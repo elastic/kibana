@@ -5,30 +5,36 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '../../significant_events/constants';
 
-export const tokenCountSchema = z.object({
-  prompt: z.number(),
-  completion: z.number(),
-  thinking: z.number().optional(),
-  total: z.number(),
-  cached: z.number().optional(),
-});
+export const tokenCountSchema = lazySchema(() =>
+  z.object({
+    prompt: z.number(),
+    completion: z.number(),
+    thinking: z.number().optional(),
+    total: z.number(),
+    cached: z.number().optional(),
+  })
+);
 
-const featureSummarySchema = z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  title: z.string().max(MAX_TITLE_LENGTH),
-});
+const featureSummarySchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    title: z.string().max(MAX_TITLE_LENGTH),
+  })
+);
 
-export const iterationResultSchema = z.object({
-  runId: z.string().max(MAX_ID_LENGTH),
-  iteration: z.number(),
-  durationMs: z.number(),
-  state: z.enum(['success', 'failure']),
-  tokensUsed: tokenCountSchema,
-  newFeatures: z.array(featureSummarySchema),
-  updatedFeatures: z.array(featureSummarySchema),
-});
+export const iterationResultSchema = lazySchema(() =>
+  z.object({
+    runId: z.string().max(MAX_ID_LENGTH),
+    iteration: z.number(),
+    durationMs: z.number(),
+    state: z.enum(['success', 'failure']),
+    tokensUsed: tokenCountSchema,
+    newFeatures: z.array(featureSummarySchema),
+    updatedFeatures: z.array(featureSummarySchema),
+  })
+);
 
 export type IterationResult = z.infer<typeof iterationResultSchema>;

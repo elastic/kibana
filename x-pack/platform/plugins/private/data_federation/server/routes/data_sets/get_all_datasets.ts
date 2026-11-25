@@ -6,11 +6,12 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { License } from '@kbn/license-api-guard-plugin/server';
 
 import { DATA_SETS_LIST_ROUTE_PATH, type DataSetWithName } from '../../../common';
 import { DataSetsClient } from '../../data_sets_client';
 
-export function registerGetAllDatasets(router: IRouter): void {
+export function registerGetAllDatasets(router: IRouter, license: License): void {
   router.get(
     {
       path: DATA_SETS_LIST_ROUTE_PATH,
@@ -25,16 +26,18 @@ export function registerGetAllDatasets(router: IRouter): void {
       },
       validate: false,
     },
-    router.handleLegacyErrors(async (context, _request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      const dataSetsClient = new DataSetsClient(client.asCurrentUser);
-      const raw = await dataSetsClient.getAll();
-      let dataSets: DataSetWithName[] = [];
-      if (raw && typeof raw === 'object' && 'datasets' in raw) {
-        const candidate = (raw as { datasets?: unknown }).datasets;
-        dataSets = Array.isArray(candidate) ? (candidate as DataSetWithName[]) : [];
-      }
-      return response.ok({ body: { data_sets: dataSets } });
-    })
+    router.handleLegacyErrors(
+      license.guardApiRoute(async (context, _request, response) => {
+        const { client } = (await context.core).elasticsearch;
+        const dataSetsClient = new DataSetsClient(client.asCurrentUser);
+        const raw = await dataSetsClient.getAll();
+        let dataSets: DataSetWithName[] = [];
+        if (raw && typeof raw === 'object' && 'datasets' in raw) {
+          const candidate = (raw as { datasets?: unknown }).datasets;
+          dataSets = Array.isArray(candidate) ? (candidate as DataSetWithName[]) : [];
+        }
+        return response.ok({ body: { data_sets: dataSets } });
+      })
+    )
   );
 }

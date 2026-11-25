@@ -35,6 +35,7 @@ const createSetupMock = () => {
     registerSubActionConnectorType: jest.fn(),
     getAxiosInstanceWithAuth: jest.fn(),
     getCredential: jest.fn(),
+    getConnectorJwtSigner: jest.fn(),
     getClientLeasePool: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
     getSubActionConnectorClass: jest.fn(),
@@ -68,6 +69,8 @@ const createStartMock = () => {
     registerDynamicConnector: jest.fn(),
     unregisterDynamicConnector: jest.fn(),
     getRelayClient: jest.fn(),
+    getUsableUserOAuthConnectorIds: jest.fn().mockResolvedValue(new Set<string>()),
+    whenCatalogReady: jest.fn().mockResolvedValue(undefined),
   });
 
   return mock;

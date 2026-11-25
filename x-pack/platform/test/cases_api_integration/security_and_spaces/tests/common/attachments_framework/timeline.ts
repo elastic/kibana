@@ -13,11 +13,11 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type {
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
   AttachmentRequestV2,
 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import { postCaseReq, postUnifiedCommentReq } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
   createCase,
@@ -94,9 +94,9 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            postCommentUserReq,
+            postUnifiedCommentReq,
             timelinePayload,
-          ] as unknown as BulkCreateAttachmentsRequestV2,
+          ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
         expect(updatedCase.comments?.length).to.be(2);

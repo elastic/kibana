@@ -21,7 +21,8 @@ export const mvExpandCommand = {
   name: 'mv_expand',
   methods: mvExpandCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.mvExpandDoc', {
+    docPreserving: true,
+    description: i18n.translate('esqlLanguage.esql.definitions.mvExpandDoc', {
       defaultMessage: 'Expands multivalued fields into one row per value, duplicating other fields',
     }),
     declaration: 'MV_EXPAND column',

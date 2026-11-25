@@ -11,9 +11,12 @@ export type { ProposalAttachmentData } from './src/attachment';
 export {
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_API_VERSION,
+  PROPOSALS_CREATE_TOOL_ID,
+  PROPOSALS_REVISE_TOOL_ID,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
+  PROPOSAL_CATEGORY_TODO,
   PROPOSAL_UNCATEGORIZED,
   PROPOSALS_RESUME_CHANNEL,
   PROPOSALS_UI_CAPABILITY_DECIDE,
@@ -21,6 +24,7 @@ export {
   PROPOSAL_APPROVE_URL,
   PROPOSAL_BY_ID_URL,
   PROPOSAL_DISMISS_URL,
+  PROPOSAL_REOPEN_URL,
   PROPOSAL_REVISIONS_URL,
   PROPOSAL_CHARTS_SUMMARY_URL,
 } from './src/constants';
@@ -30,6 +34,16 @@ export {
 export { ACTION_WORKFLOW_TAG, actionMetadataSchema } from '@kbn/workflows';
 export type { ActionMetadata } from '@kbn/workflows';
 
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionCatalogEntry,
+  ActionImpact,
+  ActionSubjectKind,
+  JsonSchema,
+  ListActionsResponse,
+} from './src/action_catalog';
+
 export {
   approveProposalRequestSchema,
   boundedActionInput,
@@ -37,15 +51,25 @@ export {
   dismissProposalRequestSchema,
   dismissReasonSchema,
   isAwaitingDecision,
+  isGatelessProposal,
+  isTodoProposal,
   isExpired,
   isProposalSettling,
+  isAwaitingRetry,
+  isTerminal,
+  OPEN_PROPOSAL_STATUSES,
+  SETTLED_PROPOSAL_STATUSES,
   listProposalsQuerySchema,
   MAX_PROPOSALS_PAGE_OFFSET,
   MAX_PROPOSALS_PAGE_SIZE,
+  DEFAULT_PROPOSAL_TITLE,
+  MAX_COMMENT_LENGTH,
+  MAX_TITLE_LENGTH,
   proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
   proposalDecisionSchema,
+  proposalGateSchema,
   proposalImpactSchema,
   proposalOriginSchema,
   proposalSchema,
@@ -65,7 +89,9 @@ export type {
   ProposalCategory,
   ProposalConfidence,
   ProposalDecision,
+  ProposalDecisionMode,
   ProposalFilters,
+  ProposalGate,
   ProposalImpact,
   ProposalOrigin,
   ProposalChartsSummaryBucket,

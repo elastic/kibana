@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
   EuiBadge,
   EuiCallOut,
   EuiCodeBlock,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -20,15 +19,29 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import {
+  type AttachmentRenderProps,
+  type InlineRenderCallbacks,
+} from '@kbn/agent-builder-browser/attachments';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { THREAT_FIELD_LABEL } from '../../../detection_engine/rule_management/components/rule_details/translations';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import { FiltersDisplay } from './filters_display';
 import { MitreAttackDisplay } from './mitre_display';
 import { RuleTypeDetails } from './rule_type_details';
-import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
+import {
+  parseRuleFromAttachment,
+  getRuleTypeLabel,
+  getQueryLabel,
+  getRuleIdFromAttachment,
+  isLatestAttachmentVersion,
+  isRuleDraftAttachment,
+} from './helpers';
 import type { RuleAttachment } from './helpers';
+import { buildPendingChangeButtons } from './rule_action_buttons';
 import {
   INDEX_FIELD_LABEL,
   RULE_TYPE_FIELD_LABEL,
@@ -37,7 +50,6 @@ import {
   SEVERITY_LABEL,
   RISK_SCORE_LABEL,
   TAGS_HEADING,
-  MITRE_HEADING,
   INTERVAL_LABEL,
   LOOKBACK_LABEL,
   LIMITATIONS_TITLE,
@@ -116,11 +128,18 @@ const getRuleDisplayFields = (rule: RuleResponse) => ({
 
 interface RuleInlineContentProps extends AttachmentRenderProps<RuleAttachment> {
   aiRuleCreation: AiRuleCreationService;
+  application: ApplicationStart;
+  uiSettings: IUiSettingsClient;
+  /** Absent when the card renders outside the conversation. */
+  registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
 }
 
 export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   attachment,
   aiRuleCreation,
+  application,
+  uiSettings,
+  registerActionButtons,
 }) => {
   const savingAttachmentIds = useObservable(aiRuleCreation.saving$);
   const isSaving = savingAttachmentIds?.has(attachment.id) ?? false;
@@ -140,6 +159,37 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     );
     return oldSource !== newSource;
   }, [originalRule, rule]);
+
+  const savedRuleId = getRuleIdFromAttachment(attachment);
+  // Offer save actions only on the latest card version.
+  const hasPendingChanges = hasDiff && isLatestAttachmentVersion(attachment);
+
+  const pendingChangeButtons = useMemo(
+    () =>
+      rule && savedRuleId && hasPendingChanges
+        ? buildPendingChangeButtons({
+            rule,
+            aiRuleCreation,
+            application,
+            uiSettings,
+            attachmentId: attachment.id,
+            ruleId: savedRuleId,
+          })
+        : [],
+    [rule, savedRuleId, hasPendingChanges, aiRuleCreation, application, uiSettings, attachment.id]
+  );
+
+  useEffect(() => {
+    if (!registerActionButtons) {
+      return;
+    }
+    registerActionButtons(pendingChangeButtons);
+    return () => registerActionButtons([]);
+  }, [registerActionButtons, pendingChangeButtons]);
+
+  // The callout lists what AI rule creation doesn't support. Show it only for a new rule the
+  // agent drafts in chat.
+  const showCreationLimitationsCallout = !attachment.origin && !isRuleDraftAttachment(attachment);
 
   if (!rule) {
     return null;
@@ -243,15 +293,9 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       {rule.threat && rule.threat.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <SectionHeading>{MITRE_HEADING}</SectionHeading>
+          <SectionHeading>{THREAT_FIELD_LABEL}</SectionHeading>
           <EuiSpacer size="xs" />
-          <EuiFlexGrid columns={2} gutterSize="m" responsive={false}>
-            {rule.threat.map((entry, threatIndex) => (
-              <EuiFlexItem key={threatIndex}>
-                <MitreAttackDisplay threat={[entry]} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
+          <MitreAttackDisplay threat={rule.threat} />
         </>
       )}
 
@@ -273,10 +317,20 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      <EuiSpacer size="s" />
-      <EuiCallOut size="s" color="primary" iconType="info" title={LIMITATIONS_TITLE}>
-        <EuiText size="xs">{LIMITATIONS_BODY}</EuiText>
-      </EuiCallOut>
+      {showCreationLimitationsCallout && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="primary"
+            iconType="info"
+            title={LIMITATIONS_TITLE}
+          >
+            <EuiText size="xs">{LIMITATIONS_BODY}</EuiText>
+          </EuiCallOut>
+        </>
+      )}
 
       {hasDiff && originalRule && (
         <>

@@ -7,47 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { dataViewReferenceSchema, dataViewSpecSchema } from '@kbn/as-code-data-views-schema';
 import {
-  MAX_SAVED_OBJECT_ID_LENGTH,
-  MAX_SAVED_OBJECT_NAME_LENGTH,
-  MAX_SAVED_OBJECT_TYPE_LENGTH,
-} from '@kbn/core-saved-objects-server';
-import { SCHEMA_DISCOVER_SESSION_LATEST } from '@kbn/saved-search-plugin/server';
+  discoverSessionApiClassicTabSchema,
+  discoverSessionApiDataSchema,
+  discoverSessionApiEsqlTabSchema,
+  discoverSessionApiMetricsTabSchema,
+} from '@kbn/as-code-discover-schema';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/discover-session-constants';
+import { MAX_SAVED_OBJECT_ID_LENGTH } from '@kbn/core-saved-objects-server';
+import { discoverSessionApiResponseSchema, discoverSessionGetResponseSchema } from './schema';
 
-// Content Management accepts the same number of references when Discover saves a session.
-const MAX_REFERENCES = 10_000;
-
-export const storedDiscoverSessionParamsSchema = schema.object({
-  id: schema.string({ minLength: 1, maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
-});
-
-/** A session in its stored format: saved object attributes and references. */
-export const storedDiscoverSessionSchema = schema.object({
-  attributes: SCHEMA_DISCOVER_SESSION_LATEST,
-  references: schema.arrayOf(
-    schema.object({
-      name: schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
-      type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
-      id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
-    }),
-    { maxSize: MAX_REFERENCES }
-  ),
-});
-
-const optionalString = schema.maybe(schema.string());
-
-export const storedDiscoverSessionResponseSchema = schema.object({
-  id: schema.string(),
-  data: storedDiscoverSessionSchema,
-  // The fields returned by getMeta.
-  meta: schema.object({
-    created_at: optionalString,
-    created_by: optionalString,
-    managed: schema.boolean(),
-    owner: optionalString,
-    updated_at: optionalString,
-    updated_by: optionalString,
-    version: optionalString,
+const internalTabSchema = z.union([
+  discoverSessionApiClassicTabSchema.extend({
+    data_source: z.discriminatedUnion('type', [
+      dataViewReferenceSchema,
+      dataViewSpecSchema.extend({
+        id: z.string().min(1).max(MAX_SAVED_OBJECT_ID_LENGTH).optional(),
+      }),
+    ]),
   }),
+  discoverSessionApiEsqlTabSchema,
+  discoverSessionApiMetricsTabSchema,
+]);
+
+/** Uses the public session format while preserving inline Data View IDs for Discover. */
+export const discoverSessionInternalDataSchema = discoverSessionApiDataSchema.extend({
+  tabs: z
+    .array(internalTabSchema)
+    .min(1)
+    .max(MAX_DISCOVER_SESSION_TABS)
+    .refine(
+      (tabs) => new Set(tabs.map((tab) => tab.id)).size === tabs.length,
+      'tabs must have unique ids'
+    ),
 });
+
+export const discoverSessionInternalParamsSchema = z
+  .object({ id: z.string().min(1).max(MAX_SAVED_OBJECT_ID_LENGTH) })
+  .strict();
+
+export const discoverSessionInternalResponseSchema = discoverSessionApiResponseSchema.extend({
+  data: discoverSessionInternalDataSchema,
+});
+
+export const discoverSessionInternalGetResponseSchema = discoverSessionGetResponseSchema.extend({
+  data: discoverSessionInternalDataSchema,
+});
+
+export type DiscoverSessionInternalData = z.output<typeof discoverSessionInternalDataSchema>;
+export type DiscoverSessionInternalDataInput = z.input<typeof discoverSessionInternalDataSchema>;
+export type DiscoverSessionInternalResponse = z.output<
+  typeof discoverSessionInternalResponseSchema
+>;
+export type DiscoverSessionInternalGetResponse = z.output<
+  typeof discoverSessionInternalGetResponseSchema
+>;

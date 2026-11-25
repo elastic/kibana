@@ -6,10 +6,13 @@
  */
 
 import type { AvailabilityConfig, AvailabilityResult } from '@kbn/agent-builder-server';
-import { isInvestigationAvailable } from './is_investigation_available';
+import {
+  isInvestigationInfrastructureAvailable,
+  type InvestigationInfrastructureAvailabilityDependencies,
+} from './is_investigation_available';
 
 type InvestigationAvailabilityDeps = Omit<
-  Parameters<typeof isInvestigationAvailable>[0],
+  InvestigationInfrastructureAvailabilityDependencies,
   'request' | 'spaceId'
 >;
 
@@ -23,9 +26,8 @@ const UNAVAILABLE: AvailabilityResult = {
  * surfaces stay listed after `nightshift.enabled` is turned off: agent documents are persisted,
  * and a registered tool is only filtered out of the catalog when it declares availability.
  *
- * Uses the same check as the investigations client, so a surface is hidden exactly when an
- * investigation cannot be started. Dependencies are read through `getDeps` because the tool is
- * registered at setup while availability is only evaluated once a request arrives.
+ * This checks infrastructure only. Model availability is evaluated per run, so an explicit model
+ * can still start an investigation when the code-owned default is unavailable.
  */
 export const createInvestigationAvailability = ({
   getDeps,
@@ -39,7 +41,7 @@ export const createInvestigationAvailability = ({
       return UNAVAILABLE;
     }
 
-    const available = await isInvestigationAvailable({ ...deps, request, spaceId });
+    const available = await isInvestigationInfrastructureAvailable({ ...deps, request, spaceId });
     return available ? { status: 'available' } : UNAVAILABLE;
   },
 });

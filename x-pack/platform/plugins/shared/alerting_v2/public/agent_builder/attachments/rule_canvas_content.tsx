@@ -5,24 +5,35 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
+import { PluginStart } from '@kbn/core-di';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
-import { RuleProvider } from '../../components/rule_details/rule_context';
+import { bindLocatorsToHost, getAlertingV2Locators } from '../../application/bind_locators_to_host';
+import { LocatorProvider } from '../../application/locator_context';
 import {
-  RuleHeaderDescription,
-  RuleTagsList,
-} from '../../components/rule_details/rule_summary_header';
-import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
-import { paths } from '../../constants';
-import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
+  RuleSummaryAboutSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../components/rule/rule_summary';
+import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
+import { RulesApi } from '../../services/rules_api';
+import {
+  recordAttachmentSync,
+  syncAttachmentOrigin,
+  useRecordedAttachmentSync,
+} from './attachment_save_state';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
@@ -35,12 +46,18 @@ export const RuleCanvasContent = ({
   updateOrigin,
 }: RuleCanvasContentProps) => {
   const rulesApi = useService(RulesApi);
-  const application = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
+  const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
+  const [queryClient] = React.useState(() => new QueryClient());
+  const locators = useMemo(
+    () => bindLocatorsToHost(getAlertingV2Locators(share), OBSERVABILITY_ALERTING_HOST),
+    [share]
+  );
 
   const { data, origin: savedObjectId } = attachment;
   const isPersisted = isPersistedSavedObject(savedObjectId);
+  const summaryRule = useMemo(() => ({ ...data, id: undefined }), [data]);
+  const recordedSyncedAt = useRecordedAttachmentSync(attachment.id);
 
   const [mounted, setMounted] = React.useState(false);
 
@@ -63,14 +80,26 @@ export const RuleCanvasContent = ({
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
-            await rulesApi.upsertRule(data.id!, buildRulePayload(data));
-            await updateOrigin(data.id!);
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
-                defaultMessage: 'Rule "{name}" created',
-                values: { name: data.metadata.name },
-              })
-            );
+            try {
+              const savedRule = data.id
+                ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
+                : await rulesApi.createRule(buildRulePayload(data));
+              // Linking the origin is what turns the draft into a saved rule, so a failure here is surfaced.
+              recordAttachmentSync(attachment.id, await updateOrigin(savedRule.id));
+              notifications.toasts.addSuccess(
+                i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
+                  defaultMessage: 'Rule "{name}" created',
+                  values: { name: data.metadata.name },
+                })
+              );
+            } catch (e) {
+              notifications.toasts.addDanger(
+                i18n.translate('xpack.alertingV2.ruleAttachment.createError', {
+                  defaultMessage: 'Failed to create rule: {error}',
+                  values: { error: e.body?.message ?? e.message },
+                })
+              );
+            }
           },
         },
       ]);
@@ -87,7 +116,19 @@ export const RuleCanvasContent = ({
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+          try {
+            await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+          } catch (e) {
+            notifications.toasts.addDanger(
+              i18n.translate('xpack.alertingV2.ruleAttachment.updateError', {
+                defaultMessage: 'Failed to update rule: {error}',
+                values: { error: e.body?.message ?? e.message },
+              })
+            );
+            return;
+          }
+          // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
+          await syncAttachmentOrigin(attachment.id, () => updateOrigin(ruleId));
           notifications.toasts.addSuccess(
             i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
               defaultMessage: 'Rule "{name}" updated',
@@ -101,10 +142,12 @@ export const RuleCanvasContent = ({
           defaultMessage: 'View in Rules',
         }),
         icon: 'external',
-        type: ActionButtonType.OVERFLOW,
-        // TODO: Migrate to rules locator once agent builder attachments render inside the LocatorProvider tree
+        type: ActionButtonType.SECONDARY,
         handler: () => {
-          application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
+          getAlertingV2Locators(share).rulesLocators.navigateSync({
+            ruleId,
+            host: OBSERVABILITY_ALERTING_HOST.rules,
+          });
         },
       },
     ]);
@@ -115,30 +158,28 @@ export const RuleCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     rulesApi,
-    application,
-    basePath,
+    share,
     notifications,
     data,
+    attachment.id,
+    // Re-registering the buttons after a recorded sync redraws the canvas header, so getHeader
+    // re-evaluates the unsaved changes badge against the new sync date.
+    recordedSyncedAt,
   ]);
 
   return (
-    <RuleProvider rule={data as unknown as RuleApiResponse}>
-      <EuiPanel paddingSize="l" hasShadow={false}>
-        {data.metadata.description && (
-          <>
-            <RuleHeaderDescription />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {data.metadata.tags && data.metadata.tags.length > 0 && (
-          <>
-            <RuleTagsList />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <RuleSidebar showQueryPreview />
-      </EuiPanel>
-    </RuleProvider>
+    <QueryClientProvider client={queryClient}>
+      <LocatorProvider locators={locators}>
+        <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+          <RuleSummaryBody rule={summaryRule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryQueryPreviewSection />
+            <RuleSummaryInvestigationSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
+        </EuiPanel>
+      </LocatorProvider>
+    </QueryClientProvider>
   );
 };
 

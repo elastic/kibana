@@ -10,10 +10,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { getAlertZeroDeepLinks } from './deep_links';
 
 const ALL_LINK_IDS = [
-  SecurityPageName.alerts,
-  SecurityPageName.attacks,
-  SecurityPageName.alertZeroThreatHunt,
-  SecurityPageName.alertZeroStreams,
+  SecurityPageName.alertZeroHome,
   SecurityPageName.alertZeroEscalations,
   SecurityPageName.alertZeroWatches,
 ];
@@ -26,6 +23,20 @@ describe('getAlertZeroDeepLinks', () => {
     expect(ids).not.toContain('discover');
     expect(ids).not.toContain('dashboards');
     expect(ids).not.toContain('more');
+  });
+
+  it('lists every page in the Classic navigation', () => {
+    for (const { visibleIn } of getAlertZeroDeepLinks()) {
+      expect(visibleIn).toContain('classicSideNav');
+    }
+  });
+
+  it('orders AlertZero, Escalations, then Watches before every Security entry in the Classic navigation', () => {
+    const orders = getAlertZeroDeepLinks().map(({ order }) => order ?? Infinity);
+
+    expect(orders).toEqual([...orders].sort((a, b) => a - b));
+    // Security's Classic nav entries start at 1.
+    expect(Math.max(...orders)).toBeLessThan(1);
   });
 
   it('registers no link for a page the app does not route', () => {
@@ -57,7 +68,6 @@ describe('getAlertZeroDeepLinks', () => {
 
     expect(ids).not.toContain(SecurityPageName.alertZeroEscalations);
     // Other links should still be present.
-    expect(ids).toContain(SecurityPageName.alerts);
     expect(ids).toContain(SecurityPageName.alertZeroWatches);
   });
 

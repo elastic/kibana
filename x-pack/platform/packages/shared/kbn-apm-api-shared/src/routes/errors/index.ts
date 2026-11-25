@@ -36,3 +36,4 @@ export type { ErrorSampleDetailsResponse } from './error_sample_details';
 export type { ErrorDistributionResponse } from './error_distribution';
 export type { TopErroneousTransactionsResponse } from './top_erroneous_transactions';
 export type { UnprocessedOtelErrorsResponse } from './unprocessed_otel_errors';
+export { MAX_UNPROCESSED_OTEL_ERRORS } from './unprocessed_otel_errors';

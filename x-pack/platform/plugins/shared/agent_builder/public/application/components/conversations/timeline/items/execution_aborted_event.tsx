@@ -14,14 +14,16 @@ interface ExecutionAbortedEventProps {
   event: ExecutionAbortedEventData;
 }
 
-/** Renders a muted indicator when a run was stopped before it completed. */
+/** Renders an indicator when a run was stopped before it completed. */
 export const ExecutionAbortedEvent: React.FC<ExecutionAbortedEventProps> = ({ event }) => {
   const { aborted_by: abortedBy } = event.data;
 
-  const label = abortedBy?.actor?.username ?? abortedBy?.actor?.id;
+  const { full_name: fullName, username, id } = abortedBy?.actor ?? {};
+
+  const label = fullName ?? username ?? id;
 
   return (
-    <EuiText color="subdued" size="s">
+    <EuiText size="s">
       {label
         ? i18n.translate('xpack.agentBuilder.conversation.timeline.executionAborted.stoppedBy', {
             defaultMessage: 'Response stopped by {actor}',

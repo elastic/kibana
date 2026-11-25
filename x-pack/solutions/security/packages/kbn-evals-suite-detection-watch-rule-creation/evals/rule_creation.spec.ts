@@ -85,7 +85,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       esClient,
       traceEsClient,
       log,
-      connector,
+      evaluationConnector,
     }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
@@ -97,7 +97,10 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         // Judge provenance: stamped into every Gap Addressed score document so a
         // self-judging model (judge connector == subject connector) is visible
         // in the data, not inferred later.
-        judgeProvenance: { judgeConnectorId: connector.id, judgeConnectorName: connector.name },
+        judgeProvenance: {
+          judgeConnectorId: evaluationConnector.id,
+          judgeConnectorName: evaluationConnector.name,
+        },
       });
 
       await evaluateDataset({
@@ -120,7 +123,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       esClient,
       traceEsClient,
       log,
-      connector,
+      evaluationConnector,
     }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
@@ -132,7 +135,10 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         // Judge provenance: stamped into every Gap Addressed score document so a
         // self-judging model (judge connector == subject connector) is visible
         // in the data, not inferred later.
-        judgeProvenance: { judgeConnectorId: connector.id, judgeConnectorName: connector.name },
+        judgeProvenance: {
+          judgeConnectorId: evaluationConnector.id,
+          judgeConnectorName: evaluationConnector.name,
+        },
       });
 
       await evaluateDataset({
@@ -156,7 +162,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       esClient,
       traceEsClient,
       log,
-      connector,
+      evaluationConnector,
     }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
@@ -168,7 +174,10 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         // Judge provenance: stamped into every Gap Addressed score document so a
         // self-judging model (judge connector == subject connector) is visible
         // in the data, not inferred later.
-        judgeProvenance: { judgeConnectorId: connector.id, judgeConnectorName: connector.name },
+        judgeProvenance: {
+          judgeConnectorId: evaluationConnector.id,
+          judgeConnectorName: evaluationConnector.name,
+        },
       });
 
       await evaluateDataset({

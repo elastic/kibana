@@ -7,41 +7,52 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
-  EuiEmptyPrompt,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
-  EuiSkeletonText,
+  EuiPopover,
   EuiSpacer,
-  EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
-import { AiButton } from '@kbn/shared-ux-ai-components';
-import React from 'react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import React, { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
+import { css } from '@emotion/react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
 import { useKibana } from '../../hooks/use_kibana';
+import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
-import { getAiIndexDetailPath } from '../../paths';
+import { getVisibleAutomations, getVisibleWorkflowIds } from '../../utils/visible_automations';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import {
+  AiIndexDetailPanelEmptyState,
+  AiIndexDetailPanelEmptyStateSkeleton,
+} from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
+import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
 /**
  * Builds the query string that tells the Workflows app to send its back button
- * here (to this AI index detail page) instead of the Workflows list.
+ * to `returnPath` (the AI index tab the user came from) instead of the Workflows list.
  */
-const getWorkflowReturnSearch = (aiIndexId: string): string =>
+const getWorkflowReturnSearch = (returnPath: string): string =>
   new URLSearchParams({
     returnApp: CONTEXT_ENGINE_APP_ID,
-    returnPath: getAiIndexDetailPath(aiIndexId),
+    returnPath,
   }).toString();
 
 interface AutomationsPanelProps {
@@ -49,6 +60,11 @@ interface AutomationsPanelProps {
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void;
   isManaged: boolean;
+  /**
+   * Replaces the default "Add automation" menu in the panel header. When set, the
+   * empty state has no add button either, so the page decides where adding happens.
+   */
+  headerAction?: ReactNode;
 }
 
 export const AutomationsPanel = ({
@@ -56,33 +72,43 @@ export const AutomationsPanel = ({
   aiIndex,
   onSaved,
   isManaged,
+  headerAction,
 }: AutomationsPanelProps) => {
   const {
     services: { application },
   } = useKibana();
-  const {
-    isEditing,
-    automations,
-    workflowIds,
-    isSaving,
-    isCreating,
-    isBusy,
-    startEditing,
-    stopEditing,
-    removeAutomation,
-    save,
-    createAndAttach,
-  } = useAutomationsEditor({ aiIndex, onSaved });
+  const { automations, isCreating, isBusy, deleteAutomation, createAndAttach } =
+    useAutomationsEditor({ aiIndex, onSaved });
+  const isMemoryEnabled = useMemoryEnabled();
+  const visibleAutomations = useMemo(
+    () => getVisibleAutomations(automations, isMemoryEnabled),
+    [automations, isMemoryEnabled]
+  );
+  const visibleWorkflowIds = useMemo(
+    () => getVisibleWorkflowIds(automations, isMemoryEnabled),
+    [automations, isMemoryEnabled]
+  );
   const {
     summaries,
     isLoading: isLoadingSummaries,
     missingReadPrivilege,
-  } = useWorkflowSummaries(workflowIds);
-  const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
+  } = useWorkflowSummaries(visibleWorkflowIds);
+  const { canSuggest, isSuggesting, suggestAutomation } = useSuggestAutomation({
+    aiIndex,
+    isManaged,
+    onSaved,
+  });
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
 
-  const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(aiIndex.id)}` : '';
+  const canCreateWorkflow = application.capabilities.workflowsManagement?.createWorkflow === true;
+
+  const { pathname } = useLocation();
+  const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(pathname)}` : '';
 
   const handleCreate = async () => {
+    setIsAddMenuOpen(false);
     const workflowId = await createAndAttach();
     if (workflowId) {
       application.navigateToApp(WORKFLOWS_APP_ID, {
@@ -91,134 +117,136 @@ export const AutomationsPanel = ({
     }
   };
 
+  const handleSuggest = () => {
+    setIsAddMenuOpen(false);
+    suggestAutomation();
+  };
+
   const canAddMore = automations.length < MAX_AI_INDEX_AUTOMATIONS;
+  const hasAutomations = visibleAutomations.length > 0;
+  const showAddAutomation = !isManaged && headerAction === undefined;
+  const createTooltip = !canCreateWorkflow
+    ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.missingCreateWorkflowTooltip', {
+        defaultMessage: 'You need the Workflows create privilege to create a workflow.',
+      })
+    : !canAddMore
+    ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.maxAutomationsTooltip', {
+        defaultMessage: 'You have reached the maximum number of automations.',
+      })
+    : undefined;
+
+  const addAutomationLabel = i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.automations.addButton',
+    {
+      defaultMessage: 'Add automation',
+    }
+  );
+
+  const menuItems = [
+    ...(canSuggest
+      ? [
+          <EuiContextMenuItem
+            key="suggest"
+            icon="productAgent"
+            onClick={handleSuggest}
+            data-test-subj="contextSuggestAutomationButton"
+            {...getEbtProps({
+              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+              action: CONTEXT_ENGINE_UI_EBT.action.automations.SUGGEST,
+            })}
+          >
+            {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.suggestButton', {
+              defaultMessage: 'Create with AI Agent',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    <EuiContextMenuItem
+      key="create"
+      icon="workflow"
+      onClick={handleCreate}
+      disabled={isCreating || !canAddMore || !canCreateWorkflow}
+      toolTipContent={createTooltip}
+      data-test-subj="contextCreateAutomationButton"
+      {...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+        action: CONTEXT_ENGINE_UI_EBT.action.automations.CREATE,
+      })}
+    >
+      {/* We can't use the `external` prop because the menu item is a button and not a link  */}
+      <>
+        {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
+          defaultMessage: 'Create workflow',
+        })}
+
+        <EuiIcon
+          type="external"
+          size="m"
+          color={euiTheme.colors.textDisabled}
+          css={css`
+            margin-left: ${euiTheme.size.xs};
+          `}
+          aria-hidden={true}
+        />
+      </>
+    </EuiContextMenuItem>,
+  ];
+
+  const renderAddAutomationButton = ({ fill }: { fill: boolean }) => (
+    <EuiPopover
+      panelPaddingSize="none"
+      anchorPosition="downCenter"
+      isOpen={isAddMenuOpen}
+      closePopover={() => setIsAddMenuOpen(false)}
+      aria-label={addAutomationLabel}
+      button={
+        <EuiButton
+          size="s"
+          fill={fill}
+          iconType="chevronSingleDown"
+          iconSide="right"
+          isLoading={isSuggesting}
+          isDisabled={isBusy || isSuggesting || aiIndex === undefined}
+          data-test-subj="contextAddAutomationButton"
+          onClick={() => setIsAddMenuOpen((open) => !open)}
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+            action: CONTEXT_ENGINE_UI_EBT.action.automations.ADD_MENU,
+          })}
+        >
+          {addAutomationLabel}
+        </EuiButton>
+      }
+    >
+      <EuiContextMenuPanel items={menuItems} />
+    </EuiPopover>
+  );
+
+  const panelDescription = i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.automations.description',
+    {
+      defaultMessage: 'Automations keep knowledge documents current as your sources change.',
+    }
+  );
 
   return (
-    <EuiPanel hasBorder paddingSize="l">
+    <EuiPanel hasBorder paddingSize="l" id={AUTOMATIONS_PANEL_ID}>
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
+          <EuiTitle size="xs">
+            <h2 id={AUTOMATIONS_HEADING_ID} tabIndex={-1}>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
                 defaultMessage: 'Automations',
               })}
             </h2>
           </EuiTitle>
+          <AiIndexDetailPanelDescription>{panelDescription}</AiIndexDetailPanelDescription>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {isEditing ? (
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  onClick={stopEditing}
-                  isDisabled={isBusy}
-                  data-test-subj="contextCancelEditingAutomationsButton"
-                  {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                    action: CONTEXT_ENGINE_UI_EBT.action.automations.CANCEL,
-                  })}
-                >
-                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.cancelButton', {
-                    defaultMessage: 'Cancel',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  size="s"
-                  onClick={save}
-                  isLoading={isSaving}
-                  isDisabled={isCreating}
-                  data-test-subj="contextSaveAutomationsButton"
-                  {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                    action: CONTEXT_ENGINE_UI_EBT.action.automations.SAVE,
-                  })}
-                >
-                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.saveButton', {
-                    defaultMessage: 'Save',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : !isManaged && !isLoading ? (
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {canSuggest && (
-                <EuiFlexItem grow={false}>
-                  <AiButton
-                    size="s"
-                    iconType="productAgent"
-                    onClick={suggestAutomation}
-                    data-test-subj="contextSuggestAutomationButton"
-                    {...getEbtProps({
-                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                      action: CONTEXT_ENGINE_UI_EBT.action.automations.SUGGEST,
-                    })}
-                  >
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.suggestButton', {
-                      defaultMessage: 'Suggest automation',
-                    })}
-                  </AiButton>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="plusCircle"
-                  onClick={handleCreate}
-                  isLoading={isCreating}
-                  isDisabled={isBusy || !canAddMore}
-                  title={i18n.translate(
-                    'xpack.contextEngine.aiIndexDetail.automations.createAutomationTooltip',
-                    { defaultMessage: 'Create a new automation' }
-                  )}
-                  aria-label={i18n.translate(
-                    'xpack.contextEngine.aiIndexDetail.automations.createAutomationAriaLabel',
-                    { defaultMessage: 'Create automation' }
-                  )}
-                  data-test-subj="contextCreateAutomationButton"
-                  {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                    action: CONTEXT_ENGINE_UI_EBT.action.automations.CREATE,
-                  })}
-                >
-                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
-                    defaultMessage: 'Create automation',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="pencil"
-                  onClick={startEditing}
-                  isDisabled={isBusy || aiIndex === undefined}
-                  data-test-subj="contextEditAutomationsButton"
-                  {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                    action: CONTEXT_ENGINE_UI_EBT.action.automations.EDIT,
-                  })}
-                >
-                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.editButton', {
-                    defaultMessage: 'Edit',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
-        </EuiFlexItem>
+        {headerAction !== undefined && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
+        {showAddAutomation && !isLoading && hasAutomations && (
+          <EuiFlexItem grow={false}>{renderAddAutomationButton({ fill: false })}</EuiFlexItem>
+        )}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.description', {
-            defaultMessage:
-              "Automations extract and refresh this AI index's Knowledge Indicators from its sources.",
-          })}
-        </p>
-      </EuiText>
       <EuiSpacer size="m" />
       {missingReadPrivilege && (
         <>
@@ -239,51 +267,43 @@ export const AutomationsPanel = ({
         </>
       )}
       {isLoading || isLoadingSummaries ? (
-        <EuiSkeletonText lines={2} data-test-subj="contextAiIndexAutomationsLoading" />
+        <>
+          <EuiSpacer size="m" />
+          <AiIndexDetailPanelEmptyStateSkeleton dataTestSubj="contextAiIndexAutomationsLoading" />
+        </>
       ) : (
         <>
-          {automations.length === 0 && !isEditing ? (
-            <EuiEmptyPrompt
-              iconType="tablePlay"
-              titleSize="xs"
-              data-test-subj="contextAiIndexAutomationsEmpty"
-              title={
-                <h3>
-                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyTitle', {
-                    defaultMessage: 'No automations yet',
-                  })}
-                </h3>
-              }
-              body={
-                <p>
-                  {isManaged
-                    ? i18n.translate(
-                        'xpack.contextEngine.aiIndexDetail.automations.emptyBodyManaged',
-                        { defaultMessage: 'No automations are configured for this AI index.' }
-                      )
-                    : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyBody', {
-                        defaultMessage: 'Create an automation to get started.',
-                      })}
-                </p>
-              }
-            />
+          {!hasAutomations ? (
+            <>
+              <EuiSpacer size="m" />
+              <AiIndexDetailPanelEmptyState
+                iconType="workflow"
+                dataTestSubj="contextAiIndexAutomationsEmpty"
+                message={i18n.translate(
+                  'xpack.contextEngine.aiIndexDetail.automations.emptyBodyManaged',
+                  { defaultMessage: 'No automations configured.' }
+                )}
+                action={showAddAutomation ? renderAddAutomationButton({ fill: true }) : undefined}
+              />
+            </>
           ) : (
-            automations.map((automation, index) => {
+            visibleAutomations.map((automation, index) => {
               const summary = summaries.get(automation.value);
               return (
                 <React.Fragment key={automation.value}>
                   <AutomationRow
+                    aiIndexId={aiIndex?.id}
                     automation={automation}
-                    name={summary?.name}
-                    enabled={summary?.enabled}
+                    workflowSummary={summary}
                     editHref={application.getUrlForApp(WORKFLOWS_APP_ID, {
                       path: `/${encodeURIComponent(automation.value)}${returnSearch}`,
                     })}
-                    isEditing={isEditing}
-                    isRemoveDisabled={isBusy}
-                    onRemove={() => removeAutomation(automation.value)}
+                    isReadOnly={isManaged}
+                    isBusy={isBusy}
+                    canRun={canExecuteWorkflow}
+                    onDelete={() => deleteAutomation(automation.value)}
                   />
-                  {index < automations.length - 1 && <EuiSpacer size="s" />}
+                  {index < visibleAutomations.length - 1 && <EuiSpacer size="s" />}
                 </React.Fragment>
               );
             })

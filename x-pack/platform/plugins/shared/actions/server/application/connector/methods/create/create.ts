@@ -6,10 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents, connectorTypePublishesKeys } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import {
+  createConnectorSigningKey,
+  getSigningKeyPublicBaseUrl,
+} from '../../../../lib/connector_signing_keys';
+import { resolveInboundEventsSpaceId } from '../../../../inbound/resolve_inbound_events_space_id';
 import type { Connector } from '../../types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
@@ -18,9 +23,16 @@ import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
+import {
+  getConnectorAuthType,
+  getConnectorCreateErrorType,
+  recordConnectorCreate,
+  toBoundedLabel,
+} from '../../../../lib/connector_metrics';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
+import { resolveConnectorSpecVersion } from '../../../../lib/resolve_connector_spec_version';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
 import {
   invalidateStoredConnectorEventIdentity,
@@ -32,13 +44,39 @@ import {
   resolveCreateInboundEventsEnabled,
 } from '../../../../inbound/inbound_events_enabled';
 
-export async function create({
+export async function create(params: ConnectorCreateParams): Promise<Connector> {
+  const { actionTypeId, config, secrets } = params.action;
+  const authType = getConnectorAuthType({ config, secrets });
+
+  try {
+    const connector = await createConnector(params);
+    recordConnectorCreate({
+      connectorType: actionTypeId,
+      authType,
+      specBased: params.context.actionTypeRegistry.isSpecActionType(actionTypeId),
+    });
+    return connector;
+  } catch (error) {
+    // A failed request can carry values that were never validated, so unregistered ones are not used as labels.
+    const { actionTypeRegistry, authTypeRegistry } = params.context;
+    recordConnectorCreate({
+      connectorType: toBoundedLabel(actionTypeId, actionTypeRegistry.has(actionTypeId)),
+      authType: toBoundedLabel(authType, authType === 'none' || authTypeRegistry.has(authType)),
+      specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
+      errorType: getConnectorCreateErrorType(error),
+    });
+    throw error;
+  }
+}
+
+async function createConnector({
   context,
   action: {
     actionTypeId,
     name,
     config,
     secrets,
+    specVersion,
     isInboundEventsEnabled: requestedInboundEventsEnabled,
   },
   options,
@@ -96,8 +134,13 @@ export async function create({
     requestedEnabled: requestedInboundEventsEnabled,
   });
 
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
+  const { resolvedSpecVersion, actionTypeForValidation: actionType } = resolveConnectorSpecVersion({
+    actionType: context.actionTypeRegistry.get(actionTypeId),
+    specVersion,
+    configurationUtilities,
+  });
+
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
@@ -108,6 +151,11 @@ export async function create({
     validateConnector(actionType, { config, secrets });
   }
   context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+
+  const publishesKeys = connectorTypePublishesKeys(actionTypeId);
+  if (publishesKeys) {
+    getSigningKeyPublicBaseUrl(context.publicBaseUrl);
+  }
 
   if (options?.id) {
     validateConnectorId(options.id);
@@ -185,6 +233,7 @@ export async function create({
           ...(authMode !== undefined ? { authMode } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
           hasInboundEventIdentity: Boolean(identityAttributes),
+          ...(resolvedSpecVersion !== undefined ? { specVersion: resolvedSpecVersion } : {}),
         },
         { id }
       )
@@ -192,6 +241,23 @@ export async function create({
 
   if (result instanceof Error) {
     await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
+  }
+
+  // The key is written only after this request owns the connector ID, so a conflicting create
+  // cannot overwrite the key of an existing connector.
+  if (publishesKeys && !(result instanceof Error)) {
+    try {
+      await createConnectorSigningKey({
+        unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+        publicBaseUrl: context.publicBaseUrl,
+        spaceId: resolveInboundEventsSpaceId(context),
+        connectorTypeId: actionTypeId,
+        connectorId: id,
+      });
+    } catch (error) {
+      await context.unsecuredSavedObjectsClient.delete('action', id);
+      throw error;
+    }
   }
 
   const wasSuccessful = !(result instanceof Error);
@@ -255,6 +321,9 @@ export async function create({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    ...(result.attributes.specVersion !== undefined
+      ? { specVersion: result.attributes.specVersion }
+      : {}),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
     ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
   };

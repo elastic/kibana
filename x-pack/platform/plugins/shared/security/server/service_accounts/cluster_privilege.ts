@@ -11,11 +11,12 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 /**
- * The two cluster privileges service accounts are gated on. `manage_security` is the one gate on
- * every change to what a service account is or which workloads run as one. `read_security` is
- * enough to look at the directory, matching what Elasticsearch asks of its own read API.
+ * The cluster privilege service accounts are gated on. `manage_security` covers every service
+ * account operation, reads included, because the accounts and the workloads they run are a
+ * security administrator's concern. The one exception is `getWorkloadServiceAccountSummary`,
+ * which names the account a workload runs as to users who may see the workload.
  */
-export type ServiceAccountClusterPrivilege = 'manage_security' | 'read_security';
+export type ServiceAccountClusterPrivilege = 'manage_security';
 
 export interface EnsureClusterPrivilegeParams {
   request: KibanaRequest;
@@ -24,12 +25,51 @@ export interface EnsureClusterPrivilegeParams {
   privilege: ServiceAccountClusterPrivilege;
   /** What the caller is attempting, as a verb phrase for the messages, e.g. `create a service account`. */
   action: string;
+  /**
+   * Called with the 403 before it is thrown. The one hook for auditing a refusal: an
+   * authorization refusal is the only failure the service account audit events record, and this
+   * is where it is told apart from every other 403 on the same path.
+   */
+  onRefused?: (error: Boom.Boom) => void;
 }
 
+export type CheckClusterPrivilegeParams = Pick<
+  EnsureClusterPrivilegeParams,
+  'request' | 'checkPrivilegesWithRequest' | 'privilege'
+>;
+
 /**
- * Rejects with a 403 unless the request holds the given cluster privilege. Elasticsearch answers
- * the check from the caller's effective permissions, so a `manage_security` holder passes a
- * `read_security` check without holding that name.
+ * Whether the request holds the given cluster privilege. Elasticsearch answers the check from the
+ * caller's effective permissions, so a privilege that implies it, such as `all`, passes too. A
+ * failed check propagates: it says nothing about what the caller may do.
+ */
+export const hasClusterPrivilege = async ({
+  request,
+  checkPrivilegesWithRequest,
+  privilege,
+}: CheckClusterPrivilegeParams): Promise<boolean> => {
+  const { hasAllRequested } = await checkPrivilegesWithRequest(request).globally({
+    elasticsearch: { cluster: [privilege], index: {} },
+  });
+  return hasAllRequested;
+};
+
+/**
+ * Logs the refusal of an action for a missing cluster privilege, and returns the 403 to refuse it
+ * with. For a caller that refuses without throwing; {@link ensureClusterPrivilege} throws it.
+ */
+export const clusterPrivilegeRefusal = ({
+  logger,
+  privilege,
+  action,
+}: Pick<EnsureClusterPrivilegeParams, 'logger' | 'privilege' | 'action'>): Boom.Boom => {
+  logger.warn(`Refused to ${action}: missing \`${privilege}\` cluster privilege`);
+  return Boom.forbidden(`Cannot ${action}: missing \`${privilege}\` cluster privilege`);
+};
+
+/**
+ * Rejects with a 403 unless the request holds the given cluster privilege. See
+ * {@link hasClusterPrivilege} for how the check is answered.
  */
 export const ensureClusterPrivilege = async ({
   request,
@@ -37,13 +77,11 @@ export const ensureClusterPrivilege = async ({
   logger,
   privilege,
   action,
+  onRefused,
 }: EnsureClusterPrivilegeParams): Promise<void> => {
-  const { hasAllRequested } = await checkPrivilegesWithRequest(request).globally({
-    elasticsearch: { cluster: [privilege], index: {} },
-  });
-
-  if (!hasAllRequested) {
-    logger.warn(`Refused to ${action}: missing \`${privilege}\` cluster privilege`);
-    throw Boom.forbidden(`Cannot ${action}: missing \`${privilege}\` cluster privilege`);
+  if (!(await hasClusterPrivilege({ request, checkPrivilegesWithRequest, privilege }))) {
+    const error = clusterPrivilegeRefusal({ logger, privilege, action });
+    onRefused?.(error);
+    throw error;
   }
 };

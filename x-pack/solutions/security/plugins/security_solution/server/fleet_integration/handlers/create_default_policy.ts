@@ -28,9 +28,12 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeAiDataCollection,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  removeLinuxRansomware,
+  removeRegistryCredentialHardening,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -66,6 +69,13 @@ export const createDefaultPolicy = (
     factoryPolicy = removeCustomYaraSignatures(factoryPolicy);
   }
 
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointRegistryCredentialHardening) ||
+    !experimentalFeatures.registryCredentialHardening
+  ) {
+    factoryPolicy = removeRegistryCredentialHardening(factoryPolicy);
+  }
+
   let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
       ? getCloudPolicyConfig(factoryPolicy)
@@ -91,6 +101,14 @@ export const createDefaultPolicy = (
 
   if (!experimentalFeatures.linuxDnsEvents) {
     defaultPolicyPerType = removeLinuxDnsEvents(defaultPolicyPerType);
+  }
+
+  if (!experimentalFeatures.linuxRansomwareProtection) {
+    defaultPolicyPerType = removeLinuxRansomware(defaultPolicyPerType);
+  }
+
+  if (!experimentalFeatures.endpointAiDataCollection) {
+    defaultPolicyPerType = removeAiDataCollection(defaultPolicyPerType);
   }
 
   defaultPolicyPerType.meta.billable = isBillablePolicy(defaultPolicyPerType);

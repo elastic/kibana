@@ -6,18 +6,25 @@
  */
 
 import React from 'react';
+import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
-import { AntivirusRegistrationModes } from '../../../../../../../common/endpoint/types';
+import {
+  AntivirusRegistrationModes,
+  ProtectionModes,
+} from '../../../../../../../common/endpoint/types';
 import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { PerOsAntivirusRegistrationCardProps } from './per_os_antivirus_registration_card';
 import { PerOsAntivirusRegistrationCard } from './per_os_antivirus_registration_card';
-import { selectOsControlOption } from './select_os_control_option.test.helpers';
+import {
+  openOsControlAndScrollPage,
+  selectOsControlOption,
+} from './select_os_control_option.test.helpers';
 
 jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('PerOsAntivirusRegistrationCard', () => {
@@ -32,6 +39,10 @@ describe('PerOsAntivirusRegistrationCard', () => {
       <PerOsAntivirusRegistrationCard {...props} policy={policy} />
     );
     return renderResult;
+  };
+
+  const rerender = (nextPolicy: PolicyConfig) => {
+    renderResult.rerender(<PerOsAntivirusRegistrationCard {...props} policy={nextPolicy} />);
   };
 
   const getUpdatedPolicy = (): PolicyConfig => {
@@ -133,17 +144,71 @@ describe('PerOsAntivirusRegistrationCard', () => {
     );
   });
 
-  it.each([
-    AntivirusRegistrationModes.enabled,
-    AntivirusRegistrationModes.disabled,
-    AntivirusRegistrationModes.sync,
-  ])('shows the Windows Defender notice regardless of mode (%s)', (mode) => {
-    policy.windows.antivirus_registration.mode = mode;
+  it('shows the Windows Defender notice for Enabled, hides it for Disabled, and follows the outcome for Sync', async () => {
+    policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.enabled;
+    policy.windows.malware.mode = ProtectionModes.detect;
     render();
 
-    expect(renderResult.getByTestId(`${testSubj.card}-windows-defenderNotice`)).toHaveTextContent(
-      'This will also disable Windows Defender.'
+    const queryNotice = () => renderResult.queryByTestId(`${testSubj.card}-windows-defenderNotice`);
+    const querySyncExplanation = () =>
+      renderResult.queryByTestId(`${testSubj.card}-windows-syncExplanation`);
+
+    expect(queryNotice()).toHaveTextContent('This will also disable Windows Defender.');
+    expect(querySyncExplanation()).not.toBeInTheDocument();
+
+    await selectOsControlOption(renderResult, testSubj.windows.modeSelect, 'Disabled');
+    rerender(getUpdatedPolicy());
+    expect(queryNotice()).not.toBeInTheDocument();
+    expect(querySyncExplanation()).not.toBeInTheDocument();
+
+    await selectOsControlOption(
+      renderResult,
+      testSubj.windows.modeSelect,
+      'Sync with malware protection level'
     );
+    rerender(getUpdatedPolicy());
+    expect(queryNotice()).not.toBeInTheDocument();
+    expect(querySyncExplanation()).toBeInTheDocument();
+
+    await selectOsControlOption(renderResult, testSubj.windows.modeSelect, 'Enabled');
+    rerender(getUpdatedPolicy());
+    expect(queryNotice()).toHaveTextContent('This will also disable Windows Defender.');
+    expect(querySyncExplanation()).not.toBeInTheDocument();
+  });
+
+  it('shows the Windows Defender notice in Sync mode only while the current level is enabled', () => {
+    policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.sync;
+    policy.windows.malware.mode = ProtectionModes.prevent;
+    render();
+
+    const expectSyncOutcome = (outcome: 'enabled' | 'disabled') => {
+      expect(renderResult.getByText(`(Current level: ${outcome})`)).toBeInTheDocument();
+      const notice = renderResult.queryByTestId(`${testSubj.card}-windows-defenderNotice`);
+      if (outcome === 'enabled') {
+        expect(notice).toHaveTextContent('This will also disable Windows Defender.');
+      } else {
+        expect(notice).not.toBeInTheDocument();
+      }
+      expect(
+        renderResult.getByTestId(`${testSubj.card}-windows-syncExplanation`)
+      ).toBeInTheDocument();
+    };
+
+    expectSyncOutcome('enabled');
+    const nextPolicy = cloneDeep(policy);
+    nextPolicy.windows.malware.mode = ProtectionModes.detect;
+    rerender(nextPolicy);
+    expectSyncOutcome('disabled');
+
+    const disabledPolicy = cloneDeep(nextPolicy);
+    disabledPolicy.windows.malware.mode = ProtectionModes.off;
+    rerender(disabledPolicy);
+    expectSyncOutcome('disabled');
+
+    const restoredPolicy = cloneDeep(disabledPolicy);
+    restoredPolicy.windows.malware.mode = ProtectionModes.prevent;
+    rerender(restoredPolicy);
+    expectSyncOutcome('enabled');
   });
 
   it('exposes all three AntivirusRegistrationModes values in the dropdown', async () => {
@@ -159,6 +224,29 @@ describe('PerOsAntivirusRegistrationCard', () => {
 
     const disabledOption = await renderResult.findByRole('option', { name: /^Disabled$/ });
     expect(disabledOption.querySelector('[color="danger"]')).toBeInTheDocument();
+  });
+
+  describe('when the page scrolls', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      jest.useRealTimers();
+    });
+
+    it('closes the mode options list', async () => {
+      render();
+
+      await openOsControlAndScrollPage(renderResult, testSubj.windows.modeSelect);
+
+      await waitFor(() => {
+        expect(renderResult.queryByRole('listbox')).not.toBeInTheDocument();
+      });
+    });
   });
 
   it('selecting a mode updates windows.antivirus_registration.mode and leaves mac and linux byte-identical', async () => {

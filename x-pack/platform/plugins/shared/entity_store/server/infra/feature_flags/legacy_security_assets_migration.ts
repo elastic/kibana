@@ -5,16 +5,58 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
-import type { FeatureFlagsStart } from '@kbn/core/server';
-import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
+import {
+  catchError,
+  concatMap,
+  distinctUntilChanged,
+  EMPTY,
+  filter,
+  firstValueFrom,
+  from,
+  takeUntil,
+} from 'rxjs';
+import type { Subject } from 'rxjs';
+import type { CoreStart, FeatureFlagsStart, Logger } from '@kbn/core/server';
+import { FF_MIGRATE_LEGACY_SECURITY_ASSETS, getErrorMessage } from '../../../common';
 
 /**
- * Returns whether legacy Security-scoped Entity Store assets may be migrated to
- * solution-neutral names. Default is false so existing deployments keep reads and
- * writes on the old concrete indices until this flag is enabled for a given env.
+ * Reads the migration FF's current settled value without waiting for it to become true.
+ * Safe for request and task execution paths (`AssetManagerClient`, the migration task's own
+ * run), which must resolve immediately regardless of the flag's value.
  */
-export const isLegacySecurityAssetsMigrationEnabled = (
+export const getLegacySecurityAssetsMigrationFlag = (
   featureFlags: FeatureFlagsStart
 ): Promise<boolean> =>
   firstValueFrom(featureFlags.getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false));
+
+/** Subscribes to migration flag updates and schedules the idempotent migration when enabled. */
+export const subscribeToLegacySecurityAssetsMigrationFlag = ({
+  coreStart,
+  logger,
+  stop$,
+  scheduleMigration,
+}: {
+  coreStart: CoreStart;
+  logger: Logger;
+  stop$: Subject<void>;
+  scheduleMigration: () => Promise<void>;
+}): void => {
+  coreStart.featureFlags
+    .getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false)
+    .pipe(
+      distinctUntilChanged(),
+      filter(Boolean),
+      concatMap(() =>
+        from(scheduleMigration()).pipe(
+          catchError((error) => {
+            logger.error(
+              `Error scheduling legacy security assets migration: ${getErrorMessage(error)}`
+            );
+            return EMPTY;
+          })
+        )
+      ),
+      takeUntil(stop$)
+    )
+    .subscribe();
+};

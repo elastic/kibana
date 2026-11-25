@@ -12,11 +12,58 @@ import type {
   BindServiceAccountWorkloadParams,
   CreateServiceAccountParams,
   ServiceAccount,
+  ServiceAccountBoundWorkload,
   ServiceAccountWorkloadBinding,
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeResult,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
+  ServiceAccountSummary,
 } from '@kbn/core-security-common';
+
+/**
+ * A platform service, outside Kibana, that can also assume a service account a plugin creates.
+ * The security plugin maps each name to that service's identity, so a caller never names a
+ * principal directly. Adding a name here needs a matching entry in the security plugin.
+ *
+ * @public
+ */
+export type ServiceAccountPlatformAssumer = 'relay' | 'sandbox';
+
+/**
+ * Create parameters for server-side callers. Only the server contract accepts
+ * `platformAssumers`. The HTTP route and the browser contract take {@link CreateServiceAccountParams}.
+ *
+ * @public
+ */
+export interface CreateServiceAccountServerParams extends CreateServiceAccountParams {
+  /**
+   * Platform services that may exchange the account for a token, in addition to this Kibana
+   * project. Only supported when service accounts are backed by UIAM. Elasticsearch service
+   * accounts reject a create that names any.
+   */
+  platformAssumers?: readonly ServiceAccountPlatformAssumer[];
+}
+
+/** @public */
+export interface DeleteServiceAccountOptions {
+  /**
+   * Deletes the account even when workloads are still bound to it. Those workloads then fail at
+   * their next token exchange until someone unbinds them.
+   */
+  force: boolean;
+}
+
+/**
+ * What came of a delete. An account that is still bound to workloads is not deleted unless the
+ * caller forces it, and the workloads that stopped it are reported back.
+ *
+ * @public
+ */
+export type DeleteServiceAccountResult =
+  | { deleted: true; warnings: string[] }
+  | { deleted: false; workloads: [ServiceAccountBoundWorkload, ...ServiceAccountBoundWorkload[]] };
 
 /**
  * Core's service accounts service.
@@ -39,9 +86,22 @@ export interface CoreServiceAccountsService {
    * the provided request. Requires the `manage_security` cluster privilege.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name and roles for the new service account.
+   * @param params The name and roles for the new service account, and any platform services that
+   * may also assume it.
    */
-  create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+  create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
+
+  /**
+   * Deletes a service account. Requires `manage_security`. When workloads are still bound to the
+   * account and `options.force` is not set, the account is kept and the result has
+   * `deleted: false` with the blocking workloads. Otherwise it has `deleted: true` with any
+   * warnings from the delete.
+   */
+  delete(
+    request: KibanaRequest,
+    id: string,
+    params: DeleteServiceAccountOptions
+  ): Promise<DeleteServiceAccountResult>;
 
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it is
@@ -50,7 +110,8 @@ export interface CoreServiceAccountsService {
    * caller that has to name it again at execution time. Re-binding is the same call: it replaces
    * the existing binding for the workload.
    *
-   * Rejects when the workload type was not registered by the calling plugin.
+   * Rejects when the workload type was not registered by the calling plugin, or when
+   * `serviceAccountId` is empty or longer than {@link SERVICE_ACCOUNT_ID_MAX_LENGTH}.
    */
   bindWorkload(
     request: KibanaRequest,
@@ -68,12 +129,73 @@ export interface CoreServiceAccountsService {
   unbindWorkload(request: KibanaRequest, params: ServiceAccountWorkloadRef): Promise<boolean>;
 
   /**
+   * Binds and unbinds many workloads in the space of the request, in one call. Each change is
+   * authorized and audited exactly as the same {@link bindWorkload} or {@link unbindWorkload} call
+   * would be, and the result reports on every change, in the order given.
+   *
+   * One change that fails does not stop the others: when the caller may not change bindings, or a
+   * change cannot be read or written, its result has `ok: false` and the reason, and nothing is
+   * thrown. A workload-delete path must therefore treat an unbind with `ok: false` as a failed
+   * delete, or it leaves a binding behind for a later workload with the same ID to inherit.
+   *
+   * The call itself rejects, before changing anything, when bindings are unavailable, the
+   * privilege check cannot be made, a change binds an account and the request is not
+   * authenticated, there are more than {@link SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX}
+   * changes, a change names a workload type the calling plugin did not register, a malformed
+   * workload ID, or a bind names no service account, or two changes name the same workload.
+   * Two changes to one workload always come down to the last of them, so send only that one.
+   *
+   * Every change applies in the space of the request, as with the single-workload methods. A flow
+   * that copies workloads into another space has to make the call from a request in that space.
+   *
+   * Changes are not applied atomically. A caller that needs its own records to agree with the
+   * bindings reconciles them by the results.
+   *
+   * A change that failed with a status of 500 or above may still have been applied, so do not
+   * read it as "nothing changed". Every change can be retried safely: a bind writes the same
+   * binding again, and an unbind of a workload with no binding succeeds. To settle such a change,
+   * send it again, unchanged, until its result is not a server error. Retry with the same account:
+   * a write that timed out can still land after the retry, and then the last write wins.
+   *
+   * A caller that gives up instead, such as an import that skips the workloads whose bind failed,
+   * should unbind those workloads. Right after a timeout this is best effort, because the
+   * original write can still land after the unbind. Two things protect against a binding that is
+   * left behind: register `resolveWorkloads` for the workload type, so the stale binding cleanup
+   * removes bindings of workloads that do not exist, and pass `expectedServiceAccountId` to
+   * {@link withScopedRequestForWorkload}, so a workload never runs as an account it did not record.
+   */
+  bulkUpdateWorkloadBindings(
+    request: KibanaRequest,
+    changes: readonly ServiceAccountWorkloadBindingChange[]
+  ): Promise<ServiceAccountWorkloadBindingChangeResult[]>;
+
+  /**
    * Returns the workload's binding, or `null` when it has none. Throws if the stored binding fails
    * its integrity check, or if bindings are unavailable.
    */
   getWorkloadBinding(
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
+
+  /**
+   * Returns the name and status of the account a workload is bound to, so that a user who can see
+   * the workload can see which account it runs as without having to manage service accounts.
+   *
+   * Resolves `null` when the workload has no binding, or when the account no longer exists.
+   * Rejects when the workload type was not registered by the calling plugin, the workload ID is
+   * malformed, the stored binding fails its integrity check, the account cannot be read, or
+   * bindings are unavailable.
+   *
+   * It always names the account the workload is bound to now. To name the account a past run of
+   * the workload recorded, compare that account's id with the summary's `id`, and show the name
+   * only when they match.
+   *
+   * Kibana reads the account as itself, so this performs no user authorization. Before calling it
+   * on a user's behalf, the calling plugin must confirm that the user can see the workload.
+   */
+  getWorkloadServiceAccountSummary(
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null>;
 
   /**
    * Runs `fn` with a request authenticated as the workload's service account, for use with
@@ -83,7 +205,9 @@ export interface CoreServiceAccountsService {
    * request kept past `fn` is refused by Elasticsearch rather than allowed to keep acting.
    *
    * Rejects when the workload has no binding (a 404), its account differs from
-   * expectedServiceAccountId (a 403), or bindings are unavailable.
+   * expectedServiceAccountId (a 403), `executionId` is empty or longer than a workload ID, or
+   * bindings are unavailable. On the Elasticsearch backend it also rejects when Kibana refuses the
+   * account's stored credential (a 403), or when that credential is missing (a 404).
    */
   withScopedRequestForWorkload<T>(
     params: ServiceAccountWorkloadRequestParams,

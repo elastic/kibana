@@ -20,6 +20,7 @@ import { castEntityField, castField } from '../../../common/esql/cast';
 import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
+  ExtractedEntityDefinition,
   FieldValueSchema,
   GatedEntityDefinition,
   SetFieldsByCondition,
@@ -27,10 +28,10 @@ import type {
 import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
 import { type EntityField } from '../../../common/domain/definitions/entity_schema';
 import {
-  getEuidEsqlDocumentsContainsIdFilterFromDefinition,
-  getFieldEvaluationsEsqlFromDefinition,
+  getEuidEsqlDocumentsContainsIdFilter,
+  getFieldEvaluationsEsql,
 } from '../../../common/domain/euid/esql';
-import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
+import { getFieldEvaluations } from '../../../common/domain/euid/field_evaluations';
 
 export const MAX_COLLECTED_VALUES_PER_FIELD = 50;
 
@@ -91,9 +92,7 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
-      AND (${getEuidEsqlDocumentsContainsIdFilterFromDefinition(
-        entityDefinition
-      )})${extractionGateFilter}`;
+      AND (${getEuidEsqlDocumentsContainsIdFilter(entityDefinition)})${extractionGateFilter}`;
 
   if (!logsPageCursorStart) {
     return baseWhere;
@@ -189,7 +188,7 @@ export function extractPaginationParams(
  * Returns empty string when there are no field evaluations.
  */
 export function buildFieldEvaluations(entityDefinition: EntityDefinition): string {
-  const fieldEvaluationsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+  const fieldEvaluationsEsql = getFieldEvaluationsEsql(entityDefinition);
   if (fieldEvaluationsEsql === undefined || fieldEvaluationsEsql === '') {
     return '';
   }
@@ -304,9 +303,9 @@ export function statsFieldDestinations(fields: EntityField[]): Set<string> {
  */
 export function mapPostAggFilterFieldsToRecentForEsql(
   postAggFilter: Condition,
-  entityDefinition: Pick<EntityDefinition, 'fields'>
+  entityDefinition: Pick<ExtractedEntityDefinition, 'extraction'>
 ): Condition {
-  const destinations = statsFieldDestinations(entityDefinition.fields);
+  const destinations = statsFieldDestinations(entityDefinition.extraction.fields);
 
   const mapNode = (node: Condition): Condition => {
     if (isAlwaysCondition(node) || isNeverCondition(node)) {
@@ -410,23 +409,30 @@ function fieldValueToEsqlExpressionAfterStats(
   return `CONCAT(${parts.join(', ')})`;
 }
 
-export function buildPaginationSection(
-  docsLimit: number,
+/**
+ * Drops everything at or before the entity cursor. Returns nothing on the first page.
+ * It only compares the id column, so it can run on raw rows before `STATS ... BY id`
+ * as well as on the aggregated rows after it, with the same result.
+ */
+export function buildPaginationCursorFilter(
   paginationFields: PaginationFields,
   pagination?: PaginationParams
 ): string[] {
-  const parts = [];
-  parts.push(`| SORT ${paginationFields.idFieldInQuery} ASC`);
-
-  if (pagination) {
-    const escapedId = escapeEsqlStringLiteral(pagination.idCursor);
-    parts.push(`| WHERE ${paginationFields.idFieldInQuery} > "${escapedId}"`);
+  if (!pagination) {
+    return [];
   }
+  const escapedId = escapeEsqlStringLiteral(pagination.idCursor);
+  return [`| WHERE ${paginationFields.idFieldInQuery} > "${escapedId}"`];
+}
 
-  parts.push(`| LIMIT ${docsLimit}`);
-  return parts;
+/** Orders the aggregated entity rows by id and keeps the first `docsLimit` of them. */
+export function buildPaginationSortAndLimit(
+  docsLimit: number,
+  paginationFields: PaginationFields
+): string[] {
+  return [`| SORT ${paginationFields.idFieldInQuery} ASC`, `| LIMIT ${docsLimit}`];
 }
 
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {
-  return getFieldEvaluationsFromDefinition(entityDefinition).length > 0;
+  return getFieldEvaluations(entityDefinition).length > 0;
 }

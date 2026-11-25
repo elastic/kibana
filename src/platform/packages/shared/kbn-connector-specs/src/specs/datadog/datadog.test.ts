@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { datadogAlert } from '@kbn/connector-topics';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getConnectorSpec } from '../../..';
 import type { ActionContext } from '../../connector_spec';
@@ -14,13 +15,9 @@ import type { ConnectorIngressContext, HandleEventsResult } from '../../connecto
 import { buildEventId } from '../../event_type_id';
 import { SPECS_ALLOWED_EVENTS } from '../../specs_allowed_events';
 import { validateEmittedEvents } from '../../validate_emitted_events';
-import {
-  DATADOG_ALERT_EVENT_ID,
-  DATADOG_ALERT_EVENT_KEY,
-  DATADOG_CONNECTOR_TYPE_ID,
-} from './constants';
+import { DATADOG_ALERT_EVENT_KEY, DATADOG_CONNECTOR_TYPE_ID } from './constants';
 import { Datadog } from './datadog';
-import { DatadogReceivedEventSchema, UpdateIncidentInputSchema } from './types';
+import { UpdateIncidentInputSchema } from './types';
 
 describe('Datadog', () => {
   const mockClient = {
@@ -105,14 +102,14 @@ describe('Datadog', () => {
 
     it('is allowlisted and uses the connector event id convention', () => {
       expect(SPECS_ALLOWED_EVENTS.has(DATADOG_CONNECTOR_TYPE_ID)).toBe(true);
-      expect(DATADOG_ALERT_EVENT_ID).toBe(
+      expect(datadogAlert.name).toBe(
         buildEventId(DATADOG_CONNECTOR_TYPE_ID, DATADOG_ALERT_EVENT_KEY)
       );
-      expect(DATADOG_ALERT_EVENT_ID).toBe('datadog.alert');
+      expect(datadogAlert.name).toBe('datadog.alert');
     });
 
     it('accepts partial alert payloads with custom properties and value types', () => {
-      const result = DatadogReceivedEventSchema.safeParse({
+      const result = events.definitions[DATADOG_ALERT_EVENT_KEY].eventSchema.safeParse({
         body: {
           monitor_id: 123,
           alert_transition: 'Triggered',
@@ -122,7 +119,9 @@ describe('Datadog', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.body.custom_property).toEqual({ nested: true });
+        expect(result.data.body).toEqual(
+          expect.objectContaining({ custom_property: { nested: true } })
+        );
       }
     });
 
@@ -136,7 +135,7 @@ describe('Datadog', () => {
 
       expect(result.events).toEqual([
         {
-          eventId: DATADOG_ALERT_EVENT_ID,
+          eventId: datadogAlert.name,
           correlationKey: expect.any(String),
           payload: { body: rawBody },
         },
@@ -543,6 +542,43 @@ describe('Datadog', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.datadoghq.com/api/v1/validate');
       expect(result).toEqual({});
+    });
+  });
+
+  describe('postEvent input bounds', () => {
+    const isValid = (input: Record<string, unknown>) =>
+      Datadog.actions.postEvent.input.safeParse({ title: 'Deploy', text: 'done', ...input })
+        .success;
+
+    it.each([
+      [{ text: 'x'.repeat(4000) }, true],
+      [{ text: 'x'.repeat(4001) }, false],
+      [{ aggregationKey: 'k'.repeat(100) }, true],
+      [{ aggregationKey: 'k'.repeat(101) }, false],
+    ])('%#: valid=%s', (input, expected) => {
+      expect(isValid(input)).toBe(expected);
+    });
+  });
+
+  describe('free-text field bounds', () => {
+    const { scheduleDowntime, createIncident } = Datadog.actions;
+
+    it.each([
+      [65_536, true],
+      [65_537, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      const text = 'x'.repeat(length);
+      expect(
+        scheduleDowntime.input.safeParse({
+          scope: 'env:prod',
+          start: '2024-01-15T00:00:00Z',
+          end: '2024-01-15T01:00:00Z',
+          message: text,
+        }).success
+      ).toBe(expected);
+      expect(createIncident.input.safeParse({ title: 'Outage', initialCell: text }).success).toBe(
+        expected
+      );
     });
   });
 });

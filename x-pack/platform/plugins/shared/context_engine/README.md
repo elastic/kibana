@@ -64,9 +64,24 @@ agent prompt's AI-index catalog uses the same rule.
 ## Querying AI Indices
 
 `POST /api/context_engine/ai_index/_query` runs caller-supplied ES|QL as the
-current user. Body: `{ query, params?, limit? }`. Two things are server-owned
+current user. Body: `{ query, params?, limit? }`. Three things are server-owned
 and cannot be overridden:
 
+- **Lifecycle filter.** A query that reads a registered AI Index's backing
+  store (by name, pattern, or as one of several `FROM` targets) gets the
+  knowledge indicator lifecycle pipeline inserted after `FROM`: only
+  indicators whose `governance.lifecycle.status` is unset or `active` and
+  whose `expires_at` is unset or in the future are returned, and
+  `governance.*` is dropped from the result. A top-level `WHERE` command on a
+  lifecycle field switches off that filter: `WHERE expires_at < NOW()` the
+  expiry filter, `WHERE governance.lifecycle.status == "deleted"` the status
+  filter. Naming a lifecycle field in `KEEP`, `SORT` or `EVAL`, or in a
+  `WHERE` inside a `FORK` branch, leaves both filters on, and naming any
+  `governance.*` field keeps `governance` in the result. When a
+  data stream is read, only the newest revision of each `id` per
+  target is considered in every case (`METADATA _id, _index` are added when
+  missing). An index outside the registry is read as-is on its own; in a query
+  that also reads a registered dest, the pipeline applies to every row.
 - **Space filter.** Documents are visible when they carry no
   `permissions.kibana.privileges` element (public), or when one is scoped to
   the request's space or to `*`. The space comes from the request URL
@@ -81,11 +96,6 @@ The query is otherwise a pass-through: it decides which indices it reads
 Elasticsearch index privileges bound what it can reach. Elasticsearch 4xx
 errors (bad ES|QL, missing index privilege) are returned with their status.
 
-Every AI index also has an ES|QL view, `v-ai-index-<id>`, that returns only
-its current, active, unexpired knowledge indicators with `governance.*`
-dropped. Data stream views keep the latest revision per `id`. The view is
-created with the AI index and deleted with it.
-
 ## Describing AI Indices
 
 `GET /api/context_engine/ai_index/{id}/_describe` is the step before writing a
@@ -93,9 +103,9 @@ query. It returns `{ response: string }`: a free-form text context block meant
 to be handed to an agent as-is, not parsed.
 
 ```
-AI index: sales-knowledge
+AI-index registry ID: sales-knowledge
 Curated sales knowledge.
-Query with ES|QL against: ai-index-idx-sales-knowledge
+Backing Elasticsearch target (use only in ES|QL queries): ai-index-idx-sales-knowledge
 
 Fields
 @timestamp: date, searchable, aggregatable
@@ -117,6 +127,8 @@ Example queries (adapt field names for non-canonical indices)
 
 Full text search, lexical and semantic fused together (?query)
 FROM ai-index-idx-sales-knowledge METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | FORK
     ( WHERE MATCH(title, ?query) OR ... | SORT _score DESC | LIMIT 20 )
     ( WHERE MATCH(title.semantic, ?query) OR ... | SORT _score DESC | LIMIT 20 )
@@ -130,8 +142,8 @@ Count by type
 ...
 ```
 
-- The `Query with ES|QL against` line is `dest.value`, the string to put after
-  `FROM`.
+- The `Backing Elasticsearch target` line is `dest.value`, the string to put
+  after `FROM`.
 - `Fields` lists every mapped field, mapping-defined runtime fields included
   (`path: type`, then `searchable` and/or `aggregatable` when true), one per
   line, sorted by path and capped at 500;
@@ -141,25 +153,28 @@ Count by type
 - `Semantic fields` lists the searchable `semantic_text` fields among those
   shown, detected from the mapping type. Omitted when there are none.
 - `Knowledge item types` and `Tags` show the top 20 `type` / `tags` values by
-  document count in the current space, one `"value": count` per line. Each
+  document count in the current space, active and unexpired only, one
+  `"value": count` per line. Each
   section is omitted unless its field is an aggregatable `keyword` — always the
   case on canonical KI indices, but a custom index that maps `type` / `tags` as
-  `text`, or inconsistently across a pattern, gets no counts. One `terms`
-  aggregation backs both; it errors rather than return undercounts if a shard
-  fails. Both sections are also omitted when the caller lacks `read` on the
-  backing indices; the rest of the block still renders.
+  `text`, or inconsistently across a pattern, gets no counts. One ES|QL query
+  per field backs both, through the same lifecycle pipeline as `_query`. Both
+  sections are also omitted when the caller lacks `read` on the backing
+  indices; the rest of the block still renders.
 - `Example queries` are three fixed ES|QL shapes written for the canonical KI
   schema (`title`, `description`, `content`, their `.semantic` multi-fields,
-  `type`, `tags`) with only the `FROM` target substituted. They use named
+  `type`, `tags`) with only the `FROM` target substituted. Each opens with the
+  lifecycle pipeline for the dest type, so the filters the query API would add
+  are visible and the same when run elsewhere. They use named
   parameters (`?query`; `?type` and `?tag`) meant for `_query`'s `params`. They
   run as-is on canonical indices; for other mappings the agent adapts field
   names from `Fields`.
 
-Describe runs no ES|QL. It issues `_mapping` and `_field_caps` (both needed:
-`_field_caps` reports `semantic_text` as `text`) plus the one aggregation, all
+Describe issues `_mapping` and `_field_caps` (both needed:
+`_field_caps` reports `semantic_text` as `text`) plus the count queries, all
 as the current user. 404 when the AI Index is not registered; Elasticsearch 4xx
 from `_mapping` / `_field_caps` (missing `view_index_metadata`) is returned
-with its status. The aggregation is the exception: its 403 (missing `read`)
+with its status. The count queries are the exception: their 403 (missing `read`)
 drops the counts sections instead. Each `_mapping` /
 `_field_caps` response is capped at 20 MB before the field cap applies; a
 target broad enough to exceed it returns 400.
@@ -171,11 +186,11 @@ privileges. Callers also need, on every backing index (`ai-index-*`):
 
 - `read` to be listed. Without it the AI Index is left out of the list; there
   is no error;
-- `read` to query, or Elasticsearch returns 403. Querying the view needs
-  `read` on `v-ai-index-<id>` as well as on the backing index;
+- `read` to query, or Elasticsearch returns 403;
 - `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
   Elasticsearch returns 403. The counts aggregation also needs `read`; without
-  it the two counts sections are omitted and the rest of the block is returned.
+  it the two counts sections are omitted and the rest of the block is returned;
+- `read` and `write` to create, update, or delete a knowledge indicator.
 
 Two things decide what a caller can see: the space filter Kibana adds, and the
 caller's own Elasticsearch permissions on the backing indices. Nothing checks
@@ -343,6 +358,182 @@ rounds.
 The round filter depends on the agent calling `load_skill`; an agent carrying
 the same guidance in its instructions goes unmarked.
 
+## Session events
+
+Harnesses such as Agent Builder save what happens in an agent session over HTTP. The route
+is public and experimental:
+
+```
+POST /api/context_engine/memory/_save_event
+```
+
+```json
+{
+  "session_id": "3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43",
+  "ai_index_ids": ["ops-memory"],
+  "events": [
+    { "id": "evt-001", "type": "user", "turn_id": "turn-1", "event_at": "2026-11-16T09:58:00.000Z", "content": "Why is checkout latency up?" },
+    { "id": "evt-002", "type": "tool", "turn_id": "turn-1", "event_at": "2026-11-16T09:58:32.000Z", "tool_call_id": "call-1", "tool_name": "search_logs", "status": "failed", "result": "Search timed out" }
+  ]
+}
+```
+
+Each event is one document in the `.context-engine-session-events` data stream, which
+Elasticsearch owns. Readers group turns by `turn_id`, so there is no call to close a turn.
+`type` is `user`, `assistant`, `reasoning`, `tool` or `meta`:
+
+- `user` needs `content`; `assistant` may have `content` and `tool_calls`. The `content` of
+  both is indexed for semantic search.
+- `reasoning` may have `content`, which is stored but not indexed.
+- `tool` needs `tool_call_id` and `tool_name`, and may have `status` (`successful`, `failed` or
+  `null`). A `null` or missing status is stored as `unknown`.
+- Every event needs `id`, `turn_id` and an ISO 8601 `event_at`, and may have a
+  non-negative integer `seq`.
+
+Any other field, such as a tool event's `result` or a tool call's `args`, is stored as sent in
+`raw`, whatever its JSON type, and never read. `content` must be a string because it is
+embedded, so a harness flattens content blocks into text first.
+
+A request takes 1 to 1,000 events and up to 10 MB. The route validates the request as a whole,
+so one bad event causes it to reject the request. The response has one result per event, in
+request order:
+
+- `created`: the event was saved.
+- `failed`: Elasticsearch rejected the event, for example when its content could not be
+  embedded. The reason is in `error`; resend the event to retry.
+
+Elasticsearch generates each document's `_id`, so a resent event is stored again. Readers drop
+duplicates by `session_id` and `id`, and a harness should send each event once and track what
+it has sent.
+
+The route runs synchronously, so a harness should send events in the background rather
+than make the agent wait. It is gated by `contextEngine:enabled` and by the memory setting,
+and returns 404 while either is off. The space comes from the request URL.
+
+### Privileges and audit
+
+The route needs `contextEngine:write`. Without `user_id`, the events belong to the caller's
+user profile, as core's `userProfile.getCurrentProfileId()` resolves it: the profile of a UI
+session, the API key owner's profile, or for basic authentication the profile Elasticsearch
+activates for those credentials. A caller without a profile, such as a service account or an
+API key whose owner never logged in to Kibana, gets a 403 unless it names `user_id`.
+
+Naming another user in `user_id` also needs `contextEngine:manage_memory`, for example on the
+API key of a harness that saves events for many users. It is not part of All, so an
+administrator grants it explicitly. Without it the request gets a 403.
+
+Each AI index in `ai_index_ids` must exist in the space, or the route returns 404. The caller
+needs the Elasticsearch `write` privilege on each backing index, checked with `has_privileges`,
+or the route returns 403. If any AI index fails, the route rejects the request and saves
+nothing.
+
+Each request writes one `memory_save_event` audit event. It records the user the events belong
+to in `user.target.id`, the session in `kibana.saved_object`, and how many events were saved
+and failed. It records rejected requests, failed writes, and batches where every event fails as
+failures. Core adds the caller, the space and the request id.
+
+## Session memory
+
+Context Engine can remember and forget session memories over HTTP. Both routes are public
+and experimental.
+
+### Remember
+
+```
+POST /api/context_engine/memory/_remember
+```
+
+```json
+{
+  "session_id": "8f3c2a1e",
+  "ai_index_ids": ["ops-memory"],
+  "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
+  "attributes": { "incident": "INC-4211" }
+}
+```
+
+`session_id` and `content` are required. Pass `id` to revise an existing memory. The revision
+replaces the memory in full, and the route does not check whether the id exists. Without `id`,
+the route generates one. `ai_index_ids` lists the AI indices that dreaming promotes the memory
+into. `attributes` is a map of string hints for dreaming.
+
+The route returns `202` with `{ "id": "..." }` and writes the memory in the background, because
+`semantic_text` inference runs inside the index request. The memory becomes searchable after
+the background write completes. The route does not report a failed write in the response.
+Instead, it logs the error to the Kibana logs and writes a failure audit event.
+
+The space comes from the request URL. The route returns 404 while `contextEngine:enabled` or
+the memory setting is off. Each AI index in `ai_index_ids` must exist in the request space, or
+the route returns 404. The caller must hold the Elasticsearch `write` privilege on each
+backing index, or the route returns 403. A rejected request writes nothing.
+
+### Forget
+
+```
+POST /api/context_engine/memory/_forget
+```
+
+```json
+{ "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"] }
+```
+
+`ids` takes 1 to 100 ids, and the route collapses duplicates. Forgetting writes a tombstone and
+keeps the memory's revisions until retention removes them.
+
+The response lists one outcome per unique id, in request order: `forgotten`,
+`already_forgotten`, `not_found`, or `failed`. A `failed` entry includes `error` when
+Elasticsearch rejects the tombstone.
+
+The space comes from the request URL. The route reports a memory of another user or another
+space as `not_found`, so it never reveals that the memory exists. It returns 404 while
+`contextEngine:enabled` is off, and does not check the memory setting, so forgetting still
+works after memory is turned off.
+
+### Privileges and audit
+
+Both routes require `contextEngine:write`. Without `user_id`, they act on the caller's own
+memories. A caller without a user profile gets a 403.
+
+Naming another user in `user_id` also requires `contextEngine:manage_memory`. That privilege
+is not part of All, so an administrator must grant it. Without it, the request gets a 403
+and the route audits the attempt as a failure. On `_forget`, when `user_id` does not match a
+memory's owner, the route returns `not_found`.
+
+After authorization (`contextEngine:write`), schema validation, and feature-flag checks pass,
+`_remember` writes one `memory_remember` audit event per request when the background write
+finishes or when the handler rejects the request, and `_forget` writes one `memory_forget`
+audit event per unique id. Requests rejected before the handler (for example, missing
+`contextEngine:write`, invalid request body, or Context Engine disabled) do not emit these
+events. Because `_remember` does not check whether a supplied `id` exists, a request with an
+unknown `id` creates a memory while auditing with `event.type` set to `change`. Both events
+record the authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the
+memory in `kibana.saved_object`. Because memories are scoped by space and user and the caller
+can choose `id`, two users can share the same id; combine the space, `user.target.id`, and
+`kibana.saved_object.id` to identify a single memory. The routes record in-handler rejections,
+background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
+
+## Dreaming input
+
+Dreaming reads what agents saved in the two session stores, and nothing from the AI index it
+writes to or from traces.
+
+- The dreaming workflow reads **session memories** with `context-engine.readSessionMemories`.
+  It reads the memories that list the AI index in `ai_index_ids` and were remembered or revised
+  since the last run, across all users of the space. A memory revised since is read once, as its
+  latest revision. A forgotten memory, or one whose latest revision no longer lists the AI index,
+  is left out.
+- The transcript dreaming workflow reads **transcripts** with `context-engine.readSessionTranscripts`.
+  It finds the events that list the AI index and were saved since the last run, then rebuilds
+  each turn they belong to from all its events. A turn that continues after a run is read again,
+  whole, by a later run. Reasoning and meta events are left out of a transcript, and a turn
+  nobody said anything in is skipped. Events saved in the last 5 minutes wait for the next run,
+  by default, so a turn still running is not read half way.
+
+Both steps read as the internal user once they check that the workflow user can read AI
+indices in the space, and the memories they return are visible to the space, not to the user
+who saved them. A fact or entity cites the memories it came from as `session-memory://<id>`
+and `session://<session id>/<turn id>`.
+
 ## Improvements
 
 An **improvement** is a proposed change to one AI Index's KI pipeline, derived
@@ -458,8 +649,9 @@ only in the skill because the briefing is the one part of a run that cannot be
 replaced by configuring a different agent.
 
 The `platform.context_engine.ai_index` attachment is not used: it carries the
-`save_automation` tool and instructions to ask the user questions, which belong
-to the interactive setup conversation.
+install and save tools and the authority to write to the index, which belong to
+the interactive setup conversation. How that conversation asks the user is in
+the Context Engine agent's instructions.
 
 The `ai.agent` step runs under the workflow owner's identity — the user who
 turned analysis on. The conversation it creates is private to that user, Agent

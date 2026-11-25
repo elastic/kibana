@@ -14,25 +14,41 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   assertEntitiesEqual,
   expectedHostEntities,
+  expectedUserEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
+  type ApiClientFixture,
 } from '../../../common/fixtures/helpers';
+import {
+  LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+} from '../../../../../server/domain/saved_objects';
 
 apiTest.describe(
   'Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage)',
   { tag: ENTITY_STORE_TAGS },
   () => {
+    const DOCS_LIMIT = 5;
+
     let defaultHeaders: Record<string, string>;
     let internalHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver, kbnClient }) => {
+    const setDocsLimit = async (apiClient: ApiClientFixture, docsLimit: number) => {
+      const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { docsLimit } },
+      });
+      expect(response.statusCode).toBe(200);
+    };
+
+    apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
@@ -42,75 +58,125 @@ apiTest.describe(
         ...credentials.cookieHeader,
         ...INTERNAL_HEADERS,
       };
-
-      // enable feature flag
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
-
-      // Install the entity store
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          logExtraction: {
-            docsLimit: 5,
-          },
-        },
-      });
-      expect(response.statusCode).toBe(201);
+      await clearInstalledEntityStoreDocuments(esClient);
 
       await setupLogsTestDataStream(esClient);
       await esArchiver.loadIfNeeded(
         'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
       );
+
+      await setDocsLimit(apiClient, DOCS_LIMIT);
+    });
+
+    // Every test starts from an empty latest index, so none depends on what an earlier test or a
+    // failed attempt left behind.
+    apiTest.beforeEach(async ({ esClient }) => {
+      await clearInstalledEntityStoreDocuments(esClient);
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
+      try {
+        const resetResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            logExtraction: {
+              docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+              maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+            },
+          },
+        });
+        expect(resetResponse.statusCode).toBe(200);
+      } finally {
+        await teardownLogsTestDataStream(esClient);
+      }
+    });
+
+    apiTest('Should extract host with entity pagination', async ({ apiClient, esClient, log }) => {
+      const expectedPageCount = Math.ceil(expectedHostEntities.length / DOCS_LIMIT);
+
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {
+            fromDateISO: '2026-01-20T11:00:00Z',
+            toDateISO: '2026-01-20T13:00:00Z',
+          },
+        }
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body.success).toBe(true);
+      expect(extractionResponse.body.count).toBe(expectedHostEntities.length);
+      expect(extractionResponse.body.pages).toBe(expectedPageCount);
+
+      const entities = await esClient.search({
+        index: LATEST_ALIAS,
+        query: {
+          bool: {
+            filter: {
+              term: { 'entity.EngineMetadata.Type': 'host' },
+            },
+          },
+        },
+        size: 1000, // a lot just to be sure we are not capping it
       });
-      expect(response.statusCode).toBe(200);
-      await clearEntityStoreIndices(esClient);
-      await teardownLogsTestDataStream(esClient);
+
+      assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
     });
 
     apiTest(
-      'Should extract host with entity pagination (docsLimit 5, wide log slices)',
+      'Should extract user entities across entity pages in both extraction modes, through the postAggFilter path',
       async ({ apiClient, esClient, log }) => {
-        const expectedPageCount = 5;
+        // Each mode pages with its own limit. `priority` owns most of the users, so a page of
+        // DOCS_LIMIT holds several rows and a short page ends the loop. `nonPriority` only owns a
+        // couple of users in this archive: with a larger page it would finish in a single page and
+        // never apply its cursor, so it pages one entity at a time.
+        const limitByProcess = [
+          { process: 'priority', docsLimit: DOCS_LIMIT },
+          { process: 'nonPriority', docsLimit: 1 },
+        ] as const;
 
-        const extractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
-          {
-            headers: internalHeaders,
-            responseType: 'json',
-            body: {
-              fromDateISO: '2026-01-20T11:00:00Z',
-              toDateISO: '2026-01-20T13:00:00Z',
-            },
+        try {
+          for (const { process, docsLimit } of limitByProcess) {
+            await setDocsLimit(apiClient, docsLimit);
+            const extractionResponse = await apiClient.post(
+              ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
+              {
+                headers: internalHeaders,
+                responseType: 'json',
+                body: {
+                  fromDateISO: '2026-01-20T11:00:00Z',
+                  toDateISO: '2026-01-20T13:00:00Z',
+                  process,
+                },
+              }
+            );
+            expect(extractionResponse.statusCode).toBe(200);
+            expect(extractionResponse.body.success).toBe(true);
+            const { count, pages } = extractionResponse.body;
+            expect(count, `${process} extracted no users`).toBeGreaterThan(0);
+            expect(pages, `${process} did not page`).toBe(Math.ceil(count / docsLimit));
+            expect(pages, `${process} stayed on a single page`).toBeGreaterThan(1);
           }
-        );
-        expect(extractionResponse.statusCode).toBe(200);
-        expect(extractionResponse.body.success).toBe(true);
-        expect(extractionResponse.body.count).toBe(expectedHostEntities.length);
-        expect(extractionResponse.body.pages).toBe(expectedPageCount);
+        } finally {
+          await setDocsLimit(apiClient, DOCS_LIMIT);
+        }
 
         const entities = await esClient.search({
           index: LATEST_ALIAS,
           query: {
             bool: {
               filter: {
-                term: { 'entity.EngineMetadata.Type': 'host' },
+                term: { 'entity.EngineMetadata.Type': 'user' },
               },
             },
           },
           size: 1000, // a lot just to be sure we are not capping it
         });
 
-        assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
+        assertEntitiesEqual(expectedUserEntities, entities.hits.hits, (msg) => log.error(msg));
       }
     );
 
@@ -125,18 +191,6 @@ apiTest.describe(
           body: { logExtraction: { maxLogsPerPage: 2 } },
         });
         expect(update.statusCode).toBe(200);
-
-        await esClient.deleteByQuery({
-          index: LATEST_ALIAS,
-          refresh: true,
-          query: {
-            bool: {
-              filter: {
-                term: { 'entity.EngineMetadata.Type': 'host' },
-              },
-            },
-          },
-        });
 
         const extractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),

@@ -8,12 +8,24 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { InferenceClient } from '@kbn/inference-common';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { invokeAttackDiscoveryGraphWithAlerts } from './invoke_graph_with_alerts';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { getDefaultAttackDiscoveryGraph } from '.';
 import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
+import { resolveAttackDiscoveryTemplateCompletion } from './template_completion';
 
+const mockSetAttributes = jest.fn();
+let mockSpan: { setAttributes: jest.Mock } | undefined;
+
+jest.mock('@kbn/inference-tracing', () => ({
+  ElasticGenAIAttributes: { InferenceSpanKind: 'elastic.inference.span.kind' },
+  withActiveInferenceSpan: jest.fn(
+    (_name: string, _opts: unknown, cb: (span: unknown) => unknown) => cb(mockSpan)
+  ),
+}));
 jest.mock('@kbn/langchain/server');
 jest.mock('@kbn/langchain/server/tracers/langsmith');
 jest.mock('.', () => ({
@@ -21,6 +33,15 @@ jest.mock('.', () => ({
   getDefaultAttackDiscoveryGraph: jest.fn(),
 }));
 jest.mock('./throw_if_error_counts_exceeded');
+jest.mock('./template_completion', () => {
+  const actual = jest.requireActual('./template_completion');
+  return {
+    ...actual,
+    resolveAttackDiscoveryTemplateCompletion: jest.fn(
+      actual.resolveAttackDiscoveryTemplateCompletion
+    ),
+  };
+});
 
 describe('invokeAttackDiscoveryGraphWithAlerts', () => {
   const mockActionsClient = {} as PublicMethodsOf<ActionsClient>;
@@ -56,6 +77,7 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSpan = undefined;
     (getDefaultAttackDiscoveryGraph as jest.Mock).mockReturnValue(mockGraph);
     (getLangSmithTracer as jest.Mock).mockReturnValue([]);
   });
@@ -96,6 +118,86 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
         tracers: [],
       },
     });
+  });
+
+  it('passes caller-provided telemetryMetadata to the LLM so its calls are attributed', async () => {
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+      telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+    });
+
+    expect(ActionsClientLlm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+      })
+    );
+  });
+
+  it('passes caller-provided telemetryMetadata to the template completion resolver', async () => {
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.inference',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+      telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+    });
+
+    expect(resolveAttackDiscoveryTemplateCompletion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+      })
+    );
+  });
+
+  it('does not invent telemetryMetadata when the caller provides none', async () => {
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+    });
+
+    const [constructorArgs] = (ActionsClientLlm as unknown as jest.Mock).mock.calls.at(-1) ?? [];
+    expect(constructorArgs.telemetryMetadata).toBeUndefined();
   });
 
   it('strips leading dot from action_type_id for llmType', async () => {
@@ -232,6 +334,8 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
 
     mockGraphInvoke.mockResolvedValue({
       anonymizedDocuments: mockAlerts,
+      generationAttempts: 2,
+      hallucinationFailures: 1,
       insights: mockDiscoveries,
       replacements: mockReplacements,
     });
@@ -252,8 +356,92 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
     expect(result).toEqual({
       alertsContextCount: 2,
       discoveries: mockDiscoveries,
+      generationAttempts: 2,
+      hallucinationFailures: 1,
       replacements: mockReplacements,
     });
+  });
+
+  it('records the graph result counters on the root span', async () => {
+    mockSpan = { setAttributes: mockSetAttributes };
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      errors: ['parse error'],
+      generationAttempts: 3,
+      generations: ['g1', 'g2'],
+      hallucinationFailures: 1,
+      insights: [],
+      maxGenerationAttempts: 10,
+      maxHallucinationFailures: 5,
+      refinements: ['r1'],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+    });
+
+    expect(withActiveInferenceSpan).toHaveBeenCalledWith(
+      'attack_discovery.graph',
+      expect.anything(),
+      expect.any(Function)
+    );
+    expect(mockSetAttributes).toHaveBeenCalledWith({
+      'attack_discovery.errors_count': 1,
+      'attack_discovery.generation_attempts': 3,
+      'attack_discovery.generations_count': 2,
+      'attack_discovery.hallucination_failures': 1,
+      'attack_discovery.max_generation_attempts': 10,
+      'attack_discovery.max_hallucination_failures': 5,
+      'attack_discovery.refinements_count': 1,
+    });
+  });
+
+  it('caps a template connector at 100 alerts and logs the omitted count', async () => {
+    const alerts = Array.from({ length: 120 }, (_, index) => ({
+      metadata: {},
+      pageContent: `alert ${index}`,
+    }));
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: alerts.slice(0, 100),
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts,
+      apiConfig: {
+        action_type_id: '.inference',
+        connector_id: 'daybreak',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      inferenceClient: {
+        chatComplete: jest.fn(),
+        getConnectorById: jest.fn().mockResolvedValue({
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      } as unknown as InferenceClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+      size: 500,
+    });
+
+    expect(getDefaultAttackDiscoveryGraph).toHaveBeenCalledWith(
+      expect.objectContaining({ size: 100 })
+    );
+    expect(mockGraphInvoke.mock.calls[0][0].anonymizedDocuments).toHaveLength(100);
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('omitting 20 of 120'));
   });
 
   it('uses default size of 10 when not provided', async () => {
@@ -411,6 +599,57 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
           prompts: mockPrompts,
         })
       ).rejects.toThrow('Maximum generation attempts (10) reached.');
+    });
+
+    it('throws only the summary line inside the root span, gives the caller the full error, and records the counters first', async () => {
+      mockSpan = { setAttributes: mockSetAttributes };
+      const limitError = new Error(
+        'Maximum generation attempts (10) reached.\nmodel error with alert content,\nanother model error'
+      );
+      mockGraphInvoke.mockResolvedValue({
+        anonymizedDocuments: mockAlerts,
+        errors: [],
+        generationAttempts: 10,
+        generations: [],
+        hallucinationFailures: 0,
+        insights: [],
+        maxGenerationAttempts: 10,
+        maxHallucinationFailures: 5,
+        refinements: [],
+        replacements: {},
+      });
+      (throwIfErrorCountsExceeded as jest.Mock).mockImplementationOnce(() => {
+        throw limitError;
+      });
+      let callbackOutcome: Promise<unknown> | undefined;
+      (withActiveInferenceSpan as jest.Mock).mockImplementationOnce(
+        (_name: string, _opts: unknown, cb: (span: unknown) => Promise<unknown>) => {
+          callbackOutcome = cb(mockSpan);
+          return callbackOutcome;
+        }
+      );
+
+      await expect(
+        invokeAttackDiscoveryGraphWithAlerts({
+          actionsClient: mockActionsClient,
+          alerts: mockAlerts,
+          apiConfig: {
+            action_type_id: '.gen-ai',
+            connector_id: 'test-connector',
+          },
+          connectorTimeout: 60000,
+          esClient: mockEsClient,
+          logger: mockLogger,
+          prompts: mockPrompts,
+        })
+      ).rejects.toBe(limitError);
+
+      await expect(callbackOutcome).rejects.toMatchObject({
+        message: 'Maximum generation attempts (10) reached.',
+      });
+      expect(mockSetAttributes).toHaveBeenCalledWith(
+        expect.objectContaining({ 'attack_discovery.generation_attempts': 10 })
+      );
     });
   });
 

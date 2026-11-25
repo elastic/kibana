@@ -16,7 +16,7 @@ export const RepositoryEmptyPrompt: React.FunctionComponent = () => {
   const history = useHistory();
   return (
     <EuiPageTemplate.EmptyPrompt
-      iconType="managementApp"
+      iconType="gear"
       title={
         <h1 data-test-subj="title">
           <FormattedMessage

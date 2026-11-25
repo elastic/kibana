@@ -10,8 +10,13 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
-import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
+import {
+  getConversationId,
+  getSandboxCallContext,
+  getSandboxCaller,
+  resolveAbsolutePath,
+} from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
@@ -44,14 +49,14 @@ export const createSandboxViewFileTool = ({
   sandboxWorkspaceManager,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   logger: Logger;
 }): BuiltinToolDefinition<typeof viewFileSchema> => ({
   id: SANDBOX_VIEW_FILE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'View sandbox file contents with line numbers. ALWAYS use this instead of `cat`, `head`, `tail`, or `sed -n` in bash. Returns numbered lines for easy reference when editing with sandbox_str_replace. View a specific range to keep output small — avoid reading entire large files. The default working directory is /workspace.',
+    'View sandbox file contents with line numbers. ALWAYS use this instead of `cat`, `head`, `tail`, or `sed -n` in nightshift_sandbox_bash. Returns numbered lines for easy reference when editing with nightshift_sandbox_str_replace. View a specific range to keep output small — avoid reading entire large files. The default working directory is /workspace.',
   tags: ['sandbox', 'file'],
   schema: viewFileSchema,
   annotations: {
@@ -61,6 +66,7 @@ export const createSandboxViewFileTool = ({
     idempotentHint: true,
     openWorldHint: false,
   },
+  excludeFromMcp: true,
   handler: async (params, context) => {
     const rawConversationId = getConversationId(context);
     if (!rawConversationId) {
@@ -78,9 +84,13 @@ export const createSandboxViewFileTool = ({
       };
     }
 
-    let session: SandboxSession;
+    let session: AuditedSandboxSession;
     try {
-      session = sandboxStart.getSession(context.request, rawConversationId);
+      session = sandboxStart.getSession(
+        context.request,
+        rawConversationId,
+        getSandboxCaller(context)
+      );
     } catch (err) {
       return {
         results: [

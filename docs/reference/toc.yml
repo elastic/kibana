@@ -46,6 +46,7 @@ toc:
       - file: connectors-kibana/elastic-connectors.md
         children:
           - file: connectors-kibana/cases-action-type.md
+          - file: connectors-kibana/inbound-webhook-action-type.md
           - file: connectors-kibana/index-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
@@ -81,12 +82,20 @@ toc:
           - file: connectors-kibana/amazon-s3-action-type.md
           - file: connectors-kibana/ansible-controller-action-type.md
           - file: connectors-kibana/argocd-action-type.md
+          - file: connectors-kibana/aws-action-type.md
           - file: connectors-kibana/aws-cloudwatch-action-type.md
+          - file: connectors-kibana/aws-eks-action-type.md
+          - file: connectors-kibana/aws-lambda-action-type.md
+          - file: connectors-kibana/aws-rds-action-type.md
+          - file: connectors-kibana/aws-ssm-action-type.md
           - file: connectors-kibana/aws-x-ray-action-type.md
+          - file: connectors-kibana/azure-aks-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
           - file: connectors-kibana/azure-functions-action-type.md
           - file: connectors-kibana/azure-monitor-action-type.md
+          - file: connectors-kibana/azure-sql-action-type.md
           - file: connectors-kibana/bigquery-action-type.md
+          - file: connectors-kibana/bitbucket-action-type.md
           - file: connectors-kibana/box-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/buildkite-action-type.md
@@ -109,6 +118,7 @@ toc:
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-docs-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
+          - file: connectors-kibana/google-gke-action-type.md
           - file: connectors-kibana/google-threat-intelligence-action-type.md
           - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/graphql-action-type.md
@@ -118,6 +128,7 @@ toc:
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
           - file: connectors-kibana/kubernetes-action-type.md
+          - file: connectors-kibana/microsoft-sql-server-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/monday-com-action-type.md
           - file: connectors-kibana/misp-action-type.md
@@ -135,6 +146,7 @@ toc:
           - file: connectors-kibana/prometheus-action-type.md
           - file: connectors-kibana/rootly-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
+          - file: connectors-kibana/sentinelone-v2-action-type.md
           - file: connectors-kibana/sentry-action-type.md
           - file: connectors-kibana/servicenow-search-action-type.md
           - file: connectors-kibana/sharepoint-online-action-type.md
@@ -142,6 +154,7 @@ toc:
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/slack-v2-action-type.md
           - file: connectors-kibana/snowflake-action-type.md
+          - file: connectors-kibana/solarwinds-platform-action-type.md
           - file: connectors-kibana/sublime-security-action-type.md
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/threatq-action-type.md
@@ -155,6 +168,7 @@ toc:
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
+      - file: connectors-kibana/quick-connect-oauth.md
   - file: kibana-plugins.md
   - file: commands.md
     children:

@@ -47,14 +47,13 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
 
   public start(core: CoreStart, startDeps: GlobalSearchBarPluginStartDeps) {
     const { globalSearch, savedObjectsTagging, usageCollection } = startDeps;
-    const { application, http } = core;
+    const { application } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
     const searchProps: SearchProps = {
       globalSearch: { ...globalSearch, searchCharLimit: this.config.input_max_limit },
       navigateToUrl: application.navigateToUrl,
       taggingApi: savedObjectsTagging,
-      basePathUrl: http.basePath.prepend('/plugins/globalSearchBar/assets/'),
       reportEvent,
     };
 

@@ -10,6 +10,10 @@
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import {
+  RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
+  upgradeStoredWorkerSettings,
+} from './worker_settings_defaults';
+import {
   renderRuleTuningWorkerYaml,
   type RuleTuningWorkerTemplateValues,
 } from './worker_template_values';
@@ -19,11 +23,14 @@ export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID =
   'system-security-detection-rule-tuning';
 
 export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
+  version: 12,
   yamlTemplate: (values: RuleTuningWorkerTemplateValues): string =>
-    renderRuleTuningWorkerYaml(DETECTION_RULE_TUNING_YAML, values),
+    renderRuleTuningWorkerYaml(
+      DETECTION_RULE_TUNING_YAML,
+      upgradeStoredWorkerSettings(RULE_TUNING_WORKER_SETTINGS_DEFAULTS, values)
+    ),
 } as const satisfies ManagedWorkflowDefinition<RuleTuningWorkerTemplateValues>;

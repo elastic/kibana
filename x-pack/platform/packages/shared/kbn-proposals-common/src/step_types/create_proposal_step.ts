@@ -10,6 +10,7 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import {
+  MAX_TITLE_LENGTH,
   proposalCategorySchema,
   proposalConfidenceSchema,
   proposalImpactSchema,
@@ -21,6 +22,9 @@ export const CreateProposalStepId = 'proposals.createProposal' as const;
 
 export const createProposalStepInputSchema = z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
+  title: optionalStepInput(z.string().max(MAX_TITLE_LENGTH)).describe(
+    'Short plain-text label naming what is proposed \u2014 `comment` is already the markdown body. Optional here, but stored on every proposal: omitting it stores the action workflow\u2019s own name, or `Proposed action` when the action has no name either.'
+  ),
   comment: z
     .string()
     .describe(
@@ -41,11 +45,14 @@ export const createProposalStepInputSchema = z.object({
   confidence: optionalStepInput(proposalConfidenceSchema).describe(
     'Confidence in the recommendation.'
   ),
-  origin: optionalStepInput(proposalOriginSchema).describe(
-    'Whether a worker or an analyst proposed this.'
+  origin: proposalOriginSchema.describe(
+    'Which system is producing this proposal, so a solution\u2019s queue can show its own and not another\u2019s. Required and undefaulted: a default would attribute every caller that forgot it to whichever system the default named.'
   ),
   expiresIn: optionalStepInput(z.string()).describe(
     'How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation.'
+  ),
+  proposalId: optionalStepInput(z.uuid()).describe(
+    'The id to create the proposal under, instead of a random one, for a caller that derives it from what it is proposing. An id that already exists fails the step with a conflict and creates nothing. Omit for a proposal that is always new.'
   ),
 });
 
@@ -101,9 +108,11 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
   type: proposals.createProposal
   with:
     conversationId: "{{ inputs.conversationId }}"
+    title: "Tune noisy rule"
     comment: "Tune the noisy rule that produced this alert"
     actionWorkflowId: "{{ inputs.actionWorkflowId }}"
     actionInput: "{{ inputs.actionInput }}"
+    origin: alertzero
     impact: low
     confidence: medium`,
     ],

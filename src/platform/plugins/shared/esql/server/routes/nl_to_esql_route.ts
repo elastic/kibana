@@ -9,10 +9,9 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
-import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { EsqlServerPluginStart } from '../types';
-import { createScopedModel, resolveConnectorId, resolveIncludeDatasets } from './helpers';
+import { createScopedModel, resolveConnectorId } from './helpers';
 
 const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
@@ -27,6 +26,7 @@ const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
     '- If the instruction explicitly names a technology, product, or data source (e.g. "logstash", "nginx", "apache", "metrics"), prefer indices whose names contain that keyword over indices that merely have matching field names.',
     '- Treat a bare word like "logstash" as an explicit index name hint: prefer indices whose names start with or contain that word.',
     '- An ES|QL view is a valid source. If the instruction names a view, select that view rather than reporting that no index exists.',
+    '- An external ES|QL dataset is a valid source. If the instruction names a dataset, select that dataset rather than reporting that no index exists.',
   ];
 
   if (currentQuery) {
@@ -75,6 +75,19 @@ export const registerNLtoESQLRoute = (
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
+        if (!inference) {
+          return response.customError({
+            statusCode: 503,
+            body: { message: 'Inference plugin is unavailable.' },
+          });
+        }
+
+        // Load after the inference guard: @kbn/agent-builder-genai-utils pulls in
+        // inference-plugin code and must not run when that package is omitted.
+        const { generateEsql, generateEsqlCompletion } = await import(
+          '@kbn/agent-builder-genai-utils'
+        );
+
         const connectorId = await resolveConnectorId({
           inference,
           request,
@@ -109,16 +122,16 @@ export const registerNLtoESQLRoute = (
         }
 
         const additionalContext = buildNlToEsqlAdditionalContext(trimmedCurrent ?? '');
-        const includeDatasets = await resolveIncludeDatasets(core.uiSettings.client);
 
         const result = await generateEsql({
           model,
           esClient: client,
+          internalEsClient: core.elasticsearch.client.asInternalUser,
           logger,
           nlQuery: nlInstruction,
           additionalContext,
           execute: 'none',
-          includeDatasets,
+          includeDatasets: true,
           includeViews: true,
         });
 

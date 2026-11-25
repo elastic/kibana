@@ -52,7 +52,8 @@ export class MigrationHelper {
    * It will therefore accept downgrading the document before returning it from the API.
    */
   migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.migrator.migrateDocument(document, { allowDowngrade: true });
+    // The caller hands over ownership of this document fetched from Elasticsearch, so cloning is unnecessary.
+    return this.migrator.migrateDocument(document, { allowDowngrade: true, allowSkipClone: true });
   }
 
   async migrateAndDecryptStorageDocument<T, A extends string>({
@@ -68,7 +69,11 @@ export class MigrationHelper {
 
     const migrate = (doc: SavedObjectUnsanitizedDoc | SavedObject) => {
       try {
-        return this.migrator.migrateDocument(doc, { allowDowngrade: true }) as SavedObject<T>;
+        // The caller hands over ownership of this document fetched from Elasticsearch, so cloning is unnecessary.
+        return this.migrator.migrateDocument(doc, {
+          allowDowngrade: true,
+          allowSkipClone: true,
+        }) as SavedObject<T>;
       } catch (error) {
         throw SavedObjectsErrorHelpers.decorateGeneralError(
           error,

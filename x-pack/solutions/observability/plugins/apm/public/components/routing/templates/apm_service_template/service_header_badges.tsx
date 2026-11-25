@@ -87,6 +87,9 @@ function useServiceHeaderStatusData({
         return;
       }
       return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
+        // Active-alert badges must not use the APM client LRU cache: when end < now
+        // (absolute picker / post-Refresh), cached snapshots diverge across surfaces.
+        isCachable: false,
         params: {
           path: { serviceName },
           query: { start, end, environment },

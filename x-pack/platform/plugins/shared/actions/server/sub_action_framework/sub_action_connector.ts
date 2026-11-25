@@ -31,6 +31,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ServiceParams, SubAction, SubActionRequestParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
+import { isNetworkError } from '../lib/network_error_message';
 import { combineHeadersWithBasicAuthHeader } from '../lib/get_basic_auth_header';
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
@@ -181,6 +182,12 @@ export abstract class SubActionConnector<Config, Secrets> {
 
   private async addMessageToResponseError(initialError: unknown) {
     if (isAxiosError(initialError)) {
+      // Network-level failures carry no response to categorize per connector and are already
+      // described by the request layer; keep that message instead of wrapping it.
+      if (isNetworkError(initialError)) {
+        return initialError;
+      }
+
       const error = await this.getErrorWithResponse(initialError);
 
       // Here we overwrite the message without creating a new Error to preserve the user/framework

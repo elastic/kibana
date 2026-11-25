@@ -14,10 +14,10 @@ import {
   type ScanFailuresResponse,
 } from '@kbn/alertzero-common';
 import { retryOnTransientError } from './retry_on_transient_error';
-import { PROPOSALS_POLL_INTERVAL_MS } from './use_proposals_api';
+import { QUEUE_POLL_INTERVAL_MS } from './use_queue_polling';
 
 /** The queue already refreshes on this interval. The 24-hour window is applied per request. */
-export const SCAN_FAILURES_POLL_INTERVAL_MS = PROPOSALS_POLL_INTERVAL_MS;
+export const SCAN_FAILURES_POLL_INTERVAL_MS = QUEUE_POLL_INTERVAL_MS;
 
 /** Workers with a failed managed scan in the trailing 24 hours. */
 export const useScanFailures = (): UseQueryResult<ScanFailuresResponse> => {

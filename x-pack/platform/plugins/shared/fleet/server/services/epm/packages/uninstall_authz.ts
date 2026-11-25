@@ -10,8 +10,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { Installation, PackagePolicy } from '../../../types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
-import { FleetUnauthorizedError, PackageRemovalError } from '../../../errors';
+import { PackageRemovalError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
+
+import { assertPrivilegesInSpaces } from '../../security/assert_privileges_in_spaces';
 
 import { getInstallationObject } from '.';
 
@@ -158,7 +160,6 @@ export async function assertUninstallAuthorizedForAffectedSpaces({
   if (!security) {
     return;
   }
-
   if (!security.authz.mode.useRbacForRequest(request)) {
     return;
   }
@@ -185,17 +186,10 @@ export async function assertUninstallAuthorizedForAffectedSpaces({
     spaceIdsArray = Array.from(spaceIds);
   }
 
-  const { authz } = security;
-  const result = await authz.checkPrivilegesWithRequest(request).atSpaces(spaceIdsArray, {
-    kibana: [
-      authz.actions.api.get('integrations-all'),
-      authz.actions.api.get('fleet-agent-policies-all'),
-    ],
+  await assertPrivilegesInSpaces({
+    request,
+    spaceIds: spaceIdsArray,
+    apiPrivileges: ['integrations-all', 'fleet-agent-policies-all'],
+    errorMessage: `Insufficient privileges to uninstall package ${pkgName}: it is used in spaces you are not authorized to access`,
   });
-
-  if (!result.hasAllRequested) {
-    throw new FleetUnauthorizedError(
-      `Insufficient privileges to uninstall package ${pkgName}: it is used in spaces you are not authorized to access`
-    );
-  }
 }

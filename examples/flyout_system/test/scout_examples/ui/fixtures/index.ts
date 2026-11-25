@@ -35,4 +35,4 @@ export const test = baseTest.extend<FlyoutSystemTestFixtures, ScoutWorkerFixture
   },
 });
 
-export type { ChildLabel, FlyoutForm, FlyoutSystemApp } from './page_objects';
+export type { ChildLabel, FlyoutForm, FlyoutSystemApp, PushFlyoutLabel } from './page_objects';

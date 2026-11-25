@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 
 interface LockedSectionPanelProps {
   title: React.ReactNode;
   description: React.ReactNode;
   ariaLabel: string;
+  id?: string;
+  /** Lets links move focus to the heading. It is not a Tab stop. */
+  headingId?: string;
   'data-test-subj'?: string;
 }
 
@@ -28,12 +24,15 @@ export const LockedSectionPanel = ({
   title,
   description,
   ariaLabel,
+  id,
+  headingId,
   'data-test-subj': dataTestSubj,
 }: LockedSectionPanelProps) => (
   <EuiPanel
     hasBorder
     paddingSize="l"
     color="subdued"
+    id={id}
     aria-label={ariaLabel}
     data-test-subj={dataTestSubj}
   >
@@ -43,12 +42,11 @@ export const LockedSectionPanel = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <h3>{title}</h3>
+          <h2 id={headingId} tabIndex={headingId !== undefined ? -1 : undefined}>
+            {title}
+          </h2>
         </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p>{description}</p>
-        </EuiText>
+        <AiIndexDetailPanelDescription>{description}</AiIndexDetailPanelDescription>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

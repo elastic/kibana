@@ -11,6 +11,7 @@ import {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
 } from './get_index_pattern_from_query';
 
@@ -133,6 +134,13 @@ describe('getIndexPatternsFromESQLQuery', () => {
     });
   });
 
+  it('should list direct sources before sources from immediate inline subqueries', () => {
+    expect(getIndexPatternsFromESQLQuery('FROM (FROM index2, (FROM index3)), index1')).toEqual({
+      indexPattern: 'index1,index2',
+      indexPatternWithoutRemoteClusterPrefix: 'index1,index2',
+    });
+  });
+
   it('should leave quoted "cluster:index" blobs unchanged (no structured prefix)', () => {
     expect(getIndexPatternsFromESQLQuery('FROM "cluster1:idx1,cluster2:idx2"')).toEqual({
       indexPattern: 'cluster1:idx1,cluster2:idx2',
@@ -149,6 +157,140 @@ describe('getIndexPatternsFromESQLQuery', () => {
       indexPattern: '',
       indexPatternWithoutRemoteClusterPrefix: '',
     });
+  });
+
+  it('should resolve LET references to the indices of their bodies', () => {
+    expect(
+      getIndexPatternsFromESQLQuery(
+        'LET base = (FROM logs-*, remote_cluster:metrics-*::data); LET selected = (FROM base | WHERE a > 1); LET unused = (FROM other); FROM selected, (FROM traces), index1'
+      )
+    ).toEqual({
+      indexPattern: 'logs-*,remote_cluster:metrics-*::data,index1,traces',
+      indexPatternWithoutRemoteClusterPrefix: 'logs-*,metrics-*::data,index1,traces',
+    });
+  });
+
+  it('should return no index pattern for a LET without indices', () => {
+    expect(getIndexPatternsFromESQLQuery('LET numbers = (ROW a = 1); FROM numbers')).toEqual({
+      indexPattern: '',
+      indexPatternWithoutRemoteClusterPrefix: '',
+    });
+  });
+});
+
+describe('getSourceCommandQueryFromESQLQuery', () => {
+  it('drops the commands after FROM', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery('FROM logs-* | WHERE a > 1 | STATS count() BY host')
+    ).toBe('FROM logs-*');
+  });
+
+  it('keeps TS and METADATA', () => {
+    expect(getSourceCommandQueryFromESQLQuery('TS metrics-* | STATS avg(cpu)')).toBe(
+      'TS metrics-*'
+    );
+    expect(getSourceCommandQueryFromESQLQuery('FROM logs-* METADATA _index | KEEP _index')).toBe(
+      'FROM logs-* METADATA _index'
+    );
+  });
+
+  it('leaves out SET headers, whose routing is passed separately', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'SET project_routing = "_alias:*"; FROM logs-* | STATS count()'
+      )
+    ).toBe('FROM logs-*');
+  });
+
+  it('reduces subqueries to their source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'FROM index1, (FROM index2 METADATA _id | WHERE a > 1 | KEEP a | LIMIT 10) | STATS count()'
+      )
+    ).toBe('FROM index1, (FROM index2 METADATA _id)');
+  });
+
+  it('reduces nested subqueries to their source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'FROM index1, (FROM index2, (FROM index3 | KEEP b) | DROP c) | LIMIT 5'
+      )
+    ).toBe('FROM index1, (FROM index2, (FROM index3))');
+  });
+
+  it('keeps only the LET bindings it reads, with their bodies reduced to the source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'SET project_routing = "_alias:*"; LET base = (FROM logs-* METADATA _id | KEEP a); LET selected = (FROM base | WHERE a > 1); LET unused = (FROM other); FROM selected, index1 | STATS count()'
+      )
+    ).toBe(
+      'LET base = (FROM logs-* METADATA _id); LET selected = (FROM base); FROM selected, index1'
+    );
+  });
+
+  it('keeps a LET read by a subquery', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'LET base = (FROM logs-* | KEEP a); FROM (FROM base | WHERE a > 1), index1'
+      )
+    ).toBe('LET base = (FROM logs-*); FROM (FROM base), index1');
+  });
+
+  it('keeps a LET declared after the LET that reads it', () => {
+    const query = 'LET a = (FROM b); LET b = (FROM logs-*); FROM a';
+
+    expect(getSourceCommandQueryFromESQLQuery(query)).toBe(query);
+  });
+
+  it('leaves out a LET read only after the source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'LET ids = (FROM a | KEEP id); FROM logs | WHERE id IN (FROM ids)'
+      )
+    ).toBe('FROM logs');
+  });
+
+  it('keeps shared LET dependencies compact', () => {
+    const bindings = [
+      'LET a0 = (FROM logs);',
+      ...Array.from(
+        { length: 12 },
+        (_, index) => `LET a${index + 1} = (FROM a${index}, a${index});`
+      ),
+    ];
+    const query = `${bindings.join(' ')} FROM a12`;
+
+    expect(getSourceCommandQueryFromESQLQuery(query)).toBe(query);
+  });
+
+  it('uses the index parameter of a PROMQL query, as the ES|QL editor does', () => {
+    const sourceQuery = getSourceCommandQueryFromESQLQuery(
+      'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+    );
+
+    expect(sourceQuery).toBe('FROM "metrics-*"');
+    expect(getIndexPatternFromESQLQuery(sourceQuery)).toBe('metrics-*');
+  });
+
+  it('uses the names of a quoted PROMQL index list', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'PROMQL index="metrics-a","metrics-b" step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('FROM "metrics-a,metrics-b"');
+  });
+
+  it('returns an empty string without a FROM or TS command', () => {
+    expect(getSourceCommandQueryFromESQLQuery('')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery(undefined)).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('ROW a = 1')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('FROM ')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('FROM | LIMIT 10')).toBe('');
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'PROMQL step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('');
   });
 });
 

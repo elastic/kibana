@@ -23,7 +23,7 @@ const addDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'add',
   operator: '+',
-  description: i18n.translate('kbn-esql-language.promql.definitions.add', {
+  description: i18n.translate('esqlLanguage.promql.definitions.add', {
     defaultMessage:
       'Adds the two operands element-wise. For vector–vector operations, the metric name is dropped.',
   }),
@@ -107,7 +107,7 @@ const andDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'and',
   operator: 'and',
-  description: i18n.translate('kbn-esql-language.promql.definitions.and', {
+  description: i18n.translate('esqlLanguage.promql.definitions.and', {
     defaultMessage:
       'Returns elements from the left vector that have matching label sets in the right vector. Values and metric name come from the left-hand side.',
   }),
@@ -140,7 +140,7 @@ const divDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'div',
   operator: '/',
-  description: i18n.translate('kbn-esql-language.promql.definitions.div', {
+  description: i18n.translate('esqlLanguage.promql.definitions.div', {
     defaultMessage:
       'Divides the left operand by the right operand element-wise. For vector–vector operations, the metric name is dropped.',
   }),
@@ -224,7 +224,7 @@ const eqDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'eq',
   operator: '==',
-  description: i18n.translate('kbn-esql-language.promql.definitions.eq', {
+  description: i18n.translate('esqlLanguage.promql.definitions.eq', {
     defaultMessage:
       'Compares elements for equality. By default, acts as a filter. With the bool modifier, returns 0 or 1.',
   }),
@@ -308,7 +308,7 @@ const gtDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'gt',
   operator: '>',
-  description: i18n.translate('kbn-esql-language.promql.definitions.gt', {
+  description: i18n.translate('esqlLanguage.promql.definitions.gt', {
     defaultMessage:
       'Compares elements where the left operand is greater than the right. By default, acts as a filter. With the bool modifier, returns 0 or 1.',
   }),
@@ -392,7 +392,7 @@ const gteDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'gte',
   operator: '>=',
-  description: i18n.translate('kbn-esql-language.promql.definitions.gte', {
+  description: i18n.translate('esqlLanguage.promql.definitions.gte', {
     defaultMessage:
       'Compares elements where the left operand is greater than or equal to the right. By default, acts as a filter. With the bool modifier, returns 0 or 1.',
   }),
@@ -476,7 +476,7 @@ const ltDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'lt',
   operator: '<',
-  description: i18n.translate('kbn-esql-language.promql.definitions.lt', {
+  description: i18n.translate('esqlLanguage.promql.definitions.lt', {
     defaultMessage:
       'Compares elements where the left operand is less than the right. By default, acts as a filter. With the bool modifier, returns 0 or 1.',
   }),
@@ -560,7 +560,7 @@ const lteDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'lte',
   operator: '<=',
-  description: i18n.translate('kbn-esql-language.promql.definitions.lte', {
+  description: i18n.translate('esqlLanguage.promql.definitions.lte', {
     defaultMessage:
       'Compares elements where the left operand is less than or equal to the right. By default, acts as a filter. With the bool modifier, returns 0 or 1.',
   }),
@@ -644,7 +644,7 @@ const modDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'mod',
   operator: '%',
-  description: i18n.translate('kbn-esql-language.promql.definitions.mod', {
+  description: i18n.translate('esqlLanguage.promql.definitions.mod', {
     defaultMessage:
       'Returns the remainder of dividing the left operand by the right operand element-wise. For vector–vector operations, the metric name is dropped.',
   }),
@@ -728,7 +728,7 @@ const mulDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'mul',
   operator: '*',
-  description: i18n.translate('kbn-esql-language.promql.definitions.mul', {
+  description: i18n.translate('esqlLanguage.promql.definitions.mul', {
     defaultMessage:
       'Multiplies the two operands element-wise. For vector–vector operations, the metric name is dropped.',
   }),
@@ -812,7 +812,7 @@ const negDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'neg',
   operator: '-',
-  description: i18n.translate('kbn-esql-language.promql.definitions.neg', {
+  description: i18n.translate('esqlLanguage.promql.definitions.neg', {
     defaultMessage:
       'Negates the instant vector or scalar by inverting the sign of each sample value.',
   }),
@@ -850,7 +850,7 @@ const neqDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'neq',
   operator: '!=',
-  description: i18n.translate('kbn-esql-language.promql.definitions.neq', {
+  description: i18n.translate('esqlLanguage.promql.definitions.neq', {
     defaultMessage:
       'Compares elements for inequality. By default, acts as a filter. With the bool modifier, returns 0 or 1.',
   }),
@@ -934,7 +934,7 @@ const orDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'or',
   operator: 'or',
-  description: i18n.translate('kbn-esql-language.promql.definitions.or', {
+  description: i18n.translate('esqlLanguage.promql.definitions.or', {
     defaultMessage:
       'Returns all elements from the left vector plus elements from the right vector that have no matching label sets in the left.',
   }),
@@ -967,7 +967,7 @@ const powDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'pow',
   operator: '^',
-  description: i18n.translate('kbn-esql-language.promql.definitions.pow', {
+  description: i18n.translate('esqlLanguage.promql.definitions.pow', {
     defaultMessage:
       'Raises the left operand to the power of the right operand element-wise. For vector–vector operations, the metric name is dropped.',
   }),
@@ -1051,7 +1051,7 @@ const subDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'sub',
   operator: '-',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sub', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sub', {
     defaultMessage:
       'Subtracts the right operand from the left operand element-wise. For vector–vector operations, the metric name is dropped.',
   }),
@@ -1135,7 +1135,7 @@ const unlessDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: 'unless',
   operator: 'unless',
-  description: i18n.translate('kbn-esql-language.promql.definitions.unless', {
+  description: i18n.translate('esqlLanguage.promql.definitions.unless', {
     defaultMessage:
       'Returns elements from the left vector that have no matching label sets in the right vector.',
   }),

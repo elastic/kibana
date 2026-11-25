@@ -11,6 +11,8 @@ export interface MarkdownFormatterContextValue {
   disableActions: boolean;
   scopeId?: string;
   alertIds?: string[];
+  /** Wraps long field chip values instead of clipping them, for narrow containers. */
+  wrapFieldValues?: boolean;
 }
 
 export const MarkdownFormatterContext = createContext<MarkdownFormatterContextValue>({

@@ -19,4 +19,6 @@ export interface EscalationRouteDependencies {
   getSpaceId: (request: KibanaRequest) => string;
   /** Resolves the security plugin start contract; undefined when security is absent. */
   getSecurity: () => Promise<SecurityPluginStart | undefined>;
+  /** `xpack.agenticInvestigations.escalations.enabled`; when false only the shared routes register. */
+  escalationsEnabled: boolean;
 }

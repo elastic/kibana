@@ -133,6 +133,10 @@ This means that developing with enrolled agents requires at least two Elastic Ag
 
 Note: if you need to do simultaneous Kibana and Fleet Server development, refer to the [Developing Kibana and Fleet Server simultaneously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) guide
 
+### Feature flags
+
+Refer to [Feature flags in Fleet](dev_docs/feature_flags.md) for how to gate functionality (use Kibana feature flags).
+
 ### Tests
 
 #### Unit tests

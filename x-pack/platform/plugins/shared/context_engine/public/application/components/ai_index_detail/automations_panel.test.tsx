@@ -11,18 +11,25 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { AiIndexAutomation, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { UseAutomationsEditorResult } from '../../hooks/use_automations_editor';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
+import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import type { UseSuggestAutomationResult } from '../../hooks/use_suggest_automation';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { AutomationsPanel } from './automations_panel';
+import { AUTOMATIONS_HEADING_ID } from './automations_panel_id';
 
 jest.mock('../../hooks/use_automations_editor', () => ({
   useAutomationsEditor: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_memory_enabled', () => ({
+  useMemoryEnabled: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_suggest_automation', () => ({
@@ -30,6 +37,7 @@ jest.mock('../../hooks/use_suggest_automation', () => ({
 }));
 
 jest.mock('../../hooks/use_workflow_summaries', () => ({
+  ...jest.requireActual('../../hooks/use_workflow_summaries'),
   useWorkflowSummaries: jest.fn(),
 }));
 
@@ -38,25 +46,42 @@ jest.mock('@kbn/workflows-ui', () => ({
     mgetWorkflows: jest.fn(),
     createWorkflow: jest.fn(),
   }),
+  useWorkflowsCapabilities: () => ({
+    canExecuteWorkflow: true,
+  }),
+}));
+
+jest.mock('./automation_row', () => ({
+  AutomationRow: ({
+    workflowSummary,
+    onDelete,
+  }: {
+    workflowSummary?: { name?: string };
+    onDelete: () => Promise<void>;
+  }) => (
+    <div data-test-subj="contextAiIndexAutomationRow">
+      {workflowSummary?.name}
+      <button type="button" data-test-subj="stubAutomationRowDelete" onClick={() => onDelete()}>
+        Delete
+      </button>
+    </div>
+  ),
 }));
 
 const mockUseAutomationsEditor = jest.mocked(useAutomationsEditor);
+const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 const mockUseSuggestAutomation = jest.mocked(useSuggestAutomation);
 const mockUseWorkflowSummaries = jest.mocked(useWorkflowSummaries);
 
 const editorResult = (
   overrides: Partial<UseAutomationsEditorResult> = {}
 ): UseAutomationsEditorResult => ({
-  isEditing: false,
   automations: [],
   workflowIds: [],
   isSaving: false,
   isCreating: false,
   isBusy: false,
-  startEditing: jest.fn(),
-  stopEditing: jest.fn(),
-  removeAutomation: jest.fn(),
-  save: jest.fn().mockResolvedValue(undefined),
+  deleteAutomation: jest.fn().mockResolvedValue(undefined),
   createAndAttach: jest.fn().mockResolvedValue(undefined),
   ...overrides,
 });
@@ -65,6 +90,7 @@ const suggestResult = (
   overrides: Partial<UseSuggestAutomationResult> = {}
 ): UseSuggestAutomationResult => ({
   canSuggest: false,
+  isSuggesting: false,
   suggestAutomation: jest.fn(),
   ...overrides,
 });
@@ -92,22 +118,39 @@ const aiIndex: GetAiIndexResponse = {
 
 type PanelProps = React.ComponentProps<typeof AutomationsPanel>;
 
+interface RenderPanelOptions {
+  canCreateWorkflow?: boolean;
+  pathname?: string;
+}
+
 /** Rerender re-wraps in the same providers so tests can flip the mocked hook and re-render in one call. */
-const renderPanel = (props: Partial<PanelProps> = {}) => {
+const renderPanel = (
+  props: Partial<PanelProps> = {},
+  { canCreateWorkflow = true, pathname = '/ai_index/my-ai-index/settings' }: RenderPanelOptions = {}
+) => {
   const onSaved = jest.fn();
   const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    workflowsManagement: {
+      ...services.application.capabilities.workflowsManagement,
+      createWorkflow: canCreateWorkflow,
+    },
+  };
   const wrap = (overrides: Partial<PanelProps> = {}) => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <AutomationsPanel
-            isLoading={false}
-            aiIndex={aiIndex}
-            onSaved={onSaved}
-            isManaged={false}
-            {...props}
-            {...overrides}
-          />
+          <MemoryRouter initialEntries={[pathname]}>
+            <AutomationsPanel
+              isLoading={false}
+              aiIndex={aiIndex}
+              onSaved={onSaved}
+              isManaged={false}
+              {...props}
+              {...overrides}
+            />
+          </MemoryRouter>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
@@ -120,11 +163,16 @@ const renderPanel = (props: Partial<PanelProps> = {}) => {
   };
 };
 
+const openAddAutomationMenu = () => {
+  fireEvent.click(screen.getByTestId('contextAddAutomationButton'));
+};
+
 const oneAutomation: AiIndexAutomation[] = [{ type: 'workflow', value: 'wf-1' }];
 
 describe('AutomationsPanel', () => {
   beforeEach(() => {
     mockUseAutomationsEditor.mockReturnValue(editorResult());
+    mockUseMemoryEnabled.mockReturnValue(true);
     mockUseSuggestAutomation.mockReturnValue(suggestResult());
     mockUseWorkflowSummaries.mockReturnValue(summariesResult());
   });
@@ -139,6 +187,7 @@ describe('AutomationsPanel', () => {
     expect(screen.getByTestId('contextAiIndexAutomationsLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
   });
 
   it('shows the loading skeleton while the workflow summaries resolve', () => {
@@ -153,34 +202,44 @@ describe('AutomationsPanel', () => {
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });
 
-  it('shows the empty prompt when there are no automations and not editing', () => {
+  it('shows the empty prompt when there are no automations', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.getByText('Create an automation to get started.')).toBeInTheDocument();
+    expect(screen.getByText('No automations configured.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Automations keep knowledge documents current as your sources change.')
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });
 
-  it('shows read-only empty body copy for managed AI indexes', () => {
+  it('shows read-only empty copy for managed AI indexes', () => {
     renderPanel({ isManaged: true });
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(
-      screen.getByText('No automations are configured for this AI index.')
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Create an automation to get started.')).not.toBeInTheDocument();
+    expect(screen.getByText('No automations configured.')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
   });
 
-  it('does not render the edit button while loading', () => {
-    renderPanel({ isLoading: true });
-
-    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-  });
-
-  it('shows the create control when not editing', () => {
+  it('shows the add automation button', () => {
     renderPanel();
 
+    expect(screen.getByTestId('contextAddAutomationButton')).toBeInTheDocument();
+    openAddAutomationMenu();
     expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
+  });
+
+  it('calls createAndAttach when create workflow is chosen from the add menu', async () => {
+    const createAndAttach = jest.fn().mockResolvedValue(undefined);
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
+
+    renderPanel();
+    openAddAutomationMenu();
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
+
+    await waitFor(() => {
+      expect(createAndAttach).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('shows the suggest automation control when agent builder is available', () => {
@@ -190,6 +249,7 @@ describe('AutomationsPanel', () => {
     );
 
     renderPanel();
+    openAddAutomationMenu();
 
     fireEvent.click(screen.getByTestId('contextSuggestAutomationButton'));
     expect(suggestAutomation).toHaveBeenCalledTimes(1);
@@ -197,21 +257,48 @@ describe('AutomationsPanel', () => {
 
   it('hides the suggest automation control when agent builder is unavailable', () => {
     renderPanel();
+    openAddAutomationMenu();
 
     expect(screen.queryByTestId('contextSuggestAutomationButton')).not.toBeInTheDocument();
   });
 
-  it('opens the created workflow in the Workflows app', async () => {
+  it('disables create workflow when the user lacks the workflows create privilege', async () => {
+    const createAndAttach = jest.fn().mockResolvedValue('wf-created');
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
+
+    renderPanel({}, { canCreateWorkflow: false });
+    openAddAutomationMenu();
+
+    const createButton = screen.getByTestId('contextCreateAutomationButton');
+    expect(createButton).toBeDisabled();
+    fireEvent.click(createButton);
+    expect(createAndAttach).not.toHaveBeenCalled();
+  });
+
+  it('opens the created workflow in the Workflows app, with back returning to the Settings tab', async () => {
     const createAndAttach = jest.fn().mockResolvedValue('wf-created');
     mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
 
     const { services } = renderPanel();
+    openAddAutomationMenu();
     fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-        path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
+        path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index%2Fsettings',
       });
+    });
+  });
+
+  it('links automation rows back to the tab they are shown on', () => {
+    mockUseAutomationsEditor.mockReturnValue(
+      editorResult({ automations: [{ type: 'workflow', value: 'wf-1' }], workflowIds: ['wf-1'] })
+    );
+
+    const { services } = renderPanel({}, { pathname: '/ai_index/my-ai-index' });
+
+    expect(services.application.getUrlForApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-1?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
     });
   });
 
@@ -220,12 +307,21 @@ describe('AutomationsPanel', () => {
     mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
 
     const { services } = renderPanel();
+    openAddAutomationMenu();
     fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(createAndAttach).toHaveBeenCalledTimes(1);
     });
     expect(services.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('lets the failed-runs warning focus the Automations heading without adding a Tab stop', () => {
+    renderPanel();
+
+    const heading = screen.getByRole('heading', { name: 'Automations' });
+    expect(heading).toHaveAttribute('id', AUTOMATIONS_HEADING_ID);
+    expect(heading).toHaveAttribute('tabindex', '-1');
   });
 
   it('renders one row per automation', () => {
@@ -243,12 +339,75 @@ describe('AutomationsPanel', () => {
     expect(screen.getAllByTestId('contextAiIndexAutomationRow')).toHaveLength(automations.length);
   });
 
+  describe('dreaming workflows', () => {
+    const dreamingAutomation: AiIndexAutomation = {
+      type: 'workflow',
+      value: 'system-context-engine-dreaming-my-ai-index-0123456789ab',
+    };
+    const automations = [...oneAutomation, dreamingAutomation];
+
+    beforeEach(() => {
+      mockUseAutomationsEditor.mockReturnValue(
+        editorResult({ automations, workflowIds: automations.map(({ value }) => value) })
+      );
+    });
+
+    it('lists them while memory is on', () => {
+      renderPanel();
+
+      expect(screen.getAllByTestId('contextAiIndexAutomationRow')).toHaveLength(2);
+      expect(mockUseWorkflowSummaries).toHaveBeenLastCalledWith(['wf-1', dreamingAutomation.value]);
+    });
+
+    it('hides them while memory is off', () => {
+      mockUseMemoryEnabled.mockReturnValue(false);
+
+      renderPanel();
+
+      expect(screen.getAllByTestId('contextAiIndexAutomationRow')).toHaveLength(1);
+      expect(mockUseWorkflowSummaries).toHaveBeenLastCalledWith(['wf-1']);
+    });
+
+    it('shows the empty prompt while memory is off and only they are attached', () => {
+      mockUseMemoryEnabled.mockReturnValue(false);
+      mockUseAutomationsEditor.mockReturnValue(
+        editorResult({ automations: [dreamingAutomation], workflowIds: [dreamingAutomation.value] })
+      );
+
+      renderPanel();
+
+      expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
+    });
+  });
+
+  it('passes onDelete to each row so deleteAutomation is called with the workflow id', async () => {
+    const deleteAutomation = jest.fn().mockResolvedValue(undefined);
+    mockUseAutomationsEditor.mockReturnValue(
+      editorResult({
+        automations: oneAutomation,
+        workflowIds: ['wf-1'],
+        deleteAutomation,
+      })
+    );
+
+    renderPanel();
+
+    fireEvent.click(screen.getByTestId('stubAutomationRowDelete'));
+
+    await waitFor(() => {
+      expect(deleteAutomation).toHaveBeenCalledWith('wf-1');
+    });
+  });
+
   it('renders the resolved workflow name rather than the raw id', () => {
     mockUseAutomationsEditor.mockReturnValue(
       editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
     );
     mockUseWorkflowSummaries.mockReturnValue(
-      summariesResult([['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true }]])
+      summariesResult([
+        ['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true, definition: undefined }],
+      ])
     );
 
     renderPanel();
@@ -269,74 +428,6 @@ describe('AutomationsPanel', () => {
     );
   });
 
-  it('swaps the Edit button for Save and Cancel while editing', () => {
-    const { rerender } = renderPanel();
-
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
-    expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextSaveAutomationsButton')).not.toBeInTheDocument();
-
-    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true }));
-    rerender();
-
-    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextCreateAutomationButton')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextSaveAutomationsButton')).toBeInTheDocument();
-    expect(screen.getByTestId('contextCancelEditingAutomationsButton')).toBeInTheDocument();
-  });
-
-  it('enables the Edit button as soon as the AI index is available', () => {
-    const { rerender } = renderPanel({ aiIndex: undefined });
-
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeDisabled();
-
-    rerender({ aiIndex });
-
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
-  });
-
-  it('disables the Edit button while busy, even with a defined AI index', () => {
-    mockUseAutomationsEditor.mockReturnValue(editorResult({ isBusy: true }));
-
-    renderPanel();
-
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeDisabled();
-  });
-
-  it('hides the Edit button for managed AI indexes', () => {
-    renderPanel({ isManaged: true });
-
-    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-  });
-
-  it('shows the Edit button for non-managed AI indexes when not editing', () => {
-    renderPanel({ isManaged: false });
-
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
-  });
-
-  it('delegates the header actions to the editor', () => {
-    const startEditing = jest.fn();
-    const stopEditing = jest.fn();
-    const save = jest.fn().mockResolvedValue(undefined);
-    mockUseAutomationsEditor.mockReturnValue(editorResult({ startEditing, stopEditing, save }));
-
-    const { rerender } = renderPanel();
-    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
-
-    expect(startEditing).toHaveBeenCalledTimes(1);
-
-    mockUseAutomationsEditor.mockReturnValue(
-      editorResult({ isEditing: true, startEditing, stopEditing, save })
-    );
-    rerender();
-    fireEvent.click(screen.getByTestId('contextSaveAutomationsButton'));
-    fireEvent.click(screen.getByTestId('contextCancelEditingAutomationsButton'));
-
-    expect(save).toHaveBeenCalledTimes(1);
-    expect(stopEditing).toHaveBeenCalledTimes(1);
-  });
-
   it('stops allowing new automations once the limit is reached', () => {
     const automations: AiIndexAutomation[] = Array.from(
       { length: MAX_AI_INDEX_AUTOMATIONS },
@@ -350,42 +441,47 @@ describe('AutomationsPanel', () => {
     );
 
     renderPanel();
+    openAddAutomationMenu();
 
-    expect(screen.getByTestId('contextCreateAutomationButton')).toBeDisabled();
+    const createButton = screen.getByTestId('contextCreateAutomationButton');
+    expect(createButton).toBeDisabled();
   });
 
-  it('only offers the row actions while editing', () => {
-    mockUseAutomationsEditor.mockReturnValue(
-      editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
-    );
-
-    const { rerender } = renderPanel();
-
-    expect(screen.queryByTestId('contextRemoveAutomationButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextOpenWorkflowButton')).not.toBeInTheDocument();
-
-    mockUseAutomationsEditor.mockReturnValue(
-      editorResult({ isEditing: true, automations: oneAutomation, workflowIds: ['wf-1'] })
-    );
-    rerender();
-
-    expect(screen.getByTestId('contextRemoveAutomationButton')).toBeInTheDocument();
-    expect(screen.getByTestId('contextOpenWorkflowButton')).toBeInTheDocument();
-  });
-
-  it('disables the row remove action while a save is in flight', () => {
-    mockUseAutomationsEditor.mockReturnValue(
-      editorResult({
-        isEditing: true,
-        isBusy: true,
-        isSaving: true,
-        automations: oneAutomation,
-        workflowIds: ['wf-1'],
-      })
-    );
+  it('disables the add automation button while busy', () => {
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ isBusy: true }));
 
     renderPanel();
 
-    expect(screen.getByTestId('contextRemoveAutomationButton')).toBeDisabled();
+    expect(screen.getByTestId('contextAddAutomationButton')).toBeDisabled();
+  });
+
+  it('disables the add automation button when the AI index is not loaded', () => {
+    renderPanel({ aiIndex: undefined });
+
+    expect(screen.getByTestId('contextAddAutomationButton')).toBeDisabled();
+  });
+
+  describe('with a header action', () => {
+    const headerAction = <span data-test-subj="customHeaderAction">Manage</span>;
+
+    it('shows the header action instead of the add menu next to the rows', () => {
+      mockUseAutomationsEditor.mockReturnValue(
+        editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
+      );
+
+      renderPanel({ headerAction });
+
+      expect(screen.getByTestId('customHeaderAction')).toBeInTheDocument();
+      expect(screen.getByTestId('contextAiIndexAutomationRow')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+    });
+
+    it('shows the header action and no add button in the empty state', () => {
+      renderPanel({ headerAction });
+
+      expect(screen.getByTestId('customHeaderAction')).toBeInTheDocument();
+      expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+    });
   });
 });

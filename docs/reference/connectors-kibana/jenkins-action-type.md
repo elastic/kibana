@@ -11,6 +11,8 @@ applies_to:
 
 The Jenkins connector calls the [Jenkins Remote Access API](https://www.jenkins.io/doc/book/using/remote-access-api/) so a workflow or agent can trigger a build, follow it to completion, gather evidence (console log, test report), and mitigate a bad job (stop, disable, quiet-down) — all without opening the Jenkins UI. It authenticates with a Jenkins username and API token, and every action runs under that account.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 Jenkins is self-hosted, so the target Jenkins controller must be network-reachable from {{kib}}.
 
 ::::{warning}

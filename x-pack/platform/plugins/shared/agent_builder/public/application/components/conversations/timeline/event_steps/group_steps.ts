@@ -11,8 +11,11 @@ import type {
 } from '@kbn/agent-builder-common/chat/conversation';
 import {
   isToolCallStep,
-  isTodosStep,
   isRelevantSkillsStep,
+  isPreExecutionWorkflowStep,
+  isSubstitutionStep,
+  isInjectedContextStep,
+  isModelReasoningStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 
 export type GroupedStep =
@@ -34,7 +37,13 @@ export const groupSteps = (steps: ConversationRoundStep[]): GroupedStep[] => {
     const step = steps[i];
     if (isToolCallStep(step)) {
       toolBuffer.push(step);
-    } else if (!isTodosStep(step) && !isRelevantSkillsStep(step)) {
+    } else if (
+      !isRelevantSkillsStep(step) &&
+      !isPreExecutionWorkflowStep(step) &&
+      !isSubstitutionStep(step) &&
+      !isInjectedContextStep(step) &&
+      !isModelReasoningStep(step)
+    ) {
       flushBuffer();
       result.push({ kind: 'step', step, index: i });
     }

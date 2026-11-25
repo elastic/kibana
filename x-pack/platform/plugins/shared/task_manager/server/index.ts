@@ -31,13 +31,7 @@ export {
 } from './saved_objects';
 
 export type { RruleSchedule } from './task';
-export {
-  TaskStatus,
-  TaskPriority,
-  TaskCost,
-  InstanceTaskCost,
-  getTaskCostFromInstance,
-} from './task';
+export { TaskStatus, TaskPriority, TaskCost } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
@@ -53,7 +47,12 @@ export {
 
 export type { DecoratedError } from './task_running';
 
-export type { RunNowResult, BulkUpdateTaskResult } from './task_scheduling';
+export type {
+  RunNowResult,
+  RunSoonOptions,
+  BulkUpdateTaskResult,
+  BulkUpdateSchedulesOptions,
+} from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 export {
   IdleTaskWithExpiredRunAt,
@@ -126,6 +125,9 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   },
   exposeToUsage: {
     claim_strategy: true,
+    claim_nudge: {
+      enabled: true,
+    },
     discovery: {
       active_nodes_lookback: true,
     },

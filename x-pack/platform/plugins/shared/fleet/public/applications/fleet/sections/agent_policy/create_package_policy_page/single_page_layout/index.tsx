@@ -183,10 +183,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     { enabled: !!pkgName }
   );
   const packageInfo = useMemo(() => {
-    if (packageInfoData && packageInfoData.item) {
-      return packageInfoData.item;
+    // The form initializes its inputs once from the package info, so wait for the FIPS status
+    // to avoid initializing them from the unfiltered templates.
+    if (!packageInfoData?.item || fleetStatus.isLoading) {
+      return undefined;
     }
-  }, [packageInfoData]);
+    const item = packageInfoData.item;
+    if (!fleetStatus.isFipsEnabled || !item.policy_templates) {
+      return item;
+    }
+    const fipsCompatibleTemplates = item.policy_templates.filter(
+      (t) => t.fips_compatible !== false
+    );
+    return { ...item, policy_templates: fipsCompatibleTemplates };
+  }, [packageInfoData, fleetStatus.isFipsEnabled, fleetStatus.isLoading]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
 
@@ -233,6 +243,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
+    acknowledgeAgentVersionIncompatibility,
+    setAcknowledgeAgentVersionIncompatibility,
+    serverAgentVersionBlock,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -407,8 +420,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
-    agentPolicyData?.items
+    agentPolicyData?.items,
+    serverAgentVersionBlock
   );
+  // The package policy can't be created on these agent policies without acknowledging that some
+  // agents would stop collecting the integration's data
+  const isAgentVersionAcknowledgementMissing =
+    incompatibleAgentVersion.status !== 'NONE' &&
+    incompatibleAgentVersion.requiresAcknowledgement &&
+    !isAgentlessSelected &&
+    !acknowledgeAgentVersionIncompatibility;
 
   useEffect(() => {
     if (
@@ -438,9 +459,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   useEffect(() => {
     addIntegrationFlyoutProps?.updateHasErrors(
-      Boolean(packageInfo && (formState === 'INVALID' || hasAgentPolicyError))
+      Boolean(
+        packageInfo &&
+          (formState === 'INVALID' || hasAgentPolicyError || isAgentVersionAcknowledgementMissing)
+      )
     );
-  }, [packageInfo, formState, hasAgentPolicyError, addIntegrationFlyoutProps]);
+  }, [
+    packageInfo,
+    formState,
+    hasAgentPolicyError,
+    isAgentVersionAcknowledgementMissing,
+    addIntegrationFlyoutProps,
+  ]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -559,12 +589,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
   const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
-  const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
   const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
-    return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
-  }, [replaceDefineStepView, enableSimplifiedAgentlessUX, isDefaultDeploymentMode]);
+    return !replaceDefineStepView && isDefaultDeploymentMode;
+  }, [replaceDefineStepView, isDefaultDeploymentMode]);
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -877,6 +906,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <IncompatibleAgentVersionCallout
           incompatibility={incompatibleAgentVersion.status}
           versionCondition={incompatibleAgentVersion.versionCondition}
+          blockedCount={incompatibleAgentVersion.blockedCount}
+          observedVersions={incompatibleAgentVersion.observedVersions}
+          minVersion={incompatibleAgentVersion.minVersion}
+          agentPolicyCount={incompatibleAgentVersion.agentPolicyCount}
+          acknowledged={acknowledgeAgentVersionIncompatibility}
+          onAcknowledgeChange={
+            incompatibleAgentVersion.requiresAcknowledgement
+              ? setAcknowledgeAgentVersionIncompatibility
+              : undefined
+          }
         />
       )}
 
@@ -1034,7 +1073,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                           formState !== 'VALID' ||
                           hasAgentPolicyError ||
                           !validationResults ||
-                          isFleetExtensionLoaded === false
+                          isFleetExtensionLoaded === false ||
+                          isAgentVersionAcknowledgementMissing
                         }
                         iconType="save"
                         color="primary"

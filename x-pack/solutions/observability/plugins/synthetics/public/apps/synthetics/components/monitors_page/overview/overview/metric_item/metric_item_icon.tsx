@@ -49,11 +49,13 @@ export const MetricItemIcon = ({
   status,
   timestamp,
   configIdByLocation,
+  isInteractive = true,
 }: {
   monitor: OverviewStatusMetaData;
   status: string;
   configIdByLocation: string;
   timestamp?: string;
+  isInteractive?: boolean;
 }) => {
   const locationId = monitor.locations[0]?.id ?? '';
 
@@ -131,6 +133,21 @@ export const MetricItemIcon = ({
   }
 
   if (status === 'down') {
+    if (!isInteractive) {
+      return (
+        <Container>
+          <EuiIconTip
+            content={latestPing?.error?.message ?? ERROR_DETAILS}
+            type="warning"
+            color="danger"
+            iconProps={{
+              'data-test-subj': 'syntheticsMetricItemDownIcon',
+            }}
+          />
+        </Container>
+      );
+    }
+
     return (
       <Container>
         <EuiPopover
@@ -213,7 +230,7 @@ export const MetricItemIcon = ({
       </Container>
     );
   } else {
-    if (monitor.urls) {
+    if (monitor.urls && isInteractive) {
       return (
         <Container>
           <EuiToolTip content={monitor.urls} disableScreenReaderOutput>
@@ -224,9 +241,10 @@ export const MetricItemIcon = ({
               iconType="link"
               target="_blank"
               aria-label={i18n.translate(
-                'xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl',
+                'xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrlWithValue',
                 {
-                  defaultMessage: 'Monitor url',
+                  defaultMessage: 'Monitor url: {url}',
+                  values: { url: monitor.urls },
                 }
               )}
             />

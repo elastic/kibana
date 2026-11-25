@@ -29,7 +29,6 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
@@ -72,6 +71,10 @@ import type { MitreAttackPublicStart } from '@kbn/mitre-attack-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type {
+  AgenticInvestigationsPublicPluginSetup,
+  AgenticInvestigationsPublicPluginStart,
+} from '@kbn/agentic-investigations-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EsqlPluginSetup } from '@kbn/esql/public';
 import type { ResolverPluginSetup } from './resolver/types';
@@ -125,6 +128,7 @@ export interface SetupPlugins {
   discoverShared: DiscoverSharedPublicStart;
   esql?: EsqlPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginSetup;
   /**
    * Optional. When present, `enabled` is the AlertZero soft-enable switch
    * (`xpack.alertzero.enabled`). Threat-intel supply gates on this.
@@ -156,7 +160,6 @@ export interface StartPlugins {
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
-  timelines: TimelinesUIStart;
   sessionView: SessionViewStart;
   uiActions: UiActionsStart;
   maps: MapsStartApi;
@@ -185,6 +188,7 @@ export interface StartPlugins {
   inference: InferencePublicStart;
   share?: SharePluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
   mitreAttack?: MitreAttackPublicStart;
   cps?: CPSPluginStart;
   evals?: EvalsPublicStart;

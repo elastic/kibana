@@ -36,7 +36,6 @@ const renderComponent = (props: Partial<React.ComponentProps<typeof ConnectToPro
           elasticsearchUrl={ELASTICSEARCH_URL}
           apiKey={null}
           isLoading={false}
-          telemetryPage="testPage"
           {...props}
         />
       </KibanaContextProvider>
@@ -50,68 +49,57 @@ describe('ConnectToProject', () => {
     jest.clearAllMocks();
   });
 
-  it('does not render the connection type selector by default', () => {
+  it('shows the Elasticsearch endpoint URL by default', () => {
     renderComponent();
 
+    expect(screen.getByTestId('vectordbConnectionTypeButton')).toHaveTextContent('Elasticsearch');
     expect(screen.getByText(ELASTICSEARCH_URL)).toBeInTheDocument();
-    expect(screen.queryByTestId('vectordbConnectionTypeButton')).not.toBeInTheDocument();
+    expect(getCurrentTextToCopy()).toBe(ELASTICSEARCH_URL);
   });
 
-  describe('with the connection type selector', () => {
-    const renderWithSelector = () => renderComponent({ showConnectionTypeSelector: true });
+  it('shows both connection type options in the popover', () => {
+    renderComponent();
 
-    it('shows the Elasticsearch endpoint URL by default', () => {
-      renderWithSelector();
+    fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
 
-      expect(screen.getByTestId('vectordbConnectionTypeButton')).toHaveTextContent('Elasticsearch');
-      expect(screen.getByText(ELASTICSEARCH_URL)).toBeInTheDocument();
-      expect(getCurrentTextToCopy()).toBe(ELASTICSEARCH_URL);
-    });
+    expect(screen.getByTestId('vectordbConnectionTypeOption-elasticsearch')).toHaveTextContent(
+      'Elasticsearch'
+    );
+    expect(screen.getByTestId('vectordbConnectionTypeOption-mcpServer')).toHaveTextContent(
+      'Agent Builder MCP'
+    );
+  });
 
-    it('shows both connection type options in the popover', () => {
-      renderWithSelector();
+  it('shows and copies the Agent Builder MCP URL when Agent Builder MCP is selected', () => {
+    renderComponent();
 
-      fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
+    fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
+    fireEvent.click(screen.getByTestId('vectordbConnectionTypeOption-mcpServer'));
 
-      expect(screen.getByTestId('vectordbConnectionTypeOption-elasticsearch')).toHaveTextContent(
-        'Elasticsearch'
-      );
-      expect(screen.getByTestId('vectordbConnectionTypeOption-mcpServer')).toHaveTextContent(
-        'Agent Builder MCP'
-      );
-    });
+    const mcpServerUrl = `${KIBANA_URL}${MCP_SERVER_PATH}`;
+    expect(screen.getByTestId('vectordbConnectionTypeButton')).toHaveTextContent(
+      'Agent Builder MCP'
+    );
+    expect(screen.getByText(mcpServerUrl)).toBeInTheDocument();
+    expect(screen.queryByText(ELASTICSEARCH_URL)).not.toBeInTheDocument();
+    expect(getCurrentTextToCopy()).toBe(mcpServerUrl);
+  });
 
-    it('shows and copies the Agent Builder MCP URL when Agent Builder MCP is selected', () => {
-      renderWithSelector();
+  it('switches back to the Elasticsearch endpoint URL', () => {
+    renderComponent();
 
-      fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
-      fireEvent.click(screen.getByTestId('vectordbConnectionTypeOption-mcpServer'));
+    fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
+    fireEvent.click(screen.getByTestId('vectordbConnectionTypeOption-mcpServer'));
+    fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
+    fireEvent.click(screen.getByTestId('vectordbConnectionTypeOption-elasticsearch'));
 
-      const mcpServerUrl = `${KIBANA_URL}${MCP_SERVER_PATH}`;
-      expect(screen.getByTestId('vectordbConnectionTypeButton')).toHaveTextContent(
-        'Agent Builder MCP'
-      );
-      expect(screen.getByText(mcpServerUrl)).toBeInTheDocument();
-      expect(screen.queryByText(ELASTICSEARCH_URL)).not.toBeInTheDocument();
-      expect(getCurrentTextToCopy()).toBe(mcpServerUrl);
-    });
+    expect(screen.getByText(ELASTICSEARCH_URL)).toBeInTheDocument();
+    expect(getCurrentTextToCopy()).toBe(ELASTICSEARCH_URL);
+  });
 
-    it('switches back to the Elasticsearch endpoint URL', () => {
-      renderWithSelector();
+  it('keeps the API key control rendered', () => {
+    renderComponent();
 
-      fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
-      fireEvent.click(screen.getByTestId('vectordbConnectionTypeOption-mcpServer'));
-      fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
-      fireEvent.click(screen.getByTestId('vectordbConnectionTypeOption-elasticsearch'));
-
-      expect(screen.getByText(ELASTICSEARCH_URL)).toBeInTheDocument();
-      expect(getCurrentTextToCopy()).toBe(ELASTICSEARCH_URL);
-    });
-
-    it('keeps the API key control rendered', () => {
-      renderWithSelector();
-
-      expect(screen.getByTestId('vectordbPathSelectionGenerateApiKey')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('vectordbPathSelectionGenerateApiKey')).toBeInTheDocument();
   });
 });

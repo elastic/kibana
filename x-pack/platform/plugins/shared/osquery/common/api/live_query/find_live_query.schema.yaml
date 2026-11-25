@@ -150,6 +150,24 @@ components:
               type: array
               items:
                 type: string
+            origin:
+              description: 'What started the live query. Absent for live queries started from the UI, the API or a rule.'
+              type: object
+              properties:
+                type:
+                  description: 'The kind of origin. `workflow` means a workflow run made the request.'
+                  type: string
+                  enum: [workflow]
+                run_id:
+                  description: 'The workflow execution (run) ID that made the request.'
+                  type: string
+                verified:
+                  description: 'Whether Kibana verified that the run exists and made the request. Always `false` for now.'
+                  type: boolean
+              required:
+                - type
+                - run_id
+                - verified
             status:
               description: 'Global status of the live query (completed, running).'
               type: string

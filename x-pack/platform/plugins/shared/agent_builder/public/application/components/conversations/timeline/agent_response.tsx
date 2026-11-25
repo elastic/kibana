@@ -20,6 +20,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { ResponseMessage } from './response/response_message';
 import { EventSteps } from './event_steps/event_steps';
+import { groupSteps } from './event_steps/group_steps';
 import { AttachmentReferences } from './attachments/attachment_references';
 
 interface AgentResponseProps {
@@ -33,6 +34,8 @@ interface AgentResponseProps {
   attachmentRefs?: AttachmentVersionRef[];
   /** The trigger message's refs; the agent's and system's entries are listed under the response. */
   triggerAttachmentRefs?: AttachmentVersionRef[];
+  /** The execution id; enables the feedback buttons when set. */
+  executionId?: string;
 }
 
 /** The assistant's turn: shared presenter for both the finished run and the in-flight one. */
@@ -44,12 +47,13 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
   conversationAttachments,
   attachmentRefs,
   triggerAttachmentRefs,
+  executionId,
 }) => {
   const conversationId = useConversationId();
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {steps.length > 0 && (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {groupSteps(steps).length > 0 && (
         <EuiFlexItem grow={false}>
           <EventSteps
             steps={steps}
@@ -68,6 +72,7 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
           conversationAttachments={conversationAttachments}
           attachmentRefs={attachmentRefs}
           conversationId={conversationId}
+          executionId={executionId}
         />
       </EuiFlexItem>
       {!isLoading && (

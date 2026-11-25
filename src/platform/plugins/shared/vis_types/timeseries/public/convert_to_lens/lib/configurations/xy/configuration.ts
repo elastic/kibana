@@ -9,9 +9,12 @@
 
 import { Position } from '@elastic/charts';
 import type { XYVisualizationState as XYConfiguration, XYLayerConfig } from '@kbn/lens-common';
-import { XYCurveTypes } from '@kbn/expression-xy-plugin/common';
+import { AreaFillOptions, XYCurveTypes } from '@kbn/expression-xy-plugin/common';
 import type { Panel } from '../../../../../common/types';
 import { getYExtents } from './extents';
+
+const hasAreaLayer = (layers: XYLayerConfig[]): boolean =>
+  layers.some((layer) => 'seriesType' in layer && layer.seriesType.includes('area'));
 
 export const getConfigurationForTimeseries = (
   model: Panel,
@@ -22,6 +25,7 @@ export const getConfigurationForTimeseries = (
     layers,
     curveType: model.series[0].steps === 1 ? XYCurveTypes.CURVE_STEP_AFTER : undefined,
     fillOpacity: Number(model.series[0].fill) ?? 0.3,
+    ...(hasAreaLayer(layers) ? { areaFill: AreaFillOptions.SOLID } : {}),
     legend: {
       isVisible: Boolean(model.show_legend),
       showSingleSeries: Boolean(model.show_legend),

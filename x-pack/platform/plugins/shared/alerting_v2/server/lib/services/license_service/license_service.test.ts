@@ -30,6 +30,56 @@ describe('LicenseService', () => {
     service = new LicenseService(licensing);
   });
 
+  describe('getActionPoliciesLicenseState', () => {
+    it.each<LicenseType>(['enterprise', 'trial'])(
+      'reports a valid state for an active %s license',
+      async (type) => {
+        licensing.getLicense.mockResolvedValue(createLicense(type));
+
+        await expect(service.getActionPoliciesLicenseState()).resolves.toEqual({
+          isValid: true,
+          type,
+          status: 'active',
+        });
+      }
+    );
+
+    it.each<LicenseType>(['basic', 'standard', 'gold', 'platinum'])(
+      'reports an invalid state for an active %s license',
+      async (type) => {
+        licensing.getLicense.mockResolvedValue(createLicense(type));
+
+        await expect(service.getActionPoliciesLicenseState()).resolves.toEqual({
+          isValid: false,
+          type,
+          status: 'active',
+        });
+      }
+    );
+
+    it('reports an invalid state for an expired enterprise license', async () => {
+      licensing.getLicense.mockResolvedValue(createLicense('enterprise', 'expired'));
+
+      await expect(service.getActionPoliciesLicenseState()).resolves.toEqual({
+        isValid: false,
+        type: 'enterprise',
+        status: 'expired',
+      });
+    });
+
+    it('reports an invalid state when license information is unavailable', async () => {
+      licensing.getLicense.mockResolvedValue(
+        new License({ error: 'Elasticsearch license API unavailable', signature: 'error-sig' })
+      );
+
+      await expect(service.getActionPoliciesLicenseState()).resolves.toEqual({
+        isValid: false,
+        type: null,
+        status: null,
+      });
+    });
+  });
+
   describe('assertActionPoliciesLicense', () => {
     it.each<LicenseType>(['enterprise', 'trial'])(
       'resolves for an active %s license',

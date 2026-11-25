@@ -51,6 +51,9 @@ spaceTest.describe(
         // The group-by column is filterable, and doing so adds a dashboard filter.
         await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'for' });
         await expect.poll(() => filterBar.getFilterCount()).toBe(1);
+        // The filter refetches the panel, which empties the grid while loading; wait for the
+        // single filtered row so the next cell action doesn't race the remount.
+        await expect(page.locator('[data-grid-visible-row-index]')).toHaveCount(1);
 
         // The aggregated column is not: its cell offers no filter action to click.
         await dataGrid.expandCell({ rowIndex: 0, columnId: 'countB' });

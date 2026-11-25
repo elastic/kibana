@@ -177,11 +177,10 @@ export const getESQLQueryFromIndexPattern = ({
     query = query.where`${esql.col(TRANSACTION_TYPE)} == ${transactionType}`;
   }
 
-  if (
-    environment &&
-    environment !== ENVIRONMENT_ALL_VALUE &&
-    environment !== ENVIRONMENT_NOT_DEFINED_VALUE
-  ) {
+  if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
+    const notDefinedKql = `NOT ${SERVICE_ENVIRONMENT} : *`;
+    query = query.where`KQL(${esql.str(notDefinedKql)})`;
+  } else if (environment && environment !== ENVIRONMENT_ALL_VALUE) {
     query = query.where`${esql.col(SERVICE_ENVIRONMENT)} == ${environment}`;
   }
 
@@ -205,11 +204,14 @@ export const getESQLQueryFromIndexPattern = ({
   }
 
   if (exceptionsOnly) {
-    query = query.pipe`WHERE KQL(${UNPROCESSED_OTEL_EXCEPTION_KQL})`;
+    query = query.where`KQL(${esql.str(UNPROCESSED_OTEL_EXCEPTION_KQL)})`;
   }
 
   if (kuery) {
-    query = query.pipe`WHERE KQL(${kuery})`;
+    // The kuery comes from the user's query bar and can contain any character. Pass it through
+    // `esql.str` so it is always embedded as a single, explicitly escaped string literal, the
+    // same way every other KQL clause in this file is built.
+    query = query.where`KQL(${esql.str(kuery)})`;
   }
 
   if (sortDirection) {

@@ -20,7 +20,6 @@ export interface ConversationStepDeps {
   getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>;
   getAgentRegistry: (request: KibanaRequest) => Promise<AgentRegistry>;
   getExecutionService: () => AgentExecutionService;
-  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>;
 }
 
 type ConversationStepFactory = (deps: ConversationStepDeps) => ServerStepDefinition;

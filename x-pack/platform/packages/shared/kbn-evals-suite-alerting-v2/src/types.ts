@@ -15,6 +15,9 @@ export type ExpectRenderAttachment = readonly string[];
 
 export type ExpectAttachmentDataFn = (attachments: VersionedAttachment[]) => void | Promise<void>;
 
+/** Named attachment assertions; each name is also scored as its own `AttachmentData:<name>` evaluator. */
+export type AttachmentDataChecks = Readonly<Record<string, ExpectAttachmentDataFn>>;
+
 export interface RuleManagementExample extends Example {
   input: {
     turns: string[];
@@ -26,7 +29,7 @@ export interface RuleManagementExample extends Example {
     expectedToolIds?: readonly string[];
     expectedAnyOfToolIds?: readonly string[];
     expectRenderAttachment?: ExpectRenderAttachment;
-    expectAttachmentData?: ExpectAttachmentDataFn;
+    expectAttachmentData?: ExpectAttachmentDataFn | AttachmentDataChecks;
     expectedSkills?: readonly string[];
     notExpectedSkills?: readonly string[];
   };

@@ -48,7 +48,7 @@ function ColorCell({ color, onChange }: ColorCellProps) {
       color={color}
       compressed
       aria-label={selectColorLabel}
-      button={<EuiColorPickerSwatch color={color} aria-label={selectColorLabel} />}
+      button={<EuiColorPickerSwatch color={color} />}
     />
   );
 }

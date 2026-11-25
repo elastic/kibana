@@ -13,24 +13,11 @@ const detected = {
 };
 
 describe('resolveDetailSchema', () => {
-  it('omits schema for pods while the schema selector flag is off', () => {
-    expect(
-      resolveDetailSchema({
-        urlSchema: 'semconv',
-        timeRangeMetadata: detected,
-        nodeType: 'pod',
-        isPodSchemaSelectorEnabled: false,
-      })
-    ).toBeUndefined();
-  });
-
   it('waits while time-range metadata is missing', () => {
     expect(
       resolveDetailSchema({
         urlSchema: 'semconv',
         timeRangeMetadata: undefined,
-        nodeType: 'pod',
-        isPodSchemaSelectorEnabled: true,
       })
     ).toBeUndefined();
   });
@@ -40,8 +27,6 @@ describe('resolveDetailSchema', () => {
       resolveDetailSchema({
         urlSchema: 'ecs',
         timeRangeMetadata: detected,
-        nodeType: 'pod',
-        isPodSchemaSelectorEnabled: true,
       })
     ).toBe('ecs');
   });
@@ -51,8 +36,6 @@ describe('resolveDetailSchema', () => {
       resolveDetailSchema({
         urlSchema: 'semconv',
         timeRangeMetadata: { schemas: ['ecs'], preferredSchema: 'ecs' },
-        nodeType: 'pod',
-        isPodSchemaSelectorEnabled: true,
       })
     ).toBe('ecs');
   });
@@ -62,9 +45,16 @@ describe('resolveDetailSchema', () => {
       resolveDetailSchema({
         urlSchema: null,
         timeRangeMetadata: { schemas: ['ecs'], preferredSchema: null },
-        nodeType: 'pod',
-        isPodSchemaSelectorEnabled: true,
       })
     ).toBeUndefined();
+  });
+
+  it('honors a leftover Hosts OpenTelemetry URL when both schemas are in range', () => {
+    expect(
+      resolveDetailSchema({
+        urlSchema: 'semconv',
+        timeRangeMetadata: detected,
+      })
+    ).toBe('semconv');
   });
 });

@@ -7,6 +7,7 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -76,7 +77,7 @@ const aiIndexBody = {
   description: 'AI index created by the Scout API test suite',
   dest: dataStreamDest(DEST.dataStream),
   automations: [{ type: 'workflow', value: 'scout-automation' }],
-  sources: [{ type: 'esql', value: `FROM ${DEST.dataStream} | LIMIT 1` }],
+  sources: [{ type: 'esql', value: 'FROM logs | LIMIT 1' }],
   traces: [],
 };
 
@@ -118,6 +119,155 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     }
   });
 
+  apiTest(
+    'keeps the dreaming config behind the internal route while the global memory setting is on',
+    async ({ apiClient, esClient, kbnClient, requestAuth }) => {
+      const id = 'scout_memory_toggle_ai_index';
+      const path = aiIndexPath(id);
+      const dreamingPath = testData.aiIndexDreamingPath(id);
+      const dest = 'ai-index-ds-scout-memory-toggle';
+      const credentials = await requestAuth.getApiKey('admin');
+      const headers = { ...credentials.apiKeyHeader, ...API_HEADERS };
+      const internalHeaders = { ...credentials.apiKeyHeader, ...testData.INTERNAL_API_HEADERS };
+      const dreaming = { enabled: false, facts: [{ type: 'preference' }] };
+      const body = {
+        description: 'Memory toggle integration test',
+        dest: dataStreamDest(dest),
+        automations: [],
+        sources: [],
+      };
+
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
+      await apiClient.delete(path, { headers, responseType: 'json' });
+      await esClient.indices.createDataStream({ name: dest }, { ignore: [400] });
+
+      try {
+        await apiTest.step('rejects a dreaming config on the public API', async () => {
+          const response = await apiClient.post(COLLECTION, {
+            headers,
+            responseType: 'json',
+            body: { id, ...body, dreaming },
+          });
+          expect(response).toHaveStatusCode(400);
+
+          const createResponse = await apiClient.post(COLLECTION, {
+            headers,
+            responseType: 'json',
+            body: { id, ...body },
+          });
+          expect(createResponse).toHaveStatusCode(201);
+        });
+
+        await apiTest.step('hides the dreaming route while memory is off', async () => {
+          const getResponse = await apiClient.get(dreamingPath, {
+            headers: internalHeaders,
+            responseType: 'json',
+          });
+          expect(getResponse).toHaveStatusCode(404);
+
+          const putResponse = await apiClient.put(dreamingPath, {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: dreaming,
+          });
+          expect(putResponse).toHaveStatusCode(404);
+        });
+
+        await kbnClient.uiSettings.updateGlobal({
+          [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+        });
+        await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
+        await apiTest.step('stores the config while memory is on', async () => {
+          const putResponse = await apiClient.put(dreamingPath, {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: dreaming,
+          });
+          expect(putResponse).toHaveStatusCode(200);
+          expect(putResponse.body).toStrictEqual({ dreaming, workflow_ids: [] });
+        });
+
+        await apiTest.step(
+          'keeps the config out of the public AI index and through a public replace',
+          async () => {
+            const getResponse = await apiClient.get(path, { headers, responseType: 'json' });
+            expect(getResponse).toHaveStatusCode(200);
+            expect('dreaming' in getResponse.body).toBe(false);
+            expect('memory_enabled' in getResponse.body).toBe(false);
+
+            const replaceResponse = await apiClient.put(path, {
+              headers,
+              responseType: 'json',
+              body: { ...body, description: 'Replaced' },
+            });
+            expect(replaceResponse).toHaveStatusCode(200);
+
+            const dreamingResponse = await apiClient.get(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+            });
+            expect(dreamingResponse).toHaveStatusCode(200);
+            expect(dreamingResponse.body).toStrictEqual({ dreaming, workflow_ids: [] });
+          }
+        );
+
+        await apiTest.step(
+          'stores a maintenance config, rejecting one out of bounds or with nothing to maintain',
+          async () => {
+            const withMaintenance = {
+              ...dreaming,
+              maintenance: { enabled: true, mode: 'apply', neighbors: 8 },
+            };
+            const putResponse = await apiClient.put(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+              body: withMaintenance,
+            });
+            expect(putResponse).toHaveStatusCode(200);
+            expect(putResponse.body).toStrictEqual({
+              dreaming: withMaintenance,
+              workflow_ids: [],
+            });
+
+            const outOfBounds = await apiClient.put(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+              body: { ...dreaming, maintenance: { enabled: true, mode: 'apply', neighbors: 50 } },
+            });
+            expect(outOfBounds).toHaveStatusCode(400);
+
+            const nothingToMaintain = await apiClient.put(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+              body: { enabled: false, maintenance: { enabled: true, mode: 'apply' } },
+            });
+            expect(nothingToMaintain).toHaveStatusCode(400);
+
+            const getResponse = await apiClient.get(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+            });
+            expect(getResponse.body).toStrictEqual({
+              dreaming: withMaintenance,
+              workflow_ids: [],
+            });
+          }
+        );
+      } finally {
+        await apiClient.delete(path, { headers, responseType: 'json' });
+        await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
+        await kbnClient.uiSettings.updateGlobal({
+          [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+        });
+        await kbnClient.uiSettings.waitForEventualCacheRefresh();
+      }
+    }
+  );
+
   apiTest('manages an AI index through its full lifecycle', async ({ apiClient }) => {
     let dateCreated: string;
     const path = aiIndexPath(AI_INDEX.lifecycle);
@@ -130,7 +280,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body).toStrictEqual({ status: 'created' });
+      expect(response.body).toMatchObject({ status: 'created' });
     });
 
     await apiTest.step('rejects a duplicate id with a 409', async () => {
@@ -151,6 +301,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({ id: AI_INDEX.lifecycle, ...aiIndexBody });
+      expect('memory_enabled' in response.body).toBe(false);
       expect(response.body.date_created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       expect(response.body.date_modified).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       dateCreated = response.body.date_created;
@@ -172,17 +323,18 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       const response = await apiClient.put(path, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: { ...aiIndexBody, description: 'Updated description' },
+        body: { ...aiIndexBody, description: 'Updated description', memory_enabled: false },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ status: 'updated' });
+      expect(response.body).toMatchObject({ status: 'updated' });
 
       const updatedResponse = await apiClient.get(path, {
         headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
       });
       expect(updatedResponse.body.description).toBe('Updated description');
+      expect('memory_enabled' in updatedResponse.body).toBe(false);
       expect(updatedResponse.body.date_created).toBe(dateCreated);
     });
 
@@ -224,7 +376,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body).toStrictEqual({ status: 'created' });
+      expect(response.body).toMatchObject({ status: 'created' });
     }
   );
 
@@ -476,7 +628,9 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('Must use only lowercase letters');
+    expect(response.body.message).toContain(
+      'must name a single index or data stream, not a pattern'
+    );
   });
 
   apiTest('rejects a comma-separated dest', async ({ apiClient }) => {
@@ -487,7 +641,9 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('Must use only lowercase letters');
+    expect(response.body.message).toContain(
+      'must name a single index or data stream, not a pattern'
+    );
   });
 
   apiTest('rejects an alias dest', async ({ apiClient }) => {
@@ -782,7 +938,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     async ({ apiClient }) => {
       const id = AI_INDEX.sourceRejectPut;
       const path = aiIndexPath(id);
-      const sources = [{ type: 'esql', value: `FROM ${DEST.dataStream}` }];
+      const sources = [{ type: 'esql', value: 'FROM logs' }];
 
       await apiTest.step('creates an AI index with a valid ES|QL source', async () => {
         const response = await apiClient.post(COLLECTION, {

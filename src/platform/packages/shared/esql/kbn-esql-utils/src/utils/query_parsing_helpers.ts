@@ -85,6 +85,21 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
 }
 
 /**
+ * Returns true when the query contains a STATS or PROMQL command, including nested
+ * FORK branches. KEEP and INLINE STATS are not aggregating.
+ */
+export function hasAggregatingCommand(esql?: string): boolean {
+  if (!esql) return false;
+  const { root } = Parser.parse(esql);
+  return (
+    Walker.findAll(
+      root,
+      (node) => node.type === 'command' && (node.name === 'stats' || node.name === 'promql')
+    ).length > 0
+  );
+}
+
+/**
  * Determines if an ES|QL query contains transformational commands.
  *
  * For ES|QL, we consider the following as transformational commands:
@@ -193,7 +208,7 @@ export function convertTimeseriesCommandNodeToFrom<T extends ESQLCommand>(cmd: T
  */
 export function convertTimeseriesCommandToFrom(esql?: string): string {
   const { root } = Parser.parse(esql || '');
-  const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
+  const timeseriesCommand = root.commands.find(({ name }) => name === 'ts');
   if (!timeseriesCommand) return esql || '';
 
   const fromCommand = convertTimeseriesCommandNodeToFrom(timeseriesCommand);
@@ -213,7 +228,8 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
 
 /**
  * Parses the ES|QL query and returns the column used with `?_tstart`/`?_tend` named params.
- * Returns `undefined` when the query contains no time filter params.
+ * Queries that use TBUCKET, which always buckets on `@timestamp`, or PromQL, resolve to
+ * `@timestamp` without named params. Returns `undefined` when the query contains no time filter.
  *
  * Use this for synchronous/server-side contexts where only local parsing is needed.
  * For client-side code with HTTP access that also needs `fieldCaps` fallback,
@@ -221,13 +237,20 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
  */
 export const parseTimeFieldFromESQLQuery = (esql: string) => {
   const { root } = Parser.parse(esql);
+  // The main pipeline comes first, so its time params win over the ones of a LET.
+  const commands = [...root.commands, ...(root.header ?? [])];
   const functions: ESQLFunction[] = [];
 
-  walk(root.commands, {
+  walk(commands, {
     visitFunction: (node) => functions.push(node),
   });
 
-  const params = Walker.params(root);
+  // TBUCKET always buckets on @timestamp, used when no named params point to a field
+  const implicitTimeField = functions.some(({ name }) => name === 'tbucket')
+    ? '@timestamp'
+    : undefined;
+
+  const params = Walker.params(commands);
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );
@@ -238,7 +261,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
   }
 
   if (!timeNamedParam || !functions.length) {
-    return undefined;
+    return implicitTimeField;
   }
   const allFunctionsWithNamedParams = functions.filter(
     ({ location }) =>
@@ -246,7 +269,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
   );
 
   if (!allFunctionsWithNamedParams.length) {
-    return undefined;
+    return implicitTimeField;
   }
   const lowLevelFunction = allFunctionsWithNamedParams[allFunctionsWithNamedParams.length - 1];
 
@@ -270,7 +293,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
     return false;
   });
 
-  return columnName;
+  return columnName ?? implicitTimeField;
 };
 
 export const getKqlSearchQueries = (esql: string) => {
@@ -485,11 +508,22 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
  *
  * **Backward compat only** — unnecessary for new integrations, which have no saved queries
  * predating the `??` syntax (https://github.com/elastic/elasticsearch/pull/122459).
+ *
+ * TODO: remove this function (and its callers) in the next major release, when saved queries
+ * that predate the `??` syntax are no longer supported.
  */
 export const fixESQLQueryWithVariables = (
   queryString: string,
   esqlVariables?: ESQLControlVariable[]
 ) => {
+  // Only FIELDS and FUNCTIONS variables are ever rewritten, so skip parsing the query otherwise
+  const hasIdentifierTypeVariables = esqlVariables?.some(
+    ({ type }) => type === ESQLVariableType.FIELDS || type === ESQLVariableType.FUNCTIONS
+  );
+  if (!hasIdentifierTypeVariables) {
+    return queryString;
+  }
+
   const currentVariables = getESQLQueryVariables(queryString);
   if (!currentVariables.length) {
     return queryString;

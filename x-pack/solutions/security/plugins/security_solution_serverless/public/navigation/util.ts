@@ -6,7 +6,6 @@
  */
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { SECURITY_PROJECT_TYPE } from '../../common';
 
 export type GetCloudUrl = (cloudUrlKey: string, cloud: CloudStart) => string | undefined;
 
@@ -14,14 +13,6 @@ export const isCloudLink = (linkId: string): boolean => linkId.startsWith('cloud
 export const getCloudLinkKey = (linkId: string): string => linkId.replace('cloud:', '');
 
 export const getProjectId = (cloud: CloudStart) => cloud.serverless?.projectId;
-export const getProjectFeaturesUrl = (cloud: CloudStart): string | undefined => {
-  const projectsBaseUrl = getCloudUrl('projects', cloud);
-  const projectId = getProjectId(cloud);
-  if (!projectsBaseUrl || !projectId) {
-    return undefined;
-  }
-  return `${projectsBaseUrl}${SECURITY_PROJECT_TYPE}/${projectId}?open=securityProjectFeatures`;
-};
 
 export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
   const cloudUrls = cloud.getUrls();

@@ -26,6 +26,7 @@ export {
 export {
   WatchAutonomyLevel,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -37,8 +38,16 @@ export {
   AnalysisWindowDays,
   FpCountThreshold,
   FpRateThresholdPct,
+  LookbackDays,
+  MaxGapsPerRun,
+  RuleCoverageWorkerExtras,
   RuleTuningWorkerExtras,
 } from './components/detection_watch_settings.gen';
+
+export {
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
+} from './components/floor_watch_settings.gen';
 
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
 export { GetWatchResponse } from './watches/get_watch_route.gen';
@@ -50,24 +59,24 @@ export {
 } from './workers/update_worker_route.gen';
 export {
   AffectedAsset,
+  HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
+  HuntForThreatPerIoc,
   HuntForThreatResult,
   HuntForThreatStatus,
   HuntIncompleteness,
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
-  HuntTechnology,
+  HuntScope,
+  HuntScopeResolution,
   IndexScopeStatus,
   IndexScopeWindow,
-  ResolvedIndexScope,
 } from './components/hunt.gen';
 export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
-export {
-  HuntIndexScopeRequestQuery,
-  HuntIndexScopeResponse,
-} from './hunt/hunt_index_scope_route.gen';
+export { HuntIndexScopeResponse } from './hunt/hunt_index_scope_route.gen';
+export { HuntWorkerIndexCoverageResponse } from './hunt/hunt_worker_index_coverage_route.gen';
 export {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
@@ -83,5 +92,27 @@ export {
 export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
+export {
+  FindOrCreateInvestigationRequestBody,
+  FindOrCreateInvestigationResponse,
+} from './hunt/find_or_create_investigation_route.gen';
+export {
+  WriteHuntEvidenceRequestBody,
+  WriteHuntEvidenceResponse,
+} from './hunt/write_hunt_evidence_route.gen';
+export {
+  HUNT_EVIDENCE_FIELD_KEYS,
+  HUNT_EVIDENCE_FIELDS_MAX_KEYS,
+  HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  HUNT_MATCHED_IOCS_MAX,
+  HUNT_HIT_NAME_MAX,
+  HUNT_CASE_INSENSITIVE_IOC_TYPES,
+  huntEvidenceFieldsSchema,
+  huntResultSchema,
+  isoDatetimeSchema,
+  type HuntEvidenceFieldKey,
+  type HuntResult,
+} from './hunt/hunt_result';

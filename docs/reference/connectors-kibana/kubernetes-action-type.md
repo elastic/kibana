@@ -11,6 +11,8 @@ applies_to:
 
 The Kubernetes connector calls the [Kubernetes API](https://kubernetes.io/docs/reference/using-api/) to read and modify resources in a cluster. It exposes a generic `request` action for any API path, plus typed convenience actions for common operations. It authenticates with a service account bearer token or with cloud provider credentials for managed clusters (GKE, Amazon EKS, AKS), and verifies the API server TLS certificate against the cluster CA.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ::::{warning}
 This connector can perform any operation the configured service account is authorized for, including deleting resources. There are no additional restrictions in {{kib}}: access is governed entirely by the token's Kubernetes [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). Use a service account with least-privilege permissions scoped to what the connector actually needs.
 ::::

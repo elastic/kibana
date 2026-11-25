@@ -5,42 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiPopover,
-  EuiSpacer,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { FlyoutTemplate } from '@kbn/flyout-template';
+import type { FlyoutFooterMenuPanel } from '@kbn/flyout-template';
 import moment from 'moment';
-import {
-  TagsOverflowBadgeRow,
-  getTagsOverflowLimits,
-} from '@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_row';
 import { EMPTY_VALUE } from '../../../utils/rule_display';
 import { RuleDetailsTable } from '../rule_details_table';
-
-const FLYOUT_TITLE_ID = 'sourceRuleSummaryFlyoutTitle';
-
-const { overflowSize: TAGS_OVERFLOW_SIZE, maxVisible: TAGS_MAX_VISIBLE_ON_OVERFLOW } =
-  getTagsOverflowLimits(1);
+import {
+  DISABLED_TAKE_ACTION_PANELS,
+  RULE_SUMMARY_FLYOUT_TITLE,
+  RuleSummaryLoadingBody,
+  RuleSummaryNotFoundBody,
+} from './rule_summary_state_bodies';
 
 interface DetailItem {
   title: string;
@@ -126,225 +105,162 @@ const buildMetadataItems = (rule: RuleResponse, dateFormat: string): DetailItem[
 };
 
 export interface SourceRuleSummaryFlyoutProps {
-  rule: RuleResponse;
+  /** Unset while loading, or when no rule is available (missing, or failed to load with no cached copy). */
+  rule?: RuleResponse;
+  isLoading?: boolean;
   ruleCategory?: string;
   ruleDetailsHref: string | null;
   onClose: () => void;
 }
 
+const { Header, Body, Footer } = FlyoutTemplate;
+const { Badge } = Header;
+
 export const SourceRuleSummaryFlyout = ({
   rule,
+  isLoading = false,
   ruleCategory,
   ruleDetailsHref,
   onClose,
 }: SourceRuleSummaryFlyoutProps) => {
-  const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const toggleActions = useCallback(() => setIsActionsOpen((prev) => !prev), []);
-  const closeActions = useCallback(() => setIsActionsOpen(false), []);
-
   const uiSettings = useService(CoreStart('uiSettings'));
   const dateFormat: string = uiSettings.get('dateFormat');
 
-  const tags = rule.metadata?.tags ?? [];
-  const { enabled } = rule;
+  const ruleName = rule ? rule.metadata?.name ?? rule.id : RULE_SUMMARY_FLYOUT_TITLE;
+  const tags = rule?.metadata?.tags ?? [];
+  const conditionItems = rule ? buildConditionItems(rule, ruleCategory) : [];
+  const metadataItems = rule ? buildMetadataItems(rule, dateFormat) : [];
 
-  const statusBadge =
-    enabled !== undefined ? (
-      enabled ? (
-        <EuiBadge color="success" data-test-subj="sourceRuleEnabledBadge">
-          {i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.enabled', {
-            defaultMessage: 'Enabled',
-          })}
-        </EuiBadge>
-      ) : (
-        <EuiBadge color="default" data-test-subj="sourceRuleDisabledBadge">
-          {i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.disabled', {
-            defaultMessage: 'Disabled',
-          })}
-        </EuiBadge>
-      )
-    ) : null;
+  const getTakeActionPanels = (): FlyoutFooterMenuPanel[] => {
+    if (!ruleDetailsHref) {
+      return [];
+    }
+    if (!rule) {
+      return DISABLED_TAKE_ACTION_PANELS;
+    }
+    return [
+      {
+        id: 0,
+        items: [
+          {
+            key: 'viewDetails',
+            name: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.viewDetails', {
+              defaultMessage: 'View details',
+            }),
+            icon: 'eye',
+            href: ruleDetailsHref,
+            'data-test-subj': 'sourceRuleSummaryFlyoutViewDetailsAction',
+          },
+        ],
+      },
+    ];
+  };
 
-  const conditionItems = buildConditionItems(rule, ruleCategory);
-  const metadataItems = buildMetadataItems(rule, dateFormat);
+  const renderBody = () => {
+    if (isLoading) {
+      return <RuleSummaryLoadingBody />;
+    }
+    if (!rule) {
+      return <RuleSummaryNotFoundBody />;
+    }
+    return (
+      <>
+        {conditionItems.length > 0 && (
+          <Body.Section
+            id="conditions"
+            title={i18n.translate(
+              'xpack.alertingV2.sourceRuleSummaryFlyout.ruleConditionsSection',
+              {
+                defaultMessage: 'Rule conditions',
+              }
+            )}
+          >
+            <RuleDetailsTable items={conditionItems} />
+          </Body.Section>
+        )}
+        <Body.Section
+          id="metadata"
+          title={i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.metadata', {
+            defaultMessage: 'Metadata',
+          })}
+        >
+          <RuleDetailsTable items={metadataItems} />
+        </Body.Section>
+      </>
+    );
+  };
 
   return (
-    <EuiFlyout
+    <FlyoutTemplate
       type="overlay"
-      hasAnimation={false}
-      size="s"
+      size="m"
+      resizable
       ownFocus={false}
-      hideCloseButton
-      paddingSize="none"
+      session="start"
       onClose={onClose}
-      aria-labelledby={FLYOUT_TITLE_ID}
+      flyoutMenuProps={{ title: RULE_SUMMARY_FLYOUT_TITLE }}
       data-test-subj="sourceRuleSummaryFlyout"
     >
-      <EuiPanel
-        paddingSize="xs"
-        hasShadow={false}
-        hasBorder={false}
-        borderRadius="none"
-        color="transparent"
+      <Header
+        title={<span data-test-subj="sourceRuleName">{ruleName}</span>}
+        titleText={ruleName}
+        isLoading={isLoading}
       >
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          gutterSize="s"
-          responsive={false}
-          alignItems="center"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.close', {
-                defaultMessage: 'Close',
+        {rule && (
+          <>
+            <Badge color="hollow" data-test-subj="classicRulesBadge">
+              {i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.classicRulesBadge', {
+                defaultMessage: 'Classic',
               })}
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={onClose}
-                aria-label={i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.close', {
-                  defaultMessage: 'Close',
-                })}
-                data-test-subj="sourceRuleSummaryFlyoutCloseButton"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiHorizontalRule margin="none" />
-      <EuiFlyoutBody>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          color="transparent"
-        >
-          <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-            <h2 data-test-subj="sourceRuleSummaryFlyoutTitle">
-              <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <span data-test-subj="sourceRuleName">{rule.metadata?.name ?? rule.id}</span>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
-                    {statusBadge ? <EuiFlexItem grow={false}>{statusBadge}</EuiFlexItem> : null}
-                    <TagsOverflowBadgeRow
-                      tags={tags}
-                      overflowSize={TAGS_OVERFLOW_SIZE}
-                      maxVisible={TAGS_MAX_VISIBLE_ON_OVERFLOW}
-                    />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </h2>
-          </EuiTitle>
-        </EuiPanel>
-        <EuiHorizontalRule margin="xs" />
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          color="transparent"
-        >
-          {conditionItems.length > 0 ? (
-            <>
-              <EuiTitle size="xxs">
-                <h3>
-                  {i18n.translate(
-                    'xpack.alertingV2.sourceRuleSummaryFlyout.ruleConditionsSection',
-                    {
-                      defaultMessage: 'Rule conditions',
-                    }
-                  )}
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <RuleDetailsTable items={conditionItems} />
-              <EuiHorizontalRule />
-            </>
-          ) : null}
-          <EuiTitle size="xxs">
-            <h3>
-              {i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.metadata', {
-                defaultMessage: 'Metadata',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <RuleDetailsTable items={metadataItems} />
-        </EuiPanel>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          color="transparent"
-        >
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onClose}
-                data-test-subj="sourceRuleSummaryFlyoutFooterCloseButton"
+            </Badge>
+            {rule.enabled !== undefined && (
+              <Badge
+                color={rule.enabled ? 'success' : 'default'}
+                data-test-subj={rule.enabled ? 'sourceRuleEnabledBadge' : 'sourceRuleDisabledBadge'}
               >
-                <FormattedMessage
-                  id="xpack.alertingV2.sourceRuleSummaryFlyout.closeButton"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {ruleDetailsHref && (
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  isOpen={isActionsOpen}
-                  closePopover={closeActions}
-                  anchorPosition="upRight"
-                  panelPaddingSize="none"
-                  aria-label={i18n.translate(
-                    'xpack.alertingV2.sourceRuleSummaryFlyout.takeActionAriaLabel',
-                    { defaultMessage: 'Rule actions' }
-                  )}
-                  button={
-                    <EuiButton
-                      fill
-                      iconType={isActionsOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-                      iconSide="right"
-                      onClick={toggleActions}
-                      data-test-subj="sourceRuleSummaryFlyoutTakeActionButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.alertingV2.sourceRuleSummaryFlyout.takeAction"
-                        defaultMessage="Take action"
-                      />
-                    </EuiButton>
-                  }
-                >
-                  <EuiContextMenuPanel
-                    items={[
-                      <EuiContextMenuItem
-                        key="viewDetails"
-                        icon="eye"
-                        href={ruleDetailsHref}
-                        data-test-subj="sourceRuleSummaryFlyoutViewDetailsAction"
-                      >
-                        <FormattedMessage
-                          id="xpack.alertingV2.sourceRuleSummaryFlyout.viewDetails"
-                          defaultMessage="View details"
-                        />
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
+                {rule.enabled
+                  ? i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.enabled', {
+                      defaultMessage: 'Enabled',
+                    })
+                  : i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.disabled', {
+                      defaultMessage: 'Disabled',
+                    })}
+              </Badge>
             )}
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+            {tags.map((tag) => (
+              <Badge key={tag} color="hollow">
+                {tag}
+              </Badge>
+            ))}
+          </>
+        )}
+      </Header>
+
+      <Body>{renderBody()}</Body>
+
+      <Footer>
+        <Footer.SecondaryAction
+          label={i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.closeButton', {
+            defaultMessage: 'Close',
+          })}
+          onClick={onClose}
+          data-test-subj="sourceRuleSummaryFlyoutFooterCloseButton"
+        />
+        <Footer.PrimaryActionMenu
+          label={i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.takeAction', {
+            defaultMessage: 'Take action',
+          })}
+          aria-label={i18n.translate(
+            'xpack.alertingV2.sourceRuleSummaryFlyout.takeActionAriaLabel',
+            {
+              defaultMessage: 'Rule actions',
+            }
+          )}
+          panels={getTakeActionPanels()}
+          isDisabled={!rule}
+          data-test-subj="sourceRuleSummaryFlyoutTakeActionButton"
+        />
+      </Footer>
+    </FlyoutTemplate>
   );
 };

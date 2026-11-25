@@ -19,8 +19,6 @@ export const CONNECTOR_NAME = i18n.translate('connectors.mcp.title', {
  */
 export const MCP_CLIENT_VERSION = '1.0.0';
 
-export const MAX_RETRIES = 2; // Three total attempts (1 initial + 2 retries)
-
 /**
  * Sub-actions supported by the MCP connector.
  * Values must match the registered sub-action names in the backend.

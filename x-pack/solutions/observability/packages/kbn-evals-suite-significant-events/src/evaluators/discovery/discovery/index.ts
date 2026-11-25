@@ -19,11 +19,16 @@ import {
   createEvidenceDescriptionEvaluator,
   createNarrativeFieldsEvaluator,
   createSignalEvidenceConsistencyEvaluator,
+  skipWhenNoSignificantEvents,
 } from '../common/evidence_quality';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { topologyCorrectnessEvaluator } from './grouping/topology_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
+import {
+  continuationEventIdProvenanceEvaluator,
+  eventIdProvenanceEvaluator,
+} from './tool_usage/event_id_provenance';
 import {
   continuationRoutingEvaluator,
   continuationStabilityEvaluator,
@@ -31,10 +36,11 @@ import {
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
 import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
+import { continuationNarrativeEvolutionEvaluator } from './continuation/continuation_narrative_evolution';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
 import { severityExactEvaluator } from './severity/severity_exact';
-import { createStatusCorrectnessEvaluator } from './status/status_correctness';
+import { statusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
  * Factory that creates the full set of evaluators for the discovery agent eval suite.
@@ -46,11 +52,13 @@ export const createDiscoveryEvaluators = (
     groupingCorrectnessEvaluator,
     topologyCorrectnessEvaluator,
     evidenceCollectionEvaluator,
+    eventIdProvenanceEvaluator,
     createDiscoveryToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
     confirmationAlignmentEvaluator,
     severityExactEvaluator,
+    statusCorrectnessEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);
@@ -63,8 +71,11 @@ export const createDiscoveryEvaluators = (
 
   return [
     ...base,
-    createStatusCorrectnessEvaluator(criteriaFn),
-    createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
+    createScenarioCriteriaLlmEvaluator({
+      criteriaFn,
+      criteria,
+      skipWhen: skipWhenNoSignificantEvents,
+    }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
     createNarrativeFieldsEvaluator({ criteriaFn }),
     createSignalEvidenceConsistencyEvaluator({ criteriaFn }),
@@ -83,6 +94,8 @@ export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
     continuationStabilityEvaluator,
     continuationRoutingEvaluator,
     continuationSeverityStabilityEvaluator,
+    continuationNarrativeEvolutionEvaluator,
     continuationTopologyStabilityEvaluator,
+    continuationEventIdProvenanceEvaluator,
     continuationTrajectoryEvaluator,
   ]);

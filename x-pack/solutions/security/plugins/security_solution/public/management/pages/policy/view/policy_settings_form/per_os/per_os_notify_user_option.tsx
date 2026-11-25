@@ -31,7 +31,7 @@ import type {
 } from '../../../types';
 import { useGetCustomNotificationUnavailableComponent } from '../hooks/use_get_custom_notification_unavailable_component';
 import { NOTIFY_USER_CHECKBOX_LABEL } from '../components/shared_translations';
-import { SupportedVersionForProtectionNotice } from '../components/notify_user_option';
+import { SupportedVersionForProtectionNotice } from './supported_version_for_protection_notice';
 import { osRowPanelCss } from './os_control_layout';
 import type { PerOsPolicyAccessor } from './policy_accessor';
 
@@ -74,12 +74,13 @@ export type PerOsNotifyUserOptionProps = {
 } & {
   [Protection in PolicyProtection]: {
     protection: Protection;
+    os: ProtectionOperatingSystems[Protection];
     accessor: PerOsPolicyAccessor<ProtectionOperatingSystems[Protection]>;
   };
 }[PolicyProtection];
 
 export const PerOsNotifyUserOption = memo<PerOsNotifyUserOptionProps>(
-  ({ accessor, onChange, mode = 'edit', protection, 'data-test-subj': dataTestSubj }) => {
+  ({ accessor, onChange, mode = 'edit', protection, os, 'data-test-subj': dataTestSubj }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const CustomNotificationUpsellingComponent = useGetCustomNotificationUnavailableComponent();
@@ -230,6 +231,7 @@ export const PerOsNotifyUserOption = memo<PerOsNotifyUserOptionProps>(
                       <EuiSpacer size="s" />
                       <SupportedVersionForProtectionNotice
                         protection={protection}
+                        os={os}
                         data-test-subj={getTestId('supportedVersion')}
                       />
                     </>

@@ -16,6 +16,7 @@ import * as SELECTORS from '../screens/siem_migrations';
 import { TRANSLATED_RULES_PAGE_URL } from '../urls/navigation';
 import { visit } from './navigation';
 import { bedrockConnectorAPIPayload } from './api_calls/connectors';
+import { setCodeEditorValue } from './common/monaco';
 
 export const navigateToTranslatedRulesPage = (isClassicNavUpdateEnabled: boolean) => {
   if (Cypress.env('IS_SERVERLESS')) {
@@ -67,6 +68,16 @@ export const toggleMigrateDashboardsCard = () => {
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.MIGRATE_DASHBOARDS).click();
 };
 
+export const toggleMigrateWorkflowsCard = () => {
+  cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.MIGRATE_WORKFLOWS).click();
+};
+
+export const openUploadWorkflowsFlyout = () => {
+  toggleMigrateWorkflowsCard();
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_BTN).click();
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_FLYOUT).should('exist');
+};
+
 export const openUploadRulesFlyout = () => {
   toggleMigrateRulesCard();
   cy.get(SELECTORS.UPLOAD_RULES_BTN).click();
@@ -109,6 +120,15 @@ export const uploadDashboards = (splunkDashboardsJSON: object) => {
   cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
 };
 
+export const uploadTinesStories = (tinesStoriesJSON: object) => {
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(JSON.stringify(tinesStoriesJSON)),
+    fileName: 'stories.json',
+    mimeType: 'application/json',
+  });
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_SUBMIT_BTN).should('not.be.disabled').click();
+};
+
 export const startMigrationFromFlyout = () => {
   cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).should('not.be.disabled');
   cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).click();
@@ -134,12 +154,12 @@ export const updateTranslatedRuleQuery = (newQuery: string) => {
   cy.get(SELECTORS.TRANSLATED_RULE_EDIT_BTN).click();
   cy.get(SELECTORS.TRANSLATED_RULE_SAVE_BTN).should('be.visible');
 
-  cy.get(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_INPUT).type(
-    Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}',
-    { force: true }
+  setCodeEditorValue(
+    SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_PARENT,
+    Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}'
   );
 
-  cy.get(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_INPUT).type(newQuery, { force: true });
+  setCodeEditorValue(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_PARENT, newQuery);
 };
 
 export const editTranslatedRuleByRow = (rowNum: number) => {

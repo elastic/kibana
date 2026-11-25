@@ -80,7 +80,7 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id="dismiss-discard-starred-query-modal"
-              label={i18n.translate('esqlEditor.overrideWarningModal.dismissButtonLabel', {
+              label={i18n.translate('indexEditor.overrideWarningModal.dismissButtonLabel', {
                 defaultMessage: "Don't ask me again",
               })}
               checked={dontAskMeAgainCheck}
@@ -92,7 +92,7 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={onCancel} color="primary">
                   <FormattedMessage
-                    id="esqlEditor.overrideWarningModal.cancelLabel"
+                    id="indexEditor.overrideWarningModal.cancelLabel"
                     defaultMessage="Cancel"
                   />
                 </EuiButtonEmpty>
@@ -100,7 +100,7 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton fill onClick={continueHandler}>
                   <FormattedMessage
-                    id="esqlEditor.overrideWarningModal.continue"
+                    id="indexEditor.overrideWarningModal.continue"
                     defaultMessage="Continue"
                   />
                 </EuiButton>

@@ -56,12 +56,15 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-execution-context-common'
+  - '@kbn/core-spaces-common'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -71,6 +74,4 @@ fileGroups:
     - server/**/*.ts
     - test/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

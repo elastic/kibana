@@ -9,7 +9,6 @@
 
 export {
   convertToWorkflowGraph,
-  convertToSerializableGraph,
   visitWaitForInputStep,
 } from './build_execution_graph/build_execution_graph';
 export { GraphBuildError, isGraphBuildError } from './build_execution_graph/graph_build_error';
@@ -79,6 +78,8 @@ export type {
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowAwaitExecutionsGraphNode,
+  WorkflowAwaitExecutionsGraphNodeSchema,
   WorkflowOutputGraphNode,
   WorkflowOutputGraphNodeSchema,
   LoopEnterNode,
@@ -93,6 +94,7 @@ export {
   isWait,
   isWaitForInput,
   isWaitForApproval,
+  isWorkflowExecute,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,

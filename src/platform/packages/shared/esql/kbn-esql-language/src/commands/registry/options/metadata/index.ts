@@ -18,23 +18,33 @@ import {
   pipeCompleteItem,
 } from '../../complete_items';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
-import { endsWithNonWhitespace } from '../../../definitions/utils/regex';
+import { endsWithNonWhitespace, matchesWildcardPattern } from '../../../definitions/utils/regex';
 
-export const METADATA_FIELDS = [
-  '_version',
-  '_id',
-  '_index',
-  '_source',
-  '_ignored',
-  '_index_mode',
-  '_score',
-];
+import { METADATA_FIELDS, CPS_METADATA_FIELDS } from './fields';
+
+export { METADATA_FIELDS, CPS_METADATA_FIELDS } from './fields';
+
+const PROJECT_TAG_PREFIX = '_project.';
+
+export const getAvailableMetadataFields = (isServerless?: boolean): string[] =>
+  isServerless ? [...METADATA_FIELDS, ...CPS_METADATA_FIELDS] : METADATA_FIELDS;
+
+export const isValidMetadataField = (name: string, isServerless?: boolean): boolean => {
+  const availableFields = getAvailableMetadataFields(isServerless);
+  if (availableFields.includes(name)) {
+    return true;
+  }
+  if (isServerless && name.startsWith(PROJECT_TAG_PREFIX)) {
+    return true;
+  }
+  return name.includes('*') && availableFields.some((field) => matchesWildcardPattern(name, field));
+};
 
 export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'METADATA',
   text: 'METADATA ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.esql.definitions.metadataDoc', {
+  detail: i18n.translate('esqlLanguage.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
   category: SuggestionCategory.VALUE,
@@ -47,20 +57,29 @@ const getMetadataFragment = (innerText: string) => {
   return match?.[1] ?? '';
 };
 
-export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {
+export const getMetadataSuggestions = (
+  command: ESQLAstAllCommands,
+  queryText: string,
+  isServerless?: boolean
+) => {
   const metadataNode = command.args.find((arg) => isOptionNode(arg) && arg.name === 'metadata') as
     | ESQLCommandOption
     | undefined;
 
   // FROM index METADATA ... /
   if (metadataNode) {
-    return suggestForMetadata(metadataNode, queryText);
+    return suggestForMetadata(metadataNode, queryText, isServerless);
   }
 };
 
-async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string) {
+async function suggestForMetadata(
+  metadata: ESQLCommandOption,
+  innerText: string,
+  isServerless?: boolean
+) {
+  const availableFields = getAvailableMetadataFields(isServerless);
   const existingFields = new Set(metadata.args.filter(isColumn).map(({ name }) => name));
-  const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
+  const filteredMetaFields = availableFields.filter((name) => !existingFields.has(name));
   const suggestions: ISuggestionItem[] = [];
 
   // FROM something METADATA /
@@ -69,7 +88,7 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
   if (/(?:,|METADATA)\s+$/i.test(innerText) || endsWithNonWhitespace(innerText)) {
     const prefix = getMetadataFragment(innerText);
 
-    if (prefix && METADATA_FIELDS.includes(prefix)) {
+    if (prefix && availableFields.includes(prefix)) {
       const completionSuggestions: ISuggestionItem[] = [
         {
           ...pipeCompleteItem,

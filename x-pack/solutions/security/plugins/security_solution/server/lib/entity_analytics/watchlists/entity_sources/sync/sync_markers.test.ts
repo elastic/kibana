@@ -114,6 +114,7 @@ describe('Watchlist sync markers service', () => {
         expect.objectContaining({
           index: 'logs-entityanalytics_okta.entity-default',
           query: { term: { 'event.action': 'completed' } },
+          ignore_unavailable: true,
         })
       );
     });
@@ -146,13 +147,35 @@ describe('Watchlist sync markers service', () => {
       expect(result).toBeUndefined();
       expect(esClient.search).not.toHaveBeenCalled();
     });
+
+    it('bounds the query to atOrBefore when provided', async () => {
+      const descriptorClient = createDescriptorClient();
+      esClient.search.mockResolvedValueOnce({
+        hits: { hits: [] },
+      } as unknown as SearchResponse<unknown>);
+
+      const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
+      await service.findLastEventMarkerInIndex(mockSource, 'started', '2024-03-01T00:00:00Z');
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.action': 'started' } },
+                { range: { '@timestamp': { lte: '2024-03-01T00:00:00Z' } } },
+              ],
+            },
+          },
+        })
+      );
+    });
   });
 
   describe('detectNewFullSync', () => {
-    it('returns true when a completed event is found and no previous marker exists', async () => {
+    it('returns hasNewFullSync true and the completed timestamp when no previous marker exists', async () => {
       const descriptorClient = createDescriptorClient();
       mockGetLastFullSyncMarker.mockResolvedValue(undefined);
-      mockUpdateLastFullSyncMarker.mockResolvedValue(undefined);
       esClient.search.mockResolvedValueOnce({
         hits: {
           hits: [{ _id: '1', _source: { '@timestamp': '2024-03-01T00:00:00Z' } }],
@@ -162,14 +185,12 @@ describe('Watchlist sync markers service', () => {
       const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
       const result = await service.detectNewFullSync(mockSource);
 
-      expect(result).toBe(true);
-      expect(mockUpdateLastFullSyncMarker).toHaveBeenCalledWith(mockSource, '2024-03-01T00:00:00Z');
+      expect(result).toEqual({ hasNewFullSync: true, completedAt: '2024-03-01T00:00:00Z' });
     });
 
-    it('returns true when a completed event is newer than the saved marker', async () => {
+    it('returns hasNewFullSync true when a completed event is newer than the saved marker', async () => {
       const descriptorClient = createDescriptorClient();
       mockGetLastFullSyncMarker.mockResolvedValue('2024-02-01T00:00:00Z');
-      mockUpdateLastFullSyncMarker.mockResolvedValue(undefined);
       esClient.search.mockResolvedValueOnce({
         hits: {
           hits: [{ _id: '1', _source: { '@timestamp': '2024-03-01T00:00:00Z' } }],
@@ -179,11 +200,10 @@ describe('Watchlist sync markers service', () => {
       const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
       const result = await service.detectNewFullSync(mockSource);
 
-      expect(result).toBe(true);
-      expect(mockUpdateLastFullSyncMarker).toHaveBeenCalledWith(mockSource, '2024-03-01T00:00:00Z');
+      expect(result).toEqual({ hasNewFullSync: true, completedAt: '2024-03-01T00:00:00Z' });
     });
 
-    it('returns false when the completed event is not newer than the saved marker', async () => {
+    it('returns hasNewFullSync false when the completed event is not newer than the saved marker', async () => {
       const descriptorClient = createDescriptorClient();
       mockGetLastFullSyncMarker.mockResolvedValue('2024-03-01T00:00:00Z');
       esClient.search.mockResolvedValueOnce({
@@ -195,11 +215,10 @@ describe('Watchlist sync markers service', () => {
       const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
       const result = await service.detectNewFullSync(mockSource);
 
-      expect(result).toBe(false);
-      expect(mockUpdateLastFullSyncMarker).not.toHaveBeenCalled();
+      expect(result).toEqual({ hasNewFullSync: false });
     });
 
-    it('returns false when no completed event exists in the sync marker index', async () => {
+    it('returns hasNewFullSync false when no completed event exists in the sync marker index', async () => {
       const descriptorClient = createDescriptorClient();
       mockGetLastFullSyncMarker.mockResolvedValue(undefined);
       esClient.search.mockResolvedValueOnce({
@@ -209,8 +228,80 @@ describe('Watchlist sync markers service', () => {
       const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
       const result = await service.detectNewFullSync(mockSource);
 
-      expect(result).toBe(false);
-      expect(mockUpdateLastFullSyncMarker).not.toHaveBeenCalled();
+      expect(result).toEqual({ hasNewFullSync: false });
+    });
+  });
+
+  describe('markFullSyncProcessed', () => {
+    it('delegates to descriptor client', async () => {
+      const descriptorClient = createDescriptorClient();
+      mockUpdateLastFullSyncMarker.mockResolvedValue(undefined);
+
+      const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
+      const completedAt = '2024-03-01T00:00:00Z';
+      await service.markFullSyncProcessed(mockSource, completedAt);
+
+      expect(mockUpdateLastFullSyncMarker).toHaveBeenCalledWith(mockSource, completedAt);
+    });
+  });
+
+  describe('getFullSyncWindowStart', () => {
+    const completedAt = '2024-03-05T00:00:00Z';
+
+    it('returns the started marker at or before the detected completion', async () => {
+      const descriptorClient = createDescriptorClient();
+      const startedMarker = '2024-02-01T00:00:00Z';
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [{ _id: '1', _source: { '@timestamp': startedMarker } }],
+        },
+      } as unknown as SearchResponse<unknown>);
+
+      const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
+      const result = await service.getFullSyncWindowStart(mockSource, completedAt);
+
+      expect(result).toBe(startedMarker);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'logs-entityanalytics_okta.entity-default',
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.action': 'started' } },
+                { range: { '@timestamp': { lte: completedAt } } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('falls back to the default lookback window when no started marker is found', async () => {
+      const descriptorClient = createDescriptorClient();
+      esClient.search.mockResolvedValueOnce({
+        hits: { hits: [] },
+      } as unknown as SearchResponse<unknown>);
+
+      const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
+      const result = await service.getFullSyncWindowStart(mockSource, completedAt);
+
+      expect(typeof result).toBe('string');
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+    });
+
+    it('falls back to the default lookback window when syncMarkerIndex is not configured', async () => {
+      const descriptorClient = createDescriptorClient();
+      const sourceWithoutMarkerIndex: MonitoringEntitySource = {
+        ...mockSource,
+        integrations: undefined,
+      };
+
+      const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
+      const result = await service.getFullSyncWindowStart(sourceWithoutMarkerIndex, completedAt);
+
+      expect(typeof result).toBe('string');
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+      expect(esClient.search).not.toHaveBeenCalled();
     });
   });
 });

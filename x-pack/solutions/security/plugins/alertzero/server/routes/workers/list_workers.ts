@@ -12,14 +12,17 @@ import {
   type ListWorkersResponse,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
+import { resolveHuntUniverse } from '../hunt/resolve_hunt_universe';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import { hasManageSecurity } from './has_manage_security';
 
 export const registerListWorkersRoute = ({
   router,
   logger,
   getSpaceId,
   getWorkersService,
+  isCpsEnabled,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -39,12 +42,15 @@ export const registerListWorkersRoute = ({
           request: {},
         },
       },
-      withAlertZeroEnabled(async (_context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
-          const body: ListWorkersResponse = await getWorkersService().list(
-            request,
-            getSpaceId(request)
+          const listed = await getWorkersService().list(request, getSpaceId(request), () =>
+            resolveHuntUniverse(context, logger, isCpsEnabled()).then(({ patterns }) => patterns)
           );
+          const body: ListWorkersResponse = {
+            ...listed,
+            canModifyWorkers: await hasManageSecurity(context),
+          };
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list workers: ${error}`);

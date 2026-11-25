@@ -7,9 +7,10 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { UserAvatar, UserProfilesPopover, UserToolTip } from '@kbn/user-profile-components';
+import { UserProfilesPopover } from '@kbn/user-profile-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ESCALATION_QUEUE_LABELS } from './translations';
+import { AssigneeAvatarStack } from './assignee_avatar_stack';
 
 interface AssignToUsersProps {
   conversationId: string;
@@ -42,6 +43,11 @@ interface AssignToUsersProps {
   onChange: (selected: UserProfileWithAvatar[]) => void;
   /** Size of the `+` button. */
   buttonIconSize?: 'xs' | 's';
+  /**
+   * Color of the `+` button. Defaults to EUI's primary (blue). Nightshift home cards
+   * pass `text` so the control matches the neighboring chat / overflow icons.
+   */
+  buttonIconColor?: 'primary' | 'text';
 }
 
 /**
@@ -68,6 +74,7 @@ export const AssignToUsers = memo<AssignToUsersProps>(
     onSearchChange,
     onChange,
     buttonIconSize = 'xs',
+    buttonIconColor,
   }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -81,20 +88,8 @@ export const AssignToUsers = memo<AssignToUsersProps>(
       [onChange]
     );
 
-    const avatarStack = selected.map((profile) => (
-      <EuiFlexItem key={profile.uid} grow={false}>
-        <UserToolTip user={profile.user} avatar={profile.data?.avatar}>
-          <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
-        </UserToolTip>
-      </EuiFlexItem>
-    ));
-
     if (!canManage) {
-      return (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          {avatarStack}
-        </EuiFlexGroup>
-      );
+      return <AssigneeAvatarStack profiles={selected} />;
     }
 
     const button = (
@@ -102,18 +97,20 @@ export const AssignToUsers = memo<AssignToUsersProps>(
         <EuiButtonIcon
           iconType="plusCircle"
           aria-label={ESCALATION_QUEUE_LABELS.addAssignee}
-          color="text"
           onClick={togglePopover}
           isDisabled={isProfilesLoading}
           data-test-subj={`assignToUsersAdd-${conversationId}`}
           size={buttonIconSize}
+          color={buttonIconColor}
         />
       </EuiToolTip>
     );
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        {avatarStack}
+        <EuiFlexItem grow={false}>
+          <AssigneeAvatarStack profiles={selected} />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <UserProfilesPopover
             isOpen={isPopoverOpen}

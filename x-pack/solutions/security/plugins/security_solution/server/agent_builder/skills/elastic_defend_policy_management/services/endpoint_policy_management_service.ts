@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { EndpointAuthorizationError } from '../../../../endpoint/errors';
 import {
@@ -35,7 +35,11 @@ import type { ClassifiedPolicyUsage } from './classify_policy_usage';
 import { classifyPolicyUsage } from './classify_policy_usage';
 import { countEndpoints } from './count_endpoints';
 import type { FieldReferenceResult } from './field_reference';
-import { lookupFieldReference } from './field_reference';
+import {
+  lookupFieldReference,
+  parseGetPolicyFieldReferenceParams,
+  searchFieldReference,
+} from './field_reference';
 import type { PolicyRolloutStatus } from './read_policy_rollout_status';
 import { readPolicyRolloutStatus } from './read_policy_rollout_status';
 import type { ListPoliciesDto, ListPolicyItem } from './list_endpoint_policies';
@@ -69,7 +73,6 @@ export type PolicyComparison = Readonly<{
 
 export interface EndpointPolicyManagementServiceDependencies {
   readonly endpointAppContextService: EndpointAppContextService;
-  readonly getStartServices: StartServicesAccessor;
   readonly request: KibanaRequest;
   readonly spaceId: string;
 }
@@ -85,7 +88,7 @@ export interface EndpointPolicyManagementService {
   comparePolicies(from: PolicyRef, to: PolicyRef): Promise<PolicyComparison>;
   assessPolicyChange(input: AssessPolicyChangeParams): Promise<AssessPolicyChangeDto>;
   getPolicyRolloutStatus(reference: Readonly<{ idOrName: string }>): Promise<PolicyRolloutStatus>;
-  getPolicyFieldReference(input: Readonly<{ path: string }>): Promise<FieldReferenceResult>;
+  getPolicyFieldReference(rawParams: unknown): Promise<FieldReferenceResult>;
   previewApplyPolicyChange(rawParams: unknown): Promise<ApplyPolicyChangePreview>;
   applyPolicyChange(
     rawParams: unknown,
@@ -137,19 +140,13 @@ const toDeniedUsageItem = (item: ListPolicyItem): ListedPolicyItem => ({
 
 export const createEndpointPolicyManagementService = ({
   endpointAppContextService,
-  getStartServices,
   request,
   spaceId,
 }: EndpointPolicyManagementServiceDependencies): EndpointPolicyManagementService => {
   const requireAccess = async (
     requiredAuthz: EndpointAuthzRequirement
   ): Promise<PolicyAccessContext> =>
-    createPolicyAccessContext(
-      endpointAppContextService,
-      { request, spaceId },
-      requiredAuthz,
-      getStartServices
-    );
+    createPolicyAccessContext(endpointAppContextService, { request, spaceId }, requiredAuthz);
 
   return {
     listPolicies: async ({ page, perPage, includeEndpointUsage }) => {
@@ -217,22 +214,18 @@ export const createEndpointPolicyManagementService = ({
       return readPolicyRolloutStatus(access, endpointAppContextService, { packagePolicy }, request);
     },
 
-    getPolicyFieldReference: async ({ path }) => {
+    getPolicyFieldReference: async (rawParams) => {
       await requireAccess(ENDPOINT_POLICY_READ_REQUIRED_AUTHZ);
-      return lookupFieldReference(path);
+      const selector = parseGetPolicyFieldReferenceParams(rawParams);
+      return 'path' in selector
+        ? lookupFieldReference(selector.path)
+        : searchFieldReference(selector.keywords, selector.os);
     },
 
     previewApplyPolicyChange: (rawParams) =>
-      previewApplyPolicyChangeService(
-        { endpointAppContextService, getStartServices, request, spaceId },
-        rawParams
-      ),
+      previewApplyPolicyChangeService({ endpointAppContextService, request, spaceId }, rawParams),
 
     applyPolicyChange: (rawParams, input) =>
-      applyPolicyChangeService(
-        { endpointAppContextService, getStartServices, request, spaceId },
-        rawParams,
-        input
-      ),
+      applyPolicyChangeService({ endpointAppContextService, request, spaceId }, rawParams, input),
   };
 };

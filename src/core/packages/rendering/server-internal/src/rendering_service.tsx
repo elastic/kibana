@@ -11,6 +11,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
 import { i18n as i18nLib, EN_LOCALE } from '@kbn/i18n';
+import { getBrowserTracingConfiguration } from '@kbn/apm-config-loader';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import type { Logger } from '@kbn/logging';
@@ -180,7 +181,7 @@ export class RenderingService {
       client: IUiSettingsClient;
       globalClient: IUiSettingsClient;
     },
-    { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
+    { isAnonymousPage = false }: IRenderOptions = {}
   ) {
     const {
       elasticsearch,
@@ -300,6 +301,7 @@ export class RenderingService {
       translationHashes,
       serverBasePath,
       allowLocaleCookie: i18n.allowLocaleCookie,
+      detectBrowserLocale: i18n.detectBrowserLocale,
     });
     // When the effective locale is English, the browser's pre-allocated `intl`
     // instance is already wired to English (see kbn-i18n module initialisation).
@@ -315,6 +317,7 @@ export class RenderingService {
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
+    const edotBrowserConfig = getBrowserTracingConfiguration() ?? null;
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
@@ -370,6 +373,7 @@ export class RenderingService {
         },
         clusterInfo,
         apmConfig,
+        edotBrowserConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
@@ -397,12 +401,11 @@ export class RenderingService {
         externalUrl: http.externalUrl,
         uiPlugins: await Promise.all(
           filteredPlugins.map(async ([id, plugin]) => {
-            const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);
+            const { browserConfig } = await getUiConfig(uiPlugins, id);
             return {
               id,
               plugin,
               config: browserConfig,
-              ...(includeExposedConfigKeys && { exposedConfigKeys }),
             };
           })
         ),
@@ -461,8 +464,7 @@ const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
   const browserConfig = uiPlugins.browserConfigs.get(pluginId);
   return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {
     browserConfig: {},
-    exposedConfigKeys: {},
-  }) as { browserConfig: Record<string, unknown>; exposedConfigKeys: Record<string, string> };
+  }) as { browserConfig: Record<string, unknown> };
 };
 
 const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {

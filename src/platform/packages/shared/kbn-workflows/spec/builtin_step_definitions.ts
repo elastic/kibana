@@ -7,20 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   ConsoleStepInputSchema,
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
+  IfStepOutputSchema,
   ParallelStepConfigSchema,
+  ParallelStepOutputSchema,
   SwitchStepConfigSchema,
   WaitForApprovalStepInputSchema,
   WaitForInputStepInputSchema,
   WaitStepInputSchema,
   WhileStepConfigSchema,
+  WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS,
+  WorkflowAwaitExecutionsStepInputSchema,
+  WorkflowAwaitExecutionsStepOutputSchema,
   WorkflowExecuteAsyncStepOutputSchema,
   WorkflowExecuteStepInputSchema,
+  WorkflowFailStepInputSchema,
+  WorkflowOutputStepConfigSchema,
+  WorkflowOutputStepInputSchema,
 } from './schema';
 import { type BaseStepDefinition, StepCategory } from './step_definition_types';
 import {
@@ -71,7 +79,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       'Conditional execution. Runs steps when condition is true, with optional else block for the false branch',
     category: StepCategory.FlowControl,
     inputSchema: EmptyObjectSchema,
-    outputSchema: EmptyObjectSchema,
+    outputSchema: IfStepOutputSchema,
     configSchema: IfStepConfigSchema,
     documentation: {
       examples: [
@@ -179,7 +187,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     category: StepCategory.FlowControl,
     stability: 'tech_preview',
     inputSchema: EmptyObjectSchema,
-    outputSchema: EmptyObjectSchema,
+    outputSchema: ParallelStepOutputSchema,
     configSchema: ParallelStepConfigSchema,
     documentation: {
       examples: [
@@ -254,7 +262,8 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     description: 'Set variables in the workflow context',
     category: StepCategory.Data,
     inputSchema: DataSetStepInputSchema,
-    outputSchema: EmptyObjectSchema,
+    // The engine returns the rendered `with` object as the step output.
+    outputSchema: lazySchema(() => z.record(z.string(), z.unknown())),
     documentation: {
       examples: [
         `- name: set_variables
@@ -323,6 +332,50 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       slack_api:
         connector-id: my-slack-api-connector
         channels: ['C0123456789', '#alerts']`,
+        `- name: ask_by_email
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      email:
+        connector-id: my-email-connector
+        to: ['analyst@example.com']`,
+        `- name: ask_in_slack2
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      slack2:
+        connector-id: my-slack2-connector
+        channels: ['C0123456789']`,
+        `- name: ask_in_teams
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      teams:
+        connector-id: my-teams-connector
+        team-id: team-id
+        channel-id: channel-id`,
+        `- name: ask_in_servicenow
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      servicenow:
+        connector-id: my-servicenow-connector
+        table: incident
+        sys-id: abc123def456`,
+        `- name: ask_over_http
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      http:
+        url: https://hooks.example/hitl
+        method: POST
+        body: |
+          {"form":"{{ context.hitl.externalFormLink }}"}`,
       ],
     },
   },
@@ -351,7 +404,26 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         connector-id: my-slack-webhook-connector
       slack_api:
         connector-id: my-slack-api-connector
-        channels: ['C0123456789', '#alerts']`,
+        channels: ['C0123456789', '#alerts']
+      email:
+        connector-id: my-email-connector
+        to: ['oncall@example.com']
+      slack2:
+        connector-id: my-slack2-connector
+        channels: ['C0123456789']
+      teams:
+        connector-id: my-teams-connector
+        team-id: team-id
+        channel-id: channel-id
+      servicenow:
+        connector-id: my-servicenow-connector
+        table: incident
+        sys-id: abc123def456
+      http:
+        url: https://hooks.example/hitl
+        method: POST
+        body: |
+          {"approve":"{{ context.hitl.externalApproveLink }}","reject":"{{ context.hitl.externalRejectLink }}"}`,
       ],
     },
   },
@@ -371,6 +443,91 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     workflow-id: "child_workflow"
     inputs:
       alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.awaitExecutions',
+    label: 'Await Workflow Executions',
+    description: `Wait for executions started by workflow.executeAsync to finish and collect their results. Fails fast on the first unsuccessful execution (without cancelling the others), or waits for all of them in settled mode. Only executions started by this run can be awaited, at most ${WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS} per step. Waits at most 24 hours, even when the step timeout is longer`,
+    category: StepCategory.FlowControl,
+    stability: 'tech_preview',
+    inputSchema: WorkflowAwaitExecutionsStepInputSchema,
+    outputSchema: WorkflowAwaitExecutionsStepOutputSchema,
+    documentation: {
+      examples: [
+        `- name: wait_for_agent
+  type: workflow.awaitExecutions
+  timeout: 10m
+  with:
+    from-steps: [run_agent]`,
+        `- name: join_enrichments
+  type: workflow.awaitExecutions
+  timeout: 30m
+  with:
+    from-steps: [enrich_hosts, enrich_users]`,
+        `- name: fan_out
+  type: parallel
+  foreach: "{{ inputs.hosts }}"
+  steps:
+    - name: start_scan
+      type: workflow.executeAsync
+      with:
+        workflow-id: "scan_host"
+        inputs:
+          host: "{{ foreach.item }}"
+- name: collect_all_results
+  type: workflow.awaitExecutions
+  with:
+    from-steps: [fan_out]
+    mode: settled`,
+        `- name: start_batch
+  type: workflow.execute
+  with:
+    workflow-id: "start_host_scans"
+- name: wait_for_batch
+  type: workflow.awaitExecutions
+  timeout: 30m
+  with:
+    execution-ids: "{{ steps.start_batch.output.executionIds }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.output',
+    label: 'Workflow Output',
+    description:
+      'Set the workflow outputs and stop the workflow with the given status (completed by default)',
+    category: StepCategory.FlowControl,
+    inputSchema: WorkflowOutputStepInputSchema,
+    // The workflow stops after this step, so no later step reads its output.
+    outputSchema: EmptyObjectSchema,
+    configSchema: WorkflowOutputStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: return_result
+  type: workflow.output
+  with:
+    alert_id: "{{ workflow.event.id }}"
+    severity: "{{ steps.classify.output.severity }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.fail',
+    label: 'Fail Workflow',
+    description: 'Stop the workflow with a failed status and an optional error message',
+    category: StepCategory.FlowControl,
+    inputSchema: WorkflowFailStepInputSchema,
+    // The workflow stops after this step, so no later step reads its output.
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: fail_on_missing_alert
+  type: workflow.fail
+  with:
+    message: "Alert {{ workflow.event.id }} not found"
+    reason: "missing_alert"`,
       ],
     },
   },

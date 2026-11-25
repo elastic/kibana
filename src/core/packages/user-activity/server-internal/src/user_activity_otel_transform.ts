@@ -14,15 +14,22 @@ import type {
 } from '@kbn/core-logging-server';
 
 /** Written onto the OTel resource AND used (via Object.keys) as the allowlist of resource keys to keep. */
-export const USER_ACTIVITY_OTEL_RESOURCE_ATTRIBUTES: Record<string, string> = {
-  'service.name': 'serverless-kibana',
+export const getUserActivityOtelResourceAttributes = (
+  isServerless: boolean,
+  isElasticCloud: boolean
+): Record<string, string> => ({
+  'service.name': isServerless
+    ? 'serverless-kibana'
+    : isElasticCloud
+    ? 'hosted-kibana'
+    : 'self-managed-kibana',
   'service.type': 'kibana',
-};
+});
 
 /** project.id would be dropped by the allowlist above, so it is copied onto every record instead. */
 export const USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES: string[] = ['project.id'];
 
-/** Shapes the flattened per-record attributes to the Serverless user activity requirements. */
+/** Shapes the flattened per-record attributes to the user activity requirements. */
 export const applyUserActivityOtelFieldMap: OtelAttributesTransform = (attributes) => {
   const attrs = { ...attributes };
 
@@ -42,26 +49,39 @@ export const applyUserActivityOtelFieldMap: OtelAttributesTransform = (attribute
   return attrs;
 };
 
-const shapeOtelAppender = (appender: OtelAppenderPluginConfig): OtelAppenderPluginConfig => ({
-  ...appender,
-  transformAttributes: applyUserActivityOtelFieldMap,
-  includeResources: Object.keys(USER_ACTIVITY_OTEL_RESOURCE_ATTRIBUTES),
-  promoteResourceAttributes: [
-    ...(appender.promoteResourceAttributes ?? []),
-    ...USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-  ],
-  attributes: {
-    ...appender.attributes,
-    ...USER_ACTIVITY_OTEL_RESOURCE_ATTRIBUTES,
-  },
-});
+const shapeOtelAppender = (
+  appender: OtelAppenderPluginConfig,
+  isServerless: boolean,
+  isElasticCloud: boolean
+): OtelAppenderPluginConfig => {
+  const resourceAttributes = getUserActivityOtelResourceAttributes(isServerless, isElasticCloud);
 
-/** Extends every `otel` appender with the Serverless shaping above; others pass through. */
-export const shapeServerlessOtelAppenders = (
-  appenders: ReadonlyMap<string, PluginAppenderConfigType>
+  return {
+    ...appender,
+    transformAttributes: applyUserActivityOtelFieldMap,
+    includeResources: Object.keys(resourceAttributes),
+    promoteResourceAttributes: [
+      ...(appender.promoteResourceAttributes ?? []),
+      ...USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+    ],
+    // config wins: deployments can override the detected `service.name` via the appender config.
+    attributes: {
+      ...resourceAttributes,
+      ...appender.attributes,
+    },
+  };
+};
+
+/** Extends every `otel` appender with the user activity shaping above; others pass through. */
+export const shapeUserActivityOtelAppenders = (
+  appenders: ReadonlyMap<string, PluginAppenderConfigType>,
+  isServerless: boolean,
+  isElasticCloud: boolean
 ): Map<string, PluginAppenderConfigType> =>
   new Map(
     [...appenders].map(([name, appender]): [string, PluginAppenderConfigType] =>
-      appender.type === 'otel' ? [name, shapeOtelAppender(appender)] : [name, appender]
+      appender.type === 'otel'
+        ? [name, shapeOtelAppender(appender, isServerless, isElasticCloud)]
+        : [name, appender]
     )
   );

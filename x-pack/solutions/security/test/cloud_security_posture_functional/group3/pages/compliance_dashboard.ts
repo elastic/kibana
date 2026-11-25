@@ -75,11 +75,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     //   it('todo - displays accurate summary compliance score', async () => {});
     // });
 
-    describe('Access with custom roles', async () => {
-      this.afterEach(async () => {
-        // force logout to prevent the next test from failing
-        await cspSecurity.logout();
+    describe('Access with custom roles', () => {
+      afterEach(async () => {
+        await cspSecurity.restoreDefaultUser();
       });
+
       it('Access with valid user role', async () => {
         await cspSecurity.logout();
         await cspSecurity.login('csp_read_user');
@@ -91,9 +91,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect((await scoreElement.getVisibleText()) === '0%').to.be(true); // based on the ingested findings
       });
-
-      // Blocked by https://github.com/elastic/kibana/issues/184621
-      it.skip('todo - Access with invalid user role', async () => {});
     });
   });
 }

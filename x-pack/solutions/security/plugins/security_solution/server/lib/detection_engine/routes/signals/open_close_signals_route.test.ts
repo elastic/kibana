@@ -67,14 +67,19 @@ describe('set signal status', () => {
     });
 
     it('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
+      context.securitySolution.getAppClient.mockReturnValue(undefined as never);
       const response = await server.inject(
         getSetSignalStatusByQueryRequest(),
-        // @ts-expect-error
-        contextWithoutSecuritySolution
+        requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+      expect(context.securitySolution.getAuditLogger()?.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
+          error: expect.objectContaining({ message: 'Alert update target unavailable' }),
+        })
+      );
     });
 
     test('catches error if asCurrentUser throws error', async () => {
@@ -116,6 +121,109 @@ describe('set signal status', () => {
           query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
         })
       );
+    });
+
+    test('logs alert_update audit events when setting a status by ids', async () => {
+      await server.inject(
+        getSetSignalStatusByIdsRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      const auditLogger = context.securitySolution.getAuditLogger();
+      expect(auditLogger?.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'User is updating alert [id=somefakeid1]',
+          event: expect.objectContaining({ action: 'alert_update' }),
+        })
+      );
+      expect(auditLogger?.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'User is updating alert [id=somefakeid2]',
+          event: expect.objectContaining({ action: 'alert_update' }),
+        })
+      );
+    });
+
+    test('logs one bulk alert_update event when setting a status by query', async () => {
+      await server.inject(
+        getSetSignalStatusByQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      const auditLogger = context.securitySolution.getAuditLogger();
+      const query = typicalSetStatusSignalByQueryPayload().query;
+      expect(auditLogger?.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger?.log).toHaveBeenCalledWith({
+        message: `User is updating alerts. Bulk updating workflow status for alerts matching query: ${JSON.stringify(
+          query
+        )}`,
+        event: {
+          action: 'alert_update',
+          category: ['database'],
+          type: ['change'],
+          outcome: 'unknown',
+        },
+        error: undefined,
+      });
+    });
+
+    test('audits partial by-query conflicts and omits workflow success', async () => {
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse({
+        ...getSuccessfulSignalUpdateResponse(),
+        version_conflicts: 1,
+      });
+
+      await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: { ...typicalSetStatusSignalByQueryPayload(), status: 'acknowledged' },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      const auditLogger = context.securitySolution.getAuditLogger();
+      expect(auditLogger?.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
+          error: expect.objectContaining({ message: 'Alert update had 1 version conflict(s)' }),
+        })
+      );
+      expect(auditLogger?.log).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'alert_acknowledge' }),
+        })
+      );
+    });
+
+    test('logs a bulk failure event and returns 500 when by-query updateByQuery rejects', async () => {
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
+        new Error('Test error')
+      );
+
+      const response = await server.inject(
+        getSetSignalStatusByQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      const auditLogger = context.securitySolution.getAuditLogger();
+      const query = typicalSetStatusSignalByQueryPayload().query;
+      expect(auditLogger?.log).toHaveBeenCalledWith({
+        message: `Failed attempt to update alerts. Bulk updating workflow status for alerts matching query: ${JSON.stringify(
+          query
+        )}`,
+        event: {
+          action: 'alert_update',
+          category: ['database'],
+          type: ['change'],
+          outcome: 'failure',
+        },
+        error: {
+          code: 'Error',
+          message: 'Test error',
+        },
+      });
     });
 
     test('returns 400 when runtime_fields exceeds the per-request entry limit', async () => {

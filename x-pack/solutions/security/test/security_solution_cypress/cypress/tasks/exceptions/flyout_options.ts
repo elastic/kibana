@@ -9,6 +9,7 @@ import { TOASTER_CLOSE_ICON } from '../../screens/alerts_detection_rules';
 import {
   CANCEL_BTN,
   CLOSE_ALERTS_CHECKBOX,
+  CLOSE_ALERTS_REASON_SELECT,
   CLOSE_SINGLE_ALERT_CHECKBOX,
   CONFIRM_BTN,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
@@ -66,6 +67,11 @@ export const selectBulkCloseAlerts = () => {
 
 export const selectCloseSingleAlerts = () => {
   cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).click({ force: true });
+};
+
+export const selectCloseAlertsReason = (reason: string) => {
+  cy.get(CLOSE_ALERTS_REASON_SELECT).click();
+  cy.get(`[role=option][id="${reason}"]`).click();
 };
 
 export const closeExceptionBuilderFlyout = () => {

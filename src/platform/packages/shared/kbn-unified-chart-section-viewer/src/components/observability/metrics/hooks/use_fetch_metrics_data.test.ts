@@ -9,12 +9,7 @@
 
 // Stable references for mock functions that must not change across renders
 // (otherwise useAsyncFn recreates executeFetch, causing infinite loops).
-const mockTrackRequest = jest.fn(
-  async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
-    const result = await fn();
-    return result.data;
-  }
-);
+const mockRequestAdapter = { reset: jest.fn() };
 const mockTrackMetricsInfo = jest.fn();
 const mockTrackEsqlQueryFailure = jest.fn();
 
@@ -61,7 +56,7 @@ jest.mock('../../../../context/ebt_telemetry_context', () => ({
 }));
 jest.mock('../../../../context/chart_section_inspector', () => ({
   useChartSectionInspector: () => ({
-    trackRequest: mockTrackRequest,
+    requestAdapter: mockRequestAdapter,
   }),
 }));
 const mockReportError = jest.fn();
@@ -71,7 +66,6 @@ jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
@@ -116,44 +110,25 @@ const createMockParsedMetrics = (
   },
 });
 
-// Minimal DataView surface the hook-under-test and its collaborators actually
-// read. `isTimeBased` is a type predicate on DataView, so we declare the
-// stub as its plain boolean sibling and cast once at the use site via the
-// DataView `as unknown as` below.
-type MockDataView = Pick<DataView, 'getFieldByName' | 'getIndexPattern'> & {
-  isTimeBased: () => boolean;
-};
-
-// Default to "every requested field exists" so the appliedDimensions
-// derivation in useFetchMetricsData (#264957) is a no-op for existing
-// tests. Tests that exercise the prune behavior override this per-test.
-const createMockDataView = (): MockDataView => ({
-  getFieldByName: jest.fn((name: string) => ({ name } as unknown as DataViewField)),
-  getIndexPattern: () => 'metrics-*',
-  isTimeBased: () => true,
-});
-
-// Minimal services surface the hook-under-test reads: `data.search.search`
+// Minimal services surface the hook-under-test reads: `data.search.esql`
 // and `uiSettings`. Declared as a partial so we don't have to mock the
 // entire UnifiedHistogramServices tree.
 interface MockServices {
-  data: { search: { search: jest.Mock } };
+  data: { search: { esql: jest.Mock } };
   uiSettings: Record<string, unknown>;
 }
 
 const createMockServices = (): MockServices => ({
-  data: { search: { search: jest.fn() } },
+  data: { search: { esql: jest.fn() } },
   uiSettings: {},
 });
 
-const createDefaultParams = (overrides?: Record<string, unknown>) => ({
+const createDefaultParams = () => ({
   fetchParams: getFetchParamsMock({
     query: { esql: 'TS metrics-*' },
-    dataView: createMockDataView() as unknown as DataView,
     timeRange: { from: 'now-15m', to: 'now' },
     filters: [],
     esqlVariables: [],
-    ...overrides,
   }),
   services: createMockServices() as unknown as ChartSectionProps['services'],
   isComponentVisible: true,
@@ -167,7 +142,7 @@ describe('useFetchMetricsData', () => {
 
     // Restore mock implementations after clearAllMocks resets them.
     // Without these restorations, getEsqlQuery returns undefined (disabling shouldFetch),
-    // trackRequest stops calling fn() (so the fetch never runs), etc.
+    // the fetch never runs, etc.
     const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
@@ -195,13 +170,6 @@ describe('useFetchMetricsData', () => {
       return sourceCommand ? sourceCommand[1].toUpperCase() : '';
     });
 
-    mockTrackRequest.mockImplementation(
-      async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
-        const result = await fn();
-        return result.data;
-      }
-    );
-
     const parsed = createMockParsedMetrics(['system.cpu.utilization'], [hostDimension]);
 
     mockExecuteEsqlQuery.mockResolvedValue({
@@ -215,8 +183,10 @@ describe('useFetchMetricsData', () => {
           dimension_fields: ['host.name'],
         },
       ],
-      rawResponse: {},
-      requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+      rawResponse: {
+        columns: [],
+        values: [],
+      },
     });
 
     mockParseMetricsWithTelemetry.mockReturnValue(parsed);
@@ -258,8 +228,10 @@ describe('useFetchMetricsData', () => {
     it('returns empty arrays when no data is available', async () => {
       mockExecuteEsqlQuery.mockResolvedValue({
         documents: [],
-        rawResponse: {},
-        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        rawResponse: {
+          columns: [],
+          values: [],
+        },
       });
       mockParseMetricsWithTelemetry.mockReturnValue({
         metricItems: [],
@@ -286,6 +258,75 @@ describe('useFetchMetricsData', () => {
     });
   });
 
+  describe('loadedFetchParams', () => {
+    it('reports the fetch params the metric items were fetched under, not the ones in flight', async () => {
+      let resolveSecondFetch: (value: unknown) => void = () => {};
+      const secondFetch = new Promise((resolve) => {
+        resolveSecondFetch = resolve;
+      });
+      const response = {
+        documents: [
+          {
+            metric_name: 'system.cpu.utilization',
+            index_name: 'metrics-*',
+            unit: null,
+            metric_type: 'gauge',
+            field_type: 'double',
+            dimension_fields: ['host.name'],
+          },
+        ],
+        rawResponse: {
+          columns: [],
+          values: [],
+        },
+      };
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(response)
+        .mockImplementationOnce(() => secondFetch as Promise<typeof response>);
+
+      const defaults = createDefaultParams();
+      const params = {
+        ...defaults,
+        fetchParams: {
+          ...defaults.fetchParams,
+          searchSessionId: 'session-1',
+        },
+      };
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() =>
+        expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-1')
+      );
+      expect(mockExecuteEsqlQuery.mock.calls[0][0].sessionId).toBe('session-1');
+
+      // A Discover refresh starts a new session and replaces the abort controller.
+      rerender({
+        ...params,
+        fetchParams: {
+          ...params.fetchParams,
+          searchSessionId: 'session-2',
+          abortController: new AbortController(),
+        },
+      });
+
+      await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
+      expect(result.current.loading).toBe(true);
+      expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-1');
+
+      await act(async () => {
+        resolveSecondFetch(response);
+      });
+
+      await waitFor(() =>
+        expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-2')
+      );
+      expect(mockExecuteEsqlQuery.mock.calls[1][0].sessionId).toBe('session-2');
+    });
+  });
+
   describe('shouldFetch guard', () => {
     it('does not fetch when component is not visible', async () => {
       const params = createDefaultParams();
@@ -305,18 +346,6 @@ describe('useFetchMetricsData', () => {
       buildMetricsInfoQuery.mockReturnValue('');
 
       const params = createDefaultParams();
-
-      renderHook(() => useFetchMetricsData(params));
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    });
-
-    it('does not fetch when dataView is undefined', async () => {
-      const params = createDefaultParams({ dataView: undefined });
 
       renderHook(() => useFetchMetricsData(params));
 
@@ -380,8 +409,10 @@ describe('useFetchMetricsData', () => {
               dimension_fields: ['host.name'],
             },
           ],
-          rawResponse: {},
-          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+          rawResponse: {
+            columns: [],
+            values: [],
+          },
         };
       });
 
@@ -417,8 +448,10 @@ describe('useFetchMetricsData', () => {
             dimension_fields: ['host.name'],
           },
         ],
-        rawResponse: {},
-        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        rawResponse: {
+          columns: [],
+          values: [],
+        },
       });
 
       // After resolution, activeDimensions should eventually reflect the latest fetch's dimensions
@@ -775,11 +808,11 @@ describe('useFetchMetricsData', () => {
       '@kbn/esql-utils'
     ) as { buildMetricsInfoQuery: jest.Mock };
 
-    it('passes no dimensions to the query when none of the selected ones exist on the current data view', async () => {
+    it('passes no dimensions to the query when none of the selected ones exist in columnsMap', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension];
-      // Stream B does not carry `host.name` — simulate the issue scenario.
-      (params.fetchParams.dataView as any).getFieldByName = jest.fn(() => undefined);
+      // Stream B does not carry `host.name` — simulate by providing an empty columnsMap.
+      params.fetchParams = { ...params.fetchParams, columnsMap: {} };
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -793,13 +826,14 @@ describe('useFetchMetricsData', () => {
       expect(params.selectedDimensionNames).toEqual([hostDimension]);
     });
 
-    it('keeps only the subset of selected dimensions that exist on the current data view', async () => {
+    it('keeps only the subset of selected dimensions that exist in columnsMap', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension, serviceDimension];
-      // Only `host.name` exists on the current data view.
-      (params.fetchParams.dataView as any).getFieldByName = jest.fn((name: string) =>
-        name === 'host.name' ? { name } : undefined
-      );
+      // Only `host.name` is in columnsMap.
+      params.fetchParams = {
+        ...params.fetchParams,
+        columnsMap: { 'host.name': {} as any },
+      };
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -815,10 +849,10 @@ describe('useFetchMetricsData', () => {
       expect(result.current.activeDimensions).toEqual([hostDimension]);
     });
 
-    it('passes all selected dimensions when they all exist on the current data view', async () => {
+    it('passes all selected dimensions when columnsMap is undefined', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension, serviceDimension];
-      // Default mock returns a stub field for every requested name.
+      // No columnsMap means no filtering — all dimensions pass through.
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -834,24 +868,10 @@ describe('useFetchMetricsData', () => {
       expect(result.current.activeDimensions).toEqual([hostDimension, serviceDimension]);
     });
 
-    it('does not validate when dataView is undefined (fetch is already gated by shouldFetch)', async () => {
-      const params = createDefaultParams({ dataView: undefined });
-      params.selectedDimensionNames = [hostDimension];
-
-      renderHook(() => useFetchMetricsData(params));
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      // No fetch happens because the effect bails out when dataView is missing.
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    });
-
-    it('does not invoke getFieldByName when there are no selected dimensions', async () => {
+    it('passes all dimensions when columnsMap is undefined (no validation applied)', async () => {
       const params = createDefaultParams();
-      const getFieldByName = jest.fn((name: string) => ({ name }));
-      (params.fetchParams.dataView as any).getFieldByName = getFieldByName;
+      params.selectedDimensionNames = [hostDimension];
+      // columnsMap is undefined by default — all selected dimensions pass through.
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -859,16 +879,35 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      // The validation memo short-circuits when selectedDimensionNames is empty/undefined,
-      // so getFieldByName is only reached by the unrelated getFieldType helper inside the
-      // parser (which doesn't run for the empty document set used here).
-      expect(getFieldByName).not.toHaveBeenCalled();
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith(
+        'TS metrics-*',
+        ['host.name'],
+        'MV_CONTAINS(dimension_fields, "host.name")'
+      );
+      expect(result.current.activeDimensions).toEqual([hostDimension]);
+    });
+
+    it('does not filter dimensions when none are selected', async () => {
+      const params = createDefaultParams();
+      // No selectedDimensionNames — activeDimensions should be empty.
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
       expect(result.current.activeDimensions).toEqual([]);
     });
 
-    it('refetches when the applied set changes after a data view switch', async () => {
+    it('refetches when the applied set changes after a columnsMap switch', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension];
+      // Start with host.name present in columnsMap.
+      params.fetchParams = {
+        ...params.fetchParams,
+        columnsMap: { 'host.name': {} as any },
+      };
 
       const { rerender } = renderHook(
         (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
@@ -879,18 +918,10 @@ describe('useFetchMetricsData', () => {
         expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       });
 
-      // Switch to a data view that doesn't carry `host.name` — same intent,
-      // different applied set, so we expect a refetch with the pruned dimensions.
+      // Switch to empty columnsMap — host.name no longer exists.
       const switchedParams = {
         ...params,
-        fetchParams: {
-          ...params.fetchParams,
-          dataView: {
-            getFieldByName: jest.fn(() => undefined),
-            getIndexPattern: () => 'metrics-*',
-            isTimeBased: () => true,
-          } as any,
-        },
+        fetchParams: { ...params.fetchParams, columnsMap: {} },
       };
       rerender(switchedParams);
 

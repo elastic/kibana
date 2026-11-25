@@ -27,7 +27,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type { PackagePolicyAssetsMap } from '../../common/types';
+import type { AgentPolicyPackagePoliciesSummary, PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
@@ -91,6 +91,8 @@ export interface PackagePolicyClient {
       overwrite?: boolean;
       packageInfo?: PackageInfo;
       createDatasetTemplates?: boolean;
+      /** Proceed even if some active agents don't satisfy the package's agent version condition. */
+      acknowledgeAgentVersionIncompatibility?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -110,11 +112,18 @@ export interface PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
+      /** Proceed even if some active agents don't satisfy the package's agent version condition. */
+      acknowledgeAgentVersionIncompatibility?: boolean;
     },
     request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+    /**
+     * Pass to `agentPolicyService.bumpRevision` when bumping separately (`bumpRevision: false`).
+     * Treat a missing value as `false`.
+     */
+    agentVersionConditionsUnchanged?: boolean;
   }>;
 
   bulkUpdate(
@@ -129,6 +138,11 @@ export interface PackagePolicyClient {
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }>;
+    /**
+     * Pass to `agentPolicyService.bumpRevision` when bumping separately (`bumpRevision: false`).
+     * Treat a missing value as `false`.
+     */
+    agentVersionConditionsUnchanged?: boolean;
   }>;
 
   /**
@@ -144,7 +158,13 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      batchSize?: number;
+      /** Proceed even if some active agents don't satisfy a package's agent version condition. */
+      acknowledgeAgentVersionIncompatibility?: boolean;
+    },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
@@ -159,6 +179,11 @@ export interface PackagePolicyClient {
     agentPolicyId: string,
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  getSummaryForAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicyIds: string[]
+  ): Promise<Map<string, AgentPolicyPackagePoliciesSummary>>;
 
   compilePackagePolicyForVersions(
     soClient: SavedObjectsClientContract,
@@ -199,6 +224,8 @@ export interface PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
+      /** Proceed even if some active agents don't satisfy the package's agent version condition. */
+      acknowledgeAgentVersionIncompatibility?: boolean;
     },
     /** Request context so update callbacks can use the caller's Elasticsearch client. */
     context?: RequestHandlerContext
@@ -228,6 +255,13 @@ export interface PackagePolicyClient {
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem>;
+
+  /** Same as `getUpgradeDryRunDiff` for several package policies, with a single agent query. */
+  getUpgradeDryRunDiffs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyDryRunResponseItem[]>;
 
   enrichPolicyWithDefaultsFromPackage(
     soClient: SavedObjectsClientContract,
@@ -276,6 +310,11 @@ export interface PackagePolicyClient {
     outputId: string,
     options?: { force?: boolean }
   ): Promise<void>;
+
+  getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs
@@ -394,6 +433,8 @@ export interface PackagePolicyClientBulkUpdateOptions {
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];
+  /** Proceed even if some active agents don't satisfy a package's agent version condition. */
+  acknowledgeAgentVersionIncompatibility?: boolean;
 }
 
 export type PackagePolicyClientFindAllForAgentPolicyOptions = WithSpaceIdsOption;

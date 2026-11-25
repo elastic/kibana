@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ATTACKS_PAGE_LOADING_TEST_ID, AttacksPage } from './attacks';
+import { ATTACKS_PATH } from '../../../../common/constants';
 import { useUserData } from '../../components/user_info';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { useSignalHelpers } from '../../hooks/use_signal_helpers';
@@ -74,11 +77,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
       expect(getByTestId(ATTACKS_PAGE_LOADING_TEST_ID)).toBeInTheDocument();
     });
 
@@ -89,11 +94,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
       expect(getByTestId(ATTACKS_PAGE_LOADING_TEST_ID)).toBeInTheDocument();
     });
   });
@@ -106,11 +113,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
       expect(queryByTestId(ATTACKS_PAGE_LOADING_TEST_ID)).not.toBeInTheDocument();
       expect(getByTestId(USER_UNAUTHENTICATED_TEST_ID)).toBeInTheDocument();
     });
@@ -124,11 +133,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
       expect(queryByTestId(ATTACKS_PAGE_LOADING_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(USER_UNAUTHENTICATED_TEST_ID)).not.toBeInTheDocument();
       expect(getByTestId(NO_INDEX_TEST_ID)).toBeInTheDocument();
@@ -141,11 +152,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
       expect(queryByTestId(ATTACKS_PAGE_LOADING_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(USER_UNAUTHENTICATED_TEST_ID)).not.toBeInTheDocument();
       expect(getByTestId(NO_INDEX_TEST_ID)).toBeInTheDocument();
@@ -176,11 +189,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(getByTestId(NO_INTEGRATION_CALLOUT_TEST_ID)).toBeInTheDocument();
     });
 
@@ -208,11 +223,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(getByTestId(`callout-${NEED_ADMIN_CALLOUT_TEST_ID}`)).toBeInTheDocument();
     });
 
@@ -238,11 +255,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByText, queryByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(getByText('Insufficient privileges')).toBeInTheDocument();
     });
   });
@@ -273,11 +292,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(queryByTestId('attacks-page-data-view-wrapper')).not.toBeInTheDocument();
       expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
     });
@@ -304,11 +325,13 @@ describe('<AttacksPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AttacksPage />
+          <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+            <AttacksPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
       expect(getByTestId('attacks-page-data-view-wrapper')).toBeInTheDocument();
     });

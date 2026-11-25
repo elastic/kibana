@@ -11,6 +11,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useKibana } from '../../hooks/use_kibana';
+import { useNowrapFitsContainer } from './use_nowrap_fits_container';
 
 jest.mock('../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
@@ -24,13 +25,29 @@ jest.mock('./conversation_input/conversation_input', () => ({
   ConversationInput: () => <div data-test-subj="mockConversationInput" />,
 }));
 
+const mockUseConversationStarters = jest.fn();
+const mockStartersListProps = jest.fn();
+
+jest.mock('./conversation_starters', () => ({
+  useConversationStarters: () => mockUseConversationStarters(),
+  ConversationStartersList: (props: unknown) => {
+    mockStartersListProps(props);
+    return <div data-test-subj="mockConversationStarters" />;
+  },
+}));
+
 jest.mock('./use_typewriter_loop', () => ({
   useTypewriterLoop: ({ messages, enabled }: { messages: readonly string[]; enabled: boolean }) =>
     enabled && messages.length > 0 ? messages[0] : '',
 }));
 
+jest.mock('./use_nowrap_fits_container', () => ({
+  useNowrapFitsContainer: jest.fn(() => true),
+}));
+
 const mockedUseConversationContext = jest.mocked(useConversationContext);
 const mockedUseKibana = jest.mocked(useKibana);
+const mockedUseNowrapFitsContainer = jest.mocked(useNowrapFitsContainer);
 
 const mockGetActiveSpace = jest.fn();
 
@@ -53,6 +70,13 @@ describe('NewConversationPrompt', () => {
         },
       },
     } as never);
+    mockedUseNowrapFitsContainer.mockReturnValue(true);
+    mockUseConversationStarters.mockReturnValue({
+      starters: [{ label: 'first' }],
+      source: 'default',
+      onSelect: jest.fn(),
+      isDisabled: false,
+    });
   });
 
   it('renders the static greeting and typed capability slot', async () => {
@@ -65,6 +89,53 @@ describe('NewConversationPrompt', () => {
       );
     });
     expect(screen.getByTestId('mockConversationInput')).toBeInTheDocument();
+  });
+
+  it('renders the conversation starters', async () => {
+    render(<NewConversationPrompt />, { wrapper });
+
+    expect(await screen.findByTestId('mockConversationStarters')).toBeInTheDocument();
+  });
+
+  it('tells the starters where they came from and the solution of the space', async () => {
+    render(<NewConversationPrompt />, { wrapper });
+
+    await waitFor(() =>
+      expect(mockStartersListProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({ source: 'default', solution: 'classic' })
+      )
+    );
+  });
+
+  it('shows the starters in a row on the full screen and stacked in the flyout', async () => {
+    render(<NewConversationPrompt />, { wrapper });
+    await screen.findByTestId('mockConversationStarters');
+    expect(mockStartersListProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isStacked: false })
+    );
+
+    mockedUseConversationContext.mockReturnValue({
+      isEmbeddedContext: true,
+      conversationActions: {} as never,
+    });
+    render(<NewConversationPrompt />, { wrapper });
+
+    expect(mockStartersListProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isStacked: true })
+    );
+  });
+
+  it('renders no conversation starters when there are none', async () => {
+    mockUseConversationStarters.mockReturnValue({
+      starters: [],
+      onSelect: jest.fn(),
+      isDisabled: false,
+    });
+
+    render(<NewConversationPrompt />, { wrapper });
+
+    expect(await screen.findByTestId('mockConversationInput')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockConversationStarters')).not.toBeInTheDocument();
   });
 
   it('renders Observability capability messages for oblt spaces', async () => {
@@ -118,5 +189,18 @@ describe('NewConversationPrompt', () => {
     expect(screen.queryByTestId('agentBuilderWelcomeTypedText')).not.toBeInTheDocument();
 
     await waitFor(() => expect(mockGetActiveSpace).toHaveBeenCalled());
+  });
+
+  it('wraps and centers typed capability messages when the greeting no longer fits on one line', async () => {
+    mockedUseNowrapFitsContainer.mockReturnValue(false);
+
+    render(<NewConversationPrompt />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agentBuilderWelcomeTypedText')).toHaveAttribute(
+        'data-wrap-and-center',
+        'true'
+      );
+    });
   });
 });

@@ -17,6 +17,7 @@ import { getRiskSeverityColors } from '../../../../common/utils/risk_color_palet
 export interface SeverityOptionItem {
   value: Severity;
   inputDisplay: React.ReactElement;
+  'data-test-subj': string;
 }
 
 const StyledEuiHealth = styled(EuiHealth)`
@@ -35,18 +36,22 @@ const getSeverityOptions: (euiTheme: EuiThemeComputed) => SeverityOptionItem[] =
   return [
     {
       value: SeverityLevel.low,
+      'data-test-subj': 'severityOption-low',
       inputDisplay: <StyledEuiHealth color={palette.low}>{I18n.LOW}</StyledEuiHealth>,
     },
     {
       value: SeverityLevel.medium,
+      'data-test-subj': 'severityOption-medium',
       inputDisplay: <StyledEuiHealth color={palette.medium}>{I18n.MEDIUM}</StyledEuiHealth>,
     },
     {
       value: SeverityLevel.high,
+      'data-test-subj': 'severityOption-high',
       inputDisplay: <StyledEuiHealth color={palette.high}>{I18n.HIGH}</StyledEuiHealth>,
     },
     {
       value: SeverityLevel.critical,
+      'data-test-subj': 'severityOption-critical',
       inputDisplay: <StyledEuiHealth color={palette.critical}>{I18n.CRITICAL}</StyledEuiHealth>,
     },
   ];

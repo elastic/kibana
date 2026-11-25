@@ -9,6 +9,7 @@
 
 export type { RefreshInterval } from '@kbn/data-service-server';
 export {
+  DEFAULT_HISTOGRAM_BAR_TARGET,
   DEFAULT_QUERY_LANGUAGE,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
@@ -22,7 +23,7 @@ export type { SerializedField, SerializedValue } from './serialize_utils';
 export { SerializableType, deserializeField, serializeField } from './serialize_utils';
 export type { ValueSuggestionsMethod } from './constants';
 export { DatatableUtilitiesService } from './datatable_utilities';
-export { getEsQueryConfig } from './es_query';
+export { getEsQueryConfig, getEsQueryConfigAsync } from './es_query';
 export { KbnFieldType } from './kbn_field_types';
 export {
   calculateBounds,
@@ -525,6 +526,7 @@ export {
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   ESQL_TABLE_TYPE,
+  mapEsqlResponseToDatatable,
   getQueryLanguage,
   getQueryString,
   getQueryStringCharCount,

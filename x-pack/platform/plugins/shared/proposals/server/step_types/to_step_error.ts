@@ -8,9 +8,9 @@
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
+  ProposalInvalidGateError,
   ProposalNotFoundError,
 } from '../services/errors';
 
@@ -26,9 +26,9 @@ import {
 const ERROR_TYPES: ReadonlyArray<[new (...args: never[]) => Error, string]> = [
   [ProposalForbiddenError, 'PermissionError'],
   [ProposalConflictError, 'ConflictError'],
-  [ProposalExpiredError, 'ExpiredError'],
   [ProposalNotFoundError, 'NotFoundError'],
   [ProposalInvalidActionInputError, 'ValidationError'],
+  [ProposalInvalidGateError, 'ValidationError'],
 ];
 
 export const toStepError = (error: unknown, fallbackMessage: string): ExecutionError => {

@@ -9,12 +9,13 @@ import type { Client } from '@elastic/elasticsearch';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createGcsRepository, replaySnapshot, TEMP_INDEX_PREFIX } from '@kbn/es-snapshot-loader';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { deleteLogsIndexTemplate, ensureLogsIndexTemplate } from './logs_index_template';
+import { RULE_EVENTS_DATA_STREAM } from './snapshot_indices';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 
 const LOGS_STREAM_NAME = 'logs';
-const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -81,7 +82,7 @@ async function deleteStaleSnapshotLoaderIndices(esClient: Client, log: ToolingLo
 }
 
 export interface CleanSignificantEventsDataStreamsOptions {
-  /** When false, only clears `.significant_events-events` and leaves the replayed logs stream intact. */
+  /** When false, only clears Significant Events docs and leaves the replayed logs stream intact. */
   includeLogs?: boolean;
 }
 
@@ -120,10 +121,18 @@ export async function cleanSignificantEventsDataStreams(
     await deleteLogsIndexTemplate(esClient, log);
   }
 
+  // Scoped to the Significant Events source so other alerting_v2 producers' series are left untouched.
   await esClient
     .deleteByQuery({
-      index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-      query: { match_all: {} },
+      index: RULE_EVENTS_DATA_STREAM,
+      query: {
+        bool: {
+          filter: [
+            { term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE } },
+            { term: { space_id: 'default' } },
+          ],
+        },
+      },
       refresh: true,
     })
     .catch(() => {});

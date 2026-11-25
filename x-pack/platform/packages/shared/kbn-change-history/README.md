@@ -41,6 +41,8 @@ Pass the Saved Object's `updated_at` field (assigned by Elasticsearch at write t
 
 - Returns change documents for the given object `type` and `id` in the specified Kibana space, sorted by `sequence` (if available), then `@timestamp`, then `event.id` as a tie-breaker. Supports pagination and custom sort/filters via `opts`. Results can be incomplete if an admin has applied retention — see [Retention](#retention).
 
+**Get a single event** with `getEvent(spaceId, eventId, opts?)` — looks up one document by its unique `event.id`, without needing the object type or ID.
+
 **Facet distinct field values** with `getHistoryByFields(spaceId, objectType, objectId, fields, opts?)` — terms buckets on mapped keyword fields (`user.name`, `event.action`, etc.).
 
 All persisted documents follow the same schema (see below).
@@ -84,9 +86,22 @@ Each persisted document gets a unique `event.id` assigned by the package (UUID v
 
 UUID v7 values are monotonically increasing within the same millisecond. That matters when two change history events are written back-to-back with the same timestamp (for example `rule_install` and `rule_enable` when a user chooses "Install and enable"): `getHistory()` sorts by `sequence`, then `@timestamp`, then `event.id`, so ordering stays deterministic.
 
-### Backwards/forwards compatibility in `object.snapshot`
+### Reading snapshots back
 
-`object.snapshot` is stored unmapped in the `.kibana_change_history` data stream, separate from the original tracked object. Because of this, it is recommended that callers store an application-layer type rather than a raw on-disk format. If/when there are underlying changes in tracked object storage format, using an application-layer type will likely save on having to introduce a compensating storage-layer transform to keep old snapshots readable. See [#273561](https://github.com/elastic/kibana/pull/273561) for more context and a concrete example.
+This package stores `object.snapshot` unmapped and never changes it afterwards. Before storing it, `log()` and `logBulk()` mask the fields in `fieldsToHash` and `fieldsToRedact` (see [Sensitive fields in the snapshot](#sensitive-fields-in-the-snapshot)). Elasticsearch stores the snapshot as JSON, so values such as `Date` come back as strings. The package has no restore API, no snapshot migrations, and no read-time transforms. How to read a snapshot, and whether it still applies to the current object, depends on your domain, so your feature owns that logic.
+
+If your feature reads snapshots back, for example to show a diff or to restore an object to an earlier version, your code must understand every snapshot shape your feature has ever written. Snapshots from older Kibana versions stay in the data stream until an admin applies retention (see [Retention](#retention)). The opposite case also happens. During a Serverless rollout or rollback, older Kibana code can read a snapshot that a newer version wrote. `service.version` records the Kibana version that wrote each document.
+
+Ways to keep snapshots readable across versions:
+
+- Store an application-layer type, not the raw storage format of the tracked object. If that storage format changes later, an application-layer snapshot usually stays readable without a compensating transform. See [#273561](https://github.com/elastic/kibana/pull/273561) for an example.
+- Change the snapshot shape only by adding optional fields. A rename, a removal, or a new required field breaks older snapshots unless your read path handles both the old and the new shape.
+- Treat every field of a historical snapshot as optional, including fields that your current code always writes.
+- Validate loosely when you read a snapshot. Check only the fields your code needs, and allow unknown keys. A strict schema for the current shape rejects both older and newer snapshots. When you list history, skip a snapshot you can't use instead of failing the whole response.
+- Don't restore masked values. The paths listed in `object.fields.hashed` and `object.fields.redacted` hold a hash or `[redacted]`, not the original value. Keep the current value for those paths, or get it from another source.
+- Before you restore a snapshot that a newer Kibana version wrote, compare its `service.version` to the running version. Restoring it with older code can drop fields that the older code doesn't know.
+- If the shape must change in a breaking way, write a schema version into the snapshot, `metadata`, or `tags`. Your read path can then branch on that version instead of guessing from the shape.
+- Decide up front what happens to a snapshot that your current code can't apply, for example one that predates a required setting. Fill in defaults, reject the restore with a clear error, or show the snapshot as read-only.
 
 ## API
 
@@ -98,8 +113,9 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
 
 - **`isInitialized()`** — Returns `true` if the client has been initialized (e.g. after `initialize()` has been called).
 
-- **`initialize(elasticsearchClient)`**
+- **`initialize(elasticsearchClient, opts?)`**
   Creates/ensures the data stream and stores the internal client. Called once during plugin `start()` phase and before `log` / `logBulk` / `getHistory` / `getHistoryByFields`.
+  - Optional `opts.userProfileService` (`core.userProfile`). When provided, `getHistory` and `getEvent` resolve `user.full_name` and `user.email` from the matching user profile at read time. These fields are never persisted, and are absent when no profile is found or the lookup fails. Render the author as `user.full_name || user.email || user.name`.
 
 - **`log(change, opts)`**
   Writes one `change` document with given `opts` context (`action`, `username`, etc) in `LogChangeHistoryOptions`.
@@ -123,6 +139,11 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
   - Results are scoped by `spaceId`, the client’s `module` and `dataset`, and filtered by `object.type` and `object.id`.
   - Optional `opts: GetChangeHistoryOptions` with `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100).
   - Results are sorted by `object.sequence` (if available), then `@timestamp`, and `event.id` as the tie-breaker.
+
+- **`getEvent(spaceId, eventId, opts?)`**
+  - Returns a promise with the change document whose `event.id` matches `eventId`, or `undefined` when none exists.
+  - `event.id` is a UUID v7 minted per document (also the Elasticsearch `_id`), so no `objectType` / `objectId` is needed to identify the event.
+  - Results are scoped by `spaceId` and the client's `module` and `dataset`. Check `object.type` / `object.id` on the returned document if the caller needs the event to belong to a specific object.
 
 - **`getHistoryByFields(spaceId, objectType, objectId, fields, opts?)`**
   - Returns `{ results }` — one `{ field, buckets, sumOtherDocCount }` entry per requested field (duplicates removed, first-seen order preserved).
@@ -212,7 +233,7 @@ const client = new ChangeHistoryClient({
 });
 
 // During plugin `start()` phase
-await client.initialize(elasticsearchClient);
+await client.initialize(elasticsearchClient, { userProfileService: core.userProfile });
 const spaceId = 'default';
 
 // When user makes a change

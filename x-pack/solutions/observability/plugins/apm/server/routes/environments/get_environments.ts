@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { SERVICE_ENVIRONMENT } from '../../../common/es_fields/apm';
+import { uniq } from 'lodash';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
+import { ENVIRONMENT_FIELDS } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { hasUnsetValueForField } from './has_unset_value_for_field';
+import { hasUnsetValueForFields } from './has_unset_value_for_fields';
 import { getSuggestionsWithTermsAggregation } from '../suggestions/get_suggestions_with_terms_aggregation';
 
 /**
  * This is used for getting the list of environments for the environment selector,
- * filtered by range.
+ * filtered by range. Environments are collected from every field in
+ * `ENVIRONMENT_FIELDS` so OTel documents that only carry
+ * `deployment.environment.name` are included.
  */
 export async function getEnvironments({
   searchAggregatedTransactions,
@@ -31,28 +34,30 @@ export async function getEnvironments({
   start: number;
   end: number;
 }): Promise<Environment[]> {
-  const [hasUnsetEnvironments, resp] = await Promise.all([
-    hasUnsetValueForField({
+  const [hasUnsetEnvironments, ...suggestions] = await Promise.all([
+    hasUnsetValueForFields({
       apmEventClient,
       searchAggregatedTransactions,
       serviceName,
-      fieldName: SERVICE_ENVIRONMENT,
+      fieldNames: ENVIRONMENT_FIELDS,
       start,
       end,
     }),
-    getSuggestionsWithTermsAggregation({
-      fieldName: SERVICE_ENVIRONMENT,
-      fieldValue: '',
-      searchAggregatedTransactions,
-      serviceName,
-      apmEventClient,
-      size,
-      start,
-      end,
-    }),
+    ...ENVIRONMENT_FIELDS.map((fieldName) =>
+      getSuggestionsWithTermsAggregation({
+        fieldName,
+        fieldValue: '',
+        searchAggregatedTransactions,
+        serviceName,
+        apmEventClient,
+        size,
+        start,
+        end,
+      })
+    ),
   ]);
 
-  const environments = resp.terms;
+  const environments = uniq(suggestions.flatMap(({ terms }) => terms)).sort();
 
   if (hasUnsetEnvironments) {
     environments.push(ENVIRONMENT_NOT_DEFINED.value);

@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { ClientPluginsStart } from '../../../../plugin';
 import { PLUGIN } from '../../../../../common/constants/plugin';
+import { isHeartbeatSyntheticsMonitor } from '../../../../../common/runtime_types';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { MonitorLocationSelect } from '../common/components/monitor_location_select';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
@@ -58,6 +59,7 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
       monitorLocations={monitor?.locations}
       configId={monitorId}
       selectedLocation={selectedLocation}
+      origin={isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined}
       onChange={useCallback(
         (id, label) => {
           if (isAlertsTab) {

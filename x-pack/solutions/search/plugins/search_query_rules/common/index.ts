@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const PLUGIN_ID = 'searchQueryRules';
 export const PLUGIN_NAME = 'Query rules';
 
-export const PLUGIN_TITLE = i18n.translate('xpack.searchQueryRules.pluginTitle', {
+export const PLUGIN_TITLE = i18n.translate('xpack.queryRules.pluginTitle', {
   defaultMessage: 'Query rules',
 });

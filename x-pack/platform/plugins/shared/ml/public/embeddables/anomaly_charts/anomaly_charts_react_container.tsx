@@ -23,6 +23,7 @@ import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type {
   AnomalyChartsEmbeddableServices,
   AnomalyChartsApi,
@@ -51,6 +52,12 @@ export interface AnomalyChartsContainerProps {
   onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
   showFilterIcons?: boolean;
+  /**
+   * Owned by the embeddable so that `cancelRequests` can cancel the container's requests.
+   * Attachments without a cancellable host omit it.
+   */
+  requestCancellationManager?: RequestCancellationManager;
+  isInteractive?: boolean;
 }
 
 const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
@@ -63,6 +70,8 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   onLoading,
   api,
   showFilterIcons = true,
+  requestCancellationManager,
+  isInteractive = true,
 }) => {
   const isMounted = useMountedState();
 
@@ -137,7 +146,14 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
     chartsData,
     isLoading: isExplorerLoading,
     error,
-  } = useAnomalyChartsData(api, services, chartWidth, severityThresholds, renderCallbacks);
+  } = useAnomalyChartsData(
+    api,
+    services,
+    chartWidth,
+    severityThresholds,
+    renderCallbacks,
+    requestCancellationManager
+  );
 
   const dateFormatTz = useDateFormatTz();
 
@@ -291,6 +307,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
               chartsService={chartsService}
               timeRange={timeRange}
               showFilterIcons={showFilterIcons}
+              isInteractive={isInteractive}
             />
           ) : null}
         </div>

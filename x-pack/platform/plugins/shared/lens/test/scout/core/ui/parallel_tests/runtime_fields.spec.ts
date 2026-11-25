@@ -20,7 +20,9 @@ spaceTest.describe('Lens runtime fields', { tag: '@local-stateful-classic' }, ()
   const suiteSetup = createLogstashLensEditorSuiteSetup();
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
+
   spaceTest.beforeEach(suiteSetup.beforeEach);
+
   spaceTest.afterAll(suiteSetup.afterAll);
 
   // The four FTR tests were one ordered journey sharing the same runtime field and editor state.

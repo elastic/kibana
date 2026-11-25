@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
+import { inject, injectable } from 'inversify';
+import { Request } from '@kbn/core-di-server';
+import {
+  bulkByIdsSchema,
+  bulkGetRulesResponseSchema,
+  errorResponseSchema,
+} from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams } from '@kbn/alerting-v2-schemas';
+import { RulesClient } from '../../lib/rules_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { bulkGetRulesOasExamples } from './bulk_get_rules_oas_example';
+
+@injectable()
+export class BulkGetRulesRoute extends BaseAlertingRoute {
+  static method = 'post' as const;
+  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk_get`;
+  static security: RouteSecurity = {
+    authz: {
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
+    },
+  };
+  static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
+    summary: 'Get rules in bulk',
+    description:
+      'Returns the requested rules. Ids that match no rule are reported per item in `errors` as `RULE_NOT_FOUND`. The request itself succeeds as long as it is valid.',
+    oasOperationObject: bulkGetRulesOasExamples,
+  } as const;
+  static schemas = {
+    request: {
+      body: bulkByIdsSchema,
+    },
+    response: {
+      200: {
+        body: () => bulkGetRulesResponseSchema,
+        description:
+          'Returns the rules that were found in `items` and a per-item error in `errors` for every id that matched no rule.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+    },
+  };
+
+  protected readonly routeName = 'bulk get rules';
+
+  constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(Request)
+    private readonly request: KibanaRequest<unknown, unknown, BulkByIdsParams>,
+    @inject(RulesClient) private readonly rulesClient: RulesClient
+  ) {
+    super(ctx);
+  }
+
+  protected async execute() {
+    const body = await this.rulesClient.getRules(this.request.body.ids);
+    return this.ctx.response.ok({ body });
+  }
+}

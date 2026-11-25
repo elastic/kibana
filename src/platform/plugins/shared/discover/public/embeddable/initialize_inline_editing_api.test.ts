@@ -10,16 +10,17 @@
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
+import type { IDslPagination } from '@kbn/search-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
-  DataTableColumnsMeta,
   SortOrder,
   DataGridDensity,
   JsonModeSettings,
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
+import type { EsqlSource } from '@kbn/data-source';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getPersistedTabMock } from '../application/main/state_management/redux/__mocks__/internal_state.mocks';
@@ -42,7 +43,7 @@ const tab2 = getPersistedTabMock({
 
 const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => ({
   columns: new BehaviorSubject<string[] | undefined>(['message']),
-  columnsMeta: new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined),
+  resultDataSource: new BehaviorSubject<EsqlSource | undefined>(undefined),
   grid: new BehaviorSubject<DiscoverGridSettings | undefined>(undefined),
   rowHeight: new BehaviorSubject<number | undefined>(undefined),
   headerRowHeight: new BehaviorSubject<number | undefined>(undefined),
@@ -56,6 +57,8 @@ const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => (
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
+  pagination: new BehaviorSubject<IDslPagination | undefined>(undefined),
+  isLoadingMore: new BehaviorSubject<boolean>(false),
 });
 
 const createMockSavedSearch = (): SavedSearch => ({

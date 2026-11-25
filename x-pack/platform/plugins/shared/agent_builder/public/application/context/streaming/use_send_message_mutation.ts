@@ -11,6 +11,8 @@ import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_too
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom, tap } from 'rxjs';
 import { isEqual } from 'lodash';
+import { isHttpFetchError } from '@kbn/core-http-browser';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { v4 as uuidv4 } from 'uuid';
 import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import type {
@@ -28,15 +30,21 @@ import {
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useToasts } from '../../hooks/use_toasts';
 import { mutationKeys } from '../../mutation_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
-import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import { isDetached, isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import type { StreamOwner } from './types';
+import { isDisconnectError } from '../../../services/chat/reattach_on_disconnect';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
+
+const isRequestRejectedError = (error: unknown): boolean =>
+  isHttpFetchError(error) && !isDisconnectError(error);
 
 export interface SendMessageVars {
   message: string;
@@ -47,6 +55,11 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  /**
+   * Called when the server rejects the request before any event arrives. Returning true means
+   * the caller dealt with it and no toast is shown.
+   */
+  onRejected?: (error: unknown) => boolean;
 }
 
 export interface SendMessageMutationBindings {
@@ -57,7 +70,7 @@ export interface SendMessageMutationBindings {
     attachments?: OptimisticAttachments
   ) => void;
   clearPendingMessage: (conversationId: string) => void;
-  clearActiveStream: (conversationId: string) => void;
+  clearActiveStream: (conversationId: string, streamId: string) => void;
   markStreamStarted: (conversationId: string) => void;
 }
 
@@ -137,6 +150,7 @@ export const useSendMessageMutation = ({
 }: UseSendMessageMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
+  const { addErrorToast } = useToasts();
   const queryClient = useQueryClient();
   // One controller + executionId per in-flight conversation. Concurrent streams need
   // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
@@ -149,7 +163,7 @@ export const useSendMessageMutation = ({
 
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
-    mutationFn: async (vars: SendMessageVars) => {
+    mutationFn: async (vars: SendMessageVars & StreamOwner) => {
       const streamActions = createConversationActions({
         conversationId: vars.conversationId,
         queryClient,
@@ -178,13 +192,9 @@ export const useSendMessageMutation = ({
         })
       );
 
-      // The run owns its live events: hold the stream for its whole lifetime so it is not reclaimed
-      // while the user is looking at another conversation, before or after `execution_started`.
-      const retainedStream = conversationStreamService
-        .getActiveStream$(vars.conversationId)
-        .subscribe();
       let timelineExecutionId: string | undefined;
       let triggerEventId: string | undefined;
+      let streamEventArrived = false;
 
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
@@ -209,7 +219,9 @@ export const useSendMessageMutation = ({
         });
 
         const events$ = rawEvents$.pipe(
+          conversationStreamService.trackStream(vars.conversationId),
           tap((event) => {
+            streamEventArrived = true;
             if (isExecutionStartedEvent(event)) {
               markStreamStarted(vars.conversationId);
             }
@@ -220,19 +232,33 @@ export const useSendMessageMutation = ({
           })
         );
 
-        // Failures are persisted by the server and arrive through the refetch below, so a stream
-        // that errors ends the same way as one that completed or was stopped.
+        // Failures of a run are persisted by the server and arrive through the refetch below, so a
+        // stream that errors ends the same way as one that completed or was stopped. Requests the
+        // server rejected before any event arrived have nothing persisted, so those are reported with
+        // a toast. An error after events arrived (e.g. a failed reattach) concerns a run that started.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => isStreamCancelled(handle),
-        }).catch(() => {});
+        }).catch((error: unknown) => {
+          if (streamEventArrived || !isRequestRejectedError(error)) {
+            return;
+          }
+          if (vars.onRejected?.(error)) {
+            return;
+          }
+          addErrorToast({ title: formatAgentBuilderErrorMessage(error) });
+        });
+
+        if (isDetached(handle)) {
+          return;
+        }
 
         // The message and its attachments are persisted whether the run completed or was stopped, so reset the composer.
         vars.resetAttachments?.();
-        clearActiveStream(vars.conversationId);
+        clearActiveStream(vars.conversationId, vars.streamId);
         await releaseLocalContent({
           refetch: streamActions.refetchConversation,
           triggerEventId,
@@ -245,8 +271,7 @@ export const useSendMessageMutation = ({
             ),
         });
       } finally {
-        retainedStream.unsubscribe();
-        clearActiveStream(vars.conversationId);
+        clearActiveStream(vars.conversationId, vars.streamId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
         }
@@ -255,26 +280,28 @@ export const useSendMessageMutation = ({
   });
 
   const cancel = useCallback(
-    (conversationId: string) => {
+    (conversationId: string): string | undefined => {
       const handle = controllersRef.current.get(conversationId);
-      if (handle) {
-        requestAbort(handle, chatService);
+      if (!handle) {
+        return undefined;
       }
+      requestAbort(handle, chatService);
+      return handle.executionId;
     },
     [chatService]
   );
 
-  const cancelAll = useCallback(() => {
-    for (const { controller, executionId } of controllersRef.current.values()) {
-      chatService.abort(executionId).catch(() => {});
+  /** Closes every connection locally; the runs keep going on the server. */
+  const detachAll = useCallback(() => {
+    for (const { controller } of controllersRef.current.values()) {
       controller.abort();
     }
-  }, [chatService]);
+  }, []);
 
   return {
     mutate,
     isLoading,
     cancel,
-    cancelAll,
+    detachAll,
   };
 };

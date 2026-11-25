@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import { LegendValue } from '@elastic/charts';
-import { LegendSize } from '@kbn/chart-expressions-common';
 import { type PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
 import type {
   LensPartitionVisualizationState as PieVisualizationState,
@@ -19,7 +18,7 @@ import type {
 import { PartitionChartsMeta } from '../partition_charts_meta';
 import { LegendDisplay } from '../../../../common/constants';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
-import { getLegendStats } from '../render_helpers';
+import { getLegendStats, MAX_PARTITION_LEGEND_STATS } from '../render_helpers';
 import { LegendSettings } from '../../../shared_components';
 
 export const PartitionLegendSettings = ({
@@ -30,8 +29,6 @@ export const PartitionLegendSettings = ({
   const layer = state.layers[0];
 
   const legendSize = layer.legendSize;
-
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {
@@ -77,7 +74,11 @@ export const PartitionLegendSettings = ({
 
   const onLegendStatsChange = useCallback(
     (legendStats: unknown) => {
-      onStateChange({ legendStats });
+      onStateChange({
+        legendStats: Array.isArray(legendStats)
+          ? legendStats.slice(0, MAX_PARTITION_LEGEND_STATS)
+          : legendStats,
+      });
     },
     [onStateChange]
   );
@@ -114,7 +115,6 @@ export const PartitionLegendSettings = ({
       onMaxLinesChange={onLegendMaxLinesChange}
       legendSize={legendSize}
       onLegendSizeChange={onLegendSizeChange}
-      showAutoLegendSizeOption={hadAutoLegendSize}
     />
   );
 };

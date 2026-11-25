@@ -9,7 +9,10 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
-import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  createSubstitutionStep,
+  createToolCallStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import { EventSteps } from './event_steps';
 
 const renderWithProviders = (ui: React.ReactElement) =>
@@ -37,6 +40,21 @@ describe('EventSteps — single vs grouped tool calls', () => {
     expect(screen.getByTestId('agentBuilderToolCallGroup')).toBeInTheDocument();
     expect(screen.queryByTestId('agentBuilderToolCallStep')).not.toBeInTheDocument();
   });
+
+  it('renders nothing when every step is hidden', () => {
+    renderWithProviders(
+      <EventSteps
+        steps={[
+          createSubstitutionStep({
+            trigger: 'round_start',
+            threshold_tokens: 1_000,
+            substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'tc-1' }],
+          }),
+        ]}
+      />
+    );
+    expect(screen.queryByTestId('agentBuilderThinkingPanel')).not.toBeInTheDocument();
+  });
 });
 
 describe('EventSteps — stopped turn threads isAborted to the labels', () => {
@@ -54,9 +72,9 @@ describe('EventSteps — stopped turn threads isAborted to the labels', () => {
     expect(screen.queryByText('2 tools running…')).not.toBeInTheDocument();
   });
 
-  it('leaves a running turn (default) reading "running…"', () => {
+  it('does not append a running status to a lone tool call', () => {
     renderWithProviders(<EventSteps steps={[toolStep('tc-1', 'search')]} />);
-    expect(screen.getByText('running…')).toBeInTheDocument();
+    expect(screen.queryByText('running…')).not.toBeInTheDocument();
     expect(screen.queryByText('stopped')).not.toBeInTheDocument();
   });
 });

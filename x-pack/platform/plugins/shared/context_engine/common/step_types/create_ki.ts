@@ -26,7 +26,7 @@ export const createKiInputSchema = z.object({
   verifiers: kiVerifiersSchema
     .optional()
     .describe(
-      'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, the KI is not written.'
+      'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, the KI is written with lifecycle status `verification_failed` and excluded from search.'
     ),
   refresh: z
     .boolean()
@@ -37,10 +37,7 @@ export const createKiInputSchema = z.object({
 });
 
 export const createKiOutputSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .describe('The id of the created knowledge indicator; absent when verification failed'),
+  id: z.string().describe('The id of the created knowledge indicator'),
   verification: VerifyKiOutputSchema.optional().describe(
     'Verifier results; present when `verifiers` was given'
   ),
@@ -70,8 +67,8 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
         'When the AI index does not exist yet, it is created automatically with an index backing ' +
         'store derived from its id. Pass ki_id to set a stable id; re-runs with the same id ' +
         'replace the KI on an index and append a new revision on a data stream. Pass verifiers to ' +
-        'run KI verifiers before writing: when any fails, nothing is written, the output carries ' +
-        'no id, and verification.results names the failing verifiers. The write is not refreshed ' +
+        'run KI verifiers before writing: when any fails, the KI is written as verification_failed, ' +
+        'excluded from search, and verification.results names the failing verifiers. The write is not refreshed ' +
         'unless refresh is true, so set it when a later step in the same run reads the KI back. ' +
         'The step returns the id of the created KI, which can be used by later steps to update ' +
         'or delete it.',
@@ -111,7 +108,7 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
   type: console
   if: "steps.create_ki.output.verification.passed : false"
   with:
-    message: "KI not written: {{ steps.create_ki.output.verification.results | json }}"
+    message: "KI written as verification_failed: {{ steps.create_ki.output.verification.results | json }}"
 \`\`\``,
     ],
   },

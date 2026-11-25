@@ -28,27 +28,6 @@ export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_STATUS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.status',
-  {
-    defaultMessage: 'Status',
-  }
-);
-
-export const ENTITY_ANALYTICS_STATUS_ON = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.statusOn',
-  {
-    defaultMessage: 'On',
-  }
-);
-
-export const ENTITY_ANALYTICS_STATUS_OFF = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.statusOff',
-  {
-    defaultMessage: 'Off',
-  }
-);
-
 export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.generalSection',
   {

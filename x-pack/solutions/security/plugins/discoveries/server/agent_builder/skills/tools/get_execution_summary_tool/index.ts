@@ -10,7 +10,7 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { WorkflowFetcher } from '../get_workflow_health_check_tool';
 
@@ -103,20 +103,22 @@ const fetchAndSummarize = async (
   return execution != null ? toExecutionSummary(execution) : toNotFoundSummary(runId);
 };
 
-const inputSchema = z.object({
-  alert_retrieval_run_ids: z
-    .array(
-      z.object({
-        workflow_id: z.string(),
-        workflow_run_id: z.string(),
-      })
-    )
-    .optional(),
-  generation_run_id: z.string().optional(),
-  generation_workflow_id: z.string().optional(),
-  validation_run_id: z.string().optional(),
-  validation_workflow_id: z.string().optional(),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    alert_retrieval_run_ids: z
+      .array(
+        z.object({
+          workflow_id: z.string(),
+          workflow_run_id: z.string(),
+        })
+      )
+      .optional(),
+    generation_run_id: z.string().optional(),
+    generation_workflow_id: z.string().optional(),
+    validation_run_id: z.string().optional(),
+    validation_workflow_id: z.string().optional(),
+  })
+);
 
 export const getExecutionSummaryTool = (
   fetcher: WorkflowExecutionFetcher

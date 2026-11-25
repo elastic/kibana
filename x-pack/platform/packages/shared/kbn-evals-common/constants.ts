@@ -41,6 +41,7 @@ export const EVALS_RESOLVE_INSTRUMENTATION_URL =
 export const EVALS_EVALUATORS_URL = `${EVALS_INTERNAL_URL}/evaluators` as const;
 export const EVALS_EVALUATOR_URL = `${EVALS_EVALUATORS_URL}/{name}` as const;
 export const EVALS_VALIDATE_URL = `${EVALS_INTERNAL_URL}/evaluators/_validate` as const;
+export const EVALS_TEST_EVALUATOR_URL = `${EVALS_INTERNAL_URL}/evaluators/_test` as const;
 export const EVALS_EVALUATE_URL = `${EVALS_INTERNAL_URL}/_evaluate` as const;
 export const EVALS_TRACING_PROJECTS_URL = `${EVALS_INTERNAL_URL}/tracing/projects` as const;
 export const EVALS_TRACING_PROJECT_TRACES_URL =
@@ -52,6 +53,33 @@ export const EVALS_DATASET_COPY_URL = `${EVALS_DATASET_URL}/_copy` as const;
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 export const EVALS_DATASET_RESOLVE_URL = `${EVALS_DATASETS_URL}/_resolve` as const;
+/**
+ * The pinned-baseline registry is served by the agent_builder plugin, so these routes live
+ * under its internal namespace (it must match `internalApiPath` in that plugin). They are
+ * defined here, next to the rest of the wire contract (schemas, index name), so the server
+ * routes and the CLI client share a single definition.
+ */
+export const EVAL_BASELINES_URL = '/internal/agent_builder/evals/baselines' as const;
+export const EVAL_BASELINES_PIN_URL = `${EVAL_BASELINES_URL}/_pin` as const;
+export const EVAL_BASELINES_LATEST_URL = `${EVAL_BASELINES_URL}/latest` as const;
+export const EVAL_BASELINE_SCORES_URL = `${EVAL_BASELINES_URL}/{baselineId}/scores` as const;
+
+/**
+ * Upper bound on the scores one pinned baseline can snapshot; a pin of a larger execution
+ * is refused rather than truncated, because a partial snapshot would silently lose the
+ * overflow once the source scores age out of the scores stream's retention.
+ */
+export const MAX_PINNABLE_SCORES = 10000;
+
+// These fields are unbounded (additionalProperties: true, no ingest-time size limit)
+// and can hold ~100 KB+ of raw data per document. Exclude them from bulk fetches
+// to avoid exceeding Kibana's 100 MB max response size.
+export const UNBOUNDED_SCORE_FIELDS = [
+  'task.output',
+  'example.input',
+  'example.metadata',
+  'evaluator.metadata',
+];
 
 const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
 
@@ -61,6 +89,9 @@ export const EvaluationIndices = {
   DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
   EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
+  // Pinned regression baselines: score snapshots + pointer docs that must outlive the
+  // 90-day retention on the scores data stream (365-day retention on this stream).
+  PINNED_BASELINES: `${EVALUATION_INDEX_PREFIX}-pinned-baselines`,
 } as const;
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
@@ -95,5 +126,6 @@ export const MAX_DATASET_NAME_LENGTH = 256 as const;
 export const MAX_DATASET_DESCRIPTION_LENGTH = 2048 as const;
 
 export const MAX_EVALUATOR_NAME_LENGTH = 128 as const;
+export const MAX_EVALUATOR_VERSION_LENGTH = 64 as const;
 
 export const MAX_DATASET_TAG_FACETS = 100 as const;

@@ -44,7 +44,6 @@
       "sessionView",
       "spaces",
       "taskManager",
-      "timelines",
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
@@ -90,7 +89,8 @@
       "cps",
       "searchInferenceEndpoints",
       "esql",
-      "alertzero"
+      "alertzero",
+      "agenticInvestigations"
     ],
     "requiredBundles": [
       "esUiShared",

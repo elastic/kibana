@@ -6,4 +6,15 @@
  */
 
 export { apiTest } from '@kbn/scout';
-export { COMMON_HEADERS, DEPLOYMENT_STATS_API_PATH } from './constants';
+export {
+  API_KEY_API_PATH,
+  COMMON_HEADERS,
+  DEPLOYMENT_STATS_API_PATH,
+  ONBOARDING_KEY_NAME_PREFIX,
+  STARRED_DASHBOARDS_COUNT_API_PATH,
+} from './constants';
+export {
+  getSessionUsername,
+  invalidateApiKeyByName,
+  invalidateOnboardingApiKeys,
+} from './api_keys';

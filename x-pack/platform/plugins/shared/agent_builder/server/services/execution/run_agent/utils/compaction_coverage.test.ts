@@ -6,13 +6,7 @@
  */
 
 import type { CompactionStructuredData, CompactionSummary } from '@kbn/agent-builder-common';
-import {
-  coveredRoundIds,
-  hasUncoveredPrefixRounds,
-  isLegacySummary,
-  legacyEligibleRoundIds,
-  takeRoundsWithinBudget,
-} from './compaction_coverage';
+import { coveredRoundIds, legacyEligibleRoundIds } from './compaction_coverage';
 import {
   completedRoundTimeline,
   failedExec0Timeline,
@@ -60,13 +54,6 @@ describe('legacyEligibleRoundIds', () => {
   });
 });
 
-describe('isLegacySummary', () => {
-  it('is true only without covered_round_ids', () => {
-    expect(isLegacySummary(summary({ summarized_round_count: 2 }))).toBe(true);
-    expect(isLegacySummary(summary({ covered_round_ids: [] }))).toBe(false);
-  });
-});
-
 describe('coveredRoundIds', () => {
   it('a covered_round_ids summary ∩ current rounds; a removed round drops out', () => {
     expect(
@@ -102,40 +89,5 @@ describe('coveredRoundIds', () => {
     expect(
       coveredRoundIds({ summary: undefined, rounds: ids(['A']), legacyEligibleIds: new Set(['A']) })
     ).toEqual(new Set());
-  });
-});
-
-describe('hasUncoveredPrefixRounds', () => {
-  it('is true when an uncovered round precedes the last covered one', () => {
-    expect(hasUncoveredPrefixRounds(ids(['A', 'X', 'B', 'C']), new Set(['A', 'B']))).toBe(true);
-    expect(hasUncoveredPrefixRounds(ids(['A', 'B', 'X', 'C']), new Set(['A', 'B']))).toBe(false);
-    expect(hasUncoveredPrefixRounds(ids(['A']), new Set())).toBe(false);
-  });
-});
-
-describe('takeRoundsWithinBudget', () => {
-  const tokens = new Map([
-    ['a', 40],
-    ['b', 40],
-    ['c', 40],
-    ['big', 500],
-  ]);
-
-  it('takes the longest oldest-first prefix within the budget', () => {
-    expect(takeRoundsWithinBudget(ids(['a', 'b', 'c']), tokens, 100).map((r) => r.id)).toEqual([
-      'a',
-      'b',
-    ]);
-  });
-
-  it('always takes the first round, even when it alone exceeds the budget', () => {
-    expect(takeRoundsWithinBudget(ids(['big', 'a']), tokens, 100).map((r) => r.id)).toEqual([
-      'big',
-    ]);
-    expect(takeRoundsWithinBudget(ids(['a', 'b']), tokens, -10).map((r) => r.id)).toEqual(['a']);
-  });
-
-  it('empty input → empty', () => {
-    expect(takeRoundsWithinBudget([], tokens, 100)).toEqual([]);
   });
 });

@@ -15,8 +15,9 @@ import { createBulkEpisodeActionRouteForType } from './create_bulk_episode_actio
 export const BulkAssignEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
   pathSuffix: '_bulk_assign',
-  summary: 'Bulk assign alert episodes',
+  summary: 'Bulk assign alerts',
   bodySchema: bulkAssignEpisodeActionBodySchema,
   oasOperationObject: bulkAssignEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
 });

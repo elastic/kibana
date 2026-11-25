@@ -82,6 +82,7 @@ export enum SecurityPageName {
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
   siemMigrationsDashboards = 'siem_migrations-dashboards',
+  siemMigrationsWorkflows = 'siem_migrations-workflows',
   siemMigrationsManage = 'siem_migrations-manage',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -125,6 +126,7 @@ export enum SecurityPageName {
    * external links
    */
   externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkAlertZero = 'external_link-alertzero',
   externalLinkDiscover = 'external_link-discover',
   externalLinkWorkflows = 'external_link-workflows',
 
@@ -137,11 +139,9 @@ export enum SecurityPageName {
    * AlertZero pages.
    *
    * These live on the `alertzero` plugin rather than `securitySolutionUI`, so their link ids are built with
-   * `alertZeroLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
-   * name is the same concept, and the app prefix is what distinguishes the two links.
+   * `alertZeroLink()` instead of `securityLink()`.
    */
-  alertZeroThreatHunt = 'threat_hunt',
-  alertZeroStreams = 'streams',
+  alertZeroHome = 'home',
   alertZeroEscalations = 'escalations',
   alertZeroWatches = 'watches',
   alertZeroWatchesWorkers = 'watches_workers',

@@ -15,7 +15,6 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   EqlRuleCreateProps,
-  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -47,14 +46,11 @@ import {
   ALERTS_INDEX_BUTTON,
   ANOMALY_THRESHOLD_INPUT,
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
-  AT_LEAST_ONE_INDEX_PATTERN,
-  AT_LEAST_ONE_VALID_MATCH,
   COMBO_BOX_CLEAR_BTN,
   CREATE_AND_ENABLE_BTN,
   CREATE_WITHOUT_ENABLING_BTN,
   CUSTOM_INDEX_PATTERN_INPUT,
   CUSTOM_QUERY_INPUT,
-  CUSTOM_QUERY_REQUIRED,
   DATA_VIEW_COMBO_BOX,
   DATA_VIEW_OPTION,
   DEFAULT_RISK_SCORE_INPUT,
@@ -62,14 +58,11 @@ import {
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
-  ESQL_QUERY_BAR,
-  ESQL_QUERY_BAR_INPUT_AREA,
   ESQL_TYPE,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
   INPUT,
-  INVALID_MATCH_CONTENT,
   INVESTIGATION_NOTES_TEXTAREA,
   INVESTIGATIONS_INPUT,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
@@ -106,7 +99,6 @@ import {
   RULE_INDICES,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
-  RULE_NAME_OVERRIDE_FOR_ESQL,
   RULE_TIMESTAMP_OVERRIDE,
   RULES_CREATION_FORM,
   RULES_CREATION_PREVIEW_BUTTON,
@@ -124,15 +116,12 @@ import {
   SEVERITY_OVERRIDE_ROW,
   SHOW_QUERY_BAR_BUTTON,
   TAGS_INPUT,
-  THREAT_COMBO_BOX_INPUT,
   THREAT_ITEM_ENTRY_DELETE_BUTTON,
   THREAT_MAPPING_COMBO_BOX_INPUT,
   THREAT_MATCH_AND_BUTTON,
   THREAT_MATCH_CUSTOM_QUERY_INPUT,
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
-  THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
-  THREAT_MATCH_QUERY_REQUIRED,
   THREAT_MATCH_OPERATOR_SELECT,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   THRESHOLD_INPUT_AREA,
@@ -446,12 +435,6 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
-export const fillOverrideEsqlRuleName = (value: string) => {
-  cy.get(RULE_NAME_OVERRIDE_FOR_ESQL).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${value}{enter}`);
-  });
-};
-
 // called after import rule from saved timeline
 // if alerts index is created, it is included in the timeline
 // to be consistent in multiple test runs, remove it if it's there
@@ -644,50 +627,6 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
 };
 
 /**
- * Pastes query into the ES|QL Monaco editor via a synthetic ClipboardEvent.
- * This avoids flakiness in the tests when typing in the ES|QL query bar.
- */
-export const fillEsqlQueryBar = (query: string) => {
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('exist').click({ force: true });
-
-  const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(`${selectAll}{del}`, { force: true });
-
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).then(($textarea) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData('text/plain', query);
-    const pasteEvent = new ClipboardEvent('paste', {
-      clipboardData: dataTransfer,
-      bubbles: true,
-      cancelable: true,
-    });
-    $textarea[0].dispatchEvent(pasteEvent);
-  });
-
-  cy.get(ESQL_QUERY_BAR).contains(query);
-};
-
-export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
-  cy.get(ESQL_QUERY_BAR).contains('ES|QL query');
-  fillEsqlQueryBar(rule.query);
-
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
-};
-
-/**
- * fills only required(name, description) and specific to ES|QL(rule name override) fields on about page
- */
-export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
-  fillRuleName(rule.name);
-  fillDescription(rule.description);
-
-  expandAdvancedSettings();
-  // this field defined to be returned in rule query
-  fillOverrideEsqlRuleName(rule.rule_name_override ?? '');
-  getAboutContinueButton().click();
-};
-
-/**
  * Fills in the indicator match rows for tests by giving it an optional rowNumber,
  * a indexField, a indicatorIndexField, and an optional validRows which indicates
  * which row is valid or not.
@@ -754,32 +693,12 @@ export const fillIndexAndIndicatorIndexPattern = (
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
-/** Returns the indicator index drop down field. Pass in row number, default is 1 */
-export const getIndicatorIndexComboField = (row = 1) =>
-  cy.get(THREAT_COMBO_BOX_INPUT).eq(row * 2 - 2);
-
-/** Returns the indicator mapping drop down field. Pass in row number, default is 1 */
-export const getIndicatorMappingComboField = (row = 1) =>
-  cy.get(THREAT_COMBO_BOX_INPUT).eq(row * 2 - 1);
-
 /** Returns the indicator matches DELETE button for the mapping. Pass in row number, default is 1  */
 export const getIndicatorDeleteButton = (row = 1) =>
   cy.get(THREAT_ITEM_ENTRY_DELETE_BUTTON).eq(row - 1);
 
 /** Returns the indicator matches AND button for the mapping */
 export const getIndicatorAndButton = () => cy.get(THREAT_MATCH_AND_BUTTON);
-
-/** Returns the indicator matches OR button for the mapping */
-export const getIndicatorOrButton = () => cy.get(THREAT_MATCH_OR_BUTTON);
-
-/** Returns the invalid match content. */
-export const getIndicatorInvalidationText = () => cy.contains(INVALID_MATCH_CONTENT);
-
-/** Returns that at least one valid match is required content */
-export const getIndicatorAtLeastOneInvalidationText = () => cy.contains(AT_LEAST_ONE_VALID_MATCH);
-
-/** Returns that at least one index pattern is required content */
-export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_INDEX_PATTERN);
 
 /** Returns the continue button on the step of about */
 export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
@@ -804,21 +723,6 @@ export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT)
 
 /** Returns the custom query input */
 export const getCustomIndicatorQueryInput = () => cy.get(THREAT_MATCH_QUERY_INPUT).eq(0);
-
-/** Returns custom query required content */
-export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQUIRED);
-
-/** Returns threat match query required content */
-export const getThreatMatchQueryInvalidationText = () => cy.contains(THREAT_MATCH_QUERY_REQUIRED);
-
-/**
- * Fills in the define indicator match rules and then presses the continue button
- * @param rule The rule to use to fill in everything
- */
-export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCreateProps) => {
-  fillDefineIndicatorMatchRule(rule);
-  continueFromDefineStep();
-};
 
 export const fillDefineIndicatorMatchRule = (rule: ThreatMatchRuleCreateProps) => {
   if (rule.index) {
@@ -1017,20 +921,6 @@ export const openSuppressionFieldsTooltipAndCheckLicense = () => {
   cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
   // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
   cy.get(TOOLTIP).contains('Platinum license');
-};
-
-/**
- * intercepts esql_async request that contains esqlQuery and adds alias to it
- */
-export const interceptEsqlQueryFieldsRequest = (
-  esqlQuery: string,
-  alias: string = 'esqlQueryFields'
-) => {
-  cy.intercept('POST', '/internal/search/esql_async', (req) => {
-    if (req.body?.params?.query?.includes?.(esqlQuery)) {
-      req.alias = alias;
-    }
-  });
 };
 
 export const selectDoesNotMatchOperator = (rowNumber: number = 0) => {

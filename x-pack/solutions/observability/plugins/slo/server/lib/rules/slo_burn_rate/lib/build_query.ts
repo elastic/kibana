@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import type { SLODefinition } from '../../../../domain/models';
 import { Duration, toDurationUnit } from '../../../../domain/models';
@@ -22,6 +21,8 @@ type BurnRateWindowWithDuration = WindowSchema & {
 export interface EvaluationAfterKey extends AggregationsCompositeAggregateKey {
   instanceId: string;
 }
+
+export const EVALUATION_PAGE_SIZE = 1000;
 
 export const LONG_WINDOW = 'LONG';
 export const SHORT_WINDOW = 'SHORT';
@@ -63,7 +64,7 @@ function buildWindowAgg(
   slo: SLODefinition,
   dateRange: { from: Date; to: Date }
 ) {
-  const isTimesliceBudgetingMethod = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod);
+  const isTimesliceBudgetingMethod = slo.budgetingMethod === 'timeslices';
 
   const aggs = isTimesliceBudgetingMethod ? TIMESLICE_AGGS : OCCURRENCE_AGGS;
 
@@ -192,11 +193,102 @@ function buildGroupingAgg() {
   };
 }
 
-export function buildQuery(
+function buildSloRevisionFilter(slo: SLODefinition, dateRange: { from: Date; to: Date }) {
+  return [
+    { term: { 'slo.id': slo.id } },
+    { term: { 'slo.revision': slo.revision } },
+    {
+      range: {
+        '@timestamp': {
+          gte: dateRange.from.toISOString(),
+          lt: dateRange.to.toISOString(),
+        },
+      },
+    },
+  ];
+}
+
+/**
+ * Builds the query listing the instances whose short window burn rate reaches the threshold of at least one window, with the response trimmed to their keys and the search time.
+ */
+export function buildCandidatesQuery(
   startedAt: Date,
   slo: SLODefinition,
   params: BurnRateRuleParams,
   afterKey?: EvaluationAfterKey
+) {
+  const delayInSeconds = getDelayInSecondsFromSLO(slo);
+  const shortWindows = params.windows.map((winDef, index) => ({
+    windowId: generateWindowId(index),
+    threshold: winDef.burnRateThreshold,
+    duration: new Duration(winDef.shortWindow.value, toDurationUnit(winDef.shortWindow.unit)),
+  }));
+  const longestShortWindow = shortWindows.reduce((acc, shortWindow) =>
+    shortWindow.duration.isShorterThan(acc.duration) ? acc : shortWindow
+  );
+  const isTimesliceBudgetingMethod = slo.budgetingMethod === 'timeslices';
+
+  return {
+    size: 0,
+    filter_path: ['took', 'aggregations.instances.after_key', 'aggregations.instances.buckets.key'],
+    query: {
+      bool: {
+        filter: [
+          ...buildSloRevisionFilter(
+            slo,
+            getLookbackDateRange(startedAt, longestShortWindow.duration, delayInSeconds)
+          ),
+          // The timeslices burn rate only depends on the bad slices.
+          ...(isTimesliceBudgetingMethod ? [{ term: { 'slo.isGoodSlice': 0 } }] : []),
+        ],
+      },
+    },
+    aggs: {
+      instances: {
+        composite: {
+          ...(afterKey ? { after: afterKey } : {}),
+          size: EVALUATION_PAGE_SIZE,
+          sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
+        },
+        aggs: {
+          ...shortWindows.reduce(
+            (acc, { windowId, threshold, duration }) => ({
+              ...acc,
+              ...buildWindowAgg(
+                windowId,
+                SHORT_WINDOW,
+                threshold,
+                slo,
+                getLookbackDateRange(startedAt, duration, delayInSeconds)
+              ),
+            }),
+            {}
+          ),
+          evaluation: {
+            bucket_selector: {
+              buckets_path: Object.fromEntries(
+                shortWindows.map(({ windowId }) => [
+                  windowId,
+                  generateAboveThresholdKey(windowId, SHORT_WINDOW),
+                ])
+              ),
+              script: {
+                source: shortWindows.map(({ windowId }) => `params.${windowId} == 1`).join(' || '),
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
+export function buildQuery(
+  startedAt: Date,
+  slo: SLODefinition,
+  params: BurnRateRuleParams,
+  afterKey?: EvaluationAfterKey,
+  instanceIds?: string[]
 ) {
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
   const burnRateWindows = params.windows.map((winDef) => {
@@ -224,16 +316,8 @@ export function buildQuery(
     query: {
       bool: {
         filter: [
-          { term: { 'slo.id': slo.id } },
-          { term: { 'slo.revision': slo.revision } },
-          {
-            range: {
-              '@timestamp': {
-                gte: longestDateRange.from.toISOString(),
-                lt: longestDateRange.to.toISOString(),
-              },
-            },
-          },
+          ...buildSloRevisionFilter(slo, longestDateRange),
+          ...(instanceIds ? [{ terms: { 'slo.instanceId': instanceIds } }] : []),
         ],
       },
     },
@@ -241,7 +325,7 @@ export function buildQuery(
       instances: {
         composite: {
           ...(afterKey ? { after: afterKey } : {}),
-          size: 1000,
+          size: EVALUATION_PAGE_SIZE,
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
         aggs: {

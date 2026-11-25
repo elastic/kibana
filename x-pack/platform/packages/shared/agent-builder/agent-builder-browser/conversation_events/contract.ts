@@ -93,7 +93,7 @@ export interface ConversationEventsServiceStartContract {
    * Registers a UI definition for a custom conversation event type.
    *
    * Throws if the type name is already registered, contains the id delimiter (`::`), is a
-   * reserved name (`execution`, `step`), or shadows a built-in timeline event type.
+   * reserved name (`execution`, `step`), or shadows a built-in event type (timeline or activity).
    */
   register: <TType extends string, TData = unknown>(
     definition: ValidatedConversationEventUIDefinition<TType, TData>

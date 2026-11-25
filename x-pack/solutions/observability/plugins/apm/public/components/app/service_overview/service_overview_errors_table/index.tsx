@@ -36,6 +36,7 @@ export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) 
     kuery,
     rangeFrom,
     rangeTo,
+    maxRows: 5,
   });
 
   const headerTitle = i18n.translate('xpack.apm.serviceOverview.errorsTableTitle', {

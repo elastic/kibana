@@ -66,14 +66,32 @@ describe('AiIndexManagedRow', () => {
 
     expect(screen.getByTestId('contextAiIndexManagedRowTitle')).toHaveTextContent('elastic');
     expect(screen.getByTestId('contextAiIndexManagedRowManaged')).toHaveTextContent('Managed');
-    expect(screen.getByTestId('contextAiIndexManagedRowIntegratedVia')).toHaveTextContent(
-      'Elastic (built-in)'
-    );
+    expect(screen.queryByTestId('contextAiIndexManagedRowIntegratedVia')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexManagedRowActions')).toBeInTheDocument();
 
     await waitFor(() =>
       expect(screen.getByTestId('contextAiIndexManagedRowKnowledgeIndicators')).toHaveTextContent(
         '9'
+      )
+    );
+  });
+
+  it('counts active and expired knowledge documents', async () => {
+    const core = coreMock.createStart();
+    core.http.get.mockResolvedValue({
+      kis: [],
+      total: 0,
+      summary: { total: 0, counts_by_type: [] },
+    });
+
+    renderWithProviders(core, buildManagedAiIndex());
+
+    await waitFor(() =>
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/internal/context_engine/ai_index/elastic/kis',
+        expect.objectContaining({
+          query: expect.objectContaining({ status: ['active', 'expired'] }),
+        })
       )
     );
   });

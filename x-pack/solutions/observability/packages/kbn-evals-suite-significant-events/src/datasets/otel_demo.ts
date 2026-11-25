@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
-import { GCS_BUCKET, OTEL_DEMO_GCS_BASE_PATH_PREFIX, OTEL_DEMO_NAMESPACE } from '../constants';
+import {
+  GCS_BUCKET,
+  KI_FEATURE_DEDUPLICATION_ITERATIONS,
+  OTEL_DEMO_GCS_BASE_PATH_PREFIX,
+  OTEL_DEMO_NAMESPACE,
+} from '../constants';
 import type { DatasetConfig } from './types';
 
 export const otelDemoDataset: DatasetConfig = {
@@ -572,13 +576,13 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'healthy-baseline',
-        iterations: DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_iterations,
+        iterations: KI_FEATURE_DEDUPLICATION_ITERATIONS,
       },
     },
     {
       input: {
         scenario_id: 'payment-unreachable',
-        iterations: DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_iterations,
+        iterations: KI_FEATURE_DEDUPLICATION_ITERATIONS,
       },
     },
   ],
@@ -605,7 +609,7 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'healthy-baseline',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'OTel Demo application logs under healthy conditions with normal traffic across all microservices',
       },
@@ -664,7 +668,7 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'payment-unreachable',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'OTel Demo logs where the payment service becomes unreachable, causing charge failures with dial tcp / i/o timeout / connection refused and gRPC transport dialing errors in frontend logs',
       },
@@ -705,7 +709,7 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'cart-redis-cutoff',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'OTel Demo logs where the cart service loses connectivity to its Valkey/Redis backing store, causing cart operations to fail',
       },
@@ -754,7 +758,7 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'checkout-memory-starvation',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'OTel Demo logs during a checkout service disruption with Kubernetes pod lifecycle events (pod termination and rolling update) across a multi-service microservice environment',
       },

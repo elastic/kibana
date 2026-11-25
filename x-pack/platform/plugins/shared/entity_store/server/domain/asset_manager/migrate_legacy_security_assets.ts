@@ -28,6 +28,7 @@ import {
   deleteIndexTemplate,
   reindex,
 } from '../../infra/elasticsearch';
+import { signalRequestOptions } from '../../infra/elasticsearch/signal_request_options';
 import {
   getLegacySecurityComponentTemplateName,
   getLegacySecurityUpdatesComponentTemplateName,
@@ -69,12 +70,33 @@ const getLegacyLatestCompatibilityAlias = (namespace: string) =>
  */
 const getCollidingNeutralNamespace = (namespace: string) => `security_${namespace}`;
 
-async function entityAliasExists(esClient: ElasticsearchClient, alias: string): Promise<boolean> {
+async function entityAliasExists(
+  esClient: ElasticsearchClient,
+  alias: string,
+  signal?: AbortSignal,
+  strict?: boolean
+): Promise<boolean> {
   try {
-    await esClient.indices.getAlias({ name: alias });
+    await esClient.indices.getAlias({ name: alias }, { signal });
     return true;
-  } catch {
-    return false;
+  } catch (err) {
+    // An aborted lookup says nothing about the alias
+    if (signal?.aborted) {
+      throw err;
+    }
+    if (!strict) {
+      return false;
+    }
+    // In strict mode only swallow genuine 404s; rethrow everything else so the
+    // caller can decide whether to skip the operation rather than risk touching
+    // indices in another space.
+    const status =
+      (err as { statusCode?: number })?.statusCode ??
+      (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    if (status === 404) {
+      return false;
+    }
+    throw err;
   }
 }
 
@@ -82,10 +104,16 @@ async function entityAliasExists(esClient: ElasticsearchClient, alias: string): 
  * True when space `security_{namespace}` already owns Entity Store assets under the
  * names this migration would treat as legacy for `namespace`. Matching is via the
  * colliding space's `entities-{dataset}-security_{namespace}` aliases.
+ *
+ * When `strict` is true, non-404 alias-lookup failures are rethrown instead of
+ * silently treated as "alias absent". Use this when incorrectly assuming no
+ * collision could touch indices in another space (e.g. unattended deletion tasks).
  */
 export async function hasCollidingNeutralNamespaceAssets(
   esClient: ElasticsearchClient,
-  namespace: string
+  namespace: string,
+  signal?: AbortSignal,
+  strict?: boolean
 ): Promise<boolean> {
   const collidingNamespace = getCollidingNeutralNamespace(namespace);
   const collidingAliases = [
@@ -94,7 +122,7 @@ export async function hasCollidingNeutralNamespaceAssets(
     getEntitiesAlias(ENTITY_METADATA, collidingNamespace),
   ];
   for (const alias of collidingAliases) {
-    if (await entityAliasExists(esClient, alias)) {
+    if (await entityAliasExists(esClient, alias, signal, strict)) {
       return true;
     }
   }
@@ -107,22 +135,33 @@ export async function hasCollidingNeutralNamespaceAssets(
  */
 export async function isConcreteIndexOrDataStream(
   esClient: ElasticsearchClient,
-  name: string
+  name: string,
+  signal?: AbortSignal
 ): Promise<boolean> {
   try {
-    const { data_streams: dataStreams } = await esClient.indices.getDataStream({ name });
+    const { data_streams: dataStreams } = await esClient.indices.getDataStream(
+      { name },
+      ...signalRequestOptions(signal)
+    );
     if (dataStreams.some((dataStream) => dataStream.name === name)) {
       return true;
     }
-  } catch {
-    // Not a data stream (or not found).
+  } catch (error) {
+    // Not a data stream (or not found), unless the request was aborted.
+    if (signal?.aborted) {
+      throw error;
+    }
   }
 
   try {
-    const indices = await esClient.indices.get({ index: name });
+    const indices = await esClient.indices.get({ index: name }, ...signalRequestOptions(signal));
     // When `name` is only an alias, the response is keyed by concrete index names.
     return Object.hasOwn(indices, name);
-  } catch {
+  } catch (error) {
+    // Missing, unless the request was aborted.
+    if (signal?.aborted) {
+      throw error;
+    }
     return false;
   }
 }

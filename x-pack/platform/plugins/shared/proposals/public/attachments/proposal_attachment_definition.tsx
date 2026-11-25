@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ProposalAttachmentData, PROPOSAL_ATTACHMENT_TYPE } from '@kbn/proposals-common';
@@ -18,20 +17,12 @@ export type ProposalAttachment = Attachment<
   ProposalAttachmentData
 >;
 
-/**
- * Shown when the proposal carries no action to name. `getLabel` is synchronous,
- * so it can only title a card from what the attachment itself stores — the
- * impact, status and decision are rendered live by the card instead, which is
- * also why this type contributes no `getHeader` badges.
- */
-const ATTACHMENT_LABEL = i18n.translate('xpack.proposals.attachments.label', {
-  defaultMessage: 'Proposed action',
-});
-
 /** Factory for the browser-side proposal attachment UI definition. */
 export const createProposalAttachmentDefinition =
   (): AttachmentUIDefinition<ProposalAttachment> => ({
-    getLabel: ({ data }) => data.title ?? ATTACHMENT_LABEL,
+    // Synchronous, so it can only title a card from what the attachment
+    // stores; impact, status and decision are rendered live by the card.
+    getLabel: ({ data }) => data.title,
 
     getIcon: () => 'lock',
 

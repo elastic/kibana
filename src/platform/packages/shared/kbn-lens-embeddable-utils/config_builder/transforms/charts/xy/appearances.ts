@@ -161,7 +161,10 @@ export function convertStylingToStateFormat(
   seriesTypes: SeriesType[]
 ): XYLensAppearanceState {
   const layerPresence = getLayerPresence(seriesTypes);
+  const hasLinesOrAreas = layerPresence.hasLines || layerPresence.hasAreas;
 
+  // The runtime applies fitting only to line and area series, and the bar settings (minimum
+  // height, value labels) only to bar series, so they are not stored without such a layer.
   return stripUndefined<XYLensAppearanceState>({
     hideEndzones:
       config.overlays?.partial_buckets?.visible != null
@@ -169,22 +172,30 @@ export function convertStylingToStateFormat(
         : undefined,
     showCurrentTimeMarker: config.overlays?.current_time_marker?.visible,
     valueLabels:
-      config.bars?.data_labels != null
+      layerPresence.hasBars && config.bars?.data_labels != null
         ? config.bars.data_labels.visible
           ? 'show'
           : 'hide'
         : undefined,
-    pointVisibility: pointVisibilityCompat.toState(config.points?.visibility),
-    curveType: curveTypeCompat.toState(config.interpolation),
-    minBarHeight: config.bars?.minimum_height,
+    pointVisibility: hasLinesOrAreas
+      ? pointVisibilityCompat.toState(config.points?.visibility ?? DEFAULT_POINTS_VISIBILITY)
+      : undefined,
+    curveType: hasLinesOrAreas
+      ? curveTypeCompat.toState(config.interpolation ?? DEFAULT_LINES_INTERPOLATION)
+      : undefined,
+    minBarHeight: layerPresence.hasBars ? config.bars?.minimum_height : undefined,
     ...(layerPresence.hasAreas
       ? {
           fillOpacity: config.areas?.fill_opacity ?? DEFAULT_AREAS_FILL_OPACITY,
           areaFill: config.areas?.fill ?? DEFAULT_AREAS_FILL,
         }
       : {}),
-    fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
-    emphasizeFitting: config.fitting?.emphasize,
-    endValue: extendCompat.toState(config.fitting?.extend),
+    ...(hasLinesOrAreas
+      ? {
+          fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
+          emphasizeFitting: config.fitting?.emphasize,
+          endValue: extendCompat.toState(config.fitting?.extend),
+        }
+      : {}),
   });
 }

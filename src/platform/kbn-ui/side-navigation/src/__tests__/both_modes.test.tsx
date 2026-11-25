@@ -19,6 +19,7 @@ import { mockClientHeight } from './mock_client_height';
 import { observabilityMock } from '../mocks/observability';
 import { resizeWindow } from './resize_window';
 import { securityMock } from '../mocks/security';
+import type { MenuItem, NavigationStructure } from '../../types';
 
 const mockMenuItemHeight = 51;
 
@@ -279,7 +280,7 @@ describe('Both modes', () => {
 
         const sidePanel = screen.getByTestId(sidePanelId);
 
-        let overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
+        const overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
 
         const tlsCertificatesLink = within(sidePanel).getByTestId(
           sidePanelItemId('tls_certificates')
@@ -296,9 +297,8 @@ describe('Both modes', () => {
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
         expect(appsLink).toHaveAttribute('aria-current', 'page');
 
-        // "Overview" becomes stale and leads to incorrect assertions, we need to re-query the link
-        overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
-
+        // The same element is updated in place; a remount would restart the label slide.
+        expect(overviewLink).toBe(within(sidePanel).getByTestId(sidePanelItemId('apps_overview')));
         expect(overviewLink).toHaveAttribute('aria-current', 'page');
         expect(overviewLink).toHaveAttribute('data-highlighted', 'true');
       });
@@ -312,7 +312,7 @@ describe('Both modes', () => {
               id: 'analytics',
               label: 'Analytics',
               href: '/analytics',
-              iconType: 'visVisualBuilder',
+              iconType: 'productTSVB',
               sections: [
                 {
                   id: 'analytics_section',
@@ -344,6 +344,164 @@ describe('Both modes', () => {
 
         const analyticsPopover = await screen.findByTestId(popoverId('Analytics'));
         expect(analyticsPopover).toBeInTheDocument();
+      });
+    });
+
+    describe('Show more', () => {
+      const listItems = (count: number) =>
+        Array.from({ length: count }, (_, index) => ({
+          id: `recent-${index + 1}`,
+          label: `Recent ${index + 1}`,
+          href: `/recent/${index + 1}`,
+        }));
+
+      const withDashboardsSections = (
+        sections: Pick<MenuItem, 'supplementarySections' | 'sections'>
+      ): NavigationStructure => ({
+        ...basicMock.navItems,
+        primaryItems: basicMock.navItems.primaryItems.map((item) =>
+          item.id === dashboardsItemId ? { ...item, ...sections } : item
+        ),
+      });
+
+      const withAppsSections = (
+        sections: Pick<MenuItem, 'supplementarySections' | 'sections'>
+      ): NavigationStructure => ({
+        ...basicMock.navItems,
+        primaryItems: basicMock.navItems.primaryItems.map((item) =>
+          item.id === 'apps_overview' ? { ...item, ...sections } : item
+        ),
+      });
+
+      const openDashboardsPopover = async () => {
+        await user.hover(screen.getByTestId(primaryItemId(dashboardsItemId)));
+        flushPopoverTimers();
+        return screen.findByTestId(popoverId('Dashboards'));
+      };
+
+      const visibleItemCount = (popover: HTMLElement) =>
+        within(popover).queryAllByRole('link', { name: /^Recent \d+$/ }).length;
+
+      const showMoreButton = (popover: HTMLElement) =>
+        within(popover).queryByRole('button', { name: 'Show more' });
+
+      /**
+       * GIVEN a hover list longer than the first page
+       * WHEN "Show more" is clicked until the list is exhausted
+       * THEN the list grows 5 → 15 → all and the button disappears
+       */
+      it('should page hover lists by 5, then 10 more per click', async () => {
+        render(
+          <TestComponent
+            items={withDashboardsSections({
+              supplementarySections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(22) },
+              ],
+            })}
+          />
+        );
+
+        const popover = await openDashboardsPopover();
+        expect(visibleItemCount(popover)).toBe(5);
+
+        await user.click(showMoreButton(popover)!);
+        expect(visibleItemCount(popover)).toBe(15);
+
+        await user.click(showMoreButton(popover)!);
+        expect(visibleItemCount(popover)).toBe(22);
+        expect(showMoreButton(popover)).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a hover list with no more items than the first page
+       * WHEN the popover opens
+       * THEN all items show and there is no "Show more"
+       */
+      it('should not show "Show more" when the list fits the first page', async () => {
+        render(
+          <TestComponent
+            items={withDashboardsSections({
+              supplementarySections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(5) },
+              ],
+            })}
+          />
+        );
+
+        const popover = await openDashboardsPopover();
+        expect(visibleItemCount(popover)).toBe(5);
+        expect(showMoreButton(popover)).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a long section without `isPaginated` shown in the hover popover
+       * WHEN the popover opens
+       * THEN the section is not paged
+       */
+      it('should not page sections without `isPaginated`', async () => {
+        render(
+          <TestComponent
+            items={withDashboardsSections({
+              sections: [{ id: 'recent', label: 'Recent', items: listItems(12) }],
+            })}
+          />
+        );
+
+        const popover = await openDashboardsPopover();
+        expect(visibleItemCount(popover)).toBe(12);
+        expect(showMoreButton(popover)).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN keyboard focus on "Show more"
+       * WHEN it is activated with Enter
+       * THEN focus moves to the first revealed item
+       */
+      it('should move keyboard focus to the first revealed item', async () => {
+        render(
+          <TestComponent
+            items={withDashboardsSections({
+              supplementarySections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(8) },
+              ],
+            })}
+          />
+        );
+
+        const popover = await openDashboardsPopover();
+        act(() => showMoreButton(popover)!.focus());
+        await user.keyboard('{Enter}');
+
+        expect(within(popover).getByRole('link', { name: 'Recent 6' })).toHaveFocus();
+      });
+
+      /**
+       * GIVEN a panel opener has a paginated supplementary section
+       * WHEN its side panel opens and "Show more" is clicked
+       * THEN the supplementary list grows without affecting its structural section
+       */
+      it('should page supplementary sections in a side panel', async () => {
+        render(
+          <TestComponent
+            items={withAppsSections({
+              supplementarySections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(8) },
+              ],
+            })}
+            initialActiveItemId={tlsCertificatesItemId}
+          />
+        );
+
+        const sidePanel = screen.getByTestId(sidePanelId);
+
+        expect(within(sidePanel).getByTestId(sidePanelItemId('apps_overview'))).toBeInTheDocument();
+        expect(visibleItemCount(sidePanel)).toBe(5);
+
+        await user.click(showMoreButton(sidePanel)!);
+
+        expect(visibleItemCount(sidePanel)).toBe(8);
+        expect(showMoreButton(sidePanel)).not.toBeInTheDocument();
+        expect(within(sidePanel).getByTestId(sidePanelItemId('apps_overview'))).toBeInTheDocument();
       });
     });
 
@@ -507,6 +665,65 @@ describe('Both modes', () => {
 
       /**
        * GIVEN not all primary menu items fit the menu height
+       * WHEN I hover over the "More" primary menu
+       * AND I click on an item that has a submenu
+       * AND I hover out (the shorter nested panel can shrink out from under the cursor)
+       * THEN the popover should persist
+       */
+      it('should have persistent popover on hover out after opening a nested panel', async () => {
+        render(<TestComponent items={securityMock.navItems} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.hover(moreButton);
+        flushPopoverTimers();
+
+        const morePopover = await screen.findByTestId(morePopoverId);
+
+        await user.click(within(morePopover).getByTestId(secondaryItemId(mlItemId)));
+
+        const nestedPanelTitle = within(morePopover).getByRole('heading');
+        await user.hover(nestedPanelTitle);
+        await user.unhover(nestedPanelTitle);
+        flushPopoverTimers();
+
+        // The closed popover stays in the DOM while it transitions out
+        expect(moreButton).toHaveAttribute('aria-expanded', 'true');
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
+       * WHEN I hover over the "More" primary menu
+       * AND I click on an item without a submenu
+       * THEN the popover should close
+       * AND when I hover over the "More" primary menu again
+       * THEN the popover should show again
+       */
+      it('should show the popover on hover again after clicking an item in it', async () => {
+        render(<TestComponent items={securityMock.navItems} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.hover(moreButton);
+        flushPopoverTimers();
+
+        const morePopover = await screen.findByTestId(morePopoverId);
+
+        await user.click(within(morePopover).getByTestId(secondaryItemId('coverage')));
+
+        await waitFor(() => {
+          expect(morePopover).not.toBeInTheDocument();
+        });
+
+        await user.unhover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
+
+        expect(await screen.findByTestId(morePopoverId)).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
        * WHEN I click on the “More” primary menu
        * AND when I hover over another popover trigger
        * THEN the popover attached to that trigger should not show
@@ -635,6 +852,46 @@ describe('Both modes', () => {
         // First submenu item should be current and highlighted (same ID as parent = same page)
         expect(integrationsLink).toHaveAttribute('aria-current', 'page');
         expect(integrationsLink).toHaveAttribute('data-highlighted', 'true');
+      });
+
+      /**
+       * GIVEN a footer panel opener has structural and supplementary sections
+       * WHEN its side panel opens
+       * THEN the supplementary section is appended to the footer item's structural sections
+       */
+      it('should append supplementary sections in a footer side panel', () => {
+        const navItems: NavigationStructure = {
+          ...basicMock.navItems,
+          footerItems: basicMock.navItems.footerItems.map((item) =>
+            item.id === 'integrations'
+              ? {
+                  ...item,
+                  supplementarySections: [
+                    {
+                      id: 'recent-settings',
+                      label: 'Recent',
+                      items: [
+                        {
+                          id: 'recent-setting',
+                          label: 'Recent setting',
+                          href: '/recent-setting',
+                        },
+                      ],
+                    },
+                  ],
+                }
+              : item
+          ),
+        };
+
+        render(<TestComponent items={navItems} initialActiveItemId={advancedSettingsItemId} />);
+
+        const sidePanel = screen.getByTestId(sidePanelId);
+
+        expect(within(sidePanel).getByTestId(sidePanelItemId('integrations'))).toBeInTheDocument();
+        expect(
+          within(sidePanel).getByTestId(sidePanelItemId('recent-setting'))
+        ).toBeInTheDocument();
       });
 
       /**
@@ -1049,7 +1306,7 @@ describe('Both modes', () => {
           {
             id: 'resource',
             label: 'Resources',
-            iconType: 'apps',
+            iconType: 'grid',
             href: '/resource/overview',
             secondaryMenuTitle: longTitle,
             sections: [
@@ -1136,7 +1393,7 @@ describe('Both modes', () => {
             {
               id: 'resource',
               label: 'Resources',
-              iconType: 'apps',
+              iconType: 'grid',
               href: '/resource/overview',
               secondaryMenuTitle: longTitle,
               sections: [
@@ -1189,9 +1446,74 @@ describe('Both modes', () => {
       });
     });
 
-    describe('Hover-only lists', () => {
+    describe('Supplementary sections', () => {
+      const supplementarySection = {
+        id: 'recentlyViewed',
+        label: 'Recently viewed',
+        items: [{ id: 'recent-app', label: 'Recent app', href: '/apps/recent' }],
+      };
+
+      const appsWithSupplementarySections: NavigationStructure = {
+        ...basicMock.navItems,
+        primaryItems: basicMock.navItems.primaryItems.map((item) =>
+          item.id === 'apps_overview'
+            ? { ...item, supplementarySections: [supplementarySection] }
+            : item
+        ),
+      };
+
       /**
-       * GIVEN a primary item has hover `popoverSections` and an href
+       * GIVEN a panel opener has structural and supplementary sections
+       * WHEN its side panel opens
+       * THEN structural items render first and supplementary items are appended
+       */
+      it('should append supplementary sections in the side panel', () => {
+        render(
+          <TestComponent
+            items={appsWithSupplementarySections}
+            initialActiveItemId={tlsCertificatesItemId}
+          />
+        );
+
+        const sidePanel = screen.getByTestId(sidePanelId);
+        const items = within(sidePanel).getAllByTestId(/^kbnChromeNav-sidePanelItem-/);
+
+        expect(items.map(({ dataset }) => dataset.testSubj)).toEqual([
+          sidePanelItemId('apps_overview'),
+          sidePanelItemId('tls_certificates'),
+          sidePanelItemId('recent-app'),
+        ]);
+      });
+
+      /**
+       * GIVEN a panel opener has structural and supplementary sections
+       * WHEN it is hovered in collapsed mode
+       * THEN the popover contains the same structural-first composition
+       */
+      it('should append supplementary sections in the collapsed popover', async () => {
+        render(
+          <TestComponent
+            isCollapsed
+            items={appsWithSupplementarySections}
+            initialActiveItemId={dashboardsItemId}
+          />
+        );
+
+        await user.hover(screen.getByTestId(primaryItemId('apps_overview')));
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(popoverId('Apps'));
+        const items = within(popover).getAllByTestId(/^kbnChromeNav-popoverItem-/);
+
+        expect(items.map(({ dataset }) => dataset.testSubj)).toEqual([
+          popoverItemId('apps_overview'),
+          popoverItemId('tls_certificates'),
+          popoverItemId('recent-app'),
+        ]);
+      });
+
+      /**
+       * GIVEN a primary item has supplementary sections and an href
        * WHEN I hover it, click it, and stay hovered
        * THEN the popover must not reopen on the click's focus
        * AND hovering again after leaving still opens it
@@ -1204,7 +1526,7 @@ describe('Both modes', () => {
               label: 'Dashboards',
               iconType: 'dashboardApp',
               href: '/dashboards',
-              popoverSections: [
+              supplementarySections: [
                 {
                   id: 'recentlyViewed',
                   label: 'Recently viewed',
@@ -1238,13 +1560,13 @@ describe('Both modes', () => {
       });
     });
 
-    describe('Hover-only lists in More', () => {
+    describe('Supplementary sections in More', () => {
       /**
-       * GIVEN an overflow item has hover `popoverSections` but no tree `sections`
+       * GIVEN an overflow item has supplementary sections but no structural `sections`
        * WHEN I open More
        * THEN it stays a normal link — recents do not become a nested submenu
        */
-      it('should keep hover-only lists as a flat link in More', async () => {
+      it('should keep supplementary sections as a flat link in More', async () => {
         const overflowNav = {
           primaryItems: [
             {
@@ -1261,7 +1583,7 @@ describe('Both modes', () => {
               label: 'Dashboards',
               iconType: 'dashboardApp',
               href: '/dashboards',
-              popoverSections: [
+              supplementarySections: [
                 {
                   id: 'recentlyViewed',
                   label: 'Recently viewed',
@@ -1285,6 +1607,118 @@ describe('Both modes', () => {
         expect(dashboardsLink).toHaveAttribute('href', '/dashboards');
         expect(within(popover).queryByText('Recently viewed')).not.toBeInTheDocument();
         expect(within(popover).queryByText('One')).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN an overflow item has structural and supplementary sections
+       * WHEN I open its nested submenu in More
+       * THEN only its structural sections appear
+       */
+      it('should exclude supplementary sections from a nested More submenu', async () => {
+        const overflowNav: NavigationStructure = {
+          primaryItems: [
+            {
+              id: 'home',
+              label: 'Home',
+              iconType: 'home',
+              href: '/home',
+            },
+          ],
+          footerItems: [],
+          overflowItems: [
+            {
+              id: 'resources',
+              label: 'Resources',
+              iconType: 'folderOpen',
+              href: '/resources',
+              sections: [
+                {
+                  id: 'resources-navigation',
+                  label: 'Navigation',
+                  items: [{ id: 'resources-overview', label: 'Overview', href: '/resources' }],
+                },
+              ],
+              supplementarySections: [
+                {
+                  id: 'recentlyViewed',
+                  label: 'Recently viewed',
+                  items: [{ id: 'recent-resource', label: 'Recent resource', href: '/recent' }],
+                },
+              ],
+            },
+          ],
+        };
+
+        render(<TestComponent items={overflowNav} />);
+
+        await user.click(await screen.findByTestId(moreMenuId));
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(morePopoverId);
+        await user.click(within(popover).getByTestId(secondaryItemId('resources')));
+
+        expect(
+          within(popover).getByTestId(nestedMenuItemId('resources-overview'))
+        ).toBeInTheDocument();
+        expect(within(popover).queryByText('Recently viewed')).not.toBeInTheDocument();
+        expect(within(popover).queryByText('Recent resource')).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN primary items with supplementary sections do not fit and are pushed into More
+       * WHEN I open More and the nested submenu of the panel opener
+       * THEN the plain link stays a link, the panel opener shows its structural sections only
+       * AND no supplementary section is rendered
+       */
+      it('should exclude supplementary sections from items pushed into More', async () => {
+        const pushedItemIds = ['ml-overview', 'coverage'];
+        const pushedNav: NavigationStructure = {
+          ...securityMock.navItems,
+          primaryItems: securityMock.navItems.primaryItems.map((item) =>
+            pushedItemIds.includes(item.id)
+              ? {
+                  ...item,
+                  supplementarySections: [
+                    {
+                      id: `${item.id}-recent`,
+                      label: `Recent ${item.label}`,
+                      items: [
+                        { id: `${item.id}-recent-1`, label: 'Recent entry', href: '/recent' },
+                      ],
+                    },
+                  ],
+                }
+              : item
+          ),
+          overflowItems: [],
+        };
+
+        render(<TestComponent items={pushedNav} initialActiveItemId={dashboardsItemId} />);
+
+        await waitFor(() => {
+          pushedItemIds.forEach((id) => {
+            expect(screen.queryByTestId(primaryItemId(id))).not.toBeInTheDocument();
+          });
+        });
+
+        await user.click(screen.getByTestId(moreMenuId));
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(morePopoverId);
+
+        expect(within(popover).getByRole('link', { name: 'Coverage' })).toHaveAttribute(
+          'href',
+          '/coverage'
+        );
+        expect(within(popover).queryByText('Recent Coverage')).not.toBeInTheDocument();
+
+        await user.click(within(popover).getByTestId(secondaryItemId('ml-overview')));
+
+        expect(
+          within(popover).getByTestId(nestedMenuItemId('data-visualizer'))
+        ).toBeInTheDocument();
+        expect(within(popover).queryByText('Recent Machine learning')).not.toBeInTheDocument();
+        expect(within(popover).queryByText('Recent entry')).not.toBeInTheDocument();
       });
     });
   });
@@ -1838,7 +2272,7 @@ describe('Both modes', () => {
           {
             id: 'maps',
             label: 'Maps',
-            iconType: 'apps',
+            iconType: 'grid',
             href: '/maps',
           },
         ],

@@ -8,7 +8,6 @@
 import type {
   AggregationsCalendarInterval,
   ClusterPutComponentTemplateRequest,
-  MappingDynamicMapping,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -21,7 +20,6 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import {
   getIndexPatternDataStream,
-  getTransformOptions,
   mappingComponentName,
   nameSpaceAwareMappingsComponentName,
   riskScoreFieldMap,
@@ -34,16 +32,10 @@ import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../common/entity_analytics/risk_engine';
-import {
-  createTransform,
-  deleteTransform,
-  stopTransform,
-  getLatestTransformId,
-} from '../utils/transforms';
+import { deleteTransform, getLatestTransformId } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 import type { RiskScoreHistoryEntry } from '../../../../common/api/entity_analytics/risk_engine';
 import { RiskScoreAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
@@ -52,6 +44,7 @@ import {
   getIngestPipelineName,
 } from '../utils/event_ingested_pipeline';
 import { riskScoreSeriesEntityBatchSize } from '../utils/elasticsearch_terms_limits';
+import { toScoreTypeFilter } from './score_type_filter';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -190,6 +183,12 @@ export class RiskScoreDataClient {
    * executes a `date_histogram` and returns, per bucket, the maximum-scoring
    * document so each entry keeps a real document `@timestamp` (the point-in-time
    * contributions flow refetches by exact timestamp).
+   *
+   * TODO: normalized scores written before the alert sample size dropped from 10,000 to 500
+   * (see DEFAULT_ALERT_SAMPLE_SIZE) are on the old scale, about 2.8% lower than the same alerts
+   * score today, so history shows a step at the upgrade. Either rescale older entries here
+   * (score documents don't record which normalizer produced them, so that needs a cutover
+   * timestamp or a new field on the score document) or mark the change in the history UI.
    */
   public getRiskScoreHistory = async (params: {
     entityType: string;
@@ -373,40 +372,6 @@ export class RiskScoreDataClient {
   }
 
   /**
-   * @deprecated This is for the legacy risk engine and will be removed when 9.4 mode is default.
-   */
-  public async initLegacyTransforms() {
-    const namespace = this.options.namespace;
-    const esClient = this.options.esClient;
-
-    try {
-      await this.createOrUpdateRiskScoreLatestIndex();
-
-      const indexPatterns = getIndexPatternDataStream(namespace);
-      const transformId = getLatestTransformId(namespace);
-      await createTransform({
-        esClient,
-        logger: this.options.logger,
-        transform: {
-          transform_id: transformId,
-          ...getTransformOptions({
-            dest: getRiskScoreLatestIndex(namespace),
-            source: [indexPatterns.alias],
-            namespace: this.options.namespace,
-          }),
-        },
-      });
-    } catch (error) {
-      this.options.logger.error(
-        `Error initializing legacy risk engine transforms: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      throw error;
-    }
-  }
-
-  /**
    * Deletes all resources created by init().
    * It returns an array of errors that occurred during the deletion.
    *
@@ -464,98 +429,6 @@ export class RiskScoreDataClient {
 
     return errors;
   }
-
-  /**
-   * Ensures that configuration migrations for risk score indices are seamlessly handled across Kibana upgrades.
-   *
-   * Upgrades:
-   * - Migrating to 8.12+ requires a change to the risk score latest transform index's 'dynamic' setting to ensure that
-   * unmapped fields are allowed within stored documents.
-   *
-   */
-  public async upgradeIfNeeded() {
-    const desiredDynamicValue = 'false';
-    const currentDynamicValue = await this.getRiskScoreLatestIndexDynamicConfiguration();
-    if (currentDynamicValue !== desiredDynamicValue) {
-      await this.setRiskScoreLatestIndexDynamicConfiguration(desiredDynamicValue);
-    }
-  }
-
-  private async getRiskScoreLatestIndexDynamicConfiguration(): Promise<string | undefined> {
-    const riskScoreLatestIndexName = getRiskScoreLatestIndex(this.options.namespace);
-    const riskScoreLatestIndexResponse = await retryTransientEsErrors(
-      () => this.options.esClient.indices.get({ index: riskScoreLatestIndexName }),
-      { logger: this.options.logger }
-    );
-    return riskScoreLatestIndexResponse[riskScoreLatestIndexName]?.mappings?.dynamic?.toString();
-  }
-
-  /**
-   * Sets the risk score latest index's 'dynamic' mapping property to the desired value.
-   * @throws Error if the index does not exist.
-   */
-  private async setRiskScoreLatestIndexDynamicConfiguration(dynamic: MappingDynamicMapping) {
-    return retryTransientEsErrors(
-      () =>
-        this.options.esClient.indices.putMapping({
-          index: getRiskScoreLatestIndex(this.options.namespace),
-          dynamic,
-        }),
-      { logger: this.options.logger }
-    );
-  }
-
-  public copyTimestampToEventIngestedForRiskScore = (abortSignal?: AbortSignal) => {
-    return this.options.esClient.updateByQuery(
-      {
-        index: getRiskScoreLatestIndex(this.options.namespace),
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: {
-          bool: {
-            must_not: {
-              exists: {
-                field: 'event.ingested',
-              },
-            },
-          },
-        },
-        script: {
-          source: 'ctx._source.event.ingested = ctx._source.@timestamp',
-          lang: 'painless',
-        },
-      },
-      {
-        requestTimeout: '5m',
-        retryOnTimeout: true,
-        maxRetries: 2,
-        signal: abortSignal,
-      }
-    );
-  };
-
-  public async reinstallTransform() {
-    const esClient = this.options.esClient;
-    const namespace = this.options.namespace;
-    const transformId = getLatestTransformId(namespace);
-    const indexPatterns = getIndexPatternDataStream(namespace);
-
-    await stopTransform({ esClient, logger: this.options.logger, transformId });
-    await deleteTransform({ esClient, logger: this.options.logger, transformId });
-    await createTransform({
-      esClient,
-      logger: this.options.logger,
-      transform: {
-        transform_id: transformId,
-        ...getTransformOptions({
-          dest: getRiskScoreLatestIndex(namespace),
-          source: [indexPatterns.alias],
-          namespace: this.options.namespace,
-        }),
-      },
-    });
-  }
 }
 
 // --- types and helpers for getRiskScoreHistory ---
@@ -593,33 +466,6 @@ const toDateHistogramInterval = (interval: {
     ? { calendar_interval: calendarExpression }
     : { fixed_interval: `${interval.value}${interval.unit}` };
 };
-
-const toScoreTypeFilter = (
-  riskPath: string,
-  scoreType: string | undefined
-): Array<Record<string, unknown>> => {
-  if (scoreType === undefined) {
-    return [];
-  }
-
-  // documents written before score_type was introduced have no field — treat as base
-  if (scoreType === 'base') {
-    return [
-      {
-        bool: {
-          should: [
-            { term: { [`${riskPath}.score_type`]: 'base' } },
-            { bool: { must_not: { exists: { field: `${riskPath}.score_type` } } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ];
-  }
-
-  return [{ term: { [`${riskPath}.score_type`]: scoreType } }];
-};
-
 const getRiskFromSource = (
   source: RiskScoreTimeSeriesSource,
   entityType: string

@@ -26,6 +26,7 @@ import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { FeedbackAgentSelector } from './feedback_agent_selector';
 import { SignalGroupFlyout } from './signal_group_flyout';
 import { SignalGroupRow } from './signal_group_row';
@@ -79,13 +80,19 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSignalsPanel">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h2>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.title', {
                 defaultMessage: 'Signals',
               })}
             </h2>
           </EuiTitle>
+          <AiIndexDetailPanelDescription data-test-subj="contextSignalsPanelDescription">
+            {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.description', {
+              defaultMessage:
+                'Signals are observations classified from Agent Builder traces, grouped by tag. Open a group to inspect individual signals and their traces.',
+            })}
+          </AiIndexDetailPanelDescription>
         </EuiFlexItem>
         {chatOpener && (
           <EuiFlexItem grow={false}>
@@ -144,15 +151,6 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
         </>
       )}
 
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.description', {
-            defaultMessage:
-              'Signals are observations classified from Agent Builder traces, grouped by tag. Open a group to inspect individual signals and their traces.',
-          })}
-        </p>
-      </EuiText>
       <EuiSpacer size="m" />
 
       {loading ? (

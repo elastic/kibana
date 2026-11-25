@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
@@ -14,28 +15,19 @@ import {
 } from '../fixtures/alerting_v2_setting';
 import type { ObservabilityAlertingPage } from '../fixtures/page_objects';
 import {
-  createV1ThresholdSourceIndex,
-  deleteV1PrivilegeAlerts,
-  deleteV1PrivilegeRule,
-  deleteV1ThresholdSourceIndex,
+  createV1PrivilegeRule,
+  deleteV1PrivilegeRuleData,
   deleteV2PrivilegeRule,
-  CUSTOM_THRESHOLD_RULE_TYPE_ID,
   OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
+  READER_ES_PRIVILEGES,
   seedV2PrivilegeRule,
-  THRESHOLD_DATA_VIEW_ID,
   THRESHOLD_TEST_INDEX,
   V1_EPISODE_TAG,
   V2_EPISODE_TAG,
-  waitForV1RuleAlert,
 } from '../fixtures/privilege_test_data';
-import { OBSERVABILITY_ALERTING_INBOX_PATH } from '../../../../public/constants';
+import { OBSERVABILITY_ALERTING_ALERTS_PATH } from '../../../../public/constants';
 
 type ElasticsearchPrivileges = KibanaRole['elasticsearch'];
-
-const READER_ES_PRIVILEGES: ElasticsearchPrivileges = {
-  cluster: [],
-  indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
-};
 
 /** Read on the classic alerts and rule source indices only, so any v2 query would be forbidden. */
 const CLASSIC_ONLY_ES_PRIVILEGES: ElasticsearchPrivileges = {
@@ -102,8 +94,8 @@ const NO_ALERTING_ROLE: KibanaRole = {
   ],
 };
 
-/** Matches both the uncapped (`Showing N episode(s)`) and capped toolbar labels. */
-const EPISODES_ITEM_COUNT_RE = /^Showing(?: first)? \d[\d,]* episodes?$/;
+/** Matches both the uncapped (`Showing N alert(s)`) and capped toolbar labels. */
+const ALERTS_ITEM_COUNT_RE = /^Showing(?: first)? \d[\d,]* alerts?$/;
 
 const assertEpisodesInboxHappyPath = async (
   observabilityAlerting: ObservabilityAlertingPage,
@@ -118,7 +110,7 @@ const assertEpisodesInboxHappyPath = async (
   }
 ): Promise<void> => {
   await test.step('page renders without the privilege prompt', async () => {
-    await expect(observabilityAlerting.pageTitle).toHaveText('Alert episodes', {
+    await expect(observabilityAlerting.pageTitle).toHaveText('Alerts', {
       timeout: 60_000,
     });
     await expect(observabilityAlerting.requiredPrivilegesPrompt).not.toBeVisible();
@@ -138,7 +130,7 @@ const assertEpisodesInboxHappyPath = async (
   await test.step('episodes list resolves', async () => {
     await expect(observabilityAlerting.episodesListPage).toBeVisible();
     await expect(observabilityAlerting.episodesTableToolbar).toBeVisible({ timeout: 60_000 });
-    await expect(observabilityAlerting.episodesItemCount).toHaveText(EPISODES_ITEM_COUNT_RE);
+    await expect(observabilityAlerting.episodesItemCount).toHaveText(ALERTS_ITEM_COUNT_RE);
     for (const ruleName of expectedRuleNames) {
       await expect(observabilityAlerting.episodeRuleCell(ruleName)).toBeVisible({
         timeout: 30_000,
@@ -185,14 +177,10 @@ const assertEpisodesInboxHappyPath = async (
  * `logs`) is created against a source index, forced with `runSoon`, and waited
  * on until a real observability threshold AAD document appears. A v2 rule (with
  * a tag action) is also created so the combined tag filter can show both sources.
- *
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
  */
 test.describe(
   'Observability Alerting - privilege-based page access',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     let v1RuleId: string | undefined;
     let v2RuleId: string | undefined;
@@ -200,54 +188,17 @@ test.describe(
     test.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       test.setTimeout(180_000);
       await setAlertingV2EnabledSetting(kbnClient, true);
-      await createV1ThresholdSourceIndex(esClient);
-      await apiServices.dataViews.create({
-        id: THRESHOLD_DATA_VIEW_ID,
-        name: THRESHOLD_DATA_VIEW_ID,
-        title: THRESHOLD_TEST_INDEX,
-        timeFieldName: '@timestamp',
-        override: true,
-      });
-      const created = await apiServices.alerting.rules.create({
+      v1RuleId = await createV1PrivilegeRule({
+        apiServices,
+        esClient,
+        kbnClient,
         name: V1_RULE_NAME,
-        ruleTypeId: CUSTOM_THRESHOLD_RULE_TYPE_ID,
-        consumer: 'logs',
-        enabled: true,
-        tags: [V1_EPISODE_TAG],
-        schedule: { interval: '10s' },
-        actions: [],
-        params: {
-          criteria: [
-            {
-              comparator: '>',
-              threshold: [0],
-              timeSize: 5,
-              timeUnit: 'm',
-              metrics: [{ name: 'A', aggType: 'count' }],
-            },
-          ],
-          alertOnNoData: false,
-          alertOnGroupDisappear: false,
-          searchConfiguration: {
-            query: { query: '', language: 'kuery' },
-            index: THRESHOLD_DATA_VIEW_ID,
-          },
-        },
       });
-      const ruleId = created.data.id as string;
-      v1RuleId = ruleId;
-      await apiServices.alerting.rules.runSoon(ruleId);
-      await waitForV1RuleAlert(esClient, kbnClient, ruleId);
       v2RuleId = await seedV2PrivilegeRule(esClient, kbnClient);
     });
 
     test.afterAll(async ({ apiServices, esClient, kbnClient }) => {
-      if (v1RuleId) {
-        await deleteV1PrivilegeAlerts(esClient, v1RuleId);
-        await deleteV1PrivilegeRule(kbnClient, v1RuleId);
-      }
-      await apiServices.dataViews.delete(THRESHOLD_DATA_VIEW_ID).catch(() => undefined);
-      await deleteV1ThresholdSourceIndex(esClient);
+      await deleteV1PrivilegeRuleData({ apiServices, esClient, kbnClient, ruleId: v1RuleId });
       if (v2RuleId) {
         await deleteV2PrivilegeRule(esClient, kbnClient, v2RuleId);
       }
@@ -259,7 +210,7 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(LOGS_READ_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
       await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
         expectedTags: [V1_EPISODE_TAG],
         unexpectedTags: [V2_EPISODE_TAG],
@@ -272,7 +223,7 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(LOGS_READ_CLASSIC_INDICES_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
       await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
         expectedTags: [V1_EPISODE_TAG],
         unexpectedTags: [V2_EPISODE_TAG],
@@ -285,7 +236,7 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
       await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
         expectedTags: [V2_EPISODE_TAG],
         unexpectedTags: [V1_EPISODE_TAG],
@@ -294,7 +245,7 @@ test.describe(
 
     test('user with no alerting privileges is blocked', async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(NO_ALERTING_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
       await expect(pageObjects.observabilityAlerting.requiredPrivilegesPrompt).toBeVisible({
         timeout: 60_000,

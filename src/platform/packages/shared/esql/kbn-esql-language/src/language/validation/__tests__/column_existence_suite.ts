@@ -19,6 +19,38 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       ]);
     });
 
+    it('knows the columns a HIGHLIGHT without a query reuses from a full-text WHERE', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE MATCH(textField, "x") | HIGHLIGHT | KEEP highlight_textField',
+        []
+      );
+    });
+
+    it('knows the HIGHLIGHT columns of a QSTR WHERE after its text columns are removed', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE QSTR("x") | KEEP integerField | EVAL label = TO_STRING(integerField) | HIGHLIGHT | KEEP highlight_label',
+        []
+      );
+    });
+
+    it('reports a HIGHLIGHT column whose WHERE has no full-text condition to reuse', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE keywordField == "x" | HIGHLIGHT | KEEP highlight_keywordField',
+        ['Unknown column "highlight_keywordField"']
+      );
+    });
+
+    it('reports a HIGHLIGHT column whose WHERE is cut off by a STATS', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE MATCH(textField, "x") | STATS COUNT(*) BY textField | HIGHLIGHT | KEEP highlight_textField',
+        ['Unknown column "highlight_textField"']
+      );
+    });
+
     it('treats FORK branches separately', async () => {
       const { expectErrors } = await setup();
       await expectErrors('FROM index | FORK (DROP keywordField) (KEEP keywordField)', []);
@@ -66,6 +98,48 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       await expectErrors('from conflict_index | keep conflictingField', [], [message]);
       await expectErrors('from conflict_index | drop conflictingField', [], [message]);
       await expectErrors('from conflict_index | sort conflictingField', [message]);
+    });
+
+    it('accepts a key written under a flattened field', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM index | WHERE flattenedField.env == "prod"', []);
+      await expectErrors('FROM index | KEEP flattenedField.env', []);
+      await expectErrors(
+        'FROM index | WHERE flattenedField.env == "prod" | KEEP flattenedField.env',
+        []
+      );
+      await expectErrors(
+        'FROM index | KEEP flattenedField.env | WHERE flattenedField.env == "staging"',
+        []
+      );
+      await expectErrors('FROM index | STATS COUNT(*) BY flattenedField.nested.region', []);
+      await expectErrors(
+        'FROM (FROM index | KEEP flattenedField.env) | KEEP flattenedField.env',
+        []
+      );
+      await expectErrors(
+        'FROM index | FORK (KEEP flattenedField.env) (KEEP flattenedField.env) | WHERE flattenedField.env == "prod"',
+        []
+      );
+    });
+
+    it('still reports an unknown column under a field that is not flattened', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM index | WHERE keywordField.env == "prod"', [
+        'Unknown column "keywordField.env"',
+      ]);
+      await expectErrors('FROM index | WHERE kubernetes.something.something.extra == 1', [
+        'Unknown column "kubernetes.something.something.extra"',
+      ]);
+    });
+
+    it('does not treat a flattened key as an unmapped field when unmapped fields are loaded', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'SET unmapped_fields = "LOAD"; FROM index | WHERE flattenedField.env == "prod" | KEEP flattenedField.env',
+        [],
+        []
+      );
     });
 
     it('returns one warning for each instance of the same unmapped column', async () => {

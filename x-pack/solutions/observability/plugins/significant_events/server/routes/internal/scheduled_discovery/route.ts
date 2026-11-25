@@ -6,45 +6,26 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
-} from '@kbn/management-settings-ids';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED } from '@kbn/management-settings-ids';
+import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
-import { StatusError } from '../../../lib/errors/status_error';
-import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 import {
-  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
-  DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
-  DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
-  DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
-  DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
-  MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS,
+  SCHEDULED_DISCOVERY_NUMERIC_SETTINGS,
+  assertValidDetectionWindow,
+  resolveScheduledDiscoveryConfig,
+  type ScheduledDiscoveryNumericField,
+} from '../../../lib/scheduled_discovery/scheduled_discovery_config';
+import { setScheduledDiscoveryEnabled } from '../../../lib/scheduled_discovery/set_scheduled_discovery_enabled';
+import {
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
   MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
   MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
-  MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
@@ -100,61 +81,6 @@ const putScheduledDiscoverySettingsBodySchema = z.object({
   scheduledDiscovery: scheduledDiscoverySettingsSchema,
 });
 
-// Maps each numeric `scheduledDiscovery` config field to its per-space UI setting
-// id and the default applied when neither the request nor the stored settings
-// provide a value. Drives both persistence and workflow config resolution below
-// so the field/setting-id/default triple lives in exactly one place.
-const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
-  detectionIntervalMinutes: {
-    settingId:
-      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
-    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-  },
-  detectionBucketIntervalMinutes: {
-    settingId:
-      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES,
-    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
-  },
-  detectionLookbackMinutes: {
-    settingId:
-      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES,
-    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
-  },
-  targetCoverageMinutes: {
-    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
-    defaultValue: DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
-  },
-  reviewIntervalMinutes: {
-    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
-    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  },
-  discoveryBatchSize: {
-    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
-    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
-  },
-  maxReviewPasses: {
-    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
-    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
-  },
-  flakyRuleDetectionThreshold: {
-    settingId:
-      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD,
-    defaultValue: DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
-  },
-  flakyRuleProbeAfterMinutes: {
-    settingId:
-      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES,
-    defaultValue: DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
-  },
-  flakyRuleExemptSeverityScore: {
-    settingId:
-      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
-    defaultValue: DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
-  },
-} as const;
-
-type ScheduledDiscoveryNumericField = keyof typeof SCHEDULED_DISCOVERY_NUMERIC_SETTINGS;
-
 const putScheduledDiscoverySettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_significant_events/scheduled_discovery/settings',
   options: {
@@ -165,7 +91,7 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -191,12 +117,7 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
 
     const { scheduledDiscovery } = params.body;
 
-    const spaceUpdates: Record<string, boolean | number> = {};
-
-    if (scheduledDiscovery.enabled !== undefined) {
-      spaceUpdates[OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED] =
-        scheduledDiscovery.enabled;
-    }
+    const spaceUpdates: Record<string, number> = {};
     for (const field of Object.keys(
       SCHEDULED_DISCOVERY_NUMERIC_SETTINGS
     ) as ScheduledDiscoveryNumericField[]) {
@@ -206,7 +127,7 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
       }
     }
 
-    const previousSpaceValues: Record<string, boolean | number> = {};
+    const previousSpaceValues: Record<string, number> = {};
     const spaceKeys = Object.keys(spaceUpdates);
     const spaceSettings = await uiSettingsClient.getAll<boolean | number>();
 
@@ -218,52 +139,25 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
 
     // Feature toggles are owned by Pause/Resume while paused — no edits allowed
     // (enable, disable, or config-only updates).
-    if (Object.keys(spaceUpdates).length > 0) {
+    if (scheduledDiscovery.enabled !== undefined || spaceKeys.length > 0) {
       await assertNotPaused({ maintenanceService, request });
     }
 
-    if (spaceKeys.length > 0) {
-      for (const key of spaceKeys) {
-        previousSpaceValues[key] = spaceSettings[key];
+    for (const key of spaceKeys) {
+      const previous = spaceSettings[key];
+      if (typeof previous === 'number') {
+        previousSpaceValues[key] = previous;
       }
     }
 
-    // Resolve a scheduled discovery config value, preferring the incoming request,
-    // then the stored per-space setting, then the built-in default.
-    const resolveScheduledConfigValue = (field: ScheduledDiscoveryNumericField): number => {
-      const { settingId, defaultValue } = SCHEDULED_DISCOVERY_NUMERIC_SETTINGS[field];
-      return (
-        (spaceUpdates[settingId] as number | undefined) ??
-        (spaceSettings[settingId] as number | undefined) ??
-        defaultValue
-      );
-    };
-
-    // The change_point aggregation only works on between MIN and MAX buckets, so
-    // the detection lookback must be an exact multiple of the bucket interval and
-    // the resulting bucket count must stay inside those bounds. Validate the
-    // resolved pair (request value, stored setting, or default) so a partial
-    // update can't combine into an invalid detection configuration.
-    const resolvedBucketIntervalMinutes = resolveScheduledConfigValue(
-      'detectionBucketIntervalMinutes'
-    );
-    const resolvedLookbackMinutes = resolveScheduledConfigValue('detectionLookbackMinutes');
-    if (resolvedLookbackMinutes % resolvedBucketIntervalMinutes !== 0) {
-      throw new StatusError(
-        `detectionLookbackMinutes (${resolvedLookbackMinutes}) must be an exact multiple of detectionBucketIntervalMinutes (${resolvedBucketIntervalMinutes})`,
-        400
-      );
-    }
-    const detectionBucketCount = resolvedLookbackMinutes / resolvedBucketIntervalMinutes;
-    if (
-      detectionBucketCount < MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS ||
-      detectionBucketCount > MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS
-    ) {
-      throw new StatusError(
-        `detectionLookbackMinutes (${resolvedLookbackMinutes}) divided by detectionBucketIntervalMinutes (${resolvedBucketIntervalMinutes}) must yield between ${MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS} and ${MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS} buckets, got ${detectionBucketCount}`,
-        400
-      );
-    }
+    // Request values win over stored settings, which win over the registered default.
+    // Validated before either write so a partial update cannot combine into an invalid
+    // change_point configuration.
+    const resolvedConfig = resolveScheduledDiscoveryConfig({
+      ...spaceSettings,
+      ...spaceUpdates,
+    });
+    assertValidDetectionWindow(resolvedConfig);
 
     const rollbackSettings = async () => {
       if (Object.keys(previousSpaceValues).length === 0) {
@@ -275,49 +169,28 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
     };
 
     try {
-      // Persist the settings inside the try so a partial write failure is reverted
-      // by rollbackSettings() alongside a downstream workflow reconciliation failure.
+      // Persist numeric settings inside the try so a partial write failure is reverted
+      // alongside a downstream workflow reconciliation failure. The enabled toggle is
+      // written by setScheduledDiscoveryEnabled, which rolls that write back itself.
       if (spaceKeys.length > 0) {
         await uiSettingsClient.setMany(spaceUpdates);
       }
 
-      // Reconcile the per-space workflows on an enabled-state transition, and also
-      // on a config change while enabled so the rendered workflow templates pick up
-      // the new cadence and batch sizes.
       const enabledChanged =
         scheduledDiscovery.enabled !== undefined && scheduledDiscovery.enabled !== previousEnabled;
-      const configChanged = Object.keys(spaceUpdates).some(
-        (key) => key !== OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
-      );
+      const configChanged = spaceKeys.length > 0;
 
       if (enabledChanged || (nextEnabled && configChanged)) {
-        const spaceId = await getSpaceId(request);
-        if (nextEnabled) {
-          if (!server.agentBuilder) {
-            throw new Error(
-              'Agent Builder is required to enable significant events scheduled discovery'
-            );
-          }
-          await installDiscoveryAgents({ agentBuilder: server.agentBuilder, spaceId });
-        }
-        await workflowService.ensureWorkflow({
-          enabled: nextEnabled,
+        await setScheduledDiscoveryEnabled({
+          uiSettingsClient,
+          workflowService,
+          agentBuilder: server.agentBuilder,
           request,
-          spaceId,
-          config: {
-            detectionIntervalMinutes: resolveScheduledConfigValue('detectionIntervalMinutes'),
-            detectionBucketIntervalMinutes: resolvedBucketIntervalMinutes,
-            detectionLookbackMinutes: resolvedLookbackMinutes,
-            targetCoverageMinutes: resolveScheduledConfigValue('targetCoverageMinutes'),
-            reviewIntervalMinutes: resolveScheduledConfigValue('reviewIntervalMinutes'),
-            discoveryBatchSize: resolveScheduledConfigValue('discoveryBatchSize'),
-            maxReviewPasses: resolveScheduledConfigValue('maxReviewPasses'),
-            flakyRuleDetectionThreshold: resolveScheduledConfigValue('flakyRuleDetectionThreshold'),
-            flakyRuleProbeAfterMinutes: resolveScheduledConfigValue('flakyRuleProbeAfterMinutes'),
-            flakyRuleExemptSeverityScore: resolveScheduledConfigValue(
-              'flakyRuleExemptSeverityScore'
-            ),
-          },
+          spaceId: await getSpaceId(request),
+          enabled: nextEnabled,
+          config: resolvedConfig,
+          logger,
+          ...(enabledChanged ? {} : { reconcileWhenUnchanged: true }),
         });
       }
     } catch (err) {

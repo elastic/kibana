@@ -60,6 +60,9 @@ export const createRound = (parts: Partial<ConversationRound>): ConversationRoun
 export const createConversationClientMock = (): ConversationClientMock => {
   return {
     get: jest.fn(),
+    getWithVersion: jest.fn(),
+    peekVersion: jest.fn(),
+    appendSteer: jest.fn(),
     exists: jest.fn(),
     getByOrigin: jest.fn(),
     create: jest.fn(),
@@ -77,6 +80,8 @@ export const createConversationClientMock = (): ConversationClientMock => {
     search: jest.fn(),
     delete: jest.fn(),
     updateAccessControl: jest.fn(),
+    addAccessControlEntries: jest.fn(),
+    removeAccessControlEntries: jest.fn(),
     applyTemplate: jest.fn(),
     patchMetadata: jest.fn(),
   };

@@ -16,7 +16,7 @@ const IMPACTED_SERVICE_SUBTYPE = 'service';
 interface ImpactedServiceCandidate {
   feature_id: string;
   name: string;
-  stream_name?: string;
+  source_id?: string;
 }
 
 export interface ImpactedService {
@@ -55,14 +55,14 @@ const getImpactedServiceReferences = (event: SignificantEvent): ImpactedServiceC
 export const getImpactedServiceKey = (name: string): string =>
   `${IMPACTED_SERVICE_TYPE}:${name.toLowerCase()}`;
 
-/** Streams whose knowledge indicators must be loaded before impacted services can be resolved. */
-export const getImpactedServiceStreamNames = (events: SignificantEvent[]): string[] => [
+/** Sources whose knowledge indicators must be loaded before impacted services can be resolved. */
+export const getImpactedServiceSourceIds = (events: SignificantEvent[]): string[] => [
   ...new Set(
     events
       .flatMap((event) =>
-        getImpactedServiceReferences(event).map(({ stream_name: streamName }) => streamName)
+        getImpactedServiceReferences(event).map(({ source_id: sourceId }) => sourceId)
       )
-      .filter((streamName): streamName is string => Boolean(streamName))
+      .filter((sourceId): sourceId is string => Boolean(sourceId))
   ),
 ];
 

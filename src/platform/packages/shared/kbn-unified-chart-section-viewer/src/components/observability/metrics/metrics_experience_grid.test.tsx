@@ -43,7 +43,7 @@ import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
 jest.mock('./context/metrics_experience_state_provider');
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
@@ -158,6 +158,8 @@ jest.mock('lodash', () => {
     debounce: (fn: any) => {
       const debounced = (...args: any[]) => fn(...args);
       debounced.cancel = jest.fn();
+      // This mock invokes synchronously, so there is never a pending call to flush.
+      debounced.flush = jest.fn();
       return debounced;
     },
   };
@@ -250,7 +252,6 @@ describe('MetricsExperienceGrid', () => {
     jest.clearAllMocks();
 
     fetchParams = getFetchParamsMock({
-      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
       filters: [],
       query: { esql: 'TS metrics-*' },
       esqlVariables: [],
@@ -339,6 +340,20 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
     expect(getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ)).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
+  });
+
+  it('reports the dimensions as the only breakdown fields and clears them on unmount', () => {
+    const setBreakdownFieldNames = jest.fn();
+    const { unmount } = render(
+      <MetricsExperienceGrid {...defaultProps} setBreakdownFieldNames={setBreakdownFieldNames} />,
+      { wrapper: TestWrapper }
+    );
+
+    expect(setBreakdownFieldNames).toHaveBeenLastCalledWith(['foo', 'qux']);
+
+    unmount();
+
+    expect(setBreakdownFieldNames).toHaveBeenLastCalledWith(undefined);
   });
 
   it('renders Discover ErrorCallout when METRICS_INFO fetch fails with a network error', () => {
@@ -754,6 +769,48 @@ describe('MetricsExperienceGrid', () => {
       // Page reset is owned exclusively by useResetPageOnDimensionsChange reacting
       // to the selectedDimensions change -- not by the toolbar handler directly.
       expect(onPageChange).not.toHaveBeenCalled();
+    });
+
+    it('clears the Discover breakdown field when it is deselected via the toolbar', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [dimensions[0]],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
+        onMetricsSortChange: jest.fn(),
+        profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
+        onGridSettingsChange: jest.fn(),
+      });
+
+      const { getByTestId } = render(
+        <MetricsExperienceGrid
+          {...defaultProps}
+          breakdownField="foo"
+          onBreakdownFieldChange={onBreakdownFieldChange}
+        />,
+        { wrapper: TestWrapper }
+      );
+
+      act(() => {
+        getByTestId('metricsExperienceBreakdownSelectorOption-foo').click();
+      });
+
+      expect(onBreakdownFieldChange).toHaveBeenCalledWith(undefined);
+      expect(onDimensionsChange).toHaveBeenCalledWith([]);
     });
   });
 

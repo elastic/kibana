@@ -10,14 +10,14 @@ import { SEVERITY_RANK, severityRank } from './severity_rank';
 
 describe('severityRank', () => {
   it('keeps SEVERITY_OPTIONS ordered most-severe first so positional ranks stay stable', () => {
-    expect([...SEVERITY_OPTIONS]).toEqual(['80-critical', '60-high', '40-medium', '20-low']);
+    expect([...SEVERITY_OPTIONS]).toEqual(['critical', 'high', 'medium', 'low']);
   });
 
   it('assigns lower rank indexes to higher severity tiers', () => {
-    expect(severityRank('80-critical')).toBe(0);
-    expect(severityRank('60-high')).toBe(1);
-    expect(severityRank('40-medium')).toBe(2);
-    expect(severityRank('20-low')).toBe(3);
+    expect(severityRank('critical')).toBe(0);
+    expect(severityRank('high')).toBe(1);
+    expect(severityRank('medium')).toBe(2);
+    expect(severityRank('low')).toBe(3);
     expect(SEVERITY_RANK.size).toBe(SEVERITY_OPTIONS.length);
   });
 

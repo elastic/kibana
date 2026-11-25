@@ -11,13 +11,17 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadBinding,
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeResult,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
+  ServiceAccountSummary,
 } from '@kbn/core-security-common';
 
 import type { CoreAuditService } from './audit';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
+import type { CoreAuthorizationService } from './authz';
 import type { CoreServiceAccountsService } from './service_accounts';
 
 /**
@@ -28,6 +32,7 @@ import type { CoreServiceAccountsService } from './service_accounts';
  */
 export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
+  authz: AuthorizationServiceContract;
   audit: AuditServiceContract;
   serviceAccounts: ServiceAccountsServiceContract;
   /**
@@ -51,6 +56,8 @@ export interface CoreSecurityDelegateContract {
  */
 export type AuthenticationServiceContract = CoreAuthenticationService;
 
+export type AuthorizationServiceContract = CoreAuthorizationService;
+
 export type AuditServiceContract = CoreAuditService;
 
 /**
@@ -65,7 +72,7 @@ export type AuditServiceContract = CoreAuditService;
  * @public
  */
 export interface ServiceAccountsServiceContract
-  extends Pick<CoreServiceAccountsService, 'isEnabled' | 'create'> {
+  extends Pick<CoreServiceAccountsService, 'isEnabled' | 'create' | 'delete'> {
   /**
    * Binds a workload to a service account, in the space of the request.
    *
@@ -94,6 +101,20 @@ export interface ServiceAccountsServiceContract
   ): Promise<boolean>;
 
   /**
+   * Binds and unbinds many workloads, in the space of the request.
+   * @param pluginId - The id of the plugin that owns the workloads.
+   * @param request - The request, whose space the bindings are changed in.
+   * @param changes - The changes. Core has already checked them, so they are well formed, within
+   * the limit, and name no workload twice.
+   * @returns One result per change, in the order given.
+   */
+  bulkUpdateWorkloadBindings(
+    pluginId: string,
+    request: KibanaRequest,
+    changes: readonly ServiceAccountWorkloadBindingChange[]
+  ): Promise<ServiceAccountWorkloadBindingChangeResult[]>;
+
+  /**
    * Retrieves a workload binding.
    * @param pluginId - The id of the plugin that owns the workload.
    * @param params - The parameters.
@@ -103,6 +124,17 @@ export interface ServiceAccountsServiceContract
     pluginId: string,
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
+
+  /**
+   * Names the account a workload is bound to, reading it as Kibana.
+   * @param pluginId - The id of the plugin that owns the workload.
+   * @param params - The parameters.
+   * @returns The account's summary, or `null` when there is none to report.
+   */
+  getWorkloadServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null>;
 
   /**
    * Executes a function for a workload, scoped to the Service Account.
@@ -116,4 +148,77 @@ export interface ServiceAccountsServiceContract
     params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
+}
+
+/**
+ * A bound workload, as {@link CoreSecurityDelegateServiceAccounts.resolveBoundWorkloads} takes it.
+ *
+ * @public
+ */
+export type ServiceAccountBoundWorkloadRef = Pick<
+  ServiceAccountWorkloadBinding,
+  'pluginId' | 'workloadType' | 'workloadId' | 'spaceId'
+>;
+
+/**
+ * A bound workload resolved by its workload type. See {@link ServiceAccountWorkloadDetails} for
+ * what each status means.
+ *
+ * @public
+ */
+export type ResolvedServiceAccountWorkload =
+  | {
+      status: 'present';
+      /** Title of the workload, when its workload type returned one. */
+      title?: string;
+      /** Link to the workload, with the base path and the space of the binding already applied. */
+      href?: string;
+    }
+  | { status: 'missing' }
+  | { status: 'unknown' };
+
+/**
+ * Options for {@link CoreSecurityDelegateServiceAccounts.resolveBoundWorkloads}.
+ *
+ * @public
+ */
+export interface ResolveBoundWorkloadsOptions {
+  /** Aborts the resolvers still running. Their workloads come back `unknown`. */
+  signal?: AbortSignal;
+  /**
+   * What the result is for, recorded on the resolution metrics. Defaults to `display`.
+   */
+  purpose?: 'display' | 'cleanup';
+}
+
+/**
+ * What Core exposes to the security provider about the workload types plugins register.
+ *
+ * @public
+ */
+export interface CoreSecurityDelegateServiceAccounts {
+  /**
+   * Returns the name a plugin registered for a workload type, or `undefined` when no loaded plugin
+   * registered that type.
+   */
+  getWorkloadTypeName(pluginId: string, workloadType: string): string | undefined;
+
+  /**
+   * Resolves bound workloads through their workload types. Returns one entry per binding, in the
+   * same order. Never rejects: a binding whose type has no resolver, or whose resolver fails, times
+   * out, is aborted or returns something malformed, comes back `unknown`.
+   */
+  resolveBoundWorkloads(
+    bindings: ReadonlyArray<ServiceAccountBoundWorkloadRef>,
+    options?: ResolveBoundWorkloadsOptions
+  ): Promise<ResolvedServiceAccountWorkload[]>;
+}
+
+/**
+ * What Core hands back to the security provider when it registers its delegate.
+ *
+ * @public
+ */
+export interface CoreSecurityDelegateHandle {
+  serviceAccounts: CoreSecurityDelegateServiceAccounts;
 }

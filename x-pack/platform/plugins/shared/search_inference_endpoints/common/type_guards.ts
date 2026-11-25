@@ -6,8 +6,8 @@
  */
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
-import { CHAT_COMPLETION_TASK_TYPE } from './constants';
 import type {
+  TestableTaskType,
   CspRegion,
   EisInferenceEndpoint,
   InferenceEndpointWithMetadata,
@@ -16,25 +16,10 @@ import type {
   ReasoningEffortLevel,
   RegionPolicyConflictAttributes,
 } from './types';
+import { TESTABLE_TASK_TYPES } from './constants';
 
-const KIBANA_CONNECTOR_HEURISTIC = 'kibana-connector';
-
-/**
- * True when the endpoint is a chat-completion inference entry managed as a Kibana dynamic
- * connector (see `filterPreconfiguredEndpoints` in server utils).
- */
-export function isInferenceEndpointWithKibanaConnectorHeuristic(
-  endpoint: InferenceInferenceEndpointInfo
-): boolean {
-  if (endpoint.task_type !== CHAT_COMPLETION_TASK_TYPE) {
-    return false;
-  }
-  if (!isInferenceEndpointWithMetadata(endpoint)) {
-    return false;
-  }
-  const properties = endpoint.metadata?.heuristics?.properties;
-  return Array.isArray(properties) && properties.includes(KIBANA_CONNECTOR_HEURISTIC);
-}
+export const isTestableTaskType = (taskType: string): taskType is TestableTaskType =>
+  TESTABLE_TASK_TYPES.some((testableTaskType) => testableTaskType === taskType);
 
 export const isEisEndpoint = (ep: InferenceInferenceEndpointInfo): ep is EisInferenceEndpoint =>
   ep.service === 'elastic';

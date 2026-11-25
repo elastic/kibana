@@ -8,7 +8,7 @@
 import type { MonoTypeOperatorFunction } from 'rxjs';
 import { filter } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
+import type { ChatEvent, InteractivityConfigInput } from '@kbn/agent-builder-common';
 import {
   createBadRequestError,
   AgentExecutionMode,
@@ -114,10 +114,14 @@ export const getConverseHelpers = ({
     payload,
     request,
     executionOptions,
+    interactive,
+    autoCreateConversationWithId = true,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     executionOptions?: ResolvedExecutionOptions;
+    interactive?: InteractivityConfigInput;
+    autoCreateConversationWithId?: boolean;
   }): ExecuteAgentParams => {
     const {
       agent_id: agentId,
@@ -144,11 +148,14 @@ export const getConverseHelpers = ({
       executionId,
       metadata,
       useTaskManager,
+      // Only browser requests from the Kibana UI, where a user is waiting on the first token.
+      requestImmediateClaim: request.isInternalApiRequest,
+      ...(interactive ? { interactive } : {}),
       params: {
         agentId,
         connectorId,
         conversationId,
-        autoCreateConversationWithId: true,
+        autoCreateConversationWithId,
         accessControl,
         readOnly,
         origin,
@@ -173,6 +180,8 @@ export const getConverseHelpers = ({
     request: KibanaRequest;
     executionService: AgentExecutionService;
     executionOptions?: ResolvedExecutionOptions;
+    interactive?: InteractivityConfigInput;
+    autoCreateConversationWithId?: boolean;
   }) => options.executionService.executeAgent(toExecuteParams(options));
 
   /** Persists the request's user message, and runs the agent unless the trigger mode says not to. */

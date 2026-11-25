@@ -14,6 +14,7 @@ export class EisModelsPage {
   // Search and Filters
   readonly searchBar: Locator;
   readonly modelFamilyFilter: Locator;
+  readonly regionFilter: Locator;
 
   // Model Cards
   readonly allModelCards: Locator;
@@ -23,9 +24,12 @@ export class EisModelsPage {
 
   // Model Detail Flyout
   readonly flyout: Locator;
-  readonly flyoutTaskBadges: Locator;
+  readonly flyoutTitle: Locator;
+  readonly flyoutProvider: Locator;
   readonly flyoutModelDetails: Locator;
-  readonly flyoutRegionBadges: Locator;
+  readonly flyoutViewEisDocumentationLink: Locator;
+  readonly flyoutRegionOptions: Locator;
+  readonly flyoutRegionOptionsUnavailable: Locator;
   readonly flyoutAddEndpointButton: Locator;
   readonly flyoutCloseButton: Locator;
   readonly flyoutRegionUnavailableCallout: Locator;
@@ -94,6 +98,7 @@ export class EisModelsPage {
     this.searchBar = this.page.testSubj.locator('contentListToolbar-searchBox');
     // Resolves to the popover's filter button, so it is clicked directly.
     this.modelFamilyFilter = this.page.testSubj.locator('modelFamilyFilterMultiselect');
+    this.regionFilter = this.page.testSubj.locator('regionFilterMultiselect');
 
     // Model Cards
     this.allModelCards = this.page.testSubj
@@ -105,9 +110,16 @@ export class EisModelsPage {
 
     // Model Detail Flyout
     this.flyout = this.page.testSubj.locator('modelDetailFlyout');
-    this.flyoutTaskBadges = this.page.testSubj.locator('flyoutTaskBadges');
+    this.flyoutTitle = this.page.testSubj.locator('modelDetailFlyoutTitle');
+    this.flyoutProvider = this.page.testSubj.locator('modelDetailFlyoutProvider');
     this.flyoutModelDetails = this.page.testSubj.locator('flyoutModelDetails');
-    this.flyoutRegionBadges = this.page.testSubj.locator('flyoutRegionBadges');
+    this.flyoutViewEisDocumentationLink = this.page.testSubj.locator(
+      'modelDetailFlyoutViewEisDocumentationLink'
+    );
+    this.flyoutRegionOptions = this.page.testSubj.locator('flyoutRegionOptions');
+    this.flyoutRegionOptionsUnavailable = this.page.testSubj.locator(
+      'flyoutRegionOptionsUnavailable'
+    );
     this.flyoutAddEndpointButton = this.page.testSubj.locator('modelDetailFlyoutAddEndpointButton');
     this.flyoutCloseButton = this.page.testSubj.locator('modelDetailFlyoutCloseButton');
     this.flyoutRegionUnavailableCallout = this.page.testSubj.locator(
@@ -249,6 +261,14 @@ export class EisModelsPage {
     return this.page.testSubj.locator(`eisModelCard-${modelName}`);
   }
 
+  public modelCardMeta(modelName: string): Locator {
+    return this.page.testSubj.locator(`eisModelCardMeta-${modelName}`);
+  }
+
+  public flyoutRegionOption(key: string): Locator {
+    return this.page.testSubj.locator(`flyoutRegionOption-${key}`);
+  }
+
   public endpointRow(inferenceId: string): Locator {
     return this.page.testSubj.locator(`endpoint-row-${inferenceId}`);
   }
@@ -279,10 +299,6 @@ export class EisModelsPage {
 
   public regionCheckbox(cspRegionKey: string): Locator {
     return this.page.testSubj.locator(`manageRegionsCheckbox-${cspRegionKey}`);
-  }
-
-  public flyoutRegionBadge(geo: string): Locator {
-    return this.page.testSubj.locator(`flyoutRegionBadge-${geo}`);
   }
 
   public modelStatusBadge(id: string, kind: 'preview' | 'deprecated' | 'eol'): Locator {

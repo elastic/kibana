@@ -8,7 +8,6 @@
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -79,6 +78,10 @@ const capabilities = (): PolicyChangeCapabilities => ({
   trustedDevicesExperimental: true,
   endpointCustomYaraSignatures: true,
   customYaraSignaturesExperimental: true,
+  aiDataCollectionExperimental: true,
+  linuxRansomwareProtection: true,
+  endpointRegistryCredentialHardening: true,
+  registryCredentialHardeningExperimental: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
@@ -146,15 +149,9 @@ const createContext = (callSource?: CallSource): ToolHandlerContext => {
   return ctx;
 };
 
-const createGetStartServices = (): StartServicesAccessor =>
-  jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-  ]) as unknown as StartServicesAccessor;
-
 const createTool = () =>
   createApplyPolicyChangeTool({
     endpointAppContextService: createMockEndpointAppContextService(),
-    getStartServices: createGetStartServices(),
   });
 
 type MockedApplyService = jest.Mocked<

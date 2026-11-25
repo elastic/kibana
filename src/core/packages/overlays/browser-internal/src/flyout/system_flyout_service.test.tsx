@@ -57,32 +57,12 @@ const emitEvent = (event: FlyoutManagerEvent) => {
   eventListeners.forEach((listener) => listener(event));
 };
 
-// Minimal flyout-manager store state used to exercise the push-offset cleanup: the service
-// subscribes to state changes and reads `containerElement` to reset a stranded push offset.
-const stateListeners = new Set<() => void>();
-let mockManagerState: { containerElement: HTMLElement | null } = { containerElement: null };
-const mockManagerSubscribe = jest.fn((listener: () => void) => {
-  stateListeners.add(listener);
-  return () => {
-    stateListeners.delete(listener);
-  };
-});
-const mockManagerGetState = jest.fn(() => mockManagerState);
-
-/** Sets the manager's push container and notifies subscribers, mimicking a push flyout mounting. */
-const setManagerContainer = (containerElement: HTMLElement | null) => {
-  mockManagerState = { containerElement };
-  stateListeners.forEach((listener) => listener());
-};
-
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   return {
     ...actual,
     getFlyoutManagerStore: jest.fn(() => ({
       subscribeToEvents: mockSubscribeToEvents,
-      subscribe: mockManagerSubscribe,
-      getState: mockManagerGetState,
     })),
   };
 });
@@ -97,10 +77,6 @@ beforeEach(() => {
   mockReactDomUnmount.mockClear();
   mockSubscribeToEvents.mockClear();
   eventListeners.clear();
-  mockManagerSubscribe.mockClear();
-  mockManagerGetState.mockClear();
-  stateListeners.clear();
-  mockManagerState = { containerElement: null };
 });
 
 /**
@@ -109,11 +85,17 @@ beforeEach(() => {
  */
 const getRenderedFlyout = (callIndex = 0) => {
   const controller = mockReactDomRender.mock.calls[callIndex][0].props.children;
-  return controller.props.children({
+  const titleBound = controller.props.children({
     type: controller.props.initialType ?? 'overlay',
     size: controller.props.initialSize,
     onResize: jest.fn(),
   });
+  // The flyout is wrapped in a component that reads the live title. Evaluate it outside React,
+  // reading the current snapshot, to reach the `EuiFlyout` element.
+  jest
+    .spyOn(React, 'useSyncExternalStore')
+    .mockImplementation((_subscribe, getSnapshot) => getSnapshot());
+  return titleBound.type(titleBound.props);
 };
 
 afterEach(() => {
@@ -334,6 +316,33 @@ describe('SystemFlyoutService', () => {
       expect(euiFlyoutElement.props.flyoutMenuProps.title).toBe('Top Level Title');
     });
 
+    it('setTitle updates the rendered flyout title', () => {
+      const ref = systemFlyouts.open(<div>System flyout content</div>, { title: 'Initial' });
+
+      ref.setTitle('Updated');
+
+      expect(getRenderedFlyout().props.flyoutMenuProps.title).toBe('Updated');
+    });
+
+    it('setTitle is ignored when flyoutMenuProps.title was passed', () => {
+      const ref = systemFlyouts.open(<div>System flyout content</div>, {
+        flyoutMenuProps: { title: 'Menu Title' },
+      });
+
+      ref.setTitle('Updated');
+
+      expect(getRenderedFlyout().props.flyoutMenuProps.title).toBe('Menu Title');
+    });
+
+    it('setTitle is a no-op once the flyout is closed', () => {
+      const ref = systemFlyouts.open(<div>System flyout content</div>, { title: 'Initial' });
+      ref.close();
+
+      ref.setTitle('Updated');
+
+      expect(getRenderedFlyout().props.flyoutMenuProps.title).toBe('Initial');
+    });
+
     it('renders flyoutMenuProps with custom properties', () => {
       const expectedFlyoutMenuProps = {
         title: 'Visible Title',
@@ -457,7 +466,7 @@ describe('SystemFlyoutService', () => {
       expect(mockReactDomRender).toHaveBeenCalledTimes(1);
 
       const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
-      expect(getByRole('heading', { level: 3, name: 'My Flyout Title' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'My Flyout Title' })).toBeInTheDocument();
     });
 
     it('runs content hooks inside React, so state updates re-render the zones', () => {
@@ -478,9 +487,9 @@ describe('SystemFlyoutService', () => {
       systemFlyouts.openTemplate({ session: 'never' }, Content);
       const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
 
-      expect(getByRole('heading', { level: 3, name: 'Count 0' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'Count 0' })).toBeInTheDocument();
       fireEvent.click(getByRole('button', { name: 'increment' }));
-      expect(getByRole('heading', { level: 3, name: 'Count 1' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'Count 1' })).toBeInTheDocument();
     });
 
     it('lets nested content close the flyout through useFlyoutClose', () => {
@@ -869,36 +878,6 @@ describe('SystemFlyoutService', () => {
 
       const controller = mockReactDomRender.mock.calls[0][0].props.children;
       expect(controller.props.initialType).toBeUndefined();
-    });
-
-    it('clears a stranded push offset from the container when the last flyout closes', async () => {
-      const container = document.createElement('div');
-      // The service captures the manager's container element via its subscription.
-      setManagerContainer(container);
-
-      const ref = systemFlyouts.open(<div>content</div>, { type: 'push' });
-      // EUI leaves inline push padding on the container; simulate the stranded offset.
-      container.style.setProperty('padding-inline-end', '384px');
-
-      await ref.close();
-      await Promise.resolve(); // flush the onClose `.then`
-
-      expect(container.style.paddingInlineEnd).toBe('');
-    });
-
-    it('keeps the container offset while another flyout is still open', async () => {
-      const container = document.createElement('div');
-      setManagerContainer(container);
-
-      const ref1 = systemFlyouts.open(<div>one</div>, { type: 'push' });
-      systemFlyouts.open(<div>two</div>, { type: 'push' });
-      container.style.setProperty('padding-inline-end', '384px');
-
-      await ref1.close();
-      await Promise.resolve();
-
-      // One flyout is still open, so the offset must not be cleared yet.
-      expect(container.style.paddingInlineEnd).toBe('384px');
     });
   });
 

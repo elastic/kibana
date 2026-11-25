@@ -12,10 +12,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('../test_suites/search_index_detail.ts'));
-    loadTestFile(require.resolve('../test_suites/connectors/connectors_overview'));
     loadTestFile(require.resolve('../test_suites/search_query_rules/search_query_rules_overview'));
     loadTestFile(require.resolve('../test_suites/search_synonyms/search_synonyms_overview'));
     loadTestFile(require.resolve('../test_suites/search_synonyms/search_synonym_detail'));
-    loadTestFile(require.resolve('../test_suites/console_notebooks'));
   });
 }

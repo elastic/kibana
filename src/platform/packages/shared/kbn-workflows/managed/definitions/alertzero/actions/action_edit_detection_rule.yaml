@@ -40,6 +40,12 @@ triggers:
               description: >-
                 Saved-object id of the rule, so the edit lands on the exact rule
                 incarnation the proposal was built against.
+            expected_revision:
+              type: integer
+              minimum: 0
+              description: >-
+                The rule's revision when the proposal was created. If the rule
+                has changed since, the edit is not applied.
             query:
               type: string
               maxLength: 65536
@@ -119,12 +125,52 @@ outputs:
   - name: from
     type: string
 steps:
-  # The whole object is the patch body: the API changes only the keys it
-  # receives, and a YAML object cannot omit a key conditionally.
+  - name: fetch_rule
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.actionInput.id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  - name: fail_rule_deleted
+    type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil and steps.fetch_rule.error.message contains 'HTTP 404' }}"
+    with:
+      message: >-
+        The rule was deleted after this proposal was created, so this tuning can't
+        be applied. Approving again won't work, so decline it.
+
+  - name: fail_rule_read
+    type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil }}"
+    with:
+      message: "{{ steps.fetch_rule.error.message }}"
+
+  - name: fail_rule_changed
+    type: workflow.fail
+    if: >-
+      ${{ inputs.actionInput.expected_revision != nil
+        and steps.fetch_rule.output.revision != inputs.actionInput.expected_revision }}
+    with:
+      message: >-
+        The rule was changed by "{{ steps.fetch_rule.output.updated_by }}" after this
+        proposal was created, so this tuning can't be applied. Approving again won't
+        work, so decline it. If the rule keeps producing false positives, a new review
+        will follow.
+
+  # Sends only the rule fields that were given. When you make a new field
+  # editable above, add it here too.
   - name: patch_rule
     type: security.patchRule
     with:
-      patch: "${{ inputs.actionInput }}"
+      patch: >-
+        ${{ inputs.actionInput | pick: 'id', 'query', 'risk_score', 'severity',
+          'threshold', 'interval', 'from' }}
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.

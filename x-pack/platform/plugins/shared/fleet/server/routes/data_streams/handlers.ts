@@ -20,13 +20,11 @@ import { errors } from '@elastic/elasticsearch';
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common/types';
 import type { GetDataStreamsResponse } from '../../../common/types';
+import { isValidDataStreamIndexPattern } from '../../../common/services';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import type { MeteringStats } from '../../services/data_streams';
 import { dataStreamService } from '../../services/data_streams';
-import {
-  DATA_STREAM_INDEX_PATTERN_REGEX,
-  MAX_CONCURRENT_DATASTREAM_OPERATIONS,
-} from '../../constants';
+import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../constants';
 import { appContextService } from '../../services';
 import { FleetUnauthorizedError } from '../../errors';
 
@@ -390,7 +388,7 @@ export const getHasDataHandler: RequestHandler = async (context, request, respon
   };
   const patterns = dataStreamsParam.split(',').map((p: string) => p.trim());
 
-  const invalidPattern = patterns.find((p: string) => !DATA_STREAM_INDEX_PATTERN_REGEX.test(p));
+  const invalidPattern = patterns.find((p: string) => !isValidDataStreamIndexPattern(p));
   if (invalidPattern) {
     return response.badRequest({
       body: { message: `Invalid index pattern: "${invalidPattern}"` },

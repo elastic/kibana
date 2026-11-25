@@ -62,6 +62,17 @@ const isInboundEventsEnabledResponseField = {
   ),
 };
 
+const specVersionResponseField = {
+  spec_version: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'The exact major.minor schema version pinned to the connector. Present for versioned connector types.',
+      },
+    })
+  ),
+};
+
 const referencedByCountField = {
   referenced_by_count: schema.number({
     meta: {
@@ -72,29 +83,39 @@ const referencedByCountField = {
 };
 
 /** Connector response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
-export const getConnectorResponseSchema = (includeInboundEventsField: boolean) =>
+export const getConnectorResponseSchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
   schema.object(
     {
       ...connectorResponseFields,
       ...(includeInboundEventsField ? isInboundEventsEnabledResponseField : {}),
+      ...(includeSpecVersionField ? specVersionResponseField : {}),
     },
     { meta: { id: 'connector_response' } }
   );
 
 /** Get-all connectors response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
-export const getGetAllConnectorsResponseSchema = (includeInboundEventsField: boolean) =>
+export const getGetAllConnectorsResponseSchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
   // codeql[js/kibana/unbounded-array-in-schema] Response schema for the connector list; Kibana builds the array, it is not request input
   schema.arrayOf(
-    getConnectorResponseSchema(includeInboundEventsField).extends(referencedByCountField, {
-      meta: { id: 'connector_response_with_references_count' },
-    })
+    getConnectorResponseSchema(includeInboundEventsField, includeSpecVersionField).extends(
+      referencedByCountField,
+      {
+        meta: { id: 'connector_response_with_references_count' },
+      }
+    )
   );
 
 /** Flag-on schema so TypeOf includes the optional field. */
-export const connectorResponseSchema = getConnectorResponseSchema(true);
+export const connectorResponseSchema = getConnectorResponseSchema(true, true);
 
 /** Flag-on schema so TypeOf includes the optional field. */
-export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true);
+export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true, true);
 
 export const connectorTypeResponseSchema = schema.object(
   {
@@ -354,4 +375,30 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       description: 'When true, this connector type supports the reserved test sub-action.',
     },
   }),
+  actions: schema.arrayOf(
+    schema.object({
+      name: schema.string({
+        meta: { description: 'The action key, e.g. "listIncidents".' },
+      }),
+      description: schema.maybe(
+        schema.string({
+          meta: { description: 'Human-readable description of what this action does.' },
+        })
+      ),
+      is_tool: schema.boolean({
+        meta: { description: 'Whether this action is exposed as an agent tool.' },
+      }),
+      scope: schema.maybe(
+        schema.oneOf([schema.literal('read'), schema.literal('write'), schema.literal('destroy')], {
+          meta: { description: 'Permission scope of this action (read, write, or destroy).' },
+        })
+      ),
+    }),
+    {
+      maxSize: 500,
+      meta: {
+        description: 'The actions available on this connector type.',
+      },
+    }
+  ),
 });

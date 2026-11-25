@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_XY_HIDE_ENDZONES_DEFAULT } from '@kbn/lens-common';
+import type { SeriesType } from '@kbn/lens-common';
+
 import type { ColorMappingCategoricalType } from '../../../schema/color';
+import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../../schema/color';
 
 /**
  * Lens-known defaults for XY chart styling.
@@ -18,16 +22,26 @@ import type { ColorMappingCategoricalType } from '../../../schema/color';
  * chart definition that does not depend on runtime defaults.
  */
 
-export const DEFAULT_PARTIAL_BUCKETS_VISIBLE = false;
+// Derived from the runtime default so API-created charts match editor defaults
+export const DEFAULT_PARTIAL_BUCKETS_VISIBLE = !LENS_XY_HIDE_ENDZONES_DEFAULT;
 export const DEFAULT_CURRENT_TIME_MARKER_VISIBLE = false;
 export const DEFAULT_DATA_LABELS_VISIBLE = false;
 export const DEFAULT_POINTS_VISIBILITY = 'auto' as const;
 export const DEFAULT_LINES_INTERPOLATION = 'linear' as const;
 export const DEFAULT_BARS_MINIMUM_HEIGHT = 1;
 export const DEFAULT_AREAS_FILL_OPACITY = 0.3;
-export const DEFAULT_AREAS_FILL = 'solid' as const;
+export const DEFAULT_AREAS_FILL = 'gradient' as const;
+export const DEFAULT_REFERENCE_LINE_AXIS = 'y' as const;
 export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
   mode: 'categorical',
   palette: 'elastic_line_optimized',
   mapping: [],
 };
+
+/** Returns the breakdown color mapping Lens uses for a series type when none is set. */
+export const getDefaultBreakdownColorMapping = (
+  seriesType: SeriesType
+): ColorMappingCategoricalType =>
+  seriesType === 'line'
+    ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+    : DEFAULT_CATEGORICAL_COLOR_MAPPING;

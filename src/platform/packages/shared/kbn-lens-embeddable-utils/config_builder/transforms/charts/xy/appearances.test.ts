@@ -28,16 +28,21 @@ import {
 const allLayersPresent: SeriesType[] = ['bar', 'area', 'line'];
 
 describe('XY Appearances Transforms', () => {
-  it('should return empty state when given empty API config', () => {
+  it('should default interpolation and points when converting empty API config for line/area', () => {
     const apiConfig: XYConfig['styling'] = {};
     const result = convertStylingToStateFormat(apiConfig, ['line']);
-    expect(result).toEqual({});
+    expect(result).toEqual({
+      curveType: 'LINEAR',
+      pointVisibility: 'auto',
+    });
   });
 
-  it('should default areaFill when omitted to solid', () => {
+  it('should default areaFill when omitted to gradient', () => {
     expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, ['area'])).toEqual({
       fillOpacity: 0.5,
-      areaFill: 'solid' as const,
+      areaFill: 'gradient' as const,
+      curveType: 'LINEAR',
+      pointVisibility: 'auto',
     });
   });
 
@@ -212,4 +217,79 @@ describe('XY Appearances Transforms', () => {
     expect(result.emphasizeFitting).toBe(original.emphasizeFitting);
     expect(result.endValue).toBe(original.endValue);
   });
+
+  it('should ignore interpolation and points when converting bar-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      {
+        interpolation: 'linear',
+        points: { visibility: 'auto' },
+        overlays: { partial_buckets: { visible: false } },
+      },
+      ['bar']
+    );
+    expect(result.curveType).toBeUndefined();
+    expect(result.pointVisibility).toBeUndefined();
+    expect(result.hideEndzones).toBe(true);
+  });
+
+  it('should not store fitting when converting a bar-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { fitting: { type: 'linear', emphasize: true, extend: 'zero' } },
+      ['bar', 'bar_stacked']
+    );
+    expect(result).not.toHaveProperty('fittingFunction');
+    expect(result).not.toHaveProperty('emphasizeFitting');
+    expect(result).not.toHaveProperty('endValue');
+  });
+
+  it.each<[string, SeriesType[]]>([
+    ['line layers', ['line']],
+    ['area layers', ['area']],
+    ['area and bar layers', ['area_stacked', 'bar']],
+  ])(
+    'should store fitting when converting an API config with %s to state',
+    (_name, seriesTypes) => {
+      const result = convertStylingToStateFormat(
+        { fitting: { type: 'linear', emphasize: true, extend: 'zero' } },
+        seriesTypes
+      );
+      expect(result.fittingFunction).toBe('Linear');
+      expect(result.emphasizeFitting).toBe(true);
+      expect(result.endValue).toBe('Zero');
+    }
+  );
+
+  it('should not store bar settings when converting a line-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { bars: { minimum_height: 3, data_labels: { visible: true } } },
+      ['line']
+    );
+    expect(result).not.toHaveProperty('minBarHeight');
+    expect(result).not.toHaveProperty('valueLabels');
+  });
+
+  it('should not store bar settings when converting an area-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { bars: { minimum_height: 3, data_labels: { visible: true } } },
+      ['area', 'area_stacked']
+    );
+    expect(result).not.toHaveProperty('minBarHeight');
+    expect(result).not.toHaveProperty('valueLabels');
+  });
+
+  it.each<[string, SeriesType[]]>([
+    ['bar layers', ['bar']],
+    ['horizontal stacked bar layers', ['bar_horizontal_stacked']],
+    ['line and percentage bar layers', ['line', 'bar_percentage_stacked']],
+  ])(
+    'should store bar settings when converting an API config with %s to state',
+    (_name, seriesTypes) => {
+      const result = convertStylingToStateFormat(
+        { bars: { minimum_height: 3, data_labels: { visible: true } } },
+        seriesTypes
+      );
+      expect(result.minBarHeight).toBe(3);
+      expect(result.valueLabels).toBe('show');
+    }
+  );
 });

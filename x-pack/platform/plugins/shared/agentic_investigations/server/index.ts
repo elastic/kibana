@@ -15,3 +15,27 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { AgenticInvestigationsPluginSetup, AgenticInvestigationsPluginStart } from './types';
+export type { SubjectsClient } from './subjects/services/subjects_client';
+export type { FindingsWriter } from './findings/findings_writer';
+export type { DeleteInvestigationDataAcrossSpacesResult } from './investigations/services/delete_investigation_data_across_spaces';
+export type {
+  DeleteInvestigationDataResult,
+  InvestigationsClient,
+} from './investigations/services/investigations_client';
+export type {
+  ClaimSubjectsParams,
+  ClaimSubjectsResult,
+} from './subjects/services/subject_claims_service';
+
+// Server only, so the schema stays out of the page load bundle `common` lands in.
+export { MAX_VIA_LABEL_LENGTH, subjectViaSchema } from '../common/subjects/subject';
+
+export { defineInvestigationAttachment } from './investigation_attachments/define_investigation_attachment';
+export type {
+  InvestigationAttachmentDocService,
+  InvestigationAttachmentStorage,
+} from './investigation_attachments/attachment_doc_service';
+export type {
+  StoredInvestigationAttachment,
+  InvestigationAttachmentDocument,
+} from '../common/investigation_attachments';

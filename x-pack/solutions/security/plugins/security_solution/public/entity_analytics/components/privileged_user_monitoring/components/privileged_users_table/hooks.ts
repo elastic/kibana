@@ -7,7 +7,7 @@
 
 import { take } from 'lodash/fp';
 import { useQuery } from '@kbn/react-query';
-import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
+import { prettifyQuery } from '@kbn/esql-utils';
 import { useMemo } from 'react';
 import { buildEntityNameFilter, EntityType } from '../../../../../../common/search_strategy';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
@@ -20,7 +20,24 @@ import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import type { EntityRiskScore } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import { DEFAULT_PAGE_SIZE } from '.';
+
+const PRIVILEGED_USERS_TABLE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'privileged_users_table'
+);
+const PRIVILEGED_USERS_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'privileged_users_risk_score'
+);
+const PRIVILEGED_USERS_ASSET_CRITICALITY_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'privileged_users_asset_criticality'
+);
 
 interface RiskScoresByUserName {
   [key: string]: EntityRiskScore<EntityType.user>;
@@ -52,15 +69,15 @@ export const usePrivilegedUsersTableData = (
     queryKey: ['privileged-users-table', privilegedUsersTableQuery, filterQueryWithoutTimerange],
     enabled: toggleStatus,
     queryFn: async () => {
-      return getESQLResults({
-        esqlQuery: privilegedUsersTableQuery,
-        search: data.search.search,
-        filter: filterQueryWithoutTimerange,
-      });
+      const { rawResponse } = await data.search.esql(
+        { query: privilegedUsersTableQuery, filter: filterQueryWithoutTimerange },
+        { executionContext: PRIVILEGED_USERS_TABLE_CONTEXT }
+      );
+      return rawResponse;
     },
   });
 
-  const records = useMemo(() => esqlResponseToRecords<TableItemType>(result?.response), [result]);
+  const records = useMemo(() => esqlResponseToRecords<TableItemType>(result), [result]);
 
   const nameFilterQuery = useMemo(() => {
     const userNames = records.map((user) => user['user.name']);
@@ -81,6 +98,7 @@ export const usePrivilegedUsersTableData = (
       querySize: records.length,
     },
     skip: nameFilterQuery === undefined || records.length === 0,
+    executionContext: PRIVILEGED_USERS_RISK_SCORE_CONTEXT,
   });
 
   const riskScores = riskScoreData && riskScoreData.length > 0 ? riskScoreData : [];
@@ -96,6 +114,7 @@ export const usePrivilegedUsersTableData = (
     idField: 'user.name',
     idValues: records.map((user) => user['user.name']),
     skip: !toggleStatus || records.length === 0,
+    executionContext: PRIVILEGED_USERS_ASSET_CRITICALITY_CONTEXT,
   });
   const assetCriticalityRecords =
     assetCriticalityData && assetCriticalityData.records.length > 0

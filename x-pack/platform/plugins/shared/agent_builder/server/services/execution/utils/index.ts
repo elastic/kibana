@@ -25,6 +25,7 @@ export { getPendingResumeRound, resolveTelemetryOrigin } from './pending_round';
 export { convertErrors, toClientError } from './convert_errors';
 export { serializeExecutionError, getHttpStatusFromError } from './serialize_execution_error';
 export { resolveServices } from './resolve_services';
+export { resolveAgentBuilderDefaultEndpoint } from './resolve_default_endpoint';
 export { executionStartedEvents$ } from './execution_started';
 export {
   trackExecutionInterruption,

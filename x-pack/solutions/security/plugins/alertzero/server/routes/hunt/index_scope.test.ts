@@ -5,38 +5,78 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { HuntTechnology, ResolvedIndexScope } from '@kbn/alertzero-common';
+import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntIndexScopeRoute } from './index_scope';
 import {
-  HUNT_TECHNOLOGIES,
-  resolveIndexScope,
+  resolveHuntScope,
+  type ResolvedHuntScope,
 } from '../../services/watches/hunt/common/resolve_index_scope';
 
 jest.mock('../../services/watches/hunt/common/resolve_index_scope', () => {
   const actual = jest.requireActual('../../services/watches/hunt/common/resolve_index_scope');
-  return { ...actual, resolveIndexScope: jest.fn() };
+  return { ...actual, resolveHuntScope: jest.fn() };
 });
 
-const resolveIndexScopeMock = resolveIndexScope as jest.MockedFunction<typeof resolveIndexScope>;
+const resolveHuntScopeMock = resolveHuntScope as jest.MockedFunction<typeof resolveHuntScope>;
 
-const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
+const UNIVERSE = ['logs-*', 'filebeat-*', '-*elastic-cloud-logs-*'];
+
+const okScope: ResolvedHuntScope = {
+  status: 'ok',
+  resolution: 'universe',
+  index_patterns: UNIVERSE,
+  missing: [],
+  report_matches: [],
+  actionable_indices: ['logs-endpoint.events.process-default*'],
+  window: { from: 'now-7d', to: 'now' },
+  row_limit: 100,
+  discovered: [
+    {
+      index_pattern: 'logs-endpoint.events.process-*',
+      dataset: 'endpoint.events.process',
+      vendor: 'endpoint',
+      data_streams: ['logs-endpoint.events.process-default'],
+      search_patterns: ['logs-endpoint.events.process-*'],
+    },
+  ],
+};
+
+const { discovered: _discovered, ...wireScope } = okScope;
+
+const makeDeps = ({
+  spaceId = 'default',
+  indexPatterns = UNIVERSE,
+  cpsEnabled = false,
+}: { spaceId?: string; indexPatterns?: string[]; cpsEnabled?: boolean } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { get: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
+  const clusterClient = elasticsearchServiceMock.createClusterClient();
+  const scoped = elasticsearchServiceMock.createScopedClusterClient();
+  clusterClient.asScoped.mockReturnValue(scoped);
 
   registerHuntIndexScopeRoute({
     router: router as unknown as RouteDependencies['router'],
     logger,
     getSpaceId: () => spaceId,
+    getClusterClient: () => clusterClient,
+    isCpsEnabled: () => cpsEnabled,
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
+  const uiSettingsGet = jest.fn().mockResolvedValue(indexPatterns);
   const context = {
-    core: Promise.resolve({ elasticsearch: { client: { asCurrentUser, asInternalUser } } }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
+    core: Promise.resolve({
+      uiSettings: { client: { get: uiSettingsGet } },
+    }),
   };
 
   return {
@@ -47,26 +87,16 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
       response: ReturnType<typeof httpServerMock.createResponseFactory>
     ) => Promise<unknown>,
     context,
-    asCurrentUser,
-    asInternalUser,
+    clusterClient,
+    scoped,
     logger,
+    uiSettingsGet,
   };
 };
 
-const scopeFor = (technology: HuntTechnology): ResolvedIndexScope => ({
-  technology,
-  status: 'ok',
-  required: [],
-  optional: [],
-  missing: [],
-  window: { from: 'now-7d', to: 'now' },
-  row_limit: 100,
-});
-
 describe('registerHuntIndexScopeRoute', () => {
   beforeEach(() => {
-    resolveIndexScopeMock.mockReset();
-    resolveIndexScopeMock.mockImplementation(async ({ technology }) => scopeFor(technology));
+    resolveHuntScopeMock.mockReset().mockResolvedValue(okScope);
   });
 
   it('requires only read privilege', () => {
@@ -79,31 +109,26 @@ describe('registerHuntIndexScopeRoute', () => {
     expect(routeConfig.access).toBe('internal');
   });
 
-  it('resolves every known technology when the query names none', async () => {
+  it('returns one scope object with no discovered key', async () => {
     const { handler, context } = makeDeps();
     const response = httpServerMock.createResponseFactory();
 
-    await handler(context, httpServerMock.createKibanaRequest({ query: {} }), response);
+    await handler(context, httpServerMock.createKibanaRequest(), response);
 
-    expect(resolveIndexScopeMock).toHaveBeenCalledTimes(HUNT_TECHNOLOGIES.length);
-    expect(response.ok).toHaveBeenCalledWith({
-      body: HUNT_TECHNOLOGIES.map((technology) => scopeFor(technology)),
-    });
+    expect(resolveHuntScopeMock).toHaveBeenCalledTimes(1);
+    expect(response.ok).toHaveBeenCalledWith({ body: wireScope });
   });
 
-  it('resolves only the requested technology', async () => {
-    const { handler, context } = makeDeps();
+  it('passes the universe read from uiSettings to resolveHuntScope', async () => {
+    const patterns = ['logs-*', 'winlogbeat-*', '-*elastic-cloud-logs-*'];
+    const { handler, context, uiSettingsGet } = makeDeps({ indexPatterns: patterns });
     const response = httpServerMock.createResponseFactory();
 
-    await handler(
-      context,
-      httpServerMock.createKibanaRequest({ query: { technology: 'aws_iam' } }),
-      response
-    );
+    await handler(context, httpServerMock.createKibanaRequest(), response);
 
-    expect(resolveIndexScopeMock).toHaveBeenCalledTimes(1);
-    expect(resolveIndexScopeMock).toHaveBeenCalledWith(
-      expect.objectContaining({ technology: 'aws_iam' })
+    expect(uiSettingsGet).toHaveBeenCalledWith(SECURITY_SOLUTION_DEFAULT_INDEX_ID);
+    expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+      expect.objectContaining({ indexPatterns: patterns })
     );
   });
 
@@ -111,46 +136,226 @@ describe('registerHuntIndexScopeRoute', () => {
     const { handler, context } = makeDeps({ spaceId: 'hunt-space' });
     const response = httpServerMock.createResponseFactory();
 
-    await handler(
-      context,
-      httpServerMock.createKibanaRequest({ query: { technology: 'aws_iam' } }),
-      response
-    );
+    await handler(context, httpServerMock.createKibanaRequest(), response);
 
-    expect(resolveIndexScopeMock).toHaveBeenCalledWith(
+    expect(resolveHuntScopeMock).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'hunt-space' })
     );
   });
 
   it('reads as the current user so the caller index privileges apply', async () => {
-    const { handler, context, asCurrentUser, asInternalUser } = makeDeps();
+    const { handler, context, scoped } = makeDeps();
     const response = httpServerMock.createResponseFactory();
 
-    await handler(
-      context,
-      httpServerMock.createKibanaRequest({ query: { technology: 'aws_iam' } }),
-      response
-    );
+    await handler(context, httpServerMock.createKibanaRequest(), response);
 
-    expect(resolveIndexScopeMock).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: asCurrentUser })
-    );
-    expect(resolveIndexScopeMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: asInternalUser })
+    expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: scoped.asCurrentUser })
     );
   });
 
+  it('tells scope resolution whether cross-project search is on', async () => {
+    const off = makeDeps();
+    await off.handler(
+      off.context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+    expect(resolveHuntScopeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ crossProjectSearch: false })
+    );
+
+    const on = makeDeps({ cpsEnabled: true });
+    await on.handler(
+      on.context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+    expect(resolveHuntScopeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ crossProjectSearch: true })
+    );
+  });
+
+  it('scopes the client to the request with the space project routing', async () => {
+    const { handler, context, clusterClient } = makeDeps();
+    const request = httpServerMock.createKibanaRequest();
+
+    await handler(context, request, httpServerMock.createResponseFactory());
+
+    expect(clusterClient.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+  });
+
+  it('warns once with the missing patterns for blocked:empty_universe', async () => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:empty_universe',
+      index_patterns: [],
+      missing: ['infosec_zocalo:logs-*', 'custom-edr-*'],
+    });
+    const { handler, context, logger } = makeDeps();
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('infosec_zocalo:logs-*, custom-edr-*')
+    );
+  });
+
+  it('does not warn for an ok scope', async () => {
+    const { handler, context, logger } = makeDeps();
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not warn again for blocked:discovery_failed', async () => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:discovery_failed',
+      index_patterns: [],
+    });
+    const { handler, context, logger } = makeDeps();
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('logs and returns a generic 500 when resolution throws', async () => {
-    resolveIndexScopeMock.mockRejectedValue(new Error('cluster down'));
+    resolveHuntScopeMock.mockRejectedValue(new Error('cluster down'));
     const { handler, context, logger } = makeDeps();
     const response = httpServerMock.createResponseFactory();
 
-    await handler(context, httpServerMock.createKibanaRequest({ query: {} }), response);
+    await handler(context, httpServerMock.createKibanaRequest(), response);
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('cluster down'));
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: { message: 'Failed to resolve hunt index scope' },
+    });
+  });
+
+  describe('policy-skipped entries', () => {
+    const SETTING = ['logs-*', '.alerts-security.alerts-default'];
+
+    it('hands the filtered universe and the skipped list to resolveHuntScope', async () => {
+      const { handler, context } = makeDeps({ indexPatterns: SETTING });
+
+      await handler(
+        context,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexPatterns: ['logs-*'],
+          policySkippedPatterns: ['.alerts-security.alerts-default'],
+        })
+      );
+    });
+
+    it('logs one debug line naming the skipped entries and nothing when none were skipped', async () => {
+      resolveHuntScopeMock.mockResolvedValue({
+        ...okScope,
+        policy_skipped: ['.alerts-security.alerts-default'],
+      });
+      const skipped = makeDeps({ indexPatterns: SETTING });
+      await skipped.handler(
+        skipped.context,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+      expect(skipped.logger.debug).toHaveBeenCalledTimes(1);
+      expect(skipped.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('.alerts-security.alerts-default')
+      );
+
+      resolveHuntScopeMock.mockResolvedValue({ ...okScope, policy_skipped: [] });
+      const none = makeDeps();
+      await none.handler(
+        none.context,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+      expect(none.logger.debug).not.toHaveBeenCalled();
+      expect(none.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['only skipped entries', ['.siem-signals-x'], [], 'names only hidden or alerts indices'],
+      ['skipped and missing', ['.siem-signals-x'], ['custom-1'], 'the caller resolved none of'],
+      ['nothing skipped', [], ['custom-1'], 'the caller resolved none of'],
+    ])(
+      'warns with the matching text for a blocked scope with %s',
+      async (_label, policySkipped, missing, expected) => {
+        resolveHuntScopeMock.mockResolvedValue({
+          ...okScope,
+          status: 'blocked',
+          resolution: 'blocked:empty_universe',
+          index_patterns: [],
+          missing,
+          policy_skipped: policySkipped,
+        });
+        const { handler, context, logger } = makeDeps();
+
+        await handler(
+          context,
+          httpServerMock.createKibanaRequest(),
+          httpServerMock.createResponseFactory()
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(expected));
+        // A blocked scope searched nothing, so nothing was "left out of the search".
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+      }
+    );
+  });
+
+  describe('names dropped from the search', () => {
+    const loggedWith = async (scope: Partial<ResolvedHuntScope>) => {
+      resolveHuntScopeMock.mockResolvedValue({ ...okScope, ...scope });
+      const { handler, context, logger } = makeDeps();
+      await handler(
+        context,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+      return logger.debug as jest.Mock;
+    };
+
+    it('logs one debug line with the names for a scope that dropped one', async () => {
+      const debug = await loggedWith({ index_patterns: ['logs-*'], missing: ['custom-edr-1'] });
+
+      expect(debug).toHaveBeenCalledTimes(1);
+      expect(debug).toHaveBeenCalledWith(
+        expect.stringContaining('left 1 default data view name(s) out of the search')
+      );
+      expect(debug).toHaveBeenCalledWith(expect.stringContaining('custom-edr-1'));
+    });
+
+    it('logs nothing for an unresolved wildcard that stayed in the search', async () => {
+      const debug = await loggedWith({
+        index_patterns: ['logs-*', 'winlogbeat-*'],
+        missing: ['winlogbeat-*'],
+      });
+
+      expect(debug).not.toHaveBeenCalled();
     });
   });
 });

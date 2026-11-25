@@ -36,14 +36,14 @@ const createMockKiClient = ({
   } as unknown as KnowledgeIndicatorClient);
 
 describe('shouldIdentifyFeatures', () => {
-  const streamName = 'test-stream';
+  const sourceId = 'test-stream';
   const thresholdHours = 12;
   const recent = () => new Date(Date.now() - 1 * 3_600_000).toISOString();
 
   it('returns shouldIdentify: true when there are no active inferred features', async () => {
     const kiClient = createMockKiClient({ inferred: null, computed: { '@timestamp': recent() } });
 
-    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+    const result = await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: true });
   });
@@ -51,10 +51,10 @@ describe('shouldIdentifyFeatures', () => {
   it('probes inferred features for existence before checking recency', async () => {
     const kiClient = createMockKiClient({ inferred: null });
 
-    await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+    await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours });
 
     expect(kiClient.getLatestRevisionTimestamp).toHaveBeenCalledWith(
-      streamName,
+      sourceId,
       expect.objectContaining({ types: [...INFERRED_FEATURE_TYPES] })
     );
     // Short-circuits on empty inferred set: the computed probe is never issued.
@@ -67,10 +67,10 @@ describe('shouldIdentifyFeatures', () => {
       computed: { '@timestamp': recent() },
     });
 
-    await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+    await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours });
 
     expect(kiClient.getLatestRevisionTimestamp).toHaveBeenCalledWith(
-      streamName,
+      sourceId,
       expect.objectContaining({ types: [...COMPUTED_FEATURE_TYPES] })
     );
   });
@@ -78,7 +78,7 @@ describe('shouldIdentifyFeatures', () => {
   it('returns shouldIdentify: true when inferred features exist but no computed features do', async () => {
     const kiClient = createMockKiClient({ inferred: { '@timestamp': recent() }, computed: null });
 
-    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+    const result = await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: true });
   });
@@ -89,7 +89,7 @@ describe('shouldIdentifyFeatures', () => {
       computed: { '@timestamp': new Date(Date.now() - 1 * 3_600_000).toISOString() },
     });
 
-    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+    const result = await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: false });
   });
@@ -100,9 +100,19 @@ describe('shouldIdentifyFeatures', () => {
       computed: { '@timestamp': new Date(Date.now() - 24 * 3_600_000).toISOString() },
     });
 
-    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+    const result = await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: true });
+  });
+
+  it('always identifies at threshold 0, even with features stamped ahead of the clock', async () => {
+    const ahead = { '@timestamp': new Date(Date.now() + 60_000).toISOString() };
+    const kiClient = createMockKiClient({ inferred: ahead, computed: ahead });
+
+    const result = await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours: 0 });
+
+    expect(result).toEqual({ shouldIdentify: true });
+    expect(kiClient.getLatestRevisionTimestamp).not.toHaveBeenCalled();
   });
 
   it('returns shouldIdentify: true for invalid computed timestamps', async () => {
@@ -111,7 +121,7 @@ describe('shouldIdentifyFeatures', () => {
       computed: { '@timestamp': 'not-a-date' },
     });
 
-    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+    const result = await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: true });
   });
@@ -124,7 +134,7 @@ describe('shouldIdentifyFeatures', () => {
       },
     });
 
-    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+    const result = await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: false });
   });

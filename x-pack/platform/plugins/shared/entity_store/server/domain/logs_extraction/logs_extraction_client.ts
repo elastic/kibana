@@ -22,8 +22,9 @@ import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schem
 import {
   getEntityDefinition,
   supportsNonPrioritySampling,
+  type EntityDefinitionOptions,
 } from '../../../common/domain/definitions/registry';
-import { resolveSamplingRate } from './sampling';
+import { clampSamplingRateOverride, resolveSamplingRate } from './sampling';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
 import {
   buildLogPaginationCursorProbeEsql,
@@ -42,7 +43,11 @@ import {
   resolveMainExtractionWindow,
   validateExtractionWindow,
 } from './extraction_window';
-import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
+import {
+  capAtMaxLogsPerWindow,
+  pickSampleProbability,
+  scaleMaxLogsPerPageForRate,
+} from './effective_page_limits';
 import { getMergedConfig, type MergedLogExtractionConfig } from '../config';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
@@ -64,6 +69,8 @@ import {
   type EngineError,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
+  type LogExtractionTypeOverride,
+  type NonPriorityLogExtractionTypeOverride,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../errors';
@@ -78,6 +85,9 @@ const FRESH_ENGINE_LOG_EXTRACTION_STATE: EngineLogExtractionState = {
   sliceEndTimestamp: null,
   sliceSamplingRate: null,
 };
+
+const hasKeys = (value: object | undefined): boolean =>
+  value !== undefined && Object.keys(value).length > 0;
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -185,6 +195,7 @@ export class LogsExtractionClient {
   private async getLogExtractionConfigAndState(type: EntityType): Promise<{
     config: MergedLogExtractionConfig;
     engineState: EngineLogExtractionState;
+    excludedUserNames: string[];
   }> {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
     const status = engineDescriptor[this.descriptorFields.status];
@@ -194,7 +205,10 @@ export class LogsExtractionClient {
       }
       throw new EntityStoreNotRunningError();
     }
-    const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
+    const [globalOverrides, { excludedUserNames }] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.globalStateClient.findOrThrow(),
+    ]);
     const engineState =
       this.extractionMode === EXTRACTION_MODE.nonPriority
         ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
@@ -210,6 +224,7 @@ export class LogsExtractionClient {
           : undefined
       ),
       engineState,
+      excludedUserNames,
     };
   }
 
@@ -255,9 +270,17 @@ export class LogsExtractionClient {
     let lastPersistedCheckpointISO: string | undefined;
 
     try {
-      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
+      const { config, engineState, excludedUserNames } = await this.getLogExtractionConfigAndState(
+        type
+      );
       ({ fromDateISO: resumePointISO } = resolveMainExtractionWindow({ config, engineState }));
-      const entityDefinition = getEntityDefinition(type, this.namespace, this.extractionMode);
+      const entityDefinitionOptions: EntityDefinitionOptions = { excludedUserNames };
+      const entityDefinition = getEntityDefinition(
+        type,
+        this.namespace,
+        this.extractionMode,
+        entityDefinitionOptions
+      );
       const {
         count,
         pages,
@@ -354,9 +377,68 @@ export class LogsExtractionClient {
     );
   }
 
-  public async updateConfig(params?: LogExtractionInstallParams): Promise<LogExtractionConfig> {
-    const state = await this.globalStateClient.update({ logsExtraction: params });
+  public async updateConfig(
+    params?: LogExtractionInstallParams,
+    excludedUserNames?: string[]
+  ): Promise<LogExtractionConfig> {
+    const state = await this.globalStateClient.update({
+      logsExtraction: params,
+      ...(excludedUserNames !== undefined ? { excludedUserNames } : {}),
+    });
     return state.logsExtraction;
+  }
+
+  /**
+   * Writes the two per entity-type override layers. `logExtraction` reaches both processes (minus
+   * the non-priority-exclusive fields), `nonPriorityOverride` only the non-priority one.
+   *
+   * Each block is handed to the saved object update as-is. `mergeForUpdate` recurses into nested
+   * plain objects, so an omitted field keeps its stored value and an incoming `null` overwrites it
+   * with `null`, which every reader treats as unset. An empty block is skipped: `{}` does not
+   * recurse, so it would replace the whole stored object instead of merging into it.
+   */
+  public async updateTypeConfig(
+    type: EntityType,
+    {
+      logExtraction,
+      nonPriorityOverride,
+    }: {
+      logExtraction?: LogExtractionTypeOverride;
+      nonPriorityOverride?: NonPriorityLogExtractionTypeOverride;
+    }
+  ): Promise<{
+    logExtractionConfig: LogExtractionTypeOverride;
+    nonPriorityLogExtractionConfig: NonPriorityLogExtractionTypeOverride;
+  }> {
+    const patch = {
+      ...(hasKeys(logExtraction) ? { logExtractionConfig: logExtraction } : {}),
+      ...(hasKeys(nonPriorityOverride)
+        ? { nonPriorityLogExtractionConfig: nonPriorityOverride }
+        : {}),
+    };
+
+    if (Object.keys(patch).length > 0) {
+      await this.engineDescriptorClient.update(type, patch);
+    }
+
+    const descriptor = await this.engineDescriptorClient.findOrThrow(type);
+    return {
+      logExtractionConfig: descriptor.logExtractionConfig ?? {},
+      nonPriorityLogExtractionConfig: descriptor.nonPriorityLogExtractionConfig ?? {},
+    };
+  }
+
+  /** Same dependencies, different extraction process. */
+  public withExtractionMode(extractionMode: ExtractionMode): LogsExtractionClient {
+    return new LogsExtractionClient({
+      logger: this.logger,
+      namespace: this.namespace,
+      esClient: this.esClient,
+      dataViewsService: this.dataViewsService,
+      engineDescriptorClient: this.engineDescriptorClient,
+      globalStateClient: this.globalStateClient,
+      extractionMode,
+    });
   }
 
   private async runQueryAndIngestDocs({
@@ -705,16 +787,16 @@ export class LogsExtractionClient {
     metricAttributes: ExtractionAttributes;
     onCheckpointPersisted?: (ts: string) => void;
   }) {
-    const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
+    const baseMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
-    // Escalates above the target probability (up to an exact, unsampled probe) once
-    // maxLogsPerPage is too small for the sampling estimator to be accurate — see
-    // pickSampleProbability. Computed once per loop invocation: effectiveMaxLogsPerPage is
-    // fixed for the whole loop.
-    const effectiveSampleProbability = pickSampleProbability(effectiveMaxLogsPerPage);
     // Sampling policy: only the non-priority process of a capability-declaring type may sample.
     const samplingEligible =
       this.extractionMode === EXTRACTION_MODE.nonPriority && supportsNonPrioritySampling(type);
+    // Set by the first slice that resolves a sampling rate, then reused for the rest of the run.
+    // The rate both sizes the slice and samples it, so it is pinned rather than recomputed: a
+    // slice sized for one rate and sampled at another would not retain what the budget expects.
+    let scaledMaxLogsPerPage: number | undefined;
+    let pinnedSamplingRate: number | undefined;
     let totalCount = 0;
     let totalLogs = 0;
     let pages = 0;
@@ -731,8 +813,51 @@ export class LogsExtractionClient {
 
     // Mid-slice resume cursors from a prior interrupted run; consumed by the first outer
     // iteration only, which re-enters the interrupted slice with its exact persisted bounds.
-    const { resumeEntityPagination, resumeSliceEnd, resumeSamplingRate } =
-      this.resolveMidSliceResume(initialEngineState, fromDateISO);
+    // A manual (force) window neither reads nor advances the scheduled cursor, so mid-slice state
+    // left behind by a scheduled run describes a slice of a different window entirely. Resuming
+    // into it would extract the scheduled run's bounds instead of the ones that were asked for.
+    const { resumeEntityPagination, resumeSliceEnd, resumeSamplingRate } = opts?.specificWindow
+      ? {}
+      : this.resolveMidSliceResume(initialEngineState, fromDateISO);
+
+    // Slices after a resumed one are probed at the page size the interrupted run was using. That
+    // size is derived from the rate persisted alongside the slice bounds rather than stored
+    // separately, so resuming needs no extra engine-descriptor state.
+    if (samplingEligible && resumeSamplingRate != null) {
+      pinnedSamplingRate = resumeSamplingRate;
+      scaledMaxLogsPerPage = scaleMaxLogsPerPageForRate(
+        maxLogsPerPage,
+        maxLogsPerWindow,
+        resumeSamplingRate
+      );
+    }
+
+    // An operator-supplied rate is known before any probe runs, so the base probe that exists only
+    // to discover the rate is skipped and every slice, the first included, is probed once at the
+    // scaled size.
+    //
+    // Skipped entirely while a slice is being resumed, including when that slice was unsampled and
+    // persisted no rate at all. Its earlier entity pages were already read on whatever terms the
+    // interrupted run used, so sampling the remainder at an override would draw the rest of the
+    // same slice from a different population. Later slices resolve the override from their own
+    // probe as usual.
+    if (
+      samplingEligible &&
+      resumeSliceEnd === undefined &&
+      pinnedSamplingRate === undefined &&
+      samplingRateOverride != null
+    ) {
+      const overrideRate = clampSamplingRateOverride(samplingRateOverride);
+      // An override of 1 emits no SAMPLE stage, so it is left unpinned and nothing is scaled.
+      if (overrideRate < 1) {
+        pinnedSamplingRate = overrideRate;
+        scaledMaxLogsPerPage = scaleMaxLogsPerPageForRate(
+          maxLogsPerPage,
+          maxLogsPerWindow,
+          overrideRate
+        );
+      }
+    }
 
     try {
       let lastLogsPages = false;
@@ -748,7 +873,9 @@ export class LogsExtractionClient {
         let entityPagination: PaginationParams | undefined;
         let bumpedCursorEnd: LogSlicePaginationParams | null = null;
         let sliceLogCount = 0;
-        const isResumingMidSlice = isFirstRunInThisCycle && resumeSliceEnd !== undefined;
+        /** Raw target of the probe that drew this slice. Undefined on a resumed slice, which
+         * re-enters persisted bounds without probing. */
+        let sliceRawTarget: number | undefined;
 
         if (isFirstRunInThisCycle && resumeSliceEnd) {
           // Re-enter the interrupted slice with its exact persisted bounds, skipping the probe:
@@ -762,75 +889,103 @@ export class LogsExtractionClient {
           entityPagination = resumeEntityPagination;
           lastLogsPages = false;
         } else {
-          const probe = await this.runLogPaginationCursorProbeForNextPage({
-            indexPatterns,
-            type,
-            entityDefinition,
-            fromDateISO,
-            toDateISO,
-            logsPageCursorStart,
-            maxLogsPerPage: effectiveMaxLogsPerPage,
-            sampleProbability: effectiveSampleProbability,
-            opts,
-            metricAttributes,
-          });
+          // Draws the slice boundary at `pageSize` raw logs. The probability escalates above the
+          // target (up to an exact, unsampled probe) once the page is too small for the sampling
+          // estimator to be accurate — see pickSampleProbability — so it follows the page size
+          // rather than being fixed for the whole loop.
+          const probeSliceAt = async (pageSize: number) => {
+            const sampleProbability = pickSampleProbability(pageSize);
 
-          if (!probe.hasLogsToProcess && effectiveSampleProbability >= 1) {
-            // Sampling wasn't active for this probe (maxLogsPerPage was too small — see
+            const result = await this.runLogPaginationCursorProbeForNextPage({
+              indexPatterns,
+              type,
+              entityDefinition,
+              fromDateISO,
+              toDateISO,
+              logsPageCursorStart,
+              maxLogsPerPage: pageSize,
+              sampleProbability,
+              opts,
+              metricAttributes,
+            });
+
+            // When the probe has no further pages we keep the natural end of the window as the
+            // end cursor. This is important because on low document count a sampled probe may
+            // return 0 documents, and a final extraction against the effective end of the window
+            // is still needed so documents the probe missed are not skipped.
+            const cursorEnd: LogSlicePaginationParams =
+              result.hasLogsToProcess && !result.isLastLogsPage
+                ? result.logsPaginationCursor
+                : { timestampCursor: toDateISO };
+
+            return { result, sampleProbability, pageSize, cursorEnd };
+          };
+
+          let probed = await probeSliceAt(scaledMaxLogsPerPage ?? baseMaxLogsPerPage);
+
+          // Resolve the rate from the first probe of the run, then redraw the boundary at the
+          // scaled page size. The first probe stopped at the base target, so its cursor cannot
+          // describe a slice `1 / rate` times larger. A rate of 1 is not pinned: no SAMPLE stage
+          // is emitted, and a later slice may still need to sample as the budget is consumed.
+          if (samplingEligible && pinnedSamplingRate === undefined) {
+            const rate = resolveSamplingRate(
+              {
+                // `maxLogsPerWindow` here is runMainPath's *remaining* budget for this sub-window
+                // (already reduced by logs consumed in earlier sub-windows), while `scannedLogs`
+                // separately re-adds that same prior consumption via `processedLogsBefore`.
+                // Add it back to `maxLogsPerWindow` first so the two don't double-subtract it.
+                scannedLogs: processedLogsBefore + totalLogs,
+                sliceLogCount: probed.result.sliceLogCount,
+                sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
+                sliceEndISO: probed.cursorEnd.timestampCursor,
+                windowEndISO,
+                maxLogsPerWindow: maxLogsPerWindow > 0 ? maxLogsPerWindow + processedLogsBefore : 0,
+              },
+              samplingRateOverride
+            );
+
+            if (rate < 1) {
+              pinnedSamplingRate = rate;
+              scaledMaxLogsPerPage = scaleMaxLogsPerPageForRate(
+                maxLogsPerPage,
+                maxLogsPerWindow,
+                rate
+              );
+              probed = await probeSliceAt(scaledMaxLogsPerPage);
+            }
+          }
+
+          if (!probed.result.hasLogsToProcess && probed.sampleProbability >= 1) {
+            // Sampling wasn't active for this probe (the page was too small — see
             // pickSampleProbability), so an empty, exact result is definitive: no real docs
             // remain. Stop immediately rather than running a redundant sweep extraction.
             break;
           }
 
-          lastLogsPages = probe.isLastLogsPage;
-
-          if (probe.hasLogsToProcess && !probe.isLastLogsPage) {
-            logsPageCursorEnd = probe.logsPaginationCursor;
-          } else {
-            // if the probe doesn't have more pages to process
-            // we keep the natural end of the window as the end cursor
-            // This is important because on low document count
-            // a sampled probe may return 0 documents. We need to still
-            // do a final extraction with the effective end of the window
-            // to ensure we don't miss any documents that may have been missed by the probe.
-            logsPageCursorEnd = { timestampCursor: toDateISO };
-          }
+          lastLogsPages = probed.result.isLastLogsPage;
+          logsPageCursorEnd = probed.cursorEnd;
 
           bumpedCursorEnd = this.detectLogSliceStall(
             logsPageCursorStart,
             logsPageCursorEnd,
             !lastLogsPages,
-            effectiveMaxLogsPerPage
+            probed.pageSize
           );
-          // Only read on the non-bumped path below: a stalled (bumped) slice is dropped, so it
-          // never counts against the volume cap.
-          sliceLogCount = probe.sliceLogCount;
+          // Both only read on the non-bumped path below: a stalled (bumped) slice is dropped, so
+          // it never counts against the volume cap and never became a slice to size.
+          sliceLogCount = probed.result.sliceLogCount;
+          sliceRawTarget = probed.pageSize;
         }
 
         if (bumpedCursorEnd) {
           logsPageCursorEnd = bumpedCursorEnd;
           entityStoreMetrics.extractionLogsPerPageDropped.add(1, metricAttributes);
         } else {
-          // p = 1 is not passed on: no SAMPLE stage and raw accounting.
-          let samplingRate: number | undefined;
-          if (isResumingMidSlice) {
-            // The probe is skipped on resume, leaving sliceLogCount at 0 - recomputing here would
-            // wrongly read that as "nothing left" and drop the sample. Reuse the rate pinned
-            // before the interruption instead.
-            samplingRate = resumeSamplingRate ?? undefined;
-          } else if (samplingEligible) {
-            const rate = resolveSamplingRate(
-              {
-                scannedLogs: processedLogsBefore + totalLogs,
-                sliceLogCount,
-                sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
-                sliceEndISO: logsPageCursorEnd.timestampCursor,
-                windowEndISO,
-              },
-              samplingRateOverride
-            );
-            samplingRate = rate < 1 ? rate : undefined;
-          }
+          // p = 1 is not passed on: no SAMPLE stage and raw accounting. The rate was resolved by
+          // the probe that sized this slice, or carried over from an interrupted run, so it is
+          // read here rather than recomputed. A resumed slice skips the probe, which would leave
+          // sliceLogCount at 0 and be misread as "nothing left".
+          const samplingRate = pinnedSamplingRate;
 
           // Only applied rates are recorded; unsampled slices record nothing so the histogram's
           // distribution reflects actual sampling, not a stream of 1.0s.
@@ -864,6 +1019,18 @@ export class LogsExtractionClient {
           totalCount += sliceIngestOutcome.addedToTotalCount;
           pages += sliceIngestOutcome.addedToPageCount;
           state = sliceIngestOutcome.state;
+
+          entityStoreMetrics.extractionSliceCount.add(1, metricAttributes);
+          // Recorded here rather than at the probe so the two slice metrics share a denominator:
+          // a probe that ended the loop without extracting, a base-size probe replaced by a scaled
+          // one, and a stalled slice all drew a boundary that never became a slice.
+          if (sliceRawTarget !== undefined) {
+            entityStoreMetrics.extractionSliceRawTarget.record(sliceRawTarget, metricAttributes);
+          }
+          entityStoreMetrics.extractionSliceEntities.record(
+            sliceIngestOutcome.addedToTotalCount,
+            metricAttributes
+          );
         }
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);

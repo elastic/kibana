@@ -43,6 +43,55 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  describe('entity id cursor placement', () => {
+    const ID_COLUMN = 'recent.entity.EngineMetadata.UntypedId';
+    const CURSOR_FILTER = `| WHERE ${ID_COLUMN} > "cursor-id"`;
+    const buildWithCursor = (type: EntityType, withCursor = true) =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        ...(withCursor ? { pagination: { idCursor: 'cursor-id' } } : {}),
+      });
+
+    it.each(['host', 'user'] as const)(
+      '%s: the cursor filters raw rows before STATS and LOOKUP JOIN, and only once',
+      async (type) => {
+        const query = buildWithCursor(type);
+        const cursorIdx = query.indexOf(CURSOR_FILTER);
+        expect(cursorIdx).toBeGreaterThan(query.indexOf(`${ID_COLUMN} = `));
+        expect(cursorIdx).toBeLessThan(query.indexOf('| STATS'));
+        expect(cursorIdx).toBeLessThan(query.indexOf('LOOKUP JOIN'));
+        expect(query.split(CURSOR_FILTER)).toHaveLength(2);
+        await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+      }
+    );
+
+    it.each(['host', 'user'] as const)('%s: no cursor filter on the first page', (type) => {
+      expect(buildWithCursor(type, false)).not.toContain(`${ID_COLUMN} >`);
+    });
+
+    it('user (postAggFilter): SORT and LIMIT stay after the postAggFilter', () => {
+      const query = buildWithCursor('user');
+      const lookupIdx = query.indexOf('LOOKUP JOIN');
+      const sortIdx = query.indexOf(`| SORT ${ID_COLUMN} ASC`);
+      expect(getEntityDefinition('user', 'default').extraction.postAggFilter).toBeDefined();
+      expect(sortIdx).toBeGreaterThan(lookupIdx);
+      expect(query.indexOf('| LIMIT 10000')).toBeGreaterThan(sortIdx);
+    });
+
+    it('host (no postAggFilter): SORT and LIMIT stay before LOOKUP JOIN', () => {
+      const query = buildWithCursor('host');
+      expect(query.indexOf('| LIMIT 10000')).toBeLessThan(query.indexOf('LOOKUP JOIN'));
+      expect(query.indexOf('| LIMIT 10000')).toBeGreaterThan(
+        query.indexOf(`| SORT ${ID_COLUMN} ASC`)
+      );
+    });
+  });
+
   it('excludes managed fields from STATS, merge EVAL, and produces a valid query', async () => {
     const base = getEntityDefinition('host', 'default');
     // Inject a managed field alongside a normal log-derived field to verify orthogonality.
@@ -51,22 +100,25 @@ describe('buildLogsExtractionEsqlQuery', () => {
       latestIndex: 'latest-index',
       entityDefinition: {
         ...base,
-        fields: [
-          ...base.fields,
-          {
-            source: 'test.api_only_field',
-            destination: 'test.api_only_field',
-            mapping: { type: 'keyword' },
-            retention: { operation: 'managed' },
-            allowAPIUpdate: true,
-          },
-          {
-            source: 'test.log_field',
-            destination: 'test.log_field',
-            mapping: { type: 'keyword' },
-            retention: { operation: 'prefer_newest_value' },
-          },
-        ],
+        extraction: {
+          ...base.extraction,
+          fields: [
+            ...base.extraction.fields,
+            {
+              source: 'test.api_only_field',
+              destination: 'test.api_only_field',
+              mapping: { type: 'keyword' },
+              retention: { operation: 'managed' },
+              allowAPIUpdate: true,
+            },
+            {
+              source: 'test.log_field',
+              destination: 'test.log_field',
+              mapping: { type: 'keyword' },
+              retention: { operation: 'prefer_newest_value' },
+            },
+          ],
+        },
       },
       docsLimit: 100,
       fromDateISO: '2022-01-01T00:00:00.000Z',
@@ -146,6 +198,27 @@ describe('buildLogsExtractionEsqlQuery', () => {
     });
   });
 
+  it.each(Object.values(EXTRACTION_MODE))(
+    '%s applies custom user exclusions while generating the extraction query',
+    async (extractionMode) => {
+      const query = buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition('user', 'default', extractionMode, {
+          excludedUserNames: ['svc-deploy'],
+        }),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        samplingRate: extractionMode === EXTRACTION_MODE.nonPriority ? 0.2 : undefined,
+      });
+
+      expect(query).toContain('"svc-deploy"');
+      expect(query).toContain('"root"');
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    }
+  );
+
   describe('sampling stage', () => {
     // Built with the non-priority definition since that is the only process the caller samples;
     // the builder itself is mode-agnostic and just renders the rate it is given.
@@ -185,6 +258,33 @@ describe('buildLogsExtractionEsqlQuery', () => {
     });
   });
 
+  describe('latest index created before the definition stored a field', () => {
+    const buildFor = (type: 'user' | 'host') =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+
+    it('sets user.entity.id to null right before the join so an unmapped lookup column resolves', async () => {
+      const query = buildFor('user');
+
+      const placeholder =
+        '| EVAL user.entity.id = TO_STRING(null)\n| LOOKUP JOIN _coordinator:latest-index';
+      expect(query).toContain(placeholder);
+      expect(query.indexOf(placeholder)).toBeGreaterThan(query.indexOf('| STATS'));
+      expect(query.split('TO_STRING(null)')).toHaveLength(2);
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
+    it('adds no placeholder to a definition that does not store the field', () => {
+      expect(buildFor('host')).not.toContain('TO_STRING(null)');
+    });
+  });
+
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
     const base = getEntityDefinition('host', 'default');
     const query = buildLogsExtractionEsqlQuery({
@@ -192,12 +292,15 @@ describe('buildLogsExtractionEsqlQuery', () => {
       latestIndex: 'latest-index',
       entityDefinition: {
         ...base,
-        whenConditionTrueSetFieldsAfterStats: [
-          {
-            condition: { field: 'host.name', eq: 'server1' },
-            fields: { 'host.name': { source: 'host.id' } },
-          },
-        ],
+        extraction: {
+          ...base.extraction,
+          whenConditionTrueSetFieldsAfterStats: [
+            {
+              condition: { field: 'host.name', eq: 'server1' },
+              fields: { 'host.name': { source: 'host.id' } },
+            },
+          ],
+        },
       },
       docsLimit: 100,
       fromDateISO: '2022-01-01T00:00:00.000Z',

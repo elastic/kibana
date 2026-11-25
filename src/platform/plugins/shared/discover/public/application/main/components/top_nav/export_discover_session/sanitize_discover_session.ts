@@ -9,8 +9,8 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import {
-  DISCOVER_SESSION_API_VERSION,
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../../../../../common/constants';
 import type {
   DiscoverSessionSanitizeRequest,
@@ -25,7 +25,7 @@ export const sanitizeDiscoverSession = async (
   const result = await http.post<DiscoverSessionSanitizeResponse>(
     `${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/_sanitize`,
     {
-      version: DISCOVER_SESSION_API_VERSION,
+      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
       body: JSON.stringify(state),
     }
   );

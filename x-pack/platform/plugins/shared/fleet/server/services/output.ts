@@ -6,13 +6,14 @@
  */
 import { v5 as uuidv5 } from 'uuid';
 import { escapeQuotes } from '@kbn/es-query';
-import { omit } from 'lodash';
+import { isPlainObject, omit } from 'lodash';
 import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -45,7 +46,10 @@ import type {
   BeatsOutputSOAttributes,
 } from '../types';
 import type {
+  KafkaOutput,
   NewBeatsOutput,
+  NewOtlpOutput,
+  OtlpExporterConfig,
   OtlpGrpcExporterConfig,
   OtlpHttpExporterConfig,
   UpdateOutput,
@@ -66,7 +70,6 @@ import {
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
-  kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
   otlpProtocol,
   OTLP_GRPC_ONLY_COMPRESSION_TYPES,
@@ -102,11 +105,35 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { omitNullSecrets, withSavedSecrets } from './secrets/preserve';
 import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
+import { getOutputSecretFields } from './outputs/secret_fields';
+import {
+  omitRemovedOtlpAuthSettings,
+  validateOtlpAuth,
+  validateOtlpAuthCredential,
+  withRemovedOtlpAuthSettings,
+  withTrimmedOtlpAuthCredential,
+} from './outputs/otlp_auth';
+import { checkKafkaAuthMethodAllowed } from './outputs/kafka_auth_gate';
+import type { KafkaAuthMethod, KafkaAuthOutput } from './outputs/kafka_auth';
+import {
+  KAFKA_AUTH_METHODS,
+  clearKafkaAuthFieldsForType,
+  getKafkaAuthMethod,
+  getRemovedKafkaAuthSecrets,
+  omitKafkaSecretsOfOtherAuthTypes,
+  keepsKafkaAuth,
+  omitRemovedKafkaAuthData,
+  usesKafkaAuth,
+  withRemovedKafkaAuthSettings,
+  withSavedKafkaAuth,
+} from './outputs/kafka_auth';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
   validateOutputSslPaths,
   ensureNoDuplicateSecrets,
+  validateKafkaAuthMethods,
   validateOutputServerless,
 } from './outputs/validators';
 
@@ -115,6 +142,7 @@ import {
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
 import { applyManagedOtlpDefaults } from './utils/managed_otlp';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -145,11 +173,73 @@ const isBeatsSOOutput = (attrs: OutputSOAttributes): attrs is BeatsOutputSOAttri
 const isOtlpSOOutput = (attrs: OutputSOAttributes): attrs is OutputSoOtlpAttributes =>
   isOtlpOutput(attrs);
 
+/**
+ * A saved object update merges a map into the stored one key by key, so a header that an update
+ * leaves out would be kept. Returns the update's headers with every stored header it leaves out
+ * set to `null`, which removes it.
+ */
+export function withRemovedOtlpHeaders(
+  headers: Record<string, string>,
+  storedHeaders: Record<string, string> | null | undefined
+): Record<string, string | null> {
+  const keys = new Set(Object.keys(headers));
+  const removedHeaders = Object.keys(storedHeaders ?? {}).filter((key) => !keys.has(key));
+
+  return removedHeaders.length
+    ? { ...Object.fromEntries(removedHeaders.map((key) => [key, null])), ...headers }
+    : headers;
+}
+
+/**
+ * The exporter an output has once an update is saved. The update is merged into the saved
+ * exporter, unless it changes the protocol: the settings of the previous protocol are removed,
+ * the shared headers are kept.
+ */
+function getMergedOtlpExporter(
+  update: OtlpExporterConfig | undefined,
+  stored: OtlpExporterConfig | undefined
+): Partial<OtlpExporterConfig> | undefined {
+  if (!update) {
+    return stored;
+  }
+  // headers replace the stored ones, which are kept when they are left out, also by an update
+  // that changes the protocol: they are shared by both protocols
+  const headers = update.headers !== undefined ? update.headers : stored?.headers;
+  if (!stored || update.protocol !== stored.protocol) {
+    return { ...update, headers } as Partial<OtlpExporterConfig>;
+  }
+  return { ...stored, ...update, headers } as Partial<OtlpExporterConfig>;
+}
+
+/** Drops the headers that an update removed, which the saved object keeps as `null`. */
+function omitRemovedOtlpHeaders(
+  exporter: OutputSoOtlpAttributes['otlp_exporter']
+): OutputSoOtlpAttributes['otlp_exporter'] {
+  const headers = exporter?.headers as Record<string, string | null> | null | undefined;
+  if (!headers || !isPlainObject(headers) || !Object.values(headers).includes(null)) {
+    return exporter;
+  }
+
+  // Object.fromEntries defines own properties, so a header named `__proto__` stays a header
+  const storedHeaders: Record<string, string> = Object.fromEntries(
+    Object.entries(headers).filter((entry): entry is [string, string] => entry[1] !== null)
+  );
+
+  return { ...exporter, headers: storedHeaders };
+}
+
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
+  // the references of the secrets an update removed are kept as `null` by the saved object update
+  const soAttributes = omitNullSecrets(so.attributes);
 
-  if (isBeatsSOOutput(so.attributes)) {
-    const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
+  if (isBeatsSOOutput(soAttributes)) {
+    const {
+      output_id: outputId,
+      ssl,
+      proxy_id: proxyId,
+      ...attributes
+    } = omitRemovedKafkaAuthData(soAttributes);
     let parsedSsl;
     try {
       parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
@@ -165,14 +255,22 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     };
   }
 
-  if (isOtlpSOOutput(so.attributes)) {
-    const { output_id: outputId, ...attributes } = so.attributes;
+  if (isOtlpSOOutput(soAttributes)) {
+    const { output_id: outputId, auth, ...attributes } = soAttributes;
+    const storedAuth = omitRemovedOtlpAuthSettings(auth);
     // canonical id placed last so attributes.id cannot shadow it
-    return { ...attributes, id: outputId ?? so.id };
+    return {
+      ...attributes,
+      ...(attributes.otlp_exporter && {
+        otlp_exporter: omitRemovedOtlpHeaders(attributes.otlp_exporter),
+      }),
+      ...(storedAuth && { auth: storedAuth }),
+      id: outputId ?? so.id,
+    };
   }
 
-  const { output_id: outputId, ...attributes } =
-    so.attributes as unknown as OutputSoBaseAttributes & Record<string, unknown>;
+  const { output_id: outputId, ...attributes } = soAttributes as unknown as OutputSoBaseAttributes &
+    Record<string, unknown>;
   // canonical id placed last so attributes.id cannot shadow it
   return { ...attributes, id: outputId ?? so.id } as unknown as Output;
 }
@@ -480,6 +578,9 @@ async function remoteSyncIntegrationsCheck(
   }
 }
 
+const OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE =
+  'auth of an OTLP output requires secret storage to be enabled, its credential is only stored as a secret';
+
 class OutputService {
   private get soClient() {
     return appContextService.getInternalUserSOClient();
@@ -498,6 +599,36 @@ class OutputService {
     const { result, error } = await checkOtlpOutputAllowed(esClient, soClient);
     if (!result) {
       throw new OutputInvalidError(error!);
+    }
+  }
+
+  /**
+   * Throws if the output uses an authentication method of the Kafka output that is not allowed in
+   * this deployment (feature flag, Fleet Server versions). When `original` is given, a method that
+   * the update keeps exactly as it is does not need to be allowed: it is an ordinary edit.
+   */
+  private async assertKafkaAuthMethodsAllowed(
+    output: KafkaAuthOutput,
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    original?: KafkaAuthOutput
+  ): Promise<void> {
+    for (const method of KAFKA_AUTH_METHODS) {
+      if (
+        !usesKafkaAuth(method, output) ||
+        (original && keepsKafkaAuth(method, original, output))
+      ) {
+        continue;
+      }
+      const { result, error } = await checkKafkaAuthMethodAllowed(
+        method,
+        esClient,
+        soClient,
+        output
+      );
+      if (!result) {
+        throw new OutputInvalidError(error!);
+      }
     }
   }
 
@@ -686,6 +817,25 @@ class OutputService {
     validateFleetSavedObjectId(options?.id);
 
     await this.assertOtlpOutputAllowed(output, esClient, soClient);
+    // preconfigured outputs are checked before they are created, so Fleet setup does not fail
+    if (!options?.fromPreconfiguration) {
+      await this.assertKafkaAuthMethodsAllowed(output, esClient, soClient);
+    }
+
+    if (isOtlpOutput(output)) {
+      const otlpOutput = withTrimmedOtlpAuthCredential(output);
+      // a new output has no credential yet: it can only be sent as a value
+      validateOtlpAuthCredential(otlpOutput.secrets?.auth?.credential);
+      output = otlpOutput;
+    }
+
+    if (output.type === outputType.Kafka && output.secrets) {
+      // do not store the secrets of an authentication method the output does not use
+      output = {
+        ...output,
+        secrets: omitKafkaSecretsOfOtherAuthTypes(output.secrets, output.auth_type),
+      };
+    }
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -693,6 +843,14 @@ class OutputService {
         ('is_preconfigured' in output && output.is_preconfigured)) ??
       false;
     this._runOutputValidators(output, isPreconfigured);
+
+    if (isOtlpOutput(output)) {
+      validateOtlpAuth({
+        auth: output.auth,
+        hasCredential: !!output.secrets?.auth?.credential,
+        exporter: output.otlp_exporter,
+      });
+    }
 
     const data: OutputSOAttributes = {
       ...omit(output, ['ssl', 'secrets']),
@@ -835,13 +993,7 @@ class OutputService {
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
       // Clear fields that are only valid for specific auth_type values
-      if (output.auth_type !== kafkaAuthType.None) {
-        data.connection_type = undefined;
-      }
-      if (output.auth_type !== kafkaAuthType.Userpass) {
-        data.username = undefined;
-        data.password = undefined;
-      }
+      clearKafkaAuthFieldsForType(data, output.auth_type, undefined);
       // Kafka does not support proxies — clear any proxy_id silently (#267281)
       data.proxy_id = null;
     }
@@ -855,7 +1007,11 @@ class OutputService {
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    const secretStorageEnabled = await isOutputSecretStorageEnabled(esClient, soClient);
+    if (isOtlpOutput(output) && output.auth && !secretStorageEnabled) {
+      throw new OutputInvalidError(OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE);
+    }
+    if (secretStorageEnabled) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -1062,9 +1218,10 @@ class OutputService {
 
   public async delete(
     id: string,
-    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
-      fromPreconfiguration: false,
-    }
+    {
+      fromPreconfiguration = false,
+      request,
+    }: { fromPreconfiguration?: boolean; request?: KibanaRequest } = {}
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting output ${id}`);
@@ -1083,6 +1240,41 @@ class OutputService {
 
     if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
+    }
+
+    if (request) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(request)) {
+        // Collect agent-policy and package-policy spaces before any mutation.
+        // Fail closed if SO_SEARCH_LIMIT is hit.
+        const [agentPolicySpaces, packagePolicySpaces] = await Promise.all([
+          agentPolicyService.getSpacesForPoliciesUsingOutput(id),
+          packagePolicyService.getSpacesForPoliciesUsingOutput(id),
+        ]);
+        if (agentPolicySpaces.truncated || packagePolicySpaces.truncated) {
+          throw new OutputUnauthorizedError(
+            `Unable to verify delete authorization for output ${id}: too many agent policies to enumerate`
+          );
+        }
+        const errorMessage = `Insufficient privileges to delete output ${id}: it is used by agent policies in spaces you are not authorized to access`;
+        // Agent-policy spaces only need fleet-agent-policies-all.
+        // Package-policy spaces also need integrations-all because removeOutputFromAll
+        // rewrites package policies too. Check them separately so a user with
+        // integrations-all only in the spaces that actually have package policies
+        // is not incorrectly blocked in agent-only spaces.
+        await assertPrivilegesInSpaces({
+          request,
+          spaceIds: agentPolicySpaces.spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage,
+        });
+        await assertPrivilegesInSpaces({
+          request,
+          spaceIds: packagePolicySpaces.spaceIds,
+          apiPrivileges: ['integrations-all', 'fleet-agent-policies-all'],
+          errorMessage,
+        });
+      }
     }
 
     await packagePolicyService.removeOutputFromAll(
@@ -1122,7 +1314,16 @@ class OutputService {
     {
       fromPreconfiguration = false,
       secretHashes,
-    }: { fromPreconfiguration: boolean; secretHashes?: Record<string, any> } = {
+      declaresAllSecrets = false,
+    }: {
+      fromPreconfiguration: boolean;
+      secretHashes?: Record<string, any>;
+      /**
+       * The payload declares the whole output, so the secrets it leaves out are removed rather
+       * than kept. Set by preconfiguration, for which the Kibana config file is authoritative.
+       */
+      declaresAllSecrets?: boolean;
+    } = {
       fromPreconfiguration: false,
     }
   ) {
@@ -1150,10 +1351,89 @@ class OutputService {
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
 
+    if (mergedType !== outputType.Otlp) {
+      // the update schemas are not tied to the type: an update can carry the OTLP settings
+      const { auth, secrets } = data as Partial<NewOtlpOutput>;
+      if ((auth !== undefined && auth !== null) || secrets?.auth !== undefined) {
+        throw new OutputInvalidError('auth can only be set on an OTLP output');
+      }
+    }
+
+    if (mergedType === outputType.Otlp) {
+      data = withTrimmedOtlpAuthCredential(data);
+      // checked before the saved credential is added to the update
+      validateOtlpAuthCredential(
+        (data as Partial<NewOtlpOutput>).secrets?.auth?.credential,
+        isOtlpOutput(originalOutput) ? originalOutput.secrets?.auth?.credential : undefined
+      );
+    }
+
+    if (mergedType === outputType.Kafka) {
+      // an update that does not touch the authentication keeps its settings and secrets
+      data = KAFKA_AUTH_METHODS.reduce(
+        (kept, method) => withSavedKafkaAuth(method, originalOutput, kept),
+        data
+      );
+    }
+
+    const secretStorageEnabled = await isOutputSecretStorageEnabled(esClient, soClient);
+    if (secretStorageEnabled && !declaresAllSecrets) {
+      // an update that does not touch a credential kept as a secret keeps it, and a plain text
+      // value for such a credential is stored as a secret too. Applied before the payload is
+      // validated and turned into saved object attributes, so that every step sees the same data.
+      data = withSavedSecrets({
+        fields: getOutputSecretFields(mergedType),
+        original: originalOutput,
+        update: data,
+      });
+    }
+
+    // an edit that keeps the authentication as it is does not need its method to be allowed
+    if (!fromPreconfiguration) {
+      await this.assertKafkaAuthMethodsAllowed(
+        { ...data, type: mergedType },
+        esClient,
+        soClient,
+        originalOutput
+      );
+    }
+
+    if (mergedType === outputType.Kafka && (data as { secrets?: object }).secrets) {
+      // do not store the secrets of an authentication method the output does not use
+      data = {
+        ...data,
+        secrets: omitKafkaSecretsOfOtherAuthTypes(
+          (data as { secrets?: object }).secrets,
+          (data as { auth_type?: KafkaOutput['auth_type'] }).auth_type ??
+            (originalOutput as KafkaOutput).auth_type
+        ),
+      } as UpdateOutput;
+    }
+
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
     const isPreconfigured = (fromPreconfiguration || originalOutput.is_preconfigured) ?? false;
-    this._runOutputValidators(typedFullUpdateData, isPreconfigured);
+    // the authentication methods that the update keeps as they are were checked when they were saved
+    const keptAuthMethods = KAFKA_AUTH_METHODS.filter((method) =>
+      keepsKafkaAuth(method, originalOutput, typedFullUpdateData)
+    );
+    // the update may leave out the authentication type: the one of the saved output applies
+    const validatedData =
+      mergedType === outputType.Kafka
+        ? ({
+            ...typedFullUpdateData,
+            auth_type:
+              (typedFullUpdateData as KafkaOutput).auth_type ??
+              (originalOutput as KafkaOutput).auth_type,
+          } as UpdateTypedOutput)
+        : typedFullUpdateData;
+    this._runOutputValidators(validatedData, isPreconfigured, keptAuthMethods);
+
+    if (mergedType === outputType.Otlp) {
+      this._validateOtlpAuthUpdate(data as Partial<NewOtlpOutput>, originalOutput, {
+        secretStorageEnabled,
+      });
+    }
 
     // type is always defined here after merging; ssl/secrets/id omitted at runtime but allowed on the type.
     // id is stripped to prevent poisoning the saved object's identity field.
@@ -1206,6 +1486,8 @@ class OutputService {
       target.username = null;
       target.password = null;
       target.sasl = null;
+      target.oauth2 = null;
+      target.kerberos = null;
       target.partition = null;
       target.random = null;
       target.round_robin = null;
@@ -1362,18 +1644,15 @@ class OutputService {
           updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
         // Clear fields that are only valid for specific auth_type values
-        if (updateData.auth_type && updateData.auth_type !== kafkaAuthType.None) {
-          updateData.connection_type = null;
-        }
-        if (updateData.auth_type && updateData.auth_type !== kafkaAuthType.Userpass) {
-          updateData.username = null;
-          updateData.password = null;
+        if (updateData.auth_type) {
+          clearKafkaAuthFieldsForType(updateData, updateData.auth_type, null);
         }
       }
 
       if (isOtlpOutput(originalOutput)) {
         // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
         (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+        (updateData as Nullable<OutputSoOtlpAttributes>).auth = null;
       }
 
       if (isOtlpOutput(updateData)) {
@@ -1404,8 +1683,28 @@ class OutputService {
       }
     }
 
+    if (
+      isOtlpOutput(updateData) &&
+      isOtlpOutput(originalOutput) &&
+      isPlainObject(updateData.otlp_exporter?.headers)
+    ) {
+      // headers replace the stored ones: remove the stored headers this update leaves out
+      updateData.otlp_exporter = {
+        ...updateData.otlp_exporter,
+        headers: withRemovedOtlpHeaders(
+          updateData.otlp_exporter.headers!,
+          originalOutput.otlp_exporter?.headers
+        ) as Record<string, string>,
+      };
+    }
+
     if (isOtlpOutput(updateData) && updateData.otlp_exporter) {
       updateData.otlp_exporter = applyManagedOtlpDefaults(updateData.otlp_exporter);
+    }
+
+    if (isOtlpOutput(updateData) && isOtlpOutput(originalOutput) && updateData.auth) {
+      // another authentication type: remove the settings of the stored one
+      updateData.auth = withRemovedOtlpAuthSettings(updateData.auth, originalOutput.auth);
     }
 
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
@@ -1429,6 +1728,27 @@ class OutputService {
       if (!typedFullUpdateData.sasl) {
         updateData.sasl = null;
       }
+      const authMethod = getKafkaAuthMethod(typedFullUpdateData.auth_type);
+      if (authMethod) {
+        // the credentials and the sasl mechanism do not apply to these methods
+        updateData.username = null;
+        updateData.password = null;
+        updateData.sasl = null;
+      }
+      KAFKA_AUTH_METHODS.forEach((method) => {
+        const target = updateData as Record<string, unknown>;
+        const settings = target[method];
+        if (
+          method !== authMethod &&
+          (typedFullUpdateData.auth_type || !typedFullUpdateData[method])
+        ) {
+          target[method] = null;
+        } else if (settings) {
+          // the saved object update merges objects: the settings that are no longer sent have to
+          // be removed explicitly
+          target[method] = withRemovedKafkaAuthSettings(method, originalOutput, settings as object);
+        }
+      });
       if (!typedFullUpdateData.ssl) {
         updateData.ssl = null;
       }
@@ -1502,7 +1822,7 @@ class OutputService {
     await remoteSyncIntegrationsCheck(esClient, data);
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    if (secretStorageEnabled) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,
@@ -1534,6 +1854,23 @@ class OutputService {
         }
       }
     }
+
+    // The secrets that are no longer part of the output are deleted above. Their references have to
+    // be removed too, or the output would keep pointing at deleted secrets.
+    KAFKA_AUTH_METHODS.forEach((method) => {
+      const removedSecrets = getRemovedKafkaAuthSecrets(
+        method,
+        originalOutput,
+        mergedType === outputType.Kafka ? (data as { secrets?: unknown }).secrets : undefined
+      );
+      if (removedSecrets) {
+        const newSecrets = updateData.secrets as Record<string, object> | undefined;
+        updateData.secrets = {
+          ...newSecrets,
+          [method]: { ...newSecrets?.[method], ...removedSecrets },
+        } as typeof updateData.secrets;
+      }
+    });
 
     patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
 
@@ -1718,15 +2055,48 @@ class OutputService {
     };
   }
 
+  /**
+   * Validates the authentication an OTLP output has once the update is saved: the update merged
+   * with the saved output.
+   */
+  private _validateOtlpAuthUpdate(
+    data: Partial<NewOtlpOutput>,
+    originalOutput: Output,
+    { secretStorageEnabled }: { secretStorageEnabled: boolean }
+  ): void {
+    const original = isOtlpOutput(originalOutput) ? originalOutput : undefined;
+    const auth = data.auth !== undefined ? data.auth : original?.auth;
+
+    if (auth && !secretStorageEnabled) {
+      throw new OutputInvalidError(OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE);
+    }
+
+    // `auth: null` removes the credential with the authentication
+    const credential =
+      data.secrets?.auth && 'credential' in data.secrets.auth
+        ? data.secrets.auth.credential
+        : auth
+        ? original?.secrets?.auth?.credential
+        : undefined;
+
+    validateOtlpAuth({
+      auth,
+      hasCredential: !!credential,
+      exporter: getMergedOtlpExporter(data.otlp_exporter, original?.otlp_exporter),
+    });
+  }
+
   private _runOutputValidators(
     output: UpdateTypedOutput | NewOutput,
-    isPreconfigured: boolean
+    isPreconfigured: boolean,
+    keptAuthMethods: KafkaAuthMethod[] = []
   ): void {
     try {
       if (isBeatsOutput(output)) {
         validateOutputSslPaths(output);
       }
       ensureNoDuplicateSecrets(output);
+      validateKafkaAuthMethods(output, keptAuthMethods);
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);

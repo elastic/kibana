@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const STORAGE_PREFIX = 'contentList:pageSize:';
+import { readLocalStorage, writeLocalStorage } from '../../storage/local_storage';
+
+const STORAGE_KEY_PREFIX_PAGE_SIZE = 'pageSize:';
 
 /**
  * Read persisted page size from `localStorage`, falling back to the configured default.
@@ -17,18 +19,13 @@ const STORAGE_PREFIX = 'contentList:pageSize:';
  * @returns The persisted page size, or `fallback` if none is found.
  */
 export const getPersistedPageSize = (key: string, fallback: number): number => {
-  try {
-    const raw = localStorage.getItem(`${STORAGE_PREFIX}${key}`);
-    if (raw !== null) {
-      const parsed = Number(raw);
-      if (Number.isFinite(parsed) && parsed > 0) {
-        return parsed;
-      }
-    }
-  } catch {
-    // localStorage may be unavailable (e.g. private browsing, SSR).
+  const raw = readLocalStorage(`${STORAGE_KEY_PREFIX_PAGE_SIZE}${key}`);
+  if (raw === null) {
+    return fallback;
   }
-  return fallback;
+
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
 /**
@@ -38,9 +35,5 @@ export const getPersistedPageSize = (key: string, fallback: number): number => {
  * @param size - Page size to persist.
  */
 export const setPersistedPageSize = (key: string, size: number): void => {
-  try {
-    localStorage.setItem(`${STORAGE_PREFIX}${key}`, String(size));
-  } catch {
-    // localStorage may be unavailable (e.g. private browsing, SSR).
-  }
+  writeLocalStorage(`${STORAGE_KEY_PREFIX_PAGE_SIZE}${key}`, String(size));
 };

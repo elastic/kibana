@@ -1,0 +1,898 @@
+{
+  "id": "vendor_c_audit",
+  "title": "Vendor C audit",
+  "description": "ChatGPT Enterprise audit logs",
+  "cohort": "recent",
+  "format": "json",
+  "samples": [
+    {
+      "line": "{\"event_id\":\"92b7dea7-9ff4-485e-b0a0-74efa627f15b\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"API_KEY\",\"redacted_id\":\"sk-...RxIA\"},\"timestamp\":\"2026-07-09T11:05:09.077133Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"81.2.69.142\",\"client_ip_details\":{\"country\":\"GB\",\"city\":\"London\",\"region\":\"England\",\"region_code\":\"ENG\",\"asn\":\"\",\"latitude\":\"51.50853\",\"longitude\":\"-0.12574\"},\"client_user_agent\":\"python-requests/2.34.2\",\"client_ja3\":\"86dab2109182b6bbaa644647d7db2997\",\"client_ja4\":\"t13d1713h1_ab0a1bf427ad_8537cf56674e\",\"destination_hostname\":\"api.chatgpt.com\"},\"action_data\":{\"limit\":\"100\",\"after\":\"2026-07-09T10:24:53.814285Z\",\"event_type\":\"AUDIT_LOG\"},\"action\":\"LIST_WORKSPACE_LOG_FILES\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T11:05:09.077Z",
+        "destination": {
+          "domain": "api.chatgpt.com"
+        },
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "hosts": [
+            "api.chatgpt.com"
+          ],
+          "ip": [
+            "81.2.69.142"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "tls": {
+          "client": {
+            "ja3": "86dab2109182b6bbaa644647d7db2997"
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.34.2",
+          "version": "2.34"
+        },
+        "event": {
+          "action": "list_workspace_log_files",
+          "category": [
+            "iam"
+          ],
+          "id": "92b7dea7-9ff4-485e-b0a0-74efa627f15b",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"344039bd-e40b-4020-8256-e44f7bbeeb3e\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T11:40:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"89.160.20.112\",\"client_ip_details\":{\"country\":\"SE\",\"city\":\"Linkoping\",\"region\":\"Ostergotland\",\"region_code\":\"E\",\"asn\":\"AS29518\",\"latitude\":\"58.4167\",\"longitude\":\"15.6167\"},\"client_user_agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"user_id\":\"user-Bb22AsDfGhJkLp\",\"new_role\":\"manager\"},\"action\":\"USER_ROLE_UPDATED\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T11:40:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "89.160.20.112"
+          ],
+          "user": [
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Mac"
+          },
+          "name": "Other",
+          "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+          "os": {
+            "full": "Mac OS X 10.15.7",
+            "name": "Mac OS X",
+            "version": "10.15.7"
+          }
+        },
+        "event": {
+          "action": "user_role_updated",
+          "category": [
+            "iam"
+          ],
+          "id": "344039bd-e40b-4020-8256-e44f7bbeeb3e",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"f7ce6f1c-2f08-4692-973e-3919427bde82\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T12:30:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"81.2.69.142\",\"client_ip_details\":{\"country\":\"GB\",\"city\":\"London\",\"region\":\"England\",\"region_code\":\"ENG\",\"asn\":\"\",\"latitude\":\"51.50853\",\"longitude\":\"-0.12574\"},\"client_user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/127.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"feature\":\"gpt_sharing\",\"value\":true},\"action\":\"WORKSPACE_TOGGLE_FEATURE\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T12:30:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.142"
+          ],
+          "user": [
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Firefox",
+          "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/127.0",
+          "os": {
+            "full": "Windows 10",
+            "name": "Windows",
+            "version": "10"
+          },
+          "version": "127.0"
+        },
+        "event": {
+          "action": "workspace_toggle_feature",
+          "category": [
+            "iam"
+          ],
+          "id": "f7ce6f1c-2f08-4692-973e-3919427bde82",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"b521d25e-0a2c-4b69-bfcc-70c0fdfadd03\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T12:50:00.000000Z\",\"action_result\":\"BLOCKED\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"81.2.69.142\",\"client_ip_details\":{\"country\":\"GB\",\"city\":\"London\",\"region\":\"England\",\"region_code\":\"ENG\",\"asn\":\"\",\"latitude\":\"51.50853\",\"longitude\":\"-0.12574\"},\"client_user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/127.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"email_addresses\":[\"new.hire@example.com\"],\"role\":\"user\"},\"action\":\"INVITE_SEND\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T12:50:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.142"
+          ],
+          "user": [
+            "new.hire@example.com",
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Firefox",
+          "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/127.0",
+          "os": {
+            "full": "Windows 10",
+            "name": "Windows",
+            "version": "10"
+          },
+          "version": "127.0"
+        },
+        "event": {
+          "action": "invite_send",
+          "category": [
+            "iam"
+          ],
+          "id": "b521d25e-0a2c-4b69-bfcc-70c0fdfadd03",
+          "kind": "event",
+          "outcome": "failure",
+          "type": [
+            "creation"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"c0ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"workspace_id\":\"ws-fallback-1111-2222-3333-444455556666\",\"actor\":{\"type\":\"API_KEY\",\"redacted_id\":\"sk-...Synth01\"},\"timestamp\":\"2026-07-09T13:00:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"198.51.100.10\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example City\",\"region\":\"Example Region\",\"region_code\":\"EX\",\"asn\":\"AS64512\",\"latitude\":\"38.8977\",\"longitude\":\"-77.0365\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"limit\":\"50\",\"event_type\":\"AUDIT_LOG\"},\"action\":\"LIST_WORKSPACE_LOG_FILES\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:00:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "organization": {
+          "id": "ws-fallback-1111-2222-3333-444455556666"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.10"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Amsterdam",
+            "continent_name": "Europe",
+            "country_iso_code": "NL",
+            "country_name": "Netherlands",
+            "region_iso_code": "NL-NH",
+            "region_name": "North Holland"
+          },
+          "ip": "198.51.100.10"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "list_workspace_log_files",
+          "category": [
+            "iam"
+          ],
+          "id": "c0ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"d1ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T13:05:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"203.0.113.20\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"\",\"latitude\":\"40.7128\",\"longitude\":\"-74.0060\"},\"client_user_agent\":\"curl/8.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"auth_user_id\":\"user-Cc33XxYyZzAaBb\",\"memory_id\":\"mem-synth-001\"},\"action\":\"DELETE_MEMORY\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:05:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "203.0.113.20"
+          ],
+          "user": [
+            "user-Cc33XxYyZzAaBb",
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64502,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Madrid",
+            "continent_name": "Europe",
+            "country_iso_code": "ES",
+            "country_name": "Spain",
+            "region_iso_code": "ES-M",
+            "region_name": "Madrid"
+          },
+          "ip": "203.0.113.20"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "curl",
+          "original": "curl/8.0",
+          "version": "8.0"
+        },
+        "event": {
+          "action": "delete_memory",
+          "category": [
+            "iam"
+          ],
+          "id": "d1ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"e2ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T13:10:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"198.51.100.20\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"\",\"latitude\":\"37.7749\",\"longitude\":\"-122.4194\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"agent_id\":\"agent-synth-001\",\"gpt_id\":\"gpt-synth-fallback\"},\"action\":\"GPT_UPDATE\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:10:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "gen_ai": {
+          "agent": {
+            "id": "agent-synth-001"
+          }
+        },
+        "related": {
+          "ip": [
+            "198.51.100.20"
+          ],
+          "user": [
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Amsterdam",
+            "continent_name": "Europe",
+            "country_iso_code": "NL",
+            "country_name": "Netherlands",
+            "region_iso_code": "NL-NH",
+            "region_name": "North Holland"
+          },
+          "ip": "198.51.100.20"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "gpt_update",
+          "category": [
+            "iam"
+          ],
+          "id": "e2ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"f3ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T13:15:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"203.0.113.30\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"\",\"latitude\":\"34.0522\",\"longitude\":\"-118.2437\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"shared_to\":[{\"group_id\":\"grp-shared-a001\",\"recipient_type\":\"group\"},{\"group_id\":\"grp-shared-b002\",\"recipient_type\":\"group\"}]},\"action\":\"UPDATE_SHARING\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:15:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "203.0.113.30"
+          ],
+          "user": [
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64502,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Madrid",
+            "continent_name": "Europe",
+            "country_iso_code": "ES",
+            "country_name": "Spain",
+            "region_iso_code": "ES-M",
+            "region_name": "Madrid"
+          },
+          "ip": "203.0.113.30"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "update_sharing",
+          "category": [
+            "iam"
+          ],
+          "id": "f3ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"a4ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T13:20:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"198.51.100.30\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"\",\"latitude\":\"41.8781\",\"longitude\":\"-87.6298\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"principal_id\":\"user-Dd44EeFfGgHhIi\",\"principal_type\":\"user\"},\"action\":\"SKILL_SHARE\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:20:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.30"
+          ],
+          "user": [
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Amsterdam",
+            "continent_name": "Europe",
+            "country_iso_code": "NL",
+            "country_name": "Netherlands",
+            "region_iso_code": "NL-NH",
+            "region_name": "North Holland"
+          },
+          "ip": "198.51.100.30"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "skill_share",
+          "category": [
+            "iam"
+          ],
+          "id": "a4ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"b5ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T13:25:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"203.0.113.40\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"\",\"latitude\":\"39.7392\",\"longitude\":\"-104.9903\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"hostname\":\"corp.example.com\",\"domains\":[\"api.example.com\",\"docs.example.com\"]},\"action\":\"DOMAIN_CREATE\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:25:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "hosts": [
+            "corp.example.com",
+            "api.example.com",
+            "docs.example.com"
+          ],
+          "ip": [
+            "203.0.113.40"
+          ],
+          "user": [
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64502,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Madrid",
+            "continent_name": "Europe",
+            "country_iso_code": "ES",
+            "country_name": "Spain",
+            "region_iso_code": "ES-M",
+            "region_name": "Madrid"
+          },
+          "ip": "203.0.113.40"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "domain_create",
+          "category": [
+            "iam"
+          ],
+          "id": "b5ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "creation"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"c6ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T13:30:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"198.51.100.40\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"\",\"latitude\":\"42.3601\",\"longitude\":\"-71.0589\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"principal_id\":\"grp-principal-001\",\"principal_type\":\"group\"},\"action\":\"SKILL_SHARE\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:30:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.40"
+          ],
+          "user": [
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Amsterdam",
+            "continent_name": "Europe",
+            "country_iso_code": "NL",
+            "country_name": "Netherlands",
+            "region_iso_code": "NL-NH",
+            "region_name": "North Holland"
+          },
+          "ip": "198.51.100.40"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "skill_share",
+          "category": [
+            "iam"
+          ],
+          "id": "c6ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"d7ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T13:35:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"203.0.113.50\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"\",\"latitude\":\"47.6062\",\"longitude\":\"-122.3321\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"third_party_gizmo_id\":\"gizmo-synth-001\"},\"action\":\"GPT_PUBLISH\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:35:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "gen_ai": {
+          "agent": {
+            "id": "gizmo-synth-001"
+          }
+        },
+        "related": {
+          "ip": [
+            "203.0.113.50"
+          ],
+          "user": [
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64502,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Madrid",
+            "continent_name": "Europe",
+            "country_iso_code": "ES",
+            "country_name": "Spain",
+            "region_iso_code": "ES-M",
+            "region_name": "Madrid"
+          },
+          "ip": "203.0.113.50"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "gpt_publish",
+          "category": [
+            "iam"
+          ],
+          "id": "d7ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"e8ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"actor\":{\"type\":\"API_KEY\",\"redacted_id\":\"sk-...Synth02\"},\"timestamp\":\"2026-07-09T13:40:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"198.51.100.50\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"ASnotvalid\",\"latitude\":\"not-a-lat\",\"longitude\":\"999.0\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"workspace_id\":\"ws-action-data-fallback-001\",\"limit\":\"10\",\"event_type\":\"AUDIT_LOG\"},\"action\":\"LIST_WORKSPACE_LOG_FILES\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:40:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "organization": {
+          "id": "ws-action-data-fallback-001"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.50"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Amsterdam",
+            "continent_name": "Europe",
+            "country_iso_code": "NL",
+            "country_name": "Netherlands",
+            "region_iso_code": "NL-NH",
+            "region_name": "North Holland"
+          },
+          "ip": "198.51.100.50"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "list_workspace_log_files",
+          "category": [
+            "iam"
+          ],
+          "id": "e8ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"event_id\":\"f9ffee00-1111-2222-3333-444455556666\",\"type\":\"AUDIT_LOG\",\"principal\":{\"id\":\"be545252-ad04-4cfa-9ca5-deca58416151\",\"type\":\"CHATGPT_WORKSPACE\"},\"actor\":{\"type\":\"ACCOUNT_USER\",\"user_id\":\"user-Aa11QwErTyUiOp\",\"user_email\":\"alice.martin@example.com\"},\"timestamp\":\"2026-07-09T13:45:00.000000Z\",\"action_result\":\"SUCCESS\",\"action_privilege\":\"ADMIN\",\"request_metadata\":{\"client_ip\":\"203.0.113.60\",\"client_ip_details\":{\"country\":\"US\",\"city\":\"Example\",\"region\":\"Example\",\"region_code\":\"EX\",\"asn\":\"\",\"latitude\":\"33.4484\",\"longitude\":\"-112.0740\"},\"client_user_agent\":\"python-requests/2.31.0\",\"client_ja3\":\"\",\"client_ja4\":\"\",\"destination_hostname\":null},\"action_data\":{\"requested_access_removals\":[{\"user_id\":\"user-rem-001\",\"recipient_type\":\"user\"},{\"user_id\":\"user-rem-002\",\"recipient_type\":\"user\"}],\"requested_access_updates\":[{\"user_id\":\"user-upd-001\",\"recipient_type\":\"user\"},{\"user_id\":\"user-upd-002\",\"recipient_type\":\"user\"}]},\"action\":\"PROJECT_UPDATE_SHARING\"}",
+      "expected": {
+        "@timestamp": "2026-07-09T13:45:00.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "203.0.113.60"
+          ],
+          "user": [
+            "user-rem-001",
+            "user-rem-002",
+            "user-upd-001",
+            "user-upd-002",
+            "alice.martin@example.com",
+            "user-Aa11QwErTyUiOp"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64502,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Madrid",
+            "continent_name": "Europe",
+            "country_iso_code": "ES",
+            "country_name": "Spain",
+            "region_iso_code": "ES-M",
+            "region_name": "Madrid"
+          },
+          "ip": "203.0.113.60"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.com",
+          "email": "alice.martin@example.com",
+          "id": "user-Aa11QwErTyUiOp"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Python Requests",
+          "original": "python-requests/2.31.0",
+          "version": "2.31"
+        },
+        "event": {
+          "action": "project_update_sharing",
+          "category": [
+            "iam"
+          ],
+          "id": "f9ffee00-1111-2222-3333-444455556666",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      }
+    }
+  ]
+}

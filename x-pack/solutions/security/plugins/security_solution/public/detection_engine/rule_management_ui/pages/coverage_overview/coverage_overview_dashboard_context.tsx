@@ -6,6 +6,8 @@
  */
 
 import React, { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import { DEFAULT_MITRE_FRAMEWORK } from '@kbn/security-mitre-attack-common';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import { invariant } from '../../../../../common/utils/invariant';
 import {
   BulkActionTypeEnum,
@@ -18,6 +20,7 @@ import {
   SET_RULE_ACTIVITY_FILTER,
   SET_RULE_SOURCE_FILTER,
   SET_RULE_SEARCH_FILTER,
+  SET_FRAMEWORK,
   createCoverageOverviewDashboardReducer,
 } from './coverage_overview_dashboard_reducer';
 import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
@@ -29,6 +32,7 @@ export interface CoverageOverviewDashboardActions {
   setRuleActivityFilter: (value: CoverageOverviewRuleActivity[]) => void;
   setRuleSourceFilter: (value: CoverageOverviewRuleSource[]) => void;
   setRuleSearchFilter: (value: string) => void;
+  setFramework: (value: MitreFramework) => void;
   enableAllDisabled: (ruleIds: string[]) => Promise<void>;
 }
 
@@ -50,6 +54,8 @@ export const initialState: CoverageOverviewDashboardState = {
     activity: [CoverageOverviewRuleActivity.Enabled],
     source: [CoverageOverviewRuleSource.Prebuilt, CoverageOverviewRuleSource.Custom],
   },
+  framework: DEFAULT_MITRE_FRAMEWORK,
+  frameworkVersion: undefined,
   data: undefined,
   isLoading: false,
   isMitreError: false,
@@ -59,7 +65,8 @@ export const CoverageOverviewDashboardContextProvider = ({
   children,
 }: CoverageOverviewDashboardContextProviderProps) => {
   const [state, dispatch] = useReducer(createCoverageOverviewDashboardReducer(), initialState);
-  const { data, isLoading, isMitreError, refetch } = useFetchCoverageOverviewQuery(state.filter);
+  const { data, isLoading, isMitreError, frameworkVersion, refetch } =
+    useFetchCoverageOverviewQuery(state.filter, state.framework);
   const { executeBulkAction } = useExecuteBulkAction();
 
   const setShowExpandedCells = useCallback(
@@ -102,6 +109,16 @@ export const CoverageOverviewDashboardContextProvider = ({
     [dispatch]
   );
 
+  const setFramework = useCallback(
+    (value: MitreFramework): void => {
+      dispatch({
+        type: SET_FRAMEWORK,
+        value,
+      });
+    },
+    [dispatch]
+  );
+
   const enableAllDisabled = useCallback(
     async (ruleIds: string[]) => {
       await executeBulkAction({ type: BulkActionTypeEnum.enable, ids: ruleIds });
@@ -116,6 +133,7 @@ export const CoverageOverviewDashboardContextProvider = ({
       setRuleActivityFilter,
       setRuleSourceFilter,
       setRuleSearchFilter,
+      setFramework,
       enableAllDisabled,
     }),
     [
@@ -124,16 +142,17 @@ export const CoverageOverviewDashboardContextProvider = ({
       setRuleSearchFilter,
       setRuleSourceFilter,
       setShowExpandedCells,
+      setFramework,
       enableAllDisabled,
     ]
   );
 
   const providerValue = useMemo<CoverageOverviewDashboardContextType>(() => {
     return {
-      state: { ...state, isLoading, isMitreError, data },
+      state: { ...state, isLoading, isMitreError, data, frameworkVersion },
       actions,
     };
-  }, [actions, data, isLoading, isMitreError, state]);
+  }, [actions, data, frameworkVersion, isLoading, isMitreError, state]);
 
   return (
     <CoverageOverviewDashboardContext.Provider value={providerValue}>

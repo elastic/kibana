@@ -164,6 +164,7 @@ export const createAppContextStartContractMock = (
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     encryptedSavedObjectsSetup: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     savedObjects: mockedSavedObject,
+    isFipsEnabled: false,
     securityCoreStart: securityServiceMock.createStart(),
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
@@ -270,8 +271,10 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
+    getUpgradeDryRunDiffs: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
+    getSummaryForAgentPolicies: jest.fn(),
     fetchAllItems: jest.fn((..._) => {
       return Promise.resolve({
         async *[Symbol.asyncIterator]() {
@@ -289,6 +292,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
       });
     }),
     removeOutputFromAll: jest.fn(),
+    getSpacesForPoliciesUsingOutput: jest.fn(),
     getPackagePolicySavedObjects: jest.fn(),
     rollback: jest.fn(),
     restoreRollback: jest.fn(),
@@ -315,6 +319,9 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
     deployPolicy: jest.fn().mockRejectedValue(Promise.resolve()),
+    getSpacesForPoliciesUsingOutput: jest.fn(),
+    getSpacesForPoliciesUsingFleetServerHost: jest.fn(),
+    getSpacesForPoliciesUsingDownloadSource: jest.fn(),
   };
 };
 

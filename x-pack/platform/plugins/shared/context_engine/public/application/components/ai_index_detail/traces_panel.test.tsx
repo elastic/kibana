@@ -53,9 +53,8 @@ const renderWithProviders = (
   );
 };
 
-const EMPTY_FALLBACK = /No agent traces configured/;
-const PICK_HINT =
-  /Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans/;
+const EMPTY_PROMPT = /No agent traces configured/;
+const PANEL_DESCRIPTION = /Used to identify gaps in the context agents retrieve from this AI index/;
 
 describe('TracesPanel', () => {
   beforeEach(() => {
@@ -79,8 +78,11 @@ describe('TracesPanel', () => {
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
-    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
-    expect(screen.getByText(PICK_HINT)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexTracesEmpty')).toBeInTheDocument();
+    expect(screen.getByText(EMPTY_PROMPT)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddTracesButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
+    expect(screen.getByText(PANEL_DESCRIPTION)).toBeInTheDocument();
   });
 
   it('renders read-only empty fallback for managed AI indexes', () => {
@@ -88,8 +90,9 @@ describe('TracesPanel', () => {
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
     );
 
-    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
-    expect(screen.queryByText(PICK_HINT)).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexTracesEmpty')).toBeInTheDocument();
+    expect(screen.getByText(EMPTY_PROMPT)).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddTracesButton')).not.toBeInTheDocument();
   });
 
   it('renders the configured elastic agent trace in read-only mode', () => {
@@ -109,6 +112,7 @@ describe('TracesPanel', () => {
       'Loyalty Support Agent'
     );
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Elastic agent');
+    expect(screen.getByText(PANEL_DESCRIPTION)).toBeInTheDocument();
   });
 
   it('renders the configured data stream trace in read-only mode', () => {
@@ -152,7 +156,7 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.queryByTestId('contextTracesReadOnlyValue')).not.toBeInTheDocument();
-    expect(screen.queryByText(EMPTY_FALLBACK)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexTracesEmpty')).not.toBeInTheDocument();
   });
 
   it('hides the edit button for managed AI indexes', () => {
@@ -163,7 +167,7 @@ describe('TracesPanel', () => {
     expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
   });
 
-  it('treats an esql trace as empty, shows Edit, and replaces it on save', async () => {
+  it('treats an esql trace as empty, shows Add traces, and replaces it on save', async () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
@@ -181,10 +185,10 @@ describe('TracesPanel', () => {
       testServices
     );
 
-    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
-    expect(screen.getByTestId('contextEditTracesButton')).toBeInTheDocument();
+    expect(screen.getByText(EMPTY_PROMPT)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddTracesButton')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
       target: { value: 'Loyalty' },
@@ -222,7 +226,7 @@ describe('TracesPanel', () => {
       testServices
     );
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
       target: { value: 'Loyalty' },
@@ -398,7 +402,7 @@ describe('TracesPanel', () => {
     expect(screen.queryByTestId('contextTraceDataStreamComboBox')).not.toBeInTheDocument();
   });
 
-  it('shows a loading state on the Save button while the PUT is in flight', async () => {
+  it('returns to read-only view while the PUT is in flight', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
 
@@ -419,7 +423,10 @@ describe('TracesPanel', () => {
     fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextTracesSaveButton')).toBeDisabled();
+      expect(screen.queryByTestId('contextTracesSaveButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextEditTracesButton')).toBeDisabled();
+      expect(screen.getByTestId('contextTracesReadOnlyValue')).toBeInTheDocument();
     });
   });
 
@@ -465,7 +472,7 @@ describe('TracesPanel', () => {
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     expect(screen.getByTestId('contextTracesSaveButton')).not.toBeDisabled();
   });
@@ -493,7 +500,7 @@ describe('TracesPanel', () => {
 
     renderWithProviders(<PanelWithRefetch />, testServices);
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
       target: { value: 'Loyalty' },

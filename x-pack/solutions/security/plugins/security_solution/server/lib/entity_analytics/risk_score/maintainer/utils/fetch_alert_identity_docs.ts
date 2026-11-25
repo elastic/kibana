@@ -8,7 +8,7 @@
 import { chunk } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { isEntityTypeCreatableFromSingleDocument } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { ScopedLogger } from './with_log_context';
@@ -63,7 +63,9 @@ export const fetchAlertIdentityDocs = async ({
   // Keep this runtime mapping and `alertFilters` aligned with base scoring so each bucket
   // legitimately computes its requested EUID.
   // TODO: Reconsider this coupling after elastic/security-team#18624 is resolved.
-  const runtimeMapping = euid.painless.getEuidRuntimeMapping(entityType);
+  const runtimeMapping = euid.painless.getEuidRuntimeMapping(
+    getBuiltInEntityDefinition(entityType)
+  );
 
   for (const euidsChunk of chunk(euids, ALERT_IDENTITY_DOCS_CHUNK_SIZE)) {
     if (abortSignal?.aborted) {

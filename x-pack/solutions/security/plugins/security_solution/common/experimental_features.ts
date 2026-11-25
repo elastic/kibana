@@ -18,7 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
    * @see telemetry_detection_rules_preview_route.ts
-   * @see test/security_solution_api_integration/test_suites/telemetry/README.md
+   * @see test_suites/test-suites-security-solution-apis/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
 
@@ -81,6 +81,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointKillProcessDescendants: true,
 
   /**
+   * Export `get-file` / `memory-dump` output to external storage for Elastic Defend
+   * Release: 9.7
+   */
+  responseActionsEndpointFileExport: false,
+
+  /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
    * (Fleet remote output) is visible from the managing cluster's Kibana.
    * Release: 9.5
@@ -95,6 +101,13 @@ export const allowedExperimentalValues = Object.freeze({
    * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
    */
   defendCrossProjectSearch: true,
+
+  /**
+   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
+   *
+   * Release: 9.6.0
+   */
+  endpointResponseActionsSkill: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -206,7 +219,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables custom YARA signature management in Elastic Defend.
    */
-  customYaraSignaturesEnabled: false,
+  customYaraSignaturesEnabled: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
@@ -222,6 +235,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Protects all the work related to the attacks and alerts alignment effort
    */
   enableAlertsAndAttacksAlignment: true,
+  /**
+   * Enables attaching an attack, together with its constituent alerts, to a case from
+   * the Attacks page and the attack flyout, and registers the `security.attack` unified
+   * cases attachment type on the server.
+   */
+  attackAttachments: true,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -257,6 +276,11 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: true,
 
   /**
+   * Enables the Tines workflows migration API (create, get, update, start, and stop).
+   */
+  tinesWorkflowsMigration: false,
+
+  /**
    * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,
@@ -271,6 +295,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   automaticTroubleshootingSkill: true,
 
+  /** Enables the universal Automatic Troubleshooting Agent Builder skill */
+  automaticTroubleshootingUniversalSkill: false,
+
   /**
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
    * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
@@ -279,21 +306,18 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * Shipped dark by default; enable per environment via config.
    */
-  endpointForensicAnalysisSkill: false,
+  endpointForensicAnalysisSkill: true,
 
   /**
-   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
-   * Shipped dark by default; enable per environment via config.
+   * Enables the Elastic Defend Policy Management Agent Builder skill
    */
-  elasticDefendPolicyManagementSkill: false,
+  elasticDefendPolicyManagementSkill: true,
 
   /**
    * Enables the investigate-rule Agent Builder skill.
-   * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
-  investigateRuleSkill: false,
+  investigateRuleSkill: true,
 
   /**
    * Enables the find-security-rules Agent Builder skill.
@@ -308,20 +332,6 @@ export const allowedExperimentalValues = Object.freeze({
   dexAiSkillRecommendPrebuiltRules: true,
 
   /**
-   * Enables the detection-coverage Agent Builder skill.
-   * Part of the DEX AI skills family (`dexAiSkill*`).
-   */
-  dexAiSkillDetectionCoverage: false,
-
-  /**
-   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
-   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
-   * Turning this flag on unregisters that advanced setting, forcing the
-   * legacy flyout and effectively removing the new flyout option.
-   */
-  newFlyoutSystemDisabled: false,
-
-  /**
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: true,
@@ -330,12 +340,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables entity ML anomaly details API
    */
   entityAnalyticsAnomalyDetails: true,
-
-  /**
-   * Enables the deprecated prebuilt rules UI
-   * Release: 9.4
-   */
-  prebuiltRulesDeprecationUIEnabled: true,
 
   /**
    * Enables the Detection Rule Changes History API endpoint
@@ -366,23 +370,38 @@ export const allowedExperimentalValues = Object.freeze({
   mitreAttackUpdatesUIEnabled: true,
 
   /**
-   * Enables the reworked Elastic Defend policy settings form with
-   * per-operating-system protection configuration.
+   * Enables ransomware protection for Linux in Elastic Defend policies.
+   * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
+   * ones, and is not shown in the UI.
    * Release: 9.6
    */
-  perOsPolicySettings: false,
+  linuxRansomwareProtection: true,
+
+  /**
+   * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
+   * turns AI event enrichment on by default for new policies.
+   * Release: 9.6
+   */
+  endpointAiDataCollection: true,
+
+  /**
+   * Enables the Registry credential hardening toggle in the Elastic Defend policy
+   * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
+   * Release: 9.6
+   */
+  registryCredentialHardening: true,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
    * creation policy but has no entity store record, create the entity (with its risk score)
    * instead of silently dropping the score.
    */
-  riskScoreCreateMissingEntitiesEnabled: false,
+  riskScoreCreateMissingEntitiesEnabled: true,
 
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
-  siemRuleMigrationsAgentBuilderEnabled: false,
+  siemRuleMigrationsAgentBuilderEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

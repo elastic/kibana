@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { StateTransition as ApiStateTransition } from '@kbn/alerting-v2-schemas';
+import type {
+  StateTransition as ApiStateTransition,
+  StateTransitionOperator,
+} from '@kbn/alerting-v2-schemas';
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
 import { isRecoveryEnabled } from './lifecycle_mappers';
@@ -32,18 +35,36 @@ export const deriveRecoveryDelayModeFromStateTransition = (
 
 type StateTransitionPhase = NonNullable<ApiStateTransition['pending']>;
 
+/**
+ * Copies an explicit `and` / `or` onto a phase that has both thresholds.
+ * A missing operator is left unset — the form must not default it to `or`.
+ * An operator without both thresholds is dropped; the write API rejects it.
+ */
+export const attachPhaseOperator = (
+  phase: StateTransitionPhase,
+  operator: StateTransitionOperator | null | undefined
+): StateTransitionPhase => {
+  if (operator == null || phase.count == null || phase.timeframe == null) {
+    return phase;
+  }
+  return { ...phase, operator };
+};
+
 const buildPendingPhase = (
   mode: FormValues['stateTransitionAlertDelayMode'],
   stateTransition: StateTransition | null | undefined
 ): StateTransitionPhase | undefined => {
   if (mode === DELAY_MODE.immediate) return { count: 0 };
   if (mode === DELAY_MODE.duration) {
-    return {
-      ...(stateTransition?.pendingCount != null ? { count: stateTransition.pendingCount } : {}),
-      ...(stateTransition?.pendingTimeframe != null
-        ? { timeframe: stateTransition.pendingTimeframe }
-        : {}),
-    };
+    return attachPhaseOperator(
+      {
+        ...(stateTransition?.pendingCount != null ? { count: stateTransition.pendingCount } : {}),
+        ...(stateTransition?.pendingTimeframe != null
+          ? { timeframe: stateTransition.pendingTimeframe }
+          : {}),
+      },
+      stateTransition?.pendingOperator
+    );
   }
   if (mode === DELAY_MODE.breaches && stateTransition?.pendingCount != null) {
     return { count: stateTransition.pendingCount };
@@ -57,14 +78,17 @@ const buildRecoveringPhase = (
 ): StateTransitionPhase | undefined => {
   if (mode === DELAY_MODE.immediate) return { count: 0 };
   if (mode === DELAY_MODE.duration) {
-    return {
-      ...(stateTransition?.recoveringCount != null
-        ? { count: stateTransition.recoveringCount }
-        : {}),
-      ...(stateTransition?.recoveringTimeframe != null
-        ? { timeframe: stateTransition.recoveringTimeframe }
-        : {}),
-    };
+    return attachPhaseOperator(
+      {
+        ...(stateTransition?.recoveringCount != null
+          ? { count: stateTransition.recoveringCount }
+          : {}),
+        ...(stateTransition?.recoveringTimeframe != null
+          ? { timeframe: stateTransition.recoveringTimeframe }
+          : {}),
+      },
+      stateTransition?.recoveringOperator
+    );
   }
   if (stateTransition?.recoveringCount != null) {
     return { count: stateTransition.recoveringCount };
@@ -110,6 +134,8 @@ export const apiStateTransitionToFormStateTransition = (
 ): StateTransition => ({
   pendingCount: stateTransition?.pending?.count ?? null,
   pendingTimeframe: stateTransition?.pending?.timeframe ?? null,
+  pendingOperator: stateTransition?.pending?.operator ?? null,
   recoveringCount: stateTransition?.recovering?.count ?? null,
   recoveringTimeframe: stateTransition?.recovering?.timeframe ?? null,
+  recoveringOperator: stateTransition?.recovering?.operator ?? null,
 });

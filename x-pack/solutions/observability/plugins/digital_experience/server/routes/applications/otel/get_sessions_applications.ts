@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { bucketKeys } from '../../../lib/helpers/aggregations';
+import { withNotDefined } from '../../../lib/helpers/environment';
+import { toTimeSeries } from '../../../lib/helpers/time_series';
+import { SESSIONS_SEARCH_SPAN_NAME, SESSIONS_VITALS_SEARCH_SPAN_NAME } from '../constants';
+import type { WebSourceApplications } from '../types';
+import {
+  sessionsSearch,
+  sessionsVitalsSearch,
+  type SearchParams,
+} from './sessions_search_requests';
+import type {
+  SessionsAggregations,
+  SessionsVitalsAggregations,
+  SessionsVitalsBucket,
+} from './sessions_search_responses';
+import { toSessionsApplication, toSessionsTimeSeries } from './sessions_to_application';
+
+/**
+ * EDOT Browser applications and their metrics from the sessions index, in two searches at once:
+ * the metrics, and the p75 of the vitals. They read what the current user can read there:
+ * Elasticsearch skips an index of the pattern they can't read, so the route checks that access
+ * separately.
+ */
+export const getSessionsApplications = async ({
+  tracedEsClient,
+  ...searchParams
+}: SearchParams & {
+  /** Searches as the current user and cancels with the HTTP request. */
+  tracedEsClient: TracedElasticsearchClient;
+}): Promise<WebSourceApplications> => {
+  const [response, vitalsResponse] = await Promise.all([
+    tracedEsClient.search(SESSIONS_SEARCH_SPAN_NAME, sessionsSearch(searchParams)),
+    tracedEsClient.search(SESSIONS_VITALS_SEARCH_SPAN_NAME, sessionsVitalsSearch(searchParams)),
+  ]);
+  const aggregations = response.aggregations as unknown as SessionsAggregations | undefined;
+  const vitalsAggregations = vitalsResponse.aggregations as unknown as
+    | SessionsVitalsAggregations
+    | undefined;
+  const p75sByApplication = new Map<string, SessionsVitalsBucket>(
+    (vitalsAggregations?.applications.buckets ?? []).map((bucket) => [bucket.key, bucket])
+  );
+
+  return {
+    applications: (aggregations?.inEnvironment.applications.buckets ?? []).map((bucket) =>
+      toSessionsApplication(bucket, p75sByApplication.get(bucket.key))
+    ),
+    environments: withNotDefined(
+      bucketKeys(aggregations?.environments),
+      aggregations?.environmentNotDefined.doc_count ?? 0
+    ),
+    pageLoadsOverTime: toSessionsTimeSeries(aggregations?.inEnvironment),
+    sessionsOverTime: toTimeSeries(aggregations?.inEnvironment.startedInRange.pageLoadsOverTime),
+  };
+};

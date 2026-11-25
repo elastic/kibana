@@ -8,7 +8,7 @@
  */
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 
 import { RangeSliderEditorOptions } from '../controls/data_controls/range_slider/components/editor/range_slider_editor_options';
@@ -17,8 +17,8 @@ import { RANGE_SLIDER_ACTION } from './constants';
 import type { CreateControlTypeAction } from './control_panel_actions';
 import { createDataControlOfType } from './create_data_control_panel_action';
 
-const isFieldCompatible = (field: DataViewField) => {
-  return field.aggregatable && field.type === 'number';
+const isFieldCompatible = (field: FilterableField) => {
+  return Boolean(field.aggregatable) && field.type === 'number';
 };
 
 export const createRangeSliderControlAction =

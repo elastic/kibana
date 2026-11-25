@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { readRules } from '../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules';
@@ -22,12 +22,14 @@ import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 import { escapeJsonControlChars } from './escape_json_control_chars';
 
-export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  // Escape raw control characters the model may emit when hand-stringifying the rule JSON, so the
-  // persisted text always parses. See `escapeJsonControlChars`.
-  text: z.string().max(500_000).transform(escapeJsonControlChars),
-  attachmentLabel: z.string().max(1_000).optional(),
-});
+export const ruleAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    // Escape raw control characters the model may emit when hand-stringifying the rule JSON, so the
+    // persisted text always parses. See `escapeJsonControlChars`.
+    text: z.string().max(500_000).transform(escapeJsonControlChars),
+    attachmentLabel: z.string().max(1_000).optional(),
+  })
+);
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
 const INVESTIGATE_RULE_SKILL_NAME_ID = 'investigate-rule';
@@ -68,18 +70,20 @@ export const createRuleAttachmentType = (
     // investigate-rule.resolve_rule_attachment after the user picks a rule from find-security-rules —
     // the framework calls this once to populate the card from the live rule.
     //
-    // `origin` is a detection rule signature (`rule_id`), so we look the rule up by `ruleId` (not the
-    // saved-object `id`). The full transformed rule — including `rule_id` and `id` — is stored in
-    // `text`: the investigate-rule skill reads those identifiers back out of the attachment to query
-    // the rule's alerts (`kibana.alert.rule.rule_id` / `.uuid`), and `origin` is not visible to skills.
+    // `origin` is the rule's saved-object `id`, never the `rule_id` signature: the rule card reads it
+    // as the saved-object id for Update rule, View rule, Apply to rule form and its saved-rule diff.
+    // Callers that only have a `rule_id` look the rule up first. The full transformed rule —
+    // including `rule_id` and `id` — is stored in `text`: the investigate-rule skill reads those
+    // identifiers back out of the attachment to query the rule's alerts
+    // (`kibana.alert.rule.rule_id` / `.uuid`), and `origin` is not visible to skills.
     resolve: async (origin: string, context: AttachmentResolveContext) => {
       const [, startPlugins] = await core.getStartServices();
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(context.request);
-      const rule = await readRules({ rulesClient, id: undefined, ruleId: origin });
+      const rule = await readRules({ rulesClient, id: origin, ruleId: undefined });
       const transformed = rule ? transform(rule) : null;
       if (!transformed) {
-        logger.warn(`Failed to resolve rule attachment for rule_id "${origin}"`);
-        throw new Error(`Rule with rule_id "${origin}" was not found`);
+        logger.warn(`Failed to resolve rule attachment for rule id "${origin}"`);
+        throw new Error(`Rule with id "${origin}" was not found`);
       }
       return {
         text: JSON.stringify(transformed),

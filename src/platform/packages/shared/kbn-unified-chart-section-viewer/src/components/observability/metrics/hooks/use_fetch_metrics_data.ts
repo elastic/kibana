@@ -47,7 +47,7 @@ export function useFetchMetricsData({
   profileId: string;
 }): MetricsInfo {
   const { trackMetricsInfo, trackEsqlQueryFailure } = useTelemetry();
-  const { trackRequest } = useChartSectionInspector();
+  const { requestAdapter } = useChartSectionInspector();
   const reportError = useReportChartSectionError();
   const esql = getEsqlQuery(fetchParams.query);
 
@@ -57,13 +57,13 @@ export function useFetchMetricsData({
   // "Unable to load visualization". The post-fetch state wipe (against
   // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
   const appliedDimensions = useMemo(() => {
-    if (!selectedDimensionNames?.length || !fetchParams.dataView) {
+    if (!selectedDimensionNames?.length || !fetchParams.columnsMap) {
       return selectedDimensionNames;
     }
     return selectedDimensionNames.filter(
-      (dimension) => fetchParams.dataView!.getFieldByName(dimension.name) != null
+      (dimension) => fetchParams.columnsMap![dimension.name] != null
     );
-  }, [selectedDimensionNames, fetchParams.dataView]);
+  }, [selectedDimensionNames, fetchParams.columnsMap]);
 
   const appliedDimensionNames = useMemo(
     () => appliedDimensions?.map((dimension) => dimension.name),
@@ -84,44 +84,44 @@ export function useFetchMetricsData({
   // Read inside the error effect without keying it on the query, so only a
   // freshly landed error triggers a report.
   const metricsInfoQueryRef = useLatest(metricsInfoQuery);
+  // Snapshot at execution time so consumers can key on the inputs that produced the landed items.
+  const fetchParamsRef = useLatest(fetchParams);
 
   const shouldFetch = isComponentVisible && !!metricsInfoQuery;
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
       signal: AbortSignal
-    ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
-      const documents = await trackRequest(
-        'Grid of metrics',
-        'This request queries Elasticsearch to fetch metrics info for the grid.',
-        async () => {
-          const {
-            documents: docs,
-            rawResponse,
-            requestParams,
-          } = await executeEsqlQuery<MetricsESQLResponse>({
-            esqlQuery: metricsInfoQuery,
-            search: services.data.search.search,
-            signal,
-            dataView: fetchParams.dataView,
-            timeRange: fetchParams.timeRange,
-            filters: fetchParams.filters ?? [],
-            variables: fetchParams.esqlVariables,
-            uiSettings: services.uiSettings,
-            profileId,
-          });
-
-          return {
-            data: docs,
-            request: requestParams,
-            response: rawResponse,
-          };
-        }
-      );
+    ): Promise<
+      | (ParsedMetrics & {
+          activeDimensions: Dimension[];
+          loadedFetchParams: ChartSectionProps['fetchParams'];
+        })
+      | null
+    > => {
+      const loadedFetchParams = fetchParamsRef.current;
+      requestAdapter.reset();
+      const { documents } = await executeEsqlQuery<MetricsESQLResponse>({
+        esqlQuery: metricsInfoQuery,
+        search: services.data.search,
+        sessionId: fetchParams.searchSessionId,
+        signal,
+        timeFieldName: fetchParams.dataSource?.timeFieldName,
+        timeRange: fetchParams.timeRange,
+        filters: fetchParams.filters ?? [],
+        variables: fetchParams.esqlVariables,
+        uiSettings: services.uiSettings,
+        profileId,
+        inspector: {
+          adapter: requestAdapter,
+          title: 'Grid of metrics',
+          description: 'This request queries Elasticsearch to fetch metrics info for the grid.',
+        },
+      });
 
       const getFieldType = (name: string) => {
-        const field = fetchParams.dataView?.getFieldByName(name);
-        return field ? getFieldIconType(field) : undefined;
+        const column = fetchParams.columnsMap?.[name];
+        return column ? getFieldIconType({ name, type: column.meta.type }) : undefined;
       };
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
@@ -134,16 +134,19 @@ export function useFetchMetricsData({
         metricItems: parsed.metricItems,
         allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
         activeDimensions: appliedDimensions ?? [],
+        loadedFetchParams,
       };
     },
     [
       metricsInfoQuery,
-      trackRequest,
-      fetchParams.dataView,
+      requestAdapter,
+      fetchParams.dataSource,
+      fetchParams.columnsMap,
       fetchParams.timeRange,
+      fetchParams.searchSessionId,
       fetchParams.filters,
       fetchParams.esqlVariables,
-      services.data.search.search,
+      services.data.search,
       services.uiSettings,
       trackMetricsInfo,
       appliedDimensions,
@@ -152,7 +155,7 @@ export function useFetchMetricsData({
   );
 
   useEffect(() => {
-    if (!shouldFetch || !fetchParams.dataView) {
+    if (!shouldFetch) {
       return;
     }
     const abortController = new AbortController();
@@ -162,7 +165,7 @@ export function useFetchMetricsData({
     };
   }, [
     shouldFetch,
-    fetchParams.dataView,
+    fetchParams.dataSource,
     fetchParams.timeRange,
     fetchParams.abortController,
     fetchParams.filters,
@@ -210,5 +213,6 @@ export function useFetchMetricsData({
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
     activeDimensions: value?.activeDimensions ?? [],
+    loadedFetchParams: value?.loadedFetchParams,
   };
 }
