@@ -483,7 +483,7 @@ describe('createDreamingScheduleService', () => {
 
       expect(ids).toEqual([
         dreamingWorkflowIdFor('support', SPACE),
-        traceDreamingWorkflowIdFor('support', SPACE),
+        transcriptDreamingWorkflowIdFor('support', SPACE),
         relationshipsWorkflowIdFor('support', SPACE),
       ]);
     });
@@ -512,7 +512,7 @@ describe('createDreamingScheduleService', () => {
 
     it('starts all three workflows and returns partial failures', async () => {
       const dreamingId = dreamingWorkflowIdFor('support', SPACE);
-      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
       const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
       client.execute
         .mockResolvedValueOnce('exec-dreaming')
@@ -538,7 +538,7 @@ describe('createDreamingScheduleService', () => {
 
     it('puts concurrency-skipped runs in skipped instead of executions', async () => {
       const dreamingId = dreamingWorkflowIdFor('support', SPACE);
-      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
       const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
       client.execute
         .mockResolvedValueOnce('exec-dreaming')
@@ -573,7 +573,7 @@ describe('createDreamingScheduleService', () => {
 
     it('returns only skipped workflows when every workflow already has an active run', async () => {
       const dreamingId = dreamingWorkflowIdFor('support', SPACE);
-      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
       const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
       workflowsManagement.getWorkflowExecutions.mockResolvedValue({
         results: [{ id: 'active-exec', status: ExecutionStatus.RUNNING }],
@@ -598,7 +598,7 @@ describe('createDreamingScheduleService', () => {
 
     it('skips a workflow with an active run without calling execute', async () => {
       const dreamingId = dreamingWorkflowIdFor('support', SPACE);
-      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
       const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
       workflowsManagement.getWorkflowExecutions.mockImplementation(
         async (params: { workflowId: string }) =>
@@ -687,7 +687,7 @@ describe('createDreamingScheduleService', () => {
 
     it('treats an execution as started when its status lookup fails', async () => {
       const dreamingId = dreamingWorkflowIdFor('support', SPACE);
-      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const traceId = transcriptDreamingWorkflowIdFor('support', SPACE);
       const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
       client.execute
         .mockResolvedValueOnce('exec-dreaming')
