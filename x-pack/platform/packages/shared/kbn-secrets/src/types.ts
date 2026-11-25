@@ -74,8 +74,9 @@ export interface SecretsClient {
    */
   create(params: CreateSecretParams): Promise<SecretMetadata>;
   /**
-   * Throws `SecretValidationError` when the change breaks a rule or changes nothing, and
-   * `SecretNotFoundError` when the consumer has no secret with this name.
+   * Throws `SecretValidationError` when the change breaks a rule or changes nothing,
+   * `SecretNotFoundError` when the consumer has no secret with this name, and
+   * `SecretConflictError` when another request changed the secret during the update.
    */
   update(params: UpdateSecretParams): Promise<SecretMetadata>;
   /** Throws `SecretNotFoundError` when the consumer has no secret with this name. */

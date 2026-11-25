@@ -6,6 +6,7 @@
  */
 
 export { SecretAlreadyExistsError } from './secret_already_exists_error';
+export { SecretConflictError } from './secret_conflict_error';
 export { SecretNotFoundError } from './secret_not_found_error';
 export { SecretValidationError } from './secret_validation_error';
 export { SecretsUnavailableError } from './secrets_unavailable_error';
