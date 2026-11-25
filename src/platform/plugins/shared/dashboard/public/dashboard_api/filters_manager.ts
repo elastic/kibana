@@ -51,15 +51,7 @@ export const initializeFiltersManager = (
     map((layout) => Object.keys(layout.pinnedPanels)),
     distinctUntilChanged<string[]>(deepEqual)
   );
-  /**
-   * Children that are actually rendered. The APIs of unmounted children (e.g. grid panels replaced by the
-   * awaiting screen, or in a collapsed section) stay in `children$`, but their subscriptions are gone, so
-   * a `filtersLoading$` that was set to `true` after unmounting would never be reset.
-   */
-  const renderedChildren$ = combineLatest([
-    layoutManager.api.children$,
-    layoutManager.internalApi.visibleChildren$,
-  ]).pipe(map(([children, visibleIds]) => pick(children, visibleIds)));
+  const { renderedChildren$ } = layoutManager.internalApi;
 
   /** whether the pinned children are awaiting required filters, regardless of whether it is published yet */
   const childrenAwaitingRequiredFilters$ = new BehaviorSubject<boolean>(
@@ -130,22 +122,22 @@ export const initializeFiltersManager = (
   /** when auto-apply is `false`, the first set of complete filters is published automatically, exactly once */
   let initialPublishPending = !settingsManager.api.settings.autoApplyFilters$.getValue();
   /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
-  const unpublishedFiltersSubscription = childFilters$
+  const unpublishedFiltersSubscription = combineLatest({
+    allChildFilters: childFilters$,
+    loading: anyChildFiltersLoading$,
+    // a change in what the children are awaiting also pushes, so that auto-apply publishes it along with their filters
+    childrenAwaiting: childrenAwaitingRequiredFilters$,
+    hasPendingChildApis: layoutManager.internalApi.childApisPending$,
+    // the grid mounting (published awaiting state going to `false`) also pushes, so grid controls' saved
+    // selections can be published as soon as they have reported
+    awaiting: awaitingRequiredFilters$,
+  })
     .pipe(
-      // a change in what the children are awaiting also pushes, so that auto-apply publishes it along with their filters
-      combineLatestWith(
-        anyChildFiltersLoading$,
-        childrenAwaitingRequiredFilters$,
-        layoutManager.internalApi.childApisPending$,
-        // the grid mounting (published awaiting state going to `false`) also pushes, so grid controls' saved
-        // selections can be published as soon as they have reported
-        awaitingRequiredFilters$
-      ),
       skip(1),
       debounceTime(0),
-      filter(([, loading]) => !loading)
+      filter(({ loading }) => !loading)
     )
-    .subscribe(([allChildFilters, , , hasPendingChildApis]) => {
+    .subscribe(({ allChildFilters, hasPendingChildApis }) => {
       unpublishedChildFilters$.next(allChildFilters);
       // don't consume the initial publish until every rendered child (including the pinned controls) has
       // registered, so slower controls have reported their filters
@@ -247,9 +239,6 @@ export const initializeFiltersManager = (
       childFiltersLoading$,
       publishFilters,
       awaitingRequiredFilters$,
-    },
-    internalApi: {
-      anyChildFiltersLoading$,
     },
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();

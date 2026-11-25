@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
+import useObservable from 'react-use/lib/useObservable';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
@@ -40,16 +41,11 @@ export const useApplyUnpublishedChanges = (): {
     dashboardInternalApi.unpublishedEsqlVariables$
   );
 
-  // `childFiltersLoading$` emits synchronously on subscribe; assume loading until it reports otherwise
-  const [childFiltersLoading, setChildFiltersLoading] = useState(true);
-  useEffect(() => {
-    const subscription = dashboardApi.childFiltersLoading$.subscribe(setChildFiltersLoading);
-    return () => subscription.unsubscribe();
-  }, [dashboardApi]);
+  // Filters are only staged once every child is done loading, while publishing reads the live "awaiting
+  // required filters" state. Applying mid-load could pair an older batch of filters with a newer awaiting
+  // state and open the grid without the required filter, so nothing can be applied until loading settles.
+  const childFiltersLoading = useObservable(dashboardApi.childFiltersLoading$, true);
 
-  // Filters are only staged once every child is done loading, and publishing also reads the live
-  // "awaiting required filters" state. Applying mid-load could publish an older batch while that state
-  // has already moved on, opening the grid without the required filter, so wait until loading settles.
   const hasUnpublishedTimeslice = useMemo(
     () => !deepEqual(publishedTimeslice, unpublishedTimeslice),
     [publishedTimeslice, unpublishedTimeslice]

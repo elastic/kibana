@@ -8,7 +8,6 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
 
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';

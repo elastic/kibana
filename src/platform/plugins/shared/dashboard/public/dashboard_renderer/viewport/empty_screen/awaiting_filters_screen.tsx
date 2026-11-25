@@ -18,7 +18,7 @@ import {
   apiPublishesAwaitingRequiredFilters,
   apiPublishesTitle,
   getTitle,
-  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
@@ -67,9 +67,8 @@ const useAwaitingControlLabels = (): string[] | undefined => {
 
 export function AwaitingFiltersScreen() {
   const dashboardApi = useDashboardApi();
-  const [viewMode] = useBatchedPublishingSubjects(dashboardApi.viewMode$);
-  const { hasUnpublishedChanges: hasUnpublished, applyUnpublishedChanges } =
-    useApplyUnpublishedChanges();
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
+  const { hasUnpublishedChanges, applyUnpublishedChanges } = useApplyUnpublishedChanges();
 
   const labels = useAwaitingControlLabels();
   const isDarkTheme = useKibanaIsDarkMode();
@@ -81,20 +80,21 @@ export function AwaitingFiltersScreen() {
   // read-only previews (e.g. dashboard history) disable control interaction, so viewers cannot select values
   const isReadOnly = viewMode === 'non-interactive';
 
-  const title = (() => {
-    const titleString = isReadOnly
-      ? i18n.translate('dashboard.emptyScreen.requiredControlsEmptyTitle', {
-          defaultMessage: 'Required controls are empty',
-        })
-      : i18n.translate('dashboard.emptyScreen.awaitingRequiredControlsTitle', {
-          defaultMessage: 'Waiting for required controls',
-        });
-    return <h2>{titleString}</h2>;
-  })();
+  const title = (
+    <h2>
+      {isReadOnly
+        ? i18n.translate('dashboard.emptyScreen.requiredControlsEmptyTitle', {
+            defaultMessage: 'Required controls are empty',
+          })
+        : i18n.translate('dashboard.emptyScreen.awaitingRequiredControlsTitle', {
+            defaultMessage: 'Waiting for required controls',
+          })}
+    </h2>
+  );
 
   // the search bar (and its Apply button) may be hidden, e.g. when embedded, so offer Apply here too
   const showApplyAction =
-    !isReadOnly && labels !== undefined && labels.length === 0 && hasUnpublished;
+    !isReadOnly && labels !== undefined && labels.length === 0 && hasUnpublishedChanges;
 
   const body = (
     <EuiText size="s" color="subdued">
@@ -112,7 +112,7 @@ export function AwaitingFiltersScreen() {
               'This version of the dashboard has required controls without a selected value, so its panels are not shown in this preview.',
           })}
         </span>
-      ) : labels.length === 0 && hasUnpublished ? (
+      ) : showApplyAction ? (
         <span data-test-subj="dashboardAwaitingPublishSubtitle">
           {i18n.translate('dashboard.emptyScreen.awaitingPublishSubtitle', {
             defaultMessage:
@@ -154,7 +154,7 @@ export function AwaitingFiltersScreen() {
               fill
               size="s"
               iconType="check"
-              onClick={() => applyUnpublishedChanges()}
+              onClick={applyUnpublishedChanges}
               data-test-subj="dashboardAwaitingRequiredFiltersApply"
             >
               {i18n.translate('dashboard.emptyScreen.awaitingPublishApplyButton', {

@@ -316,7 +316,6 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
         supportsJsonExport: true,
-        awaitingRequiredFilters$: dataControlManager.internalApi.awaitingRequiredFilters$,
       });
 
       const componentApi: DSLOptionsListComponentApi = {

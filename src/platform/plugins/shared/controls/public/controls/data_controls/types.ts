@@ -56,7 +56,7 @@ export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'
   PublishesValuesSourceFetchPlan &
   PublishesDataLoading &
   AppliesFilters &
-  Partial<PublishesAwaitingRequiredFilters> &
+  PublishesAwaitingRequiredFilters &
   HasPanelCapabilities &
   ReturnType<typeof initializeLabelManager>['api'] & {
     setDataLoading: (loading: boolean) => void;

@@ -17,7 +17,7 @@ import { getCompatibleSearchTechniques } from '../../../../../common/options_lis
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListStrings } from '../options_list_strings';
-import { CustomOptionsAdditionalSettings } from '../../components';
+import { CustomOptionsAdditionalSettings, RequiredSelectionsSwitch } from '../../components';
 
 const selectionOptions = [
   {
@@ -72,9 +72,6 @@ export const OptionsListEditorOptions = ({
   updateState,
 }: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.single_select ?? false);
-  const [requiredSelections, setRequiredSelections] = useState<boolean>(
-    initialState.required ?? false
-  );
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
     initialState.run_past_timeout ?? false
   );
@@ -142,19 +139,11 @@ export const OptionsListEditorOptions = ({
           {isPinned && (
             <>
               <EuiSpacer size="s" />
-              <EuiSwitch
-                compressed
-                label={
-                  <ControlSettingTooltipLabel
-                    label={OptionsListStrings.editor.getRequiredSelectionsLabel(singleSelect)}
-                    tooltip={OptionsListStrings.editor.getRequiredSelectionsTooltip(singleSelect)}
-                  />
-                }
-                checked={requiredSelections}
-                onChange={() => {
-                  setRequiredSelections(!requiredSelections);
-                  updateState({ required: !requiredSelections });
-                }}
+              <RequiredSelectionsSwitch
+                initialState={initialState}
+                updateState={updateState}
+                label={OptionsListStrings.editor.getRequiredSelectionsLabel(singleSelect)}
+                tooltip={OptionsListStrings.editor.getRequiredSelectionsTooltip(singleSelect)}
                 data-test-subj="optionsListControl__requiredSelectionsAdditionalSetting"
               />
             </>

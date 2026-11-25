@@ -8,6 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { pick } from 'lodash';
 import { BehaviorSubject, Subject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
@@ -26,10 +27,29 @@ interface MockChild {
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 10));
 
+const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
+
+/** A mounted control that applies filters; a control that is not required never awaits */
+const buildControl = (
+  uuid: string,
+  {
+    awaiting = false,
+    loading = false,
+    filters,
+  }: { awaiting?: boolean; loading?: boolean; filters?: Filter[] } = {}
+) => ({
+  uuid,
+  awaitingRequiredFilters$: new BehaviorSubject<boolean>(awaiting),
+  filtersLoading$: new BehaviorSubject<boolean>(loading),
+  appliedFilters$: new BehaviorSubject<Filter[] | undefined>(filters),
+});
+
 const buildSetup = (
   pinnedPanelIds: string[] = [],
-  autoApplyFilters: boolean = true,
-  initiallyAwaitingFilters: boolean = false
+  {
+    autoApplyFilters = true,
+    initiallyAwaitingFilters = false,
+  }: { autoApplyFilters?: boolean; initiallyAwaitingFilters?: boolean } = {}
 ) => {
   const children$ = new BehaviorSubject<{ [uuid: string]: MockChild }>({});
   const layout$ = new BehaviorSubject({
@@ -58,7 +78,12 @@ const buildSetup = (
   );
   const layoutManager = {
     api: { children$, layout$ },
-    internalApi: { childApisPending$: derivedChildApisPending$, visibleChildren$: renderedIds$ },
+    internalApi: {
+      childApisPending$: derivedChildApisPending$,
+      renderedChildren$: combineLatest([children$, renderedIds$]).pipe(
+        map(([children, ids]) => pick(children, ids))
+      ),
+    },
   } as unknown as ReturnType<typeof initializeLayoutManager>;
   const settingsManager = {
     api: { settings: { autoApplyFilters$: new BehaviorSubject<boolean>(autoApplyFilters) } },
@@ -179,21 +204,12 @@ describe('filters manager: awaiting required filters', () => {
   });
 
   test('only changes the awaiting state once the filters are published', async () => {
-    const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(
-      ['control1'],
-      false
-    );
-    const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
-    const awaiting$ = new BehaviorSubject<boolean>(false);
-    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-    setChildren([
-      {
-        uuid: 'control1',
-        awaitingRequiredFilters$: awaiting$,
-        filtersLoading$: new BehaviorSubject<boolean>(false),
-        appliedFilters$,
-      },
-    ]);
+    const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(['control1'], {
+      autoApplyFilters: false,
+    });
+    const control = buildControl('control1');
+    const { appliedFilters$, awaitingRequiredFilters$: awaiting$ } = control;
+    setChildren([control]);
     appliedFilters$.next([region]);
     await flush();
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
@@ -224,16 +240,14 @@ describe('filters manager: awaiting required filters', () => {
   test("a reset publishes the controls' new filters and awaiting state once they have reported", async () => {
     const { filtersManager, awaitingRequiredFilters$, forcePublish$, setChildren } = buildSetup(
       ['control1'],
-      false
+      {
+        autoApplyFilters: false,
+      }
     );
-    const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
     // initial state: a required control with no selection
-    const filtersLoading$ = new BehaviorSubject<boolean>(true);
-    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-    const awaiting$ = new BehaviorSubject<boolean>(true);
-    setChildren([
-      { uuid: 'control1', awaitingRequiredFilters$: awaiting$, filtersLoading$, appliedFilters$ },
-    ]);
+    const control = buildControl('control1', { awaiting: true, loading: true });
+    const { appliedFilters$, filtersLoading$, awaitingRequiredFilters$: awaiting$ } = control;
+    setChildren([control]);
     await flush();
     // the control finishes loading, which consumes the one-time initial publish
     filtersLoading$.next(false);
@@ -257,7 +271,9 @@ describe('filters manager: awaiting required filters', () => {
   test('flags an unpublished change when the awaiting state changes but the filters do not', async () => {
     const { filtersManager, awaitingRequiredFilters$, layout$, setChildren } = buildSetup(
       ['control1'],
-      false
+      {
+        autoApplyFilters: false,
+      }
     );
     const awaiting$ = new BehaviorSubject<boolean>(true);
     setChildren([{ uuid: 'control1', awaitingRequiredFilters$: awaiting$ }]);
@@ -290,23 +306,14 @@ describe('filters manager: awaiting required filters', () => {
   });
 
   test('keeps waiting for publish when a control derives awaiting from its own appliedFilters$', async () => {
-    const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(
-      ['control1'],
-      false
-    );
-    const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
-    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>([region]);
-    const awaiting$ = new BehaviorSubject<boolean>(false);
+    const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(['control1'], {
+      autoApplyFilters: false,
+    });
+    const control = buildControl('control1', { filters: [region] });
+    const { appliedFilters$, awaitingRequiredFilters$: awaiting$ } = control;
     // like a real control, awaiting is a subscriber of appliedFilters$ and so emits before the dashboard sees the new filters
     appliedFilters$.subscribe((applied) => awaiting$.next((applied ?? []).length === 0));
-    setChildren([
-      {
-        uuid: 'control1',
-        awaitingRequiredFilters$: awaiting$,
-        filtersLoading$: new BehaviorSubject<boolean>(false),
-        appliedFilters$,
-      },
-    ]);
+    setChildren([control]);
     await flush();
     filtersManager.api.publishFilters();
     await flush();
@@ -329,21 +336,11 @@ describe('filters manager: awaiting required filters', () => {
     test('the first selection after load is not published automatically', async () => {
       const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(
         ['control1', 'control2'],
-        false,
-        true // resolved from the saved state before any control mounts
+        // awaiting is resolved from the saved state before any control mounts
+        { autoApplyFilters: false, initiallyAwaitingFilters: true }
       );
-      const region = {
-        meta: { key: 'region' },
-        query: { match_phrase: { region: 'EU' } },
-      } as Filter;
-      const buildControl = (uuid: string) => ({
-        uuid,
-        awaitingRequiredFilters$: new BehaviorSubject<boolean>(true),
-        filtersLoading$: new BehaviorSubject<boolean>(loadingOnMount),
-        appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-      });
-      const control1 = buildControl('control1');
-      const control2 = buildControl('control2');
+      const control1 = buildControl('control1', { awaiting: true, loading: loadingOnMount });
+      const control2 = buildControl('control2', { awaiting: true, loading: loadingOnMount });
       setChildren([control1]);
       // the initial value holds until every pinned control has mounted, even if it is still loading
       expect(awaitingRequiredFilters$.value).toBe(true);
@@ -370,26 +367,18 @@ describe('filters manager: awaiting required filters', () => {
   });
 
   test('auto-apply off: a fast control does not consume the initial publish before slower controls register', async () => {
-    const { filtersManager, setChildren } = buildSetup(['fast', 'slow'], false);
+    const { filtersManager, setChildren } = buildSetup(['fast', 'slow'], {
+      autoApplyFilters: false,
+    });
     const fastFilter = { meta: { key: 'fast' } } as Filter;
     const slowFilter = { meta: { key: 'slow' } } as Filter;
-    const fast = {
-      uuid: 'fast',
-      awaitingRequiredFilters$: new BehaviorSubject<boolean>(false),
-      filtersLoading$: new BehaviorSubject<boolean>(false),
-      appliedFilters$: new BehaviorSubject<Filter[] | undefined>([fastFilter]),
-    };
+    const fast = buildControl('fast', { filters: [fastFilter] });
     setChildren([fast]);
     await flush();
     // the slow control hasn't registered yet, so nothing may be published
     expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
 
-    const slow = {
-      uuid: 'slow',
-      awaitingRequiredFilters$: new BehaviorSubject<boolean>(false),
-      filtersLoading$: new BehaviorSubject<boolean>(true),
-      appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-    };
+    const slow = buildControl('slow', { loading: true });
     setChildren([fast, slow]);
     await flush();
     // registered but still computing its filters
@@ -405,38 +394,21 @@ describe('filters manager: awaiting required filters', () => {
     test('keeps the initial value instead of reflecting the mounted subset of controls', async () => {
       const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(
         ['control1', 'control2'],
-        true,
-        true
+        { initiallyAwaitingFilters: true }
       );
-      const region = {
-        meta: { key: 'region' },
-        query: { match_phrase: { region: 'EU' } },
-      } as Filter;
-      const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-      setChildren([
-        {
-          uuid: 'control1',
-          awaitingRequiredFilters$: new BehaviorSubject<boolean>(false),
-          filtersLoading$: new BehaviorSubject<boolean>(false),
-          appliedFilters$,
-        },
-      ]);
+      const control1 = buildControl('control1');
+      setChildren([control1]);
       await flush();
       expect(awaitingRequiredFilters$.value).toBe(true);
 
       // publishing while control2 is still unmounted must not reveal the grid either
-      appliedFilters$.next([region]);
+      control1.appliedFilters$.next([region]);
       await flush();
       expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
       expect(awaitingRequiredFilters$.value).toBe(true);
 
       setChildren([
-        {
-          uuid: 'control1',
-          awaitingRequiredFilters$: new BehaviorSubject<boolean>(false),
-          filtersLoading$: new BehaviorSubject<boolean>(false),
-          appliedFilters$,
-        },
+        control1,
         { uuid: 'control2', awaitingRequiredFilters$: new BehaviorSubject<boolean>(false) },
       ]);
       await flush();
@@ -444,11 +416,9 @@ describe('filters manager: awaiting required filters', () => {
     });
 
     test('does not revert to the initial value when a pinned control is added after the first mount', async () => {
-      const { awaitingRequiredFilters$, layout$, setChildren } = buildSetup(
-        ['control1'],
-        true,
-        true
-      );
+      const { awaitingRequiredFilters$, layout$, setChildren } = buildSetup(['control1'], {
+        initiallyAwaitingFilters: true,
+      });
       setChildren([
         { uuid: 'control1', awaitingRequiredFilters$: new BehaviorSubject<boolean>(false) },
       ]);
@@ -474,17 +444,11 @@ describe('filters manager: awaiting required filters', () => {
 
   test('childFiltersLoading$ tracks pending child APIs and child filter computation', async () => {
     const { filtersManager, childApisPending$, setChildren } = buildSetup(['control1']);
-    const filtersLoading$ = new BehaviorSubject<boolean>(false);
+    const control = buildControl('control1', { awaiting: true });
+    const { filtersLoading$ } = control;
     const loadingStates: boolean[] = [];
     filtersManager.api.childFiltersLoading$.subscribe((loading) => loadingStates.push(loading));
-    setChildren([
-      {
-        uuid: 'control1',
-        awaitingRequiredFilters$: new BehaviorSubject<boolean>(true),
-        filtersLoading$,
-        appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-      },
-    ]);
+    setChildren([control]);
     await flush();
     // awaiting a required selection alone does not count as loading
     expect(loadingStates.at(-1)).toBe(false);
@@ -508,23 +472,15 @@ describe('filters manager: awaiting required filters', () => {
 
   test('publishes child filters while awaiting required filters, and when a selection is cleared', async () => {
     const { filtersManager, setChildren } = buildSetup(['control1']);
-    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-    setChildren([
-      {
-        uuid: 'control1',
-        awaitingRequiredFilters$: new BehaviorSubject<boolean>(true), // still awaiting a required selection
-        filtersLoading$: new BehaviorSubject<boolean>(false),
-        appliedFilters$,
-      },
-    ]);
+    const control = buildControl('control1', { awaiting: true }); // still awaiting a required selection
+    setChildren([control]);
 
-    const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
-    appliedFilters$.next([region]);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    control.appliedFilters$.next([region]);
+    await flush();
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
 
-    appliedFilters$.next(undefined);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    control.appliedFilters$.next(undefined);
+    await flush();
     expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
   });
 
@@ -532,16 +488,11 @@ describe('filters manager: awaiting required filters', () => {
     const { filtersManager, setChildren, setVisibleChildren } = buildSetup(['control1']);
     // the real layout manager hides the grid while awaiting; the mock needs to be told
     setVisibleChildren([]);
-    const awaiting$ = new BehaviorSubject<boolean>(true);
     const pinnedFilter = { meta: { key: 'pinned' } } as Filter;
     const gridFilter = { meta: { key: 'grid' } } as Filter;
+    const control = buildControl('control1', { awaiting: true, filters: [pinnedFilter] });
     setChildren([
-      {
-        uuid: 'control1',
-        awaitingRequiredFilters$: awaiting$,
-        filtersLoading$: new BehaviorSubject<boolean>(false),
-        appliedFilters$: new BehaviorSubject<Filter[] | undefined>([pinnedFilter]),
-      },
+      control,
       {
         uuid: 'gridControl',
         filtersLoading$: new BehaviorSubject<boolean>(false),
@@ -551,7 +502,7 @@ describe('filters manager: awaiting required filters', () => {
     await flush();
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([pinnedFilter]);
 
-    awaiting$.next(false);
+    control.awaitingRequiredFilters$.next(false);
     setVisibleChildren(['gridControl']);
     await flush();
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([pinnedFilter, gridFilter]);
@@ -560,12 +511,7 @@ describe('filters manager: awaiting required filters', () => {
   test('ignores filtersLoading$ of children that are not rendered, so the restored required selection can publish', async () => {
     const { filtersManager, setChildren, setVisibleChildren } = buildSetup(['control1']);
     const requiredFilter = { meta: { key: 'required' } } as Filter;
-    const required = {
-      uuid: 'control1',
-      awaitingRequiredFilters$: new BehaviorSubject<boolean>(true),
-      filtersLoading$: new BehaviorSubject<boolean>(false),
-      appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-    };
+    const required = buildControl('control1', { awaiting: true });
     // a grid control that unmounted: its subscriptions are gone, so nothing ever resets its loading state
     const unmountedGrid = {
       uuid: 'grid1',
@@ -593,7 +539,7 @@ describe('filters manager: awaiting required filters', () => {
     expect(loadingStates.at(-1)).toBe(true);
   });
 
-  test('does not re-emit loading or filters when the layout changes but the rendered children do not', async () => {
+  test('does not re-push filters when the layout changes but the rendered children do not', async () => {
     const { filtersManager, layout$, setChildren } = buildSetup(['control1']);
     setChildren([
       {
@@ -604,14 +550,9 @@ describe('filters manager: awaiting required filters', () => {
     ]);
     await flush();
 
-    const loadingStates: boolean[] = [];
     const unpublished: Array<Filter[] | undefined> = [];
-    filtersManager.internalApi.anyChildFiltersLoading$.subscribe((loading) =>
-      loadingStates.push(loading)
-    );
     filtersManager.api.unpublishedChildFilters$.subscribe((filters) => unpublished.push(filters));
     await flush();
-    const loadingCount = loadingStates.length;
     const unpublishedCount = unpublished.length;
 
     // e.g. every undo / redo step and every panel resize emits a new layout
@@ -619,28 +560,18 @@ describe('filters manager: awaiting required filters', () => {
     layout$.next({ ...layout$.value });
     await flush();
 
-    expect(loadingStates.length).toBe(loadingCount);
     expect(unpublished.length).toBe(unpublishedCount);
   });
 
   test('auto-apply off: saved grid control selections are published when the grid first opens after the awaiting screen', async () => {
     const { filtersManager, awaitingRequiredFilters$, setChildren, setVisibleChildren } =
-      buildSetup(['required'], false, true);
-    const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
+      buildSetup(['required'], { autoApplyFilters: false, initiallyAwaitingFilters: true });
     const saved = { meta: { key: 'saved' }, query: { match_phrase: { saved: 'x' } } } as Filter;
-    const requiredAwaiting$ = new BehaviorSubject<boolean>(true);
-    const requiredFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-    const gridFilters$ = new BehaviorSubject<Filter[] | undefined>([saved]);
-    const requiredChild: MockChild = {
-      uuid: 'required',
-      awaitingRequiredFilters$: requiredAwaiting$,
-      filtersLoading$: new BehaviorSubject<boolean>(false),
-      appliedFilters$: requiredFilters$,
-    };
+    const requiredChild = buildControl('required', { awaiting: true });
     const gridChild: MockChild = {
       uuid: 'grid',
       filtersLoading$: new BehaviorSubject<boolean>(false),
-      appliedFilters$: gridFilters$,
+      appliedFilters$: new BehaviorSubject<Filter[] | undefined>([saved]),
     };
     // the grid is replaced by the awaiting screen, so its panels have not mounted
     setVisibleChildren(['required']);
@@ -653,8 +584,8 @@ describe('filters manager: awaiting required filters', () => {
     expect(awaitingRequiredFilters$.value).toBe(true);
 
     // viewer selects a required value and applies
-    requiredAwaiting$.next(false);
-    requiredFilters$.next([region]);
+    requiredChild.awaitingRequiredFilters$.next(false);
+    requiredChild.appliedFilters$.next([region]);
     await flush();
     filtersManager.api.publishFilters();
     await flush();

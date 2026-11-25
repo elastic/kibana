@@ -66,6 +66,7 @@ export const DashboardViewport = () => {
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
+
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {

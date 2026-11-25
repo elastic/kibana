@@ -12,16 +12,12 @@ import { BehaviorSubject, filter, first } from 'rxjs';
 
 export function initializePauseFetchManager(childrenLoading$: Observable<boolean>) {
   const isFetchPaused$ = new BehaviorSubject<boolean>(true);
-  const setFetchPaused = (paused: boolean) => {
-    isFetchPaused$.next(paused);
-  };
+  const setFetchPaused = (paused: boolean) => isFetchPaused$.next(paused);
 
-  /**
-   * Fetching stays paused until every visible child API has registered and finished computing its filters
-   */
-  const childrenAvailableSubscription = childrenLoading$
+  /** Fetching stays paused until every rendered child API has registered and finished computing its filters */
+  const initialFiltersSubscription = childrenLoading$
     .pipe(
-      filter((childrenLoading) => !childrenLoading),
+      filter((loading) => !loading),
       first()
     )
     .subscribe(() => {
@@ -34,7 +30,7 @@ export function initializePauseFetchManager(childrenLoading$: Observable<boolean
       setFetchPaused,
     },
     cleanup: () => {
-      childrenAvailableSubscription.unsubscribe();
+      initialFiltersSubscription.unsubscribe();
     },
   };
 }

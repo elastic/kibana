@@ -128,8 +128,6 @@ export const ControlPanel = ({
           setIsRequired(Boolean(result));
         })
       );
-    } else {
-      setIsRequired(false);
     }
     if (apiPublishesTooltipLabel(api)) {
       subscriptions.add(

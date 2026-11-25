@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFormRow, EuiFieldNumber, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
-import { ControlSettingTooltipLabel } from '../../../../../control_group/components/control_setting_tooltip_label';
 import { RangeSliderStrings } from '../../range_slider_strings';
 import type { CustomOptionsComponentProps } from '../../../types';
-import { CustomOptionsAdditionalSettings } from '../../../components';
+import { CustomOptionsAdditionalSettings, RequiredSelectionsSwitch } from '../../../components';
 
 export const RangeSliderEditorOptions = ({
   initialState,
@@ -23,9 +22,6 @@ export const RangeSliderEditorOptions = ({
   setControlEditorValid,
 }: CustomOptionsComponentProps<RangeSliderControlState>) => {
   const [step, setStep] = useState(initialState.step ?? DEFAULT_RANGE_SLIDER_STATE.step);
-  const [requiredSelections, setRequiredSelections] = useState<boolean>(
-    initialState.required ?? false
-  );
 
   return (
     <>
@@ -34,20 +30,11 @@ export const RangeSliderEditorOptions = ({
           label={RangeSliderStrings.editor.getSelectionsTitle()}
           data-test-subj="rangeSliderControl__selectionOptionsRow"
         >
-          <EuiSwitch
-            compressed
-            label={
-              <ControlSettingTooltipLabel
-                label={RangeSliderStrings.editor.getRequiredSelectionsLabel()}
-                tooltip={RangeSliderStrings.editor.getRequiredSelectionsTooltip()}
-              />
-            }
-            checked={requiredSelections}
-            onChange={() => {
-              const newRequired = !requiredSelections;
-              setRequiredSelections(newRequired);
-              updateState({ required: newRequired });
-            }}
+          <RequiredSelectionsSwitch
+            initialState={initialState}
+            updateState={updateState}
+            label={RangeSliderStrings.editor.getRequiredSelectionsLabel()}
+            tooltip={RangeSliderStrings.editor.getRequiredSelectionsTooltip()}
             data-test-subj="rangeSliderControl__requiredSelectionsAdditionalSetting"
           />
         </EuiFormRow>

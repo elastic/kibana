@@ -8,3 +8,4 @@
  */
 
 export { CustomOptionsAdditionalSettings } from './custom_options_additional_settings';
+export { RequiredSelectionsSwitch } from './required_selections_switch';

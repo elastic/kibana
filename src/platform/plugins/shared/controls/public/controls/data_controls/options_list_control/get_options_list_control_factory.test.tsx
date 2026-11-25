@@ -316,28 +316,28 @@ describe('Options List Control Api', () => {
 
     test('awaitingRequiredFilters$ is true when required with no selection', async () => {
       const { api } = await buildWithState({ required: true });
-      expect(api.awaitingRequiredFilters$?.value).toBe(true);
+      expect(api.awaitingRequiredFilters$.value).toBe(true);
     });
 
     test('awaitingRequiredFilters$ is false when required with an initial selection', async () => {
       const { api } = await buildWithState({ required: true, selected_options: ['a'] });
-      await waitFor(() => expect(api.awaitingRequiredFilters$?.value).toBe(false));
+      await waitFor(() => expect(api.awaitingRequiredFilters$.value).toBe(false));
     });
 
     test('awaitingRequiredFilters$ follows selections being made and cleared', async () => {
       const { api } = await buildWithState({ required: true });
       api.setSelectedOptions(['woof']);
-      await waitFor(() => expect(api.awaitingRequiredFilters$?.value).toBe(false));
+      await waitFor(() => expect(api.awaitingRequiredFilters$.value).toBe(false));
 
       api.setSelectedOptions([]);
-      await waitFor(() => expect(api.awaitingRequiredFilters$?.value).toBe(true));
+      await waitFor(() => expect(api.awaitingRequiredFilters$.value).toBe(true));
     });
 
     test('awaitingRequiredFilters$ is false when the suggestions request fails', async () => {
       fetchSpy.mockRejectedValue(new Error('suggestions failed'));
       const { api } = await buildWithState({ required: true });
       await waitFor(() => expect(api.blockingError$?.value?.message).toBe('suggestions failed'));
-      expect(api.awaitingRequiredFilters$?.value).toBe(false);
+      expect(api.awaitingRequiredFilters$.value).toBe(false);
     });
   });
 

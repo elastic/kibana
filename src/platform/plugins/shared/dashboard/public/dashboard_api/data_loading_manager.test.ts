@@ -20,26 +20,25 @@ const buildChild = (uuid: string, dataLoading: boolean) =>
   } as unknown as DefaultEmbeddableApi);
 
 describe('data loading manager', () => {
-  test('is loading while a visible child is loading', () => {
-    const children$ = new BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }>({
-      control: buildChild('control', false),
-      panel: buildChild('panel', true),
-    });
-    const visibleChildren$ = new BehaviorSubject<string[]>(['control', 'panel']);
-    const { api } = initializeDataLoadingManager(children$, visibleChildren$);
+  const control = buildChild('control', false);
+  const panel = buildChild('panel', true);
+  const children$ = new BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }>({
+    control,
+    panel,
+  });
+
+  test('is loading while a rendered child is loading', () => {
+    const renderedChildren$ = new BehaviorSubject(children$.value);
+    const { api } = initializeDataLoadingManager(children$, renderedChildren$);
     expect(api.dataLoading$.value).toBe(true);
   });
 
   test('ignores a child that was hidden while it was still loading', () => {
-    const children$ = new BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }>({
-      control: buildChild('control', false),
-      panel: buildChild('panel', true),
-    });
-    const visibleChildren$ = new BehaviorSubject<string[]>(['control', 'panel']);
-    const { api } = initializeDataLoadingManager(children$, visibleChildren$);
+    const renderedChildren$ = new BehaviorSubject(children$.value);
+    const { api } = initializeDataLoadingManager(children$, renderedChildren$);
 
     // the grid is replaced by the awaiting screen, but the API of the panel lingers in `children$`
-    visibleChildren$.next(['control']);
+    renderedChildren$.next({ control });
     expect(api.dataLoading$.value).toBe(false);
   });
 });

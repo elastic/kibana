@@ -21,8 +21,8 @@ import { DashboardRenderer } from './dashboard_renderer';
 
 const CONTROL_TYPE = 'fakeRequiredControl';
 
-/** mirrors the data controls: awaiting while required and without selections */
-const isAwaiting = (state: { required?: boolean; selected?: string[] } | undefined) =>
+/** mirrors the data controls: awaiting while required and without selections; `mock` prefix lets `jest.mock` factories use it */
+const mockIsAwaiting = (state: { required?: boolean; selected?: string[] } | undefined) =>
   Boolean(state?.required && !state?.selected?.length);
 
 jest.mock('../dashboard_api/load_dashboard_api', () => ({
@@ -79,12 +79,7 @@ jest.mock('@kbn/controls-renderer', () => {
           if (mounted.has(uuid)) return;
           mounted.add(uuid);
           const awaitingRequiredFilters$ = new Subject(
-            Boolean(
-              (() => {
-                const state = parentApi.getSerializedStateForChild(uuid);
-                return state?.required && !state?.selected?.length;
-              })()
-            )
+            mockIsAwaiting(parentApi.getSerializedStateForChild(uuid))
           );
           parentApi.registerChildApi({
             uuid,
@@ -92,7 +87,7 @@ jest.mock('@kbn/controls-renderer', () => {
             awaitingRequiredFilters$,
             serializeState: () => parentApi.getSerializedStateForChild(uuid),
             applySerializedState: (state: { required?: boolean; selected?: string[] }) =>
-              awaitingRequiredFilters$.next(Boolean(state?.required && !state?.selected?.length)),
+              awaitingRequiredFilters$.next(mockIsAwaiting(state)),
             anyStateChange$: new Subject(undefined),
             latestState$: new Subject(undefined),
           } as unknown as DefaultEmbeddableApi);
@@ -135,7 +130,7 @@ describe('DashboardRenderer: required pinned controls across setState (history p
     jest.requireMock('@kbn/controls-renderer').__mounted.clear();
     jest.spyOn(embeddableService, 'getEmbeddableDefinition').mockResolvedValue({
       type: CONTROL_TYPE,
-      isAwaitingFilters: isAwaiting,
+      isAwaitingFilters: mockIsAwaiting,
     } as unknown as Awaited<ReturnType<typeof embeddableService.getEmbeddableDefinition>>);
   });
 

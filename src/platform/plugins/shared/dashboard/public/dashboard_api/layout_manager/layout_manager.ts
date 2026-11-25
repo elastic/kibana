@@ -140,6 +140,14 @@ export function initializeLayoutManager(
     distinctUntilChanged()
   );
 
+  /**
+   * The APIs of the rendered children. An API lingers in `children$` after its panel unmounts, but its
+   * subscriptions are gone, so state it published while mounted (e.g. loading) would never be reset.
+   */
+  const renderedChildren$ = combineLatest([children$, visibleChildren$]).pipe(
+    map(([children, visibleChildren]) => pick(children, visibleChildren))
+  );
+
   let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
 
@@ -546,6 +554,7 @@ export function initializeLayoutManager(
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
       visibleChildren$,
+      renderedChildren$,
       childApisPending$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),

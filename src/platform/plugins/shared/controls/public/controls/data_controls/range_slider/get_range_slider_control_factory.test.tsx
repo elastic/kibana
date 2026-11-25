@@ -191,25 +191,17 @@ describe('RangeSliderControlApi', () => {
 
     test('is published and true when required with no selection', async () => {
       const { api } = await buildWithState({ required: true });
-      expect(
-        (api as unknown as { awaitingRequiredFilters$: BehaviorSubject<boolean> })
-          .awaitingRequiredFilters$.value
-      ).toBe(true);
+      expect(api.awaitingRequiredFilters$.value).toBe(true);
     });
 
     test('is false when not required', async () => {
       const { api } = await buildWithState({ required: false });
-      expect(
-        (api as unknown as { awaitingRequiredFilters$: BehaviorSubject<boolean> })
-          .awaitingRequiredFilters$.value
-      ).toBe(false);
+      expect(api.awaitingRequiredFilters$.value).toBe(false);
     });
 
     test('becomes false once a value is selected', async () => {
       const { api } = await buildWithState({ required: true, value: ['5', '10'] });
-      const awaiting$ = (api as unknown as { awaitingRequiredFilters$: BehaviorSubject<boolean> })
-        .awaitingRequiredFilters$;
-      await waitFor(() => expect(awaiting$.value).toBe(false));
+      await waitFor(() => expect(api.awaitingRequiredFilters$.value).toBe(false));
     });
   });
 
@@ -220,21 +212,14 @@ describe('RangeSliderControlApi', () => {
         ...state,
       } as RangeSliderControlState);
 
-    test('is true when required with no value', () => {
-      expect(isAwaiting({ required: true })).toBe(true);
-    });
-
-    test('is true when required with an empty range', () => {
-      expect(isAwaiting({ required: true, value: ['', ''] })).toBe(true);
-    });
-
-    test('is false when required with at least one numeric bound', () => {
-      expect(isAwaiting({ required: true, value: ['5', ''] })).toBe(false);
-      expect(isAwaiting({ required: true, value: ['', '10'] })).toBe(false);
-    });
-
-    test('is false when not required', () => {
-      expect(isAwaiting({ required: false, value: ['', ''] })).toBe(false);
+    test.each<[string, Partial<RangeSliderControlState>, boolean]>([
+      ['required with no value', { required: true }, true],
+      ['required with an empty range', { required: true, value: ['', ''] }, true],
+      ['required with a numeric lower bound', { required: true, value: ['5', ''] }, false],
+      ['required with a numeric upper bound', { required: true, value: ['', '10'] }, false],
+      ['not required', { required: false, value: ['', ''] }, false],
+    ])('when %s', (_title, state, expected) => {
+      expect(isAwaiting(state)).toBe(expected);
     });
   });
 

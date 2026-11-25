@@ -130,7 +130,7 @@ export function getDashboardApi({
 
   const dataLoadingManager = initializeDataLoadingManager(
     layoutManager.api.children$,
-    layoutManager.internalApi.visibleChildren$
+    layoutManager.internalApi.renderedChildren$
   );
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
   const settingsManager = initializeSettingsManager(initialState);
@@ -273,9 +273,6 @@ export function getDashboardApi({
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
 
-  // Unpause once the visible children have registered and finished computing their filters. `childApisPending$` is
-  // scoped to the visible children (only pinned controls while required filters are awaited), so required controls
-  // are not blocked on grid panels that aren't rendered yet.
   const pauseFetchManager = initializePauseFetchManager(filtersManager.api.childFiltersLoading$);
 
   const canCancel$ = new BehaviorSubject<boolean>(false);
