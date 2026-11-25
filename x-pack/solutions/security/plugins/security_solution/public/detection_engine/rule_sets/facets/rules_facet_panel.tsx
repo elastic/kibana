@@ -21,6 +21,7 @@ import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rul
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRuleSetsQuery } from '../api';
 import { FacetPanel } from './facet_panel';
+import { HideFacetPanelButton } from './facet_panel_visibility';
 import { useFacetCounts } from './use_facet_counts';
 import * as i18n from './translations';
 
@@ -60,24 +61,30 @@ export const RulesFacetPanel = () => {
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleFacetPanelFrame">
-      <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h3>{i18n.FILTERS}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        {hasRuleSetConditions(shown) && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              flush="right"
-              onClick={() => onChange({})}
-              data-test-subj="ruleFacetClearAll"
-            >
-              {i18n.CLEAR_ALL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            {hasRuleSetConditions(shown) && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => onChange({})}
+                  data-test-subj="ruleFacetClearAll"
+                >
+                  {i18n.CLEAR_ALL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <HideFacetPanelButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiText size="xs" color="subdued">
         {set ? i18n.COUNTS_IN_SET(set.name) : i18n.COUNTS_IN_ALL}

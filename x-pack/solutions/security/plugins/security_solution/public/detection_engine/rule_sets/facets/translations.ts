@@ -122,6 +122,10 @@ export const INCLUDE = (value: string) =>
     defaultMessage: 'Include {value}',
   });
 
+export const HIDE_FILTERS = i18n.translate('xpack.securitySolution.ruleSets.facets.hide', {
+  defaultMessage: 'Hide filters',
+});
+
 export const SHOW_ALL = (count: number) =>
   i18n.translate('xpack.securitySolution.ruleSets.facets.showAll', {
     values: { count },

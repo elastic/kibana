@@ -17,6 +17,7 @@ import { AllRulesTabs } from '../constants';
 import { RuleSearchField } from './rule_search_field';
 import { GapFillStatusSelector } from './gap_fill_status_selector';
 import { RulesGroupByButton } from '../../../../rule_sets/components/rules_group_by_control';
+import { ShowFacetPanelButton } from '../../../../rule_sets/facets/facet_panel_visibility';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -59,6 +60,7 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
 
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" alignItems="center" wrap>
+      <ShowFacetPanelButton conditions={filterOptions.conditions ?? {}} />
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
       {selectedTab === AllRulesTabs.monitoring && (
         <EuiFlexItem grow={false}>

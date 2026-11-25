@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RulesFacetPanel } from '../../../rule_sets/facets/rules_facet_panel';
+import {
+  FacetPanelVisibilityProvider,
+  useFacetPanelVisibility,
+} from '../../../rule_sets/facets/facet_panel_visibility';
 import { RuleSetEditorProvider } from '../../../rule_sets/components/rule_set_editor_context';
 import { RuleSetHeader } from '../../../rule_sets/components/rule_set_header';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
@@ -27,6 +31,61 @@ import { GapSchedulerErrorsCallout } from '../../../rule_gaps/components/gap_sch
  *   * Delete
  *   * Import/Export
  */
+/**
+ * Space below the table that the panel must not cover: the Timeline bar of Security pages is
+ * sticky at the bottom (57 px) and is not in the Kibana layout variables, plus the page padding.
+ */
+const BOTTOM_SPACE = '80px';
+
+/**
+ * Height of the sticky app header (title and tabs). It covers the top of the scroll container and
+ * has no layout variable, so the panel measures it.
+ */
+const useStickyAppHeaderHeight = () => {
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    const header = document.querySelector<HTMLElement>('[data-test-subj="appHeader"]');
+    if (!header || getComputedStyle(header).position !== 'sticky') {
+      return;
+    }
+    const observer = new ResizeObserver(() => setHeight(header.getBoundingClientRect().height));
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+  return height;
+};
+
+/**
+ * Facets left, table right. The panel sticks below the Kibana headers and fits the visible part of
+ * the application, so it stays in view while the table scrolls; a long panel scrolls on its own.
+ */
+const RulesWithFacets = ({ selectedTab }: { selectedTab: AllRulesTabs }) => {
+  const { isOpen } = useFacetPanelVisibility();
+  const headerHeight = useStickyAppHeaderHeight();
+  const offset = `(var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0px)) + ${headerHeight}px)`;
+  return (
+    <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
+      {isOpen && (
+        <EuiFlexItem
+          grow={false}
+          css={{
+            width: 260,
+            position: 'sticky',
+            top: `calc(${offset} + 8px)`,
+            maxHeight: `calc(var(--kbn-application--content-height, 100vh) - ${offset} - 8px - ${BOTTOM_SPACE})`,
+            overflowY: 'auto',
+          }}
+        >
+          <RulesFacetPanel />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem css={{ minWidth: 0, position: 'relative' }}>
+        <RulesTables selectedTab={selectedTab} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const AllRules = React.memo(() => {
   useSyncRulesTableSavedState();
   const [{ tabName }] = useRouteSpy();
@@ -37,24 +96,9 @@ export const AllRules = React.memo(() => {
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <GapSchedulerErrorsCallout />
         <RuleSetHeader />
-        <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem
-            grow={false}
-            // Sticky with its own scroll, so the facets stay in view next to a long table.
-            css={{
-              width: 260,
-              position: 'sticky',
-              top: 'calc(var(--euiFixedHeadersOffset, 0px) + 8px)',
-              maxHeight: 'calc(100vh - var(--euiFixedHeadersOffset, 0px) - 16px)',
-              overflowY: 'auto',
-            }}
-          >
-            <RulesFacetPanel />
-          </EuiFlexItem>
-          <EuiFlexItem css={{ minWidth: 0, position: 'relative' }}>
-            <RulesTables selectedTab={tabName as AllRulesTabs} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FacetPanelVisibilityProvider>
+          <RulesWithFacets selectedTab={tabName as AllRulesTabs} />
+        </FacetPanelVisibilityProvider>
       </RuleSetEditorProvider>
     );
   } else {
