@@ -176163,11 +176163,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -178755,11 +178758,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -186595,11 +186601,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
