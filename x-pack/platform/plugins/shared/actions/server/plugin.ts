@@ -402,6 +402,7 @@ export class ActionsPlugin
           baseUrl: this.actionsConfig.relay.url,
           configurationUtilities: actionsConfigUtils,
           logger: this.logger.get('relay-client'),
+          kibanaUrl: this.actionsConfig.relay.kibanaUrl,
           useSystemIdentity: this.actionsConfig.relay.uiam?.enabled ?? false,
           getSystemIdentity: () => this.securityStart?.authc.systemIdentity,
         })

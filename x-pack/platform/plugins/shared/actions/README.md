@@ -72,6 +72,10 @@ configured Relay client to server plugins so all Relay consumers use the same ou
 proxy, and TLS policy. The Relay host must also be added to `xpack.actions.allowedHosts`, since
 Relay requests go through the same `ensureUriAllowed` check as any other connector call.
 
+In development only, `xpack.actions.relay.kibanaUrl` replaces the Kibana URL sent to Relay at install
+(by default the public base URL), for a Relay that reaches Kibana under another address than the one
+Kibana is browsed at, such as a Relay running in a Docker container.
+
 On Serverless, `xpack.actions.relay.uiam.enabled: true` makes every Relay request also carry an
 `Authorization: Bearer` header holding a fresh, short-lived token for Kibana's own UIAM identity,
 obtained from the security plugin's `authc.systemIdentity`. The Relay forwards that token together

@@ -37,6 +37,8 @@ export interface RelayClientOptions {
   baseUrl: string;
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
+  /** `xpack.actions.relay.kibanaUrl` (development only): replaces the `kibana_url` of an install. */
+  kibanaUrl?: string;
   /**
    * Whether to authenticate every Relay request with an ephemeral UIAM token for Kibana's own
    * identity (`xpack.actions.relay.uiam.enabled`). When `false` the Relay identifies Kibana from
@@ -118,6 +120,7 @@ export class RelayClient implements RelayClientContract {
   private readonly baseUrl: URL;
   private readonly configurationUtilities: ActionsConfigurationUtilities;
   private readonly logger: Logger;
+  private readonly kibanaUrl: string | undefined;
   private readonly useSystemIdentity: boolean;
   private readonly getSystemIdentity: RelayClientOptions['getSystemIdentity'];
 
@@ -130,18 +133,20 @@ export class RelayClient implements RelayClientContract {
     baseUrl,
     configurationUtilities,
     logger,
+    kibanaUrl,
     useSystemIdentity,
     getSystemIdentity,
   }: RelayClientOptions) {
     this.baseUrl = new URL(baseUrl);
     this.configurationUtilities = configurationUtilities;
     this.logger = logger;
+    this.kibanaUrl = kibanaUrl;
     this.useSystemIdentity = useSystemIdentity;
     this.getSystemIdentity = getSystemIdentity;
   }
 
   async startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse> {
-    const wireBody = toRelayInstallWireBody(body, this.uiamEnabled);
+    const wireBody = toRelayInstallWireBody(body, this.uiamEnabled, this.kibanaUrl);
     const credential = installCredential(wireBody);
     try {
       const response = await this.post('/v1/slack/install', wireBody);
@@ -485,7 +490,8 @@ const installCredential = (body: RelayInstallRequest): string =>
  */
 const toRelayInstallWireBody = (
   body: RelayInstallRequest,
-  uiamEnabled: boolean
+  uiamEnabled: boolean,
+  kibanaUrl?: string
 ): RelayInstallRequest => {
   const apiKey = 'kibana_api_key' in body ? body.kibana_api_key : undefined;
   const serviceAccountId =
@@ -507,7 +513,7 @@ const toRelayInstallWireBody = (
   }
 
   const shared = {
-    kibana_url: body.kibana_url,
+    kibana_url: kibanaUrl ?? body.kibana_url,
     kibana_version: body.kibana_version,
     license_info: body.license_info,
     ...(body.created_by_user_key ? { created_by_user_key: body.created_by_user_key } : {}),

@@ -33,11 +33,17 @@ const systemIdentity: jest.Mocked<SystemIdentity> = {
 const createClient = ({
   useSystemIdentity = true,
   getSystemIdentity = () => systemIdentity,
-}: { useSystemIdentity?: boolean; getSystemIdentity?: () => SystemIdentity | undefined } = {}) =>
+  kibanaUrl,
+}: {
+  useSystemIdentity?: boolean;
+  getSystemIdentity?: () => SystemIdentity | undefined;
+  kibanaUrl?: string;
+} = {}) =>
   new RelayClient({
     baseUrl: 'https://relay.test',
     configurationUtilities,
     logger,
+    kibanaUrl,
     useSystemIdentity,
     getSystemIdentity,
   });
@@ -189,6 +195,27 @@ describe('RelayClient', () => {
     );
     expect(requestMock.mock.calls[0][0].data).not.toHaveProperty('uiam_service_account_id');
     expect(systemIdentity.createEphemeralToken).not.toHaveBeenCalled();
+  });
+
+  it("sends the configured Kibana URL at install instead of the caller's", async () => {
+    requestMock.mockResolvedValue({
+      status: 200,
+      data: { authorize_url: 'https://slack/oauth', claim_id: 'claim-1' },
+    } as never);
+
+    await createClient({
+      useSystemIdentity: false,
+      kibanaUrl: 'http://host.docker.internal:5601',
+    }).startInstall({
+      kibana_api_key: 'api-key',
+      kibana_url: 'http://localhost:5601',
+      kibana_version: '9.2.0',
+      license_info: 'platinum',
+    });
+
+    expect(requestMock.mock.calls[0][0].data).toEqual(
+      expect.objectContaining({ kibana_url: 'http://host.docker.internal:5601' })
+    );
   });
 
   it('posts a service-account install with only the id when Relay UIAM is on', async () => {
