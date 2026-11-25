@@ -29,6 +29,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   type ChatCompleteAPI,
   type ChatCompletionChunkEvent,
+  type ChatCompletionEvent,
   MessageRole,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
@@ -609,7 +610,7 @@ describe('createChatCompleteApi', () => {
         },
       });
 
-      const emitted: unknown[] = [];
+      const emitted: ChatCompletionEvent[] = [];
       let caughtError: any;
       await new Promise<void>((resolve) => {
         events$.subscribe({

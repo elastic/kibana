@@ -6,10 +6,7 @@
  */
 
 import { Observable, type MonoTypeOperatorFunction } from 'rxjs';
-import type {
-  ChatCompletionChunkEvent,
-  ChatCompletionTokenCountEvent,
-} from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent, ChatCompletionEvent } from '@kbn/inference-common';
 import { isChatCompletionChunkEvent, isChatCompletionTokenCountEvent } from '@kbn/inference-common';
 
 /**
@@ -41,9 +38,9 @@ export function skipStreamedOutputFromRetryableAttempts({
   discardHeldChunksOnError,
 }: {
   discardHeldChunksOnError: (error: Error) => boolean;
-}): MonoTypeOperatorFunction<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> {
+}): MonoTypeOperatorFunction<ChatCompletionEvent> {
   return (source$) =>
-    new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
+    new Observable<ChatCompletionEvent>((subscriber) => {
       let published = false;
       const chunks: ChatCompletionChunkEvent[] = [];
 
