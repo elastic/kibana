@@ -72655,6 +72655,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_CreateLiveQueryResponse'
           description: Indicates a successful call.
+        '404':
+          description: An alert referenced by `alert_ids` was not found, or you do not have access to it. The two cases are indistinguishable by design.
       summary: Create a live query
       tags:
         - Security Osquery API
@@ -211764,7 +211766,7 @@ components:
             type: string
           type: array
         alert_ids:
-          description: A list of alert IDs associated with the live query.
+          description: A list of alert IDs associated with the live query. At most 100 distinct IDs are accepted. Every ID must refer to an alert you can read; otherwise the request fails with a 404.
           items:
             type: string
           type: array
