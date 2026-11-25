@@ -476,6 +476,49 @@ describe('InventoryService.list', () => {
     expect(columns).toEqual(type.columns.map(({ label, ...rest }) => rest));
   });
 
+  it('returns metric columns in definition order when a filtered metric is declared before an unfiltered one', async () => {
+    const withFilteredMetricFirst = {
+      ...k8sNodeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: OTEL_PATTERN,
+            metrics: [
+              {
+                name: 'cpu_idle',
+                field: 'system.cpu.utilization',
+                agg: 'last' as const,
+                filter: 'state == "idle"',
+              },
+              { name: 'memory', field: 'system.memory.utilization', agg: 'last' as const },
+            ],
+          },
+        ],
+      },
+    };
+    const { service, esClient } = createService([withFilteredMetricFirst]);
+    answerByPattern(esClient, {
+      [OTEL_PATTERN]: esqlResponse(
+        ['entity.id', 'kubernetes.node.name', 'cpu_idle', 'memory', 'last_seen'],
+        []
+      ),
+    });
+
+    const { columns } = await service.list({
+      type: withFilteredMetricFirst.type,
+      window: WINDOW,
+      limit: 10,
+    });
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    const metricNames = (names: Array<{ name: string; kind: string }>) =>
+      names.filter(({ kind }) => kind === 'metric').map(({ name }) => name);
+    expect(metricNames(type.columns)).toEqual(['cpu_idle', 'memory']);
+    expect(metricNames(columns)).toEqual(['cpu_idle', 'memory']);
+  });
+
   it.each([
     ['another plugin', { kind: 'plugin' as const, id: 'entityStore' }],
     ['an integration', { kind: 'integration' as const, package: 'kubernetes' }],

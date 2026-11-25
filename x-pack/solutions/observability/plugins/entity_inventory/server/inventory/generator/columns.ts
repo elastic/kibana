@@ -67,15 +67,20 @@ const assertSafeOutputName = (
 
 /**
  * Builds the ordered output columns from the resolved identity: `entity.id`, the identity fields
- * other than `entity.id`, the attributes then metrics in plan order (one column per name), then
- * `last_seen`.
+ * other than `entity.id`, the attributes in plan order, the metrics in definition order (one column
+ * per name), then `last_seen`.
  */
 export const buildColumns = (
   definition: EntityDefinitionWithoutId,
   plans: ReadonlyArray<Pick<QueryPlan, 'index' | 'attributes' | 'metrics'>>,
   { groupingFields, helperColumns }: IdentityPlan
 ): OutputColumn[] => {
-  getDynamicBlock(definition);
+  const { sources } = getDynamicBlock(definition);
+  // Plans put a source's unfiltered metrics before its filtered ones, so plan order is not the
+  // order the definition declares; `types` and `_list` must both follow the declaration.
+  const declaredMetricNames = [
+    ...new Set(sources.flatMap(({ metrics = [] }) => metrics.map(({ name }) => name))),
+  ];
   const identityFields = new Set(groupingFields);
   const helperColumnNames = new Set(helperColumns);
   const attributeColumns = new Map<string, Record<number, string>>();
@@ -127,15 +132,22 @@ export const buildColumns = (
     ...[...attributeColumns].map(
       ([name, fieldByPlan]): OutputColumn => ({ name, kind: 'attribute', fieldByPlan })
     ),
-    ...[...metricColumns].map(
-      ([name, { fieldByPlan, agg, unit }]): OutputColumn => ({
-        name,
-        kind: 'metric',
-        fieldByPlan,
-        agg,
-        ...(unit !== undefined ? { unit } : {}),
-      })
-    ),
+    ...declaredMetricNames.flatMap((name): OutputColumn[] => {
+      const metricColumn = metricColumns.get(name);
+      if (metricColumn === undefined) {
+        return [];
+      }
+      const { fieldByPlan, agg, unit } = metricColumn;
+      return [
+        {
+          name,
+          kind: 'metric',
+          fieldByPlan,
+          agg,
+          ...(unit !== undefined ? { unit } : {}),
+        },
+      ];
+    }),
     { name: LAST_SEEN_COLUMN, kind: 'last_seen' },
   ];
 };
