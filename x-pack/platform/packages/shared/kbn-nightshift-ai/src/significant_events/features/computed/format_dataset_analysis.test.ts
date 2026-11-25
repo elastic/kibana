@@ -120,6 +120,18 @@ describe('formatDatasetAnalysis', () => {
     });
   });
 
+  it('does not relate fields that are distinct on every document', () => {
+    const unique = (prefix: string) =>
+      Object.fromEntries(Array.from({ length: SAMPLED }, (_, index) => [`${prefix}-${index}`, 1]));
+
+    const { fields } = format([
+      field('request.id', 'keyword', unique('request'), 'request', 'unique'),
+      field('session.id', 'keyword', unique('session'), 'session', 'unique'),
+    ]);
+
+    expect(Object.values(fields).flat().join()).not.toContain('one value per');
+  });
+
   it('lists sparse non-key fields by name only', () => {
     const result = formatDatasetAnalysis({
       total: 5000,

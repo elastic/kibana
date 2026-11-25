@@ -147,9 +147,7 @@ export const formatDatasetAnalysis = (
         ({ isBookkeeping, isConstant, isRare }) => !isBookkeeping && !isConstant && !isRare
       ),
       ({ key, field }) =>
-        field.partition && (field.cardinality ?? 0) >= MIN_CORRELATED_CARDINALITY
-          ? field.partition
-          : `key:${key}`
+        field.partition && isCorrelatable(field) ? field.partition : `key:${key}`
     )
   ).flatMap((members) => {
     const [leader, ...followers] = [...members].sort(
@@ -246,6 +244,10 @@ const groupFields = (
     };
   });
 };
+
+// Fields with a distinct value on every document all split the sample alike without being related.
+const isCorrelatable = ({ cardinality, documentsWithValue }: AnalyzedField): boolean =>
+  (cardinality ?? 0) >= MIN_CORRELATED_CARDINALITY && (cardinality ?? 0) < documentsWithValue;
 
 const keyRankOf = ({ name }: AnalyzedField): number =>
   KEY_FIELD_RANK.get(name) ?? (STATUS_CODE_FIELD.test(name) ? STATUS_CODE_RANK : Infinity);
