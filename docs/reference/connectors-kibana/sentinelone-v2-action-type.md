@@ -14,12 +14,24 @@ The SentinelOne (v2) connector connects to the SentinelOne management API (v2.1)
 You can also manage blocklist entries, exclusions, threat intelligence indicators, firewall rules, and custom detection Storyline Active Response (STAR) rules.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(API only)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 ## Create connectors in {{kib}} [define-sentinelone-v2-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+
+### Connector networking configuration [sentinelone-v2-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+### Get API credentials [sentinelone-v2-api-credentials]
+
+1. Sign in to the SentinelOne management console.
+2. Go to **Settings > Users > Service Users** and create a service user, or open **My User** for your own user. Menu names can differ by console version.
+3. Select the scope and role of the user. The token has the role and scope of its user. Pick an account, site, or group scope that covers the endpoints you want to act on, and a role that grants the permissions of the actions you plan to use. Each action in [Connector actions](#sentinelone-v2-connector-actions) lists its permission, for example Endpoints: view, Endpoints: disconnect from network, Endpoint Threats: view, Endpoint Threats: update analyst verdict, and RemoteOps: view output. `getAccounts` needs an account-level or global user. A site-level user can work only inside its site: `getAccounts` and calls that filter by `accountIds` return HTTP 403 for it. Among the predefined roles, Admin has every permission listed on this page. IR Team has all of them except Groups: move to group, and SOC also lacks STAR Custom Rules: manage. Viewer has read permissions only. Custom roles can differ.
+4. Set the token expiry date, which SentinelOne requires for a service user. Generate the API token and copy it. SentinelOne shows the token once. Before the token expires, generate a new one for the service user. This revokes the existing token, so update the connector right away.
+5. In the **API token** field of the connector, paste the token.
 
 ### Connector configuration [sentinelone-v2-connector-configuration]
 
@@ -31,7 +43,7 @@ SentinelOne tenant URL
 API token
 :   The API token of a SentinelOne console user or service user. Paste the token only: the connector sends it as `Authorization: ApiToken <token>`. Refer to [Get API credentials](#sentinelone-v2-api-credentials).
 
-## Test connectors [sentinelone-v2-connector-test]
+### Test connectors [sentinelone-v2-connector-test]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test lists one agent (`GET /web/api/v2.1/agents?limit=1`), which confirms the tenant URL, the API token, and the Endpoints: view permission. The connector page offers only this connectivity test. Run the actions from Agent Builder or the connector execute API.
 
@@ -48,7 +60,7 @@ The SentinelOne (v2) connector exposes the following actions:
 `releaseHost`
 :   Reconnects isolated endpoints to the network. The result lists the agent IDs sent to SentinelOne (`requested`), the IDs already connected (`skipped`), and the IDs SentinelOne did not find (`notFound`); when every ID that SentinelOne finds is already connected, the action succeeds without a request and `data.affected` is 0, even if other IDs are listed under `notFound`; check `notFound` before you treat a successful no-op as confirmation for every ID. When SentinelOne finds none of the IDs, the action fails, and when the agent lookup itself returns an error, the action fails with that error. Requires the Endpoints: reconnect to network permission.
 
-`executeScript` _(not yet available)_
+`executeScript` _(API only)_
 :   Runs a script from the SentinelOne Script Library on selected endpoints and returns the task ID to follow. Each script type needs its own RemoteOps permission: run data collection script, run artifact collection script, or run action script. SentinelOne answers `Insufficient permissions` (HTTP 403) when the role lacks the permission for the type of script, for example action scripts such as Download File.
 
 `getRemoteScriptStatus`
@@ -96,7 +108,7 @@ The SentinelOne (v2) connector exposes the following actions:
 `addHashToBlocklist`
 :   Blocks a file hash on the endpoints of a selected account, site, group, or the whole tenant. Requires the Blocklist: create permission.
 
-`removeHashFromBlocklist` _(not yet available)_
+`removeHashFromBlocklist` _(API only)_
 :   Removes blocklist entries, for example after a false positive. Requires the Blocklist: delete permission.
 
 `searchBlocklist`
@@ -120,16 +132,16 @@ The SentinelOne (v2) connector exposes the following actions:
 `getAccounts`
 :   Lists accounts and their IDs, for account-level scope. Requires the Accounts: view permission and an account-level or global user. SentinelOne refuses site-level users.
 
-`createExclusion` _(not yet available)_
+`createExclusion` _(API only)_
 :   Creates an exclusion (hash, path, certificate, browser or file type) at a selected scope, for example after a false positive. Requires the Exclusions: create permission.
 
 `listExclusions`
 :   Lists exclusions by type, OS, value or scope. Requires the Exclusions: view permission.
 
-`deleteExclusion` _(not yet available)_
+`deleteExclusion` _(API only)_
 :   Removes exclusions so detection applies to the item again. Requires the Exclusions: delete permission.
 
-`moveAgent` _(not yet available)_
+`moveAgent` _(API only)_
 :   Moves endpoints to another group, for example one with a stricter policy. SentinelOne answers with the number of agents it moved (`data.agentsMoved`). The action reads the agents first and the result lists the agent IDs sent to SentinelOne (`requested`), the IDs already in the group (`skipped`), and the IDs SentinelOne did not find (`notFound`); when every ID that SentinelOne finds is already in the group, the action succeeds without a move request and `data.agentsMoved` is 0, even if other IDs are listed under `notFound`; check `notFound` before you treat a successful no-op as confirmation for every ID. When SentinelOne finds none of the IDs, moves none of the requested agents, or the agent lookup returns an error, the action fails. Requires the Groups: move to group and Endpoints: view permissions.
 
 `fetchThreatFile`
@@ -144,7 +156,7 @@ The SentinelOne (v2) connector exposes the following actions:
 `abortScan`
 :   Stops a running full disk scan on endpoints. Requires the Endpoints: abort scan permission.
 
-`shutdownAgent` _(not yet available)_
+`shutdownAgent` _(API only)_
 :   Shuts endpoints down as a last-resort containment step; there is no way to power them on again through the API. Requires the Endpoints: shut down permission.
 
 `broadcastMessage`
@@ -156,7 +168,7 @@ The SentinelOne (v2) connector exposes the following actions:
 `searchIOCs`
 :   Looks up threat intelligence indicators by value, type, source or scope. Requires the Threat Intelligence: view permission.
 
-`deleteIOC` _(not yet available)_
+`deleteIOC` _(API only)_
 :   Removes threat intelligence indicators by their IDs within an account. Requires the Threat Intelligence: manage permission.
 
 `getInstalledApplications`
@@ -174,7 +186,7 @@ The SentinelOne (v2) connector exposes the following actions:
 `createFirewallRule`
 :   Creates a Firewall Control rule at a selected scope, for example to block a malicious destination.
 
-`deleteFirewallRule` _(not yet available)_
+`deleteFirewallRule` _(API only)_
 :   Deletes Firewall Control rules by ID.
 
 `createStarRule`
@@ -186,13 +198,13 @@ The SentinelOne (v2) connector exposes the following actions:
 `enableStarRules`
 :   Turns on STAR custom detection rules. Requires the STAR Custom Rules: manage permission.
 
-`disableStarRules` _(not yet available)_
+`disableStarRules` _(API only)_
 :   Turns off STAR custom detection rules. Requires the STAR Custom Rules: manage permission.
 
-`deleteStarRule` _(not yet available)_
+`deleteStarRule` _(API only)_
 :   Deletes STAR custom detection rules. Requires the STAR Custom Rules: manage permission.
 
-`runScriptAndWait` _(not yet available)_
+`runScriptAndWait` _(API only)_
 :   Runs a Script Library script on selected endpoints, waits for it to finish (up to 240 seconds) and returns the result links in one step. SentinelOne can queue a script on an endpoint for much longer than that. When the wait ends first, the action returns `timedOut: true` and the `parentTaskId`. For scripts that might queue, use `executeScript`, then poll `getRemoteScriptStatus`, then call `getRemoteScriptResults`. {{kib}} closes a request to the connector execute API after 120 seconds, so when you call the action through the API, keep `waitSeconds` at 100 or less (the default is 100).
 
 `getApplicationCves`
@@ -227,15 +239,3 @@ SentinelOne (v2) keeps the 11 action names of the SentinelOne connector (`execut
 | `downloadAgentFile`, `downloadRemoteScriptResults` | Returned a file stream | Returns `content` (base64), `fileName`, `contentType` and `sizeBytes`, up to 25 MB |
 | List actions | Raw response | Same response envelope; `pagination.nextCursor` is always present |
 | Authentication | Token sent as a query parameter | Token sent in the `Authorization: ApiToken` header |
-
-## Connector networking configuration [sentinelone-v2-connector-networking-configuration]
-
-Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-## Get API credentials [sentinelone-v2-api-credentials]
-
-1. Sign in to the SentinelOne management console.
-2. Go to **Settings > Users > Service Users** and create a service user, or open **My User** for your own user. Menu names can differ by console version.
-3. Select the scope and role of the user. The token has the role and scope of its user. Pick an account, site, or group scope that covers the endpoints you want to act on, and a role that grants the permissions of the actions you plan to use. Each action in [Connector actions](#sentinelone-v2-connector-actions) lists its permission, for example Endpoints: view, Endpoints: disconnect from network, Endpoint Threats: view, Endpoint Threats: update analyst verdict, and RemoteOps: view output. `getAccounts` needs an account-level or global user. A site-level user can work only inside its site: `getAccounts` and calls that filter by `accountIds` return HTTP 403 for it. Among the predefined roles, Admin has every permission listed on this page. IR Team has all of them except Groups: move to group, and SOC also lacks STAR Custom Rules: manage. Viewer has read permissions only. Custom roles can differ.
-4. Set the token expiry date, which SentinelOne requires for a service user. Generate the API token and copy it. SentinelOne shows the token once. Before the token expires, generate a new one for the service user. This revokes the existing token, so update the connector right away.
-5. In the **API token** field of the connector, paste the token.
