@@ -145,7 +145,9 @@ apiTest.describe('Search boost list API', { tag: ['@local-serverless-vectordb'] 
           const sizes = [
             findMatch(latestRules, testData.exactRule, testData.productsIndex),
             findMatch(latestRules, testData.dataStreamsRule, testData.dataStream),
-          ].map((match) => match?.storageSizeInBytes ?? 0);
+          ].map((match) =>
+            typeof match?.storageSizeInBytes === 'number' ? match.storageSizeInBytes : 0
+          );
           return Math.min(...sizes);
         },
         { timeout: METERING_TIMEOUT_MS }
