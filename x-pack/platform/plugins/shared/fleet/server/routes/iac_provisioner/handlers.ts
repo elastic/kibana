@@ -357,7 +357,7 @@ export const receiveProvisioningCallbackHandler: FleetRequestHandler<
     case 'unverified':
       // The reason stays in the log: the caller learns only that its proof was not accepted.
       return response.unauthorized({
-        body: { message: 'The report was not signed from the AWS account of the reported role' },
+        body: { message: 'The report was not signed from the account of what it reports' },
       });
   }
 };

@@ -49,20 +49,27 @@ describe('Config schema', () => {
     });
   });
 
+  it('refuses a provisioning callback verifier URL that is not on the loopback interface', () => {
+    // Whoever answers there decides which account a report is accepted from: a test stand-in on
+    // the same host, never a service somewhere else.
+    expect(() =>
+      config.schema.validate({
+        developer: { provisioningCallbackVerifierUrls: { aws: 'https://sts.example.com/' } },
+      })
+    ).toThrow(/loopback/);
+    expect(
+      config.schema.validate({
+        developer: { provisioningCallbackVerifierUrls: { aws: 'http://127.0.0.1:8091/' } },
+      }).developer.provisioningCallbackVerifierUrls
+    ).toEqual({ aws: 'http://127.0.0.1:8091/' });
+  });
+
   it('refuses a provisioning callback verifier URL for something that is not a cloud provider', () => {
     expect(() =>
       config.schema.validate({
         developer: { provisioningCallbackVerifierUrls: { lambda: 'http://localhost:8091/' } },
       })
     ).toThrow(/provisioningCallbackVerifierUrls/);
-  });
-
-  it('no longer knows the AWS-only provisioningCallbackStsUrl', () => {
-    expect(() =>
-      config.schema.validate({
-        developer: { provisioningCallbackStsUrl: 'http://localhost:8091/' },
-      })
-    ).toThrow(/provisioningCallbackStsUrl/);
   });
 
   it('should not allow to specify both default output in xpack.fleet.ouputs and xpack.fleet.agents.elasticsearch.hosts ', () => {

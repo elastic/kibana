@@ -11,7 +11,8 @@ import {
   PROVISIONING_CALLBACK_PROVIDERS,
   isProvisioningCallbackProvider,
 } from '../../../common/types/models/provisioning_callback';
-import { provisioningCallbackReportSchema } from '../../services/provisioning_callback_providers/registry';
+
+import { provisioningCallbackReportSchema } from './provisioning_callback_providers';
 
 const CloudProviderSchema = schema.oneOf([
   schema.literal('aws'),

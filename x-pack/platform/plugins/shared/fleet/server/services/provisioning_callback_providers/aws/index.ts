@@ -5,85 +5,37 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { gte, valid } from 'semver';
 
-import { isCloudFormationStackArn } from '../../../../common/services/cloud_connectors/iac_deployment';
 import type {
+  CloudConnectorCallbackIdentity,
   CloudConnectorCallbackReceivedValues,
   CloudConnectorCallerIdentityProof,
 } from '../../../../common/types/models/provisioning_callback';
+import { AwsReportSchema } from '../../../types/rest_spec/provisioning_callback_providers/aws';
 import type { ProvisioningCallbackSOAttributes } from '../../../types/so_attributes';
-import {
-  AWS_REGION_PATTERN,
-  STS_GET_CALLER_IDENTITY_BODY,
-  verifyCallerIdentity,
-} from './caller_identity';
 
 import type { ProvisioningCallbackProvider } from '../types';
 
+import { verifyCallerIdentity } from './caller_identity';
+
 const CONNECTOR_NAME_MAX_LENGTH = 255;
 
-const AWS_IAM_ROLE_ARN_PATTERN = /^arn:aws[a-zA-Z-]*:iam::\d{12}:role\/.+$/;
-
-/** Enough for SigV4 with a session token and the two binding headers; anything more is noise. */
-const MAX_PROOF_HEADERS = 16;
-const MAX_PROOF_HEADER_NAME_LENGTH = 64;
-const MAX_PROOF_HEADER_VALUE_LENGTH = 8192;
-
 /**
- * A signed STS `GetCallerIdentity` request the service forwards to prove the AWS account the
- * report came from. Only the region, the headers and the fixed body are accepted: Kibana builds
- * the STS URL itself, so the caller cannot direct it to another host.
+ * The blueprint version from which the stack's Lambda sends `origin_proof`, per blueprint id as
+ * the provisioner reports it at render time and the browser stores it on the record at launch.
  */
-const CallerIdentityProofSchema = schema.object({
-  region: schema.string({
-    minLength: 1,
-    maxLength: 32,
-    validate: (value) => (AWS_REGION_PATTERN.test(value) ? undefined : 'must be an AWS region'),
-    meta: { description: 'Region of the STS endpoint the request was signed for.' },
-  }),
-  headers: schema.recordOf(
-    schema.string({ minLength: 1, maxLength: MAX_PROOF_HEADER_NAME_LENGTH }),
-    schema.string({ maxLength: MAX_PROOF_HEADER_VALUE_LENGTH }),
-    {
-      validate: (value) =>
-        Object.keys(value).length <= MAX_PROOF_HEADERS
-          ? undefined
-          : `must have at most ${MAX_PROOF_HEADERS} headers`,
-      meta: {
-        description:
-          'The signed request headers: `Authorization`, `X-Amz-Date`, `X-Amz-Security-Token`, `Content-Type`, and the signed `x-elastic-callback-id` and `x-elastic-report-sha256` headers that bind the proof to this record and this report.',
-      },
-    }
-  ),
-  body: schema.oneOf([schema.literal(STS_GET_CALLER_IDENTITY_BODY)], {
-    meta: { description: 'The signed request body.' },
-  }),
-});
+const ORIGIN_PROOF_SINCE = new Map<string, string>([['aws/workload_identity_federation', '1.5.0']]);
 
-/**
- * What the stack's Lambda reports: the role and the stack it created, and the proof of its
- * account. The proof is optional while stacks launched from templates that predate it can still
- * report; it becomes required once none do.
- */
-const AwsReportSchema = schema.object({
-  role_arn: schema.string({
-    minLength: 1,
-    maxLength: 2048,
-    validate: (value) =>
-      AWS_IAM_ROLE_ARN_PATTERN.test(value) ? undefined : 'must be an IAM role ARN',
-    meta: { description: 'ARN of the IAM role the stack created.' },
-  }),
-  stack_arn: schema.string({
-    minLength: 1,
-    maxLength: 2048,
-    validate: (value) =>
-      isCloudFormationStackArn(value) ? undefined : 'must be a CloudFormation stack ARN',
-    meta: { description: 'ARN (StackId) of the CloudFormation stack.' },
-  }),
-  origin_proof: schema.maybe(CallerIdentityProofSchema),
-});
+const requiresOriginProof = ({
+  iac_blueprint_id: blueprintId,
+  iac_blueprint_version: version,
+}: CloudConnectorCallbackIdentity): boolean => {
+  const since = blueprintId ? ORIGIN_PROOF_SINCE.get(blueprintId) : undefined;
+  return since !== undefined && !!version && valid(version) !== null && gte(version, since);
+};
 
+const partitionOfArn = (arn: string): string | undefined => arn.split(':')[1];
 const accountIdOfArn = (arn: string): string | undefined => arn.split(':')[4];
 
 /** Last path segment of an IAM role ARN, used when the browser has not named the identity yet. */
@@ -95,7 +47,9 @@ const roleNameFromArn = (roleArn: string): string => {
 
 /**
  * AWS: the CloudFormation stack's Lambda reports the IAM role and the stack it created, and
- * proves its account with a signed STS `GetCallerIdentity` request that Kibana replays.
+ * proves its account with a signed STS `GetCallerIdentity` request that Kibana replays. The
+ * account is what is proven; the signer's names are checked against the stack's, which anyone
+ * in the account could arrange.
  */
 export const awsProvisioningCallbackProvider: ProvisioningCallbackProvider<
   CloudConnectorCallbackReceivedValues,
@@ -105,10 +59,16 @@ export const awsProvisioningCallbackProvider: ProvisioningCallbackProvider<
 
   reportSchema: AwsReportSchema,
 
-  validateReport: (report) =>
-    accountIdOfArn(report.role_arn) !== accountIdOfArn(report.stack_arn)
-      ? 'role_arn and stack_arn must be in the same AWS account'
-      : undefined,
+  requiresOriginProof,
+
+  validateReport: (report) => {
+    if (partitionOfArn(report.role_arn) !== partitionOfArn(report.stack_arn)) {
+      return 'role_arn and stack_arn must be in the same AWS partition';
+    }
+    if (accountIdOfArn(report.role_arn) !== accountIdOfArn(report.stack_arn)) {
+      return 'role_arn and stack_arn must be in the same AWS account';
+    }
+  },
 
   verifyOrigin: async (proof, expectation, { verifierUrl }) => {
     const verification = await verifyCallerIdentity(proof, expectation, { stsUrl: verifierUrl });

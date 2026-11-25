@@ -37,6 +37,11 @@ describe('AWS provisioning callback provider', () => {
       expect(aws.reportSchema.validate(REPORT)).toEqual(REPORT);
     });
 
+    it('describes the proof for the API reference', () => {
+      const proof = aws.reportSchema.getPropSchemas().origin_proof.getSchema().describe();
+      expect(proof.flags?.description).toMatch(/signed STS `GetCallerIdentity` request/);
+    });
+
     it.each([
       ['a role that is not an IAM role ARN', { role_arn: 'arn:aws:iam::123456789012:user/x' }],
       ['a stack that is not a CloudFormation stack ARN', { stack_arn: 'arn:aws:s3:::bucket' }],
@@ -61,6 +66,49 @@ describe('AWS provisioning callback provider', () => {
           stack_arn: 'arn:aws:cloudformation:us-east-1:999999999999:stack/elastic/uuid-1',
         })
       ).toBe('role_arn and stack_arn must be in the same AWS account');
+    });
+
+    it('refuses a role and a stack of different partitions', () => {
+      expect(
+        aws.validateReport({
+          ...REPORT,
+          stack_arn:
+            'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/elastic/uuid-1',
+        })
+      ).toBe('role_arn and stack_arn must be in the same AWS partition');
+    });
+  });
+
+  describe('requiresOriginProof', () => {
+    const BLUEPRINT = 'aws/workload_identity_federation';
+
+    it.each(['1.5.0', '1.5.1', '1.6.0', '2.0.0'])(
+      'requires the proof of a launch from blueprint %s, which sends one',
+      (version) => {
+        expect(
+          aws.requiresOriginProof({ iac_blueprint_id: BLUEPRINT, iac_blueprint_version: version })
+        ).toBe(true);
+      }
+    );
+
+    it.each([
+      [
+        'an earlier blueprint version',
+        { iac_blueprint_id: BLUEPRINT, iac_blueprint_version: '1.4.0' },
+      ],
+      ['another blueprint', { iac_blueprint_id: 'aws/other', iac_blueprint_version: '3.0.0' }],
+      ['no blueprint version', { iac_blueprint_id: BLUEPRINT, iac_blueprint_version: null }],
+      ['no blueprint at all', {}],
+      [
+        'a blueprint id that names an inherited property',
+        { iac_blueprint_id: 'toString', iac_blueprint_version: '1.5.0' },
+      ],
+      [
+        'a version that is not one',
+        { iac_blueprint_id: BLUEPRINT, iac_blueprint_version: 'latest' },
+      ],
+    ])('does not require it for a launch with %s', (_, identity) => {
+      expect(aws.requiresOriginProof(identity)).toBe(false);
     });
   });
 

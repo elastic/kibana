@@ -10,7 +10,6 @@ import { PROVISIONING_CALLBACK_PROVIDERS } from '../../../common/types/models/pr
 import { awsProvisioningCallbackProvider } from './aws';
 import {
   getProvisioningCallbackProvider,
-  provisioningCallbackReportSchema,
   registeredProvisioningCallbackProviders,
 } from './registry';
 
@@ -28,20 +27,6 @@ describe('provisioning callback provider registry', () => {
     expect([...registeredProvisioningCallbackProviders()].sort()).toEqual(
       [...PROVISIONING_CALLBACK_PROVIDERS].sort()
     );
-  });
-
-  it('accepts a report shaped for any registered provider, and nothing else', () => {
-    const awsReport = {
-      role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc',
-      stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
-      origin_proof: {
-        region: 'us-east-1',
-        headers: { Authorization: 'AWS4-HMAC-SHA256 ...' },
-        body: 'Action=GetCallerIdentity&Version=2011-06-15',
-      },
-    };
-    expect(provisioningCallbackReportSchema().validate(awsReport)).toEqual(awsReport);
-    expect(() => provisioningCallbackReportSchema().validate({ origin_proof: {} })).toThrow();
   });
 
   it('every module names the provider it is registered under', () => {

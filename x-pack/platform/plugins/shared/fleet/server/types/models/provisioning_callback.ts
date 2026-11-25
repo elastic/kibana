@@ -14,12 +14,6 @@ const ProvisioningCallbackStatusSchema = schema.oneOf([
   schema.literal('cancelled'),
 ]);
 
-const CloudProviderSchema = schema.oneOf([
-  schema.literal('aws'),
-  schema.literal('azure'),
-  schema.literal('gcp'),
-]);
-
 const AccountTypeSchema = schema.oneOf([
   schema.literal('single-account'),
   schema.literal('organization-account'),
@@ -32,7 +26,9 @@ const AccountTypeSchema = schema.oneOf([
  * report creates.
  */
 export const ProvisioningCallbackSchemaV1 = schema.object({
-  provider: CloudProviderSchema,
+  // Model version 1 has shipped and is immutable. The first non-AWS provider adds model
+  // version 2 with the wider literal; the route and service are already provider-neutral.
+  provider: schema.literal('aws'),
   status: ProvisioningCallbackStatusSchema,
   token_hash: schema.string({ minLength: 64, maxLength: 64 }),
   created_at: schema.string({ maxLength: 64 }),

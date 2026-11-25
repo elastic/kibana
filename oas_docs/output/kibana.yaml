@@ -60808,7 +60808,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Called by the deployment launched from Kibana to report what it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. The body is shaped for the record's cloud provider and carries `origin_proof`, the provider's proof that the report was sent from the account of what it reports, bound to this callback and these values; a report whose proof does not verify returns 401 and leaves the record waiting. The proof is optional while deployments launched before it was sent can still report, and will become required. For AWS, the CloudFormation stack's Lambda reports `role_arn` and `stack_arn`, which must be in the same account, and the proof is an STS `GetCallerIdentity` request signed by the stack's callback function with the callback id and the SHA-256 of the reported values among its signed headers; Kibana forwards it to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
+        Called by the deployment launched from Kibana to report what it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. The body is shaped for the record's cloud provider and carries `origin_proof`, the provider's proof that the report was sent from the account of what it reports, bound to this callback and these values; a report whose proof does not verify returns 401 and leaves the record waiting. A deployment launched from a blueprint that sends the proof (for AWS, `aws/workload_identity_federation` 1.5.0 and later, as recorded on the callback at launch) must send it, and a report without one is a 400; a deployment launched before that may still report without it. For AWS, the CloudFormation stack's Lambda reports `role_arn` and `stack_arn`, which must be in the same account, and the proof is an STS `GetCallerIdentity` request signed from that account with the callback id and the SHA-256 of the reported values among its signed headers; Kibana forwards it to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints. The signer must also be named as the stack's callback function and its role would be, which only turns away a stray principal: anyone in the account can pick those names, so the account is what the proof establishes. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
       operationId: receive-provisioning-callback
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -60852,6 +60852,7 @@ paths:
               properties:
                 origin_proof:
                   additionalProperties: false
+                  description: 'The proof that the report was sent from the account of the reported role and stack: a signed STS `GetCallerIdentity` request, made by the callback function with the callback id and the SHA-256 of the reported values among its signed headers. Kibana forwards it to the regional STS endpoint; whoever answers identifies the signer. Optional while stacks launched before the proof was sent can still report.'
                   type: object
                   properties:
                     body:
@@ -60902,7 +60903,7 @@ paths:
                 type: object
                 properties:
                   status:
-                    description: 'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.'
+                    description: 'State of the callback record. `pending`: waiting for the deployment. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.'
                     enum:
                       - pending
                       - receiving
@@ -60947,11 +60948,11 @@ paths:
             application/json:
               examples:
                 unverifiedExample:
-                  description: 'For AWS: STS did not vouch that the report was signed from the account of the reported role by the stack callback function, or the proof was made for another callback or other values'
+                  description: 'For AWS: STS did not vouch that the report was signed from the account and partition of the reported role, the signer is not named as the stack callback function, or the proof was made for another callback or other values'
                   summary: Proof of the sending account did not verify
                   value:
                     error: Unauthorized
-                    message: The report was not signed from the AWS account of the reported role
+                    message: The report was not signed from the account of what it reports
                     statusCode: 401
               schema:
                 additionalProperties: false

@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { Type } from '@kbn/config-schema';
-
 import type { CloudProvider } from '../../../common/types/models/cloud_connector';
 import type {
   CloudConnectorCallbackReceivedValues,
-  CloudConnectorCallbackReport,
   CloudConnectorCallerIdentityProof,
 } from '../../../common/types/models/provisioning_callback';
 
@@ -26,7 +22,9 @@ export type RegisteredProvisioningCallbackProvider = ProvisioningCallbackProvide
 
 /**
  * The providers this Kibana can receive a callback for. Must match
- * `PROVISIONING_CALLBACK_PROVIDERS`, which the request schemas use; a test keeps them aligned.
+ * `PROVISIONING_CALLBACK_PROVIDERS`, which the request schemas use, and
+ * `PROVISIONING_CALLBACK_REPORT_SCHEMAS`, the shapes the receive route accepts; tests keep them
+ * aligned.
  */
 const PROVIDERS: Partial<Record<CloudProvider, RegisteredProvisioningCallbackProvider>> = {
   aws: awsProvisioningCallbackProvider,
@@ -38,18 +36,3 @@ export const getProvisioningCallbackProvider = (
 
 export const registeredProvisioningCallbackProviders = (): CloudProvider[] =>
   Object.keys(PROVIDERS) as CloudProvider[];
-
-/**
- * The receive route's body: a report shaped for any registered provider. The record's own
- * provider decides which shape is actually accepted for it, in the service.
- */
-export const provisioningCallbackReportSchema = (): Type<CloudConnectorCallbackReport> => {
-  // `schema.oneOf` is typed per arity, so the members are folded in two at a time.
-  const [first, ...rest] = registeredProvisioningCallbackProviders().map(
-    (provider): Type<unknown> => PROVIDERS[provider]!.reportSchema
-  );
-  return rest.reduce(
-    (union, next) => schema.oneOf([union, next]),
-    first
-  ) as Type<CloudConnectorCallbackReport>;
-};

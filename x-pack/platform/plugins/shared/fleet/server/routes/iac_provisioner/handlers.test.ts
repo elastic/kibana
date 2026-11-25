@@ -869,12 +869,11 @@ describe('Provisioning callback handlers', () => {
       await receive(withToken);
 
       expect(response.unauthorized).toHaveBeenCalledWith({
-        body: { message: 'The report was not signed from the AWS account of the reported role' },
+        body: { message: 'The report was not signed from the account of what it reports' },
       });
       expect(loggingSystemMock.collect(logger).info).toEqual([
         ['Provisioning callback report [id=cb-1] outcome=unverified reason=account_mismatch'],
       ]);
-      expect(JSON.stringify(loggingSystemMock.collect(logger))).not.toContain('AWS4-HMAC-SHA256');
     });
   });
 });

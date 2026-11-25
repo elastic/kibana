@@ -633,6 +633,49 @@ describe('provisioningCallbackService', () => {
       });
     });
 
+    it('is gone for a cancelled or expired record of a launch whose blueprint sends a proof, before the proof is asked for', async () => {
+      const launched = {
+        iac_blueprint_id: 'aws/workload_identity_federation',
+        iac_blueprint_version: '1.5.0',
+      };
+      mockRecord(pendingAttrs({ status: 'cancelled', ...launched }));
+      expect(
+        await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        })
+      ).toEqual({ outcome: 'gone' });
+
+      const expired = pendingAttrs({ expires_at: PAST, ...launched });
+      const { token, tokenHash } = mintFor(expired);
+      mockRecord({ ...expired, token_hash: tokenHash });
+      expect(
+        await provisioningCallbackService.receive(soClient, 'cb-1', { token, payload: PAYLOAD })
+      ).toEqual({ outcome: 'gone' });
+
+      // Nothing can come of either record, so neither report was accepted or refused.
+      expect(mockedReportReceived).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('is gone when the record expires while its proof is being verified, without a claim', async () => {
+      mockRecord(pendingAttrs());
+      mockedVerify.mockImplementation(async () => {
+        jest.setSystemTime(new Date(FUTURE));
+        return { verified: true, account: '123456789012', arn: CALLER_ARN };
+      });
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(result).toEqual({ outcome: 'gone' });
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+      expect(mockedReportReceived).not.toHaveBeenCalled();
+    });
+
     it('is invalid when the role ARN and the stack ARN are in different accounts', async () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
@@ -688,8 +731,66 @@ describe('provisioningCallbackService', () => {
       });
     });
 
+    it('counts a report once, when it is first applied, not when it is replayed or turned away', async () => {
+      // A replay of a received record is not another accepted report.
+      mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+      expect(mockedReportReceived).not.toHaveBeenCalled();
+
+      // A report to a cancelled record is counted as nothing either: it was not accepted.
+      mockRecord(pendingAttrs({ status: 'cancelled' }));
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+      expect(mockedReportReceived).not.toHaveBeenCalled();
+    });
+
+    it('refuses a report without a proof from a launch whose blueprint sends one, before any write', async () => {
+      mockRecord(
+        pendingAttrs({
+          iac_blueprint_id: 'aws/workload_identity_federation',
+          iac_blueprint_version: '1.5.0',
+        })
+      );
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+
+      expect(result).toEqual({
+        outcome: 'invalid',
+        message:
+          'origin_proof is required: the deployment was launched from aws/workload_identity_federation 1.5.0, which sends one',
+      });
+      expect(mockedVerify).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+      // A refused report, not a legacy one: the legacy count stays honest.
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'rejected',
+      });
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'Provisioning callback report rejected: origin_proof is required: the deployment was launched from aws/workload_identity_federation 1.5.0, which sends one',
+          event: expect.objectContaining({ type: ['denied'], outcome: 'failure' }),
+        })
+      );
+    });
+
     it('accepts a report without a proof, as a stack launched before its Lambda sent one, and counts it', async () => {
-      mockRecord(pendingAttrs());
+      mockRecord(
+        pendingAttrs({
+          iac_blueprint_id: 'aws/workload_identity_federation',
+          iac_blueprint_version: '1.4.0',
+        })
+      );
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
@@ -708,6 +809,34 @@ describe('provisioningCallbackService', () => {
         provider: 'aws',
         originProof: 'missing',
       });
+    });
+
+    it('counts a report when it is first accepted, so one whose connector the poll makes later is not missed', async () => {
+      mockRecord(pendingAttrs());
+      jest
+        .mocked(cloudConnectorService.create)
+        .mockRejectedValueOnce(new CloudConnectorCreateError('boom'));
+
+      await expect(
+        provisioningCallbackService.receive(soClient, 'cb-1', { token: TOKEN, payload: PAYLOAD })
+      ).rejects.toThrow('boom');
+      // The report is on the record, to be applied by a retry or by the browser's poll.
+      expect(mockedReportReceived).toHaveBeenCalledTimes(1);
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'missing',
+      });
+
+      // The retry of that report, against the record handed back pending with its values, applies
+      // it without counting it again.
+      mockRecord(pendingAttrs(PAYLOAD));
+      expect(
+        await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        })
+      ).toMatchObject({ outcome: 'received' });
+      expect(mockedReportReceived).toHaveBeenCalledTimes(1);
     });
 
     it('is unverified, writes nothing and audit-logs when the proof does not verify', async () => {

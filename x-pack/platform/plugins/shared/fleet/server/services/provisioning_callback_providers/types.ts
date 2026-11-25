@@ -47,6 +47,12 @@ export interface ProvisioningCallbackProvider<Report, Proof> {
   readonly reportSchema: ObjectType;
   /** Offline consistency checks on the received values. A message means the report is a 400. */
   validateReport(report: Report): string | undefined;
+  /**
+   * Whether the launch this record was created for sends `origin_proof`, judged from what the
+   * browser stored at launch. A report without a proof is refused for such a launch and accepted
+   * for any other, which was launched before proofs were sent.
+   */
+  requiresOriginProof(identity: CloudConnectorCallbackIdentity): boolean;
   /** Proves which account the report was sent from, bound to this record and these values. */
   verifyOrigin(
     proof: Proof,

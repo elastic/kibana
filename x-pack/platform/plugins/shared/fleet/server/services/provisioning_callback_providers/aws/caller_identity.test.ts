@@ -7,10 +7,11 @@
 
 import { createHash } from 'crypto';
 
+import { STS_GET_CALLER_IDENTITY_BODY } from '../../../types/rest_spec/provisioning_callback_providers/aws';
+
 import {
   CALLER_IDENTITY_CALLBACK_ID_HEADER,
   CALLER_IDENTITY_REPORT_DIGEST_HEADER,
-  STS_GET_CALLER_IDENTITY_BODY,
   canonicalReportDigest,
   isGeneratedResourceName,
   verifyCallerIdentity,
@@ -54,11 +55,11 @@ const identityXml = (account = ACCOUNT, arn = CALLER_ARN) =>
   `<GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/"><GetCallerIdentityResult><UserId>AROAEXAMPLE:fn</UserId><Account>${account}</Account><Arn>${arn}</Arn></GetCallerIdentityResult></GetCallerIdentityResponse>`;
 
 /** A fake STS: records what was forwarded and answers with the given status and body. */
-const fakeSts = (status = 200, body = identityXml()) => {
+const fakeSts = (status = 200, body: string | ReadableStream<Uint8Array> = identityXml()) => {
   const calls: Array<{ url: string; init: any }> = [];
   const fetch = jest.fn(async (url: any, init: any) => {
     calls.push({ url: String(url), init });
-    return { status, arrayBuffer: async () => Buffer.from(body) } as any;
+    return new Response(body, { status }) as any;
   });
   return { fetch: fetch as any, calls };
 };
@@ -100,12 +101,100 @@ describe('isGeneratedResourceName', () => {
         'ElasticCallbackFunction'
       )
     ).toBe(true);
-    // A long stack name: the stack part is cut, and so is the logical id.
+    // A long stack name: the parts are cut so that the name fills the 64-character limit.
     expect(
       isGeneratedResourceName(
-        'a-very-long-stack-name-for-el-ElasticCallbackFu-A1B2C3D4E5F6',
-        'a-very-long-stack-name-for-elastic-identity-federation',
+        'averylongstacknameforelasti-ElasticCallbackFunction-A1B2C3D4E5F6',
+        'averylongstacknameforelasticidentityfederationinproduction',
         'ElasticCallbackFunction'
+      )
+    ).toBe(true);
+    expect(
+      isGeneratedResourceName(
+        'averylongstacknameforel-ElasticCallbackFunctionRole-1A2B3C4D5E6F',
+        'averylongstacknameforelasticidentityfederationinproduction',
+        'ElasticCallbackFunctionRole'
+      )
+    ).toBe(true);
+  });
+
+  it('accepts the 13-character random part older CloudFormation appended', () => {
+    expect(
+      isGeneratedResourceName(
+        'elastic-wif-ElasticCallbackFunctionRole-1OFGT3XJS5J3H',
+        'elastic-wif',
+        'ElasticCallbackFunctionRole'
+      )
+    ).toBe(true);
+  });
+
+  it('wants both parts whole when they fit, and a cut name within the limit when they do not', () => {
+    // Cut short although the whole name would fit: not what CloudFormation generates.
+    expect(
+      isGeneratedResourceName(
+        'elastic-wi-ElasticCallbackFunction-A1B2C3D4E5F6',
+        'elastic-wif',
+        'ElasticCallbackFunction'
+      )
+    ).toBe(false);
+    expect(
+      isGeneratedResourceName('e-E-A1B2C3D4E5F6', 'elastic-wif', 'ElasticCallbackFunction')
+    ).toBe(false);
+    // Cut shorter than the limit: how far CloudFormation cuts is not documented, so any length
+    // within the limit is taken.
+    expect(
+      isGeneratedResourceName(
+        'averylongstackname-ElasticCallbackFunction-A1B2C3D4E5F6',
+        'averylongstacknameforelasticidentityfederationinproduction',
+        'ElasticCallbackFunction'
+      )
+    ).toBe(true);
+    // Cut, yet longer than the limit it would have been cut for: not a generated name.
+    expect(
+      isGeneratedResourceName(
+        'averylongstacknameforelasticidentityfederationinproduc-ElasticCallbackFunction-A1B2C3D4E5F6',
+        'averylongstacknameforelasticidentityfederationinproduction',
+        'ElasticCallbackFunction'
+      )
+    ).toBe(false);
+  });
+
+  it('accepts the mixed-case random part current CloudFormation appends', () => {
+    expect(
+      isGeneratedResourceName(
+        'elastic-wif-ElasticCallbackFunction-Ch7ZZ1J4zxQp',
+        'elastic-wif',
+        'ElasticCallbackFunction'
+      )
+    ).toBe(true);
+  });
+
+  it('wants the random part CloudFormation appends: 12 or 13 alphanumerics', () => {
+    expect(
+      isGeneratedResourceName(
+        'elastic-wif-ElasticCallbackFunction-A1B2C3D4E5F',
+        'elastic-wif',
+        'ElasticCallbackFunction'
+      )
+    ).toBe(false);
+    expect(
+      isGeneratedResourceName(
+        'elastic-wif-ElasticCallbackFunction-A1B2C3D4E5F6G7',
+        'elastic-wif',
+        'ElasticCallbackFunction'
+      )
+    ).toBe(false);
+    expect(isGeneratedResourceName('e-E-1', 'elastic-wif', 'ElasticCallbackFunction')).toBe(false);
+  });
+
+  it('accepts a name cut short only because its random part is 13 characters long', () => {
+    // 23-character stack name + role logical id + 12 random characters fit in 64; with 13 the
+    // name does not, so CloudFormation cuts the stack name by one.
+    expect(
+      isGeneratedResourceName(
+        'abcdefghijklmnopqrstuv-ElasticCallbackFunctionRole-1OFGT3XJS5J3H',
+        'abcdefghijklmnopqrstuvw',
+        'ElasticCallbackFunctionRole'
       )
     ).toBe(true);
   });
@@ -171,6 +260,47 @@ describe('verifyCallerIdentity', () => {
     });
   });
 
+  it('forwards whatever headers the signature covers, so a signer that signs more is not refused', async () => {
+    const sts = fakeSts();
+    const result = await verify(
+      proofFor({
+        headers: {
+          Authorization: authorization('eu-west-1', `${SIGNED_HEADERS};x-amz-content-sha256`),
+          'X-Amz-Content-Sha256':
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+          Host: 'sts.eu-west-1.amazonaws.com',
+        },
+      }),
+      sts
+    );
+
+    expect(result).toEqual({ verified: true, account: ACCOUNT, arn: CALLER_ARN });
+    const [{ init }] = sts.calls;
+    expect(init.headers['x-amz-content-sha256']).toBe(
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+    );
+    // The host is the one Kibana connects to, never one the caller names.
+    expect(init.headers.host).toBe(undefined);
+  });
+
+  it('rejects a proof whose signature covers a header it did not send, without contacting STS', async () => {
+    const sts = fakeSts();
+    const result = await verify(
+      proofFor({
+        headers: {
+          Authorization: authorization('eu-west-1', `${SIGNED_HEADERS};x-amz-content-sha256`),
+        },
+      }),
+      sts
+    );
+    expect(result).toEqual({
+      verified: false,
+      reason: 'malformed_authorization',
+      detail: 'signed header not sent: x-amz-content-sha256',
+    });
+    expect(sts.calls).toHaveLength(0);
+  });
+
   it('sends to the configured endpoint instead when one is set', async () => {
     const sts = fakeSts();
     await verifyCallerIdentity(
@@ -185,6 +315,8 @@ describe('verifyCallerIdentity', () => {
     ['a region that is not one', 'eu-west-1.evil.example'],
     ['a region with a path', 'eu-west-1/evil'],
     ['an empty region', ''],
+    // The China partition's STS is at amazonaws.com.cn, which neither side targets.
+    ['a China region', 'cn-north-1'],
   ])('rejects %s without contacting STS', async (_, region) => {
     const sts = fakeSts();
     const result = await verify({ ...proofFor(), region }, sts);
@@ -286,6 +418,30 @@ describe('verifyCallerIdentity', () => {
     expect(result).toEqual({ verified: false, reason: 'sts_rejected', detail: 'http 302' });
   });
 
+  it('stops reading an answer past the size limit, and rejects it', async () => {
+    // An answer far past the limit: a reader that takes all of it reads 256 KiB for nothing.
+    const cancel = jest.fn();
+    let pulls = 0;
+    const oversized = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (++pulls > 256) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(new Uint8Array(1024));
+      },
+      cancel,
+    });
+    const result = await verify(proofFor(), fakeSts(200, oversized));
+    expect(result).toEqual({
+      verified: false,
+      reason: 'sts_rejected',
+      detail: 'response larger than 16384 bytes',
+    });
+    expect(cancel).toHaveBeenCalled();
+    expect(pulls).toBeLessThan(32);
+  });
+
   it('is rejected when the answer is not a caller identity', async () => {
     const result = await verify(proofFor(), fakeSts(200, '<html>not sts</html>'));
     expect(result).toEqual({
@@ -302,6 +458,32 @@ describe('verifyCallerIdentity', () => {
       fakeSts(200, identityXml(other, CALLER_ARN.replace(ACCOUNT, other)))
     );
     expect(result).toEqual({ verified: false, reason: 'account_mismatch' });
+  });
+
+  it('rejects a signer from another partition than the reported role and stack', async () => {
+    // The same account number exists in every partition; the signer must be in this one.
+    const result = await verify(
+      proofFor(),
+      fakeSts(200, identityXml(ACCOUNT, CALLER_ARN.replace('arn:aws:', 'arn:aws-us-gov:')))
+    );
+    expect(result).toEqual({ verified: false, reason: 'account_mismatch', detail: 'partition' });
+  });
+
+  it('rejects a region outside the partition of the reported ARNs without contacting STS', async () => {
+    const sts = fakeSts();
+    const result = await verify(
+      proofFor({
+        region: 'us-gov-west-1',
+        headers: { Authorization: authorization('us-gov-west-1') },
+      }),
+      sts
+    );
+    expect(result).toEqual({
+      verified: false,
+      reason: 'invalid_region',
+      detail: 'region is not in the partition of the reported role',
+    });
+    expect(sts.calls).toHaveLength(0);
   });
 
   it.each([
@@ -326,12 +508,12 @@ describe('verifyCallerIdentity', () => {
   });
 
   it('accepts the callback function of a stack with a long name, whose generated names are cut short', async () => {
-    const stackName = 'a-very-long-stack-name-for-elastic-identity-federation-in-prod';
+    const stackName = 'averylongstacknameforelasticidentityfederationinproduction';
     const report = {
       ...REPORT,
       stack_arn: `arn:aws:cloudformation:eu-west-1:${ACCOUNT}:stack/${stackName}/11111111-2222-3333-4444-555555555555`,
     };
-    const arn = `arn:aws:sts::${ACCOUNT}:assumed-role/a-very-long-stack-name-for-el-ElasticCallbackFunctionRo-1A2B3C4D5E6F/a-very-long-stack-name-for-el-ElasticCallbackFu-A1B2C3D4E5F6`;
+    const arn = `arn:aws:sts::${ACCOUNT}:assumed-role/averylongstacknameforel-ElasticCallbackFunctionRole-1A2B3C4D5E6F/averylongstacknameforelasti-ElasticCallbackFunction-A1B2C3D4E5F6`;
     const proof = proofFor({
       headers: { [CALLER_IDENTITY_REPORT_DIGEST_HEADER]: canonicalReportDigest(report) },
     });

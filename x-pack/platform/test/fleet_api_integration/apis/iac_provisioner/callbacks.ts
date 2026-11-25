@@ -250,6 +250,21 @@ export default function (providerContext: FtrProviderContext) {
       expect((await getRecord(item.id)).status).to.be('received');
     });
 
+    it('requires the proof of a launch whose blueprint sends one, as recorded at launch', async () => {
+      const { item, token } = await createCallback({
+        iac_blueprint_id: 'aws/workload_identity_federation',
+        iac_blueprint_version: '1.5.0',
+      });
+
+      const refused = await receiveRaw(item.id, token, PAYLOAD).expect(400);
+      expect(refused.body.message).to.contain('origin_proof is required');
+      expect(sts.getRequests()).to.have.length(0);
+      expect((await getRecord(item.id)).status).to.be('pending');
+
+      await receive(item.id, token).expect(200);
+      expect((await getRecord(item.id)).status).to.be('received');
+    });
+
     it('rejects a malformed proof without contacting STS', async () => {
       const { item, token } = await createCallback();
 
@@ -270,7 +285,7 @@ export default function (providerContext: FtrProviderContext) {
 
       const rejected = await receive(item.id, token).expect(401);
       expect(rejected.body.message).to.be(
-        'The report was not signed from the AWS account of the reported role'
+        'The report was not signed from the account of what it reports'
       );
       expect((await getRecord(item.id)).status).to.be('pending');
       const connectors = await supertest
@@ -282,6 +297,19 @@ export default function (providerContext: FtrProviderContext) {
       sts.reset();
       await receive(item.id, token).expect(200);
       expect((await getRecord(item.id)).status).to.be('received');
+    });
+
+    it('rejects with 401 a report signed from the same account number in another partition', async () => {
+      const { item, token } = await createCallback();
+      sts.setResponder(() =>
+        callerIdentityResponse(
+          ACCOUNT,
+          CALLBACK_FUNCTION_ARN.replace('arn:aws:', 'arn:aws-us-gov:')
+        )
+      );
+
+      await receive(item.id, token).expect(401);
+      expect((await getRecord(item.id)).status).to.be('pending');
     });
 
     it('rejects with 401 a report whose signer is in the account but is not the stack callback function', async () => {

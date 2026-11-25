@@ -263,7 +263,8 @@ export const IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT: EventTypeOpts<IacKeyCheckAc
 
 /**
  * How a provisioning callback report proved where it came from: 'verified' by the provider's
- * proof; 'rejected' when the proof did not verify (the report was refused); 'missing' when the
+ * proof; 'rejected' when the proof did not verify or was required and absent (the report was
+ * refused); 'missing' when the
  * report carried none and was accepted as a report of a deployment launched before proofs were
  * sent. The proof becomes required once 'missing' stops being reported.
  */
@@ -286,7 +287,7 @@ export const IAC_PROVISIONER_CALLBACK_RECEIVED_EVENT: EventTypeOpts<IacCallbackR
       type: 'keyword',
       _meta: {
         description:
-          "Whether the report proved the account it came from: 'verified'; 'rejected' (the proof did not verify and the report was refused); 'missing' (no proof, accepted as a report of a deployment launched before proofs were sent; the proof becomes required once this is no longer reported).",
+          "Whether the report proved the account it came from: 'verified'; 'rejected' (the proof did not verify, or was required by the launch and absent; the report was refused); 'missing' (no proof, accepted as a report of a deployment launched before proofs were sent; the proof becomes required once this is no longer reported).",
       },
     },
   },

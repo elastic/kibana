@@ -16,18 +16,16 @@ describe('ProvisioningCallbackSchemaV1', () => {
     token_hash: 'a'.repeat(64),
   };
 
-  it('stores a record of any cloud provider, since the provider is the record discriminator', () => {
-    for (const provider of ['aws', 'azure', 'gcp']) {
-      expect(ProvisioningCallbackSchemaV1.validate({ ...record, provider })).toEqual({
-        ...record,
-        provider,
-      });
-    }
+  it('stores an AWS record', () => {
+    expect(ProvisioningCallbackSchemaV1.validate(record)).toEqual(record);
   });
 
-  it('rejects a provider that is not a cloud provider', () => {
-    expect(() => ProvisioningCallbackSchemaV1.validate({ ...record, provider: 'lambda' })).toThrow(
-      /provider/
-    );
+  it('is the shipped model version, so it still knows AWS records only', () => {
+    // A released model version is immutable: the first non-AWS provider adds model version 2.
+    for (const provider of ['azure', 'gcp', 'lambda']) {
+      expect(() => ProvisioningCallbackSchemaV1.validate({ ...record, provider })).toThrow(
+        /provider/
+      );
+    }
   });
 });

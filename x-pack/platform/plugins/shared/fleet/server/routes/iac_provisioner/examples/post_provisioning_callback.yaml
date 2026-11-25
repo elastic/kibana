@@ -48,11 +48,11 @@ responses:
         examples:
           unverifiedExample:
             summary: Proof of the sending account did not verify
-            description: 'For AWS: STS did not vouch that the report was signed from the account of the reported role by the stack callback function, or the proof was made for another callback or other values'
+            description: 'For AWS: STS did not vouch that the report was signed from the account and partition of the reported role, the signer is not named as the stack callback function, or the proof was made for another callback or other values'
             value:
               statusCode: 401
               error: 'Unauthorized'
-              message: 'The report was not signed from the AWS account of the reported role'
+              message: 'The report was not signed from the account of what it reports'
   404:
     description: 'Not Found'
     content:

@@ -13,6 +13,7 @@ import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
+import type { IacCallbackOriginProof } from '../../common/telemetry/iac_provisioner_events';
 import type { CloudProvider } from '../../common/types/models/cloud_connector';
 import type {
   CloudConnectorCallback,
@@ -467,20 +468,42 @@ class ProvisioningCallbackService {
       return { outcome: 'invalid', message: invalid };
     }
 
+    // A record nothing can come of any more is turned away before its proof is asked for or
+    // costs a round trip.
+    if (
+      so.attributes.status === 'cancelled' ||
+      (so.attributes.status === 'pending' &&
+        new Date(so.attributes.expires_at).getTime() <= Date.now())
+    ) {
+      return { outcome: 'gone' };
+    }
+
     // The token proves the caller was given the launch; the proof says which account the report
     // was sent from. Checked before anything is written, so a report from elsewhere leaves the
     // record waiting for the real one.
+    // How the report proved its origin, counted when the record first takes the report, so a
+    // replay or a report the record's state turns away does not count as an accepted report.
+    let originProof: IacCallbackOriginProof;
     if (proof === undefined) {
+      if (receiver.requiresOriginProof(identityOf(so.attributes))) {
+        // The launch this record was created for sends a proof; a report without one is not from
+        // it. Refused as a report, so the token alone creates nothing.
+        reportIacProvisionerCallbackReceived({
+          provider: so.attributes.provider,
+          originProof: 'rejected',
+        });
+        return {
+          outcome: 'invalid',
+          message: `origin_proof is required: the deployment was launched from ${so.attributes.iac_blueprint_id} ${so.attributes.iac_blueprint_version}, which sends one`,
+        };
+      }
       // A deployment launched from a template that predates the proof. Accepted as every report
       // was before proofs existed, and counted, so the proof can be required once no such
       // deployment reports any more.
       this.logger.warn(
         `Provisioning callback report [id=${so.id}] carries no origin proof; accepted as a report of a deployment launched before proofs were sent`
       );
-      reportIacProvisionerCallbackReceived({
-        provider: so.attributes.provider,
-        originProof: 'missing',
-      });
+      originProof = 'missing';
     } else {
       const verification = await receiver.verifyOrigin(
         proof,
@@ -492,11 +515,11 @@ class ProvisioningCallbackService {
             ],
         }
       );
-      reportIacProvisionerCallbackReceived({
-        provider: so.attributes.provider,
-        originProof: verification.verified ? 'verified' : 'rejected',
-      });
       if (!verification.verified) {
+        reportIacProvisionerCallbackReceived({
+          provider: so.attributes.provider,
+          originProof: 'rejected',
+        });
         this.logger.warn(
           `Provisioning callback report [id=${so.id}] caller identity not verified [reason=${
             verification.reason
@@ -511,23 +534,37 @@ class ProvisioningCallbackService {
       this.logger.info(
         `Provisioning callback report [id=${so.id}] caller identity verified [account=${verification.account}] [principal=${verification.principal}]`
       );
+      originProof = 'verified';
     }
 
     let { attributes, version } = so;
     let updatedAt = so.updated_at;
     let claimedHere = false;
     if (attributes.status === 'pending') {
+      // Checked again here, right before the claim: the record may have expired while the proof
+      // was being verified, and the deadline passing changes nothing the claim's version guard
+      // would notice.
       if (new Date(attributes.expires_at).getTime() <= Date.now()) {
         return { outcome: 'gone' };
       }
+      // A pending record holding values had its report accepted already: the connector could
+      // not be made and the claim was released, so this is a retry or the browser poll's turn.
+      const firstReport = !receiver.storedReport(attributes);
       const claimed = await this.claim(soClient, so, report);
       if (!claimed) {
         return { outcome: 'not_found' };
       }
       ({ attributes, version, updatedAt, claimedHere } = claimed);
+      if (claimedHere && firstReport) {
+        // Counted here, at the first durable acceptance, rather than once the connector exists:
+        // when the connector is only made later by the browser poll, this is the only request
+        // that saw how the report proved its origin.
+        reportIacProvisionerCallbackReceived({ provider: so.attributes.provider, originProof });
+      }
     }
 
     if (attributes.status === 'cancelled') {
+      // Cancelled while the record was being read, or by whoever won the claim.
       return { outcome: 'gone' };
     }
 
