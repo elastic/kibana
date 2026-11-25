@@ -255,20 +255,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       if (signal.aborted) return;
       const indexPatterns = [dataView, ...this.props.indexPatterns];
       const localFilter = merge({}, this.props.filter);
-      const queryDsl = this.parseFilterToQueryDsl(this.props.filter, indexPatterns);
-      // The loaded filter replaces the empty one reported on mount as the unchanged baseline.
-      this.props.onLocalFilterCreate?.({
-        filter: localFilter,
-        queryDslFilter: this.getQueryDslFilter({ queryDsl }),
-      });
-      this.props.onLocalFilterUpdate?.(localFilter);
-      this.setState({
+      this.applyBaselineFilter(localFilter, indexPatterns, {
         selectedDataView: dataView,
         isLoadingDataView: false,
         indexPatterns,
-        localFilter,
-        queryDsl,
-        initialQueryDsl: queryDsl,
       });
     } catch (e) {
       if (signal.aborted) return;
@@ -279,6 +269,25 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         this.showFilterAsQueryDsl();
       }
     }
+  }
+
+  /**
+   * Makes a loaded or recovered filter the unchanged baseline for the discard-changes check, not a
+   * user edit. The Query DSL is regenerated so nested fields resolve against the data view.
+   */
+  private applyBaselineFilter(
+    localFilter: Filter,
+    indexPatterns: FilterableSource[],
+    state: Partial<State>,
+    queryDslOverrides: Partial<QueryDslFilter> = {}
+  ) {
+    const queryDsl = this.parseFilterToQueryDsl(localFilter, indexPatterns);
+    this.props.onLocalFilterCreate?.({
+      filter: localFilter,
+      queryDslFilter: this.getQueryDslFilter({ ...queryDslOverrides, queryDsl }),
+    });
+    this.props.onLocalFilterUpdate?.(localFilter);
+    this.setState({ ...(state as State), localFilter, queryDsl, initialQueryDsl: queryDsl });
   }
 
   private showFilterAsQueryDsl() {
@@ -292,7 +301,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
    * saved with that ID. Without a match, the filter is shown as Query DSL instead of an empty one.
    */
   private selectDataViewByFields() {
-    const { filter, indexPatterns, onLocalFilterCreate, onLocalFilterUpdate } = this.props;
+    const { filter, indexPatterns } = this.props;
     const keys = getFilterKeys(filter);
     if (keys.length === 0) {
       this.setState({ isLoadingDataView: false });
@@ -311,23 +320,17 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     const localFilter = merge({}, rebindFilterDataView(filter, filter.meta.index, dataView.id));
-    // Regenerated so that e.g. nested fields are resolved against the selected data view.
-    const queryDsl = this.parseFilterToQueryDsl(localFilter, indexPatterns);
-    // The recovered filter is the baseline for the discard-changes check, not a user edit.
-    onLocalFilterCreate?.({
-      filter: localFilter,
-      queryDslFilter: this.getQueryDslFilter({ dataViewId: dataView.id, queryDsl }),
-    });
-    onLocalFilterUpdate?.(localFilter);
-    this.setState({
-      selectedDataView: dataView,
-      isLoadingDataView: false,
+    this.applyBaselineFilter(
       localFilter,
-      queryDsl,
-      initialQueryDsl: queryDsl,
-      useSelectedDataViewOnSubmit: true,
-      dataViewSelectedByFields: dataView,
-    });
+      indexPatterns,
+      {
+        selectedDataView: dataView,
+        isLoadingDataView: false,
+        useSelectedDataViewOnSubmit: true,
+        dataViewSelectedByFields: dataView,
+      },
+      { dataViewId: dataView.id }
+    );
   }
 
   private parseFilterToQueryDsl(filter: Filter, indexPatterns: FilterableSource[]) {
@@ -683,7 +686,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     this.props.onLocalFilterUpdate?.(this.getQueryDslFilter({ queryDsl }));
   };
 
-  /** The Query DSL editor's state, compared with the initial one to detect unsaved changes. */
+  /** Snapshot of the Query DSL editor's state, as reported to the parent. */
   private getQueryDslFilter(overrides: Partial<QueryDslFilter> = {}): QueryDslFilter {
     const { queryDsl, customLabel } = this.state;
     return { queryDsl, customLabel, dataViewId: this.getOriginalFilter().meta.index, ...overrides };
