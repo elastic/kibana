@@ -8,7 +8,7 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import { generateYamlSchemaFromConnectors, getElasticsearchConnectors } from '@kbn/workflows';
 import type { ZodSafeParseResult } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
 import { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
@@ -160,6 +160,34 @@ describe('parseWorkflowYamlToJSON', () => {
           success: true,
           data: { prefix: { value: 'web', case_insensitive: '{{ inputs.ci }}' } },
         });
+      });
+
+      it('should accept templated fields in the full form of generated Elasticsearch shortcut types', () => {
+        const esSchema = generateYamlSchemaFromConnectors(getElasticsearchConnectors(), []);
+        const yaml = [
+          'name: templated-shortcut-types',
+          'enabled: true',
+          'triggers:',
+          '  - type: manual',
+          'steps:',
+          '  - name: search',
+          '    type: elasticsearch.search',
+          '    with:',
+          '      index: logs',
+          '      query:',
+          '        bool:',
+          '          filter:',
+          '            - prefix:',
+          '                host.name:',
+          '                  value: web',
+          '                  case_insensitive: "{{ inputs.ci }}"',
+          '            - match_phrase:',
+          '                message:',
+          '                  query: connection refused',
+          '                  slop: "{{ inputs.slop }}"',
+        ].join('\n');
+        const result = parseWorkflowYamlToJSON(yaml, esSchema);
+        expect(result.success ? undefined : result.error.message).toBeUndefined();
       });
 
       it('should keep the union error when a branch also fails at a non-template value', () => {
