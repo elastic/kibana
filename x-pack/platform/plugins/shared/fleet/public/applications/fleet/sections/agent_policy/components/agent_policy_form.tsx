@@ -17,12 +17,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
-import { getAgentPolicyAdvancedSettings } from '../../../../../../common/settings';
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { useAuthz, useStartServices } from '../../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { ConfiguredSettings } from '../../../components/form_settings';
+import { getAgentPolicyAdvancedSettingsConfig } from '../../../components/form_settings/agent_policy_advanced_settings';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyGeneralFields } from './agent_policy_general_fields';
@@ -75,11 +75,12 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   // agentless policies are managed by Elastic: their settings are read-only
   const isDisabled = !authz.fleet.allAgentPolicies || !!agentPolicy?.supports_agentless;
   const { enableIncludeTagsInEvents } = ExperimentalFeaturesService.get();
-  const agentPolicyAdvancedSettings = getAgentPolicyAdvancedSettings(docLinks.links.fleet).map(
-    (setting) =>
-      setting.api_field.name === 'agent_features_include_tags_in_events_enabled'
-        ? { ...setting, hidden: !enableIncludeTagsInEvents }
-        : setting
+  const agentPolicyAdvancedSettings = getAgentPolicyAdvancedSettingsConfig(
+    docLinks.links.fleet
+  ).map((setting) =>
+    setting.api_field.name === 'agent_features_include_tags_in_events_enabled'
+      ? { ...setting, hidden: !enableIncludeTagsInEvents }
+      : setting
   );
 
   const generalSettingsWrapper = (children: JSX.Element[]) => (

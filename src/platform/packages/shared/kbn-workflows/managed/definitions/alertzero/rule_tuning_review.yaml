@@ -180,8 +180,8 @@ steps:
   # A snapshot of the rule as it was when this review started. The rule card reads
   # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
   # and `origin` survives the agent's edits to the card while the ids in `text` do
-  # not. The content is passed by value because resolving by origin looks the rule
-  # up by rule_id. The fixed attachment id makes the refresh below deterministic.
+  # not. The content is passed by value from fetch_rule, so the rule is not read a
+  # second time. The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
@@ -505,6 +505,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: exception
               summary:
                 type: string
@@ -577,6 +578,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: query
               summary:
                 type: string
@@ -596,6 +598,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: risk_score
               summary:
                 type: string
@@ -619,6 +622,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: threshold
               summary:
                 type: string
@@ -656,6 +660,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: schedule
               summary:
                 type: string
@@ -678,6 +683,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: manual
               summary:
                 type: string

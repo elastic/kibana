@@ -5,82 +5,77 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { LinkIcon } from '.';
 
 describe('LinkIcon', () => {
-  const onClick = jest.fn;
+  const onClick = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('it renders', () => {
-    const wrapper = shallow(
-      <LinkIcon onClick={onClick} iconSide="right" iconSize="xxl" iconType="warning">
+    renderWithTestingProviders(
+      <LinkIcon onClick={onClick} iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByRole('button', { name: 'Test link' })).toBeInTheDocument();
+    expect(screen.getByText('Test link')).toBeInTheDocument();
   });
 
   test('it renders an action button when onClick is provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <LinkIcon iconType="warning" onClick={() => alert('Test alert')}>
-          {'Test link'}
-        </LinkIcon>
-      </TestProviders>
+    renderWithTestingProviders(
+      <LinkIcon iconType="warning" onClick={onClick}>
+        {'Test link'}
+      </LinkIcon>
     );
 
-    expect(wrapper.find('button').first().exists()).toBe(true);
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
   test('it renders an icon', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <LinkIcon onClick={onClick} iconType="warning">
-          {'Test link'}
-        </LinkIcon>
-      </TestProviders>
+    renderWithTestingProviders(
+      <LinkIcon onClick={onClick} iconType="warning">
+        {'Test link'}
+      </LinkIcon>
     );
 
-    expect(wrapper.find('[data-euiicon-type]').first().exists()).toBe(true);
+    expect(screen.getByRole('button')).toContainHTML('data-euiicon-type="warning"');
   });
 
   test('it positions the icon to the right when iconSide is right', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <LinkIcon onClick={onClick} iconSide="right" iconType="warning">
-          {'Test link'}
-        </LinkIcon>
-      </TestProviders>
+    renderWithTestingProviders(
+      <LinkIcon onClick={onClick} iconSide="right" iconType="warning">
+        {'Test link'}
+      </LinkIcon>
     );
 
-    expect(wrapper.find('[iconSide="right"]').exists()).toBeTruthy();
+    expect(screen.getByRole('button')).toHaveStyleRule('flex-direction', 'row-reverse');
   });
 
   test('it positions the icon to the left when iconSide is left (or not provided)', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <LinkIcon onClick={onClick} iconSide="left" iconType="warning">
-          {'Test link'}
-        </LinkIcon>
-      </TestProviders>
+    renderWithTestingProviders(
+      <LinkIcon onClick={onClick} iconSide="left" iconType="warning">
+        {'Test link'}
+      </LinkIcon>
     );
 
-    expect(wrapper.find('[iconSide="left"]').exists()).toBeTruthy();
+    expect(screen.getByRole('button')).not.toHaveStyleRule('flex-direction', 'row-reverse');
   });
 
   test('it renders a label', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <LinkIcon onClick={onClick} iconType="warning">
-          {'Test link'}
-        </LinkIcon>
-      </TestProviders>
+    renderWithTestingProviders(
+      <LinkIcon onClick={onClick} iconType="warning">
+        {'Test link'}
+      </LinkIcon>
     );
 
-    expect(wrapper.find('.casesLinkIcon__label').first().exists()).toBe(true);
+    expect(screen.getByText('Test link')).toHaveClass('casesLinkIcon__label');
   });
 });

@@ -6,15 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { buildModelVersionTransformFn } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
+import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
 import type { TypeOf } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND,
   SCHEMA_SEARCH_MODEL_VERSION_5,
 } from '../../server/saved_objects/schema_legacy';
-import { DISCOVER_SESSION_MODEL_VERSIONS } from '../../server/saved_objects/schema';
+import { getSavedSearchObjectType } from '../../server/saved_objects';
 import { extractTabs, extractTabsBackfillFnV6, extractTabsTransformFnV13 } from './extract_tabs';
 import { SavedSearchType, VIEW_MODE } from '..';
 
@@ -443,10 +443,16 @@ describe('extractTabs', () => {
         tabs,
       };
 
-      const prevDoc = { id: 'discover-session-1', type: SavedSearchType, attributes };
-      const modelVersion13 = DISCOVER_SESSION_MODEL_VERSIONS[13]!;
-      const transform = buildModelVersionTransformFn(modelVersion13.changes);
-      const { document } = transform(prevDoc, mockContext);
+      const prevDoc = {
+        id: 'discover-session-1',
+        type: SavedSearchType,
+        attributes,
+        references: [],
+      };
+      const migrator = createModelVersionTestMigrator({
+        type: getSavedSearchObjectType(() => ({})),
+      });
+      const document = migrator.migrate({ document: prevDoc, fromVersion: 12, toVersion: 13 });
 
       expect(document.attributes).toEqual({
         title: 'my_title',

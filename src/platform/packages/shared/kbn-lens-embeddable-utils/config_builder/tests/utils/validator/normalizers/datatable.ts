@@ -39,11 +39,12 @@ import {
 } from './common';
 import {
   getAccessorName,
-  inferDatatypeFromColor,
+  inferColumnDatatype,
   isMetricColumnNoESQL,
   isMetricColumnESQL,
 } from '../../../../transforms/charts/datatable/helpers';
 import { buildColorProps } from '../../../../transforms/charts/datatable/to_api/columns';
+import { getClosestPageSize } from '../../../../transforms/charts/datatable/to_api/styling';
 
 type DatatableAttributes = Extract<LensAttributes, { visualizationType: 'lnsDatatable' }>;
 
@@ -323,12 +324,12 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
         return;
       }
       const visCol = visColumnByNewId.get(newColumnId);
-      const color = visCol ? buildColorProps(visCol).color : undefined;
+      const colorProps = visCol ? buildColorProps(visCol) : {};
       if (isMetricColumnId(newColumnId)) {
-        return inferDatatypeFromColor(color, 'number');
+        return inferColumnDatatype(colorProps, 'number');
       }
       if (isRowColumnId(newColumnId)) {
-        return inferDatatypeFromColor(color, 'string');
+        return inferColumnDatatype(colorProps, 'string');
       }
       return;
     }
@@ -342,7 +343,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       return;
     }
 
-    return inferDatatypeFromColor(buildColorProps(visCol).color, 'number');
+    return inferColumnDatatype(buildColorProps(visCol), 'number');
   };
 
   // Filter out visualization columns that only exist in the visualization state
@@ -439,9 +440,9 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       if (vis.paging && !vis.paging.enabled) {
         delete vis.paging;
       }
-      // The API schema only supports paging sizes [10, 20, 30, 50, 100] -> non-standard sizes are normalized to 10
-      if (vis.paging?.enabled && ![10, 20, 30, 50, 100].includes(vis.paging.size)) {
-        vis.paging.size = 10;
+      // The API schema only supports the datatable's page sizes -> other sizes map to the closest one
+      if (vis.paging?.enabled) {
+        vis.paging.size = getClosestPageSize(vis.paging.size);
       }
       // If the sorting direction is not set, set it to 'asc'
       if (vis.sorting && vis.sorting.columnId && !vis.sorting.direction) {
@@ -486,6 +487,39 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
         // collapseFn '', equivalent to not setting it
         if ((col.collapseFn as string) === '') {
           delete col.collapseFn;
+        }
+      }
+      return attrs;
+    },
+  };
+
+  const alignProgressBarColumns: NormalizerConfig<DatatableAttributes> = {
+    original: (attrs) => {
+      for (const col of attrs.state.visualization.columns) {
+        const { colorMode, fillStyle } = col;
+        if (colorMode !== 'progress' || !fillStyle) {
+          continue;
+        }
+        // The toAPI path drops the values the editor keeps for another fill mode (the palette behind
+        // a single fill, the color behind a palette fill) instead of persisting them. They are editor
+        // memory rather than chart configuration, and persisting them would need a second color field.
+        // After a dashboard save, switching fill mode in the editor restores the defaults.
+        if (fillStyle.fillMode === 'single') {
+          delete col.palette;
+        } else {
+          delete fillStyle.color;
+        }
+        // The editor seeds palette fills with a bare named palette, which renders as the
+        // distributed palette with the default band count. The toAPI path exports it as a
+        // `distributed_palette`, and the palette normalizer below rebuilds the params the in
+        // path writes.
+        if (col.palette && !col.palette.params) {
+          col.palette.params = {};
+        }
+        // The editor leaves the alignment unset, which renders `right`, and the toAPI path outputs
+        // it explicitly
+        if (col.alignment === undefined) {
+          col.alignment = 'right';
         }
       }
       return attrs;
@@ -560,6 +594,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     sortColumns,
     sortEsqlDatasourceColumns,
     alignLegacyTypes,
+    alignProgressBarColumns,
     getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
     getPaletteNormalizer<DatatableAttributes>(
       'state.visualization.columns.*.palette',

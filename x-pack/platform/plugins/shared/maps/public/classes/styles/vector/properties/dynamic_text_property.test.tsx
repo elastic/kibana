@@ -90,7 +90,7 @@ describe('syncTextFieldWithMb', () => {
 
       // @ts-expect-error
       expect(mockMbMap.getPaintPropertyCalls()).toEqual([
-        ['foobar', ['coalesce', ['get', '__kbn__dynamic__foobar__labelText'], '']],
+        ['foobar', ['coalesce', ['get', '__kbn__dynamic__foobar__label_text'], '']],
       ]);
     });
   });
@@ -109,7 +109,7 @@ describe('syncTextFieldWithMb', () => {
 
       const mockMbMap = new MockMbMap([
         'foobar',
-        ['coalesce', ['get', '__kbn__dynamic__foobar__labelText'], ''],
+        ['coalesce', ['get', '__kbn__dynamic__foobar__label_text'], ''],
       ]) as unknown as MbMap;
 
       dynamicTextProperty.syncTextFieldWithMb('foobar', mockMbMap);

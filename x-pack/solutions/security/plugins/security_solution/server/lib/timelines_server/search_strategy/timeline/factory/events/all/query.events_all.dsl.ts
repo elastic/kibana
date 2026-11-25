@@ -11,9 +11,10 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import type {
   SortItem,
   TimelineEventsAllOptions,
-} from '@kbn/timelines-plugin/common/api/search_strategy/timeline/events_all';
+  TimerangeFilter,
+  TimerangeInput,
+} from '@kbn/securitysolution-timeline-search-strategy';
 
-import type { TimerangeFilter, TimerangeInput } from '@kbn/timelines-plugin/common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getPreferredEsType } from './helpers';
 

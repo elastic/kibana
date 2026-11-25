@@ -13,6 +13,11 @@ import { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
+import {
+  DASHBOARD_COMPARATOR_DEFAULTS,
+  metadataComparators,
+  optionsComparators,
+} from '../../common/dashboard_state/comparators';
 import { coreServices, screenshotModeService } from '../services/kibana_services';
 
 export type DashboardSettings = Required<DashboardOptions> & {
@@ -26,25 +31,17 @@ export type DashboardSettings = Required<DashboardOptions> & {
 const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
   ...DEFAULT_DASHBOARD_OPTIONS,
   description: undefined,
-  tags: [],
+  tags: DASHBOARD_COMPARATOR_DEFAULTS.tags,
   time_restore: false,
   project_routing_restore: false,
-  title: '',
+  title: DASHBOARD_COMPARATOR_DEFAULTS.title,
 };
 
 const comparators: StateComparators<DashboardSettings> = {
-  title: 'referenceEquality',
-  description: 'referenceEquality',
-  hide_panel_titles: 'referenceEquality',
-  hide_panel_borders: 'referenceEquality',
-  sync_colors: 'referenceEquality',
-  sync_cursor: 'referenceEquality',
-  sync_tooltips: 'referenceEquality',
-  auto_apply_filters: 'referenceEquality',
+  ...optionsComparators,
+  ...metadataComparators,
   time_restore: 'referenceEquality',
-  use_margins: 'referenceEquality',
   project_routing_restore: 'referenceEquality',
-  tags: 'deepEquality',
 };
 
 function deserializeState(state: DashboardState) {

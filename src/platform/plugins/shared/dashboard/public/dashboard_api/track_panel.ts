@@ -8,7 +8,16 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, of, Subject, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  of,
+  Subject,
+  switchMap,
+} from 'rxjs';
 import {
   scrollToTop,
   scrollToBottom,
@@ -19,6 +28,7 @@ import {
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { apiPublishesRelatedPanels } from '@kbn/presentation-publishing';
 import type { DashboardChildren } from './layout_manager/types';
+import { reportPanelSelectionStarted } from './telemetry/report_panel_selection_started';
 
 export const highlightAnimationDuration = 2000;
 
@@ -124,6 +134,13 @@ export function initializeTrackPanel(
       if (next.length !== current.length) selectedPanelIds$.next(next);
     }
   );
+  const selectionStartedSubscription = selectedPanelIds$
+    .pipe(
+      map((ids) => ids.length > 0),
+      distinctUntilChanged(),
+      filter(Boolean)
+    )
+    .subscribe(() => reportPanelSelectionStarted());
 
   return {
     api: {
@@ -160,14 +177,18 @@ export function initializeTrackPanel(
         const id = highlightPanelId$.value;
         if (!id) return;
 
-        untilLoaded(id).then(async () => {
-          // Adds the highlight class in the next event loop to allow the DOM to update
-          await new Promise((res) => setTimeout(res, 0));
-          panelRef.classList.add('dshDashboardGrid__item--highlighted');
-          // Removes the class after the highlight animation finishes
-          await new Promise((res) => setTimeout(res, highlightAnimationDuration));
-          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-        });
+        untilLoaded(id)
+          .then(async () => {
+            // Adds the highlight class in the next event loop to allow the DOM to update
+            await new Promise((res) => setTimeout(res, 0));
+            panelRef.classList.add('dshDashboardGrid__item--highlighted');
+            // Removes the class after the highlight animation finishes
+            await new Promise((res) => setTimeout(res, highlightAnimationDuration));
+            panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+          })
+          .catch(() => {
+            // highlighting is cosmetic; ignore panels that fail to load
+          });
 
         highlightPanelId$.next(undefined);
       },
@@ -180,22 +201,27 @@ export function initializeTrackPanel(
         const id = scrollToPanelId$.value;
         if (!id) return;
 
-        untilLoaded(id).then(() => {
-          if (scrollPosition$.value !== undefined) {
-            scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
-            scrollPosition$.next(undefined);
-          } else {
-            const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries();
-            const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
+        untilLoaded(id)
+          .then(() => {
+            if (scrollPosition$.value !== undefined) {
+              scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
+              scrollPosition$.next(undefined);
+            } else {
+              const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries();
+              const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 
-            // only scroll if panel is not fully visible within the current viewport
-            if (panelTop < viewportTop || panelBottom > viewportBottom) {
-              panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
+              // only scroll if panel is not fully visible within the current viewport
+              if (panelTop < viewportTop || panelBottom > viewportBottom) {
+                panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
+              }
             }
-          }
 
-          setScrollToPanelId(undefined);
-        });
+            setScrollToPanelId(undefined);
+          })
+          .catch(() => {
+            // scrolling is cosmetic; just clear the pending scroll request
+            setScrollToPanelId(undefined);
+          });
       },
       scrollPosition$,
       scrollToTop: () => {
@@ -218,6 +244,7 @@ export function initializeTrackPanel(
     cleanup: () => {
       blurredPanelIdsSubscription.unsubscribe();
       selectionCleanupSubscription.unsubscribe();
+      selectionStartedSubscription.unsubscribe();
     },
   };
 }

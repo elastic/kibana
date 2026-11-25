@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   ActionPolicyTestDestination,
@@ -22,7 +21,7 @@ interface Props {
   sendResponse: ActionPolicyTestSendResponse;
   /** Shared with the send flyout, so EUI links both in one history and renders Back. */
   historyKey: symbol;
-  onClose: EuiFlyoutProps['onClose'];
+  onClose: () => void;
 }
 
 const { Header, Body } = FlyoutTemplate;

@@ -34,13 +34,17 @@ export const EntityInventoryPageShell = ({
         data-entity-category={entityCategory}
       >
         <EuiFlexItem grow={false}>
-          <EntityInventorySearchBar />
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EntityInventorySearchBar />
+            </EuiFlexItem>
+            {secondaryControls && (
+              <EuiFlexItem grow={false} data-test-subj="entityInventorySecondaryControls">
+                {secondaryControls}
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
-        {secondaryControls && (
-          <EuiFlexItem grow={false} data-test-subj="entityInventorySecondaryControls">
-            {secondaryControls}
-          </EuiFlexItem>
-        )}
         <EuiFlexItem data-test-subj="entityInventoryPageContent">{children}</EuiFlexItem>
       </EuiFlexGroup>
     </EntityInventorySearchProvider>

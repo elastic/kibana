@@ -21,10 +21,17 @@ const V2_UNAVAILABLE_STATUSES = [403, 404, 503];
 export interface CatalogRule {
   name: string;
   tags: string[];
+  family: 'classic' | 'universal';
+}
+
+interface RuleCatalog {
+  rules: CatalogRule[];
+  isComplete: boolean;
 }
 
 interface FindRulesResponse {
-  data: CatalogRule[];
+  data: Array<Pick<CatalogRule, 'name' | 'tags'>>;
+  total: number;
 }
 
 interface FindV2RulesResponse {
@@ -35,8 +42,8 @@ interface FindV2RulesResponse {
 const findRules = async (
   http: HttpSetup,
   signal: AbortSignal | undefined
-): Promise<CatalogRule[]> => {
-  const { data } = await http.post<FindRulesResponse>(FIND_RULES_PATH, {
+): Promise<RuleCatalog> => {
+  const { data, total } = await http.post<FindRulesResponse>(FIND_RULES_PATH, {
     body: JSON.stringify({
       rule_type_ids: OBSERVABILITY_RULE_TYPE_IDS,
       sort_field: 'name',
@@ -46,7 +53,10 @@ const findRules = async (
     }),
     signal,
   });
-  return data.map(({ name, tags }) => ({ name, tags }));
+  return {
+    rules: data.map(({ name, tags }) => ({ name, tags, family: 'classic' })),
+    isComplete: data.length >= total,
+  };
 };
 
 const findV2RulesPage = async (
@@ -68,26 +78,36 @@ const findV2RulesPage = async (
 const findV2Rules = async (
   http: HttpSetup,
   signal: AbortSignal | undefined
-): Promise<CatalogRule[]> => {
+): Promise<RuleCatalog> => {
   const rules: CatalogRule[] = [];
+  let total = 0;
   for (let page = 1; rules.length < MAX_RULES; page++) {
     const response = await findV2RulesPage(http, signal, page);
+    total = response.total;
     rules.push(
-      ...response.items.map(({ metadata: { name, tags } }) => ({ name, tags: tags ?? [] }))
+      ...response.items.map(
+        ({ metadata: { name, tags } }): CatalogRule => ({
+          name,
+          tags: tags ?? [],
+          family: 'universal',
+        })
+      )
     );
     if (rules.length >= response.total || response.items.length < V2_PAGE_SIZE) break;
   }
-  return rules;
+  return { rules, isComplete: rules.length >= total };
 };
 
 const emptyWhenUnavailable = async (
-  find: () => Promise<CatalogRule[]>,
+  find: () => Promise<RuleCatalog>,
   unavailableStatuses: number[]
-): Promise<CatalogRule[]> => {
+): Promise<RuleCatalog> => {
   try {
     return await find();
   } catch (error) {
-    if (unavailableStatuses.includes(getHttpErrorStatus(error) ?? 0)) return [];
+    if (unavailableStatuses.includes(getHttpErrorStatus(error) ?? 0)) {
+      return { rules: [], isComplete: false };
+    }
     throw error;
   }
 };
@@ -95,14 +115,22 @@ const emptyWhenUnavailable = async (
 export const useRuleCatalog = () => {
   const { http } = useKibana().services;
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['nightshift.ruleCatalog'],
-    queryFn: async ({ signal }): Promise<CatalogRule[]> => {
+    queryFn: async ({ signal }): Promise<RuleCatalog> => {
       const [rules, v2Rules] = await Promise.all([
         emptyWhenUnavailable(() => findRules(http, signal), CLASSIC_UNAVAILABLE_STATUSES),
         emptyWhenUnavailable(() => findV2Rules(http, signal), V2_UNAVAILABLE_STATUSES),
       ]);
-      return [...rules, ...v2Rules];
+      return {
+        rules: [...rules.rules, ...v2Rules.rules],
+        isComplete: rules.isComplete && v2Rules.isComplete,
+      };
     },
   });
+  return {
+    ...query,
+    data: query.data?.rules,
+    isComplete: !query.isError && (query.data?.isComplete ?? false),
+  };
 };

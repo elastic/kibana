@@ -14,21 +14,27 @@ import { SandboxConnectorsError } from './sandbox_connectors_error';
 import { ConnectTypeCard } from './connect_type_card';
 import { sourceGridStyles } from './source_grid_styles';
 
-/** The two pages of the "Add data" onboarding step. */
-export type ConnectSourcesGroup = 'telemetry' | 'additional';
-
-/** The connector types that read telemetry; the other sandbox-capable types are additional sources. */
+/** The connector types that read telemetry: the "Add data" step. */
 const TELEMETRY_TYPE_IDS = new Set(['.elasticsearch', '.new_relic']);
+
+const HIDDEN_TYPE_IDS = new Set(['.http']);
+
+export const isTelemetryType = (actionTypeId: string): boolean =>
+  TELEMETRY_TYPE_IDS.has(actionTypeId);
+
+/** Every other sandbox-capable type: the "Connect other sources" step. */
+export const isAdditionalType = (actionTypeId: string): boolean =>
+  !TELEMETRY_TYPE_IDS.has(actionTypeId) && !HIDDEN_TYPE_IDS.has(actionTypeId);
 
 const typesLoadErrorTitle = i18n.translate('xpack.nightshift.connectSources.loadError', {
   defaultMessage: 'Could not load the connector types.',
 });
 
 export function ConnectSourcesGrid({
-  group,
+  filter,
   trailing,
 }: {
-  group: ConnectSourcesGroup;
+  filter: (actionTypeId: string) => boolean;
   trailing?: React.ReactNode;
 }): React.ReactElement | null {
   const { triggersActionsUi } = useKibana().services;
@@ -44,10 +50,7 @@ export function ConnectSourcesGrid({
       />
     );
   }
-  const isTelemetry = group === 'telemetry';
-  const shown = triggersActionsUi
-    ? groups.filter(({ actionType }) => TELEMETRY_TYPE_IDS.has(actionType.id) === isTelemetry)
-    : [];
+  const shown = triggersActionsUi ? groups.filter(({ actionType }) => filter(actionType.id)) : [];
   if (shown.length === 0 && !trailing) return null;
 
   return (

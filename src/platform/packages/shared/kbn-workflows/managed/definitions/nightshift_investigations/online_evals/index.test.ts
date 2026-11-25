@@ -22,19 +22,20 @@ describe('nightshift online evals workflow', () => {
     expect(NIGHTSHIFT_ONLINE_EVALS_WORKFLOW.billable).toBe(false);
   });
 
-  const [scoreReferenceFree] = workflow.steps;
+  const [scoreReferenceFree, scoreAlertOutcome, scoreRecoveryDueDiligence] = workflow.steps;
+  const runsFor = (step: (typeof workflow.steps)[number], roundKind: string) =>
+    createWorkflowLiquidEngine().evalValueSync((step.if ?? '').slice(3, -2), {
+      inputs: { round_kind: roundKind },
+    });
 
   it.each([
-    ['initial', true],
-    ['follow_up', false],
-    ['alert_recovery', false],
-  ])('scores a %s round with the reference-free judges: %s', (roundKind, expected) => {
-    const condition = scoreReferenceFree.if ?? '';
+    ['initial', 'score_reference_free'],
+    ['follow_up', undefined],
+    ['alert_recovery', ['score_alert_outcome', 'score_recovery_due_diligence']],
+  ])('scores a %s round with %s', (roundKind, expected) => {
     expect(
-      createWorkflowLiquidEngine().evalValueSync(condition.slice(3, -2), {
-        inputs: { round_kind: roundKind },
-      })
-    ).toBe(expected);
+      workflow.steps.filter((step) => runsFor(step, roundKind)).map(({ name }) => name)
+    ).toEqual(Array.isArray(expected) ? expected : expected ? [expected] : []);
   });
 
   it('grades the first-round report with the reference-free judges', () => {
@@ -48,6 +49,46 @@ describe('nightshift online evals workflow', () => {
             { name: 'nightshift_rca_reward' },
             { name: 'nightshift_investigation_process' },
             { name: 'nightshift_conclusion_quality' },
+            { name: 'nightshift_missing_data' },
+            { name: 'nightshift_tool_call_health' },
+          ],
+          entry_point: '${{ inputs.entry_point }}',
+        }),
+      })
+    );
+  });
+
+  it('grades the first-round report against an alert recovery with the alert-outcome judges', () => {
+    expect(scoreAlertOutcome).toEqual(
+      expect.objectContaining({
+        type: 'nightshift.onlineEvals.score',
+        with: expect.objectContaining({
+          round_kind: '{{ inputs.round_kind }}',
+          graded_report: 'first_round',
+          evaluator_set: 'reference_based',
+          evaluators: [
+            { name: 'nightshift_alert_outcome_rca_accuracy' },
+            { name: 'nightshift_alert_outcome_benign_classification' },
+            { name: 'nightshift_alert_outcome_rca_reporting_gap' },
+          ],
+          entry_point: '${{ inputs.entry_point }}',
+        }),
+      })
+    );
+  });
+
+  it("grades the recovery round's own analysis with the due-diligence judges", () => {
+    expect(scoreRecoveryDueDiligence).toEqual(
+      expect.objectContaining({
+        type: 'nightshift.onlineEvals.score',
+        with: expect.objectContaining({
+          round_kind: '{{ inputs.round_kind }}',
+          graded_report: 'current',
+          evaluator_set: 'recovery_due_diligence',
+          evaluators: [
+            { name: 'nightshift_recovery_causal_checklist' },
+            { name: 'nightshift_recovery_root_cause_evidence' },
+            { name: 'nightshift_recovery_evidence_families' },
           ],
           entry_point: '${{ inputs.entry_point }}',
         }),

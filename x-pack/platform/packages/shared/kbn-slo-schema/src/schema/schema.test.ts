@@ -7,7 +7,9 @@
 
 import { z } from '@kbn/zod';
 
-import { dateType } from './common';
+import { dateType, groupingsSchema } from './common';
+import { kqlWithFiltersSchema } from './indicators';
+import { MAX_KEYWORD_LENGTH } from './limits';
 import { optionalSettingsSchema, settingsSchema } from './slo';
 
 describe('Schema', () => {
@@ -28,6 +30,29 @@ describe('Schema', () => {
 
     it('fails decoding when invalid date', () => {
       expect(dateType.safeParse('invalid date').success).toBe(false);
+    });
+  });
+
+  describe('groupingsSchema', () => {
+    it('accepts string and number values', () => {
+      expect(groupingsSchema.safeParse({ 'service.name': 'checkout', port: 8080 }).success).toBe(
+        true
+      );
+    });
+
+    it('accepts keys and string values of exactly the maximum length', () => {
+      const atLimit = 'a'.repeat(MAX_KEYWORD_LENGTH);
+      expect(groupingsSchema.safeParse({ [atLimit]: atLimit }).success).toBe(true);
+    });
+
+    it('rejects keys longer than the maximum length', () => {
+      const tooLong = 'a'.repeat(MAX_KEYWORD_LENGTH + 1);
+      expect(groupingsSchema.safeParse({ [tooLong]: 'value' }).success).toBe(false);
+    });
+
+    it('rejects string values longer than the maximum length', () => {
+      const tooLong = 'a'.repeat(MAX_KEYWORD_LENGTH + 1);
+      expect(groupingsSchema.safeParse({ 'service.name': tooLong }).success).toBe(false);
     });
   });
 
@@ -171,6 +196,41 @@ describe('Schema', () => {
     it('rejects whitespace-only projectRoutings', () => {
       const result = optionalSettingsSchema.safeParse({ projectRoutings: '   ' });
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('kqlWithFiltersSchema', () => {
+    const withFilterMetaValue = (value: string | object) => ({
+      kqlQuery: '',
+      filters: [
+        {
+          meta: { type: 'range', key: 'http.response.status_code', value },
+          query: { range: { 'http.response.status_code': { lt: '500' } } },
+        },
+      ],
+    });
+
+    it('decodes a filter meta value set as a string', () => {
+      expect(kqlWithFiltersSchema.safeParse(withFilterMetaValue('200')).success).toBe(true);
+    });
+
+    it('decodes a range filter meta value set as the range params', () => {
+      const result = kqlWithFiltersSchema.safeParse(
+        withFilterMetaValue({ gte: 200, lt: '500', format: 'strict_date_optional_time' })
+      );
+      expect(result.success).toBe(true);
+    });
+
+    it('decodes a phrases filter meta value set as an array', () => {
+      expect(kqlWithFiltersSchema.safeParse(withFilterMetaValue(['200', 201, true])).success).toBe(
+        true
+      );
+    });
+
+    it('fails decoding a range filter meta value with a non scalar bound', () => {
+      expect(
+        kqlWithFiltersSchema.safeParse(withFilterMetaValue({ lt: { nested: 1 } })).success
+      ).toBe(false);
     });
   });
 });

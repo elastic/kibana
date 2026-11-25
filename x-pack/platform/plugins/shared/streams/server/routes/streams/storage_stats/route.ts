@@ -8,7 +8,7 @@
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_STATS_READ_PRIVILEGE } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import {
   getDataStreamsMeteringStats,
@@ -33,7 +33,6 @@ const getStorageStatsForStreams = async ({
   isServerless: boolean;
   streamNames?: readonly string[];
 }): Promise<StreamStorageStat[]> => {
-  // Streams without backing datastreams (query, draft) have no storage size associated with them.
   const dataStreams = await getDataStreamsWithIndexNames({ esClient, streamNames });
 
   if (!dataStreams.length) {
@@ -100,7 +99,7 @@ const bulkStorageStatsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   handler: async ({ getScopedClients, request, server }): Promise<StreamStorageStat[]> => {
@@ -122,7 +121,7 @@ const storageStatsForStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: lazySchema(() =>

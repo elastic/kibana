@@ -27,7 +27,6 @@ const validPayload = {
     { field: 'host.name' as const, value: 'srv-01' },
     { field: 'user.name' as const, value: 'jdoe' },
   ],
-  timeline: [{ at: '2026-01-01T00:00:00Z', what: 'RDP session established' }],
   hypothesis_tested: 'Adversary used stolen credentials to move laterally',
   evidence_for: ['RDP session from unusual host'],
   evidence_against: [],
@@ -39,6 +38,22 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     const result = significantSecurityEventAttachmentDataSchema.safeParse(validPayload);
 
     expect(result.success).toBe(true);
+  });
+
+  it('does not add a timeline when the payload omits it', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse(validPayload);
+
+    expect(result.success && Object.hasOwn(result.data, 'timeline')).toBe(false);
+  });
+
+  it('still parses a legacy payload that carries timeline rows', () => {
+    const timeline = [{ at: '2026-01-01T00:00:00Z', what: 'RDP session established' }];
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      timeline,
+    });
+
+    expect(result.success && result.data.timeline).toEqual(timeline);
   });
 
   it('rejects bare entity identifiers and legacy strings', () => {
@@ -477,6 +492,242 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       const result = significantSecurityEventAttachmentDataSchema.safeParse({
         ...validPayload,
         security_knowledge_indicators: [{ type: 'ioc', value: 'suspicious hash' }],
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('hit-centric optional fields', () => {
+    const tier1OnlyFixture = {
+      ...validPayload,
+      hunt_result: {
+        has_confirmed_hit: true,
+        hit_sources: ['tier1'] as Array<'tier1' | 'tier2'>,
+        time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+        tier1: {
+          status: 'environment_hits_found' as const,
+          counts: { total_hits: 4, returned_hits: 4, affected_hosts: 1, affected_users: 1 },
+          per_index: [
+            { index: 'logs-endpoint.events.process-default', hit_count: 4, required: true },
+          ],
+          resolved_iocs: [{ type: 'ip' as const, value: '203.0.113.5' }],
+        },
+      },
+      events: [
+        {
+          event_id: 'evt-1',
+          source_index: 'logs-endpoint.events.process-default',
+          matched: { ioc: { type: 'ip' as const, value: '203.0.113.5' }, field: 'destination.ip' },
+        },
+      ],
+    };
+
+    const techniqueScopedTier2Fixture = {
+      ...validPayload,
+      corroborated_technique_id: 'T1021',
+      hunt_result: {
+        has_confirmed_hit: true,
+        hit_sources: ['tier2'] as Array<'tier1' | 'tier2'>,
+        time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+        tier1: {
+          status: 'no_environment_hits' as const,
+          counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+          per_index: [],
+          resolved_iocs: [],
+        },
+        tier2: {
+          status: 'behaviors_proposed' as const,
+          behaviors: [
+            {
+              technique_id: 'T1021',
+              technique_name: 'Remote Services',
+              tactic_ids: ['TA0008'],
+              confidence: 0.9,
+              title: 'Lateral movement via RDP',
+              validated_esql: 'FROM logs-* | WHERE true',
+              execution: { executed: true, row_count: 2, hit: true },
+            },
+          ],
+        },
+      },
+    };
+
+    const multiIocFixture = {
+      ...validPayload,
+      hunt_result: {
+        has_confirmed_hit: true,
+        hit_sources: ['tier1'] as Array<'tier1' | 'tier2'>,
+        time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+        tier1: {
+          status: 'environment_hits_found' as const,
+          counts: { total_hits: 6, returned_hits: 6, affected_hosts: 2, affected_users: 1 },
+          per_index: [
+            { index: 'logs-endpoint.events.network-default', hit_count: 6, required: true },
+          ],
+          resolved_iocs: [
+            { type: 'ip' as const, value: '203.0.113.5' },
+            { type: 'domain' as const, value: 'evil.example' },
+          ],
+        },
+      },
+    };
+
+    it.each([
+      ['Tier 1 only', tier1OnlyFixture],
+      ['technique-scoped Tier 2', techniqueScopedTier2Fixture],
+      ['multi-IOC', multiIocFixture],
+    ])('parses a stored v1 %s fixture unchanged', (_label, fixture) => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse(fixture);
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a payload without evaluation_record_ref', () => {
+      const { evaluation_record_ref: _omit, ...withoutEval } = validPayload;
+      const result = significantSecurityEventAttachmentDataSchema.safeParse(withoutEval);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.evaluation_record_ref).toBeUndefined();
+      }
+    });
+
+    it('accepts summary, basis, detections and event evidence fields', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...tier1OnlyFixture,
+        summary: 'ip 203.0.113.5 seen 4x on 1 host(s)',
+        basis: 'ioc_strong',
+        detections: [
+          {
+            id: 'ioc-203.0.113.5',
+            kind: 'ioc',
+            field: 'destination.ip',
+            basis: 'ioc_strong',
+            matched_on: [{ field: 'destination.ip', value: '203.0.113.5' }],
+            total: 4,
+            host_count: 1,
+          },
+        ],
+        events: [
+          {
+            event_id: 'evt-1',
+            source_index: 'logs-endpoint.events.process-default',
+            host: 'srv-01',
+            user: 'jdoe',
+            fields: { 'process.name': 'curl', 'event.action': 'network_connection' },
+            matched: {
+              ioc: { type: 'ip', value: '203.0.113.5' },
+              iocs: [{ type: 'ip', value: '203.0.113.5', field: 'destination.ip' }],
+              field: 'destination.ip',
+              detection: 'ioc-203.0.113.5',
+            },
+          },
+        ],
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects summary over 512 characters', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        summary: 's'.repeat(513),
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects detections over 30 entries', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        detections: Array.from({ length: 31 }, (_, i) => ({
+          id: `ioc-${i}`,
+          kind: 'ioc' as const,
+          field: 'destination.ip',
+          basis: 'ioc_strong' as const,
+          matched_on: [{ field: 'destination.ip', value: `203.0.113.${i}` }],
+          total: 1,
+        })),
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects event fields with more than 8 keys', () => {
+      const nineKeys = {
+        'process.name': 'a',
+        'process.command_line': 'b',
+        'process.parent.name': 'c',
+        'process.executable': 'd',
+        'file.path': 'e',
+        'file.hash.sha256': 'f',
+        'dns.question.name': 'g',
+        'destination.ip': 'h',
+        'event.action': 'i',
+      };
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        events: [
+          {
+            event_id: 'evt-1',
+            source_index: 'logs-endpoint.events.process-default',
+            fields: nineKeys,
+          },
+        ],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects event fields with a value over 256 characters', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        events: [
+          {
+            event_id: 'evt-1',
+            source_index: 'logs-endpoint.events.process-default',
+            fields: { 'process.command_line': 'x'.repeat(257) },
+          },
+        ],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects matched.iocs with more than 10 entries', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        events: [
+          {
+            event_id: 'evt-1',
+            source_index: 'logs-endpoint.events.process-default',
+            matched: {
+              field: 'destination.ip',
+              iocs: Array.from({ length: 11 }, (_, i) => ({
+                type: 'ip' as const,
+                value: `203.0.113.${i}`,
+                field: 'destination.ip',
+              })),
+            },
+          },
+        ],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an ioc detection missing field', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        detections: [
+          {
+            id: 'ioc-1',
+            kind: 'ioc',
+            basis: 'ioc_strong',
+            matched_on: [{ field: 'destination.ip', value: '203.0.113.5' }],
+            total: 1,
+          },
+        ],
       });
 
       expect(result.success).toBe(false);

@@ -20,7 +20,7 @@ import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import type { SearchSessionState } from '@kbn/data-plugin/public';
-import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
+import type { Theme } from '@elastic/charts';
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { MemoryRouter } from 'react-router-dom';

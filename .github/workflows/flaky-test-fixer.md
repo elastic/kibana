@@ -19,6 +19,10 @@ permissions:
   actions: read
   checks: read
   models: read
+  # Agent Router token for the agent (see shared/agent-router.md)
+  id-token: write
+  # threat detection runs on Copilot
+  copilot-requests: write
 
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
 
@@ -48,25 +52,33 @@ env:
 imports:
   - .github/workflows/buildkite-cli-setup.md
   - .github/workflows/shared/app-dex-agents-otel.md
+  - .github/workflows/shared/agent-router.md
 
 engine:
   id: claude
   version: '2.1.165'
-  model: opus
+  model: claude-opus-5
   max-turns: 200
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
-    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-    ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
+    ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
+    # `Bearer <token>`, exported by shared/agent-router.md. The fallback passes the activation job's key check.
+    ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
+    # the gateway reads only `Authorization: Bearer`
+    AWF_ANTHROPIC_AUTH_HEADER: Authorization
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
   github:
     toolsets: [default, search]
+    # the default for a public repository; issues by authors with no repository role are hidden
+    # from the agent, so the daily flaky test report's bot has to be trusted for its suite issues
+    min-integrity: approved
+    trusted-users: ['elastic-vault-github-plugin-prod[bot]']
   web-fetch:
   bash: true
 
@@ -89,7 +101,8 @@ steps:
       corepack prepare "pnpm@${PNPM_VERSION}" --activate
       pnpm --version
   - name: Bootstrap Kibana
-    run: pnpm kbn bootstrap
+    # `id-token: write` covers the whole job: keep the OIDC request variables away from install scripts
+    run: exec env -u ACTIONS_ID_TOKEN_REQUEST_TOKEN -u ACTIONS_ID_TOKEN_REQUEST_URL pnpm kbn bootstrap
   - name: Expose Kibana's Node.js path to the agent
     # the sandbox rebuilds PATH from every `bin` dir under RUNNER_TOOL_CACHE, so the agent's
     # `node` is whichever version the runner cached first, not the one setup-node just
@@ -160,7 +173,6 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - openrouter.ai
     # to properly display links to best practices docs
     - elastic.co
 sandbox:
@@ -168,11 +180,14 @@ sandbox:
 
 safe-outputs:
   threat-detection:
+    # The detection job can't request an OIDC token, so it runs on Copilot.
     engine:
-      id: claude
-      version: '2.1.165'
+      id: copilot
+      model: claude-opus-5
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
+    # a detection failure blocks the outputs instead of passing with a warning
+    continue-on-error: false
   activation-comments: true
   report-failure-as-issue: false
   messages:
@@ -261,7 +276,8 @@ safe-outputs:
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
 strict: false
-timeout-minutes: 90
+# the Agent Router token lasts about an hour and is not refreshed
+timeout-minutes: 55
 max-ai-credits: 1200
 ---
 
@@ -287,6 +303,7 @@ Many `failed-test` issues share a single **root cause**, so the fixer can open s
 - A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ team, candidates }`): `team` is this issue's owning team (from its `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Read it first.
 - Same team means same owning code area, not the same test — so **open each candidate's diff** and treat it as a real match only when it addresses the **same root cause / same method for the same purpose** as this issue's failing test — not merely the same team, a similar file, or the same file for an unrelated reason (a different method of the same page object is not a duplicate).
 - If this issue has no `Team:` label, `candidates` falls back to only the PRs already closing this exact issue.
+- When the issue carries `failure:fix-did-not-hold`, the merged PR whose fix came back is **not** a duplicate: it is the disproved hypothesis that [When an earlier fix did not hold](#when-an-earlier-fix-did-not-hold) asks you to study. Every other candidate still goes through the diff check above.
 - If a real match exists (open, or already merged), **do not open a PR**: post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 9), and stop. If you **cannot confirm** a true duplicate, proceed and open the PR — the downstream Flaky Fix Verifier is the backstop that closes any real duplicate that slips through, whereas a flake you wrongly skip here just goes unfixed.
 
 ## Environment
@@ -311,8 +328,8 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 
 ## Steps
 
-1. **Rule out a duplicate.** Before any investigation, run [Duplicate detection](#duplicate-detection). If a fix for this root cause is already in flight (or already merged), **do not open a PR** — skip straight to step 8 (outcome comment) and step 9 (remove label).
-2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any relevant PR/commit history and its precise causal role, and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8.
+1. **Rule out a duplicate.** Before any investigation, run [Duplicate detection](#duplicate-detection). If a fix for this root cause is already in flight (or already merged), **do not open a PR** — skip straight to step 8 (outcome comment) and step 9 (remove label). A merged fix that came back (the issue carries `failure:fix-did-not-hold`) does not count as a duplicate — see that section.
+2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any relevant PR/commit history and its precise causal role, and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8. If the issue carries `failure:fix-did-not-hold`, also apply [When an earlier fix did not hold](#when-an-earlier-fix-did-not-hold) before writing any patch.
 3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, following the [Fix guidelines](#fix-guidelines). If the failing test is Security Cypress, apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) first — a migrate / new-Scout verdict means skip to step 8, not a Scout rewrite. Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
@@ -338,6 +355,15 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). The doctor owns the diagnosis and recommended action; if the two skills disagree, the doctor wins. Use the `flaky-test-investigator` skill only for CI artifact retrieval, pipeline context, and this workflow's steps, PR format, and fix guidelines. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance. Then apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) before writing any patch.
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
+
+## When an earlier fix did not hold
+
+The issue may carry `failure:fix-did-not-hold`: the investigator confirmed that a fix for this same failure already merged and the failure came back in a build that contained it. Treat that fix as a disproved hypothesis, not as a starting point.
+
+- Find the merged fix PR: the issue timeline, the investigator's latest comment, or a sibling `failed-test` issue with the same test title (the reporter files a new issue once the old one has been closed for a while). Read its description and diff: what it assumed the cause was, how it verified that, and its `flaky-fix-check:*` verdict.
+- Name the assumption the recurrence contradicts before proposing anything. If you cannot, the diagnosis is not current: re-investigate per [Validate the investigation is current](#validate-the-investigation-is-current).
+- Do not ship a patch of the same shape (another wait on the same signal, a longer timeout, a second retry) unless you can say why it will hold where the earlier one did not. A fix that only widens the earlier fix is the pattern that comes back.
+- In the PR's Context section, name the earlier fix PR, what it assumed, and how this patch differs.
 
 ## Security Cypress: what this fixer may ship
 

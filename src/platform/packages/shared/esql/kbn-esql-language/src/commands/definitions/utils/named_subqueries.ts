@@ -32,6 +32,20 @@ export const getNamedSubqueries = (header: readonly ESQLAstHeaderCommand[] = [])
     .filter((command): command is ESQLAstLetHeaderCommand => command.name === 'let')
     .flatMap((command) => toNamedSubquery(command) ?? []);
 
+/** Returns the first `subqueryN` name that none of the named subqueries uses. */
+export const getNextNamedSubqueryName = (
+  namedSubqueries: readonly NamedSubquery[] = []
+): string => {
+  const names = new Set(namedSubqueries.map(({ name }) => name));
+  let counter = 0;
+
+  while (names.has(`subquery${counter}`)) {
+    counter++;
+  }
+
+  return `subquery${counter}`;
+};
+
 /** Finds the named subquery referenced by an unqualified local `FROM` source. */
 export const findNamedSubqueryForSource = (
   source: ESQLSource,
@@ -43,6 +57,12 @@ export const findNamedSubqueryForSource = (
 
   return namedSubqueries.find(({ name }) => name === source.name);
 };
+
+/** Returns whether the LET declaration ends before the source that references it. */
+export const isNamedSubqueryDeclaredBefore = (
+  { command }: NamedSubquery,
+  source: ESQLSource
+): boolean => command.location.max < source.location.min;
 
 /** Returns the named subqueries that the selected binding is allowed to reference. */
 export const getNamedSubqueriesAvailableTo = (

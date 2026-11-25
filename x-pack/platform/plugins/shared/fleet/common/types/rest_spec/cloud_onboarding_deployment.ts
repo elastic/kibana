@@ -10,6 +10,7 @@ import type {
   CloudOnboardingDeploymentAuthMethod,
   CloudOnboardingDeploymentListItem,
   CloudOnboardingInstance,
+  CloudOnboardingPolicySettings,
   CloudProvider,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
@@ -26,8 +27,12 @@ export interface CreateCloudOnboardingDeploymentRequest {
     globalRegion?: string;
     /** Global data stream namespace from the Service settings step. */
     namespace?: string;
+    /** Whether the global namespace uses dedicated index templates. */
+    dedicatedNamespaceTemplates?: boolean;
     /** The service instances (originals and duplicates) being deployed. */
     instances?: CloudOnboardingInstance[];
+    /** Package policy settings that apply to every package policy of the deployment. */
+    policySettings?: CloudOnboardingPolicySettings;
     dataFormat?: 'ecs' | 'otel';
     authMethod?: CloudOnboardingDeploymentAuthMethod;
     agentPolicyIds?: string[];
@@ -84,12 +89,16 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     description?: string | null;
     /** Set to null to clear the namespace. */
     namespace?: string | null;
+    /** Whether the global namespace uses dedicated index templates. */
+    dedicatedNamespaceTemplates?: boolean;
     services?: string[];
     packageNames?: string[];
     serviceNames?: Record<string, string>;
     serviceVars?: Record<string, Record<string, unknown>>;
     /** Replaces the stored list of service instances. */
     instances?: CloudOnboardingInstance[];
+    /** Replaces the stored package policy settings. */
+    policySettings?: CloudOnboardingPolicySettings;
     attemptCount?: number;
     authMethod?: CloudOnboardingDeploymentAuthMethod | null;
     agentPolicyIds?: string[];
