@@ -330,7 +330,8 @@ export const validateExportProviders = (policy: PolicyConfig): void => {
   }
 };
 
-const RESPONSE_ACTIONS_CONFIG_PATH_PATTERN =
+/** Matches `policy.<os>.response_actions`, or anything nested under it, in a dot-separated path */
+export const RESPONSE_ACTIONS_CONFIG_PATH_PATTERN =
   /^policy\.(?:windows|mac|linux)\.response_actions(?:\.|$)/;
 
 /**
