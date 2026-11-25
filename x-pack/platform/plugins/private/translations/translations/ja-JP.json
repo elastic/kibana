@@ -24015,7 +24015,6 @@
     "xpack.cases.caseView.userActions.expandActivity": "アクティビティを展開",
     "xpack.cases.caseView.userActions.expandAllActivities": "すべて展開",
     "xpack.cases.caseView.userActions.extendedFields": "テンプレートフィールド",
-    "xpack.cases.caseView.userActions.moreActivities": "その他{count}件の{count, plural, =1 {activity} other {アクティビティ}}",
     "xpack.cases.caseView.userActions.noSearchResults.body": "検索条件やフィルターを変更してみてください。",
     "xpack.cases.caseView.userActions.noSearchResults.title": "検索条件と一致する結果がありません",
     "xpack.cases.caseView.userActions.nothingToCollapse": "折りたたむコメントや添付ファイルはありません",

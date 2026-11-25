@@ -24036,7 +24036,6 @@
     "xpack.cases.caseView.userActions.expandActivity": "Expandir atividade",
     "xpack.cases.caseView.userActions.expandAllActivities": "Expandir tudo",
     "xpack.cases.caseView.userActions.extendedFields": "Campos de modelo",
-    "xpack.cases.caseView.userActions.moreActivities": "{count} mais {count, plural, =1 {activity} other {atividades}}",
     "xpack.cases.caseView.userActions.noSearchResults.body": "Tente modificar sua busca ou seus filtros.",
     "xpack.cases.caseView.userActions.noSearchResults.title": "Nenhum resultado corresponde aos seus critérios de pesquisa",
     "xpack.cases.caseView.userActions.nothingToCollapse": "Nenhum comentário ou anexo para recolher",

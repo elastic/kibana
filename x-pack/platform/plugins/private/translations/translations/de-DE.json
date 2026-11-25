@@ -23964,7 +23964,6 @@
     "xpack.cases.caseView.userActions.expandActivity": "Aktivität erweitern",
     "xpack.cases.caseView.userActions.expandAllActivities": "Alle erweitern",
     "xpack.cases.caseView.userActions.extendedFields": "Template-Felder",
-    "xpack.cases.caseView.userActions.moreActivities": "{count} weitere {count, plural, =1 {activity} other {activities}}",
     "xpack.cases.caseView.userActions.noSearchResults.body": "Versuchen Sie, Ihre Suche oder Ihre Filter zu ändern.",
     "xpack.cases.caseView.userActions.noSearchResults.title": "Keine Ergebnisse für Ihre Suchkriterien",
     "xpack.cases.caseView.userActions.nothingToCollapse": "Keine Kommentare oder Anhänge zum Einklappen",

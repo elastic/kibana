@@ -21,13 +21,13 @@ describe('ShowMoreActivities', () => {
     render(<ShowMoreActivities count={5} onClick={onClickMock} />);
 
     expect(screen.getByTestId('cases-show-more-user-actions')).toBeInTheDocument();
-    expect(screen.getByText('5 more activities')).toBeInTheDocument();
+    expect(screen.getByText('Show 5 more activities')).toBeInTheDocument();
   });
 
   it('renders singular form for count of 1', () => {
     render(<ShowMoreActivities count={1} onClick={onClickMock} />);
 
-    expect(screen.getByText('1 more activity')).toBeInTheDocument();
+    expect(screen.getByText('Show 1 more activity')).toBeInTheDocument();
   });
 
   it('is disabled when isLoading is true', () => {

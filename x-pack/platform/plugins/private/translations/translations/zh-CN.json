@@ -24011,7 +24011,6 @@
     "xpack.cases.caseView.userActions.expandActivity": "展开活动",
     "xpack.cases.caseView.userActions.expandAllActivities": "全部展开",
     "xpack.cases.caseView.userActions.extendedFields": "模板字段",
-    "xpack.cases.caseView.userActions.moreActivities": "另外 {count} 个 {count, plural, =1 {activity} other {活动}}",
     "xpack.cases.caseView.userActions.noSearchResults.body": "请尝试修改您的搜索或筛选。",
     "xpack.cases.caseView.userActions.noSearchResults.title": "没有任何结果匹配您的搜索条件",
     "xpack.cases.caseView.userActions.nothingToCollapse": "暂无可折叠的评论或附件",

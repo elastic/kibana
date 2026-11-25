@@ -51,11 +51,11 @@ export const useCommentsList = ({
       items.push({
         username: '',
         'data-test-subj': 'cases-show-more-user-actions-wrapper',
-        timelineAvatar: 'listBullet',
+        timelineAvatar: 'maximize',
         timelineAvatarAriaLabel: i18n.SHOW_MORE_ACTIVITIES_ARIA,
         className: 'showMoreActivities',
         verticalAlign: 'center',
-        children: (
+        event: (
           <ShowMoreActivities
             count={remainingActionCount}
             onClick={handleShowMore}

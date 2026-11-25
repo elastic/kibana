@@ -23940,7 +23940,6 @@
     "xpack.cases.caseView.userActions.expandActivity": "Développer l’activité",
     "xpack.cases.caseView.userActions.expandAllActivities": "Tout développer",
     "xpack.cases.caseView.userActions.extendedFields": "Champs de modèle",
-    "xpack.cases.caseView.userActions.moreActivities": "{count} {count, plural, =1 {activity} other {activités}}",
     "xpack.cases.caseView.userActions.noSearchResults.body": "Modifiez votre recherche ou vos filtres.",
     "xpack.cases.caseView.userActions.noSearchResults.title": "Aucun résultat ne correspond à vos critères de recherche",
     "xpack.cases.caseView.userActions.nothingToCollapse": "Aucun commentaire ni pièce jointe à réduire",
