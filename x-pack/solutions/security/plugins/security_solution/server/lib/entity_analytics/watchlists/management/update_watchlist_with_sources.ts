@@ -98,7 +98,7 @@ export const updateWatchlistWithSources = async ({
     throw createWatchlistValidationError(
       400,
       i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.api.singleSourceOnly', {
-        defaultMessage: 'A watchlist that is not managed can have only one data source',
+        defaultMessage: 'A watchlist that is not managed can have only one rule-based data source',
       })
     );
   }

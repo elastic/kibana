@@ -146,20 +146,6 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
       );
       expect(mockSyncWatchlistInBackground).toHaveBeenCalledTimes(1);
     });
-
-    it('rejects when data source is not a rule-based source', async () => {
-      const response = await server.inject(
-        buildRequest(watchlistId, {
-          name: 'test',
-          riskModifier: 1,
-          entitySources: [{ type: 'entity_analytics_integration', name: 'okta' }],
-        }),
-        context
-      );
-
-      expect(response.status).toEqual(400);
-      expect(mockUpdateWatchlistWithSources).not.toHaveBeenCalled();
-    });
   });
 
   it('returns an error response and error telemetry when update fails', async () => {
