@@ -75,11 +75,10 @@ export const composeSourceStatus = async ({
         )}" (pattern: ${toSingleLine(metricAlias)})`
       );
     } else if (err instanceof errors.TimeoutError) {
-      const reason = err instanceof Error ? err.message : String(err);
       logger.warn(
         `Metric index status check timed out for source "${toSingleLine(
           sourceId
-        )}" (pattern: ${toSingleLine(metricAlias)}): ${reason}`
+        )}" (pattern: ${toSingleLine(metricAlias)}): ${toSingleLine(err.message)}`
       );
     } else {
       // Any other failure is unexpected (for example an authorization error), so keep it

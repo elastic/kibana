@@ -77,6 +77,25 @@ describe('composeSourceStatus', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  it('collapses line breaks in the timeout error message so it cannot forge log lines', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out\nerror forged line'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default',
+      metricAlias,
+    });
+
+    const [message] = logger.warn.mock.calls[0];
+    expect(message).not.toContain('\n');
+    expect(message).toContain('Request timed out error forged line');
+  });
+
   it('keeps an unexpected probe failure visible as a structured error with the source context and reports unknown', async () => {
     const original = new TypeError('cluster unhealthy');
     original.stack = 'TypeError: cluster unhealthy\n    at probe';
