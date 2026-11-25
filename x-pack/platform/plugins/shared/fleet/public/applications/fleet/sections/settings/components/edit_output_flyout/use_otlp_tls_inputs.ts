@@ -222,7 +222,12 @@ export const hasOtlpTlsSettings = (inputs: OtlpTlsInputs): boolean =>
   inputs.otlpTlsCurvePreferencesInput.value.length > 0 ||
   hasOtlpTlsKeyPem(inputs);
 
-/** Whether the TLS settings are read-only, such as those of a preconfigured output. */
+/**
+ * Whether the TLS settings are read-only, such as those of a preconfigured output. Every setting
+ * gets the `disabled` flag of `useOtlpTlsInputs`, so any of them tells. The flag itself is not
+ * returned by the hook: what it returns is spread into the form inputs, which are all expected to
+ * be inputs (`hasChanged`, `validate`).
+ */
 const isOtlpTlsReadOnly = (inputs: OtlpTlsInputs): boolean =>
   !!inputs.otlpTlsCaPemInput.props.disabled;
 

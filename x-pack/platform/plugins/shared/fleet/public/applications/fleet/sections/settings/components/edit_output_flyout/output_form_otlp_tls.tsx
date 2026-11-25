@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiAccordion, EuiTextArea } from '@elastic/eui';
+import { EuiAccordion, EuiIcon, EuiText, EuiTextArea } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -99,7 +99,7 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
   const pairedErrors = getOtlpTlsPairedErrors(inputs);
   const { otlpTlsKeyPemInput, otlpTlsMinVersionInput, otlpTlsMaxVersionInput } = inputs;
   // the section stays open while a setting shows an error, so that the reason Save is disabled can
-  // be seen
+  // be seen: its toggle is disabled, and its title says why
   const hasErrors = hasOtlpTlsErrors(inputs);
   const [isOpen, setIsOpen] = useState(() => hasOtlpTlsSettings(inputs));
 
@@ -108,13 +108,31 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
       id="otlpTlsSettings"
       data-test-subj="settingsOutputsFlyout.otlpTlsSettings"
       forceState={isOpen || hasErrors ? 'open' : 'closed'}
-      onToggle={(open) => setIsOpen(open || hasErrors)}
+      onToggle={setIsOpen}
+      isDisabled={hasErrors}
       paddingSize="m"
       buttonContent={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.otlpTlsSettingsLabel"
-          defaultMessage="TLS"
-        />
+        <>
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpTlsSettingsLabel"
+            defaultMessage="TLS"
+          />
+          {hasErrors && (
+            <EuiText
+              component="span"
+              size="xs"
+              color="danger"
+              data-test-subj="settingsOutputsFlyout.otlpTlsSettingsErrors"
+            >
+              {' '}
+              <EuiIcon type="warning" color="danger" size="s" aria-hidden={true} />{' '}
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.otlpTlsSettingsErrorsLabel"
+                defaultMessage="Fix the errors in this section to collapse it"
+              />
+            </EuiText>
+          )}
+        </>
       }
     >
       <OtlpSettingsSpecs specs={['configTls']} />

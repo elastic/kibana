@@ -3158,10 +3158,13 @@ describe('EditOutputFlyout', () => {
           target: { value },
         });
 
+      const getTlsToggle = (utils: ReturnType<typeof renderFlyout>['utils']) =>
+        within(utils.getByTestId('settingsOutputsFlyout.otlpTlsSettings')).getByRole('button', {
+          name: /^TLS/,
+        });
+
       const isTlsSectionOpen = (utils: ReturnType<typeof renderFlyout>['utils']) =>
-        within(utils.getByTestId('settingsOutputsFlyout.otlpTlsSettings'))
-          .getByRole('button', { name: 'TLS' })
-          .getAttribute('aria-expanded');
+        getTlsToggle(utils).getAttribute('aria-expanded');
 
       const createdPayload = async () => {
         await waitFor(() => {
@@ -3213,6 +3216,19 @@ describe('EditOutputFlyout', () => {
       it('should create an output with TLS settings and the client key as a secret', async () => {
         const { utils } = renderFlyout();
         fillNewOtlpOutput(utils);
+        fireEvent.click(getTlsToggle(utils));
+        expect(isTlsSectionOpen(utils)).toBe('true');
+
+        const cipherSuitesInput = within(
+          utils.getByTestId('settingsOutputsFlyout.otlpTlsCipherSuitesInput')
+        ).getByTestId('comboBoxSearchInput');
+        fireEvent.change(cipherSuitesInput, {
+          target: { value: 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384' },
+        });
+        fireEvent.click(
+          await utils.findByRole('option', { name: 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384' })
+        );
+
         change(utils, 'otlpTlsCaPemInput', `${CA_PEM}\n`);
         change(utils, 'otlpTlsCertPemInput', CERT_PEM);
         change(utils, 'otlpTlsKeyPemInput', KEY_PEM);
@@ -3232,7 +3248,7 @@ describe('EditOutputFlyout', () => {
           key_file: null,
           min_version: null,
           max_version: '1.3',
-          cipher_suites: null,
+          cipher_suites: ['TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384'],
           curve_preferences: null,
           reload_interval: null,
         });
@@ -3410,23 +3426,23 @@ describe('EditOutputFlyout', () => {
         expect(payload.otlp_exporter.tls).toEqual(expect.objectContaining({ ca_pem: CA_PEM }));
       });
 
-      it('should keep the section open while a setting shows an error', () => {
+      it('should keep the section open while a setting shows an error, and say why', () => {
         const { utils } = renderFlyout(otlpOutputWithTls);
         change(utils, 'otlpTlsCaFileInput', '/etc/ca.pem');
-        fireEvent.click(
-          within(utils.getByTestId('settingsOutputsFlyout.otlpTlsSettings')).getByRole('button', {
-            name: 'TLS',
-          })
-        );
 
+        expect(getTlsToggle(utils)).toBeDisabled();
+        expect(getTlsToggle(utils)).toHaveTextContent(
+          'Fix the errors in this section to collapse it'
+        );
         expect(isTlsSectionOpen(utils)).toBe('true');
 
         clear(utils, 'otlpTlsCaFileInput');
-        fireEvent.click(
-          within(utils.getByTestId('settingsOutputsFlyout.otlpTlsSettings')).getByRole('button', {
-            name: 'TLS',
-          })
-        );
+
+        expect(getTlsToggle(utils)).not.toBeDisabled();
+        expect(
+          utils.queryByTestId('settingsOutputsFlyout.otlpTlsSettingsErrors')
+        ).not.toBeInTheDocument();
+        fireEvent.click(getTlsToggle(utils));
         expect(isTlsSectionOpen(utils)).toBe('false');
       });
 

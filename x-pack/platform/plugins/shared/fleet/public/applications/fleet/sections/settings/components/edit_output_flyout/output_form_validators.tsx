@@ -985,6 +985,11 @@ export const OTLP_TLS_VERSIONS = ['1.0', '1.1', '1.2', '1.3'] as const;
  * The cipher suites that the collector accepts by name (configtls), as listed by the Go version
  * that EDOT is built with (crypto/tls `CipherSuites`, without the TLS 1.3 ones, which cannot be
  * configured).
+ *
+ * These lists are copied from Go 1.26 (src/crypto/tls/cipher_suites.go). Update them, and the
+ * insecure ones below, when EDOT moves to a Go version that adds a cipher suite or moves one to
+ * `InsecureCipherSuites`: otherwise the form rejects a name that the collector accepts, or the
+ * reverse.
  */
 export const OTLP_TLS_CIPHER_SUITES = [
   'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA',
@@ -1039,7 +1044,17 @@ const otlpTooLongError = (max: number) => [
 ];
 
 // the collector parses the PEM blocks: a value without one, such as a file path, cannot be loaded
-const PEM_BLOCK_REGEX = /-----BEGIN [^-\r\n]+-----[\s\S]*-----END [^-\r\n]+-----/;
+const PEM_BEGIN_REGEX = /-----BEGIN [^-\r\n]+-----/;
+const PEM_END_REGEX = /-----END [^-\r\n]+-----/;
+
+/**
+ * Whether the value has a PEM block: a BEGIN line followed by an END line. Each delimiter is
+ * searched once, so a large value without a matching END line is checked in linear time.
+ */
+const hasPemBlock = (value: string): boolean => {
+  const begin = value.search(PEM_BEGIN_REGEX);
+  return begin >= 0 && PEM_END_REGEX.test(value.slice(begin));
+};
 
 /** An optional PEM-encoded certificate or key. */
 export function validateOtlpTlsPem(value: string) {
@@ -1050,7 +1065,7 @@ export function validateOtlpTlsPem(value: string) {
   if (pem.length > OTLP_TLS_PEM_MAX_LENGTH) {
     return otlpTooLongError(OTLP_TLS_PEM_MAX_LENGTH);
   }
-  if (!PEM_BLOCK_REGEX.test(pem)) {
+  if (!hasPemBlock(pem)) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpTlsPemInvalid', {
         defaultMessage:

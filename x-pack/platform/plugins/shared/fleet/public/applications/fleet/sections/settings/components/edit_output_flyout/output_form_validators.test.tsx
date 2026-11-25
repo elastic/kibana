@@ -820,6 +820,9 @@ describe('OTLP validators', () => {
         expect.stringContaining('Paste the PEM content'),
       ]);
       expect(validateOtlpTlsPem('-----BEGIN CERTIFICATE-----\nMIIB')).toHaveLength(1);
+      expect(
+        validateOtlpTlsPem('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
+      ).toHaveLength(1);
     });
 
     it('validateOtlpTlsPemSecret should accept a stored secret', () => {
