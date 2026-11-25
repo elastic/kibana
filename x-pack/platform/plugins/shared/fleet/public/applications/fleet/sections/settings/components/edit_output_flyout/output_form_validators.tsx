@@ -841,6 +841,32 @@ const GO_DURATION_UNIT_NS: Record<string, number> = {
   h: 3600e9,
 };
 
+const GO_MAX_INT64 = BigInt('9223372036854775807');
+const GO_FRACTION_OVERFLOW = GO_MAX_INT64 / BigInt(10);
+const GO_FRACTION_MAX = GO_MAX_INT64 + BigInt(1);
+
+/**
+ * The nanoseconds of the fraction of a duration component, as Go's `time.ParseDuration` computes
+ * them: the digits are read until they no longer fit in an int64, and the fraction is converted
+ * with floating-point arithmetic and truncated, so that Fleet and the collector agree.
+ */
+const goFractionNs = (digits: string, unitNs: number) => {
+  let fraction = BigInt(0);
+  let scale = 1;
+  for (const digit of digits) {
+    if (fraction > GO_FRACTION_OVERFLOW) {
+      break;
+    }
+    const next = fraction * BigInt(10) + BigInt(digit);
+    if (next > GO_FRACTION_MAX) {
+      break;
+    }
+    fraction = next;
+    scale *= 10;
+  }
+  return fraction ? Math.trunc(Number(fraction) * (unitNs / scale)) : 0;
+};
+
 /** The nanoseconds of a valid duration, or undefined if it is empty or not a duration. */
 export function parseOtlpDurationNs(value: string): number | undefined {
   const duration = value?.trim() ?? '';
@@ -848,14 +874,9 @@ export function parseOtlpDurationNs(value: string): number | undefined {
     return undefined;
   }
   return [...duration.matchAll(GO_DURATION_COMPONENT_REGEX)].reduce(
-    // like the collector, the whole part of each component is exact, and its fraction is
-    // truncated to whole nanoseconds, with integer arithmetic so that its digits are exact too
     (total, [, whole, fraction = '', unit]) => {
       const unitNs = GO_DURATION_UNIT_NS[unit];
-      const fractionNs = fraction
-        ? Number((BigInt(fraction) * BigInt(unitNs)) / BigInt(10) ** BigInt(fraction.length))
-        : 0;
-      return total + Number(whole || 0) * unitNs + fractionNs;
+      return total + Number(whole || 0) * unitNs + goFractionNs(fraction, unitNs);
     },
     0
   );
