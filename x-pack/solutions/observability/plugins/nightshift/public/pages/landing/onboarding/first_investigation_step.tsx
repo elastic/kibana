@@ -143,7 +143,10 @@ export function OnboardingFirstInvestigationStep({
             <h4>{CONNECT_SOURCES_TITLE}</h4>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <ConnectSourcesGrid filter={isAdditionalType} />
+          <ConnectSourcesGrid
+            ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_CONNECTORS}
+            filter={isAdditionalType}
+          />
         </section>
         {compose}
       </div>
