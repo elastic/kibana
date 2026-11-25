@@ -59,10 +59,12 @@ const NARROWED_QUERY = `process.name:* and not process.name:"${FP_PROCESS_NAME}"
 const FIXTURE_RISK_SCORE = 40;
 
 /**
- * A good change, backtested over the seeded events: the current rule alerts on every event, and
- * the proposed one only on the true positives.
+ * What the backtest counts for the scripted change, which drops `FP_PROCESS_NAME`: the current
+ * rule alerts on every seeded event, and the proposed one on the true positives only. The
+ * backtest reports totals, so the 2 is read as the true positives because the seeded events
+ * and the change are fixed. It does not say which events alerted.
  */
-const FPS_REMOVED_TPS_KEPT: BacktestOutcome = {
+const EXPECTED_BACKTEST_COUNTS: BacktestOutcome = {
   current_succeeded: true,
   current_alert_count: SEEDED_EVENT_COUNT,
   proposed_succeeded: true,
@@ -306,7 +308,7 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
           decisions: ['approve'],
         },
         async ({ review, rule, ruleAfter, space }) => {
-          expect(readBacktest(review)).toMatchObject(FPS_REMOVED_TPS_KEPT);
+          expect(readBacktest(review)).toMatchObject(EXPECTED_BACKTEST_COUNTS);
           expect(ruleAfter.query).toBe(NARROWED_QUERY);
           const alertTags = await waitForAlertTag(
             esClient,
@@ -333,7 +335,7 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
           decisions: ['approve'],
         },
         async ({ review, rule, ruleAfter, space }) => {
-          expect(readBacktest(review)).toMatchObject(FPS_REMOVED_TPS_KEPT);
+          expect(readBacktest(review)).toMatchObject(EXPECTED_BACKTEST_COUNTS);
           expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
           const items = await readRuleExceptionItems({ ...space, rule: ruleAfter });
           expect(items).toHaveLength(1);
