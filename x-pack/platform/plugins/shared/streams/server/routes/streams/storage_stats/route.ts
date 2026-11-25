@@ -33,7 +33,6 @@ const getStorageStatsForStreams = async ({
   isServerless: boolean;
   streamNames?: readonly string[];
 }): Promise<StreamStorageStat[]> => {
-  // Streams without backing datastreams (query, draft) have no storage size associated with them.
   const dataStreams = await getDataStreamsWithIndexNames({ esClient, streamNames });
 
   if (!dataStreams.length) {

@@ -22,10 +22,15 @@ export const OVERVIEW_FILTER_NAMES = [
 export type OverviewFilterName = (typeof OVERVIEW_FILTER_NAMES)[number];
 
 /**
- * The filters on the page, which narrow the page loads only: the web vitals, errors and clicks
- * carry no page URL yet. `pageContains` matches part of the URL, the others a whole URL.
+ * The filters on the URL text, which narrow the page loads and frustration signals only: the web
+ * vitals and JS errors carry no URL. `pageUrl`, which matches a page by its route (like
+ * `/products/{slug}`), or by its whole URL when the app reports no route, narrows every browser log
+ * like the other filters, since EDOT Browser adds the route to all of them.
  */
-export const PAGE_FILTER_NAMES = [
+export const URL_FILTER_NAMES = ['pageContains'] as const satisfies readonly OverviewFilterName[];
+
+/** The filters that leave some data whole (the HTTP requests, or more), which the Overview notes. */
+export const PAGE_FILTER_NOTE_NAMES = [
   'pageUrl',
   'pageContains',
 ] as const satisfies readonly OverviewFilterName[];
@@ -92,6 +97,11 @@ export type OverviewPercentile = (typeof OVERVIEW_PERCENTILES)[number];
 
 /** A percentile as the routes take it in a query, e.g. `'95'`. */
 export type OverviewPercentileParam = `${OverviewPercentile}`;
+
+/** Every percentile as a query param, for a schema of the params. */
+export const OVERVIEW_PERCENTILE_PARAMS = OVERVIEW_PERCENTILES.map(
+  (percentile): OverviewPercentileParam => `${percentile}`
+);
 
 export const DEFAULT_OVERVIEW_PERCENTILE: OverviewPercentile = 75;
 

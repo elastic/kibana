@@ -90,18 +90,18 @@ describe('runInvestigationSummary', () => {
     const { client, invoke, resolveChatModel } = setup({
       conversationOverride: { attachments: [] },
     });
-    const getProposals = jest.fn(async () => ({}));
+    const readProposals = jest.fn(async () => ({}));
 
     const result = await runInvestigationSummary({
       request,
       spaceId: 'default',
       conversationId: 'conv-1',
-      deps: { getConversationClient: async () => client, resolveChatModel, getProposals },
+      deps: { getConversationClient: async () => client, resolveChatModel, readProposals },
     });
 
     expect(result).toEqual({ skipped: true, reason: 'no_proposal' });
     expect(resolveChatModel).not.toHaveBeenCalled();
-    expect(getProposals).not.toHaveBeenCalled();
+    expect(readProposals).not.toHaveBeenCalled();
     expect(invoke).not.toHaveBeenCalled();
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
@@ -341,7 +341,7 @@ describe('runInvestigationSummary', () => {
       const { client, invoke, resolveChatModel } = setup({
         conversationOverride: proposalConversation as never,
       });
-      const getProposals = jest.fn(async () => ({
+      const readProposals = jest.fn(async () => ({
         'prop-1': {
           title: 'Review detection gap',
           status: 'pending',
@@ -353,10 +353,10 @@ describe('runInvestigationSummary', () => {
         request,
         spaceId: 'space-a',
         conversationId: 'conv-1',
-        deps: { getConversationClient: async () => client, resolveChatModel, getProposals },
+        deps: { getConversationClient: async () => client, resolveChatModel, readProposals },
       });
 
-      expect(getProposals).toHaveBeenCalledWith(['prop-1'], 'space-a', request);
+      expect(readProposals).toHaveBeenCalledWith(['prop-1'], 'space-a', request);
       expect(invoke).toHaveBeenCalledWith(
         [
           expect.anything(),
@@ -370,13 +370,13 @@ describe('runInvestigationSummary', () => {
       const { client, invoke, resolveChatModel } = setup({
         conversationOverride: proposalConversation as never,
       });
-      const getProposals = jest.fn(async () => ({}));
+      const readProposals = jest.fn(async () => ({}));
 
       const result = await runInvestigationSummary({
         request,
         spaceId: 'default',
         conversationId: 'conv-1',
-        deps: { getConversationClient: async () => client, resolveChatModel, getProposals },
+        deps: { getConversationClient: async () => client, resolveChatModel, readProposals },
       });
 
       expect(result.skipped).toBe(false);
@@ -404,30 +404,30 @@ describe('runInvestigationSummary', () => {
           ],
         } as never,
       });
-      const getProposals = jest.fn(async () => ({}));
+      const readProposals = jest.fn(async () => ({}));
 
       await runInvestigationSummary({
         request,
         spaceId: 'default',
         conversationId: 'conv-1',
-        deps: { getConversationClient: async () => client, resolveChatModel, getProposals },
+        deps: { getConversationClient: async () => client, resolveChatModel, readProposals },
       });
 
-      expect(getProposals).toHaveBeenCalledWith(['prop-1'], 'default', request);
+      expect(readProposals).toHaveBeenCalledWith(['prop-1'], 'default', request);
     });
 
     it('does not read proposals when the timeline has none', async () => {
       const { client, resolveChatModel } = setup();
-      const getProposals = jest.fn(async () => ({}));
+      const readProposals = jest.fn(async () => ({}));
 
       await runInvestigationSummary({
         request,
         spaceId: 'default',
         conversationId: 'conv-1',
-        deps: { getConversationClient: async () => client, resolveChatModel, getProposals },
+        deps: { getConversationClient: async () => client, resolveChatModel, readProposals },
       });
 
-      expect(getProposals).not.toHaveBeenCalled();
+      expect(readProposals).not.toHaveBeenCalled();
     });
 
     it('caps how many proposals it reads, keeping the newest', async () => {
@@ -446,16 +446,16 @@ describe('runInvestigationSummary', () => {
           })),
         } as never,
       });
-      const getProposals = jest.fn(async () => ({}));
+      const readProposals = jest.fn(async () => ({}));
 
       await runInvestigationSummary({
         request,
         spaceId: 'default',
         conversationId: 'conv-1',
-        deps: { getConversationClient: async () => client, resolveChatModel, getProposals },
+        deps: { getConversationClient: async () => client, resolveChatModel, readProposals },
       });
 
-      expect(getProposals).toHaveBeenCalledWith(
+      expect(readProposals).toHaveBeenCalledWith(
         ids.slice(-20).map((index) => `prop-${index}`),
         'default',
         request

@@ -55,6 +55,7 @@ This stream is the durable history of rule evaluation.
 | `alert.status_count` | `long` | Consecutive count within the current alert status. |
 | `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
+| `routing_tags` | `keyword` | Optional, `ignore_above: 128`. Action-policy routing tags. Top-level so events with no `rule` object can set it. Mapped in v9; no writer sets it yet. |
 
 Writers:
 
@@ -146,7 +147,7 @@ That distinction is why `.alert-actions` stores both series-scoped and action-gr
 
 ## ES|QL views
 
-ES|QL views are registered as `optional: true`, which lets Kibana start even on clusters without ES|QL view support.
+The views below are defined in `esql_views/` but not registered: `getEsqlViewDefinitions()` in `esql_views/register.ts` returns an empty list, so Kibana does not create them. Once registered, a failed view does not block Kibana startup or alerting tasks: the rule executor and the dispatcher wait only for the resources they name (`ResourceManager.waitForResources()`), and neither depends on a view. This lets Kibana run on clusters without ES|QL view support.
 
 | Key | View name | Summary |
 | --- | --- | --- |
@@ -183,12 +184,6 @@ Disallowed changes:
 3. Bump the corresponding datastream version constant when the template change requires rollover.
 4. Update writers and readers that need to understand the new field.
 5. Update the relevant README if the field changes the architecture or contributor mental model.
-
-### Mapping changes that cannot be applied in place
-
-Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` installs the current template, then deletes a data stream created from that version or below and recreates it. Installing the template first means that a write from a node still running the previous version recreates the data stream with the current mapping. All of its documents are lost. A field renamed without an alias uses the same reset, so that no document keeps the old name.
-
-`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8. `.alert-actions` uses `forceReset: { version: 7 }` for the `episode_id` / `episode_status` to `alert_id` / `alert_status` rename in v8, which also covers the `actor` keyword to object change in v7. Keep `forceReset.version` unchanged when bumping the datastream versions later.
 
 ## Example: adding a new optional alert event field
 

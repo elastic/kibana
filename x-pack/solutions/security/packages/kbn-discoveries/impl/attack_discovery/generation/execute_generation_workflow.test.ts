@@ -279,6 +279,89 @@ describe('executeGenerationWorkflow', () => {
     );
   });
 
+  it('reads anonymization fields with the internal user, not the caller-scoped client', async () => {
+    const mockEventLogger: jest.Mocked<IEventLogger> = {
+      logEvent: jest.fn(),
+    } as unknown as jest.Mocked<IEventLogger>;
+
+    const internalEsClient = { search: jest.fn() };
+    const scopedEsClient = {
+      indices: {
+        refresh: jest.fn().mockResolvedValue(undefined),
+      },
+      security: {
+        authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+      },
+    };
+
+    const coreStartMock: CoreStart = {
+      elasticsearch: {
+        client: {
+          asInternalUser: internalEsClient,
+          asScoped: () => ({
+            asCurrentUser: scopedEsClient,
+          }),
+        },
+      },
+      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+    } as unknown as CoreStart;
+
+    const pluginsStartMock: Record<string, unknown> = {};
+
+    const mockGetStartServices: GetStartServices = async () => ({
+      coreStart: coreStartMock,
+      pluginsStart: pluginsStartMock,
+    });
+
+    await executeGenerationWorkflow({
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector-id',
+        model: 'gpt-4',
+      },
+      authz: createAuthorizedAuthzMock(),
+      executionUuid: 'test-execution-uuid',
+      getEventLogIndex: async () => '.kibana-event-log-test',
+      getEventLogger: async () => mockEventLogger,
+      getStartServices: mockGetStartServices,
+      logger: {
+        debug: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+      } as unknown as Logger,
+      request: {} as unknown as KibanaRequest,
+      type: 'attack_discovery',
+      workflowConfig: {
+        alert_retrieval_workflow_ids: [],
+        alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
+        validation_workflow_id: 'default',
+      },
+      workflowsManagementApi: {
+        createWorkflow: jest.fn(),
+        getWorkflow: jest.fn(),
+        getWorkflowExecution: jest.fn(),
+        getWorkflows: jest.fn(),
+        runWorkflow: jest.fn(),
+      } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+    });
+
+    expect(mockFetchAnonymizationFields).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esClient: internalEsClient,
+        spaceId: 'default',
+      })
+    );
+
+    expect(mockFetchAnonymizationFields).not.toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: scopedEsClient })
+    );
+  });
+
   describe('telemetryMetadata forwarding to runManualOrchestration', () => {
     const runWithTelemetry = async (telemetryMetadata?: {
       pluginId: string;
@@ -960,6 +1043,171 @@ describe('executeGenerationWorkflow', () => {
         action: 'generation-failed',
       })
     );
+  });
+
+  describe('AI Assistant space resources', () => {
+    const run = async ({
+      ensureSpaceResources,
+      pluginsStart,
+    }: {
+      ensureSpaceResources?: jest.Mock;
+      pluginsStart?: Record<string, unknown>;
+    }) => {
+      const coreStartMock = {
+        elasticsearch: {
+          client: {
+            asScoped: () => ({
+              asCurrentUser: {
+                indices: { refresh: jest.fn().mockResolvedValue(undefined) },
+                security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              },
+            }),
+          },
+        },
+        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+        security: {
+          authc: {
+            apiKeys: {
+              grantAsInternalUser: jest
+                .fn()
+                .mockResolvedValue({ api_key: 'test-api-key', id: 'test-api-key-id' }),
+              invalidateAsInternalUser: jest.fn().mockResolvedValue({}),
+            },
+          },
+        },
+      } as unknown as CoreStart;
+      const logger = {
+        debug: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+      } as unknown as Logger;
+
+      await executeGenerationWorkflow({
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        apiConfig: { action_type_id: '.gen-ai', connector_id: 'test-connector-id', model: 'gpt-4' },
+        authz: createAuthorizedAuthzMock(),
+        executionUuid: 'test-execution-uuid',
+        getEventLogIndex: async () => '.kibana-event-log-test',
+        getEventLogger: async () => ({ logEvent: jest.fn() } as unknown as IEventLogger),
+        getStartServices: async () => ({
+          coreStart: coreStartMock,
+          pluginsStart: pluginsStart ?? { elasticAssistant: { ensureSpaceResources } },
+        }),
+        logger,
+        request: {} as unknown as KibanaRequest,
+        type: 'attack_discovery',
+        workflowConfig: {
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
+          validation_workflow_id: 'default',
+        },
+        workflowsManagementApi: {
+          createWorkflow: jest.fn(),
+          getWorkflow: jest.fn(),
+          getWorkflowExecution: jest.fn(),
+          getWorkflows: jest.fn(),
+          runWorkflow: jest.fn(),
+        } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+      });
+
+      return logger;
+    };
+
+    it('installs the space resources before fetching the anonymization fields', async () => {
+      const order: string[] = [];
+      const ensureSpaceResources = jest.fn(async () => {
+        order.push('ensure');
+        return true;
+      });
+      mockFetchAnonymizationFields.mockImplementation(async () => {
+        order.push('fetch');
+        return mockAnonymizationFields;
+      });
+
+      const logger = await run({ ensureSpaceResources });
+
+      expect(ensureSpaceResources).toHaveBeenCalledWith('default');
+      expect(order).toEqual(['ensure', 'fetch']);
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default'"
+      );
+    });
+
+    it('warns and still fetches the anonymization fields when the install fails', async () => {
+      const ensureSpaceResources = jest.fn().mockResolvedValue(false);
+
+      const logger = await run({ ensureSpaceResources });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default'"
+      );
+      expect(mockFetchAnonymizationFields).toHaveBeenCalled();
+    });
+
+    it('warns and still fetches the anonymization fields when the install rejects', async () => {
+      const ensureSpaceResources = jest.fn().mockRejectedValue(new Error('cluster unavailable'));
+
+      const logger = await run({ ensureSpaceResources });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default': cluster unavailable"
+      );
+      expect(mockFetchAnonymizationFields).toHaveBeenCalled();
+      expect(mockWriteAttackDiscoveryEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'generation-failed' })
+      );
+    });
+
+    it('names the failed install in the fetch error when the install failed', async () => {
+      const fetchError = new Error('index_not_found_exception');
+      mockFetchAnonymizationFields.mockRejectedValue(fetchError);
+
+      const result = run({ ensureSpaceResources: jest.fn().mockResolvedValue(false) });
+
+      await expect(result).rejects.toThrow(
+        'Could not install the AI Assistant resources for this space, so its anonymization fields could not be read: index_not_found_exception'
+      );
+      await expect(result).rejects.toHaveProperty('cause', fetchError);
+    });
+
+    it('names the failed install in the fetch error when the install rejects', async () => {
+      mockFetchAnonymizationFields.mockRejectedValue(new Error('index_not_found_exception'));
+
+      await expect(
+        run({ ensureSpaceResources: jest.fn().mockRejectedValue(new Error('cluster unavailable')) })
+      ).rejects.toThrow(
+        'Could not install the AI Assistant resources for this space, so its anonymization fields could not be read: index_not_found_exception'
+      );
+    });
+
+    it('rethrows the fetch error unchanged when the install succeeded', async () => {
+      const fetchError = new Error('index_not_found_exception');
+      mockFetchAnonymizationFields.mockRejectedValue(fetchError);
+
+      await expect(run({ ensureSpaceResources: jest.fn().mockResolvedValue(true) })).rejects.toBe(
+        fetchError
+      );
+    });
+
+    it('rethrows the fetch error unchanged when elastic_assistant is not available', async () => {
+      const fetchError = new Error('index_not_found_exception');
+      mockFetchAnonymizationFields.mockRejectedValue(fetchError);
+
+      await expect(run({ pluginsStart: {} })).rejects.toBe(fetchError);
+    });
+
+    it('fetches the anonymization fields when elastic_assistant is not available', async () => {
+      const logger = await run({ pluginsStart: {} });
+
+      expect(mockFetchAnonymizationFields).toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default'"
+      );
+    });
   });
 
   describe('when shouldStopExecution() reports the rule was cancelled (timed out)', () => {

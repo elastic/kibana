@@ -10,7 +10,6 @@ responses:
               id: customer_support
               description: Knowledge about customer support cases.
               managed: false
-              memory_enabled: true
               dest:
                 type: data_stream
                 value: ai-index-ds-customer-support
@@ -50,7 +49,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+        -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
         -H "Authorization: ApiKey ${API_KEY}"
   - lang: Console
     source: |

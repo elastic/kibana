@@ -12,6 +12,7 @@ import { getConfigurationFilePaths, getConfigFromFiles, applyConfigOverrides } f
 import { ApmConfiguration } from './config';
 
 let apmConfig: ApmConfiguration | undefined;
+let browserTracingConfig: { value: BrowserTracingConfiguration | undefined } | undefined;
 
 /**
  * Load the APM configuration.
@@ -30,7 +31,32 @@ export const loadConfiguration = (
   applyConfigOverrides(rawConfiguration, argv);
 
   apmConfig = new ApmConfiguration(rootDir, rawConfiguration, isDistributable);
+  browserTracingConfig = undefined;
   return apmConfig;
+};
+
+export interface BrowserTracingConfiguration {
+  url: string;
+  headers?: Record<string, string>;
+}
+
+/**
+ * Returns the EDOT Browser config to inject into the frontend, or `undefined`
+ * when browser tracing is disabled or has no endpoint.
+ */
+export const getBrowserTracingConfiguration = (): BrowserTracingConfiguration | undefined => {
+  if (!apmConfig) {
+    return undefined;
+  }
+  // Called on every page render, so resolve (and validate) the telemetry config once.
+  if (!browserTracingConfig) {
+    const { enabled, tracing } = apmConfig.getTelemetryConfig();
+    const { enabled: browserEnabled, url, headers } = tracing.browser ?? {};
+    browserTracingConfig = {
+      value: enabled && browserEnabled && url ? { url, headers } : undefined,
+    };
+  }
+  return browserTracingConfig.value;
 };
 
 export const getConfiguration = (serviceName: string): AgentConfigOptions | undefined => {
@@ -44,3 +70,8 @@ export const getConfiguration = (serviceName: string): AgentConfigOptions | unde
   }
   return undefined;
 };
+
+/**
+ * Returns the Kibana instance name (`server.name`), or `undefined` if the configuration hasn't been loaded.
+ */
+export const getKibanaName = (): string | undefined => apmConfig?.getKibanaName();

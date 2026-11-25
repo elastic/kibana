@@ -8,6 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
+import {
+  findOtlpAuthHeaderConflict,
+  isValidOtlpAuthCredential,
+  isValidOtlpGrpcMetadataKey,
+  isValidOtlpHeaderName,
+  OTLP_AUTH_CREDENTIAL_MAX_LENGTH,
+  OTLP_HEADER_NAME_MAX_LENGTH,
+} from '../../../../../../../common/services/otlp_auth';
+
 import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 export { validateSslPathInput, validateSslPathsCombo };
 
@@ -686,3 +695,279 @@ export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }
     return errors;
   }
 }
+
+const GO_DURATION_UNIT = '(?:ns|us|µs|μs|ms|s|m|h)';
+const GO_DURATION_REGEX = new RegExp(
+  `^(?:0|(?:(?:\\d+(?:\\.\\d*)?|\\.\\d+)${GO_DURATION_UNIT})+)$`
+);
+
+export function validateOtlpEndpoint(value: string) {
+  const endpoint = value?.trim() ?? '';
+  if (!endpoint) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointIsRequired', {
+        defaultMessage: 'Endpoint is required',
+      }),
+    ];
+  }
+  if (/\s/.test(endpoint)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointInvalid', {
+        defaultMessage: 'Endpoint must not contain spaces',
+      }),
+    ];
+  }
+  if (endpoint.length > 2048) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointTooLong', {
+        defaultMessage: 'Endpoint must be at most {max} characters',
+        values: { max: 2048 },
+      }),
+    ];
+  }
+}
+
+/** An optional duration in the Go format used by the collector, such as `5s` or `1m30s`. */
+export function validateOtlpDuration(value: string) {
+  const duration = value?.trim() ?? '';
+  if (!duration) {
+    return;
+  }
+  if (duration.length > 64 || !GO_DURATION_REGEX.test(duration)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpDurationInvalid', {
+        defaultMessage: 'Specify a duration such as {examples}',
+        values: { examples: '500ms, 5s, 1m30s' },
+      }),
+    ];
+  }
+}
+
+/** An optional number of bytes: a whole number that is not negative. */
+export function validateOtlpByteSize(value: string) {
+  const size = value?.trim() ?? '';
+  if (!size) {
+    return;
+  }
+  if (!/^\d+$/.test(size) || !Number.isSafeInteger(Number(size))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpByteSizeInvalid', {
+        defaultMessage: 'Specify a whole number of bytes, 0 or more',
+      }),
+    ];
+  }
+}
+
+/** An optional whole number that is not negative, such as a number of connections. */
+export function validateOtlpCount(value: string) {
+  const count = value?.trim() ?? '';
+  if (!count) {
+    return;
+  }
+  if (!/^\d+$/.test(count) || !Number.isSafeInteger(Number(count))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpCountInvalid', {
+        defaultMessage: 'Specify a whole number, 0 or more',
+      }),
+    ];
+  }
+}
+
+const OTLP_COMPRESSION_LEVEL_MIN = -2;
+const OTLP_COMPRESSION_LEVEL_MAX = 9;
+
+/** An optional gzip compression level. */
+export function validateOtlpCompressionLevel(value: string) {
+  const level = value?.trim() ?? '';
+  if (!level) {
+    return;
+  }
+  if (
+    !/^-?\d+$/.test(level) ||
+    Number(level) < OTLP_COMPRESSION_LEVEL_MIN ||
+    Number(level) > OTLP_COMPRESSION_LEVEL_MAX
+  ) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpCompressionLevelInvalid', {
+        defaultMessage: 'Specify a whole number from {min} to {max}',
+        values: { min: OTLP_COMPRESSION_LEVEL_MIN, max: OTLP_COMPRESSION_LEVEL_MAX },
+      }),
+    ];
+  }
+}
+
+const OTLP_HTTP_URL_SCHEMES = ['http:', 'https:'];
+// the proxy schemes that the Go HTTP client supports
+const OTLP_PROXY_URL_SCHEMES = ['http:', 'https:', 'socks5:', 'socks5h:'];
+const OTLP_HTTP_URL_EXAMPLE = 'https://collector.example.com:4318';
+const OTLP_PROXY_URL_EXAMPLE = 'http://proxy.example.com:3128';
+
+/** Validates a URL that is set: at most 2048 characters, with one of the schemes and a host. */
+function validateOtlpUrl(url: string, schemes: string[], example: string) {
+  if (url.length > 2048) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpUrlTooLong', {
+        defaultMessage: 'URL must be at most {max} characters',
+        values: { max: 2048 },
+      }),
+    ];
+  }
+  let isValid = false;
+  if (!/\s/.test(url)) {
+    try {
+      // a value such as `collector:4318` parses as an opaque URL with the `collector:` scheme
+      const { protocol, hostname } = new URL(url);
+      isValid = schemes.includes(protocol) && !!hostname;
+    } catch (e) {
+      isValid = false;
+    }
+  }
+  if (!isValid) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpUrlInvalid', {
+        defaultMessage: 'Specify a URL such as {example}',
+        values: { example },
+      }),
+    ];
+  }
+}
+
+/** The endpoint of an HTTP output: required, and an HTTP or HTTPS URL. */
+export function validateOtlpHttpEndpoint(value: string) {
+  return (
+    validateOtlpEndpoint(value) ??
+    validateOtlpUrl(value.trim(), OTLP_HTTP_URL_SCHEMES, OTLP_HTTP_URL_EXAMPLE)
+  );
+}
+
+/** An optional HTTP or HTTPS URL, such as `https://collector:4318/v1/traces`. */
+export function validateOtlpHttpUrl(value: string) {
+  const url = value?.trim() ?? '';
+  return url ? validateOtlpUrl(url, OTLP_HTTP_URL_SCHEMES, OTLP_HTTP_URL_EXAMPLE) : undefined;
+}
+
+/** An optional proxy URL, such as `http://proxy:3128`. */
+export function validateOtlpProxyUrl(value: string) {
+  const url = value?.trim() ?? '';
+  return url ? validateOtlpUrl(url, OTLP_PROXY_URL_SCHEMES, OTLP_PROXY_URL_EXAMPLE) : undefined;
+}
+
+/** An optional string of at most 256 characters. */
+export function validateOtlpShortString(value: string) {
+  if ((value?.trim() ?? '').length > 256) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpShortStringTooLong', {
+        defaultMessage: 'Must be at most {max} characters',
+        values: { max: 256 },
+      }),
+    ];
+  }
+}
+
+/**
+ * Validates the headers of the OTLP output. `authHeaderName` is the header that the authentication
+ * sets, which the headers cannot set too.
+ */
+export function validateOtlpHeaders(
+  pairs: Array<{ key: string; value: string }>,
+  authHeaderName?: string
+) {
+  const errors = [...(validateKafkaHeaders(pairs) ?? [])];
+
+  if (authHeaderName) {
+    const conflict = findOtlpAuthHeaderConflict(
+      pairs.map(({ key }) => key),
+      authHeaderName
+    );
+    const index = conflict === undefined ? -1 : pairs.findIndex(({ key }) => key === conflict);
+    if (index >= 0) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpHeaderSetByAuth', {
+          defaultMessage: 'The {header} header is set by the authentication',
+          values: { header: conflict },
+        }),
+        index,
+        hasKeyError: true,
+        hasValueError: false,
+      });
+    }
+  }
+
+  pairs.forEach(({ key, value }, index) => {
+    if (key.length > 256 || value.length > 1000) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpHeaderTooLong', {
+          defaultMessage:
+            'Header names must be at most {maxKey} characters and values at most {maxValue}',
+          values: { maxKey: 256, maxValue: 1000 },
+        }),
+        index,
+        hasKeyError: key.length > 256,
+        hasValueError: value.length > 1000,
+      });
+    }
+  });
+
+  return errors.length ? errors : undefined;
+}
+
+export function validateOtlpAuthHeaderName(value: string) {
+  const name = value?.trim() ?? '';
+  if (!name) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameRequired', {
+        defaultMessage: 'Header name is required',
+      }),
+    ];
+  }
+  if (!isValidOtlpHeaderName(name)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameInvalid', {
+        defaultMessage:
+          'Header name must be at most {max} characters and only contain letters, digits and {chars}',
+        values: { max: OTLP_HEADER_NAME_MAX_LENGTH, chars: "!#$%&'*+-.^_`|~" },
+      }),
+    ];
+  }
+}
+
+/** The gRPC exporter sends the custom header as metadata, which allows fewer characters. */
+export function validateOtlpAuthGrpcHeaderName(value: string) {
+  if (!isValidOtlpGrpcMetadataKey(value.trim())) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthGrpcHeaderNameInvalid', {
+        defaultMessage:
+          'With gRPC, the header name can only contain letters, digits, "-", "_" and ".", cannot start with "grpc-" or end with "-bin"',
+      }),
+    ];
+  }
+}
+
+export function validateOtlpAuthCredential(value: string) {
+  // the credential is sent trimmed
+  const credential = value?.trim() ?? '';
+  if (!credential) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialRequired', {
+        defaultMessage: 'Credential is required',
+      }),
+    ];
+  }
+  if (credential.length > OTLP_AUTH_CREDENTIAL_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialTooLong', {
+        defaultMessage: 'Credential must be at most {max} characters',
+        values: { max: OTLP_AUTH_CREDENTIAL_MAX_LENGTH },
+      }),
+    ];
+  }
+  if (!isValidOtlpAuthCredential(credential)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialInvalid', {
+        defaultMessage: 'Credential cannot contain line breaks or other control characters',
+      }),
+    ];
+  }
+}
+
+export const validateOtlpAuthCredentialSecret = toSecretValidator(validateOtlpAuthCredential);

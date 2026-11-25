@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { EuiFacetButton, EuiFacetGroup, EuiSpacer } from '@elastic/eui';
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
-import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-
-import { Loading } from '../../../../components';
 
 export interface CategoryFacet {
   count: number;
@@ -61,54 +57,3 @@ export const UPDATE_FAILED_CATEGORY = {
     defaultMessage: 'Update failed',
   }),
 };
-
-export interface Props {
-  isLoading?: boolean;
-  categories: CategoryFacet[];
-  selectedCategory: string;
-  onCategoryChange: (category: CategoryFacet) => unknown;
-}
-
-export function CategoryFacets({
-  isLoading,
-  categories,
-  selectedCategory,
-  onCategoryChange,
-}: Props) {
-  const controls = (
-    <EuiFacetGroup>
-      {isLoading ? (
-        <>
-          <EuiSpacer size="m" />
-          <Loading size="l" />
-          <EuiSpacer size="m" />
-        </>
-      ) : (
-        categories.map((category) => {
-          return (
-            <EuiFacetButton
-              data-test-subj={`epmList.categories.${category.id}`}
-              isSelected={category.id === selectedCategory}
-              key={category.id}
-              id={category.id}
-              quantity={category.count}
-              onClick={() => onCategoryChange(category)}
-              aria-label={i18n.translate('xpack.fleet.epmList.facetButton.ariaLabel', {
-                defaultMessage:
-                  '{key}, {count} {count, plural, one { integration } other { integrations }}',
-                values: {
-                  key: category.title,
-                  count: category.count,
-                },
-              })}
-            >
-              {category.title}
-            </EuiFacetButton>
-          );
-        })
-      )}
-    </EuiFacetGroup>
-  );
-
-  return controls;
-}

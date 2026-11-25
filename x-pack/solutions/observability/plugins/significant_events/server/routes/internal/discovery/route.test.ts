@@ -97,11 +97,14 @@ it('passes a strict connector override and request-scoped resolver to the discov
     step: 'discovery',
     requestedId: 'model-alias',
   });
-  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).toHaveBeenCalledWith({
-    workflow_execution_id: 'execution-1',
-    execution_id: 'execution-1',
-    space_id: 'space-a',
-  });
+  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).toHaveBeenCalledWith(
+    {
+      workflow_execution_id: 'execution-1',
+      execution_id: 'execution-1',
+      space_id: 'space-a',
+    },
+    expect.anything()
+  );
 });
 
 describe('discovery started report', () => {
@@ -111,24 +114,26 @@ describe('discovery started report', () => {
 
   it('reports the run with the execution that started it', async () => {
     const track = jest.fn();
+    const request = { spaceId: 'default' };
 
     await startedRoute.handler({
       params: {
         body: { workflow_execution_id: 'discovery-1', parent_workflow_execution_id: 'review-1' },
       },
-      request: { spaceId: 'default' },
+      request,
       getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
-      getSpaceId: jest.fn().mockResolvedValue('space-a'),
       server: {},
       telemetry: { trackSignificantEventsDiscoveryStarted: track },
     } as unknown as StartedParams);
 
-    expect(track).toHaveBeenCalledWith({
-      parent_workflow_execution_id: 'review-1',
-      workflow_execution_id: 'discovery-1',
-      space_id: 'space-a',
-      alert_source: 'elastic.significant_events',
-    });
+    expect(track).toHaveBeenCalledWith(
+      {
+        parent_workflow_execution_id: 'review-1',
+        workflow_execution_id: 'discovery-1',
+        alert_source: 'elastic.significant_events',
+      },
+      request
+    );
   });
 });
 
@@ -170,7 +175,7 @@ describe('discovery completed report', () => {
         getSpaceId: jest.fn().mockResolvedValue('space-a'),
         server: {},
         telemetry: { trackSignificantEventsDiscoveryCompleted: track },
-        logger: { debug: jest.fn() },
+        logger: { debug: jest.fn(), warn: jest.fn() },
       } as unknown as CompletedParams,
     };
   };
@@ -180,11 +185,11 @@ describe('discovery completed report', () => {
 
     await expect(completedRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
 
-    const [[reported]] = track.mock.calls;
+    const [[reported, reportedRequest]] = track.mock.calls;
+    expect(reportedRequest).toBe(handlerParams.request);
     expect(reported).toMatchObject({
       parent_workflow_execution_id: 'orchestrator-1',
       workflow_execution_id: 'discovery-1',
-      space_id: 'space-a',
       alert_source: 'elastic.significant_events',
       outcome: 'completed',
       has_work: true,
@@ -193,6 +198,7 @@ describe('discovery completed report', () => {
     });
     expect(reported.duration_ms).toBeGreaterThanOrEqual(90_000);
     expect(reported).not.toHaveProperty('error_message');
+    expect(handlerParams.logger.warn).not.toHaveBeenCalled();
   });
 
   it('still reports when the execution record cannot be read', async () => {
@@ -210,6 +216,20 @@ describe('discovery completed report', () => {
       error_message: 'agent step failed',
     });
     expect(reported).not.toHaveProperty('duration_ms');
+  });
+
+  it('warns and reports unknown written rules', async () => {
+    const { handlerParams, track } = makeParams({
+      body: { unknown_reported_rule_count: 2 },
+    });
+
+    await completedRoute.handler(handlerParams);
+
+    expect(handlerParams.logger.warn).toHaveBeenCalled();
+    expect(track).toHaveBeenCalledWith(
+      expect.objectContaining({ unknown_reported_rule_count: 2 }),
+      handlerParams.request
+    );
   });
 
   it('reports a step timeout from the failure fallback as timed out', async () => {

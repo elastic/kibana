@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { inboundWebhookReceived } from '@kbn/connector-topics';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getConnectorSpec } from '../../get_connector_spec';
 import { buildEventId } from '../../event_type_id';
@@ -16,7 +17,6 @@ import type { ConnectorIngressContext, HandleEventsResult } from '../../connecto
 import { InboundWebhook } from './inbound_webhook';
 import {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
-  INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
   INBOUND_WEBHOOK_RECEIVED_EVENT_KEY,
   MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './constants';
@@ -36,10 +36,6 @@ describe('InboundWebhook', () => {
     expect(InboundWebhook.test.enabled).toBe(false);
   });
 
-  it('does not declare ingestTokenHash (factory injects it)', () => {
-    expect(InboundWebhook.schema?.shape).not.toHaveProperty('ingestTokenHash');
-  });
-
   it('is allowlisted to declare events', () => {
     expect(SPECS_ALLOWED_EVENTS.has(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID)).toBe(true);
     expect(InboundWebhook.events).toBeDefined();
@@ -47,11 +43,11 @@ describe('InboundWebhook', () => {
 
   it('uses buildEventId for the received event', () => {
     const received = InboundWebhook.events?.definitions[INBOUND_WEBHOOK_RECEIVED_EVENT_KEY];
-    expect(received?.eventId).toBe(INBOUND_WEBHOOK_RECEIVED_EVENT_ID);
+    expect(received?.eventId).toBe(inboundWebhookReceived.name);
     expect(received?.eventId).toBe(
       buildEventId(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID, INBOUND_WEBHOOK_RECEIVED_EVENT_KEY)
     );
-    expect(INBOUND_WEBHOOK_RECEIVED_EVENT_ID).toBe('inboundWebhook.received');
+    expect(inboundWebhookReceived.name).toBe('inboundWebhook.received');
   });
 
   describe('handleEvents', () => {

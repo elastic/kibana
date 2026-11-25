@@ -30,7 +30,7 @@ const TITLE = i18n.translate('xpack.digitalExperience.overview.topPages.title', 
 
 const SUBTITLE = i18n.translate('xpack.digitalExperience.overview.topPages.subtitle', {
   defaultMessage:
-    'The ten pages loaded the most, with their load time. Select a page to filter the Overview by it.',
+    'The ten pages loaded the most, with their load time, grouped by route where the app reports one. Select a page to filter the Overview by it.',
 });
 
 const PAGE_LABEL = i18n.translate('xpack.digitalExperience.overview.topPages.pageLabel', {

@@ -10,10 +10,12 @@ import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiDelayRender,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSkeletonText,
   EuiTitle,
@@ -38,6 +40,7 @@ import type {
 } from '../../../data/investigations/use_investigation_sections';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationCardActions } from './investigation_card_actions';
+import { AiGradientBadge } from './investigation_status_badge';
 import { useInvestigationAssignees } from './use_investigation_assignees';
 
 export interface InvestigationSectionProps {
@@ -57,6 +60,8 @@ export interface InvestigationSectionProps {
   onToggle?: (isOpen: boolean) => void;
   /** Briefly draws the section's border in its severity colour, after a jump lands on it. */
   isHighlighted?: boolean;
+  /** A new search, filter or time range is loading while the previous rows are still shown. */
+  isLoadingNewFilters?: boolean;
 }
 
 /** Set on a section by the list, to the height of the sticky page header that would cover it. */
@@ -145,10 +150,15 @@ export const isInvestigationSectionVisible = (section: InvestigationSectionState
 const SectionCard = ({
   children,
   highlightColor,
+  isLoading = false,
+  loadingTestSubj,
 }: {
   children: React.ReactNode;
   /** Set while the card is highlighted. */
   highlightColor?: SeverityDotColor;
+  /** Draws the blue loading line tables show, once loading has taken a moment. */
+  isLoading?: boolean;
+  loadingTestSubj?: string;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const strongBorderColors: Record<SeverityDotColor, string> = {
@@ -176,6 +186,17 @@ const SectionCard = ({
         }
       `}
     >
+      {isLoading && (
+        // The delay keeps a fast load from flashing the line.
+        <EuiDelayRender delay={300}>
+          <EuiProgress
+            data-test-subj={loadingTestSubj}
+            size="xs"
+            color="primary"
+            position="absolute"
+          />
+        </EuiDelayRender>
+      )}
       {children}
     </EuiPanel>
   );
@@ -235,12 +256,21 @@ const SectionHeading = ({
     </EuiFlexItem>
     {showCount && (
       <EuiFlexItem grow={false}>
-        <EuiBadge
-          color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
-          data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
-        >
-          {total}
-        </EuiBadge>
+        {id === 'in-progress' ? (
+          <AiGradientBadge
+            testSubj={`nightshiftInvestigationSectionCount-${id}`}
+            forcedColorsForeground="button"
+          >
+            {total}
+          </AiGradientBadge>
+        ) : (
+          <EuiBadge
+            color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
+            data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
+          >
+            {total}
+          </EuiBadge>
+        )}
       </EuiFlexItem>
     )}
   </EuiFlexGroup>
@@ -350,6 +380,8 @@ const SectionRows = ({
             {InvestigationCard && (
               <InvestigationCard
                 investigation={investigation}
+                // Newest activity first, so the age shown is when it last changed.
+                timestamp="updated"
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
                 actions={
@@ -403,6 +435,7 @@ export const InvestigationSection = ({
   isOpen = true,
   onToggle,
   isHighlighted = false,
+  isLoadingNewFilters = false,
 }: InvestigationSectionProps): React.ReactElement | null => {
   const { euiTheme } = useEuiTheme();
   const presentation = getSectionPresentation(id);
@@ -489,6 +522,8 @@ export const InvestigationSection = ({
         <h2 id={presentation.headingId}>{presentation.title}</h2>
       </EuiScreenReaderOnly>
       <SectionCard
+        isLoading={isLoadingNewFilters}
+        loadingTestSubj={`nightshiftInvestigationSectionLoading-${id}`}
         highlightColor={
           isHighlighted && presentation.severity != null
             ? SEVERITY_DOT_COLOR[presentation.severity]

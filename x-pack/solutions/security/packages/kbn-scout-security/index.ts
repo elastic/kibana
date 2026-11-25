@@ -21,13 +21,16 @@ export {
   CUSTOM_QUERY_RULE,
   DEFAULT_SECURITY_SOLUTION_INDEXES,
   EQL_RULE,
+  ESQL_RULE,
 } from './src/playwright/constants/detection_rules';
 export type {
   CustomQueryRuleResponseAction,
+  EsqlRule,
   ThreatMatchRule,
 } from './src/playwright/constants/detection_rules';
 export { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from './src/playwright/constants/timeouts';
 export { PREVALENCE_HOST_NAME } from './src/playwright/fixtures/worker/apis/prevalence';
+export { THREAT_INDICATOR_IP } from './src/playwright/fixtures/worker/apis/threat_intelligence';
 export { ANALYZER_ORIGIN_PROCESS_NAME } from './src/playwright/fixtures/worker/apis/analyzer';
 export { NETWORK_SOURCE_IP } from './src/playwright/fixtures/worker/apis/network';
 export { HOST_NAME } from './src/playwright/fixtures/worker/apis/host';

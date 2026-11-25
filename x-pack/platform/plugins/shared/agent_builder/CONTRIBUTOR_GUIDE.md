@@ -336,31 +336,11 @@ agentBuilder.agents.register({
 
 `inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
 
-### Choosing the agent's reasoning level
-
-A built-in agent can declare the reasoning level its runs use by default:
-
-```ts
-agentBuilder.agents.register({
-  id: 'platform.my_solution.agent',
-  name: 'My solution agent',
-  description: 'Agent specialized in my solution',
-  configuration: {
-    instructions: 'You are a specialist [...]',
-    tools: [{ tool_ids: ['[...]'] }],
-    inference_feature_id: 'my_solution_agent',
-    reasoning_level: 'high',
-  },
-});
-```
-
-`reasoning_level` is only supported for built-in agents, and cannot be set by agent types.
-
 ### Turning off built-in agent features (`capabilities`)
 
 Every agent gets some built-in Agent Builder features, such as the generic attachment tools. An agent that has no use for one can turn it off with `capabilities`:
 
-- **Who can set it:** agent types and built-in agents. Unlike `reasoning_level`, it also works from an agent type's base configuration. It cannot be set through the HTTP API, the agent form, `configuration_overrides` or the `ai.agent` workflow step.
+- **Who can set it:** agent types and built-in agents. Unlike `inference_feature_id`, it also works from an agent type's base configuration. It cannot be set through the HTTP API, the agent form, `configuration_overrides` or the `ai.agent` workflow step.
 - **Defaults:** a missing `capabilities`, a missing key or a missing `enabled` all mean on. Only `enabled: false` turns a feature off.
 - **Merge:** when both an agent type and its agent set `capabilities`, they are merged per key, and the agent's value wins.
 
@@ -394,6 +374,10 @@ What keeps working:
 
 - **Attachments themselves:** attachments can still be added through the API, workflow steps, the attachment client and the agent's own tools.
 - **Type and bound tools:** tools that an attachment type declares, and tools tied to one attachment, are still added.
+
+#### `bash_tool`
+
+With `bash_tool: { enabled: false }`, the agent does not get the virtual filesystem `bash` tool, and its system prompt no longer lists it in the FILESYSTEM section or tells it to write render payloads with it (renderers are left out of the CUSTOM RENDERING section). Use it for an agent that works on files through its own tools, because the `bash` tool's `/workspace` is the Agent Builder virtual filesystem, not whatever filesystem those tools edit. `read_file` and `list_files` stay on. The capability only matters when the `bash` experimental feature is on, since the tool does not exist otherwise.
 
 #### Adding a new key
 

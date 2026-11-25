@@ -168,6 +168,7 @@
     "xpack.searchNavigation": "solutions/search/plugins/search_navigation",
     "xpack.searchInferenceEndpoints": "platform/plugins/shared/search_inference_endpoints",
     "xpack.searchAssistant": "solutions/search/plugins/search_assistant",
+    "xpack.searchBoost": "platform/plugins/private/search_boost",
     "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [
       "platform/plugins/shared/security",
@@ -245,6 +246,7 @@
     "xpack.serverlessWorkplaceAI": "solutions/workplaceai/plugins/serverless_workplace_ai",
     "xpack.sloShared": "platform/plugins/shared/slo_shared",
     "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app",
+    "xpack.entityInventory": "solutions/observability/plugins/entity_inventory",
     "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"],
     "xpack.agentBuilderDashboards": "platform/plugins/shared/agent_builder_dashboards",
     "xpack.alertingV2EpisodesUi": "platform/packages/shared/response-ops/alerting-v2-episodes-ui",

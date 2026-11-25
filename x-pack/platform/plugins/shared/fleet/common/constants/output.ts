@@ -153,6 +153,27 @@ export const otlpCompressionType = {
   None: 'none',
 } as const;
 
+/** How an OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. */
+export const otlpAuthType = {
+  // `Authorization: <scheme> <credential>`
+  AuthHeader: 'auth_header',
+  // `<name>: <credential>`
+  CustomHeader: 'custom_header',
+} as const;
+
+export const otlpAuthScheme = {
+  ApiKey: 'api_key',
+  BearerToken: 'bearer_token',
+} as const;
+
+/** The literal prefix of the `Authorization` header of each scheme. */
+export const OTLP_AUTH_SCHEME_PREFIX: Readonly<Record<ValueOf<typeof otlpAuthScheme>, string>> = {
+  [otlpAuthScheme.ApiKey]: 'ApiKey',
+  [otlpAuthScheme.BearerToken]: 'Bearer',
+};
+
+export const OTLP_AUTHORIZATION_HEADER = 'Authorization';
+
 // snappy and zstd are gRPC-only; HTTP/protobuf only supports gzip and none
 export const OTLP_GRPC_ONLY_COMPRESSION_TYPES: ReadonlyArray<string> = [
   otlpCompressionType.Snappy,
@@ -246,6 +267,10 @@ export const BEATS_OUTPUT_TYPES: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+// Output types valid for agent policies that mix OTel and Beats inputs, and that carry the
+// `otel_exporter_config_yaml` / `otel_disable_beatsauth` settings ("OpenTelemetry exporter" UI section).
+// otlp is excluded: Beats inputs cannot ship to it, and it is configured through `otlp_exporter`.
+// OTel-only policies can use otlp, see OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES.
 export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.Elasticsearch,
   outputType.RemoteElasticsearch,
