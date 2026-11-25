@@ -8,7 +8,7 @@
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 
-import { AGENT_MAPPINGS } from '../../../common/constants';
+import { AGENT_QUERYABLE_MAPPINGS } from '../../../common/constants';
 
 interface MappingProperty {
   type?: string;
@@ -17,9 +17,9 @@ interface MappingProperty {
 
 const SEARCHABLE_FIELD_TYPES: readonly string[] = ['keyword', 'text'];
 
-// `status` is declared in `AGENT_MAPPINGS` only so it passes kuery validation; it is a runtime
-// field, which a free text search on the index does not cover.
-const EXCLUDED_FIELDS: readonly string[] = ['status'];
+// Runtime fields are declared in `AGENT_QUERYABLE_MAPPINGS` only so they pass kuery validation;
+// a free text search on the index does not cover them.
+const EXCLUDED_FIELDS: readonly string[] = ['status', 'signals', 'pipeline_config'];
 
 const collectSearchableFields = (
   properties: Record<string, MappingProperty>,
@@ -34,7 +34,7 @@ const collectSearchableFields = (
 
 /** The fields a field-less (free text) agent kuery term is searched on. */
 export const AGENT_FREE_TEXT_SEARCH_FIELDS: readonly string[] = collectSearchableFields(
-  AGENT_MAPPINGS.properties
+  AGENT_QUERYABLE_MAPPINGS.properties
 ).filter((field) => !EXCLUDED_FIELDS.includes(field));
 
 const isKueryNode = (value: unknown): value is KueryNode =>

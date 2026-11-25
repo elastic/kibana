@@ -35,8 +35,16 @@ describe('AGENT_FREE_TEXT_SEARCH_FIELDS', () => {
     );
   });
 
-  it('does not include the status runtime field', () => {
-    expect(AGENT_FREE_TEXT_SEARCH_FIELDS).not.toContain('status');
+  it('includes the queryable string fields that AGENT_MAPPINGS does not declare', () => {
+    expect(AGENT_FREE_TEXT_SEARCH_FIELDS).toContain('audit_unenrolled_reason');
+  });
+
+  it('does not include runtime fields', () => {
+    expect(
+      AGENT_FREE_TEXT_SEARCH_FIELDS.filter((field) =>
+        ['status', 'signals', 'pipeline_config'].includes(field)
+      )
+    ).toEqual([]);
   });
 
   it('only includes fields that are not API keys', () => {
