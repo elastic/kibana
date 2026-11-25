@@ -16,6 +16,7 @@ import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
+import { useInvalidateChangeHistory } from '../../../rule_management/api/hooks/use_infinite_change_history';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../rule_management/api/hooks/use_find_rules_query');
@@ -24,6 +25,7 @@ jest.mock('../../../rule_management/api/hooks/use_fetch_rule_management_filters_
 jest.mock(
   '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query'
 );
+jest.mock('../../../rule_management/api/hooks/use_infinite_change_history');
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: { http: { basePath: { prepend: jest.fn() } } },
@@ -40,6 +42,7 @@ const mockInvalidateFindRulesQuery = jest.fn();
 const mockInvalidateFetchCoverageOverviewQuery = jest.fn();
 const mockInvalidateFetchRuleManagementFilters = jest.fn();
 const mockInvalidateFetchPrebuiltRuleBaseVerison = jest.fn();
+const mockInvalidateChangeHistory = jest.fn();
 jest.mocked(useInvalidateFindRulesQuery).mockReturnValue(mockInvalidateFindRulesQuery);
 jest
   .mocked(useInvalidateFetchCoverageOverviewQuery)
@@ -50,6 +53,7 @@ jest
 jest
   .mocked(useInvalidateFetchPrebuiltRuleBaseVersionQuery)
   .mockReturnValue(mockInvalidateFetchPrebuiltRuleBaseVerison);
+jest.mocked(useInvalidateChangeHistory).mockReturnValue(mockInvalidateChangeHistory);
 
 const file = new File(['file'], 'rules.json', { type: 'application/x-ndjson' });
 
@@ -77,6 +81,7 @@ describe('RuleImportModal', () => {
       expect(mockInvalidateFetchCoverageOverviewQuery).toHaveBeenCalled();
       expect(mockInvalidateFetchRuleManagementFilters).toHaveBeenCalled();
       expect(mockInvalidateFetchPrebuiltRuleBaseVerison).toHaveBeenCalled();
+      expect(mockInvalidateChangeHistory).toHaveBeenCalled();
     });
   });
 
