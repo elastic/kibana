@@ -186640,7 +186640,7 @@ components:
               nullable: true
               type: number
             queue_size:
-              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
               nullable: true
               type: number
             sizer:
@@ -186914,7 +186914,7 @@ components:
               nullable: true
               type: number
             queue_size:
-              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
               nullable: true
               type: number
             sizer:
@@ -187186,7 +187186,7 @@ components:
               nullable: true
               type: number
             queue_size:
-              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
               nullable: true
               type: number
             sizer:
@@ -187460,7 +187460,7 @@ components:
               nullable: true
               type: number
             queue_size:
-              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint.'
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
               nullable: true
               type: number
             sizer:
