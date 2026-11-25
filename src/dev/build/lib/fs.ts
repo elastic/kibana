@@ -17,7 +17,8 @@ import { resolve, dirname, isAbsolute, basename, sep } from 'path';
 import { createGunzip, createGzip } from 'zlib';
 import { inspect } from 'util';
 
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
+import type { CoreOptions, ZipOptions } from 'archiver';
 import { globby } from 'globby';
 import pMap from 'p-map';
 import del from 'del';
@@ -302,7 +303,7 @@ interface CompressZipOptions {
   rootDirectoryName?: string;
   source: string;
   destination: string;
-  archiverOptions?: archiver.ZipOptions & archiver.CoreOptions;
+  archiverOptions?: ZipOptions & CoreOptions;
 }
 export async function compressZip({
   source,
@@ -315,7 +316,7 @@ export async function compressZip({
   assertAbsolute(destination);
 
   const output = fs.createWriteStream(destination);
-  const archive = archiver('zip', archiverOptions);
+  const archive = new ZipArchive(archiverOptions);
   const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
   const name = createRootDirectory ? folder : false;
   archive.pipe(output);

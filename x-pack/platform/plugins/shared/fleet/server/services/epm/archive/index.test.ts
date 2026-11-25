@@ -10,7 +10,7 @@ import os from 'os';
 import path from 'path';
 import { PassThrough } from 'stream';
 
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import * as tar from 'tar';
 
 import type { AssetParts } from '../../../types';
@@ -19,7 +19,7 @@ import { getBufferExtractor, getPathParts, untarBuffer, unzipBuffer } from '.';
 
 function createZipBuffer(files: Array<{ name: string; content: string }>): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const archive = archiver('zip');
+    const archive = new ZipArchive();
     const chunks: Buffer[] = [];
     archive.on('data', (c: Buffer) => chunks.push(c));
     archive.on('end', () => resolve(Buffer.concat(chunks)));

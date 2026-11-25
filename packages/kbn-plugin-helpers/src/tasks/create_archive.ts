@@ -10,7 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import del from 'del';
 
 import type { TaskContext } from '../task_context';
@@ -28,7 +28,7 @@ export async function createArchive({ kibanaVersion, plugin, log }: TaskContext)
 
   // zip up the build files
   const output = Fs.createWriteStream(Path.resolve(buildDir, zipName));
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   archive.pipe(output);
 
   const directoryToAdd = Path.resolve(buildDir, 'kibana');
