@@ -5,11 +5,22 @@
  * 2.0.
  */
 
-import type { Plugin } from '@kbn/core/server';
-import type { SecretsPluginSetup, SecretsPluginStart } from './types';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { registerSecretType } from './saved_objects/secret_saved_object';
+import type {
+  SecretsPluginSetup,
+  SecretsPluginSetupDependencies,
+  SecretsPluginStart,
+} from './types';
 
-export class SecretsPlugin implements Plugin<SecretsPluginSetup, SecretsPluginStart> {
-  public setup(): SecretsPluginSetup {
+export class SecretsPlugin
+  implements Plugin<SecretsPluginSetup, SecretsPluginStart, SecretsPluginSetupDependencies>
+{
+  public setup(
+    { savedObjects }: CoreSetup,
+    { encryptedSavedObjects }: SecretsPluginSetupDependencies
+  ): SecretsPluginSetup {
+    registerSecretType({ savedObjects, encryptedSavedObjects });
     return {};
   }
 

@@ -13,21 +13,13 @@ import {
   SECRET_VALUE_MIN_LENGTH,
   SecretValidationError,
 } from '@kbn/secrets';
-import type { SecretSource, UpdateSecretParams } from '@kbn/secrets';
-
-const validateSourceValue = ({ value: { length } }: SecretSource): void => {
-  if (length < SECRET_VALUE_MIN_LENGTH || length > SECRET_VALUE_MAX_LENGTH) {
-    throw new SecretValidationError(
-      `A secret value has between ${SECRET_VALUE_MIN_LENGTH} and ${SECRET_VALUE_MAX_LENGTH} characters`
-    );
-  }
-};
+import type { UpdateSecretParams } from '@kbn/secrets';
 
 /**
  * Throws `SecretValidationError` when a secret cannot be created or updated as requested.
- * An update that keeps the current source has no source to check.
+ * An update that keeps the current value has no value to check.
  */
-export const validateSecret = ({ name, description, source }: UpdateSecretParams): void => {
+export const validateSecret = ({ name, description, value }: UpdateSecretParams): void => {
   if (!isValidSecretName(name)) {
     throw new SecretValidationError(
       `A secret name has at most ${SECRET_NAME_MAX_LENGTH} characters, starts with a lowercase letter or an underscore and contains only lowercase letters, digits and underscores`
@@ -38,7 +30,12 @@ export const validateSecret = ({ name, description, source }: UpdateSecretParams
       `A secret description has at most ${SECRET_DESCRIPTION_MAX_LENGTH} characters`
     );
   }
-  if (source) {
-    validateSourceValue(source);
+  if (
+    value !== undefined &&
+    (value.length < SECRET_VALUE_MIN_LENGTH || value.length > SECRET_VALUE_MAX_LENGTH)
+  ) {
+    throw new SecretValidationError(
+      `A secret value has between ${SECRET_VALUE_MIN_LENGTH} and ${SECRET_VALUE_MAX_LENGTH} characters`
+    );
   }
 };

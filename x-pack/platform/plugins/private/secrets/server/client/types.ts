@@ -8,19 +8,17 @@
 import type {
   CreateSecretParams,
   DeleteSecretParams,
-  KibanaSecretSource,
-  SecretDetails,
   SecretMetadata,
   UpdateSecretParams,
 } from '@kbn/secrets';
 
-export type KibanaSecretEntry = SecretDetails & KibanaSecretSource;
-
-/** A secret as stored: its details and its source, value included. Never leaves the server. */
-export type SecretEntry = KibanaSecretEntry;
+/** A secret as stored, value included. Never leaves the server. */
+export interface SecretEntry extends SecretMetadata {
+  readonly value: string;
+}
 
 /**
- * Secrets of one space, as seen by one consumer feature. No operation returns a value.
+ * The secrets of one space. No operation returns a value.
  * Every operation throws `SecretsUnavailableError` when secrets cannot be used in this Kibana.
  */
 export interface SecretsClient {
@@ -32,10 +30,10 @@ export interface SecretsClient {
   create(params: CreateSecretParams): Promise<SecretMetadata>;
   /**
    * Throws `SecretValidationError` when the change breaks a rule or changes nothing,
-   * `SecretNotFoundError` when the consumer has no secret with this name, and
+   * `SecretNotFoundError` when the space has no secret with this name, and
    * `SecretConflictError` when another request changed the secret during the update.
    */
   update(params: UpdateSecretParams): Promise<SecretMetadata>;
-  /** Throws `SecretNotFoundError` when the consumer has no secret with this name. */
+  /** Throws `SecretNotFoundError` when the space has no secret with this name. */
   delete(params: DeleteSecretParams): Promise<void>;
 }

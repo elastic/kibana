@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/** Where the value of a secret lives. */
-export const SECRET_PROVIDER_TYPE = {
-  kibana: 'kibana',
-} as const;
-
 export const SECRET_NAME_MAX_LENGTH = 128;
 export const SECRET_DESCRIPTION_MAX_LENGTH = 1024;
 /**

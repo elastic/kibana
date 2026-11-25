@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+
 /**
  * Setup contract of the secrets plugin. It has no members: dependants use its presence to know,
  * at setup, that the plugin is enabled.
@@ -13,3 +15,7 @@ export type SecretsPluginSetup = Record<string, never>;
 
 /** Start contract of the secrets plugin. */
 export type SecretsPluginStart = Record<string, never>;
+
+export interface SecretsPluginSetupDependencies {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+}

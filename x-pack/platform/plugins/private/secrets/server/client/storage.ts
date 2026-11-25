@@ -17,8 +17,8 @@ export interface StoredSecret {
 
 /** Persistence for the secrets of one space. */
 export interface SecretsStorage {
-  /** Lists the secrets that this consumer may use, without their values. */
-  list(params: { consumer: string }): Promise<SecretMetadata[]>;
+  /** Lists the secrets without their values. */
+  list(): Promise<SecretMetadata[]>;
   /** Returns the secret with its value, or `undefined` when no secret has this name. */
   get(params: { name: string }): Promise<StoredSecret | undefined>;
   /** Throws `SecretAlreadyExistsError` when the name is taken. */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/** No secret with this name exists in the space, or the consumer may not use it. */
+/** No secret with this name exists in the space. */
 export class SecretNotFoundError extends Error {
   constructor(public readonly secretName: string) {
     super(`Secret "${secretName}" not found`);

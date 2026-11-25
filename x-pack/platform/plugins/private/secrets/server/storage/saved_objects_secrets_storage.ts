@@ -1,0 +1,137 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SecretAlreadyExistsError, SecretConflictError, SecretNotFoundError } from '@kbn/secrets';
+import type { SecretMetadata } from '@kbn/secrets';
+import type { SecretsStorage } from '../client/storage';
+import type { SecretEntry } from '../client/types';
+import {
+  getSecretSavedObjectId,
+  SECRET_SAVED_OBJECT_TYPE,
+} from '../saved_objects/secret_saved_object';
+import type {
+  ListedSecretAttributes,
+  SecretAttributes,
+} from '../saved_objects/secret_saved_object';
+
+const LIST_PER_PAGE = 100;
+
+export interface CreateSavedObjectsSecretsStorageParams {
+  readonly spaceId: string;
+  /** Must include the hidden secret type and must not apply the spaces extension. */
+  readonly savedObjectsClient: Pick<
+    SavedObjectsClientContract,
+    'create' | 'createPointInTimeFinder' | 'delete'
+  >;
+  readonly encryptedClient: Pick<EncryptedSavedObjectsClient, 'getDecryptedAsInternalUser'>;
+}
+
+const toEntry = (attributes: SecretAttributes): SecretEntry => {
+  // The type promises a value, but a read does not verify it. Never return a missing value.
+  if (typeof attributes.value !== 'string') {
+    throw new Error(`Secret "${attributes.name}" has no value`);
+  }
+  return attributes;
+};
+
+/** Creates the storage that keeps the secrets of one space as encrypted saved objects. */
+export const createSavedObjectsSecretsStorage = ({
+  spaceId,
+  savedObjectsClient,
+  encryptedClient,
+}: CreateSavedObjectsSecretsStorageParams): SecretsStorage => {
+  const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
+  const idOf = (name: string): string => getSecretSavedObjectId({ spaceId, name });
+
+  return {
+    list: async () => {
+      const finder = savedObjectsClient.createPointInTimeFinder<ListedSecretAttributes>({
+        type: SECRET_SAVED_OBJECT_TYPE,
+        namespaces: [spaceId],
+        perPage: LIST_PER_PAGE,
+      });
+      const secrets: SecretMetadata[] = [];
+      try {
+        for await (const { saved_objects: page } of finder.find()) {
+          // A read that does not decrypt never returns the encrypted `value`.
+          secrets.push(...page.map(({ attributes }) => attributes));
+        }
+      } finally {
+        await finder.close();
+      }
+      return secrets;
+    },
+
+    get: async ({ name }) => {
+      try {
+        const { attributes, version } =
+          await encryptedClient.getDecryptedAsInternalUser<SecretAttributes>(
+            SECRET_SAVED_OBJECT_TYPE,
+            idOf(name),
+            { namespace }
+          );
+        if (version === undefined) {
+          throw new Error(`Secret "${name}" has no version`);
+        }
+        return { entry: toEntry(attributes), version };
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          return undefined;
+        }
+        throw error;
+      }
+    },
+
+    create: async ({ entry }) => {
+      try {
+        await savedObjectsClient.create<SecretEntry>(SECRET_SAVED_OBJECT_TYPE, entry, {
+          id: idOf(entry.name),
+          namespace,
+          overwrite: false,
+        });
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isConflictError(error)) {
+          throw new SecretAlreadyExistsError(entry.name);
+        }
+        throw error;
+      }
+    },
+
+    // A full overwrite encrypts the value again: a partial update would corrupt it. The version
+    // makes Elasticsearch refuse the write when the secret changed or was deleted since it was
+    // read.
+    replace: async ({ entry, version }) => {
+      try {
+        await savedObjectsClient.create<SecretEntry>(SECRET_SAVED_OBJECT_TYPE, entry, {
+          id: idOf(entry.name),
+          namespace,
+          overwrite: true,
+          version,
+        });
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isConflictError(error)) {
+          throw new SecretConflictError(entry.name);
+        }
+        throw error;
+      }
+    },
+
+    delete: async ({ name }) => {
+      try {
+        await savedObjectsClient.delete(SECRET_SAVED_OBJECT_TYPE, idOf(name), { namespace });
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          throw new SecretNotFoundError(name);
+        }
+        throw error;
+      }
+    },
+  };
+};
