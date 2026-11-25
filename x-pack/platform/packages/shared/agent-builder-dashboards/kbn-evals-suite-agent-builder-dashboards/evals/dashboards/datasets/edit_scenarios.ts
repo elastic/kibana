@@ -7,7 +7,10 @@
 
 import { toQueryList } from '@kbn/agent-builder-visualizations-common';
 import { LOGS_VISUALIZATIONS } from '../../../src/fixtures/logs_visualizations';
-import { SECTIONED_LOGS_DASHBOARD_DSL_VEGA } from '../../../src/fixtures/sectioned_logs_dashboard';
+import {
+  SECTIONED_LOGS_DASHBOARD,
+  SECTIONED_LOGS_DASHBOARD_DSL_VEGA,
+} from '../../../src/fixtures/sectioned_logs_dashboard';
 import { TOP_LEVEL, type DashboardDatasetExample } from '../../../src/types';
 import { layoutEditExample } from './factories';
 
@@ -152,6 +155,8 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
   }),
   editScenario({
     question: 'hide the panel titles and borders and stop syncing the cursor across panels',
+    // A setting the prompt does not name, which must stay off.
+    dashboard: { ...SECTIONED_LOGS_DASHBOARD, options: { use_margins: false } },
     layoutEdit: { changes: [] },
     settings: {
       options: { hide_panel_titles: true, hide_panel_borders: true, sync_cursor: false },

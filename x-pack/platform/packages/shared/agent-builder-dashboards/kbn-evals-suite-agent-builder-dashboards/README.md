@@ -113,7 +113,7 @@ Forty-five examples, because each dashboard example costs 150k–300k input toke
   - move the Vega chart to the top level, delete the ML swim lane, and swap the bytes slider for `machine.ram` (`removed`, a placement and `controls`);
   - add a markdown note, a second ML swim lane and a Vega heatmap to a section (`structure.panelKinds`, placements of the added kinds, and `panelEdits` on the note's terms, the swim lane's job and view, and the heatmap's `rect` mark);
   - delete the Errors section but keep its errors by host table, and recolor the 4xx chart while moving it into Traffic (`removed`, placements and `panelEdits`);
-  - hide the panel titles and borders and stop syncing the cursor, in one call that may change nothing else (`settings` and `layoutEdit` gold that lets nothing move; tagged `settings_edit`).
+  - hide the panel titles and borders and stop syncing the cursor, in one call that may change nothing else, on a seed with margins off that must stay off (`settings` and `layoutEdit` gold that lets nothing move; tagged `settings_edit`).
 
 Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit` | `edit_scenario` | `settings_edit` | `ml_panels`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced. `datasets/gold_ids.test.ts` fails when gold names a panel or section id its seeded dashboard does not have, so seed edits cannot silently zero an assertion.
 
