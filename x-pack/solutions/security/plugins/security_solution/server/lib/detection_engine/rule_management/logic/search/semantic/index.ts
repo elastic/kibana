@@ -15,15 +15,7 @@ export { syncRuleSearchIndex } from './rule_search_sync';
 
 export type SemanticSearchResult =
   | { mode: 'semantic'; ruleIds: string[] }
-  | { mode: 'legacy'; reason: 'exact' | 'no_model' | 'indexing' | 'error' };
-
-/**
- * Text that asks for an exact match stays on the keyword search, which finds all matches:
- * quoted text, MITRE ATT&CK ids (T1003, T1003.001, TA0006) and rule ids. This looks at the shape
- * of the text, not at words, so it does not depend on the language.
- */
-const EXACT_TEXT =
-  /^(".+"|(TA|T)\d{4}(\.\d{3})?|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+  | { mode: 'legacy'; reason: 'no_model' | 'indexing' | 'error' };
 
 /** The table and its facet counts ask for the same text right after each other. */
 const CACHE_TTL_MS = 30_000;
@@ -50,9 +42,6 @@ const runSemanticSearch = async ({
   term: string;
   logger: Logger;
 }): Promise<SemanticSearchResult> => {
-  if (EXACT_TEXT.test(term)) {
-    return { mode: 'legacy', reason: 'exact' };
-  }
   const key = `${spaceId}\u0000${term}`;
   const cached = cache.get(key);
   if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
