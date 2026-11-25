@@ -10,11 +10,19 @@
 import { appendToESQLQuery } from '@kbn/esql-utils';
 import {
   FAILED_SPAN_CONDITION,
+  isFailedOnlyCondition,
+  isSelectionCondition,
   operationToEsqlCondition,
   selectionToEsqlCondition,
 } from '@kbn/trace-latency-map';
 import { extractFilters } from '../../../utils';
-import { appendMapClause, removeMapSetResidue, removeWhere } from './latency_map_query_clauses';
+import {
+  MAP_SET_PREFIX,
+  appendMapClause,
+  removeMapSetResidue,
+  removeWhere,
+  replaceMapClause,
+} from './latency_map_query_clauses';
 
 const query = 'FROM traces-apm*\n| WHERE service.name == "cart"';
 const clause = '@timestamp >= TO_DATETIME("2026-10-26T10:00:00.000Z") AND (duration >= 1000)';
@@ -101,9 +109,7 @@ describe('removeWhere', () => {
 describe('appendMapClause', () => {
   it('sets unmapped fields to null once, so a source without a field of the clause still runs', () => {
     const once = appendMapClause(query, clause);
-    expect(once).toBe(
-      `SET unmapped_fields="NULLIFY";\n${appendToESQLQuery(query, `| WHERE ${clause}`)}`
-    );
+    expect(once).toBe(`${MAP_SET_PREFIX}${appendToESQLQuery(query, `| WHERE ${clause}`)}`);
     expect(
       appendMapClause(once, '(status.code == "Error")').match(/SET unmapped_fields/g)
     ).toHaveLength(1);
@@ -121,9 +127,7 @@ describe('appendMapClause', () => {
   });
 
   it('removes the clause again', () => {
-    expect(removeWhere(appendMapClause(query, clause), clause)).toBe(
-      `SET unmapped_fields="NULLIFY";\n${query}`
-    );
+    expect(removeWhere(appendMapClause(query, clause), clause)).toBe(`${MAP_SET_PREFIX}${query}`);
   });
 
   it('puts the clause before the first LIMIT, keeping the line breaks, and takes it back', () => {
@@ -159,7 +163,7 @@ describe('appendMapClause', () => {
   it('is not fooled by the words of a SET inside a string literal', () => {
     const literal = `${query} AND span.name == "SET unmapped_fields"`;
     expect(appendMapClause(literal, clause)).toBe(
-      `SET unmapped_fields="NULLIFY";\n${appendToESQLQuery(literal, `| WHERE ${clause}`)}`
+      `${MAP_SET_PREFIX}${appendToESQLQuery(literal, `| WHERE ${clause}`)}`
     );
   });
 });
@@ -182,5 +186,38 @@ describe('removeMapSetResidue', () => {
     // Same value but the user's own spacing: not the exact prefix the map writes.
     const ownNullify = `SET unmapped_fields="NULLIFY"; ${query}`;
     expect(removeMapSetResidue(ownNullify)).toBe(ownNullify);
+  });
+});
+
+describe('replaceMapClause', () => {
+  const nextSelectionClause = selectionToEsqlCondition({
+    from: '2026-10-26T10:00:00.000Z',
+    to: '2026-10-26T10:10:00.000Z',
+    minDuration: 1_000_000,
+    maxDuration: 5_000_000,
+  });
+
+  it('replaces every clause of the kind with the new one, and writes the SET once', () => {
+    const stacked = `${query}\n| WHERE ${selectionClause}\n| WHERE ${selectionClause}`;
+    expect(replaceMapClause(stacked, isSelectionCondition, nextSelectionClause)).toBe(
+      `${MAP_SET_PREFIX}${query}\n| WHERE ${nextSelectionClause}`
+    );
+  });
+
+  it('takes the clause out, and the SET with it once no map clause remains', () => {
+    const appended = appendMapClause(query, selectionClause);
+    expect(replaceMapClause(appended, isSelectionCondition, undefined)).toBe(query);
+    // Another map clause still needs the SET, and is not of the kind replaced.
+    const both = appendMapClause(appended, FAILED_SPAN_CONDITION);
+    expect(replaceMapClause(both, isSelectionCondition, undefined)).toBe(
+      `${MAP_SET_PREFIX}${query}\n| WHERE ${FAILED_SPAN_CONDITION}`
+    );
+    expect(replaceMapClause(both, isFailedOnlyCondition, undefined)).toBe(appended);
+  });
+
+  it('writes no SET when told every referenced field is mapped', () => {
+    expect(replaceMapClause(query, isSelectionCondition, selectionClause, { nullify: false })).toBe(
+      `${query}\n| WHERE ${selectionClause}`
+    );
   });
 });

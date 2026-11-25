@@ -36,7 +36,7 @@ import {
  * with the same text, or a WHERE inside a FORK branch, is left alone, as is a query that
  * does not parse.
  */
-export const removeWhere = (query: string, clause: string) => {
+export const removeWhere = (query: string, clause: string): string => {
   const root = parseEsqlQuery(query);
   const command =
     root && topLevelCommands(root, 'where').find((c) => whereExpression(c) === clause);
@@ -47,7 +47,7 @@ export const removeWhere = (query: string, clause: string) => {
 };
 
 /** The exact prefix `appendMapClause` writes, which `removeMapSetResidue` takes back off. */
-const MAP_SET_PREFIX = 'SET unmapped_fields="NULLIFY";\n';
+export const MAP_SET_PREFIX = 'SET unmapped_fields="NULLIFY";\n';
 
 /**
  * Append a WHERE clause the map writes. It names fields of every trace family (`duration` of
@@ -65,7 +65,7 @@ export const appendMapClause = (
   query: string,
   clause: string,
   { nullify = true }: { nullify?: boolean } = {}
-) => {
+): string => {
   const root = parseEsqlQuery(query);
   const [limit] = root ? topLevelCommands(root, 'limit') : [];
   const leadStart = root && limit ? commandLeadStart(query, root, limit) : undefined;
@@ -96,7 +96,23 @@ const isMapClause = (condition: string) =>
  * of a user typing the byte-exact prefix and then clearing the last map clause, which
  * retyping the SET recovers.
  */
-export const removeMapSetResidue = (query: string) =>
+export const removeMapSetResidue = (query: string): string =>
   query.startsWith(MAP_SET_PREFIX) && !extractFilters(query).some(isMapClause)
     ? query.slice(MAP_SET_PREFIX.length)
     : query;
+
+/**
+ * Replace the map's clause of one kind (the selection, the focused operation, "failed
+ * only": `isClause` tells it) with `clause`, or take it out when there is none to write.
+ * Every clause of the kind in the query goes, wherever it sits, so a second commit never
+ * stacks on the first; once the last map clause is gone, the map's own SET prefix goes too.
+ */
+export const replaceMapClause = (
+  query: string,
+  isClause: (condition: string) => boolean,
+  clause: string | undefined,
+  { nullify }: { nullify?: boolean } = {}
+): string => {
+  const without = extractFilters(query).filter(isClause).reduce(removeWhere, query);
+  return clause ? appendMapClause(without, clause, { nullify }) : removeMapSetResidue(without);
+};

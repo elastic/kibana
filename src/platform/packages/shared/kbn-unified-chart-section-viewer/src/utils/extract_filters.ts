@@ -38,7 +38,7 @@ function splitCommands(query: string): string[] {
  * The WHERE expressions of a query that does not parse (half-typed, say), read as text:
  * what is there is still worth showing, so the charts can follow a query being edited.
  */
-function extractFiltersFromText(query: string) {
+function extractFiltersFromText(query: string): string[] {
   return splitCommands(query)
     .map((command) => command.trim())
     .filter((command) => /^where\s/i.test(command))
@@ -54,7 +54,7 @@ function extractFiltersFromText(query: string) {
  * a condition the latency map wrote comes back as it was written. A query that does not
  * parse falls back to its text.
  */
-export function extractFilters(query: string) {
+export function extractFilters(query: string): string[] {
   const root = parseEsqlQuery(query);
   if (!root) return extractFiltersFromText(query);
   return topLevelCommands(root, 'where')

@@ -32,9 +32,8 @@ import type {
   RunEsql,
 } from '@kbn/trace-latency-map';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { extractFilters } from '../../../utils';
 import { expressionReadsParams } from '../../../utils/esql_commands';
-import { appendMapClause, removeMapSetResidue, removeWhere } from './latency_map_query_clauses';
+import { replaceMapClause } from './latency_map_query_clauses';
 import { buildExampleSpanQuery } from './example_span_query';
 import { getSearchErrorReason } from './search_error';
 import { useStableTraceSource } from './use_stable_trace_source';
@@ -216,45 +215,38 @@ export function TracesLatencyMapView({
     [searchEsql]
   );
 
-  const commitSelection = useCallback(
-    (next: LatencyMapSelection | undefined, esqlCondition: string | undefined) => {
-      updateESQLQuery?.((query) => {
-        // The clause to replace is found in the query being updated, not taken from the
-        // rendered props: a quick second commit runs before Discover pushes the refreshed
-        // fetch params, and the clause captured at render time would then be stale.
-        const withoutSelection = extractFilters(query)
-          .filter(isSelectionCondition)
-          .reduce(removeWhere, query);
-        return esqlCondition
-          ? appendMapClause(withoutSelection, esqlCondition, { nullify: nullifyRef.current })
-          : removeMapSetResidue(withoutSelection);
-      });
+  // Everything the map does to the documents is a clause of the query, one of each kind:
+  // the selection, the focused operation, "Errors only". The clause to replace is found in
+  // the query being updated, not taken from the rendered props: a quick second commit runs
+  // before Discover pushes the refreshed fetch params, and a clause captured at render
+  // time would then be stale.
+  const replaceClause = useCallback(
+    (isClause: (condition: string) => boolean, clause: string | undefined) => {
+      updateESQLQuery?.((query) =>
+        replaceMapClause(query, isClause, clause, { nullify: nullifyRef.current })
+      );
     },
     [updateESQLQuery]
+  );
+
+  const commitSelection = useCallback(
+    (_selection: LatencyMapSelection | undefined, esqlCondition: string | undefined) =>
+      replaceClause(isSelectionCondition, esqlCondition),
+    [replaceClause]
   );
 
   // Focusing an operation narrows the query itself, like the selection and "Errors only":
   // the documents table follows, and the map's source keeps the clause - unlike the other
   // two, it narrows what the map shows, which is the point.
   const focusOperation = useCallback(
-    (_operation: LatencyMapOperation, esqlCondition: string) => {
-      updateESQLQuery?.((query) => {
-        // Found in the query being updated, not in the rendered props, as in commitSelection.
-        const withoutOperation = extractFilters(query)
-          .filter(isOperationCondition)
-          .reduce(removeWhere, query);
-        return appendMapClause(withoutOperation, esqlCondition, { nullify: nullifyRef.current });
-      });
-    },
-    [updateESQLQuery]
+    (_operation: LatencyMapOperation, esqlCondition: string) =>
+      replaceClause(isOperationCondition, esqlCondition),
+    [replaceClause]
   );
-  const clearOperation = useCallback(() => {
-    updateESQLQuery?.((query) =>
-      removeMapSetResidue(
-        extractFilters(query).filter(isOperationCondition).reduce(removeWhere, query)
-      )
-    );
-  }, [updateESQLQuery]);
+  const clearOperation = useCallback(
+    () => replaceClause(isOperationCondition, undefined),
+    [replaceClause]
+  );
 
   // A selection left outside the picked time range matches nothing: the query would strand
   // the user on the no-results screen, with the map gone. A range that no longer overlaps
@@ -274,20 +266,9 @@ export function TracesLatencyMapView({
   // The "Errors only" switch is a filter of the query itself, like the selection: the
   // documents table follows it, it survives a reload and a shared link carries it.
   const changeFailedOnly = useCallback(
-    (next: boolean) => {
-      updateESQLQuery?.((query) => {
-        // Found in the query being updated, not in the rendered props, as in commitSelection.
-        const withoutFailedOnly = extractFilters(query)
-          .filter(isFailedOnlyCondition)
-          .reduce(removeWhere, query);
-        return next
-          ? appendMapClause(withoutFailedOnly, FAILED_SPAN_CONDITION, {
-              nullify: nullifyRef.current,
-            })
-          : removeMapSetResidue(withoutFailedOnly);
-      });
-    },
-    [updateESQLQuery]
+    (next: boolean) =>
+      replaceClause(isFailedOnlyCondition, next ? FAILED_SPAN_CONDITION : undefined),
+    [replaceClause]
   );
 
   // Only the latest click may open the flyout; a slower earlier fetch is discarded, and so
