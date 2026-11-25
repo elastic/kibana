@@ -202,6 +202,85 @@ describe('ConnectorFields renders', () => {
     });
   });
 
+  describe('extraBody', () => {
+    const fillExtraBody = async (value: string) => {
+      const input = await screen.findByTestId('config.extraBodyInput');
+      fireEvent.change(input, { target: { value } });
+    };
+
+    test('only renders for Other provider', async () => {
+      const { queryByTestId } = render(
+        <ConnectorFormTestProvider connector={openAiConnector}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      expect(queryByTestId('config.extraBodyInput')).not.toBeInTheDocument();
+    });
+
+    test('saves a JSON object as config.extraBody', async () => {
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={otherOpenAiConnector} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      await fillExtraBody('{ "chat_template_kwargs": { "enable_thinking": false } }');
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            ...otherOpenAiConnector,
+            config: {
+              ...otherOpenAiConnector.config,
+              extraBody: { chat_template_kwargs: { enable_thinking: false } },
+            },
+            __internal__: { hasHeaders: false, hasPKI: false },
+          },
+          isValid: true,
+        });
+      });
+    });
+
+    test('shows the saved value when editing', async () => {
+      render(
+        <ConnectorFormTestProvider
+          connector={{
+            ...otherOpenAiConnector,
+            config: { ...otherOpenAiConnector.config, extraBody: { top_k: 20 } },
+          }}
+        >
+          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      expect(await screen.findByTestId('config.extraBodyInput')).toHaveValue(
+        JSON.stringify({ top_k: 20 }, null, 2)
+      );
+    });
+
+    test.each([
+      ['{ not json', 'Additional request body must be a JSON object.'],
+      ['{ "model": "other" }', 'Additional request body cannot set model.'],
+    ])('blocks submit for %s', async (value, error) => {
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={otherOpenAiConnector} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      await fillExtraBody(value);
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
+      expect(await screen.findByText(error)).toBeInTheDocument();
+    });
+  });
+
   describe('Headers', () => {
     it('toggles headers as expected', async () => {
       const testFormData = {

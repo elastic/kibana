@@ -31,6 +31,15 @@ export enum OpenAiProviderType {
 
 export const DEFAULT_TIMEOUT_MS = 200000;
 
+// Request body keys Kibana owns; a connector's extraBody may not override them.
+export const EXTRA_BODY_PROTECTED_KEYS = [
+  'model',
+  'messages',
+  'stream',
+  'tools',
+  'tool_choice',
+] as const;
+
 export const DEFAULT_MODEL = 'gpt-4.1';
 
 export const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions' as const;

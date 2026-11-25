@@ -205,3 +205,32 @@ export const USE_NATIVE_FUNCTION_CALLING_DESC = i18n.translate(
       'Enable when the model supports native function calling in the chat completions API.',
   }
 );
+
+export const EXTRA_BODY_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.extraBodyLabel',
+  {
+    defaultMessage: 'Additional request body',
+  }
+);
+
+export const EXTRA_BODY_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.genAi.extraBodyHelpText',
+  {
+    defaultMessage:
+      'JSON object merged into every chat completion request sent to the model server. Use it for provider-specific parameters. For example, to turn off Qwen3 thinking on vLLM or SGLang: {example}',
+    values: { example: '{ "chat_template_kwargs": { "enable_thinking": false } }' },
+  }
+);
+
+export const EXTRA_BODY_INVALID_JSON = i18n.translate(
+  'xpack.stackConnectors.components.genAi.extraBodyInvalidJson',
+  {
+    defaultMessage: 'Additional request body must be a JSON object.',
+  }
+);
+
+export const getExtraBodyProtectedKeysError = (keys: string[]) =>
+  i18n.translate('xpack.stackConnectors.components.genAi.extraBodyProtectedKeys', {
+    defaultMessage: 'Additional request body cannot set {keys}.',
+    values: { keys: keys.join(', ') },
+  });
