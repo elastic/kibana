@@ -247,6 +247,96 @@ describe('getAxiosInstance()', () => {
     });
   });
 
+  describe('outbound actions off', () => {
+    const dualTypeId = '.slack2';
+    const message =
+      'Outbound actions are turned off for this connector. Turn them on to run or test actions.';
+
+    beforeEach(() => {
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: dualTypeId,
+          supportedFeatureIds: ['workflows'],
+          validate: {
+            config: { schema: z.object({}) },
+            secrets: { schema: z.object({ foobar: z.boolean() }) },
+          },
+          executor: undefined,
+        })
+      );
+    });
+
+    it('refuses a saved dual connector with outbound off and reads no secrets', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { actionTypeId: dualTypeId, config: { outboundEnabled: false } },
+      } as SavedObject);
+
+      await expect(actionsClient.getAxiosInstance(defaultConnectorId)).rejects.toThrow(message);
+
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+      expect(getAxiosInstanceWithAuth).not.toHaveBeenCalled();
+    });
+
+    it('refuses a preconfigured dual connector with outbound off', async () => {
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'dual-off',
+            actionTypeId: dualTypeId,
+            isPreconfigured: true,
+            config: { outboundEnabled: false },
+            secrets: { foobar: true },
+          }),
+        ],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      await expect(actionsClient.getAxiosInstance('dual-off')).rejects.toThrow(message);
+      expect(getAxiosInstanceWithAuth).not.toHaveBeenCalled();
+    });
+
+    it('still checks authorization first', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { actionTypeId: dualTypeId, config: { outboundEnabled: false } },
+      } as SavedObject);
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized to execute'));
+
+      await expect(actionsClient.getAxiosInstance(defaultConnectorId)).rejects.toThrow(
+        'Unauthorized to execute'
+      );
+    });
+
+    it('gives an instance for a dual connector that has no config key', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockReset();
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { actionTypeId: dualTypeId, config: {} },
+      } as SavedObject);
+
+      await actionsClient.getAxiosInstance(defaultConnectorId);
+
+      expect(getAxiosInstanceWithAuth).toHaveBeenCalled();
+    });
+  });
+
   describe('authorization', () => {
     it('ensures user is authorised to get an axios instance for execution', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());

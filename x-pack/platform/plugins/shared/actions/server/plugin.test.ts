@@ -776,6 +776,56 @@ describe('Actions Plugin', () => {
         });
       });
 
+      describe('Preconfigured connectors with config.outboundEnabled', () => {
+        const preconfiguredWithKey = (actionTypeId: string, config: Record<string, unknown>) =>
+          getConfig({
+            preconfigured: {
+              withKey: { actionTypeId, name: 'with key', config, secrets: {} },
+            },
+          });
+
+        it('does not load a dual connector with outbound off and logs a warning', async () => {
+          setup(preconfiguredWithKey('.slack2', { outboundEnabled: false }));
+          await plugin.setup(coreSetup as any, pluginsSetup);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors).toEqual([]);
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            expect.stringContaining('Preconfigured connector "withKey" is not loaded')
+          );
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            expect.stringContaining('both inbound events and outbound actions turned off')
+          );
+        });
+
+        it('does not load a connector that is not dual and sets the key', async () => {
+          setup(preconfiguredWithKey('.server-log', { outboundEnabled: false }));
+          await plugin.setup(coreSetup as any, pluginsSetup);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors).toEqual([]);
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            expect.stringContaining('can only be set on connectors that both send and receive')
+          );
+        });
+
+        it('loads a dual connector that has no key', async () => {
+          setup(preconfiguredWithKey('.slack2', {}));
+          await plugin.setup(coreSetup as any, pluginsSetup);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.map(({ id }) => id)).toEqual(['withKey']);
+        });
+
+        it('loads a dual connector with the key set to true', async () => {
+          setup(preconfiguredWithKey('.slack2', { outboundEnabled: true }));
+          await plugin.setup(coreSetup as any, pluginsSetup);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.map(({ id }) => id)).toEqual(['withKey']);
+        });
+      });
+
       describe('System actions', () => {
         it('should set system actions correctly', async () => {
           setup(getConfig());

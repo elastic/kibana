@@ -26,6 +26,8 @@ interface ConnectorHttpBody {
   id: string;
   connector_type_id: string;
   is_inbound_events_enabled?: boolean;
+  is_outbound_actions_enabled?: boolean;
+  config?: Record<string, unknown>;
   secrets?: { ingest_token?: string };
 }
 
@@ -322,5 +324,113 @@ describe('Inbound events HTTP API', () => {
       .set('kbn-xsrf', 'kibana')
       .expect(200);
     expect((getRes.body as ConnectorHttpBody).is_inbound_events_enabled).toBeUndefined();
+  });
+
+  it('turns outbound actions off for a dual connector, keeps it on update, and refuses to run it', async () => {
+    const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'slack-receive-only',
+        connector_type_id: '.slack2',
+        config: {},
+        secrets: {},
+        is_inbound_events_enabled: true,
+        is_outbound_actions_enabled: false,
+      })
+      .expect(200);
+    const created = createRes.body as ConnectorHttpBody;
+    expect(created.is_inbound_events_enabled).toBe(true);
+    expect(created.is_outbound_actions_enabled).toBe(false);
+    expect(created.config).not.toHaveProperty('outboundEnabled');
+
+    const getRes = await getSupertest(
+      kibanaServer.root,
+      'get',
+      `/api/actions/connector/${created.id}`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .expect(200);
+    const fetched = getRes.body as ConnectorHttpBody;
+    expect(fetched.is_outbound_actions_enabled).toBe(false);
+    expect(fetched.config).not.toHaveProperty('outboundEnabled');
+
+    const updateRes = await getSupertest(
+      kibanaServer.root,
+      'put',
+      `/api/actions/connector/${created.id}`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .send({ name: 'slack-receive-only-renamed', config: {}, secrets: {} })
+      .expect(200);
+    expect((updateRes.body as ConnectorHttpBody).is_outbound_actions_enabled).toBe(false);
+    expect((updateRes.body as ConnectorHttpBody).is_inbound_events_enabled).toBe(true);
+
+    const executeRes = await getSupertest(
+      kibanaServer.root,
+      'post',
+      `/api/actions/connector/${created.id}/_execute`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .send({ params: { subAction: '_test', subActionParams: {} } })
+      .expect(200);
+    expect(executeRes.body).toEqual(
+      expect.objectContaining({
+        status: 'error',
+        message:
+          'Outbound actions are turned off for this connector. Turn them on to run or test actions.',
+      })
+    );
+
+    await getSupertest(kibanaServer.root, 'put', `/api/actions/connector/${created.id}`)
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'slack-receive-only-renamed',
+        config: {},
+        secrets: {},
+        is_inbound_events_enabled: false,
+      })
+      .expect(400);
+  });
+
+  it('rejects a dual connector with both directions off', async () => {
+    await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'slack-nothing',
+        connector_type_id: '.slack2',
+        config: {},
+        secrets: {},
+        is_outbound_actions_enabled: false,
+      })
+      .expect(400);
+  });
+
+  it('saves a ServiceNow Search connector with outbound off and no instance URL', async () => {
+    const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'servicenow-receive-only',
+        connector_type_id: '.servicenow_search',
+        config: {},
+        secrets: {},
+        is_inbound_events_enabled: true,
+        is_outbound_actions_enabled: false,
+      })
+      .expect(200);
+
+    expect((createRes.body as ConnectorHttpBody).is_outbound_actions_enabled).toBe(false);
+  });
+
+  it('rejects the outbound field on a connector that is not dual', async () => {
+    await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'server-log-off',
+        connector_type_id: '.server-log',
+        config: {},
+        secrets: {},
+        is_outbound_actions_enabled: false,
+      })
+      .expect(400);
   });
 });

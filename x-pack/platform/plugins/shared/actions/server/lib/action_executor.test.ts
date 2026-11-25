@@ -119,6 +119,14 @@ const actionExecutorInitializationParams = {
       isPreconfigured: true,
     }),
     createMockInMemoryConnector({
+      id: 'preconfigured-dual-off',
+      name: 'Preconfigured dual, outbound off',
+      actionTypeId: '.slack2',
+      config: { outboundEnabled: false },
+      secrets: {},
+      isPreconfigured: true,
+    }),
+    createMockInMemoryConnector({
       actionTypeId: '.cases',
       config: {},
       id: 'system-connector-.cases',
@@ -3016,5 +3024,164 @@ describe('execute() - EARS structured logging', () => {
     await actionExecutor.execute(executeParams);
 
     expect(earsLines()).toEqual([]);
+  });
+});
+
+describe('execute() - outbound actions off', () => {
+  const OUTBOUND_OFF_MESSAGE =
+    'Outbound actions are turned off for this connector. Turn them on to run or test actions.';
+
+  // Secrets and config are strict, so a schema check would fail on the empty values.
+  const strictDualType = (): jest.Mocked<ConnectorType> & { executor: jest.Mock } => ({
+    ...connectorType,
+    id: '.slack2',
+    validate: {
+      config: { schema: z.object({ instanceUrl: z.string() }) },
+      secrets: { schema: z.object({ token: z.string() }) },
+      params: { schema: z.object({ subAction: z.string().optional() }).passthrough() },
+    },
+    executor: jest.fn(),
+  });
+
+  const dualSavedObject = (config: Record<string, unknown>) => ({
+    ...connectorSavedObject,
+    attributes: {
+      ...connectorSavedObject.attributes,
+      actionTypeId: '.slack2',
+      config,
+      secrets: {},
+    },
+  });
+
+  beforeEach(() => {
+    connectorTypeRegistry.isSpecActionType.mockReturnValue(false);
+  });
+
+  test('returns a user error before schema validation for a dual connector with outbound off', async () => {
+    const dualType = strictDualType();
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      dualSavedObject({ outboundEnabled: false })
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(dualType);
+
+    const result = await actionExecutor.execute({ ...executeParams, params: {} });
+
+    expect(result).toEqual({
+      actionId: CONNECTOR_ID,
+      status: 'error',
+      message: OUTBOUND_OFF_MESSAGE,
+      retry: false,
+      errorSource: TaskErrorSource.USER,
+    });
+    expect(dualType.executor).not.toHaveBeenCalled();
+  });
+
+  test('gives the same result for the _test sub-action', async () => {
+    const dualType = strictDualType();
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      dualSavedObject({ outboundEnabled: false })
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(dualType);
+
+    const result = await actionExecutor.execute({
+      ...executeParams,
+      params: { subAction: '_test' },
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.message).toBe(OUTBOUND_OFF_MESSAGE);
+    expect(dualType.executor).not.toHaveBeenCalled();
+  });
+
+  test('gives the same result for an in-memory connector with outbound off', async () => {
+    const dualType = strictDualType();
+    connectorTypeRegistry.get.mockReturnValueOnce(dualType);
+
+    const result = await actionExecutor.execute({
+      ...executeParams,
+      actionId: 'preconfigured-dual-off',
+      params: {},
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.message).toBe(OUTBOUND_OFF_MESSAGE);
+    expect(result.errorSource).toBe(TaskErrorSource.USER);
+    expect(dualType.executor).not.toHaveBeenCalled();
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+  });
+
+  test('does not retry a task execution', async () => {
+    const dualType = strictDualType();
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      dualSavedObject({ outboundEnabled: false })
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(dualType);
+
+    const result = await actionExecutor.execute({
+      ...executeParams,
+      params: {},
+      taskInfo: { scheduled: new Date(), attempts: 0 },
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.retry).toBe(false);
+  });
+
+  test('writes the execute-start and failed execute event log entries', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      dualSavedObject({ outboundEnabled: false })
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(strictDualType());
+
+    await actionExecutor.execute({ ...executeParams, params: {} });
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ event: expect.objectContaining({ action: 'execute-start' }) })
+    );
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'execute', outcome: 'failure' }),
+        error: expect.objectContaining({ message: OUTBOUND_OFF_MESSAGE }),
+      })
+    );
+  });
+
+  test('runs a dual connector that has no config key', async () => {
+    const dualType = strictDualType();
+    dualType.validate.config = { schema: z.object({}) };
+    dualType.validate.secrets = { schema: z.object({}) };
+    dualType.executor.mockResolvedValue({ actionId: CONNECTOR_ID, status: 'ok' });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      dualSavedObject({})
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(dualType);
+
+    const result = await actionExecutor.execute({ ...executeParams, params: {} });
+
+    expect(result.status).toBe('ok');
+    expect(dualType.executor).toHaveBeenCalled();
+  });
+
+  test('ignores the key on a connector that is not dual', async () => {
+    (connectorType.executor as jest.Mock).mockResolvedValue({
+      actionId: CONNECTOR_ID,
+      status: 'ok',
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      attributes: {
+        ...connectorSavedObject.attributes,
+        config: { bar: true, outboundEnabled: false },
+      },
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    const result = await actionExecutor.execute(executeParams);
+
+    expect(result.status).toBe('ok');
+    expect(connectorType.executor).toHaveBeenCalled();
   });
 });

@@ -12,6 +12,14 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionType } from '../types';
 import { generateConfigSchema } from './single_file_connectors/generate_config_schema';
 
+export const OUTBOUND_ACTIONS_DISABLED_MESSAGE = i18n.translate(
+  'xpack.actions.serverSideErrors.outboundActionsDisabled',
+  {
+    defaultMessage:
+      'Outbound actions are turned off for this connector. Turn them on to run or test actions.',
+  }
+);
+
 /**
  * Rejects `is_outbound_actions_enabled` on types that are not dual.
  */
@@ -176,3 +184,43 @@ export const getOutboundDisabledValidationType = ({
     },
   };
 };
+
+/**
+ * Checks the reserved key of a preconfigured connector (`kibana.yml`).
+ * A `kibana.yml` connector cannot turn inbound events on, so outbound off always leaves both directions off.
+ * Returns an error text, or `undefined` when the connector is valid.
+ */
+export const getPreconfiguredOutboundConfigError = ({
+  actionTypeId,
+  config,
+  isInboundEventsEnabled,
+}: {
+  actionTypeId: string;
+  config: Record<string, unknown>;
+  isInboundEventsEnabled: boolean;
+}): string | undefined => {
+  const value = config[OUTBOUND_ENABLED_CONFIG_KEY];
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!connectorTypeIsDual(actionTypeId)) {
+    return `config.${OUTBOUND_ENABLED_CONFIG_KEY} can only be set on connectors that both send and receive.`;
+  }
+  if (typeof value !== 'boolean') {
+    return `config.${OUTBOUND_ENABLED_CONFIG_KEY} must be a boolean.`;
+  }
+  if (value === false && !isInboundEventsEnabled) {
+    return `config.${OUTBOUND_ENABLED_CONFIG_KEY} is false, which leaves both inbound events and outbound actions turned off.`;
+  }
+  return undefined;
+};
+
+/** True when a connector of this type has outbound actions turned off in its raw config. */
+export const isOutboundActionsDisabledInConfig = ({
+  actionTypeId,
+  config,
+}: {
+  actionTypeId: string;
+  config: Record<string, unknown> | undefined;
+}): boolean =>
+  connectorTypeIsDual(actionTypeId) && config?.[OUTBOUND_ENABLED_CONFIG_KEY] === false;

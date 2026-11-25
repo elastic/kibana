@@ -224,6 +224,59 @@ describe('getSandboxCredentials()', () => {
     expect(result).not.toHaveProperty('secrets');
   });
 
+  describe('outbound actions off', () => {
+    const dualTypeId = '.slack2';
+    const message =
+      'Outbound actions are turned off for this connector. Turn them on to run or test actions.';
+
+    beforeEach(() => {
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: dualTypeId,
+          getSandboxHosts: getTestSandboxHosts,
+          sandboxSupportedAuthTypes: ['basic'],
+          validate: {
+            config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
+            secrets: secretsSchema,
+          },
+          executor: undefined,
+        })
+      );
+    });
+
+    it('refuses a saved dual connector with outbound off and reads no secrets', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: {
+          actionTypeId: dualTypeId,
+          config: { apiUrl: 'https://example.com', outboundEnabled: false },
+        },
+      } as SavedObject);
+
+      await expect(actionsClient.getSandboxCredentials({ id: defaultConnectorId })).rejects.toThrow(
+        message
+      );
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('refuses a preconfigured dual connector with outbound off', async () => {
+      actionsClient = createClient({
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'dual-off',
+            actionTypeId: dualTypeId,
+            isPreconfigured: true,
+            config: { apiUrl: 'https://preconfigured.example.com', outboundEnabled: false },
+            secrets: { authType: 'basic', username, password },
+          }),
+        ],
+      });
+
+      await expect(actionsClient.getSandboxCredentials({ id: 'dual-off' })).rejects.toThrow(
+        message
+      );
+    });
+  });
+
   it('decrypts persisted secrets in the current space namespace', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
     actionsClient = createClient({ spaceId: asSpaceId('space-1') });

@@ -70,6 +70,10 @@ import type { ActionExecutionSource, ActionExecutionSourceType } from './action_
 import type { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
+import {
+  OUTBOUND_ACTIONS_DISABLED_MESSAGE,
+  isOutboundActionsDisabledInConfig,
+} from './outbound_actions_enabled';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 
@@ -572,6 +576,7 @@ export class ActionExecutor {
         let validatedConfig: Record<string, unknown>;
         let validatedSecrets: Record<string, unknown>;
         try {
+          ensureOutboundActionsEnabled({ actionId, actionTypeId, config });
           const validationResult = validateAction(
             {
               actionId,
@@ -922,6 +927,32 @@ function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): str
   }
 
   return message;
+}
+
+/** A dual connector with outbound off cannot run or test actions. This runs before any schema validation. */
+function ensureOutboundActionsEnabled({
+  actionId,
+  actionTypeId,
+  config,
+}: {
+  actionId: string;
+  actionTypeId: string;
+  config: Record<string, unknown>;
+}): void {
+  if (!isOutboundActionsDisabledInConfig({ actionTypeId, config })) {
+    return;
+  }
+  throw new ActionExecutionError(
+    OUTBOUND_ACTIONS_DISABLED_MESSAGE,
+    ActionExecutionErrorReason.Validation,
+    {
+      actionId,
+      status: 'error',
+      message: OUTBOUND_ACTIONS_DISABLED_MESSAGE,
+      retry: false,
+      errorSource: TaskErrorSource.USER,
+    }
+  );
 }
 
 interface ValidateActionOpts {

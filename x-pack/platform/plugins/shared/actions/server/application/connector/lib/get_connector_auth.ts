@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { AuthMode } from '@kbn/connector-specs';
 import type { RawAction, ActionType } from '../../../types';
 import { getActionKibanaPrivileges } from '../../../lib/get_action_kibana_privileges';
@@ -13,6 +14,10 @@ import { isSystemAction } from '../../../lib/is_system_action';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../constants/saved_objects';
 import type { ActionsClientContext } from '../../../actions_client';
 import { validateSecrets } from '../../../lib';
+import {
+  OUTBOUND_ACTIONS_DISABLED_MESSAGE,
+  isOutboundActionsDisabledInConfig,
+} from '../../../lib/outbound_actions_enabled';
 
 export interface ResolvedConnectorAuth {
   connectorId: string;
@@ -83,6 +88,11 @@ export async function getConnectorAuth(
     additionalPrivileges: getActionKibanaPrivileges(context, actionTypeId),
     actionTypeId,
   });
+
+  // A connector with outbound off gives out no credentials, even when secrets are stored.
+  if (isOutboundActionsDisabledInConfig({ actionTypeId: actionTypeId!, config })) {
+    throw Boom.badRequest(OUTBOUND_ACTIONS_DISABLED_MESSAGE);
+  }
 
   const inMemoryAction = inMemoryConnectors.find(
     (inMemoryConnector) => inMemoryConnector.id === connectorId

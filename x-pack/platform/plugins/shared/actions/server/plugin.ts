@@ -106,6 +106,7 @@ import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
+import { getPreconfiguredOutboundConfigError } from './lib/outbound_actions_enabled';
 import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profile_id';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -392,6 +393,20 @@ export class ActionsPlugin
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
       if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
+        const preconfiguredConnector = this.actionsConfig.preconfigured[preconfiguredId];
+        // A `kibana.yml` connector cannot turn inbound events on, so inbound is off here.
+        const outboundConfigError = getPreconfiguredOutboundConfigError({
+          actionTypeId: preconfiguredConnector.actionTypeId,
+          config: (preconfiguredConnector.config ?? {}) as Record<string, unknown>,
+          isInboundEventsEnabled: false,
+        });
+        if (outboundConfigError !== undefined) {
+          this.logger.warn(
+            `Preconfigured connector "${preconfiguredId}" is not loaded: ${outboundConfigError}`
+          );
+          continue;
+        }
+
         const rawPreconfiguredConnector: ConnectorWithOptionalDeprecation = {
           ...this.actionsConfig.preconfigured[preconfiguredId],
           id: preconfiguredId,

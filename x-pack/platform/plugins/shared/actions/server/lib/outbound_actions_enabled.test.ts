@@ -14,7 +14,10 @@ import {
   assertOutboundActionsToggleAllowed,
   areSecretsOmitted,
   attachOutboundActionsEnabled,
+  OUTBOUND_ACTIONS_DISABLED_MESSAGE,
   getOutboundDisabledValidationType,
+  getPreconfiguredOutboundConfigError,
+  isOutboundActionsDisabledInConfig,
   readOutboundActionsEnabled,
   resolveCreateOutboundActionsEnabled,
   resolveUpdateOutboundActionsEnabled,
@@ -270,5 +273,109 @@ describe('getOutboundDisabledValidationType', () => {
 
   it('returns the same type when there is no spec', () => {
     expect(getOutboundDisabledValidationType({ actionType, spec: undefined })).toBe(actionType);
+  });
+});
+
+describe('OUTBOUND_ACTIONS_DISABLED_MESSAGE', () => {
+  it('tells the user how to fix it', () => {
+    expect(OUTBOUND_ACTIONS_DISABLED_MESSAGE).toBe(
+      'Outbound actions are turned off for this connector. Turn them on to run or test actions.'
+    );
+  });
+});
+
+describe('isOutboundActionsDisabledInConfig', () => {
+  it('is true only for a dual type with the key false', () => {
+    expect(
+      isOutboundActionsDisabledInConfig({
+        actionTypeId: '.dual',
+        config: { outboundEnabled: false },
+      })
+    ).toBe(true);
+    expect(isOutboundActionsDisabledInConfig({ actionTypeId: '.dual', config: {} })).toBe(false);
+    expect(isOutboundActionsDisabledInConfig({ actionTypeId: '.dual', config: undefined })).toBe(
+      false
+    );
+    expect(
+      isOutboundActionsDisabledInConfig({
+        actionTypeId: '.dual',
+        config: { outboundEnabled: true },
+      })
+    ).toBe(false);
+  });
+
+  it('ignores the key on a type that is not dual', () => {
+    expect(
+      isOutboundActionsDisabledInConfig({
+        actionTypeId: '.slack',
+        config: { outboundEnabled: false },
+      })
+    ).toBe(false);
+  });
+});
+
+describe('getPreconfiguredOutboundConfigError', () => {
+  it('is valid when the key is missing', () => {
+    expect(
+      getPreconfiguredOutboundConfigError({
+        actionTypeId: '.dual',
+        config: {},
+        isInboundEventsEnabled: false,
+      })
+    ).toBeUndefined();
+    expect(
+      getPreconfiguredOutboundConfigError({
+        actionTypeId: '.slack',
+        config: {},
+        isInboundEventsEnabled: false,
+      })
+    ).toBeUndefined();
+  });
+
+  it('is an error when the key is set on a type that is not dual', () => {
+    expect(
+      getPreconfiguredOutboundConfigError({
+        actionTypeId: '.slack',
+        config: { outboundEnabled: true },
+        isInboundEventsEnabled: false,
+      })
+    ).toMatch(/can only be set on connectors that both send and receive/);
+  });
+
+  it('is an error when the key is not a boolean', () => {
+    expect(
+      getPreconfiguredOutboundConfigError({
+        actionTypeId: '.dual',
+        config: { outboundEnabled: 'false' },
+        isInboundEventsEnabled: true,
+      })
+    ).toMatch(/must be a boolean/);
+  });
+
+  it('is an error when false leaves both directions off', () => {
+    expect(
+      getPreconfiguredOutboundConfigError({
+        actionTypeId: '.dual',
+        config: { outboundEnabled: false },
+        isInboundEventsEnabled: false,
+      })
+    ).toMatch(/both inbound events and outbound actions turned off/);
+  });
+
+  it('is valid when false and inbound is on, or when true', () => {
+    expect(
+      getPreconfiguredOutboundConfigError({
+        actionTypeId: '.dual',
+        config: { outboundEnabled: false },
+        isInboundEventsEnabled: true,
+      })
+    ).toBeUndefined();
+    expect(
+      getPreconfiguredOutboundConfigError({
+        actionTypeId: '.dual',
+        config: { outboundEnabled: true },
+        isInboundEventsEnabled: false,
+      })
+    ).toBeUndefined();
   });
 });
