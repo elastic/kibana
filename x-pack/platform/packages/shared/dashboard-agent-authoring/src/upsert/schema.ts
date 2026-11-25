@@ -99,7 +99,7 @@ export const upsertDashboardSchema = lazySchema(() =>
     options: upsertOptionsSchema
       .optional()
       .describe(
-        'Display and behavior settings. Set ONLY the keys the user asks to change; the other keys keep their current values.'
+        'Dashboard-wide display and behavior settings; they also apply to panels added later. Set ONLY the keys the user asks to change; the other keys keep their current values.'
       ),
     sections: z
       .array(upsertSectionSchema)
