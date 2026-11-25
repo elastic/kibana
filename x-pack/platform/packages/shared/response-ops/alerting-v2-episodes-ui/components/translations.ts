@@ -317,13 +317,6 @@ export const EPISODES_LIST_COLUMN_REASON = i18n.translate(
   }
 );
 
-export const EPISODES_LIST_REMOVE_COLUMN = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.columns.removeColumn',
-  {
-    defaultMessage: 'Remove column',
-  }
-);
-
 export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
   i18n.translate('xpack.alertingV2EpisodesUi.episodes.itemCount', {
     defaultMessage: 'Showing {count, plural, one {# alert} other {# alerts}}',

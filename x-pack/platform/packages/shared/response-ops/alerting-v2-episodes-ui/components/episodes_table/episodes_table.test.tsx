@@ -25,6 +25,20 @@ import {
   DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
 } from '../../utils/episodes_table_config';
 
+// Captures the column selector's drag handler, since drag-and-drop can't measure layout in jsdom.
+let mockColumnSelectorDragEnd: ((result: unknown) => void) | undefined;
+jest.mock('@elastic/eui/test-env/components/drag_and_drop', () => {
+  const actual = jest.requireActual('@elastic/eui/test-env/components/drag_and_drop');
+  const { createElement } = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiDragDropContext: (props: { onDragEnd: (result: unknown) => void }) => {
+      mockColumnSelectorDragEnd = props.onDragEnd;
+      return createElement(actual.EuiDragDropContext, props);
+    },
+  };
+});
+
 const episode = (id: string) => ({ 'episode.id': id, 'rule.id': `rule-${id}` });
 
 const setEpisodes = (data: Array<ReturnType<typeof episode>>) => {
@@ -320,17 +334,16 @@ describe('EpisodesTable', () => {
   };
 
   describe('column visibility', () => {
-    it("disables the grid's column selector and time column prepend", () => {
+    it("disables the grid's column selector", () => {
       renderTable();
 
       expect(lastGridProps().isColumnSelectorEnabled).toBe(false);
-      expect(lastGridProps().showTimeCol).toBe(false);
     });
 
     it('keeps the header remove action on every non-time column', () => {
       renderTable();
 
-      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.filter((id) => id !== '@timestamp').forEach((id) => {
+      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.forEach((id) => {
         const column = lastGridProps().customGridColumnsConfiguration[id]({
           column: { id, actions: { showHide: { label: 'Remove column' } } },
         });
@@ -349,13 +362,16 @@ describe('EpisodesTable', () => {
       });
     });
 
-    it('lists every column in the selector, including hidden ones', async () => {
+    it('lists every column in the selector, including hidden ones, but not the time column', async () => {
       renderTable({ visibleColumns: ['reason'], onVisibleColumnsChange: jest.fn() });
       await openColumnSelector();
 
       DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.forEach((id) => {
         expect(screen.getByTestId(`dataGridColumnSelectorColumnItem-${id}`)).toBeInTheDocument();
       });
+      expect(
+        screen.queryByTestId('dataGridColumnSelectorColumnItem-@timestamp')
+      ).not.toBeInTheDocument();
     });
 
     it('reports the remaining columns when one is toggled off', async () => {
@@ -382,19 +398,19 @@ describe('EpisodesTable', () => {
       expect(onVisibleColumnsChange).toHaveBeenLastCalledWith([]);
     });
 
-    it('passes an empty selection through to the grid', () => {
+    it('passes only the time column to the grid for an empty selection', () => {
       renderTable({ visibleColumns: [], onVisibleColumnsChange: jest.fn() });
 
-      expect(lastGridProps().columns).toEqual([]);
+      expect(lastGridProps().columns).toEqual(['@timestamp']);
     });
 
-    it('keeps a time-only selection as is', () => {
+    it('keeps the time column out of the selection reported back from the grid', () => {
       const onVisibleColumnsChange = jest.fn();
       renderTable({ onVisibleColumnsChange });
 
-      act(() => lastGridProps().onSetColumns(['@timestamp'], false));
+      act(() => lastGridProps().onSetColumns(['@timestamp', 'tags'], false));
 
-      expect(onVisibleColumnsChange).toHaveBeenCalledWith(['@timestamp']);
+      expect(onVisibleColumnsChange).toHaveBeenCalledWith(['tags']);
     });
 
     it('drops unknown columns that come back from the grid', () => {
@@ -484,6 +500,23 @@ describe('EpisodesTable', () => {
       });
     });
 
+    it('reorders the table when a column is dragged in the selector', async () => {
+      const onVisibleColumnsChange = jest.fn();
+      renderControlledTable(DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS, onVisibleColumnsChange);
+      await openColumnSelector();
+
+      act(() => mockColumnSelectorDragEnd?.({ source: { index: 0 }, destination: { index: 2 } }));
+
+      const reordered = [
+        'alerting_source',
+        'severity',
+        'episode.status',
+        ...DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.slice(3),
+      ];
+      expect(onVisibleColumnsChange).toHaveBeenLastCalledWith(reordered);
+      expect(lastGridProps().columns).toEqual(['@timestamp', ...reordered]);
+    });
+
     it('brings a reordered column back to its position after it is hidden and shown again', async () => {
       const onVisibleColumnsChange = jest.fn();
       const tagsFirst = [
@@ -501,18 +534,24 @@ describe('EpisodesTable', () => {
   });
 
   describe('time column', () => {
-    it('offers the header remove action on the time column', () => {
-      renderTable();
+    it('passes the time column to the grid first, ahead of the selection', () => {
+      renderTable({ visibleColumns: ['tags', 'reason'], onVisibleColumnsChange: jest.fn() });
 
-      const customize = lastGridProps().customGridColumnsConfiguration['@timestamp'];
-      const column = customize({
-        column: { id: '@timestamp', actions: { showHide: false } },
-      });
-
-      expect(column.actions.showHide).toEqual(expect.objectContaining({ label: 'Remove column' }));
+      expect(lastGridProps().columns).toEqual(['@timestamp', 'tags', 'reason']);
+      expect(lastGridProps().showTimeCol).toBe(true);
     });
 
-    it('resets an oldest-first time sort when the time column is hidden', () => {
+    it('never offers the header remove action on the time column', () => {
+      renderTable();
+
+      const column = lastGridProps().customGridColumnsConfiguration['@timestamp']({
+        column: { id: '@timestamp', actions: { showHide: { label: 'Remove column' } } },
+      });
+
+      expect(column.actions.showHide).toBe(false);
+    });
+
+    it('keeps an oldest-first time sort when other columns are hidden', () => {
       const onSortChange = jest.fn();
       renderTable({
         onVisibleColumnsChange: jest.fn(),
@@ -520,16 +559,7 @@ describe('EpisodesTable', () => {
         onSortChange,
       });
 
-      act(() => lastGridProps().onSetColumns(['tags'], false));
-
-      expect(onSortChange).toHaveBeenCalledWith(DEFAULT_EPISODES_TABLE_SORT);
-    });
-
-    it('keeps the default time sort when the time column is hidden', () => {
-      const onSortChange = jest.fn();
-      renderTable({ onVisibleColumnsChange: jest.fn(), onSortChange });
-
-      act(() => lastGridProps().onSetColumns(['tags'], false));
+      act(() => lastGridProps().onSetColumns(['@timestamp', 'tags'], false));
 
       expect(onSortChange).not.toHaveBeenCalled();
     });

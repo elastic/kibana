@@ -82,17 +82,12 @@ describe('episodes_table_config', () => {
       expect(mergeEpisodesTableConfig(undefined, undefined)).toEqual(DEFAULT_EPISODES_TABLE_CONFIG);
     });
 
-    it('resets an oldest-first time sort when the time column is hidden', () => {
+    it('keeps a time sort, since the time column is always shown', () => {
       const result = mergeEpisodesTableConfig({
         visibleColumns: ['tags'],
         sort: { sortField: '@timestamp', sortDirection: 'asc' },
       });
-      expect(result.sort).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.sort);
-    });
-
-    it('keeps the default sort when its column is hidden', () => {
-      const result = mergeEpisodesTableConfig({ visibleColumns: ['tags'] });
-      expect(result.sort).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.sort);
+      expect(result.sort).toEqual({ sortField: '@timestamp', sortDirection: 'asc' });
     });
 
     it('resets the sort to the default when the sorted column is hidden', () => {
@@ -244,6 +239,19 @@ describe('episodes_table_config', () => {
         visibleColumns: ['tags', 'unknown.field'],
       });
       expect(readEpisodesTableConfigFromUrl(urlStorage)?.visibleColumns).toEqual(['tags']);
+    });
+
+    it('ignores a visibleColumns list with only unknown ids so a saved layout applies', async () => {
+      const urlStorage = await createKbnTestUrlStorage({
+        visibleColumns: ['old.field', '@timestamp'],
+      });
+      const storage = createMockStorage({ visibleColumns: ['tags'] });
+
+      const merged = mergeEpisodesTableConfig(
+        readEpisodesTableConfigFromStorage(storage as any),
+        readEpisodesTableConfigFromUrl(urlStorage)
+      );
+      expect(merged.visibleColumns).toEqual(['tags']);
     });
   });
 

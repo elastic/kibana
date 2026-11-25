@@ -107,7 +107,6 @@ import {
   EPISODES_LIST_COLUMN_SUPPRESSED,
   EPISODES_LIST_COLUMN_RULE_TAGS,
   EPISODES_LIST_COLUMN_SOURCE,
-  EPISODES_LIST_REMOVE_COLUMN,
   EPISODES_LIST_ITEM_COUNT,
   EPISODES_LIST_ITEM_COUNT_CAPPED,
   EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP,
@@ -152,21 +151,9 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
     displayAsText: EPISODES_LIST_COLUMN_REASON,
     isSortable: false,
   }),
-  // The grid never offers Remove on its time field column; this table lets users hide it.
+  // Always shown, including when the data view has no time field and the grid would offer Remove.
   [EPISODES_TABLE_TIME_COLUMN_ID]: ({ column }) =>
-    column.actions
-      ? {
-          ...column,
-          actions: {
-            ...column.actions,
-            showHide: {
-              label: EPISODES_LIST_REMOVE_COLUMN,
-              iconType: 'cross',
-              'data-test-subj': 'unifiedDataTableRemoveColumn',
-            },
-          },
-        }
-      : column,
+    column.actions ? { ...column, actions: { ...column.actions, showHide: false } } : column,
 };
 
 /*
@@ -179,7 +166,7 @@ const withoutMoveActions = (column: EuiDataGridColumn): EuiDataGridColumn =>
     : column;
 
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object.fromEntries(
-  EPISODES_TABLE_COLUMN_IDS.map((columnId) => [
+  [EPISODES_TABLE_TIME_COLUMN_ID, ...EPISODES_TABLE_COLUMN_IDS].map((columnId) => [
     columnId,
     (props: Parameters<CustomGridColumnsConfiguration[string]>[0]) =>
       withoutMoveActions(COLUMN_CUSTOMIZATIONS[columnId]?.(props) ?? props.column),
@@ -487,6 +474,11 @@ export const EpisodesTable = ({
     [episodesSort, setSort, setVisibleColumns]
   );
 
+  const gridColumns = useMemo(
+    () => [EPISODES_TABLE_TIME_COLUMN_ID, ...visibleColumns],
+    [visibleColumns]
+  );
+
   const [columnSelector] = useDataGridColumnSelector(
     SELECTOR_COLUMNS,
     { visibleColumns, setVisibleColumns: applyVisibleColumns },
@@ -709,11 +701,10 @@ export const EpisodesTable = ({
           }}
           rowLineHeightOverride={TABLE_ROW_LINE_HEIGHT}
           dataView={dataView}
-          columns={visibleColumns}
+          columns={gridColumns}
           onSetColumns={applyVisibleColumns}
           isColumnSelectorEnabled={false}
-          // Otherwise the grid renders the data view's time field first whenever it's not in `columns`.
-          showTimeCol={false}
+          showTimeCol={!!dataView.timeFieldName}
           customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
           externalCustomRenderers={externalCustomRenderers}
           rows={rows}

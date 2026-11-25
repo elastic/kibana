@@ -7,7 +7,6 @@
 
 import {
   DEFAULT_EPISODES_TABLE_SORT,
-  DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
   episodesTableConfigSchema,
   resolveEpisodesTableVisibleColumns,
   resolveSortForVisibleColumns,
@@ -20,13 +19,9 @@ describe('episodesTableConfigSchema', () => {
 });
 
 describe('resolveEpisodesTableVisibleColumns', () => {
-  it('returns the defaults for a non-array value', () => {
-    expect(resolveEpisodesTableVisibleColumns(undefined)).toEqual(
-      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS
-    );
-    expect(resolveEpisodesTableVisibleColumns('tags')).toEqual(
-      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS
-    );
+  it('returns undefined for a non-array value', () => {
+    expect(resolveEpisodesTableVisibleColumns(undefined)).toBeUndefined();
+    expect(resolveEpisodesTableVisibleColumns('tags')).toBeUndefined();
   });
 
   it('keeps known ids in stored order and drops unknown ones', () => {
@@ -43,15 +38,16 @@ describe('resolveEpisodesTableVisibleColumns', () => {
     ]);
   });
 
-  it('returns the defaults when every stored id is unknown', () => {
-    expect(resolveEpisodesTableVisibleColumns(['unknown.field'])).toEqual(
-      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS
-    );
+  it('returns undefined when every stored id is unknown', () => {
+    expect(resolveEpisodesTableVisibleColumns(['unknown.field'])).toBeUndefined();
   });
 
-  it('keeps an empty or time-only selection', () => {
+  it('keeps an empty selection', () => {
     expect(resolveEpisodesTableVisibleColumns([])).toEqual([]);
-    expect(resolveEpisodesTableVisibleColumns(['@timestamp'])).toEqual(['@timestamp']);
+  });
+
+  it('drops the always-shown time column from a stored selection', () => {
+    expect(resolveEpisodesTableVisibleColumns(['@timestamp', 'tags'])).toEqual(['tags']);
   });
 });
 
@@ -66,13 +62,8 @@ describe('resolveSortForVisibleColumns', () => {
     expect(resolveSortForVisibleColumns(sort, ['tags'])).toBe(DEFAULT_EPISODES_TABLE_SORT);
   });
 
-  it('falls back to the default for an oldest-first sort on a hidden time column', () => {
+  it('keeps a time sort, since the time column is always shown', () => {
     const sort = { sortField: '@timestamp', sortDirection: 'asc' as const };
-    expect(resolveSortForVisibleColumns(sort, ['tags'])).toBe(DEFAULT_EPISODES_TABLE_SORT);
-  });
-
-  it('keeps the default sort on a hidden time column', () => {
-    const sort = { sortField: '@timestamp', sortDirection: 'desc' as const };
-    expect(resolveSortForVisibleColumns(sort, ['tags'])).toEqual(DEFAULT_EPISODES_TABLE_SORT);
+    expect(resolveSortForVisibleColumns(sort, ['tags'])).toBe(sort);
   });
 });

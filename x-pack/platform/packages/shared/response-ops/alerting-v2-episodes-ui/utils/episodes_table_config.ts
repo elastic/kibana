@@ -39,12 +39,14 @@ export const episodesTableConfigSchema = lazySchema(() =>
 export type EpisodesTableConfig = z.infer<typeof episodesTableConfigSchema>;
 export type EpisodesTableColumnSettings = EpisodesTableConfig['columnSettings'];
 
-/** Every column the episodes table can show, in default display order. */
+/** Always shown as the first column; not part of the column selection. */
+export const EPISODES_TABLE_TIME_COLUMN_ID = '@timestamp';
+
+/** Columns users can show, hide, and reorder, in default display order. */
 export const EPISODES_TABLE_COLUMN_IDS = [
   'episode.status',
   'alerting_source',
   'severity',
-  '@timestamp',
   'rule.id',
   'reason',
   'duration',
@@ -56,8 +58,6 @@ export const EPISODES_TABLE_COLUMN_IDS = [
 
 export type EpisodesTableColumnId = (typeof EPISODES_TABLE_COLUMN_IDS)[number];
 
-export const EPISODES_TABLE_TIME_COLUMN_ID = '@timestamp' satisfies EpisodesTableColumnId;
-
 export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [...EPISODES_TABLE_COLUMN_IDS];
 
 const COLUMN_ID_SET: ReadonlySet<string> = new Set(EPISODES_TABLE_COLUMN_IDS);
@@ -66,18 +66,20 @@ export const isEpisodesTableColumnId = (value: unknown): value is EpisodesTableC
   typeof value === 'string' && COLUMN_ID_SET.has(value);
 
 /**
- * Turns a stored value into a valid, de-duplicated, ordered list of column ids. An empty list is
- * kept: the grid then shows its document summary column.
+ * Turns a stored value into a valid, de-duplicated, ordered list of column ids, or `undefined` when
+ * nothing in it is usable. An empty list is kept: the grid then shows the time column and its
+ * document summary column.
  */
-export const resolveEpisodesTableVisibleColumns = (stored: unknown): string[] => {
-  const storedIds: unknown[] = Array.isArray(stored) ? stored : [];
-  const knownIds = [...new Set(storedIds.filter(isEpisodesTableColumnId))];
-  const isUnusable = !Array.isArray(stored) || (storedIds.length > 0 && knownIds.length === 0);
-  return isUnusable ? [...DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS] : knownIds;
+export const resolveEpisodesTableVisibleColumns = (stored: unknown): string[] | undefined => {
+  const knownIds = Array.isArray(stored)
+    ? [...new Set(stored.filter(isEpisodesTableColumnId))]
+    : [];
+  const isUsable = Array.isArray(stored) && (stored.length === 0 || knownIds.length > 0);
+  return isUsable ? knownIds : undefined;
 };
 
 export const DEFAULT_EPISODES_TABLE_SORT: EpisodesTableConfig['sort'] = {
-  sortField: '@timestamp',
+  sortField: EPISODES_TABLE_TIME_COLUMN_ID,
   sortDirection: 'desc',
 };
 
@@ -86,7 +88,9 @@ export const resolveSortForVisibleColumns = (
   sort: EpisodesTableConfig['sort'],
   visibleColumns: string[]
 ): EpisodesTableConfig['sort'] =>
-  visibleColumns.includes(sort.sortField) ? sort : DEFAULT_EPISODES_TABLE_SORT;
+  sort.sortField === EPISODES_TABLE_TIME_COLUMN_ID || visibleColumns.includes(sort.sortField)
+    ? sort
+    : DEFAULT_EPISODES_TABLE_SORT;
 
 export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings = {
   duration: { width: 110 },

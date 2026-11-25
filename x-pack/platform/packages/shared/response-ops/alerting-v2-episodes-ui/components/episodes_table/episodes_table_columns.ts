@@ -30,13 +30,12 @@ import {
 
 /*
  * Matches the grid header text: data view custom labels for status, severity, rule, and duration,
- * `CUSTOM_GRID_COLUMNS_CONFIGURATION` for the rest, and the raw field name for the time column.
+ * and `COLUMN_CUSTOMIZATIONS` for the rest.
  */
 export const EPISODES_TABLE_COLUMN_LABELS: Readonly<Record<EpisodesTableColumnId, string>> = {
   'episode.status': STATUS_FIELD_LABEL,
   alerting_source: EPISODES_LIST_COLUMN_SOURCE,
   severity: SEVERITY_FIELD_LABEL,
-  '@timestamp': '@timestamp',
   'rule.id': RULE_FIELD_LABEL,
   reason: EPISODES_LIST_COLUMN_REASON,
   duration: DURATION_FIELD_LABEL,

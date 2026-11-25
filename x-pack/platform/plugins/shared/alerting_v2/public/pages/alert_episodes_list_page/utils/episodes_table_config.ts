@@ -60,7 +60,13 @@ const decodeEpisodesTableConfig = (raw: unknown): Partial<EpisodesTableConfig> |
     result[field] = parsed.data;
   }
   if (result.visibleColumns) {
-    result.visibleColumns = resolveEpisodesTableVisibleColumns(result.visibleColumns);
+    // An unusable list is dropped so the next source (localStorage, then defaults) applies.
+    const visibleColumns = resolveEpisodesTableVisibleColumns(result.visibleColumns);
+    if (visibleColumns) {
+      result.visibleColumns = visibleColumns;
+    } else {
+      delete result.visibleColumns;
+    }
   }
   // `result` was built generically per schema field above, so it matches EpisodesTableConfig's
   // shape by construction — TS just can't verify that field-by-field.

@@ -320,10 +320,10 @@ describe('AlertsListPage', () => {
   it('passes severity column and custom renderer to UnifiedDataTable', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastCall?.columns).toEqual([
+      '@timestamp',
       'episode.status',
       'alerting_source',
       'severity',
-      '@timestamp',
       'rule.id',
       'reason',
       'duration',
