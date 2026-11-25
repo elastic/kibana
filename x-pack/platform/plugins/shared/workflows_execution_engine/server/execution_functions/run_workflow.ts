@@ -72,7 +72,9 @@ async function runWorkflowWithRequest({
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
 }): Promise<RunWorkflowResult | void> {
-  // Span for setup/initialization phase
+  // Same as runNode: a span started before the first await stays in the caller's
+  // context after end(), so the caller's later spans would get a stale parent.
+  await Promise.resolve();
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
   try {

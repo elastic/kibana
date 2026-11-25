@@ -19,12 +19,18 @@ export async function flushState(
   params: WorkflowExecutionLoopParams,
   options: FlushStateOptions = {}
 ) {
+  // Same as runNode: a span started before the first await stays in the caller's
+  // context after end(), so persistenceLoop would grow the run's span stack every 500 ms.
+  await Promise.resolve();
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
-  await Promise.all([
-    params.stepIoService.flush(),
-    params.eventQueue.flush({ signal: options.workflowLogFlushSignal }),
-  ]);
-  flushSpan?.end();
+  try {
+    await Promise.all([
+      params.stepIoService.flush(),
+      params.eventQueue.flush({ signal: options.workflowLogFlushSignal }),
+    ]);
+  } finally {
+    flushSpan?.end();
+  }
 }
 
 /**
