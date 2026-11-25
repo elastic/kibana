@@ -8,6 +8,7 @@
 import { MAX_IMPACT_MAP_EVENTS } from './constants';
 import {
   attachEntitiesToAlerts,
+  placeCauseBeforeImpact,
   impactMapEventId,
   mergeImpactMapEvents,
   withImpactMapEventId,
@@ -132,5 +133,53 @@ describe('attachEntitiesToAlerts', () => {
       entities
     );
     expect(results.map(({ entity_id: id }) => id)).toEqual([undefined, undefined, 'elsewhere']);
+  });
+});
+
+describe('placeCauseBeforeImpact', () => {
+  const at = (kind: ImpactMapEvent['kind'], time: string, extra: Partial<ImpactMapEvent> = {}) =>
+    ({ id: `${kind}:${time}`, kind, title: kind, at: time, ...extra } as ImpactMapEvent);
+
+  it('moves a customer impact stamped before the root cause to the root cause', () => {
+    const [impact, cause] = placeCauseBeforeImpact([
+      at('customer_impact', '2026-11-25T11:50:00Z'),
+      at('root_cause', '2026-11-25T11:51:21Z'),
+    ]);
+
+    expect(impact.at).toBe('2026-11-25T11:51:21.000Z');
+    expect(impact.id).toBe('customer_impact:2026-11-25T11:50:00Z');
+    expect(cause.at).toBe('2026-11-25T11:51:21Z');
+  });
+
+  it('keeps an impact that is at or after the cause, and every other kind', () => {
+    const events = [
+      at('failure', '2026-11-25T11:50:00Z'),
+      at('customer_impact', '2026-11-25T11:51:21Z'),
+      at('customer_impact', '2026-11-25T11:55:00Z'),
+      at('root_cause', '2026-11-25T11:51:21Z'),
+    ];
+
+    expect(placeCauseBeforeImpact(events)).toEqual(events);
+  });
+
+  it('measures from the first root cause, and does nothing without one', () => {
+    const [impact] = placeCauseBeforeImpact([
+      at('customer_impact', '2026-11-25T11:52:00Z'),
+      at('root_cause', '2026-11-25T11:55:00Z'),
+      at('root_cause', '2026-11-25T11:53:00Z'),
+    ]);
+    expect(impact.at).toBe('2026-11-25T11:53:00.000Z');
+
+    const alone = [at('customer_impact', '2026-11-25T11:52:00Z')];
+    expect(placeCauseBeforeImpact(alone)).toEqual(alone);
+  });
+
+  it('keeps the end of an impact after its start', () => {
+    const [impact] = placeCauseBeforeImpact([
+      at('customer_impact', '2026-11-25T11:50:00Z', { ends_at: '2026-11-25T11:51:00Z' }),
+      at('root_cause', '2026-11-25T11:52:00Z'),
+    ]);
+
+    expect(impact.ends_at).toBe('2026-11-25T11:52:00.000Z');
   });
 });

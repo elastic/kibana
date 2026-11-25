@@ -28,8 +28,29 @@ export interface TimelineFilters {
 }
 
 const at = (event: ImpactMapEvent): number => Date.parse(event.at);
-const byTime = (a: ImpactMapEvent, b: ImpactMapEvent): number =>
-  at(a) - at(b) || a.id.localeCompare(b.id);
+// Events with the same time, as when the data only says which bucket they fell in, go in the order
+// things cause each other: a change, then what it caused, then what that did to customers and what
+// noticed it, then recovery. An effect is never drawn before its cause.
+const CAUSAL_ORDER = [
+  'change',
+  'root_cause',
+  'failure',
+  'condition',
+  'customer_impact',
+  'alert',
+  'investigation',
+  'mitigation',
+  'recovery',
+];
+const causalRank = (kind: string): number => {
+  const rank = CAUSAL_ORDER.indexOf(kind);
+  return rank === -1 ? CAUSAL_ORDER.length : rank;
+};
+
+/** Oldest first; at the same time, causes before effects. */
+export const compareEventsByTime = (a: ImpactMapEvent, b: ImpactMapEvent): number =>
+  at(a) - at(b) || causalRank(a.kind) - causalRank(b.kind) || a.id.localeCompare(b.id);
+const byTime = compareEventsByTime;
 
 /** The entity ids an event touches: its entity, or both ends of its relationship. */
 export const getEventEntityIds = (
@@ -68,19 +89,21 @@ const DERIVED_KINDS: ImpactMapEventKind[] = [
 
 /**
  * Key events picked from their kinds, for an investigation whose agent chose none: the first of
- * each kind that tells the story, and the last change as well when there were several.
+ * each kind that tells the story, and the last change and the last recovery as well when there
+ * were several: the last recovery is where the problem ended. When there are too many, the ones
+ * that tell the most stay (a kind's rank above), not the ones that happened first.
  */
 const deriveKeyEvents = (sorted: readonly ImpactMapEvent[]): ImpactMapEvent[] => {
   const picked = new Map<string, ImpactMapEvent>();
   DERIVED_KINDS.forEach((kind) => {
     const ofKind = sorted.filter((event) => event.kind === kind);
     if (ofKind.length > 0) picked.set(ofKind[0].id, ofKind[0]);
-    if (kind === 'change' && ofKind.length > 1) {
+    if ((kind === 'change' || kind === 'recovery') && ofKind.length > 1) {
       const last = ofKind[ofKind.length - 1];
       picked.set(last.id, last);
     }
   });
-  return [...picked.values()].sort(byTime).slice(0, MAX_TIMELINE_KEY_EVENTS);
+  return [...picked.values()].slice(0, MAX_TIMELINE_KEY_EVENTS).sort(byTime);
 };
 
 /** `6h`, `6h 12m`, `45m`: how long a span lasted, for a window's label. */
@@ -92,17 +115,36 @@ export const formatTimelineSpan = (fromMs: number, toMs: number): string => {
   return hours > 0 ? `${hours}h${rest ? ` ${rest}m` : ''}` : `${rest}m`;
 };
 
-/** A window from the first customer impact to the first recovery after it, when both exist. */
+/**
+ * A window from the first customer impact to the first recovery after it. With no recovery the
+ * impact was still going at the latest data, so the window runs to the latest event, and says so.
+ */
 const deriveWindow = (sorted: readonly ImpactMapEvent[]): TimelineWindow | undefined => {
   const start = sorted.find(({ kind }) => kind === 'customer_impact');
-  const end = start && sorted.find((event) => event.kind === 'recovery' && at(event) > at(start));
-  if (!start || !end) return undefined;
-  return {
-    label: `Impact ${formatTimelineSpan(at(start), at(end))}`,
-    start: start.at,
-    end: end.at,
-    tone: 'danger',
-  };
+  if (!start) return undefined;
+  const recovery = sorted.find((event) => event.kind === 'recovery' && at(event) > at(start));
+  if (recovery) {
+    return {
+      label: `Impact ${formatTimelineSpan(at(start), at(recovery))}`,
+      start: start.at,
+      end: recovery.at,
+      tone: 'danger',
+    };
+  }
+  // The latest thing the record knows of, where an event has an end, that end.
+  const latest = sorted.reduce(
+    (latestSoFar, event) =>
+      Math.max(latestSoFar, at(event), event.ends_at ? Date.parse(event.ends_at) || 0 : 0),
+    at(start)
+  );
+  return latest > at(start)
+    ? {
+        label: `Impact since ${formatTimelineClock(start.at)}, not recovered`,
+        start: start.at,
+        end: new Date(latest).toISOString(),
+        tone: 'danger',
+      }
+    : undefined;
 };
 
 /**
@@ -123,7 +165,14 @@ export const selectTimelineSummary = ({
   const requested = timeline?.filters;
   const filters: TimelineFilters | undefined =
     requested && ((requested.entity_ids?.length ?? 0) > 0 || (requested.kinds?.length ?? 0) > 0)
-      ? { entity_ids: requested.entity_ids ?? [], kinds: requested.kinds ?? [] }
+      ? {
+          entity_ids: requested.entity_ids ?? [],
+          // Recovery is always shown by default: it is where the problem ended, whatever kinds
+          // the agent chose. No kinds chosen means every kind, recovery included.
+          kinds: requested.kinds?.length
+            ? [...new Set<ImpactMapEventKind>([...requested.kinds, 'recovery'])]
+            : [],
+        }
       : undefined;
   const matching = filters
     ? all.filter(
@@ -208,7 +257,10 @@ export interface TimeScale {
   endMs: number;
 }
 
-const TICK_STEPS_MS = [15, 30, 60, 120, 180, 360, 720, 1_440].map((minutes) => minutes * 60_000);
+// Short steps first, so an incident of a few minutes still has several times on its axis.
+const TICK_STEPS_MS = [1, 2, 5, 10, 15, 30, 60, 120, 180, 360, 720, 1_440].map(
+  (minutes) => minutes * 60_000
+);
 
 const pad2 = (value: number) => String(value).padStart(2, '0');
 const dayOf = (ms: number) => {
@@ -245,14 +297,14 @@ export const buildTimeScale = (
   const stretches = points.slice(1).map((end, index) => {
     const start = points[index];
     // Only a long stretch between real instants, with something either side, is drawn short.
-    const isGap =
-      times.length >= 3 &&
-      end - start > Math.max(totalSpan * gapShare, minGapMs);
+    const isGap = times.length >= 3 && end - start > Math.max(totalSpan * gapShare, minGapMs);
     return { start, end, isGap };
   });
   // A line cannot be all cuts: when every stretch between events would be cut, the shortest stays
   // to scale.
-  const interior = stretches.filter((s, index) => index > 0 && index < stretches.length - 1 && s.end > s.start);
+  const interior = stretches.filter(
+    (s, index) => index > 0 && index < stretches.length - 1 && s.end > s.start
+  );
   const cut = interior.filter((s) => s.isGap);
   if (cut.length > 0 && cut.length === interior.length) {
     const shortest = cut.reduce((a, b) => (b.end - b.start < a.end - a.start ? b : a));
@@ -320,7 +372,8 @@ export const buildTimeScale = (
   // Ticks too close to read are dropped, the first of two kept: a stretch's last tick and the next
   // stretch's first can sit on one another around a break.
   const spaced = ticks.filter(
-    (tick, index) => index === 0 || tick.x - ticks[index - 1].x >= minTickSpacing || Boolean(tick.day)
+    (tick, index) =>
+      index === 0 || tick.x - ticks[index - 1].x >= minTickSpacing || Boolean(tick.day)
   );
   const readable = spaced.filter(
     (tick, index) =>

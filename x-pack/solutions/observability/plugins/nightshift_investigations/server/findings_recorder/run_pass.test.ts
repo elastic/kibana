@@ -527,6 +527,62 @@ describe('runFindingsPass', () => {
     expect(chatComplete.mock.calls.length).toBe(1);
   });
 
+  it('asks again when the root cause is put after the customer impact, and saves the fixed answer', async () => {
+    const event = (kind: string, title: string, at: string) => ({
+      kind,
+      title,
+      at,
+      entity: 'shipping',
+      data_source: { name: 'Elasticsearch' },
+    });
+    const backwards = [
+      event('customer_impact', 'Checkout failed', '2026-11-24T14:54:00Z'),
+      event('root_cause', 'Bad pod', '2026-11-24T14:54:51Z'),
+    ];
+    const fixed = [
+      event('customer_impact', 'Checkout failed', '2026-11-24T14:55:10Z'),
+      event('root_cause', 'Bad pod', '2026-11-24T14:54:51Z'),
+    ];
+    const { deps, memory, writer, chatComplete } = setup({
+      answers: [
+        answerWith({ ...output, events: backwards }),
+        answerWith({ ...output, events: fixed }),
+      ],
+    });
+    await run(deps, memory);
+
+    expect(chatComplete.mock.calls.length).toBe(2);
+    const secondMessages = chatComplete.mock.calls[1][0].messages;
+    expect(JSON.stringify(secondMessages[secondMessages.length - 1])).toContain('Bad pod');
+    const [{ events }] = writer.addImpactMapEvents.mock.calls[0];
+    expect(events.find(({ kind }: { kind: string }) => kind === 'customer_impact').at).toContain(
+      '14:55:10'
+    );
+  });
+
+  it('does not ask again when the root cause comes before the customer impact', async () => {
+    const events = [
+      {
+        kind: 'root_cause',
+        title: 'Bad pod',
+        at: '2026-11-24T14:54:51Z',
+        entity: 'shipping',
+        data_source: { name: 'Elasticsearch' },
+      },
+      {
+        kind: 'customer_impact',
+        title: 'Checkout failed',
+        at: '2026-11-24T14:55:10Z',
+        entity: 'shipping',
+        data_source: { name: 'Elasticsearch' },
+      },
+    ];
+    const { deps, memory, chatComplete } = setup({ answers: [answerWith({ ...output, events })] });
+    await run(deps, memory);
+
+    expect(chatComplete.mock.calls.length).toBe(1);
+  });
+
   it('writes events with the map, or on their own when there is no map', async () => {
     const events = [
       {

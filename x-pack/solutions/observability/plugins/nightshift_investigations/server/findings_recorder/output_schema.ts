@@ -834,8 +834,9 @@ export type FindingsRecord = Omit<
 export const limitTimeline = (
   raw: NonNullable<FindingsOutput['timeline']>
 ): ImpactMapTimeline | undefined => {
-  const entityIds = [...new Set((raw.filters?.entity_ids ?? []).map((id) => id.trim()).filter(Boolean))]
-    .slice(0, MAX_TIMELINE_FILTER_ENTITIES);
+  const entityIds = [
+    ...new Set((raw.filters?.entity_ids ?? []).map((id) => id.trim()).filter(Boolean)),
+  ].slice(0, MAX_TIMELINE_FILTER_ENTITIES);
   const kinds = [...new Set(raw.filters?.kinds ?? [])];
   const timeline: ImpactMapTimeline = {
     ...(entityIds.length > 0 || kinds.length > 0
@@ -914,31 +915,47 @@ export const limitFindings = (
       ? {
           proposals: rawProposals
             .slice(0, MAX_PROPOSALS)
-            .map(({ title, comment, how, why, event_ids: eventIds, hypotheses, blind_spot, impact, confidence }) => ({
-              title: truncate(title.trim(), MAX_TITLE_LENGTH),
-              // The "what", then the "why" behind it as a hidden reference, within the comment limit.
-              comment: truncate(
-                buildProposalComment(truncate(comment, MAX_PROPOSAL_WHAT), {
-                  how: how ? truncate(how.trim(), MAX_PROPOSAL_HOW) : undefined,
-                  explanation: why ? clipAtWord(normalizeEventLinks(why.trim()), MAX_PROPOSAL_WHY) : undefined,
-                  event_ids: eventIds
-                    ?.map((id) => id.trim())
-                    .filter(Boolean)
-                    .slice(0, MAX_PROPOSAL_EVENTS),
-                  hypotheses: hypotheses
-                    ?.map((name) => truncate(name.trim(), MAX_PROPOSAL_NAME))
-                    .filter(Boolean)
-                    .slice(0, MAX_PROPOSAL_HYPOTHESES),
-                  blind_spot: blind_spot ? truncate(blind_spot.trim(), MAX_PROPOSAL_NAME) : undefined,
-                }),
-                MAX_COMMENT_LENGTH
-              ),
-              // A value the proposal store does not know is left out, not sent to fail the write.
-              ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
-              ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
-                ? { confidence }
-                : {}),
-            })),
+            .map(
+              ({
+                title,
+                comment,
+                how,
+                why,
+                event_ids: eventIds,
+                hypotheses,
+                blind_spot,
+                impact,
+                confidence,
+              }) => ({
+                title: truncate(title.trim(), MAX_TITLE_LENGTH),
+                // The "what", then the "why" behind it as a hidden reference, within the comment limit.
+                comment: truncate(
+                  buildProposalComment(truncate(comment, MAX_PROPOSAL_WHAT), {
+                    how: how ? truncate(how.trim(), MAX_PROPOSAL_HOW) : undefined,
+                    explanation: why
+                      ? clipAtWord(normalizeEventLinks(why.trim()), MAX_PROPOSAL_WHY)
+                      : undefined,
+                    event_ids: eventIds
+                      ?.map((id) => id.trim())
+                      .filter(Boolean)
+                      .slice(0, MAX_PROPOSAL_EVENTS),
+                    hypotheses: hypotheses
+                      ?.map((name) => truncate(name.trim(), MAX_PROPOSAL_NAME))
+                      .filter(Boolean)
+                      .slice(0, MAX_PROPOSAL_HYPOTHESES),
+                    blind_spot: blind_spot
+                      ? truncate(blind_spot.trim(), MAX_PROPOSAL_NAME)
+                      : undefined,
+                  }),
+                  MAX_COMMENT_LENGTH
+                ),
+                // A value the proposal store does not know is left out, not sent to fail the write.
+                ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
+                ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
+                  ? { confidence }
+                  : {}),
+              })
+            ),
         }
       : {}),
     hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {

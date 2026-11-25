@@ -286,7 +286,10 @@ export const impactMapTimelineSchema = lazySchema(() =>
     filters: z
       .object({
         /** Only events that happened to one of these entities, or to a relationship that touches one. */
-        entity_ids: z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_TIMELINE_FILTER_ENTITIES).optional(),
+        entity_ids: z
+          .array(z.string().min(1).max(MAX_ID_LENGTH))
+          .max(MAX_TIMELINE_FILTER_ENTITIES)
+          .optional(),
         /** Only events of these kinds. */
         kinds: z.array(impactMapEventKindSchema).max(IMPACT_MAP_EVENT_KINDS.length).optional(),
       })

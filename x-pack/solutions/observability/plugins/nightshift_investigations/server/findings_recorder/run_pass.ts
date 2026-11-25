@@ -37,6 +37,7 @@ import {
 } from './output_schema';
 import { buildRecorderSystemPrompt } from './prompt';
 import { withLocalElasticsearch, type LocalElasticsearch } from './local_elasticsearch';
+import { causeAfterImpactRequest, findCauseAfterImpact } from './event_order';
 import { RECORDER_MAX_TOOL_CALLS, RECORDER_MAX_TOOL_ROUNDS } from './constants';
 import {
   RECORDER_READ_FILE_SCHEMA,
@@ -101,6 +102,15 @@ const MISSING_EVIDENCE_REQUEST =
 
 const eventsWithoutEvidence = (record: FindingsRecord): number =>
   (record.events ?? []).filter((event) => !event.data_source).length;
+
+/** What is wrong with a record that is worth asking for again, as the request to send. */
+const recordProblems = (record: FindingsRecord): string[] => {
+  const causeAfterImpact = findCauseAfterImpact(record.events);
+  return [
+    ...(eventsWithoutEvidence(record) > 0 ? [MISSING_EVIDENCE_REQUEST] : []),
+    ...(causeAfterImpact ? [causeAfterImpactRequest(causeAfterImpact)] : []),
+  ];
+};
 
 type RecordEntity = NonNullable<FindingsRecord['impact_entities']>[number];
 
@@ -515,14 +525,16 @@ export const runFindingsPass = async (
     // One call, forced to answer. This is every live pass, and the final pass when it has no
     // files or could not use them. The replay carries no file paths it could not follow.
     const plainMessages = workspace ? buildMessages(false) : messages;
-    // A record whose events lack evidence is asked for again, once; if the model still leaves some
-    // out, the record is saved anyway (those events show that no source was recorded).
-    let withoutEvidence: FindingsRecord | undefined;
+    // A record whose events lack evidence, or put the root cause after the customer impact, is asked
+    // for again, once; if the model still gets it wrong, the record is saved anyway (events show
+    // that no source was recorded).
+    let flawed: FindingsRecord | undefined;
+    let retryRequest: string | undefined;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !output && !guard.signal.aborted; attempt++) {
       try {
         const response = await ask(
-          withoutEvidence
-            ? [...plainMessages, { role: MessageRole.User, content: MISSING_EVIDENCE_REQUEST }]
+          flawed && retryRequest
+            ? [...plainMessages, { role: MessageRole.User, content: retryRequest }]
             : plainMessages,
           tools,
           { function: STRUCTURED_OUTPUT_TOOL },
@@ -530,9 +542,16 @@ export const runFindingsPass = async (
         );
         const call = response.toolCalls?.find((c) => c.function.name === STRUCTURED_OUTPUT_TOOL);
         const candidate = parseRecord(call?.function.arguments, `attempt ${attempt}`);
-        if (candidate && eventsWithoutEvidence(candidate) > 0) {
-          withoutEvidence = candidate;
-          if (attempt === MAX_ATTEMPTS) output = candidate;
+        const problems = candidate ? recordProblems(candidate) : [];
+        if (candidate && problems.length > 0) {
+          flawed = candidate;
+          retryRequest = problems.join(' ');
+          if (attempt === MAX_ATTEMPTS) {
+            logger.warn(
+              `Findings recorder for ${conversationId} kept a record with problems: ${retryRequest}`
+            );
+            output = candidate;
+          }
         } else {
           output = candidate;
         }
@@ -548,7 +567,7 @@ export const runFindingsPass = async (
         }
       }
     }
-    output ??= withoutEvidence;
+    output ??= flawed;
   } catch (error) {
     if (!guard.signal.aborted) {
       logger.warn(

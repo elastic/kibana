@@ -155,6 +155,7 @@ export {
 } from './impact_map/impact_map';
 export {
   buildTimeScale,
+  compareEventsByTime,
   formatTimelineClock,
   formatTimelineGap,
   formatTimelineSpan,

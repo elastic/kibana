@@ -29,7 +29,9 @@ const AFFECTS = i18n.translate('xpack.agenticInvestigations.timelineExpanded.aff
 export const EventHoverCard: React.FC<{
   event: ImpactMapEvent;
   impactMap: InvestigationImpactMapResponse;
-}> = ({ event, impactMap }) => {
+  /** Something to do with the event, at the foot of the card: only when the card can be clicked. */
+  action?: React.ReactNode;
+}> = ({ event, impactMap, action }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div data-test-subj="agenticInvestigationsTimelineExpandedHover">
@@ -99,6 +101,7 @@ export const EventHoverCard: React.FC<{
           <EventChart event={event} allEvents={impactMap.events} />
         </div>
       )}
+      {action && <div css={{ marginTop: euiTheme.size.s }}>{action}</div>}
     </div>
   );
 };

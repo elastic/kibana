@@ -8,6 +8,7 @@
 import type { ImpactMapEvent } from './impact_map';
 import {
   buildTimeScale,
+  compareEventsByTime,
   formatTimelineGap,
   isInsideWindow,
   selectTimelineSummary,
@@ -42,7 +43,10 @@ describe('selectTimelineSummary', () => {
     });
     expect(summary?.events.map(({ id }) => id)).toEqual(['cause', 'alert', 'clean']);
     expect(summary?.windows).toEqual(windows);
-    expect(summary?.filters).toEqual({ entity_ids: [], kinds: ['root_cause', 'alert', 'recovery'] });
+    expect(summary?.filters).toEqual({
+      entity_ids: [],
+      kinds: ['root_cause', 'alert', 'recovery'],
+    });
     // Between the cause and the alert lie the impact and the note; between alert and clean, a change.
     expect(summary?.hiddenBetween.map((hidden) => hidden.map(({ id }) => id))).toEqual([
       ['impact', 'note'],
@@ -104,7 +108,7 @@ describe('formatTimelineGap', () => {
     expect(formatTimelineGap(t, t + 42 * 60_000)).toBe('+42m');
     expect(formatTimelineGap(t, t + (4 * 60 + 5) * 60_000)).toBe('+4h 5m');
     expect(formatTimelineGap(t, t + 60 * 60_000)).toBe('+1h');
-    expect(formatTimelineGap(t, t + (27 * 60) * 60_000)).toBe('+1d 3h');
+    expect(formatTimelineGap(t, t + 27 * 60 * 60_000)).toBe('+1d 3h');
   });
 });
 
@@ -172,7 +176,9 @@ describe('buildTimeScale', () => {
     expect(scale?.toX(t0 + 11 * minute)).toBe(1);
     expect((scale?.toX(t0 + 9 * minute) ?? 1) - (scale?.toX(t0) ?? 0)).toBeLessThan(0.3);
     // Evenly spaced events are not cut.
-    expect(buildTimeScale([t0, t0 + 10 * minute, t0 + 20 * minute, t0 + 30 * minute], options)?.gaps).toEqual([]);
+    expect(
+      buildTimeScale([t0, t0 + 10 * minute, t0 + 20 * minute, t0 + 30 * minute], options)?.gaps
+    ).toEqual([]);
     // When every stretch would be cut, the shortest stays to scale.
     const sparse = buildTimeScale([t0, t0 + 60 * minute, t0 + 150 * minute], options);
     expect(sparse?.gaps).toHaveLength(1);
@@ -184,5 +190,119 @@ describe('buildTimeScale', () => {
     expect(scale?.ticks.length).toBeGreaterThan(2);
     expect(scale?.ticks.every(({ label }) => /^\d\d:\d\d$/.test(label))).toBe(true);
     expect(scale?.ticks[0].day).toBe('10-30 UTC');
+  });
+});
+
+describe('compareEventsByTime', () => {
+  it('orders by time, and at the same time puts causes before effects', () => {
+    const sameTime = '2026-11-24T14:55:00.000Z';
+    const sorted = [
+      event('a-impact', 'customer_impact', sameTime),
+      event('b-alert', 'alert', sameTime),
+      event('c-cause', 'root_cause', sameTime),
+      event('d-failure', 'failure', sameTime),
+      event('e-change', 'change', sameTime),
+      event('f-earlier', 'recovery', '2026-11-24T14:00:00Z'),
+    ].sort(compareEventsByTime);
+
+    expect(sorted.map(({ id }) => id)).toEqual([
+      'f-earlier',
+      'e-change',
+      'c-cause',
+      'd-failure',
+      'a-impact',
+      'b-alert',
+    ]);
+  });
+});
+
+describe('the derived customer impact window', () => {
+  it('runs from the first customer impact to the latest event when nothing recovered', () => {
+    const summary = selectTimelineSummary({
+      events: [
+        event('cause', 'root_cause', '2026-11-24T14:54:51Z'),
+        event('impact', 'customer_impact', '2026-11-24T14:55:00Z'),
+        event('later', 'failure', '2026-11-24T14:59:00Z'),
+      ],
+    });
+
+    expect(summary?.windows).toEqual([
+      expect.objectContaining({
+        start: '2026-11-24T14:55:00Z',
+        end: '2026-11-24T14:59:00.000Z',
+        label: expect.stringContaining('not recovered'),
+      }),
+    ]);
+  });
+
+  it('draws nothing when the impact is the latest thing known', () => {
+    const summary = selectTimelineSummary({
+      events: [
+        event('cause', 'root_cause', '2026-11-24T14:54:51Z'),
+        event('other', 'change', '2026-11-24T14:54:00Z'),
+        event('impact', 'customer_impact', '2026-11-24T14:55:00Z'),
+      ],
+    });
+
+    expect(summary?.windows).toEqual([]);
+  });
+});
+
+describe('buildTimeScale ticks for a short incident', () => {
+  it('has several times on the axis for a few minutes of data', () => {
+    const start = Date.parse('2026-11-25T11:45:00Z');
+    const scale = buildTimeScale([start, start + 4 * 60_000, start + 15 * 60_000]);
+
+    expect(scale?.ticks.map(({ label }) => label)).toEqual(['11:45', '11:50', '11:55', '12:00']);
+  });
+});
+
+describe('recovery on the timeline by default', () => {
+  it('keeps recovery in the kinds the agent chose, so the end of the problem is shown', () => {
+    const summary = selectTimelineSummary({
+      events: [
+        event('up', 'change', '2026-11-25T11:51:00Z'),
+        event('cause', 'root_cause', '2026-11-25T11:51:21Z'),
+        event('impact', 'customer_impact', '2026-11-25T11:52:00Z'),
+        event('back', 'recovery', '2026-11-25T12:16:00Z'),
+      ],
+      timeline: { filters: { kinds: ['change', 'root_cause', 'customer_impact'] } },
+    });
+
+    expect(summary?.filters?.kinds).toEqual([
+      'change',
+      'root_cause',
+      'customer_impact',
+      'recovery',
+    ]);
+    expect(summary?.events.map(({ id }) => id)).toContain('back');
+  });
+
+  it('leaves "every kind" as it is', () => {
+    const summary = selectTimelineSummary({
+      events: EVENTS,
+      timeline: { filters: { entity_ids: ['x'] } },
+    });
+
+    expect(summary?.filters?.kinds ?? []).toEqual([]);
+  });
+
+  it('keeps the last recovery when too many key events are derived', () => {
+    const summary = selectTimelineSummary({
+      events: [
+        event('c1', 'change', '2026-11-25T11:50:00Z'),
+        event('cause', 'root_cause', '2026-11-25T11:51:00Z'),
+        event('impact', 'customer_impact', '2026-11-25T11:52:00Z'),
+        event('f', 'failure', '2026-11-25T11:53:00Z'),
+        event('a', 'alert', '2026-11-25T11:54:00Z'),
+        event('m', 'mitigation', '2026-11-25T12:10:00Z'),
+        event('r1', 'recovery', '2026-11-25T12:15:00Z'),
+        event('c2', 'change', '2026-11-25T12:16:00Z'),
+        event('r2', 'recovery', '2026-11-25T12:18:00Z'),
+      ],
+    });
+
+    expect(summary?.events.length).toBeLessThanOrEqual(8);
+    expect(summary?.events.map(({ id }) => id)).toContain('r2');
   });
 });

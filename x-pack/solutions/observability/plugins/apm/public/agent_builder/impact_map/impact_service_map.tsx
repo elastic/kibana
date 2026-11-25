@@ -50,21 +50,29 @@ import {
   type ImpactServiceMapNode,
 } from './transform_impact_map';
 
-const BADGES: Record<'root_cause', { icon: IconType; score: number; label: string }> = {
+type BadgeState = 'root_cause' | 'recovered';
+
+const BADGES: Record<BadgeState, { icon: IconType; label: string }> = {
   root_cause: {
     icon: 'bullseye',
-    score: IMPACT_SEVERITY_SCORES.rootCause,
     label: i18n.translate('xpack.apm.impactMap.badge.rootCause', {
       defaultMessage: 'Root cause',
+    }),
+  },
+  recovered: {
+    icon: 'checkCircleFill',
+    label: i18n.translate('xpack.apm.impactMap.badge.recovered', {
+      defaultMessage: 'Recovered',
     }),
   },
 };
 
 const BADGE_SIZE = 22;
 
-function StateBadge({ state, floating }: { state: 'root_cause'; floating?: boolean }) {
+function StateBadge({ state, floating }: { state: BadgeState; floating?: boolean }) {
   const { euiTheme } = useEuiTheme();
-  const { icon, score, label } = BADGES[state];
+  const { icon, label } = BADGES[state];
+  const isRecovered = state === 'recovered';
   return (
     <EuiToolTip
       content={<EuiText size="xs">{label}</EuiText>}
@@ -95,11 +103,18 @@ function StateBadge({ state, floating }: { state: 'root_cause'; floating?: boole
           width: ${BADGE_SIZE}px;
           height: ${BADGE_SIZE}px;
           border-radius: 50%;
-          background: ${getSeverityColor(score)};
+          background: ${isRecovered
+            ? euiTheme.colors.success
+            : getSeverityColor(IMPACT_SEVERITY_SCORES.rootCause)};
           border: 2px solid ${euiTheme.colors.backgroundBasePlain};
         `}
       >
-        <EuiIcon type={icon} size="s" color={euiTheme.colors.darkestShade} aria-hidden="true" />
+        <EuiIcon
+          type={icon}
+          size="s"
+          color={isRecovered ? euiTheme.colors.emptyShade : euiTheme.colors.darkestShade}
+          aria-hidden="true"
+        />
       </span>
     </EuiToolTip>
   );
@@ -157,7 +172,9 @@ function EventCountBadge({ count }: { count?: number }) {
 const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) => (
   <>
     <ServiceNode {...(props as unknown as ComponentProps<typeof ServiceNode>)} />
-    {props.data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
+    {(props.data.impactState === 'root_cause' || props.data.impactState === 'recovered') && (
+      <StateBadge state={props.data.impactState} floating />
+    )}
     <EventCountBadge count={props.data.eventCount} />
   </>
 ));
@@ -179,7 +196,9 @@ const ImpactDependencyNode = memo(
           data.severityScore !== undefined ? getSeverityColor(data.severityScore) : undefined
         }
       />
-      {data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
+      {(data.impactState === 'root_cause' || data.impactState === 'recovered') && (
+        <StateBadge state={data.impactState} floating />
+      )}
       <EventCountBadge count={data.eventCount} />
     </>
   )
@@ -189,7 +208,9 @@ ImpactDependencyNode.displayName = 'ImpactDependencyNode';
 const ImpactInfrastructureNode = memo((props: NodeProps<Node<ImpactDependencyNodeData>>) => (
   <>
     <InfrastructureNode {...props} />
-    {props.data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
+    {(props.data.impactState === 'root_cause' || props.data.impactState === 'recovered') && (
+      <StateBadge state={props.data.impactState} floating />
+    )}
     <EventCountBadge count={props.data.eventCount} />
   </>
 ));
@@ -208,12 +229,21 @@ const LEGEND = {
   impacted: i18n.translate('xpack.apm.impactMap.legend.impacted', {
     defaultMessage: 'Impacted',
   }),
+  recovered: i18n.translate('xpack.apm.impactMap.legend.recovered', {
+    defaultMessage: 'Recovered',
+  }),
   criticalPath: i18n.translate('xpack.apm.impactMap.legend.criticalPath', {
     defaultMessage: 'Critical path',
   }),
 };
 
-function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
+function ImpactMapLegend({
+  criticalPathColor,
+  hasRecovered,
+}: {
+  criticalPathColor: string;
+  hasRecovered: boolean;
+}) {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel paddingSize="xs" hasShadow={false} hasBorder data-test-subj="impactServiceMapLegend">
@@ -238,6 +268,14 @@ function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
             <EuiText size="xs">{LEGEND.impacted}</EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {hasRecovered && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <StateBadge state="recovered" />
+              <EuiText size="xs">{LEGEND.recovered}</EuiText>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -465,11 +503,16 @@ export function ImpactServiceMap({
 }: ImpactMapRendererProps) {
   const { euiTheme, colorMode } = useEuiTheme();
   const criticalPathColor = euiTheme.colors.danger;
+  const recoveredColor = euiTheme.colors.success;
 
   const agentNames = useServiceAgentNames(impactMap);
 
   const { laidOutNodes, edges } = useMemo(() => {
-    const graph = transformImpactMap(impactMap, { criticalPath: criticalPathColor }, agentNames);
+    const graph = transformImpactMap(
+      impactMap,
+      { criticalPath: criticalPathColor, recovered: recoveredColor },
+      agentNames
+    );
     // Only a target with events, or an entity with metadata, opens anything, so only it looks
     // clickable.
     const withMetadata = new Set(
@@ -489,7 +532,7 @@ export function ImpactServiceMap({
         edge.data?.eventCount ? { ...edge, className: CLICKABLE_CLASS } : edge
       ),
     };
-  }, [impactMap, criticalPathColor, agentNames]);
+  }, [impactMap, criticalPathColor, recoveredColor, agentNames]);
 
   // Local state so a dragged node stays put; a revised map from the agent lays out afresh.
   const [nodes, setNodes, onNodesChange] = useNodesState<ImpactServiceMapNode>(laidOutNodes);
@@ -568,7 +611,10 @@ export function ImpactServiceMap({
                 <MapControls onToggleFullScreen={onToggleFullScreen} isFullScreen={isFullScreen} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ImpactMapLegend criticalPathColor={criticalPathColor} />
+                <ImpactMapLegend
+                  criticalPathColor={criticalPathColor}
+                  hasRecovered={nodes.some(({ data }) => data.impactState === 'recovered')}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </Panel>

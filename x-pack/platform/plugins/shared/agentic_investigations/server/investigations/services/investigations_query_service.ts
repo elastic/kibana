@@ -61,6 +61,7 @@ import {
   attachEntitiesToAlerts,
   appliedProposalsToImpactMapEvents,
   mergeImpactMapEvents,
+  placeCauseBeforeImpact,
 } from '../../../common/impact_map/events';
 import { toEntityName } from '../../../common/impact_map/entity_name';
 import { normalizeEntityType } from '../../../common/impact_map/built_in_types';
@@ -823,7 +824,8 @@ const toImpactMapResponse = (
   relationship_types: relationshipTypes,
   ...(timeline && { timeline }),
   // Alerts the investigation was opened on join the events the agent recorded.
-  events: mergeImpactMapEvents(events ?? [], alertEvents),
+  // A cause is never after what it did to customers, however the passes timed them.
+  events: placeCauseBeforeImpact(mergeImpactMapEvents(events ?? [], alertEvents)),
   created_at: createdAt,
   ...(updatedAt !== undefined && { updated_at: updatedAt }),
 });

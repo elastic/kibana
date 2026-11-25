@@ -34,6 +34,11 @@ export const getImpactSeverityScore = (annotations?: ImpactMapAnnotations): numb
     return undefined;
   }
   const { role, health, impacted } = annotations;
+  // An entity the investigation says is healthy again has recovered: it was impacted, and the
+  // `impacted` flag and role stay as the record of that, but it is not red now.
+  if (health === 'healthy') {
+    return undefined;
+  }
   if (role === 'root_cause' || health === 'critical') {
     return IMPACT_SEVERITY_SCORES.rootCause;
   }
@@ -46,14 +51,23 @@ export const getImpactSeverityScore = (annotations?: ImpactMapAnnotations): numb
 };
 
 /** What an entity is in the incident: where it started, or what it hurt. */
-export type ImpactState = 'root_cause' | 'impacted';
+export type ImpactState = 'root_cause' | 'impacted' | 'recovered';
 
-/** The one state a node is badged with. A root cause outranks being impacted. */
+/**
+ * The one state a node is badged with. A root cause outranks being impacted, and an entity that
+ * was hurt (or the cause) and is healthy again is recovered.
+ */
 export const getImpactState = (annotations?: ImpactMapAnnotations): ImpactState | undefined => {
   if (!annotations) {
     return undefined;
   }
   const { role, health, impacted } = annotations;
+  // Healthy again: it recovered if it was hurt or was the cause, else it was never in the incident.
+  if (health === 'healthy') {
+    return impacted || role === 'root_cause' || role === 'symptom' || role === 'contributor'
+      ? 'recovered'
+      : undefined;
+  }
   if (role === 'root_cause') {
     return 'root_cause';
   }
@@ -96,11 +110,13 @@ export type ImpactServiceMapNode =
 
 export interface ImpactServiceMapEdge extends Edge {
   type: 'default';
-  data: { onCriticalPath: boolean; eventCount: number };
+  data: { onCriticalPath: boolean; recovered: boolean; eventCount: number };
 }
 
 export interface ImpactMapEdgeColors {
   criticalPath: string;
+  /** A link on the critical path that is fine again. */
+  recovered: string;
 }
 
 const CRITICAL_PATH_STROKE_WIDTH = 3;
@@ -133,6 +149,13 @@ export const transformImpactMap = (
       eventCounts.set(target, (eventCounts.get(target) ?? 0) + 1);
     }
   });
+
+  // A link that was on the critical path is fine again when the entity it comes from has recovered.
+  const recoveredIds = new Set(
+    entities
+      .filter(({ annotations }) => getImpactState(annotations) === 'recovered')
+      .map(({ id }) => id)
+  );
 
   const nodes = entities.map<ImpactServiceMapNode>(
     ({ id, type_id: typeId, label, annotations }) => {
@@ -201,6 +224,7 @@ export const transformImpactMap = (
   const edges = relationships.map<ImpactServiceMapEdge>(
     ({ id, type_id: typeId, source_id: source, target_id: target, on_critical_path }) => {
       const onCriticalPath = on_critical_path === true;
+      const recovered = onCriticalPath && recoveredIds.has(source);
       const eventCount = eventCounts.get(id) ?? 0;
       const label = relationshipLabels.get(typeId) ?? typeId;
       return {
@@ -215,13 +239,20 @@ export const transformImpactMap = (
                 values: { label, count: eventCount },
               })
             : label,
-        style: onCriticalPath
+        style: recovered
+          ? { stroke: colors.recovered, strokeWidth: CRITICAL_PATH_STROKE_WIDTH }
+          : onCriticalPath
           ? { stroke: colors.criticalPath, strokeWidth: CRITICAL_PATH_STROKE_WIDTH }
           : DEFAULT_EDGE_STYLE,
-        markerEnd: onCriticalPath ? createEdgeMarker(colors.criticalPath) : createEdgeMarker(),
-        animated: onCriticalPath,
+        markerEnd: recovered
+          ? createEdgeMarker(colors.recovered)
+          : onCriticalPath
+          ? createEdgeMarker(colors.criticalPath)
+          : createEdgeMarker(),
+        // Moving dashes mean trouble is flowing along it; a recovered link holds still.
+        animated: onCriticalPath && !recovered,
         zIndex: onCriticalPath ? 1 : 0,
-        data: { onCriticalPath, eventCount },
+        data: { onCriticalPath, recovered, eventCount },
       };
     }
   );

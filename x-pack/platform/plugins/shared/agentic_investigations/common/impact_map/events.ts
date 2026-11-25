@@ -120,7 +120,9 @@ export const attachEntitiesToAlerts = (
     const longest = [...named].sort((a, b) => (b.label?.length ?? 0) - (a.label?.length ?? 0))[0];
     const clear =
       longest &&
-      named.every(({ label }) => (longest.label ?? '').toLowerCase().includes((label ?? '').toLowerCase()));
+      named.every(({ label }) =>
+        (longest.label ?? '').toLowerCase().includes((label ?? '').toLowerCase())
+      );
     return clear ? { ...event, entity_id: longest.id } : event;
   });
 
@@ -146,3 +148,32 @@ export const appliedProposalsToImpactMapEvents = (
       ...(comment.trim() && { description: `- ${comment.trim().replace(/\n+/g, ' ')}` }),
       at: decidedAt as string,
     }));
+
+/**
+ * Puts every customer impact at or after the first root cause. A cause comes before what it does to
+ * customers, so an impact stamped earlier has an imprecise time (the start of the bucket a query
+ * grouped by, or a pass that did not yet know the cause), and the cause's moment is the earliest it
+ * can have been. The ids stay as recorded, so links to an event still work.
+ */
+export const placeCauseBeforeImpact = (events: ImpactMapEvent[]): ImpactMapEvent[] => {
+  const causeTimes = events
+    .filter(({ kind }) => kind === 'root_cause')
+    .map(({ at }) => Date.parse(at))
+    .filter((time) => !Number.isNaN(time));
+  if (causeTimes.length === 0) {
+    return events;
+  }
+  const cause = Math.min(...causeTimes);
+  return events.map((event) => {
+    const time = Date.parse(event.at);
+    if (event.kind !== 'customer_impact' || Number.isNaN(time) || time >= cause) {
+      return event;
+    }
+    const ends = event.ends_at ? Date.parse(event.ends_at) : NaN;
+    return {
+      ...event,
+      at: new Date(cause).toISOString(),
+      ...(!Number.isNaN(ends) && ends < cause ? { ends_at: new Date(cause).toISOString() } : {}),
+    };
+  });
+};

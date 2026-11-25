@@ -419,7 +419,11 @@ export const withRecoveredHealth = <
     ...impactMap,
     entities: impactMap.entities.map((entity) =>
       recovered.has(entity.id)
-        ? { ...entity, annotations: { ...entity.annotations, health: 'healthy' as const } }
+        ? {
+            ...entity,
+            // An entity with a recovery was hurt: it shows as recovered, not as never affected.
+            annotations: { ...entity.annotations, health: 'healthy' as const, impacted: true },
+          }
         : entity
     ),
   };

@@ -8,7 +8,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -22,6 +26,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -32,11 +37,18 @@ import type {
   ImpactMapEventKind,
   InvestigationImpactMapResponse,
 } from '../../common';
-import { buildTimeScale, formatTimelineClock, selectTimelineSummary } from '../../common';
+import {
+  buildTimeScale,
+  compareEventsByTime,
+  formatTimelineClock,
+  selectTimelineSummary,
+} from '../../common';
 import {
   EVENT_GROUPS,
+  EventAffects,
   EventDetail,
   EventKeyFacts,
+  eventAffectsAnything,
   describeEventTarget,
   getEntityIcon,
   getEventEntityIds,
@@ -48,8 +60,74 @@ import {
 import { formatDuration } from '../conversation_templates/templates/investigation/flyout/timeline_event';
 import { KindDot } from './timeline_summary';
 import { EventHoverCard } from './event_hover_card';
+import { getTrendTone, pickTrendSeries } from './trend';
 import { EntityHoverCard } from './entity_hover_card';
 
+/** The exact time under the pointer, to the second, in UTC: `11-25 11:51:21 UTC`. */
+const formatPointerTime = (ms: number): string => {
+  const iso = new Date(ms).toISOString();
+  return `${iso.slice(5, 10)} ${iso.slice(11, 19)} UTC`;
+};
+
+/** The trend an event carries: its series that matters, as points in time, and whether it is good or bad. */
+const getTrend = (event: ImpactMapEvent) => {
+  const chart = event.evidence?.chart;
+  const series = pickTrendSeries(event.kind, chart?.series);
+  const points = (series?.points ?? [])
+    .map(({ x, y }) => ({ ms: Date.parse(x), y }))
+    .filter(({ ms }) => !Number.isNaN(ms))
+    .sort((a, b) => a.ms - b.ms);
+  return {
+    title: chart?.title,
+    seriesName: series?.name,
+    points,
+    tone: getTrendTone(event.kind, series?.name),
+  };
+};
+
+const TRENDS = i18n.translate('xpack.agenticInvestigations.timelineExpanded.trends', {
+  defaultMessage: 'Trends from events',
+});
+const ADD_TREND = i18n.translate('xpack.agenticInvestigations.timelineExpanded.addTrend', {
+  defaultMessage: 'Add trend',
+});
+const ADD_TO_TRENDS = i18n.translate('xpack.agenticInvestigations.timelineExpanded.addToTrends', {
+  defaultMessage: 'Add to trends',
+});
+const SEARCH_TRENDS = i18n.translate('xpack.agenticInvestigations.timelineExpanded.searchTrends', {
+  defaultMessage: 'Search events with a trend',
+});
+const NO_TRENDS = i18n.translate('xpack.agenticInvestigations.timelineExpanded.noTrends', {
+  defaultMessage: 'No events with a trend match',
+});
+const CLOSE_EVENT = i18n.translate('xpack.agenticInvestigations.timelineExpanded.closeEvent', {
+  defaultMessage: 'Close event',
+});
+const VIEW_EVENT_DATA = i18n.translate(
+  'xpack.agenticInvestigations.timelineExpanded.viewEventData',
+  {
+    defaultMessage: 'View event data',
+  }
+);
+const FILTER_FOR = (value: string) =>
+  i18n.translate('xpack.agenticInvestigations.timelineExpanded.filterFor', {
+    defaultMessage: 'Filter for {value}',
+    values: { value },
+  });
+const FILTER_OUT = (value: string) =>
+  i18n.translate('xpack.agenticInvestigations.timelineExpanded.filterOut', {
+    defaultMessage: 'Filter out {value}',
+    values: { value },
+  });
+const REMOVE_FILTER = i18n.translate('xpack.agenticInvestigations.timelineExpanded.removeFilter', {
+  defaultMessage: 'Remove filter',
+});
+const MODIFY_TRENDS = i18n.translate('xpack.agenticInvestigations.timelineExpanded.modifyTrends', {
+  defaultMessage: 'Modify trends',
+});
+const REMOVE_TREND = i18n.translate('xpack.agenticInvestigations.timelineExpanded.removeTrend', {
+  defaultMessage: 'Remove trend',
+});
 const TITLE = i18n.translate('xpack.agenticInvestigations.timelineExpanded.title', {
   defaultMessage: 'Timeline',
 });
@@ -116,7 +194,7 @@ const TimelineExpanded: React.FC<{
     () => selectTimelineSummary({ events, relationships, timeline: impactMap.timeline }),
     [events, relationships, impactMap.timeline]
   );
-  const windows = summary?.windows ?? [];
+  const windows = useMemo(() => summary?.windows ?? [], [summary]);
   // It opens with the filters the agent applied, unless it was asked for particular entities or
   // an event, which would otherwise be filtered out. The reader can clear them.
   const focused = focus.entityIds.length > 0 || Boolean(focus.eventId);
@@ -130,15 +208,47 @@ const TimelineExpanded: React.FC<{
   const [selectedId, setSelectedId] = useState<string | undefined>(focus.eventId);
   const detailRef = useRef<HTMLDivElement>(null);
   const [hoverId, setHoverId] = useState<string>();
+  // A card with something to click stays open a moment after the pointer leaves the marker, so the
+  // pointer can cross to it.
+  const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
+  const showHover = (id: string) => {
+    clearTimeout(hoverTimer.current);
+    setHoverId(id);
+  };
+  const hideHover = (delay = 0) => {
+    clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setHoverId(undefined), delay);
+  };
+  useEffect(() => () => clearTimeout(hoverTimer.current), []);
   const [hoverLaneId, setHoverLaneId] = useState<string>();
+  // The events whose trends are drawn under the lanes; absent, the one the agent picked.
+  const [trendIds, setTrendIds] = useState<string[]>();
+  const [isTrendPickerOpen, setIsTrendPickerOpen] = useState(false);
+  // What narrows the events the picker offers: typed text, entities and types.
+  const [pickerText, setPickerText] = useState('');
+  const [pickerEntities, setPickerEntities] = useState<string[]>([]);
+  const [pickerKinds, setPickerKinds] = useState<string[]>([]);
   // The time range dragged out on the lanes. Absent, every event is in view.
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ start: number; end: number } | null>(null);
-  const isFiltered = entityFilter.length > 0 || kindFilter.length > 0 || text.trim() !== '';
+  // What is filtered out, beside what is filtered in: Kibana's "filter for" and "filter out".
+  const [entityExclude, setEntityExclude] = useState<string[]>([]);
+  const [kindExclude, setKindExclude] = useState<string[]>([]);
+  const [legendMenuKind, setLegendMenuKind] = useState<string>();
+  const hoverLineRef = useRef<HTMLDivElement>(null);
+  const hoverTimeRef = useRef<HTMLSpanElement>(null);
+  const isFiltered =
+    entityFilter.length > 0 ||
+    kindFilter.length > 0 ||
+    entityExclude.length > 0 ||
+    kindExclude.length > 0 ||
+    text.trim() !== '';
   const clearFilters = () => {
     setEntityFilter([]);
     setKindFilter([]);
+    setEntityExclude([]);
+    setKindExclude([]);
     setText('');
   };
 
@@ -147,6 +257,13 @@ const TimelineExpanded: React.FC<{
     { entityIds, kinds, search }: { entityIds?: string[]; kinds?: string[]; search?: string }
   ) => {
     if (kinds?.length && !kinds.includes(event.kind)) return false;
+    if (kindExclude.includes(event.kind)) return false;
+    if (
+      entityExclude.length > 0 &&
+      getEventEntityIds(event, relationships).some((id) => entityExclude.includes(id))
+    ) {
+      return false;
+    }
     if (
       entityIds?.length &&
       !getEventEntityIds(event, relationships).some((id) => entityIds.includes(id))
@@ -172,9 +289,9 @@ const TimelineExpanded: React.FC<{
                 Date.parse(event.ends_at ?? event.at) >= range.from)) &&
             matches(event, { entityIds: entityFilter, kinds: kindFilter, search: text })
         )
-        .sort((a, b) => Date.parse(a.at) - Date.parse(b.at)),
+        .sort(compareEventsByTime),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [events, entityFilter, kindFilter, text, range]
+    [events, entityFilter, kindFilter, entityExclude, kindExclude, text, range]
   );
 
   const entityOptions = useMemo<FilterOption[]>(() => {
@@ -196,7 +313,17 @@ const TimelineExpanded: React.FC<{
         icon: getEntityIcon(types.get(typeId)),
       }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, entities, entityTypes, relationships, kindFilter, entityFilter, text]);
+  }, [
+    events,
+    entities,
+    entityTypes,
+    relationships,
+    kindFilter,
+    entityFilter,
+    entityExclude,
+    kindExclude,
+    text,
+  ]);
 
   const kindOptions = useMemo<FilterOption[]>(() => {
     const scoped = events.filter((event) =>
@@ -208,9 +335,11 @@ const TimelineExpanded: React.FC<{
       iconColor: color,
       count: scoped.filter(({ kind }) => kind === id).length,
       icon,
-    })).filter(({ key, count }) => count > 0 || kindFilter.includes(key));
+    })).filter(
+      ({ key, count }) => count > 0 || kindFilter.includes(key) || kindExclude.includes(key)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, entityFilter, kindFilter, text]);
+  }, [events, entityFilter, kindFilter, entityExclude, kindExclude, text]);
 
   const lanes = useMemo<Lane[]>(() => {
     const types = new Map(entityTypes.map((type) => [type.id, type]));
@@ -236,27 +365,102 @@ const TimelineExpanded: React.FC<{
     return [...byLane.values()];
   }, [visible, entities, entityTypes, relationships]);
 
-  const chart = summary?.chartEvent?.evidence?.chart;
-  // The series that is the trouble when the chart has several: failures, errors, drops.
-  const chartSeries = useMemo(
-    () =>
-      chart?.series?.find(({ name }) => /fail|error|drop|reject|lost|timeout/i.test(name)) ??
-      chart?.series?.[0],
-    [chart]
+  // Every event that carries a trend can be drawn as a row under the lanes.
+  const trendEvents = useMemo(
+    () => events.filter((event) => getTrend(event).points.length >= 2),
+    [events]
   );
-  const chartPoints = useMemo(() => {
-    const series = chartSeries;
-    const points = (series?.points ?? [])
-      .map(({ x, y }) => ({ ms: Date.parse(x), y }))
-      .filter(({ ms }) => !Number.isNaN(ms))
-      .sort((a, b) => a.ms - b.ms);
-    const inRange = range
-      ? points.filter(
-          ({ ms }, index) => ms <= range.to && (points[index + 1]?.ms ?? ms) >= range.from
-        )
-      : points;
-    return inRange.length >= 2 ? inRange : [];
-  }, [chartSeries, range]);
+  const defaultTrendId = summary?.chartEvent?.id;
+  // Whenever the timeline opens, the trends that tell the story are drawn: every customer impact,
+  // root cause and recovery that has one, and the event the agent picked for the chart, in the
+  // order the events happened.
+  const shownTrendIds =
+    trendIds ??
+    trendEvents
+      .filter(
+        ({ id, kind }) =>
+          id === defaultTrendId ||
+          kind === 'customer_impact' ||
+          kind === 'root_cause' ||
+          kind === 'recovery'
+      )
+      .map(({ id }) => id);
+  const trends = useMemo(
+    () =>
+      shownTrendIds.flatMap((id) => {
+        const event = trendEvents.find((candidate) => candidate.id === id);
+        if (!event) return [];
+        const { title, seriesName, points, tone } = getTrend(event);
+        const inRange = range
+          ? points.filter(
+              ({ ms }, index) => ms <= range.to && (points[index + 1]?.ms ?? ms) >= range.from
+            )
+          : points;
+        return inRange.length >= 2
+          ? [
+              {
+                event,
+                title,
+                seriesName,
+                tone,
+                points: inRange,
+                maxY: Math.max(...inRange.map(({ y }) => y), 1),
+              },
+            ]
+          : [];
+      }),
+    // shownTrendIds is derived from trendIds and the summary
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [trendEvents, trendIds, defaultTrendId, range]
+  );
+
+  const pickerEvents = useMemo(() => {
+    const needle = pickerText.trim().toLowerCase();
+    return trendEvents.filter(
+      (event) =>
+        (pickerKinds.length === 0 || pickerKinds.includes(event.kind)) &&
+        (pickerEntities.length === 0 ||
+          getEventEntityIds(event, relationships).some((id) => pickerEntities.includes(id))) &&
+        (needle === '' ||
+          `${event.title} ${getTrend(event).title ?? ''}`.toLowerCase().includes(needle))
+    );
+  }, [trendEvents, pickerText, pickerKinds, pickerEntities, relationships]);
+  const pickerEntityOptions = useMemo<FilterOption[]>(() => {
+    const types = new Map(entityTypes.map((type) => [type.id, type]));
+    const counts = new Map<string, number>();
+    trendEvents.forEach((event) =>
+      getEventEntityIds(event, relationships).forEach((id) =>
+        counts.set(id, (counts.get(id) ?? 0) + 1)
+      )
+    );
+    return entities
+      .filter(({ id }) => counts.has(id))
+      .map(({ id, label, type_id: typeId }) => ({
+        key: id,
+        label,
+        count: counts.get(id) ?? 0,
+        icon: getEntityIcon(types.get(typeId)),
+      }));
+  }, [trendEvents, entities, entityTypes, relationships]);
+  const pickerKindOptions = useMemo<FilterOption[]>(
+    () =>
+      EVENT_GROUPS.map(({ id, label, icon, color }) => ({
+        key: id,
+        label,
+        iconColor: color,
+        icon,
+        count: trendEvents.filter(({ kind }) => kind === id).length,
+      })).filter(({ count }) => count > 0),
+    [trendEvents]
+  );
+
+  const toggleTrend = (id: string) =>
+    setTrendIds(
+      shownTrendIds.includes(id)
+        ? shownTrendIds.filter((shown) => shown !== id)
+        : [...shownTrendIds, id]
+    );
+  const trendEventIds = useMemo(() => new Set(trendEvents.map(({ id }) => id)), [trendEvents]);
 
   const scale = useMemo(
     () =>
@@ -269,9 +473,9 @@ const TimelineExpanded: React.FC<{
               ...(endsAt ? [Date.parse(endsAt)] : []),
             ]),
             ...windows.flatMap(({ start, end }) => [Date.parse(start), Date.parse(end)]),
-            ...chartPoints.map(({ ms }) => ms),
+            ...trends.flatMap(({ points }) => points.map(({ ms }) => ms)),
           ]),
-    [range, visible, windows, chartPoints]
+    [range, visible, windows, trends]
   );
 
   const shown = events.find(({ id }) => id === selectedId);
@@ -283,13 +487,27 @@ const TimelineExpanded: React.FC<{
   const last = visible[visible.length - 1] && Date.parse(visible[visible.length - 1].at);
   const pct = (value: number) => `${(value * 100).toFixed(3)}%`;
 
-  const toggleKind = (kind: string) =>
-    setKindFilter((current) =>
-      current.includes(kind) ? current.filter((id) => id !== kind) : [...current, kind]
-    );
-
-  const maxY = Math.max(...chartPoints.map(({ y }) => y), 1);
-
+  const toggleIn = (list: string[], setList: (next: string[]) => void, id: string) =>
+    setList(list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
+  /** Filter for or out of a value: choosing one takes it out of the other. */
+  const filterEntity = (id: string, mode: 'for' | 'out') => {
+    if (mode === 'for') {
+      setEntityExclude(entityExclude.filter((item) => item !== id));
+      toggleIn(entityFilter, setEntityFilter, id);
+    } else {
+      setEntityFilter(entityFilter.filter((item) => item !== id));
+      toggleIn(entityExclude, setEntityExclude, id);
+    }
+  };
+  const filterKind = (kind: string, mode: 'for' | 'out') => {
+    if (mode === 'for') {
+      setKindExclude(kindExclude.filter((item) => item !== kind));
+      toggleIn(kindFilter, setKindFilter, kind);
+    } else {
+      setKindFilter(kindFilter.filter((item) => item !== kind));
+      toggleIn(kindExclude, setKindExclude, kind);
+    }
+  };
   // Dragging across the lanes picks a time range; the view follows it.
   const fractionAt = (clientX: number) => {
     const box = trackRef.current?.getBoundingClientRect();
@@ -408,6 +626,34 @@ const TimelineExpanded: React.FC<{
             </EuiFlexItem>
           </>
         )}
+        {/* What is filtered out, to put back: its lane or type is not on the timeline to click. */}
+        {[
+          ...entityExclude.map((id) => ({
+            key: `entity:${id}`,
+            label: entities.find((entity) => entity.id === id)?.label ?? id,
+            remove: () => setEntityExclude(entityExclude.filter((item) => item !== id)),
+          })),
+          ...kindExclude.map((kind) => ({
+            key: `kind:${kind}`,
+            label: EVENT_GROUPS.find(({ id }) => id === kind)?.label ?? kind,
+            remove: () => setKindExclude(kindExclude.filter((item) => item !== kind)),
+          })),
+        ].map(({ key, label, remove }) => (
+          <EuiFlexItem grow={false} key={key}>
+            <EuiBadge
+              color="hollow"
+              iconType="minusCircle"
+              iconSide="left"
+              onClick={remove}
+              onClickAriaLabel={REMOVE_FILTER}
+              iconOnClick={remove}
+              iconOnClickAriaLabel={REMOVE_FILTER}
+              data-test-subj="agenticInvestigationsTimelineExpandedExcluded"
+            >
+              {label}
+            </EuiBadge>
+          </EuiFlexItem>
+        ))}
         {isFiltered && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -437,41 +683,83 @@ const TimelineExpanded: React.FC<{
           >
             {kindOptions.map(({ key, label, count }) => {
               const isSelected = kindFilter.includes(key);
-              const isDimmed = kindFilter.length > 0 && !isSelected;
+              const isExcluded = kindExclude.includes(key);
+              const isDimmed = (kindFilter.length > 0 && !isSelected) || isExcluded;
               return (
                 <EuiFlexItem key={key} grow={false}>
-                  <button
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => toggleKind(key)}
-                    data-test-subj={`agenticInvestigationsTimelineExpandedLegend-${key}`}
-                    css={css`
-                      display: flex;
-                      align-items: center;
-                      gap: ${euiTheme.size.xs};
-                      padding: ${euiTheme.size.xxs} ${euiTheme.size.s} ${euiTheme.size.xxs}
-                        ${euiTheme.size.xxs};
-                      border: 1px solid ${isSelected ? euiTheme.colors.primary : 'transparent'};
-                      border-radius: ${euiTheme.size.l};
-                      background: ${isSelected
-                        ? euiTheme.colors.backgroundBasePrimary
-                        : 'transparent'};
-                      color: inherit;
-                      font: inherit;
-                      cursor: pointer;
-                      opacity: ${isDimmed ? 0.5 : 1};
-                      &:hover,
-                      &:focus-visible {
-                        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-                        opacity: 1;
-                      }
-                    `}
+                  {/* A click offers to filter for the type or out of it, as Kibana does for a value. */}
+                  <EuiPopover
+                    isOpen={legendMenuKind === key}
+                    closePopover={() => setLegendMenuKind(undefined)}
+                    anchorPosition="downLeft"
+                    panelPaddingSize="none"
+                    button={
+                      <button
+                        type="button"
+                        aria-pressed={isSelected}
+                        aria-haspopup="menu"
+                        onClick={() => setLegendMenuKind(legendMenuKind === key ? undefined : key)}
+                        data-test-subj={`agenticInvestigationsTimelineExpandedLegend-${key}`}
+                        css={css`
+                          display: flex;
+                          align-items: center;
+                          gap: ${euiTheme.size.xs};
+                          padding: ${euiTheme.size.xxs} ${euiTheme.size.s} ${euiTheme.size.xxs}
+                            ${euiTheme.size.xxs};
+                          border: 1px solid ${isSelected ? euiTheme.colors.primary : 'transparent'};
+                          border-radius: ${euiTheme.size.l};
+                          background: ${isSelected
+                            ? euiTheme.colors.backgroundBasePrimary
+                            : 'transparent'};
+                          color: inherit;
+                          font: inherit;
+                          cursor: pointer;
+                          opacity: ${isDimmed ? 0.5 : 1};
+                          &:hover,
+                          &:focus-visible {
+                            background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+                            opacity: 1;
+                          }
+                        `}
+                      >
+                        <KindDot kind={key as ImpactMapEventKind} size="s" />
+                        <EuiText
+                          size="s"
+                          component="span"
+                          css={{ textDecoration: isExcluded ? 'line-through' : 'none' }}
+                        >
+                          {isExcluded ? label : `${label} ${count}`}
+                        </EuiText>
+                      </button>
+                    }
                   >
-                    <KindDot kind={key as ImpactMapEventKind} size="s" />
-                    <EuiText size="s" component="span">
-                      {label} {count}
-                    </EuiText>
-                  </button>
+                    <EuiContextMenuPanel
+                      items={[
+                        <EuiContextMenuItem
+                          key="for"
+                          icon={isSelected ? 'check' : 'plusCircle'}
+                          onClick={() => {
+                            filterKind(key, 'for');
+                            setLegendMenuKind(undefined);
+                          }}
+                          data-test-subj={`agenticInvestigationsTimelineExpandedLegendFor-${key}`}
+                        >
+                          {FILTER_FOR(label)}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="out"
+                          icon={isExcluded ? 'check' : 'minusCircle'}
+                          onClick={() => {
+                            filterKind(key, 'out');
+                            setLegendMenuKind(undefined);
+                          }}
+                          data-test-subj={`agenticInvestigationsTimelineExpandedLegendOut-${key}`}
+                        >
+                          {FILTER_OUT(label)}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
                 </EuiFlexItem>
               );
             })}
@@ -525,14 +813,46 @@ const TimelineExpanded: React.FC<{
           <div
             data-test-subj="agenticInvestigationsTimelineExpandedLanes"
             onPointerDown={(event) => {
-              // Anywhere but on an event starts a selection.
-              if (event.button !== 0 || (event.target as HTMLElement).closest('button')) return;
+              // Anywhere on the lanes but on an event or a control starts a selection. Not what is
+              // in a popover (it bubbles here through React, not through the page), and not the
+              // trend picker, whose list and search need their own clicks.
+              const target = event.target as HTMLElement;
+              if (
+                event.button !== 0 ||
+                !event.currentTarget.contains(target) ||
+                target.closest('button, input, [role="option"], [data-no-drag]')
+              ) {
+                return;
+              }
               event.currentTarget.setPointerCapture(event.pointerId);
               const at = fractionAt(event.clientX);
               setDrag({ start: at, end: at });
             }}
             onPointerMove={(event) => {
               if (drag) setDrag({ ...drag, end: fractionAt(event.clientX) });
+              // The hover line follows the pointer without a render: it moves every few pixels.
+              const box = trackRef.current?.getBoundingClientRect();
+              const line = hoverLineRef.current;
+              const time = hoverTimeRef.current;
+              if (!box || !line || !time || box.width <= 0) return;
+              const fraction = (event.clientX - box.left) / box.width;
+              if (!(fraction >= 0 && fraction <= 1)) {
+                line.style.display = 'none';
+                return;
+              }
+              line.style.display = 'block';
+              line.style.left = `${fraction * 100}%`;
+              time.textContent = formatPointerTime(scale.toMs(fraction));
+              // Near an edge the time sits to the inside, so it is not cut off.
+              time.style.transform =
+                fraction > 0.85
+                  ? 'translateX(-100%)'
+                  : fraction < 0.15
+                  ? 'none'
+                  : 'translateX(-50%)';
+            }}
+            onPointerLeave={() => {
+              if (hoverLineRef.current) hoverLineRef.current.style.display = 'none';
             }}
             onPointerUp={finishDrag}
             onPointerCancel={() => setDrag(null)}
@@ -556,6 +876,36 @@ const TimelineExpanded: React.FC<{
               `}
               ref={trackRef}
             >
+              <div
+                ref={hoverLineRef}
+                data-test-subj="agenticInvestigationsTimelineExpandedHoverLine"
+                css={css`
+                  display: none;
+                  position: absolute;
+                  top: 0;
+                  bottom: 0;
+                  z-index: 6;
+                  border-inline-start: 1px solid ${euiTheme.colors.darkestShade};
+                  pointer-events: none;
+                `}
+              >
+                {/* The exact time under the pointer, at the top of the line. */}
+                <span
+                  ref={hoverTimeRef}
+                  data-test-subj="agenticInvestigationsTimelineExpandedHoverTime"
+                  css={css`
+                    position: absolute;
+                    top: 0;
+                    white-space: nowrap;
+                    padding: 0 ${euiTheme.size.xs};
+                    border-radius: ${euiTheme.border.radius.small};
+                    background: ${euiTheme.colors.darkestShade};
+                    color: ${euiTheme.colors.emptyShade};
+                    font-size: ${euiTheme.size.m};
+                    line-height: ${euiTheme.size.l};
+                  `}
+                />
+              </div>
               {drag && (
                 <div
                   data-test-subj="agenticInvestigationsTimelineExpandedSelection"
@@ -596,6 +946,10 @@ const TimelineExpanded: React.FC<{
                   display: flex;
                   height: ${LANE_HEIGHT}px;
                   border-bottom: ${euiTheme.border.thin};
+                  &:hover .laneActions,
+                  &:focus-within .laneActions {
+                    opacity: 1;
+                  }
                   /* The lane of the event being viewed is tinted, to find it among many. */
                   ${lane.events.some(({ id }) => id === selectedId)
                     ? `background: ${euiTheme.colors.backgroundBaseSubdued};`
@@ -608,8 +962,51 @@ const TimelineExpanded: React.FC<{
                     padding-top: ${euiTheme.size.s};
                     flex: 0 0 ${LABEL_WIDTH}px;
                     min-width: 0;
+                    position: relative;
                   `}
                 >
+                  {lane.id !== 'investigation' && (
+                    // Filter for or out of this entity, shown on hover as Kibana shows them on a value.
+                    <div
+                      className="laneActions"
+                      css={css`
+                        position: absolute;
+                        top: ${euiTheme.size.xs};
+                        right: ${euiTheme.size.xs};
+                        z-index: 2;
+                        display: flex;
+                        /* Over the name, only while the lane is hovered, so it takes no room of its own. */
+                        background: ${euiTheme.colors.backgroundBasePlain};
+                        border-radius: ${euiTheme.border.radius.medium};
+                        box-shadow: 0 0 0 1px ${euiTheme.colors.borderBasePlain};
+                        opacity: 0;
+                        &:focus-within {
+                          opacity: 1;
+                        }
+                      `}
+                    >
+                      <EuiToolTip content={FILTER_FOR(lane.label)} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="plusCircle"
+                          size="xs"
+                          color="text"
+                          aria-label={FILTER_FOR(lane.label)}
+                          onClick={() => filterEntity(lane.id, 'for')}
+                          data-test-subj={`agenticInvestigationsTimelineExpandedLaneFor-${lane.id}`}
+                        />
+                      </EuiToolTip>
+                      <EuiToolTip content={FILTER_OUT(lane.label)} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="minusCircle"
+                          size="xs"
+                          color="text"
+                          aria-label={FILTER_OUT(lane.label)}
+                          onClick={() => filterEntity(lane.id, 'out')}
+                          data-test-subj={`agenticInvestigationsTimelineExpandedLaneOut-${lane.id}`}
+                        />
+                      </EuiToolTip>
+                    </div>
+                  )}
                   {lane.id === 'investigation' ? (
                     // What belongs to no entity: nothing to show or open.
                     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
@@ -617,7 +1014,17 @@ const TimelineExpanded: React.FC<{
                         <EuiIcon type={lane.icon} aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem css={{ minWidth: 0 }}>
-                        <EuiText size="s">{lane.label}</EuiText>
+                        <EuiText
+                          size="s"
+                          css={css`
+                            display: -webkit-box;
+                            -webkit-line-clamp: 2;
+                            -webkit-box-orient: vertical;
+                            overflow: hidden;
+                          `}
+                        >
+                          {lane.label}
+                        </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ) : (
@@ -649,6 +1056,8 @@ const TimelineExpanded: React.FC<{
                             display: flex;
                             gap: ${euiTheme.size.s};
                             align-items: flex-start;
+                            max-width: 100%;
+                            min-width: 0;
                             padding: 0;
                             border: none;
                             background: none;
@@ -663,7 +1072,19 @@ const TimelineExpanded: React.FC<{
                           `}
                         >
                           <EuiIcon type={lane.icon} aria-hidden />
-                          <EuiText size="s" className="laneName">
+                          <EuiText
+                            size="s"
+                            className="laneName"
+                            css={css`
+                              /* Two lines at most, so a long name stays inside its lane. */
+                              display: -webkit-box;
+                              -webkit-line-clamp: 2;
+                              -webkit-box-orient: vertical;
+                              overflow: hidden;
+                              overflow-wrap: anywhere;
+                              min-width: 0;
+                            `}
+                          >
                             {lane.label}
                           </EuiText>
                         </button>
@@ -716,7 +1137,7 @@ const TimelineExpanded: React.FC<{
                         )}
                         <EuiPopover
                           isOpen={hoverId === event.id}
-                          closePopover={() => setHoverId(undefined)}
+                          closePopover={() => hideHover()}
                           anchorPosition="upCenter"
                           panelPaddingSize="m"
                           ownFocus={false}
@@ -735,13 +1156,16 @@ const TimelineExpanded: React.FC<{
                           `}
                           panelProps={{
                             css: css`
-                              pointer-events: none;
+                              /* Only a card with a button to click takes the pointer. */
+                              pointer-events: ${trendEventIds.has(event.id) ? 'auto' : 'none'};
                               inline-size: 400px;
                               max-inline-size: 90vw;
-                              /* The card only shows, so a tall chart is cut off, not scrolled. */
+                              /* A tall chart is cut off, not scrolled. */
                               max-block-size: 80vh;
                               overflow: hidden;
                             `,
+                            onMouseEnter: () => showHover(event.id),
+                            onMouseLeave: () => hideHover(150),
                           }}
                           button={
                             <button
@@ -749,10 +1173,10 @@ const TimelineExpanded: React.FC<{
                               aria-label={event.title}
                               aria-pressed={event.id === selectedId}
                               data-test-subj={`agenticInvestigationsTimelineExpandedEvent-${event.id}`}
-                              onMouseEnter={() => setHoverId(event.id)}
-                              onMouseLeave={() => setHoverId(undefined)}
-                              onFocus={() => setHoverId(event.id)}
-                              onBlur={() => setHoverId(undefined)}
+                              onMouseEnter={() => showHover(event.id)}
+                              onMouseLeave={() => hideHover(trendEventIds.has(event.id) ? 150 : 0)}
+                              onFocus={() => showHover(event.id)}
+                              onBlur={() => hideHover()}
                               onClick={() =>
                                 setSelectedId(event.id === selectedId ? undefined : event.id)
                               }
@@ -774,7 +1198,25 @@ const TimelineExpanded: React.FC<{
                             </button>
                           }
                         >
-                          <EventHoverCard event={event} impactMap={impactMap} />
+                          <EventHoverCard
+                            event={event}
+                            impactMap={impactMap}
+                            action={
+                              trendEventIds.has(event.id) ? (
+                                <EuiButtonEmpty
+                                  size="xs"
+                                  flush="left"
+                                  iconType={
+                                    shownTrendIds.includes(event.id) ? 'minusCircle' : 'plusCircle'
+                                  }
+                                  onClick={() => toggleTrend(event.id)}
+                                  data-test-subj="agenticInvestigationsTimelineExpandedToggleTrend"
+                                >
+                                  {shownTrendIds.includes(event.id) ? REMOVE_TREND : ADD_TO_TRENDS}
+                                </EuiButtonEmpty>
+                              ) : undefined
+                            }
+                          />
                         </EuiPopover>
                       </React.Fragment>
                     );
@@ -782,76 +1224,316 @@ const TimelineExpanded: React.FC<{
                 </div>
               </div>
             ))}
-            {chartPoints.length > 0 && (
+            {trendEvents.length > 0 && (
+              <>
+                <div
+                  data-test-subj="agenticInvestigationsTimelineExpandedTrends"
+                  data-no-drag
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    gap: ${euiTheme.size.s};
+                    min-height: 40px;
+                    border-top: 2px solid ${euiTheme.colors.borderBaseProminent};
+                    border-bottom: ${euiTheme.border.thin};
+                    background: ${euiTheme.colors.backgroundBaseSubdued};
+                    padding-inline-start: ${euiTheme.size.xs};
+                  `}
+                >
+                  <EuiIcon type="visLine" color="subdued" aria-hidden />
+                  <EuiText size="xs" color="subdued">
+                    <strong>{TRENDS}</strong>
+                  </EuiText>
+                  <EuiPopover
+                    isOpen={isTrendPickerOpen}
+                    closePopover={() => setIsTrendPickerOpen(false)}
+                    anchorPosition="downLeft"
+                    panelPaddingSize="none"
+                    // Its filters are popovers too: a focus trap would stop them taking clicks.
+                    ownFocus={false}
+                    panelProps={{
+                      'data-test-subj': 'agenticInvestigationsTimelineExpandedTrendPicker',
+                    }}
+                    button={
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType={shownTrendIds.length === 0 ? 'plusCircle' : 'pencil'}
+                        onClick={() => setIsTrendPickerOpen((open) => !open)}
+                        data-test-subj="agenticInvestigationsTimelineExpandedAddTrend"
+                      >
+                        {/* "Add trend" while there are none; "Modify trends" once there are. */}
+                        {shownTrendIds.length === 0 ? ADD_TREND : MODIFY_TRENDS}
+                      </EuiButtonEmpty>
+                    }
+                  >
+                    <div css={{ inlineSize: 540, maxInlineSize: '90vw' }}>
+                      <div>
+                        {/* Type to narrow by name; the two filters narrow by type and by entity. */}
+                        <EuiFlexGroup
+                          gutterSize="s"
+                          alignItems="center"
+                          responsive={false}
+                          css={{ padding: euiTheme.size.s }}
+                        >
+                          <EuiFlexItem>
+                            <EuiFieldSearch
+                              compressed
+                              autoFocus
+                              value={pickerText}
+                              onChange={(event) => setPickerText(event.target.value)}
+                              placeholder={SEARCH_TRENDS}
+                              aria-label={SEARCH_TRENDS}
+                              data-test-subj="agenticInvestigationsTimelineExpandedTrendSearch"
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiFilterGroup compressed>
+                              <FilterPopover
+                                label={ENTITY}
+                                options={pickerEntityOptions}
+                                selected={pickerEntities}
+                                onChange={setPickerEntities}
+                                searchable
+                                searchPlaceholder={SEARCH_ENTITIES}
+                                testSubj="agenticInvestigationsTimelineExpandedTrendEntityFilter"
+                              />
+                              <FilterPopover
+                                label={TYPE}
+                                options={pickerKindOptions}
+                                selected={pickerKinds}
+                                onChange={setPickerKinds}
+                                testSubj="agenticInvestigationsTimelineExpandedTrendTypeFilter"
+                              />
+                            </EuiFilterGroup>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                        <EuiContextMenuPanel
+                          css={{ maxBlockSize: 320, overflowY: 'auto' }}
+                          items={pickerEvents.map((event) => (
+                            <EuiContextMenuItem
+                              key={event.id}
+                              onClick={() => toggleTrend(event.id)}
+                              data-test-subj={`agenticInvestigationsTimelineExpandedTrendOption-${event.id}`}
+                            >
+                              {/* The event's own icon says what kind it is; a tick says it is drawn. */}
+                              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                                <EuiFlexItem grow={false}>
+                                  <KindDot kind={event.kind} size="s" quiet />
+                                </EuiFlexItem>
+                                <EuiFlexItem css={{ minWidth: 0 }}>
+                                  <EuiText size="s">{event.title}</EuiText>
+                                  <EuiText size="xs" color="subdued">
+                                    {getTrend(event).title}
+                                  </EuiText>
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon
+                                    type="check"
+                                    color="primary"
+                                    aria-hidden
+                                    css={{
+                                      visibility: shownTrendIds.includes(event.id)
+                                        ? 'visible'
+                                        : 'hidden',
+                                    }}
+                                  />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiContextMenuItem>
+                          ))}
+                        />
+                        {pickerEvents.length === 0 && (
+                          <EuiText size="s" color="subdued" css={{ padding: euiTheme.size.m }}>
+                            {NO_TRENDS}
+                          </EuiText>
+                        )}
+                      </div>
+                    </div>
+                  </EuiPopover>
+                </div>
+              </>
+            )}
+            {trends.map(({ event, title, seriesName, tone, points, maxY }) => (
               <div
+                key={event.id}
+                data-test-subj={`agenticInvestigationsTimelineExpandedTrend-${event.id}`}
                 css={css`
                   display: flex;
-                  height: 96px;
+                  /* Tall enough for the label (title, entity, series), growing if it needs more. */
+                  min-height: 112px;
                   border-bottom: ${euiTheme.border.thin};
+                  ${event.id === selectedId
+                    ? `background: ${euiTheme.colors.backgroundBaseSubdued};`
+                    : ''}
                 `}
               >
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="flexStart"
-                  responsive={false}
+                <div
                   css={css`
                     width: ${LABEL_WIDTH}px;
                     padding-top: ${euiTheme.size.s};
                     flex: 0 0 ${LABEL_WIDTH}px;
+                    min-width: 0;
                   `}
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="visBarVertical" aria-hidden />
-                  </EuiFlexItem>
-                  <EuiFlexItem css={{ minWidth: 0 }}>
-                    {/* Two lines at most, so the label stays inside its lane; the full title is on hover. */}
-                    <EuiText
-                      size="s"
-                      title={chart?.title}
-                      css={css`
-                        display: -webkit-box;
-                        -webkit-line-clamp: 2;
-                        -webkit-box-orient: vertical;
-                        overflow: hidden;
-                      `}
-                    >
-                      {chart?.title}
-                    </EuiText>
-                    {chartSeries?.name && (
-                      <EuiText size="xs" color="subdued">
-                        {chartSeries.name}
+                  <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <KindDot kind={event.kind} size="s" quiet />
+                    </EuiFlexItem>
+                    <EuiFlexItem css={{ minWidth: 0 }}>
+                      {/* The trend belongs to an event: its title names it, and a click opens it below. */}
+                      <EuiPopover
+                        isOpen={hoverId === `trend:${event.id}`}
+                        closePopover={() => hideHover()}
+                        anchorPosition="rightUp"
+                        panelPaddingSize="m"
+                        ownFocus={false}
+                        hasArrow
+                        display="block"
+                        panelProps={{
+                          css: css`
+                            pointer-events: none;
+                            inline-size: 400px;
+                            max-inline-size: 90vw;
+                            max-block-size: 80vh;
+                            overflow: hidden;
+                          `,
+                        }}
+                        button={
+                          <button
+                            type="button"
+                            onMouseEnter={() => showHover(`trend:${event.id}`)}
+                            onMouseLeave={() => hideHover()}
+                            onFocus={() => showHover(`trend:${event.id}`)}
+                            onBlur={() => hideHover()}
+                            onClick={() =>
+                              setSelectedId(event.id === selectedId ? undefined : event.id)
+                            }
+                            title={event.title}
+                            css={css`
+                              padding: 0;
+                              border: none;
+                              background: none;
+                              color: inherit;
+                              font: inherit;
+                              text-align: start;
+                              cursor: pointer;
+                              &:hover {
+                                text-decoration: underline;
+                              }
+                            `}
+                          >
+                            <EuiText
+                              size="s"
+                              css={css`
+                                display: -webkit-box;
+                                -webkit-line-clamp: 2;
+                                -webkit-box-orient: vertical;
+                                overflow: hidden;
+                              `}
+                            >
+                              {event.title}
+                            </EuiText>
+                          </button>
+                        }
+                      >
+                        <EventHoverCard event={event} impactMap={impactMap} />
+                      </EuiPopover>
+                      {/* What the trend is about, where the event says: the entity, to open it. */}
+                      {eventAffectsAnything(event, impactMap) && (
+                        <div css={{ marginBlock: euiTheme.size.xxs }}>
+                          <EventAffects
+                            event={event}
+                            impactMap={impactMap}
+                            onOpenEntity={onOpenEntity}
+                          />
+                        </div>
+                      )}
+                      <EuiText
+                        size="xs"
+                        color="subdued"
+                        title={seriesName ?? title}
+                        css={css`
+                          /* One line, so it never runs into the next trend. */
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                        `}
+                      >
+                        {seriesName ?? title}
                       </EuiText>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        size="xs"
+                        color="text"
+                        aria-label={REMOVE_TREND}
+                        onClick={() => setTrendIds(shownTrendIds.filter((id) => id !== event.id))}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
                 <div
                   data-test-subj="agenticInvestigationsTimelineExpandedChart"
                   css={{ position: 'relative', flex: '1 1 auto' }}
                 >
-                  {chartPoints.map(({ ms, y }, index) => {
-                    const next =
-                      chartPoints[index + 1]?.ms ?? ms + (ms - chartPoints[index - 1].ms);
+                  {points.map(({ ms, y }, index) => {
+                    const next = points[index + 1]?.ms ?? ms + (ms - points[index - 1].ms);
                     const x = scale.toX(ms);
                     const width = Math.max(scale.toX(next) - x, 0.004);
                     return (
-                      <div
+                      <EuiToolTip
                         key={ms}
-                        title={`${formatTimelineClock(new Date(ms).toISOString())}: ${y}`}
-                        css={css`
-                          position: absolute;
-                          bottom: 0;
-                          left: ${pct(x)};
-                          width: calc(${pct(width)} - 2px);
-                          height: ${Math.max((y / maxY) * 88, 1)}px;
-                          background: ${euiTheme.colors.danger};
-                          opacity: 0.6;
-                        `}
-                      />
+                        position="top"
+                        content={
+                          <>
+                            <div>{VIEW_EVENT_DATA}</div>
+                            <div>{`${formatTimelineClock(new Date(ms).toISOString())}: ${y}`}</div>
+                          </>
+                        }
+                        // The anchor is the bar's box, placed on the chart as the bar was.
+                        anchorProps={{
+                          css: css`
+                            position: absolute;
+                            bottom: 0;
+                            left: ${pct(x)};
+                            width: calc(${pct(width)} - 2px);
+                            height: ${Math.max((y / maxY) * 100, 1)}px;
+                          `,
+                        }}
+                      >
+                        {/* A click on the trend opens the event it belongs to, below. */}
+                        <button
+                          type="button"
+                          aria-label={VIEW_EVENT_DATA}
+                          data-test-subj="agenticInvestigationsTimelineExpandedTrendBar"
+                          data-tone={tone}
+                          onClick={() => setSelectedId(event.id)}
+                          css={css`
+                            display: block;
+                            width: 100%;
+                            height: 100%;
+                            padding: 0;
+                            border: none;
+                            cursor: pointer;
+                            /* Bad is red, good is green: a number that should go up is not red. */
+                            background: ${tone === 'good'
+                              ? euiTheme.colors.success
+                              : tone === 'bad'
+                              ? euiTheme.colors.danger
+                              : euiTheme.colors.primary};
+                            opacity: 0.6;
+                            &:hover {
+                              opacity: 0.9;
+                            }
+                          `}
+                        />
+                      </EuiToolTip>
                     );
                   })}
                 </div>
               </div>
-            )}
+            ))}
           </div>
           {/* The axis: round times, the day where it changes, and a break where a quiet stretch is cut short. */}
           <div
@@ -919,10 +1601,24 @@ const TimelineExpanded: React.FC<{
             padding: ${euiTheme.size.base};
             border: ${euiTheme.border.thin};
             border-radius: ${euiTheme.border.radius.medium};
+            position: relative;
           `}
         >
+          <EuiButtonIcon
+            iconType="cross"
+            color="text"
+            aria-label={CLOSE_EVENT}
+            onClick={() => setSelectedId(undefined)}
+            data-test-subj="agenticInvestigationsTimelineExpandedDetailClose"
+            css={css`
+              position: absolute;
+              top: ${euiTheme.size.s};
+              right: ${euiTheme.size.s};
+            `}
+          />
           <EuiTitle size="s">
-            <h3>{shown.title}</h3>
+            {/* Room on the right for the close button. */}
+            <h3 css={{ paddingInlineEnd: euiTheme.size.xl }}>{shown.title}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EventKeyFacts event={shown} impactMap={impactMap} onOpenEntity={onOpenEntity} />

@@ -100,6 +100,11 @@ describe('getImpactSeverityScore', () => {
     expect(getImpactSeverityScore({ health: 'degraded' })).toBe(IMPACT_SEVERITY_SCORES.impacted);
     expect(getImpactSeverityScore({ impacted: true })).toBe(IMPACT_SEVERITY_SCORES.impacted);
     expect(getImpactSeverityScore({ health: 'healthy' })).toBeUndefined();
+    // Impacted or the cause once, healthy now: no longer red.
+    expect(
+      getImpactSeverityScore({ role: 'symptom', impacted: true, health: 'healthy' })
+    ).toBeUndefined();
+    expect(getImpactSeverityScore({ role: 'root_cause', health: 'healthy' })).toBeUndefined();
     expect(getImpactSeverityScore(undefined)).toBeUndefined();
   });
 });
@@ -135,7 +140,7 @@ describe('infrastructure entities', () => {
   };
 
   it('draws infrastructure as its own shape, including an older Kubernetes type', () => {
-    const { nodes } = transformImpactMap(map, { criticalPath: 'red' });
+    const { nodes } = transformImpactMap(map, { criticalPath: 'red', recovered: 'green' });
     expect(nodes.map(({ type }) => type)).toEqual(['impactInfrastructure', 'impactInfrastructure']);
     expect(nodes[0].data).toMatchObject({ euiIcon: 'logoKubernetes' });
     expect(nodes[1].data).toMatchObject({ euiIcon: 'compute' });
@@ -148,11 +153,21 @@ describe('getImpactState', () => {
     expect(getImpactState({ role: 'symptom', impacted: true })).toBe('impacted');
     expect(getImpactState({ impacted: true })).toBe('impacted');
     expect(getImpactState({ health: 'healthy' })).toBeUndefined();
+    // Hurt or the cause once, and healthy now: recovered, to show a green check.
+    expect(getImpactState({ role: 'symptom', impacted: true, health: 'healthy' })).toBe(
+      'recovered'
+    );
+    expect(getImpactState({ role: 'root_cause', impacted: true, health: 'healthy' })).toBe(
+      'recovered'
+    );
   });
 });
 
 describe('transformImpactMap', () => {
-  const { nodes, edges } = transformImpactMap(impactMap, { criticalPath: 'red' });
+  const { nodes, edges } = transformImpactMap(impactMap, {
+    criticalPath: 'red',
+    recovered: 'green',
+  });
 
   it('draws services as service nodes and dependencies as diamonds, with their icons', () => {
     expect(nodes.find(({ id }) => id === 'frontend')).toMatchObject({
@@ -206,7 +221,7 @@ describe('event counts', () => {
         { id: 'd', kind: 'response', title: 'Channel opened', at },
       ],
     },
-    { criticalPath: 'red' }
+    { criticalPath: 'red', recovered: 'green' }
   );
 
   it('counts the events of each entity and relationship', () => {
@@ -252,5 +267,40 @@ describe('ImpactServiceMap', () => {
     }
     fireEvent.click(screen.getByTestId('impactServiceMapFullScreenButton'));
     expect(onToggleFullScreen).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('a recovered impact map', () => {
+  const recoveredMap = {
+    ...impactMap,
+    entities: impactMap.entities.map((entity) => ({
+      ...entity,
+      annotations: { ...entity.annotations, health: 'healthy' as const },
+    })),
+  };
+
+  it('badges what was hurt and is healthy again as recovered, not impacted', () => {
+    const { nodes } = transformImpactMap(recoveredMap, { criticalPath: 'red', recovered: 'green' });
+
+    expect(nodes.filter(({ data }) => data.impactState === 'recovered').length).toBeGreaterThan(0);
+    expect(nodes.some(({ data }) => data.impactState === 'impacted')).toBe(false);
+    expect(nodes.some(({ data }) => data.impactState === 'root_cause')).toBe(false);
+  });
+
+  it('draws a critical-path link green and still once its entity has recovered', () => {
+    const colors = { criticalPath: 'red', recovered: 'green' };
+    const before = transformImpactMap(impactMap, colors).edges.find(
+      ({ data }) => data.onCriticalPath
+    );
+    const after = transformImpactMap(recoveredMap, colors).edges.find(
+      ({ id }) => id === before?.id
+    );
+
+    expect(before).toMatchObject({ style: { stroke: 'red' }, animated: true });
+    expect(after).toMatchObject({
+      style: { stroke: 'green' },
+      animated: false,
+      data: { recovered: true },
+    });
   });
 });
