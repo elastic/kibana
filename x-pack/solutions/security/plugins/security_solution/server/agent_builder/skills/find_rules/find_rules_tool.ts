@@ -28,6 +28,7 @@ import {
 } from '../../../../common/detection_engine/rule_management/rule_fields';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 import { resolveSemanticSearch } from '../../../lib/detection_engine/rule_management/logic/search/semantic';
+import { isRuleSearchWorkflowEnabled } from '../../../workflows/rule_search_workflow/status';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 export const FIND_RULES_INLINE_TOOL_ID = 'security.find_rules';
@@ -279,7 +280,12 @@ export const createFindRulesInlineTool = ({
       const semantic = input.query
         ? await resolveSemanticSearch({
             esClient: coreStart.elasticsearch.client.asInternalUser,
+            uiSettings: coreStart.uiSettings.asScopedToClient(
+              coreStart.savedObjects.getScopedClient(request)
+            ),
             spaceId: startPlugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+            isWorkflowEnabled: (spaceId) =>
+              isRuleSearchWorkflowEnabled(startPlugins.workflowsExtensions, spaceId),
             term: input.query,
             logger,
           })

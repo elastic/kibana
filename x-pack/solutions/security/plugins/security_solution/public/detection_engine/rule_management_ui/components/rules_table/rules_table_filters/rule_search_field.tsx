@@ -8,6 +8,7 @@
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import type { EuiFieldSearchProps } from '@elastic/eui';
 import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 
@@ -24,12 +25,14 @@ interface RuleSearchFieldProps {
   initialValue?: string;
   onSearch: (value: string) => void;
   placeholder?: string;
+  prepend?: EuiFieldSearchProps['prepend'];
 }
 
 export function RuleSearchField({
   initialValue,
   onSearch,
   placeholder,
+  prepend,
 }: RuleSearchFieldProps): JSX.Element {
   const [searchText, setSearchText] = useState(initialValue);
   const handleChange = useCallback(
@@ -51,6 +54,7 @@ export function RuleSearchField({
         value={searchText}
         onChange={handleChange}
         onSearch={onSearch}
+        prepend={prepend}
         data-test-subj="ruleSearchField"
       />
     </SearchBarWrapper>

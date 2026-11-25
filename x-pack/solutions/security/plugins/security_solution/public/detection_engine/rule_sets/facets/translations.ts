@@ -144,17 +144,6 @@ export const MORE_TAG_MATCHES = (count: number) =>
     defaultMessage: '{count} more: type more of the tag',
   });
 
-export const BEST_MATCHES = (count: number) =>
-  i18n.translate('xpack.securitySolution.ruleSets.search.bestMatches', {
-    values: { count },
-    defaultMessage:
-      'Best matches for your text, by meaning and by words: {count, plural, one {# relevant rule} other {# relevant rules}}, best first.',
-  });
-
-export const EXACT_MATCHES = i18n.translate('xpack.securitySolution.ruleSets.search.exactMatches', {
-  defaultMessage: 'Exact matches in rule names, index patterns and MITRE ATT&CK.',
-});
-
 export const SHOW_ALL = (count: number) =>
   i18n.translate('xpack.securitySolution.ruleSets.facets.showAll', {
     values: { count },

@@ -5,15 +5,51 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { RULE_SEARCH_INDEX, getRuleSearchModels } from './rule_search_index';
 import { searchRelevantRuleIds } from './rule_search_query';
 
 export { syncRuleSearchIndex } from './rule_search_sync';
 
+/**
+ * Why a search by meaning ran as the keyword search: "Use AI features" is off in the space, the
+ * cluster lacks the embedding or the rerank model, Workflows is not available, the admin has not
+ * turned the rule search index workflow on, its first run has not finished, or the search failed
+ * or timed out.
+ */
+export type SemanticSearchFallbackReason =
+  | 'ai_off'
+  | 'no_model'
+  | 'no_workflows'
+  | 'off'
+  | 'not_indexed'
+  | 'error';
+
 export type SemanticSearchResult =
   | { mode: 'semantic'; ruleIds: string[] }
-  | { mode: 'legacy'; reason: 'no_model' | 'not_indexed' | 'error' };
+  | { mode: 'legacy'; reason: SemanticSearchFallbackReason };
+
+/** The values that "Use AI features: off" writes, depending on which settings page wrote them. */
+const AI_OFF_CONNECTORS = new Set(['NO_DEFAULT_MODEL', 'NO_DEFAULT_CONNECTOR']);
+
+/** "Use AI features" of the space (Stack Management, GenAI settings). */
+export const areAiFeaturesOn = async (uiSettings: IUiSettingsClient): Promise<boolean> => {
+  const [connector, connectorOnly] = await Promise.all([
+    uiSettings.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR).catch(() => ''),
+    uiSettings.get<boolean>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY).catch(() => false),
+  ]);
+  return !(AI_OFF_CONNECTORS.has(connector) && connectorOnly === true);
+};
+
+/** Search by meaning needs both models: without the reranker there is no score to cut on. */
+const hasRuleSearchModels = async (esClient: ElasticsearchClient) => {
+  const models = await getRuleSearchModels(esClient);
+  return models.embedding && models.rerank;
+};
 
 /** The table and its facet counts ask for the same text right after each other. */
 const CACHE_TTL_MS = 30_000;
@@ -36,37 +72,75 @@ const isSpaceIndexed = async (esClient: ElasticsearchClient, spaceId: string) =>
   return (typeof total === 'number' ? total : total?.value ?? 0) > 0;
 };
 
+interface RuleSearchContext {
+  esClient: ElasticsearchClient;
+  uiSettings: IUiSettingsClient;
+  spaceId: string;
+  /** Whether the admin turned the workflow on; `undefined` when Workflows is not available. */
+  isWorkflowEnabled: (spaceId: string) => Promise<boolean | undefined>;
+}
+
+/**
+ * What the rules page offers in the space: `unavailable` (only the keyword search: AI features
+ * off, no models or no Workflows), `off` (the admin has not turned the rule search index workflow
+ * on), `indexing` (on, first run not finished) or `ready`.
+ */
+export type RuleSearchStatus = 'unavailable' | 'off' | 'indexing' | 'ready';
+
+const checkRuleSearch = async ({
+  esClient,
+  uiSettings,
+  spaceId,
+  isWorkflowEnabled,
+}: RuleSearchContext): Promise<
+  | { status: 'ready' }
+  | { status: Exclude<RuleSearchStatus, 'ready'>; reason: SemanticSearchFallbackReason }
+> => {
+  if (!(await areAiFeaturesOn(uiSettings))) {
+    return { status: 'unavailable', reason: 'ai_off' };
+  }
+  if (!(await hasRuleSearchModels(esClient))) {
+    return { status: 'unavailable', reason: 'no_model' };
+  }
+  const enabled = await isWorkflowEnabled(spaceId);
+  if (enabled === undefined) {
+    return { status: 'unavailable', reason: 'no_workflows' };
+  }
+  if (!enabled) {
+    return { status: 'off', reason: 'off' };
+  }
+  if (!(await isSpaceIndexed(esClient, spaceId))) {
+    return { status: 'indexing', reason: 'not_indexed' };
+  }
+  return { status: 'ready' };
+};
+
+export const getRuleSearchStatus = async (context: RuleSearchContext) =>
+  (await checkRuleSearch(context)).status;
+
+type SemanticSearchParams = RuleSearchContext & { term: string; logger: Logger };
+
 /**
  * The relevant rules for a text, best first, as saved object ids; or why the search falls back
- * to `legacy` (no model on this cluster, the space is not indexed because its rule search index
- * workflow is off or has not run yet, or an error). Search only reads the index, with the
- * internal user; only ids leave this function.
+ * to `legacy`. Search only reads the index, with the internal user; only ids leave this function.
  */
 const runSemanticSearch = async ({
-  esClient,
-  spaceId,
   term,
   logger,
-}: {
-  esClient: ElasticsearchClient;
-  spaceId: string;
-  term: string;
-  logger: Logger;
-}): Promise<SemanticSearchResult> => {
-  const key = `${spaceId}\u0000${term}`;
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
-    return { mode: 'semantic', ruleIds: cached.ruleIds };
-  }
+  ...context
+}: SemanticSearchParams): Promise<SemanticSearchResult> => {
+  const { esClient, spaceId } = context;
   try {
-    const models = await getRuleSearchModels(esClient);
-    if (!models.embedding) {
-      return { mode: 'legacy', reason: 'no_model' };
+    const check = await checkRuleSearch(context);
+    if (check.status !== 'ready') {
+      return { mode: 'legacy', reason: check.reason };
     }
-    if (!(await isSpaceIndexed(esClient, spaceId))) {
-      return { mode: 'legacy', reason: 'not_indexed' };
+    const key = `${spaceId}\u0000${term}`;
+    const cached = cache.get(key);
+    if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
+      return { mode: 'semantic', ruleIds: cached.ruleIds };
     }
-    const ranked = await searchRelevantRuleIds({ esClient, spaceId, term, models });
+    const ranked = await searchRelevantRuleIds({ esClient, spaceId, term });
     const ruleIds = ranked.map(({ soId }) => soId);
     const oldest = cache.keys().next().value;
     if (cache.size >= CACHE_SIZE && oldest !== undefined) cache.delete(oldest);
@@ -78,12 +152,9 @@ const runSemanticSearch = async ({
   }
 };
 
-export const resolveSemanticSearch = (params: {
-  esClient: ElasticsearchClient;
-  spaceId: string;
-  term: string;
-  logger: Logger;
-}): Promise<SemanticSearchResult> => {
+export const resolveSemanticSearch = (
+  params: SemanticSearchParams
+): Promise<SemanticSearchResult> => {
   const key = `${params.spaceId}\u0000${params.term}`;
   const running = inFlight.get(key);
   if (running) return running;

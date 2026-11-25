@@ -46,16 +46,23 @@ export const isRuleSetChanged = (filterOptions: FilterOptions, set: SavedSet | u
 export interface RuleQueryParams {
   rule_scope?: RuleScope;
   filter_params?: RuleSetConditions;
-  search?: { term: string; mode: 'semantic' };
+  search?: { term: string; mode: 'semantic' | 'legacy' };
 }
 
 /**
- * The search box asks for `semantic`; the server keeps exact text (quotes, MITRE and rule ids) on
- * the keyword search and falls back to it without a model, and says which mode ran.
+ * The search box asks for `semantic` unless the user picked Keyword; the server runs the keyword
+ * search when search by meaning is not ready in the space, and says which mode ran and why.
  */
-const searchParam = (filter: string) => {
+const searchParam = ({ filter, searchMode }: FilterOptions) => {
   const term = filter.trim();
-  return term ? { search: { term, mode: 'semantic' as const } } : {};
+  return term
+    ? {
+        search: {
+          term,
+          mode: searchMode === 'keyword' ? ('legacy' as const) : ('semantic' as const),
+        },
+      }
+    : {};
 };
 
 /**
@@ -69,7 +76,7 @@ export const ruleQueryParams = (filterOptions: FilterOptions): RuleQueryParams =
   if (ruleSetId && members) {
     return {
       rule_scope: { rule_set_id: ruleSetId, members },
-      ...searchParam(filterOptions.filter),
+      ...searchParam(filterOptions),
     };
   }
   if (ruleSetId) {
@@ -78,11 +85,11 @@ export const ruleQueryParams = (filterOptions: FilterOptions): RuleQueryParams =
         filterOptions.draftOf === ruleSetId
           ? { rule_set_id: ruleSetId, conditions: draftConditions(filterOptions) }
           : { rule_set_id: ruleSetId },
-      ...searchParam(filterOptions.filter),
+      ...searchParam(filterOptions),
     };
   }
   return {
-    ...searchParam(filterOptions.filter),
+    ...searchParam(filterOptions),
     ...(filterOptions.conditions && hasRuleSetConditions(filterOptions.conditions)
       ? { filter_params: filterOptions.conditions }
       : {}),

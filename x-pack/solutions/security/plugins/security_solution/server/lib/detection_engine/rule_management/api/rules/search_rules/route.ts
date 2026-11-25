@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
@@ -34,6 +34,8 @@ import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
 import { resolveRuleScopeMembership } from '../../../logic/search/rule_scope';
 import { fetchDisjunctiveFacetCounts } from '../../../logic/search/facet_counts';
 import { resolveSemanticSearch } from '../../../logic/search/semantic';
+import { isRuleSearchWorkflowEnabled } from '../../../../../../workflows/rule_search_workflow/status';
+import type { StartPlugins } from '../../../../../../plugin_contract';
 import {
   buildConditionsFilter,
   buildRuleSetFilter,
@@ -56,7 +58,11 @@ const orderByRelevance = <T extends { data: Array<{ id: string }> }>(
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
  */
-export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const searchRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  getStartServices: StartServicesAccessor<StartPlugins>
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -138,13 +144,25 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
             search?.mode === 'semantic' && search.term.trim()
               ? await resolveSemanticSearch({
                   esClient: ctx.core.elasticsearch.client.asInternalUser,
+                  uiSettings: ctx.core.uiSettings.client,
                   spaceId: ctx.securitySolution.getSpaceId(),
+                  isWorkflowEnabled: async (spaceId) =>
+                    isRuleSearchWorkflowEnabled(
+                      (
+                        await getStartServices()
+                      )[1].workflowsExtensions,
+                      spaceId
+                    ),
                   term: search.term.trim(),
                   logger,
                 })
               : undefined;
           const relevantIds = semantic?.mode === 'semantic' ? semantic.ruleIds : undefined;
           const searchMode = search ? semantic?.mode ?? 'legacy' : undefined;
+          const modeFields = {
+            ...(searchMode ? { search_mode: searchMode } : {}),
+            ...(semantic?.mode === 'legacy' ? { search_fallback_reason: semantic.reason } : {}),
+          };
 
           const combinedKql = buildGranularRulesKql({
             filter,
@@ -210,7 +228,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
                 perPage,
                 total: 0,
                 data: [],
-                ...(searchMode ? { search_mode: searchMode } : {}),
+                ...modeFields,
               },
             });
           }
@@ -275,7 +293,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
               ? { tag_category_counts: disjunctive.tagCategoryCounts }
               : {}),
             ...(shouldUseSearchAfter && !relevantIds ? { search_after: rules.searchAfter } : {}),
-            ...(searchMode ? { search_mode: searchMode } : {}),
+            ...modeFields,
           };
 
           return response.ok({ body: responseBody });

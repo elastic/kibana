@@ -8,18 +8,24 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import { RULE_SEARCH_INDEX, RULE_SEARCH_RERANK_ID } from './rule_search_index';
-import type { RuleSearchModels } from './rule_search_index';
 
 /** Candidates for fusion and for the reranker; a space has at most 10,000 rules. */
 const RANK_WINDOW = 200;
-const RERANK_WINDOW = 100;
+/**
+ * The reranker reads this many candidates. A listwise reranker gets worse on long lists, and its
+ * cost and time grow with the window; it is also the most rules a search by meaning can show.
+ */
+const RERANK_WINDOW = 50;
 /**
  * The relevant set, after the reranker: a rule stays when its score reaches both an absolute
- * minimum and a share of the best score. The reranker's scale is not documented; on test queries
- * (demo-custom, 8,066 rules) relevant rules scored about 1.0–1.7 and unrelated ones 0.84–0.95.
+ * minimum and a share of the best score. The scale depends on the model and the window, so both
+ * values are calibrated again when either changes. Text with no answer among the rules scores
+ * 0.87–1.11 at best, relevant rules up to about 1.5.
  */
 const MIN_SCORE = 1.0;
 const RELATIVE_SCORE = 0.6;
+/** A search by meaning that takes longer falls back to the keyword search. */
+const SEARCH_TIMEOUT_MS = 5_000;
 
 export interface RankedRule {
   soId: string;
@@ -35,12 +41,10 @@ export const searchRelevantRuleIds = async ({
   esClient,
   spaceId,
   term,
-  models,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   term: string;
-  models: RuleSearchModels;
 }): Promise<RankedRule[]> => {
   const inSpace = [{ term: { space_id: spaceId } }];
   const byWords: RetrieverContainer = {
@@ -81,28 +85,24 @@ export const searchRelevantRuleIds = async ({
   const fused: RetrieverContainer = {
     rrf: { retrievers: [byWords, byMeaning], rank_window_size: RANK_WINDOW },
   };
-  const retriever: RetrieverContainer = models.rerank
-    ? {
-        text_similarity_reranker: {
-          retriever: fused,
-          field: 'card',
-          inference_id: RULE_SEARCH_RERANK_ID,
-          inference_text: term,
-          rank_window_size: RERANK_WINDOW,
-        },
-      }
-    : fused;
+  const retriever: RetrieverContainer = {
+    text_similarity_reranker: {
+      retriever: fused,
+      field: 'card',
+      inference_id: RULE_SEARCH_RERANK_ID,
+      inference_text: term,
+      rank_window_size: RERANK_WINDOW,
+    },
+  };
 
-  const result = await esClient.search<{ so_id: string }>({
-    index: RULE_SEARCH_INDEX,
-    size: models.rerank ? RERANK_WINDOW : RANK_WINDOW,
-    _source: ['so_id'],
-    retriever,
-  });
+  const result = await esClient.search<{ so_id: string }>(
+    { index: RULE_SEARCH_INDEX, size: RERANK_WINDOW, _source: ['so_id'], retriever },
+    { requestTimeout: SEARCH_TIMEOUT_MS }
+  );
   const ranked = result.hits.hits.flatMap((hit) =>
     hit._source ? [{ soId: hit._source.so_id, score: hit._score ?? 0 }] : []
   );
-  if (!models.rerank || ranked.length === 0) {
+  if (ranked.length === 0) {
     return ranked;
   }
   const cut = Math.max(MIN_SCORE, ranked[0].score * RELATIVE_SCORE);

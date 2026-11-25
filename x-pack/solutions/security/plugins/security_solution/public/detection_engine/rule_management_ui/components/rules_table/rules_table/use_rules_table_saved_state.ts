@@ -65,6 +65,7 @@ function validateState(
   // and validateNonExact doesn't truncate fields not included in the type RulesTableSavedFilter and etc.
   const filter: RulesTableSavedFilter = {
     searchTerm: filterFromUrl?.searchTerm ?? filterFromStorage?.searchTerm,
+    searchMode: filterFromUrl?.searchMode ?? filterFromStorage?.searchMode,
     source: filterFromUrl?.source ?? filterFromStorage?.source,
     tags: filterFromUrl?.tags ?? filterFromStorage?.tags,
     enabled: filterFromUrl?.enabled ?? filterFromStorage?.enabled,

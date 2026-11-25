@@ -40,6 +40,11 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.searchTerm = state.filterOptions.filter;
     }
 
+    if (state.filterOptions.searchMode) {
+      urlStateToSave.searchMode = state.filterOptions.searchMode;
+      storageStateToSave.searchMode = state.filterOptions.searchMode;
+    }
+
     if (state.filterOptions.showElasticRules || state.filterOptions.showCustomRules) {
       const source = state.filterOptions.showCustomRules ? RuleSource.Custom : RuleSource.Prebuilt;
 

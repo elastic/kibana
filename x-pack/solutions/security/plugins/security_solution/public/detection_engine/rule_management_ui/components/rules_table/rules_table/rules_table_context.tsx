@@ -45,6 +45,7 @@ import type {
   WarningSchema,
 } from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
+import type { SearchFallbackReason } from '../../../../rule_management/api/hooks/use_find_rules_query';
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_PAGE,
@@ -159,6 +160,8 @@ export interface RulesTableState {
   warnings?: WarningSchema[];
   /** The search mode that ran: `semantic` lists the relevant rules in relevance order. */
   searchMode?: 'legacy' | 'semantic';
+  /** Why a search by meaning ran as the keyword search. */
+  searchFallbackReason?: SearchFallbackReason;
 }
 
 export type LoadingRuleAction =
@@ -257,6 +260,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     return {
       ...DEFAULT_FILTER_OPTIONS,
       filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
+      searchMode: savedFilter?.searchMode,
       gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
       ruleSetId: savedFilter?.ruleSetId,
       groupBy: savedFilter?.groupBy,
@@ -335,6 +339,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       // The selected rule set is where the user is, not a filter. Keep it.
       ruleSetId: current.ruleSetId,
       groupBy: current.groupBy,
+      searchMode: current.searchMode,
     }));
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
@@ -372,7 +377,11 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules
   const {
-    data: { rules, total, warnings, searchMode } = { rules: [], total: 0, warnings: [] },
+    data: { rules, total, warnings, searchMode, searchFallbackReason } = {
+      rules: [],
+      total: 0,
+      warnings: [],
+    },
     refetch,
     dataUpdatedAt,
     isFetched,
@@ -494,6 +503,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         }),
         warnings,
         searchMode,
+        searchFallbackReason,
       },
       actions,
     };
@@ -523,6 +533,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     actions,
     warnings,
     searchMode,
+    searchFallbackReason,
   ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;

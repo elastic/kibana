@@ -21,6 +21,7 @@ export const RulesTableSavedFilter = lazySchema(() =>
   z
     .object({
       searchTerm: z.string(),
+      searchMode: z.enum(['ai', 'keyword']),
       source: z.nativeEnum(RuleSource),
       tags: z.array(z.string()),
       enabled: z.boolean(),

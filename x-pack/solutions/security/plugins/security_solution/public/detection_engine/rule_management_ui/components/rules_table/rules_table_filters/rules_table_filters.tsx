@@ -18,6 +18,13 @@ import { RuleSearchField } from './rule_search_field';
 import { GapFillStatusSelector } from './gap_fill_status_selector';
 import { RulesGroupByButton } from '../../../../rule_sets/components/rules_group_by_control';
 import { ShowFacetPanelButton } from '../../../../rule_sets/facets/facet_panel_visibility';
+import { SearchModeSwitch } from '../../../../rule_sets/search/search_mode_switch';
+import {
+  searchBoxMode,
+  useRuleSearchStatus,
+} from '../../../../rule_sets/search/use_rule_search_status';
+import { AI_PLACEHOLDER } from '../../../../rule_sets/search/translations';
+import type { RuleSearchBoxMode } from '../../../../rule_management/logic/types';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -47,6 +54,16 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
     [setFilterOptions, startTransaction]
   );
 
+  const searchStatus = useRuleSearchStatus();
+  const boxMode = searchBoxMode(searchStatus, filterOptions.searchMode);
+  const handleSearchModeChange = useCallback(
+    (searchMode: RuleSearchBoxMode) => {
+      startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+      setFilterOptions({ searchMode });
+    },
+    [setFilterOptions, startTransaction]
+  );
+
   const handleSelectedGapStatuses = useCallback(
     (newStatuses: GapFillStatus[]) => {
       const currentStatuses = gapFillStatuses ?? [];
@@ -61,7 +78,20 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" alignItems="center" wrap>
       <ShowFacetPanelButton conditions={filterOptions.conditions ?? {}} />
-      <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
+      <RuleSearchField
+        initialValue={filterOptions.filter}
+        onSearch={handleOnSearch}
+        placeholder={boxMode === 'ai' ? AI_PLACEHOLDER : undefined}
+        prepend={
+          searchStatus === 'unavailable' ? undefined : (
+            <SearchModeSwitch
+              status={searchStatus}
+              mode={boxMode}
+              onChange={handleSearchModeChange}
+            />
+          )
+        }
+      />
       {selectedTab === AllRulesTabs.monitoring && (
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>

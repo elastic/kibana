@@ -110,6 +110,8 @@ export const SortingOptions = lazySchema(() =>
 
 export interface FilterOptions {
   filter: string;
+  /** How the search box searches; unset means AI when search by meaning is ready in the space. */
+  searchMode?: RuleSearchBoxMode;
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
@@ -135,6 +137,8 @@ export interface FilterOptions {
   /** Split the table into sections by this field. */
   groupBy?: GranularRulesFacetCategory;
 }
+
+export type RuleSearchBoxMode = 'ai' | 'keyword';
 
 export interface FetchRulesResponse {
   page: number;

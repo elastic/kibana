@@ -17,6 +17,7 @@ import type {
   SearchRulesAggregations,
   SearchRulesSearchAfterItem,
   GranularRulesSearch,
+  SearchRulesResponse,
 } from '../../../../../common/api/detection_engine/rule_management';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../common/api/detection_engine/rule_management/urls';
 import type {
@@ -52,7 +53,11 @@ export interface RulesQueryResponse {
   warnings?: WarningSchema[];
   /** The search mode that ran, when the query had a search text. */
   searchMode?: 'legacy' | 'semantic';
+  /** Why a search by meaning ran as the keyword search. */
+  searchFallbackReason?: SearchFallbackReason;
 }
+
+export type SearchFallbackReason = NonNullable<SearchRulesResponse['search_fallback_reason']>;
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
@@ -86,6 +91,7 @@ export const useFindRulesQuery = (
         total: response.total,
         warnings: response.warnings,
         searchMode: response.search_mode,
+        searchFallbackReason: response.search_fallback_reason,
       };
     },
     {
@@ -146,6 +152,7 @@ export const useUpdateRulesCache = () => {
                 total: currentData.total,
                 warnings: currentData.warnings,
                 searchMode: currentData.searchMode,
+                searchFallbackReason: currentData.searchFallbackReason,
               }
             : undefined
       );

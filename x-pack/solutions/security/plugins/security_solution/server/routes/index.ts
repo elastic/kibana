@@ -67,7 +67,7 @@ import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/regist
 import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
 import { registerAlertAnalysisWorkflowSettingsRoutes } from '../workflows/alert_analysis_workflow/settings_routes';
 import { registerAlertAnalysisWorkflowRuleAttachmentRoutes } from '../workflows/alert_analysis_workflow/rule_attachment_routes';
-import { registerRuleSearchIndexWorkflowRoute } from '../workflows/rule_search_workflow/routes';
+import { registerRuleSearchIndexRoutes } from '../workflows/rule_search_workflow/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -96,7 +96,7 @@ export const initRoutes = (
   registerPrebuiltRulesRoutes(router, logger);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
-  registerRuleManagementRoutes(router, config, ml, logger);
+  registerRuleManagementRoutes(router, config, ml, logger, getStartServices);
   registerRuleSetsRoutes(router);
   registerRuleMonitoringRoutes(router);
   registerRulePreviewRoutes(
@@ -176,7 +176,7 @@ export const initRoutes = (
   registerWorkflowInsightsRoutes(router, config, endpointContext);
   registerAlertAnalysisWorkflowSettingsRoutes(router, getStartServices, logger);
   registerAlertAnalysisWorkflowRuleAttachmentRoutes(router);
-  registerRuleSearchIndexWorkflowRoute(router, getStartServices, logger);
+  registerRuleSearchIndexRoutes(router, getStartServices, logger);
 
   registerAssetInventoryRoutes({ router, logger });
 

@@ -158,11 +158,21 @@ at or past the default 10,000-result max) or the request used `search_after`.
       counts: FacetCounts.optional(),
       tag_category_counts: FacetCounts.optional(),
       /**
-       * The search mode that ran; `legacy` when `semantic` was asked but there is no model or the space is not indexed yet.
+       * The search mode that ran; `legacy` when `semantic` was asked but search by meaning is not ready in the space (see `search_fallback_reason`).
        */
       search_mode: GranularRulesSearchMode.optional().describe(
-        'The search mode that ran; `legacy` when `semantic` was asked but there is no model or the space is not indexed yet.'
+        'The search mode that ran; `legacy` when `semantic` was asked but search by meaning is not ready in the space (see `search_fallback_reason`).'
       ),
+      /**
+      * Why `semantic` ran as `legacy`: "Use AI features" is off in the space (`ai_off`), the cluster lacks the embedding or the rerank model (`no_model`), Workflows is not available (`no_workflows`), the rule search index workflow of the space is off (`off`) or has not finished its first run (`not_indexed`), or the search failed or timed out (`error`).
+
+      */
+      search_fallback_reason: z
+        .enum(['ai_off', 'no_model', 'no_workflows', 'off', 'not_indexed', 'error'])
+        .optional()
+        .describe(
+          'Why `semantic` ran as `legacy`: "Use AI features" is off in the space (`ai_off`), the cluster lacks the embedding or the rerank model (`no_model`), Workflows is not available (`no_workflows`), the rule search index workflow of the space is off (`off`) or has not finished its first run (`not_indexed`), or the search failed or timed out (`error`).\n'
+        ),
     })
     .strict()
 );

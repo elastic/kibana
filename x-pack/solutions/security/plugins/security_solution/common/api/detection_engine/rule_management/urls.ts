@@ -14,6 +14,9 @@ export const RULE_MANAGEMENT_RULES_URL_SEARCH =
 /** Installs the workflow that keeps the rule search index of the current space up to date. */
 export const RULE_MANAGEMENT_RULE_SEARCH_INDEX_WORKFLOW_URL =
   `${RULE_MANAGEMENT_RULES_URL_SEARCH}_index/_workflow` as const;
+/** Whether search by meaning is available, off, indexing or ready in the current space. */
+export const RULE_MANAGEMENT_RULE_SEARCH_STATUS_URL =
+  `${RULE_MANAGEMENT_RULES_URL_SEARCH}_index/_status` as const;
 export const RULE_HISTORY_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/history/_list` as const;
 export const RULE_RESTORE_FROM_HISTORY_URL =
