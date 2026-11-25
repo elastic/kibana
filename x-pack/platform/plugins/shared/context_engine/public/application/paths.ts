@@ -28,6 +28,12 @@ export const getAiIndexKnowledgeDocumentsPath = (id: string): string =>
 
 export const getAiIndexSettingsPath = (id: string): string => `/ai_index/${id}/settings`;
 
+/** URL hash that makes the Settings tab scroll to its Automations panel. */
+export const AUTOMATIONS_HASH = '#automations';
+
+export const getAiIndexAutomationsPath = (id: string): string =>
+  `${getAiIndexSettingsPath(id)}${AUTOMATIONS_HASH}`;
+
 /** Path of the page for picking an example dreaming config for a new AI index with memory. */
 export const getAiIndexDreamingTemplatePath = (id: string): string =>
   `/ai_index/${id}/dreaming_template`;
@@ -39,3 +45,14 @@ export const getAiIndexDreamingTemplatePath = (id: string): string =>
  */
 export const getKnowledgeDocumentPath = (aiIndexId: string, index: string): string =>
   `${getAiIndexKnowledgeDocumentsPath(aiIndexId)}/${encodeURIComponent(index)}`;
+
+export const getKnowledgeDocumentLocation = (
+  aiIndexId: string,
+  { id, index }: { id: string; index: string }
+): { path: string; params: Record<string, string> } => ({
+  path:
+    index.length > 0
+      ? getKnowledgeDocumentPath(aiIndexId, index)
+      : getAiIndexKnowledgeDocumentsPath(aiIndexId),
+  params: { [KI_DOC_QUERY_PARAM]: id },
+});
