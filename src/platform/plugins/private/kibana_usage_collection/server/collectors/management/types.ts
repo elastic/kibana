@@ -209,9 +209,7 @@ export interface UsageStats {
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
   'observability:streamsEnableContentPacks': boolean;
-  'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
-  'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
   'observability:nightshiftContinuousOnboardingEnabled': boolean;
   'observability:nightshiftContinuousOnboardingIntervalHours': number;
