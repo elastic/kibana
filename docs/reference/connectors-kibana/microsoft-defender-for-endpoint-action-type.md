@@ -1,7 +1,7 @@
 ---
 navigation_title: "Microsoft Defender for Endpoint (v2)"
 type: reference
-description: "Contain and investigate devices in Microsoft Defender for Endpoint — list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators."
+description: "Contain and investigate devices in Microsoft Defender for Endpoint: list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators."
 applies_to:
   stack: preview 9.7
   serverless: preview
@@ -9,23 +9,31 @@ applies_to:
 
 # Microsoft Defender for Endpoint (v2) connector [microsoft-defender-for-endpoint-action-type]
 
-Contain and investigate devices in Microsoft Defender for Endpoint — list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators.
+Use the Microsoft Defender for Endpoint (v2) connector to contain and investigate devices in Microsoft Defender for Endpoint. You can list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(API only)_ aren't available to agents yet. You can run them with the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
-## Overview [microsoft-defender-for-endpoint-overview]
-
-Response actions such as `isolateHost`, `runAntivirusScan`, and `collectInvestigationPackage` run asynchronously on the device. Each returns a machine action with status `Pending`. Poll it with `getActions` until its status is `Succeeded`, `Failed`, `TimeOut`, or `Cancelled`.
-
-The actions marked _(not yet available)_ run arbitrary scripts on a device or change many tenant-wide indicators in one call, so they are not exposed to agents.
+The actions marked _(API only)_ run arbitrary scripts on a device or change many tenant-wide indicators in one call, so they aren't available to agents.
 
 Alerts, incidents, and advanced hunting are not part of this connector.
 
 ## Create connectors in {{kib}} [define-microsoft-defender-for-endpoint-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
+
+### Get API credentials [microsoft-defender-for-endpoint-api-credentials]
+
+1. In the [Microsoft Entra admin center](https://entra.microsoft.com/), register an application.
+2. Under **API permissions**, add **APIs my organization uses** > **WindowsDefenderATP** and add the application permissions for the actions you use: `Machine.Read.All`, `Machine.ReadWrite.All`, `Machine.Isolate`, `Machine.Scan`, `Machine.CollectForensics`, `Machine.LiveResponse`, `Machine.StopAndQuarantine`, `Machine.RestrictExecution`, `Library.Manage`, `File.Read.All`, `Ip.Read.All`, `URL.Read.All`, `User.Read.All`, `Vulnerability.Read.All`, and `Ti.ReadWrite.All`. To find the permission each action needs, refer to [Permissions by action](#microsoft-defender-for-endpoint-permissions).
+3. Grant admin consent.
+4. Under **Certificates & secrets**, create a client secret, or upload a certificate if you authenticate with a certificate.
+5. Copy the tenant ID and the application (client) ID, and the secret value if you use a client secret. Enter them when you create the connector in {{kib}}.
+
+If you also use the Microsoft Defender XDR connector, you can use one app registration for both connectors. Add the Microsoft Graph permissions of the Defender XDR connector next to the WindowsDefenderATP permissions of this connector. Each connector requests a token for its own API, so it uses only its own permissions.
+
+For more information, refer to [Create an app to access Microsoft Defender for Endpoint without a user](https://learn.microsoft.com/en-us/defender-endpoint/api/exposed-apis-create-app-webapp).
 
 ### Connector configuration [microsoft-defender-for-endpoint-connector-configuration]
 
@@ -59,7 +67,7 @@ Scope
     - GCC: `https://api-gcc.securitycenter.microsoft.us/.default`
     - GCC High and DoD: `https://api-gov.securitycenter.microsoft.us/.default`
 
-## Test connectors [microsoft-defender-for-endpoint-action-configuration]
+### Test connectors [microsoft-defender-for-endpoint-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test requests an access token and lists one device to verify the credentials, the Defender cloud, and the API URL.
 
@@ -86,7 +94,7 @@ The Microsoft Defender for Endpoint (v2) connector has the following actions. Li
 
 ### Response actions [microsoft-defender-for-endpoint-response-actions]
 
-Response actions require a comment (up to 2,000 characters), which is shown in the Microsoft Defender portal action center. They return a machine action with status `Pending`. Only one action of a kind can be pending on a device at a time; refer to [Usage notes](#microsoft-defender-for-endpoint-usage-notes).
+Response actions require a comment (up to 2,000 characters), which is shown in the Microsoft Defender portal action center. They run asynchronously on the device and return a machine action with status `Pending`. Poll it with `getActions` until its status is `Succeeded`, `Failed`, `TimeOut`, or `Cancelled`. Only one action of a kind can be pending on a device at a time; refer to [Usage notes](#microsoft-defender-for-endpoint-usage-notes).
 
 `isolateHost`
 :   Isolate a device from the network. `Full` (the default) blocks all traffic except the Defender service, `Selective` also keeps Outlook, Teams, and Skype for Business working, and `UnManagedDevice` applies only to devices that aren't onboarded. Undo with `releaseHost`.
@@ -112,7 +120,7 @@ Response actions require a comment (up to 2,000 characters), which is shown in t
 `getFile`
 :   Collect a file from a device with live response, by its full path on the device (for example `C:\Windows\Temp\sample.exe`). When the action has succeeded, get a download link with `getActionResults`.
 
-`runScript` _(not yet available)_
+`runScript` _(API only)_
 :   Run a script from the live response library on a device, with optional arguments. Pass the script's file name as listed by `getLibraryFiles`, without a path. When the action has succeeded, get the script output with `getActionResults`.
 
 ### Machine actions [microsoft-defender-for-endpoint-machine-actions]
@@ -180,13 +188,13 @@ Indicators that the connector creates appear in the Microsoft Defender portal un
 `submitIndicator`
 :   Create or update a tenant-wide indicator for a file hash, certificate, IPv4 address, domain, or URL, with an action such as `Audit`, `Block`, or `Allowed`. The legacy `Alert` and `AlertAndBlock` actions aren't supported: use `Audit` or `Block` with `generateAlert` set to `true` instead. IP indicators take a single public IPv4 address; private ranges, IPv6 addresses, and CIDR ranges aren't supported. Submitting the same value with a different action creates a second indicator. Microsoft stores `Block` on a certificate thumbprint as `BlockAndRemediate`. `Audit` requires `generateAlert` set to `true`, and `educateUrl` applies only to a URL indicator with `Block` or `Warn`. Set `expirationTime` in UTC with a `Z` suffix, for example `2026-12-31T00:00:00Z`; without it, the indicator never expires.
 
-`deleteIndicator` _(not yet available)_
+`deleteIndicator` _(API only)_
 :   Delete a custom indicator by ID. Deleting an ID that doesn't exist also succeeds.
 
-`batchSubmitIndicators` _(not yet available)_
+`batchSubmitIndicators` _(API only)_
 :   Create or update up to 500 custom indicators in one call, with the same fields and rules as `submitIndicator`. The call succeeds even when some indicators fail, and returns the result of each indicator and the number that failed.
 
-`batchDeleteIndicators` _(not yet available)_
+`batchDeleteIndicators` _(API only)_
 :   Delete up to 500 custom indicators by ID in one call. Unknown IDs aren't rejected.
 
 ## Usage notes [microsoft-defender-for-endpoint-usage-notes]
@@ -238,19 +246,7 @@ Both versions return the device and machine action records from the Defender API
 
 When a response action fails because another action is pending on the device, V1 returns the Defender error message. V2 also names the pending action, in the form `Conflicting machine action: id=..., type=..., status=...`, so you can wait for it with `getActions` or cancel it with `cancelAction`.
 
-## Get API credentials [microsoft-defender-for-endpoint-api-credentials]
-
-1. In the [Microsoft Entra admin center](https://entra.microsoft.com/), register an application.
-2. Under **API permissions**, add **APIs my organization uses** > **WindowsDefenderATP** and add the application permissions for the actions you use: `Machine.Read.All`, `Machine.ReadWrite.All`, `Machine.Isolate`, `Machine.Scan`, `Machine.CollectForensics`, `Machine.LiveResponse`, `Machine.StopAndQuarantine`, `Machine.RestrictExecution`, `Library.Manage`, `File.Read.All`, `Ip.Read.All`, `URL.Read.All`, `User.Read.All`, `Vulnerability.Read.All`, and `Ti.ReadWrite.All`. To find the permission each action needs, refer to [Permissions by action](#microsoft-defender-for-endpoint-permissions).
-3. Grant admin consent.
-4. Under **Certificates & secrets**, create a client secret, or upload a certificate if you authenticate with a certificate.
-5. Copy the tenant ID and the application (client) ID, and the secret value if you use a client secret. Enter them when you create the connector in {{kib}}.
-
-If you also use the Microsoft Defender XDR connector, you can use one app registration for both connectors. Add the Microsoft Graph permissions of the Defender XDR connector next to the WindowsDefenderATP permissions of this connector. Each connector requests a token for its own API, so it uses only its own permissions.
-
-For more information, refer to [Create an app to access Microsoft Defender for Endpoint without a user](https://learn.microsoft.com/en-us/defender-endpoint/api/exposed-apis-create-app-webapp).
-
-### Permissions by action [microsoft-defender-for-endpoint-permissions]
+## Permissions by action [microsoft-defender-for-endpoint-permissions]
 
 Each action needs the following WindowsDefenderATP application permission. When a permission is missing, the action fails with a `403` error that names the permission.
 
