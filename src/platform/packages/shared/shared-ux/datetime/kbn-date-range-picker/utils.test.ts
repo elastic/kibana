@@ -142,7 +142,7 @@ describe('getOptionDisplayLabel', () => {
     expect(
       getOptionDisplayLabel(
         { start, end, label: 'May 25, 00:00:00.000 → May 27, 23:59:59.999' },
-        { timePrecision: 'none' }
+        { timePrecision: 'm' }
       )
     ).toBe(
       `${moment.utc(start).local().format('MMM D, HH:mm')} → ${moment
@@ -405,7 +405,7 @@ describe('formatDateRange', () => {
     expect(formatDateRange(start, end, 'ms')).toBe(
       'Feb 10, 2026, 10:15:30.500 to Feb 11, 2026, 23:30:00.000'
     );
-    expect(formatDateRange(start, end, 'none')).toBe('Feb 10, 2026, 10:15 to Feb 11, 2026, 23:30');
+    expect(formatDateRange(start, end, 'm')).toBe('Feb 10, 2026, 10:15 to Feb 11, 2026, 23:30');
   });
 
   it('handles same-day ranges', () => {

@@ -475,7 +475,7 @@ export const QueryBarTopRow = React.memo(
     const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
       {
         roundRelativeTime: false,
-        timePrecision: 'none',
+        timePrecision: 'm',
       }
     );
     const isAutoRefreshEnabled = props.isRefreshPaused === false;

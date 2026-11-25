@@ -166,7 +166,7 @@ describe('DateRangePickerControl', () => {
         <DateRangePicker
           {...defaultProps}
           defaultValue="last 20 minutes"
-          settings={{ roundRelativeTime: false, timePrecision: 'none' }}
+          settings={{ roundRelativeTime: false, timePrecision: 'm' }}
           presets={[
             {
               start: '2026-05-01T00:00:00.000Z',

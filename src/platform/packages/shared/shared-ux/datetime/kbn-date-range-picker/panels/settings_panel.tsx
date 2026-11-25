@@ -73,7 +73,7 @@ export function SettingsPanel() {
   );
 
   const timePrecisionOptions = [
-    { id: 'none', label: settingsPanelTexts.timePrecisionNone },
+    { id: 'm', label: settingsPanelTexts.timePrecisionMinutes },
     { id: 's', label: settingsPanelTexts.timePrecisionSeconds },
     { id: 'ms', label: settingsPanelTexts.timePrecisionMilliseconds },
   ];

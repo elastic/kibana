@@ -24,10 +24,10 @@ describe('applyTimePrecision', () => {
     expect(applyTimePrecision('HH:mm:ss.SSS', 's')).toBe('HH:mm:ss');
   });
 
-  it('strips seconds and milliseconds for none', () => {
-    expect(applyTimePrecision('MMM D, YYYY, HH:mm:ss.SSS', 'none')).toBe('MMM D, YYYY, HH:mm');
-    expect(applyTimePrecision('HH:mm:ss.SSS', 'none')).toBe('HH:mm');
-    expect(applyTimePrecision('HH:mm:ss', 'none')).toBe('HH:mm');
+  it('strips seconds and milliseconds for m', () => {
+    expect(applyTimePrecision('MMM D, YYYY, HH:mm:ss.SSS', 'm')).toBe('MMM D, YYYY, HH:mm');
+    expect(applyTimePrecision('HH:mm:ss.SSS', 'm')).toBe('HH:mm');
+    expect(applyTimePrecision('HH:mm:ss', 'm')).toBe('HH:mm');
   });
 
   it('defaults to s when no precision is given', () => {
@@ -134,8 +134,8 @@ describe('timeRangeToDisplayText', () => {
       expect(toDisplay('Feb 3 2016 to now')).toBe('Feb 3, 2016, 00:00:00 → now');
     });
 
-    it('shows only minutes with none', () => {
-      expect(toDisplay('Feb 3 2016 to now', { timePrecision: 'none' })).toBe(
+    it('shows only minutes with m', () => {
+      expect(toDisplay('Feb 3 2016 to now', { timePrecision: 'm' })).toBe(
         'Feb 3, 2016, 00:00 → now'
       );
     });
