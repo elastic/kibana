@@ -87,7 +87,7 @@ Every check is deterministic except Dashboard Reply, which judges reply wording 
 
 ## Dataset
 
-Forty-four examples, because each dashboard example costs 150k–300k input tokens:
+Forty-five examples, because each dashboard example costs 150k–300k input tokens:
 
 - **Creation** (`datasets/creation.ts`, 4): a rich logs dashboard, two requested sections, six compact KPIs, and four KPIs above a time series.
 - **Routing** (`datasets/routing.ts`, 4): a standalone chart, ES|QL help, and field discovery, which must stay out of the dashboard skill, and a dashboard over a `nonexistent-*` index, which loads the skill but must end without a dashboard (`noDashboard`). Nothing is generated, so these are cheap.
@@ -101,7 +101,7 @@ Forty-four examples, because each dashboard example costs 150k–300k input toke
   - The prompt from [#294133](https://github.com/elastic/kibana/issues/294133): the same dashboard plus controls for HTTP method, status code, path and HTTP version, which only exist as `DISSECT` output. The agent either substitutes mapped fields or says in plain words which filters it could not add.
   - Four KPIs and a status code breakdown plus a control on machine OS, a mapped field the results do not show, to prove requested controls still get added.
 - **Layout edit** (`datasets/layout_edit.ts`, 17), over the seeded sectioned dashboard: remove panels from one or two sections, remove a section, add a KPI, a chart in a section, or a section before or between others, move panels between sections and the top level, restyle or edit panels, set widths, add to a collapsed section, and empty a section. The two in-place edits (recolor and rename a chart; turn the pie into a table and the intro into a bullet list) also carry `panelEdits` gold.
-- **Edit scenarios** (`datasets/edit_scenarios.ts`, 11), over the same seeded sectioned dashboard. Each example combines asks, so one run covers several gaps:
+- **Edit scenarios** (`datasets/edit_scenarios.ts`, 12), over the same seeded sectioned dashboard. Each example combines asks, so one run covers several gaps:
   - recolor the ES|QL Vega bars and raise the ML swim lane's severity threshold (`panelEdits`);
   - rename the data-view chart, which the agent must not edit silently (`replaceConfirmation`);
   - recolor the Vega bars on a variant whose Vega chart reads an Elasticsearch query; the agent must not edit it and should offer an ES|QL replacement (`replaceConfirmation`);
@@ -109,12 +109,13 @@ Forty-four examples, because each dashboard example costs 150k–300k input toke
   - add a Payments section from a `payments-*` index that does not exist, next to a KPI it can add (`unavailableRequests`);
   - add two Lens ES|QL charts the agent made earlier in the conversation, sent as visualization attachments (`src/fixtures/logs_visualizations.ts`), in a new section whose panels must run their ES|QL (`structure.sections[].queries`);
   - add a range slider on `machine.ram` and remove the time slider (`controls.rangeSliders`, `controls.timeSlider: false`);
-  - rename the Visitors section and move a panel out of it (`structure.sections` and a placement);
+  - rename the Visitors section and move a panel out of it, changing no dashboard setting (`structure.sections`, a placement and `settings: {}`);
   - move the Vega chart to the top level, delete the ML swim lane, and swap the bytes slider for `machine.ram` (`removed`, a placement and `controls`);
   - add a markdown note, a second ML swim lane and a Vega heatmap to a section (`structure.panelKinds`, placements of the added kinds, and `panelEdits` on the note's terms, the swim lane's job and view, and the heatmap's `rect` mark);
-  - delete the Errors section but keep its errors by host table, and recolor the 4xx chart while moving it into Traffic (`removed`, placements and `panelEdits`).
+  - delete the Errors section but keep its errors by host table, and recolor the 4xx chart while moving it into Traffic (`removed`, placements and `panelEdits`);
+  - hide the panel titles and borders and stop syncing the cursor, in one call that may change nothing else (`settings` and `layoutEdit` gold that lets nothing move; tagged `settings_edit`).
 
-Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit` | `edit_scenario` | `ml_panels`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced. `datasets/gold_ids.test.ts` fails when gold names a panel or section id its seeded dashboard does not have, so seed edits cannot silently zero an assertion.
+Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit` | `edit_scenario` | `settings_edit` | `ml_panels`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced. `datasets/gold_ids.test.ts` fails when gold names a panel or section id its seeded dashboard does not have, so seed edits cannot silently zero an assertion.
 
 ### Seeded dashboard
 
