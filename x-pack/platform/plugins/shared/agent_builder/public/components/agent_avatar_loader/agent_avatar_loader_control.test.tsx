@@ -63,6 +63,10 @@ describe('AgentAvatarLoaderControl', () => {
     const panelChoices = screen.getByTestId('loaderChoices-customPanel');
     expect(within(avatarChoices).getByRole('radio', { name: 'Orbit ring' })).toBeChecked();
     expect(within(avatarChoices).getByRole('radio', { name: 'Pulse dots' })).toBeInTheDocument();
+    expect(within(avatarChoices).getByRole('radio', { name: 'Dot morph' })).toBeInTheDocument();
+    expect(
+      within(panelChoices).queryByRole('radio', { name: 'Dot morph' })
+    ).not.toBeInTheDocument();
     expect(within(avatarChoices).queryByRole('radio', { name: 'Scan' })).not.toBeInTheDocument();
     expect(
       within(panelChoices).queryByRole('radio', { name: 'Pulse dots' })

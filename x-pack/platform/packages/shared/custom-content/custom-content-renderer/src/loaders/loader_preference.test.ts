@@ -49,6 +49,16 @@ describe('loader preference', () => {
     expect(getLoader('customPanel')).toBe('elastic');
   });
 
+  it('allows dot morph only for the agent avatar', () => {
+    setLoader('agentAvatar', 'dotMorph');
+    setLoader('customPanel', 'dotMorph');
+    setLoader('workersRunning', 'dotMorph');
+
+    expect(getLoader('agentAvatar')).toBe('dotMorph');
+    expect(getLoader('customPanel')).toBe('scanDots');
+    expect(getLoader('workersRunning')).toBe('pulseDots');
+  });
+
   it('allows scan dots for workers running', () => {
     setLoader('workersRunning', 'scanDots');
     setLoader('agentAvatar', 'scanDots');

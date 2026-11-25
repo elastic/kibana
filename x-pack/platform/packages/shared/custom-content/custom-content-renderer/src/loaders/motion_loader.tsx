@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { LoaderId, LoaderScenario } from './loader_preference';
+import { ElasticMorphLoader } from './elastic_morph_loader';
 import { OrbitRingLoader } from './orbit_ring_loader';
 import { PulseDotsLoader } from './pulse_dots_loader';
 import { ScanDotsLoader } from './scan_dots_loader';
@@ -37,6 +38,7 @@ export const MotionLoader: React.FC<MotionLoaderProps> = ({
   const loaderId = loaderIdProp ?? selectedLoaderId;
   const { euiTheme } = useEuiTheme();
   const resolvedSize = size ?? euiTheme.size.l;
+  const numericSize = typeof resolvedSize === 'number' ? resolvedSize : parseFloat(resolvedSize);
   const progressLabel = decorative ? undefined : label;
 
   const frameStyles = css`
@@ -55,6 +57,14 @@ export const MotionLoader: React.FC<MotionLoaderProps> = ({
         return <ScanDotsLoader size={resolvedSize} label={progressLabel} />;
       case 'pulseDots':
         return <PulseDotsLoader size={resolvedSize} label={progressLabel} />;
+      case 'dotMorph':
+        return (
+          <ElasticMorphLoader
+            size={Number.isFinite(numericSize) ? numericSize : undefined}
+            label={progressLabel}
+            decorative={decorative}
+          />
+        );
       default: {
         const unhandled: never = loaderId;
         return unhandled;

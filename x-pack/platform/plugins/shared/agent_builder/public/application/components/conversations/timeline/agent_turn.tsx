@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { useLoader } from '@kbn/custom-content-renderer';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentAvatarLoader } from '../../../../components/agent_avatar_loader/agent_avatar_loader';
+import { DotMorphAvatar } from '../../../../components/agent_avatar_loader/dot_morph_avatar';
 import { AuthorHeader } from './author_header';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { EventSteps } from './event_steps/event_steps';
@@ -123,9 +125,27 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   isResuming = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const avatarLoader = useLoader('agentAvatar');
   const conversationId = useConversationId();
   const { status, startedAt, origin } = item;
   const isLoading = status === 'running' || isResuming;
+  const morphWasLoading = useRef(false);
+  const [, setMorphEpoch] = useState(0);
+  // The Elastic loader stays up after the response, logo and all. Other agents only keep the
+  // generic grid mounted long enough for it to swap back to their avatar.
+  const isElasticMorph = avatarLoader === 'dotMorph' && agent?.id === agentBuilderDefaultAgentId;
+  if (avatarLoader !== 'dotMorph' || isElasticMorph) {
+    morphWasLoading.current = false;
+  } else if (isLoading) {
+    morphWasLoading.current = true;
+  }
+
+  const finishMorph = () => {
+    morphWasLoading.current = false;
+    setMorphEpoch((epoch) => epoch + 1);
+  };
+  const showGenericMorph =
+    avatarLoader === 'dotMorph' && !isElasticMorph && (isLoading || morphWasLoading.current);
 
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
@@ -137,6 +157,7 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    line-height: 0;
     inline-size: ${euiTheme.size.l};
     block-size: ${euiTheme.size.l};
   `;
@@ -155,7 +176,20 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
         css={avatarColumnStyles}
         data-test-subj="agentBuilderTimelineAvatar"
       >
-        {isLoading ? (
+        {isElasticMorph ? (
+          <div css={loaderFrameStyles} data-test-subj="agentBuilderAvatarLoaderFrame">
+            <DotMorphAvatar agent={agent} isLoading={isLoading} label={loadingLabel} />
+          </div>
+        ) : showGenericMorph ? (
+          <div css={loaderFrameStyles} data-test-subj="agentBuilderAvatarLoaderFrame">
+            <DotMorphAvatar
+              agent={agent}
+              isLoading={isLoading}
+              label={loadingLabel}
+              onSettled={finishMorph}
+            />
+          </div>
+        ) : isLoading ? (
           <div css={loaderFrameStyles} data-test-subj="agentBuilderAvatarLoaderFrame">
             <AgentAvatarLoader label={loadingLabel} size={16} />
           </div>

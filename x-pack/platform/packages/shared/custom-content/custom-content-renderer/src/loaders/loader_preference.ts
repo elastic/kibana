@@ -16,13 +16,13 @@ export const LOADER_SCENARIOS = [
 export type LoaderScenario = (typeof LOADER_SCENARIOS)[number];
 
 /** Every loader. A scenario may offer only some of these. */
-export const LOADER_IDS = ['orbitRing', 'elastic', 'scanDots', 'pulseDots'] as const;
+export const LOADER_IDS = ['orbitRing', 'elastic', 'scanDots', 'pulseDots', 'dotMorph'] as const;
 
 export type LoaderId = (typeof LOADER_IDS)[number];
 
 /** Options shown for each scenario. */
 export const LOADER_IDS_BY_SCENARIO: Record<LoaderScenario, readonly LoaderId[]> = {
-  agentAvatar: ['orbitRing', 'elastic', 'pulseDots'],
+  agentAvatar: ['orbitRing', 'elastic', 'pulseDots', 'dotMorph'],
   customPanel: ['orbitRing', 'elastic', 'scanDots'],
   workersRunning: ['orbitRing', 'elastic', 'pulseDots', 'scanDots'],
   nightshift: ['orbitRing', 'elastic', 'pulseDots', 'scanDots'],
@@ -44,14 +44,18 @@ const DEFAULT_SELECTION: LoaderSelection = {
   nightshift: 'scanDots',
 };
 
-const isAvatarLoaderId = (value: unknown): value is 'orbitRing' | 'elastic' | 'pulseDots' =>
-  value === 'orbitRing' || value === 'elastic' || value === 'pulseDots';
+const isAvatarLoaderId = (
+  value: unknown
+): value is 'orbitRing' | 'elastic' | 'pulseDots' | 'dotMorph' =>
+  value === 'orbitRing' || value === 'elastic' || value === 'pulseDots' || value === 'dotMorph';
 
 const isPanelLoaderId = (value: unknown): value is 'orbitRing' | 'elastic' | 'scanDots' =>
   value === 'orbitRing' || value === 'elastic' || value === 'scanDots';
 
-const isWorkersLoaderId = (value: unknown): value is LoaderId =>
-  isAvatarLoaderId(value) || value === 'scanDots';
+const isWorkersLoaderId = (
+  value: unknown
+): value is 'orbitRing' | 'elastic' | 'pulseDots' | 'scanDots' =>
+  value === 'orbitRing' || value === 'elastic' || value === 'pulseDots' || value === 'scanDots';
 
 const isNightshiftLoaderId = (value: unknown): value is LoaderId =>
   value === 'orbitRing' || value === 'elastic' || value === 'pulseDots' || value === 'scanDots';

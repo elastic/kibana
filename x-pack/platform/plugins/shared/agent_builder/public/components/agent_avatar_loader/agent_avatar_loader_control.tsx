@@ -98,6 +98,13 @@ const labels = {
   pulseDotsDescription: i18n.translate('xpack.agentBuilder.loaders.pulseDotsDescription', {
     defaultMessage: 'The center dots light, then the dots around them.',
   }),
+  dotMorph: i18n.translate('xpack.agentBuilder.loaders.dotMorphLabel', {
+    defaultMessage: 'Dot morph',
+  }),
+  dotMorphDescription: i18n.translate('xpack.agentBuilder.loaders.dotMorphDescription', {
+    defaultMessage:
+      'The Elastic logo breaks into dots for the Elastic AI Agent. Any other agent swaps its avatar for a neutral dot grid.',
+  }),
   shimmer: i18n.translate('xpack.agentBuilder.loaders.shimmerLabel', {
     defaultMessage: 'Shimmering text',
   }),
@@ -152,6 +159,7 @@ const LOADER_COPY: Record<LoaderId, { label: string; description: string }> = {
   elastic: { label: labels.elastic, description: labels.elasticDescription },
   scanDots: { label: labels.scanDots, description: labels.scanDotsDescription },
   pulseDots: { label: labels.pulseDots, description: labels.pulseDotsDescription },
+  dotMorph: { label: labels.dotMorph, description: labels.dotMorphDescription },
 };
 
 const SCENARIO_COPY: Record<LoaderScenario, { title: string; description: string }> = {

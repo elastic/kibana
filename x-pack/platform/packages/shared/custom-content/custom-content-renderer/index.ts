@@ -10,6 +10,8 @@ export type { CustomContentComponentProps } from './src/custom_content_component
 export { CustomContentComponent } from './src/custom_content_component';
 export { CustomContentEmptyPrompt } from './src/custom_content_empty_prompt';
 export { MotionLoader } from './src/loaders/motion_loader';
+export { ElasticMorphLoader } from './src/loaders/elastic_morph_loader';
+export { GenericMorphLoader } from './src/loaders/generic_morph_loader';
 export {
   getLoader,
   setLoader,

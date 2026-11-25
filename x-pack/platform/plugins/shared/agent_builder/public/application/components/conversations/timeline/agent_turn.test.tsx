@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { setLoader } from '@kbn/custom-content-renderer';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
@@ -102,11 +103,33 @@ const aborted: TimelineItem = {
   response: undefined,
 };
 
-const renderTimeline = (item: TimelineItem, conversationAttachments?: VersionedAttachment[]) =>
+const elasticAgent = {
+  id: 'elastic-ai-agent',
+  type: 'chat',
+  name: 'Elastic AI Agent',
+  description: '',
+  readonly: true,
+} as AgentDefinition;
+
+const otherAgent = {
+  id: 'payments-agent',
+  type: 'chat',
+  name: 'Payments',
+  description: '',
+  readonly: false,
+  avatar_symbol: 'PA',
+  avatar_color: '#8144CC',
+} as AgentDefinition;
+
+const renderTimeline = (
+  item: TimelineItem,
+  conversationAttachments?: VersionedAttachment[],
+  agent?: AgentDefinition
+) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <Timeline items={[item]} conversationAttachments={conversationAttachments} />
+        <Timeline items={[item]} agent={agent} conversationAttachments={conversationAttachments} />
       </EuiProvider>
     </I18nProvider>
   );
@@ -129,6 +152,51 @@ describe('AgentTurn', () => {
     expect(dots).toHaveAttribute('data-variant', 'pulse-dots');
     expect(dots).toHaveAttribute('width', '16');
     expect(dots).toHaveAttribute('height', '16');
+  });
+
+  it('keeps the Elastic loader as the avatar, gathering the grid into its logo when the turn finishes', () => {
+    setLoader('agentAvatar', 'dotMorph');
+    const { rerender } = renderTimeline(running, undefined, elasticAgent);
+
+    const morph = screen.getByTestId('elasticMorphLoader');
+    expect(morph).toHaveAttribute('data-state', 'thinking');
+    expect(morph).toHaveAttribute('data-size', '16');
+    expect(screen.getByTestId('agentBuilderAvatarLoaderFrame')).toContainElement(morph);
+    expect(morph.querySelectorAll('circle')).toHaveLength(16);
+    expect(screen.queryByTestId('genericDotMorphLoader')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderAgentIconAvatar')).not.toBeInTheDocument();
+
+    rerender(
+      <I18nProvider>
+        <EuiProvider>
+          <Timeline items={[completedLive]} agent={elasticAgent} />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    const settled = screen.getByTestId('elasticMorphLoader');
+    expect(settled).toHaveAttribute('data-state', 'idle');
+    expect(settled).toHaveAttribute('data-size', '24');
+    expect(screen.queryByTestId('agentBuilderAgentIconAvatar')).not.toBeInTheDocument();
+  });
+
+  it('shows the settled Elastic loader for a turn that is already complete', () => {
+    setLoader('agentAvatar', 'dotMorph');
+    renderTimeline(completedLive, undefined, elasticAgent);
+
+    expect(screen.getByTestId('elasticMorphLoader')).toHaveAttribute('data-state', 'idle');
+    expect(screen.getByTestId('elasticMorphLoader')).toHaveAttribute('data-size', '24');
+    expect(screen.queryByTestId('agentBuilderAgentIconAvatar')).not.toBeInTheDocument();
+  });
+
+  it('shows the generic dot grid at 16px for any other agent', () => {
+    setLoader('agentAvatar', 'dotMorph');
+    renderTimeline(running, undefined, otherAgent);
+
+    const morph = screen.getByTestId('genericDotMorphLoader');
+    expect(morph).toHaveAttribute('data-shown', 'true');
+    expect(morph).toHaveAttribute('data-size', '16');
+    expect(screen.queryByTestId('elasticMorphLoader')).not.toBeInTheDocument();
   });
 
   it('gives the response what it needs to render attachments', () => {
