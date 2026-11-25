@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { chunk } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   ISavedObjectsSerializer,
@@ -28,8 +29,6 @@ const BULK_CREATE_CHUNK_SIZE = 1_000;
 const SCAN_PAGE_SIZE = 5_000;
 
 export type ObservableSortField = 'createdAt' | 'value' | 'typeKey';
-export type ObservableSortOrder = 'asc' | 'desc';
-export type ObservableSortValues = estypes.SortResults;
 
 export interface ObservableKey {
   typeKey: string;
@@ -52,15 +51,15 @@ export interface ObservablesPreview {
 export interface ObservablesPageItem {
   observable: Observable;
   /** The sort values of the item; pass the last item's as `searchAfter` to get the next page. */
-  sort: ObservableSortValues;
+  sort: estypes.SortResults;
 }
 
 export interface FindObservablesPageArgs {
   caseId: string;
   perPage: number;
-  searchAfter?: ObservableSortValues;
+  searchAfter?: estypes.SortResults;
   sortField: ObservableSortField;
-  sortOrder: ObservableSortOrder;
+  sortOrder: estypes.SortOrder;
   typeKeys?: string[];
   /** Matches values that start with it, ignoring case. */
   search?: string;
@@ -109,7 +108,7 @@ const TIE_BREAKERS: Readonly<Record<ObservableSortField, ObservableSortField[]>>
 
 const buildSort = (
   sortField: ObservableSortField,
-  sortOrder: ObservableSortOrder
+  sortOrder: estypes.SortOrder
 ): estypes.SortCombinations[] => [
   { [SORT_FIELDS[sortField]]: { order: sortOrder } },
   ...TIE_BREAKERS[sortField].map((tieBreaker) => ({
@@ -140,9 +139,7 @@ const caseReferenceQuery = (caseIds: string[]): estypes.QueryDslQueryContainer =
 const keysQuery = (keys: ObservableKey[]): estypes.QueryDslQueryContainer => {
   const valuesByTypeKey = new Map<string, Set<string>>();
   for (const { typeKey, value } of keys) {
-    const values = valuesByTypeKey.get(typeKey) ?? new Set<string>();
-    values.add(value);
-    valuesByTypeKey.set(typeKey, values);
+    valuesByTypeKey.set(typeKey, (valuesByTypeKey.get(typeKey) ?? new Set()).add(value));
   }
 
   return {
@@ -160,16 +157,27 @@ const keysQuery = (keys: ObservableKey[]): estypes.QueryDslQueryContainer => {
   };
 };
 
+/** Throws one error listing every per-object failure other than `toleratedStatusCode`. */
+const throwOnErrors = (
+  action: string,
+  results: Array<{ id: string; error?: { statusCode: number; message: string } }>,
+  toleratedStatusCode: number
+): void => {
+  const failures = results.filter(
+    ({ error }) => error != null && error.statusCode !== toleratedStatusCode
+  );
+
+  if (failures.length > 0) {
+    throw Boom.internal(
+      `Failed to ${action} ${failures.length} observables: ${failures
+        .map(({ id, error }) => `${id}: ${error?.message}`)
+        .join('; ')}`
+    );
+  }
+};
+
 const getTotal = (total: estypes.SearchTotalHits | number | undefined): number =>
   typeof total === 'number' ? total : total?.value ?? 0;
-
-const chunk = <T>(items: T[], size: number): T[][] => {
-  const chunks: T[][] = [];
-  for (let start = 0; start < items.length; start += size) {
-    chunks.push(items.slice(start, start + size));
-  }
-  return chunks;
-};
 
 const toObservable = ({
   id,
@@ -209,8 +217,6 @@ export class ObservableService {
       `bulk create ${observables.length} observables on case ${caseId}`,
       async () => {
         const references = [{ type: CASE_SAVED_OBJECT, name: CASE_REF_NAME, id: caseId }];
-        const created: Observable[] = [];
-
         const chunks = chunk(observables, BULK_CREATE_CHUNK_SIZE);
 
         for (const [chunkIndex, observablesChunk] of chunks.entries()) {
@@ -236,27 +242,17 @@ export class ObservableService {
               { refresh: chunkIndex === chunks.length - 1 ? 'wait_for' : false }
             );
 
-          const failures: string[] = [];
-          results.forEach((result, index) => {
-            if (isSavedObjectErrorResult(result) && result.error.statusCode !== 409) {
-              failures.push(`${result.id}: ${result.error.message}`);
-              return;
-            }
-
-            const { id, typeKey, value, description, createdAt } = observablesChunk[index];
-            created.push({ id, typeKey, value, description, createdAt, updatedAt: null });
-          });
-
-          if (failures.length > 0) {
-            throw Boom.internal(
-              `Failed to create ${failures.length} observables on case ${caseId}: ${failures.join(
-                '; '
-              )}`
-            );
-          }
+          throwOnErrors('create', results, 409);
         }
 
-        return created;
+        return observables.map(({ id, typeKey, value, description, createdAt }) => ({
+          id,
+          typeKey,
+          value,
+          description,
+          createdAt,
+          updatedAt: null,
+        }));
       }
     );
   }
@@ -279,30 +275,16 @@ export class ObservableService {
           ids.map((id) => ({ id, type: CASE_OBSERVABLE_SAVED_OBJECT }))
         );
 
-      const found: Array<SavedObject<ObservablePersistedAttributes>> = [];
-      const missingIds: string[] = [];
+      throwOnErrors('get', savedObjects, 404);
 
-      for (const [index, savedObject] of savedObjects.entries()) {
-        if (isSavedObjectErrorResult(savedObject) && savedObject.error.statusCode !== 404) {
-          throw Boom.internal(
-            `Failed to get observable ${savedObject.id}: ${savedObject.error.message}`
-          );
-        }
-
-        const belongsToCase =
+      const found = savedObjects.filter(
+        (savedObject): savedObject is SavedObject<ObservablePersistedAttributes> =>
           !isSavedObjectErrorResult(savedObject) &&
-          savedObject.references.some(
-            ({ type, id }) => type === CASE_SAVED_OBJECT && id === caseId
-          );
+          savedObject.references.some(({ type, id }) => type === CASE_SAVED_OBJECT && id === caseId)
+      );
+      const foundIds = new Set(found.map(({ id }) => id));
 
-        if (belongsToCase) {
-          found.push(savedObject);
-        } else {
-          missingIds.push(ids[index]);
-        }
-      }
-
-      return { found, missingIds };
+      return { found, missingIds: ids.filter((id) => !foundIds.has(id)) };
     });
   }
 
@@ -343,17 +325,7 @@ export class ObservableService {
         { refresh: 'wait_for' }
       );
 
-      const failures = statuses.filter(
-        ({ success, error }) => !success && error?.statusCode !== 404
-      );
-
-      if (failures.length > 0) {
-        throw Boom.internal(
-          `Failed to delete ${failures.length} observables: ${failures
-            .map(({ id, error }) => `${id}: ${error?.message}`)
-            .join('; ')}`
-        );
-      }
+      throwOnErrors('delete', statuses, 404);
     });
   }
 
@@ -383,7 +355,7 @@ export class ObservableService {
       async () => {
         const query = { bool: { filter: [caseReferenceQuery([caseId]), keysQuery(keys)] } };
         const existing: Observable[] = [];
-        let searchAfter: ObservableSortValues | undefined;
+        let searchAfter: estypes.SortResults | undefined;
 
         do {
           const response = await this.search({

@@ -63,19 +63,15 @@ describe('cases-observables model versions', () => {
         expect(() => create.validate(withoutTypeKey)).toThrow(/\[type_key\]/);
       });
 
-      it('rejects an unknown attribute', () => {
-        expect(() => create.validate({ ...observable, metadata: { triage: 'confirmed' } })).toThrow(
-          /\[metadata\]/
-        );
-      });
-
-      it('rejects an unknown user attribute', () => {
-        expect(() =>
-          create.validate({
-            ...observable,
-            created_by: { ...observable.created_by, avatar: 'a.png' },
-          })
-        ).toThrow(/\[created_by\.avatar\]/);
+      it.each([
+        ['attribute', { metadata: { triage: 'confirmed' } }, /\[metadata\]/],
+        [
+          'user attribute',
+          { created_by: { username: 'analyst', avatar: 'a.png' } },
+          /\[created_by\.avatar\]/,
+        ],
+      ])('rejects an unknown %s', (_kind, unknown, error) => {
+        expect(() => create.validate({ ...observable, ...unknown })).toThrow(error);
       });
     });
 
