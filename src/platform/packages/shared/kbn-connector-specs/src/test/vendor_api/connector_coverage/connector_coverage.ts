@@ -224,6 +224,8 @@ const AUTH_STATUS_ORDER: readonly AuthStatus[] = [
   'oauth_token_url_user_set',
 ];
 
+const withoutQueryOrFragment = (url: string): string => url.replace(/[?#].*$/, '');
+
 const getAuthTypeStatus = (
   { type, tokenUrl }: AuthTypeFact,
   servedTokenUrls: readonly string[]
@@ -231,7 +233,12 @@ const getAuthTypeStatus = (
   if (STATIC_CREDENTIAL_AUTH_TYPES.has(type)) return 'none';
   if (type.startsWith('oauth_')) {
     if (!tokenUrl) return 'oauth_token_url_user_set';
-    return servedTokenUrls.includes(tokenUrl) ? 'oauth_served' : 'oauth_token_url_not_served';
+    // The served URLs come from the resolver, which drops the query and fragment, so the
+    // connector's default has to be compared without them too. Otherwise a token URL carrying
+    // one reads as not served although the emulator serves it.
+    return servedTokenUrls.map(withoutQueryOrFragment).includes(withoutQueryOrFragment(tokenUrl))
+      ? 'oauth_served'
+      : 'oauth_token_url_not_served';
   }
   // The auth types #305216 verified or found broken, and the rest it didn't check (`ears`,
   // AWS signing, Kubernetes, Azure shared key, relay).

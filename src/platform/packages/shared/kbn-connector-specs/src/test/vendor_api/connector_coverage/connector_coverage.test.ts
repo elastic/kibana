@@ -290,6 +290,32 @@ describe('getOauthEmulation', () => {
       expected
     );
   });
+
+  // The served URLs come from the resolver, which drops the query and fragment. Comparing them
+  // with a connector default that keeps one would report a served endpoint as not served.
+  it('matches a token URL that carries a query against the resolved one', () => {
+    expect(
+      getOauthEmulation({
+        emulated: true,
+        facts: {
+          authTypes: [oauth('https://a/token?tenant=example')],
+          servedTokenUrls: ['https://a/token'],
+        },
+      })
+    ).toBe('served');
+  });
+
+  it('still reports a different token URL as not served', () => {
+    expect(
+      getOauthEmulation({
+        emulated: true,
+        facts: {
+          authTypes: [oauth('https://b/token?tenant=example')],
+          servedTokenUrls: ['https://a/token'],
+        },
+      })
+    ).toBe('token_url_not_served');
+  });
 });
 
 describe('getEmulationBlocker', () => {

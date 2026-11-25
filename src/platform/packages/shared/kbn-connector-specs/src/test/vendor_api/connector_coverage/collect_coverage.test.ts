@@ -11,8 +11,16 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { vendorApiExemptionsSchema } from '../exemptions';
 import { listConnectors } from '../find_connector';
-import { collectCoverage, readManifest, serializeCoverage } from './collect_coverage';
+import {
+  collectCoverage,
+  readManifest,
+  readServedTokenUrls,
+  serializeCoverage,
+} from './collect_coverage';
+
+const EXEMPTIONS_FILE = path.resolve(__dirname, '../vendor_api_exemptions.json');
 
 describe('collectCoverage', () => {
   it('describes every connector in all_specs.ts once', async () => {
@@ -70,12 +78,27 @@ describe('collectCoverage', () => {
   // into the catch-all without anyone noticing. This fails when that happens.
   it('classifies every exempt connector by its reason, never as a catch-all', async () => {
     const documents = await collectCoverage(REPO_ROOT);
-    const exempt = documents.filter(({ exemption_reason: reason }) => reason !== undefined);
+    const byId = new Map(documents.map((document) => [document.connector_id, document]));
+    // Driven by the committed list, not by the documents: filtering on `exemption_reason`
+    // would drop a connector whose reason the collector lost, and pass on the rest.
+    const exempted = Object.keys(
+      vendorApiExemptionsSchema.parse(
+        JSON.parse(await fs.readFile(EXEMPTIONS_FILE, 'utf8'))
+      ) as Record<string, string>
+    );
 
-    expect(exempt.length).toBeGreaterThan(0);
-    for (const { connector_id: id, api_types: types } of exempt) {
-      expect({ id, types }).toEqual({ id, types: expect.not.arrayContaining(['other']) });
-      expect({ id, types }).toEqual({ id, types: expect.not.arrayContaining(['unexplained']) });
+    expect(exempted.length).toBeGreaterThan(0);
+    for (const id of exempted) {
+      const document = byId.get(id);
+      expect({ id, found: document !== undefined }).toEqual({ id, found: true });
+      expect({ id, reason: document?.exemption_reason }).toEqual({
+        id,
+        reason: expect.any(String),
+      });
+      expect({ id, types: document?.api_types }).toEqual({
+        id,
+        types: expect.not.arrayContaining(['other', 'unexplained']),
+      });
     }
   });
 
@@ -118,5 +141,57 @@ describe('readManifest', () => {
     );
 
     await expect(readManifest(directory)).rejects.toThrow(path.join(directory, 'manifest.json'));
+  });
+});
+
+describe('readServedTokenUrls', () => {
+  let directory: string;
+
+  const writeSnapshot = async (snapshot: unknown) => {
+    await fs.mkdir(path.join(directory, 'snapshots'), { recursive: true });
+    await fs.writeFile(
+      path.join(directory, 'snapshots', 'v1.openapi.json'),
+      JSON.stringify(snapshot)
+    );
+  };
+
+  beforeEach(async () => {
+    directory = await fs.mkdtemp(path.join(os.tmpdir(), 'connector-served-tokens-'));
+  });
+
+  afterEach(async () => {
+    await fs.rm(directory, { recursive: true, force: true });
+  });
+
+  const withTokenUrl = (tokenUrl: string, servers: Array<{ url: string }>) => ({
+    openapi: '3.0.3',
+    servers,
+    components: {
+      securitySchemes: {
+        oauth: { type: 'oauth2', flows: { clientCredentials: { tokenUrl, scopes: {} } } },
+      },
+    },
+  });
+
+  it('keeps an absolute token URL as declared', async () => {
+    await writeSnapshot(
+      withTokenUrl('https://id.example.com/token', [{ url: 'https://api.example.com' }])
+    );
+
+    await expect(readServedTokenUrls(directory)).resolves.toEqual(['https://id.example.com/token']);
+  });
+
+  // Okta and Datadog declare a relative token URL against a templated server. Comparing the
+  // raw `/oauth2/v1/token` with a connector's absolute default would never match.
+  it('resolves a relative token URL against the servers, templates included', async () => {
+    await writeSnapshot(withTokenUrl('/oauth2/v1/token', [{ url: 'https://{yourOktaDomain}' }]));
+
+    await expect(readServedTokenUrls(directory)).resolves.toEqual([
+      'https://{yourOktaDomain}/oauth2/v1/token',
+    ]);
+  });
+
+  it('reports no token URLs when the connector has no snapshots', async () => {
+    await expect(readServedTokenUrls(directory)).resolves.toEqual([]);
   });
 });

@@ -43,8 +43,13 @@ const hasFiles = (directory: string): Promise<boolean> =>
     () => false
   );
 
-/** The token URLs the connector's committed vendor specs declare as an `oauth2` flow. */
-const readServedTokenUrls = async (directory: string): Promise<string[]> => {
+/**
+ * The token URLs the connector's committed vendor specs declare as an `oauth2` flow, resolved
+ * against each spec's servers. Exported so a test can assert the resolution, which the
+ * collector's own output cannot show: no connector today both fixes its token URL and declares
+ * it relative.
+ */
+export const readServedTokenUrls = async (directory: string): Promise<string[]> => {
   const snapshots = path.join(directory, 'snapshots');
   const files = await fs.readdir(snapshots).catch(() => [] as string[]);
   const urls = new Set<string>();

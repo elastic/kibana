@@ -52,6 +52,21 @@ describe('resolveTokenUrlAgainstServers', () => {
   it('falls back to the server OpenAPI assumes when a spec declares none', () => {
     expect(resolveTokenUrlAgainstServers('/oauth2/v1/token', [])).toEqual(['/oauth2/v1/token']);
   });
+
+  it('leaves a scheme-relative token URL alone when the server has no scheme to take', () => {
+    expect(resolveTokenUrlAgainstServers('//auth.example.com/token', [])).toEqual([
+      '//auth.example.com/token',
+    ]);
+    expect(resolveTokenUrlAgainstServers('//auth.example.com/token', ['/v1'])).toEqual([
+      '//auth.example.com/token',
+    ]);
+  });
+
+  it('takes the scheme from the server for a scheme-relative token URL', () => {
+    expect(
+      resolveTokenUrlAgainstServers('//auth.example.com/token', ['https://api.example.com/v1'])
+    ).toEqual(['https://auth.example.com/token']);
+  });
 });
 
 const spec = {
