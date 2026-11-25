@@ -43,8 +43,8 @@ const frustrationAggs = {
 /**
  * What users load and do in one application: top pages and breakdowns (navigation timings), top
  * clicks and frustration signals, over the selected environment and the Overview's filters. The
- * page filter narrows the page loads and the frustration, which carry a page URL, but not the
- * clicks, which carry none yet. The breakdowns read the fields the filters and the Sessions read,
+ * filter on the URL text narrows the page loads and the frustration, which carry a URL, but not
+ * the clicks. The breakdowns read the fields the filters and the Sessions read,
  * so a row is a value the filter takes. The environments for the picker ignore the selected one and
  * the filters, not the KQL query.
  */

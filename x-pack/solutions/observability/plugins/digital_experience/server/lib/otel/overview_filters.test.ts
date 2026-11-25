@@ -148,8 +148,14 @@ describe('documentFilters', () => {
     ]);
   });
 
-  it('leaves out the page, which narrows the page loads only', () => {
-    expect(documentFilters({ pageUrl: include('https://shop.example.com/') })).toEqual([]);
+  it('narrows every log to the selected page, by its route or else its URL', () => {
+    expect(documentFilters({ pageUrl: include('/products/{slug}') })).toEqual([
+      { terms: { [PAGE_FIELD]: ['/products/{slug}'] } },
+    ]);
+  });
+
+  it('leaves out the URL text, which narrows the page loads only', () => {
+    expect(documentFilters({ pageContains: include('cart') })).toEqual([]);
   });
 
   it('leaves out the excluded filter, so its other values stay selectable', () => {
@@ -213,20 +219,19 @@ describe('the page contains filter', () => {
     ]);
   });
 
-  it('narrows the page loads only, like the page, and each page filter leaves the other alone', () => {
+  it('narrows the page loads only, while the page narrows every log', () => {
     const filters = {
       pageUrl: include('https://shop.example.com/'),
       pageContains: include('cart'),
     };
 
-    expect(documentFilters(filters)).toEqual([]);
-    expect(pageLoadFilters(filters)).toHaveLength(2);
-    expect(pageLoadFilters(filters, 'pageUrl')).toEqual([
-      { bool: { should: [contains('cart')], minimum_should_match: 1 } },
-    ]);
-    expect(pageLoadFilters(filters, 'pageContains')).toEqual([
+    expect(documentFilters(filters)).toEqual([
       { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
     ]);
+    expect(pageLoadFilters(filters)).toEqual([
+      { bool: { should: [contains('cart')], minimum_should_match: 1 } },
+    ]);
+    expect(pageLoadFilters(filters, 'pageContains')).toEqual([]);
   });
 
   it('has no values to pick from, but the other filters have', () => {
@@ -240,22 +245,20 @@ describe('the page contains filter', () => {
 });
 
 describe('pageLoadFilters', () => {
-  it('narrows the page loads to the selected pages, or leaves out the excluded ones', () => {
-    expect(pageLoadFilters({ pageUrl: include('https://shop.example.com/') })).toEqual([
-      { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
-    ]);
-    expect(pageLoadFilters({ pageUrl: exclude('https://shop.example.com/') })).toEqual([
+  it('has the URL text only, not the page or the other filters', () => {
+    expect(pageLoadFilters({ pageUrl: include('https://shop.example.com/') })).toEqual([]);
+    expect(pageLoadFilters({ browser: include('Chrome') })).toEqual([]);
+  });
+
+  it('leaves out the page when it is excluded, so its other values stay selectable', () => {
+    expect(documentFilters({ pageUrl: exclude('https://shop.example.com/') })).toEqual([
       {
         bool: {
           must_not: [{ terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } }],
         },
       },
     ]);
-    expect(pageLoadFilters({ browser: include('Chrome') })).toEqual([]);
-  });
-
-  it('leaves out the page when it is the excluded filter', () => {
-    expect(pageLoadFilters({ pageUrl: include('https://shop.example.com/') }, 'pageUrl')).toEqual(
+    expect(documentFilters({ pageUrl: include('https://shop.example.com/') }, 'pageUrl')).toEqual(
       []
     );
   });

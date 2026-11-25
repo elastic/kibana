@@ -147,7 +147,7 @@ describe('usageSearch with filters', () => {
     ]);
   });
 
-  it('narrows the pages, breakdowns and clicks to the selected browser, OS, device and country', () => {
+  it('narrows the pages, breakdowns and clicks to the selected browser, country and page', () => {
     const { filter } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS }));
 
     expect(filter).toEqual({
@@ -157,27 +157,23 @@ describe('usageSearch with filters', () => {
           { terms: { digital_experience_filter_browser: ['Chrome'] } },
           { bool: { must_not: [{ terms: { digital_experience_filter_browser: ['Safari'] } }] } },
           { terms: { digital_experience_filter_country: ['DE'] } },
+          { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
         ],
       },
     });
   });
 
-  it('narrows the page loads and frustration to the selected page, not the clicks', () => {
+  it('narrows the page loads and frustration to the URL text, not the clicks', () => {
+    const filters = { pageContains: [{ value: 'cart', exclude: false }] };
     const { pageLoads, clicks, frustration } = inEnvironment(
-      usageSearch({ ...PARAMS, filters: FILTERS })
+      usageSearch({ ...PARAMS, filters })
     ).aggs;
 
-    expect(pageLoads.filter.bool.filter).toEqual([
-      { term: { event_name: 'browser.navigation_timing' } },
-      { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
-    ]);
+    expect(JSON.stringify(pageLoads.filter)).toContain('*cart*');
+    expect(JSON.stringify(frustration.filter)).toContain('*cart*');
     expect(clicks.filter).toEqual({
       bool: { filter: [{ term: { event_name: 'browser.user_action.click' } }] },
     });
-    expect(frustration.filter.bool.filter).toEqual([
-      { terms: { event_name: [...FRUSTRATION_EVENTS] } },
-      { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
-    ]);
   });
 
   it('is unchanged without a selection', () => {

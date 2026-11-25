@@ -8,6 +8,7 @@
 import {
   esqlDocumentConditions,
   esqlFilterEvals,
+  esqlLogConditions,
   esqlPageLoadConditions,
 } from './overview_filters_esql';
 import { FILTER_SOURCE_FIELDS } from './overview_filters';
@@ -50,16 +51,18 @@ describe('overview filters as ES|QL', () => {
     ]);
   });
 
-  it('leaves the page filters to the page loads', () => {
+  it('leaves the page to the logs, and keeps it off the documents of every kind', () => {
     const filters = {
       browser: [{ value: 'Chrome', exclude: false }],
       pageUrl: [{ value: 'https://shop.example/cart', exclude: false }],
     };
 
     expect(esqlDocumentConditions(filters)).toEqual(['filter_browser IN ("Chrome")']);
-    expect(esqlPageLoadConditions(filters)).toEqual([
+    // The page narrows the logs; the HTTP request spans carry the URL they request.
+    expect(esqlLogConditions(filters)).toEqual([
       'filter_page_url IN ("https://shop.example/cart")',
     ]);
+    expect(esqlPageLoadConditions(filters)).toEqual([]);
   });
 
   it('reads the route of the page first, and its URL when the app reports no route', () => {

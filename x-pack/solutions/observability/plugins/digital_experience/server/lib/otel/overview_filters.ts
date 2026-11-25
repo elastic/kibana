@@ -14,7 +14,7 @@ import {
   OVERVIEW_FILTER_MAX_LENGTHS,
   OVERVIEW_FILTER_NAMES,
   OVERVIEW_FILTER_SIZE,
-  PAGE_FILTER_NAMES,
+  URL_FILTER_NAMES,
   type ListedFilterName,
   type OverviewFilterName,
   type OverviewFilterOptions,
@@ -145,24 +145,24 @@ const filterClause = (
 };
 
 /**
- * The selected filters that narrow every document of the Overview, except `exclude`'s own. The
- * page filters are left out: the web vitals, errors and clicks carry no page URL yet, so they
- * narrow the page loads only (`pageLoadFilters`).
+ * The selected filters that narrow every log of the Overview, except `exclude`'s own. The filters
+ * on the URL text are left out: the web vitals and JS errors carry no URL, so they narrow the page
+ * loads only (`pageLoadFilters`).
  */
 export const documentFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
   OVERVIEW_FILTER_NAMES.filter(
-    (name) => !PAGE_FILTER_NAMES.some((page) => page === name) && name !== exclude
+    (name) => !URL_FILTER_NAMES.some((url) => url === name) && name !== exclude
   ).flatMap((name) => filterClause(name, filters));
 
-/** The selected page filters, which narrow the page loads (except `exclude`'s own). */
+/** The selected filters on the URL text, which narrow the page loads (except `exclude`'s own). */
 export const pageLoadFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
-  PAGE_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
+  URL_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
     filterClause(name, filters)
   );
 
