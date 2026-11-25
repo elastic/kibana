@@ -27,7 +27,7 @@ export const ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW = {
   id: ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 13,
+  version: 14,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'floor_alert_triage_batch.yaml');
   },

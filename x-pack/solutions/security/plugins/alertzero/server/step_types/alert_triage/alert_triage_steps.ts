@@ -87,7 +87,14 @@ export const getTriageHeadroomStepDefinition = ({ getTaskManager }: AlertTriageS
     },
   });
 
-export const getTriagePlanSweepStepDefinition = () =>
+export interface TriagePlanSweepStepDependencies {
+  /** The flag `alertzero.triageSeverityFirst`. Without it, every rule gets the same first share as before. */
+  getSeverityFirst?: () => Promise<boolean>;
+}
+
+export const getTriagePlanSweepStepDefinition = ({
+  getSeverityFirst,
+}: TriagePlanSweepStepDependencies = {}) =>
   createServerStepDefinition({
     ...triagePlanSweepStepCommonDefinition,
     handler: async ({ input, contextManager, logger }) => {
@@ -102,6 +109,7 @@ export const getTriagePlanSweepStepDefinition = () =>
             : { status: 'unknown' };
 
         const now = Date.now();
+        const severityFirst = getSeverityFirst ? await getSeverityFirst() : false;
         const filters = {
           minSeverity: input.min_severity,
           excludeBuildingBlocks: input.exclude_building_blocks,
@@ -134,6 +142,7 @@ export const getTriagePlanSweepStepDefinition = () =>
             intervalMinutes: input.interval_minutes,
             lookbackHours: input.lookback_hours,
             analysisTagPrefix: input.analysis_tag_prefix,
+            severityFirst,
           }
         );
         const { numbers } = plan;

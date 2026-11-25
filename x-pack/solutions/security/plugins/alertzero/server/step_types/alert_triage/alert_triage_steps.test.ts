@@ -199,6 +199,58 @@ describe('triage plan sweep step', () => {
       })
     );
   });
+  describe('with the flag alertzero.triageSeverityFirst', () => {
+    const alertOf = (id: string, rule: string, severity: string, riskScore: number) => ({
+      _id: id,
+      _source: {
+        'kibana.alert.rule.uuid': rule,
+        'kibana.alert.rule.name': `${rule} name`,
+        'kibana.alert.risk_score': riskScore,
+        'kibana.alert.severity': severity,
+        'kibana.alert.workflow_status': 'open',
+        'kibana.alert.workflow_tags': [],
+        '@timestamp': new Date().toISOString(),
+      },
+    });
+    const hits = [
+      ...Array.from({ length: 60 }, (_unused, i) => alertOf(`h-${i}`, 'rule-h', 'high', 73)),
+      ...Array.from({ length: 60 }, (_unused, i) => alertOf(`m-${i}`, 'rule-m', 'medium', 47)),
+    ];
+    const api = jest.fn(async ({ path, body }: { path: string; body?: { aggs?: unknown } }) => {
+      if (path.includes('/executions')) return { status: 200, headers: {}, body: { results: [] } };
+      if (path.endsWith('/signals/search') && body?.aggs !== undefined) {
+        return {
+          status: 200,
+          headers: {},
+          body: { aggregations: { rules: { buckets: [{ top: { hits: { hits } } }] } } },
+        };
+      }
+      if (path.endsWith('/signals/search')) {
+        return { status: 200, headers: {}, body: { hits: { hits: [], total: { value: 0 } } } };
+      }
+      return { status: 200, headers: {}, body: {} };
+    });
+    // The sweep budget is 100 units: 600 an hour, every 10 minutes.
+    const batchSizes = async (severityFirst: boolean) => {
+      const { output } = await getTriagePlanSweepStepDefinition({
+        getSeverityFirst: async () => severityFirst,
+      }).handler(
+        createContext({ ...baseInput, headroom: { status: 'ok', in_flight: 0, slots: 40 } }, api)
+      );
+      const { batches } = output as { batches: Array<{ rule_id: string; alert_ids: string[] }> };
+      return Object.fromEntries(
+        batches.map(({ rule_id: rule, alert_ids: ids }) => [rule, ids.length])
+      );
+    };
+
+    it('reads the severity of the alerts and gives the busy high rule a full first share when on', async () => {
+      expect(await batchSizes(true)).toEqual({ 'rule-h': 60, 'rule-m': 30 });
+    });
+
+    it('gives both rules the same first share and splits the rest evenly when off', async () => {
+      expect(await batchSizes(false)).toEqual({ 'rule-h': 45, 'rule-m': 45 });
+    });
+  });
 });
 
 describe('triage load alerts step', () => {

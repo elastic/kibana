@@ -634,6 +634,38 @@ describe('fetchDecisionCandidates', () => {
     });
   });
 
+  it('leaves out alerts that carry a tag with one of the given prefixes, and adds nothing when none is given', async () => {
+    const { callKibanaApi: withPrefix, run: runWith } = run([]);
+    const callWith = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+    const callPlain = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+    const prefix = { prefix: { 'kibana.alert.workflow_tags': 'az:would_reuse:' } };
+
+    await fetchDecisionCandidates(
+      { callKibanaApi: callWith },
+      'alert_analysis:',
+      Date.parse('2026-10-12'),
+      NO_FILTERS,
+      {
+        excludeTagPrefixes: ['az:would_reuse:'],
+      }
+    );
+    await fetchDecisionCandidates(
+      { callKibanaApi: callPlain },
+      'alert_analysis:',
+      Date.parse('2026-10-12'),
+      NO_FILTERS
+    );
+    await runWith();
+
+    expect(callWith.mock.calls[0][0].body.query.bool.must_not).toContainEqual(prefix);
+    expect(callPlain.mock.calls[0][0].body.query.bool.must_not).not.toContainEqual(prefix);
+    expect(withPrefix.mock.calls[0][0].body.query.bool.must_not).not.toContainEqual(prefix);
+  });
+
   it('reads the next page from the cursor without `search_after`, which the alerts route drops', async () => {
     const after = { timestamp: 5000, seenIds: ['a1', 'a2'] };
     const next = run([], {}, after);

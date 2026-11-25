@@ -56,6 +56,7 @@ const ALERT_FIELDS = {
   ruleId: 'kibana.alert.rule.uuid',
   ruleName: 'kibana.alert.rule.name',
   riskScore: 'kibana.alert.risk_score',
+  severity: 'kibana.alert.severity',
   status: 'kibana.alert.workflow_status',
   reason: 'kibana.alert.workflow_reason',
   tags: 'kibana.alert.workflow_tags',
@@ -87,12 +88,14 @@ const toTriageAlert = ({ _id, _source = {} }: AlertHit): TriageAlert => {
   const tags = readField(_source, ALERT_FIELDS.tags);
   const timestamp = readField(_source, ALERT_FIELDS.timestamp);
   const detection = getDetection(_source);
+  const severity = readField(_source, ALERT_FIELDS.severity);
   return {
     id: _id,
     ruleId: String(readField(_source, ALERT_FIELDS.ruleId) ?? ''),
     ruleName: String(readField(_source, ALERT_FIELDS.ruleName) ?? ''),
     ...(detection ? { detection } : {}),
     riskScore: Number(readField(_source, ALERT_FIELDS.riskScore) ?? 0),
+    ...(typeof severity === 'string' ? { severity } : {}),
     timestamp: typeof timestamp === 'number' ? timestamp : Date.parse(String(timestamp)) || 0,
     status: String(readField(_source, ALERT_FIELDS.status) ?? ''),
     tags: Array.isArray(tags) ? tags.map(String) : [],
@@ -841,7 +844,8 @@ export interface DecisionCandidatesPage {
  * One page of the open (not acknowledged), untriaged alerts of the look-back that a decision may match, oldest first,
  * so the alerts closest to ageing out are matched first. They are the alerts the planner would
  * consider, not only the ones it picks, so a match never has to wait for a batch. Alerts already
- * tagged by a decision match are left out. Only the fields a key reads are fetched. A page is at
+ * tagged by a decision match are left out, and so are alerts that carry a tag with one of the `excludeTagPrefixes` (the verdict cache
+ * uses this to leave out the alerts it tagged already). Only the fields a key reads are fetched. A page is at
  * most `ALERT_FETCH_LIMIT` alerts; pass `after` of the last page to read the next. A timestamp with
  * more than one page of alerts is read through its `seenIds`, so no alert is read twice or missed.
  */
@@ -850,7 +854,16 @@ export const fetchDecisionCandidates = async (
   analysisTagPrefix: string,
   windowStart: number,
   filters: TriageFilters,
-  { after }: { after?: DecisionCursor } = {}
+  {
+    after,
+    excludeTagPrefixes = [],
+    extraSourceFields = [],
+  }: {
+    after?: DecisionCursor;
+    excludeTagPrefixes?: readonly string[];
+    /** Fields to fetch on top of the pattern key fields, for a caller that reads more of the alert (the novelty guard). */
+    extraSourceFields?: readonly string[];
+  } = {}
 ): Promise<DecisionCandidatesPage> => {
   const { body } = await callKibanaApi<
     SearchCompleteness & { hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> } }
@@ -861,6 +874,7 @@ export const fetchDecisionCandidates = async (
       size: ALERT_FETCH_LIMIT,
       _source: [
         ...PATTERN_KEY_FIELDS,
+        ...extraSourceFields,
         SEVERITY_FIELD,
         ...Object.values(DECISION_SIGNER_TRUST_FIELDS),
       ],
@@ -895,6 +909,7 @@ export const fetchDecisionCandidates = async (
             // search every sweep.
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
+            ...excludeTagPrefixes.map((prefix) => ({ prefix: { [ALERT_FIELDS.tags]: prefix } })),
             ...excludedByFilters(filters),
           ],
         },

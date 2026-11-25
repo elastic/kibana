@@ -8,9 +8,12 @@
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { ReportWorkerOutcomeStepId } from '../../common/step_types';
 import {
+  TRIAGE_JEV_FIRST_LINE_STEP_ID,
   TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
+  TRIAGE_MATCH_VERDICT_CACHE_STEP_ID,
   TRIAGE_REVOKE_FP_DECISION_STEP_ID,
   TRIAGE_STORE_FP_DECISIONS_STEP_ID,
+  TRIAGE_WRITE_VERDICT_CACHE_STEP_ID,
 } from '../../common/step_types/alert_triage';
 import { registerAlertZeroPublicStepDefinitions } from '.';
 
@@ -34,6 +37,9 @@ describe('AlertZero public step definitions', () => {
       'function',
       'function',
       'function',
+      'function',
+      'function',
+      'function',
     ]);
   });
 
@@ -46,13 +52,16 @@ describe('AlertZero public step definitions', () => {
       TRIAGE_STORE_FP_DECISIONS_STEP_ID,
       TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
       TRIAGE_REVOKE_FP_DECISION_STEP_ID,
+      TRIAGE_MATCH_VERDICT_CACHE_STEP_ID,
+      TRIAGE_JEV_FIRST_LINE_STEP_ID,
+      TRIAGE_WRITE_VERDICT_CACHE_STEP_ID,
     ]);
   });
 
   it('gives every step an icon', async () => {
     const resolved = await Promise.all(register().map((load) => load()));
 
-    expect(resolved).toHaveLength(4);
+    expect(resolved).toHaveLength(7);
     resolved.forEach((definition) => expect(definition).toHaveProperty('icon'));
   });
 });

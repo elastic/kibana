@@ -1,0 +1,75 @@
+{
+  "rule": "Unusual Process Network Activity",
+  "approved_pattern": "Benign vendor updater: C:\\Program Files\\Acme\\updater.exe, signed by Acme Software Inc., started by C:\\Windows\\System32\\services.exe, connecting to updates.acme.example over HTTPS.",
+  "alerts": [
+    {
+      "id": "fp-1",
+      "label": "fp",
+      "note": "same pattern, other host and user",
+      "doc": { "host.name": "ws-014", "user.name": "svc-update", "process.executable": "C:\\Program Files\\Acme\\updater.exe", "process.code_signature.subject_name": "Acme Software Inc.", "process.parent.executable": "C:\\Windows\\System32\\services.exe", "destination.domain": "updates.acme.example", "destination.port": 443, "kibana.alert.severity": "low" }
+    },
+    {
+      "id": "fp-2",
+      "label": "fp",
+      "exact_key_miss": true,
+      "note": "new version folder, exact key would miss",
+      "doc": { "host.name": "ws-021", "user.name": "svc-update", "process.executable": "C:\\Program Files\\Acme\\2.4.1\\updater.exe", "process.code_signature.subject_name": "Acme Software Inc.", "process.parent.executable": "C:\\Windows\\System32\\services.exe", "destination.domain": "updates.acme.example", "destination.port": 443, "kibana.alert.severity": "low" }
+    },
+    {
+      "id": "fp-3",
+      "label": "fp",
+      "exact_key_miss": true,
+      "note": "x86 install folder, exact key would miss",
+      "doc": { "host.name": "ws-033", "user.name": "SYSTEM", "process.executable": "C:\\Program Files (x86)\\Acme\\updater.exe", "process.code_signature.subject_name": "Acme Software Inc.", "process.parent.executable": "C:\\Windows\\System32\\services.exe", "destination.domain": "updates.acme.example", "destination.port": 443, "kibana.alert.severity": "low" }
+    },
+    {
+      "id": "fp-4",
+      "label": "fp",
+      "exact_key_miss": true,
+      "note": "vendor launcher as parent, exact key would miss",
+      "doc": { "host.name": "ws-040", "user.name": "SYSTEM", "process.executable": "C:\\Program Files\\Acme\\updater.exe", "process.code_signature.subject_name": "Acme Software Inc.", "process.parent.executable": "C:\\Program Files\\Acme\\launcher.exe", "destination.domain": "updates.acme.example", "destination.port": 443, "kibana.alert.severity": "medium" }
+    },
+    {
+      "id": "fp-5",
+      "label": "fp",
+      "note": "CDN host of the same vendor",
+      "doc": { "host.name": "ws-052", "user.name": "svc-update", "process.executable": "C:\\Program Files\\Acme\\updater.exe", "process.code_signature.subject_name": "Acme Software Inc.", "process.parent.executable": "C:\\Windows\\System32\\services.exe", "destination.domain": "cdn.updates.acme.example", "destination.port": 443, "kibana.alert.severity": "low" }
+    },
+    {
+      "id": "tp-1",
+      "label": "tp",
+      "note": "same name, unsigned, in Temp",
+      "doc": { "host.name": "ws-014", "user.name": "jsmith", "process.executable": "C:\\Users\\jsmith\\AppData\\Local\\Temp\\updater.exe", "process.code_signature.exists": false, "process.parent.executable": "C:\\Windows\\System32\\cmd.exe", "destination.ip": "185.220.101.7", "destination.port": 443, "kibana.alert.severity": "low" }
+    },
+    {
+      "id": "tp-2",
+      "label": "tp",
+      "note": "same path, other signer",
+      "doc": { "host.name": "ws-021", "user.name": "svc-update", "process.executable": "C:\\Program Files\\Acme\\updater.exe", "process.code_signature.subject_name": "Totally Legit Ltd", "process.parent.executable": "C:\\Windows\\System32\\services.exe", "destination.domain": "updates.acme.example", "destination.port": 443, "kibana.alert.severity": "low" }
+    },
+    {
+      "id": "tp-3",
+      "label": "tp",
+      "note": "approved binary, unrelated destination",
+      "doc": { "host.name": "ws-033", "user.name": "SYSTEM", "process.executable": "C:\\Program Files\\Acme\\updater.exe", "process.code_signature.subject_name": "Acme Software Inc.", "process.parent.executable": "C:\\Windows\\System32\\services.exe", "destination.ip": "45.9.148.22", "destination.port": 8443, "kibana.alert.severity": "medium" }
+    },
+    {
+      "id": "tp-4",
+      "label": "tp",
+      "note": "approved binary spawns encoded PowerShell",
+      "doc": { "host.name": "ws-040", "user.name": "SYSTEM", "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "process.command_line": "powershell.exe -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQA", "process.parent.executable": "C:\\Program Files\\Acme\\updater.exe", "destination.ip": "45.9.148.22", "destination.port": 443, "kibana.alert.severity": "medium" }
+    },
+    {
+      "id": "tp-5",
+      "label": "tp",
+      "note": "masquerade in a public folder",
+      "doc": { "host.name": "ws-052", "user.name": "guest", "process.executable": "C:\\Users\\Public\\Acme\\updater.exe", "process.code_signature.exists": false, "process.parent.executable": "C:\\Windows\\System32\\wscript.exe", "destination.domain": "updates-acme.example.top", "destination.port": 443, "kibana.alert.severity": "low" }
+    },
+    {
+      "id": "tp-6",
+      "label": "tp",
+      "note": "unrelated process, unrelated rule hit",
+      "doc": { "host.name": "ws-060", "user.name": "jdoe", "process.executable": "C:\\Windows\\Temp\\svchost.exe", "process.code_signature.exists": false, "process.parent.executable": "C:\\Windows\\System32\\winword.exe", "destination.ip": "91.215.85.14", "destination.port": 80, "kibana.alert.severity": "low" }
+    }
+  ]
+}

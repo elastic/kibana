@@ -11,7 +11,7 @@ import { buildPatternKeys, describePatternKey, getField } from './pattern_key';
 
 /**
  * Decisions: what an approved (or dismissed) closure proposal teaches Alert Triage about later
- * alerts. This module is pure: alert documents in, Knowledge Item documents out. The step does
+ * alerts. This module is pure: alert documents in, Knowledge Indicator (KI) documents out. The step does
  * the reading and the writing.
  *
  * A decision is keyed by the strict pattern key and never by the wide one, so it matches later
@@ -149,7 +149,7 @@ export interface DecisionProvenance {
   now: Date;
 }
 
-/** The Knowledge Item document for one key. `content` is for humans: matching uses `key_hash` only. */
+/** The Knowledge Indicator document for one key. `content` is for humans: matching uses `key_hash` only. */
 export const buildDecisionDocument = ({
   kind,
   group,

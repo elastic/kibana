@@ -15,7 +15,7 @@
  *       B  scan.exe          3 medium alerts         a dismissed decision       -> would_skip
  *       C  unknown.exe       2 low alerts            no decision                -> never matched
  *   - the two decisions (`fp-decision-<hash>`, `fp-dismissal-<hash>`) in the
- *     `.ai-index-idx-security-triage-decisions` Knowledge Item index, built with the same code the
+ *     `.ai-index-idx-security-triage-decisions` Knowledge Indicator index, built with the same code the
  *     store step uses.
  *
  * The first write creates that index from Elasticsearch's managed AI index template, which maps

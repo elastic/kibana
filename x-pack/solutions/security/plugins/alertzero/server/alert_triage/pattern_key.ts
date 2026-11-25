@@ -35,6 +35,9 @@ export interface PatternKeys {
 type PathKind = 'library' | 'registry' | 'file' | 'process';
 export type Kind = PathKind | 'cloud';
 
+export type PatternKeyKind = Kind;
+export type PatternKeyPathKind = PathKind;
+
 /** Most specific first, process last: file, library and registry events also carry `process.executable`. */
 const KINDS: readonly PathKind[] = ['library', 'registry', 'file', 'process'];
 
@@ -43,6 +46,11 @@ interface FieldSet {
   identifying: string;
   /** Added to the key when the signer is missing, because an unsigned binary has no signer to rely on. */
   hash?: string;
+  /**
+   * Added to the key, with the hash, only when it is `false`: the signature is invalid, so the signer name is a claim and not a
+   * fact. A trusted or missing value leaves the key as it was, so stored keys of signed binaries stay valid.
+   */
+  trusted?: string;
 }
 
 const FIELD_SETS: Record<PathKind, FieldSet> = {
@@ -50,6 +58,7 @@ const FIELD_SETS: Record<PathKind, FieldSet> = {
     fields: ['dll.path', 'dll.code_signature.subject_name'],
     identifying: 'dll.path',
     hash: 'dll.hash.sha256',
+    trusted: 'dll.code_signature.trusted',
   },
   registry: { fields: ['registry.path', 'process.executable'], identifying: 'registry.path' },
   file: {
@@ -65,13 +74,14 @@ const FIELD_SETS: Record<PathKind, FieldSet> = {
     ],
     identifying: 'process.executable',
     hash: 'process.hash.sha256',
+    trusted: 'process.code_signature.trusted',
   },
 };
 
 /**
  * The strict condition of an alert with no path: `event.action` plus the first scope it has, the
  * cloud account, else the user. The action alone would be the whole rule (one rule collapsed 67,000
- * alerts into one key); the scope splits it by account or person. Chosen on InfoSec's top 100 rules
+ * alerts into one key); the scope splits it by account or person. Chosen on the top 100 rules of a large deployment
  * without path fields (800,000 alerts in 7 days): action + account gave 6,805 keys of which 97% of
  * alerts repeat, and action + user 82,745 keys of which 93% repeat. Adding the source IP gave 292,000
  * keys, mostly seen once. An alert with no action, or with neither scope, has no strict key.
@@ -94,7 +104,11 @@ export const PATTERN_KEY_FIELDS: readonly string[] = [
   ...new Set([
     CLOUD_ACTION,
     ...CLOUD_SCOPES,
-    ...Object.values(FIELD_SETS).flatMap(({ fields, hash }) => (hash ? [...fields, hash] : fields)),
+    ...Object.values(FIELD_SETS).flatMap(({ fields, hash, trusted }) => [
+      ...fields,
+      ...(hash ? [hash] : []),
+      ...(trusted ? [trusted] : []),
+    ]),
     RULE_UUID,
     RULE_REVISION,
     NAME_OVERRIDE,
@@ -149,8 +163,8 @@ const normalizeRegistry = (value: string): string =>
     .replace(GUID, '<guid>')
     .replace(SID, '<sid>');
 
-/** One rule per kind of value, chosen by field, never by rule. */
-const normalize = (field: string, value: string, osType: unknown): string => {
+/** One rule per kind of value, chosen by field, never by rule. The novelty guard uses it for the fields outside the key. */
+export const normalizeKeyValue = (field: string, value: string, osType: unknown): string => {
   if (field.endsWith('.sha256')) return value.toLowerCase();
   if (field === 'registry.path') return normalizeRegistry(value);
   if (!field.endsWith('path') && !field.endsWith('executable')) return value;
@@ -180,6 +194,8 @@ const byField = ([a]: [string, string], [b]: [string, string]): number =>
 interface Condition {
   kind: Kind;
   values: Array<[string, string]>;
+  /** Strict key only: what an invalid signature adds. The wide key leaves it out, so grouping does not change. */
+  trust?: Array<[string, string]>;
 }
 
 const buildCloudCondition = (doc: AlertDocument): Condition | undefined => {
@@ -199,19 +215,24 @@ const buildCondition = (doc: AlertDocument): Condition | undefined => {
   );
   if (kind === undefined) return buildCloudCondition(doc);
 
-  const { fields, hash } = FIELD_SETS[kind];
+  const { fields, hash, trusted } = FIELD_SETS[kind];
   const wanted = [...fields];
   const signer = fields.find((field) => field.endsWith(SIGNER_SUFFIX));
   if (hash && (signer === undefined || !isPresent(getField(doc, signer)))) wanted.push(hash);
 
-  const values = wanted
-    .filter((field) => isPresent(getField(doc, field)))
-    .map((field): [string, string] => [
-      field,
-      normalize(field, String(getField(doc, field)), osType),
-    ])
-    .sort(byField);
-  return { kind, values };
+  const read = (list: readonly string[]): Array<[string, string]> =>
+    list
+      .filter((field) => isPresent(getField(doc, field)))
+      .map((field): [string, string] => [
+        field,
+        normalizeKeyValue(field, String(getField(doc, field)), osType),
+      ])
+      .sort(byField);
+  const values = read(wanted);
+  const untrusted = trusted !== undefined && String(getField(doc, trusted)) === 'false';
+  if (!untrusted) return { kind, values };
+  const extra = [trusted, ...(hash && !wanted.includes(hash) ? [hash] : [])];
+  return { kind, values, trust: read(extra) };
 };
 
 const serialize = (doc: AlertDocument, condition: Condition | undefined): string =>
@@ -221,6 +242,7 @@ const serialize = (doc: AlertDocument, condition: Condition | undefined): string
     getDetection(doc),
     condition?.kind ?? '',
     condition?.values ?? [],
+    ...(condition?.trust ? [condition.trust] : []),
   ]);
 
 /** Only process and file conditions are widened: the folder of the executable and file path. */
@@ -246,19 +268,20 @@ export interface PatternKeyDescription {
 
 /** Reads back what `serialize` wrote, so a stored decision can say what it matches. */
 export const describePatternKey = (key: string): PatternKeyDescription => {
-  const [ruleId, revision, detection, kind, values] = JSON.parse(key) as [
+  const [ruleId, revision, detection, kind, values, trust = []] = JSON.parse(key) as [
     string | null,
     string | number | null,
     string,
     string,
-    Array<[string, string]>
+    Array<[string, string]>,
+    Array<[string, string]>?
   ];
   return {
     ruleId: ruleId ?? '',
     ...(revision === null ? {} : { ruleRevision: revision }),
     detection,
     kind,
-    values,
+    values: [...values, ...trust],
   };
 };
 

@@ -24,6 +24,8 @@ export interface PlanBatchesParams {
   budget: number;
   /** Alerts created before this (epoch ms) are outside the look-back and are not planned. */
   lookbackCutoff: number;
+  /** The flag `alertzero.triageSeverityFirst` (see `allocateBudget`). */
+  severityFirst?: boolean;
 }
 
 export interface BatchPlan {
@@ -47,6 +49,7 @@ export const planBatches = ({
   headroomSlots,
   budget,
   lookbackCutoff,
+  severityFirst,
 }: PlanBatchesParams): BatchPlan => {
   if (liveExecutionIds === undefined) {
     return {
@@ -92,7 +95,12 @@ export const planBatches = ({
     return { ...base, skipReason: 'nothing_pending' };
   }
 
-  const { batches, cost } = allocateBudget({ alerts: candidates, budget, maxBatches });
+  const { batches, cost } = allocateBudget({
+    alerts: candidates,
+    budget,
+    maxBatches,
+    severityFirst,
+  });
   // With candidates and a free slot, no batch means the sweep budget cannot fund even the cheapest
   // one, so an idle sweep is not mistaken for an empty queue.
   return {

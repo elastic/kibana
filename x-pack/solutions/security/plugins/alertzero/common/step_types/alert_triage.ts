@@ -14,6 +14,9 @@ export const TRIAGE_HEADROOM_STEP_ID = 'alertzero.triage.headroom' as const;
 export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
 export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const;
 export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys' as const;
+export const TRIAGE_WRITE_VERDICT_CACHE_STEP_ID = 'alertzero.triage.writeVerdictCache' as const;
+export const TRIAGE_MATCH_VERDICT_CACHE_STEP_ID = 'alertzero.triage.matchVerdictCache' as const;
+export const TRIAGE_JEV_FIRST_LINE_STEP_ID = 'alertzero.triage.jevFirstLine' as const;
 export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
 export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
 export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
@@ -206,6 +209,244 @@ export const triageTagPatternKeysStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: tagPatternKeysInputSchema,
   outputSchema: tagPatternKeysOutputSchema,
+};
+
+export const WRITE_VERDICT_CACHE_SKIP_REASONS = [
+  'none',
+  'off',
+  'disabled',
+  'denied',
+  'storage_failure',
+] as const;
+export type WriteVerdictCacheSkipReason = (typeof WRITE_VERDICT_CACHE_SKIP_REASONS)[number];
+
+const writeVerdictCacheInputSchema = lazySchema(() =>
+  z.object({
+    verdicts: z
+      .array(
+        z.object({
+          alert_id: idSchema,
+          classification: z.string().max(64),
+          confidence_score: z.number(),
+        })
+      )
+      .min(1)
+      .max(1000)
+      .describe('The verdicts of one triage batch.'),
+    confidence_floor: z
+      .number()
+      .min(0)
+      .max(1)
+      .describe('The confidence a verdict needs before it is cached.'),
+  })
+);
+
+const writeVerdictCacheOutputSchema = lazySchema(() =>
+  z.object({
+    skip_reason: z.enum(WRITE_VERDICT_CACHE_SKIP_REASONS),
+    keys_seen: z.number().describe('Strict keys among the alerts of the batch.'),
+    alerts_without_strict_key: z.number(),
+    created: z.number().describe('Pending records started from run 1.'),
+    activated: z.number().describe('Pending records that run 2 made active.'),
+    made_unstable: z.number().describe('Records whose runs disagreed.'),
+    left_alone: z.number().describe('Keys that needed no write: blocked, active or not eligible.'),
+    conflicts: z.number().describe('Writes that lost a race. The next batch tries again.'),
+    failed: z.number(),
+    records_updated: z.number().describe('Active records whose hit counters were updated.'),
+    hit_alerts: z
+      .number()
+      .describe('Analyzed alerts whose key has an active record (would-be hits).'),
+    agreements: z.number().describe('Hits whose fresh verdict equals the verdict of the record.'),
+    disagreements: z
+      .number()
+      .describe('Hits whose fresh verdict differs from the verdict of the record.'),
+  })
+);
+
+export const triageWriteVerdictCacheStepCommonDefinition: CommonStepDefinition<
+  typeof writeVerdictCacheInputSchema,
+  typeof writeVerdictCacheOutputSchema
+> = {
+  id: TRIAGE_WRITE_VERDICT_CACHE_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageWriteVerdictCache.label', {
+    defaultMessage: 'Write triage verdict cache records',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageWriteVerdictCache.description',
+    {
+      defaultMessage:
+        'Keeps the verdict of the first alert of each pattern in a batch as a cache record. Two confident runs that agree make a record active. In shadow mode nothing reuses it yet.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: writeVerdictCacheInputSchema,
+  outputSchema: writeVerdictCacheOutputSchema,
+};
+
+export const MATCH_VERDICT_CACHE_STATUSES = ['ok', 'off', 'disabled', 'failed'] as const;
+export type MatchVerdictCacheStatus = (typeof MATCH_VERDICT_CACHE_STATUSES)[number];
+
+const matchVerdictCacheInputSchema = lazySchema(() =>
+  z.object({
+    analysis_tag_prefix: idSchema.describe(
+      'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
+    ),
+    lookback_hours: z.number().int().min(1).max(8760),
+    min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+    exclude_building_blocks: z.boolean(),
+    excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
+  })
+);
+
+const matchVerdictCacheOutputSchema = lazySchema(() =>
+  z.object({
+    status: z.enum(MATCH_VERDICT_CACHE_STATUSES),
+    candidates: z.number().describe('Pending alerts read.'),
+    alerts_with_strict_key: z.number(),
+    reusable_records: z
+      .number()
+      .describe('Active records that at least one pending alert matches.'),
+    would_reuse: z.number().describe('Pending alerts that an active record would cover.'),
+    would_reuse_false_positive: z.number(),
+    would_reuse_true_positive: z.number(),
+    reused: z
+      .number()
+      .describe(
+        'In `on` mode: alerts that took the verdict of a record and skip analysis. They carry `az:cache_reuse:<record id>`.'
+      ),
+    reused_false_positive: z.number(),
+    reused_true_positive: z.number(),
+    audit_sampled: z
+      .number()
+      .describe(
+        'In `on` mode: alerts with a cache hit that are analyzed anyway, to measure wrong reuse.'
+      ),
+    guard_hits: z
+      .number()
+      .describe(
+        'Alerts that the novelty guard fired on. They carry `az:guard_hit:novelty:<field>` tags.'
+      ),
+    guard_not_checked: z
+      .number()
+      .describe(
+        'Alert and field pairs not checked, because the list of the record for that field is full.'
+      ),
+    tag_failures: z.number(),
+    deferred: z.number().describe('Records left for the next sweep because time ran out.'),
+    out_of_time: z.boolean(),
+    confirm_tagged: z
+      .number()
+      .describe(
+        'With `alertzero.triageCacheConfirm` on: waiting alerts tagged `az:cache_confirm:<record id>`, one per pending record that many waiting alerts share. The planner serves them first.'
+      ),
+  })
+);
+
+export const triageMatchVerdictCacheStepCommonDefinition: CommonStepDefinition<
+  typeof matchVerdictCacheInputSchema,
+  typeof matchVerdictCacheOutputSchema
+> = {
+  id: TRIAGE_MATCH_VERDICT_CACHE_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageMatchVerdictCache.label', {
+    defaultMessage: 'Match pending alerts to the triage verdict cache',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageMatchVerdictCache.description',
+    {
+      defaultMessage:
+        'Tags the pending alerts that an active verdict cache record would cover. In shadow mode every alert is still analyzed.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: matchVerdictCacheInputSchema,
+  outputSchema: matchVerdictCacheOutputSchema,
+};
+
+export const JEV_FIRST_LINE_STATUSES = ['ok', 'off', 'disabled', 'failed'] as const;
+export type JevFirstLineStatus = (typeof JEV_FIRST_LINE_STATUSES)[number];
+
+const jevFirstLineInputSchema = lazySchema(() =>
+  z.object({
+    analysis_tag_prefix: idSchema.describe(
+      'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
+    ),
+    lookback_hours: z.number().int().min(1).max(8760),
+    min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+    exclude_building_blocks: z.boolean(),
+    excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
+  })
+);
+
+const jevFirstLineOutputSchema = lazySchema(() =>
+  z.object({
+    status: z.enum(JEV_FIRST_LINE_STATUSES),
+    candidates: z.number().describe('Pending alerts read.'),
+    eligible: z.number().describe('Pending alerts of a kind that Jev scores.'),
+    scored: z.number().describe('Alerts that got a score.'),
+    lane_benign: z.number(),
+    lane_attack: z.number(),
+    lane_middle: z.number(),
+    applied: z
+      .number()
+      .describe(
+        'In `on` mode: alerts of the benign lane that took a false positive verdict and skip analysis.'
+      ),
+    audit_sampled: z
+      .number()
+      .describe(
+        'In `on` mode: alerts of the benign lane that are analyzed anyway (the audit sample). They are counted in `lane_benign` and `scored`, not in `applied`.'
+      ),
+    calls: z.number().describe('Calls to the model, without the retries.'),
+    failed_calls: z
+      .number()
+      .describe('Calls that failed after the retries. Their alerts are analyzed.'),
+    near_bound_middle: z
+      .number()
+      .describe(
+        'Alerts with a benign score above 0.02 from a batch of more than one alert, put in the middle lane. They are analyzed. Counted in `lane_middle`.'
+      ),
+    tag_failures: z.number(),
+    out_of_time: z.boolean(),
+    shadow_eligible: z
+      .number()
+      .describe('Process shadow (a measurement, no verdict): pending process alerts read.'),
+    shadow_scored: z.number().describe('Process shadow: alerts that got a score and a lane tag.'),
+    shadow_lane_benign: z.number(),
+    shadow_lane_attack: z.number(),
+    shadow_lane_middle: z.number(),
+    shadow_guard_hits: z
+      .number()
+      .describe(
+        'Process shadow: scored alerts with a value that the cache record of their key has not seen.'
+      ),
+    shadow_calls: z
+      .number()
+      .describe('Process shadow: calls to the model, not counted in `calls`.'),
+    shadow_failed_calls: z.number(),
+    shadow_errors: z
+      .number()
+      .describe('Process shadow: pages on which the shadow failed (a record read, for example).'),
+  })
+);
+
+export const triageJevFirstLineStepCommonDefinition: CommonStepDefinition<
+  typeof jevFirstLineInputSchema,
+  typeof jevFirstLineOutputSchema
+> = {
+  id: TRIAGE_JEV_FIRST_LINE_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageJevFirstLine.label', {
+    defaultMessage: 'Score pending alerts with the decision model',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageJevFirstLine.description', {
+    defaultMessage:
+      'Scores the pending alerts of some kinds with a decision model and tags the lane. In on mode an alert of the benign lane takes a false positive verdict and skips analysis.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: jevFirstLineInputSchema,
+  outputSchema: jevFirstLineOutputSchema,
 };
 
 const proposalTextInputShape = {
@@ -488,7 +729,7 @@ export const triageStoreFpDecisionsStepCommonDefinition: CommonStepDefinition<
     'xpack.alertzero.workflows.steps.triageStoreFpDecisions.description',
     {
       defaultMessage:
-        'Stores the exact patterns of an approved or dismissed closure proposal as Knowledge Items, so later alerts can be matched without the model.',
+        'Stores the exact patterns of an approved or dismissed closure proposal as Knowledge Indicators, so later alerts can be matched without the model.',
     }
   ),
   category: StepCategory.KibanaSecurity,

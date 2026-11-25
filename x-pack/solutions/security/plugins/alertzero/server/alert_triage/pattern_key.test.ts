@@ -137,6 +137,65 @@ describe('buildPatternKeys', () => {
       expect(strictOf(withHash('aa'))).not.toBe(strictOf(withHash('bb')));
     });
 
+    describe('signature trust', () => {
+      const signed = (trusted?: boolean | string, hash = 'aa') => ({
+        ...RULE,
+        ...WINDOWS,
+        process: {
+          executable: 'C:\\t.exe',
+          hash: { sha256: hash },
+          code_signature: {
+            subject_name: 'Microsoft Corporation',
+            ...(trusted === undefined ? {} : { trusted }),
+          },
+        },
+      });
+
+      it('gives an invalid signature another key than the real one, because the signer name is only a claim', () => {
+        expect(strictOf(signed(false))).not.toBe(strictOf(signed(true)));
+      });
+
+      it('leaves the key of a trusted or unchecked signature as it was, so stored keys stay valid', () => {
+        expect(strictOf(signed(true, 'bb'))).toBe(strictOf(signed(undefined, 'aa')));
+      });
+
+      it('reads the value as a string too, because alerts can carry it that way', () => {
+        expect(strictOf(signed('false'))).toBe(strictOf(signed(false)));
+      });
+
+      it('keys an invalid signature by hash, so one bad binary does not vouch for another', () => {
+        expect(strictOf(signed(false, 'aa'))).not.toBe(strictOf(signed(false, 'bb')));
+        expect(strictOf(signed(false, 'AA'))).toBe(strictOf(signed(false, 'aa')));
+      });
+
+      it('applies to the signature of a library as well', () => {
+        const library = (trusted: boolean) => ({
+          ...RULE,
+          ...WINDOWS,
+          event: { category: ['library'] },
+          dll: {
+            path: 'C:\\a.dll',
+            hash: { sha256: 'aa' },
+            code_signature: { subject_name: 'Acme', trusted },
+          },
+        });
+        expect(strictOf(library(false))).not.toBe(strictOf(library(true)));
+      });
+
+      it('shows the trust fields when a stored key is described', () => {
+        const key = strictOf(signed(false));
+        if (key === undefined) throw new Error('no strict key');
+        const { values } = describePatternKey(key);
+        expect(values.map(([field]) => field)).toEqual(
+          expect.arrayContaining(['process.code_signature.trusted', 'process.hash.sha256'])
+        );
+      });
+
+      it('does not change the wide key, so grouping and proposals stay as they were', () => {
+        expect(wideOf(signed(false))).toBe(wideOf(signed(true)));
+      });
+    });
+
     it('keeps the parent executable in both keys', () => {
       const withParent = (parent: string) =>
         processAlert('C:\\t.exe', {

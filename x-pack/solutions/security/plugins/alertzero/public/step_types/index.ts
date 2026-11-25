@@ -23,4 +23,13 @@ export const registerAlertZeroPublicStepDefinitions = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./triage_decision_steps').then((m) => m.triageRevokeFpDecisionPublicStepDefinition)
   );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./triage_cache_steps').then((m) => m.triageMatchVerdictCachePublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./triage_cache_steps').then((m) => m.triageJevFirstLinePublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./triage_cache_steps').then((m) => m.triageWriteVerdictCachePublicStepDefinition)
+  );
 };

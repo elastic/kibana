@@ -35,6 +35,8 @@ export interface SweepConfig {
   intervalMinutes: number;
   lookbackHours: number;
   analysisTagPrefix: string;
+  /** The flag `alertzero.triageSeverityFirst` (see `allocateBudget`). */
+  severityFirst?: boolean;
 }
 
 const EMPTY_NUMBERS: SweepNumbers = {
@@ -127,6 +129,7 @@ export const planSweep = async (ports: SweepPorts, config: SweepConfig): Promise
     headroomSlots: headroom.slots,
     budget: sweepBudget,
     lookbackCutoff: config.now - config.lookbackHours * HOUR_MS,
+    severityFirst: config.severityFirst,
   });
 
   // A verdicted alert is never planned again, but a dead claim on it is released like any other.
