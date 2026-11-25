@@ -528,7 +528,7 @@ describe('detection rule workflows', () => {
       ).toEqual([
         ['propose_query'],
         ['propose_risk_score'],
-        ['attach_exception', 'resume_exception_attachment', 'propose_exception'],
+        ['attach_exception', 'propose_exception'],
         ['incomplete_threshold_output', 'propose_threshold'],
         ['propose_schedule'],
       ]);
@@ -1376,10 +1376,12 @@ describe('detection rule workflows', () => {
       it.each([
         'attach_rule',
         'resume_rule_attachment',
+        'readd_rule_attachment',
         'refresh_rule_attachment',
         'attach_exception',
         'attach_alerts',
         'resume_alerts_attachment',
+        'readd_alerts_attachment',
       ])('renders %s inline in the investigation', (stepName) => {
         const step = reviewSteps.find(({ name }) => name === stepName)!;
 
@@ -1420,25 +1422,41 @@ describe('detection rule workflows', () => {
       // A resumed review lands on the Investigation an earlier review attached to under
       // the same fixed ids, so the add fails on the earlier copy. The resume steps then
       // update that copy with this review's rule and alerts, and the post-tuning refresh
-      // accepts either writer. The add still runs first so an Investigation whose earlier
-      // review failed to attach gets the attachment on the next review.
+      // accepts any writer. The add still runs first so an Investigation whose earlier
+      // review failed to attach gets the attachment on the next review. A copy the
+      // analyst removed keeps its id and refuses the update, and no step can restore
+      // it, so a third step adds this review's copy under an id of its own.
       it.each([
-        ['attach_rule', 'resume_rule_attachment', 'tuned-rule'],
-        ['attach_alerts', 'resume_alerts_attachment', 'fp-alerts'],
-      ])('updates %s on a resumed review through %s', (addName, resumeName, attachmentId) => {
-        const add = reviewSteps.find(({ name }) => name === addName)!;
-        const resume = reviewSteps.find(({ name }) => name === resumeName)!;
+        ['attach_rule', 'resume_rule_attachment', 'readd_rule_attachment', 'tuned-rule'],
+        ['attach_alerts', 'resume_alerts_attachment', 'readd_alerts_attachment', 'fp-alerts'],
+      ])(
+        'updates %s on a resumed review through %s, or re-adds it through %s',
+        (addName, resumeName, readdName, attachmentId) => {
+          const add = reviewSteps.find(({ name }) => name === addName)!;
+          const resume = reviewSteps.find(({ name }) => name === resumeName)!;
+          const readd = reviewSteps.find(({ name }) => name === readdName)!;
 
-        expect(add.if).not.toContain('created');
-        expect(resume.type).toBe('ai.attachment.update');
-        expect(resume.if).toContain('steps.find_or_create_investigation.output.created != true');
-        expect(resume.if).toContain(`steps.${addName}.error != null`);
-        expect(resume.if).toContain(`steps.${addName}.error.message contains 'already exists'`);
-        expect(resume.with?.attachment_id).toBe(attachmentId);
-        expect(resume.with?.data).toEqual(add.with?.data);
-        expect(resume.with?.description).toBe(add.with?.description);
-        expect(reviewSteps.indexOf(resume)).toBe(reviewSteps.indexOf(add) + 1);
-      });
+          expect(add.if).not.toContain('created');
+          expect(resume.type).toBe('ai.attachment.update');
+          expect(resume.if).toContain('steps.find_or_create_investigation.output.created != true');
+          expect(resume.if).toContain(`steps.${addName}.error != null`);
+          expect(resume.if).toContain(`steps.${addName}.error.message contains 'already exists'`);
+          expect(resume.with?.attachment_id).toBe(attachmentId);
+          expect(resume.with?.data).toEqual(add.with?.data);
+          expect(resume.with?.description).toBe(add.with?.description);
+          expect(reviewSteps.indexOf(resume)).toBe(reviewSteps.indexOf(add) + 1);
+
+          expect(readd.type).toBe('ai.attachment.add');
+          expect(readd.if).toContain(`steps.${resumeName}.error != null`);
+          expect(readd.if).toContain(`steps.${resumeName}.error.message contains 'deleted'`);
+          expect(readd.with?.id).toBe(`${attachmentId}-{{ execution.id }}`);
+          expect(readd.with?.type).toBe(add.with?.type);
+          expect(readd.with?.origin).toBe(add.with?.origin);
+          expect(readd.with?.data).toEqual(add.with?.data);
+          expect(readd.with?.description).toBe(add.with?.description);
+          expect(reviewSteps.indexOf(readd)).toBe(reviewSteps.indexOf(resume) + 1);
+        }
+      );
 
       it('refreshes the rule attachment whichever step wrote it', () => {
         const written = reviewSteps.find(({ name }) => name === 'rule_attachment_written')!;
@@ -1450,6 +1468,17 @@ describe('detection rule workflows', () => {
         );
         expect(String(written.with?.written)).toContain(
           'steps.resume_rule_attachment.output.attachment_id != null'
+        );
+        expect(String(written.with?.written)).toContain(
+          'steps.readd_rule_attachment.output.attachment_id != null'
+        );
+        // The refresh writes to the card this review wrote: the per-run copy when the
+        // fixed one had been deleted, else the fixed one.
+        expect(written.with?.attachment_id).toBe(
+          "{{ steps.readd_rule_attachment.output.attachment_id | default: 'tuned-rule' }}"
+        );
+        expect(refresh.with?.attachment_id).toBe(
+          '{{ steps.rule_attachment_written.output.attachment_id }}'
         );
         expect(refresh.if).toContain('steps.rule_attachment_written.output.written == true');
         expect(refresh.if).not.toContain('steps.attach_rule.error');

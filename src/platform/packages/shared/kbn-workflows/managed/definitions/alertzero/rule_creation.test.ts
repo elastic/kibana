@@ -178,7 +178,7 @@ describe('Detection Rule Creation worker', () => {
     // the analyst cannot inspect on the investigation is not proposed.
     it.each([
       ['a ready draft that was attached', true, true, true],
-      ['a ready draft that reached the investigation by neither writer', true, false, false],
+      ['a ready draft that did not reach the investigation', true, false, false],
       ['a draft that was never ready', false, true, false],
     ])('decides whether to propose %s', (_scenario, ok, attached, expected) => {
       expect(stepByName('propose_creation')?.if).toBe(
@@ -186,43 +186,26 @@ describe('Detection Rule Creation worker', () => {
       );
       expect(
         evaluate(flagOf('proposal_ready', 'ok'), {
-          steps: { draft_ready: { output: { ok } }, draft_attached: { output: { ok: attached } } },
+          steps: {
+            draft_ready: { output: { ok } },
+            attach_draft: attached ? { output: { attachment_id: 'rule-draft-run-1' } } : {},
+          },
         })
       ).toBe(expected);
     });
 
     // The caller keeps one investigation per gap, so a re-review after an expired
-    // proposal finds the earlier draft card already there. The draft is then written as
-    // a new version of that card, and either writer satisfies the proposal gate.
-    it("writes the draft over the earlier review's card when the add finds it, and proposes from either", () => {
+    // proposal finds the earlier review's draft card there, and an analyst may have
+    // removed it, which leaves an id that refuses every later write. Each review's
+    // draft is its own card, named after the review's run, so neither case arises.
+    it("gives each review's draft a card of its own, named after the run", () => {
       const attach = stepByName('attach_draft');
-      const resume = stepByName('resume_draft');
-      const attached = stepByName('draft_attached');
-      const index = (name: string) => worker.steps.findIndex((step) => step.name === name);
 
-      expect(resume?.type).toBe('ai.attachment.update');
-      expect(resume?.if).toContain('steps.draft_ready.output.ok == true');
-      expect(resume?.if).toContain('steps.attach_draft.error != null');
-      expect(resume?.if).toContain("steps.attach_draft.error.message contains 'already exists'");
-      expect(resume?.with?.attachment_id).toBe(attach?.with?.id);
-      expect(resume?.with?.conversation_id).toBe(attach?.with?.conversation_id);
-      expect(resume?.with?.data).toEqual(attach?.with?.data);
-      expect(index('attach_draft') + 1).toBe(index('resume_draft'));
-      expect(index('resume_draft')).toBeLessThan(index('draft_attached'));
-      expect(index('draft_attached')).toBeLessThan(index('proposal_ready'));
-
-      const written = flagOf('draft_attached', 'ok');
-      const attachedBy = (writer: 'attach_draft' | 'resume_draft') => ({
-        steps: { [writer]: { output: { attachment_id: 'rule-draft' } } },
-      });
-      expect(evaluate(written, attachedBy('attach_draft'))).toBe(true);
-      expect(evaluate(written, attachedBy('resume_draft'))).toBe(true);
-      expect(
-        evaluate(written, {
-          steps: { attach_draft: { error: { message: "Attachment 'rule-draft' already exists" } } },
-        })
-      ).toBe(false);
-      expect(String(attached?.with?.ok)).not.toContain('(');
+      expect(attach?.type).toBe('ai.attachment.add');
+      expect(attach?.with?.id).toBe('rule-draft-{{ execution.id }}');
+      expect(stepByName('resume_draft')).toBeUndefined();
+      expect(stepByName('draft_attached')).toBeUndefined();
+      expect(String(stepByName('proposal_ready')?.with?.ok)).not.toContain('(');
     });
 
     // NO_DATA comes back the same on every run. INVALID_OUTPUT, a tool error (no code)
@@ -524,39 +507,14 @@ describe('Detection Rule Creation worker', () => {
         'the attachment error for a draft that could not be copied',
         { ok: true },
         { reason: '' },
-        { attach_draft: { error: { message: 'boom' } }, draft_attached: { output: { ok: false } } },
+        { attach_draft: { error: { message: 'boom' } } },
         'The draft could not be attached to the investigation: boom',
-      ],
-      [
-        'the update error for a draft that could be neither added nor written over the earlier card',
-        { ok: true },
-        { reason: '' },
-        {
-          attach_draft: { error: { message: "Attachment 'rule-draft' already exists" } },
-          resume_draft: { error: { message: 'conversation is locked' } },
-          draft_attached: { output: { ok: false } },
-        },
-        'The draft could not be attached to the investigation: conversation is locked',
       ],
       [
         'nothing for a proposed draft',
         { ok: true },
         { reason: '' },
-        {
-          attach_draft: { output: { attachment_id: 'rule-draft' } },
-          draft_attached: { output: { ok: true } },
-        },
-        '',
-      ],
-      [
-        'nothing for a draft written over the earlier card',
-        { ok: true },
-        { reason: '' },
-        {
-          attach_draft: { error: { message: "Attachment 'rule-draft' already exists" } },
-          resume_draft: { output: { attachment_id: 'rule-draft' } },
-          draft_attached: { output: { ok: true } },
-        },
+        { attach_draft: { output: { attachment_id: 'rule-draft-run-1' } } },
         '',
       ],
     ])('reports %s as skip_reason', (_scenario, ready, structured, writers, expected) => {

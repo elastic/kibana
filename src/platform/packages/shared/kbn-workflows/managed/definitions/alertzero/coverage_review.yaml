@@ -210,7 +210,7 @@ steps:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       message: |-
         {% if steps.find_or_create_investigation.output.reopened == true -%}
-        **Review resumed.** An earlier review closed this investigation, but the gap is still pending, so it was reviewed again. The proposal below is for this new review.
+        **Review resumed.** An earlier review closed this investigation, but the gap is pending again, so it was reviewed again. The proposal below is for this new review.
 
         {% elsif steps.find_or_create_investigation.output.created != true -%}
         **Review resumed.** An earlier review opened this investigation and reached no applied decision, so the gap was reviewed again. The proposal below replaces the earlier one.
@@ -528,7 +528,10 @@ steps:
   # deterministic: a resumed review of the same rule finds the earlier review's
   # copy, the add fails on it, and the update after it writes the rule as it is
   # now as a new version of that copy. A review that matched a different rule adds
-  # a card of its own, because an attachment cannot change its origin.
+  # a card of its own, because an attachment cannot change its origin. A card the
+  # analyst removed keeps its id and refuses the update, so a third step adds this
+  # review's copy under a per-run id; the refresh after the action reads which id
+  # was written.
   - name: attach_rule
     type: ai.attachment.add
     if: >-
@@ -557,6 +560,25 @@ steps:
       data:
         text: "{{ steps.resolve_rule.output | json }}"
         attachmentLabel: "{{ steps.resolve_rule.output.name }}"
+      description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # The earlier review's card was removed by an analyst: the add still finds it
+  # and the update refuses a deleted card, which no workflow step can restore.
+  # Add this review's copy under an id of its own instead, so the review keeps
+  # its rule card.
+  - name: readd_rule_attachment
+    type: ai.attachment.add
+    if: >-
+      ${{ steps.resume_rule_attachment.error != null
+        and steps.resume_rule_attachment.error.message contains 'deleted' }}
+    with:
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+      id: "coverage-rule-{{ steps.resolve_rule.output.id }}-{{ execution.id }}"
+      type: security.rule
+      origin: "{{ steps.resolve_rule.output.id }}"
       description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
       render_inline: true
     on-failure:
@@ -953,15 +975,19 @@ steps:
     on-failure:
       continue: true
 
-  # Whether the rule attachment exists to refresh: attach_rule or
-  # resume_rule_attachment must have returned an id. Computed here because a step
-  # condition cannot group with parentheses (see the detection workflow tests).
+  # Whether the rule attachment exists to refresh: attach_rule,
+  # resume_rule_attachment or readd_rule_attachment must have returned an id.
+  # Computed here because a step condition cannot group with parentheses (see the
+  # detection workflow tests).
   - name: rule_attachment_written
     type: data.set
     with:
       written: >-
         ${{ steps.attach_rule.output.attachment_id != null
-          or steps.resume_rule_attachment.output.attachment_id != null }}
+          or steps.resume_rule_attachment.output.attachment_id != null
+          or steps.readd_rule_attachment.output.attachment_id != null }}
+      # The card this review wrote: the per-run copy when the fixed one was deleted.
+      attachment_id: "{% if steps.readd_rule_attachment.output.attachment_id != blank %}{{ steps.readd_rule_attachment.output.attachment_id }}{% else %}coverage-rule-{{ steps.resolve_rule.output.id }}{% endif %}"
 
   # security.rule attachments resolve once and never refresh, so after the enable
   # the snapshot would silently show the disabled rule. This writes the enabled
@@ -975,7 +1001,7 @@ steps:
         and steps.refetch_rule.output.id != null }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-      attachment_id: "coverage-rule-{{ steps.resolve_rule.output.id }}"
+      attachment_id: "{{ steps.rule_attachment_written.output.attachment_id }}"
       data:
         text: "{{ steps.refetch_rule.output | json }}"
         attachmentLabel: "{{ steps.refetch_rule.output.name }}"

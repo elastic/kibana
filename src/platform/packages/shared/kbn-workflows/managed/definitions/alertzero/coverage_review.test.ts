@@ -479,7 +479,7 @@ describe('Detection Coverage review', () => {
     // A resumed review of the same rule finds the earlier review's copy under the same
     // id, so the add fails and the update after it writes the rule as it is now. The
     // update runs only on that conflict, and the refresh after an enable accepts
-    // either writer.
+    // any writer.
     it('updates the rule attachment on a resumed review and refreshes whichever copy exists', () => {
       const attach = stepByName('attach_rule');
       const resume = stepByName('resume_rule_attachment');
@@ -502,8 +502,49 @@ describe('Detection Coverage review', () => {
       expect(String(written?.with?.written)).toContain(
         'steps.resume_rule_attachment.output.attachment_id != null'
       );
+      expect(String(written?.with?.written)).toContain(
+        'steps.readd_rule_attachment.output.attachment_id != null'
+      );
       expect(refresh?.if).toContain('steps.rule_attachment_written.output.written == true');
       expect(refresh?.if).not.toContain('steps.attach_rule.error');
+    });
+
+    // A card the analyst removed keeps its id: the add still finds it and the update
+    // refuses it, and no step can restore it. This review's copy then goes under an
+    // id of its own, and the refresh writes to whichever card this review wrote.
+    it('re-adds the rule card under a per-run id when the earlier copy was deleted', () => {
+      const attach = stepByName('attach_rule');
+      const readd = stepByName('readd_rule_attachment');
+      const written = stepByName('rule_attachment_written');
+      const refresh = stepByName('refresh_rule_attachment');
+
+      expect(readd?.type).toBe('ai.attachment.add');
+      expect(readd?.if).toContain('steps.resume_rule_attachment.error != null');
+      expect(readd?.if).toContain("steps.resume_rule_attachment.error.message contains 'deleted'");
+      expect(readd?.with?.id).toBe(
+        'coverage-rule-{{ steps.resolve_rule.output.id }}-{{ execution.id }}'
+      );
+      expect(readd?.with?.origin).toBe(attach?.with?.origin);
+      expect(readd?.with?.description).toBe(attach?.with?.description);
+      expect(stepIndex('resume_rule_attachment') + 1).toBe(stepIndex('readd_rule_attachment'));
+      const engine = createWorkflowLiquidEngine();
+      const cardId = String(written?.with?.attachment_id);
+      expect(
+        engine.parseAndRenderSync(cardId, {
+          steps: { resolve_rule: { output: { id: 'rule-1' } }, readd_rule_attachment: {} },
+        })
+      ).toBe('coverage-rule-rule-1');
+      expect(
+        engine.parseAndRenderSync(cardId, {
+          steps: {
+            resolve_rule: { output: { id: 'rule-1' } },
+            readd_rule_attachment: { output: { attachment_id: 'coverage-rule-rule-1-run-2' } },
+          },
+        })
+      ).toBe('coverage-rule-rule-1-run-2');
+      expect(refresh?.with?.attachment_id).toBe(
+        '{{ steps.rule_attachment_written.output.attachment_id }}'
+      );
     });
 
     it('describes the gap from the indicator, not from raw inputs', () => {
@@ -542,7 +583,6 @@ describe('Detection Coverage review', () => {
       );
 
       expect(refresh?.type).toBe('ai.attachment.update');
-      expect(refresh?.with?.attachment_id).toBe('coverage-rule-{{ steps.resolve_rule.output.id }}');
       expect(JSON.stringify(refresh?.with)).toContain('steps.refetch_rule.output | json');
       expect(refresh?.if).toContain('steps.refetch_rule.output.id != null');
 
@@ -1091,6 +1131,7 @@ describe('Detection Coverage review', () => {
       'resolve_rule',
       'attach_rule',
       'resume_rule_attachment',
+      'readd_rule_attachment',
       'run_rule_creation',
       'refetch_rule',
       'refresh_rule_attachment',

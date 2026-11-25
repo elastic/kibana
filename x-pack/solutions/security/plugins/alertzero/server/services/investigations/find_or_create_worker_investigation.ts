@@ -10,8 +10,9 @@ import {
   agentBuilderDefaultAgentId,
   ConversationAccessControlMode,
   isConversationAlreadyExistsError,
+  isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { ConversationWithPermissions, MetadataFieldValue } from '@kbn/agent-builder-common';
+import type { ConversationPermissions, MetadataFieldValue } from '@kbn/agent-builder-common';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import type { FindOrCreateWorkerInvestigationResponse } from '@kbn/alertzero-common';
 import { buildWorkerInvestigationConversationId } from './worker_investigation_id';
@@ -26,16 +27,18 @@ export type FindOrCreateWorkerInvestigationOutput = FindOrCreateWorkerInvestigat
  */
 export interface FindOrCreateWorkerInvestigationConversationClient {
   create: (request: {
-    id: string;
+    /** Omitted for an Investigation Agent Builder mints a random id for. */
+    id?: string;
     agentId: string;
     title: string;
     templateId: string;
     accessControl: { access_mode: ConversationAccessControlMode; entries: never[] };
     metadata?: Record<string, MetadataFieldValue>;
-  }) => Promise<ConversationWithPermissions>;
+  }) => Promise<{ id: string }>;
   get: (conversationId: string) => Promise<{
     metadata?: Record<string, MetadataFieldValue>;
     template_id?: string;
+    permissions?: Pick<ConversationPermissions, 'update_access_control'>;
   }>;
   patchMetadata: (
     conversationId: string,
@@ -101,6 +104,10 @@ const resumeExisting = async (
   if (description !== undefined && metadata?.description !== description) {
     updates.description = description;
   }
+  // Appended to the list this call read, so two calls resuming the same Investigation at
+  // once would each write a list without the other's id. The review workflows never do:
+  // each keeps one review per subject in flight through its concurrency key, and the
+  // subject is what the id derives from, so no two calls share an Investigation.
   if (workflowExecutionId !== undefined) {
     const executionIds = readExecutionIds(metadata);
     if (!executionIds.includes(workflowExecutionId)) {
@@ -117,6 +124,28 @@ const resumeExisting = async (
   );
   // A concurrent reopen that won the race leaves this write nothing to change on `status`.
   return { reopened: wasClosed && changedFields.includes('status') };
+};
+
+type ExistingConversation = Awaited<
+  ReturnType<FindOrCreateWorkerInvestigationConversationClient['get']>
+>;
+
+/**
+ * Why the conversation at the derived id is not one this Worker can review on, or `undefined`
+ * when it is. Agent Builder lets any caller create a conversation under an id of their
+ * choosing, and every input to the derived id is public, so an existing conversation at it
+ * is not by itself one of this Worker's. The checks that are available today: it can be
+ * read, it is on the Investigation template, and the Worker owns it. Only the owner may
+ * change a conversation's access control, so `update_access_control` is the owner check.
+ */
+const whyNotReusable = (existing: ExistingConversation): string | undefined => {
+  if (existing.template_id !== TEMPLATE_ID_INVESTIGATION) {
+    return `it is not an Investigation (template: ${existing.template_id ?? 'none'})`;
+  }
+  if (existing.permissions?.update_access_control !== true) {
+    return 'the Worker does not own it';
+  }
+  return undefined;
 };
 
 /** Creates the Worker's Investigation for a subject, or resumes the one an earlier review opened. */
@@ -136,12 +165,9 @@ export const runFindOrCreateWorkerInvestigation = async (
     workerId,
     subjectId,
   });
-
-  let created = true;
-  let reopened = false;
-  try {
-    await conversationClient.create({
-      id: investigationConversationId,
+  const create = (id: string | undefined) =>
+    conversationClient.create({
+      ...(id !== undefined ? { id } : {}),
       agentId: agentBuilderDefaultAgentId,
       title,
       templateId: TEMPLATE_ID_INVESTIGATION,
@@ -156,52 +182,63 @@ export const runFindOrCreateWorkerInvestigation = async (
           : {}),
       },
     });
+
+  try {
+    await create(investigationConversationId);
+    return { investigationConversationId, created: true, reopened: false };
   } catch (error) {
     if (!isConversationAlreadyExistsError(error)) {
       throw error;
     }
-    created = false;
-    const existing = await conversationClient.get(investigationConversationId);
-    // Agent Builder lets any caller create a conversation under an id of their choosing, so
-    // an existing conversation at the derived id is not by itself one of this Worker's. A
-    // conversation on another template was not minted here and is never reviewed on: the
-    // review would put its proposals and evidence into a conversation someone else owns.
-    // This does not tell a planted Investigation from a real one; that needs a binding
-    // Agent Builder holds, which it has no API for yet.
-    if (existing.template_id !== TEMPLATE_ID_INVESTIGATION) {
-      throw new Error(
-        `findOrCreateWorkerInvestigation: conversation ${investigationConversationId} exists but is not an Investigation (template: ${
-          existing.template_id ?? 'none'
-        }); refusing to review ${workerId} subject ${subjectId} on it`
-      );
+  }
+
+  // Something sits at the derived id. Reuse it only when it is this Worker's own
+  // Investigation. Otherwise the review runs on a fresh Investigation with a random id, as
+  // every review did before the id was derived: the subject then gets one Investigation per
+  // review rather than failing on every sweep. That also means a Worker whose service
+  // account changed does not reuse the Investigations the earlier account minted.
+  let existing: ExistingConversation | undefined;
+  try {
+    existing = await conversationClient.get(investigationConversationId);
+  } catch (error) {
+    if (!isConversationNotFoundError(error)) {
+      throw error;
     }
-    // Deliberately not swallowed. Without an Investigation id the review has nowhere to
-    // propose, so a failure here fails the review and leaves the subject for the next sweep.
-    // Continuing instead would propose on an Investigation this call knows is closed.
-    ({ reopened } = await resumeExisting(
-      conversationClient,
-      investigationConversationId,
-      existing.metadata,
-      {
-        description,
-        workflowExecutionId,
-      }
-    ));
-    if (reopened) {
-      logger?.debug(
-        `findOrCreateWorkerInvestigation: reopened Investigation ${investigationConversationId} for ${workerId} subject ${subjectId}, which an earlier review had closed.`
-      );
-      try {
-        await onReopened?.(investigationConversationId);
-      } catch (reportError) {
+  }
+  const reason = existing === undefined ? 'the Worker cannot read it' : whyNotReusable(existing);
+  if (existing === undefined || reason !== undefined) {
+    logger?.warn(
+      `findOrCreateWorkerInvestigation: conversation ${investigationConversationId} exists but ${reason}; reviewing ${workerId} subject ${subjectId} on a fresh Investigation instead`
+    );
+    const fallback = await create(undefined);
+    return { investigationConversationId: fallback.id, created: true, reopened: false };
+  }
+
+  // Deliberately not swallowed. Without an Investigation id the review has nowhere to
+  // propose, so a failure here fails the review and leaves the subject for the next sweep.
+  // Continuing instead would propose on an Investigation this call knows is closed.
+  const { reopened } = await resumeExisting(
+    conversationClient,
+    investigationConversationId,
+    existing.metadata,
+    { description, workflowExecutionId }
+  );
+  if (reopened) {
+    logger?.debug(
+      `findOrCreateWorkerInvestigation: reopened Investigation ${investigationConversationId} for ${workerId} subject ${subjectId}, which an earlier review had closed.`
+    );
+    // Not awaited: the Investigation is already open, and a report that stalls (the route
+    // checks the run against workflows management first) must not hold up the review's step.
+    Promise.resolve()
+      .then(() => onReopened?.(investigationConversationId))
+      .catch((reportError) => {
         logger?.debug(
           `findOrCreateWorkerInvestigation: could not report the reopen of ${investigationConversationId}: ${
             reportError instanceof Error ? reportError.message : String(reportError)
           }`
         );
-      }
-    }
+      });
   }
 
-  return { investigationConversationId, created, reopened };
+  return { investigationConversationId, created: false, reopened };
 };

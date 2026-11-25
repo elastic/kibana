@@ -217,7 +217,10 @@ steps:
   # second time. The fixed attachment id makes the refreshes below deterministic:
   # on a resumed investigation the add fails on the earlier review's copy, and the
   # update after it writes the current rule as a new version of that copy. An
-  # investigation whose earlier review failed to attach gets the add instead.
+  # investigation whose earlier review failed to attach gets the add instead. A
+  # card the analyst removed keeps its id and refuses the update, so a third step
+  # adds this review's copy under a per-run id; the refresh after the action
+  # reads which id was written.
   - name: attach_rule
     type: ai.attachment.add
     if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
@@ -243,6 +246,28 @@ steps:
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       attachment_id: "tuned-rule"
+      data:
+        text: "{{ steps.fetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.fetch_rule.output.name }}"
+      description: "Rule under tuning: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # The earlier review's card was removed by an analyst: the add still finds it
+  # and the update refuses a deleted card, which no workflow step can restore.
+  # Add this review's copy under an id of its own instead, so the review keeps
+  # its rule card.
+  - name: readd_rule_attachment
+    type: ai.attachment.add
+    if: >-
+      ${{ steps.resume_rule_attachment.error != null
+        and steps.resume_rule_attachment.error.message contains 'deleted' }}
+    with:
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+      id: "tuned-rule-{{ execution.id }}"
+      type: security.rule
+      origin: "{{ inputs.rule_uuid }}"
       data:
         text: "{{ steps.fetch_rule.output | json }}"
         attachmentLabel: "{{ steps.fetch_rule.output.name }}"
@@ -278,6 +303,23 @@ steps:
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       attachment_id: fp-alerts
+      data:
+        alertIds: "${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}"
+      description: "False-positive alerts under review for rule: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # Same deleted-card case as readd_rule_attachment.
+  - name: readd_alerts_attachment
+    type: ai.attachment.add
+    if: >-
+      ${{ steps.resume_alerts_attachment.error != null
+        and steps.resume_alerts_attachment.error.message contains 'deleted' }}
+    with:
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+      id: "fp-alerts-{{ execution.id }}"
+      type: security.alerts
       data:
         alertIds: "${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}"
       description: "False-positive alerts under review for rule: {{ steps.fetch_rule.output.name }}"
@@ -1509,34 +1551,16 @@ steps:
         steps:
           # The proposed item as its own card, laid out the way the Detection Rules
           # UI lays out an exception. Its name and entries must match the action
-          # input below, so the card shows exactly what approving creates.
+          # input below, so the card shows exactly what approving creates. The id
+          # carries this run's execution id: each review proposes its own item, and
+          # a resumed investigation already holds the earlier review's card, which
+          # the analyst may have removed, so this review never writes over it.
           - name: attach_exception
             type: ai.attachment.add
             with:
               conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-              id: "proposed-exception"
+              id: "proposed-exception-{{ execution.id }}"
               type: security.exception
-              data:
-                name: "{{ steps.build_exception_name.output.name }}"
-                description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
-                entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
-              description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
-              render_inline: true
-            on-failure:
-              continue: true
-          # A resumed review finds the earlier review's exception card under this id, so
-          # the add reports it as existing. Write this review's exception as a new
-          # version of it instead: the card must show the entries approving creates,
-          # not the ones an expired proposal would have.
-          - name: resume_exception_attachment
-            type: ai.attachment.update
-            if: >-
-              ${{ steps.find_or_create_investigation.output.created != true
-                and steps.attach_exception.error != null
-                and steps.attach_exception.error.message contains 'already exists' }}
-            with:
-              conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-              attachment_id: proposed-exception
               data:
                 name: "{{ steps.build_exception_name.output.name }}"
                 description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
@@ -1711,15 +1735,19 @@ steps:
           and (steps.propose_exception.output.status == 'succeeded'
             or steps.refetch_rule.output.revision > steps.fetch_rule.output.revision) }}
 
-  # Whether the rule attachment exists to refresh: attach_rule or
-  # resume_rule_attachment must have returned an id. Computed here because a step
-  # condition cannot group with parentheses (see the detection workflow tests).
+  # Whether the rule attachment exists to refresh: attach_rule,
+  # resume_rule_attachment or readd_rule_attachment must have returned an id.
+  # Computed here because a step condition cannot group with parentheses (see the
+  # detection workflow tests).
   - name: rule_attachment_written
     type: data.set
     with:
       written: >-
         ${{ steps.attach_rule.output.attachment_id != null
-          or steps.resume_rule_attachment.output.attachment_id != null }}
+          or steps.resume_rule_attachment.output.attachment_id != null
+          or steps.readd_rule_attachment.output.attachment_id != null }}
+      # The card this review wrote: the per-run copy when the fixed one was deleted.
+      attachment_id: "{{ steps.readd_rule_attachment.output.attachment_id | default: 'tuned-rule' }}"
 
   # The rule attachment is a snapshot and never refreshes, so after the patch it
   # would silently show the pre-tuning rule. This writes the patched rule as a new
@@ -1732,7 +1760,7 @@ steps:
         and steps.refetch_rule.output.id != null }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-      attachment_id: "tuned-rule"
+      attachment_id: "{{ steps.rule_attachment_written.output.attachment_id }}"
       data:
         text: "{{ steps.refetch_rule.output | json }}"
         attachmentLabel: "{{ steps.refetch_rule.output.name }}"

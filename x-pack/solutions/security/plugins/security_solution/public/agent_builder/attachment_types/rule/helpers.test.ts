@@ -32,8 +32,18 @@ describe('getSavedRuleId', () => {
 });
 
 describe('isRuleDraftAttachment', () => {
-  it('is true for the drafted rule attachment id', () => {
+  it('is true for a drafted rule attachment id', () => {
+    expect(isRuleDraftAttachment({ id: 'rule-draft-3f1c2a9e-0000-4000-8000-000000000001' })).toBe(
+      true
+    );
+  });
+
+  it('is true for the bare id conversations saved before the per-review id used', () => {
     expect(isRuleDraftAttachment({ id: 'rule-draft' })).toBe(true);
+  });
+
+  it('is false for an id that only shares the prefix text', () => {
+    expect(isRuleDraftAttachment({ id: 'rule-drafts' })).toBe(false);
   });
 
   it('is false for any other attachment id', () => {

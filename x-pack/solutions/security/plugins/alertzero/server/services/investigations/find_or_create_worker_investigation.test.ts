@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { createConversationAlreadyExistsError } from '@kbn/agent-builder-common';
+import {
+  createConversationAlreadyExistsError,
+  createConversationNotFoundError,
+} from '@kbn/agent-builder-common';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -31,11 +34,19 @@ const input = {
   workflowExecutionId: 'run-2',
 };
 
+/** The Investigation as the Worker that minted it reads it back: its own, on the template. */
+const ownInvestigation = (metadata?: Record<string, MetadataFieldValue>) => ({
+  id: conversationId,
+  template_id: TEMPLATE_ID_INVESTIGATION,
+  permissions: { update_access_control: true },
+  metadata,
+});
+
 const buildClient = (
   overrides: Partial<FindOrCreateWorkerInvestigationConversationClient> = {}
 ): FindOrCreateWorkerInvestigationConversationClient => ({
-  create: jest.fn().mockResolvedValue(undefined),
-  get: jest.fn().mockResolvedValue({ id: conversationId, template_id: TEMPLATE_ID_INVESTIGATION }),
+  create: jest.fn().mockResolvedValue({ id: conversationId }),
+  get: jest.fn().mockResolvedValue(ownInvestigation()),
   // Agent Builder reports the fields the write changed.
   patchMetadata: jest.fn().mockResolvedValue({ changedFields: ['status'] }),
   ...overrides,
@@ -48,10 +59,22 @@ const buildRerunClient = (
 ): FindOrCreateWorkerInvestigationConversationClient =>
   buildClient({
     create: jest.fn().mockRejectedValue(createConversationAlreadyExistsError({ conversationId })),
-    get: jest
-      .fn()
-      .mockResolvedValue({ id: conversationId, template_id: TEMPLATE_ID_INVESTIGATION, metadata }),
+    get: jest.fn().mockResolvedValue(ownInvestigation(metadata)),
     ...overrides,
+  });
+
+const fallbackId = 'c0ffee00-0000-4000-8000-000000000001';
+
+/** A 409 at the derived id, then a create Agent Builder gives a random id. */
+const buildPlantedClient = (
+  get: FindOrCreateWorkerInvestigationConversationClient['get']
+): FindOrCreateWorkerInvestigationConversationClient =>
+  buildClient({
+    create: jest
+      .fn()
+      .mockRejectedValueOnce(createConversationAlreadyExistsError({ conversationId }))
+      .mockResolvedValueOnce({ id: fallbackId }),
+    get,
   });
 
 describe('buildWorkerInvestigationConversationId', () => {
@@ -192,31 +215,95 @@ describe('runFindOrCreateWorkerInvestigation', () => {
       );
     });
 
-    it.each([
-      ['another template', 'some-chat-template'],
-      ['no template', undefined],
-    ])(
-      'refuses to review on a conversation at the id that carries %s, without writing to it',
-      async (_scenario, templateId) => {
-        const conversationClient = buildRerunClient(undefined, {
-          get: jest.fn().mockResolvedValue({ id: conversationId, template_id: templateId }),
-        });
-
-        await expect(
-          runFindOrCreateWorkerInvestigation(input, { conversationClient })
-        ).rejects.toThrow(/exists but is not an Investigation/);
-        expect(conversationClient.patchMetadata).not.toHaveBeenCalled();
-      }
-    );
-
-    it('rethrows when the verify-read fails after a 409', async () => {
+    it('rethrows when the verify-read fails after a 409 for a reason other than not found', async () => {
       const conversationClient = buildRerunClient(undefined, {
-        get: jest.fn().mockRejectedValue(new Error('not found')),
+        get: jest.fn().mockRejectedValue(new Error('cluster unavailable')),
       });
 
       await expect(
         runFindOrCreateWorkerInvestigation(input, { conversationClient })
-      ).rejects.toThrow('not found');
+      ).rejects.toThrow('cluster unavailable');
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // Every input to the derived id is public, so anyone with Agent Builder access can create
+  // a conversation at it first. Such a conversation is not reviewed on: the review runs on a
+  // fresh Investigation with a random id instead, as every review did before the id was
+  // derived, rather than failing on every sweep.
+  describe('a conversation at the derived id the Worker did not mint', () => {
+    it.each([
+      [
+        'is private to whoever planted it',
+        jest.fn().mockRejectedValue(createConversationNotFoundError({ conversationId })),
+        'cannot read it',
+      ],
+      [
+        'is on another template',
+        jest.fn().mockResolvedValue({ ...ownInvestigation(), template_id: 'some-chat-template' }),
+        'not an Investigation (template: some-chat-template)',
+      ],
+      [
+        'has no template',
+        jest.fn().mockResolvedValue({ ...ownInvestigation(), template_id: undefined }),
+        'not an Investigation (template: none)',
+      ],
+      [
+        'is an Investigation someone else owns',
+        jest.fn().mockResolvedValue({
+          ...ownInvestigation(),
+          permissions: { update_access_control: false },
+        }),
+        'does not own it',
+      ],
+      [
+        'carries no permissions',
+        jest.fn().mockResolvedValue({ ...ownInvestigation(), permissions: undefined }),
+        'does not own it',
+      ],
+    ])('reviews on a fresh Investigation when the conversation %s', async (_scenario, get, why) => {
+      const logger = loggingSystemMock.createLogger();
+      const conversationClient = buildPlantedClient(get);
+
+      const output = await runFindOrCreateWorkerInvestigation(input, {
+        conversationClient,
+        logger,
+      });
+
+      expect(output).toEqual({
+        investigationConversationId: fallbackId,
+        created: true,
+        reopened: false,
+      });
+      // The planted conversation is neither written to nor read beyond the one check.
+      expect(conversationClient.patchMetadata).not.toHaveBeenCalled();
+      expect(conversationClient.create).toHaveBeenCalledTimes(2);
+      const [, [fallbackRequest]] = (conversationClient.create as jest.Mock).mock.calls;
+      expect(fallbackRequest).not.toHaveProperty('id');
+      expect(fallbackRequest).toEqual(
+        expect.objectContaining({
+          title: input.title,
+          templateId: TEMPLATE_ID_INVESTIGATION,
+          accessControl: { access_mode: 'public', entries: [] },
+          metadata: expect.objectContaining({ status: 'open' }),
+        })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(why));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(conversationId));
+    });
+
+    it('rethrows when the fallback create fails too', async () => {
+      const conversationClient = buildClient({
+        create: jest
+          .fn()
+          .mockRejectedValueOnce(createConversationAlreadyExistsError({ conversationId }))
+          .mockRejectedValueOnce(new Error('quota')),
+        get: jest.fn().mockRejectedValue(createConversationNotFoundError({ conversationId })),
+      });
+
+      await expect(
+        runFindOrCreateWorkerInvestigation(input, { conversationClient })
+      ).rejects.toThrow('quota');
     });
   });
 
@@ -309,19 +396,45 @@ describe('runFindOrCreateWorkerInvestigation', () => {
       expect(onReopened).not.toHaveBeenCalled();
     });
 
-    it('still succeeds, with a debug log, when the reopen callback throws', async () => {
-      const logger = loggingSystemMock.createLogger();
+    it.each([
+      [
+        'throws',
+        () => {
+          throw new Error('telemetry down');
+        },
+      ],
+      ['rejects', () => Promise.reject(new Error('telemetry down'))],
+    ])(
+      'still succeeds, with a debug log, when the reopen callback %s',
+      async (_how, onReopened) => {
+        const logger = loggingSystemMock.createLogger();
+
+        const output = await runFindOrCreateWorkerInvestigation(input, {
+          conversationClient: buildRerunClient({ status: 'closed' }),
+          logger,
+          onReopened,
+        });
+        await new Promise(setImmediate);
+
+        expect(output.reopened).toBe(true);
+        expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('telemetry down'));
+      }
+    );
+
+    // The Investigation is already open when the report runs, and the route's report looks
+    // the run up in workflows management, so a slow lookup must not hold the review's step.
+    it('returns without waiting for the reopen callback', async () => {
+      let release!: () => void;
+      const onReopened = jest.fn(() => new Promise<void>((resolve) => (release = resolve)));
 
       const output = await runFindOrCreateWorkerInvestigation(input, {
         conversationClient: buildRerunClient({ status: 'closed' }),
-        logger,
-        onReopened: () => {
-          throw new Error('telemetry down');
-        },
+        onReopened,
       });
 
       expect(output.reopened).toBe(true);
-      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('telemetry down'));
+      expect(onReopened).toHaveBeenCalledWith(conversationId);
+      release();
     });
   });
 });
