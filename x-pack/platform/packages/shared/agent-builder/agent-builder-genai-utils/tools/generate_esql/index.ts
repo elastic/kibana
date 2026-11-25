@@ -8,3 +8,4 @@
 export { generateEsql, type GenerateEsqlResponse, GenerateEsqlNoDataError } from './nl_to_esql';
 export { generateEsqlCompletion, type GenerateEsqlCompletionResponse } from './esql_completion';
 export { getDefaultEsqlCacheKey, setDefaultEsqlCacheKey } from './cache_key';
+export { extractQueryTarget, type ExtractedQueryTarget } from './resolve_query_target';

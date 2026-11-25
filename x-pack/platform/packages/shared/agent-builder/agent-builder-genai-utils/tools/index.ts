@@ -13,6 +13,8 @@ export {
   generateEsqlCompletion,
   type GenerateEsqlCompletionResponse,
   setDefaultEsqlCacheKey,
+  extractQueryTarget,
+  type ExtractedQueryTarget,
 } from './generate_esql';
 export { relevanceSearch, type RelevanceSearchResponse } from './relevance_search';
 export { naturalLanguageSearch, type NaturalLanguageSearchResponse } from './nl_search';

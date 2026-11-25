@@ -51,6 +51,8 @@ export {
   runSearchTool,
   type TopSnippetsConfig,
   setDefaultEsqlCacheKey,
+  extractQueryTarget,
+  type ExtractedQueryTarget,
 } from './tools';
 export {
   resolveResourceForEsqlWithSamplingStats,
