@@ -18,7 +18,7 @@ import {
   sent,
   vendorError,
 } from './test_helpers';
-import { ETAG_LOOKUP_TIMEOUT_MS, REQUEST_TIMEOUT_MS } from './constants';
+import { REQUEST_TIMEOUT_MS, UPDATE_ALERT_DEADLINE_MS } from './constants';
 
 resetMocksAroundEachTest();
 
@@ -246,27 +246,34 @@ describe('TrendAI Vision One updateAlertStatus', () => {
     });
   });
 
-  it('keeps the two requests under the execute API timeout: the ETag lookup gets 30 s, the PATCH 60 s', async () => {
+  it('sends the lookup with the normal timeout and the PATCH with the time left of one shared deadline', async () => {
+    const now = jest.spyOn(Date, 'now');
+    now.mockReturnValueOnce(1_000_000).mockReturnValueOnce(1_000_000 + 50_000);
     request
       .mockResolvedValueOnce(ok(alert('WB-1'), { etag: '"e1"' }))
       .mockResolvedValueOnce(ok(undefined, {}, 204));
     await run('updateAlertStatus', { id: 'WB-1', status: 'Closed' });
-    expect(sent(0)).toMatchObject({ method: 'GET', timeout: 30_000 });
-    expect(sent(1)).toMatchObject({ method: 'PATCH', timeout: 60_000 });
-    expect(ETAG_LOOKUP_TIMEOUT_MS + REQUEST_TIMEOUT_MS).toBeLessThan(120_000);
+    expect(sent(0)).toMatchObject({ method: 'GET', timeout: REQUEST_TIMEOUT_MS });
+    expect(sent(1)).toMatchObject({ method: 'PATCH', timeout: UPDATE_ALERT_DEADLINE_MS - 50_000 });
+    expect(UPDATE_ALERT_DEADLINE_MS).toBeLessThan(120_000);
+    now.mockRestore();
   });
 
-  it('names the shorter timeout when the ETag lookup times out, and sends no PATCH', async () => {
-    request.mockRejectedValueOnce(
-      Object.assign(new Error('timeout of 30000ms exceeded'), {
-        isAxiosError: true,
-        code: 'ECONNABORTED',
-      })
-    );
-    await expect(run('updateAlertStatus', { id: 'WB-1', status: 'Closed' })).rejects.toThrow(
-      'timed out after 30 s'
-    );
-    expect(request).toHaveBeenCalledTimes(1);
+  it('gives the PATCH its full timeout when the lookup was quick, and never more than REQUEST_TIMEOUT_MS', async () => {
+    const now = jest.spyOn(Date, 'now');
+    now.mockReturnValueOnce(1_000_000).mockReturnValueOnce(1_000_000 + 200);
+    request
+      .mockResolvedValueOnce(ok(alert('WB-1'), { etag: '"e1"' }))
+      .mockResolvedValueOnce(ok(undefined, {}, 204));
+    await run('updateAlertStatus', { id: 'WB-1', status: 'Closed' });
+    expect(sent(1)).toMatchObject({ method: 'PATCH', timeout: REQUEST_TIMEOUT_MS });
+    now.mockRestore();
+  });
+
+  it('sends the PATCH with the full timeout when the etag is given (no lookup)', async () => {
+    request.mockResolvedValueOnce(ok(undefined, {}, 204));
+    await run('updateAlertStatus', { id: 'WB-1', status: 'Closed', etag: '"e9"' });
+    expect(sent(0)).toMatchObject({ method: 'PATCH', timeout: REQUEST_TIMEOUT_MS });
   });
 
   it('skips the update when the alert already has the requested values', async () => {

@@ -12,12 +12,23 @@ applies_to:
 The TrendAI Vision One connector connects to the TrendAI Vision One public API (v3.0) of your tenant's region. Use it to list Workbench alerts, read Observed Attack Techniques detections, find endpoints, follow response tasks, and read the result of a sandbox analysis.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Agents can only read: every action that changes data in TrendAI Vision One is marked _(not yet available)_ and is not exposed to agents. You can call those actions only through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+This connector is currently available in **Agent Builder** only. Agents can only read. Actions marked _(not yet available)_ change data in TrendAI Vision One and are not exposed to agents until workflow support is added. Until then, you can run them only through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 ## Create connectors in {{kib}} [define-trend-vision-one-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
+
+### Connector networking configuration [trend-vision-one-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+### Get API credentials [trend-vision-one-api-credentials]
+
+1. Sign in to the TrendAI Vision One console.
+2. Go to **Administration > User Roles** and create or pick a role that grants the permissions of the actions you plan to use. [Required permissions](#trend-vision-one-permissions) lists the permissions of each action.
+3. Go to **Administration > API Keys** and add an API key with that role and an expiry date.
+4. Copy the API key. In the **API key** field of the connector, paste the key. In **Region API URL**, enter the API address of your tenant's region from the table in [Connector configuration](#trend-vision-one-connector-configuration).
 
 ### Connector configuration [trend-vision-one-connector-configuration]
 
@@ -43,7 +54,7 @@ Region API URL
 API key
 :   A TrendAI Vision One API key. The connector sends it as `Authorization: Bearer <API key>`. Refer to [Get API credentials](#trend-vision-one-api-credentials).
 
-## Test connectors [trend-vision-one-connector-test]
+### Test connectors [trend-vision-one-connector-test]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test runs the TrendAI Vision One connectivity check, which confirms the region API URL and the API key. It needs no role permission. An invalid or expired key, or a key from another region, fails the test.
 
@@ -127,7 +138,7 @@ The TrendAI Vision One connector exposes the following actions:
 * **Filters.** Filter values such as `endpointName` and the free-form `filter` are trimmed. A blank value is ignored like a missing one; spaces inside a value are kept. `agentGuid` is trimmed and must be a UUID, so a blank `agentGuid` is rejected; leave it out instead.
 * **Deprecated fields.** The connector never sends the deprecated `investigationStatus` alert field and removes it from returned alerts. Use `status` and `investigationResult`.
 * **Errors.** A failed request is thrown once and keeps its HTTP status and the response headers, including `Retry-After`, so the agent decides what to do. The connector does not retry. A write that fails with a 5xx or a timeout may already have been applied, so check before repeating it. The connector does not follow redirects: an HTTP 3xx answer fails the action with its status, and nothing is sent to the redirect location.
-* **Limits.** Every request times out after 60 seconds, except the read of the alert's ETag that `updateAlertStatus` makes when no `etag` is given, which times out after 30 seconds. Responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`).
+* **Limits.** Every request times out after 60 seconds, except the update that `updateAlertStatus` sends after reading the alert's ETag (when no `etag` is given): the read and the update share 100 seconds, so the update gets the time that is left, up to 60 seconds. Responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`).
 
 ## Required permissions [trend-vision-one-permissions]
 
@@ -166,14 +177,3 @@ Each action needs the permissions in the following table on the role of the API 
 * A sandbox analysis needs a supported file type (for example a PDF; plain text files are rejected) and, for a URL, a host that TrendAI Vision One can reach. A failed analysis shows on the sandbox task, not when you submit. The submission ID is the analysis ID.
 * Email response actions need the quarantine location of your mail provider configured in Email and Collaboration Protection; otherwise TrendAI Vision One answers with a configuration error.
 * Without a time range, `listObservedAttackTechniques` returns only the last hour (the product default). Give a detection range to read more.
-
-## Connector networking configuration [trend-vision-one-connector-networking-configuration]
-
-Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-## Get API credentials [trend-vision-one-api-credentials]
-
-1. Sign in to the TrendAI Vision One console.
-2. Go to **Administration > User Roles** and create or pick a role that grants the permissions of the actions you plan to use. [Required permissions](#trend-vision-one-permissions) lists the permissions of each action.
-3. Go to **Administration > API Keys** and add an API key with that role and an expiry date.
-4. Copy the API key. In the **API key** field of the connector, paste the key. In **Region API URL**, enter the API address of your tenant's region from the table in [Connector configuration](#trend-vision-one-connector-configuration).

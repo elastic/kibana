@@ -16,7 +16,7 @@ import {
   withoutDeprecated,
 } from './client';
 import { readOnePage } from './list_actions';
-import { ETAG_LOOKUP_TIMEOUT_MS, VENDOR } from './constants';
+import { REQUEST_TIMEOUT_MS, UPDATE_ALERT_DEADLINE_MS, VENDOR } from './constants';
 import { ACTION_DESCRIPTIONS } from './descriptions';
 import type {
   AddAlertNoteInput,
@@ -36,13 +36,12 @@ const ALERTS_PATH = '/workbench/alerts';
 const alertPath = (id: string): string => `${ALERTS_PATH}/${encodeURIComponent(id)}`;
 
 /** Reads the alert and its ETag; the deprecated investigationStatus field is removed. */
-const readAlert = async (ctx: ActionContext, action: string, id: string, timeoutMs?: number) => {
+const readAlert = async (ctx: ActionContext, action: string, id: string) => {
   const response = await vendorRequest<Record<string, unknown>>(ctx, {
     action,
     method: 'GET',
     path: alertPath(id),
     mutating: false,
-    timeoutMs,
     notFound: `Workbench alert ${id}`,
   });
   return {
@@ -103,8 +102,10 @@ export const alertActions: ConnectorSpec['actions'] = {
           : {}),
       };
       let etag = input.etag;
+      let patchTimeoutMs = REQUEST_TIMEOUT_MS;
       if (etag === undefined) {
-        const current = await readAlert(ctx, 'updateAlertStatus', input.id, ETAG_LOOKUP_TIMEOUT_MS);
+        const startedAt = Date.now();
+        const current = await readAlert(ctx, 'updateAlertStatus', input.id);
         const unchanged = Object.entries(changes).every(
           ([field, value]) => current.alert[field] === value
         );
@@ -118,6 +119,10 @@ export const alertActions: ConnectorSpec['actions'] = {
           );
         }
         etag = current.etag;
+        patchTimeoutMs = Math.min(
+          REQUEST_TIMEOUT_MS,
+          UPDATE_ALERT_DEADLINE_MS - (Date.now() - startedAt)
+        );
       }
       await vendorRequest(ctx, {
         action: 'updateAlertStatus',
@@ -126,6 +131,7 @@ export const alertActions: ConnectorSpec['actions'] = {
         data: changes,
         headers: { 'If-Match': etag },
         mutating: true,
+        timeoutMs: patchTimeoutMs,
         notFound: `Workbench alert ${input.id}`,
       });
       return { id: input.id, updated: true, outcome: 'updated', ...changes };

@@ -30,8 +30,11 @@ export const REGION_HOSTS: Readonly<Record<string, string>> = {
 
 export const API_PREFIX = '/v3.0';
 export const REQUEST_TIMEOUT_MS = 60_000;
-/** The read that gets the ETag for updateAlertStatus: with the 60 s PATCH it stays under the execute API's 120 s socket timeout. */
-export const ETAG_LOOKUP_TIMEOUT_MS = 30_000;
+/**
+ * updateAlertStatus without an etag reads the alert, then sends the PATCH: the PATCH gets the time
+ * left of this shared deadline (up to REQUEST_TIMEOUT_MS), so both stay under the execute API's 120 s.
+ */
+export const UPDATE_ALERT_DEADLINE_MS = 100_000;
 
 export const ENDPOINT_FILTER_MAX = 1024;
 export const OAT_FILTER_MAX = 4000;
