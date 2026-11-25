@@ -65,5 +65,5 @@ export {
   type BacktestOutcome,
   type RuleState,
   type SeededRule,
-} from './rule_tuning_review';
+} from './rule_tuning';
 export { startScriptedModel, type ScriptedModel } from './scripted_model';
