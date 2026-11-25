@@ -22,6 +22,8 @@ export { getActionPolicySavedObjectService } from './action_policy_saved_object_
 
 export type { RuleTemplatesApiService, SeedRuleTemplateParams } from './rule_templates_api_service';
 export { getRuleTemplatesApiService } from './rule_templates_api_service';
+export type { ExternalSourcesApiService } from './external_sources_api_service';
+export { getExternalSourcesApiService } from './external_sources_api_service';
 
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';

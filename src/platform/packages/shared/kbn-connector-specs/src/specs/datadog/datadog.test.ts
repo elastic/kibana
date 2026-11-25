@@ -73,6 +73,13 @@ describe('Datadog', () => {
     expect(types).toContain('basic');
   });
 
+  it('should support no authentication for connectors that only receive events', () => {
+    const types = (Datadog.auth?.types as Array<string | { type: string }>).map((t) =>
+      typeof t === 'string' ? t : t.type
+    );
+    expect(types).toContain('none');
+  });
+
   it('should keep test.enabled true', () => {
     expect(Datadog.test?.enabled).toBe(true);
   });
@@ -173,6 +180,26 @@ describe('Datadog', () => {
       expect(mockClient.defaults.headers.common['DD-API-KEY']).toBe('api-key');
       expect(mockClient.defaults.headers.common['DD-APPLICATION-KEY']).toBe('app-key');
       expect(mockClient.defaults.auth).toBeUndefined();
+    });
+
+    it('should fail when the connector uses no authentication', async () => {
+      const noAuthContext = {
+        ...mockContext,
+        secrets: { authType: 'none' },
+      } as unknown as ActionContext;
+
+      await expect(Datadog.actions.listMonitors.handler(noAuthContext, {})).rejects.toThrow(
+        'The Datadog listMonitors action requires an API Key and Application Key'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should fail when the connector has no secrets', async () => {
+      const noSecretsContext = { ...mockContext, secrets: undefined } as unknown as ActionContext;
+
+      await expect(Datadog.actions.listMonitors.handler(noSecretsContext, {})).rejects.toThrow(
+        'The Datadog listMonitors action requires an API Key and Application Key'
+      );
     });
   });
 

@@ -15,7 +15,7 @@ You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Overview
 
-The Datadog connector uses Datadog's regional API hosts with API key and Application key authentication. You configure the Datadog site (region) and both keys when creating the connector.
+The Datadog connector uses Datadog's regional API hosts with API key and Application key authentication. You configure the Datadog site (region) and both keys when creating the connector. A connector that only receives Datadog webhook events can use **No authentication (receive events only)** instead of the keys.
 
 ## Create connectors in {{kib}} [define-datadog-ui]
 
@@ -27,7 +27,7 @@ Datadog site
 :   The Datadog site where the account lives (for example `datadoghq.com` for US1, `datadoghq.eu` for EU1, `us3.datadoghq.com` for US3). Requests go to the matching `api.*` host.
 
 Authentication
-:   API Key and Application Key. Both are required for monitor, downtime, incident, event, metric, and log actions. Create them under **Organization Settings > API Keys** and **Organization Settings > Application Keys** in Datadog.
+:   API Key and Application Key, or **No authentication (receive events only)**. Both keys are required for monitor, downtime, incident, event, metric, and log actions. Create them under **Organization Settings > API Keys** and **Organization Settings > Application Keys** in Datadog. **No authentication** skips the Datadog API credentials only. Actions on a connector that uses it fail until you add both keys. Receiving webhook events still needs the {{kib}} ingest token. Refer to [Receive Datadog webhook events](#datadog-inbound-events).
 
 ## Receive Datadog webhook events [datadog-inbound-events]
 

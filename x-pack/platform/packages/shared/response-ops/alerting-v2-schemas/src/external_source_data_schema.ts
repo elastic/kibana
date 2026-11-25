@@ -41,7 +41,7 @@ export const externalSourceTypeSchema = lazySchema(() =>
   z
     .enum(EXTERNAL_SOURCE_TYPES)
     .describe(
-      'The source the import receives events from. It cannot be changed after the import is created.'
+      'The source the import receives events from. Kibana creates a connector of this type, with no authentication, to receive them. It cannot be changed after the import is created.'
     )
 );
 
@@ -102,7 +102,7 @@ const connectorIdSchema = lazySchema(() =>
     .min(1)
     .max(ID_MAX_LENGTH)
     .describe(
-      'The ID of the connector that receives the events for this import. It cannot be changed after the import is created.'
+      'The ID of the connector that receives the events for this import. Kibana creates it with the import, and it cannot be changed.'
     )
 );
 
@@ -118,13 +118,25 @@ const externalSourceDataBaseSchema = lazySchema(() =>
     type: externalSourceTypeSchema,
     kind: externalSourceKindSchema,
     metadata: externalSourceMetadataSchema,
-    connector_id: connectorIdSchema,
   })
 );
 
 /**
+ * The stored fields of an external source that callers set, which a PATCH is merged into and
+ * validated against. The connector is created with the import and is not part of it.
+ */
+export const externalSourceDataSchema = lazySchema(() =>
+  externalSourceDataBaseSchema.strict().refine(isRoutingTagsAllowedForKind, {
+    message: ROUTING_TAGS_KIND_MESSAGE,
+    path: ['metadata', 'routing_tags'],
+  })
+);
+
+export type ExternalSourceData = z.infer<typeof externalSourceDataSchema>;
+
+/**
  * Data accepted when creating an external source. The `id` is optional; when omitted, Kibana
- * generates one.
+ * generates one. Kibana creates a connector of the given `type` for the import.
  */
 export const createExternalSourceDataSchema = lazySchema(() =>
   externalSourceDataBaseSchema
@@ -146,9 +158,26 @@ export const createExternalSourceDataSchema = lazySchema(() =>
 export type CreateExternalSourceData = z.infer<typeof createExternalSourceDataSchema>;
 
 /**
+ * Data accepted when creating or replacing an external source at a known ID. The ID comes from the
+ * path. A create makes a connector of the given `type`. A replace keeps the existing connector,
+ * and its `type` must match the stored one.
+ */
+export const putExternalSourceDataSchema = lazySchema(() =>
+  externalSourceDataBaseSchema
+    .strict()
+    .refine(isRoutingTagsAllowedForKind, {
+      message: ROUTING_TAGS_KIND_MESSAGE,
+      path: ['metadata', 'routing_tags'],
+    })
+    .meta({ id: 'alerting_put_external_source' })
+);
+
+export type PutExternalSourceData = z.infer<typeof putExternalSourceDataSchema>;
+
+/**
  * Data accepted when updating an external source. Omitted fields are kept and `null` clears an
- * optional field. `type` and `connector_id` are not accepted: an import keeps the source and
- * connector it was created with.
+ * optional field. `type` is not accepted: an import keeps the source and connector it was
+ * created with.
  */
 export const updateExternalSourceDataSchema = lazySchema(() =>
   z
@@ -167,6 +196,7 @@ export const externalSourceResponseSchema = lazySchema(() =>
   externalSourceDataBaseSchema
     .extend({
       id: z.string().describe('Unique import identifier.'),
+      connector_id: connectorIdSchema,
       type: z
         .string()
         .max(256)

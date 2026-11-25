@@ -16,6 +16,10 @@ import {
   type ExternalSourceSavedObjectServiceMock,
 } from '../services/external_source_saved_object_service/external_source_saved_object_service.mock';
 import type { ExternalSourceSavedObjectDoc } from '../services/external_source_saved_object_service/types';
+import {
+  createExternalSourceConnectorServiceMock,
+  type ExternalSourceConnectorServiceMock,
+} from '../services/external_source_connector_service/external_source_connector_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { ExternalSourceClient } from './external_source_client';
@@ -37,7 +41,6 @@ const createData = (
     tags: ['datadog'],
     routing_tags: ['team-a'],
   },
-  connector_id: 'connector-1',
   ...overrides,
 });
 
@@ -75,17 +78,20 @@ const getBoomData = (error: unknown) => (Boom.isBoom(error) ? error.data : undef
 
 describe('ExternalSourceClient', () => {
   let savedObjectService: ExternalSourceSavedObjectServiceMock;
+  let connectorService: ExternalSourceConnectorServiceMock;
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let client: ExternalSourceClient;
 
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date(NOW));
     savedObjectService = createExternalSourceSavedObjectServiceMock();
+    connectorService = createExternalSourceConnectorServiceMock();
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
     client = new ExternalSourceClient(
       savedObjectService,
       createUserService().userService,
+      connectorService,
       logger.loggerService
     );
   });
@@ -95,10 +101,15 @@ describe('ExternalSourceClient', () => {
   });
 
   describe('createExternalSource', () => {
-    it('stores the attributes and a connector reference, and returns the import', async () => {
+    it('creates a connector from the type and stores it with the attributes, without the type', async () => {
       savedObjectService.create.mockResolvedValue({ id: 'import-1', version: 'WzEsMV0=' });
 
       const result = await client.createExternalSource({ data: createData({ id: 'import-1' }) });
+
+      expect(connectorService.create).toHaveBeenCalledWith({
+        type: 'datadog',
+        name: 'Datadog production',
+      });
 
       expect(savedObjectService.create).toHaveBeenCalledWith({
         id: 'import-1',
@@ -156,7 +167,7 @@ describe('ExternalSourceClient', () => {
       expect(result.metadata).toEqual({ name: 'Signals only' });
     });
 
-    it('throws EXTERNAL_SOURCE_ALREADY_EXISTS when the id is taken', async () => {
+    it('throws EXTERNAL_SOURCE_ALREADY_EXISTS and deletes the new connector when the id is taken', async () => {
       savedObjectService.create.mockRejectedValue(
         SavedObjectsErrorHelpers.createConflictError(EXTERNAL_SOURCE_SAVED_OBJECT_TYPE, 'import-1')
       );
@@ -164,6 +175,8 @@ describe('ExternalSourceClient', () => {
       const error = await client
         .createExternalSource({ data: createData({ id: 'import-1' }) })
         .catch((e) => e);
+
+      expect(connectorService.delete).toHaveBeenCalledWith('connector-1');
 
       expect(error.output.statusCode).toBe(409);
       expect(getBoomData(error)).toEqual({
@@ -175,7 +188,7 @@ describe('ExternalSourceClient', () => {
     it('throws INVALID_EXTERNAL_SOURCE_DATA when the data fails validation', async () => {
       const error = await client
         .createExternalSource({
-          data: { ...createData(), connector_id: '' },
+          data: { ...createData(), type: 'pagerduty' as never },
         })
         .catch((e) => e);
 
@@ -186,7 +199,33 @@ describe('ExternalSourceClient', () => {
           details: expect.objectContaining({ context: 'create' }),
         })
       );
+      expect(connectorService.create).not.toHaveBeenCalled();
       expect(savedObjectService.create).not.toHaveBeenCalled();
+    });
+
+    it('does not create the import when the connector cannot be created', async () => {
+      const failure = new Error('Unauthorized to create connectors');
+      connectorService.create.mockRejectedValue(failure);
+
+      await expect(client.createExternalSource({ data: createData() })).rejects.toBe(failure);
+      expect(savedObjectService.create).not.toHaveBeenCalled();
+    });
+
+    it('logs and keeps the saved object error when the new connector cannot be deleted', async () => {
+      const failure = new Error('cluster unavailable');
+      savedObjectService.create.mockRejectedValue(failure);
+      connectorService.delete.mockRejectedValue(new Error('connector delete failed'));
+
+      await expect(client.createExternalSource({ data: createData() })).rejects.toBe(failure);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.EXTERNAL_SOURCE_CONNECTOR_DELETE_FAILED,
+            connector_id: 'connector-1',
+          }),
+        })
+      );
     });
 
     it('rejects routing tags on a signal import', async () => {
@@ -447,15 +486,159 @@ describe('ExternalSourceClient', () => {
     });
   });
 
+  describe('upsertExternalSource', () => {
+    const notFound = () =>
+      SavedObjectsErrorHelpers.createGenericNotFoundError(
+        EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
+        'import-1'
+      );
+
+    it('creates the import at the given id when it does not exist', async () => {
+      savedObjectService.get.mockRejectedValue(notFound());
+      savedObjectService.create.mockResolvedValue({ id: 'import-1', version: 'WzEsMV0=' });
+
+      const { externalSource, created } = await client.upsertExternalSource({
+        id: 'import-1',
+        data: createData(),
+      });
+
+      expect(created).toBe(true);
+      expect(connectorService.create).toHaveBeenCalledWith({
+        type: 'datadog',
+        name: 'Datadog production',
+      });
+      expect(savedObjectService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'import-1',
+          attrs: expect.objectContaining({ type: 'datadog' }),
+          references: [CONNECTOR_REFERENCE],
+        })
+      );
+      expect(externalSource).toEqual(expect.objectContaining({ id: 'import-1', version: 1 }));
+    });
+
+    it('replaces an existing import, increments the version and keeps the creation fields', async () => {
+      savedObjectService.get.mockResolvedValue(storedDoc());
+
+      const { externalSource, created } = await client.upsertExternalSource({
+        id: 'import-1',
+        data: createData({ kind: 'signal', metadata: { name: 'Replaced' } }),
+      });
+
+      expect(created).toBe(false);
+      expect(connectorService.create).not.toHaveBeenCalled();
+      expect(savedObjectService.create).not.toHaveBeenCalled();
+      expect(savedObjectService.update).toHaveBeenCalledWith({
+        id: 'import-1',
+        version: 'WzEsMV0=',
+        attrs: {
+          type: 'datadog',
+          kind: 'signal',
+          metadata: { name: 'Replaced' },
+          connector_id: 'connector-1',
+          version: 4,
+          createdBy: CREATOR,
+          updatedBy: ACTOR,
+          createdAt: CREATED_AT,
+          updatedAt: NOW,
+        },
+        references: [CONNECTOR_REFERENCE],
+      });
+      expect(externalSource).toEqual(
+        expect.objectContaining({ id: 'import-1', kind: 'signal', version: 4 })
+      );
+    });
+
+    it('rejects a type that differs from the stored one', async () => {
+      savedObjectService.get.mockResolvedValue(
+        storedDoc({ attributes: storedAttributes({ type: 'another-source' as never }) })
+      );
+
+      const error = await client
+        .upsertExternalSource({ id: 'import-1', data: createData() })
+        .catch((e) => e);
+
+      expect(getBoomData(error)).toEqual(
+        expect.objectContaining({
+          code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA,
+          details: { context: 'upsert', external_source_id: 'import-1' },
+        })
+      );
+      expect(error.message).toBe(
+        'External source with ID "import-1" has type "another-source", which cannot be changed'
+      );
+      expect(savedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws INVALID_EXTERNAL_SOURCE_DATA before reading when the data fails validation', async () => {
+      const error = await client
+        .upsertExternalSource({ id: 'import-1', data: createData({ kind: 'signal' }) })
+        .catch((e) => e);
+
+      expect(getBoomData(error)).toEqual(
+        expect.objectContaining({
+          code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA,
+          details: expect.objectContaining({ context: 'upsert' }),
+        })
+      );
+      expect(savedObjectService.get).not.toHaveBeenCalled();
+    });
+
+    it('throws EXTERNAL_SOURCE_VERSION_CONFLICT when another writer updated the import', async () => {
+      savedObjectService.get.mockResolvedValue(storedDoc());
+      savedObjectService.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError(EXTERNAL_SOURCE_SAVED_OBJECT_TYPE, 'import-1')
+      );
+
+      const error = await client
+        .upsertExternalSource({ id: 'import-1', data: createData() })
+        .catch((e) => e);
+
+      expect(error.output.statusCode).toBe(409);
+      expect(getBoomData(error)?.code).toBe(ALERTING_ERROR_CODES.EXTERNAL_SOURCE_VERSION_CONFLICT);
+    });
+  });
+
   describe('deleteExternalSource', () => {
-    it('deletes the import', async () => {
+    it('deletes the import and then its connector', async () => {
+      savedObjectService.get.mockResolvedValue(storedDoc());
+
       await client.deleteExternalSource({ id: 'import-1' });
 
       expect(savedObjectService.delete).toHaveBeenCalledWith({ id: 'import-1' });
+      expect(connectorService.delete).toHaveBeenCalledWith('connector-1');
+    });
+
+    it('keeps the connector when the import cannot be deleted', async () => {
+      const failure = new Error('cluster unavailable');
+      savedObjectService.get.mockResolvedValue(storedDoc());
+      savedObjectService.delete.mockRejectedValue(failure);
+
+      await expect(client.deleteExternalSource({ id: 'import-1' })).rejects.toBe(failure);
+      expect(connectorService.delete).not.toHaveBeenCalled();
+    });
+
+    it('still deletes the import and logs when its connector cannot be deleted', async () => {
+      savedObjectService.get.mockResolvedValue(storedDoc());
+      connectorService.delete.mockRejectedValue(new Error('connector delete failed'));
+
+      await client.deleteExternalSource({ id: 'import-1' });
+
+      expect(savedObjectService.delete).toHaveBeenCalledWith({ id: 'import-1' });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.EXTERNAL_SOURCE_CONNECTOR_DELETE_FAILED,
+            connector_id: 'connector-1',
+            external_source_id: 'import-1',
+          }),
+        })
+      );
     });
 
     it('throws EXTERNAL_SOURCE_NOT_FOUND when the import does not exist', async () => {
-      savedObjectService.delete.mockRejectedValue(
+      savedObjectService.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
           'missing'

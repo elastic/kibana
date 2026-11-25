@@ -11,4 +11,5 @@ export type {
   FindExternalSourcesParams,
   FindExternalSourcesResponse,
   UpdateExternalSourceParams,
+  UpsertExternalSourceParams,
 } from './types';

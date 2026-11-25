@@ -588,6 +588,13 @@ export const ALERTING_LOG_CODES = {
    * import was written, since the external source client always writes it.
    */
   EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NOT_FOUND: 'EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NOT_FOUND',
+  /**
+   * The connector of an external source could not be deleted, either after the
+   * import failed to save or after the import was deleted. The request still
+   * returns its own result, so the connector is left behind. Operator should
+   * delete the connector named in `connector_id` from the connectors page.
+   */
+  EXTERNAL_SOURCE_CONNECTOR_DELETE_FAILED: 'EXTERNAL_SOURCE_CONNECTOR_DELETE_FAILED',
 
   // ─────────────────────────── Rule executor ─────────────────────────
   /**

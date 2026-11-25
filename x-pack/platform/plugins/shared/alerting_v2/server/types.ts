@@ -12,6 +12,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
@@ -138,6 +139,7 @@ export interface AlertingServerSetupDependencies {
 }
 
 export interface AlertingServerStartDependencies {
+  actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
   features: FeaturesPluginStart;
   spaces: SpacesPluginStart;

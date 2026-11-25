@@ -21,6 +21,7 @@ import {
   getAlertActionsEventsService,
   getDispatcherApiService,
   getEbtService,
+  getExternalSourcesApiService,
   getMaintenanceWindowsApiService,
   getRuleChangesHistoryApiService,
   getRuleExecutorTaskApiService,
@@ -39,6 +40,7 @@ import {
   type AlertActionsEventsService,
   type DispatcherApiService,
   type EbtService,
+  type ExternalSourcesApiService,
   type MaintenanceWindowsApiService,
   type RuleChangesHistoryApiService,
   type RuleExecutorTaskApiService,
@@ -59,6 +61,7 @@ export interface AlertingApiServices {
   rules: RulesApiService;
   ruleSavedObject: RuleSavedObjectService;
   ruleTemplates: RuleTemplatesApiService;
+  externalSources: ExternalSourcesApiService;
   ruleChangesHistory: RuleChangesHistoryApiService;
   ruleEvents: RuleEventsApiService;
   alertActionsEvents: AlertActionsEventsService;
@@ -107,6 +110,7 @@ export const buildAlertingApiServices = ({
     rules,
     ruleSavedObject: getRuleSavedObjectService({ esClient, log, config }),
     ruleTemplates: getRuleTemplatesApiService({ kbnClient, log }),
+    externalSources: getExternalSourcesApiService({ kbnClient, log }),
     ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
     ruleEvents,
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
