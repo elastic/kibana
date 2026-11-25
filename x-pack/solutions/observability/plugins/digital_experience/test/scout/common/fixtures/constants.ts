@@ -51,14 +51,23 @@ export const OTEL_SHOP_SAFARI_PAGE_LOADS = '1';
 
 export const STAGING_ENVIRONMENT = 'staging';
 
+// The vitals and errors of the fixture carry no route or URL, as from an app that reports no
+// routes, so no page has any.
+const NO_SIGNALS = { lcpP75Ms: null, inpP75Ms: null, clsP75: null, jsErrors: null };
+
 /**
  * The usage of `OTEL_APPS.shop` inside `TIME_RANGE`; every duration is a
  * single sample, so the percentiles are exact.
  */
 export const OTEL_SHOP_USAGE = {
   topPages: [
-    { url: 'https://otel-shop.example.com/', pageLoads: 3, loadTimeP75Ms: null },
-    { url: 'https://otel-shop.example.com/products', pageLoads: 2, loadTimeP75Ms: 1200 },
+    { url: 'https://otel-shop.example.com/', pageLoads: 3, loadTimeP75Ms: null, ...NO_SIGNALS },
+    {
+      url: 'https://otel-shop.example.com/products',
+      pageLoads: 2,
+      loadTimeP75Ms: 1200,
+      ...NO_SIGNALS,
+    },
   ],
   // A page load without browser attributes and a click without a selector sit in no row.
   breakdowns: {
@@ -81,6 +90,23 @@ export const OTEL_SHOP_USAGE = {
     { cssSelector: '.nav-link', tagName: 'A', count: 1 },
   ],
   totalClicks: 4,
+  // The frustration documents are not clicks: they add to `frustration` and not to `totalClicks`.
+  frustration: { rageClicks: 1, deadClicks: 1, errorClicks: 0, total: 2, sessions: 1 },
+  frustratedElements: [
+    {
+      cssSelector: '#pay',
+      tagName: 'BUTTON',
+      rageClicks: 1,
+      deadClicks: 1,
+      errorClicks: 0,
+      total: 2,
+      sessions: 1,
+      topPage: '/products',
+    },
+  ],
+  frustratedPages: [
+    { page: '/products', rageClicks: 1, deadClicks: 1, errorClicks: 0, total: 2, sessions: 1 },
+  ],
 } as const;
 
 /** The Errors tab of `OTEL_APPS.shop` inside `TIME_RANGE`. */

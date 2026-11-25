@@ -843,22 +843,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Content packs in Streams',
     },
   },
-  'observability:streamsEnableQueryStreams': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Query streams in Streams',
-    },
-  },
   'observability:streamsEnableWiredStreamViews': {
     type: 'boolean',
     _meta: {
       description: 'Enable ES|QL views for wired streams',
-    },
-  },
-  'observability:streamsEnableDraftStreams': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable draft streams with read-time ES|QL views',
     },
   },
   'observability:streamsEnableCanvas': {

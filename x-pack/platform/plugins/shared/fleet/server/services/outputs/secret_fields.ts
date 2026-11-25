@@ -17,7 +17,8 @@ import type { SecretFieldDefinition } from '../secrets/preserve';
  * keeps the settings and the secrets of the method of an output together. The TLS credentials of
  * an OTLP output have no plain text counterpart, they are only accepted under `secrets`: they are
  * removed with an explicit `null` of the credential, or by clearing the TLS settings they belong to
- * (`otlp_exporter.tls: null`, or `otlp_exporter.tls.tpm: null` for the TPM ones).
+ * (`otlp_exporter.tls: null`, or `otlp_exporter.tls.tpm: null` for the TPM ones). The same goes
+ * for the authentication credential of an OTLP output, which `auth: null` removes.
  */
 export function getOutputSecretFields(type: ValueOf<OutputType>): SecretFieldDefinition[] {
   const fields: SecretFieldDefinition[] = [];
@@ -46,6 +47,8 @@ export function getOutputSecretFields(type: ValueOf<OutputType>): SecretFieldDef
   }
   if (type === outputType.Otlp) {
     fields.push(
+      // the credential belongs to the authentication, `auth: null` removes it
+      { secretPath: 'secrets.auth.credential', clearedBy: ['auth'] },
       { secretPath: 'secrets.otlp_exporter.tls.key_pem', clearedBy: ['otlp_exporter.tls'] },
       {
         secretPath: 'secrets.otlp_exporter.tls.tpm.owner_auth',
