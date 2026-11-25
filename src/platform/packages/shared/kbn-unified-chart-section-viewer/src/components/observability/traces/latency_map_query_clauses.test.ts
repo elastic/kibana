@@ -140,6 +140,17 @@ describe('appendMapClause', () => {
     );
   });
 
+  it('keeps a comment between the pipe and the LIMIT with the LIMIT', () => {
+    const commented = 'FROM traces-apm* | /* cap results */ LIMIT 100';
+    const appended = appendMapClause(commented, clause, { nullify: false });
+    expect(appended).toBe(`FROM traces-apm*\n| WHERE ${clause} | /* cap results */ LIMIT 100`);
+    expect(removeWhere(appended, clause)).toBe(commented);
+    const lineComment = `FROM traces-apm*\n| // cap results\n  LIMIT 100`;
+    expect(appendMapClause(lineComment, clause, { nullify: false })).toBe(
+      `FROM traces-apm*\n| WHERE ${clause}\n| // cap results\n  LIMIT 100`
+    );
+  });
+
   it('sees a SET the user wrote with other spacing', () => {
     const own = `SET  unmapped_fields = "LOAD" ;\n${query}`;
     expect(appendMapClause(own, clause)).toBe(appendToESQLQuery(own, `| WHERE ${clause}`));

@@ -152,8 +152,13 @@ spaceTest.describe(
 
         await spaceTest.step('the focused operation draws its duration groups', async () => {
           await charts.waitForLatencyMapReady();
-          await charts.hoverLatencyMap();
-          await expect(charts.latencyMapBand(1)).toBeVisible();
+          // The chart tells the map where its cells are from the first cell hovered. The map
+          // keeps the previous grid while the focused one loads, so a hover may land before
+          // the chart has its new cells: hovered again until the chart has answered.
+          await expect(async () => {
+            await charts.hoverLatencyMap();
+            await expect(charts.latencyMapBand(1)).toBeVisible({ timeout: 1000 });
+          }).toPass({ timeout: 15_000 });
         });
 
         await spaceTest.step('clicking a band selects the group', async () => {
@@ -182,7 +187,7 @@ spaceTest.describe(
       // the pointer says so before it is clicked, so a layout change cannot turn the click
       // into a press on an empty cell.
       await charts.hoverLatencyMap();
-      await expect(charts.latencyMapCellDetails).toContainText(/[1-9]\d* spans?\b/);
+      await expect(charts.latencyMapCellDetails).toContainText(/[1-9]\d* spans?/);
       await charts.clickLatencyMapCell();
 
       await pageObjects.docViewer.waitForFlyoutOpen();

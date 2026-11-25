@@ -32,8 +32,8 @@ globalTeardownHook(
       );
 
     // The latency map fixtures share the APM streams with the other traces fixtures, under
-    // their own service: taken out by service, so that a later run against the same cluster
-    // does not count this run's spans twice.
+    // this run's own service: taken out by service, so that a later run against the same
+    // cluster does not count this run's spans twice, and no other run's spans are touched.
     await esClient
       .deleteByQuery({
         index: 'traces-apm*',

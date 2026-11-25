@@ -35,12 +35,38 @@ export const whereExpression = (command: ESQLCommand): string | undefined => {
 /**
  * Where a top-level command's lead starts in the query text: the pipe before it, and the
  * whitespace before that, so cutting or inserting there keeps the query's own line breaks.
- * The command's location starts at its keyword, past the pipe.
+ * The command's location starts at its keyword, past the pipe and past any comment between
+ * the two, so the pipe is looked for in the gap after the command before it.
  */
-export function commandLeadStart(query: string, command: ESQLCommand): number {
-  let index = command.location.min;
-  while (index > 0 && /\s/.test(query[index - 1])) index -= 1;
-  if (query[index - 1] === '|') index -= 1;
-  while (index > 0 && /\s/.test(query[index - 1])) index -= 1;
-  return index;
+export function commandLeadStart(
+  query: string,
+  root: ESQLAstQueryExpression,
+  command: ESQLCommand
+): number {
+  const index = root.commands.indexOf(command);
+  const previous = index > 0 ? root.commands[index - 1] : undefined;
+  const gapStart = previous ? previous.location.max + 1 : 0;
+  const pipe = findPipe(query, gapStart, command.location.min);
+  let start = pipe === -1 ? command.location.min : pipe;
+  while (start > gapStart && /\s/.test(query[start - 1])) start -= 1;
+  return start;
+}
+
+/** The index of the first pipe between `from` and `to` that is not inside a comment. */
+function findPipe(query: string, from: number, to: number): number {
+  let i = from;
+  while (i < to) {
+    if (query.startsWith('//', i)) {
+      const end = query.indexOf('\n', i);
+      i = end === -1 ? to : end + 1;
+    } else if (query.startsWith('/*', i)) {
+      const end = query.indexOf('*/', i + 2);
+      i = end === -1 ? to : end + 2;
+    } else if (query[i] === '|') {
+      return i;
+    } else {
+      i += 1;
+    }
+  }
+  return -1;
 }

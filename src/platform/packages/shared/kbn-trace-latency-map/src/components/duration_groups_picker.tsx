@@ -70,6 +70,7 @@ export function DurationGroupsPicker({
       panelPaddingSize="none"
     >
       <EuiContextMenuPanel
+        data-test-subj="traceLatencyMapSuggestions"
         title={i18n.translate('traceLatencyMap.durationGroups.title', {
           defaultMessage: 'Select a suggested operation',
         })}

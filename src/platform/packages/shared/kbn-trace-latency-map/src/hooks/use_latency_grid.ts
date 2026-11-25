@@ -116,7 +116,10 @@ export function useLatencyGrid({
         cached?.stats ??
         statsCache.get(sourceKey) ??
         parseDurationStats(await run(buildDurationStatsQuery(stableSource)));
-      statsCache.set(sourceKey, stats);
+      // Nothing of a cancelled load reaches the cache: an older answer resolving after a
+      // newer load of the same source must not overwrite it.
+      const cacheable = () => !controller.signal.aborted;
+      if (cacheable()) statsCache.set(sourceKey, stats);
       const timeGrid = getTimeGrid(
         stableSource.timeRange.from,
         stableSource.timeRange.to,
@@ -124,7 +127,7 @@ export function useLatencyGrid({
       );
       if (!stats.spans) {
         const empty = { isEmpty: true, stats, timeGrid, loadedSource: stableSource };
-        gridCache.set(getGridCacheKey(sourceKey, targetBins), empty);
+        if (cacheable()) gridCache.set(getGridCacheKey(sourceKey, targetBins), empty);
         return { isLoading: false, ...empty };
       }
       const sampling = getMapSampling(stats);
@@ -140,7 +143,7 @@ export function useLatencyGrid({
                   table,
                   sampling ? 1 / sampling.probability : 1
                 );
-                operationsCache.set(sourceKey, operations);
+                if (cacheable()) operationsCache.set(sourceKey, operations);
                 return operations;
               },
               () => undefined
@@ -174,9 +177,7 @@ export function useLatencyGrid({
           grid,
           loadedSource: stableSource,
         };
-        if (!controller.signal.aborted) {
-          gridCache.set(getGridCacheKey(sourceKey, targetBins), loaded);
-        }
+        if (cacheable()) gridCache.set(getGridCacheKey(sourceKey, targetBins), loaded);
         gridState = { isLoading: false, ...loaded };
       }
       if (!loadOperations) return gridState;

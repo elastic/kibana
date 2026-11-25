@@ -71,22 +71,35 @@ export interface TracesLatencyMapViewProps {
 
 /**
  * The search context as a key: a change loads the map again. Disabled filters apply to
- * nothing, and pinning changes nothing of what a filter selects, so neither reloads.
+ * nothing, and pinning changes nothing of what a filter selects, so neither reloads. The
+ * time range counts only while a query filter reads it through `?_tstart`/`?_tend`: then
+ * the values the map counted with must be the ones an example span is looked up with.
  */
-const getContextKey = ({ filters = [], esqlVariables = [] }: TracesSearchContext) =>
+const getContextKey = (
+  { filters = [], esqlVariables = [], timeRange }: TracesSearchContext,
+  queryFilters: string[]
+) =>
   JSON.stringify({
     filters: filters
       .filter((filter) => !isFilterDisabled(filter))
       .map((filter) => [Boolean(filter.meta?.negate), cleanFilter(filter)]),
     variables: esqlVariables,
+    ...(queryFilters.some((filter) => TIME_PARAMS.test(filter)) ? { timeRange } : {}),
   });
 
-/** Whether the cell lies within the selection: its spans are among the selection's. */
+/**
+ * Whether the cell lies within the selection: its spans are among the selection's. The
+ * bounds are compared as the query writes them - whole nanoseconds, rounded up - so a cell
+ * starting on the selection's own edge is inside it.
+ */
 const isCellWithin = (cell: LatencyMapCell, selection: LatencyMapSelection) =>
   Date.parse(cell.from) >= Date.parse(selection.from) &&
   Date.parse(cell.to) <= Date.parse(selection.to) &&
-  cell.minDuration >= selection.minDuration &&
-  cell.maxDuration <= selection.maxDuration;
+  Math.ceil(cell.minDuration) >= Math.ceil(selection.minDuration) &&
+  Math.ceil(cell.maxDuration) <= Math.ceil(selection.maxDuration);
+
+/** Whether a query filter reads the time range through its named params. */
+const TIME_PARAMS = /\?_t(start|end)\b/;
 
 /**
  * The latency map in the Discover traces chart section. The selection lives in the ES|QL
@@ -128,8 +141,8 @@ export function TracesLatencyMapView({
   );
   const { filters: kibanaFilters, esqlVariables, timeRange, searchSessionId } = searchContext;
   const contextKey = useMemo(
-    () => getContextKey({ filters: kibanaFilters, esqlVariables }),
-    [kibanaFilters, esqlVariables]
+    () => getContextKey({ filters: kibanaFilters, esqlVariables, timeRange }, baseFilters),
+    [kibanaFilters, esqlVariables, timeRange, baseFilters]
   );
   const source = useStableTraceSource({
     indexPattern,
@@ -274,7 +287,9 @@ export function TracesLatencyMapView({
     [updateESQLQuery]
   );
 
-  // Only the latest click may open the flyout; a slower earlier fetch is discarded.
+  // Only the latest click may open the flyout; a slower earlier fetch is discarded, and so
+  // is one still running when the map's source changes under it: its span may no longer be
+  // among the documents.
   const clickAbortRef = useRef<AbortController>();
   useEffect(() => () => clickAbortRef.current?.abort(), []);
 
@@ -289,7 +304,10 @@ export function TracesLatencyMapView({
       setActiveCell(undefined);
     }
   }, [expandedDocId]);
-  useEffect(() => setActiveCell(undefined), [source]);
+  useEffect(() => {
+    clickAbortRef.current?.abort();
+    setActiveCell(undefined);
+  }, [source]);
 
   // Opens the newest span of a clicked cell in Discover's document flyout, leaving the
   // query and the selection as they are. Without _id and _index Discover shows the span as

@@ -23,21 +23,29 @@ export interface CachedGrid {
   loadedSource: TraceSource;
 }
 
-/** The last few entries, the oldest dropped first; a hit counts as new. */
-export function createBoundedCache<T>(max: number) {
-  const entries = new Map<string, T>();
+/**
+ * The last few entries, the oldest dropped first; a hit counts as new. An entry older than
+ * `maxAgeMs` is forgotten: spans can arrive late for a range, and a map shown again after a
+ * while should see them, as the documents do.
+ */
+export function createBoundedCache<T>(
+  max: number,
+  maxAgeMs: number,
+  now: () => number = () => Date.now()
+) {
+  const entries = new Map<string, { value: T; storedAt: number }>();
   return {
     get(key: string): T | undefined {
-      const value = entries.get(key);
-      if (value !== undefined) {
-        entries.delete(key);
-        entries.set(key, value);
-      }
-      return value;
+      const entry = entries.get(key);
+      if (!entry) return undefined;
+      entries.delete(key);
+      if (now() - entry.storedAt > maxAgeMs) return undefined;
+      entries.set(key, entry);
+      return entry.value;
     },
     set(key: string, value: T) {
       entries.delete(key);
-      entries.set(key, value);
+      entries.set(key, { value, storedAt: now() });
       if (entries.size > max) entries.delete(entries.keys().next().value as string);
     },
     clear() {
@@ -53,12 +61,28 @@ export function createBoundedCache<T>(max: number) {
  */
 export const LATENCY_GRID_CACHE_SIZE = 8;
 
+/**
+ * How long a loaded map is kept: long enough for the view to be switched away and back, or
+ * a flyout to be resized, short enough that spans arriving late for an absolute range show
+ * on the next look.
+ */
+export const LATENCY_GRID_CACHE_MAX_AGE_MS = 5 * 60_000;
+
 /** Duration statistics by source: a resize into another tier keeps them. */
-export const statsCache = createBoundedCache<DurationStats>(LATENCY_GRID_CACHE_SIZE);
+export const statsCache = createBoundedCache<DurationStats>(
+  LATENCY_GRID_CACHE_SIZE,
+  LATENCY_GRID_CACHE_MAX_AGE_MS
+);
 /** Per-operation histograms by source, which have no time axis either. */
-export const operationsCache = createBoundedCache<OperationHistogram[]>(LATENCY_GRID_CACHE_SIZE);
+export const operationsCache = createBoundedCache<OperationHistogram[]>(
+  LATENCY_GRID_CACHE_SIZE,
+  LATENCY_GRID_CACHE_MAX_AGE_MS
+);
 /** The loaded map by source and time columns. */
-export const gridCache = createBoundedCache<CachedGrid>(LATENCY_GRID_CACHE_SIZE);
+export const gridCache = createBoundedCache<CachedGrid>(
+  LATENCY_GRID_CACHE_SIZE,
+  LATENCY_GRID_CACHE_MAX_AGE_MS
+);
 
 export const getGridCacheKey = (sourceKey: string, targetBins: number) =>
   `${sourceKey}|${targetBins}`;

@@ -61,7 +61,8 @@ export function createTracesCharts(page: ScoutPage): TracesCharts {
     redMetricsCharts,
     legendItems: redMetricsCharts.locator('[data-testid="echLegendItemLabel"]'),
     expectedTitles: RED_METRICS_CHART_TITLES,
-    getChartTitle: (title: string): Locator => redMetricsCharts.getByText(title),
+    // Exact: "Latency" must not match the "Latency map" view toggle in the same grid.
+    getChartTitle: (title: string): Locator => redMetricsCharts.getByText(title, { exact: true }),
     getChartError: (title: string): Locator => {
       const headingTestSubj = `embeddablePanelHeading-${title.replace(/\s/g, '')}`;
       return redMetricsCharts
@@ -78,14 +79,20 @@ export function createTracesCharts(page: ScoutPage): TracesCharts {
     latencyMapClearSelection: page.testSubj.locator('traceLatencyMapClearSelection'),
     latencyMapDurationGroups: page.testSubj.locator('traceLatencyMapDurationGroups'),
     latencyMapCellDetails: page.testSubj.locator('traceLatencyMapCellDetails'),
-    latencyMapSuggestion: (name: string) => page.getByRole('button', { name }),
+    latencyMapSuggestion: (name: string) =>
+      page.testSubj.locator('traceLatencyMapSuggestions').getByText(name),
     latencyMapOperationBadge: page.testSubj.locator('traceLatencyMapOperationBadge'),
     latencyMapDurationGroup: (n: number) =>
       page.testSubj.locator(`traceLatencyMapDurationGroup-${n}`),
     latencyMapBand: (n: number) => page.testSubj.locator(`traceLatencyMapBand-${n}`),
     hoverLatencyMap: async (at = { x: 0.5, y: 0.5 }) => {
-      const point = await layerPoint(at);
-      await page.mouse.move(point.x, point.y);
+      const box = await latencyMapLayer.boundingBox();
+      if (!box) throw new Error('The latency map layer is not visible');
+      const point = { x: box.x + box.width * at.x, y: box.y + box.height * at.y };
+      // From outside the chart, in steps: the chart reads the pointer from its moves, and
+      // a pointer already sitting on the point would not move.
+      await page.mouse.move(box.x - 10, box.y - 10);
+      await page.mouse.move(point.x, point.y, { steps: 5 });
     },
     waitForLatencyMapReady: async () => {
       await latencyMapLayer.waitFor({ state: 'visible' });

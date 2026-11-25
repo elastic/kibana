@@ -10,7 +10,11 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { TraceSource } from '../types';
-import { LATENCY_GRID_CACHE_SIZE, clearLatencyGridCaches } from './latency_grid_cache';
+import {
+  LATENCY_GRID_CACHE_MAX_AGE_MS,
+  LATENCY_GRID_CACHE_SIZE,
+  clearLatencyGridCaches,
+} from './latency_grid_cache';
 import { useLatencyGrid } from './use_latency_grid';
 
 const source: TraceSource = {
@@ -182,6 +186,52 @@ describe('useLatencyGrid', () => {
       expect(again.result.current.isLoading).toBe(true);
       await waitFor(() => expect(again.result.current.error?.message).toBe('boom'));
       expect(runEsql).toHaveBeenCalledTimes(2);
+    });
+
+    it('caches nothing of a load that was cancelled, so a newer load is not overwritten', async () => {
+      let resolveStats: (table: ESQLSearchResponse) => void = () => {};
+      let calls = 0;
+      const runEsql = jest.fn((query: string): Promise<ESQLSearchResponse> => {
+        if (query.includes('PERCENTILE')) {
+          calls += 1;
+          // The first load's statistics hang; the second's answer at once.
+          return calls === 1
+            ? new Promise((resolve) => (resolveStats = resolve))
+            : Promise.resolve(statsTable(100));
+        }
+        return Promise.resolve(gridTable([[1, 2, 7, 3]]));
+      });
+      const { result, rerender } = renderHook(
+        (props: { targetBins: number }) => useLatencyGrid({ source, runEsql, ...props }),
+        { initialProps: { targetBins: 60 } }
+      );
+      rerender({ targetBins: 120 });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      // The cancelled first load answers now, with an empty range: it must not reach the cache.
+      resolveStats(statsTable(0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      rerender({ targetBins: 60 });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.isEmpty).toBe(false);
+      expect(result.current.grid?.cells.size).toBe(1);
+    });
+
+    it('forgets a map after a while, so late spans show on the next look', async () => {
+      const now = jest.spyOn(Date, 'now');
+      try {
+        now.mockReturnValue(1_000_000);
+        const runEsql = createRunner(statsTable(100), gridTable([[1, 2, 7, 3]]));
+        const first = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+        await waitFor(() => expect(first.result.current.isLoading).toBe(false));
+        first.unmount();
+        now.mockReturnValue(1_000_000 + LATENCY_GRID_CACHE_MAX_AGE_MS + 1);
+        const again = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+        expect(again.result.current.isLoading).toBe(true);
+        await waitFor(() => expect(again.result.current.isLoading).toBe(false));
+        expect(runEsql).toHaveBeenCalledTimes(4);
+      } finally {
+        now.mockRestore();
+      }
     });
 
     it('keeps the newest sources only', async () => {

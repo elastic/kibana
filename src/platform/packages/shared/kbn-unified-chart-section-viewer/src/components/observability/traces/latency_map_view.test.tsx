@@ -380,6 +380,43 @@ describe('TracesLatencyMapView', () => {
     expect(actions.setExpandedDoc.mock.lastCall?.[0]?.id).toBe('.ds-traces-apm-000001::span-1::');
   });
 
+  it('keeps the identity of a span on the selection edge: the bounds round as the query does', async () => {
+    answerWith(spanWithIdentity);
+    const { actions, mapProps } = renderView({
+      filters: ['service.name == "cart"', selectionClause],
+    });
+    // A cell edge is a fraction of a nanosecond below the written bound, which rounded up.
+    await act(() =>
+      mapProps.onCellClick!({
+        ...cell,
+        from: selection.from,
+        to: '2026-10-26T10:01:00.000Z',
+        minDuration: selection.minDuration - 0.4,
+        maxDuration: 2_000_000,
+      })
+    );
+    expect(actions.setExpandedDoc.mock.lastCall?.[0]?.id).toBe('.ds-traces-apm-000001::span-1::');
+  });
+
+  it('abandons a pending span lookup when the map source changes', async () => {
+    let resolveLookup: (value: { rawResponse: ESQLSearchResponse }) => void = () => {};
+    esql.mockImplementation(
+      (_params, options) =>
+        new Promise((resolve, reject) => {
+          resolveLookup = resolve;
+          options?.abortSignal?.addEventListener('abort', () => reject(new Error('aborted')));
+        })
+    );
+    const view = renderView();
+    const clicked = view.mapProps.onCellClick!(cell);
+    // A filter pill changed: the documents are different now.
+    view.rerender({ filters: ['service.name == "checkout"'] });
+    expect(esql.mock.lastCall?.[1]?.abortSignal?.aborted).toBe(true);
+    resolveLookup({ rawResponse: spanWithIdentity });
+    await act(() => clicked);
+    expect(view.actions.setExpandedDoc).not.toHaveBeenCalled();
+  });
+
   it('leaves the view as it is when the cell has no span to open', async () => {
     esql.mockRejectedValue(new Error('shards failed'));
     const { actions, mapProps } = renderView();
@@ -478,6 +515,22 @@ describe('TracesLatencyMapView', () => {
     expect(disabled.source.contextKey).toBe(first.source.contextKey);
     expect(negated.source.contextKey).not.toBe(first.source.contextKey);
     expect(variables.source.contextKey).not.toBe(first.source.contextKey);
+  });
+
+  it('keys the map source by the time range only while a query filter reads it as a param', () => {
+    const at = (to: string) => ({
+      searchContext: { timeRange: { from: '2026-10-26T10:00:00.000Z', to } },
+    });
+    const { mapProps: plain } = renderView(at('2026-10-26T11:00:00.000Z'));
+    const { mapProps: plainLater } = renderView(at('2026-10-26T11:00:10.000Z'));
+    expect(plainLater.source.contextKey).toBe(plain.source.contextKey);
+    const withParams = { filters: ['@timestamp >= ?_tstart AND service.name == "cart"'] };
+    const { mapProps: params } = renderView({ ...withParams, ...at('2026-10-26T11:00:00.000Z') });
+    const { mapProps: paramsLater } = renderView({
+      ...withParams,
+      ...at('2026-10-26T11:00:10.000Z'),
+    });
+    expect(paramsLater.source.contextKey).not.toBe(params.source.contextKey);
   });
 
   it('offers no cell click without a document flyout to open', () => {

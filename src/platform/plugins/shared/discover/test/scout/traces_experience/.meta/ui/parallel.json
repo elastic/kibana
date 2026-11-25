@@ -1,5 +1,5 @@
 {
-  "sha1": "7c5ab073dbdacfe2ffdb398a266fa40f41ec33ec",
+  "sha1": "4100d9b2cb4908a3ab6c5413a76d8799fed3fc6e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -347,8 +347,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 136,
-        "column": 34
+        "line": 141,
+        "column": 22
       }
     },
     {

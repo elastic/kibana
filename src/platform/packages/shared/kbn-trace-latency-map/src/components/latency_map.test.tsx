@@ -1168,6 +1168,30 @@ describe('LatencyMap', () => {
       expect(condition).toContain('event.outcome == "failure"');
     });
 
+    it('keeps the failure clause of a moved selection that carries its own', async () => {
+      // An inferred errors-only region (or one from a shared URL) under a host filter that
+      // is off: moving it must not widen it to every span.
+      const selection = {
+        ...geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+        failedOnly: true,
+      };
+      const { onSelectionCommit } = renderMap({
+        selection,
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      hover(4, 5);
+      const grip = screen.getByTestId('traceLatencyMapGrip');
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(grip, { ...centerOf(4, 5), button: 0, pointerId: 1 });
+      fireEvent.pointerMove(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      const [moved, condition] = onSelectionCommit.mock.calls[0];
+      expect(moved.failedOnly).toBe(true);
+      expect(condition).toContain('event.outcome == "failure"');
+    });
+
     it('keeps the errors switch usable while the filter is on, whatever it left to show', async () => {
       // The host's filter emptied the map: the switch is the way back to the spans.
       renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() }, gridTable([]));

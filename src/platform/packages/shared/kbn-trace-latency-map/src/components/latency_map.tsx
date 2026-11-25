@@ -446,8 +446,13 @@ export function LatencyMap({
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
       if (displaySelection && committedRange && isSameRange(range, committedRange)) return;
-      // With a host filter the failure clause is the host's, never the selection's.
-      let next = geometry.rangeToSelection(range, controlled ? undefined : failedOnly);
+      // With a host filter the failure clause is the host's, never the selection's - unless
+      // the selection carries its own (inferred, or from a shared URL) while the host filter
+      // is off: moving or resizing such a region keeps it about failures.
+      let next = geometry.rangeToSelection(
+        range,
+        controlled ? (hostFailedOnly ? undefined : displaySelection?.failedOnly) : failedOnly
+      );
       // A region where failures concentrate is about them: the selection says so on its
       // own, as long as the user has not chosen an outcome with the errors filter. On its
       // own, under a host filter too: the inference is part of the region drawn, and
@@ -465,6 +470,7 @@ export function LatencyMap({
       committedRange,
       commit,
       failedOnly,
+      hostFailedOnly,
       controlled,
       grid,
       gridTotals,

@@ -40,8 +40,10 @@ export const removeWhere = (query: string, clause: string) => {
   const root = parseEsqlQuery(query);
   const command =
     root && topLevelCommands(root, 'where').find((c) => whereExpression(c) === clause);
-  if (!command) return query;
-  return query.slice(0, commandLeadStart(query, command)) + query.slice(command.location.max + 1);
+  if (!root || !command) return query;
+  return (
+    query.slice(0, commandLeadStart(query, root, command)) + query.slice(command.location.max + 1)
+  );
 };
 
 /** The exact prefix `appendMapClause` writes, which `removeMapSetResidue` takes back off. */
@@ -66,11 +68,11 @@ export const appendMapClause = (
 ) => {
   const root = parseEsqlQuery(query);
   const [limit] = root ? topLevelCommands(root, 'limit') : [];
-  const appended = limit
-    ? `${query.slice(0, commandLeadStart(query, limit))}\n| WHERE ${clause}${query.slice(
-        commandLeadStart(query, limit)
-      )}`
-    : appendToESQLQuery(query, `| WHERE ${clause}`);
+  const leadStart = root && limit ? commandLeadStart(query, root, limit) : undefined;
+  const appended =
+    leadStart !== undefined
+      ? `${query.slice(0, leadStart)}\n| WHERE ${clause}${query.slice(leadStart)}`
+      : appendToESQLQuery(query, `| WHERE ${clause}`);
   const hasSet = root
     ? mutate.commands.set.findBySettingName(root, 'unmapped_fields') !== undefined
     : /\bSET\s+unmapped_fields\b/i.test(query);
