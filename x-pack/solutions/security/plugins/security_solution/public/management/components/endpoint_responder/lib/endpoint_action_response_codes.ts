@@ -58,10 +58,10 @@ const CODES = Object.freeze({
     { defaultMessage: 'File retrieval was interrupted' }
   ),
 
-  /** The fleet upload API was unreachable (not just busy) */
+  /** The upload target (Fleet Server, or the export storage with --export) was unreachable (not just busy) */
   'ra_get-file_error_upload-api-unreachable': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.getFile.uploadApiUnreachable',
-    { defaultMessage: 'File upload api (fleet-server) is unreachable' }
+    { defaultMessage: 'File upload service is unreachable' }
   ),
 
   /** Perhaps internet connection was too slow or unstable to upload all chunks before unique upload-id expired. Endpoint will re-try a bit (3 times?). */
@@ -572,6 +572,24 @@ const CODES = Object.freeze({
       defaultMessage:
         "The storage service rejected the upload. Check the export provider's account key and the storage account's network rules",
     }
+  ),
+
+  // DEV: same meaning as ra_get-file_error_too-big
+  'ra_memory-dump_error_too-big': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.tooBig',
+    { defaultMessage: 'The memory dump is too large to upload' }
+  ),
+
+  // DEV: same meaning as ra_get-file_error_upload-timeout
+  'ra_memory-dump_error_upload-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.uploadTimeout',
+    { defaultMessage: 'Memory dump upload timed out' }
+  ),
+
+  // DEV: the upload target (Fleet Server, or the export storage with --export) was unreachable
+  'ra_memory-dump_error_upload-api-unreachable': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.uploadApiUnreachable',
+    { defaultMessage: 'The upload service is unreachable' }
   ),
 
   // -----------------------------------------------------------------
