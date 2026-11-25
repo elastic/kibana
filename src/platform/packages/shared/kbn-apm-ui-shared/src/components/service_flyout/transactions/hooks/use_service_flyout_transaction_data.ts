@@ -36,6 +36,11 @@ interface MainStatisticsResponse {
   hasActiveAlerts: boolean;
 }
 
+/** Main stats plus the server search query that produced this retained value. */
+interface MainStatisticsResult extends MainStatisticsResponse {
+  appliedServerSearchQuery: string;
+}
+
 // TODO: replace with typed callApmApi once it lives in a package outside of APM (https://github.com/elastic/kibana/issues/271155)
 interface ServiceTransactionGroupDetailedStat {
   transactionName: string;
@@ -66,6 +71,7 @@ export function useServiceFlyoutTransactionData({
   searchQuery,
   refreshToken,
   offset,
+  projectRouting,
 }: {
   http: HttpStart;
   notifications: NotificationsStart;
@@ -78,6 +84,7 @@ export function useServiceFlyoutTransactionData({
   searchQuery: string;
   refreshToken?: number;
   offset?: string;
+  projectRouting?: string;
 }) {
   const enabled = !!transactionType && !!latencyAggregationType;
 
@@ -87,7 +94,7 @@ export function useServiceFlyoutTransactionData({
     dataSource,
     isLoading: isDataSourceLoading,
     error: dataSourceError,
-  } = usePreferredTransactionDataSource({ http, start, end });
+  } = usePreferredTransactionDataSource({ http, start, end, projectRouting });
 
   useEffect(() => {
     if (
@@ -118,19 +125,27 @@ export function useServiceFlyoutTransactionData({
 
   useEffect(() => {
     setMaxCountExceeded(false);
-  }, [serviceName, environment, start, end, transactionType]);
+  }, [serviceName, environment, start, end, transactionType, projectRouting]);
 
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
 
-  const { value: mainResponse, loading: isMainLoading } = useAbortableAsync(
-    async ({ signal }) => {
+  const {
+    value: mainResponse,
+    loading: isMainLoading,
+    error: mainStatsError,
+  } = useAbortableAsync(
+    async ({ signal }): Promise<MainStatisticsResult | undefined> => {
       if (!enabled || !dataSource) return undefined;
+      // Capture the query for this request — useAbortableAsync retains the previous
+      // value while loading, so isServerSearch must follow the retained result, not
+      // the live search input (clearing search would otherwise mislabel narrowed rows).
       const result = await http.get<MainStatisticsResponse>(
         `/internal/apm/services/${encodeURIComponent(
           serviceName
         )}/transactions/groups/main_statistics`,
         {
           signal,
+          ...(projectRouting ? { headers: { 'x-project-routing': projectRouting } } : {}),
           query: {
             environment,
             kuery: '',
@@ -146,7 +161,7 @@ export function useServiceFlyoutTransactionData({
         }
       );
       setMaxCountExceeded((prev) => prev || result.maxCountExceeded);
-      return result;
+      return { ...result, appliedServerSearchQuery: serverSearchQuery };
     },
     [
       http,
@@ -160,16 +175,12 @@ export function useServiceFlyoutTransactionData({
       enabled,
       dataSource,
       refreshToken,
+      projectRouting,
     ]
   );
 
-  const items: TransactionGroup[] = useMemo(() => {
-    const groups = mainResponse?.transactionGroups ?? [];
-    const filtered =
-      !mainResponse?.maxCountExceeded && searchQuery
-        ? groups.filter((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()))
-        : groups;
-    return filtered.map((group) => ({
+  const allItems: TransactionGroup[] = useMemo(() => {
+    return (mainResponse?.transactionGroups ?? []).map((group) => ({
       name: group.name,
       transactionType: group.transactionType,
       latency: { value: group.latency ?? null },
@@ -178,7 +189,15 @@ export function useServiceFlyoutTransactionData({
       alertsCount: group.alertsCount,
       impact: group.impact != null ? { value: group.impact } : undefined,
     }));
-  }, [mainResponse, searchQuery]);
+  }, [mainResponse]);
+
+  const items: TransactionGroup[] = useMemo(() => {
+    if (!mainResponse?.maxCountExceeded && searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return allItems.filter((group) => group.name.toLowerCase().includes(query));
+    }
+    return allItems;
+  }, [allItems, mainResponse?.maxCountExceeded, searchQuery]);
 
   const transactionNames = useMemo(() => items.map(({ name }) => name), [items]);
 
@@ -200,6 +219,7 @@ export function useServiceFlyoutTransactionData({
         )}/transactions/groups/detailed_statistics`,
         {
           signal,
+          ...(projectRouting ? { headers: { 'x-project-routing': projectRouting } } : {}),
           query: {
             environment,
             kuery: '',
@@ -229,6 +249,7 @@ export function useServiceFlyoutTransactionData({
       offset,
       enabled,
       dataSource,
+      projectRouting,
     ]
   );
 
@@ -276,5 +297,17 @@ export function useServiceFlyoutTransactionData({
     maxCountExceeded,
     hasActiveAlerts: mainResponse?.hasActiveAlerts ?? false,
     error: dataSourceError,
+    mainError: mainStatsError,
+    /** Full list before client-side search. Server search still narrows this list. */
+    presenceItems: allItems,
+    /**
+     * True when the retained list cannot prove absence under the live search:
+     * either it was fetched with a server search, or it hit maxCountExceeded while
+     * a search is active (a follow-up server-search request is pending / about to run).
+     * Clearing search keeps appliedServerSearchQuery until the unsearched request settles.
+     */
+    isServerSearch:
+      Boolean(mainResponse?.appliedServerSearchQuery) ||
+      Boolean(searchQuery && mainResponse?.maxCountExceeded),
   };
 }

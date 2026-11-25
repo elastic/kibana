@@ -21,7 +21,7 @@ export async function listSampleDataSets() {
 }
 
 export async function installSampleDataSet(id: string, sampleDataDefaultIndex: string) {
-  await getServices().http.post(`${sampleDataUrl}/${id}`);
+  await getServices().http.post(buildPath(`${sampleDataUrl}/{id}`, { id }));
 
   if (getServices().uiSettings.isDefault('defaultIndex')) {
     getServices().uiSettings.set('defaultIndex', sampleDataDefaultIndex);

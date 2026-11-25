@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useStableCallback } from '@kbn/react-hooks';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -23,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../../../../form/types';
 import type { CustomRecoveryRenderProps } from '../../types';
 import { useBuilderState } from '../builder_state_context';
@@ -32,37 +34,66 @@ import {
   DEFAULT_RECOVERY_CONDITION,
   deriveRecoveryConditions,
   generateId,
+  reconcileAlertConditionMetrics,
 } from './form_types';
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
 
-export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state, dispatch }) => {
-  const { state: builderState, setState: onBuilderStateChange } =
-    useBuilderState<ThresholdFormValues>();
+export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
+  const {
+    state: builderState,
+    setState: onBuilderStateChange,
+    initStateOnMount,
+  } = useBuilderState<ThresholdFormValues>();
   const { setValue, getValues } = useFormContext<FormValues>();
   const initializedRef = useRef(false);
+  const recoverySyncStartedRef = useRef(false);
+
+  const seedRecoveryOnMount = useStableCallback(() => {
+    const currentBuilderState = builderState;
+    let recovery = currentBuilderState.recovery;
+    if (!recovery) {
+      const validAlert = currentBuilderState.alertConditions.filter(
+        (c) => c.metric.trim() && c.threshold.length > 0
+      );
+      const conditions =
+        validAlert.length > 0
+          ? deriveRecoveryConditions(validAlert)
+          : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }];
+      recovery = { conditions, conditionOperator: currentBuilderState.conditionOperator };
+      initStateOnMount({
+        ...currentBuilderState,
+        recovery,
+      });
+    }
+
+    const generatedBlock = buildRecoveryBlock({ recovery } as ThresholdFormValues);
+    if (!generatedBlock) return;
+    const current = getValues('recovery');
+    if (current?.segment === generatedBlock) return;
+    setValue(
+      'recovery',
+      {
+        strategy: recoveryStrategy.condition,
+        segment: generatedBlock,
+      },
+      { shouldDirty: false }
+    );
+  });
 
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
-    if (builderState.recovery) return;
-
-    const validAlert = builderState.alertConditions.filter(
-      (c) => c.metric.trim() && c.threshold.length > 0
-    );
-    const conditions =
-      validAlert.length > 0
-        ? deriveRecoveryConditions(validAlert)
-        : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }];
-
-    onBuilderStateChange({
-      ...builderState,
-      recovery: { conditions, conditionOperator: builderState.conditionOperator },
-    });
-  }, [builderState, onBuilderStateChange]);
+    seedRecoveryOnMount();
+  }, [seedRecoveryOnMount]);
 
   const recoveryConfig = builderState.recovery;
 
+  /*
+   * `buildRecoveryBlock` reads only the recovery conditions. Time-field
+   * resolution updates `timeField` and leaves this config reference unchanged,
+   * so it does not run the sync below or mark the form dirty.
+   */
   const generatedRecoveryBlock = useMemo(
     () =>
       recoveryConfig
@@ -73,16 +104,24 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state
 
   useEffect(() => {
     if (!recoveryConfig || !generatedRecoveryBlock) return;
-    const current = getValues('query');
-    if (current.format !== 'composed') return;
-    if (current.recovery?.segment === generatedRecoveryBlock) return;
-    setValue('query', {
-      ...current,
-      recovery: { segment: generatedRecoveryBlock },
-    });
+    /*
+     * The first sync normalises the persisted segment. Later syncs follow builder
+     * edits that do not go through this step (group-by, threshold, aggregation),
+     * and those must mark the form dirty.
+     */
+    const shouldDirty = recoverySyncStartedRef.current;
+    recoverySyncStartedRef.current = true;
+    const current = getValues('recovery');
+    if (current?.segment === generatedRecoveryBlock) return;
+    setValue(
+      'recovery',
+      {
+        strategy: recoveryStrategy.condition,
+        segment: generatedRecoveryBlock,
+      },
+      { shouldDirty }
+    );
   }, [recoveryConfig, generatedRecoveryBlock, getValues, setValue]);
-
-  const hasValidRecoveryBlock = Boolean(generatedRecoveryBlock);
 
   const metricOptions = useMemo(() => {
     const statLabels = builderState.stats.filter((s) => s.label.trim()).map((s) => s.label);
@@ -113,65 +152,41 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state
   const addRecoveryCondition = useCallback(() => {
     if (!recoveryConfig) return;
     updateRecovery({
-      conditions: [
-        ...recoveryConfig.conditions,
-        { id: generateId(), ...DEFAULT_RECOVERY_CONDITION },
-      ],
+      conditions: reconcileAlertConditionMetrics(
+        [...recoveryConfig.conditions, { id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+        builderState.stats,
+        builderState.evaluations
+      ),
     });
-  }, [recoveryConfig, updateRecovery]);
+  }, [recoveryConfig, updateRecovery, builderState.stats, builderState.evaluations]);
 
   const removeRecoveryCondition = useCallback(
     (index: number) => {
       if (!recoveryConfig) return;
-      const next = recoveryConfig.conditions.filter((_, i) => i !== index);
+      const filtered = recoveryConfig.conditions.filter((_, i) => i !== index);
       updateRecovery({
-        conditions: next.length ? next : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+        conditions: reconcileAlertConditionMetrics(
+          filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+          builderState.stats,
+          builderState.evaluations
+        ),
       });
     },
-    [recoveryConfig, updateRecovery]
+    [recoveryConfig, updateRecovery, builderState.stats, builderState.evaluations]
   );
 
   if (!recoveryConfig) return null;
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.recoveryCondition.thresholdTitle"
-                defaultMessage="Recovery threshold conditions"
-              />
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.alertingV2.composeDiscover.recoveryCondition.previewTooltip',
-              { defaultMessage: 'Preview results' }
-            )}
-          >
-            <EuiButtonIcon
-              iconType="inspect"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.composeDiscover.recoveryCondition.previewAriaLabel',
-                { defaultMessage: 'Preview results' }
-              )}
-              isDisabled={!hasValidRecoveryBlock || state.childOpen}
-              onClick={() =>
-                dispatch({
-                  type: 'OPEN_CHILD_FOR_STEP',
-                  step: state.step,
-                  isAlert: true,
-                })
-              }
-              data-test-subj="ruleBuilderRecoveryPreview"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xxs">
+        <h4>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.recoveryCondition.thresholdTitle"
+            defaultMessage="Recovery threshold conditions"
+          />
+        </h4>
+      </EuiTitle>
       <EuiSpacer size="s" />
 
       {recoveryConfig.conditions.length > 1 && (

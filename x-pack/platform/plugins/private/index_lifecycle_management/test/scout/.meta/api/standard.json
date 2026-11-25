@@ -1,0 +1,269 @@
+{
+  "sha1": "6cf8c296e88f1022d801dc4aaacb2fb4dfb0b9c8",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "2e707bba1683597-78259e3a0ac0975",
+      "title": "Index Lifecycle Management - explain includes hidden indices in the explain response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/explain.spec.ts",
+        "line": 23,
+        "column": 44
+      }
+    },
+    {
+      "id": "ea0249dac49a098-851fe5d80c74778",
+      "title": "Index Lifecycle Management - indices adds a lifecycle policy to an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/indices.spec.ts",
+        "line": 49,
+        "column": 24
+      }
+    },
+    {
+      "id": "ea0249dac49a098-1fa3adcac8cdb83",
+      "title": "Index Lifecycle Management - indices removes a lifecycle policy from an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/indices.spec.ts",
+        "line": 61,
+        "column": 36
+      }
+    },
+    {
+      "id": "ea0249dac49a098-796b40edf46c1c6",
+      "title": "Index Lifecycle Management - indices retries a policy on an index through the ES \"_ilm/retry\" endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/indices.spec.ts",
+        "line": 72,
+        "column": 45
+      }
+    },
+    {
+      "id": "d23ac4185a6d1d4-cc016b20367febb",
+      "title": "Index Lifecycle Management - nodes lists the ES nodes for each custom attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/nodes.spec.ts",
+        "line": 24,
+        "column": 48
+      }
+    },
+    {
+      "id": "d23ac4185a6d1d4-bfceb2ff767f87d",
+      "title": "Index Lifecycle Management - nodes returns the node stats for a custom node attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/nodes.spec.ts",
+        "line": 33,
+        "column": 21
+      }
+    },
+    {
+      "id": "7e3d610aa8ea2d5-4f7a98674418260",
+      "title": "Index Lifecycle Management - policies with searchable snapshots creates a lifecycle policy with a searchable snapshot action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/policies_searchable_snapshots.spec.ts",
+        "line": 60,
+        "column": 91
+      }
+    },
+    {
+      "id": "25c63e93e35b30e-99553fe3dc1c3df",
+      "title": "Index Lifecycle Management - policies lists the indices linked to a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/policies.spec.ts",
+        "line": 70,
+        "column": 19
+      }
+    },
+    {
+      "id": "25c63e93e35b30e-d2368aa488592f1",
+      "title": "Index Lifecycle Management - policies lists hidden indices linked to a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/policies.spec.ts",
+        "line": 92,
+        "column": 24
+      }
+    },
+    {
+      "id": "25c63e93e35b30e-b9a94ec10d021c8",
+      "title": "Index Lifecycle Management - policies creates a lifecycle policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/policies.spec.ts",
+        "line": 120,
+        "column": 16
+      }
+    },
+    {
+      "id": "25c63e93e35b30e-8c04b711d35d2a1",
+      "title": "Index Lifecycle Management - policies rejects creating a policy without manage_ilm",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/policies.spec.ts",
+        "line": 132,
+        "column": 11
+      }
+    },
+    {
+      "id": "25c63e93e35b30e-e3bca39c6a40d2e",
+      "title": "Index Lifecycle Management - policies keeps the _meta field when editing a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/policies.spec.ts",
+        "line": 146,
+        "column": 11
+      }
+    },
+    {
+      "id": "25c63e93e35b30e-5ac9213d940deac",
+      "title": "Index Lifecycle Management - policies deletes a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/policies.spec.ts",
+        "line": 173,
+        "column": 7
+      }
+    },
+    {
+      "id": "e24c27b745aa622-94754446326d97a",
+      "title": "Index Lifecycle Management - snapshot policies returns the snapshot policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/snapshot_policies.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "1732d03b14cc132-284d7c95620b8dd",
+      "title": "Index Lifecycle Management - snapshot repositories (Cloud) returns the Cloud default repository",
+      "expectedStatus": "passed",
+      "tags": [
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/snapshot_repositories_cloud.spec.ts",
+        "line": 27,
+        "column": 50
+      }
+    },
+    {
+      "id": "ea1c390f2b00ffd-e71fde37d4dfa90",
+      "title": "Index Lifecycle Management - snapshot repositories returns the snapshot repositories",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/snapshot_repositories.spec.ts",
+        "line": 28,
+        "column": 84
+      }
+    },
+    {
+      "id": "3217ca00bba8edf-b38e7b6513fba46",
+      "title": "Index Lifecycle Management - templates lists legacy templates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/templates.spec.ts",
+        "line": 66,
+        "column": 55
+      }
+    },
+    {
+      "id": "3217ca00bba8edf-812fcd705680433",
+      "title": "Index Lifecycle Management - templates filters out system templates whose index patterns have no wildcard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/templates.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "3217ca00bba8edf-89d95be3c2ea856",
+      "title": "Index Lifecycle Management - templates adds a policy to a legacy template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/api/tests/templates.spec.ts",
+        "line": 82,
+        "column": 69
+      }
+    }
+  ]
+}

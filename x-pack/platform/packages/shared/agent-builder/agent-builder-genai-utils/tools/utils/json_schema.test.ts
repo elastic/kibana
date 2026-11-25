@@ -5,7 +5,26 @@
  * 2.0.
  */
 
-import { wrapJsonSchema } from './json_schema';
+import { z } from '@kbn/zod/v4';
+import { wrapJsonSchema, zodToolInputToJsonSchema } from './json_schema';
+
+describe('zodToolInputToJsonSchema', () => {
+  it('inlines a root schema with .meta({ id }) into a concrete object schema', () => {
+    const schema = z
+      .object({
+        query: z.string().max(100).describe('Search query'),
+      })
+      .meta({ id: 'my_tool' });
+
+    const jsonSchema = zodToolInputToJsonSchema(schema);
+
+    expect(jsonSchema.type).toBe('object');
+    expect(jsonSchema.properties).toEqual({
+      query: expect.objectContaining({ type: 'string', maxLength: 100 }),
+    });
+    expect(jsonSchema.$ref).toBeUndefined();
+  });
+});
 
 describe('wrapJsonSchema', () => {
   describe('when the schema is already an object', () => {

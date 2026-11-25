@@ -30,11 +30,11 @@ describe('AlertTimelineViewAllButton', () => {
       expect(btn).toHaveAttribute('href', VIEW_ALL_HREF);
     });
 
-    it('displays "View all episodes" label', () => {
+    it('displays "View all alerts" label', () => {
       wrap({ viewAllHref: VIEW_ALL_HREF });
 
       expect(screen.getByTestId('alertTimelineViewAllEpisodes')).toHaveTextContent(
-        'View all episodes'
+        'View all alerts'
       );
     });
 
@@ -58,7 +58,7 @@ describe('AlertTimelineViewAllButton', () => {
 
       const primary = screen.getByTestId('alertTimelineViewAllEpisodes');
       expect(primary).toHaveAttribute('href', VIEW_ALL_HREF);
-      expect(primary).toHaveTextContent('View all episodes');
+      expect(primary).toHaveTextContent('View all alerts');
     });
 
     it('secondary toggle button is rendered', () => {

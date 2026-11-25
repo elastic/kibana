@@ -14,6 +14,7 @@
 
 import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { AUDITBEAT_ARCHIVE_INDEX } from '../../../fixtures';
 
 spaceTest.describe(
   'Rule flyout v2',
@@ -26,7 +27,7 @@ spaceTest.describe(
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
-        index: ['auditbeat-*'],
+        index: [AUDITBEAT_ARCHIVE_INDEX],
       });
       await browserAuth.loginAsPlatformEngineer();
     });

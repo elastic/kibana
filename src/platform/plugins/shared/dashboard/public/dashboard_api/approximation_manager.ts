@@ -7,23 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
-import type { DashboardState } from '../../common';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import {
+  approximationComparators as comparators,
+  DEFAULT_APPROXIMATION_STATE,
+} from '../../common/dashboard_state/approximation';
 
 export function initializeApproximationManager(initialState: DashboardState) {
-  const isApproximate$ = new BehaviorSubject<boolean>(initialState.esql_approximation ?? false);
+  const isApproximate$ = new BehaviorSubject<boolean | undefined>(initialState.esql_approximation);
 
   function setEsqlApproximation(value: boolean) {
     if (value !== isApproximate$.value) {
       isApproximate$.next(value);
     }
   }
-
-  const comparators: StateComparators<Pick<DashboardState, 'esql_approximation'>> = {
-    esql_approximation: 'referenceEquality',
-  };
 
   const getState = (): Pick<DashboardState, 'esql_approximation'> => ({
     esql_approximation: isApproximate$.value,
@@ -50,8 +49,9 @@ export function initializeApproximationManager(initialState: DashboardState) {
           map(([latestState, lastSavedState]) => {
             return diffComparators(
               comparators,
-              { esql_approximation: lastSavedState.esql_approximation ?? false },
-              latestState
+              lastSavedState,
+              latestState,
+              DEFAULT_APPROXIMATION_STATE
             );
           })
         );

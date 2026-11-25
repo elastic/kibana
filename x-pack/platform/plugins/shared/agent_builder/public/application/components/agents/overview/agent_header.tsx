@@ -81,7 +81,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <AgentAvatar agent={agent} size="xl" iconSize="xl" iconPaddingSize="m" />
+            <AgentAvatar agent={agent} size="xl" iconSize="xl" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="xs">
@@ -224,6 +224,16 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
               </EuiBadge>
             ))}
           </EuiFlexGroup>
+        </>
+      )}
+      {agent.service_account_id && (
+        <>
+          <EuiSpacer size="s" />
+          <div>
+            <EuiBadge color="hollow" iconType="user" data-test-subj="agentOverviewRunsAsBadge">
+              {labels.executionIdentity.runsAsBadge(agent.service_account_id)}
+            </EuiBadge>
+          </div>
         </>
       )}
       <EuiSpacer size="m" />

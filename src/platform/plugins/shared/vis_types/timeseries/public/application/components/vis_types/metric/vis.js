@@ -41,7 +41,7 @@ function getColors(props) {
 }
 
 function MetricVisualization(props) {
-  const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
+  const { backgroundColor, model, visData, fieldFormatMap, getConfig, isInteractive } = props;
   const colors = getColors(props);
   const series = get(visData, `${model.id}.series`, [])
     .filter((row) => row)
@@ -54,7 +54,9 @@ function MetricVisualization(props) {
             ? createReactFieldFormatter(
                 getMetricsField(seriesDef.metrics),
                 fieldFormatMap,
-                !!colors.color
+                !!colors.color,
+                undefined,
+                isInteractive
               )
             : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
@@ -83,6 +85,7 @@ function MetricVisualization(props) {
 }
 
 MetricVisualization.propTypes = {
+  isInteractive: PropTypes.bool,
   backgroundColor: PropTypes.string,
   className: PropTypes.string,
   additionalLabel: PropTypes.string,

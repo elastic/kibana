@@ -148,6 +148,10 @@ describe('CancelablePendingActionsSelector', () => {
     onChange: mockOnChange,
     command: mockCommand,
     requestFocus: mockRequestFocus,
+    consoleApi: {
+      setInput: jest.fn(),
+      setFocusOnInput: jest.fn(),
+    },
   };
 
   beforeEach(() => {

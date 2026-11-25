@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ObjectType } from '@kbn/config-schema';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import {
@@ -13,6 +14,7 @@ import {
   API_VERSIONS,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 import { getUnifiedHistoryRoute } from './get_unified_history_route';
 
 jest.mock('../../utils/get_internal_saved_object_client', () => ({
@@ -47,7 +49,7 @@ describe('getUnifiedHistoryRoute', () => {
     mockScopedEsClient = { search: jest.fn() };
 
     mockOsqueryContext = {
-      cpsEnabled: false,
+      isCpsActive: jest.fn().mockResolvedValue(false),
       logFactory: {
         get: jest.fn().mockReturnValue({ debug: jest.fn(), warn: jest.fn(), error: jest.fn() }),
       },
@@ -79,13 +81,117 @@ describe('getUnifiedHistoryRoute', () => {
     }
 
     routeHandler = routeVersion.handler;
+
+    return routeVersion.config;
   };
+
+  describe('sourceFilters validation', () => {
+    const validateSourceFilters = (sourceFilters: string) => {
+      const { validate } = setupRoute();
+      if (
+        !validate ||
+        typeof validate === 'function' ||
+        !(validate.request?.query instanceof ObjectType)
+      ) {
+        throw new Error('Expected a query validation schema');
+      }
+
+      return validate.request.query.validate({ sourceFilters });
+    };
+
+    it.each(['workflow', 'live,rule,scheduled,workflow'])(
+      'accepts sourceFilters=%s',
+      (sourceFilters) => {
+        expect(validateSourceFilters(sourceFilters)).toEqual(
+          expect.objectContaining({ sourceFilters })
+        );
+      }
+    );
+
+    it.each(['unknown', 'workflow,unknown'])('rejects sourceFilters=%s', (sourceFilters) => {
+      expect(() => validateSourceFilters(sourceFilters)).toThrow(
+        'invalid sourceFilter values: unknown'
+      );
+    });
+  });
+
+  it('sourceFilters=workflow alone queries live actions and does not query scheduled rows', async () => {
+    mockEsClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              action_id: 'workflow-action',
+              '@timestamp': '2026-11-18T12:00:00.000Z',
+              origin: { type: 'workflow', run_id: 'execution-1', verified: false },
+              alert_ids: ['alert-1'],
+              queries: [{ query: 'SELECT 1' }],
+            },
+          },
+        ],
+      },
+    });
+    setupRoute();
+    const response = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      httpServerMock.createKibanaRequest({ query: { sourceFilters: 'workflow' } }),
+      response
+    );
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        data: [expect.objectContaining({ actionId: 'workflow-action', source: 'Workflow' })],
+        hasMore: false,
+        nextPage: undefined,
+      },
+    });
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0][0].index).toContain(ACTIONS_INDEX);
+    expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter).toContainEqual({
+      bool: { should: [{ term: { 'origin.type': 'workflow' } }], minimum_should_match: 1 },
+    });
+  });
+
+  it('sourceFilters=live,rule excludes workflow actions in both source clauses', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+    setupRoute();
+    const response = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      httpServerMock.createKibanaRequest({ query: { sourceFilters: 'live,rule' } }),
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalled();
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter).toContainEqual({
+      bool: {
+        should: [
+          {
+            bool: {
+              must_not: [
+                { exists: { field: 'alert_ids' } },
+                { term: { 'origin.type': 'workflow' } },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [{ exists: { field: 'alert_ids' } }],
+              must_not: [{ term: { 'origin.type': 'workflow' } }],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
 
   describe('when CPS is enabled', () => {
     beforeEach(() => {
       mockOsqueryContext = {
         ...mockOsqueryContext,
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
       } as unknown as OsqueryAppContext;
 
       mockScopedEsClient.search
@@ -121,6 +227,19 @@ describe('getUnifiedHistoryRoute', () => {
         )
       ).toBe(false);
     });
+
+    it('does not probe or add CCS remote patterns for the fanned-out reads', async () => {
+      setupRoute();
+
+      await routeHandler(
+        {} as never,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(hasConnectedRemoteClusters).not.toHaveBeenCalled();
+      expect(prefixIndexPatternsWithCcs).toHaveBeenCalledWith(`${ACTIONS_INDEX}*`, false);
+    });
   });
 
   describe('when CPS is disabled', () => {
@@ -141,6 +260,50 @@ describe('getUnifiedHistoryRoute', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(2);
       expect(mockScopedEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('adds CCS remote patterns when remote clusters are connected', async () => {
+      (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
+      setupRoute();
+
+      await routeHandler(
+        {} as never,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(prefixIndexPatternsWithCcs).toHaveBeenCalledWith(`${ACTIONS_INDEX}*`, true);
+    });
+  });
+
+  describe('when no linked projects are visible to the principal', () => {
+    it('uses the internal ES client and never scopes the cluster client', async () => {
+      const asScoped = jest.fn();
+      mockOsqueryContext.getStartServices = jest.fn().mockResolvedValue([
+        {
+          elasticsearch: {
+            client: {
+              asInternalUser: mockEsClient,
+              asScoped,
+            },
+          },
+        },
+      ]);
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce(emptyScheduledAggregations);
+
+      setupRoute();
+
+      await routeHandler(
+        {} as never,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockOsqueryContext.isCpsActive).toHaveBeenCalled();
+      expect(mockEsClient.search).toHaveBeenCalled();
+      expect(asScoped).not.toHaveBeenCalled();
     });
   });
 

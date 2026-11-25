@@ -89,7 +89,7 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
    */
   return async function run(task: Task | GlobalTask) {
     if (task.global) {
-      await execTask(chalk`{dim [  global  ]} ${task.description}`, task);
+      await execTask(`${chalk.dim('[  global  ]')} ${task.description}`, task);
     } else {
       for (const build of builds) {
         const desc = `${build.getLogTag()} ${task.description}`;

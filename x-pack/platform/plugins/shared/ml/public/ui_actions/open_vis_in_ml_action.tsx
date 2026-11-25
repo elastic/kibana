@@ -10,7 +10,7 @@ import { type EmbeddableApiContext, apiHasType, apiIsOfType } from '@kbn/present
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isMapApi } from '@kbn/maps-plugin/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { ActionApi } from './types';
 import type { MlCoreSetup } from '../plugin';
@@ -77,7 +77,7 @@ export function createVisToADJobAction(
       try {
         if (isLensApi(embeddable) && lens) {
           const vis = embeddable.getSavedVis();
-          if (!vis || isOfAggregateQueryType(vis.state.query)) {
+          if (!vis || isTextBasedAttributes(vis)) {
             return false;
           }
 

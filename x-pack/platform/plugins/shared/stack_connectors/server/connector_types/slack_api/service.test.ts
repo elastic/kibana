@@ -447,8 +447,7 @@ describe('Slack API service', () => {
     const errorNoAllowedChannelsRes = {
       actionId: CONNECTOR_ID,
       message: 'error posting slack message',
-      serviceMessage:
-        'One or more provided channel names are not included in the allowed channels list',
+      serviceMessage: 'One or more provided channels are not included in the allowed channels list',
       status: 'error',
     };
 

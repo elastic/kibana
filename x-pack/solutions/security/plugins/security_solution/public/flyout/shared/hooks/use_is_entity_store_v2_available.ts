@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
-import { useQuery } from '@kbn/react-query';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { useMemo } from 'react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useResolvedLatestEntitiesIndexName } from '../../../common/hooks/use_resolved_latest_entities_index_name';
 
 interface EntitiesIndexExistsResult {
   indexExists: boolean;
 }
-
-const ENTITY_STORE_V2_AVAILABLE = ['GET', 'ENTITY_STORE_V2_AVAILABLE'];
 
 /**
  * Hook to check if the Entity Store v2 entities index exists.
@@ -29,40 +23,14 @@ const ENTITY_STORE_V2_AVAILABLE = ['GET', 'ENTITY_STORE_V2_AVAILABLE'];
  * Once those roles are compatible with the Entity Store `/status` endpoint,
  * this hook should be updated to check the status endpoint instead.
  *
- * Uses the data search service to run a lightweight ES search (size: 0)
- * against the entities latest index. Both editor and viewer roles have
- * read access to `.entities.v2.latest.*` indices.
+ * Probes both the solution-neutral and the pre-migration Security-scoped
+ * concrete index names, so un-migrated deployments (feature flag
+ * `entityStore.migrateLegacySecurityAssets` off) still report the store as
+ * available.
  */
-export const useIsEntityStoreV2Available = () => {
-  const { data } = useKibana().services;
+export const useIsEntityStoreV2Available = (): { data?: EntitiesIndexExistsResult } => {
   const spaceId = useSpaceId();
+  const { data } = useResolvedLatestEntitiesIndexName(spaceId);
 
-  return useQuery<EntitiesIndexExistsResult, IHttpFetchError>({
-    queryKey: [...ENTITY_STORE_V2_AVAILABLE, spaceId],
-    queryFn: async () => {
-      const index = getLatestEntitiesIndexName(spaceId ?? 'default');
-
-      try {
-        const response = await lastValueFrom(
-          data.search.search<
-            { params: Record<string, unknown> },
-            IKibanaSearchResponse<{ _shards: { total: number } }>
-          >({
-            params: {
-              index,
-              size: 0,
-              allow_no_indices: true,
-              terminate_after: 1,
-            },
-          })
-        );
-
-        return { indexExists: (response.rawResponse._shards?.total ?? 0) > 0 };
-      } catch {
-        return { indexExists: false };
-      }
-    },
-    enabled: spaceId != null,
-    retry: false,
-  });
+  return useMemo(() => ({ data: data && { indexExists: data.indexName != null } }), [data]);
 };

@@ -14,6 +14,7 @@ import type {
   Position as PositionType,
   VerticalAlignment as VerticalAlignmentType,
 } from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
 
 /**
  * Server-safe re-exports of @elastic/charts constants.
@@ -31,6 +32,7 @@ export const ChartPosition = {
   Left: 'left',
   Right: 'right',
 } as const satisfies Record<string, PositionType>;
+export type ChartPosition = $Values<typeof ChartPosition>;
 
 export const ChartHorizontalAlignment = {
   Center: 'center',

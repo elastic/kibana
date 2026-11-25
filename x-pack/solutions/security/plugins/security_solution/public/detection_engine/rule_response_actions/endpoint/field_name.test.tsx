@@ -7,7 +7,12 @@
 
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  Form,
+  useForm,
+  UseField,
+  type FormHook,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useState } from 'react';
 import type { JSX } from 'react';
 import { FieldNameField } from './field_name';
@@ -242,6 +247,55 @@ describe('FieldNameField', () => {
         'input'
       ) as HTMLInputElement;
       expect(input.value).toBe('');
+    });
+  });
+
+  describe('validation', () => {
+    it('should show a required error when the process.pid toggle is disabled and no field is selected', async () => {
+      let form: FormHook | undefined;
+      const FormWithValidation = () => {
+        const { form: formApi } = useForm({
+          defaultValue: {
+            responseActions: [
+              {
+                actionTypeId: '.endpoint',
+                params: {
+                  command: 'kill-process',
+                  config: {
+                    field: '',
+                    overwrite: false,
+                  },
+                },
+              },
+            ],
+          },
+        });
+        form = formApi;
+
+        return (
+          <Form form={formApi}>
+            <UseField path={OVERWRITE_PATH}>{() => null}</UseField>
+            <FieldNameField
+              basePath={BASE_PATH}
+              path={FIELD_PATH}
+              disabled={false}
+              readDefaultValueOnForm={true}
+              isRequired={true}
+            />
+          </Form>
+        );
+      };
+
+      const { getByText } = testContext.render(<FormWithValidation />);
+      await form?.validate();
+
+      await waitFor(() => {
+        expect(
+          getByText(
+            'Custom field name selection is required when the process.pid toggle is disabled.'
+          )
+        ).toBeInTheDocument();
+      });
     });
   });
 });

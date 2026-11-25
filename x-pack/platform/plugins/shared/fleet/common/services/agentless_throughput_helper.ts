@@ -9,13 +9,7 @@ import { uniq } from 'lodash';
 
 import type { PackagePolicy } from '../types/models';
 
-/**
- * Derives the unique Elasticsearch index patterns for the enabled data streams
- * of an agentless package policy. Matches the index targeting used by the
- * throughput aggregation query in `server/services/agentless/throughput.ts`.
- *
- * Returns patterns of the form `${type}-${dataset}-*`.
- */
+/** Derives unique ES index patterns for an agentless policy's enabled streams, widening to `<type>-<pkg>.*-*` when `dynamic_dataset: true` to cover routing-rule targets. */
 export const getAgentlessThroughputIndexPatterns = (
   packagePolicy: Pick<PackagePolicy, 'inputs'>
 ): string[] =>
@@ -23,6 +17,14 @@ export const getAgentlessThroughputIndexPatterns = (
     packagePolicy.inputs.flatMap((input) =>
       input.streams
         .filter((stream) => stream.enabled)
-        .map((stream) => `${stream.data_stream.type ?? 'logs'}-${stream.data_stream.dataset}-*`)
+        .map((stream) => {
+          const type = stream.data_stream.type ?? 'logs';
+          const { dataset, elasticsearch } = stream.data_stream;
+          if (elasticsearch?.dynamic_dataset) {
+            const packageName = dataset.split('.')[0];
+            return `${type}-${packageName}.*-*`;
+          }
+          return `${type}-${dataset}-*`;
+        })
     )
   );

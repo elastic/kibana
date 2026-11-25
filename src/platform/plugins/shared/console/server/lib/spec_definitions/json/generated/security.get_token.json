@@ -12,13 +12,15 @@
           "password",
           "client_credentials",
           "_kerberos",
-          "refresh_token"
+          "refresh_token",
+          "_user_managed_service_account"
         ]
       },
       "scope": "",
       "password": "",
       "kerberos_ticket": "",
       "refresh_token": "",
+      "service_account_token": "",
       "username": ""
     },
     "methods": [

@@ -21,7 +21,7 @@ describe('DeprecationsRegistry', () => {
       const deprecationsConfig = {
         getDeprecations: null,
       } as unknown as RegisterDeprecationsConfig;
-      expect(() => deprecationsRegistry.registerDeprecations(deprecationsConfig)).toThrowError(
+      expect(() => deprecationsRegistry.registerDeprecations(deprecationsConfig)).toThrow(
         /getDeprecations must be a function/
       );
     });
@@ -95,7 +95,7 @@ describe('DeprecationsRegistry', () => {
       deprecationsRegistry.registerDeprecations(deprecationsConfig);
       const deprecations = await deprecationsRegistry.getDeprecations(mockContext);
       expect(deprecations).toHaveLength(1);
-      expect(deprecationsConfig.getDeprecations).toBeCalledWith(mockContext);
+      expect(deprecationsConfig.getDeprecations).toHaveBeenCalledWith(mockContext);
     });
   });
 });

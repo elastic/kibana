@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import {
+  getInstanceCostFromTaskCost,
   getTaskCostFromInstance,
   getDeleteTaskRunResult,
   isFailedRunResult,
@@ -31,10 +32,37 @@ describe('task', () => {
     it(`should return undefined for no parameter`, () => {
       expect(getTaskCostFromInstance()).toBeUndefined();
       expect(getTaskCostFromInstance(undefined)).toBeUndefined();
+      expect(getTaskCostFromInstance('')).toBeUndefined();
     });
 
     it(`should return undefined for unexpected parameter`, () => {
-      expect(getTaskCostFromInstance('NOPE' as InstanceTaskCost)).toBeUndefined();
+      expect(getTaskCostFromInstance('NOPE')).toBeUndefined();
+    });
+  });
+
+  describe('getInstanceCostFromTaskCost()', () => {
+    it(`should return the relevant value from existing constants`, () => {
+      expect(getInstanceCostFromTaskCost(TaskCost.Tiny)).toBe(InstanceTaskCost.Tiny);
+      expect(getInstanceCostFromTaskCost(TaskCost.Normal)).toBe(InstanceTaskCost.Normal);
+      expect(getInstanceCostFromTaskCost(TaskCost.Large)).toBe(InstanceTaskCost.Large);
+      expect(getInstanceCostFromTaskCost(TaskCost.ExtraLarge)).toBe(InstanceTaskCost.ExtraLarge);
+    });
+
+    it(`should return undefined for no parameter`, () => {
+      expect(getInstanceCostFromTaskCost()).toBeUndefined();
+      expect(getInstanceCostFromTaskCost(undefined)).toBeUndefined();
+    });
+
+    it(`should return undefined for unexpected parameter`, () => {
+      expect(getInstanceCostFromTaskCost(99 as TaskCost)).toBeUndefined();
+    });
+
+    it(`should round-trip every TaskCost`, () => {
+      Object.values(TaskCost)
+        .filter((value): value is TaskCost => typeof value === 'number')
+        .forEach((cost) => {
+          expect(getTaskCostFromInstance(getInstanceCostFromTaskCost(cost))).toBe(cost);
+        });
     });
   });
 
@@ -90,6 +118,17 @@ describe('task', () => {
     describe('priority', () => {
       it('handles proper values', () => {
         expect(() => v(taskDef)).not.toThrow();
+        expect(() => v({ ...taskDef, priority: TaskPriority.Maintenance })).not.toThrow();
+        expect(() => v({ ...taskDef, priority: TaskPriority.Deferrable })).not.toThrow();
+        expect(() => v({ ...taskDef, priority: TaskPriority.Standard })).not.toThrow();
+        expect(() => v({ ...taskDef, priority: TaskPriority.UserInteractive })).not.toThrow();
+      });
+
+      it('handles the deprecated aliases, which keep their numeric values', () => {
+        expect(TaskPriority.Low).toEqual(TaskPriority.Maintenance);
+        expect(TaskPriority.NormalLongRunning).toEqual(TaskPriority.Deferrable);
+        expect(TaskPriority.Normal).toEqual(TaskPriority.Standard);
+
         expect(() => v({ ...taskDef, priority: TaskPriority.Low })).not.toThrow();
         expect(() => v({ ...taskDef, priority: TaskPriority.NormalLongRunning })).not.toThrow();
         expect(() => v({ ...taskDef, priority: TaskPriority.Normal })).not.toThrow();
@@ -98,6 +137,12 @@ describe('task', () => {
       it('throws errors on invalid values', () => {
         expect(() => v({ ...taskDef, priority: 'x' })).toThrow('[priority]');
         expect(() => v({ ...taskDef, priority: 2 })).toThrow('Invalid priority');
+      });
+
+      it('does not suggest the deprecated aliases in the validation error', () => {
+        expect(() => v({ ...taskDef, priority: 2 })).toThrow(
+          'Invalid priority "2". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100'
+        );
       });
     });
 

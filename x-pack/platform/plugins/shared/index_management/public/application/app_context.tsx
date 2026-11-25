@@ -82,6 +82,8 @@ export interface AppDependencies {
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
     enableIndexMode: boolean;
+    enableVectorCount: boolean;
+    showManagedDataStreamsByDefault: boolean;
     isServerless: boolean;
   };
   history: ScopedHistory;

@@ -23,19 +23,8 @@ describe('ValuePopoverContent', () => {
     render(
       <ValuePopoverContent
         fieldConfig={{ ...defaultFieldConfig, valueCellContent: () => <span>Cell Value</span> }}
-        cellActions={null}
       />
     );
     expect(screen.getByText('Cell Value')).toBeInTheDocument();
-  });
-
-  it('renders cellActions if provided', () => {
-    render(
-      <ValuePopoverContent
-        fieldConfig={{ ...defaultFieldConfig, valueCellContent: () => <span>With Action</span> }}
-        cellActions={<button>ActionBtn</button>}
-      />
-    );
-    expect(screen.getByText('ActionBtn')).toBeInTheDocument();
   });
 });

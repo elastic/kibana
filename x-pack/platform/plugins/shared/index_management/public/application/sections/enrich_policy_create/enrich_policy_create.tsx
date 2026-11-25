@@ -26,7 +26,12 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
         title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.appTitle', {
           defaultMessage: 'Create enrich policy',
         })}
-        back="/app/management/data/index_management/enrich_policies"
+        back={{
+          href: '/app/management/data/index_management/enrich_policies',
+          label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.backToListLabel', {
+            defaultMessage: 'Enrich policies',
+          }),
+        }}
         spacing="bleed"
         docLink={documentationService.getCreateEnrichPolicyLink()}
       />

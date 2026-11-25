@@ -6,7 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  TransformGetTransformStatsTransformStats,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { isEndpointPackageV2 } from './package_v2';
 import { usageTracker } from '../data_loaders/usage_tracker';
@@ -16,6 +19,7 @@ import {
   METADATA_CURRENT_TRANSFORM_V2,
   METADATA_TRANSFORMS_PATTERN,
   METADATA_TRANSFORMS_PATTERN_V2,
+  METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
   METADATA_UNITED_TRANSFORM_V2,
 } from '../constants';
@@ -82,10 +86,34 @@ export const startMetadataTransforms = usageTracker.track(
     await startTransformWithRetry(esClient, currentTransformId);
 
     if (agentIds.length > 0) {
-      await waitForCurrentMetdataDocs(esClient, agentIds);
+      await waitForMetadataDocs({
+        esClient,
+        index: metadataCurrentIndexPattern,
+        agentIdField: 'agent.id',
+        agentIds,
+        transformId: currentTransformId,
+        label: 'current endpoint metadata',
+      });
     }
 
     await startTransformWithRetry(esClient, unitedTransformId);
+
+    // Host APIs read the united index. The current index can be ready while this
+    // transform is still catching up, or while a parallel test has stopped it.
+    // METADATA_UNITED_INDEX is the v1 destination. isEndpointPackageV2() is still
+    // a stub; when it starts returning true, this index must follow the same
+    // versioning as unitedTransformId above.
+    if (agentIds.length > 0) {
+      await waitForMetadataDocs({
+        esClient,
+        index: METADATA_UNITED_INDEX,
+        agentIdField: 'united.endpoint.agent.id',
+        agentIds,
+        transformId: unitedTransformId,
+        label: 'united endpoint metadata',
+        extraFilters: [{ term: { 'united.agent.active': { value: true } } }],
+      });
+    }
   }
 );
 
@@ -114,6 +142,21 @@ async function waitForTransformsToBeCreated(
   return { currentTransformId: undefined, unitedTransformId: undefined };
 }
 
+const isTransformAlreadyStartedError = (err: unknown): boolean => {
+  if (typeof err !== 'object' || err === null) {
+    return false;
+  }
+
+  const error = err as {
+    statusCode?: number;
+    body?: { error?: { type?: string } };
+    meta?: { body?: { error?: { type?: string } } };
+  };
+  const errorType = error.body?.error?.type ?? error.meta?.body?.error?.type;
+
+  return error.statusCode === 409 || errorType === 'resource_already_exists_exception';
+};
+
 async function startTransformWithRetry(
   esClient: Client,
   transformId: string,
@@ -126,8 +169,10 @@ async function startTransformWithRetry(
       await esClient.transform.startTransform({ transform_id: transformId });
       return;
     } catch (err) {
-      // 409: transform already started — not an error
-      if (err.statusCode === 409) {
+      // 409: transform already started.
+      // resource_already_exists_exception: a parallel caller created this transform's
+      // task in the same moment. The task id is the transform id, so it is starting.
+      if (isTransformAlreadyStartedError(err)) {
         return;
       }
 
@@ -179,58 +224,92 @@ async function getMetadataTransformIds(
 
 async function areMetadataTransformsReady(esClient: Client, version: string): Promise<boolean> {
   const transforms = await getMetadataTransformStats(esClient, version);
-  return !transforms.some(
-    // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
-    (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
-      transform?.health?.status !== 'green'
+  return (
+    transforms.length > 0 &&
+    !transforms.some(
+      // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
+      (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
+        transform?.health?.status !== 'green'
+    )
   );
 }
 
-async function waitForCurrentMetdataDocs(esClient: Client, agentIds: string[]) {
-  const query = agentIds.length
-    ? {
+async function waitForMetadataDocs({
+  esClient,
+  index,
+  agentIdField,
+  agentIds,
+  transformId,
+  label,
+  extraFilters = [],
+}: {
+  esClient: Client;
+  index: string;
+  agentIdField: string;
+  agentIds: string[];
+  transformId: string;
+  label: string;
+  extraFilters?: QueryDslQueryContainer[];
+}): Promise<void> {
+  const size = agentIds.length;
+  let lastDistinctAgents = 0;
+  const areDocsReady = async (): Promise<boolean> => {
+    // Count distinct agents, not documents. A restarted transform can write a
+    // second doc for the same agent, and an exact document count then never matches.
+    const response = await esClient.search({
+      index,
+      query: {
         bool: {
-          filter: [
-            {
-              terms: {
-                'agent.id': agentIds,
-              },
-            },
-          ],
+          filter: [{ terms: { [agentIdField]: agentIds } }, ...extraFilters],
         },
-      }
-    : {
-        match_all: {},
-      };
-  const size = agentIds.length ?? 1;
-  await waitFor(
-    async () =>
-      (
-        await esClient.search({
-          index: metadataCurrentIndexPattern,
-          query,
-          size,
-          rest_total_hits_as_int: true,
-        })
-      ).hits.total === size
-  );
+      },
+      size: 0,
+      aggs: {
+        agents: {
+          cardinality: { field: agentIdField },
+        },
+      },
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    lastDistinctAgents =
+      (response.aggregations as { agents?: { value?: number } } | undefined)?.agents?.value ?? 0;
+
+    if (lastDistinctAgents >= size) {
+      return true;
+    }
+
+    // Parallel suites share these transforms and stop them while indexing.
+    await startTransformWithRetry(esClient, transformId);
+    return false;
+  };
+
+  // Poll every 5s for 4 minutes. Another worker can stop the shared transform
+  // near the end of a shorter window, and the sync delay then needs another cycle.
+  const isReady = await waitFor(areDocsReady, 5_000, 49);
+  if (!isReady) {
+    throw new Error(
+      `Timed out waiting for ${size} ${label} docs for agent ids [${agentIds.join(
+        ', '
+      )}] (last distinct agent count: ${lastDistinctAgents})`
+    );
+  }
 }
 
 async function waitFor(
   cb: () => Promise<boolean>,
   interval: number = 20000,
   maxAttempts = 6
-): Promise<void> {
-  let attempts = 0;
-  let isReady = false;
+): Promise<boolean> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (await cb()) {
+      return true;
+    }
 
-  while (!isReady) {
-    await new Promise((res) => setTimeout(() => res(''), interval));
-    isReady = await cb();
-    attempts++;
-
-    if (attempts > maxAttempts) {
-      return;
+    if (attempt < maxAttempts - 1) {
+      await new Promise((res) => setTimeout(res, interval));
     }
   }
+
+  return false;
 }

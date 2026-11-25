@@ -27,6 +27,10 @@ import {
 import { appContextService } from '../app_context';
 
 import { getNormalizedDataStreams } from '../../../common/services';
+import {
+  isAgentlessIntegration,
+  isInputAllowedForDeploymentMode,
+} from '../../../common/services/agentless_policy_helper';
 
 import type {
   FullAgentPolicyOutputPermissions,
@@ -42,6 +46,7 @@ import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common
 
 import { extractSignalTypesFromPipelines } from './otel_collector';
 import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
+import { getRoleDescriptorNames } from './role_descriptor_name';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -105,6 +110,8 @@ function applyOtelDatasetSuffixIfNeeded(
   return `${dataset}.${OTEL_TEMPLATE_SUFFIX}`;
 }
 
+type PermissionEntry = [packagePolicyId: string, descriptor: SecurityRoleDescriptor];
+
 export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyNamespace: string,
@@ -121,7 +128,7 @@ export function storedPackagePoliciesToAgentPermissions(
     return;
   }
 
-  const permissionEntries = packagePolicies.map((packagePolicy) => {
+  const permissionEntries = packagePolicies.map((packagePolicy): PermissionEntry => {
     if (!packagePolicy.package) {
       throw new PackagePolicyRequestError(
         `No package for package policy ${packagePolicy.name ?? packagePolicy.id}`
@@ -169,7 +176,7 @@ export function storedPackagePoliciesToAgentPermissions(
     const dataStreams = getNormalizedDataStreams(pkg);
     if (!isDynamicInput && (!dataStreams || dataStreams.length === 0)) {
       // Return empty object (not undefined) if no additional permissions
-      return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy) ?? {}];
+      return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy)];
     }
 
     let dataStreamsForPermissions: DataStreamMeta[];
@@ -351,7 +358,7 @@ export function storedPackagePoliciesToAgentPermissions(
       packagePolicy.id,
       maybeAddAdditionalPackagePoliciesPermissions(
         packagePolicy,
-        maybeAddAgentlessPermissions(packagePolicy, {
+        maybeAddAgentlessPermissions(packagePolicy, pkg, {
           indices: dataStreamsForPermissions.map((ds) => getDataStreamPrivileges(ds, namespace)),
           ...clusterRoleDescriptor,
         })
@@ -359,7 +366,15 @@ export function storedPackagePoliciesToAgentPermissions(
     ];
   });
 
-  return Object.fromEntries(permissionEntries);
+  // The package policy ID becomes the role descriptor name of the output API key. It can be set
+  // by API callers, so make sure one ID that ES rejects cannot block the whole agent policy.
+  const roleDescriptorNames = getRoleDescriptorNames(
+    permissionEntries.map(([packagePolicyId]) => packagePolicyId)
+  );
+
+  return Object.fromEntries(
+    permissionEntries.map(([, descriptor], index) => [roleDescriptorNames[index], descriptor])
+  );
 }
 
 export interface DataStreamMeta {
@@ -464,9 +479,36 @@ function universalProfilingPermissions(
 
 function maybeAddAgentlessPermissions(
   packagePolicy: PackagePolicy,
+  pkg: PackageInfo,
   existing: SecurityRoleDescriptor
 ): SecurityRoleDescriptor {
+  // Grant agentless index permissions only for a policy that is genuinely an agentless deployment,
+  // not when the stored flag alone says so. The flag can be set through a write path that skips the
+  // package-policy service validation, so re-apply the same eligibility checks that validation runs:
+  // the package must be agentless-eligible and every enabled input must be allowed in agentless mode
+  // (the per-input, per-template deployment-mode check). This mirrors `validateAgentlessForPackagePolicy`
+  // so a legitimately saved policy keeps the grant while an invalid stored one does not.
   if (!packagePolicy.supports_agentless) {
+    return existing;
+  }
+
+  const isPackageEligible = isAgentlessIntegration(pkg);
+  const disallowedInputTypes = packagePolicy.inputs
+    .filter((input) => input.enabled && !isInputAllowedForDeploymentMode(input, 'agentless', pkg))
+    .map((input) => input.type);
+
+  if (!isPackageEligible || disallowedInputTypes.length > 0) {
+    // The policy is marked agentless but is not a valid agentless deployment, so it does not get
+    // agentless index permissions. Log it so an affected policy can be found and fixed: saving it
+    // through Fleet reports which input is not allowed, and disabling that input restores the grant.
+    const reason = !isPackageEligible
+      ? `package "${pkg.name}" does not support agentless deployment mode`
+      : `input(s) not allowed in agentless deployment mode: ${disallowedInputTypes.join(', ')}`;
+    appContextService
+      .getLogger()
+      .warn(
+        `Package policy "${packagePolicy.id}" has agentless enabled but is not eligible (${reason}); agentless index permissions are not granted.`
+      );
     return existing;
   }
   existing.indices!.push({
@@ -478,17 +520,13 @@ function maybeAddAgentlessPermissions(
 
 function maybeAddAdditionalPackagePoliciesPermissions(
   packagePolicy: PackagePolicy,
-  existing?: SecurityRoleDescriptor
-): SecurityRoleDescriptor | undefined {
+  existing: SecurityRoleDescriptor = {}
+): SecurityRoleDescriptor {
   if (
     !packagePolicy.additional_datastreams_permissions ||
     !packagePolicy.additional_datastreams_permissions.length
   ) {
     return existing;
-  }
-
-  if (!existing) {
-    existing = {};
   }
 
   if (!existing.indices) {

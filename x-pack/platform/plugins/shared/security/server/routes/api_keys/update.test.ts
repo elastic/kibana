@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { Type } from '@kbn/config-schema';
+import type { RequestHandler, RouteValidatorConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
@@ -28,6 +29,8 @@ describe('Update API Key route', () => {
 
   let routeHandler: RequestHandler<any, any, any, any>;
 
+  let bodyValidation: Type<unknown>;
+
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
 
   beforeEach(() => {
@@ -39,10 +42,74 @@ describe('Update API Key route', () => {
 
     defineUpdateApiKeyRoutes(mockRouteDefinitionParams);
 
-    const [, apiKeyRouteHandler] = mockRouteDefinitionParams.router.put.mock.calls.find(
-      ([{ path }]) => path === '/internal/security/api_key'
-    )!;
+    const [apiKeyRouteConfig, apiKeyRouteHandler] =
+      mockRouteDefinitionParams.router.put.mock.calls.find(
+        ([{ path }]) => path === '/internal/security/api_key'
+      )!;
     routeHandler = apiKeyRouteHandler;
+    bodyValidation = (apiKeyRouteConfig.validate as RouteValidatorConfig<{}, {}, {}>)
+      .body as Type<unknown>;
+  });
+
+  describe('payload validation', () => {
+    it('accepts a REST API key payload', () => {
+      expect(() =>
+        bodyValidation.validate({
+          id: 'test_id',
+          expiration: '12d',
+          role_descriptors: { role_1: {} },
+          metadata: { foo: 'bar' },
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts a cross-cluster API key payload', () => {
+      expect(() =>
+        bodyValidation.validate({
+          id: 'test_id',
+          type: 'cross_cluster',
+          access: {
+            search: [{ names: ['logs*'] }],
+            replication: [{ names: ['logs*'] }],
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects an id longer than 256 characters', () => {
+      expect(() => bodyValidation.validate({ id: 'a'.repeat(257), role_descriptors: {} })).toThrow(
+        /value has length \[257\] but it must have a maximum length of \[256\]/
+      );
+    });
+
+    it('rejects an expiration longer than 64 characters', () => {
+      expect(() =>
+        bodyValidation.validate({
+          id: 'test_id',
+          expiration: '1'.repeat(65),
+          role_descriptors: {},
+        })
+      ).toThrow(/value has length \[65\] but it must have a maximum length of \[64\]/);
+    });
+
+    it('rejects a role descriptor name longer than 1024 characters', () => {
+      expect(() =>
+        bodyValidation.validate({
+          id: 'test_id',
+          role_descriptors: { ['r'.repeat(1025)]: {} },
+        })
+      ).toThrow(/value has length \[1025\] but it must have a maximum length of \[1024\]/);
+    });
+
+    it('rejects a cross-cluster index name expression longer than 4096 characters', () => {
+      expect(() =>
+        bodyValidation.validate({
+          id: 'test_id',
+          type: 'cross_cluster',
+          access: { search: [{ names: ['l'.repeat(4097)] }] },
+        })
+      ).toThrow(/value has length \[4097\] but it must have a maximum length of \[4096\]/);
+    });
   });
 
   describe('failure', () => {

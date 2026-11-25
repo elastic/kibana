@@ -16,6 +16,7 @@ import {
   untrackRuleAlerts,
   updateMeta,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DisableRuleParams } from './types';
@@ -99,6 +100,8 @@ async function disableWithOCC(
 
   if (attributes.enabled === true) {
     const migratedIds = await bulkMigrateLegacyActions({ context, rules: [alert] });
+    const username = await context.getUserName();
+    const profileUid = await context.getProfileUid();
 
     await context.unsecuredSavedObjectsClient.update(
       RULE_SAVED_OBJECT_TYPE,
@@ -107,7 +110,8 @@ async function disableWithOCC(
         ...attributes,
         enabled: false,
         scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
-        updatedBy: await context.getUserName(),
+        updatedBy: username,
+        updatedByProfileUid: profileUid,
         updatedAt: new Date().toISOString(),
         nextRun: null,
       }),
@@ -116,6 +120,8 @@ async function disableWithOCC(
         ...(migratedIds.includes(alert.id) ? { references: alert.references } : {}),
       }
     );
+    // Legacy actions are deleted only once the rule carrying them is saved, so a conflict can be retried
+    await deleteLegacyActionsForRules(context, migratedIds);
     const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(
       attributes.alertTypeId
     );

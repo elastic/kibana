@@ -11,7 +11,6 @@ import execa from 'execa';
 import chalk from 'chalk';
 import assert from 'assert';
 import pRetry from 'p-retry';
-import type { Output } from '@kbn/fleet-plugin/common';
 import {
   API_VERSIONS,
   FLEET_SERVER_PACKAGE,
@@ -677,7 +676,7 @@ const updateFleetElasticsearchOutputHostNames = async (
         if (output.type === 'elasticsearch') {
           if (output.hosts) {
             let needsUpdating = false;
-            const updatedHosts: Output['hosts'] = [];
+            const updatedHosts: typeof output.hosts = [];
 
             for (const host of output.hosts) {
               const hostURL = new URL(host);
@@ -698,8 +697,8 @@ const updateFleetElasticsearchOutputHostNames = async (
             }
 
             if (needsUpdating) {
-              const update: PutOutputRequest['body'] = {
-                ...(output as PutOutputRequest['body']), // cast needed to quite TS - looks like the types for Output in fleet differ a bit between create/update
+              const update: Extract<PutOutputRequest['body'], { type: 'elasticsearch' }> = {
+                ...(output as Extract<PutOutputRequest['body'], { type: 'elasticsearch' }>),
                 hosts: updatedHosts,
               };
 

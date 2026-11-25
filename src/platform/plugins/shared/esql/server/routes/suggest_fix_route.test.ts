@@ -19,12 +19,10 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 jest.mock('./helpers', () => ({
   resolveConnectorId: jest.fn(),
   createScopedModel: jest.fn(),
-  resolveIncludeDatasets: jest.fn(),
 }));
 
 const { generateEsql } = jest.requireMock('@kbn/agent-builder-genai-utils');
-const { resolveConnectorId, createScopedModel, resolveIncludeDatasets } =
-  jest.requireMock('./helpers');
+const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
 
 function buildMocks() {
   const handler = jest.fn();
@@ -112,6 +110,26 @@ describe('registerSuggestFixRoute', () => {
     expect(generateEsql).not.toHaveBeenCalled();
   });
 
+  it('returns 503 when the inference plugin is unavailable', async () => {
+    const { router, handler, requestHandlerContext, request, response, context } = buildMocks();
+    const getStartServices = jest.fn().mockResolvedValue([{}, {}]);
+    registerSuggestFixRoute(
+      router,
+      getStartServices as unknown as CoreSetup<EsqlServerPluginStart>['getStartServices'],
+      context
+    );
+
+    request.body = { queryString: 'FROM index', errorMessage: 'syntax error' };
+    await handler(requestHandlerContext, request, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 503,
+      body: { message: 'Inference plugin is unavailable.' },
+    });
+    expect(resolveConnectorId).not.toHaveBeenCalled();
+    expect(generateEsql).not.toHaveBeenCalled();
+  });
+
   it('returns 403 when the license check fails', async () => {
     const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
       buildMocks();
@@ -146,25 +164,11 @@ describe('registerSuggestFixRoute', () => {
     };
     await handler(requestHandlerContext, request, response);
 
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ executeQuery: false }));
+    expect(generateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: 'none', includeDatasets: true, includeViews: true })
+    );
     expect(response.ok).toHaveBeenCalledWith({
       body: { content: 'FROM kibana_sample_data_flights | SORT avg DESC' },
     });
-  });
-
-  it('passes includeDatasets through from resolveIncludeDatasets', async () => {
-    const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
-      buildMocks();
-    registerSuggestFixRoute(router, getStartServices, context);
-
-    resolveConnectorId.mockResolvedValue('connector-1');
-    createScopedModel.mockResolvedValue({});
-    resolveIncludeDatasets.mockResolvedValue(true);
-    generateEsql.mockResolvedValue({ query: 'FROM correct_index' });
-
-    request.body = { queryString: 'FROM wrong_index', errorMessage: 'Unknown index' };
-    await handler(requestHandlerContext, request, response);
-
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ includeDatasets: true }));
   });
 });

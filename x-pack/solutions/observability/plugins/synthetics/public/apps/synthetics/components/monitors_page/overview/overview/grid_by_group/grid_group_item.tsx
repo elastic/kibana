@@ -38,10 +38,12 @@ const GroupGridCardContent = ({
   isLoading,
   setFlyoutConfigCallback,
   groupMonitors,
+  isInteractive = true,
 }: {
   isLoading: boolean;
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   groupMonitors: OverviewStatusMetaData[];
+  isInteractive?: boolean;
 }) => {
   const [activePage, setActivePage] = useState(0);
   const [rowSize, setRowSize] = useState(DEFAULT_ROW_SIZE);
@@ -72,7 +74,11 @@ const GroupGridCardContent = ({
               key={`${monitor.configId}-${monitor.locations[0]?.id ?? 'default'}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
-              <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+              <MetricItem
+                monitor={monitor}
+                onClick={setFlyoutConfigCallback}
+                isInteractive={isInteractive}
+              />
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
@@ -91,6 +97,7 @@ const GroupGridCardContent = ({
         itemsPerPage={rowSize}
         onChangeItemsPerPage={changeItemsPerPage}
         itemsPerPageOptions={[2, 3, 4, 5, 10]}
+        showPerPageOptions={isInteractive}
       />
     </>
   );
@@ -98,20 +105,24 @@ const GroupGridCardContent = ({
 
 export const GroupGridItem = ({
   loaded,
+  groupId,
   groupLabel,
   fullScreenGroup,
   setFullScreenGroup,
   groupMonitors: allGroupMonitors,
   setFlyoutConfigCallback,
   view,
+  isInteractive = true,
 }: {
   loaded: boolean;
   groupMonitors: OverviewStatusMetaData[];
+  groupId?: string;
   groupLabel: string;
   fullScreenGroup: string;
   setFullScreenGroup: (group: string) => void;
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   view: OverviewView;
+  isInteractive?: boolean;
 }) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
@@ -129,9 +140,10 @@ export const GroupGridItem = ({
   const downMonitorsCount = downMonitors.length;
 
   const { status } = useSelector(selectOverviewStatus);
+  const groupKey = groupId ?? groupLabel;
 
   useKey('Escape', () => {
-    if (fullScreenGroup === groupLabel) {
+    if (fullScreenGroup === groupKey) {
       setFullScreenGroup('');
     }
   });
@@ -140,9 +152,10 @@ export const GroupGridItem = ({
 
   return (
     <EuiAccordion
-      initialIsOpen={fullScreenGroup === groupLabel}
-      isDisabled={fullScreenGroup === groupLabel || groupMonitors.length === 0}
-      id={'groupAccordion' + groupLabel}
+      data-test-subj={`syntheticsOverviewGroup-${groupKey}`}
+      initialIsOpen={fullScreenGroup === groupKey}
+      isDisabled={fullScreenGroup === groupKey || groupMonitors.length === 0}
+      id={'groupAccordion' + groupKey}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem className="eui-textNoWrap">{groupLabel}</EuiFlexItem>
@@ -179,7 +192,7 @@ export const GroupGridItem = ({
                       document.exitFullscreen();
                     } else {
                       document.documentElement.requestFullscreen();
-                      setFullScreenGroup(groupLabel);
+                      setFullScreenGroup(groupKey);
                     }
                   }}
                 />
@@ -222,10 +235,16 @@ export const GroupGridItem = ({
           isLoading={isLoading}
           setFlyoutConfigCallback={setFlyoutConfigCallback}
           groupMonitors={groupMonitors}
+          isInteractive={isInteractive}
         />
       ) : null}
       {view === 'compactView' ? (
-        <MonitorsTable items={groupMonitors} setFlyoutConfigCallback={setFlyoutConfigCallback} />
+        <MonitorsTable
+          items={groupMonitors}
+          setFlyoutConfigCallback={setFlyoutConfigCallback}
+          enableServerPagination={false}
+          isInteractive={isInteractive}
+        />
       ) : null}
     </EuiAccordion>
   );

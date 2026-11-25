@@ -11,7 +11,14 @@ import { resolve, join } from 'path';
 import { format as formatUrl } from 'url';
 import Fs from 'fs';
 
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import {
+  CA_CERT_PATH,
+  KBN_CERT_PATH,
+  KBN_KEY_PATH,
+  KBN_SERVERLESS_UIAM_CERTS,
+  kibanaDevServiceAccount,
+} from '@kbn/dev-utils';
+import type { KbnServerlessProjectType } from '@kbn/dev-utils';
 import {
   fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
@@ -26,6 +33,7 @@ import {
   MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../../constants';
 
@@ -68,6 +76,25 @@ const servers = {
     password: 'changeme',
   },
 };
+
+const UIAM_CERT_ARG_PREFIXES = [
+  '--xpack.security.uiam.ssl.certificate=',
+  '--xpack.security.uiam.ssl.key=',
+];
+
+/**
+ * Swaps the UIAM client certificate of the base config, which names a search project, for the one
+ * of the given project type. UIAM reads Kibana's project type from the certificate, and refuses to
+ * let Kibana assume the service accounts of a project of another type.
+ */
+export const withUiamCertOfProject = (
+  serverArgs: string[],
+  projectType: KbnServerlessProjectType
+): string[] => [
+  ...serverArgs.filter((arg) => !UIAM_CERT_ARG_PREFIXES.some((prefix) => arg.startsWith(prefix))),
+  `--xpack.security.uiam.ssl.certificate=${KBN_SERVERLESS_UIAM_CERTS[projectType].certPath}`,
+  `--xpack.security.uiam.ssl.key=${KBN_SERVERLESS_UIAM_CERTS[projectType].keyPath}`,
+];
 
 export const defaultConfig: ScoutServerConfig = {
   serverless: true,
@@ -131,6 +158,8 @@ export const defaultConfig: ScoutServerConfig = {
       `--elasticsearch.serviceAccountToken=${kibanaDevServiceAccount.token}`,
       `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       '--telemetry.sendUsageTo=staging',
+      // Keeps test servers from downloading the real product documentation artifacts
+      `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
       `--logging.appenders.deprecation=${JSON.stringify({
         type: 'console',
         layout: {
@@ -172,6 +201,8 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.cloud.projects_url=/projects/',
       `--xpack.cloud.serverless.project_id=${MOCK_IDP_UIAM_PROJECT_ID}`,
       '--xpack.cloud.users_and_roles_url=/account/members/',
+      // Clears `dataUsageDisabled` from config/serverless.yml, as the project controller does
+      '--xpack.dataUsage.enableExperimental=[]',
       // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
       // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
       // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher

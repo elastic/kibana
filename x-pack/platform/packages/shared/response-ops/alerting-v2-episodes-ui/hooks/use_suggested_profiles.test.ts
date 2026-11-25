@@ -27,11 +27,12 @@ describe('useSuggestedProfiles', () => {
     queryClient.clear();
   });
 
-  it('does not call suggest when the search term is empty or whitespace-only', () => {
-    const suggest = jest.fn();
+  it('calls suggest with an empty name when the search term is empty or whitespace-only', async () => {
+    const profiles = [{ uid: 'u-1' }];
+    const suggest = jest.fn().mockResolvedValue(profiles);
     const userProfile = { suggest } as unknown as UserProfileService;
 
-    renderHook(
+    const { result } = renderHook(
       () =>
         useSuggestedProfiles({
           userProfile,
@@ -42,7 +43,14 @@ describe('useSuggestedProfiles', () => {
       { wrapper }
     );
 
-    expect(suggest).not.toHaveBeenCalled();
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // The server turns the empty name into "no filter", which is what backs the
+    // initial list of users shown before the user types.
+    expect(suggest).toHaveBeenCalledWith(ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH, {
+      name: '',
+      size: 20,
+    });
   });
 
   it('calls suggest with the internal path and trimmed name when the search term is non-empty', async () => {

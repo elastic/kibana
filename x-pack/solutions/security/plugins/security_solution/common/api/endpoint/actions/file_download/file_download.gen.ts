@@ -21,7 +21,11 @@ export const EndpointFileDownloadRequestParams = lazySchema(() =>
     /**
      * The ID of the response action that generated the file.
      */
-    action_id: z.string().min(1).max(256),
+    action_id: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('The ID of the response action that generated the file.'),
     /**
       * The file identifier is constructed in one of two ways:
 - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
@@ -29,7 +33,13 @@ export const EndpointFileDownloadRequestParams = lazySchema(() =>
 - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
 
       */
-    file_id: z.string().min(1).max(256),
+    file_id: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe(
+        'The file identifier is constructed in one of two ways:\n- For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:\n`{file_id}` = `{action_id}.{agent_id}`\n- For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.\n'
+      ),
   })
 );
 export type EndpointFileDownloadRequestParams = z.infer<typeof EndpointFileDownloadRequestParams>;

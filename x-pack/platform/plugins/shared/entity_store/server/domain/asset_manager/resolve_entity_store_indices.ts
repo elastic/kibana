@@ -22,6 +22,10 @@ import {
   hasCollidingNeutralNamespaceAssets,
   isConcreteIndexOrDataStream,
 } from './migrate_legacy_security_assets';
+import {
+  getHistorySnapshotIndexPattern,
+  getLegacySecurityHistorySnapshotIndexPattern,
+} from './history_snapshot_index';
 
 export interface EntityStoreWriteTargets {
   latestIndex: string;
@@ -41,7 +45,8 @@ export interface EntityStoreWriteTargets {
  */
 export async function resolveEntityStoreWriteTargets(
   esClient: ElasticsearchClient,
-  namespace: string
+  namespace: string,
+  signal?: AbortSignal
 ): Promise<EntityStoreWriteTargets> {
   const neutral: EntityStoreWriteTargets = {
     latestIndex: getLatestEntitiesIndexName(namespace),
@@ -49,7 +54,7 @@ export async function resolveEntityStoreWriteTargets(
     metadataDataStream: getMetadataEntitiesDataStreamName(namespace),
   };
 
-  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace)) {
+  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace, signal)) {
     return neutral;
   }
 
@@ -58,9 +63,9 @@ export async function resolveEntityStoreWriteTargets(
   const legacyMetadata = getLegacySecurityMetadataEntitiesDataStreamName(namespace);
 
   const [latestIsLegacy, updatesIsLegacy, metadataIsLegacy] = await Promise.all([
-    isConcreteIndexOrDataStream(esClient, legacyLatest),
-    isConcreteIndexOrDataStream(esClient, legacyUpdates),
-    isConcreteIndexOrDataStream(esClient, legacyMetadata),
+    isConcreteIndexOrDataStream(esClient, legacyLatest, signal),
+    isConcreteIndexOrDataStream(esClient, legacyUpdates, signal),
+    isConcreteIndexOrDataStream(esClient, legacyMetadata, signal),
   ]);
 
   return {
@@ -92,4 +97,33 @@ export async function resolveMetadataDataStreamName(
 ): Promise<string> {
   const { metadataDataStream } = await resolveEntityStoreWriteTargets(esClient, namespace);
   return metadataDataStream;
+}
+
+/**
+ * Returns the index patterns covering all history snapshot indices for a namespace,
+ * including the legacy Security-scoped pattern while un-migrated snapshots may still
+ * exist. History has no compatibility alias, so readers must query both patterns.
+ *
+ * Collision: legacy patterns for `namespace` equal neutral patterns for space
+ * `security_{namespace}`. When that space owns live assets, only the neutral pattern
+ * is returned so readers never see another space's snapshots.
+ */
+export async function resolveHistorySnapshotIndexPatterns(
+  esClient: ElasticsearchClient,
+  namespace: string,
+  signal?: AbortSignal,
+  strict?: boolean
+): Promise<string[]> {
+  const neutral = getHistorySnapshotIndexPattern(namespace);
+  try {
+    if (await hasCollidingNeutralNamespaceAssets(esClient, namespace, signal, strict)) {
+      return [neutral];
+    }
+  } catch {
+    // Only reachable when strict=true: a non-404 alias-lookup failure means
+    // ownership cannot be verified, so omit the legacy pattern to avoid touching
+    // indices that may belong to the security_{namespace} space.
+    return [neutral];
+  }
+  return [neutral, getLegacySecurityHistorySnapshotIndexPattern(namespace)];
 }

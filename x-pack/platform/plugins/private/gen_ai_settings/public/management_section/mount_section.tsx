@@ -14,7 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { GenAiSettingsApp } from '../components/gen_ai_settings_app';
 import { EnabledFeaturesContextProvider } from '../contexts/enabled_features_context';
@@ -59,7 +59,12 @@ export const mountManagementSection = async ({
     </QueryClientProvider>
   );
 
-  ReactDOM.render(wrapWithTheme(<GenAiSettingsAppWithContext />, core.theme), element);
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...coreStart}>
+      <GenAiSettingsAppWithContext />
+    </KibanaRenderContextProvider>,
+    element
+  );
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);

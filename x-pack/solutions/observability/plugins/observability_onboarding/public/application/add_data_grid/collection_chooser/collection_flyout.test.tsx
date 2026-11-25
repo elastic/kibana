@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { CollectionVariant } from '../types';
@@ -26,6 +26,7 @@ const variants: CollectionVariant[] = [
     description: 'OTel collector.',
     icon: <span />,
     href: '/app/integrations/detail/nginx_otel',
+    badge: <span data-test-subj="badgeStub">Recommended</span>,
     'data-test-subj': 'collectionVariantRow-epr:nginx_otel',
   },
 ];
@@ -57,6 +58,17 @@ describe('CollectionFlyout', () => {
     expect(
       screen.getByTestId('collectionVariantRow-epr:nginx_otel').querySelector('a')
     ).toHaveAttribute('href', '/app/integrations/detail/nginx_otel');
+  });
+
+  it('shows a badge only on the row whose variant carries one', () => {
+    renderFlyout();
+
+    expect(
+      within(screen.getByTestId('collectionVariantRow-epr:nginx_otel')).getByTestId('badgeStub')
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('collectionVariantRow-epr:nginx')).queryByTestId('badgeStub')
+    ).not.toBeInTheDocument();
   });
 
   it('closes through the flyout close button', async () => {

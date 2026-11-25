@@ -6,29 +6,13 @@
  */
 
 import { castArray } from 'lodash';
-import {
-  ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
-} from '@kbn/apm-types/es_fields';
+import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/genai-common';
 import { getFieldFromSource } from './get_field_from_source';
 
-// Fields stored under the OTel flattened `attributes` mapping (ignore_above: 1024)
-// whose values routinely exceed the limit. Values over the limit are silently
-// dropped from the index at ingest time — invisible to the fields API — but
-// survive in _source, so we fetch them there and merge as a fallback.
-// Only the OTel `attributes.*` shape is covered here; the other key shapes the
-// UI can read (`gen_ai.*`, `labels.gen_ai_*`) have no _source fallback.
-// Keep in sync with the client-side twin `GEN_AI_LONG_MESSAGE_FIELDS` in
-// `@kbn/apm-ui-shared` — that browser package cannot be imported here.
-export const LONG_FIELDS_SOURCE_FALLBACK = [
-  ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
-];
+export const LONG_FIELDS_SOURCE_FALLBACK = GEN_AI_LONG_MESSAGE_FIELDS;
 
 /**
- * Returns a copy of the hit's `fields` with the {@link LONG_FIELDS_SOURCE_FALLBACK}
+ * Returns a copy of the hit's `fields` with the {@link GEN_AI_LONG_MESSAGE_FIELDS}
  * values recovered from `_source` where the indexed value is missing or was
  * dropped by `ignore_above`.
  */

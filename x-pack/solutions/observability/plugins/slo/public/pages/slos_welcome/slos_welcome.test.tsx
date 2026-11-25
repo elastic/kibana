@@ -77,6 +77,8 @@ const mockKibana = () => {
           },
         },
       },
+      inspector: { open: jest.fn() },
+      uiSettings: { get: () => false },
       observabilityAIAssistant: mockObservabilityAIAssistant,
     },
   });
@@ -212,7 +214,7 @@ describe('SLOs Welcome Page', () => {
         });
 
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.sloCreate);
+          expect(mockNavigate).toHaveBeenCalledWith(paths.sloCreate);
         });
       });
 

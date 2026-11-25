@@ -21,10 +21,12 @@ import {
   getAttackDiscoveryApiService,
   getCorrelationsApiService,
   getPrevalenceApiService,
+  getThreatIntelligenceApiService,
   getAnalyzerApiService,
   getNetworkApiService,
   getHostApiService,
   getUserApiService,
+  getEndpointArtifactsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -109,6 +111,10 @@ export const spaceTest = securityParallelFixtures.extend<
         esClient,
         log,
       });
+      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
+        esClient,
+        log,
+      });
       extendedApiServices.analyzer = getAnalyzerApiService({
         esClient,
         log,
@@ -124,6 +130,12 @@ export const spaceTest = securityParallelFixtures.extend<
       extendedApiServices.user = getUserApiService({
         esClient,
         log,
+      });
+      extendedApiServices.endpointArtifacts = getEndpointArtifactsApiService({
+        kbnClient,
+        esClient,
+        log,
+        scoutSpace,
       });
 
       await use(extendedApiServices);

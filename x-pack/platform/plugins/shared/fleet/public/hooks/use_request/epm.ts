@@ -45,6 +45,7 @@ import type {
   RollbackAvailableCheckResponse,
   BulkRollbackAvailableCheckResponse,
   GetIlmPoliciesResponse,
+  SimpleSOAssetType,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -59,13 +60,6 @@ export function useGetAppendCustomIntegrationsQuery() {
   return useQuery(['get-append-custom-integrations'], () => {
     const customIntegrations = getCustomIntegrations();
     return customIntegrations.getAppendCustomIntegrations();
-  });
-}
-
-export function useGetReplacementCustomIntegrationsQuery() {
-  return useQuery(['get-replacemenet-custom-integrations'], () => {
-    const customIntegrations = getCustomIntegrations();
-    return customIntegrations.getReplacementCustomIntegrations();
   });
 }
 
@@ -345,8 +339,19 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
-  const body = force ? { force } : undefined;
+export const sendInstallPackage = (
+  pkgName: string,
+  pkgVersion: string,
+  force: boolean = false,
+  options?: { acknowledgeBreakingChanges?: boolean }
+) => {
+  const body =
+    force || options?.acknowledgeBreakingChanges
+      ? {
+          ...(force ? { force } : {}),
+          ...(options?.acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
+        }
+      : undefined;
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',
@@ -606,8 +611,10 @@ export const sendUpdatePackage = (
   });
 };
 
-export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
-  return sendRequest<GetBulkAssetsResponse>({
+export const sendGetBulkAssets = <TAsset extends SimpleSOAssetType = SimpleSOAssetType>(
+  body: GetBulkAssetsRequest['body']
+) => {
+  return sendRequest<GetBulkAssetsResponse<TAsset>>({
     path: epmRouteService.getBulkAssetsPath(),
     method: 'post',
     version: API_VERSIONS.public.v1,

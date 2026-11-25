@@ -13,6 +13,7 @@ const path = require('path');
 const DEFAULT_OUTPUT_DIR = '/tmp/pr-context';
 const DEFAULT_GRAPHQL_ATTEMPTS = 3;
 const DEFAULT_GRAPHQL_RETRY_DELAY_MS = 1000;
+const TRUSTED_AUTHOR_ASSOCIATIONS = new Set(['OWNER', 'MEMBER', 'COLLABORATOR']);
 
 const parseRepo = (repoFullName) => {
   const [owner, repo] = repoFullName.split('/');
@@ -70,6 +71,23 @@ const getBotAwareLogin = (author) => {
 
   return author.login;
 };
+
+/**
+ * Keeps comments from repo members, GitHub App bots and the PR author, so agents don't act on text from anyone else.
+ */
+const filterTrustedComments = ({ comments, prAuthorLogin }) =>
+  comments.filter(({ user, author_association: association }) => {
+    const login = user?.login;
+    if (!login) {
+      return false;
+    }
+
+    return (
+      TRUSTED_AUTHOR_ASSOCIATIONS.has(association) ||
+      login.endsWith('[bot]') ||
+      login === prAuthorLogin
+    );
+  });
 
 const buildPrDiffFromFiles = (files) =>
   `${files
@@ -460,11 +478,30 @@ const prefetchPrContext = async ({
     pullNumber,
   });
 
+  const prAuthorLogin = metadata.author?.is_bot
+    ? `${metadata.author.login}[bot]`
+    : metadata.author?.login;
+  const trusted = {
+    issueComments: filterTrustedComments({ comments: issueComments, prAuthorLogin }),
+    reviewComments: filterTrustedComments({ comments: reviewComments, prAuthorLogin }),
+    reviews: filterTrustedComments({ comments: reviews, prAuthorLogin }),
+  };
+  const droppedCount =
+    issueComments.length +
+    reviewComments.length +
+    reviews.length -
+    trusted.issueComments.length -
+    trusted.reviewComments.length -
+    trusted.reviews.length;
+  if (droppedCount > 0) {
+    core.info(`Skipped ${droppedCount} comment(s) and review(s) from untrusted authors`);
+  }
+
   writeJson({ outputDir, filename: 'pr-metadata.json', value: metadata });
   writeJson({ outputDir, filename: 'pr-files.json', value: filesWithPatch.map(withoutPatch) });
-  writeJson({ outputDir, filename: 'pr-issue-comments.json', value: issueComments });
-  writeJson({ outputDir, filename: 'pr-review-comments.json', value: reviewComments });
-  writeJson({ outputDir, filename: 'pr-reviews.json', value: reviews });
+  writeJson({ outputDir, filename: 'pr-issue-comments.json', value: trusted.issueComments });
+  writeJson({ outputDir, filename: 'pr-review-comments.json', value: trusted.reviewComments });
+  writeJson({ outputDir, filename: 'pr-reviews.json', value: trusted.reviews });
   writeText({ outputDir, filename: 'pr-diff.txt', value: buildPrDiffFromFiles(filesWithPatch) });
 
   core.info(`Wrote PR context to ${outputDir}`);
@@ -472,6 +509,7 @@ const prefetchPrContext = async ({
 
 module.exports = {
   buildPrDiffFromFiles,
+  filterTrustedComments,
   getPrMetadata,
   getReviewComments,
   graphqlWithRetry,

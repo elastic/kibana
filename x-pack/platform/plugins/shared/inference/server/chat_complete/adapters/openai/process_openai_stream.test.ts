@@ -7,6 +7,7 @@
 
 import { lastValueFrom, of, toArray } from 'rxjs';
 import { ChatCompletionEventType } from '@kbn/inference-common';
+import { CONTENT_FILTER_REFUSAL } from '../../utils/content_filter_refusal';
 import { processOpenAIStream } from './process_openai_stream';
 
 describe('processOpenAIStream', () => {
@@ -39,6 +40,29 @@ describe('processOpenAIStream', () => {
     ]);
   });
 
+  it('emits chunk events for reasoning-only deltas', async () => {
+    const result = await lastValueFrom(
+      of(
+        JSON.stringify({
+          id: 'reasoning',
+          object: 'chat.completion.chunk',
+          created: 1753747200,
+          model: 'gpt-5',
+          choices: [{ index: 0, delta: { reasoning: 'thinking...' }, finish_reason: null }],
+        })
+      ).pipe(processOpenAIStream(), toArray())
+    );
+
+    expect(result).toEqual([
+      {
+        content: '',
+        reasoning: 'thinking...',
+        tool_calls: [],
+        type: ChatCompletionEventType.ChatCompletionChunk,
+      },
+    ]);
+  });
+
   it('preserves token-limit errors for accepted null-object chunks', async () => {
     const result$ = of(
       JSON.stringify({
@@ -51,5 +75,30 @@ describe('processOpenAIStream', () => {
     ).pipe(processOpenAIStream({ allowNullObjectWithChoices: true }), toArray());
 
     await expect(lastValueFrom(result$)).rejects.toThrow('Token limit reached');
+  });
+
+  it('surfaces content_filter finish_reason as a refusal instead of throwing', async () => {
+    // Contrast with length above: content_filter is a soft refusal, not a hard error.
+    // Anthropic refusals arrive this way through the Elasticsearch inference API.
+    const result = await lastValueFrom(
+      of(
+        JSON.stringify({
+          id: 'filtered',
+          object: 'chat.completion.chunk',
+          created: 1753747200,
+          model: 'claude-sonnet-4',
+          choices: [{ index: 0, delta: {}, finish_reason: 'content_filter' }],
+        })
+      ).pipe(processOpenAIStream(), toArray())
+    );
+
+    expect(result).toEqual([
+      {
+        content: '',
+        refusal: CONTENT_FILTER_REFUSAL,
+        tool_calls: [],
+        type: ChatCompletionEventType.ChatCompletionChunk,
+      },
+    ]);
   });
 });

@@ -12,8 +12,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { findTestPluginPaths } from '@kbn/test-kibana-server';
 
 /**
- * Server args aligned with x-pack/platform/test/examples/config.ts so developer
- * example plugins (and their cross-dependencies) load via --plugin-path.
+ * Stateful examples server args: example plugins via `--plugin-path` plus search
+ * sessions. Do not add `--run-examples` — Scout CI uses `--kibanaInstallDir`.
  */
 export const examplesServerArgs = [
   '--data.search.sessions.enabled=true',

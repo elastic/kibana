@@ -10,6 +10,7 @@ import {
   registerUninstall,
   registerStop,
   registerStart,
+  registerUpdateApiKey,
   registerStatus,
   registerForceLogExtraction,
   registerStartMaintainer,
@@ -17,8 +18,9 @@ import {
   registerGetMaintainers,
   registerInitMaintainers,
   registerRunMaintainer,
-  registerForceRemoteExtractToUpdates,
   registerForceHistorySnapshot,
+  registerEnableHistorySnapshot,
+  registerDisableHistorySnapshot,
   registerCRUDCreate,
   registerCRUDUpdate,
   registerCRUDBulkUpdate,
@@ -30,8 +32,12 @@ import {
   registerResolutionRulesList,
   registerResolutionRulesEnable,
   registerResolutionRulesDisable,
+  registerCustomResolutionRulesRoutes,
   registerUpdate,
   registerCheckPrivileges,
+  registerEngineConfig,
+  registerInternalStart,
+  registerInternalStop,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -41,8 +47,9 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerStatus(router);
   registerUninstall(router);
   registerForceLogExtraction(router);
-  registerForceRemoteExtractToUpdates(router);
   registerForceHistorySnapshot(router);
+  registerEnableHistorySnapshot(router);
+  registerDisableHistorySnapshot(router);
   registerCheckPrivileges(router);
   registerCRUDCreate(router);
   registerCRUDUpdate(router);
@@ -50,13 +57,18 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerCRUDGet(router);
   registerCRUDDelete(router);
   registerStart(router);
+  registerUpdateApiKey(router);
   registerUpdate(router);
+  registerEngineConfig(router);
+  registerInternalStart(router);
+  registerInternalStop(router);
   registerResolutionLink(router);
   registerResolutionUnlink(router);
   registerResolutionGroup(router);
   registerResolutionRulesList(router);
   registerResolutionRulesEnable(router);
   registerResolutionRulesDisable(router);
+  registerCustomResolutionRulesRoutes(router);
   registerStartMaintainer(router);
   registerStopMaintainer(router);
   registerGetMaintainers(router);

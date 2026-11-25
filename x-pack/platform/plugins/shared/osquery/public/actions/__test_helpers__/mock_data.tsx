@@ -10,7 +10,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
-import type { SearchHit } from '../../../common/search_strategy';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
+import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
+
 import type {
   LiveHistoryRow,
   ScheduledHistoryRow,
@@ -42,10 +45,16 @@ const createTestQueryClient = () =>
     },
   });
 
-export const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const TestProviders: React.FC<{
+  children: React.ReactNode;
+  /** Defaults to the plugin's shipped defaults (every experimental feature off). */
+  experimentalFeatures?: ExperimentalFeatures;
+}> = ({ children, experimentalFeatures = allowedExperimentalValues }) => (
   <EuiProvider>
     <IntlProvider locale="en">
-      <QueryClientProvider client={createTestQueryClient()}>{children}</QueryClientProvider>
+      <ExperimentalFeaturesProvider value={experimentalFeatures}>
+        <QueryClientProvider client={createTestQueryClient()}>{children}</QueryClientProvider>
+      </ExperimentalFeaturesProvider>
     </IntlProvider>
   </EuiProvider>
 );
@@ -62,99 +71,6 @@ const createMockCounter = () => {
 };
 
 const mockCounter = createMockCounter();
-
-export const createMockSearchHit = (overrides?: Partial<SearchHit>): SearchHit => {
-  const counter = mockCounter.next();
-  const actionId = `action-${counter}`;
-  const { _source, fields, ...rest } = overrides ?? {};
-
-  return {
-    _id: actionId,
-    _index: '.fleet-actions',
-    _source: {
-      action_id: actionId,
-      queries: [{ query: 'SELECT * FROM uptime', action_id: actionId, id: 'q1' }],
-      agent_ids: ['agent-1', 'agent-2'],
-      agent_all: false,
-      agent_platforms: [],
-      agent_policy_ids: [],
-      ...(_source as Record<string, unknown>),
-    },
-    fields: {
-      action_id: [actionId],
-      agents: ['agent-1', 'agent-2'],
-      user_id: ['elastic'],
-      '@timestamp': ['2025-06-15T10:00:00.000Z'],
-      ...(fields as Record<string, unknown>),
-    },
-    ...rest,
-  } as SearchHit;
-};
-
-export const createMockPackSearchHit = (overrides?: Partial<SearchHit>): SearchHit => {
-  const counter = mockCounter.next();
-  const actionId = `pack-action-${counter}`;
-  const { _source, fields, ...rest } = overrides ?? {};
-
-  return {
-    _id: actionId,
-    _index: '.fleet-actions',
-    _source: {
-      action_id: actionId,
-      pack_id: 'pack-1',
-      pack_name: 'My Pack',
-      queries: [
-        { query: 'SELECT * FROM uptime', action_id: actionId, id: 'q1' },
-        { query: 'SELECT * FROM os_version', action_id: actionId, id: 'q2' },
-      ],
-      agent_ids: ['agent-1', 'agent-2', 'agent-3'],
-      agent_all: false,
-      agent_platforms: [],
-      agent_policy_ids: [],
-      ...(_source as Record<string, unknown>),
-    },
-    fields: {
-      action_id: [actionId],
-      agents: ['agent-1', 'agent-2', 'agent-3'],
-      user_id: ['admin'],
-      pack_id: ['pack-1'],
-      '@timestamp': ['2025-06-15T11:00:00.000Z'],
-      ...(fields as Record<string, unknown>),
-    },
-    ...rest,
-  } as SearchHit;
-};
-
-export const createMockSearchHitWithResultCounts = (overrides?: Partial<SearchHit>): SearchHit =>
-  createMockSearchHit({
-    ...overrides,
-    _source: {
-      result_counts: {
-        total_rows: 42,
-        responded_agents: 2,
-        successful_agents: 2,
-        error_agents: 0,
-      },
-      ...(overrides?._source as Record<string, unknown>),
-    },
-  });
-
-export const createMockPackSearchHitWithResultCounts = (
-  overrides?: Partial<SearchHit>
-): SearchHit =>
-  createMockPackSearchHit({
-    ...overrides,
-    _source: {
-      result_counts: {
-        total_rows: 100,
-        queries_with_results: 3,
-        queries_total: 5,
-        successful_agents: 3,
-        error_agents: 1,
-      },
-      ...(overrides?._source as Record<string, unknown>),
-    },
-  });
 
 export const resetMockCounter = () => {
   mockCounter.reset();
@@ -217,6 +133,9 @@ export const createMockPackLiveRow = (overrides?: Partial<LiveHistoryRow>): Live
 
 export const createMockRuleRow = (overrides?: Partial<LiveHistoryRow>): LiveHistoryRow =>
   createMockLiveRow({ source: 'Rule', userId: undefined, userProfileUid: undefined, ...overrides });
+
+export const createMockWorkflowRow = (overrides?: Partial<LiveHistoryRow>): LiveHistoryRow =>
+  createMockLiveRow({ source: 'Workflow', ...overrides });
 
 export const createMockScheduledRow = (
   overrides?: Partial<ScheduledHistoryRow>

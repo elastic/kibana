@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { AlertingServerStartDependencies } from '../../types';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { emptyState } from './task_state';
 import { TASK_ID, SCHEDULE, TELEMETRY_TASK_TYPE } from './constants';
 
@@ -14,7 +15,7 @@ export async function scheduleTelemetryTask({
   logger,
   taskManager,
 }: {
-  logger: Logger;
+  logger: LoggerServiceContract;
   taskManager: AlertingServerStartDependencies['taskManager'];
 }): Promise<void> {
   try {
@@ -25,9 +26,11 @@ export async function scheduleTelemetryTask({
       state: emptyState,
       params: {},
     });
-  } catch (err) {
-    logger.error(`Error scheduling ${TASK_ID}, received ${err.message}`, {
-      error: { stack_trace: err.stack },
+  } catch (error) {
+    logger.error({
+      error,
+      code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
+      labels: { task_id: TASK_ID },
     });
   }
 }

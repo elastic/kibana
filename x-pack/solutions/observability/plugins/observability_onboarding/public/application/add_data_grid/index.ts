@@ -11,6 +11,7 @@ export {
   type CollectionFlyoutProps,
 } from './collection_chooser/collection_flyout';
 export { VariantCountBadge } from './collection_chooser/variant_count_badge';
+export { RecommendedBadge } from './collection_chooser/recommended_badge';
 export { CuratedGrid, type CuratedGridProps } from './curated_grid/curated_grid';
 export { CuratedTileCard, type CuratedTileCardProps } from './curated_grid/curated_tile';
 export { MiniTilesRow, type MiniTilesRowProps } from './mini_tiles/mini_tiles_row';

@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /*
 Axis Labels Plugin for flot.
 http://github.com/markrcote/flot-axislabels

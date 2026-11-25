@@ -7,12 +7,16 @@
 
 export { isReservedSpace } from './is_reserved_space';
 export {
+  ALL_SPACES_ID,
+  UNKNOWN_SPACE,
   MAX_SPACE_INITIALS,
+  MAX_SPACE_INITIALS_CODE_UNITS,
   SPACE_SEARCH_COUNT_THRESHOLD,
   ENTER_SPACE_PATH,
   API_VERSIONS,
 } from './constants';
 export { getRouteUrlForSpace } from './get_spaced_route_url';
+export { getGraphemes, isValidSpaceInitials } from './lib/avatar_initials';
 export type {
   Space,
   GetAllSpacesOptions,
@@ -21,3 +25,9 @@ export type {
   SolutionView,
 } from './types/latest';
 export type { spaceV1 } from './types';
+export type {
+  CompleteInitialSolutionSetupRequest,
+  CompleteInitialSolutionSetupResponse,
+  GetInitialSolutionSetupResponse,
+  InitialSolutionSetupView,
+} from './types/initial_solution_setup';

@@ -7,13 +7,41 @@
 
 import React from 'react';
 
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode;
+  inline?: boolean;
 }
 
-export const SectionLoading: React.FunctionComponent<Props> = ({ children }) => {
+export const SectionLoading: React.FunctionComponent<Props> = ({ children, inline }) => {
+  if (inline) {
+    return (
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        alignItems="center"
+        gutterSize="s"
+        data-test-subj="sectionLoading"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <EuiTextColor color="subdued">{children}</EuiTextColor>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiEmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}

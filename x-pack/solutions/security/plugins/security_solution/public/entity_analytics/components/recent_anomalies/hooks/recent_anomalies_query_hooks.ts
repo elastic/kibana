@@ -6,11 +6,11 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
+import { prettifyQuery } from '@kbn/esql-utils';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
@@ -18,13 +18,30 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
-import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
+import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import type { AnomalyBand } from '../anomaly_bands';
 import {
   useRecentAnomaliesDataEsqlSource,
   useRecentAnomaliesTopRowsEsqlSource,
   type ViewByMode,
 } from './recent_anomalies_esql_source_query_hooks';
+
+const ANOMALIES_ENTITY_FILTER_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_entity_filter'
+);
+const ANOMALIES_TOP_ROWS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_top_rows'
+);
+const ANOMALIES_HEATMAP_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_heatmap'
+);
 
 export interface EntityMetadata {
   entityId: string;
@@ -50,7 +67,7 @@ const MAX_FILTERED_ENTITIES = 1000;
  * they are resolved separately via {@link useFilteredEntityIds}.
  *
  * The time range is applied inside the query text as ?_tstart/?_tend named
- * params (via getESQLResults' timeRange option) rather than the request-level
+ * params (via the esql search's `kibanaQueryContext.timeRange`) rather than the request-level
  * `filter` DSL. A request-level filter that matches no data makes the FROM
  * pattern resolve to zero indices, triggering an Elasticsearch bug in LOOKUP
  * JOIN lookup-index resolution (elastic/kibana#277613).
@@ -89,14 +106,15 @@ interface FilteredEntityIds {
  * to the ML anomalies index, which lacks those fields.
  */
 const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
-  const search = useKibana().services.data.search.search;
+  const search = useKibana().services.data.search;
   // Entity-only filter (KQL + filter pills), without any time range.
   const { filterQuery } = useGlobalFilterQuery();
   const isFilterActive = hasActiveFilter(filterQuery);
 
   const esqlSource =
     isFilterActive && spaceId
-      ? `FROM ${getLatestEntitiesIndexName(
+      ? `FROM ${getEntitiesAlias(
+          ENTITY_LATEST,
           spaceId
         )} | WHERE entity.id IS NOT NULL | KEEP entity.id | SORT entity.id | LIMIT ${MAX_FILTERED_ENTITIES}`
       : undefined;
@@ -107,13 +125,11 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
       if (!esqlSource) {
         return [] as string[];
       }
-      const esqlResult = await getESQLResults({
-        esqlQuery: esqlSource,
-        search,
-        signal,
-        filter: filterQuery,
-      });
-      return esqlResponseToRecords<{ 'entity.id': string }>(esqlResult?.response)
+      const { rawResponse } = await search.esql(
+        { query: esqlSource, filter: filterQuery },
+        { abortSignal: signal, executionContext: ANOMALIES_ENTITY_FILTER_CONTEXT }
+      );
+      return esqlResponseToRecords<{ 'entity.id': string }>(rawResponse)
         .map((record) => record['entity.id'])
         .filter((id): id is string => Boolean(id));
     },
@@ -135,13 +151,13 @@ interface SecurityJobIds {
 }
 
 /**
- * Resolves the ML jobs in the `security`/`siem` ML group, matching the
- * server's `getSecurityMlJobIds` (all module-defined security jobs, whether
- * installed or not) so this panel is constrained to the same job set as the
- * anomaly overview/summary APIs.
+ * Resolves the security ML jobs actually installed in the current space,
+ * matching the space-aware job set the anomaly overview/summary APIs search
+ * (server/lib/entity_analytics/anomaly_summary) so this panel does not
+ * surface anomaly records from jobs installed in other spaces.
  */
 const useSecurityJobIds = (): SecurityJobIds => {
-  const { jobIds, loading } = useSecurityMlModuleJobIds();
+  const { jobIds, loading } = useInstalledSecurityJobsIds();
   return { jobIds: loading ? undefined : jobIds, isLoading: loading };
 };
 
@@ -179,7 +195,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
    */
   timeRange?: FixedTimeRange;
 }) => {
-  const search = useKibana().services.data.search.search;
+  const search = useKibana().services.data.search;
   const timeRange = useRecentAnomaliesTimeRange(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
   const { jobIds: securityJobIds, isLoading: isSecurityJobIdsLoading } = useSecurityJobIds();
@@ -201,15 +217,13 @@ const useRecentAnomaliesTopRowsQuery = (params: {
       if (!topRowsEsqlSource || noFilterMatches || noSecurityJobs || !mlIndexExists) {
         return { records: [], rawResponse: undefined };
       }
-      const esqlResult = await getESQLResults({
-        esqlQuery: topRowsEsqlSource,
-        search,
-        signal,
-        timeRange,
-      });
+      const { rawResponse } = await search.esql(
+        { query: topRowsEsqlSource, kibanaQueryContext: { timeRange } },
+        { abortSignal: signal, executionContext: ANOMALIES_TOP_ROWS_CONTEXT }
+      );
       return {
-        records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
-        rawResponse: esqlResult?.response,
+        records: esqlResponseToRecords<Record<string, string>>(rawResponse),
+        rawResponse,
       };
     },
     {
@@ -253,7 +267,7 @@ export const useRecentAnomaliesQuery = (params: {
    */
   timeRange?: FixedTimeRange;
 }) => {
-  const search = useKibana().services.data.search.search;
+  const search = useKibana().services.data.search;
   const timeRange = useRecentAnomaliesTimeRange(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
   const { jobIds: securityJobIds, isLoading: isSecurityJobIdsLoading } = useSecurityJobIds();
@@ -295,14 +309,12 @@ export const useRecentAnomaliesQuery = (params: {
       if (!anomalyDataEsqlSource || !hasAnomaliesData || noFilterMatches || noSecurityJobs) {
         return { anomalyRecords: [], rowLabels: [] };
       }
-      const esqlResult = await getESQLResults({
-        esqlQuery: anomalyDataEsqlSource,
-        search,
-        signal,
-        timeRange,
-      });
+      const { rawResponse } = await search.esql(
+        { query: anomalyDataEsqlSource, kibanaQueryContext: { timeRange } },
+        { abortSignal: signal, executionContext: ANOMALIES_HEATMAP_CONTEXT }
+      );
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
-        esqlResult.response
+        rawResponse
       ).map((eachRawRecord) => ({
         ...eachRawRecord,
         '@timestamp': new Date(eachRawRecord['@timestamp']).getTime(),
@@ -310,7 +322,7 @@ export const useRecentAnomaliesQuery = (params: {
       return {
         anomalyRecords: anomalyRecords ?? [],
         rowLabels: rowLabels ?? [],
-        rawResponse: esqlResult.response,
+        rawResponse,
       };
     },
     {

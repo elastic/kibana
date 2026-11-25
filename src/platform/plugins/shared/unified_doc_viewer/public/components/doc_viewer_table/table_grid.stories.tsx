@@ -26,13 +26,13 @@ import {
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import React from 'react';
 import type { UnifiedDocViewerStorybookArgs } from '../../../.storybook/preview';
 import type { TableGridProps } from './table_grid';
 import { TableGrid, GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid';
 import APMSpanFixture from '../../__fixtures__/span_apm.json';
 import { FieldRow } from './field_row';
+import type { TableGridCellContext } from './table_grid/model';
 
 const fieldNames = [
   AT_TIMESTAMP,
@@ -65,7 +65,7 @@ const rows: FieldRow[] = fieldNames.map((fieldName) => {
     }),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     isPinned: false,
-    columnsMeta: {},
+    dataSource: undefined,
   });
 });
 
@@ -103,32 +103,20 @@ export const CustomRenderers: Story = {
     onAddColumn: () => {},
     onRemoveColumn: () => {},
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
-    initialPageSize: 25,
-    pinnedFields: [],
     hidePinColumn: false,
-    customRenderCellValue: ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      const row = rows[rowIndex];
+    renderCell: ({ row, columnId }: TableGridCellContext<FieldRow>) => {
       return (
         <p>
           Custom cell content: {columnId === 'name' ? String(row.name) : String(row.flattenedValue)}
         </p>
       );
     },
-    customRenderCellPopover: ({
-      columnId,
-      cellActions,
-      rowIndex,
-    }: EuiDataGridCellPopoverElementProps) => {
-      const row = rows[rowIndex];
-
+    renderCellDetails: ({ row, columnId }: TableGridCellContext<FieldRow>) => {
       return (
-        <>
-          <p>
-            Custom popover content:{' '}
-            {columnId === 'name' ? String(row.name) : String(row.flattenedValue)}
-          </p>
-          {cellActions}
-        </>
+        <p>
+          Custom popover content:{' '}
+          {columnId === 'name' ? String(row.name) : String(row.flattenedValue)}
+        </p>
       );
     },
   },

@@ -10,73 +10,179 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
-import { isTaskCurrentlyRunningError } from './utils';
+import {
+  INSTALL_TASK_TIMEOUT,
+  anySupersededForced,
+  deferForRepositoryVersion,
+  isStaleRepositoryRequest,
+  isTaskSuperseded,
+  requestTaskStateSchemaByVersion,
+  runTaskUnderInstallLock,
+  scheduleRequestTask,
+  shouldDeferForRepositoryVersion,
+  type InstallLockManager,
+  type RequestTaskParams,
+} from './utils';
 
 export const ENSURE_DOC_UP_TO_DATE_TASK_TYPE = 'ProductDocBase:EnsureUpToDate';
-export const ENSURE_DOC_UP_TO_DATE_TASK_ID = 'ProductDocBase:EnsureUpToDate';
-export const ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL =
-  'ProductDocBase:EnsureUpToDateMultilingual';
+
+interface EnsureUpToDateTaskParams extends RequestTaskParams {
+  forceUpdate?: boolean;
+}
 
 export const registerEnsureUpToDateTaskDefinition = ({
   getServices,
   taskManager,
+  lockManager,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  lockManager: InstallLockManager;
 }) => {
   taskManager.registerTaskDefinitions({
     [ENSURE_DOC_UP_TO_DATE_TASK_TYPE]: {
       title: 'Ensure product documentation up to date task',
-      timeout: '10m',
-      maxAttempts: 3,
-      createTaskRunner: (context) => {
+      timeout: INSTALL_TASK_TIMEOUT,
+      maxAttempts: 5,
+      createTaskRunner: ({ taskInstance }) => {
+        const { inferenceId, forceUpdate, requestedAt, repositoryVersion } =
+          taskInstance.params as EnsureUpToDateTaskParams;
+        const since = new Date(requestedAt);
         return {
           async run() {
-            const inferenceId = context.taskInstance?.params?.inferenceId;
-            const forceUpdate = context.taskInstance?.params?.forceUpdate;
-            const { packageInstaller } = getServices();
-            return packageInstaller.ensureUpToDate({ inferenceId, forceUpdate });
+            const { packageInstaller, logger, taskManager: taskManagerStart } = getServices();
+            const { id: taskId, state } = taskInstance;
+            const superseded = async () => {
+              const result = await isTaskSuperseded({ taskManager: taskManagerStart, taskId });
+              if (result) {
+                logger.info(
+                  `Skipping product documentation update for [${inferenceId}]: superseded by a request against a newer artifact repository version`
+                );
+              }
+              return result;
+            };
+            if (await superseded()) {
+              return { state };
+            }
+            if (
+              shouldDeferForRepositoryVersion({
+                requestedVersion: repositoryVersion,
+                localVersion: await packageInstaller.getRepositoryVersion(),
+                requestedAt,
+              })
+            ) {
+              logger.info(
+                `Deferring product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], newer than this node's`
+              );
+              return deferForRepositoryVersion(state);
+            }
+            return runTaskUnderInstallLock({
+              lockManager,
+              state,
+              metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
+              run: async () => {
+                // Re-checked under the lock: a newer request may have completed or superseded this
+                // one while it waited, and forced updates are the documented repair path
+                if (await superseded()) {
+                  return;
+                }
+                if (
+                  !forceUpdate &&
+                  isStaleRepositoryRequest({
+                    requestedVersion: repositoryVersion,
+                    installedVersion: await packageInstaller.getInstalledRepositoryVersion({
+                      inferenceId,
+                    }),
+                  })
+                ) {
+                  logger.info(
+                    `Skipping product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], older than the installed one`
+                  );
+                  return;
+                }
+                const uninstalledSince = async (
+                  resourceType: typeof ResourceTypes.productDoc | typeof ResourceTypes.openapiSpec
+                ) => {
+                  const result = await packageInstaller.wasUninstalledSince({
+                    inferenceId,
+                    since,
+                    resourceType,
+                  });
+                  if (result) {
+                    logger.info(
+                      `Stopping product documentation update for [${inferenceId}]: superseded by a later uninstall of ${resourceType}`
+                    );
+                  }
+                  return result;
+                };
+                for (const productName of await packageInstaller.getProductsToUpdate({
+                  inferenceId,
+                  forceUpdate,
+                })) {
+                  if (await uninstalledSince(ResourceTypes.productDoc)) {
+                    return;
+                  }
+                  // Re-checked under the lock so concurrent update tasks do not install it twice
+                  await packageInstaller.updateProductIfNeeded({
+                    productName,
+                    inferenceId,
+                    forceUpdate,
+                    since,
+                  });
+                }
+                if (await uninstalledSince(ResourceTypes.openapiSpec)) {
+                  return;
+                }
+                await packageInstaller.ensureOpenApiSpecUpToDate({
+                  inferenceId,
+                  forceUpdate,
+                  since,
+                });
+              },
+            });
           },
         };
       },
-      stateSchemaByVersion: {},
+      stateSchemaByVersion: requestTaskStateSchemaByVersion,
     },
   });
 };
 
-export const scheduleEnsureUpToDateTask = async ({
+/**
+ * Schedules an update task for this request. A pending update with the same `forceUpdate` and
+ * repository version for the inference ID is reused, so e.g. every node's startup does not queue its
+ * own update. A forced update superseded by this request is carried over, so a requested repair
+ * still runs.
+ */
+export const scheduleEnsureUpToDateTask = ({
   taskManager,
   logger,
   inferenceId,
   forceUpdate,
+  repositoryVersion,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
   forceUpdate?: boolean;
-}) => {
-  const taskId = isImpliedDefaultElserInferenceId(inferenceId)
-    ? ENSURE_DOC_UP_TO_DATE_TASK_ID
-    : ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL;
-  try {
-    await taskManager.ensureScheduled({
-      id: taskId,
-      taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
-      params: { inferenceId, forceUpdate },
-      state: {},
-      scope: ['productDoc'],
-    });
-
-    await taskManager.runSoon(taskId);
-
-    logger.info(`Task ${taskId} scheduled to run soon`);
-  } catch (e) {
-    if (!isTaskCurrentlyRunningError(e)) {
-      throw e;
-    }
-  }
-
-  return taskId;
+  repositoryVersion?: string;
+}): Promise<string> => {
+  const params: EnsureUpToDateTaskParams = {
+    inferenceId,
+    forceUpdate,
+    requestedAt: new Date().toISOString(),
+    repositoryVersion,
+  };
+  return scheduleRequestTask({
+    taskManager,
+    logger,
+    taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
+    params,
+    reusePending: true,
+    matches: (task) => Boolean(task.params.forceUpdate) === Boolean(forceUpdate),
+    mergeSuperseded: (requestParams, superseded) =>
+      anySupersededForced(superseded) ? { ...requestParams, forceUpdate: true } : requestParams,
+  });
 };

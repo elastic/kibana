@@ -14,7 +14,7 @@ import {
 } from './commons';
 import type { Condition } from '@kbn/streamlang';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { getBuiltInEntityDefinition } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import { applyFieldEvaluations } from './field_evaluations';
@@ -398,14 +398,14 @@ describe('applyWhenConditionTrueSetFields', () => {
 });
 
 describe('user containsId filter condition (documentsFilter AND postAggFilter)', () => {
-  const def = getEntityDefinitionWithoutId('user');
+  const def = getBuiltInEntityDefinition('user');
   const { identityField } = def;
   if (isSingleFieldIdentity(identityField)) {
     throw new Error('User has calculated identity');
   }
   let condition: Condition = identityField.documentsFilter;
-  if (def.postAggFilter) {
-    condition = { and: [condition, def.postAggFilter] };
+  if (def.extraction.postAggFilter) {
+    condition = { and: [condition, def.extraction.postAggFilter] };
   }
 
   const fieldEvaluations = identityField.fieldEvaluations!;
@@ -425,14 +425,14 @@ describe('user containsId filter condition (documentsFilter AND postAggFilter)',
     expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(true);
   });
 
-  it('matches IDP doc: event.category=iam, event.type=user, user.id present', () => {
+  it('excludes IAM lifecycle doc: event.category=iam, event.type=user, user.id present, no host.id', () => {
     const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'success',
       'event.category': 'iam',
       'event.type': 'user',
       'user.id': 'user-123',
     });
-    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(true);
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(false);
   });
 
   it('matches non-IDP doc: user.name + host.id, user.name not in excluded list', () => {

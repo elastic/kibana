@@ -50,39 +50,18 @@ describe('getEsqlColumnSchema', () => {
     expect(query.mock.calls[0][0].query).toBe('FROM logs-a, logs-b | LIMIT 0');
   });
 
-  it('passes a time range filter only when both bounds are provided', async () => {
+  it('inlines the time range only when both bounds are provided', async () => {
     const { esClient, query } = createEsClient();
-    query.mockResolvedValueOnce({ columns: [], values: [] });
+    query.mockResolvedValue({ columns: [], values: [] });
 
     await getEsqlColumnSchema({ esClient, signal, index: 'logs-*', start: 100, end: 200 });
-
-    expect(query.mock.calls[0][0]).toEqual({
-      query: 'FROM logs-* | LIMIT 0',
-      filter: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: 100,
-                  lte: 200,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ],
-        },
-      },
-    });
-  });
-
-  it('omits the filter when only one bound is provided', async () => {
-    const { esClient, query } = createEsClient();
-    query.mockResolvedValueOnce({ columns: [], values: [] });
-
     await getEsqlColumnSchema({ esClient, signal, index: 'logs-*', start: 100 });
 
-    expect(query.mock.calls[0][0]).not.toHaveProperty('filter');
+    expect(query.mock.calls[0][0]).toEqual({
+      query:
+        'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | LIMIT 0',
+    });
+    expect(query.mock.calls[1][0]).toEqual({ query: 'FROM logs-* | LIMIT 0' });
   });
 
   it('parses column names, types, and original conflict types', async () => {
@@ -103,6 +82,55 @@ describe('getEsqlColumnSchema', () => {
       { name: 'message', type: 'text' },
       { name: 'host.name', type: 'unsupported', originalTypes: ['ip', 'keyword'] },
     ]);
+  });
+
+  it('parses the suggested cast for conflicting fields', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce({
+      columns: [
+        {
+          name: 'host.name',
+          type: 'unsupported',
+          original_types: ['ip', 'keyword'],
+          suggested_cast: 'keyword',
+        },
+      ],
+      values: [],
+    });
+
+    const schema = await getEsqlColumnSchema({ esClient, signal, index: 'logs-*' });
+
+    expect(schema).toEqual([
+      {
+        name: 'host.name',
+        type: 'unsupported',
+        originalTypes: ['ip', 'keyword'],
+        suggestedCast: 'keyword',
+      },
+    ]);
+  });
+
+  it('probes only the requested columns and leaves out the unmapped ones', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce({
+      columns: [
+        { name: 'message', type: 'null' },
+        { name: 'body.text', type: 'text' },
+      ],
+      values: [],
+    });
+
+    const schema = await getEsqlColumnSchema({
+      esClient,
+      signal,
+      index: 'logs-*',
+      fields: ['message', 'body.text'],
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      'SET unmapped_fields = "NULLIFY"; FROM logs-* | KEEP message, body.text | LIMIT 0'
+    );
+    expect(schema).toEqual([{ name: 'body.text', type: 'text' }]);
   });
 
   it('filters the no-fields placeholder column', async () => {

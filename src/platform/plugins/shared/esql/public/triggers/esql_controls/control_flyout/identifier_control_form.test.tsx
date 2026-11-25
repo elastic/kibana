@@ -24,11 +24,9 @@ import {
 } from '@kbn/controls-constants';
 
 jest.mock('@kbn/esql-utils', () => {
-  const actual = jest.requireActual('@kbn/esql-utils');
   return {
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
-    getVariableNamePrefix: actual.getVariableNamePrefix,
   };
 });
 
@@ -39,7 +37,7 @@ const defaultProps = {
   onSaveControl: jest.fn(),
   closeFlyout: jest.fn(),
   onCancelControl: jest.fn(),
-  search: dataPluginMock.createStartContract().search.search,
+  search: dataPluginMock.createStartContract().search,
   cursorPosition: { column: 19, lineNumber: 1 } as monaco.Position,
   esqlVariables: [],
   ariaLabelledBy: 'esqlControlFlyoutTitle',

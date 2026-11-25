@@ -1,0 +1,26 @@
+import { inject, injectable } from 'inversify';
+import { CoreStart } from '@kbn/core-di-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+
+export interface ExampleApiResponse {
+  time: string;
+  configSavedObjectTotal: number;
+}
+
+@injectable()
+export class ExampleApiService {
+  constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
+
+  <% if (hasServer) { %>
+  public getExample(): Promise<ExampleApiResponse> {
+    return this.http.get<ExampleApiResponse>('/api/<%= snakeCase(name) %>/example');
+  }
+  <% } else { %>
+  public getExample(): Promise<ExampleApiResponse> {
+    return Promise.resolve({
+      time: new Date().toISOString(),
+      configSavedObjectTotal: 0,
+    });
+  }
+  <% } %>
+}

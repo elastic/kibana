@@ -50,6 +50,9 @@ jest.mock('../../kibana_services', () => {
         },
       };
     },
+    getMapsCapabilities() {
+      return { save: true };
+    },
   };
 });
 

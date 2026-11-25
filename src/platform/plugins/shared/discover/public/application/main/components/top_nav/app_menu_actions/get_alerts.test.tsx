@@ -25,6 +25,7 @@ import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { alertingV2PluginMock } from '@kbn/alerting-v2-plugin/public/mocks';
 import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateActions } from '../../../state_management/redux';
 
@@ -276,7 +277,10 @@ describe('getAlertsAppMenuItem', () => {
     it('should render CreateRuleOptionsFlyout with the current ES|QL query and subscribe handler', async () => {
       const createRuleOptionsFlyoutMock = jest.fn(() => null);
       const services = createDiscoverServicesMock();
-      services.alertingVTwo = { CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock };
+      services.alertingVTwo = {
+        ...alertingV2PluginMock.createStartContract(),
+        CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock,
+      };
       const { createRuleOptionsAppMenuItem } = await setupCreateRuleOptionsMenuItem({
         services,
         isEsqlMode: true,

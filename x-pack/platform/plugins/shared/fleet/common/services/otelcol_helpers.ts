@@ -26,3 +26,13 @@ export const packagePolicyHasOtelInputs = (
   (packagePolicyInputs || []).some(
     (input) => input.type === OTEL_COLLECTOR_INPUT_TYPE && input.enabled
   );
+
+export const packagePolicyHasOnlyOtelInputs = (
+  packagePolicyInputs: Array<Pick<PackagePolicyInput, 'type' | 'enabled'>> | undefined
+): boolean => {
+  const enabledInputs = (packagePolicyInputs || []).filter((input) => input.enabled);
+  return (
+    enabledInputs.length > 0 &&
+    enabledInputs.every((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
+  );
+};

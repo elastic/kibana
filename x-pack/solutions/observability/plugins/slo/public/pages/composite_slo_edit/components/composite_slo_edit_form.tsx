@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiSpacer, EuiSteps } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, EuiSteps } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -43,10 +44,8 @@ export function CompositeSloEditForm({ initialValues, compositeSloId, isEditMode
   return (
     <FormProvider {...form}>
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="compositeSloForm">
-        <EuiCallOut
+        <KbnInfoCallout
           size="s"
-          color="primary"
-          iconType="iInCircle"
           title={i18n.translate('xpack.slo.compositeSloEdit.experimentalNotice', {
             defaultMessage:
               'Composite SLOs are experimental. The weighted average of member SLO error budgets determines the composite SLO status.',

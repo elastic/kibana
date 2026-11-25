@@ -10,6 +10,7 @@ A callout that **appears conditionally** (validation, async result, toggle, post
 - **Always-mounted, static callout** → omit **`announceOnMount`**; it does not need a live region.
 - **Conditional but must not announce** (rare) → **`announceOnMount={false}`** and document why in the callsite if non-obvious.
 - New user-visible strings (`title`, body) → **`i18n.translate`** (see *Localization (i18n)* in **`../shared_principles.md`**).
+- **Feedback in an open modal or flyout** (e.g. a save error that keeps it open) → use a callout with **`announceOnMount`** inside the dialog rather than a global toast. VoiceOver doesn't announce toasts while a modal is open, and keyboard users can't reach them; see **`status_messages.md`**.
 
 If **`EuiCallOut`** uses **`{...calloutProps}`** and **`announceOnMount`** is not on the opening tag, merge it at the callsite or in the spread source.
 

@@ -35,6 +35,7 @@ export interface NewAgentPolicy {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  download_source_ids?: string[];
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
@@ -102,11 +103,20 @@ export interface AgentPolicyAgentVersionCondition {
   version_condition: string;
 }
 
+export interface AgentPolicyPackagePoliciesSummary {
+  count: number;
+  has_fleet_server: boolean;
+  has_managed: boolean;
+  has_root_integrations: boolean;
+  has_shared: boolean;
+}
+
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   space_ids?: string[] | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
+  package_policies_summary?: AgentPolicyPackagePoliciesSummary;
   is_managed: boolean; // required for created policy
   created_at?: string;
   updated_at: string;
@@ -116,6 +126,8 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   unprivileged_agents?: number;
   fips_agents?: number;
   agents_per_version?: Array<{ version: string; count: number }>;
+  /** Active agents per version, excluding OpAMP agents: the agents agent version conditions apply to. */
+  active_agents_per_version?: Array<{ version: string; count: number }>;
   is_protected: boolean;
   version?: string;
   min_agent_version?: string | null;
@@ -170,12 +182,15 @@ export interface FullAgentPolicyAddFields {
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
-export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+export interface FullAgentPolicyOutput {
+  type: Output['type'];
+  hosts?: string[];
+  ca_sha256?: string | null;
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
   [key: string]: any;
-};
+}
 
 export interface FullAgentPolicyMonitoring {
   namespace?: string;
@@ -225,11 +240,15 @@ export interface FullAgentPolicyDownloadSecrets extends BaseSSLSecrets {
 
 export interface FullAgentPolicyDownload {
   sourceURI: string;
+  sources?: string[];
   ssl?: BaseSSLConfig;
   auth?: FullAgentPolicyDownloadAuth;
   secrets?: FullAgentPolicyDownloadSecrets;
   proxy_url?: string;
   proxy_headers?: any;
+  reserve_diskspace?: {
+    enabled: boolean;
+  };
 }
 
 export interface FullAgentPolicy {

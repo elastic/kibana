@@ -98,6 +98,43 @@ export default function (providerContext: FtrProviderContext) {
       expect(agentPolicy.item.monitoring_output_id).to.be(ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID);
     });
 
+    it('should emit only the apm applications block in output_permissions for a managed bulk policy', async () => {
+      const id = uuidv4();
+
+      const policy = await apiClient.createAgentlessPolicy({
+        id,
+        package: {
+          name: 'test_agentless',
+          version: '1.0.0',
+        },
+        name: `test_agentless-bulk-permissions-${Date.now()}`,
+        description: 'test agentless managed bulk permissions',
+        namespace: 'default',
+        inputs: {
+          'sample-httpjson': {
+            enabled: true,
+            vars: {
+              api_key: 'TEST_VALUE_API_KEY',
+            },
+            streams: {},
+          },
+        },
+      });
+
+      const { body: fullPolicy } = await supertest
+        .get(`/api/fleet/agent_policies/${policy.item.id}/full`)
+        .expect(200);
+
+      const outputPerms = fullPolicy.item.output_permissions;
+      const bulkPerms = outputPerms?.[ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID];
+
+      expect(bulkPerms).to.be.ok();
+      expect(bulkPerms._managed_bulk_apm).to.eql({
+        applications: [{ application: 'apm', privileges: ['event:write'], resources: ['*'] }],
+      });
+      expect(bulkPerms._managed_bulk_apm).not.to.have.key('indices');
+    });
+
     it('should keep an OTel agentless policy on the direct-ES output', async () => {
       const id = uuidv4();
 

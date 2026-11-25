@@ -24,7 +24,7 @@ import {
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { buildEsQuery, type Filter, type Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
-import type { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
+import type { DataSeriesDatum } from '@elastic/charts';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { FullTimeRangeSelectorProps } from '@kbn/ml-date-picker';
 import {
@@ -73,6 +73,9 @@ interface PageHeaderProps {
 export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
+  const {
+    services: { cps },
+  } = useDataVisualizerKibana();
 
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     DVKey,
@@ -128,6 +131,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
                 disabled={false}
                 timefilter={timefilter}
                 callback={updateTimeState}
+                projectRouting={cps?.cpsManager?.getProjectRouting()}
               />
             </EuiFlexItem>
           )}

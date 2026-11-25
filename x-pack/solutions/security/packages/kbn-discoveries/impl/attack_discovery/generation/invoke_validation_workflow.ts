@@ -91,6 +91,15 @@ export interface InvokeValidationParams {
   executionUuid: string;
   logger: Logger;
   generationResult: GenerationWorkflowResult;
+  /**
+   * Optional producer identity, contributed to the attack hash so this producer's
+   * attacks never de-duplicate against another producer's attacks built from the
+   * same detection alerts. Forwarded both to the workflow inputs (so the persist
+   * step writes and hashes it) and to the scheduled de-duplication lookup, which
+   * must compute the same hashes persistence does. Kibana Attack Discovery omits
+   * it, preserving the hashes already persisted.
+   */
+  generationSource?: string;
   maxWaitMs?: number;
   request: KibanaRequest;
   /**
@@ -181,12 +190,14 @@ const buildWorkflowInputs = ({
   alertRetrievalResult,
   enableFieldRendering,
   generationResult,
+  generationSource,
   source,
   withReplacements,
 }: {
   alertRetrievalResult: AlertRetrievalResult;
   enableFieldRendering: boolean;
   generationResult: GenerationWorkflowResult;
+  generationSource?: string;
   source?: AttackDiscoverySource;
   withReplacements: boolean;
 }): Record<string, unknown> => ({
@@ -200,6 +211,7 @@ const buildWorkflowInputs = ({
   attack_discoveries: generationResult.attackDiscoveries,
   connector_name: alertRetrievalResult.connectorName,
   enable_field_rendering: enableFieldRendering,
+  generation_source: generationSource,
   generation_uuid: generationResult.executionUuid,
   replacements: generationResult.replacements,
   source,
@@ -496,6 +508,7 @@ const deduplicateScheduledResult = async ({
   esClient,
   extractedResult,
   generationResult,
+  generationSource,
   logger,
   ruleId,
   spaceId,
@@ -505,6 +518,7 @@ const deduplicateScheduledResult = async ({
   esClient: ElasticsearchClient;
   extractedResult: ExtractedValidationResult;
   generationResult: GenerationWorkflowResult;
+  generationSource?: string;
   logger: Logger;
   ruleId: string;
   spaceId: string;
@@ -516,6 +530,7 @@ const deduplicateScheduledResult = async ({
     connectorId: alertRetrievalResult.apiConfig.connector_id,
     discoveriesToPersist: originalDiscoveries,
     esClient,
+    generationSource,
     logger,
     replacements: generationResult.replacements,
     ruleId,
@@ -744,6 +759,7 @@ export const invokeValidationWorkflow = async ({
   executionUuid,
   logger,
   generationResult,
+  generationSource,
   maxWaitMs,
   request,
   ruleId,
@@ -767,7 +783,7 @@ export const invokeValidationWorkflow = async ({
 
   try {
     // Step 1: Get and validate the workflow
-    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
     const validatedWorkflow = validateWorkflow(rawWorkflow, workflowId);
     workflowName = validatedWorkflow.name;
 
@@ -776,6 +792,7 @@ export const invokeValidationWorkflow = async ({
       alertRetrievalResult,
       enableFieldRendering,
       generationResult,
+      generationSource,
       source,
       withReplacements,
     });
@@ -842,6 +859,7 @@ export const invokeValidationWorkflow = async ({
 
     // Step 5: Poll for completion
     const execution = await pollForWorkflowCompletion({
+      request,
       executionId: workflowRunId,
       isReady: (exec) => exec.stepExecutions.length > 0,
       logger,
@@ -880,6 +898,7 @@ export const invokeValidationWorkflow = async ({
             esClient,
             extractedResult,
             generationResult,
+            generationSource,
             logger,
             ruleId,
             spaceId,

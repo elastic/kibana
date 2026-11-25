@@ -25,180 +25,25 @@ import type {
   CaseSeverity,
   CaseStatuses,
   CustomFieldsConfiguration,
-  ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
   CustomFieldTypes,
-} from '../../common/types/domain';
-import {
-  ActionsAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
-  EventAttachmentPayloadRt,
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  ExternalReferenceSOAttachmentPayloadRt,
-  ExternalReferenceStorageType,
-  PersistableStateAttachmentPayloadRt,
-  UserCommentAttachmentPayloadRt,
 } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
-import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
   NO_ASSIGNEES_FILTERING_KEYWORD,
   OWNER_FIELD,
 } from '../../common/constants';
-import {
-  isCommentRequestTypeExternalReference,
-  isCommentRequestTypePersistableState,
-  isUnifiedAttachmentRequest,
-  isUnifiedReferenceAttachmentRequest,
-  isUnifiedValueAttachmentRequest,
-  isLegacyAttachmentRequest,
-  isLegacyCommentAttachment,
-} from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
-import {
-  getIDsAndIndicesAsArrays,
-  isCommentRequestTypeAlert,
-  isCommentRequestTypeActions,
-  assertUnreachable,
-  isCommentRequestTypeEvent,
-} from '../common/utils';
-import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
+import { isCommentRequestTypeAlert } from '../common/utils';
 import type { UnifiedAttachmentPayload } from '../../common/types/domain/attachment/v2';
-import { parseUnifiedAttachmentWithSchema } from './attachments/validators';
-import type {
-  AttachmentRequest,
-  AttachmentRequestV2,
-  CasesFindRequestSortFields,
-} from '../../common/types/api';
+import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
-
-// TODO: I think we can remove most of this function since we're using a different excess
-export const decodeCommentRequest = (comment: AttachmentRequest) => {
-  if (isLegacyCommentAttachment(comment)) {
-    decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
-  } else if (isCommentRequestTypeActions(comment)) {
-    decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
-  } else if (isCommentRequestTypeAlert(comment)) {
-    decodeWithExcessOrThrow(AlertAttachmentPayloadRt)(comment);
-
-    const { ids, indices } = getIDsAndIndicesAsArrays(comment);
-
-    /**
-     * The alertId and index field must either be both of type string or they must both be string[] and be the same length.
-     * Having a one-to-one relationship between the id and index of an alert avoids accidentally updating or
-     * retrieving the wrong alert. Elasticsearch only guarantees that the _id (the field we use for alertId) to be
-     * unique within a single index. So if we attempt to update or get a specific alert across multiple indices we could
-     * update or receive the wrong one.
-     *
-     * Consider the situation where we have a alert1 with _id = '100' in index 'my-index-awesome' and also in index
-     *  'my-index-hi'.
-     * If we attempt to update the status of alert1 using an index pattern like `my-index-*` or even providing multiple
-     * indices, there's a chance we'll accidentally update too many alerts.
-     *
-     * This check doesn't enforce that the API request has the correct alert ID to index relationship it just guards
-     * against accidentally making a request like:
-     * {
-     *  alertId: [1,2,3],
-     *  index: awesome,
-     * }
-     *
-     * Instead this requires the requestor to provide:
-     * {
-     *  alertId: [1,2,3],
-     *  index: [awesome, awesome, awesome]
-     * }
-     *
-     * Ideally we'd change the format of the comment request to be an array of objects like:
-     * {
-     *  alerts: [{id: 1, index: awesome}, {id: 2, index: awesome}]
-     * }
-     *
-     * But we'd need to also implement a migration because the saved object document currently stores the id and index
-     * in separate fields.
-     */
-    if (ids.length !== indices.length) {
-      throw badRequest(
-        `Received an alert comment with ids and indices arrays of different lengths ids: ${JSON.stringify(
-          ids
-        )} indices: ${JSON.stringify(indices)}`
-      );
-    }
-  } else if (isCommentRequestTypeEvent(comment)) {
-    decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
-  } else if (isCommentRequestTypeExternalReference(comment)) {
-    decodeExternalReferenceAttachment(comment);
-  } else if (isCommentRequestTypePersistableState(comment)) {
-    decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
-  } else {
-    /**
-     * This assertion ensures that TS will show an error
-     * when we add a new attachment type. This way, we rely on TS
-     * to remind us that we have to do a check for the new attachment.
-     */
-    assertUnreachable(comment);
-  }
-};
-
-const decodeExternalReferenceAttachment = (attachment: ExternalReferenceAttachmentPayload) => {
-  if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
-    decodeWithExcessOrThrow(ExternalReferenceSOAttachmentPayloadRt)(attachment);
-  } else {
-    decodeWithExcessOrThrow(ExternalReferenceNoSOAttachmentPayloadRt)(attachment);
-  }
-};
-
-/** Validates a unified attachment via the registered `schema`. */
-const decodeUnifiedAttachment = (
-  attachment: UnifiedAttachmentPayload,
-  unifiedRegistry: UnifiedAttachmentTypeRegistry
-) => {
-  if (!unifiedRegistry.has(attachment.type)) {
-    throw badRequest(
-      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
-    );
-  }
-
-  const attachmentType = unifiedRegistry.get(attachment.type);
-
-  if (!attachmentType.schema) {
-    throw badRequest(`Attachment type '${attachment.type}' does not define a schema.`);
-  }
-
-  parseUnifiedAttachmentWithSchema(attachmentType.schema, attachment, attachment.type);
-};
-
-export const decodeUnifiedCommentRequest = (
-  attachment: UnifiedAttachmentPayload,
-  unifiedRegistry: UnifiedAttachmentTypeRegistry
-) => {
-  if (
-    isUnifiedValueAttachmentRequest(attachment) ||
-    isUnifiedReferenceAttachmentRequest(attachment)
-  ) {
-    decodeUnifiedAttachment(attachment, unifiedRegistry);
-  } else {
-    assertUnreachable(attachment);
-  }
-};
-
-export const decodeCommentRequestV2 = (
-  attachment: AttachmentRequestV2,
-  unifiedRegistry: UnifiedAttachmentTypeRegistry
-) => {
-  if (isLegacyAttachmentRequest(attachment)) {
-    decodeCommentRequest(attachment);
-  } else if (isUnifiedAttachmentRequest(attachment)) {
-    decodeUnifiedCommentRequest(attachment, unifiedRegistry);
-  } else {
-    assertUnreachable(attachment);
-  }
-};
 
 /**
  * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
@@ -776,7 +621,7 @@ export const buildAttachmentRequestFromFileJSON = ({
 }: {
   owner: string;
   fileMetadata: FileJSON;
-}): AttachmentRequestV2 => ({
+}): UnifiedAttachmentPayload => ({
   owner,
   type: FILE_ATTACHMENT_TYPE,
   attachmentId: fileMetadata.id,

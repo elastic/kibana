@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope } from '../../affected-packages';
+import { allChangedFilesInScope, createScopeMatcher } from '../../affected-packages/index.ts';
 
 /**
- * Scout-tests-only fast path for the Jest/FTR orchestrator.
+ * Scout test scopes shared by the Jest/FTR orchestrator.
  *
  * When a PR's diff contains only Scout test files (Playwright configs, specs,
  * generated `.meta` manifests, co-located helpers/constants), no Jest
- * unit/integration or FTR config can be affected, so the orchestrator skips
- * emitting them entirely. The Scout pipeline still runs its own selective
- * testing in parallel.
+ * integration or FTR config can be affected, so the orchestrator omits them.
+ * Jest unit selection uses Moon's task inputs alongside the existing package
+ * selection. The Scout pipeline runs in parallel.
  *
  * Changes under a Scout `fixtures/` directory are excluded: their entry points
  * can be imported by other plugins, so they're treated as regular changes.
@@ -43,6 +43,11 @@ const SCOUT_TESTS_ONLY_EXCLUDE_GLOBS: readonly string[] = [
   '**/test/scout{_*,}/{api,ui}/fixtures/**',
   '**/test/scout{_*,}/*/{api,ui}/fixtures/**',
 ];
+
+/**
+ * Returns `true` when a single file sits inside a Scout test scope (fixtures included).
+ */
+export const isScoutTestPath = createScopeMatcher(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
 
 /**
  * Returns `true` only when every changed file is either documentation noise

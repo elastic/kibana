@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { Entity } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import type { AnomalySummaryEntry } from '../../../../../../common/api/entity_analytics/anomaly_summary';
 import { getAnomalyData } from './get_anomaly_data';
@@ -25,6 +26,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
       getEuidFilterBasedOnDocument: jest.fn(),
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -65,6 +68,7 @@ const makeAnomalySummaryEntry = (
   partitionFieldValue: null,
   recordScore: 75,
   recordId: 'record-1',
+  entityId: 'user:alice',
   timestamp: '2023-11-14T22:13:20.000Z',
   actual: [],
   typical: [],
@@ -179,11 +183,30 @@ describe('getAnomalyData', () => {
 
       expect(jest.mocked(getEntityAnomalies)).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityId: 'user:alice',
+          entityIds: ['user:alice'],
           entityType: 'user',
           fromMs: 0,
           toMs: 1_700_000_000_000,
         })
+      );
+    });
+
+    it('forwards mitreDataClient to getEntityAnomalies when provided', async () => {
+      jest.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [], total: 0 });
+
+      const mockMitreDataClient: MitreAttackDataClient = { list: jest.fn(), getById: jest.fn() };
+
+      await getAnomalyData({
+        ...baseOptions,
+        entities: [makeEntity({ id: 'user:alice', type: 'user' })],
+        experimentalFeatures: experimentalFeaturesApiOn,
+        mitreDataClient: mockMitreDataClient,
+        ml: makeMl() as never,
+        uiSettingsClient: makeUiSettingsClient() as never,
+      });
+
+      expect(jest.mocked(getEntityAnomalies)).toHaveBeenCalledWith(
+        expect.objectContaining({ mitreDataClient: mockMitreDataClient })
       );
     });
 

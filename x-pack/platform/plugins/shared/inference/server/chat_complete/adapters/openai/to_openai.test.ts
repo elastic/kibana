@@ -321,9 +321,32 @@ describe('messagesToOpenAI', () => {
           role: 'user',
           content: [
             { type: 'text', text: 'text message' },
-            { type: 'image_url', image_url: { url: 'base64data' } },
+            { type: 'image_url', image_url: { url: 'data:image/png;base64,base64data' } },
             { type: 'text', text: 'with image' },
           ],
+        },
+      ]);
+    });
+
+    it('passes the image data through unchanged when no mimeType is provided', () => {
+      const result = messagesToOpenAI({
+        messages: [
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'image',
+                source: { data: 'https://example.com/image.png', mimeType: '' },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(result).toEqual([
+        {
+          role: 'user',
+          content: [{ type: 'image_url', image_url: { url: 'https://example.com/image.png' } }],
         },
       ]);
     });
@@ -446,5 +469,50 @@ describe('messagesToOpenAI', () => {
       expect(result).toHaveLength(3);
       expect(result[1]).toEqual({ role: 'assistant', content: '...' });
     });
+  });
+});
+
+describe('toolChoiceToOpenAI with a model id', () => {
+  it('downgrades a named function to "auto" for a Claude model that rejects forced tool choice', () => {
+    expect(
+      toolChoiceToOpenAI({ function: 'foo' }, { modelId: 'eu.anthropic.claude-sonnet-5-5' })
+    ).toEqual('auto');
+  });
+
+  it('downgrades "required" to "auto" for a Claude model that rejects forced tool choice', () => {
+    expect(
+      toolChoiceToOpenAI(ToolChoiceType.required, { modelId: 'anthropic-claude-5.5-opus' })
+    ).toEqual('auto');
+  });
+
+  it('keeps the named function for a model that accepts forced tool choice', () => {
+    expect(toolChoiceToOpenAI({ function: 'foo' }, { modelId: 'claude-sonnet-4-6' })).toEqual({
+      type: 'function',
+      function: { name: 'foo' },
+    });
+    expect(toolChoiceToOpenAI({ function: 'foo' }, { modelId: 'gpt-5' })).toEqual({
+      type: 'function',
+      function: { name: 'foo' },
+    });
+  });
+
+  it('downgrades before the single-tool "required" coercion for Other providers', () => {
+    const connector = {
+      config: {
+        apiProvider: OpenAiProviderType.Other,
+        enableNativeFunctionCalling: true,
+      },
+    } as unknown as InferenceConnector;
+
+    const tools: NonNullable<ToolOptions['tools']> = {
+      myTool: { description: 'my tool' },
+    };
+
+    expect(
+      toolChoiceToOpenAI(
+        { function: 'myTool' },
+        { connector, tools, modelId: 'eu.anthropic.claude-opus-5-5' }
+      )
+    ).toEqual('auto');
   });
 });

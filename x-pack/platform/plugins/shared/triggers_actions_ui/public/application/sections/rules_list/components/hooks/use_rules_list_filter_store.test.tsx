@@ -222,8 +222,8 @@ describe('useRulesListFilterStore', () => {
       types: [],
     });
     expect(result.current.numberOfFiltersStore).toEqual(0);
-    expect(useUrlStateStorageSetMock).toBeCalledTimes(1);
-    expect(setRulesListFilterLocalMock).toBeCalledTimes(1);
+    expect(useUrlStateStorageSetMock).toHaveBeenCalledTimes(1);
+    expect(setRulesListFilterLocalMock).toHaveBeenCalledTimes(1);
   });
 
   it('Should set filter when setFiltersStore has been called', async () => {
@@ -261,7 +261,7 @@ describe('useRulesListFilterStore', () => {
       types: [],
     });
     expect(result.current.numberOfFiltersStore).toEqual(1);
-    expect(useUrlStateStorageSetMock).toBeCalledTimes(1);
-    expect(setRulesListFilterLocalMock).toBeCalledTimes(1);
+    expect(useUrlStateStorageSetMock).toHaveBeenCalledTimes(1);
+    expect(setRulesListFilterLocalMock).toHaveBeenCalledTimes(1);
   });
 });

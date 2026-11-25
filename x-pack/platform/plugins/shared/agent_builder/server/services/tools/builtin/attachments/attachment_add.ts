@@ -30,7 +30,6 @@ type AttachmentAddSchema = ReturnType<typeof buildAttachmentAddSchema>;
  * Creates a new attachment with the specified type and content.
  */
 export const createAttachmentAddTool = ({
-  attachmentManager,
   attachmentsService,
 }: AttachmentToolsOptions): InternalBuiltinToolDefinition<AttachmentAddSchema> => {
   const registeredTypes = (attachmentsService?.getRegisteredTypeIds?.() ?? []).filter(
@@ -50,7 +49,8 @@ export const createAttachmentAddTool = ({
       'Create a new attachment to store data for later use in the conversation. The "data" field is required and must contain the content to store. Attachments persist across conversation rounds and can be read, updated, or deleted.',
     schema: attachmentAddSchema,
     tags: ['attachment'],
-    handler: async ({ id, type, data, description }, _context) => {
+    excludeFromMcp: true,
+    handler: async ({ id, type, data, description }, { attachments: attachmentManager }) => {
       const definition = attachmentsService?.getTypeDefinition(type);
       if (!definition) {
         const validTypes = attachmentsService?.getRegisteredTypeIds() ?? [];

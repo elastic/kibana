@@ -405,7 +405,7 @@ describe('data table dimension editor', () => {
     await btnGroups.colorMode.select(getDynamicColoringLabel('none'));
 
     await act(async () => jest.advanceTimersByTime(256));
-    expect(props.setState).toBeCalledWith({
+    expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
         expect.objectContaining({

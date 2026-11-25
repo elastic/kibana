@@ -15,7 +15,10 @@ import {
   getSparklineColumns,
 } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type {
+  CustomGridColumnsConfiguration,
+  DataGridCellValueElementProps,
+} from '@kbn/unified-data-table';
 import { createElement } from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
@@ -34,6 +37,37 @@ export const createPatternsDataSourceProfileProvider = (
 }> => ({
   profileId: 'patterns-data-source-profile',
   profile: {
+    getColumnsConfiguration:
+      (prev, { context }) =>
+      (params) => {
+        const previous = prev(params);
+        const { columns = [], dataSource, settings } = params ?? {};
+        const hasFlexiblePattern = columns.some(
+          (name) =>
+            context.patternColumns.includes(name) &&
+            dataSource?.getColumn(name)?.type === 'string' &&
+            !settings?.columns?.[name]?.width
+        );
+        if (!hasFlexiblePattern || dataSource?.kind !== 'esql') {
+          return previous;
+        }
+
+        const configuration: CustomGridColumnsConfiguration = { ...previous };
+        for (const name of columns) {
+          if (
+            context.patternColumns.includes(name) ||
+            dataSource.getColumn(name)?.type !== 'number' ||
+            settings?.columns?.[name] !== undefined
+          ) {
+            continue;
+          }
+          configuration[name] = (columnProps) => {
+            const column = previous[name]?.(columnProps) ?? columnProps.column;
+            return { ...column, initialWidth: column.initialWidth ?? 150 };
+          };
+        }
+        return configuration;
+      },
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
@@ -81,7 +115,7 @@ export const createPatternsDataSourceProfileProvider = (
               i18n.translate('discover.docViews.patterns.cellAction.viewResults', {
                 defaultMessage: 'View matching results',
               }),
-            getIconType: () => 'discoverApp',
+            getIconType: () => 'productDiscover',
             isCompatible: (compatibleContext) => {
               const { query, field } = compatibleContext;
               const { patternColumns } = context;
@@ -129,16 +163,6 @@ export const createPatternsDataSourceProfileProvider = (
           },
         ];
       },
-    getDefaultAppState: (prev) => (params) => {
-      return {
-        ...prev(params),
-        columns: [
-          { name: 'Count', width: 150 },
-          { name: 'Sparkline', width: 150 },
-          { name: 'Pattern', width: undefined },
-        ],
-      };
-    },
   },
   resolve: (params) => {
     if (!isDataSourceType(params.dataSource, DataSourceType.Esql)) {
@@ -157,6 +181,8 @@ export const createPatternsDataSourceProfileProvider = (
     }
 
     const sparklineColumns = getSparklineColumns(query.esql);
+
+    void services.aiops?.aiopsUsage.trackRenderEsqlCategorizationResults();
 
     return {
       isMatch: true,

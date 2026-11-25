@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InferenceEndpointProvider } from '@kbn/inference-common';
 import { wrapWithSimulatedFunctionCalling } from '../../simulated_function_calling';
 import type { OpenAIRequest } from '../openai/types';
 import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
@@ -12,7 +13,7 @@ import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
-import { getModelId } from './utils';
+import { getModelId, getProvider } from './utils';
 
 export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIRequest => {
   const {
@@ -24,6 +25,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     temperature = 0,
     modelName,
     reasoning,
+    logger,
   } = applyProviderTransforms(options);
 
   // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
@@ -55,6 +57,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       reasoning,
       hasNativeTools: hasTools,
       model,
+      isEis: getProvider(options.connector) === InferenceEndpointProvider.Elastic,
     });
 
     request = {
@@ -63,7 +66,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       messages: messagesToOpenAI({ system, messages }),
       ...(hasTools
         ? {
-            tool_choice: toolChoiceToOpenAI(toolChoice),
+            tool_choice: toolChoiceToOpenAI(toolChoice, { modelId: model, logger }),
             tools: openAiTools,
           }
         : {}),

@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { errorResult, evalsTools, otherResult, toErrorResult } from './common';
-import { hasReadEvalsPrivilege } from './check_privileges';
+import { errorResult, evalsExperimentTools, otherResult, toErrorResult } from './tool_utils';
+import { hasReadEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const schema = z.object({});
@@ -21,10 +21,10 @@ const schema = z.object({});
 export const listEvaluatorsTool = (
   deps: EvalExperimentsToolDeps
 ): BuiltinSkillBoundedTool<typeof schema> => ({
-  id: evalsTools.listEvaluators,
+  id: evalsExperimentTools.listEvaluators,
   type: ToolType.builtin,
   description:
-    'List available evaluators (name, version, kind, description). `llm` evaluators require a judge connector_id (needsJudgeConnector=true); `code` evaluators do not.',
+    'List the evaluators available in this space (name, version, kind, origin, description), both built-in and user-defined. `llm` evaluators require a judge connector_id (needsJudgeConnector=true); `code` evaluators do not.',
   schema,
   handler: async (_args, { request, spaceId }) => {
     try {
@@ -41,7 +41,7 @@ export const listEvaluatorsTool = (
         );
       }
 
-      const evaluators = evals.listEvaluators();
+      const evaluators = await evals.listEvaluators({ spaceId });
       return otherResult({ total: evaluators.length, evaluators });
     } catch (error) {
       return toErrorResult(error, 'Failed to list evaluators');

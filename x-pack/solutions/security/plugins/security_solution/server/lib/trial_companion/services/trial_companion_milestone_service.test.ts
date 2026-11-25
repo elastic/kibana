@@ -237,7 +237,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [mockDetectorM2],
         repo,
       });
-      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
+      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrow();
       expect(repo.getCurrent).toHaveBeenCalledTimes(1);
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
         TRIAL_COMPANION_MILESTONE_REFRESH_ERROR.eventType,
@@ -256,7 +256,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [mockDetectorM2],
         repo,
       });
-      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
+      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrow();
       expect(repo.update).toHaveBeenCalledTimes(1);
     });
 
@@ -269,7 +269,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [mockDetectorM2],
         repo,
       });
-      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
+      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrow();
       expect(repo.create).toHaveBeenCalledTimes(1);
     });
 
@@ -281,7 +281,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
         detectors: [mockDetectorError],
         repo,
       });
-      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
+      await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrow();
       expect(repo.getCurrent).toHaveBeenCalledTimes(1);
       expect(mockDetectorError).toHaveBeenCalledTimes(1);
       expect(repo.create).not.toHaveBeenCalled();

@@ -24,5 +24,6 @@
     "@kbn/storybook",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/test-jest-helpers",
+    "@kbn/ui-callout",
   ]
 }

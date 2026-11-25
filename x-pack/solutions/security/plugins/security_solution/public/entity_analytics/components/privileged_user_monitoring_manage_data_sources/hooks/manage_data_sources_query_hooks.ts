@@ -6,10 +6,18 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const PUM_DATA_SOURCES_LATEST_CSV_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_data_sources_latest_csv'
+);
 
 const getLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
   return `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
@@ -20,20 +28,16 @@ const getLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
 const GET_LATEST_CSV_UPLOAD_QUERY_ID = 'getPrivilegedUserMonitoringLatestCsvQuery';
 
 export const useGetLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
-  const search = useKibana().services.data.search.search;
+  const search = useKibana().services.data.search;
 
   const { isLoading, data, isError, refetch } = useQuery(
     [GET_LATEST_CSV_UPLOAD_QUERY_ID],
     async ({ signal }) => {
-      return esqlResponseToRecords<{ latest_timestamp: string }>(
-        (
-          await getESQLResults({
-            esqlQuery: getLatestCSVPrivilegedUserUploadQuery(namespace),
-            search,
-            signal,
-          })
-        )?.response
+      const { rawResponse } = await search.esql(
+        { query: getLatestCSVPrivilegedUserUploadQuery(namespace) },
+        { abortSignal: signal, executionContext: PUM_DATA_SOURCES_LATEST_CSV_CONTEXT }
       );
+      return esqlResponseToRecords<{ latest_timestamp: string }>(rawResponse);
     }
   );
   const latestTimestamp = data ? data.find(Boolean)?.latest_timestamp : undefined;

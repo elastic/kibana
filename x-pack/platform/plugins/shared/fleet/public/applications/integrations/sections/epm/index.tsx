@@ -11,7 +11,13 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiSkeletonText } from '@elastic/eui';
 
 import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
-import { IntegrationsStateContextProvider, useBreadcrumbs, useStartServices } from '../../hooks';
+import {
+  IntegrationsStateContextProvider,
+  useAuthz,
+  useAutomaticImportAuthz,
+  useBreadcrumbs,
+  useStartServices,
+} from '../../hooks';
 
 import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy_package_policy_page';
 import { CreatePackagePolicyPage } from '../../../fleet/sections/agent_policy/create_package_policy_page';
@@ -21,13 +27,16 @@ import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
-import { CollectionDetailPage } from './screens/collection';
 
 export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
+  const { canView, canCreate } = useAutomaticImportAuthz();
+  const canUploadPackages = useAuthz().integrations.uploadPackages;
   useBreadcrumbs('integrations');
 
-  const hasCreateIntegration = Boolean(automaticImport);
+  const hasCreateIntegration = Boolean(automaticImport) && canCreate;
+  // Upload checks the package name against Automatic Import integrations, which needs read access.
+  const hasUploadIntegration = Boolean(automaticImport) && canView && canUploadPackages;
 
   return (
     <Routes>
@@ -57,14 +66,11 @@ export const EPMApp: React.FunctionComponent = () => {
           <CreateIntegration />
         </Route>
       )}
-      {hasCreateIntegration && (
+      {hasUploadIntegration && (
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_upload}>
           <CreateIntegration />
         </Route>
       )}
-      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_collection}>
-        <CollectionDetailPage />
-      </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
         <EPMHomePage />
       </Route>

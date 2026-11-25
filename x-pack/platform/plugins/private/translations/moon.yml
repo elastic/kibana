@@ -29,5 +29,6 @@ fileGroups:
     - translations/fr-FR.json
     - translations/de-DE.json
     - translations/zh-CN.json
+    - translations/pt-BR.json
     - '!target/**/*'
 tasks: {}

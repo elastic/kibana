@@ -38,12 +38,6 @@ export default createTestConfig({
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
   ],
   apps: {
-    serverlessConnectors: {
-      pathname: '/app/connectors',
-    },
-    searchPlayground: {
-      pathname: '/app/search_playground',
-    },
     searchInferenceEndpoints: {
       pathname: '/app/management/modelManagement/inference_endpoints',
     },

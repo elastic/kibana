@@ -28,7 +28,7 @@ describe('updateActionTagsRoute', () => {
     mockDataReadEsClient = { search: jest.fn() };
 
     mockOsqueryContext = {
-      cpsEnabled: false,
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
       },
@@ -122,7 +122,7 @@ describe('updateActionTagsRoute', () => {
     });
 
     it('uses a strict default-space filter for the scheduled probe when CPS is enabled', async () => {
-      (mockOsqueryContext as { cpsEnabled: boolean }).cpsEnabled = true;
+      (mockOsqueryContext.isCpsActive as jest.Mock).mockResolvedValue(true);
       mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } });
       mockDataReadEsClient.search.mockResolvedValueOnce({ hits: { total: { value: 0 } } });
 

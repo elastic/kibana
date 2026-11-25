@@ -11,8 +11,9 @@ import { managementRoutes } from './streams/management/route';
 import { internalSchemaRoutes } from './internal/streams/schema/route';
 import { internalProcessingRoutes } from './internal/streams/processing/route';
 import { ingestRoutes } from './streams/ingest/route';
+import { unitRoutes } from './streams/unit/route';
+import { componentRoutes } from './streams/components/route';
 import { internalLifecycleRoutes } from './internal/streams/lifecycle/route';
-import { queryStreamRoutes } from './streams/query/route';
 import { contentRoutes } from './content/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
@@ -24,6 +25,8 @@ import { storageStatsRoutes } from './streams/storage_stats/route';
 import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
+import { internalSourceRoutes } from './internal/streams/sources/route';
+import { internalDestinationRoutes } from './internal/streams/destinations/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -35,6 +38,10 @@ export const streamsRouteRepository = {
   ...failureStoreRoutes,
   ...timeSeriesRoutes,
   ...internalIngestRoutes,
+  ...internalSourceRoutes,
+  ...internalDestinationRoutes,
+  ...unitRoutes,
+  ...componentRoutes,
   ...connectorRoutes,
   ...internalAttachmentRoutes,
   ...storageStatsRoutes,
@@ -44,7 +51,6 @@ export const streamsRouteRepository = {
   ...enablementRoutes,
   ...managementRoutes,
   ...ingestRoutes,
-  ...queryStreamRoutes,
   ...contentRoutes,
   ...attachmentRoutes,
 };

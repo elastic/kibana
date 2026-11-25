@@ -7,14 +7,14 @@
 
 import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields.json';
+import { fieldsBeat as beatFields } from '../../lib/timelines_server/utils/beat_schema/fields.json';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { requestEndpointFieldsSearch } from '.';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpoint/constants';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
-import type { IndexFieldsStrategyRequestByIndices } from '@kbn/timelines-plugin/common/search_strategy';
+import type { IndexFieldsStrategyRequestByIndices } from '@kbn/securitysolution-timeline-search-strategy';
 import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 
 jest.mock('../../../common/endpoint/utils/index_name_utilities', () => ({
@@ -423,7 +423,7 @@ describe('Endpoint fields', () => {
           beatFields,
           IndexPatterns
         );
-      }).rejects.toThrowError(/invalid_type/);
+      }).rejects.toThrow(/invalid_type/);
     });
 
     it('should throw when invalid index', async () => {
@@ -441,7 +441,7 @@ describe('Endpoint fields', () => {
           beatFields,
           IndexPatterns
         );
-      }).rejects.toThrowError('Invalid indices request invalid');
+      }).rejects.toThrow('Invalid indices request invalid');
     });
 
     it('should throw when more than one index', async () => {
@@ -459,7 +459,7 @@ describe('Endpoint fields', () => {
           beatFields,
           IndexPatterns
         );
-      }).rejects.toThrowError('Invalid indices request invalid, invalid2');
+      }).rejects.toThrow('Invalid indices request invalid, invalid2');
     });
   });
 

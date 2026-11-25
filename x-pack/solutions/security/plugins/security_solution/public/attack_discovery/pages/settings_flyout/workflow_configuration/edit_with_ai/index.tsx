@@ -9,14 +9,12 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { RoundCompleteEventData } from '@kbn/agent-builder-common/chat/events';
-import { z } from '@kbn/zod/v4';
-import React, { useCallback, useMemo, useRef } from 'react';
+import { z, lazySchema } from '@kbn/zod/v4';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../../common/lib/telemetry';
-import { useRoundComplete } from './helpers/use_round_complete';
 import { tryGetLatestEsqlQueryFromAttachments } from './helpers/try_get_latest_esql_query_from_attachments';
 import * as i18n from './translations';
 
@@ -27,9 +25,11 @@ export interface EditWithAiProps {
 
 const UPDATE_ESQL_QUERY_TOOL_ID = 'update_esql_query';
 
-const updateEsqlQuerySchema = z.object({
-  query: z.string().describe('The new ES|QL query to use for alert retrieval'),
-});
+const updateEsqlQuerySchema = lazySchema(() =>
+  z.object({
+    query: z.string().describe('The new ES|QL query to use for alert retrieval'),
+  })
+);
 
 const EditWithAiComponent: React.FC<EditWithAiProps> = ({ esqlQuery, onEsqlQueryChange }) => {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
@@ -38,16 +38,13 @@ const EditWithAiComponent: React.FC<EditWithAiProps> = ({ esqlQuery, onEsqlQuery
   const onEsqlQueryChangeRef = useRef(onEsqlQueryChange);
   onEsqlQueryChangeRef.current = onEsqlQueryChange;
 
-  const lastAppliedEsqlQueryRef = useRef<string | undefined>(undefined);
-  const hasExplicitEsqlToolCallInRoundRef = useRef(false);
+  const trackedRef = useRef<{ conversationId?: string; query: string } | undefined>(undefined);
 
   const updateEsqlQueryTool: BrowserApiToolDefinition<{ query: string }> = useMemo(
     () => ({
       description: i18n.UPDATE_ESQL_QUERY_TOOL_DESCRIPTION,
       displayName: i18n.UPDATE_ESQL_QUERY_TOOL_DISPLAY_NAME,
       handler: ({ query }: { query: string }) => {
-        lastAppliedEsqlQueryRef.current = query;
-        hasExplicitEsqlToolCallInRoundRef.current = true;
         onEsqlQueryChangeRef.current(query);
       },
       id: UPDATE_ESQL_QUERY_TOOL_ID,
@@ -64,20 +61,30 @@ const EditWithAiComponent: React.FC<EditWithAiProps> = ({ esqlQuery, onEsqlQuery
     [esqlQuery]
   );
 
-  const handleRoundComplete = useCallback((data: RoundCompleteEventData) => {
-    const hadExplicitToolCall = hasExplicitEsqlToolCallInRoundRef.current;
-    hasExplicitEsqlToolCallInRoundRef.current = false;
+  // Fallback for when the agent changes the ES|QL attachment without calling the tool.
+  // `activeConversation$` replays the open conversation and re-publishes it on every change,
+  // so only follow the conversation opened by "Edit with AI" and only apply a changed query.
+  useEffect(() => {
+    const subscription = agentBuilder?.events.ui.activeConversation$.subscribe((active) => {
+      const tracked = trackedRef.current;
+      if (!tracked || !active?.id) {
+        return;
+      }
 
-    if (!hadExplicitToolCall) {
-      const query = tryGetLatestEsqlQueryFromAttachments(data.attachments);
-      if (query && query !== lastAppliedEsqlQueryRef.current) {
-        lastAppliedEsqlQueryRef.current = query;
+      tracked.conversationId ??= active.id;
+      if (active.id !== tracked.conversationId) {
+        return;
+      }
+
+      const query = tryGetLatestEsqlQueryFromAttachments(active.conversation?.attachments);
+      if (query && query !== tracked.query) {
+        tracked.query = query;
         onEsqlQueryChangeRef.current(query);
       }
-    }
-  }, []);
+    });
 
-  useRoundComplete({ eventsService: agentBuilder?.events, onRoundComplete: handleRoundComplete });
+    return () => subscription?.unsubscribe();
+  }, [agentBuilder]);
 
   const handleClick = useCallback(() => {
     if (agentBuilder?.openChat == null) {
@@ -85,6 +92,8 @@ const EditWithAiComponent: React.FC<EditWithAiProps> = ({ esqlQuery, onEsqlQuery
     }
 
     telemetry.reportEvent(AttackDiscoveryEventTypes.EditWithAiClicked, {});
+
+    trackedRef.current = { query: esqlQuery };
 
     agentBuilder.openChat({
       attachments: [esqlAttachment],
@@ -94,7 +103,7 @@ const EditWithAiComponent: React.FC<EditWithAiProps> = ({ esqlQuery, onEsqlQuery
       newConversation: true,
       sessionTag: 'security',
     });
-  }, [agentBuilder, esqlAttachment, telemetry, updateEsqlQueryTool]);
+  }, [agentBuilder, esqlAttachment, esqlQuery, telemetry, updateEsqlQueryTool]);
 
   const button = (
     <EuiButtonEmpty

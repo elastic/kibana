@@ -64,16 +64,16 @@ ${
     {
       description: `ES serverless start script for Security project.
 This is a bypass utility that calls ${chalk.cyan(
-        'yarn es serverless'
+        'pnpm es serverless'
       )} along with some default options
 that will enable users and roles to be loaded into ES.
 `,
       flags: {
         allowUnexpected: true,
         help: `
-Any option supported by ${chalk.cyan('yarn es')} can also be used with this utility.
+Any option supported by ${chalk.cyan('pnpm es')} can also be used with this utility.
 
-For more on ${chalk.cyan('yarn es')} usage, enter: ${chalk.cyan('yarn es --help')}
+For more on ${chalk.cyan('pnpm es')} usage, enter: ${chalk.cyan('pnpm es --help')}
 `,
       },
     }

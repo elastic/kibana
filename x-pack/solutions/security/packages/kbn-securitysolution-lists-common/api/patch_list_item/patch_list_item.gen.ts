@@ -33,7 +33,10 @@ export const PatchListItemRequestBody = lazySchema(() =>
     /**
      * Determines when changes made by the request are made visible to search.
      */
-    refresh: z.enum(['true', 'false', 'wait_for']).optional(),
+    refresh: z
+      .enum(['true', 'false', 'wait_for'])
+      .optional()
+      .describe('Determines when changes made by the request are made visible to search.'),
   })
 );
 export type PatchListItemRequestBody = z.infer<typeof PatchListItemRequestBody>;

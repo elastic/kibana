@@ -9,17 +9,17 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
 import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
 import { HASH_ALG } from '../../../common/domain/euid';
+import { getUnmappedLatestFieldPlaceholders } from '../../../common/domain/latest_index_added_fields';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
   type EntityDefinition,
   type EntityField,
   type EntityType,
+  type GatedEntityDefinition,
+  type ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import {
-  getEuidEsqlEvaluation,
-  getFieldEvaluationsEsqlFromDefinition,
-} from '../../../common/domain/euid/esql';
+import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
@@ -28,7 +28,6 @@ import {
   type PaginationParams,
   type PaginationFields,
   type LogSlicePaginationParams,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   ENGINE_METADATA_UNTYPED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
   MAIN_ENTITY_ID_FIELD,
@@ -39,7 +38,8 @@ import {
   aggregationStats,
   fieldsToKeep,
   extractPaginationParams,
-  buildPaginationSection,
+  buildPaginationCursorFilter,
+  buildPaginationSortAndLimit,
   mapPostAggFilterFieldsToRecentForEsql,
   NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
@@ -47,7 +47,6 @@ import {
 export const HASHED_ID_FIELD = 'entity.hashedId';
 
 export const MAIN_EXTRACTION_PAGINATION_FIELDS: PaginationFields = {
-  timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   finalIdField: ENGINE_METADATA_UNTYPED_ID_FIELD,
   idFieldInQuery: recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
 };
@@ -59,20 +58,19 @@ const FIELDS_TO_KEEP = [
   ENGINE_METADATA_UNTYPED_ID_FIELD,
   HASHED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
 ];
 
 interface LogsExtractionQueryParams {
   indexPatterns: string[];
   latestIndex: string;
-  entityDefinition: EntityDefinition;
+  entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
   docsLimit: number;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
   pagination?: PaginationParams;
   logsPageCursorStart?: LogSlicePaginationParams;
   logsPageCursorEnd?: LogSlicePaginationParams;
+  samplingRate?: number;
 }
 
 export function buildLogsExtractionEsqlQuery({
@@ -82,12 +80,20 @@ export function buildLogsExtractionEsqlQuery({
   toDateISO,
   docsLimit,
   latestIndex,
-  recoveryId,
   pagination,
   logsPageCursorStart,
   logsPageCursorEnd,
+  samplingRate,
 }: LogsExtractionQueryParams): string {
-  const { fields, type, entityTypeFallback } = entityDefinition;
+  const { type, extraction } = entityDefinition;
+  const { fields, entityTypeFallback, postAggFilter } = extraction;
+
+  if (
+    samplingRate !== undefined &&
+    (!Number.isFinite(samplingRate) || samplingRate <= 0 || samplingRate > 1)
+  ) {
+    throw new Error(`samplingRate must be in (0, 1], got ${samplingRate}`);
+  }
 
   const parts = [];
 
@@ -97,7 +103,7 @@ export function buildLogsExtractionEsqlQuery({
   parts.push(
     buildExtractionSourceClause({
       indexPatterns,
-      type,
+      entityDefinition,
       fromDateISO,
       toDateISO,
       logsPageCursorStart,
@@ -105,40 +111,44 @@ export function buildLogsExtractionEsqlQuery({
     })
   );
 
+  // Right after the source filter and before any computation: the only position where sampling
+  // reduces the rows entering EVAL/STATS/LOOKUP JOIN rather than dropping finished entity rows.
+  if (samplingRate !== undefined && samplingRate < 1) {
+    parts.push(`| SAMPLE ${samplingRate}`);
+  }
+
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
-    const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
-    const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
-      withTypeId: false,
-    });
+    const fieldEvalsEsql = getFieldEvaluationsEsql(entityDefinition);
+    const euidEsql = getEuidEsqlEvaluation(
+      entityDefinition,
+      recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
+      { withTypeId: false }
+    );
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
 
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+  // Entity ids at or before the cursor were already emitted by an earlier page, so their rows
+  // are dropped before STATS, LOOKUP JOIN and postAggFilter spend work on them. It must sit
+  // after the EVAL that computes the id and before anything that aggregates by it.
+  parts.push(...buildPaginationCursorFilter(MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
+
+  if (extraction.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of extraction.whenConditionTrueSetFieldsPreAgg) {
       parts.push(buildSetFieldsByCondition(entry));
     }
   }
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS
-    ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${aggregationStats(fields)}
     BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}`);
 
   // If there is no post aggregation filter we can paginate before the lookup join
   // and save some performance
-  if (!entityDefinition.postAggFilter) {
-    parts.push(
-      ...buildPaginationSection(
-        fromDateISO,
-        docsLimit,
-        MAIN_EXTRACTION_PAGINATION_FIELDS,
-        pagination,
-        recoveryId
-      )
-    );
+  if (!postAggFilter) {
+    parts.push(...buildPaginationSortAndLimit(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS));
   }
 
   // Builds the main entity id
@@ -149,37 +159,31 @@ export function buildLogsExtractionEsqlQuery({
     )}`
   );
 
+  // The aggregation leaves only `recent.*` columns, so these names are free until the join. An older
+  // latest index lacks them, and the join resolves every column the query names; where it maps them,
+  // its value replaces the null.
+  parts.push(...getUnmappedLatestFieldPlaceholders(fields.map(({ destination }) => destination)));
+
   // Lookup join to the latest index to perform data retention
-  parts.push(`| LOOKUP JOIN ${latestIndex}
+  parts.push(`| LOOKUP JOIN _coordinator:${latestIndex}
       ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}`);
 
-  if (entityDefinition.postAggFilter) {
+  if (postAggFilter) {
     // If it has post aggregation filter, we filter it right after lookup join
     parts.push(
-      buildPostAggFilter(
-        mapPostAggFilterFieldsToRecentForEsql(entityDefinition.postAggFilter, entityDefinition)
-      )
+      buildPostAggFilter(mapPostAggFilterFieldsToRecentForEsql(postAggFilter, entityDefinition))
     );
     // then we can paginate after the post aggregation filter
-    parts.push(
-      ...buildPaginationSection(
-        fromDateISO,
-        docsLimit,
-        MAIN_EXTRACTION_PAGINATION_FIELDS,
-        pagination,
-        recoveryId
-      )
-    );
+    parts.push(...buildPaginationSortAndLimit(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS));
   }
 
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+  if (extraction.whenConditionTrueSetFieldsAfterStats?.length) {
     // Merge all post-STATS overrides into a single | EVAL stage.
-    const postStatsAssignments = entityDefinition.whenConditionTrueSetFieldsAfterStats.map(
-      (entry) =>
-        buildSetFieldsByConditionAssignments(entry, {
-          entityFields: fields,
-          useRecentDataPrefix: true,
-        })
+    const postStatsAssignments = extraction.whenConditionTrueSetFieldsAfterStats.map((entry) =>
+      buildSetFieldsByConditionAssignments(entry, {
+        entityFields: fields,
+        useRecentDataPrefix: true,
+      })
     );
     parts.push(`| EVAL ${postStatsAssignments.join(',\n    ')}`);
   }

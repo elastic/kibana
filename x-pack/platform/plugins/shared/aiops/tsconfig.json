@@ -9,6 +9,7 @@
     "public/**/*",
     "scripts/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "types/**/*"
   ],
   "kbn_references": [
@@ -49,6 +50,7 @@
     "@kbn/licensing-plugin",
     "@kbn/logging",
     "@kbn/ml-agg-utils",
+    "@kbn/ml-cancellable-search",
     "@kbn/ml-category-validator",
     "@kbn/ml-date-picker",
     "@kbn/ml-error-utils",
@@ -68,8 +70,8 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/rison",
     "@kbn/saved-search-plugin",
+    "@kbn/scout",
     "@kbn/search-types",
     "@kbn/share-plugin",
     "@kbn/shared-ux-utility",
@@ -86,6 +88,8 @@
     "@kbn/presentation-util",
     "@kbn/licensing-types",
     "@kbn/unified-data-table",
+    "@kbn/esql-utils",
+    "@kbn/css-utils",
     "@kbn/cps",
     "@kbn/zod",
     "@kbn/ui-callout"

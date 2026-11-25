@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  SignificantEventCloseReason,
+  SignificantEventManualStatus,
+} from '@kbn/significant-events-schema';
+import type {
+  RuleEventsClient,
+  UpdateEventStatusResult,
+} from '../../../lib/significant_events/events/rule_events_client';
+import { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
+
+export async function updateEventStatusToolHandler({
+  eventSearchClient,
+  eventId,
+  status,
+  closeReason,
+  assessmentNote,
+  workflowExecutionId,
+}: {
+  eventSearchClient: RuleEventsClient;
+  eventId: string;
+  status: SignificantEventManualStatus;
+  closeReason?: SignificantEventCloseReason;
+  assessmentNote?: string;
+  workflowExecutionId?: string;
+}): Promise<{ event_id: string } & UpdateEventStatusResult> {
+  const result = await eventSearchClient.updateEventStatus({
+    eventId,
+    change: StatusChange.byOperator(status),
+    actor: 'agent_tool',
+    closeReason,
+    assessmentNote,
+    workflowExecutionId,
+  });
+
+  return { event_id: eventId, ...result };
+}

@@ -6,20 +6,11 @@
  */
 
 import { createHash } from 'crypto';
-import { stableStringify } from '@kbn/std';
 
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type {
-  AlertEvent,
-  AlertEventSeverity,
-  AlertEventType,
-} from '../../resources/datastreams/alert_events';
-import {
-  alertEventSeverity,
-  alertEventType,
-  buildRuleEventDocument,
-} from '../../resources/datastreams/alert_events';
+import type { AlertEventSeverity, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { AlertEventDocument, AlertEventType } from '../../resources/datastreams/alert_events';
+import { alertEventType, buildRuleEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 
 /**
@@ -47,6 +38,13 @@ export const resolveAlertEventType = (rule: Pick<RuleResponse, 'kind'>): AlertEv
     }
   }
 };
+
+/**
+ * `source` of every alert event the rule executor writes. The
+ * `alerting.alertStatusChanged` trigger reports it as `event.source`, so the
+ * two must not drift apart.
+ */
+export const RULE_EXECUTION_SOURCE = 'internal';
 
 const SEVERITY_COLUMN = 'severity';
 const SUPPORTED_SEVERITIES = new Set<AlertEventSeverity>(
@@ -83,29 +81,33 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
-export const buildExecutionUuid = ({
-  ruleId,
-  spaceId,
-  scheduledTimestamp,
-  suffix,
-}: {
-  ruleId: string;
-  spaceId: string;
-  scheduledTimestamp: string;
-  suffix?: string;
-}): string => sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}${suffix ? `|${suffix}` : ''}`);
+/**
+ * Stable `group_hash` shared by every row of an **ungrouped** rule (a rule with
+ * no `grouping.fields`).
+ *
+ * Ungrouped rules are single-series: every row the query returns is a rule event
+ * of the same series, so they all share one group hash. Within a run those rows
+ * also share one episode (`alert.id`); the value is a hash of a fixed sentinel,
+ * so it is identical for every row (the run collapses to a single series) and
+ * deterministic across runs (the series — and its open episode — stay correlated
+ * run over run instead of being re-created every run).
+ *
+ * Like the grouped branch of {@link buildGroupHash}, this hash is rule-local,
+ * not globally unique: group hashes are only ever compared within a single
+ * `rule.id`, so reusing the same constant across ungrouped rules is intentional
+ * and safe. A user who wants separate series provides `grouping.fields`.
+ */
+export const UNGROUPED_GROUP_HASH = sha256('alerting_v2:ungrouped');
 
 export function buildGroupHash({
   rowDoc,
   groupKeyFields,
-  fallbackSeed,
 }: {
   rowDoc: Record<string, unknown>;
   groupKeyFields: string[];
-  fallbackSeed: string;
 }): string {
   if (!groupKeyFields || groupKeyFields.length === 0) {
-    return sha256(fallbackSeed);
+    return UNGROUPED_GROUP_HASH;
   }
 
   const keyPart = groupKeyFields.join('|');
@@ -124,9 +126,14 @@ export interface BuildAlertEventsBaseOpts {
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
   scheduledTimestamp: string;
+  maxGroupsPerExecution: number;
+  activeGroupHashes?: ReadonlySet<string>;
 }
 
-export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
+export interface AlertEventsBatchBuilder {
+  buildBatch(batch: Array<Record<string, unknown>>): AlertEventDocument[];
+  readonly droppedGroupCount: number;
+}
 
 export function createAlertEventsBatchBuilder({
   ruleId,
@@ -135,31 +142,41 @@ export function createAlertEventsBatchBuilder({
   ruleAttributes,
   type,
   scheduledTimestamp,
+  maxGroupsPerExecution,
+  activeGroupHashes = new Set<string>(),
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
-  // Stable per run to support retries without duplicating documents.
-  // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
-  const executionUuid = buildExecutionUuid({ ruleId, spaceId, scheduledTimestamp });
-
-  // Timestamp when the alert event is written to the index.
-  const wroteAt = new Date().toISOString();
-  const source = 'internal';
+  const source = RULE_EXECUTION_SOURCE;
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
-  let index = 0;
+  const hasGroupingFields = groupingFields.length > 0;
+  const groupHashes = new Set<string>();
+  const droppedGroupHashes = new Set<string>();
 
-  return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
-    const alertEventsBatch: AlertEvent[] = [];
+  const buildBatch = (batch: Array<Record<string, unknown>>): AlertEventDocument[] => {
+    const alertEventsBatch: AlertEventDocument[] = [];
 
     for (const rowDoc of batch) {
-      const groupHash = buildGroupHash({
-        rowDoc,
-        groupKeyFields: groupingFields,
-        get fallbackSeed(): string {
-          return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
-        },
-      });
+      // Ungrouped rules collapse to a single series: every row shares UNGROUPED_GROUP_HASH.
+      const groupHash = buildGroupHash({ rowDoc, groupKeyFields: groupingFields });
+
+      const isNewGroup = !groupHashes.has(groupHash);
+      const isActiveGroup = activeGroupHashes.has(groupHash);
+      if (
+        // Only check maxGroupsPerExecution for grouped rules
+        hasGroupingFields &&
+        isNewGroup &&
+        // Active groups with an existing episode should not be dropped.
+        !isActiveGroup &&
+        groupHashes.size >= maxGroupsPerExecution
+      ) {
+        droppedGroupHashes.add(groupHash);
+        continue;
+      }
+
+      if (isNewGroup) {
+        groupHashes.add(groupHash);
+      }
 
       const doc = buildRuleEventDocument({
-        '@timestamp': wroteAt,
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash: groupHash,
@@ -171,11 +188,17 @@ export function createAlertEventsBatchBuilder({
         severity: extractSeverity(rowDoc),
       });
 
-      index++;
       alertEventsBatch.push(doc);
     }
 
     return alertEventsBatch;
+  };
+
+  return {
+    buildBatch,
+    get droppedGroupCount() {
+      return droppedGroupHashes.size;
+    },
   };
 }
 
@@ -205,9 +228,7 @@ export function buildRecoveryAlertEvents({
   scheduledTimestamp,
   type,
   dataPresentGroupHashes,
-}: BuildRecoveryAlertEventsOpts): AlertEvent[] {
-  const wroteAt = new Date().toISOString();
-
+}: BuildRecoveryAlertEventsOpts): AlertEventDocument[] {
   return activeGroupHashes
     .filter(
       ({ group_hash }) =>
@@ -216,13 +237,12 @@ export function buildRecoveryAlertEvents({
     )
     .map(({ group_hash }) =>
       buildRuleEventDocument({
-        '@timestamp': wroteAt,
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash,
         data: {},
         status: 'recovered',
-        source: 'internal',
+        source: RULE_EXECUTION_SOURCE,
         type,
         space_id: spaceId,
       })
@@ -251,17 +271,14 @@ export function buildContinuedBreachAlertEvents({
   groupHashes,
   scheduledTimestamp,
   type,
-}: BuildContinuedBreachAlertEventsOpts): AlertEvent[] {
-  const wroteAt = new Date().toISOString();
-
+}: BuildContinuedBreachAlertEventsOpts): AlertEventDocument[] {
   return groupHashes.map((groupHash) => ({
-    '@timestamp': wroteAt,
     scheduled_timestamp: scheduledTimestamp,
     rule: { id: ruleId, version: ruleVersion },
     group_hash: groupHash,
     data: {},
     status: 'breached' as const,
-    source: 'internal',
+    source: RULE_EXECUTION_SOURCE,
     type,
     space_id: spaceId,
   }));
@@ -279,7 +296,7 @@ export interface BuildNoDataAlertEventsOpts {
 /**
  * Creates `no_data` alert events for the supplied group hashes.
  *
- * Used when no_data_strategy is configured on the rule.
+ * Used when the rule's `no_data.strategy` classifies absent groups.
  */
 export function buildNoDataAlertEvents({
   ruleId,
@@ -288,31 +305,17 @@ export function buildNoDataAlertEvents({
   groupHashes,
   scheduledTimestamp,
   type,
-}: BuildNoDataAlertEventsOpts): AlertEvent[] {
-  const wroteAt = new Date().toISOString();
-
+}: BuildNoDataAlertEventsOpts): AlertEventDocument[] {
   return groupHashes.map((groupHash) => ({
-    '@timestamp': wroteAt,
     scheduled_timestamp: scheduledTimestamp,
     rule: { id: ruleId, version: ruleVersion },
     group_hash: groupHash,
     data: {},
     status: 'no_data' as const,
-    source: 'internal',
+    source: RULE_EXECUTION_SOURCE,
     type,
     space_id: spaceId,
   }));
-}
-
-export function rowToDocument(
-  columns: EsqlQueryResponse['columns'],
-  row: unknown[]
-): Record<string, unknown> {
-  const doc: Record<string, unknown> = {};
-  for (let i = 0; i < columns.length; i++) {
-    doc[columns[i].name] = row[i];
-  }
-  return doc;
 }
 
 export interface BuildQueryRecoveryAlertEventsOpts {
@@ -322,7 +325,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   ruleAttributes: Pick<RuleResponse, 'grouping'>;
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: ReadonlySet<string>;
-  esqlResponse: EsqlQueryResponse;
+  rows: Array<Record<string, unknown>>;
   scheduledTimestamp: string;
   type: AlertEventType;
 }
@@ -342,38 +345,22 @@ export function buildQueryRecoveryAlertEvents({
   ruleAttributes,
   activeGroupHashes,
   breachedGroupHashes,
-  esqlResponse,
+  rows,
   scheduledTimestamp,
   type,
-}: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
-  const columns = esqlResponse.columns ?? [];
-  const values = esqlResponse.values ?? [];
-
-  if (columns.length === 0 || values.length === 0) {
+}: BuildQueryRecoveryAlertEventsOpts): AlertEventDocument[] {
+  if (rows.length === 0) {
     return [];
   }
 
-  const executionUuid = buildExecutionUuid({
-    ruleId,
-    spaceId,
-    scheduledTimestamp,
-    suffix: 'recovery',
-  });
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const activeGroupHashSet = new Set(activeGroupHashes.map(({ group_hash }) => group_hash));
 
   // Keep the first matching row's data per group hash.
   const recoveredByGroupHash = new Map<string, Record<string, unknown>>();
 
-  for (let i = 0; i < values.length; i++) {
-    const rowDoc = rowToDocument(columns, values[i]);
-    const groupHash = buildGroupHash({
-      rowDoc,
-      groupKeyFields: groupingFields,
-      get fallbackSeed(): string {
-        return `${executionUuid}|row:${i}|${stableStringify(rowDoc)}`;
-      },
-    });
+  for (const rowDoc of rows) {
+    const groupHash = buildGroupHash({ rowDoc, groupKeyFields: groupingFields });
 
     if (
       activeGroupHashSet.has(groupHash) &&
@@ -388,17 +375,14 @@ export function buildQueryRecoveryAlertEvents({
     return [];
   }
 
-  const wroteAt = new Date().toISOString();
-
   return Array.from(recoveredByGroupHash).map(([groupHash, data]) =>
     buildRuleEventDocument({
-      '@timestamp': wroteAt,
       scheduled_timestamp: scheduledTimestamp,
       rule: { id: ruleId, version: ruleVersion },
       group_hash: groupHash,
       data,
       status: 'recovered',
-      source: 'internal',
+      source: RULE_EXECUTION_SOURCE,
       type,
       space_id: spaceId,
     })

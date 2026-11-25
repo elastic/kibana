@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import {
   type PublishesBlockingError,
   type PublishesDataLoading,
-  type PublishesDataViews,
+  type PublishesDataSources,
   type PublishesSavedObjectId,
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash';
+import { isPlainObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
@@ -28,7 +29,7 @@ import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transf
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
     PublishesSavedObjectId &
-    PublishesDataViews &
+    PublishesDataSources<DataView> &
     PublishesDataLoading &
     PublishesRendered &
     PublishesBlockingError;
@@ -38,6 +39,23 @@ export interface StateManagementConfig {
   getLatestState: () => Pick<LensRuntimeState, 'attributes' | 'ref_id'>;
   cleanup: () => void;
 }
+
+/**
+ * Drops object keys holding `undefined`, which are lost once state is persisted as JSON.
+ */
+const omitUndefinedKeys = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(omitUndefinedKeys);
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .map(([key, entryValue]) => [key, omitUndefinedKeys(entryValue)])
+    );
+  }
+  return value;
+};
 
 /**
  * Due to inline editing we need something advanced to handle the state
@@ -64,15 +82,21 @@ export function initializeStateManagement(
     return value;
   };
 
+  const publicRenderCount$ = new BehaviorSubject(internalApi.renderCount$.getValue() + 1);
+  const renderCountSubscription = internalApi.renderCount$.subscribe((count) =>
+    publicRenderCount$.next(count + 1)
+  );
+
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,
       updateRefId: (newRefId: LensRuntimeState['ref_id']) => savedObjectId$.next(newRefId),
       savedObjectId$,
-      dataViews$: internalApi.dataViews$,
+      dataSources$: internalApi.dataSources$,
       dataLoading$: internalApi.dataLoading$,
       blockingError$: internalApi.blockingError$,
       rendered$: internalApi.hasRenderCompleted$,
+      renderCount$: publicRenderCount$,
     },
     anyStateChange$: merge(
       internalApi.attributes$.pipe(
@@ -87,7 +111,10 @@ export function initializeStateManagement(
             ? (lastValue, currentValue, lastState, currentState) => {
                 const lastAttributes = resolveAttributes(lastValue, lastState);
                 const currentAttributes = resolveAttributes(currentValue, currentState);
-                return deepEqual(lastAttributes, currentAttributes);
+                return deepEqual(
+                  omitUndefinedKeys(lastAttributes),
+                  omitUndefinedKeys(currentAttributes)
+                );
               }
             : 'skip',
         ref_id: 'skip',
@@ -101,7 +128,11 @@ export function initializeStateManagement(
     },
     reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => {
       internalApi.updateAttributes(lastSavedRuntimeState.attributes);
+      // clear error from a previous load
+      internalApi.updateLoadError(lastSavedRuntimeState.loadError);
     },
-    cleanup: noop,
+    cleanup: () => {
+      renderCountSubscription.unsubscribe();
+    },
   };
 }

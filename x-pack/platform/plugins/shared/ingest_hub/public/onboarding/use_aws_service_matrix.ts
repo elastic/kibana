@@ -38,33 +38,62 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     isError: awsIsError,
     refetch: awsRefetch,
   } = useGetPackageInfoByKeyQuery('aws', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const { data: bedrockData, refetch: bedrockRefetch } = useGetPackageInfoByKeyQuery(
-    'aws_bedrock',
+  const {
+    data: bedrockData,
+    isError: bedrockIsError,
+    refetch: bedrockRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_bedrock', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: bedrockAgentcoreData,
+    isError: bedrockAgentcoreIsError,
+    refetch: bedrockAgentcoreRefetch,
+  } = useGetPackageInfoByKeyQuery(
+    'aws_bedrock_agentcore',
     undefined,
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const { data: bedrockAgentcoreData, refetch: bedrockAgentcoreRefetch } =
-    useGetPackageInfoByKeyQuery(
-      'aws_bedrock_agentcore',
-      undefined,
-      PACKAGE_QUERY_OPTIONS,
-      CACHE_OPTS
-    );
-  const { data: fargateData, refetch: fargateRefetch } = useGetPackageInfoByKeyQuery(
-    'awsfargate',
+  const {
+    data: fargateData,
+    isError: fargateIsError,
+    refetch: fargateRefetch,
+  } = useGetPackageInfoByKeyQuery('awsfargate', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: mqData,
+    isError: mqIsError,
+    refetch: mqRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_mq', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: logsData,
+    isError: logsIsError,
+    refetch: logsRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_logs', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: cloudwatchOtelData,
+    isError: cloudwatchOtelIsError,
+    refetch: cloudwatchOtelRefetch,
+  } = useGetPackageInfoByKeyQuery(
+    'aws_cloudwatch_input_otel',
     undefined,
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const { data: mqData, refetch: mqRefetch } = useGetPackageInfoByKeyQuery(
-    'aws_mq',
-    undefined,
-    PACKAGE_QUERY_OPTIONS,
-    CACHE_OPTS
-  );
-  const { data: logsData, refetch: logsRefetch } = useGetPackageInfoByKeyQuery(
-    'aws_logs',
+  const {
+    data: securityHubData,
+    isError: securityHubIsError,
+    refetch: securityHubRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_securityhub', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: billingData,
+    isError: billingIsError,
+    refetch: billingRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_billing', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: securityLakeData,
+    isError: securityLakeIsError,
+    refetch: securityLakeRefetch,
+  } = useGetPackageInfoByKeyQuery(
+    'amazon_security_lake',
     undefined,
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
@@ -81,9 +110,51 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
       ...(fargateData?.item && { awsfargate: fargateData.item }),
       ...(mqData?.item && { aws_mq: mqData.item }),
       ...(logsData?.item && { aws_logs: logsData.item }),
+      ...(cloudwatchOtelData?.item && {
+        aws_cloudwatch_input_otel: cloudwatchOtelData.item,
+      }),
+      ...(securityHubData?.item && { aws_securityhub: securityHubData.item }),
+      ...(billingData?.item && { aws_billing: billingData.item }),
+      ...(securityLakeData?.item && { amazon_security_lake: securityLakeData.item }),
     };
-    return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC);
-  }, [awsData, bedrockData, bedrockAgentcoreData, fargateData, mqData, logsData]);
+    // Track packages whose queries have failed so buildAwsServiceMatrix can set isManifestError.
+    // A failed secondary manifest blocks Next in Step 3 and surfaces a retry callout, rather than
+    // silently proceeding with empty dataStreams/inputs.
+    const erroredPackageNames = new Set(
+      [
+        bedrockIsError && !bedrockData?.item && 'aws_bedrock',
+        bedrockAgentcoreIsError && !bedrockAgentcoreData?.item && 'aws_bedrock_agentcore',
+        fargateIsError && !fargateData?.item && 'awsfargate',
+        mqIsError && !mqData?.item && 'aws_mq',
+        logsIsError && !logsData?.item && 'aws_logs',
+        cloudwatchOtelIsError && !cloudwatchOtelData?.item && 'aws_cloudwatch_input_otel',
+        securityHubIsError && !securityHubData?.item && 'aws_securityhub',
+        billingIsError && !billingData?.item && 'aws_billing',
+        securityLakeIsError && !securityLakeData?.item && 'amazon_security_lake',
+      ].filter((name): name is string => typeof name === 'string')
+    );
+    return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC, erroredPackageNames);
+  }, [
+    awsData,
+    bedrockData,
+    bedrockIsError,
+    bedrockAgentcoreData,
+    bedrockAgentcoreIsError,
+    fargateData,
+    fargateIsError,
+    mqData,
+    mqIsError,
+    logsData,
+    logsIsError,
+    cloudwatchOtelData,
+    cloudwatchOtelIsError,
+    securityHubData,
+    securityHubIsError,
+    billingData,
+    billingIsError,
+    securityLakeData,
+    securityLakeIsError,
+  ]);
 
   const refetch = useCallback(() => {
     awsRefetch();
@@ -92,7 +163,22 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     fargateRefetch();
     mqRefetch();
     logsRefetch();
-  }, [awsRefetch, bedrockRefetch, bedrockAgentcoreRefetch, fargateRefetch, mqRefetch, logsRefetch]);
+    cloudwatchOtelRefetch();
+    securityHubRefetch();
+    billingRefetch();
+    securityLakeRefetch();
+  }, [
+    awsRefetch,
+    bedrockRefetch,
+    bedrockAgentcoreRefetch,
+    fargateRefetch,
+    mqRefetch,
+    logsRefetch,
+    cloudwatchOtelRefetch,
+    securityHubRefetch,
+    billingRefetch,
+    securityLakeRefetch,
+  ]);
 
   return { matrix, isError: awsIsError, refetch };
 }

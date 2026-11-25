@@ -34,6 +34,8 @@
  *   gen_ai.request.{model, temperature, top_p, top_k, max_tokens, seed}
  *   gen_ai.response.{model, id, finish_reasons}
  *   gen_ai.usage.{input_tokens, output_tokens}
+ *   gen_ai.usage.cache_read.input_tokens / gen_ai.usage.cache_write.input_tokens
+ *     (chat: 75% read + ~11% written; tool: zero read/write, the row must still show)
  *   gen_ai.provider.name (EDOT extension)
  *   gen_ai.input.messages / gen_ai.output.messages (EDOT extension)
  *   gen_ai.system_instructions / gen_ai.conversation.id (EDOT extension)
@@ -489,6 +491,79 @@ const OVERLIMIT_OUTPUT_MESSAGES = [
 ];
 
 // ---------------------------------------------------------------------------
+// Service 12: Partially-indexed message array
+// These fields are multi-valued and `ignore_above` drops only the over-long
+// elements, so the indexed value is a non-null PARTIAL array — the short system
+// message survives while the long user message is dropped. The UI cannot detect
+// this by checking for an absent value; it has to re-read the whole field.
+// ---------------------------------------------------------------------------
+
+const PARTIAL_INPUT_MESSAGES = [
+  JSON.stringify({
+    role: 'system',
+    content: 'You are a concise assistant. Answer in at most three sentences.',
+  }),
+  OVERLIMIT_INPUT_MESSAGES[1],
+];
+
+// ---------------------------------------------------------------------------
+// Service 11: Reasoning part fixture
+// A single serialized array in the OTel `parts` schema, as sent by OpenRouter's
+// Elastic Observability broadcast. The `reasoning` part must render as plain text
+// inside a collapsed accordion, not as raw JSON. Kept under the 1024-char
+// ignore_above limit so the field stays indexed.
+// ---------------------------------------------------------------------------
+
+const REASONING_OUTPUT_MESSAGES = [
+  JSON.stringify([
+    {
+      role: 'assistant',
+      parts: [
+        {
+          type: 'reasoning',
+          content:
+            'Here\'s a thinking process:\n\n1. **Analyze User Input:** The user asks whether perception changes if it rains, in the context of 15°C in Rome in January.\n\n2. **Core Question:** How does rain affect the perceived coldness of 15°C?\n\n3. **Relevant Knowledge:**\n - Rain increases heat loss via convection and evaporation\n - Wind often accompanies rain\n - "Feels like" temperature\n\n4. **Response Plan:** Confirm that rain changes perception, explain why, compare dry and rainy 15°C, give practical advice.',
+        },
+        {
+          type: 'text',
+          content:
+            'Yes, rain changes perception noticeably and usually makes 15°C feel colder.\n\n**Why it happens:**\n- Water conducts heat away from your body faster than air.\n- Evaporation from wet skin and clothing adds extra cooling.\n\nPack a waterproof, wind-resistant layer.',
+        },
+      ],
+      finish_reason: 'stop',
+    },
+  ]),
+];
+
+// ---------------------------------------------------------------------------
+// Service 12: Markdown reasoning fixture
+// Same `parts` schema, but the reasoning content uses rich markdown (heading, bold,
+// lists, table, code block, blockquote) to verify how formatting is rendered. Kept
+// under the 1024-char ignore_above limit so the field stays indexed.
+// ---------------------------------------------------------------------------
+
+const REASONING_MARKDOWN_OUTPUT_MESSAGES = [
+  JSON.stringify([
+    {
+      role: 'assistant',
+      parts: [
+        {
+          type: 'reasoning',
+          content:
+            '## Plan\n\nThe user wants to **compare two sorting approaches**. Steps:\n\n1. Pick candidates: `sorted()` and `list.sort()`\n2. Compare in-place vs copy\n3. Show a snippet\n\n| Approach | In place | Returns |\n|----------|----------|---------|\n| `sorted()` | no | new list |\n| `list.sort()` | yes | `None` |\n\n```python\nnums = [3, 1, 2]\nprint(sorted(nums))  # [1, 2, 3]\nnums.sort()\n```\n\n> Note: both are stable, so equal keys keep their order.\n\n- Keep the answer short\n- Mention *key=* for custom ordering',
+        },
+        {
+          type: 'text',
+          content:
+            'Use `sorted()` when you need a new list and `list.sort()` to sort in place. Both are stable and accept `key=`.',
+        },
+      ],
+      finish_reason: 'stop',
+    },
+  ]),
+];
+
+// ---------------------------------------------------------------------------
 // Scenario
 // ---------------------------------------------------------------------------
 
@@ -527,6 +602,8 @@ const scenario: Scenario<ApmOtelFields> = async () => {
               'attributes.gen_ai.response.model': 'gpt-4o-2024-08-06',
               'attributes.gen_ai.usage.input_tokens': 2800,
               'attributes.gen_ai.usage.output_tokens': 950,
+              'attributes.gen_ai.usage.cache_read.input_tokens': 2100,
+              'attributes.gen_ai.usage.cache_write.input_tokens': 300,
               'attributes.gen_ai.request.temperature': 0.7,
               'attributes.gen_ai.request.top_p': 1,
               'attributes.gen_ai.request.max_tokens': 2048,
@@ -574,6 +651,8 @@ const scenario: Scenario<ApmOtelFields> = async () => {
               'attributes.gen_ai.request.model': 'claude-3-5-sonnet-20241022',
               'attributes.gen_ai.usage.input_tokens': 95,
               'attributes.gen_ai.usage.output_tokens': 62,
+              'attributes.gen_ai.usage.cache_read.input_tokens': 0,
+              'attributes.gen_ai.usage.cache_write.input_tokens': 0,
               'attributes.gen_ai.request.max_tokens': 1024,
               'attributes.gen_ai.request.temperature': 0.5,
               'attributes.gen_ai.request.top_k': 40,
@@ -1020,6 +1099,150 @@ const scenario: Scenario<ApmOtelFields> = async () => {
         );
 
       // =================================================================
+      // Service 12: Partially-indexed array — `fields` returns a non-null
+      // PARTIAL array, so recovery must replace the whole field.
+      // =================================================================
+      const partialInstance = apm
+        .otelService({
+          name: 'genai-partial-service',
+          namespace: ENVIRONMENT,
+          sdkLanguage: 'python',
+          sdkName: 'opentelemetry',
+          distro: 'elastic',
+        })
+        .instance('partial-instance-1');
+
+      const partialSpans = range
+        .interval('13s')
+        .rate(1)
+        .generator((timestamp) =>
+          partialInstance
+            .span({ name: 'POST /v1/chat/completions', kind: 'Server' })
+            .overrides({
+              'attributes.http.request.method': 'POST',
+              'attributes.url.path': '/v1/chat/completions',
+              'attributes.http.response.status_code': 200,
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.system': 'openai',
+              'attributes.gen_ai.provider.name': 'openai',
+              'attributes.gen_ai.request.model': 'gpt-4o',
+              'attributes.gen_ai.response.model': 'gpt-4o-2024-08-06',
+              'attributes.gen_ai.usage.input_tokens': 8100,
+              'attributes.gen_ai.usage.output_tokens': 90,
+              'attributes.gen_ai.request.temperature': 0.2,
+              'attributes.gen_ai.response.id': 'chatcmpl-partial-001',
+              'attributes.gen_ai.response.finish_reasons': ['stop'],
+              'attributes.gen_ai.conversation.id': 'conv-partial-001',
+              'attributes.gen_ai.input.messages': PARTIAL_INPUT_MESSAGES,
+              'attributes.gen_ai.output.messages': [
+                JSON.stringify({
+                  role: 'assistant',
+                  content:
+                    'Roll back event-processor to v2.14.3 immediately. The v2.15.0 parallel batch processor spawns unbounded goroutines that exhaust the Redis connection pool. Cap concurrency with a semaphore before re-deploying.',
+                }),
+              ],
+            })
+            .timestamp(timestamp)
+            .duration(9800)
+            .success()
+        );
+
+      // =================================================================
+      // Service 11: Reasoning output — OpenRouter-style `reasoning` part
+      // followed by a `text` part. The reasoning must render as text in a
+      // collapsed accordion.
+      // =================================================================
+      const reasoningInstance = apm
+        .otelService({
+          name: 'genai-reasoning-service',
+          namespace: ENVIRONMENT,
+          sdkLanguage: 'python',
+          sdkName: 'opentelemetry',
+          distro: 'elastic',
+        })
+        .instance('reasoning-instance-1');
+
+      const reasoningSpans = range
+        .interval('14s')
+        .rate(1)
+        .generator((timestamp) =>
+          reasoningInstance
+            .span({ name: 'POST /v1/chat/completions', kind: 'Server' })
+            .overrides({
+              'attributes.http.request.method': 'POST',
+              'attributes.url.path': '/v1/chat/completions',
+              'attributes.http.response.status_code': 200,
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.system': 'openrouter',
+              'attributes.gen_ai.provider.name': 'openrouter',
+              'attributes.gen_ai.request.model': 'nvidia/nemotron-3.5-lightning:free',
+              'attributes.gen_ai.response.model': 'nvidia/nemotron-3.5-lightning:free',
+              'attributes.gen_ai.usage.input_tokens': 42,
+              'attributes.gen_ai.usage.output_tokens': 380,
+              'attributes.gen_ai.response.id': 'gen-reasoning-001',
+              'attributes.gen_ai.response.finish_reasons': ['stop'],
+              'attributes.gen_ai.conversation.id': 'conv-reasoning-001',
+              'attributes.gen_ai.input.messages': [
+                JSON.stringify({
+                  role: 'user',
+                  content: 'Does perception change if it rains?',
+                }),
+              ],
+              'attributes.gen_ai.output.messages': REASONING_OUTPUT_MESSAGES,
+            })
+            .timestamp(timestamp)
+            .duration(4200)
+            .success()
+        );
+
+      // =================================================================
+      // Service 12: Reasoning output with rich markdown — checks how
+      // formatting inside the collapsed reasoning accordion is rendered.
+      // =================================================================
+      const reasoningMarkdownInstance = apm
+        .otelService({
+          name: 'genai-reasoning-markdown-service',
+          namespace: ENVIRONMENT,
+          sdkLanguage: 'python',
+          sdkName: 'opentelemetry',
+          distro: 'elastic',
+        })
+        .instance('reasoning-markdown-instance-1');
+
+      const reasoningMarkdownSpans = range
+        .interval('15s')
+        .rate(1)
+        .generator((timestamp) =>
+          reasoningMarkdownInstance
+            .span({ name: 'POST /v1/chat/completions', kind: 'Server' })
+            .overrides({
+              'attributes.http.request.method': 'POST',
+              'attributes.url.path': '/v1/chat/completions',
+              'attributes.http.response.status_code': 200,
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.system': 'openrouter',
+              'attributes.gen_ai.provider.name': 'openrouter',
+              'attributes.gen_ai.request.model': 'nvidia/nemotron-3.5-lightning:free',
+              'attributes.gen_ai.response.model': 'nvidia/nemotron-3.5-lightning:free',
+              'attributes.gen_ai.usage.input_tokens': 38,
+              'attributes.gen_ai.usage.output_tokens': 410,
+              'attributes.gen_ai.response.id': 'gen-reasoning-md-001',
+              'attributes.gen_ai.response.finish_reasons': ['stop'],
+              'attributes.gen_ai.conversation.id': 'conv-reasoning-md-001',
+              'attributes.gen_ai.input.messages': [
+                JSON.stringify({
+                  role: 'user',
+                  content: 'What is the difference between sorted() and list.sort() in Python?',
+                }),
+              ],
+              'attributes.gen_ai.output.messages': REASONING_MARKDOWN_OUTPUT_MESSAGES,
+            })
+            .timestamp(timestamp)
+            .duration(4800)
+            .success()
+        );
+
+      // =================================================================
       // Service 8: Non-GenAI HTTP service — GenAI tab must NOT appear.
       // =================================================================
       const regularInstance = apm
@@ -1060,6 +1283,9 @@ const scenario: Scenario<ApmOtelFields> = async () => {
           realworldSpans,
           maxlenSpans,
           overlimitSpans,
+          partialSpans,
+          reasoningSpans,
+          reasoningMarkdownSpans,
           regularSpans,
         ]),
       ];

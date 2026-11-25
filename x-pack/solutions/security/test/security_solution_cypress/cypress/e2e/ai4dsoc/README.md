@@ -47,7 +47,7 @@ Note that we use tags in order to select which tests we want to execute:
 
 When running the tests, FTR is used to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section).
 
-Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
+Run the tests with the following pnpm scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
 | Script Name                     | Description                                                                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

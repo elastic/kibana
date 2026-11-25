@@ -10,6 +10,7 @@ import { EuiFieldSearch } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
+import { subscribeMonitorFiltersCleared } from './monitor_filters/monitor_filters_cleared';
 
 export function SearchField() {
   const { query } = useGetUrlParams();
@@ -40,6 +41,13 @@ export function SearchField() {
       setSearch(query ?? '');
     }
   }, [query]);
+
+  useEffect(() => {
+    return subscribeMonitorFiltersCleared(() => {
+      lastWrittenQueryRef.current = '';
+      setSearch('');
+    });
+  }, []);
 
   return (
     <EuiFieldSearch

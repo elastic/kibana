@@ -85,8 +85,11 @@ const createFetchProjectsByRouting = (projects: CPSProject[] = availableProjects
     const matched = projects.filter((project) =>
       tagClauses.every((clause) => {
         const separatorIndex = clause.indexOf(':');
-        const tag = clause.slice(0, separatorIndex);
+        const tag = clause.slice(0, separatorIndex) as keyof CPSProject;
         const value = clause.slice(separatorIndex + 1);
+        if (value === '*') {
+          return project[tag] != null && project[tag] !== '';
+        }
         return project[tag] === value;
       })
     );
@@ -167,7 +170,7 @@ const createDeferred = <T,>() => {
 };
 
 const clickRevertToSpaceDefaults = async (user: UserEvent) => {
-  const [globalActionsButton] = screen.getAllByRole('button');
+  const globalActionsButton = screen.getByTestId('projectPickerGlobalActionsButton');
   await user.click(globalActionsButton);
   await user.click(screen.getByText('Revert to space defaults').closest('button')!);
 };
@@ -348,6 +351,64 @@ describe('ProjectPickerStateProvider', () => {
         });
       });
 
+      it('emits `_id:origin` when only the origin project remains selected with no filters', async () => {
+        const user = userEvent.setup();
+        let currentRouting: ProjectRouting = '';
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
+        });
+        renderProjectPicker({
+          projectRoutingStrategy: 'snapshot',
+          onProjectRoutingChange,
+          currentProjectRoutingGetter: () => currentRouting,
+        });
+
+        await toggleProjectListItemSwitch(user, linkedProjectOne._id);
+        await toggleProjectListItemSwitch(user, linkedProjectTwo._id);
+
+        await waitFor(() => {
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:origin');
+        });
+      });
+
+      it('emits PROJECT_ROUTING.ORIGIN when exists `_alias` is the only filter and origin is the only selection', async () => {
+        const user = userEvent.setup();
+        let currentRouting: ProjectRouting = '';
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
+        });
+        const aliasExistsFilter = {
+          operator: FilterOperator.EXISTS,
+          tagName: '_alias',
+          tagValue: undefined,
+        } as const;
+
+        render(
+          <ProjectPickerStateProvider
+            {...defaultProviderProps}
+            projectRoutingStrategy="snapshot"
+            onProjectRoutingChange={onProjectRoutingChange}
+            currentProjectRoutingGetter={() => currentRouting}
+          >
+            <AddFilterExpression expression={aliasExistsFilter} />
+            <ProjectPickerList />
+          </ProjectPickerStateProvider>
+        );
+
+        await user.click(screen.getByTestId('addFilterExpression'));
+
+        await waitFor(() => {
+          expect(onProjectRoutingChange).toHaveBeenCalled();
+        });
+
+        await toggleProjectListItemSwitch(user, linkedProjectOne._id);
+        await toggleProjectListItemSwitch(user, linkedProjectTwo._id);
+
+        await waitFor(() => {
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(PROJECT_ROUTING.ORIGIN);
+        });
+      });
+
       it('includes encoded filter expressions with explicit id clauses that omit a project when it is excluded', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
@@ -415,13 +476,7 @@ describe('ProjectPickerStateProvider', () => {
 
         // Now we expect the generated routing to be the origin project only
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
-            projectRoutingCodec.encode({
-              ...emptyEncodeInput,
-              selectedProjectIds: [originProject._id],
-              projectRoutingStrategy: 'snapshot',
-            })
-          );
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:origin');
         });
       });
 

@@ -16,23 +16,34 @@ import {
 } from '@kbn/connector-schemas/mcp/schemas/v1';
 import { SUB_ACTION } from '@kbn/connector-schemas/mcp';
 import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { LeasePool } from '@kbn/actions-plugin/server/lib';
+import {
+  buildClientLeaseKey,
+  createConnectorNetworkSettings,
+  createPlatformServices,
+} from '@kbn/actions-plugin/server/lib';
 import type { AxiosError } from 'axios';
 import type { z } from '@kbn/zod/v4';
 import {
-  McpClient,
-  type McpClientOptions,
-  type CallToolParams,
+  type McpClient,
   type CallToolResponse,
-  type ClientDetails,
   type ListToolsResponse,
+  type Tool,
+  type ServerCapabilities,
   StreamableHTTPError,
   UnauthorizedError,
 } from '@kbn/mcp-client';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
+import { clientTypes } from '@kbn/connector-specs/server';
+import type {
+  CredentialAccessor,
+  ConnectorNetworkSettings,
+  PlatformServices,
+} from '@kbn/connector-specs';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { createRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { buildHeadersFromSecrets } from './auth_helpers';
-import { buildCustomFetch } from './build_custom_fetch';
-import { retryWithRecovery, type RetryOptions } from './retry_utils';
+import { markConnectFailure, mcpCircuitBreaker } from './circuit_breaker';
 
 // TTL for list_tools cache: 15 minutes
 export const LIST_TOOLS_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -50,53 +61,106 @@ export const listToolsCache = new LRUCache<string, ListToolsResponse>({
   ttlAutopurge: false,
 });
 
+/** Consecutive connection failures inside the window before a thrown error is not retryable. */
+export const CONNECTION_FAILURE_RETRY_LIMIT = 3;
+/** Window for consecutive connection failures. Each failure restarts this TTL. */
+export const CONNECTION_FAILURE_WINDOW_MS = 5 * 60 * 1000;
+
+/**
+ * Consecutive connection failures per lease key. Bounded like listToolsCache.
+ */
+export const connectionFailures = new LRUCache<string, number>({
+  max: 1000,
+  ttl: CONNECTION_FAILURE_WINDOW_MS,
+  allowStale: false,
+  ttlAutopurge: false,
+});
+
+const failedLeaseCounts = new WeakMap<
+  Promise<McpClient>,
+  { count: number; successVersion: number }
+>();
+const leaseGenerations = new WeakMap<Promise<McpClient>, number>();
+// Older lease failures are stale after a newer lease succeeds. Success tokens invalidate cached
+// per-lease failure decisions recorded before a later success, including after key state is evicted.
+interface ConnectionFailureState {
+  highestSuccessfulGeneration: number;
+  successVersion: number;
+}
+
+const connectionFailureState = new LRUCache<string, ConnectionFailureState>({
+  max: 1000,
+  allowStale: false,
+  ttlAutopurge: false,
+});
+let nextLeaseGeneration = 0;
+let nextSuccessVersion = 0;
+
+const getConnectionFailureState = (key: string): ConnectionFailureState => {
+  const state = connectionFailureState.get(key);
+  if (state) {
+    return state;
+  }
+
+  const newState = {
+    highestSuccessfulGeneration: 0,
+    successVersion: ++nextSuccessVersion,
+  };
+  connectionFailureState.set(key, newState);
+  return newState;
+};
+
+const getLeaseGeneration = (promise: Promise<McpClient>): number => {
+  const generation = leaseGenerations.get(promise);
+  if (generation !== undefined) {
+    return generation;
+  }
+
+  const nextGeneration = ++nextLeaseGeneration;
+  leaseGenerations.set(promise, nextGeneration);
+  return nextGeneration;
+};
+
+export interface McpTestConnectorResponse {
+  connected: boolean;
+  capabilities?: ServerCapabilities;
+}
+
 /**
  * MCP Connector for Kibana Stack Connectors.
  *
- * Connection Lifecycle:
- * - The connector maintains a single MCP Client instance per connector instance.
- * - Connections are established automatically on-demand (lazy connection):
- *   - When calling listTools() or callTool(), the connector will auto-connect if not already connected.
- * - Connections are disconnected after each operation completes to ensure proper cleanup.
+ * Client lifecycle is owned by the actions LeasePool: each operation leases a connected
+ * McpClient keyed by connector id, client type, and saved-object version. Pooled clients
+ * survive across executions until idle TTL, connector update/delete eviction, invalidation,
+ * or plugin shutdown.
  */
 export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
-  private mcpClient: McpClient;
-  private authHeaders: Record<string, string>;
+  private readonly pool: LeasePool<McpClient>;
+  private readonly connectorVersion: string | undefined;
+  private readonly networkSettings: ConnectorNetworkSettings;
+  private readonly platform: PlatformServices;
+  private readonly credential: CredentialAccessor;
+  private readonly authHeaders: Record<string, string>;
 
-  constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
+  constructor(
+    params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>,
+    pool: LeasePool<unknown>
+  ) {
     super(params);
 
-    // Build auth headers from secrets based on authType
-    this.authHeaders = buildHeadersFromSecrets(this.secrets, this.config);
-
-    // Merge non-secret headers from config with auth headers (auth headers take precedence)
-    const headers: Record<string, string> = {
-      ...(this.config.headers ?? {}),
-      ...this.authHeaders,
+    this.pool = pool as LeasePool<McpClient>;
+    this.connectorVersion = params.connectorVersion;
+    const configHeaders = this.config.headers ?? {};
+    const authHeaders = buildHeadersFromSecrets(this.secrets, this.config);
+    this.authHeaders = authHeaders;
+    this.networkSettings = createConnectorNetworkSettings(params.configurationUtilities);
+    this.platform = createPlatformServices(params.configurationUtilities);
+    this.credential = {
+      getAuthHeaders: async () => ({
+        ...configHeaders,
+        ...authHeaders,
+      }),
     };
-
-    // Build a custom fetch that applies the actions plugin's SSL/proxy settings
-    const customFetch = buildCustomFetch(
-      this.configurationUtilities,
-      this.logger,
-      this.config.serverUrl
-    );
-
-    // Build client options
-    const clientOptions: McpClientOptions = {
-      headers,
-      fetch: customFetch,
-    };
-
-    // Create client details using connector ID and server URL
-    const clientDetails: ClientDetails = {
-      name: `kibana-mcp-connector-${this.connector.id}`,
-      version: MCP_CLIENT_VERSION,
-      url: this.config.serverUrl,
-    };
-
-    // Initialize the single MCP Client instance for this connector
-    this.mcpClient = new McpClient(this.logger, clientDetails, clientOptions);
 
     this.registerSubActions();
   }
@@ -136,120 +200,204 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     return `${this.connector.id}:${configHash}`;
   }
 
-  /**
-   * Test the connector by attempting to connect to the MCP server.
-   * Disconnects after the test to clean up resources.
-   * Note: Test operations always disconnect to ensure clean test state.
-   */
-  public async testConnector(
-    _params: z.infer<typeof TestConnectorRequestSchema>,
-    connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<{ connected: boolean; capabilities?: unknown }> {
-    try {
-      const result = await this.mcpClient.connect();
-
-      if (result.connected) {
-        this.logger.info(`MCP connector test successful. Connected: ${result.connected}`);
-      } else {
-        this.logger.warn(
-          `MCP connector test completed but connection failed. Connected: ${result.connected}`
-        );
-      }
-
-      return result;
-    } catch (error) {
-      this.logger.error(
-        `MCP connector test failed: ${error instanceof Error ? error.message : String(error)}`
-      );
-      throw error;
-    } finally {
-      // Always disconnect after test to clean up
-      await this.safeDisconnect('test');
-    }
-  }
-
-  /**
-   * Safely disconnects the MCP client if connected.
-   * Logs any errors but does not throw, making it safe to use in finally blocks.
-   * @param operationName - Optional operation name for logging context
-   */
-  private async safeDisconnect(operationName?: string): Promise<void> {
-    if (!this.mcpClient.isConnected()) {
-      return;
-    }
-
-    try {
-      await this.mcpClient.disconnect();
-    } catch (disconnectError) {
-      const operationContext = operationName ? ` after ${operationName}` : '';
-      this.logger.debug(
-        `Error disconnecting${operationContext}: ${
-          disconnectError instanceof Error ? disconnectError.message : String(disconnectError)
-        }`
+  private getLeaseKey(): string {
+    if (this.connectorVersion === undefined) {
+      throw createTaskRunError(
+        new Error(`Missing saved-object version for connector "${this.connector.id}".`),
+        TaskErrorSource.FRAMEWORK
       );
     }
+
+    return buildClientLeaseKey({
+      connectorId: this.connector.id,
+      clientTypeId: clientTypes.mcp.id,
+      connectorVersion: this.connectorVersion,
+    });
   }
 
-  /**
-   * Checks if an error is a connection-related error that should trigger retry or cleanup.
-   */
-  private isConnectionError(error: unknown): error is Error {
-    return (
-      error instanceof StreamableHTTPError ||
-      error instanceof UnauthorizedError ||
-      (error instanceof Error &&
-        (error.message.includes('connection') || error.message.includes('ECONNREFUSED')))
+  private withBreaker<T>(fn: () => Promise<T>): Promise<T> {
+    return mcpCircuitBreaker.run(
+      { key: this.getLeaseKey(), connectorId: this.connector.id, logger: this.logger },
+      fn
+    );
+  }
+
+  private buildClient(): Promise<McpClient> {
+    return markConnectFailure(
+      clientTypes.mcp.build({
+        logger: this.logger,
+        config: {
+          serverUrl: this.config.serverUrl,
+          clientName: `kibana-mcp-connector-${this.connector.id}`,
+        },
+        networkSettings: this.networkSettings,
+        platform: this.platform,
+        credential: this.credential,
+      })
     );
   }
 
   /**
-   * Ensures the MCP client is connected, with automatic retry and recovery on failure.
-   * Uses the retry utility to handle connection failures gracefully.
+   * Runs `fn` against the pooled client. With `redactToolError`, tool-level failures (which embed
+   * the tool arguments in their message) are logged without the error message.
+   * Consecutive connection failures on the lease key stop being retryable after the limit.
    */
-  private async ensureConnected(operationName: string): Promise<void> {
-    if (this.mcpClient.isConnected()) {
-      return;
+  private async withPooledClient<T>(
+    operation: string,
+    fn: (client: McpClient) => Promise<T>,
+    { redactToolError = false }: { redactToolError?: boolean } = {}
+  ): Promise<T> {
+    const key = this.getLeaseKey();
+    const { promise, release } = this.pool.acquire(
+      key,
+      () => this.buildClient(),
+      (client) => clientTypes.mcp.terminate(client)
+    );
+    const leaseGeneration = getLeaseGeneration(promise);
+    getConnectionFailureState(key);
+    try {
+      const result = await fn(await promise);
+      const keyState = getConnectionFailureState(key);
+      keyState.highestSuccessfulGeneration = Math.max(
+        keyState.highestSuccessfulGeneration,
+        leaseGeneration
+      );
+      keyState.successVersion = ++nextSuccessVersion;
+      connectionFailureState.set(key, keyState);
+      connectionFailures.delete(key);
+      failedLeaseCounts.delete(promise);
+      return result;
+    } catch (err) {
+      // Release first: invalidate waits for every active use, including this one, to finish.
+      release();
+      const isConnectionError = clientTypes.mcp.shouldInvalidateOnError?.(err) ?? false;
+      const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
+      let retry = true;
+      if (isConnectionError && !isUserError) {
+        const keyState = getConnectionFailureState(key);
+        if (leaseGeneration >= keyState.highestSuccessfulGeneration) {
+          const cachedFailure = failedLeaseCounts.get(promise);
+          if (!cachedFailure || cachedFailure.successVersion === keyState.successVersion) {
+            const failureCount =
+              cachedFailure?.count ??
+              this.recordAndRememberLeaseFailure(key, promise, keyState.successVersion);
+            retry = failureCount < CONNECTION_FAILURE_RETRY_LIMIT;
+          }
+        }
+      }
+      if (isConnectionError) {
+        await this.pool.invalidate(key, promise);
+      }
+
+      this.throwClassified(operation, err, {
+        redact: redactToolError && !isConnectionError,
+        retry,
+      });
+    } finally {
+      release();
+    }
+  }
+
+  /** Increments the failure count for the lease key and restarts the window TTL. */
+  private recordConnectionFailure(key: string): number {
+    const count = (connectionFailures.get(key) ?? 0) + 1;
+    connectionFailures.set(key, count);
+    return count;
+  }
+
+  private recordAndRememberLeaseFailure(
+    key: string,
+    promise: Promise<McpClient>,
+    successVersion: number
+  ): number {
+    const count = this.recordConnectionFailure(key);
+    failedLeaseCounts.set(promise, { count, successVersion });
+    return count;
+  }
+
+  private throwClassified(
+    operation: string,
+    err: unknown,
+    { redact = false, retry = true }: { redact?: boolean; retry?: boolean } = {}
+  ): never {
+    const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
+    const detail = err instanceof Error ? err.message : String(err);
+    const retriesDisabled = retry
+      ? ''
+      : `; retries disabled after ${CONNECTION_FAILURE_RETRY_LIMIT} consecutive connection failures`;
+    const message =
+      redact && !isUserError
+        ? `MCP ${operation} failed${retriesDisabled}`
+        : `MCP ${operation} failed: ${detail}${retriesDisabled}`;
+    if (isUserError) {
+      this.logger.warn(message);
+    } else {
+      this.logger.error(message);
     }
 
-    const retryOptions: RetryOptions = {
-      maxAttempts: MAX_RETRIES,
-      initialDelayMs: 100,
-      isRetryableError: (error) => this.isConnectionError(error),
-      logger: this.logger,
-      operationName: `${operationName}.connect`,
-      onRetry: async () => {
-        // Recovery: disconnect before retrying connection
-        try {
-          await this.mcpClient.disconnect();
-        } catch (disconnectError) {
-          // Ignore disconnect errors during recovery
-          this.logger.debug(
-            `Error during disconnect recovery: ${
-              disconnectError instanceof Error ? disconnectError.message : String(disconnectError)
-            }`
-          );
-        }
-      },
-    };
+    if (isUserError) {
+      throw createTaskRunError(
+        err instanceof Error ? err : new Error(String(err)),
+        TaskErrorSource.USER
+      );
+    }
 
-    await retryWithRecovery(() => this.mcpClient.connect(), retryOptions);
+    if (!retry) {
+      const retryableError = new Error(err instanceof Error ? err.message : String(err), {
+        cause: err,
+      });
+      throw createRetryableError(retryableError, false);
+    }
+
+    throw err;
+  }
+
+  /**
+   * Test the connector with a fresh isolated client: build and connect outside the pool, verify
+   * the session with a live `listTools` round trip, and always terminate that client. Does not
+   * read or write the pooled client or the tool-list cache.
+   */
+  public async testConnector(
+    _params: z.infer<typeof TestConnectorRequestSchema>,
+    _connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<McpTestConnectorResponse> {
+    return this.withBreaker(() => this.runIsolatedTest());
+  }
+
+  private async runIsolatedTest(): Promise<McpTestConnectorResponse> {
+    let client: McpClient;
+    try {
+      client = await this.buildClient();
+    } catch (err) {
+      return this.throwClassified('test', err);
+    }
+
+    try {
+      await client.listTools();
+      return { connected: true, capabilities: client.getServerCapabilities() };
+    } catch (err) {
+      return this.throwClassified('test', err);
+    } finally {
+      try {
+        await clientTypes.mcp.terminate(client);
+      } catch (err) {
+        this.logger.debug(
+          `MCP test client terminate failed: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
   }
 
   /**
    * List all available tools from the MCP server.
    * Results are cached based on connector id + config to reduce redundant calls.
-   * Automatically connects if not already connected.
-   * Handles connection failures with automatic recovery.
    */
   public async listTools(
     params: z.infer<typeof ListToolsRequestSchema>,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<{
-    tools: Array<{ name: string; description?: string; inputSchema: Record<string, unknown> }>;
-  }> {
+  ): Promise<{ tools: Tool[] }> {
     const cacheKey = this.getListToolsCacheKey();
 
-    // Check cache first (unless forceRefresh is requested)
     if (!params.forceRefresh) {
       const cachedResult = listToolsCache.get(cacheKey);
       if (cachedResult) {
@@ -260,85 +408,34 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       }
     }
 
-    try {
-      connectorUsageCollector.addRequestBodyBytes(undefined, params);
+    connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-      // Ensure we're connected before listing tools (with automatic retry/recovery)
-      await this.ensureConnected('listTools');
-
-      const result = await this.mcpClient.listTools();
-      this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
-
-      // Cache the result
-      listToolsCache.set(cacheKey, result);
-
-      return result;
-    } catch (error) {
-      // On error, ensure connection state is cleaned up
-      await this.handleConnectionError(error, 'listTools');
-      throw error;
-    } finally {
-      // Always disconnect after operation to clean up
-      await this.safeDisconnect('listTools');
-    }
+    const result = await this.withBreaker(() =>
+      this.withPooledClient('listTools', (client) => client.listTools())
+    );
+    this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
+    listToolsCache.set(cacheKey, result);
+    return result;
   }
 
   /**
    * Call a tool on the MCP server.
-   * Automatically connects if not already connected.
-   * Handles connection failures with automatic recovery.
    */
   public async callTool(
     params: z.infer<typeof CallToolRequestSchema>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CallToolResponse> {
-    try {
-      connectorUsageCollector.addRequestBodyBytes(undefined, params);
+    connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-      // Ensure we're connected before calling tools (with automatic retry/recovery)
-      await this.ensureConnected('callTool');
-
-      const callParams: CallToolParams = {
-        name: params.name,
-        arguments: params.arguments,
-      };
-
-      const result = await this.mcpClient.callTool(callParams);
-      this.logger.debug(`Successfully called tool: ${params.name}`);
-
-      return result;
-    } catch (error) {
-      // On error, ensure connection state is cleaned up
-      await this.handleConnectionError(error, `callTool(${params.name})`);
-      throw error;
-    } finally {
-      // Always disconnect after operation to clean up
-      await this.safeDisconnect(`callTool(${params.name})`);
-    }
-  }
-  /**
-   * Handles connection errors by cleaning up connection state.
-   * This ensures we don't leave the connection in a bad state after errors.
-   */
-  private async handleConnectionError(error: unknown, operation: string): Promise<void> {
-    // Check if this is a connection-related error that requires cleanup
-    if (this.isConnectionError(error) && this.mcpClient.isConnected()) {
-      this.logger.warn(
-        `Connection error during ${operation}, cleaning up connection state: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      try {
-        await this.mcpClient.disconnect();
-      } catch (cleanupError) {
-        // Log but don't throw - we're already handling an error
-        this.logger.debug(
-          `Error during connection cleanup: ${
-            cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
-          }`
-        );
-      }
-    }
+    const result = await this.withBreaker(() =>
+      this.withPooledClient(
+        `callTool(${params.name})`,
+        (client) => client.callTool({ name: params.name, arguments: params.arguments }),
+        { redactToolError: true }
+      )
+    );
+    this.logger.debug(`Successfully called tool: ${params.name}`);
+    return result;
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {

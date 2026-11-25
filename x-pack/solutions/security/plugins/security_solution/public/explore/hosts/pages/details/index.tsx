@@ -81,10 +81,10 @@ import {
   type EntityStoreRecord,
 } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { ObservedDataSection as HostObservedDataSection } from '../../../../flyout_v2/entity/shared/components/observed_data_section';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '../../../../flyout/entity_details/host_right';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '../../../../flyout_v2/entity/host/main/constants';
 import { useObservedHost } from '../../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
+import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout_v2/entity/shared/translations';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { euidDslFilterToPageFilters } from '../../../helpers';
@@ -227,7 +227,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
       return legacyFilters;
     }
     const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
-      EntityType.host,
+      euidApi.getBuiltInEntityDefinition(EntityType.host),
       entityFromStoreResult.entityRecord
     );
     return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;
@@ -236,7 +236,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
     noEntityInStore,
-    euidApi?.euid,
+    euidApi,
   ]);
 
   const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
@@ -435,13 +435,13 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                   <AnomalyTableProvider
                     criteriaFields={hostToCriteria({
                       hostItem: hostDetailsForOverview,
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityRecord: entityStoreV2Enabled
                         ? entityFromStoreResult.entityRecord
                         : undefined,
                     })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityType: 'host',
                       isScopedToEntity: true,
                       identityFields: resolvedIdentityFields,

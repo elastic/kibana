@@ -62,6 +62,29 @@ describe('useFooterLinks', () => {
     );
   });
 
+  it('returns "Get started" link pointing at the vectordb onboarding for vectordb serverless projects', () => {
+    const application = createApplication({ navLinks: { home: true, vectordb: true } });
+    const cloudMock = createCloud({
+      serverless: { projectType: 'vectordb' } as CloudStart['serverless'],
+    });
+
+    const { result } = renderHook(() =>
+      useFooterLinks({ application, cloud: cloudMock, isServerless: true })
+    );
+
+    expect(result.current).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'getStarted',
+          label: 'Get started',
+        }),
+      ])
+    );
+    expect(application.getUrlForApp).toHaveBeenCalledWith('vectordb', {
+      path: '/getting_started',
+    });
+  });
+
   it('returns "Connection details" link when cloud is enabled', () => {
     const application = createApplication();
 

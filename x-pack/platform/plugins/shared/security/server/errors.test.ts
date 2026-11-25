@@ -135,5 +135,27 @@ describe('lib/errors', () => {
     it('extracts `message` property', () => {
       expect(errors.getDetailedErrorMessage(new Error('some-message'))).toBe('some-message');
     });
+
+    it.each([
+      [null, 'null'],
+      [undefined, 'undefined'],
+      ['some-message', 'some-message'],
+      [42, '42'],
+    ])('reports a thrown %p that is not an object as is', (thrown, message) => {
+      expect(errors.getDetailedErrorMessage(thrown)).toBe(message);
+    });
+  });
+
+  describe('#toErrorStatusCode', () => {
+    it.each([400, 404, 409, 500, 503, 599])('keeps the HTTP error status %p', (statusCode) => {
+      expect(errors.toErrorStatusCode(statusCode)).toBe(statusCode);
+    });
+
+    it.each([undefined, null, '404', 200, 399, 600, 404.5, NaN])(
+      'turns %p, which Boom would refuse, into 500',
+      (statusCode) => {
+        expect(errors.toErrorStatusCode(statusCode)).toBe(500);
+      }
+    );
   });
 });

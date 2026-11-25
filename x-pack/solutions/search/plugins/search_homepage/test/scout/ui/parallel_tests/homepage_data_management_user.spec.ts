@@ -23,39 +23,35 @@ spaceTest.describe(
       await browserAuth.loginWithCustomRole(role);
 
       await page.addInitScript(() => {
-        window.sessionStorage.setItem('gettingStartedVisited', 'true');
+        window.localStorage.setItem('gettingStartedVisited', 'true');
       });
       await pageObjects.homepage.goto();
     });
 
-    spaceTest(
-      'should only see Data Management panel and Storage/Indices badges',
-      async ({ pageObjects, page }) => {
-        const navigationCards = await pageObjects.homepage.getNavigationCards();
-        await expect(navigationCards).toHaveCount(1);
+    spaceTest('only sees the data card, with its manage data action', async ({ pageObjects }) => {
+      const { homepage } = pageObjects;
+      await expect(homepage.dataCard).toBeVisible();
+      await expect(homepage.manageDataButton).toBeVisible();
 
-        const dataManagementCard = page.testSubj.locator('searchHomepageNavLinks-dataManagement');
-        await expect(dataManagementCard).toBeVisible();
+      await expect(homepage.dashboardsCard).toBeHidden();
+      await expect(homepage.workflowsCard).toBeHidden();
+      await expect(homepage.apiKeysCard).toBeHidden();
+    });
 
-        const badges = await pageObjects.homepage.getMetricBadges();
-        await expect(badges).toHaveCount(2);
-
-        const indicesBadge = await pageObjects.homepage.getMetricBadge('indices');
-        await expect(indicesBadge).toBeVisible();
-
-        const storageBadge = await pageObjects.homepage.getMetricBadge('storage');
-        await expect(storageBadge).toBeVisible();
-      }
-    );
+    spaceTest('cannot chat with the AI agent without Agent Builder', async ({ pageObjects }) => {
+      const { homepage } = pageObjects;
+      await expect(homepage.viewPromptButton).toBeVisible();
+      await expect(homepage.openElasticAgentButton).toBeHidden();
+    });
 
     spaceTest('should only see expected primary sidenav items', async ({ pageObjects }) => {
       const { chrome } = pageObjects;
-      const isChromeNext = await chrome.isNextChrome();
+      const isProjectChrome = await chrome.isProjectChrome();
 
-      await expect(chrome.primaryNavigationItems).toHaveCount(Number(isChromeNext) + 1);
+      await expect(chrome.primaryNavigationItems).toHaveCount(Number(isProjectChrome) + 1);
       await expect(chrome.navItemInPrimaryById('data_management')).toBeVisible();
       await expect(chrome.navItemInPrimaryById('searchHomepage')).toBeVisible({
-        visible: isChromeNext,
+        visible: isProjectChrome,
       });
     });
   }

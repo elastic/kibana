@@ -21,8 +21,9 @@ import {
   isQueryESQLControl,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { getValuesFromQueryField, getVariableNamePrefix } from '@kbn/esql-utils';
-import type { ISearchGeneric } from '@kbn/search-types';
+import { getValuesFromQueryField } from '@kbn/esql-utils';
+import { getVariableNamePrefix } from '@kbn/esql-controls-utils';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { monaco } from '@kbn/code-editor';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
@@ -39,7 +40,7 @@ import {
 } from './helpers';
 
 interface ESQLControlsFlyoutProps {
-  search: ISearchGeneric;
+  search: DataPublicPluginStart['search'];
   initialVariableType: ESQLVariableType;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
@@ -57,6 +58,9 @@ interface ESQLControlsFlyoutProps {
   telemetryTriggerSource?: ControlTriggerSource;
   telemetryService: ESQLEditorTelemetryService;
 }
+
+const isValuesType = (type: ESQLVariableType) =>
+  type === ESQLVariableType.VALUES || type === ESQLVariableType.MULTI_VALUES;
 
 export function ESQLControlsFlyout({
   search,
@@ -79,7 +83,7 @@ export function ESQLControlsFlyout({
     getVariableNamePrefix(initialVariableType)
   );
   const valuesField = useMemo(() => {
-    if (initialVariableType === ESQLVariableType.VALUES) {
+    if (isValuesType(initialVariableType)) {
       return getValuesFromQueryField(queryString, cursorPosition);
     }
     return undefined;
@@ -99,7 +103,7 @@ export function ESQLControlsFlyout({
 
     let variableNameSuggestion = getVariableSuggestion(initialVariableType);
 
-    if (valuesField && initialVariableType === ESQLVariableType.VALUES) {
+    if (valuesField && isValuesType(initialVariableType)) {
       // variables names can't have special characters, only underscore
       const fieldVariableName = valuesField.replace(/[^a-zA-Z0-9]/g, '_');
       variableNameSuggestion = fieldVariableName;
@@ -113,7 +117,7 @@ export function ESQLControlsFlyout({
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
     (initialState?.control_type ??
-      (initialVariableType === ESQLVariableType.VALUES
+      (isValuesType(initialVariableType)
         ? EsqlControlType.VALUES_FROM_QUERY
         : EsqlControlType.STATIC_VALUES)) as EsqlControlType
   );
@@ -140,10 +144,7 @@ export function ESQLControlsFlyout({
       const newType = getVariableTypeFromQuery(text, variableType);
       setVariableType(newType);
       setVariableNamePrefix(getVariableNamePrefix(newType));
-      if (
-        controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-        newType !== ESQLVariableType.VALUES
-      ) {
+      if (controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && !isValuesType(newType)) {
         setControlFlyoutType(EsqlControlType.STATIC_VALUES);
       }
     },
@@ -246,7 +247,7 @@ export function ESQLControlsFlyout({
         queryString={queryString}
         setControlState={setControlState}
         initialState={initialState}
-        search={search}
+        search={search.search}
         cursorPosition={cursorPosition}
         currentApp={currentApp}
       />
@@ -257,7 +258,7 @@ export function ESQLControlsFlyout({
       <Header isInEditMode={isControlInEditMode} ariaLabelledBy={ariaLabelledBy} />
       <EuiFlyoutBody css={flyoutStyles}>
         <ControlType
-          isDisabled={variableType !== ESQLVariableType.VALUES}
+          isDisabled={!isValuesType(variableType)}
           initialControlFlyoutType={controlFlyoutType}
           onFlyoutTypeChange={onFlyoutTypeChange}
         />

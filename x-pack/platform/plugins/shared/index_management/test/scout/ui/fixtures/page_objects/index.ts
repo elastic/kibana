@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { IndexManagement } from './index_management_page';
 
@@ -15,10 +15,11 @@ export interface IndexManagementPageObjects extends PageObjects {
 
 export function extendPageObjects(
   pageObjects: PageObjects,
-  page: ScoutPage
+  page: ScoutPage,
+  kbnUrl: KibanaUrl
 ): IndexManagementPageObjects {
   return {
     ...pageObjects,
-    indexManagement: createLazyPageObject(IndexManagement, page),
+    indexManagement: createLazyPageObject(IndexManagement, page, kbnUrl),
   };
 }

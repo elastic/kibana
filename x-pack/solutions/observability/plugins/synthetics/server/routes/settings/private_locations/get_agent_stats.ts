@@ -5,12 +5,25 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { AgentStat, LocationAgentStats } from '../../../../common/types';
+import { ConfigKey } from '../../../../common/runtime_types';
+import {
+  configIdOf,
+  countMonitorsByAssignedAgent,
+} from '../../../synthetics_service/private_location/assign_by_condition';
+import type { MonitorConfigRepository } from '../../../services/monitor_config_repository';
+import { getSavedObjectKqlFilter } from '../../common';
+import { isShardingEnabled } from '../../../synthetics_service/private_location/agent_sharding_license';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+import { isCompleteElasticAgent } from '../../../synthetics_service/private_location/get_agent_info';
 
 const BYTES_PER_MIB = 1024 * 1024;
 
@@ -31,7 +44,12 @@ interface EnrolledAgentMeta {
   lastCheckinMessage: string | null;
   platform: string | null;
   tags: string[];
+  /** Active agent that can run browser monitors. Inactive agents never count. */
+  complete: boolean;
 }
+
+// Listed with `showInactive: true` for display, but placement only targets active agents.
+const NOT_ACTIVE_STATUSES = new Set(['inactive', 'unenrolled', 'uninstalled']);
 
 interface AgentLocalMetadata {
   host?: { name?: string; hostname?: string; memory?: number };
@@ -43,7 +61,7 @@ interface AgentLocalMetadata {
  * One entry per enrolled Fleet agent (`agent.id`) on the location's policy.
  * Host memory from agent metadata is optional; `metrics-system.*` fills gaps.
  */
-const getEnrolledAgents = async (
+export const getEnrolledAgents = async (
   server: SyntheticsServerSetup,
   agentPolicyId: string
 ): Promise<Map<string, EnrolledAgentMeta>> => {
@@ -63,7 +81,7 @@ const getEnrolledAgents = async (
         showInactive: true,
         perPage,
         page,
-        kuery: `policy_id:"${agentPolicyId}"`,
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
       });
     total = totalAgents ?? agents.length;
 
@@ -92,6 +110,10 @@ const getEnrolledAgents = async (
         lastCheckinMessage: agent.last_checkin_message ?? null,
         platform: meta?.os?.platform ?? meta?.os?.name ?? null,
         tags: agent.tags ?? [],
+        complete:
+          agent.active !== false &&
+          !NOT_ACTIVE_STATUSES.has(agent.status ?? '') &&
+          isCompleteElasticAgent(agent.local_metadata),
       });
     }
 
@@ -182,6 +204,43 @@ const getHostMetricsFromSystem = async (
 };
 
 /**
+ * Package policies are listed across all spaces; counts are limited to monitors
+ * in spaces the caller can read so a shared location doesn't leak other spaces.
+ */
+const getVisibleMonitorSpacesByLocation = async (
+  monitorConfigRepository: MonitorConfigRepository,
+  locationIds: string[]
+): Promise<Map<string, Map<string, Set<string>>>> => {
+  if (locationIds.length === 0) {
+    return new Map();
+  }
+  const requestedLocationIds = new Set(locationIds);
+  const monitors = await monitorConfigRepository.getAll({
+    filter: getSavedObjectKqlFilter({ field: 'locations.id', values: locationIds }),
+    fields: ['config_id', ConfigKey.MONITOR_QUERY_ID, ConfigKey.LOCATIONS],
+    showFromAllSpaces: true,
+  });
+  const configIdsByLocation = new Map<string, Map<string, Set<string>>>();
+
+  for (const { id, attributes, namespaces } of monitors) {
+    const configId = attributes[ConfigKey.MONITOR_QUERY_ID] || attributes.config_id || id;
+    const visibleSpaces = namespaces?.length ? namespaces : [DEFAULT_SPACE_ID];
+    for (const { id: locationId } of attributes[ConfigKey.LOCATIONS] ?? []) {
+      if (!requestedLocationIds.has(locationId)) {
+        continue;
+      }
+      const spacesByConfigId = configIdsByLocation.get(locationId) ?? new Map();
+      const spaces = spacesByConfigId.get(configId) ?? new Set<string>();
+      visibleSpaces.forEach((spaceId) => spaces.add(spaceId));
+      spacesByConfigId.set(configId, spaces);
+      configIdsByLocation.set(locationId, spacesByConfigId);
+    }
+  }
+
+  return configIdsByLocation;
+};
+
+/**
  * Per-agent health and host metrics for every private location's agent policy —
  * one row per Fleet `agent.id`. Identity/health from Fleet; RAM/CPU from System
  * integration when available (else "N/A").
@@ -192,21 +251,68 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATION_AGENT_STATS,
   validate: {},
-  handler: async ({ server, context, savedObjectsClient, syntheticsMonitorClient }) => {
+  handler: async ({
+    server,
+    context,
+    savedObjectsClient,
+    syntheticsMonitorClient,
+    monitorConfigRepository,
+  }) => {
     const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,
       syntheticsMonitorClient
     );
     const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
+    const packagePolicyService = new PackagePolicyService(server);
+    const isShardingActive = await isShardingEnabled(server);
+    const visibleMonitorSpacesByLocation = isShardingActive
+      ? await getVisibleMonitorSpacesByLocation(
+          monitorConfigRepository,
+          locations.map(({ id }) => id)
+        ).catch((error) => {
+          server.logger.warn('Unable to load visible monitors for private location agent stats', {
+            error,
+          });
+          return new Map<string, Map<string, Set<string>>>();
+        })
+      : new Map<string, Map<string, Set<string>>>();
 
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
 
     return Promise.all(
       locations.map(async (location): Promise<LocationAgentStats> => {
-        const enrolled = await getEnrolledAgents(server, location.agentPolicyId).catch(
-          () => new Map<string, EnrolledAgentMeta>()
-        );
+        const [enrolled, assignmentCounts] = await Promise.all([
+          getEnrolledAgents(server, location.agentPolicyId).catch(
+            () => new Map<string, EnrolledAgentMeta>()
+          ),
+          isShardingActive
+            ? packagePolicyService
+                .listByAgentPolicy({ agentPolicyId: location.agentPolicyId })
+                .then((policies) => {
+                  const visibleSpacesByConfigId = visibleMonitorSpacesByLocation.get(location.id);
+                  return countMonitorsByAssignedAgent(
+                    policies.filter(({ id, spaceIds }) => {
+                      const configId = configIdOf(id, location.id);
+                      const visibleSpaces = configId
+                        ? visibleSpacesByConfigId?.get(configId)
+                        : undefined;
+                      if (!visibleSpaces) {
+                        return false;
+                      }
+                      const policySpaceIds = spaceIds?.length ? spaceIds : [DEFAULT_SPACE_ID];
+                      return (
+                        visibleSpaces.has(ALL_SPACES_ID) ||
+                        policySpaceIds.includes(ALL_SPACES_ID) ||
+                        policySpaceIds.some((spaceId) => visibleSpaces.has(spaceId))
+                      );
+                    }),
+                    location.id
+                  );
+                })
+                .catch(() => new Map<string, number>())
+            : Promise.resolve(new Map<string, number>()),
+        ]);
 
         // Unique original-case host names for the metrics terms query.
         const metricHostNames = [
@@ -241,6 +347,8 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
               lastCheckinMessage: meta.lastCheckinMessage,
               platform: meta.platform,
               tags: meta.tags,
+              monitorsAssigned: isShardingActive ? assignmentCounts.get(meta.agentId) ?? 0 : null,
+              complete: meta.complete,
             };
           })
           .sort((a, b) => {
@@ -253,6 +361,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           locationLabel: location.label,
           agentPolicyId: location.agentPolicyId,
           agentPolicyName: policyNameById.get(location.agentPolicyId) ?? location.agentPolicyId,
+          isShardingActive,
           agents,
         };
       })

@@ -52,6 +52,7 @@ export type {
   SavedObjectsFindOptionsReference,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsFindSort,
   SavedObjectsPitParams,
 } from './find';
 export type { SavedObjectsGetOptions } from './get';

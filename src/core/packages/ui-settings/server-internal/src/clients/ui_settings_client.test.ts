@@ -978,6 +978,113 @@ describe('ui settings', () => {
         expect(result1).toEqual(result2);
         expect(result2).toEqual(result3);
       });
+
+      it('reads again when another caller is waiting on a rejected in-flight read', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        const { uiSettings: clientA, savedObjectsClient: soClientA } = setupWithSharedCache({
+          sharedCache,
+        });
+        const { uiSettings: clientB, savedObjectsClient: soClientB } = setupWithSharedCache({
+          sharedCache,
+          esDocSource: { foo: 'from-b' },
+        });
+
+        const authError = SavedObjectsClient.errors.decorateNotAuthorizedError(
+          new Error('dead key')
+        );
+        let rejectReadA: (error: Error) => void = () => {};
+        soClientA.get.mockReturnValue(
+          new Promise((_resolve, reject) => {
+            rejectReadA = reject;
+          }) as any
+        );
+
+        const readA = clientA.getUserProvided();
+        expect(sharedCache.getInflightRead('default')).not.toBeNull();
+        const readB = clientB.getUserProvided();
+        rejectReadA(authError);
+
+        await expect(readA).rejects.toBe(authError);
+        await expect(readB).resolves.toEqual({ foo: { userValue: 'from-b' } });
+        expect(soClientA.get).toHaveBeenCalledTimes(1);
+        expect(soClientB.get).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not share a forbidden in-flight read with another caller', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        const { uiSettings: clientA, savedObjectsClient: soClientA } = setupWithSharedCache({
+          sharedCache,
+        });
+        const { uiSettings: clientB, savedObjectsClient: soClientB } = setupWithSharedCache({
+          sharedCache,
+          esDocSource: { foo: 'from-b' },
+        });
+
+        let rejectReadA: (error: Error) => void = () => {};
+        soClientA.get.mockReturnValue(
+          new Promise((_resolve, reject) => {
+            rejectReadA = reject;
+          }) as any
+        );
+
+        const readA = clientA.getUserProvided();
+        expect(sharedCache.getInflightRead('default')).not.toBeNull();
+        const readB = clientB.getUserProvided();
+        rejectReadA(SavedObjectsClient.errors.decorateForbiddenError(new Error()));
+
+        await expect(readA).resolves.toStrictEqual({});
+        await expect(readB).resolves.toEqual({ foo: { userValue: 'from-b' } });
+        expect(soClientA.get).toHaveBeenCalledTimes(1);
+        expect(soClientB.get).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('ignorable read errors', () => {
+      it('does not cache a forbidden read', async () => {
+        const { uiSettings, savedObjectsClient, sharedUserProvidedCache } = setupWithSharedCache();
+        savedObjectsClient.get.mockRejectedValueOnce(
+          SavedObjectsClient.errors.decorateForbiddenError(new Error())
+        );
+
+        await expect(uiSettings.getUserProvided()).resolves.toStrictEqual({});
+        expect(sharedUserProvidedCache.has('default')).toBe(false);
+
+        savedObjectsClient.get.mockResolvedValueOnce({ attributes: { foo: 'bar' } } as any);
+        await expect(uiSettings.getUserProvided()).resolves.toEqual({
+          foo: { userValue: 'bar' },
+        });
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not cache an Elasticsearch-unavailable read', async () => {
+        const { uiSettings, savedObjectsClient, sharedUserProvidedCache } = setupWithSharedCache();
+        savedObjectsClient.get.mockRejectedValueOnce(
+          SavedObjectsClient.errors.decorateEsUnavailableError(new Error())
+        );
+
+        await expect(uiSettings.getUserProvided()).resolves.toStrictEqual({});
+        expect(sharedUserProvidedCache.has('default')).toBe(false);
+
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('caches a successful read that stores no user values', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        const { uiSettings: client1, savedObjectsClient: soClient1 } = setupWithSharedCache({
+          sharedCache,
+          esDocSource: {},
+        });
+        const { uiSettings: client2, savedObjectsClient: soClient2 } = setupWithSharedCache({
+          sharedCache,
+          esDocSource: { foo: 'should-not-be-read' },
+        });
+
+        await expect(client1.getUserProvided()).resolves.toStrictEqual({});
+        await expect(client2.getUserProvided()).resolves.toStrictEqual({});
+        expect(soClient1.get).toHaveBeenCalledTimes(1);
+        expect(soClient2.get).toHaveBeenCalledTimes(0);
+      });
     });
 
     describe('cache invalidation', () => {
@@ -1179,6 +1286,54 @@ describe('ui settings', () => {
         const result = await uiSettings.getUserProvided();
 
         expect(result.foo).toEqual({ userValue: 'after-write' });
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('invalidates cache repopulated by a concurrent read during the write window', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+
+        // The concurrent read (during the write) sees the pre-write value; the read after the
+        // write commits sees the new value.
+        savedObjectsClient.get.mockResolvedValueOnce({
+          attributes: { foo: 'before-write' },
+        } as any);
+        savedObjectsClient.get.mockResolvedValueOnce({ attributes: { foo: 'after-write' } } as any);
+
+        // Hold the ES write open so a concurrent read can slip into the [invalidate -> commit] window.
+        let resolveUpdate: (value: any) => void;
+        savedObjectsClient.update.mockReturnValue(
+          new Promise((resolve) => {
+            resolveUpdate = resolve;
+          }) as any
+        );
+
+        const uiSettings = new UiSettingsClient({
+          type: TYPE,
+          id: ID,
+          buildNum: BUILD_NUM,
+          defaults: {},
+          savedObjectsClient,
+          overrides: {},
+          log: logger,
+          namespace: 'default',
+          sharedUserProvidedCache: sharedCache,
+        });
+
+        // Start the write: the pre-write invalidation has run and the ES update is now pending.
+        const writePromise = uiSettings.setMany({ foo: 'after-write' });
+
+        // A concurrent read lands in the window and repopulates the cache with the pre-write value.
+        const concurrentRead = await uiSettings.getUserProvided();
+        expect(concurrentRead.foo).toEqual({ userValue: 'before-write' });
+
+        // The write commits.
+        resolveUpdate!({});
+        await writePromise;
+
+        // The next read must not be served the stale pre-write value.
+        const afterWrite = await uiSettings.getUserProvided();
+        expect(afterWrite.foo).toEqual({ userValue: 'after-write' });
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
       });
 

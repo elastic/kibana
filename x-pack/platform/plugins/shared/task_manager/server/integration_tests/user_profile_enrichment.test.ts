@@ -12,6 +12,7 @@ import { TaskStatus, type RunContext } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import { injectTask, setupTestServers, retry } from './lib';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 interface CapturedRun {
   called: boolean;
@@ -125,7 +126,7 @@ describe('Task Manager user profile enrichment (integration)', () => {
       apiKey: Buffer.from('integration-api-key-id:integration-api-key-value').toString('base64'),
       userScope: {
         apiKeyId: 'integration-api-key-id',
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         apiKeyCreatedByUser: false,
         userProfileId: testProfileUid,
         userName: testUserName,

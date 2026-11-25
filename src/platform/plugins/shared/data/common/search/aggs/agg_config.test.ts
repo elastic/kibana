@@ -335,7 +335,7 @@ describe('AggConfig', () => {
     it('fails when the list is not defined', () => {
       expect(() => {
         AggConfig.nextId(undefined as unknown as IAggConfig[]);
-      }).toThrowError();
+      }).toThrow();
     });
   });
 

@@ -68,14 +68,18 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
   const action: TransformListAction = useMemo(
     () => ({
       name: () => <EditActionName />,
-      enabled: () => canCreateTransform && !forceDisable && transformNodes > 0,
+      enabled: () =>
+        dataViewsTitleIdMap !== undefined &&
+        canCreateTransform &&
+        !forceDisable &&
+        transformNodes > 0,
       description: editActionNameText,
       icon: 'pencil',
       type: 'icon',
       onClick: (item: TransformListRow) => clickHandler(item),
       'data-test-subj': 'transformActionEdit',
     }),
-    [canCreateTransform, clickHandler, forceDisable, transformNodes]
+    [canCreateTransform, clickHandler, dataViewsTitleIdMap, forceDisable, transformNodes]
   );
 
   return {

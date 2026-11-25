@@ -14,7 +14,7 @@ import type { MouseEventHandler, ReactElement, ReactNode } from 'react';
 export interface CuratedTile {
   id: string;
   title: string;
-  description: string;
+  description: ReactNode;
   icon: ReactElement;
   href?: string;
   /** Anchor `target`, for example `_blank` for external destinations. */
@@ -50,6 +50,8 @@ export interface CollectionVariant {
   icon: ReactElement;
   href?: string;
   onClick?: MouseEventHandler;
+  /** Optional badge rendered beside the title, e.g. the host's recommendation. */
+  badge?: ReactNode;
   'data-test-subj'?: string;
 }
 

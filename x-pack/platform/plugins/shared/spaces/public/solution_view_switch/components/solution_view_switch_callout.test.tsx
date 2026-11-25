@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { addSpaceIdToPath } from '@kbn/core-spaces-common';
+import { addSpaceIdToPath, asSpaceId } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
@@ -83,7 +83,7 @@ describe('SolutionViewSwitchCallout', () => {
 
     const spacesManager = spacesManagerMock.create();
     spacesManager.getActiveSpace.mockResolvedValue({
-      id: 'default',
+      id: asSpaceId('default'),
       name: 'Default',
       disabledFeatures: [],
     });

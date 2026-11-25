@@ -15,6 +15,17 @@ requestBody:
                 - type: user
                   id: u_def456_uid
                   role: member
+        createConversationFromTemplateExample:
+          description: "Example request applying a conversation template and seeding metadata (each key must be declared by the template)"
+          value:
+            title: Incident triage
+            template_id: incident-response
+            metadata:
+              severity: high
+              services:
+                - checkout
+                - payments
+              on_call: true
 responses:
   200:
     description: "Indicates a successful response"

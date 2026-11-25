@@ -8,6 +8,7 @@
 import '@testing-library/jest-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { McpClientForm } from './mcp_client_form';
@@ -52,4 +53,19 @@ describe('McpClientForm', () => {
       expect(screen.getByTestId('mcpClientRedirectTypeRadio')).toBeInTheDocument();
     }
   );
+
+  it('supports adding and removing remote redirect URLs', async () => {
+    const user = userEvent.setup();
+    render(<TestForm mode={McpClientFormMode.CREATE} />);
+
+    await user.click(screen.getByRole('radio', { name: /Remote/ }));
+    expect(screen.getByTestId('mcpClientRemoteUri-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('mcpClientRemoteUri-1')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('mcpClientAddUri'));
+    expect(screen.getByTestId('mcpClientRemoteUri-1')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('mcpClientRemoveUri-1'));
+    expect(screen.queryByTestId('mcpClientRemoteUri-1')).not.toBeInTheDocument();
+  });
 });

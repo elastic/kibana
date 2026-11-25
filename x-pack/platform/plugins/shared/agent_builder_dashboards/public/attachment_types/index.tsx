@@ -6,11 +6,19 @@
  */
 
 import React from 'react';
-import { combineLatest, EMPTY, from, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  EMPTY,
+  from,
+  map,
+  switchMap,
+} from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import type { ChromeStart } from '@kbn/core/public';
+import type { ChromeStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
@@ -23,13 +31,14 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardCanvasAttachmentProps } from './async_services';
+import type { ShownAttachmentVersion } from './dashboard_integration/dashboard_app_integration';
 
 export interface IdGenerator {
   readonly current: string;
   next: () => string;
 }
 
-const createIdGenerator = (): IdGenerator => {
+export const createIdGenerator = (): IdGenerator => {
   let id = uuidv4();
   return {
     get current() {
@@ -58,6 +67,8 @@ export const registerDashboardAttachmentUiDefinition = ({
   data,
   dashboardPlugin,
   canWriteDashboards,
+  draftAttachmentId,
+  toasts,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
@@ -66,9 +77,10 @@ export const registerDashboardAttachmentUiDefinition = ({
   data: DataPublicPluginStart;
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
+  draftAttachmentId: IdGenerator;
+  toasts: NotificationsStart['toasts'];
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
-  const draftAttachmentId = createIdGenerator();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
   const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
@@ -87,6 +99,10 @@ export const registerDashboardAttachmentUiDefinition = ({
     (origin: string) => Promise<UpdateOriginResponse | undefined>
   >();
 
+  const shownAttachmentVersion$ = new BehaviorSubject<ShownAttachmentVersion | undefined>(
+    undefined
+  );
+
   const dashboardAppApiSubscription = combineLatest([
     dashboardPlugin.dashboardAppClientApi$,
     chrome.sidebar.getCurrentAppId$(),
@@ -103,8 +119,13 @@ export const registerDashboardAttachmentUiDefinition = ({
                 createDashboardAppIntegration$({
                   agentBuilder,
                   api,
+                  areEqual: dashboardPlugin.areEqual,
+                  canWriteDashboards,
+                  dashboardLocator,
+                  toasts,
                   draftAttachmentId,
                   checkSavedDashboardExist,
+                  setShownAttachmentVersion: (shown) => shownAttachmentVersion$.next(shown),
                   getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
                 })
               )
@@ -136,6 +157,15 @@ export const registerDashboardAttachmentUiDefinition = ({
         />
       </React.Suspense>
     ),
+    getPreviewState$: ({ id, versionData }) =>
+      shownAttachmentVersion$.pipe(
+        map((shown) =>
+          shown?.attachmentId === id && shown.version === versionData?.version
+            ? 'previewing'
+            : 'none'
+        ),
+        distinctUntilChanged()
+      ),
     getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
       // Capture the framework-provided updater keyed by attachment id so that
       // dashboard-save origin sync (outside the React tree) can reuse it.
@@ -162,6 +192,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               canWriteDashboards,
               isSidebar,
               dashboardLocator,
+              toasts,
               checkSavedDashboardExist,
               openCanvas,
             });
@@ -175,5 +206,6 @@ export const registerDashboardAttachmentUiDefinition = ({
     dashboardAppApiSubscription.unsubscribe();
     dashboardApi = undefined;
     updateOriginByAttachmentId.clear();
+    shownAttachmentVersion$.complete();
   };
 };

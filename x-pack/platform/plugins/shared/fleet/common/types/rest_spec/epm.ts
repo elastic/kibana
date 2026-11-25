@@ -211,6 +211,7 @@ export interface BulkUpgradePackagesRequest {
   upgrade_package_policies?: boolean;
   force?: boolean;
   prerelease?: boolean;
+  acknowledge_breaking_changes?: boolean;
 }
 
 export interface BulkUninstallPackagesRequest {
@@ -226,10 +227,24 @@ export interface BulkOperationPackagesResponse {
   taskId: string;
 }
 
+/** A package policy that a bulk package upgrade left on its current package version. */
+export interface BulkUpgradeSkippedPackagePolicy {
+  id: string;
+  name?: string;
+  /** The agent version condition that some of its active agents don't satisfy. */
+  version_condition?: string;
+}
+
 export interface GetOneBulkOperationPackagesResponse {
   status: string;
   error?: { message: string };
-  results?: Array<{ name: string; success?: boolean; error?: { message: string } }>;
+  results?: Array<{
+    name: string;
+    success?: boolean;
+    error?: { message: string };
+    /** Package policies not upgraded because some of their agents don't satisfy the new version. */
+    skipped_package_policies?: BulkUpgradeSkippedPackagePolicy[];
+  }>;
 }
 
 export interface BulkInstallPackagesRequest {
@@ -265,8 +280,8 @@ export interface GetBulkAssetsRequest {
   };
 }
 
-export interface GetBulkAssetsResponse {
-  items: Array<SimpleSOAssetType & { appLink?: string }>;
+export interface GetBulkAssetsResponse<TAsset extends SimpleSOAssetType = SimpleSOAssetType> {
+  items: Array<TAsset & { appLink?: string }>;
 }
 
 export interface GetInputsTemplatesRequest {

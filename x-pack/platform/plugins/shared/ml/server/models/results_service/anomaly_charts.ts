@@ -7,7 +7,7 @@
 
 import type { ErrorType } from 'eventsource-parser';
 import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
-import { extent, max, min } from 'd3';
+import { extent, max, min } from 'd3-array';
 
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -45,6 +45,7 @@ import type {
 } from '@kbn/ml-common-types/results';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
 
 import {
@@ -63,9 +64,10 @@ import { getChartType } from '../../../common/util/chart_utils';
 
 import type { MlClient } from '../../lib/ml_client';
 import type { MlJob } from '../..';
+import { getIsMlCpsEnabled } from '../../lib/cps_utils';
 
 export function chartLimits(data: ChartPoint[] = []) {
-  const domain = extent(data, (d) => {
+  const [domainMin, domainMax] = extent(data, (d) => {
     let metricValue = d.value as number;
     if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
       // If an anomaly coincides with a gap in the data, use the anomaly actual value.
@@ -73,7 +75,10 @@ export function chartLimits(data: ChartPoint[] = []) {
     }
     return metricValue;
   });
-  const limits = { max: domain[1], min: domain[0] };
+  const limits: { max: number | undefined; min: number | undefined } = {
+    max: domainMax,
+    min: domainMin,
+  };
 
   if (limits.max === limits.min) {
     // @ts-ignore
@@ -100,6 +105,10 @@ export function chartLimits(data: ChartPoint[] = []) {
     });
   }
 
+  if (limits.max === undefined || limits.min === undefined) {
+    return { max: NaN, min: NaN };
+  }
+
   // add padding of 5% of the difference between max and min
   // if we ended up with the same value for both of them
   if (limits.max === limits.min) {
@@ -108,7 +117,7 @@ export function chartLimits(data: ChartPoint[] = []) {
     limits.min -= padding;
   }
 
-  return limits;
+  return { max: limits.max, min: limits.min };
 }
 
 const CHART_MAX_POINTS = 500;
@@ -154,6 +163,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   ): Promise<MetricData> {
     const scriptFields = datafeedConfig?.script_fields;
     const aggFields = getDatafeedAggregations(datafeedConfig);
+
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
 
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, entity fields,
@@ -206,6 +217,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       }
     });
 
+    const projectRouting =
+      isMlCpsEnabled && datafeedConfig ? getProjectRoutingFromDatafeed(datafeedConfig) : null;
+
     const esSearchRequest: estypes.SearchRequest = {
       index,
       query: {
@@ -225,6 +239,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
         ? { runtime_mappings: datafeedConfig?.runtime_mappings }
         : {}),
+      ...(projectRouting !== null ? { project_routing: projectRouting } : {}),
       size: 0,
       _source: false,
     };
@@ -1241,13 +1256,16 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         };
       });
 
-    if (mapData.length) {
-      // push map data in if it's available
-      // @ts-ignore
-      seriesToPlot.push(...mapData);
-    }
-
-    data.seriesToPlot = seriesToPlot;
+    data.seriesToPlot = mapData.length
+      ? [
+          ...seriesToPlot,
+          ...mapData.map((series) => ({
+            ...series,
+            plotEarliest: chartRange.min,
+            plotLatest: chartRange.max,
+          })),
+        ]
+      : seriesToPlot;
 
     data.errorMessages = errorMessages
       ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
@@ -1684,6 +1702,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     const datafeedQuery = get(config, 'datafeedConfig.query', null);
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+    const projectRouting =
+      isMlCpsEnabled && config.datafeedConfig
+        ? getProjectRoutingFromDatafeed(config.datafeedConfig) ?? undefined
+        : undefined;
 
     try {
       return await getEventDistributionData(
@@ -1699,7 +1722,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         range.min,
         range.max,
         config.bucketSpanSeconds * 1000,
-        config.datafeedConfig.project_routing
+        projectRouting
       );
     } catch (e) {
       handleError(
