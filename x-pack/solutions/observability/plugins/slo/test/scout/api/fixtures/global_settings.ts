@@ -8,7 +8,7 @@
 import { randomUUID } from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
 
-export const GLOBAL_SETTINGS_PATH = 'api/observability/slos/_global_settings';
+export const GLOBAL_SETTINGS_PATH = 'api/observability/slo_settings/global';
 
 const SAVED_OBJECT_INDEX = '.kibana';
 const SAVED_OBJECT_DOC_ID = 'slo-global-settings:slo-global-settings-singleton';

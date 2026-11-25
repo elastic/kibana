@@ -124,8 +124,8 @@ const EXPECTED_ERROR_STATUS_CODES: Record<string, string[]> = {
   'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31': ['401', '403'],
   'POST /api/observability/slos/_bulk_snapshot 2023-10-31': ['400', '401', '403'],
   'GET /api/observability/slos/{id}/_snapshot 2023-10-31': ['400', '401', '403', '404'],
-  'GET /api/observability/slos/_global_settings 2023-10-31': ['401', '403'],
-  'PUT /api/observability/slos/_global_settings 2023-10-31': ['400', '401', '403'],
+  'GET /api/observability/slo_settings/global 2023-10-31': ['401', '403'],
+  'PUT /api/observability/slo_settings/global 2023-10-31': ['400', '401', '403'],
 };
 
 describe('SLO routes OpenAPI examples', () => {

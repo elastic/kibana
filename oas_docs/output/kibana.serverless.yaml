@@ -68120,6 +68120,323 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/observability/slo_settings/global:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/observability/slo_settings/global</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Global SLO settings apply to all spaces. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges in all spaces. The response holds the saved settings and the resolved settings, which a kibana.yml setting can override.<br/><br/>[Required authorization] Route required privileges: slo_write.
+      operationId: getSloGlobalSettingsOp
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - {}
+              nullable: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                configOverrideGlobalSettingsResponse:
+                  summary: Saved global SLO settings overridden in kibana.yml
+                  value:
+                    sliRetention:
+                      effective:
+                        enabled: true
+                        periodDays: 200
+                        source: config
+                      enabled: false
+                      periodDays: 400
+                      updatedAt: '2026-11-20T10:00:00.000Z'
+                defaultGlobalSettingsResponse:
+                  summary: Global SLO settings that were never saved
+                  value:
+                    sliRetention:
+                      effective:
+                        enabled: false
+                        periodDays: 365
+                        source: default
+                      enabled: false
+                      periodDays: 365
+                      updatedAt: null
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOGlobalSettingsResponse'
+          description: Successful request
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                properties:
+                  error:
+                    example: Unauthorized
+                    type: string
+                  message:
+                    example: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    type: string
+                  statusCode:
+                    example: 401
+                    type: number
+                required:
+                  - statusCode
+                  - error
+                  - message
+                title: Unauthorized
+                type: object
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  summary: Missing the SLO privilege in some spaces
+                  value:
+                    error: Forbidden
+                    message: Global SLO settings require the SLO "All" privilege in all spaces
+                    statusCode: 403
+              schema:
+                properties:
+                  error:
+                    example: Forbidden
+                    type: string
+                  message:
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
+                    type: string
+                  statusCode:
+                    example: 403
+                    type: number
+                required:
+                  - statusCode
+                  - error
+                  - message
+                title: Forbidden
+                type: object
+          description: Forbidden response
+      summary: Get the global SLO settings
+      tags:
+        - slo
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/observability/slo_settings/global</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Global SLO settings apply to all spaces. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges in all spaces. Each settings block is replaced as a whole. The request fails when the setting is set in kibana.yml.<br/><br/>[Required authorization] Route required privileges: slo_write.
+      operationId: updateSloGlobalSettingsOp
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              enableSliRetention:
+                summary: Enable SLI retention for one year
+                value:
+                  sliRetention:
+                    enabled: true
+                    periodDays: 365
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                sliRetention:
+                  additionalProperties: false
+                  description: 'The SLI retention settings. Both fields are required: the whole block is replaced.'
+                  type: object
+                  properties:
+                    enabled:
+                      description: Indicates if dated SLI indices older than the retention period are deleted
+                      type: boolean
+                    periodDays:
+                      description: The number of days of SLI data kept when SLI retention is enabled
+                      maximum: 3650
+                      minimum: 180
+                      type: integer
+                  required:
+                    - enabled
+                    - periodDays
+              required:
+                - sliRetention
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateGlobalSettingsResponse:
+                  summary: Saved global SLO settings
+                  value:
+                    sliRetention:
+                      effective:
+                        enabled: true
+                        periodDays: 365
+                        source: settings
+                      enabled: true
+                      periodDays: 365
+                      updatedAt: '2026-11-24T10:00:00.000Z'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOGlobalSettingsResponse'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              examples:
+                configOverrideExample:
+                  summary: SLI retention is set in kibana.yml
+                  value:
+                    error: Bad Request
+                    message: SLI retention is set by xpack.slo.sliRetention in kibana.yml and cannot be changed through the API
+                    statusCode: 400
+                invalidPeriodExample:
+                  summary: Retention period below the minimum
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "origin": "number",
+                          "code": "too_small",
+                          "minimum": 180,
+                          "inclusive": true,
+                          "path": [
+                            "sliRetention",
+                            "periodDays"
+                          ],
+                          "message": "Too small: expected number to be >=180"
+                        }
+                      ]
+                    statusCode: 400
+              schema:
+                properties:
+                  error:
+                    example: Bad Request
+                    type: string
+                  message:
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
+                    type: string
+                  statusCode:
+                    example: 400
+                    type: number
+                required:
+                  - statusCode
+                  - error
+                  - message
+                title: Bad request
+                type: object
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                properties:
+                  error:
+                    example: Unauthorized
+                    type: string
+                  message:
+                    example: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    type: string
+                  statusCode:
+                    example: 401
+                    type: number
+                required:
+                  - statusCode
+                  - error
+                  - message
+                title: Unauthorized
+                type: object
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  summary: Missing the SLO privilege in some spaces
+                  value:
+                    error: Forbidden
+                    message: Global SLO settings require the SLO "All" privilege in all spaces
+                    statusCode: 403
+              schema:
+                properties:
+                  error:
+                    example: Forbidden
+                    type: string
+                  message:
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
+                    type: string
+                  statusCode:
+                    example: 403
+                    type: number
+                required:
+                  - statusCode
+                  - error
+                  - message
+                title: Forbidden
+                type: object
+          description: Forbidden response
+      summary: Update the global SLO settings
+      tags:
+        - slo
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/observability/slos:
     get:
       description: |-
@@ -70491,323 +70808,6 @@ paths:
       summary: Batch delete SLO instances
       tags:
         - slo
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/observability/slos/_global_settings:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/observability/slos/_global_settings</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Global SLO settings apply to all spaces. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges in all spaces. The response holds the saved settings and the resolved settings, which a kibana.yml setting can override.<br/><br/>[Required authorization] Route required privileges: slo_write.
-      operationId: getSloGlobalSettingsOp
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            examples: {}
-            schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - {}
-              nullable: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                configOverrideGlobalSettingsResponse:
-                  summary: Saved global SLO settings overridden in kibana.yml
-                  value:
-                    sliRetention:
-                      effective:
-                        enabled: true
-                        periodDays: 200
-                        source: config
-                      enabled: false
-                      periodDays: 400
-                      updatedAt: '2026-11-20T10:00:00.000Z'
-                defaultGlobalSettingsResponse:
-                  summary: Global SLO settings that were never saved
-                  value:
-                    sliRetention:
-                      effective:
-                        enabled: false
-                        periodDays: 365
-                        source: default
-                      enabled: false
-                      periodDays: 365
-                      updatedAt: null
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOGlobalSettingsResponse'
-          description: Successful request
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorizedExample:
-                  summary: Unauthorized
-                  value:
-                    error: Unauthorized
-                    message: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
-                    statusCode: 401
-              schema:
-                properties:
-                  error:
-                    example: Unauthorized
-                    type: string
-                  message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
-                    type: string
-                  statusCode:
-                    example: 401
-                    type: number
-                required:
-                  - statusCode
-                  - error
-                  - message
-                title: Unauthorized
-                type: object
-          description: Unauthorized response
-        '403':
-          content:
-            application/json:
-              examples:
-                forbiddenExample:
-                  summary: Missing the SLO privilege in some spaces
-                  value:
-                    error: Forbidden
-                    message: Global SLO settings require the SLO "All" privilege in all spaces
-                    statusCode: 403
-              schema:
-                properties:
-                  error:
-                    example: Forbidden
-                    type: string
-                  message:
-                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
-                    type: string
-                  statusCode:
-                    example: 403
-                    type: number
-                required:
-                  - statusCode
-                  - error
-                  - message
-                title: Forbidden
-                type: object
-          description: Forbidden response
-      summary: Get the global SLO settings
-      tags:
-        - slo
-      x-state: Technical Preview
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-    put:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/observability/slos/_global_settings</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Global SLO settings apply to all spaces. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges in all spaces. Each settings block is replaced as a whole. The request fails when the setting is set in kibana.yml.<br/><br/>[Required authorization] Route required privileges: slo_write.
-      operationId: updateSloGlobalSettingsOp
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              enableSliRetention:
-                summary: Enable SLI retention for one year
-                value:
-                  sliRetention:
-                    enabled: true
-                    periodDays: 365
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                sliRetention:
-                  additionalProperties: false
-                  description: 'The SLI retention settings. Both fields are required: the whole block is replaced.'
-                  type: object
-                  properties:
-                    enabled:
-                      description: Indicates if dated SLI indices older than the retention period are deleted
-                      type: boolean
-                    periodDays:
-                      description: The number of days of SLI data kept when SLI retention is enabled
-                      maximum: 3650
-                      minimum: 180
-                      type: integer
-                  required:
-                    - enabled
-                    - periodDays
-              required:
-                - sliRetention
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                updateGlobalSettingsResponse:
-                  summary: Saved global SLO settings
-                  value:
-                    sliRetention:
-                      effective:
-                        enabled: true
-                        periodDays: 365
-                        source: settings
-                      enabled: true
-                      periodDays: 365
-                      updatedAt: '2026-11-24T10:00:00.000Z'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOGlobalSettingsResponse'
-          description: Successful request
-        '400':
-          content:
-            application/json:
-              examples:
-                configOverrideExample:
-                  summary: SLI retention is set in kibana.yml
-                  value:
-                    error: Bad Request
-                    message: SLI retention is set by xpack.slo.sliRetention in kibana.yml and cannot be changed through the API
-                    statusCode: 400
-                invalidPeriodExample:
-                  summary: Retention period below the minimum
-                  value:
-                    error: Bad Request
-                    message: |-
-                      [
-                        {
-                          "origin": "number",
-                          "code": "too_small",
-                          "minimum": 180,
-                          "inclusive": true,
-                          "path": [
-                            "sliRetention",
-                            "periodDays"
-                          ],
-                          "message": "Too small: expected number to be >=180"
-                        }
-                      ]
-                    statusCode: 400
-              schema:
-                properties:
-                  error:
-                    example: Bad Request
-                    type: string
-                  message:
-                    example: |-
-                      [
-                        {
-                          "expected": "string",
-                          "code": "invalid_type",
-                          "path": [
-                            "name"
-                          ],
-                          "message": "Invalid input: expected string, received undefined"
-                        }
-                      ]
-                    type: string
-                  statusCode:
-                    example: 400
-                    type: number
-                required:
-                  - statusCode
-                  - error
-                  - message
-                title: Bad request
-                type: object
-          description: Bad request
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorizedExample:
-                  summary: Unauthorized
-                  value:
-                    error: Unauthorized
-                    message: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
-                    statusCode: 401
-              schema:
-                properties:
-                  error:
-                    example: Unauthorized
-                    type: string
-                  message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
-                    type: string
-                  statusCode:
-                    example: 401
-                    type: number
-                required:
-                  - statusCode
-                  - error
-                  - message
-                title: Unauthorized
-                type: object
-          description: Unauthorized response
-        '403':
-          content:
-            application/json:
-              examples:
-                forbiddenExample:
-                  summary: Missing the SLO privilege in some spaces
-                  value:
-                    error: Forbidden
-                    message: Global SLO settings require the SLO "All" privilege in all spaces
-                    statusCode: 403
-              schema:
-                properties:
-                  error:
-                    example: Forbidden
-                    type: string
-                  message:
-                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
-                    type: string
-                  statusCode:
-                    example: 403
-                    type: number
-                required:
-                  - statusCode
-                  - error
-                  - message
-                title: Forbidden
-                type: object
-          description: Forbidden response
-      summary: Update the global SLO settings
-      tags:
-        - slo
-      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name

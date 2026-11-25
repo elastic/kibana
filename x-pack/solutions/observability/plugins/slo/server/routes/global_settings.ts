@@ -22,7 +22,7 @@ const GLOBAL_ADMIN_DESCRIPTION =
 const AVAILABILITY = { stability: 'tech_preview', since: '9.7.0' } as const;
 
 export const getSLOGlobalSettingsRoute = createSloServerRoute({
-  endpoint: 'GET /api/observability/slos/_global_settings 2023-10-31',
+  endpoint: 'GET /api/observability/slo_settings/global 2023-10-31',
   options: {
     access: 'public',
     summary: 'Get the global SLO settings',
@@ -52,7 +52,7 @@ export const getSLOGlobalSettingsRoute = createSloServerRoute({
 });
 
 export const updateSLOGlobalSettingsRoute = createSloServerRoute({
-  endpoint: 'PUT /api/observability/slos/_global_settings 2023-10-31',
+  endpoint: 'PUT /api/observability/slo_settings/global 2023-10-31',
   options: {
     access: 'public',
     summary: 'Update the global SLO settings',

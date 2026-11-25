@@ -58,8 +58,8 @@ const EXPECTED_OPERATION_IDS: Record<string, string> = {
   'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31': 'bulkDeleteStatusOp',
   'POST /api/observability/slos/_bulk_snapshot 2023-10-31': 'bulkSnapshotOp',
   'GET /api/observability/slos/{id}/_snapshot 2023-10-31': 'getSnapshotOp',
-  'GET /api/observability/slos/_global_settings 2023-10-31': 'getSloGlobalSettingsOp',
-  'PUT /api/observability/slos/_global_settings 2023-10-31': 'updateSloGlobalSettingsOp',
+  'GET /api/observability/slo_settings/global 2023-10-31': 'getSloGlobalSettingsOp',
+  'PUT /api/observability/slo_settings/global 2023-10-31': 'updateSloGlobalSettingsOp',
 };
 
 describe('SLO routes OpenAPI metadata', () => {
