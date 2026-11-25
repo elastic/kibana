@@ -36,7 +36,8 @@ import {
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { LAST_SEEN_LABEL, UNKNOWN_ERROR_TYPE_LABEL } from '../../../labels';
-import { sessionEsqlQuery, sessionTimeRange } from '../../session_detail/utils/session_discover';
+import { mobileSessionDiscoverEsql } from '../../../../common/mobile/discover';
+import { sessionTimeRange } from '../../session_detail/utils/session_discover';
 import { CrashBreakdowns } from './crash_breakdowns';
 import { CrashTimeline } from './crash_timeline';
 import { useMobileCrashGroup } from './use_mobile_crash_group';
@@ -140,7 +141,7 @@ function SectionTitle({ title }: { title: string }) {
 function OpenSessionButton({ serviceName, crash }: { serviceName: string; crash: MobileCrash }) {
   const { sessionId, time, reportedAt } = crash;
   const esql = useMemo(
-    () => (sessionId ? sessionEsqlQuery({ serviceName, sessionId }) : undefined),
+    () => (sessionId ? mobileSessionDiscoverEsql({ serviceName, sessionId }) : undefined),
     [serviceName, sessionId]
   );
   const timeRange = useMemo(

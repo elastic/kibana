@@ -57,7 +57,8 @@ const toCrashGroup = (row: CrashGroupRow, newInRelease: string | null): MobileCr
 
 /**
  * An application's crash groups in the range, the most affected users first, each marked new when
- * only the newest release crashed that way in the lookback, whatever the release filter.
+ * only the newest release crashed that way in the lookback, whatever the release filter. Groups of
+ * EDOT iOS reports are never marked new: their fingerprint changes with every build.
  */
 export const getCrashGroups = async ({
   esClient,
@@ -72,8 +73,11 @@ export const getCrashGroups = async ({
     withCrashGroupStats(withCrashFingerprint(crashEvents({ ...filters, start, end }))),
     timeFilter(start, end + CRASH_DELAY_MS, environment)
   );
-  if (rows.length === 0) {
-    return [];
+  // An EDOT iOS report's fingerprint has offsets that change with every build, so each build's
+  // crashes would look new; those groups get no badge until frames are readable (#75).
+  const candidates = rows.filter((row) => !row[RESULT_COLUMNS.iosReports]);
+  if (candidates.length === 0) {
+    return rows.map((row) => toCrashGroup(row, null));
   }
 
   // A group the newest release brought can't be told apart on that release alone.
@@ -86,7 +90,7 @@ export const getCrashGroups = async ({
       'get_mobile_crash_group_releases',
       withCrashGroupReleases(
         withCrashFingerprint(crashEvents({ ...allReleases, start: lookbackStart, end })),
-        rows.map((row) => row[RESULT_COLUMNS.fingerprint])
+        candidates.map((row) => row[RESULT_COLUMNS.fingerprint])
       ),
       timeFilter(lookbackStart, end + CRASH_DELAY_MS, environment)
     ),
@@ -107,7 +111,11 @@ export const getCrashGroups = async ({
   );
   return rows.map((row) => {
     const releases = releasesByFingerprint.get(row[RESULT_COLUMNS.fingerprint]) ?? [];
-    const isNew = latestRelease !== null && releases.length === 1 && releases[0] === latestRelease;
+    const isNew =
+      !row[RESULT_COLUMNS.iosReports] &&
+      latestRelease !== null &&
+      releases.length === 1 &&
+      releases[0] === latestRelease;
     return toCrashGroup(row, isNew ? latestRelease : null);
   });
 };

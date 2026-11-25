@@ -26,7 +26,7 @@ const PARTIAL_ACCESS_TITLE = i18n.translate(
   'xpack.digitalExperience.mobile.crashes.partialAccess',
   {
     defaultMessage:
-      "You can't read all of the mobile logs indices, so crashes may be missing. Ask an administrator for read access to them.",
+      "You can't read all of the mobile logs and traces indices, so crashes may be missing and the New badges may be wrong. Ask an administrator for read access to them.",
   }
 );
 

@@ -9,7 +9,7 @@ import { Builder, esql, type ComposerQuery } from '@elastic/esql';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
 import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
-import { crashFingerprint } from './crash_fingerprint';
+import { crashFingerprint, isIosReport } from './crash_fingerprint';
 import { mobileDocuments } from './documents';
 import type { RESULT_COLUMNS } from './fields';
 import { inValues, mobileColumn, resultColumn } from './fields';
@@ -66,7 +66,8 @@ export const withCrashGroupStats = (query: ComposerQuery): ComposerQuery => {
       ${resultColumn('exceptionType')} = LAST(${mobileColumn('exceptionType')}, ${crashTime}),
       ${resultColumn('message')} = LAST(${mobileColumn('exceptionMessage')}, ${crashTime}),
       ${resultColumn('firstRelease')} = FIRST(${mobileColumn('serviceVersion')}, ${crashTime}),
-      ${resultColumn('lastRelease')} = LAST(${mobileColumn('serviceVersion')}, ${crashTime})
+      ${resultColumn('lastRelease')} = LAST(${mobileColumn('serviceVersion')}, ${crashTime}),
+      ${resultColumn('iosReports')} = COUNT(*) WHERE ${isIosReport()}
     BY ${resultColumn('fingerprint')}`.pipe`SORT ${users} DESC, ${events} DESC`
     .pipe`LIMIT ${ERROR_GROUPS_ROWS}`;
 };
@@ -101,6 +102,8 @@ export interface CrashGroupRow {
   [RESULT_COLUMNS.message]?: string | null;
   [RESULT_COLUMNS.firstRelease]?: string | null;
   [RESULT_COLUMNS.lastRelease]?: string | null;
+  /** Crashes reported as EDOT iOS reports, whose fingerprint changes with every build. */
+  [RESULT_COLUMNS.iosReports]?: number | null;
 }
 
 /** The row of `withCrashGroupReleases`: one release is a string, several an array. */

@@ -54,6 +54,13 @@ export const JAVASCRIPT_EXCEPTION_SUFFIX = 'JavascriptException';
 /** A line only PLCrashReporter reports have. */
 export const IOS_REPORT_MARKER = 'Crashed:';
 
+/**
+ * Whether a crash is an EDOT iOS report: PLCrashReporter runs without symbolication, so its frames
+ * are offsets into binaries, which a rebuild moves.
+ */
+export const isIosReport = (): ESQLAstExpression =>
+  esql.exp`${mobileColumn('exceptionStacktrace')} LIKE ${`*${IOS_REPORT_MARKER}*`}`;
+
 const withRules = (input: ESQLAstExpression, kind: CrashKind): ESQLAstExpression =>
   CRASH_FRAME_RULES[kind].reduce<ESQLAstExpression>(
     (expression, rule: CrashFrameRule) =>
@@ -68,7 +75,7 @@ export const crashFrames = (): ESQLAstExpression =>
   esql.exp`CASE(
     ${mobileColumn('exceptionType')} LIKE ${`*${JAVASCRIPT_EXCEPTION_SUFFIX}`},
     ${withRules(mobileColumn('exceptionMessage'), 'javascript')},
-    ${mobileColumn('exceptionStacktrace')} LIKE ${`*${IOS_REPORT_MARKER}*`},
+    ${isIosReport()},
     ${withRules(mobileColumn('exceptionStacktrace'), 'ios')},
     ${withRules(mobileColumn('exceptionStacktrace'), 'jvm')}
   )`;

@@ -117,6 +117,7 @@ export const RESULT_COLUMNS = {
   firstRelease: 'first_release',
   lastRelease: 'last_release',
   releases: 'releases',
+  iosReports: 'ios_reports',
   value: 'value',
   count: 'count',
   total: 'total',

@@ -16,7 +16,19 @@ export const CRASH_APPS = {
   android: 'scout-crashes-android',
   ios: 'scout-crashes-ios',
   fingerprints: 'scout-crash-fingerprints',
+  breakdowns: 'scout-crash-breakdowns',
 } as const;
+
+/** The device models of the breakdown group's crashes, one each; one more crash has none. */
+export const BREAKDOWN_DEVICE_MODELS = [
+  'Model A',
+  'Model B',
+  'Model C',
+  'Model D',
+  'Model E',
+  'Model F',
+  'Model G',
+] as const;
 
 const at = (time: string) => `2021-01-18T${time}.000Z`;
 
@@ -43,7 +55,8 @@ interface Crash {
   message?: string;
   stacktrace?: string;
   storedFingerprint?: string;
-  deviceModel: string;
+  /** Unset for a crash whose resource has no device model. */
+  deviceModel?: string;
   osVersion: string;
 }
 
@@ -149,6 +162,19 @@ const CRASHES: Crash[] = [
     observedTimestamp: at('11:30:00'),
     stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace,
   },
+  // More device models than a breakdown shows, and a crash without one: "Other" must count both.
+  ...[...BREAKDOWN_DEVICE_MODELS, undefined].map((deviceModel, index) => ({
+    serviceName: CRASH_APPS.breakdowns,
+    osName: 'Android' as const,
+    version: '1.0.0',
+    installationId: `crash-breakdown-device-${index}`,
+    timestamp: at(`12:${String(30 + index).padStart(2, '0')}:00`),
+    type: 'java.lang.NullPointerException',
+    message: 'crashed',
+    stacktrace: jvmTrace('java.lang.NullPointerException', 'com.example.Breakdown.run', 1),
+    deviceModel,
+    osVersion: '15',
+  })),
   // The fingerprint's golden cases, one device each.
   ...Object.entries(CRASH_FINGERPRINT_CASES).map(([name, crash], index) => ({
     serviceName: CRASH_APPS.fingerprints,
@@ -294,7 +320,7 @@ const documents = [
             'service.version': crash.version,
             'os.name': crash.osName,
             'os.version': crash.osVersion,
-            'device.model.identifier': crash.deviceModel,
+            ...(crash.deviceModel ? { 'device.model.identifier': crash.deviceModel } : {}),
             'app.installation.id': crash.installationId,
           },
           crash.osName

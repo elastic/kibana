@@ -48,6 +48,11 @@ const CRASH_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table
   defaultMessage: 'Crash',
 });
 
+const CRASH_TOOLTIP = i18n.translate('xpack.digitalExperience.mobile.crashes.table.crashTooltip', {
+  defaultMessage:
+    '"New in" marks a group only the newest release had in the last 30 days. iOS groups are never marked: their stack traces have no symbols yet, so each build changes them.',
+});
+
 const USERS_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table.users', {
   defaultMessage: 'Users',
 });
@@ -110,6 +115,7 @@ export function MobileCrashGroupsTable({
     {
       field: 'type',
       name: CRASH_LABEL,
+      nameTooltip: { content: CRASH_TOOLTIP },
       render: (type: string | null, { fingerprint, message, newInRelease }: MobileCrashGroup) => (
         <div className="eui-textTruncate">
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

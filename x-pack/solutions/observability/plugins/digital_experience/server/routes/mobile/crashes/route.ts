@@ -31,21 +31,24 @@ export const MOBILE_CRASH_GROUPS_ENDPOINT =
 export const MOBILE_CRASH_GROUP_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/crash_groups/{fingerprint}';
 
-/** Whether the user can't read every index of `indices`. */
+/**
+ * Whether the user can't read every OTel logs and traces index. Both routes read both: crashes are
+ * log records, while the newest release and the session before a crash also come from spans.
+ */
 const isPartialRead = async ({
   context,
   request,
   logger,
-  indices,
-}: Pick<DigitalExperienceRouteHandlerResources, 'context' | 'request' | 'logger'> & {
-  indices: string[];
-}): Promise<boolean> => {
+}: Pick<
+  DigitalExperienceRouteHandlerResources,
+  'context' | 'request' | 'logger'
+>): Promise<boolean> => {
   const { elasticsearch } = await context.core;
   // Elasticsearch skips the indices the user can't read, so the counts would look complete.
   return hasPartialReadAccess({
     esClient: elasticsearch.client.asCurrentUser,
     internalEsClient: elasticsearch.client.asInternalUser,
-    getIndices: async () => indices,
+    getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
     signal: getRequestAbortedSignal(request.events.aborted$),
     logger,
   });
@@ -72,8 +75,7 @@ const listRoute = createDigitalExperienceServerRoute({
         end,
         environment,
       }),
-      // Crashes are log records.
-      isPartialRead({ context, request, logger, indices: [OTEL_LOGS_INDEX] }),
+      isPartialRead({ context, request, logger }),
     ]);
     return { crashGroups, isPartial };
   },
@@ -106,8 +108,7 @@ const detailRoute = createDigitalExperienceServerRoute({
         end,
         environment,
       }),
-      // The session before the crash has requests and screens, which are spans.
-      isPartialRead({ context, request, logger, indices: [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX] }),
+      isPartialRead({ context, request, logger }),
     ]);
     return { ...detail, isPartial };
   },

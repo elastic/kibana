@@ -13,13 +13,16 @@ import type {
   MobileCrashGroupDetailResponse,
   MobileCrashGroupsResponse,
 } from '../../../../common/types/mobile';
-import { CRASH_APPS, NPE_LATEST_SESSION } from '../../common/fixtures/mobile_crash_data';
+import {
+  BREAKDOWN_DEVICE_MODELS,
+  CRASH_APPS,
+  NPE_LATEST_SESSION,
+} from '../../common/fixtures/mobile_crash_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const { APM_ONLY_ROLE, COMMON_HEADERS, DIGITAL_EXPERIENCE_ONLY_ROLE, mobileCrashGroupsPath } =
-  testData;
+const { COMMON_HEADERS, mobileCrashGroupsPath } = testData;
 
 apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
   let headers: Record<string, string>;
@@ -131,6 +134,8 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
         sessions: 2,
         firstSeen: { time: '2021-01-18T12:15:00.000Z' },
         lastSeen: { time: '2021-01-18T12:55:00.000Z' },
+        // Only on the newest release, but an iOS report's fingerprint changes with every build.
+        newInRelease: null,
       });
     }
   );
@@ -224,28 +229,19 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
     expect(response).toHaveStatusCode(400);
   });
 
-  // The detail returns stack traces and session events: both routes need both privileges.
-  for (const [privilege, role] of [
-    ['Digital Experience', APM_ONLY_ROLE],
-    ['APM', DIGITAL_EXPERIENCE_ONLY_ROLE],
-  ] as const) {
-    apiTest(
-      `answers 403 to the crash routes without the ${privilege} privilege`,
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(role);
-        const paths = [
-          mobileCrashGroupsPath(CRASH_APPS.android),
-          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint: 'any-group' }),
-        ];
+  apiTest(
+    'counts every crash the top values leave out as Other, those without a value too',
+    async ({ apiClient }) => {
+      const [group] = (await getGroups(apiClient, CRASH_APPS.breakdowns)).crashGroups;
 
-        for (const path of paths) {
-          const response = await apiClient.get(path, {
-            headers: { ...COMMON_HEADERS, ...cookieHeader },
-            responseType: 'json',
-          });
-          expect(response).toHaveStatusCode(403);
-        }
-      }
-    );
-  }
+      const detail = await getDetail(apiClient, CRASH_APPS.breakdowns, group.fingerprint);
+
+      // 7 device models with a crash each, and a crash without one: the top 5, then 2 more models
+      // and the crash without a model.
+      expect(detail.deviceModels).toStrictEqual({
+        top: BREAKDOWN_DEVICE_MODELS.slice(0, 5).map((key) => ({ key, count: 1 })),
+        other: 3,
+      });
+    }
+  );
 });

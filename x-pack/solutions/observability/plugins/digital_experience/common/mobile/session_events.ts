@@ -58,9 +58,23 @@ const eventKind = () =>
   )`;
 
 /**
+ * The mobile documents of one session of an application: the id as the crash has it, and in either
+ * case, as EDOT iOS writes `session.id` in uppercase. The timeline and its Discover link both read
+ * the session this way, so they show the same events.
+ */
+export const mobileSessionDocuments = ({
+  serviceName,
+  sessionId,
+}: Pick<SessionEventsParams, 'serviceName' | 'sessionId'>): ComposerQuery =>
+  mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} == ${{
+    service_name: serviceName,
+  }}`.pipe`WHERE ${mobileColumn('sessionId')} IN (${{ session_id: sessionId }}, ${{
+    session_id_lower: sessionId.toLowerCase(),
+  }}, ${{ session_id_upper: sessionId.toUpperCase() }})`;
+
+/**
  * The latest events of a mobile session before a time, newest first: requests, screens, taps,
- * handled errors and logs. The id as the crash has it, and in either case: EDOT iOS writes
- * `session.id` in uppercase.
+ * handled errors and logs.
  */
 export const sessionEventsBefore = ({
   serviceName,
@@ -70,11 +84,7 @@ export const sessionEventsBefore = ({
 }: SessionEventsParams): ComposerQuery => {
   const eventKindColumn = resultColumn('eventKind');
   const is = (value: MobileSessionEventKind) => esql.exp`${eventKindColumn} == ${value}`;
-  return mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} == ${{
-    service_name: serviceName,
-  }}`.pipe`WHERE ${mobileColumn('sessionId')} IN (${{ session_id: sessionId }}, ${{
-    session_id_lower: sessionId.toLowerCase(),
-  }}, ${{ session_id_upper: sessionId.toUpperCase() }})`.pipe`WHERE @timestamp < TO_DATETIME(${{
+  return mobileSessionDocuments({ serviceName, sessionId }).pipe`WHERE @timestamp < TO_DATETIME(${{
     before,
   }})`.pipe`EVAL ${eventKindColumn} = ${eventKind()}`.pipe`WHERE ${eventKindColumn} IS NOT NULL`
     .pipe`SORT @timestamp DESC`.pipe`LIMIT ${limit}`.pipe`EVAL

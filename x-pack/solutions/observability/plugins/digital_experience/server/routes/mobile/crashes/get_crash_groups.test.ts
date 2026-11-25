@@ -150,4 +150,49 @@ describe('getCrashGroups', () => {
       expect.arrayContaining([{ crash_start: new Date(start).toISOString() }])
     );
   });
+
+  it('never marks new a group of EDOT iOS reports, whose fingerprint changes with every build', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(
+        esqlResponse([
+          groupRow('sigsegv', { exception_type: 'SIGSEGV', ios_reports: 2 }),
+          groupRow('npe'),
+        ])
+      )
+      .mockResolvedValueOnce(esqlResponse([{ fingerprint: 'npe', releases: '4.2.0' }]))
+      .mockResolvedValueOnce(esqlResponse([{ latest_release: '4.2.0' }]));
+
+    const groups = await getCrashGroups({
+      esClient,
+      filters: { serviceName: 'transit-companion' },
+      start: START,
+      end: END,
+    });
+
+    // Both only on the newest release, but the iOS one's fingerprint can't tell an older build's.
+    expect(groups.map(({ fingerprint, newInRelease }) => ({ fingerprint, newInRelease }))).toEqual([
+      { fingerprint: 'sigsegv', newInRelease: null },
+      { fingerprint: 'npe', newInRelease: '4.2.0' },
+    ]);
+    const [, [releasesRequest]] = client.esql.query.mock.calls;
+    expect(releasesRequest.query).toContain('WHERE fingerprint IN ("npe")');
+  });
+
+  it('runs no release query when every group is of EDOT iOS reports', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockResolvedValueOnce(
+      esqlResponse([groupRow('sigsegv', { exception_type: 'SIGSEGV', ios_reports: 3 })])
+    );
+
+    const [group] = await getCrashGroups({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      start: START,
+      end: END,
+    });
+
+    expect(group.newInRelease).toBeNull();
+    expect(client.esql.query).toHaveBeenCalledTimes(1);
+  });
 });

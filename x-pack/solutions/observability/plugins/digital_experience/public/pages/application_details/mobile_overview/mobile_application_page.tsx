@@ -30,7 +30,6 @@ import {
 } from '../../../labels';
 import { MobileCrashesTab } from '../mobile_crashes/mobile_crashes_tab';
 import { MobileOverview } from './mobile_overview';
-import { useMobileReleases } from './release_health/use_mobile_releases';
 import { useMobileDiscoverHref } from './use_mobile_discover_href';
 import { useMobileKpis } from './use_mobile_kpis';
 
@@ -51,7 +50,7 @@ const isMobileTab = (tab: ApplicationTabId): tab is MobileApplicationTabId =>
 /**
  * A mobile application's page, all its platforms: its header, with its platforms as badges and
  * Open in Discover as an action, as the Session page has it, and its Overview and Crashes tabs.
- * The page fetches the KPIs, whose filter options both tabs use, and the release health.
+ * The page fetches the KPIs, whose filter options both tabs use.
  */
 export function MobileApplicationPage({
   serviceName,
@@ -72,7 +71,6 @@ export function MobileApplicationPage({
   const shareAction = useShareAction({ serviceName, source: SOURCE, tab });
   const discoverHref = useMobileDiscoverHref(serviceName);
   const kpisState = useMobileKpis(serviceName);
-  const releasesState = useMobileReleases(serviceName);
 
   const isUnsupportedTab = !isMobileTab(selectedTab);
   useEffect(() => {
@@ -123,7 +121,7 @@ export function MobileApplicationPage({
           {tab === 'crashes' ? (
             <MobileCrashesTab serviceName={serviceName} kpisState={kpisState} />
           ) : (
-            <MobileOverview kpisState={kpisState} releasesState={releasesState} />
+            <MobileOverview serviceName={serviceName} kpisState={kpisState} />
           )}
         </EuiPageSection>
       )}

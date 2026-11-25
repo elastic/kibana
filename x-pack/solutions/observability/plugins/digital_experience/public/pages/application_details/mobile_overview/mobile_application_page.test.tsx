@@ -18,7 +18,6 @@ import { MobileApplicationPage } from './mobile_application_page';
 import { MobileCrashesTab } from '../mobile_crashes/mobile_crashes_tab';
 import { MobileOverview } from './mobile_overview';
 import { useMobileReleases } from './release_health/use_mobile_releases';
-import type { MobileReleasesState } from './release_health/use_mobile_releases';
 import { useMobileDiscoverHref } from './use_mobile_discover_href';
 import { useMobileKpis } from './use_mobile_kpis';
 import type { MobileKpisState } from './use_mobile_kpis';
@@ -74,13 +73,6 @@ const KPIS_STATE: MobileKpisState = {
   refresh: jest.fn(),
 };
 
-const RELEASES_STATE: MobileReleasesState = {
-  releases: undefined,
-  isLoading: true,
-  error: undefined,
-  refresh: jest.fn(),
-};
-
 beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(useApplicationLinks).mockReturnValue({
@@ -96,7 +88,6 @@ beforeEach(() => {
   });
   jest.mocked(useMobileDiscoverHref).mockReturnValue(DISCOVER_HREF);
   jest.mocked(useMobileKpis).mockReturnValue(KPIS_STATE);
-  jest.mocked(useMobileReleases).mockReturnValue(RELEASES_STATE);
 });
 
 describe('MobileApplicationPage', () => {
@@ -220,13 +211,19 @@ describe('MobileApplicationPage', () => {
     expect(useShareAction).toHaveBeenCalledWith(expect.objectContaining({ tab: 'crashes' }));
   });
 
-  it('gives the Overview the KPIs and the release health the page fetched', () => {
+  it('gives the Overview the KPIs the page fetched, and leaves the release health to it', () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
 
     expect(jest.mocked(MobileOverview).mock.calls.at(-1)?.[0]).toEqual({
+      serviceName: 'shop-mobile',
       kpisState: KPIS_STATE,
-      releasesState: RELEASES_STATE,
     });
-    expect(useMobileReleases).toHaveBeenCalledWith('shop-mobile');
+    expect(useMobileReleases).not.toHaveBeenCalled();
+  });
+
+  it('runs no release health query on the Crashes tab', () => {
+    render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="crashes" />);
+
+    expect(useMobileReleases).not.toHaveBeenCalled();
   });
 });

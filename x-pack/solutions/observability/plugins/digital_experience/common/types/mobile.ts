@@ -97,7 +97,10 @@ export interface MobileCrashGroup {
 export interface MobileCrashGroupsResponse {
   /** Most affected users first. */
   crashGroups: MobileCrashGroup[];
-  /** Whether the user can't read every OTel logs index, so the values may be missing some data. */
+  /**
+   * Whether the user can't read every OTel logs and traces index, so crashes may be missing and
+   * the newest release, which marks groups new, may be wrong.
+   */
   isPartial: boolean;
 }
 

@@ -82,6 +82,10 @@ describe('withCrashGroupStats', () => {
     expect(query).toContain('first_release = FIRST(`service.version`, crash_time)');
     expect(query).toContain('last_release = LAST(`service.version`, crash_time)');
     expect(query).toContain('BY fingerprint');
+    // EDOT iOS reports, whose fingerprint changes with every build, so they are never marked new.
+    expect(query).toContain(
+      'ios_reports = COUNT(*) WHERE `attributes.exception.stacktrace` LIKE "*Crashed:*"'
+    );
   });
 
   it('ranks by affected users, so a crash loop on one device does not lead', () => {
@@ -119,13 +123,14 @@ describe('crash group detail', () => {
 
   it('reads the latest crash with its stack trace and session', () => {
     expect(withLatestCrash(groupCrashes()).print('basic')).toContain(
-      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = `service.version`, session_id = `attributes.session.id` | KEEP crash_time, exception_type, message, stacktrace, release, session_id'
+      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = `service.version`, session_id = `attributes.session.id`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, session_id'
     );
   });
 
-  it('counts the crashes per release, OS version and device model', () => {
+  it('counts the crashes per release, OS version and device model, with the total for "Other"', () => {
+    // The total is counted before the top values are cut, so "Other" holds every crash they leave out.
     expect(withCrashBreakdown(groupCrashes(), 'releases').print('basic')).toContain(
-      '| STATS count = COUNT(*) BY value = `service.version` | SORT count DESC, value | LIMIT 1000'
+      '| INLINE STATS total = COUNT(*) | STATS count = COUNT(*), total = MAX(total) BY value = `service.version` | SORT count DESC, value | LIMIT 6'
     );
     expect(withCrashBreakdown(groupCrashes(), 'osVersions').print('basic')).toContain(
       'BY value = `resource.attributes.os.version`'

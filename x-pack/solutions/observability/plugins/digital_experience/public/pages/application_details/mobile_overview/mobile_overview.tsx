@@ -35,7 +35,7 @@ import {
 import { ComparedKpiPanel } from '../../../components/compared_kpi_panel';
 import type { ComparedKpiPanelProps } from '../../../components/compared_kpi_panel';
 import { ReleaseHealth } from './release_health/release_health';
-import type { MobileReleasesState } from './release_health/use_mobile_releases';
+import { useMobileReleases } from './release_health/use_mobile_releases';
 import { MobileToolbar, useMobileFilters } from './mobile_toolbar';
 import type { MobileKpisState } from './use_mobile_kpis';
 
@@ -152,14 +152,15 @@ const NO_MATCHES_BODY = i18n.translate('xpack.digitalExperience.mobile.noMatches
  * fill them.
  */
 export function MobileOverview({
+  serviceName,
   kpisState: { kpis, currentKpis, isLoading, error, refresh: refreshKpis },
-  releasesState,
 }: {
+  serviceName: string;
   /** Fetched by the page, whose header shows its platforms. */
   kpisState: MobileKpisState;
-  /** Fetched by the page, so the toolbar's refresh reloads it with the KPIs. */
-  releasesState: MobileReleasesState;
 }) {
+  // Fetched here, so only the Overview runs its queries; the toolbar's refresh reloads it with the KPIs.
+  const releasesState = useMobileReleases(serviceName);
   const refresh = () => {
     refreshKpis();
     releasesState.refresh();

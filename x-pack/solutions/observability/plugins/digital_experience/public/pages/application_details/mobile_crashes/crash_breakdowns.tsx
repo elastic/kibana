@@ -35,6 +35,12 @@ const BREAKDOWN_TITLES: Record<BreakdownName, string> = {
   }),
 };
 
+const shareLabel = (value: string, share: string) =>
+  i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.shareLabel', {
+    defaultMessage: '{value}: {share} of the crashes',
+    values: { value, share },
+  });
+
 const OTHER_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.other', {
   defaultMessage: 'Other',
 });
@@ -67,7 +73,13 @@ function Breakdown({ name, breakdown }: { name: BreakdownName; breakdown: CrashB
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiProgress value={count} max={total || 1} size="xs" color="primary" />
+          <EuiProgress
+            value={count}
+            max={total || 1}
+            size="xs"
+            color="primary"
+            aria-label={shareLabel(key, formatPercent(total ? count / total : 0))}
+          />
         </div>
       ))}
     </div>

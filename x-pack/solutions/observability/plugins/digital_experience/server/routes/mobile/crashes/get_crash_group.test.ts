@@ -34,15 +34,18 @@ describe('getCrashGroup', () => {
         return esqlResponse([LATEST]);
       }
       if (query.includes('BY value = `service.version`')) {
+        // The top values and the crashes without a release, as the query cuts them; the total also
+        // counts 8.1.0's 4 crashes, which the limit left out.
         return esqlResponse(
-          ['8.5.0', '8.4.1', '8.4.0', '8.3.0', '8.2.0', '8.1.0', null].map((value, index) => ({
+          ['8.5.0', '8.4.1', '8.4.0', '8.3.0', '8.2.0', null].map((value, index) => ({
             value,
             count: 10 - index,
+            total: 49,
           }))
         );
       }
       if (query.includes('BY value =')) {
-        return esqlResponse([{ value: '18.1', count: 3 }]);
+        return esqlResponse([{ value: '18.1', count: 3, total: 3 }]);
       }
       // The session's events, newest first, with the timeline's fields the query computes.
       return esqlResponse([

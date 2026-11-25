@@ -99,15 +99,16 @@ describe('mobile crash groups route', () => {
     );
   });
 
-  it("reports partial values when the user can't read every OTel logs index", async () => {
+  it("reports partial values when the user can't read every OTel logs and traces index", async () => {
     jest.mocked(hasPartialReadAccess).mockResolvedValue(true);
 
     const response = await runHandler();
 
+    // The newest release, which marks groups new, also comes from spans.
     expect(response.isPartial).toBe(true);
     await expect(
       jest.mocked(hasPartialReadAccess).mock.calls[0][0].getIndices()
-    ).resolves.toStrictEqual(['logs-*.otel-*']);
+    ).resolves.toStrictEqual(['logs-*.otel-*', 'traces-*.otel-*']);
   });
 });
 

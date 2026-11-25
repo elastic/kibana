@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mobilePanelDiscoverEsql } from './discover';
+import { mobilePanelDiscoverEsql, mobileSessionDiscoverEsql } from './discover';
 
 describe('mobilePanelDiscoverEsql', () => {
   it('writes the filters and the environment into the query, as Discover takes no params', () => {
@@ -43,5 +43,17 @@ describe('mobilePanelDiscoverEsql', () => {
       /^SET unmapped_fields = "nullify";\s*FROM traces-\*\.otel-\*, logs-\*\.otel-\*/
     );
     expect(query).toContain('`service.name` == "shop-mobile"');
+  });
+});
+
+describe('mobileSessionDiscoverEsql', () => {
+  it("opens a session's events, oldest first, whatever the case of its id", () => {
+    const query = mobileSessionDiscoverEsql({ serviceName: 'ride-ios', sessionId: 'Df831c22' });
+
+    expect(query).toContain('`service.name` == "ride-ios"');
+    // EDOT iOS writes `session.id` in uppercase; the crash may have it in another case.
+    expect(query).toContain('`attributes.session.id` IN ("Df831c22", "df831c22", "DF831C22")');
+    expect(query).not.toMatch(/\?\w/);
+    expect(query.trim()).toMatch(/\| SORT @timestamp ASC$/);
   });
 });

@@ -159,6 +159,13 @@ describe('MobileCrashFlyout', () => {
     expect(osVersions).toHaveTextContent('OS version');
     expect(osVersions).toHaveTextContent('15');
     expect(osVersions).toHaveTextContent('Other');
+    // Each bar names the value it measures, not only its share.
+    expect(
+      within(osVersions).getByRole('progressbar', { name: /^15: .+ of the crashes$/ })
+    ).toBeInTheDocument();
+    expect(
+      within(osVersions).getByRole('progressbar', { name: /^Other: .+ of the crashes$/ })
+    ).toBeInTheDocument();
     expect(
       screen.getByTestId('digitalExperienceMobileCrashBreakdown-deviceModels')
     ).toHaveTextContent('Pixel 8');
@@ -191,8 +198,9 @@ describe('MobileCrashFlyout', () => {
       '/app/discover#/session'
     );
     const [esql, timeRange] = jest.mocked(useDiscoverHref).mock.calls.at(-1) ?? [];
-    expect(esql).toContain('session.id == "7f4b0c7e"');
-    expect(esql).toContain('service.name == "trailmap-android"');
+    // The session as "Before the crash" matches it: the id as the crash has it, in either case.
+    expect(esql).toContain('`attributes.session.id` IN ("7f4b0c7e", "7f4b0c7e", "7F4B0C7E")');
+    expect(esql).toContain('`service.name` == "trailmap-android"');
     // From the longest a session lasts before the crash to just after it was sent, so the crash
     // is in it.
     expect(timeRange).toEqual({
