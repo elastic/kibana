@@ -119,8 +119,8 @@ interface DateRangePickerPanelProps {
 
 /**
  * Gate component that renders its children only when the panel is active.
- * Automatically saves and restores focus when navigating away and back,
- * so keyboard users return to the element they last interacted with.
+ * Moves focus into the panel when navigating to it, and back to the element
+ * keyboard users last interacted with when they return to it.
  *
  * Use inside a `DateRangePickerPanelNavigationProvider`.
  */
@@ -146,6 +146,10 @@ export function DateRangePickerPanel({
 /**
  * Saves the index of the focused element when `isActive` becomes false,
  * and restores focus to that index when `isActive` becomes true again.
+ * With nothing saved, such as on a first visit, focus moves to the first
+ * focusable element instead of being lost when the previous panel unmounts.
+ * The panel shown when the dialog opens is left alone, so the dialog's own
+ * initial focus wins.
  *
  * Focus is captured during the render phase (before React commits DOM
  * changes) so the previous container and `document.activeElement` are
@@ -157,6 +161,7 @@ function useFocusRestore(isActive: boolean) {
   const containerRef = useRef<HTMLDivElement>(null);
   const focusedIndexRef = useRef(-1);
   const wasActiveRef = useRef(false);
+  const hasMountedRef = useRef(false);
 
   if (wasActiveRef.current && !isActive && containerRef.current) {
     const focusables = containerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
@@ -167,11 +172,14 @@ function useFocusRestore(isActive: boolean) {
   wasActiveRef.current = isActive;
 
   useLayoutEffect(() => {
-    if (!isActive || focusedIndexRef.current < 0) return;
+    const isMount = !hasMountedRef.current;
+    hasMountedRef.current = true;
+
+    if (!isActive || isMount) return;
     const container = containerRef.current;
     if (!container) return;
 
-    const idx = focusedIndexRef.current;
+    const idx = Math.max(focusedIndexRef.current, 0);
     focusedIndexRef.current = -1;
 
     const focusables = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);

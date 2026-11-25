@@ -201,12 +201,27 @@ describe('DateRangePickerPanelNavigation', () => {
       expect(screen.getByTestId('main-btn-b')).toHaveFocus();
     });
 
-    it('does not restore focus on first visit to a panel', () => {
+    it('leaves focus alone for the panel shown on mount', () => {
+      renderWithFocusableButtons();
+
+      expect(screen.getByTestId('main-btn-a')).not.toHaveFocus();
+    });
+
+    it('moves focus to the first focusable element on first visit to a panel', () => {
       renderWithFocusableButtons();
 
       fireEvent.click(screen.getByTestId('goToPresets'));
 
-      expect(screen.getByTestId('presets-btn-x')).not.toHaveFocus();
+      expect(screen.getByTestId('presets-btn-x')).toHaveFocus();
+    });
+
+    it('moves focus to the first focusable element when going back with nothing to restore', () => {
+      renderWithFocusableButtons();
+
+      fireEvent.click(screen.getByTestId('goToPresets'));
+      fireEvent.click(screen.getByTestId('goBack'));
+
+      expect(screen.getByTestId('main-btn-a')).toHaveFocus();
     });
 
     it('restores focus across multi-level navigation', () => {
