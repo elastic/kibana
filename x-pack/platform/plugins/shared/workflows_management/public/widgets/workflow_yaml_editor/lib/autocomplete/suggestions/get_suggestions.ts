@@ -7,6 +7,7 @@
 
 import type { monaco } from '@kbn/monaco';
 import { LoopStepTypes } from '@kbn/workflows';
+import { getFromStepsSuggestions } from './await_executions/get_from_steps_suggestions';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
 import { getEsqlQuerySuggestions } from './esql_query/get_esql_query_suggestions';
@@ -209,6 +210,11 @@ export async function getSuggestions(
     if (inputsSuggestions !== null) {
       return inputsSuggestions;
     }
+  }
+
+  const fromStepsSuggestions = getFromStepsSuggestions(autocompleteContext);
+  if (fromStepsSuggestions !== null) {
+    return fromStepsSuggestions;
   }
 
   const workflowOutputSuggestions = await getWorkflowOutputsSuggestions(autocompleteContext);

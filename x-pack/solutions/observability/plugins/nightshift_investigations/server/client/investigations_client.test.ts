@@ -1474,6 +1474,75 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     });
   const runInputs = () => mockManagement.runWorkflow.mock.calls[0][2];
 
+  describe('records the automation that started a new investigation on its subjects', () => {
+    const startFromAutomation = () =>
+      makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1')] },
+        },
+        {
+          automationId: 'automation-1',
+          automationName: 'Payments alerts',
+          entryPoint: 'automation',
+        }
+      );
+
+    it('in the subjects the run records', async () => {
+      await startFromAutomation();
+
+      expect(runInputs().subjects).toEqual([
+        expect.objectContaining({
+          id: 'alert-1',
+          via: {
+            label: 'Payments alerts',
+            locator: {
+              id: 'NIGHTSHIFT_AUTOMATION_LOCATOR',
+              params: { automationId: 'automation-1' },
+            },
+          },
+        }),
+      ]);
+    });
+
+    it('not for a start no automation made', async () => {
+      await startAlerts('alert-1');
+
+      expect(runInputs().subjects[0]).not.toHaveProperty('via');
+    });
+
+    it('only on the subjects a follow-up adds, never on the ones already recorded', async () => {
+      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-recent' }]);
+      withConversations(makeConversation({ id: 'inv-recent' }));
+      subjectsClient.listByConversationIds.mockResolvedValue([
+        makeStoredSubject({ conversationId: 'inv-recent', subjectId: 'alert-1' }),
+      ]);
+
+      await makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1'), makeAlert('alert-3')] },
+        },
+        { automationId: 'automation-2', automationName: 'Other', entryPoint: 'automation' }
+      );
+
+      expect(runInputs().subjects).toEqual([
+        expect.objectContaining({
+          id: 'alert-3',
+          via: {
+            label: 'Other',
+            locator: {
+              id: 'NIGHTSHIFT_AUTOMATION_LOCATOR',
+              params: { automationId: 'automation-2' },
+            },
+          },
+        }),
+      ]);
+    });
+  });
+
   beforeEach(() => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
@@ -3752,6 +3821,23 @@ describe('NightshiftInvestigationsClient.claimSlackThread()', () => {
         type: 'slack_thread',
         id: 'slack:T1:C1:1.1',
         slack: { channel: 'C1', thread_ts: '1.1' },
+      },
+    ]);
+  });
+
+  it('records the permalink and summary when the workspace is known', async () => {
+    await makeClient().claimSlackThread({ ...THREAD, workspace: 'T1', summary: 'Latency' });
+
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: 'slack:T1:C1:1.1',
+        slack: {
+          channel: 'C1',
+          thread_ts: '1.1',
+          permalink: 'https://app.slack.com/client/T1/C1/thread/C1-1.1',
+        },
+        summary: 'Latency',
       },
     ]);
   });

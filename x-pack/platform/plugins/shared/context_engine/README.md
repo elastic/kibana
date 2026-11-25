@@ -499,15 +499,40 @@ is not part of All, so an administrator must grant it. Without it, the request g
 and the route audits the attempt as a failure. On `_forget`, when `user_id` does not match a
 memory's owner, the route returns `not_found`.
 
-`_remember` writes one `memory_remember` audit event per request, when the background write
-finishes or when the route rejects the request. Because `_remember` does not check whether a
-supplied `id` exists, a request with an unknown `id` creates a memory while auditing with
-`event.type` set to `change`. `_forget` writes one `memory_forget` audit event per unique id.
-Both events record the authenticated actor in `user.*`, the memory's owner in `user.target.id`,
-and the memory in `kibana.saved_object`. Because memories are scoped by space and user and the
-caller can choose `id`, two users can share the same id; combine the space, `user.target.id`,
-and `kibana.saved_object.id` to identify a single memory. The routes record rejected requests,
+After authorization (`contextEngine:write`), schema validation, and feature-flag checks pass,
+`_remember` writes one `memory_remember` audit event per request when the background write
+finishes or when the handler rejects the request, and `_forget` writes one `memory_forget`
+audit event per unique id. Requests rejected before the handler (for example, missing
+`contextEngine:write`, invalid request body, or Context Engine disabled) do not emit these
+events. Because `_remember` does not check whether a supplied `id` exists, a request with an
+unknown `id` creates a memory while auditing with `event.type` set to `change`. Both events
+record the authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the
+memory in `kibana.saved_object`. Because memories are scoped by space and user and the caller
+can choose `id`, two users can share the same id; combine the space, `user.target.id`, and
+`kibana.saved_object.id` to identify a single memory. The routes record in-handler rejections,
 background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
+
+## Dreaming input
+
+Dreaming reads what agents saved in the two session stores, and nothing from the AI index it
+writes to or from traces.
+
+- The dreaming workflow reads **session memories** with `context-engine.readSessionMemories`.
+  It reads the memories that list the AI index in `ai_index_ids` and were remembered or revised
+  since the last run, across all users of the space. A memory revised since is read once, as its
+  latest revision. A forgotten memory, or one whose latest revision no longer lists the AI index,
+  is left out.
+- The transcript dreaming workflow reads **transcripts** with `context-engine.readSessionTranscripts`.
+  It finds the events that list the AI index and were saved since the last run, then rebuilds
+  each turn they belong to from all its events. A turn that continues after a run is read again,
+  whole, by a later run. Reasoning and meta events are left out of a transcript, and a turn
+  nobody said anything in is skipped. Events saved in the last 5 minutes wait for the next run,
+  by default, so a turn still running is not read half way.
+
+Both steps read as the internal user once they check that the workflow user can read AI
+indices in the space, and the memories they return are visible to the space, not to the user
+who saved them. A fact or entity cites the memories it came from as `session-memory://<id>`
+and `session://<session id>/<turn id>`.
 
 ## Improvements
 
