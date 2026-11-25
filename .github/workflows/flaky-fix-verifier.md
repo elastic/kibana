@@ -104,8 +104,8 @@ engine:
     # the gateway reads only `Authorization: Bearer`
     AWF_ANTHROPIC_AUTH_HEADER: Authorization
     ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-5-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-5-5
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
