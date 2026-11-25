@@ -8,6 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
+import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ScopedLogger } from './with_log_context';
 import {
   fetchAlertIdentityDocs,
@@ -168,6 +169,30 @@ describe('fetchAlertIdentityDocs', () => {
       ALERT_IDENTITY_DOCS_CHUNK_SIZE
     );
     expect(secondChunkFilter[secondChunkFilter.length - 1].terms.entity_id).toHaveLength(1);
+  });
+
+  it('sends every chunk request with the scoring request timeout and the abort signal', async () => {
+    const euids = Array.from(
+      { length: ALERT_IDENTITY_DOCS_CHUNK_SIZE + 1 },
+      (_, i) => `host:host-${i}`
+    );
+    const controller = new AbortController();
+    const expectedOptions = {
+      signal: controller.signal,
+      requestTimeout: RISK_SCORING_REQUEST_TIMEOUT,
+    };
+
+    await fetchAlertIdentityDocs({
+      esClient,
+      logger,
+      ...baseParams,
+      euids,
+      abortSignal: controller.signal,
+    });
+
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(esClient.search).toHaveBeenNthCalledWith(1, expect.anything(), expectedOptions);
+    expect(esClient.search).toHaveBeenNthCalledWith(2, expect.anything(), expectedOptions);
   });
 
   it('stops issuing further chunk requests once the abort signal fires between chunks', async () => {
