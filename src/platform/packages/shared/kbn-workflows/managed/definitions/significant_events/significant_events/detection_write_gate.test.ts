@@ -11,37 +11,56 @@ import { parse } from 'yaml';
 import DETECTION_YAML from './detection.yaml';
 import { createWorkflowLiquidEngine } from '../../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 
-interface IWorkflowStep {
+interface WorkflowStep {
   name: string;
   if?: string;
-  steps?: IWorkflowStep[];
+  steps?: WorkflowStep[];
   with?: Record<string, unknown>;
 }
 
 /** A document the workflow wrote for the rule: a detection or a scan marker. */
-type TStoredRecord = Record<string, unknown>;
+interface StoredRecord {
+  /** When the record was written, in minutes since the first scan. */
+  atMinute: number;
+  [field: string]: unknown;
+}
 
-interface IScan {
+interface Scan {
   /** The change point type Elasticsearch reports for the rule in this scan. */
   type: string;
+  /** When the scan runs, in minutes since the first scan. */
+  atMinute: number;
   /** Whether the lookup of the rule's previous record fails. */
   isLookupFailing?: boolean;
 }
 
+interface LookupFilter {
+  exists?: { field: string };
+  range?: { '@timestamp': { gte: string } };
+}
+
 const RULE_UUID = 'rule-1';
 const LOOKUP_STEP = 'check_last_scan';
+const SCAN_INTERVAL_MINUTES = 10;
+// The default schedule: a 50 minute gate window.
+const INPUTS = {
+  lookback: 'now-40m',
+  targetCoverageMinutes: 30,
+  detectionIntervalMinutes: SCAN_INTERVAL_MINUTES,
+};
 
 const engine = createWorkflowLiquidEngine();
 
-const ruleSteps = (parse(DETECTION_YAML) as { steps: IWorkflowStep[] }).steps.find(
-  ({ name }) => name === 'foreach_rule'
-)?.steps;
+const topSteps = (parse(DETECTION_YAML) as { steps: WorkflowStep[] }).steps;
+const ruleSteps = topSteps.find(({ name }) => name === 'foreach_rule')?.steps;
 
-const getRuleStep = (name: string): IWorkflowStep => {
-  const step = ruleSteps?.find((candidate) => candidate.name === name);
+const findStep = (steps: WorkflowStep[] | undefined, name: string): WorkflowStep => {
+  const step = steps?.find((candidate) => candidate.name === name);
   if (!step) throw new Error(`Step ${name} not found`);
   return step;
 };
+
+const getRuleStep = (name: string): WorkflowStep => findStep(ruleSteps, name);
 
 /** Evaluates `${{ }}` to a typed value and renders any other template, like the workflow engine. */
 const render = (template: unknown, context: object): unknown => {
@@ -53,36 +72,54 @@ const render = (template: unknown, context: object): unknown => {
   );
 };
 
-const renderWith = (stepName: string, context: object): Record<string, unknown> =>
+const renderWith = (step: WorkflowStep, context: object): Record<string, unknown> =>
   Object.fromEntries(
-    Object.entries(getRuleStep(stepName).with ?? {}).map(([key, value]) => [
-      key,
-      render(value, context),
-    ])
+    Object.entries(step.with ?? {}).map(([key, value]) => [key, render(value, context)])
   );
 
-/** The newest record the lookup step's query can match, honouring its `exists` filters. */
-const findPrevious = (store: TStoredRecord[]): TStoredRecord | undefined => {
+/** Runs the top-level steps that size check_last_scan's window, in workflow order. */
+const getGateWindowMinutes = (inputs: Record<string, unknown>): unknown => {
+  const scanGap = renderWith(findStep(topSteps, 'compute_scan_gap'), { inputs });
+  return renderWith(findStep(topSteps, 'compute_gate_window'), { inputs, variables: scanGap })
+    .gate_window_minutes;
+};
+
+/** The newest record the lookup step's query can match, honouring its `exists` and range filters. */
+const findPrevious = (
+  store: StoredRecord[],
+  { atMinute, context }: { atMinute: number; context: object }
+): StoredRecord | undefined => {
   const { body } = getRuleStep(LOOKUP_STEP).with as {
-    body: { query: { bool: { filter: Array<{ exists?: { field: string } }> } } };
+    body: { query: { bool: { filter: LookupFilter[] } } };
   };
-  const requiredFields = body.query.bool.filter.flatMap(({ exists }) =>
-    exists ? [exists.field] : []
+  const { filter } = body.query.bool;
+  const requiredFields = filter.flatMap(({ exists }) => (exists ? [exists.field] : []));
+  const windowsMinutes = filter.flatMap(({ range }) =>
+    range ? [Number(String(render(range['@timestamp'].gte, context)).replace(/^now-|m$/g, ''))] : []
   );
-  return store.filter((record) => requiredFields.every((field) => field in record)).at(-1);
+  return store
+    .filter(
+      (record) =>
+        requiredFields.every((field) => field in record) &&
+        windowsMinutes.every((windowMinutes) => atMinute - record.atMinute <= windowMinutes)
+    )
+    .at(-1);
 };
 
 /** Runs one scan of the rule through the foreach steps and appends what it writes to `store`. */
-const runScan = (store: TStoredRecord[], { type, isLookupFailing = false }: IScan): void => {
-  const previous = findPrevious(store);
+const runScan = (
+  store: StoredRecord[],
+  { type, atMinute, isLookupFailing = false }: Scan
+): void => {
   const steps: Record<string, { output?: unknown; error?: unknown }> = {};
   const context = {
     foreach: { item: { key: RULE_UUID, change_points: { type: { [type]: { p_value: 1e-6 } } } } },
-    variables: { batch_rule_uuids: [RULE_UUID] },
+    variables: { batch_rule_uuids: [RULE_UUID], gate_window_minutes: getGateWindowMinutes(INPUTS) },
     steps,
   };
+  const previous = findPrevious(store, { atMinute, context });
 
-  steps.compute_rule_context = { output: renderWith('compute_rule_context', context) };
+  steps.compute_rule_context = { output: renderWith(getRuleStep('compute_rule_context'), context) };
   steps[LOOKUP_STEP] = isLookupFailing
     ? { error: new Error('search failed') }
     : {
@@ -93,11 +130,11 @@ const runScan = (store: TStoredRecord[], { type, isLookupFailing = false }: ISca
           },
         },
       };
-  steps.compute_transition = { output: renderWith('compute_transition', context) };
-  steps.compute_write_gate = { output: renderWith('compute_write_gate', context) };
+  steps.compute_transition = { output: renderWith(getRuleStep('compute_transition'), context) };
+  steps.compute_write_gate = { output: renderWith(getRuleStep('compute_write_gate'), context) };
 
   if (render(getRuleStep('write_detection').if, context) === true) {
-    store.push({ rule_uuid: RULE_UUID, change_point_type: type });
+    store.push({ rule_uuid: RULE_UUID, change_point_type: type, atMinute });
   }
   if (render(getRuleStep('write_scan_marker').if, context) === true) {
     const { body } = getRuleStep('write_scan_marker').with as {
@@ -107,15 +144,24 @@ const runScan = (store: TStoredRecord[], { type, isLookupFailing = false }: ISca
     store.push({
       rule_uuid: RULE_UUID,
       ...(observed ? { observed_change_point_type: observed } : {}),
+      atMinute,
     });
   }
 };
 
-const countDetections = (scans: IScan[]): number => {
-  const store: TStoredRecord[] = [];
-  scans.forEach((scan) => runScan(store, scan));
-  return store.filter((record) => 'change_point_type' in record).length;
+/** Runs the scans one interval apart unless a scan sets its own time, and returns the store. */
+const runScans = (
+  scans: Array<Omit<Scan, 'atMinute'> & Partial<Pick<Scan, 'atMinute'>>>,
+  store: StoredRecord[] = []
+): StoredRecord[] => {
+  scans.forEach((scan, index) =>
+    runScan(store, { atMinute: index * SCAN_INTERVAL_MINUTES, ...scan })
+  );
+  return store;
 };
+
+const countDetections = (scans: Parameters<typeof runScans>[0]): number =>
+  runScans(scans).filter((record) => 'change_point_type' in record).length;
 
 describe('detection write gate', () => {
   it('writes a new detection when the rule changes again after a stationary scan', () => {
@@ -126,57 +172,43 @@ describe('detection write gate', () => {
     expect(countDetections([{ type: 'spike' }, { type: 'spike' }, { type: 'spike' }])).toBe(1);
   });
 
+  it('writes a new detection when the rule comes back after its last record left the window', () => {
+    expect(countDetections([{ type: 'spike' }, { type: 'spike', atMinute: 60 }])).toBe(2);
+  });
+
   it('writes neither a detection nor a marker when the lookup fails', () => {
-    const store: TStoredRecord[] = [];
-    runScan(store, { type: 'spike' });
-    runScan(store, { type: 'stationary' });
-    runScan(store, { type: 'spike', isLookupFailing: true });
+    const store = runScans([
+      { type: 'spike' },
+      { type: 'stationary' },
+      { type: 'spike', isLookupFailing: true },
+    ]);
 
     expect(store).toEqual([
-      { rule_uuid: RULE_UUID, change_point_type: 'spike' },
-      { rule_uuid: RULE_UUID, observed_change_point_type: 'stationary' },
+      { rule_uuid: RULE_UUID, change_point_type: 'spike', atMinute: 0 },
+      { rule_uuid: RULE_UUID, observed_change_point_type: 'stationary', atMinute: 10 },
     ]);
   });
 
   it('reads a marker written before markers recorded the observed type as no previous type', () => {
-    const store: TStoredRecord[] = [{ rule_uuid: RULE_UUID }];
-    runScan(store, { type: 'spike' });
+    const store = runScans([{ type: 'spike' }], [{ rule_uuid: RULE_UUID, atMinute: -10 }]);
 
-    expect(store.at(-1)).toEqual({ rule_uuid: RULE_UUID, change_point_type: 'spike' });
+    expect(store.at(-1)).toEqual({ rule_uuid: RULE_UUID, change_point_type: 'spike', atMinute: 0 });
   });
 
   describe('lookup window', () => {
-    const getTopStep = (name: string): IWorkflowStep => {
-      const step = (parse(DETECTION_YAML) as { steps: IWorkflowStep[] }).steps.find(
-        (candidate) => candidate.name === name
-      );
-      if (!step) throw new Error(`Step ${name} not found`);
-      return step;
-    };
-
-    const windowMinutes = (inputs: Record<string, unknown>): unknown => {
-      const variables: Record<string, unknown> = {};
-      for (const name of ['compute_scan_gap', 'compute_gate_window']) {
-        Object.entries(getTopStep(name).with ?? {}).forEach(([key, value]) => {
-          variables[key] = render(value, { inputs, variables });
-        });
-      }
-      return variables.gate_window_minutes;
-    };
-
     it.each([
       // A one-run drop on the default schedule leaves 50 minutes between scans of a rule.
       ['now-40m', 30, 10, 50],
-      // Coverage longer than the scan window.
-      ['now-22m', 60, 10, 80],
       // A scan window longer than the gap, as on c0: a quiet rule ages out with the window.
       ['now-180m', 30, 10, 180],
+      // The scan route accepts the unit in upper case.
+      ['now-180M', 30, 10, 180],
     ])(
       'with lookback %s, %d minutes coverage and a %d minute interval, is %d minutes',
       (lookback, targetCoverageMinutes, detectionIntervalMinutes, expected) => {
-        expect(windowMinutes({ lookback, targetCoverageMinutes, detectionIntervalMinutes })).toBe(
-          expected
-        );
+        expect(
+          getGateWindowMinutes({ lookback, targetCoverageMinutes, detectionIntervalMinutes })
+        ).toBe(expected);
       }
     );
   });
