@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { pick, transform, uniq } from 'lodash';
 
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import { ALL_SPACES_ID } from '@kbn/core-spaces-common';
 import type {
   CheckPrivileges,
   CheckPrivilegesOptions,
@@ -28,10 +29,23 @@ interface CheckPrivilegesActions {
   login: string;
 }
 
+/**
+ * Privileges that a request-scoped check answers on the side, in the same Elasticsearch request,
+ * without changing the result its caller sees. The object-level security (OLS) service implements it
+ * for recovery.
+ */
+export interface PrivilegeCheckRecovery {
+  /** Returns the recovery actions to add for the requested Kibana privileges, mapped to their type. */
+  getRecoveryActions(kibanaPrivileges: readonly string[]): ReadonlyMap<string, string>;
+  /** Receives the answer for one type in the given spaces, `*` meaning globally. */
+  primeRecovery(request: KibanaRequest, type: string, spaceIds: string[], granted: boolean): void;
+}
+
 export function checkPrivilegesFactory(
   actions: CheckPrivilegesActions,
   getClusterClient: () => Promise<IClusterClient>,
-  applicationName: string
+  applicationName: string,
+  getRecovery?: () => PrivilegeCheckRecovery | undefined
 ) {
   const createApplicationPrivilegesCheck = (
     resources: string[],
@@ -100,9 +114,25 @@ export function checkPrivilegesFactory(
       privileges: CheckPrivilegesPayload,
       { requireLoginAction = true }: CheckPrivilegesOptions = {}
     ): Promise<CheckPrivilegesResponse> => {
+      const requestedKibanaPrivileges =
+        privileges.kibana === undefined
+          ? []
+          : Array.isArray(privileges.kibana)
+          ? privileges.kibana
+          : [privileges.kibana];
+      // Like the login action, recovery is checked without being requested, so the caller never sees
+      // it. Recovery counts only with the login action, so a check that doesn't ask for login can't
+      // answer it.
+      const recovery = requireLoginAction ? getRecovery?.() : undefined;
+      const recoveryActions = new Map(
+        [...(recovery?.getRecoveryActions(requestedKibanaPrivileges) ?? [])].filter(
+          ([action]) => !requestedKibanaPrivileges.includes(action)
+        )
+      );
+
       const applicationPrivilegesCheck = createApplicationPrivilegesCheck(
         resources,
-        privileges.kibana ?? [],
+        [...requestedKibanaPrivileges, ...recoveryActions.keys()],
         { requireLoginAction }
       );
 
@@ -163,8 +193,49 @@ export function checkPrivilegesFactory(
         })
         .flat();
 
+      let hasAllRequested = hasPrivilegesResponse.has_all_requested;
+      // This check also asked about recovery for some object types, for OLS and not for the caller.
+      // Hand each answer to OLS: per space, or for every space when the check ran globally. Then
+      // compute `hasAllRequested` again without those actions, so the caller's result is exactly
+      // what it would be if recovery had never been asked about.
+      if (recovery && recoveryActions.size > 0) {
+        for (const [resource, resourcePrivilegesResponse] of Object.entries(
+          applicationPrivilegesResponse
+        )) {
+          const spaceId =
+            resource !== GLOBAL_RESOURCE
+              ? ResourceSerializer.deserializeSpaceResource(resource)
+              : ALL_SPACES_ID;
+          for (const [action, type] of recoveryActions) {
+            recovery.primeRecovery(
+              request,
+              type,
+              [spaceId],
+              resourcePrivilegesResponse[action] && resourcePrivilegesResponse[actions.login]
+            );
+          }
+        }
+
+        // Elasticsearch counts the missing recovery privileges as missing requested ones. Each
+        // requested Elasticsearch privilege must have an answer, as a missing one isn't granted.
+        hasAllRequested =
+          Object.values(applicationPrivilegesResponse).every((resourcePrivilegesResponse) =>
+            Object.entries(resourcePrivilegesResponse).every(
+              ([privilege, authorized]) => authorized || recoveryActions.has(privilege)
+            )
+          ) &&
+          (privileges.elasticsearch?.cluster ?? []).every(
+            (privilege) => clusterPrivilegesResponse[privilege] === true
+          ) &&
+          Object.entries(privileges.elasticsearch?.index ?? {}).every(([index, indexPrivilege]) =>
+            indexPrivilege.every(
+              (privilege) => hasPrivilegesResponse.index?.[index]?.[privilege] === true
+            )
+          );
+      }
+
       return {
-        hasAllRequested: hasPrivilegesResponse.has_all_requested,
+        hasAllRequested,
         username: hasPrivilegesResponse.username,
         privileges: {
           kibana: privilegeArray,

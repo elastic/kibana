@@ -24,6 +24,7 @@ import {
 import type { CreatePackagePolicyRouteState } from '../../../../types';
 import {
   sendCreatePackagePolicyForRq,
+  useBulkGetAgentPoliciesQuery,
   sendCreateAgentPolicy,
   sendGetAgentStatus,
   useIntraAppState,
@@ -95,6 +96,9 @@ jest.mock('../../../../hooks', () => {
       })
     ),
     useGetPackageInfoByKeyQuery: jest.fn(),
+    useBulkGetAgentPoliciesQuery: jest.fn((...args) =>
+      jest.requireActual('../../../../hooks').useBulkGetAgentPoliciesQuery(...args)
+    ),
     sendGetSettings: jest.fn().mockResolvedValue({
       data: { item: {} },
     }),
@@ -170,6 +174,9 @@ import {
 } from '../../../../../../services/setup_technology_selector';
 
 import { CreatePackagePolicySinglePage } from '.';
+
+const AGENTLESS_OPTION_SELECTOR = '#SetupTechnologySelector_agentless';
+const AGENT_BASED_OPTION_SELECTOR = '#SetupTechnologySelector_agent-based';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
@@ -604,6 +611,118 @@ describe('When on the package policy create page', () => {
       await waitFor(() => {
         expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
       });
+    });
+
+    test('requires acknowledging that some agents would stop collecting data before saving', async () => {
+      const packageInfo = getMockPackageInfo();
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+        ...packageInfo,
+        data: {
+          ...packageInfo.data,
+          item: { ...packageInfo.data.item, conditions: { agent: { version: '^9.4.0' } } },
+        },
+      });
+      const bulkGetAgentPoliciesQuery = jest.mocked(useBulkGetAgentPoliciesQuery);
+      const actualBulkGetAgentPoliciesQuery = bulkGetAgentPoliciesQuery.getMockImplementation();
+      bulkGetAgentPoliciesQuery.mockReturnValue({
+        data: {
+          items: [
+            {
+              id: 'agent-policy-1',
+              active_agents_per_version: [
+                { version: '9.3.1', count: 2 },
+                { version: '9.4.0', count: 1 },
+              ],
+            },
+          ],
+        },
+      } as unknown as ReturnType<typeof useBulkGetAgentPoliciesQuery>);
+
+      try {
+        await act(async () => {
+          render('agent-policy-1');
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+        });
+        const saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).toBeDisabled();
+
+        await act(async () => {
+          fireEvent.click(
+            renderResult.getByTestId('acknowledgeAgentVersionIncompatibilityCheckbox')
+          );
+        });
+        await waitFor(() => expect(saveBtn).not.toBeDisabled());
+
+        await act(async () => {
+          fireEvent.click(saveBtn);
+        });
+
+        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+          expect.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+          expect.anything()
+        );
+      } finally {
+        bulkGetAgentPoliciesQuery.mockImplementation(actualBulkGetAgentPoliciesQuery!);
+      }
+    });
+
+    test('asks to acknowledge an incompatibility reported by Fleet that the agent counts do not show', async () => {
+      // e.g. without the Agents Read privilege, the agent policies have no agent counts
+      const packageInfo = getMockPackageInfo();
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+        ...packageInfo,
+        data: {
+          ...packageInfo.data,
+          item: { ...packageInfo.data.item, conditions: { agent: { version: '^9.4.0' } } },
+        },
+      });
+      (sendCreatePackagePolicyForRq as jest.MockedFunction<any>).mockRejectedValueOnce({
+        statusCode: 400,
+        message: 'Cannot add nginx 1.3.0 to the selected agent policies',
+        attributes: {
+          type: 'agent_version_incompatible',
+          agent_version_block: {
+            package_name: 'nginx',
+            package_version: '1.3.0',
+            version_condition: '^9.4.0',
+          },
+        },
+      });
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      let saveBtn: HTMLElement;
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).not.toBeDisabled();
+      });
+      expect(renderResult.queryByTestId('incompatibleAgentVersionCallout')).toBeNull();
+
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+      });
+      expect(saveBtn!).toBeDisabled();
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('acknowledgeAgentVersionIncompatibilityCheckbox'));
+      });
+      await waitFor(() => expect(saveBtn).not.toBeDisabled());
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenLastCalledWith(
+        expect.objectContaining({ acknowledge_agent_version_incompatibility: true }),
+        expect.anything()
+      );
     });
 
     test('warns when the policy saved but its cloud connector could not record the template details', async () => {
@@ -1376,6 +1495,45 @@ describe('When on the package policy create page', () => {
           ).toBeInTheDocument();
           expect(renderResult.getByText('Recommended')).toBeInTheDocument();
         });
+      });
+
+      test('should render the setup technology selector as checkable cards in its own Deployment step when agentless is the default deployment', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ agentless: { enabled: true, isDefault: true }, dualMode: true })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+        expect(renderResult.getByRole('heading', { name: 'Deployment' })).toBeInTheDocument();
+        expect(renderResult.container.querySelector(AGENTLESS_OPTION_SELECTOR)).toBeChecked();
+        expect(renderResult.container.querySelector(AGENT_BASED_OPTION_SELECTOR)).not.toBeChecked();
+        expect(renderResult.container.querySelector(AGENT_BASED_OPTION_SELECTOR)).toBeEnabled();
+        expect(renderResult.queryByText('Deployment options')).not.toBeInTheDocument();
+        expect(
+          renderResult.getByText('Best for simple setup and faster onboarding.')
+        ).toBeInTheDocument();
+      });
+
+      test('should render the setup technology selector inline when agentless is not the default deployment', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ agentless: { enabled: true }, dualMode: true })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+        expect(renderResult.queryByRole('heading', { name: 'Deployment' })).not.toBeInTheDocument();
+        expect(renderResult.getByText('Deployment options')).toBeInTheDocument();
+        expect(renderResult.container.querySelector(AGENT_BASED_OPTION_SELECTOR)).toBeChecked();
+        expect(renderResult.container.querySelector(AGENTLESS_OPTION_SELECTOR)).not.toBeChecked();
+        expect(renderResult.container.querySelector(AGENTLESS_OPTION_SELECTOR)).toBeEnabled();
       });
     });
   });

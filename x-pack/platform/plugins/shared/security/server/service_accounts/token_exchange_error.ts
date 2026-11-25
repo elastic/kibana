@@ -20,6 +20,11 @@ export interface ServiceAccountTokenExchangeErrorOptions {
    * a revoked account, and are as safe to log as the status.
    */
   errorCode?: string;
+  /**
+   * Whether the exchange failed before it reached upstream, for example when the connection was
+   * refused or timed out. Upstream never saw it, so trying again right away skips no backoff.
+   */
+  notSent?: boolean;
 }
 
 /** Describes whether a failed service account token exchange can be retried. */
@@ -28,10 +33,17 @@ export class ServiceAccountTokenExchangeError extends Error {
   public readonly retryAfterMs: number;
   public readonly statusCode?: number;
   public readonly errorCode?: string;
+  public readonly notSent: boolean;
 
   constructor(
     cause: Error,
-    { retryable, retryAfterMs = 0, statusCode, errorCode }: ServiceAccountTokenExchangeErrorOptions
+    {
+      retryable,
+      retryAfterMs = 0,
+      statusCode,
+      errorCode,
+      notSent = false,
+    }: ServiceAccountTokenExchangeErrorOptions
   ) {
     super(
       statusCode === undefined
@@ -44,5 +56,6 @@ export class ServiceAccountTokenExchangeError extends Error {
     this.retryAfterMs = retryAfterMs;
     this.statusCode = statusCode;
     this.errorCode = errorCode;
+    this.notSent = notSent;
   }
 }

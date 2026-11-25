@@ -85,6 +85,7 @@ export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   OS_FILTER: 'mobileOsFilter',
   RETRY: 'mobileRetry',
   CLEAR_FILTERS: 'mobileClearFilters',
+  COMPARE_TOGGLE: 'mobileCompareToggle',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
@@ -102,9 +103,11 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   RETRY: 'overviewRetry',
+  KPIS_RETRY: 'overviewKpisRetry',
   USAGE_RETRY: 'overviewUsageRetry',
   BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
   OS_SESSIONS_LINK: 'overviewOsSessionsLink',
+  FRUSTRATION_SESSIONS_LINK: 'overviewFrustrationSessionsLink',
   BROWSER_FILTER: 'overviewBrowserFilter',
   OS_FILTER: 'overviewOsFilter',
   DEVICE_FILTER: 'overviewDeviceFilter',
@@ -149,6 +152,9 @@ export const SESSIONS_EBT_ELEMENTS = {
   SESSION_LINK: 'sessionLink',
   ERRORS_FILTER: 'sessionsErrorsFilter',
   FAILED_REQUESTS_FILTER: 'sessionsFailedRequestsFilter',
+  FRUSTRATION_FILTER: 'sessionsFrustrationFilter',
+  FRUSTRATION_TARGET_FILTER: 'sessionsFrustrationTargetFilter',
+  FRUSTRATION_PAGE_FILTER: 'sessionsFrustrationPageFilter',
   DURATION_FILTER: 'sessionsDurationFilter',
   BROWSER_FILTER: 'sessionsBrowserFilter',
   OS_FILTER: 'sessionsOsFilter',

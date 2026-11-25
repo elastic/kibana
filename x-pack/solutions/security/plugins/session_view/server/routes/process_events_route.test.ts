@@ -168,10 +168,99 @@ describe('process_events_route.ts', () => {
         expect(range).toEqual({ gte: firstTimestamp, lte: cursor });
       });
 
+      it('searches alerts from the cursor when no process event follows it', async () => {
+        // Session View opened from an alert, and later alerts exist but no later process event does
+        const cursor = '2021-11-23T15:25:06.510Z';
+        const client = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
+        const alertsClient = getAlertsClientMockInstance();
+        const find = jest.spyOn(alertsClient, 'find');
+
+        const body = await fetchEventsAndScopedAlerts(
+          client,
+          alertsClient,
+          TEST_PROCESS_INDEX,
+          'mockId',
+          TEST_SESSION_START_TIME,
+          cursor,
+          true
+        );
+
+        expect(find).toHaveBeenCalledTimes(1);
+        const { query } = find.mock.calls[0][0];
+        const { must } = (query as { bool: { must: RangeClause[] } }).bool;
+        expect(must.find((clause) => clause.range)?.range?.[ALERT_ORIGINAL_TIME_PROPERTY]).toEqual({
+          gte: cursor,
+        });
+        expect(body.events.length).toBeGreaterThan(0);
+      });
+
+      it('does not search alerts for an empty first page', async () => {
+        const client = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
+        const alertsClient = getAlertsClientMockInstance();
+        const find = jest.spyOn(alertsClient, 'find');
+
+        await fetchEventsAndScopedAlerts(
+          client,
+          alertsClient,
+          TEST_PROCESS_INDEX,
+          'mockId',
+          TEST_SESSION_START_TIME
+        );
+
+        expect(find).not.toHaveBeenCalled();
+      });
+
       it('keeps the range of the events for a backward page without a cursor', async () => {
         const range = await fetchAndGetAlertsRange(undefined, false);
 
         expect(range).toEqual({ gte: firstTimestamp, lte: lastTimestamp });
+      });
+
+      // The event query ignores a cursor that is not a date. An alert range with such a cursor makes
+      // Elasticsearch reject the range, so the alerts of a valid page would all be dropped.
+      describe('with a cursor that is not a date', () => {
+        it('sends a date that Elasticsearch can parse for a date that only JavaScript parses', async () => {
+          // after the last mocked event, like the backward page of a cursor that is newer than its events
+          const range = await fetchAndGetAlertsRange('Tue, 23 Nov 2021 15:25:06 GMT', false);
+
+          expect(range).toEqual({ gte: firstTimestamp, lte: '2021-11-23T15:25:06.000Z' });
+        });
+
+        it('ignores it on a short forward page', async () => {
+          const range = await fetchAndGetAlertsRange('not-a-date', true);
+
+          expect(range).toEqual({ gte: firstTimestamp });
+        });
+
+        it('ignores it on a full forward page', async () => {
+          const range = await fetchAndGetAlertsRange('not-a-date', true, mockEvents.length);
+
+          expect(range).toEqual({ gte: firstTimestamp, lte: lastTimestamp });
+        });
+
+        it('ignores it on a backward page', async () => {
+          const range = await fetchAndGetAlertsRange('not-a-date', false);
+
+          expect(range).toEqual({ gte: firstTimestamp, lte: lastTimestamp });
+        });
+
+        it('does not search alerts when no process event follows it', async () => {
+          const client = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
+          const alertsClient = getAlertsClientMockInstance();
+          const find = jest.spyOn(alertsClient, 'find');
+
+          await fetchEventsAndScopedAlerts(
+            client,
+            alertsClient,
+            TEST_PROCESS_INDEX,
+            'mockId',
+            TEST_SESSION_START_TIME,
+            'not-a-date',
+            true
+          );
+
+          expect(find).not.toHaveBeenCalled();
+        });
       });
     });
   });

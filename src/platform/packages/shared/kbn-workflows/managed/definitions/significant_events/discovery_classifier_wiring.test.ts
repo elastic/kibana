@@ -15,6 +15,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   condition?: string;
+  if?: string;
   'on-failure'?: { continue?: boolean };
   'iteration-on-failure'?: { continue?: boolean };
   foreach?: string;
@@ -105,6 +106,105 @@ describe('discovery workflow detection classifier wiring', () => {
 
       expect(step.type).toBe('significantEvents.classifyDetections');
       expect(step['on-failure']).toBeUndefined();
+    });
+
+    it('resolves written detections only when the agent succeeded, and a failure does not fail the run', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(evaluate(resolve.if, { steps: { run_discovery_agent: { error: null } } })).toBe(true);
+      expect(
+        evaluate(resolve.if, { steps: { run_discovery_agent: { error: { message: 'failed' } } } })
+      ).toBe(false);
+      expect(resolve['on-failure']).toEqual({ continue: true });
+    });
+
+    it('uses the workflow execution space rather than caller-provided step input', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(resolve.with).not.toHaveProperty('space_id');
+    });
+
+    it('stamps only the valid batch UUID when the agent reports an unknown UUID', () => {
+      const resolve = requireStep('resolve_written_detections');
+      const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
+      const context = {
+        steps: {
+          classify_detections: {
+            output: {
+              batch: [{ detection_id: 'detection-A', rule_uuid: 'rule-A' }],
+            },
+          },
+          compute_written_rule_uuids: {
+            output: { written_rule_uuids: ['rule-A', 'unknown-rule'] },
+          },
+        },
+      };
+
+      expect(evaluate(resolve.with?.batch, context)).toEqual([
+        { detection_id: 'detection-A', rule_uuid: 'rule-A' },
+      ]);
+      expect(evaluate(resolve.with?.reported_rule_uuids, context)).toEqual([
+        'rule-A',
+        'unknown-rule',
+      ]);
+      expect(
+        evaluate(stampRuleUuids, {
+          steps: {
+            compute_resolved_stamp_rule_uuids: {
+              output: { stamp_rule_uuids: ['rule-A'] },
+            },
+            compute_fallback_stamp_rule_uuids: { output: { stamp_rule_uuids: [] } },
+          },
+        })
+      ).toEqual(['rule-A']);
+    });
+
+    describe('stamp rule uuids', () => {
+      const resolved = requireStep('compute_resolved_stamp_rule_uuids');
+      const fallback = requireStep('compute_fallback_stamp_rule_uuids');
+      const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
+
+      // Runs each stamp step only when its `if` passes, as the engine does, then merges the outputs.
+      const stampRules = (resolver: { error: { message: string } | null; stamp: string[] }) => {
+        const context = {
+          steps: {
+            resolve_written_detections: {
+              error: resolver.error,
+              output: resolver.error ? undefined : { stamp_rule_uuids: resolver.stamp },
+            },
+            compute_written_rule_uuids: { output: { written_rule_uuids: ['rule-X'] } },
+          },
+        };
+        const run = (step: typeof resolved) =>
+          evaluate(step.if, context)
+            ? { output: { stamp_rule_uuids: evaluate(step.with?.stamp_rule_uuids, context) } }
+            : undefined;
+
+        return evaluate(stampRuleUuids, {
+          steps: {
+            compute_resolved_stamp_rule_uuids: run(resolved),
+            compute_fallback_stamp_rule_uuids: run(fallback),
+          },
+        });
+      };
+
+      it('keeps an empty resolver result instead of falling back to the reported rules', () => {
+        expect(stampRules({ error: null, stamp: [] })).toEqual([]);
+      });
+
+      it('falls back to the reported rules when the resolver step failed', () => {
+        expect(stampRules({ error: { message: 'down' }, stamp: [] })).toEqual(['rule-X']);
+      });
+    });
+
+    it('reports the unknown reported rule count in the completed body', () => {
+      const body = requireStep('report_discovery_completed').with?.body as Record<string, unknown>;
+
+      expect(
+        evaluate(body.unknown_reported_rule_count, {
+          steps: { resolve_written_detections: { output: { unknown_reported_count: 3 } } },
+        })
+      ).toBe(3);
     });
 
     it('passes the detection rows, the space and every classifier input to the step', () => {

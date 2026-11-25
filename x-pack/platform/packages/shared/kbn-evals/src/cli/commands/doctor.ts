@@ -288,9 +288,9 @@ export const doctorCmd: Command<void> = {
         })`
       );
       if (!localConfigExists) {
-        log.info('  Create local export profile: node scripts/evals init config --profile local');
+        log.info('  Create local tracing profile: node scripts/evals init config --profile local');
       }
-      log.info('  node scripts/evals start --suite attack-discovery --export-profile local');
+      log.info('  node scripts/evals start --suite attack-discovery --tracing-profile local');
     }
   },
 };
