@@ -341,6 +341,105 @@ export default ({ getService }: FtrProviderContext) => {
             expectSnapshot(result.csvFile).toMatch();
           });
         });
+
+        describe('filters of the locator params, over the ones of the saved search', () => {
+          const savedSearchWithFilterId = 'csv-v2-saved-search-with-filter';
+          const maleFilter = {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+              key: 'customer_gender',
+              params: { query: 'MALE' },
+              type: 'phrase',
+              index: ECOM_DATA_VIEW_ID,
+            },
+            query: { match_phrase: { customer_gender: 'MALE' } },
+          };
+
+          const getGenders = (csvFile: string) => {
+            const [header, ...rows] = csvFile.trim().split('\n');
+            const genderIndex = header.split(',').indexOf('customer_gender');
+            return new Set(rows.map((row) => row.split(',')[genderIndex]));
+          };
+
+          before(async () => {
+            await kibanaServer.savedObjects.create({
+              type: 'search',
+              id: savedSearchWithFilterId,
+              overwrite: true,
+              attributes: {
+                title: 'Ecommerce with a filter',
+                description: '',
+                tabs: [
+                  {
+                    id: 'tab-1',
+                    label: 'Untitled',
+                    attributes: {
+                      columns: ['customer_gender', 'order_id'],
+                      sort: [['order_id', 'asc']],
+                      kibanaSavedObjectMeta: {
+                        searchSourceJSON: JSON.stringify({
+                          query: { query: '', language: 'kuery' },
+                          filter: [
+                            {
+                              ...maleFilter,
+                              meta: {
+                                ...maleFilter.meta,
+                                index: undefined,
+                                indexRefName:
+                                  'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                              },
+                            },
+                          ],
+                          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                        }),
+                      },
+                    },
+                  },
+                ],
+              },
+              references: [
+                {
+                  id: ECOM_DATA_VIEW_ID,
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                },
+                {
+                  id: ECOM_DATA_VIEW_ID,
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                  type: 'index-pattern',
+                },
+              ],
+            });
+          });
+
+          after(async () => {
+            await kibanaServer.savedObjects.delete({
+              type: 'search',
+              id: savedSearchWithFilterId,
+            });
+          });
+
+          it('uses the filters of the saved search if the locator params do not have filters', async () => {
+            const { csvFile } = await generateCsv({
+              savedSearchId: savedSearchWithFilterId,
+              timeRange,
+            });
+
+            expect(getGenders(csvFile)).to.eql(new Set(['MALE']));
+          });
+
+          it('does not use the filters of the saved search if they were removed in the locator params', async () => {
+            const { csvFile } = await generateCsv({
+              savedSearchId: savedSearchWithFilterId,
+              filters: [],
+              timeRange,
+            });
+
+            expect(getGenders(csvFile)).to.eql(new Set(['MALE', 'FEMALE']));
+          });
+        });
       });
     });
   });

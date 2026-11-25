@@ -163,34 +163,76 @@ test('with locator params containing a filter', async () => {
   expect(searchSource.getSerializedFields().filter).toEqual([testFilter]);
 });
 
-test('with saved search and locator params both containing a filter', async () => {
-  // search source belonging to the saved search
-  mockSearchSource.setField('filter', {
+describe('filters of the saved search and of the locator params', () => {
+  const savedFilter = {
     meta: { index: 'logstash-*' },
     query: { term: { host: 'elastic.co' } },
+  };
+  const paramsFilter = {
+    meta: { index: 'logstash-*' },
+    query: { term: { os: 'Palm Pilot' } },
+  };
+
+  beforeEach(() => {
+    // search source belonging to the saved search
+    mockSearchSource.setField('filter', savedFilter);
   });
 
-  // locator params
-  mockPayload = [
-    {
-      params: {
-        savedSearchId: mockSavedSearchId,
-        filters: [
-          {
-            meta: { index: 'logstash-*' },
-            query: { term: { os: 'Palm Pilot' } },
-          },
-        ],
-      },
-    },
-  ];
+  test('the filters of the locator params replace the ones of the saved search', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({
+      savedSearchId: mockSavedSearchId,
+      filters: [paramsFilter],
+    });
 
-  const provider = searchSourceFromLocatorFactory(mockServices);
-  const searchSource = await provider(mockPayload[0].params);
-  expect(searchSource.getSerializedFields().filter).toEqual([
-    { meta: { index: 'logstash-*' }, query: { term: { host: 'elastic.co' } } },
-    { meta: { index: 'logstash-*' }, query: { term: { os: 'Palm Pilot' } } },
-  ]);
+    // the saved filter was removed in the UI, and the locator params have the current filters
+    expect(searchSource.getSerializedFields().filter).toEqual([paramsFilter]);
+  });
+
+  test('empty filters in the locator params remove the ones of the saved search', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId, filters: [] });
+
+    expect(searchSource.getSerializedFields().filter).toBeUndefined();
+  });
+
+  test('keeps the time range filter next to the filters of the locator params', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({
+      savedSearchId: mockSavedSearchId,
+      filters: [paramsFilter],
+      timeRange: { from: 'now-15m', to: 'now' },
+    });
+
+    expect(searchSource.getSerializedFields().filter).toEqual([
+      expect.objectContaining({ meta: expect.objectContaining({ field: 'timestamp' }) }),
+      paramsFilter,
+    ]);
+  });
+
+  test('uses the filters of the saved search if the locator params do not have filters', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId });
+
+    expect(searchSource.getSerializedFields().filter).toEqual([savedFilter]);
+  });
+
+  test('does not use the filters of the saved search for a data view that replaces its data view', async () => {
+    const otherDataView = createStubDataView({
+      spec: { id: 'other-data-view', name: 'other', timeFieldName: 'event.created' },
+    });
+    dataViewsService.get.mockResolvedValue(otherDataView);
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({
+      savedSearchId: mockSavedSearchId,
+      dataViewId: 'other-data-view',
+      filters: [],
+    });
+
+    expect(searchSource.getField('index')).toBe(otherDataView);
+    expect(searchSource.getSerializedFields().filter).toBeUndefined();
+  });
 });
 
 test('with locator params containing a timeRange', async () => {

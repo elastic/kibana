@@ -42,7 +42,9 @@ function normalizeFilter(savedSearchFilterTmp?: FilterResponse) {
 }
 
 /*
- * Combine the time range filter from the job request body with any filters that have been saved into the saved search object
+ * Combine the time range filter with the filters of the search. The filters in the locator params (the current
+ * state of the search, which already includes the saved ones that were not removed) replace the filters that have
+ * been saved into the saved search object. Without them, the saved filters are used.
  * NOTE: if the filters that were saved into the search are NOT an array, it may be a function, and can not be supported.
  */
 const getFilters = (
@@ -77,13 +79,13 @@ const getFilters = (
     }
   }
 
-  const savedSearchFilter = normalizeFilter(searchSource.getField('filter'));
-  if (savedSearchFilter) {
-    filters.push(...savedSearchFilter);
-  }
-  const paramsFilter = normalizeFilter(params.filters);
-  if (paramsFilter) {
-    filters.push(...paramsFilter);
+  // Adding the saved filters to the ones of the params would apply the filters that were removed in the UI, or
+  // that are for fields of a data view that was replaced.
+  const sourceFilters =
+    params.filters !== undefined ? params.filters : searchSource.getField('filter');
+  const normalizedFilters = normalizeFilter(sourceFilters);
+  if (normalizedFilters) {
+    filters.push(...normalizedFilters);
   }
 
   return filters;
@@ -152,8 +154,12 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
       searchSource,
       params
     );
-    if (filters.length > 0) {
+    // `filters` is the full list of filters, so the ones of the saved search are always removed when the
+    // locator params have filters, even if they are empty
+    if (filters.length > 0 || params.filters !== undefined) {
       searchSource.removeField('filter');
+    }
+    if (filters.length > 0) {
       searchSource.setField('filter', filters);
     }
 
