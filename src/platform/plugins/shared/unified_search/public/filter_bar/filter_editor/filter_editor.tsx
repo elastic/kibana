@@ -43,7 +43,7 @@ import { merge } from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';
@@ -59,10 +59,12 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { GenericComboBox } from './generic_combo_box';
 import {
+  getDataViewName,
   getFieldFromFilter,
   getFilterableFields,
   getOperatorFromFilter,
   isFilterValid,
+  rebindFilterDataView,
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
@@ -71,23 +73,9 @@ import { flattenFilters } from '../lib/flatten_filters';
 import { getFilterKeys } from '../filter_item/is_filter_applicable';
 import { filterBadgeStyle, filterPreviewLabelStyle } from './filter_editor.styles';
 import { ScrollableContainer } from './scrollable_container';
+import type { QueryDslFilter } from './with_close_confirm_modal';
 
 const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
-
-const getDataViewName = (dataView?: FilterableSource): string =>
-  dataView?.getName?.() ?? dataView?.name ?? dataView?.title ?? '';
-
-/** Points a filter, and the nested filters of a combined one, from one data view to another. */
-const rebindFilterDataView = (filter: Filter, fromId?: string, toId?: string): Filter => ({
-  ...filter,
-  meta: {
-    ...filter.meta,
-    ...(filter.meta.index === fromId && { index: toId }),
-    ...(isCombinedFilter(filter) && {
-      params: filter.meta.params.map((nested) => rebindFilterDataView(nested, fromId, toId)),
-    }),
-  },
-});
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -152,13 +140,6 @@ export const strings = {
     }),
 };
 
-interface QueryDslFilter {
-  queryDsl: string;
-  customLabel: string | null;
-  /** The data view ID the filter is saved with, which the data view picker can change. */
-  dataViewId?: string;
-}
-
 export interface FilterEditorComponentProps {
   filter: Filter;
   indexPatterns: FilterableSource[];
@@ -188,7 +169,10 @@ interface State {
   localFilter: Filter;
   isLoadingDataView?: boolean;
   resetVisibleHeight$: Subject<void>;
-  /** Set when the filter's data view isn't available and another one was selected, by its fields or in the picker. */
+  /**
+   * Set when the filter's data view isn't available and another one was selected, by its fields or
+   * in the picker. `dataViewSelectedByFields` is only ever set together with it.
+   */
   useSelectedDataViewOnSubmit: boolean;
   /** The data view selected by the filter's fields, to notify the user about the swap. */
   dataViewSelectedByFields?: FilterableSource;
@@ -250,16 +234,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
    */
   private async loadDataView(dataViewId: string, dataViews: DataViewsContract) {
     const { signal } = this.unmountController;
+    let dataView: DataView;
     try {
-      const dataView = await dataViews.get(dataViewId, false);
-      if (signal.aborted) return;
-      const indexPatterns = [dataView, ...this.props.indexPatterns];
-      const localFilter = merge({}, this.props.filter);
-      this.applyBaselineFilter(localFilter, indexPatterns, {
-        selectedDataView: dataView,
-        isLoadingDataView: false,
-        indexPatterns,
-      });
+      dataView = await dataViews.get(dataViewId, false);
     } catch (e) {
       if (signal.aborted) return;
       if (e instanceof SavedObjectNotFound) {
@@ -268,7 +245,16 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         // The data view may still exist (e.g. a network or permission error), so keep its ID.
         this.showFilterAsQueryDsl();
       }
+      return;
     }
+    if (signal.aborted) return;
+
+    const indexPatterns = [dataView, ...this.props.indexPatterns];
+    this.applyBaselineFilter(merge({}, this.props.filter), indexPatterns, {
+      selectedDataView: dataView,
+      isLoadingDataView: false,
+      indexPatterns,
+    });
   }
 
   /**

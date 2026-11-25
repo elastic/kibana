@@ -17,6 +17,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createNestedDataView } from './lib/nested_data_view.mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { FilterableSource } from '@kbn/data-source';
@@ -828,22 +829,7 @@ describe('Filter whose data view cannot be found', () => {
   });
 
   describe('with a nested field', () => {
-    const nestedDataView = {
-      ...mockedDataView,
-      id: 'nested-data-view-id',
-      fields: [
-        {
-          name: 'user.name',
-          type: 'string',
-          esTypes: ['keyword'],
-          aggregatable: true,
-          filterable: true,
-          searchable: true,
-          subType: { nested: { path: 'user' } },
-        },
-      ],
-      getName: () => 'nested',
-    } as DataView;
+    const nestedDataView = createNestedDataView(mockedDataView);
     const nestedFilter = withMissingDataView(filterPhrase('user.name', 'alice'));
     const nestedQueryDsl = JSON.stringify(
       { nested: { path: 'user', query: { match_phrase: { 'user.name': 'alice' } } } },

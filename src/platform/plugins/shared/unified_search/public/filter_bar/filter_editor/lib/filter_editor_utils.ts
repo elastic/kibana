@@ -9,7 +9,7 @@
 
 import dateMath from '@kbn/datemath';
 import type { Filter, RangeFilter, ScriptedRangeFilter } from '@kbn/es-query';
-import { isRangeFilter } from '@kbn/es-query';
+import { isCombinedFilter, isRangeFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
@@ -119,3 +119,18 @@ export function isFilterValid(
       throw new Error(`Unknown operator type: ${operator.type}`);
   }
 }
+
+export const getDataViewName = (dataView?: FilterableSource): string =>
+  dataView?.getName?.() ?? dataView?.name ?? dataView?.title ?? '';
+
+/** Points a filter, and the nested filters of a combined one, from one data view to another. */
+export const rebindFilterDataView = (filter: Filter, fromId?: string, toId?: string): Filter => ({
+  ...filter,
+  meta: {
+    ...filter.meta,
+    ...(filter.meta.index === fromId && { index: toId }),
+    ...(isCombinedFilter(filter) && {
+      params: filter.meta.params.map((nested) => rebindFilterDataView(nested, fromId, toId)),
+    }),
+  },
+});

@@ -13,9 +13,10 @@ import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import { CloseFilterEditorConfirmModal } from './close_confirm_modal';
 
-interface QueryDslFilter {
+export interface QueryDslFilter {
   queryDsl: string;
   customLabel: string | null;
+  /** The data view ID the filter is saved with, which the data view picker can change. */
   dataViewId?: string;
 }
 

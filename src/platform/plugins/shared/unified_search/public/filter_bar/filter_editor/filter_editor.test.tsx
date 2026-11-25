@@ -16,7 +16,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { createNestedDataView } from './lib/nested_data_view.mock';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
 import { dataViewMockList } from '../../dataview_picker/mocks/dataview';
@@ -170,22 +170,7 @@ describe('<FilterEditor />', () => {
     });
 
     describe('with a nested field', () => {
-      const nestedDataView = {
-        ...dataViewMockList[0],
-        id: 'nested-data-view-id',
-        fields: [
-          {
-            name: 'user.name',
-            type: 'string',
-            esTypes: ['keyword'],
-            aggregatable: true,
-            filterable: true,
-            searchable: true,
-            subType: { nested: { path: 'user' } },
-          },
-        ],
-        getName: () => 'nested',
-      } as DataView;
+      const nestedDataView = createNestedDataView(dataViewMockList[0]);
       const filter = {
         meta: {
           type: 'phrase',
