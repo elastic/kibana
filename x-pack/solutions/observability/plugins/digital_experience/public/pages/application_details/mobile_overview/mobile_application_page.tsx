@@ -10,7 +10,6 @@ import { useHistory } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
-import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import type { ApplicationTabId, MobilePlatform } from '../../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../../breadcrumbs/use_route_breadcrumb';
@@ -22,6 +21,7 @@ import { useShareAction } from '../../../hooks/use_share_action';
 import {
   APPLICATIONS_LABEL,
   APPLICATION_TAB_LABELS,
+  COMPARE_LABEL,
   OPEN_IN_DISCOVER_LABEL,
   PLATFORM_LABELS,
 } from '../../../labels';
@@ -31,10 +31,6 @@ import { useMobileKpis } from './use_mobile_kpis';
 
 /** Mobile applications are EDOT data. */
 const SOURCE = APPLICATION_SOURCE.otel;
-
-const COMPARE_LABEL = i18n.translate('xpack.digitalExperience.mobile.compare', {
-  defaultMessage: 'Compare to the previous period',
-});
 
 /** The platforms the application reported on, as the header's badges. */
 const platformBadges = (platforms: MobilePlatform[]): AppHeaderBadge[] =>
