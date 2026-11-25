@@ -1,5 +1,5 @@
 {
-  "sha1": "4cb67ebe5f01cd78be8d4369bd31c4a0829bb3c5",
+  "sha1": "1dd8feaefa62940056c10d006057af1472993e36",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,7 +28,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
         "line": 28,
-        "column": 60
+        "column": 64
       }
     },
     {
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
-        "line": 50,
+        "line": 52,
         "column": 22
       }
     },
@@ -59,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
-        "line": 63,
-        "column": 22
+        "line": 65,
+        "column": 15
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
-        "line": 87,
-        "column": 22
+        "line": 89,
+        "column": 15
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
-        "line": 98,
-        "column": 22
+        "line": 100,
+        "column": 9
       }
     },
     {
@@ -107,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/protection_updates_edit.spec.ts",
-        "line": 116,
-        "column": 9
+        "line": 118,
+        "column": 33
       }
     },
     {
