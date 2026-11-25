@@ -36,17 +36,14 @@ const DEFAULT_MAX_CONTENT_LENGTH = 1024 * 1024;
 // - HTTPURITYPE, URITYPE, DBURITYPE, XDBURITYPE: fetch a URL from SQL.
 // - @: a database link, which reads or writes on another database.
 export const ORACLE_READ_GUARD_PATTERN =
-  /\bFOR\s+UPDATE\b|\bWITH\s+(?:FUNCTION|PROCEDURE)\b|\b(?:UTL_|DBMS_)\w*|\b(?:HTTP|DB|XDB)?URITYPE\b|@/i;
+  /\bFOR\s+UPDATE\b|\bWITH\s+(?:FUNCTION|PROCEDURE)\b|\b(?:UTL_|DBMS_)\w*|\b(?:HTTP|DB|XDB)?URITYPE\b|\bURIFACTORY\b|@/i;
 
 const QUOTE_PAIRS: Record<string, string> = { '(': ')', '[': ']', '{': '}', '<': '>' };
 
-/**
- * Replaces comments and string literals with spaces (same length, so indexes line up with the original SQL) so the
- * write-token scan only sees SQL tokens. A keyword inside a literal is not a statement, and a comment is whitespace to
- * Oracle (`DROP/**\/TABLE` is `DROP TABLE`). Double-quoted identifiers keep their text and lose only the quotes:
- * a package can be called as `SYS."DBMS_LOCK".SLEEP(1)`, so hiding them would hide the call. Only the check sees this
- * text; the original SQL is what runs.
- */
+// Replaces comments and string literals with spaces, keeping the length, so the write-token scan only sees SQL tokens.
+// A comment is whitespace to Oracle (`DROP/**\/TABLE` is `DROP TABLE`). Double-quoted identifiers keep their text and
+// lose only the quotes, because a package can be called as `SYS."DBMS_LOCK".SLEEP(1)`. Only the check sees this text.
+/** Blanks comments and string literals so the read guard scans only SQL tokens. */
 export const blankNonCode = (sql: string): string => {
   const out: string[] = [];
   const blank = (from: number, to: number) => {
@@ -106,7 +103,7 @@ export const blankNonCode = (sql: string): string => {
           i++;
           break;
         } else {
-          out.push(sql[i]);
+          out.push(sql[i] === ';' ? ' ' : sql[i]);
           i++;
         }
       }
@@ -118,10 +115,9 @@ export const blankNonCode = (sql: string): string => {
   return out.join('');
 };
 
-/**
- * Oracle rejects a trailing `;` (ORA-00911), which agents often add. Removes one if nothing but whitespace and
- * comments follow it. `blanked` is `blankNonCode(sql)`, so a `;` inside a literal is never touched.
- */
+// Oracle rejects a trailing `;` (ORA-00911), which agents often add. `blanked` is `blankNonCode(sql)`, so a `;` inside
+// a literal is never touched.
+/** Removes a single trailing semicolon when only whitespace and comments follow it. */
 export const stripTrailingSemicolon = (sql: string, blanked: string): string => {
   const index = blanked.lastIndexOf(';');
   if (index === -1 || blanked.slice(index + 1).trim() !== '') {
@@ -258,12 +254,9 @@ const quietly = async (fn: () => Promise<unknown>): Promise<void> => {
   }
 };
 
-/**
- * Runs a read on a pooled connection inside a READ ONLY transaction (writes fail with ORA-01456) and streams rows
- * so memory stays bounded: rows are retained only up to `maxRows` and the Actions maximum response size, then the
- * result is flagged as truncated and the cursor is closed. The transaction is rolled back before the connection
- * returns to the pool.
- */
+// Streams rows inside a READ ONLY transaction (writes fail with ORA-01456), keeping rows only up to `maxRows` and the
+// Actions maximum response size, then flags the result as truncated and closes the cursor. The transaction is rolled
+// back before the connection returns to the pool.
 const runQueryOnce = async (
   ctx: ActionContext,
   sql: string,
@@ -323,11 +316,9 @@ export const runQuery = async (
   }
 };
 
-/**
- * Runs any statement and commits it. Used only by the workflow-only `executeSql`, so it makes no read-only
- * promise. The connection is dropped from the pool afterwards instead of returned, so session state the
- * statement changed (`ALTER SESSION`, package variables) never reaches another call.
- */
+// Used only by the workflow-only `executeSql`, so it makes no read-only promise. The connection is dropped from the
+// pool afterwards, so session state the statement changed (`ALTER SESSION`, package variables) never reaches another call.
+/** Runs any statement on a pooled connection and commits it. */
 export const runStatement = async (ctx: ActionContext, sql: string): Promise<SqlResult> => {
   const pool = await ctx.getClient('oracle');
   const lib = await import('oracledb');

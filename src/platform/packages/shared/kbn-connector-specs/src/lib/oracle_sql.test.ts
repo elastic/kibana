@@ -52,6 +52,13 @@ describe('blankNonCode', () => {
     expect(blankNonCode(`SELECT seq'x' FROM dual`)).toMatch(/seq\s+FROM dual/);
   });
 
+  it('blanks a semicolon inside a double-quoted identifier so it is not a statement terminator', () => {
+    expect(blankNonCode('SELECT * FROM "a;b"')).not.toContain(';');
+    expect(() => guard('SELECT * FROM "a;b"')).not.toThrow();
+    const sql = 'SELECT * FROM "t;"';
+    expect(stripTrailingSemicolon(sql, blankNonCode(sql))).toBe(sql);
+  });
+
   it('keeps the text of double-quoted identifiers so quoted package calls stay visible', () => {
     expect(blankNonCode('SELECT SYS."DBMS_LOCK".SLEEP(1) FROM dual')).toMatch(/DBMS_LOCK/);
   });
@@ -106,6 +113,8 @@ describe('read guard', () => {
     ['SELECT SYS."DBMS_LOCK".SLEEP(10) FROM dual'],
     ['SELECT dbms_pipe.receive_message(1) FROM dual'],
     ["SELECT HTTPURITYPE('http://evil.example').getclob() FROM dual"],
+    ["SELECT SYS.URIFACTORY.getURI('http://evil.example').getClob() FROM DUAL"],
+    ['SELECT sys."URIFACTORY".getURI(x) FROM t'],
     ['SELECT * FROM remote_table@other_db'],
     ['SELECT * INTO x FROM dual; SELECT 1 FROM dual'],
   ])('rejects %s', (sql) => {

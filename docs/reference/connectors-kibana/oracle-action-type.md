@@ -84,7 +84,7 @@ You can test connectors as you're creating or editing the connector in {{kib}}.
 The Oracle Database connector has the following actions:
 
 Query
-:   Run a read-only SQL query against the database. Results are limited to `maxRows` rows and to the {{kib}} maximum response size (`xpack.actions.maxResponseContentLength`), and are marked as truncated when more rows exist. `DATE` and `TIMESTAMP` values are returned as wall-clock strings without a time zone, such as `2026-01-02T03:04:05`. Timestamps with a time zone are returned as UTC instants that end in `Z`. Text LOB values are cut at 10,000 characters, and binary LOB values are described rather than returned.
+:   Run a read-only SQL query against the database. Results are limited to `maxRows` rows and to the {{kib}} maximum response size (`xpack.actions.maxResponseContentLength`), and are marked as truncated when more rows exist. `DATE` and `TIMESTAMP` values are returned as wall-clock strings without a time zone, such as `2026-01-02T03:04:05`. Timestamps with a time zone are returned as UTC instants that end in `Z`. If the {{kib}} host's time zone observes daylight saving time, a `DATE` or `TIMESTAMP` value that falls in the skipped hour of the spring clock change doesn't exist in that zone and is returned one hour later than stored. Text LOB values are cut at 10,000 characters, and binary LOB values are described rather than returned.
     - **sql** (required): The `SELECT` or `WITH` query to run. Use `FETCH FIRST n ROWS ONLY` to limit results, because `LIMIT` is not valid in Oracle SQL. Do not include a trailing semicolon.
     - **maxRows** (optional): Maximum number of rows to return (1 to 1,000, default: 100).
 

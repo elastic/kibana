@@ -69,14 +69,12 @@ export interface OracleTlsOptions {
   sslServerDNMatch: boolean;
 }
 
-/**
- * Maps the Kibana TLS options for a host onto the Thin-mode options.
- * - No custom CA (`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData`): no wallet, so Node's
- *   default trusted roots apply.
- * - Custom CA: a PEM wallet of an ephemeral identity plus the CA, which then replaces the default roots.
- * - Verification mode "certificate" skips the host name check; "none" cannot be honored because the driver always
- *   verifies the chain, so it verifies fully and logs a warning.
- */
+// - No custom CA (`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData`): no wallet, so Node's default
+//   trusted roots apply.
+// - Custom CA: a PEM wallet of an ephemeral identity plus the CA, which then replaces the default roots.
+// - Verification mode "certificate" skips the host name check; "none" cannot be honored because the driver always
+//   verifies the chain, so it verifies fully and logs a warning.
+/** Maps the Kibana TLS options for a host onto the Thin-mode options. */
 export const buildOracleTlsOptions = async (
   tls: TlsConnectionOptions,
   logger: Logger,
