@@ -175,4 +175,25 @@ describe('resourceInstaller', () => {
     await expect(createInstaller(esClient).install()).resolves.toBeUndefined();
     expect(esClient.indices.createDataStream).toHaveBeenCalledTimes(2);
   });
+
+  it('passes the abort signal to every Elasticsearch call', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { signal } = new AbortController();
+
+    await createInstaller(esClient).install(signal);
+
+    const calls: unknown[][] = [
+      ...esClient.cluster.getComponentTemplate.mock.calls,
+      ...esClient.cluster.putComponentTemplate.mock.calls,
+      ...esClient.indices.getIndexTemplate.mock.calls,
+      ...esClient.indices.putIndexTemplate.mock.calls,
+      ...esClient.indices.create.mock.calls,
+      ...esClient.indices.putMapping.mock.calls,
+      ...esClient.indices.createDataStream.mock.calls,
+    ];
+    expect(calls.length).toBeGreaterThan(0);
+    calls.forEach((call) => {
+      expect(call[call.length - 1]).toEqual(expect.objectContaining({ signal }));
+    });
+  });
 });

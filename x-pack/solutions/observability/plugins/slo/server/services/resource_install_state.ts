@@ -96,7 +96,7 @@ export class ResourceInstallState {
       onLockAcquired: () => {
         clearTimeout(timer);
         // An abandoned attempt that acquires the lock late must not install.
-        if (lockWaitExpired) {
+        if (lockWaitExpired || Date.now() >= deadline) {
           throw new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE);
         }
       },

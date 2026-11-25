@@ -214,4 +214,19 @@ describe('ResourceInstallState', () => {
     await state.ensureInstalled();
     expect(installer.install).toHaveBeenCalledTimes(1);
   });
+
+  it('does not install when the lock is acquired after the wait budget elapsed', async () => {
+    jest.useFakeTimers();
+    const { installer, lockManager, state } = setup();
+    lockManager.withLock.mockImplementation(async (_lockId, callback) => {
+      // the budget elapses while the acquisition is pending, before the timer callback runs
+      jest.setSystemTime(Date.now() + 31_000);
+      return callback();
+    });
+
+    await expect(state.ensureInstalled()).rejects.toThrow(
+      new SLOResourcesNotInstalled('SLO resources are being installed by another process')
+    );
+    expect(installer.install).not.toHaveBeenCalled();
+  });
 });
