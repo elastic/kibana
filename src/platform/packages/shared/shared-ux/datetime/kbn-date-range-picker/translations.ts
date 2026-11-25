@@ -339,6 +339,12 @@ export const refreshIntervalTexts = {
   }),
 };
 
+export const autoRefreshPanelTexts = {
+  doneButton: i18n.translate('sharedUXPackages.dateRangePicker.autoRefreshPanel.doneButton', {
+    defaultMessage: 'Done',
+  }),
+};
+
 export const mainPanelTexts = {
   presetsLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsLabel', {
     defaultMessage: 'Presets',
@@ -353,6 +359,10 @@ export const mainPanelTexts = {
   customTimeRangePanelTitle: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.customTimeRangePanelTitle',
     { defaultMessage: 'Custom range' }
+  ),
+  autoRefreshPanelTitle: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.autoRefreshPanelTitle',
+    { defaultMessage: 'Auto-refresh' }
   ),
   savePresetTooltip: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',

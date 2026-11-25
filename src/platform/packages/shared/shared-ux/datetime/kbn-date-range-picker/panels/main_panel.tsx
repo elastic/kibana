@@ -30,6 +30,7 @@ import {
 } from '../date_range_picker_panel_ui';
 import { DocumentationPanel } from './documentation_panel';
 import { SettingsPanel } from './settings_panel';
+import { AutoRefreshPanel } from './auto_refresh_panel';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
@@ -151,6 +152,7 @@ const PresetsRecentTabs = () => {
 
 const SubPanelMenu = () => {
   const { navigateTo, panelDescriptors } = useDateRangePickerPanelNavigation();
+  const { hasAutoRefresh } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
@@ -170,6 +172,15 @@ const SubPanelMenu = () => {
       >
         {mainPanelTexts.customTimeRangePanelTitle}
       </PanelNavItem>
+      {hasAutoRefresh && (
+        <PanelNavItem
+          onClick={() => navigateTo(AutoRefreshPanel.PANEL_ID)}
+          icon="refreshTime"
+          data-test-subj="dateRangePickerAutoRefreshNavItem"
+        >
+          {mainPanelTexts.autoRefreshPanelTitle}
+        </PanelNavItem>
+      )}
       {panelDescriptors.map(({ id, title, icon }) => (
         <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
           {title}

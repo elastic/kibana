@@ -33,6 +33,7 @@ import { CalendarPanel } from './panels/calendar_panel';
 import { CustomTimeRangePanel } from './panels/custom_time_range_panel';
 import { DocumentationPanel } from './panels/documentation_panel';
 import { SettingsPanel } from './panels/settings_panel';
+import { AutoRefreshPanel } from './panels/auto_refresh_panel';
 import { ExamplePanel, ExampleNestedPanel } from './panels/example_panel';
 
 const DEFAULT_PANEL_ID = 'main' as const;
@@ -267,6 +268,9 @@ export function DateRangePicker({
             </DateRangePickerPanel>
             <DateRangePickerPanel id={SettingsPanel.PANEL_ID}>
               <SettingsPanel />
+            </DateRangePickerPanel>
+            <DateRangePickerPanel id={AutoRefreshPanel.PANEL_ID}>
+              <AutoRefreshPanel />
             </DateRangePickerPanel>
             {panels.map(({ id, component: Component }) => (
               <DateRangePickerPanel key={id} id={id}>

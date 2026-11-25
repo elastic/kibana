@@ -284,17 +284,17 @@ export class DatePicker {
     }
   }
 
-  private async openDateRangePickerSettingsPanel() {
+  private async openDateRangePickerAutoRefreshPanel() {
     await this.page.testSubj.locator('dateRangePickerControlButton').click();
     await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor({ state: 'visible' });
-    await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
-    await this.page.testSubj.locator('dateRangePickerSettingsPanel').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('dateRangePickerAutoRefreshNavItem').click();
+    await this.page.testSubj
+      .locator('dateRangePickerAutoRefreshPanel')
+      .waitFor({ state: 'visible' });
   }
 
-  private async closeDateRangePickerSettingsPanel() {
-    await this.page.testSubj.locator('dateRangePickerSubPanelBackButton').click();
-    await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor({ state: 'visible' });
-    await this.page.keyboard.press('Escape');
+  private async closeDateRangePickerAutoRefreshPanel() {
+    await this.page.testSubj.locator('dateRangePickerAutoRefreshDoneButton').click();
     await this.page.testSubj.locator('dateRangePickerPopoverPanel').waitFor({ state: 'hidden' });
   }
 
@@ -583,7 +583,7 @@ export class DatePicker {
 
   async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
     if (await this.isNewDateRangePicker()) {
-      await this.openDateRangePickerSettingsPanel();
+      await this.openDateRangePickerAutoRefreshPanel();
 
       const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
       const isPaused = (await toggle.getAttribute('aria-checked')) !== 'true';
@@ -598,7 +598,7 @@ export class DatePicker {
         .locator('dateRangePickerAutoRefreshIntervalUnit')
         .selectOption({ value: dateUnit });
 
-      await this.closeDateRangePickerSettingsPanel();
+      await this.closeDateRangePickerAutoRefreshPanel();
     } else {
       await this.openLegacyQuickMenu();
       const isPaused = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'false';
@@ -615,7 +615,7 @@ export class DatePicker {
 
   async pauseAutoRefresh() {
     if (await this.isNewDateRangePicker()) {
-      await this.openDateRangePickerSettingsPanel();
+      await this.openDateRangePickerAutoRefreshPanel();
 
       const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
       const isRunning = (await toggle.getAttribute('aria-checked')) === 'true';
@@ -624,7 +624,7 @@ export class DatePicker {
         await toggle.click();
       }
 
-      await this.closeDateRangePickerSettingsPanel();
+      await this.closeDateRangePickerAutoRefreshPanel();
     } else {
       await this.openLegacyQuickMenu();
       const isRunning = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
