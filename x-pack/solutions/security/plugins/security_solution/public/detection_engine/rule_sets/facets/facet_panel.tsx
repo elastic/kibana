@@ -33,7 +33,7 @@ import type {
   FacetSelection,
   FacetValue,
 } from './facet_fields';
-import { allFacetFields, hasSelection } from './facet_fields';
+import { allFacetFields, hasSelection, tagFieldOf } from './facet_fields';
 import { useIntegrationTitles } from '../components/group_by_fields';
 import * as i18n from './translations';
 
@@ -41,6 +41,17 @@ const VISIBLE_VALUES = 5;
 const SEARCH_FROM = 10;
 const VISIBLE_TAG_GROUPS = 6;
 const NO_VALUES: FacetValue[] = [];
+const MAX_TAG_MATCHES = 50;
+
+/** Every tag that the conditions include or exclude, in "Other tags" or in a tag group. */
+const selectedTags = (conditions: RuleSetConditions): string[] => [
+  ...(conditions.tags?.include ?? []),
+  ...(conditions.tags?.exclude ?? []),
+  ...Object.values(conditions.tag_categories ?? {}).flatMap((values) => [
+    ...(values.include ?? []),
+    ...(values.exclude ?? []),
+  ]),
+];
 
 const usePanelStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -433,6 +444,7 @@ export const FacetPanel = ({
   const styles = usePanelStyles();
   const integrationTitles = useIntegrationTitles();
   const [showAllTagGroups, setShowAllTagGroups] = useState(false);
+  const [tagSearch, setTagSearch] = useState('');
   const fields = allFacetFields(counts, conditions);
 
   // The latest conditions and callback, so the handler passed to the memoized groups never changes.
@@ -455,6 +467,23 @@ export const FacetPanel = ({
     return byId;
   }, [counts, integrationTitles]);
   const valuesOf = (field: FacetField) => valuesById.get(field.id) ?? NO_VALUES;
+
+  // One search over the tags of all groups, like the tags filter of the table had.
+  const tagTerm = tagSearch.trim().toLowerCase();
+  const tagMatches = useMemo(() => {
+    if (!tagTerm) return [];
+    const byTag = new Map(Object.entries(counts?.counts.tags ?? {}));
+    // Counts of a group with a selection come without that selection, as in the group itself.
+    Object.values(counts?.tagCategoryCounts ?? {}).forEach((bucket) =>
+      Object.entries(bucket).forEach(([tag, count]) => byTag.set(tag, count))
+    );
+    selectedTags(conditions).forEach((tag) => {
+      if (!byTag.has(tag)) byTag.set(tag, 0);
+    });
+    return [...byTag.entries()]
+      .filter(([tag]) => tag.toLowerCase().includes(tagTerm))
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }, [tagTerm, counts, conditions]);
 
   if (isLoading && !counts) {
     return <EuiSkeletonText lines={10} />;
@@ -498,8 +527,45 @@ export const FacetPanel = ({
       {fields.filter(({ section }) => section === 'state').map(renderGroup)}
 
       <div css={styles.section}>{SECTION_TITLES.tags}</div>
-      {shownTagFields.map(renderGroup)}
-      {(hiddenTagGroups > 0 || showAllTagGroups) && (
+      <EuiFieldSearch
+        compressed
+        fullWidth
+        isClearable
+        placeholder={i18n.FIND_TAG}
+        value={tagSearch}
+        onChange={(e) => setTagSearch(e.target.value)}
+        data-test-subj="ruleFacetTagSearch"
+      />
+      <EuiSpacer size="xs" />
+      {tagTerm &&
+        (tagMatches.length === 0 ? (
+          <EuiText size="xs" color="subdued">
+            {i18n.NO_TAGS_MATCH}
+          </EuiText>
+        ) : (
+          <>
+            {tagMatches.slice(0, MAX_TAG_MATCHES).map(([tag, count]) => {
+              const field = tagFieldOf(tag);
+              return (
+                <FacetValueRow
+                  key={tag}
+                  field={field}
+                  value={{ value: tag, label: tag, count }}
+                  selection={field.get(conditions)}
+                  onChange={(next) => onFieldChange(field, next)}
+                  styles={styles}
+                />
+              );
+            })}
+            {tagMatches.length > MAX_TAG_MATCHES && (
+              <EuiText size="xs" color="subdued">
+                {i18n.MORE_TAG_MATCHES(tagMatches.length - MAX_TAG_MATCHES)}
+              </EuiText>
+            )}
+          </>
+        ))}
+      {!tagTerm && shownTagFields.map(renderGroup)}
+      {!tagTerm && (hiddenTagGroups > 0 || showAllTagGroups) && (
         <EuiButtonEmpty
           size="xs"
           flush="left"

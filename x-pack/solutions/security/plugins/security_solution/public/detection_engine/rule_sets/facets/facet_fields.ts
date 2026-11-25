@@ -73,8 +73,11 @@ export interface FacetLabels {
   integrationTitles: Map<string, string>;
 }
 
-/** Tag prefixes that repeat a rule field; the rule field facet is more precise. */
-const HIDDEN_TAG_CATEGORIES = new Set(['Tactic', 'Rule Type']);
+/**
+ * Tag prefixes that mostly repeat a rule field (MITRE tactic, rule type): listed last. They stay,
+ * because some of their tags have no rule field, for example "Rule Type: BBR".
+ */
+const LAST_TAG_CATEGORIES = new Set(['Tactic', 'Rule Type']);
 
 const RULE_TYPES: readonly string[] = Object.values(RuleSetRuleTypeEnum);
 const SEVERITIES: readonly string[] = ['low', 'medium', 'high', 'critical'];
@@ -323,7 +326,7 @@ export const tagFacets = (
   const sizes = new Map<string, number>();
   for (const [tag, count] of Object.entries(counts?.counts.tags ?? {})) {
     const category = tagCategoryOf(tag);
-    if (category && !HIDDEN_TAG_CATEGORIES.has(category)) {
+    if (category) {
       sizes.set(category, (sizes.get(category) ?? 0) + count);
     }
   }
@@ -331,8 +334,19 @@ export const tagFacets = (
   Object.keys(conditions.tag_categories ?? {}).forEach((category) => {
     if (!sizes.has(category)) sizes.set(category, 0);
   });
-  const categories = [...sizes.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name);
+  const categories = [...sizes.entries()]
+    .sort(
+      (a, b) =>
+        Number(LAST_TAG_CATEGORIES.has(a[0])) - Number(LAST_TAG_CATEGORIES.has(b[0])) || b[1] - a[1]
+    )
+    .map(([name]) => name);
   return [...categories.map(tagCategoryField), OTHER_TAGS_FIELD];
+};
+
+/** The facet of one tag: its prefix category, or "Other tags". */
+export const tagFieldOf = (tag: string): FacetField => {
+  const category = tagCategoryOf(tag);
+  return category ? tagCategoryField(category) : OTHER_TAGS_FIELD;
 };
 
 export const allFacetFields = (

@@ -5672,6 +5672,8 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_scope:
+          $ref: '#/components/schemas/RuleScope'
         rule_set_id:
           description: >
             Limit the action to the rules of this rule set. Valid only with
@@ -5726,6 +5728,8 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_scope:
+          $ref: '#/components/schemas/RuleScope'
         rule_set_id:
           description: >
             Limit the action to the rules of this rule set. Valid only with
@@ -5789,6 +5793,8 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_scope:
+          $ref: '#/components/schemas/RuleScope'
         rule_set_id:
           description: >
             Limit the action to the rules of this rule set. Valid only with
@@ -5918,6 +5924,8 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_scope:
+          $ref: '#/components/schemas/RuleScope'
         rule_set_id:
           description: >
             Limit the action to the rules of this rule set. Valid only with
@@ -5973,6 +5981,8 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_scope:
+          $ref: '#/components/schemas/RuleScope'
         rule_set_id:
           description: >
             Limit the action to the rules of this rule set. Valid only with
@@ -6025,6 +6035,8 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_scope:
+          $ref: '#/components/schemas/RuleScope'
         rule_set_id:
           description: >
             Limit the action to the rules of this rule set. Valid only with
@@ -6093,6 +6105,8 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_scope:
+          $ref: '#/components/schemas/RuleScope'
         rule_set_id:
           description: >
             Limit the action to the rules of this rule set. Valid only with
@@ -6144,6 +6158,8 @@ components:
         query:
           description: Query to filter rules.
           type: string
+        rule_scope:
+          $ref: '#/components/schemas/RuleScope'
         rule_set_id:
           description: >
             Limit the action to the rules of this rule set. Valid only with
@@ -10142,6 +10158,36 @@ components:
         cause revision increments.
       minimum: 0
       type: integer
+    RuleScope:
+      additionalProperties: false
+      description: >
+        Limits the rules to a saved rule set (`rule_set_id`); to a saved set
+        with other conditions
+
+        (`rule_set_id` and `conditions`: its picked and left-out rules stay, an
+        unsaved change of the
+
+        set); or to a rule set definition that is not saved (`conditions`,
+        `included_rule_ids`,
+
+        `excluded_rule_ids`). `rule_set_id` and the rule id lists do not go
+        together.
+      type: object
+      properties:
+        conditions:
+          $ref: '#/components/schemas/RuleSetConditions'
+        excluded_rule_ids:
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+          maxItems: 10000
+          type: array
+        included_rule_ids:
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+          maxItems: 10000
+          type: array
+        rule_set_id:
+          $ref: '#/components/schemas/RuleSetId'
     RuleSet:
       allOf:
         - $ref: '#/components/schemas/RuleSetDefinition'

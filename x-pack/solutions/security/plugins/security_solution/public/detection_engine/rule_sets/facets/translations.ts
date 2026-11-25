@@ -126,6 +126,20 @@ export const HIDE_FILTERS = i18n.translate('xpack.securitySolution.ruleSets.face
   defaultMessage: 'Hide filters',
 });
 
+export const FIND_TAG = i18n.translate('xpack.securitySolution.ruleSets.facets.findTag', {
+  defaultMessage: 'Find a tag in all groups',
+});
+
+export const NO_TAGS_MATCH = i18n.translate('xpack.securitySolution.ruleSets.facets.noTagsMatch', {
+  defaultMessage: 'No tags match',
+});
+
+export const MORE_TAG_MATCHES = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleSets.facets.moreTagMatches', {
+    values: { count },
+    defaultMessage: '{count} more: type more of the tag',
+  });
+
 export const SHOW_ALL = (count: number) =>
   i18n.translate('xpack.securitySolution.ruleSets.facets.showAll', {
     values: { count },
