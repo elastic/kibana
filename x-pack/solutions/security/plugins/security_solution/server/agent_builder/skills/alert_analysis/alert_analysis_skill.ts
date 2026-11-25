@@ -109,7 +109,7 @@ An alert shows that a rule matched. It does not show what happened around it, an
 - Suggest the entity-analytics skill to the user for deeper entity profiling or asset criticality review. Do not load it unless the user asks
 
 ## Tool Selection Guardrails
-- For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
+- For plain list and count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested. Judgment questions (which alert to handle first, is it serious) follow 'Judgment questions about the queue' and 'Check the evidence before you answer'.
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.get_entity'. If it is not available, say that risk scores are not available and do not load another skill or search for another tool.
 - For a plain list of alerts (the user only wants to see them), call 'security.alerts' with detail 'summary' to list more alerts with their key fields. Keep the default detail when you need to analyze alert content.

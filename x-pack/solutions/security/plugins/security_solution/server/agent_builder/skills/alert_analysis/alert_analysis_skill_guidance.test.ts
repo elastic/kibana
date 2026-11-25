@@ -103,6 +103,16 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(queuePath).toMatch(/which alert to handle first[^\n]*use the next two sections/i);
   });
 
+  // Why: the shipped guardrail said prioritization questions use only security.alerts, which contradicts
+  // the evidence step for "which alert do I handle first".
+  it('does not tell the guardrails to answer prioritization from security.alerts alone', () => {
+    const { content } = alertAnalysisSkill;
+    const guardrails = content.slice(content.indexOf('## Tool Selection Guardrails'));
+
+    expect(guardrails).not.toMatch(/prioritization/i);
+    expect(guardrails).toMatch(/judgment questions[^\n]*check the evidence before you answer/i);
+  });
+
   // Why: each security.alerts call runs an NL -> ES|QL generator on a second model. In the 21037 lab it
   // was ~70% of the extra input tokens, and the model called the tool ~2.8 times per run.
   it('tells the model to call security.alerts once and tally breakdowns itself', () => {
