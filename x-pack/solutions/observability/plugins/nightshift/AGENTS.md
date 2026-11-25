@@ -82,10 +82,11 @@ Every user action in `public/` must send an EBT click event. Use click tags firs
 - Add new action and element names to `public/common/ebt_constants.ts`. Do not inline strings.
 - Before you add or change a tag, fetch the EBT click tracking guidelines and follow them:
   `gh api repos/elastic/observability-dev/contents/docs/telemetry/ebt-click-tracking-guidelines.md -H "Accept: application/vnd.github.raw"`
+- Use a native `button` or link for every tagged control. A custom control that acts on a key handler without a `click` event is not tracked. Route its keyboard activation through the same `click` path.
 - Do not track typing in fields. Click tracking records click intents only.
 - Do not leave `@kbn/telemetry(ebt_props_should_be_present)` warnings on code you add or change.
 - A tag on an ancestor counts: `track_clicks.ts` reads the whole ancestor chain. Do not tag a container that holds other controls. A click on an untagged child then sends the container's action, and a click on a tagged child sends both.
-- `track_clicks.ts` listens on `window` in the bubble phase. Never call `stopPropagation()` on or above a tagged control. To keep a clickable parent (row, card) from reacting, mark the inner control with `data-prevent-row-click` and make the parent handler return early when `event.target.closest('[data-prevent-row-click]')`.
+- `track_clicks.ts` listens on `window` in the bubble phase. Never call `stopPropagation()` on or above a tagged control. `data-prevent-row-click` stops the parent handler only, not the parent's tag. Do not tag a clickable row or card. Tag its primary open control, such as the title button or link, and tag each secondary control separately. Then a click on a secondary control records only its own action.
 - Tag a control with `getEbtProps`. Do not rely on `data-test-subj`: a reused DOM node can change it before the listener runs.
 
 ## Custom events
@@ -99,4 +100,4 @@ These are not valid reasons: "it is a state change", "it is important". A click 
 
 ## Verify
 
-Run Kibana with `telemetry.localShipper: true`. Click each tagged control with real mouse and keyboard input. Read the `ebt-kibana-browser-click-with-action` index and filter on `click.action`. Check that each click sends one event with the expected action, and that no parent action fires.
+Run Kibana with `telemetry.localShipper: true`. Click each tagged control with real mouse and keyboard input. Read click events in the `ebt-kibana-browser` index. Check that `properties.target` holds the expected `data-ebt-action=...` entry and no unexpected ancestor tag. Check that each click sends one event.
