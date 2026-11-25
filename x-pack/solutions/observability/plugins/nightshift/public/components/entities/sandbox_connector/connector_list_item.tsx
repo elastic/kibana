@@ -17,7 +17,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_DETAILS } from '../../../common/ebt_constants';
 
 const ACTIONS_CLASS = 'nightshiftConnectorListItem__actions';
 
@@ -31,6 +33,7 @@ export function ConnectorListItem({
   openDetailsDisabledReason,
   onDelete,
   deleteDisabledReason,
+  ebtElement,
 }: {
   connector: SandboxConnector;
   isAssigned: boolean;
@@ -41,6 +44,7 @@ export function ConnectorListItem({
   openDetailsDisabledReason?: string;
   onDelete: () => void;
   deleteDisabledReason?: string;
+  ebtElement: string;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const checkboxId = useGeneratedHtmlId({ prefix: 'nightshiftConnectorListItem' });
@@ -109,6 +113,11 @@ export function ConnectorListItem({
         </span>
       }
       data-test-subj={`nightshiftConnectorListToggle-${connector.id}`}
+      {...getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+        element: ebtElement,
+        detail: isAssigned ? NIGHTSHIFT_EBT_DETAILS.DISABLE : NIGHTSHIFT_EBT_DETAILS.ENABLE,
+      })}
     />
   );
 
@@ -133,6 +142,10 @@ export function ConnectorListItem({
             isDisabled={openDetailsDisabledReason !== undefined}
             onClick={onOpenDetails}
             data-test-subj={`nightshiftConnectorListOpenDetails-${connector.id}`}
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.EDIT_CONNECTOR,
+              element: ebtElement,
+            })}
           />
         </EuiToolTip>
         <EuiToolTip content={deleteDisabledReason ?? deleteLabel} disableScreenReaderOutput>
@@ -143,6 +156,10 @@ export function ConnectorListItem({
             isDisabled={deleteDisabledReason !== undefined}
             onClick={onDelete}
             data-test-subj={`nightshiftConnectorListDelete-${connector.id}`}
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.OPEN_DELETE_CONNECTOR,
+              element: ebtElement,
+            })}
           />
         </EuiToolTip>
       </div>

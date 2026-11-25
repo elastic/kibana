@@ -649,6 +649,10 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
     type: 'command',
     name: 'mv_expand',
   },
+  nested_expand: {
+    type: 'command',
+    name: 'nested_expand',
+  },
   registered_domain: {
     type: 'command',
     name: 'registered_domain',
@@ -799,6 +803,7 @@ export enum EsqlCommandNames {
   METRICS_INFO = 'metrics_info',
   MMR = 'mmr',
   MV_EXPAND = 'mv_expand',
+  NESTED_EXPAND = 'nested_expand',
   REGISTERED_DOMAIN = 'registered_domain',
   RENAME = 'rename',
   RERANK = 'rerank',

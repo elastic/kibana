@@ -247,6 +247,53 @@ describe('Outputs secrets', () => {
     });
   });
 
+  describe('OTLP authentication credential', () => {
+    const otlpAuthOutput = {
+      id: 'otlp-id',
+      name: 'OTLP output',
+      type: 'otlp',
+      is_default: false,
+      is_default_monitoring: false,
+      otlp_exporter: { endpoint: 'https://collector.example.com:4317', protocol: 'grpc' },
+      auth: { type: 'auth_header', scheme: 'bearer_token' },
+    } as any;
+
+    it('getOutputSecretReferences should list the credential, so Fleet Server resolves it', () => {
+      expect(
+        getOutputSecretReferences({
+          ...otlpAuthOutput,
+          secrets: {
+            auth: { credential: { id: 'credential-id' } },
+            otlp_exporter: { tls: { key_pem: { id: 'key-pem-id' } } },
+          },
+        })
+      ).toEqual([{ id: 'credential-id' }, { id: 'key-pem-id' }]);
+    });
+
+    it('extractAndWriteOutputSecrets should store the credential', async () => {
+      const result = await extractAndWriteOutputSecrets({
+        output: { ...otlpAuthOutput, secrets: { auth: { credential: 'my-token' } } },
+        esClient: esClientMock,
+      });
+
+      expect(result.output.secrets).toEqual({ auth: { credential: { id: expect.any(String) } } });
+      expect(esClientMock.transport.request.mock.calls.map(([req]: any) => req.body.value)).toEqual(
+        ['my-token']
+      );
+    });
+
+    it('deleteOutputSecrets should delete the credential', async () => {
+      await deleteOutputSecrets({
+        output: { ...otlpAuthOutput, secrets: { auth: { credential: { id: 'credential-id' } } } },
+        esClient: esClientMock,
+      });
+
+      expect(esClientMock.transport.request.mock.calls.map(([req]: any) => req.path)).toEqual([
+        '/_fleet/secret/credential-id',
+      ]);
+    });
+  });
+
   describe('extractAndUpdateOutputSecrets', () => {
     it('should delete secret if type changed from kafka to remote es', async () => {
       const result = await extractAndUpdateOutputSecrets({
