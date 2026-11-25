@@ -152,6 +152,85 @@ describe('createUiamAssertionSigner', () => {
     });
   });
 
+  describe('assertion reuse', () => {
+    let currentTime: number;
+    let signer: ReturnType<typeof createUiamAssertionSigner>;
+
+    beforeEach(() => {
+      currentTime = NOW;
+      signer = createUiamAssertionSigner({
+        certificate: rsaCertificate,
+        key: rsaKey,
+        now: () => currentTime,
+      });
+    });
+
+    it('reuses the assertion of a credential for two thirds of its lifetime', () => {
+      const assertion = signer.sign(bearerCredential);
+
+      currentTime = NOW + 19_999;
+      expect(signer.sign(bearerCredential)).toBe(assertion);
+      expect(decodeAssertion(assertion).payload.iat).toBe(NOW / 1000);
+    });
+
+    it('signs a new assertion once two thirds of the lifetime have passed', () => {
+      const assertion = signer.sign(bearerCredential);
+
+      currentTime = NOW + 20_000;
+      const renewed = signer.sign(bearerCredential);
+      expect(renewed).not.toBe(assertion);
+      expect(decodeAssertion(renewed).payload).toEqual(
+        expect.objectContaining({ iat: NOW / 1000 + 20, exp: NOW / 1000 + 50 })
+      );
+
+      currentTime = NOW + 39_999;
+      expect(signer.sign(bearerCredential)).toBe(renewed);
+    });
+
+    it('scales the reuse window with a custom lifetime', () => {
+      const shortLivedSigner = createUiamAssertionSigner({
+        certificate: rsaCertificate,
+        key: rsaKey,
+        lifetimeSeconds: 6,
+        now: () => currentTime,
+      });
+      const assertion = shortLivedSigner.sign(bearerCredential);
+
+      currentTime = NOW + 3_999;
+      expect(shortLivedSigner.sign(bearerCredential)).toBe(assertion);
+
+      currentTime = NOW + 4_000;
+      expect(shortLivedSigner.sign(bearerCredential)).not.toBe(assertion);
+    });
+
+    it('never reuses the assertion of another credential', () => {
+      const assertion = signer.sign(bearerCredential);
+      const otherAssertion = signer.sign(new HTTPAuthorizationHeader('Bearer', 'essu_other'));
+
+      expect(otherAssertion).not.toBe(assertion);
+      expect(decodeAssertion(otherAssertion).payload.ath).toBe(expectedAth('essu_other'));
+      expect(signer.sign(bearerCredential)).toBe(assertion);
+    });
+
+    it('signs a new assertion when the clock moved back', () => {
+      const assertion = signer.sign(bearerCredential);
+
+      currentTime = NOW - 5_000;
+      const renewed = signer.sign(bearerCredential);
+      expect(renewed).not.toBe(assertion);
+      expect(decodeAssertion(renewed).payload.iat).toBe(NOW / 1000 - 5);
+    });
+
+    it('refuses to return a reusable assertion once the certificate has expired', () => {
+      const expiresAt = new Date(new X509Certificate(rsaCertificate).validTo).getTime();
+      currentTime = expiresAt - 1_000;
+      signer.sign(bearerCredential);
+
+      currentTime = expiresAt;
+      expect(() => signer.sign(bearerCredential)).toThrow(/the certificate expired at/);
+    });
+  });
+
   describe('validation', () => {
     it('rejects input without certificates', () => {
       expect(() => createUiamAssertionSigner({ certificate: '', key: rsaKey })).toThrowError(

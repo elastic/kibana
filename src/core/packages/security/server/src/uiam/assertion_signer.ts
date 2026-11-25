@@ -15,6 +15,7 @@ import {
   sign as signData,
   verify as verifySignature,
 } from 'crypto';
+import { LRUCache } from 'lru-cache';
 
 import type { HTTPAuthorizationHeader } from '../authentication';
 
@@ -26,6 +27,10 @@ export const UIAM_ASSERTION_SCHEME = 'Assertion';
 const ASSERTION_TYPE = 'uiam-provenance+jwt';
 const ASSERTION_AUDIENCE = 'spiffe://uiam.elastic.co';
 const DEFAULT_LIFETIME_SECONDS = 30;
+// An assertion is reused for this share of its lifetime, so a reused one always has at least the
+// rest of it left to reach UIAM.
+const REUSABLE_LIFETIME_SHARE = 2 / 3;
+const ASSERTION_CACHE_MAX_SIZE = 1000;
 const CERTIFICATE_PATTERN = /-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g;
 const EIDENT_DNS_PREFIX = 'eident.';
 
@@ -39,7 +44,8 @@ export interface UiamAssertionSigner {
   readonly subject: string;
   /**
    * Returns the `x-client-authentication` header value (`Assertion <jwt>`) bound to the given
-   * credential.
+   * credential. The same assertion is returned for a credential until two thirds of its lifetime
+   * have passed, so repeated calls do not each pay for a signature.
    */
   sign(credential: HTTPAuthorizationHeader): string;
   /**
@@ -153,6 +159,11 @@ export function createUiamAssertionSigner({
       x5c: chain.map((cert) => cert.raw.toString('base64')),
     })
   );
+  const reusableForMs = lifetimeSeconds * 1000 * REUSABLE_LIFETIME_SHARE;
+  // Keyed by the hash of the credential, so the credential itself is never held.
+  const assertions = new LRUCache<string, { value: string; issuedAtMs: number }>({
+    max: ASSERTION_CACHE_MAX_SIZE,
+  });
 
   return Object.freeze({
     subject,
@@ -163,6 +174,19 @@ export function createUiamAssertionSigner({
         throw new Error(`UIAM assertion signer: the certificate expired at ${leaf.validTo}.`);
       }
 
+      const credentialHash = createHash('sha256')
+        .update(credential.credentials)
+        .digest('base64url');
+      const cached = assertions.get(credentialHash);
+      // An assertion issued in the future means the clock moved back, so it is signed again.
+      if (
+        cached &&
+        currentTime >= cached.issuedAtMs &&
+        currentTime - cached.issuedAtMs < reusableForMs
+      ) {
+        return cached.value;
+      }
+
       const issuedAt = Math.floor(currentTime / 1000);
       const encodedPayload = toBase64Url(
         JSON.stringify({
@@ -170,7 +194,7 @@ export function createUiamAssertionSigner({
           aud: ASSERTION_AUDIENCE,
           iat: issuedAt,
           exp: issuedAt + lifetimeSeconds,
-          ath: createHash('sha256').update(credential.credentials).digest('base64url'),
+          ath: credentialHash,
         })
       );
       const signingInput = `${encodedHeader}.${encodedPayload}`;
@@ -179,7 +203,9 @@ export function createUiamAssertionSigner({
         ...dsaOptions,
       });
 
-      return `${UIAM_ASSERTION_SCHEME} ${signingInput}.${signature.toString('base64url')}`;
+      const value = `${UIAM_ASSERTION_SCHEME} ${signingInput}.${signature.toString('base64url')}`;
+      assertions.set(credentialHash, { value, issuedAtMs: issuedAt * 1000 });
+      return value;
     },
 
     isOwnAssertion(headerValue: string) {
