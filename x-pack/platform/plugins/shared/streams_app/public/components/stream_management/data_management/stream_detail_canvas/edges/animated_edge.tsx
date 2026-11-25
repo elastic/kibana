@@ -19,6 +19,7 @@ import {
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useCanvasEvents } from '../state_management';
+import { usePendingConnectionContext } from '../canvas_connection_highlight';
 import { getFlowDimStyles, useFlowHighlightState } from '../canvas_flow_highlight';
 import { useCanvasReadOnly } from '../canvas_read_only_context';
 import type { ClassicCanvasEdge } from '../types';
@@ -87,6 +88,7 @@ export function AnimatedEdge({
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
   const flowHighlightState = useFlowHighlightState(id, 'edge');
+  const isConnecting = usePendingConnectionContext() !== null;
   const canUnhook = Boolean(data?.editable) && !readOnly;
   const processingTarget = data?.processingTarget;
   const routingLine = data?.routingLine;
@@ -209,7 +211,8 @@ export function AnimatedEdge({
     [closeAll]
   );
 
-  const isActive = isHovered || Boolean(selected);
+  // A line cannot take the dragged line, so it shows no menu or hover animation during the drag.
+  const isActive = !isConnecting && (isHovered || Boolean(selected));
   // An edge in the hovered node's flow animates like a hovered edge, without its menu.
   const isFlowing = isActive || flowHighlightState === 'highlighted';
   const strokeColor = isFlowing ? 'transparent' : euiTheme.colors.borderBaseProminent;
