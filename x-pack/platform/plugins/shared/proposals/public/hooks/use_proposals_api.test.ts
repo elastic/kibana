@@ -735,6 +735,80 @@ describe('useProposal', () => {
       expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'))).toHaveLength(1);
     });
 
+    it('refreshes an earlier card whose stale first read arrives after a later revision loaded and the revision between them has no cached card', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-3': {
+          id: 'p-3',
+          rootProposalId: 'p-1',
+          revision: 3,
+          supersedes: 'p-2',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      // The first read of p-1 happens before p-2 and p-3 exist, and answers after p-3 loaded.
+      const staleRead = proposals['p-1'];
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      http.get.mockImplementationOnce(async () => {
+        await gate;
+        return staleRead;
+      });
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+      proposals['p-1'] = { ...staleRead, status: 'superseded', supersededBy: 'p-2' };
+      const latest = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+
+      release();
+      await waitFor(() => expect(first.result.current.data?.supersededBy).toBe('p-2'));
+    });
+
+    it('does not refetch the current revision when only earlier revisions are cached', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': {
+          id: 'p-1',
+          rootProposalId: 'p-1',
+          revision: 1,
+          status: 'superseded',
+          supersededBy: 'p-2',
+        },
+        'p-2': {
+          id: 'p-2',
+          rootProposalId: 'p-1',
+          revision: 2,
+          supersedes: 'p-1',
+          status: 'superseded',
+          supersededBy: 'p-3',
+        },
+        'p-3': {
+          id: 'p-3',
+          rootProposalId: 'p-1',
+          revision: 3,
+          supersedes: 'p-2',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
+      await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+      const latest = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(http.get).toHaveBeenCalledTimes(3);
+    });
+
     it('refreshes a decided card that is not marked replaced when its successor is already cached', async () => {
       const proposals: Record<string, object> = {
         'p-1': {

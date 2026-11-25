@@ -155,11 +155,15 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
 /**
  * The other side of `useRefreshEarlierRevisions`: that one only finds earlier cards that already
  * have data. A card whose first read was still loading then, and reads open when it arrives,
- * checks once for a cached successor. It does not repeat, so the number of requests stays bounded.
+ * checks once for a cached later proposal of its chain. The revision between them can be missing
+ * from the cache, so a later revision number counts, not only a direct successor. A retry keeps
+ * the revision number, so it never counts. The check does not repeat, so requests stay bounded.
  */
 const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): void => {
   const queryClient = useQueryClient();
   const id = proposal?.id;
+  const rootProposalId = proposal?.rootProposalId;
+  const revision = proposal?.revision ?? 1;
   const isOpen = proposal !== undefined && !isReplacedProposal(proposal);
 
   useEffect(() => {
@@ -168,14 +172,20 @@ const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): v
     }
     const hasCachedSuccessor = queryClient
       .getQueriesData<ProposalWithMetadata>({ queryKey: queryKeys.proposals.details })
-      .some(([, cached]) => cached?.supersedes === id);
+      .some(
+        ([, cached]) =>
+          cached?.supersedes === id ||
+          (rootProposalId !== undefined &&
+            cached?.rootProposalId === rootProposalId &&
+            (cached?.revision ?? 1) > revision)
+      );
     if (hasCachedSuccessor) {
       void queryClient.invalidateQueries(
         { queryKey: queryKeys.proposals.detail(id), exact: true },
         { cancelRefetch: false }
       );
     }
-  }, [queryClient, id, isOpen]);
+  }, [queryClient, id, rootProposalId, revision, isOpen]);
 };
 
 /**
