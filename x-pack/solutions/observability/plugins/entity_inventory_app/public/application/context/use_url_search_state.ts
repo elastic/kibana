@@ -15,6 +15,7 @@ import { buildEsQuery, isFilter } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { decode, encode } from '@kbn/rison';
+import { useStableCallback } from '@kbn/react-hooks';
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { DEFAULT_QUERY, DEFAULT_TIME_RANGE, URL_SEARCH_STATE_KEY } from '../constants';
@@ -138,6 +139,9 @@ const getStateParam = (search: string) => {
   return Array.isArray(param) ? param[0] : param;
 };
 
+const getStartState = (search: string, fallbackState: UrlSearchState): UrlSearchState =>
+  getStateParam(search) ? DEFAULT_URL_SEARCH_STATE : fallbackState;
+
 const readUrlSearchState = (
   value: string | null | undefined,
   uiSettings: IUiSettingsClient,
@@ -154,16 +158,34 @@ const readUrlSearchState = (
   }
 };
 
+// The same range object while `from` and `to` are equal, so a consumer that compares the range by
+// reference does not request again for an unchanged range.
+const useStableDateRange = (state: UrlSearchState): UrlSearchState => {
+  const { from, to } = state.dateRange;
+  const dateRange = useMemo(() => ({ from, to }), [from, to]);
+  return useMemo(() => ({ ...state, dateRange }), [state, dateRange]);
+};
+
 export const useUrlSearchState = ({
   maxDays,
+  defaultDateRange,
 }: {
   maxDays: number;
+  defaultDateRange?: TimeRange;
 }): [UrlSearchState, (patch: Partial<UrlSearchState>) => void] => {
   const history = useHistory();
   const { search } = useLocation();
   const {
     services: { uiSettings, notifications },
   } = useKibana();
+
+  const fallbackState = useMemo(
+    () =>
+      defaultDateRange && checkTimeRange(defaultDateRange, maxDays) === 'valid'
+        ? { ...DEFAULT_URL_SEARCH_STATE, dateRange: defaultDateRange }
+        : DEFAULT_URL_SEARCH_STATE,
+    [defaultDateRange, maxDays]
+  );
 
   const stateParam = getStateParam(search);
   const urlRead = useMemo(
@@ -192,26 +214,33 @@ export const useUrlSearchState = ({
     [history, uiSettings, maxDays]
   );
 
-  const updateUrlSearchState = useCallback(
-    (patch: Partial<UrlSearchState>) =>
-      writeSearchStateToUrl({ ...(readCurrent()?.state ?? DEFAULT_URL_SEARCH_STATE), ...patch }),
-    [readCurrent, writeSearchStateToUrl]
+  const updateUrlSearchState = useStableCallback((patch: Partial<UrlSearchState>) =>
+    writeSearchStateToUrl({
+      ...(readCurrent()?.state ?? getStartState(history.location.search, fallbackState)),
+      ...patch,
+    })
+  );
+
+  const writeStartState = useStableCallback(() =>
+    writeSearchStateToUrl(getStartState(history.location.search, fallbackState))
   );
 
   const repairUrl = useCallback(() => {
     if (!urlRead) {
-      writeSearchStateToUrl(DEFAULT_URL_SEARCH_STATE);
+      writeStartState();
     } else if (urlRead.needsRepair) {
       writeSearchStateToUrl(urlRead.state);
       if (urlRead.wasLimited) {
         notifications.toasts.addWarning({ title: TIME_RANGE_CLAMPED_TOAST_TITLE });
       }
     }
-  }, [notifications, urlRead, writeSearchStateToUrl]);
+  }, [notifications, urlRead, writeSearchStateToUrl, writeStartState]);
 
   useEffect(() => {
     repairUrl();
   }, [repairUrl]);
 
-  return [urlRead?.state ?? DEFAULT_URL_SEARCH_STATE, updateUrlSearchState];
+  const state = useStableDateRange(urlRead?.state ?? getStartState(search, fallbackState));
+
+  return [state, updateUrlSearchState];
 };

@@ -10,6 +10,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { MemoryHistory } from 'history';
 import { act, renderHook } from '@testing-library/react';
+import type { TimeRange } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { decode } from '@kbn/rison';
@@ -34,7 +35,10 @@ const readWrittenState = (history: MemoryHistory) =>
 
 const renderUrlState = (
   initialEntry = '/kubernetes',
-  { maxDays = ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } = {}
+  {
+    maxDays = ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS,
+    defaultDateRange,
+  }: { maxDays?: number; defaultDateRange?: TimeRange } = {}
 ) => {
   const core = coreMock.createStart();
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
@@ -45,12 +49,12 @@ const renderUrlState = (
     </KibanaContextProvider>
   );
   const hook = renderHook(
-    () => {
-      const value = useUrlSearchState({ maxDays });
+    ({ defaultRange }: { defaultRange?: TimeRange }) => {
+      const value = useUrlSearchState({ maxDays, defaultDateRange: defaultRange });
       seen.push(value[0]);
       return value;
     },
-    { wrapper }
+    { wrapper, initialProps: { defaultRange: defaultDateRange } }
   );
 
   return { core, history, seen, ...hook };
@@ -332,6 +336,96 @@ describe('useUrlSearchState', () => {
       const { result } = renderUrlState('/kubernetes?_g=(time:(from:now-7d,to:now))');
 
       expect(result.current[0].dateRange).toEqual(DEFAULT_TIME_RANGE);
+    });
+  });
+
+  describe('default date range', () => {
+    const DEFAULT_RANGE = { from: 'now-1h', to: 'now' };
+
+    it('starts a URL without state from the default range and writes it', () => {
+      const { result, history } = renderUrlState('/kubernetes', {
+        defaultDateRange: DEFAULT_RANGE,
+      });
+
+      expect(result.current[0].dateRange).toEqual(DEFAULT_RANGE);
+      expect(readWrittenState(history)).toEqual({ ...DEFAULT_STATE, dateRange: DEFAULT_RANGE });
+    });
+
+    it('starts a page that opens without state from it after a page change', () => {
+      const { result, history } = renderUrlState(
+        '/kubernetes?_a=(dateRange:(from:now-2h,to:now))',
+        { defaultDateRange: DEFAULT_RANGE }
+      );
+
+      act(() => {
+        history.push('/hosts');
+      });
+
+      expect(result.current[0].dateRange).toEqual(DEFAULT_RANGE);
+      expect(readWrittenState(history).dateRange).toEqual(DEFAULT_RANGE);
+    });
+
+    it('keeps the state of the URL over it', () => {
+      const { result } = renderUrlState('/kubernetes?_a=(dateRange:(from:now-2h,to:now))', {
+        defaultDateRange: DEFAULT_RANGE,
+      });
+
+      expect(result.current[0].dateRange).toEqual({ from: 'now-2h', to: 'now' });
+    });
+
+    it('uses the default range of the app for a state that cannot be read', () => {
+      const { result, history } = renderUrlState('/kubernetes?_a=(dateRange:foo)', {
+        defaultDateRange: DEFAULT_RANGE,
+      });
+
+      expect(result.current[0].dateRange).toEqual(DEFAULT_TIME_RANGE);
+      expect(readWrittenState(history)).toEqual(DEFAULT_STATE);
+    });
+
+    it('uses the default range of the app for a state without a range', () => {
+      const { result } = renderUrlState(
+        '/kubernetes?_a=(filterControls:(attributes:(os.type:!(linux))))',
+        { defaultDateRange: DEFAULT_RANGE }
+      );
+
+      expect(result.current[0].dateRange).toEqual(DEFAULT_TIME_RANGE);
+    });
+
+    it('does not use a range that is not allowed', () => {
+      const { result, history } = renderUrlState('/kubernetes', {
+        defaultDateRange: { from: 'now-7d', to: 'now' },
+      });
+
+      expect(result.current[0].dateRange).toEqual(DEFAULT_TIME_RANGE);
+      expect(readWrittenState(history)).toEqual(DEFAULT_STATE);
+    });
+
+    it('uses a range over the maximum when the limit is disabled', () => {
+      const wide = { from: 'now-30d', to: 'now' };
+      const { result } = renderUrlState('/kubernetes', {
+        maxDays: Infinity,
+        defaultDateRange: wide,
+      });
+
+      expect(result.current[0].dateRange).toEqual(wide);
+    });
+
+    it('keeps the same range object after the default range is written', () => {
+      const { seen } = renderUrlState('/kubernetes', { defaultDateRange: DEFAULT_RANGE });
+
+      expect(seen.length).toBeGreaterThan(1);
+      seen.forEach((state) => expect(state.dateRange).toBe(seen[0].dateRange));
+    });
+
+    it('keeps the same range object when the default range is replaced by an equal one', () => {
+      const { result, rerender } = renderUrlState('/kubernetes', {
+        defaultDateRange: DEFAULT_RANGE,
+      });
+      const [before] = result.current;
+
+      rerender({ defaultRange: { ...DEFAULT_RANGE } });
+
+      expect(result.current[0].dateRange).toBe(before.dateRange);
     });
   });
 });
