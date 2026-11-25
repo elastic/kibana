@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mapValues } from 'lodash';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -17,6 +18,7 @@ import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constan
 import { appContextService } from '../app_context';
 import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
+import { INPUTS_FOR_VERSIONS_COMPILER_VERSION } from '../package_policies/inputs_for_versions';
 
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
@@ -1466,7 +1468,13 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
 
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
-  const makeSoClient = (existingInputsForVersions?: Record<string, PackagePolicyInput[]>) => {
+  const makeSoClient = (
+    existingInputsForVersions?: Record<string, PackagePolicyInput[]>,
+    compilerVersions: Record<string, number> = mapValues(
+      existingInputsForVersions ?? {},
+      () => INPUTS_FOR_VERSIONS_COMPILER_VERSION
+    )
+  ) => {
     const soClient = savedObjectsClientMock.create();
     soClient.get.mockResolvedValue({
       id: versionedPackagePolicy.id,
@@ -1474,7 +1482,10 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
       references: [],
       version: soVersion,
       attributes: existingInputsForVersions
-        ? { inputs_for_versions: existingInputsForVersions }
+        ? {
+            inputs_for_versions: existingInputsForVersions,
+            inputs_for_versions_compiler_versions: compilerVersions,
+          }
         : {},
     } as any);
     soClient.update.mockResolvedValue({} as any);
@@ -1538,6 +1549,10 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
           '9.5': storedInputsFor95,
           '9.6': recompiledInputs,
         },
+        inputs_for_versions_compiler_versions: {
+          '9.5': INPUTS_FOR_VERSIONS_COMPILER_VERSION,
+          '9.6': INPUTS_FOR_VERSIONS_COMPILER_VERSION,
+        },
       },
       { version: soVersion }
     );
@@ -1554,6 +1569,32 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
     expect(soClient.update).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['without a compiler version', {}],
+    ['with an outdated compiler version', { '9.6': INPUTS_FOR_VERSIONS_COMPILER_VERSION - 1 }],
+  ])('recompiles and persists the inputs of a version compiled %s', async (_, compilerVersions) => {
+    const soClient = makeSoClient(
+      { '9.5': storedInputsFor95, '9.6': storedInputsFor95 },
+      compilerVersions
+    );
+
+    const result = await getAgentInputs(soClient);
+
+    expect(result[0]).toMatchObject({ type: 'test-logs-recompiled' });
+    expect(soClient.update).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      {
+        inputs_for_versions: { '9.5': storedInputsFor95, '9.6': recompiledInputs },
+        inputs_for_versions_compiler_versions: {
+          ...compilerVersions,
+          '9.6': INPUTS_FOR_VERSIONS_COMPILER_VERSION,
+        },
+      },
+      { version: soVersion }
+    );
+  });
+
   it('backfills a package policy that has no inputs_for_versions at all', async () => {
     // Written before enableVersionSpecificPolicies was turned on, so nothing was ever compiled for
     // it. Previously this fell through to the default inputs silently.
@@ -1565,7 +1606,10 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
     expect(soClient.update).toHaveBeenCalledWith(
       LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       versionedPackagePolicy.id,
-      { inputs_for_versions: { '9.6': recompiledInputs } },
+      {
+        inputs_for_versions: { '9.6': recompiledInputs },
+        inputs_for_versions_compiler_versions: { '9.6': INPUTS_FOR_VERSIONS_COMPILER_VERSION },
+      },
       { version: soVersion }
     );
   });

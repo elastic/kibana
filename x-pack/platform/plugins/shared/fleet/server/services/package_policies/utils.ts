@@ -44,6 +44,7 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
     bump_agent_policy_revision: bumpAgentPolicyRevision,
     latest_revision: latestRevision,
     inputs_for_versions: inputsForVersions,
+    inputs_for_versions_compiler_versions: inputsForVersionsCompilerVersions,
     ...restAttributes
   } = attributes;
   return {

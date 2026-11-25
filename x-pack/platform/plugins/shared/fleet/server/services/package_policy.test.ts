@@ -13,6 +13,7 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { produce } from 'immer-v9';
+import { mapValues } from 'lodash';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -100,6 +101,7 @@ import { outputService } from './output';
 import * as secretsModule from './secrets';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
 import { getAgentVersionsForVersionSpecificPolicies } from './utils/version_specific_policies';
+import { INPUTS_FOR_VERSIONS_COMPILER_VERSION } from './package_policies/inputs_for_versions';
 import {
   assertAgentVersionCompatible,
   getAgentVersionBlocks,
@@ -16085,6 +16087,7 @@ describe('Package policy service', () => {
                 enabled: true,
                 inputs: [],
                 inputs_for_versions: {},
+                inputs_for_versions_compiler_versions: {},
                 package: { name: 'system', title: 'System', version: '2.2.0' },
                 revision: 4,
                 latest_revision: true,
@@ -16120,6 +16123,7 @@ describe('Package policy service', () => {
                 enabled: true,
                 inputs: [],
                 inputs_for_versions: {},
+                inputs_for_versions_compiler_versions: {},
                 package: { name: 'system', title: 'System', version: '2.2.0' },
                 revision: 4,
                 latest_revision: true,
@@ -16924,13 +16928,22 @@ describe('compilePackagePolicyForVersions()', () => {
     jest.clearAllMocks();
   });
 
-  const makeSoClient = (existingInputsForVersions: Record<string, any> = {}) => {
+  const makeSoClient = (
+    existingInputsForVersions: Record<string, any> = {},
+    compilerVersions: Record<string, number> = mapValues(
+      existingInputsForVersions,
+      () => INPUTS_FOR_VERSIONS_COMPILER_VERSION
+    )
+  ) => {
     const soClient = savedObjectsClientMock.create();
     soClient.get.mockResolvedValue({
       id: 'pkg-policy-1',
       type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       references: [],
-      attributes: { inputs_for_versions: existingInputsForVersions },
+      attributes: {
+        inputs_for_versions: existingInputsForVersions,
+        inputs_for_versions_compiler_versions: compilerVersions,
+      },
     } as any);
     soClient.update.mockResolvedValue({} as any);
     return soClient;
@@ -16976,8 +16989,36 @@ describe('compilePackagePolicyForVersions()', () => {
         mockPackagePolicy.id,
         expect.objectContaining({
           inputs_for_versions: expect.objectContaining({ '8.18': expect.anything(), '9.3': [] }),
+          inputs_for_versions_compiler_versions: {
+            '8.18': INPUTS_FOR_VERSIONS_COMPILER_VERSION,
+            '9.3': INPUTS_FOR_VERSIONS_COMPILER_VERSION,
+          },
         })
       );
+    });
+
+    it('recompiles requested versions compiled with an outdated or no compiler version', async () => {
+      const soClient = makeSoClient(
+        { '8.18': [{ type: 'logfile' }], '9.3': [{ type: 'logfile' }] },
+        { '8.18': INPUTS_FOR_VERSIONS_COMPILER_VERSION - 1 }
+      );
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy,
+        ['8.18', '9.3']
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), mockPackagePolicy.id, {
+        inputs_for_versions: { '8.18': [], '9.3': [] },
+        inputs_for_versions_compiler_versions: {
+          '8.18': INPUTS_FOR_VERSIONS_COMPILER_VERSION,
+          '9.3': INPUTS_FOR_VERSIONS_COMPILER_VERSION,
+        },
+      });
     });
 
     it('compiles all requested versions when none exist in inputs_for_versions', async () => {
@@ -17173,7 +17214,7 @@ describe('clearStaleInputsForVersions()', () => {
     expect(soClient.bulkUpdate).toHaveBeenCalledWith([
       expect.objectContaining({
         id: 'a',
-        attributes: { inputs_for_versions: {} },
+        attributes: { inputs_for_versions: {}, inputs_for_versions_compiler_versions: {} },
         version: 'WzEsMV0=',
       }),
     ]);

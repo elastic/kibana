@@ -190,6 +190,11 @@ export interface PackagePolicySOAttributes {
   bump_agent_policy_revision?: boolean;
   latest_revision?: boolean;
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
+  /**
+   * Version of the agent version condition evaluation each `inputs_for_versions` entry was
+   * compiled with, see `INPUTS_FOR_VERSIONS_COMPILER_VERSION`.
+   */
+  inputs_for_versions_compiler_versions?: Record<string, number>;
   package_agent_version_condition?: string;
   condition?: string | null;
   onboarding_deployment_id?: string | null;

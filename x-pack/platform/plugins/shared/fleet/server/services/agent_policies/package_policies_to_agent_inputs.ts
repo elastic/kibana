@@ -40,6 +40,11 @@ import {
   getInputEffectiveName,
 } from '../../../common/services';
 
+import {
+  getCurrentInputsForVersion,
+  withCompiledInputsForVersions,
+} from '../package_policies/inputs_for_versions';
+
 import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
@@ -317,7 +322,7 @@ const backfillInputsForVersion = async ({
   agentVersion,
   soClient,
   savedObjectType,
-  inputsForVersions,
+  storedAttributes,
   version,
   namespace,
 }: {
@@ -326,7 +331,7 @@ const backfillInputsForVersion = async ({
   agentVersion: string;
   soClient: SavedObjectsClientContract;
   savedObjectType: string;
-  inputsForVersions?: Record<string, PackagePolicyInput[]>;
+  storedAttributes?: PackagePolicySOAttributes;
   version?: string;
   namespace?: string;
 }): Promise<PackagePolicyInput[] | undefined> => {
@@ -359,12 +364,7 @@ const backfillInputsForVersion = async ({
       await soClient.update<PackagePolicySOAttributes>(
         savedObjectType,
         packagePolicy.id,
-        {
-          inputs_for_versions: {
-            ...inputsForVersions,
-            [agentVersion]: versionInputs,
-          },
-        },
+        withCompiledInputsForVersions(storedAttributes, { [agentVersion]: versionInputs }),
         { version, ...(namespace ? { namespace } : {}) }
       );
     } catch (error) {
@@ -452,20 +452,22 @@ export const storedPackagePoliciesToAgentInputs = async (
       );
 
       if (hasVersionSpecificInputs || packageHasVersionCondition) {
-        let versionInputs = inputsForVersions?.[agentVersion];
+        let versionInputs = getCurrentInputsForVersion(packagePolicySO?.attributes, agentVersion);
 
         if (!versionInputs) {
           // Not backfilled yet, e.g. right after a Kibana upgrade widens the default version set
           // (see getAgentVersionsForVersionSpecificPolicies) before this package policy has been
           // recompiled for it, or the package policy predates `enableVersionSpecificPolicies` and
-          // has no `inputs_for_versions` at all. Compile on the fly so the read still succeeds.
+          // has no `inputs_for_versions` at all. Also recompiled when the stored entry was compiled
+          // by a Kibana version that evaluated agent version conditions differently. Compile on
+          // the fly so the read still succeeds.
           versionInputs = await backfillInputsForVersion({
             packageInfo: packageInfo!,
             packagePolicy,
             agentVersion,
             soClient: soClient!,
             savedObjectType,
-            inputsForVersions,
+            storedAttributes: packagePolicySO?.attributes,
             version: packagePolicySO?.version,
             namespace: packagePoliciesNamespace,
           });

@@ -259,6 +259,10 @@ import {
   getInputsWithIds,
   validateNoTraversalInCompiledIds,
 } from './package_policies/get_input_with_ids';
+import {
+  getCurrentInputsForVersion,
+  withCompiledInputsForVersions,
+} from './package_policies/inputs_for_versions';
 import { runWithCache } from './epm/packages/cache';
 import {
   getAgentVersionsForVersionSpecificPolicies,
@@ -950,8 +954,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (agentVersions) {
           // Async task path: skip versions already compiled to avoid unnecessary recompilation and
           // deployment. The stored inputs are guaranteed to be current because the create/update
-          // path (below) recompiles all previously stored versions whenever the package policy changes.
-          versionsToCompile = agentVersions.filter((v) => !existingInputsForVersions[v]);
+          // path (below) recompiles all previously stored versions whenever the package policy
+          // changes, unless they were compiled by a Kibana version that evaluated agent version
+          // conditions differently.
+          versionsToCompile = agentVersions.filter(
+            (v) => !getCurrentInputsForVersion(packagePolicySO.attributes, v)
+          );
           if (versionsToCompile.length === 0) {
             t.end();
             return;
@@ -977,12 +985,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         await soClient
-          .update<PackagePolicySOAttributes>(savedObjectType, packagePolicy.id, {
-            inputs_for_versions: {
-              ...existingInputsForVersions,
-              ...inputsForVersions,
-            },
-          })
+          .update<PackagePolicySOAttributes>(
+            savedObjectType,
+            packagePolicy.id,
+            withCompiledInputsForVersions(packagePolicySO.attributes, inputsForVersions)
+          )
           .catch(
             catchAndSetErrorStackTrace.withMessage(
               `attempt to update package policy saved object with inputs_for_versions failed`
@@ -1044,7 +1051,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         stale.map(({ id, version }) => ({
           type: savedObjectType,
           id,
-          attributes: { inputs_for_versions: {} },
+          attributes: { inputs_for_versions: {}, inputs_for_versions_compiler_versions: {} },
           version,
         }))
       );
@@ -4000,6 +4007,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             attributes: {
               ...previousRevision?.attributes,
               inputs_for_versions: previousRevision?.attributes.inputs_for_versions ?? {},
+              inputs_for_versions_compiler_versions:
+                previousRevision?.attributes.inputs_for_versions_compiler_versions ?? {},
               revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
               latest_revision: true,
               // Ownership may have changed since the snapshot was taken; keep the current value.
