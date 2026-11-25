@@ -173,4 +173,23 @@ describe('DreamingConfigEditor', () => {
     expect(screen.getByTestId('contextDreamingConfigEntitiesSwitch')).toBeDisabled();
     expect(screen.getByTestId('contextDreamingConfigEntity-issue')).toHaveTextContent('severity');
   });
+
+  it('uses renderLayout instead of the default stacked layout', () => {
+    renderEditor(
+      <DreamingConfigEditor
+        draft={SUPPORT}
+        renderLayout={(parts) => (
+          <div data-test-subj="customLayout">
+            {parts.facts}
+            {parts.renderEntitiesSwitch({ showLabel: true })}
+          </div>
+        )}
+      />
+    );
+
+    const customLayout = screen.getByTestId('customLayout');
+    expect(within(customLayout).getByTestId('contextDreamingConfigFacts')).toBeInTheDocument();
+    expect(screen.getAllByTestId('contextDreamingConfigFacts')).toHaveLength(1);
+    expect(screen.queryByTestId('contextDreamingConfigEntities')).not.toBeInTheDocument();
+  });
 });
