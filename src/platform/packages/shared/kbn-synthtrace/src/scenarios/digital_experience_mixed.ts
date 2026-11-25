@@ -9,7 +9,7 @@
 
 /**
  * Generates EDOT Browser apps (see `digital_experience_browser`), EDOT React Native apps (see
- * `digital_experience_mobile`) and native EDOT Android and EDOT iOS apps (see
+ * `digital_experience_mobile` and `digital_experience_mobile_releases`) and native EDOT Android and EDOT iOS apps (see
  * `digital_experience_mobile_native`) next to a classic Elastic APM RUM (`rum-js`) app, so the
  * Digital Experience applications list shows `otel`, mobile and `classic` apps.
  *
@@ -62,6 +62,7 @@ import {
 import { generateClassicRumPageLoads } from './helpers/classic_rum_page_loads';
 import {
   ALL_MOBILE_PLATFORMS,
+  DIGITAL_EXPERIENCE_RELEASE_TRAIN_APP,
   generateEdotNativeSessions,
   generateEdotReactNativeSessions,
 } from './helpers/digital_experience_mobile_apps';
@@ -93,6 +94,20 @@ const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logg
           withManualSpans: true,
           environment: ENVIRONMENT,
           from,
+        })
+      ),
+      // The app of `digital_experience_mobile_releases`, so the release health has more releases
+      // than it names, and one that first appears inside the run
+      withClient(
+        otelEsClient,
+        generateEdotReactNativeSessions(range, {
+          scale: opts.scale,
+          seed: opts.seed,
+          platform: ALL_MOBILE_PLATFORMS,
+          withManualSpans: true,
+          environment: ENVIRONMENT,
+          from,
+          apps: [DIGITAL_EXPERIENCE_RELEASE_TRAIN_APP],
         })
       ),
       withClient(

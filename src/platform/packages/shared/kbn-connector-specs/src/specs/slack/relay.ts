@@ -107,6 +107,7 @@ export async function relaySendMessage(
   channel: string;
   ts: string;
   timestamp: string;
+  workspace: string;
   externalConversationId?: string;
 }> {
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
@@ -140,6 +141,7 @@ export async function relaySendMessage(
       channel: resolvedChannel,
       ts: ref,
       timestamp: ref,
+      workspace: connection.tenantKey,
       ...(externalConversationId ? { externalConversationId } : {}),
     };
   } catch (error) {
