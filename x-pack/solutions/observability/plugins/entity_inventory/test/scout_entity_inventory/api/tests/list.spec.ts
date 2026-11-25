@@ -227,13 +227,13 @@ apiTest.describe(
           {
             name: 'k8s.deployment.available',
             kind: 'metric',
-            agg: 'max',
+            agg: 'last',
             unit: 'count',
           },
           {
             name: 'k8s.deployment.desired',
             kind: 'metric',
-            agg: 'max',
+            agg: 'last',
             unit: 'count',
           },
           // The column carries the first source's agg; the OpenTelemetry source uses `sum_delta`.
@@ -431,10 +431,10 @@ apiTest.describe(
       }
     );
 
-    // Metric samples per window: common/README.md. available and desired use `max`; restarts use
+    // Metric samples per window: common/README.md. available and desired use `last`; restarts use
     // `sum_increase` on the Agent counter and `sum_delta` on the OpenTelemetry gauge, both `TS` only.
     apiTest(
-      'returns max available and desired, and null restarts, when only FROM plans read the data',
+      'returns last available and desired, and null restarts, when only FROM plans read the data',
       async ({ apiClient }) => {
         const response = await postList(apiClient, WINDOW);
 
@@ -445,13 +445,13 @@ apiTest.describe(
         expect(columns.find(({ name }) => name === 'k8s.deployment.available')).toStrictEqual({
           name: 'k8s.deployment.available',
           kind: 'metric',
-          agg: 'max',
+          agg: 'last',
           unit: 'count',
         });
         expect(columns.find(({ name }) => name === 'k8s.deployment.desired')).toStrictEqual({
           name: 'k8s.deployment.desired',
           kind: 'metric',
-          agg: 'max',
+          agg: 'last',
           unit: 'count',
         });
         expect(columns.find(({ name }) => name === 'k8s.container.restarts')).toStrictEqual({
@@ -484,7 +484,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'uses the max sample inside the window for cart-api available and desired',
+      'uses the last sample inside the window for cart-api available and desired',
       async ({ apiClient }) => {
         const through1000 = await postList(apiClient, {
           from: '2026-11-01T09:00:00.000Z',
@@ -659,6 +659,8 @@ apiTest.describe(
       async ({ apiClient }) => {
         // `gauges/restarts-drop` in the OpenTelemetry time-series index: 9, 9, 4 at 16:00:00 to
         // 16:02:00 on 2026-11-05. A gauge has no reset handling, so the drop is a negative change.
+        // Its available and desired replicas are 2, 2, 1 in the same window, so `last` is 1 where
+        // `max` would be 2.
         const response = await postList(apiClient, {
           from: '2026-11-05T15:30:00.000Z',
           to: '2026-11-05T16:30:00.000Z',

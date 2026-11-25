@@ -32,20 +32,16 @@ No body and no parameters. It returns one entry per registered definition that h
         { "name": "k8s.deployment.paused", "kind": "attribute" },
         { "name": "k8s.deployment.label.app", "kind": "attribute" },
         { "name": "k8s.deployment.uid", "kind": "attribute" },
-        { "name": "k8s.deployment.available", "kind": "metric", "agg": "max", "unit": "count" },
-        { "name": "k8s.deployment.desired", "kind": "metric", "agg": "max", "unit": "count" },
+        { "name": "k8s.deployment.available", "kind": "metric", "agg": "last", "unit": "count" },
+        { "name": "k8s.deployment.desired", "kind": "metric", "agg": "last", "unit": "count" },
         { "name": "k8s.container.restarts", "kind": "metric", "agg": "sum_increase", "unit": "count" },
         { "name": "last_seen", "kind": "last_seen", "label": "Last seen" }
       ],
       "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
       "sources": [
         {
-          "indexPattern": "metrics-kubernetes.state_deployment-*",
-          "filter": "metricset.name == \"state_deployment\""
-        },
-        {
-          "indexPattern": "metrics-kubernetes.state_container-*",
-          "filter": "metricset.name == \"state_container\""
+          "indexPattern": "metrics-kubernetes.*",
+          "filter": "metricset.name == \"state_deployment\" OR metricset.name == \"state_container\""
         },
         { "indexPattern": "metrics-k8sclusterreceiver.otel-*" }
       ]
@@ -175,7 +171,7 @@ Registered today:
 
 | type | identified by | sources |
 | --- | --- | --- |
-| `k8s.deployment` | `<namespace>/<name>` (`kubernetes.namespace`, `kubernetes.deployment.name`; the ECS<->OTel alias layer resolves them on the OTel stream), cluster as the `k8s.cluster.name` column | `metrics-kubernetes.state_deployment-*` (available/desired `max`), `metrics-kubernetes.state_container-*` (restarts `sum_increase`, a counter), `metrics-k8sclusterreceiver.otel-*` (available/desired `max`, restarts `sum_delta`, a gauge) |
+| `k8s.deployment` | `<namespace>/<name>` (`kubernetes.namespace`, `kubernetes.deployment.name`; the ECS<->OTel alias layer resolves them on the OTel stream), cluster as the `k8s.cluster.name` column | `metrics-kubernetes.*` filtered to `state_deployment` and `state_container` (available/desired `last`, restarts `sum_increase`, a counter), `metrics-k8sclusterreceiver.otel-*` (available/desired `last`, restarts `sum_delta`, a gauge) |
 
 The same namespace and name in two clusters is one `k8s.deployment` entity today.
 

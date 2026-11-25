@@ -24,7 +24,7 @@ No index maps `k8s.deployment.uid`, although every OpenTelemetry document carrie
 - `metrics-kubernetes.state_deployment-default` (data stream): Elastic Agent names
   (`orchestrator.cluster.name`, `kubernetes.namespace`, `kubernetes.deployment.*`,
   `kubernetes.labels.app`) and `metricset.name: state_deployment`. Supplies
-  `k8s.deployment.available` via `max` of `kubernetes.deployment.replicas.available`.
+  `k8s.deployment.available` via `last` of `kubernetes.deployment.replicas.available`.
 - `metrics-kubernetes.state_container-default` (data stream): Elastic Agent container state
   (`kubernetes.namespace`, `kubernetes.deployment.name`,
   `kubernetes.container.status.restarts`) and `metricset.name: state_container`. The definition
@@ -62,7 +62,7 @@ No index maps `k8s.deployment.uid`, although every OpenTelemetry document carrie
 
 ## Metric samples
 
-available is `max` over the window. restarts is the change inside the window: `SUM(INCREASE)` of the
+available and desired are the `last` sample inside the window. restarts is the change inside the window: `SUM(INCREASE)` of the
 Agent counter, `SUM(DELTA)` of the OpenTelemetry gauge, both `TS` only and summed over a
 deployment's time series. It is `null` on rows only a `FROM` plan reads, and on a time series with a
 single sample in the window (both functions need two).
@@ -76,7 +76,7 @@ single sample in the window (both functions need two).
 | 2026-11-05 10:00 | streaming/standard-only | `FROM` | 3 | 1 | `null` |
 | 2026-11-05 10:00 | streaming/tsds-only | `TS` | 7 | 2 | `null` |
 | 2026-11-05 14:01 | timeseries/ts-window | `TS` | 6, 8 | 2 | 2 |
-| 2026-11-05 16:02 | gauges/restarts-drop | `TS` | 9, 9, 4 | 1 | -5 |
+| 2026-11-05 16:02 | gauges/restarts-drop | `TS` | 9, 9, 4 | 1 (samples 2, 2, 1; `max` would be 2) | -5 |
 | 2026-11-07 10:00 | aliased/kept-standard | `FROM` | 9 | 1 | `null` |
 | 2026-11-07 10:00 | aliased/kept-tsds | `TS` | 11 | 2 | `null` |
 | 2026-11-09 10:02 | counters/two-containers | `TS` | app 1, 2, 4; sidecar 5, 6, 6 | `null` | 4 |
@@ -98,7 +98,8 @@ and last samples inside the window, with no extrapolation to the window bounds, 
 - 2026-11-05, 14:00:00 and 14:01:00, namespace `timeseries`: `ts-window` in the time-series index
   only.
 - 2026-11-05, 16:00:00 to 16:02:00, namespace `gauges`: `restarts-drop` in the OpenTelemetry
-  time-series index only, its restarts gauge dropping from 9 to 4.
+  time-series index only, its restarts gauge dropping from 9 to 4 and its available and desired
+  replicas from 2 to 1 (so `last` and `max` differ).
 - 2026-11-07, 10:00:00, namespace `aliased`: `kept-standard` and `dropped-standard` in
   `entity-inventory-scout-aliased-standard`, `kept-tsds` and `dropped-tsds` in
   `entity-inventory-scout-aliased-tsds`.

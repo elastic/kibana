@@ -49,13 +49,13 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.deployment.available',
             field: 'kubernetes.deployment.replicas.available',
-            agg: 'max',
+            agg: 'last',
             unit: 'count',
           },
           {
             name: 'k8s.deployment.desired',
             field: 'kubernetes.deployment.replicas.desired',
-            agg: 'max',
+            agg: 'last',
             unit: 'count',
           },
           {
@@ -76,13 +76,13 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
           {
             name: 'k8s.deployment.available',
             field: 'k8s.deployment.available',
-            agg: 'max',
+            agg: 'last',
             unit: 'count',
           },
           {
             name: 'k8s.deployment.desired',
             field: 'k8s.deployment.desired',
-            agg: 'max',
+            agg: 'last',
             unit: 'count',
           },
           {

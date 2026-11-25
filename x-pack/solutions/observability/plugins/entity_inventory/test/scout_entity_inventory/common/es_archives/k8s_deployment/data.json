@@ -838,8 +838,8 @@
         "deployment": {
           "name": "restarts-drop",
           "uid": "uid-gauges-restarts-drop",
-          "available": 1,
-          "desired": 1
+          "available": 2,
+          "desired": 2
         },
         "container": {
           "restarts": 9
@@ -865,8 +865,8 @@
         "deployment": {
           "name": "restarts-drop",
           "uid": "uid-gauges-restarts-drop",
-          "available": 1,
-          "desired": 1
+          "available": 2,
+          "desired": 2
         },
         "container": {
           "restarts": 9
