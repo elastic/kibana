@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/observability/plugins/nightshift_investigations
 dependsOn:
   - '@kbn/dev-cli-runner'
+  - '@kbn/agent-knowledge-wiki'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-observability'
   - '@kbn/nightshift-decision-trees'

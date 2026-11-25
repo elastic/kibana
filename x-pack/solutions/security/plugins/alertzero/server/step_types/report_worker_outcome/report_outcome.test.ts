@@ -134,6 +134,8 @@ describe('reportOutcome', () => {
         change_type: 'none' as const,
         confidence: 'none' as const,
         decision: 'none' as const,
+        decision_history_read: 'none' as const,
+        decision_history_saved: 'none' as const,
         entry_gate: 'declined' as const,
         event: 'rule_tuning_review_completed' as const,
         rule_unavailable: false,

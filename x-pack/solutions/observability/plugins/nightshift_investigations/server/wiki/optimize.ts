@@ -8,6 +8,12 @@
 import type { Logger } from '@kbn/core/server';
 import { MessageRole, type BoundInferenceClient, type Message } from '@kbn/inference-common';
 import {
+  WIKI_RELATION_KINDS,
+  dropEmptySections,
+  lintWikiContent,
+  tidyWikiOntology,
+} from '@kbn/agent-knowledge-wiki';
+import {
   WIKI_EDIT_ACTIONS,
   WIKI_ENTITY_TYPES,
   WIKI_SECTIONS_BY_TYPE,
@@ -16,7 +22,6 @@ import {
   type WikiPageSummary,
   type WikiRoundKind,
 } from '../../common/wiki';
-import { WIKI_RELATION_KINDS, tidyWikiOntology } from '../../common/wiki_relations';
 import type { AppliedWikiEdit, WikiTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -25,8 +30,6 @@ import {
   type AppliedWriteRecord,
   type WriteProvenance,
 } from '../investigation_round';
-import { dropEmptySections } from './drop_empty_sections';
-import { lintWikiContent } from './lint_content';
 import type { WikiPageStore } from './page_store';
 import {
   canonicalizeSlug,

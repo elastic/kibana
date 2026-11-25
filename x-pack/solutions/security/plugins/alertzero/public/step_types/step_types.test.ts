@@ -7,6 +7,7 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { ReportWorkerOutcomeStepId } from '../../common/step_types';
+import { BuildRuleTuningWikiEntryStepId } from '../../common/step_types/build_rule_tuning_wiki_entry_step';
 import {
   TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
   TRIAGE_REVOKE_FP_DECISION_STEP_ID,
@@ -34,6 +35,7 @@ describe('AlertZero public step definitions', () => {
       'function',
       'function',
       'function',
+      'function',
     ]);
   });
 
@@ -46,13 +48,14 @@ describe('AlertZero public step definitions', () => {
       TRIAGE_STORE_FP_DECISIONS_STEP_ID,
       TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
       TRIAGE_REVOKE_FP_DECISION_STEP_ID,
+      BuildRuleTuningWikiEntryStepId,
     ]);
   });
 
   it('gives every step an icon', async () => {
     const resolved = await Promise.all(register().map((load) => load()));
 
-    expect(resolved).toHaveLength(4);
+    expect(resolved).toHaveLength(5);
     resolved.forEach((definition) => expect(definition).toHaveProperty('icon'));
   });
 });

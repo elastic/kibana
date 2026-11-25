@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
 dependsOn:
   - '@kbn/evals'
+  - '@kbn/agent-knowledge-wiki'
   - '@kbn/evals-common'
   - '@kbn/scout'
   - '@kbn/tooling-log'

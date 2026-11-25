@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lintWikiContent } from '@kbn/nightshift-investigations-plugin/server/wiki/lint_content';
+import { lintWikiContent } from '@kbn/agent-knowledge-wiki';
 import type {
   WikiOptimizeEvaluator,
   WikiOptimizeTaskOutput,

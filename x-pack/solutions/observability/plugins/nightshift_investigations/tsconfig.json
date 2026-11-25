@@ -14,6 +14,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/dev-cli-runner",
+    "@kbn/agent-knowledge-wiki",
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/nightshift-decision-trees",

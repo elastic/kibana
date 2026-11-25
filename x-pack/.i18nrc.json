@@ -150,6 +150,7 @@
       "platform/packages/shared/agent_builder_visualizations"
     ],
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
+    "xpack.agentKnowledge": "platform/plugins/shared/agent_knowledge",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.alertzero": ["solutions/security/plugins/alertzero", "solutions/security/packages/kbn-alertzero-common"],

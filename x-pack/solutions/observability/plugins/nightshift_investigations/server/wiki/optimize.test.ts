@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { WIKI_ENTITY_TYPES, WIKI_SECTIONS_BY_TYPE } from '../../common/wiki';
-import { WIKI_RELATION_KINDS } from '../../common/wiki_relations';
+import { WIKI_RELATION_KINDS } from '@kbn/agent-knowledge-wiki';
 import type { WikiTelemetry } from '../telemetry';
 import {
   applyWikiEdits,

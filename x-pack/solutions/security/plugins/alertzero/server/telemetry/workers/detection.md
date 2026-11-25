@@ -44,6 +44,13 @@ Both reviews send `applied` only when the change landed, and `approved_not_appli
 - **Rule Tuning** re-reads the rule after an action reported success (`refetch_rule`). A query, risk score, threshold or schedule change bumps the rule's revision; an added exception item does not, so that arm counts on the action's success. An approved change identical to the rule (no new revision) counts as not applied. A `manual` change has no action, so neither flag is set.
 - **Rule Coverage** re-reads the rule after an approved enable or install, and requires it enabled.
 
+## Decision history
+
+Rule Tuning only. The review reads the rule's decision history before diagnosis (`recall_rule_history`) and adds the analyst's decision to it after the alerts are tagged and the Investigation is closed (`save_decision`).
+
+- `decision_history_read` is `found` when the rule has a page, `empty` when it has none yet, and `failed` when the read failed; the diagnosis then goes ahead and is told the history is unknown. It is `none` when no diagnosis ran: the entry gate's arms and a rule that could not be read.
+- `decision_history_saved` is `saved` when the decision is on the page, including a replay that found it there. It is `failed` when reading the decided proposal, building the entry or the write failed; the review then posts the error to the Investigation. It is `none` when nobody decided.
+
 ## Closes
 
 | Worker | Close | `close_reason` |

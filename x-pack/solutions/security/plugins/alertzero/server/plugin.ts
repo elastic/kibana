@@ -60,6 +60,7 @@ import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { ALERTZERO_AI_INDICES, type AlertZeroAiIndexId } from './context_engine/ai_index_registry';
 import { registerAiIndices } from './context_engine/register_ai_indices';
+import { registerAlertZeroWiki } from './agent_knowledge/register_wiki';
 import {
   installSpaceScopedIndexTemplates,
   type AiIndexWriteGates,
@@ -179,6 +180,7 @@ export class AlertZeroPlugin
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
     {
       agentBuilder,
+      agentKnowledge,
       proposals,
       agenticInvestigations,
       contextEngine,
@@ -209,6 +211,7 @@ export class AlertZeroPlugin
     if (contextEngine) {
       registerAiIndices({ contextEngine });
     }
+    registerAlertZeroWiki(agentKnowledge);
     // Outside the optional-plugin guard below: the browser offers this step whenever AlertZero is
     // enabled, and an unregistered step type fails the run before `on-failure: continue` applies.
     // The handler reports only for a managed Worker, which needs those plugins.

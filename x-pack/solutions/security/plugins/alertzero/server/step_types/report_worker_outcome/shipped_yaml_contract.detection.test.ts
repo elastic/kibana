@@ -94,7 +94,9 @@ describe('shipped Rule Tuning and Rule Coverage Worker YAML and the reportWorker
               record_proposal_action_decision: {
                 output: { applied: true, approved: true, dismissed: false },
               },
+              recall_rule_history: { output: { found: false } },
               resolve_applied: { output: { landed: true } },
+              resolve_decision_saved: { output: { outcome: 'saved' } },
             },
           },
           SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
@@ -112,6 +114,8 @@ describe('shipped Rule Tuning and Rule Coverage Worker YAML and the reportWorker
           change_type: 'query',
           confidence: 'high',
           decision: 'approved',
+          decision_history_read: 'empty',
+          decision_history_saved: 'saved',
           entry_gate: 'skipped',
           investigation_id: INVESTIGATION_ID,
           rule_source: 'custom',

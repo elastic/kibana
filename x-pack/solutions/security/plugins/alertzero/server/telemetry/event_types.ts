@@ -24,6 +24,8 @@ import type {
   RuleCoverageVerdict,
   RuleReviewEntryGate,
   RuleTuningChangeType,
+  RuleTuningDecisionHistoryRead,
+  RuleTuningDecisionHistorySave,
   WorkerDegradedReason,
   WorkerRecommendationConfidence,
   WorkerReviewDecision,
@@ -48,6 +50,8 @@ import {
   RULE_COVERAGE_VERDICTS,
   RULE_REVIEW_ENTRY_GATES,
   RULE_TUNING_CHANGE_TYPES,
+  RULE_TUNING_DECISION_HISTORY_READS,
+  RULE_TUNING_DECISION_HISTORY_SAVES,
   WORKER_DEGRADED_REASONS,
   WORKER_RECOMMENDATION_CONFIDENCES,
   WORKER_REVIEW_DECISIONS,
@@ -167,6 +171,8 @@ export interface AlertZeroRuleTuningReviewCompletedPayload extends AlertZeroEnve
   change_type: RuleTuningChangeType;
   confidence: WorkerRecommendationConfidence;
   decision: WorkerReviewDecision;
+  decision_history_read: RuleTuningDecisionHistoryRead;
+  decision_history_saved: RuleTuningDecisionHistorySave;
   entry_gate: RuleReviewEntryGate;
   investigation_id?: string;
   rule_source?: DetectionRuleSource;
@@ -654,6 +660,14 @@ export const ALERTZERO_RULE_TUNING_REVIEW_COMPLETED_EVENT: EventTypeOpts<AlertZe
         WORKER_RECOMMENDATION_CONFIDENCES
       ),
       decision: vocabularyField('What the tuning proposal came to', WORKER_REVIEW_DECISIONS),
+      decision_history_read: vocabularyField(
+        "How the review read the rule's decision history before diagnosis (`found` a page, `empty` when the rule has none yet, `failed` when the read failed and the diagnosis went ahead without it, `none` when no diagnosis ran)",
+        RULE_TUNING_DECISION_HISTORY_READS
+      ),
+      decision_history_saved: vocabularyField(
+        "Whether the analyst's decision was added to the rule's decision history (`saved`, also when a replay found it there already; `failed` when it could not be, after the alerts were tagged and the Investigation closed; `none` when nobody decided)",
+        RULE_TUNING_DECISION_HISTORY_SAVES
+      ),
       entry_gate: vocabularyField(
         'How the manual-autonomy entry gate went (`skipped` when none ran: assisted autonomy, or a rule that could not be read)',
         RULE_REVIEW_ENTRY_GATES

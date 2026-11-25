@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+import type {
+  WikiPage as SharedWikiPage,
+  WikiPageSummary as SharedWikiPageSummary,
+  WikiStats,
+} from '@kbn/agent-knowledge-wiki';
+
+export {
+  WIKI_PAGE_STATUSES,
+  WIKI_PROMOTION_CORROBORATIONS,
+  type WikiPageStatus,
+  type WikiStats,
+} from '@kbn/agent-knowledge-wiki';
+
 /** Managed Context Engine AI index that stores Wiki pages as KIs. */
 export const WIKI_AI_INDEX_ID = 'nightshift-wiki';
 
@@ -25,13 +38,6 @@ export const WIKI_ENTITY_TYPES = [
 ] as const;
 
 export type WikiEntityType = (typeof WIKI_ENTITY_TYPES)[number];
-
-export const WIKI_PAGE_STATUSES = ['established', 'tentative', 'archived'] as const;
-
-export type WikiPageStatus = (typeof WIKI_PAGE_STATUSES)[number];
-
-/** Confirmations from later runs a tentative page needs before it is promoted to established. */
-export const WIKI_PROMOTION_CORROBORATIONS = 1;
 
 /**
  * What a round is to the optimizer. A follow-up may correct or extend the previous answer, so it
@@ -83,38 +89,9 @@ export const WIKI_SECTIONS_BY_TYPE: Record<WikiEntityType, readonly string[]> = 
   ontology: ['Nodes', 'Relations', 'Concepts'],
 };
 
-export interface WikiPageSummary {
-  id: string;
-  title: string;
-  entity_type: WikiEntityType;
-  status: WikiPageStatus;
-  corroborations: number;
-  updated_at: string;
-  description?: string;
-  conversation_id?: string;
-  round_id?: string;
-  workflow_execution_id?: string;
-  /**
-   * Conversations that created or rewrote the page, unlike `conversation_id`, which names whoever
-   * wrote it last, including a write that only corroborated it.
-   */
-  authored_by?: string[];
-  doc_version?: number;
-}
+export type WikiPageSummary = SharedWikiPageSummary<WikiEntityType>;
 
-export interface WikiPage extends WikiPageSummary {
-  content: string;
-  slug: string;
-  /** Opaque stored-document version; pass it back on a write to reject concurrent changes. */
-  version?: string;
-}
-
-export interface WikiStats {
-  total: number;
-  established: number;
-  total_corroborations: number;
-  last_updated?: string;
-}
+export type WikiPage = SharedWikiPage<WikiEntityType>;
 
 export interface ListWikiPagesResponse {
   pages: WikiPageSummary[];
