@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
+import { MAX_QUERY_PLANS, type EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import type { QueryEngine } from '../../../common';
 import { getDynamicBlock } from './dynamic';
 import { InventoryDefinitionError } from './errors';
@@ -16,7 +16,6 @@ import {
   groupSourceMetricsByFilterForPlans,
 } from './metrics/metrics';
 import type { QueryPlan, SourceProbe } from './types';
-import { MAX_QUERY_PLANS } from './types';
 
 /**
  * Turns the sources of a definition into validated query plans, with `probes[i]` the probe result

@@ -11,6 +11,10 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 /** Most sources one `dynamic` block may declare. */
 export const MAX_SOURCES = 16;
+/** Most query plans one definition may expand to, since each plan is a concurrent query. */
+export const MAX_QUERY_PLANS = 32;
+/** A source plan group runs under `TS` and `FROM` at most, and registration cannot know which. */
+const ENGINES_PER_PLAN_GROUP = 2;
 /** Longest index pattern of a source. */
 export const MAX_INDEX_PATTERN_LENGTH = 256;
 /** Longest ES|QL filter of a source or metric. */
@@ -193,8 +197,8 @@ export const dynamicSourceSchema = lazySchema(() =>
       // piece of ES|QL an author writes; validated for length only, placement is the generator's job.
       filter: filterSchema.optional(),
       attributes: z.array(dynamicAttributeSchema).max(MAX_ATTRIBUTES_PER_SOURCE).optional(),
-      // How many metrics this source declares — that is the registration cap. Concurrent query
-      // plan count is the generator's concern after probes, not a definition worst-case gate.
+      // At most `MAX_METRICS_PER_SOURCE` per source; the block schema caps the query plans they
+      // expand into across sources.
       metrics: z.array(dynamicMetricSchema).max(MAX_METRICS_PER_SOURCE).optional(),
     })
     .superRefine(({ attributes = [], metrics = [] }, ctx) => {
@@ -255,6 +259,19 @@ const addDuplicateIssues = (
   });
 };
 
+/**
+ * How many query plans the sources can expand to, before the probes say which engines run. A
+ * source gives one plan group per distinct metric filter, and one more for its unfiltered metrics,
+ * so a metric-less source is one group. Each group runs under `TS` and `FROM` at most. Filters are
+ * counted as written: two spellings of one expression count twice, which can only over-count,
+ * never let a definition past the generator's budget.
+ */
+const countPossibleQueryPlans = (sources: readonly DynamicSource[]): number =>
+  sources.reduce((total, { metrics = [] }) => {
+    const planGroups = new Set(metrics.map(({ filter }) => filter ?? null));
+    return total + Math.max(planGroups.size, 1) * ENGINES_PER_PLAN_GROUP;
+  }, 0);
+
 /** What the inventory reads to generate ES|QL over raw telemetry for an entity type. */
 export const dynamicBlockSchema = lazySchema(() =>
   z
@@ -267,7 +284,15 @@ export const dynamicBlockSchema = lazySchema(() =>
       // attribute or an identity field, which the whole-definition rules check.
       suggestedFilters: z.array(literalFieldPathSchema).max(MAX_SUGGESTED_FILTERS).optional(),
     })
-    .superRefine(({ displayLabels = [], suggestedFilters = [] }, ctx) => {
+    .superRefine(({ sources, displayLabels = [], suggestedFilters = [] }, ctx) => {
+      const possibleQueryPlans = countPossibleQueryPlans(sources);
+      if (possibleQueryPlans > MAX_QUERY_PLANS) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['sources'],
+          message: `the sources can expand to ${possibleQueryPlans} query plans (one per distinct metric filter per source, under TS and FROM); at most ${MAX_QUERY_PLANS} are allowed`,
+        });
+      }
       addDuplicateIssues(
         ctx,
         displayLabels.map(({ name }) => name),

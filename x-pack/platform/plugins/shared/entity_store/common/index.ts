@@ -152,6 +152,7 @@ export type {
 } from './domain/definitions/dynamic';
 export {
   MAX_FIELD_PATH_LENGTH,
+  MAX_QUERY_PLANS,
   METRIC_AGGS,
   METRIC_UNITS,
   CHANGE_OVER_RANGE_AGGS,

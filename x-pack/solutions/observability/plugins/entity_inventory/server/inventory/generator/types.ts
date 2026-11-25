@@ -46,6 +46,3 @@ export interface GeneratedQuery {
   esql: string;
   params: NamedParams;
 }
-
-/** The most plans a definition may expand to, since each plan is a concurrent query. */
-export const MAX_QUERY_PLANS = 32;
