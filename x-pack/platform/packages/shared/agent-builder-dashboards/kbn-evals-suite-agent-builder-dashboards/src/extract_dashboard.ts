@@ -46,6 +46,22 @@ export const getToolErrors = (steps: Step[]): ToolError[] =>
  * tool result only carries a compact summary; the full dashboard (panel
  * configs, ES|QL, controls, time range) lives on the conversation.
  */
+/** Every dashboard attachment the steps' `generate_dashboard` calls wrote, without duplicates. */
+export const getWrittenDashboardIds = (steps: Step[]): string[] => {
+  const ids = steps.flatMap((step) => {
+    if (step.type !== 'tool_call' || step.tool_id !== GENERATE_DASHBOARD_TOOL_ID) {
+      return [];
+    }
+    const results = Array.isArray(step.results) ? step.results : [];
+    return results.flatMap((result) =>
+      isRecord(result) && isRecord(result.data) && typeof result.data.attachment_id === 'string'
+        ? [result.data.attachment_id]
+        : []
+    );
+  });
+  return [...new Set(ids)];
+};
+
 export const getLastWrittenDashboardId = (steps: Step[]): string | undefined => {
   for (const step of steps.toReversed()) {
     if (step.type !== 'tool_call' || step.tool_id !== GENERATE_DASHBOARD_TOOL_ID) {

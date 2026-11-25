@@ -67,6 +67,7 @@ import {
   findAskUserQuestionPrompt,
   findModeOptionIndex,
   getLastWrittenDashboardId,
+  getWrittenDashboardIds,
   getToolErrors,
   readDashboardVersions,
   type AskUserQuestionPrompt,
@@ -207,19 +208,24 @@ export function createEvaluateDataset({
     return { before, dashboard };
   };
 
-  /** The dashboard the turn changed; a `generate_dashboard` call that changed nothing doesn't count. */
+  /**
+   * A dashboard the turn changed, checking every dashboard it wrote; a `generate_dashboard` call
+   * that changed nothing doesn't count.
+   */
   const getChangedDashboardId = async (
     { conversationId, steps }: AgentBuilderClientResponse,
     before: Conversation | undefined
   ): Promise<string | undefined> => {
-    const writtenId = getLastWrittenDashboardId(steps);
-    if (!writtenId || !conversationId) {
+    const writtenIds = getWrittenDashboardIds(steps);
+    if (writtenIds.length === 0 || !conversationId) {
       return undefined;
     }
     const after = await agentBuilderClient.getConversation<Conversation>(conversationId);
-    const { latest } = readDashboardVersions(after, writtenId);
-    const { latest: previous } = before ? readDashboardVersions(before, writtenId) : {};
-    return latest !== undefined && !isEqual(previous, latest) ? writtenId : undefined;
+    return writtenIds.find((writtenId) => {
+      const { latest } = readDashboardVersions(after, writtenId);
+      const { latest: previous } = before ? readDashboardVersions(before, writtenId) : {};
+      return latest !== undefined && !isEqual(previous, latest);
+    });
   };
 
   const task: ExperimentTask<DashboardDatasetExample, DashboardAgentTaskOutput> = async ({
