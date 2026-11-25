@@ -50,11 +50,16 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   pagePathGetters: {
     // Mirrors Fleet pagePathGetters: path segment is `/policies/${id}` (not `/fleet/policies/...`).
     policy_details: ({ policyId }: { policyId: string }) => ['', `/policies/${policyId}`],
+    integration_details_policies: ({ pkgkey }: { pkgkey: string }) => [
+      '',
+      `/detail/${pkgkey}/policies`,
+    ],
   },
 }));
 
 jest.mock('@kbn/fleet-plugin/common', () => ({
   PLUGIN_ID: 'fleet',
+  INTEGRATIONS_PLUGIN_ID: 'integrations',
 }));
 
 interface WrapperProps {
@@ -117,6 +122,45 @@ describe('PolicyAssignmentList', () => {
 
     beforeEach(() => {
       mockUseAgentPolicies.mockReturnValue({ data: sharedData, isFetching: false, isError: false });
+    });
+
+    describe('split integration hint', () => {
+      const hint =
+        'To run this pack on only some of these agent policies, give each its own Osquery Manager integration in Fleet.';
+
+      it('links to the integration policies with Integrations read', () => {
+        mockCapabilities = { fleet: { read: true } };
+        render(<FormWrapper defaultValues={{ policy_ids: ['policy-1'] }} />);
+
+        const callout = screen.getByTestId('policyAssignmentSharedIntegrationCallout');
+        expect(callout).toHaveTextContent(hint);
+        const link = within(callout).getByTestId('policyAssignmentSharedIntegrationFleetLink');
+        expect(link).toHaveTextContent('Fleet');
+        expect(link).toHaveAttribute('href', '/app/integrations/detail/osquery_manager/policies');
+        expect(link).not.toHaveAttribute('target');
+      });
+
+      it.each<Record<string, Record<string, boolean>>>([{}, { fleet: { read: false } }])(
+        'shows plain text without Integrations read (%j)',
+        (capabilities) => {
+          mockCapabilities = capabilities;
+          render(<FormWrapper defaultValues={{ policy_ids: ['policy-1'] }} />);
+
+          const callout = screen.getByTestId('policyAssignmentSharedIntegrationCallout');
+          expect(callout).toHaveTextContent(hint);
+          expect(within(callout).queryByRole('link')).not.toBeInTheDocument();
+        }
+      );
+
+      it('hides the callout when no policies are implicitly included', () => {
+        mockCapabilities = { fleet: { read: true } };
+        render(<FormWrapper defaultValues={{ policy_ids: ['policy-1', 'policy-2'] }} />);
+
+        expect(
+          screen.queryByTestId('policyAssignmentSharedIntegrationCallout')
+        ).not.toBeInTheDocument();
+        expect(screen.queryByText(hint)).not.toBeInTheDocument();
+      });
     });
 
     const openSharedPolicies = async () => {

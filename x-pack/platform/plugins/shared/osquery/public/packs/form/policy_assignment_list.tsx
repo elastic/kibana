@@ -34,8 +34,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs, Query, UseEuiTheme } from '@elastic/eui';
-import { PLUGIN_ID as FLEET_PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { PLUGIN_ID as FLEET_PLUGIN_ID, INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { useAgentPolicies } from '../../agent_policies';
 import { expandToSharedIntegrations } from '../../agent_policies/expand_to_shared_integrations';
 import { useKibana } from '../../common/lib/kibana';
@@ -301,6 +302,10 @@ const tableCaption = i18n.translate('xpack.osquery.pack.policyList.tableCaption'
   defaultMessage: 'Agent policies for pack assignment',
 });
 
+const fleetLinkText = i18n.translate('xpack.osquery.pack.form.sharedIntegration.fleetLinkText', {
+  defaultMessage: 'Fleet',
+});
+
 const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   isReadOnly = false,
   receivingPolicyIds,
@@ -309,6 +314,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   // The policy list is fetched with Osquery privileges only, so a user can see
   // rows here without being allowed to open the Fleet policy details page.
   const canReadFleetPolicies = !!capabilities.fleetv2?.agent_policies_read;
+  const canReadIntegrations = !!capabilities.fleet?.read;
   const {
     data: { agentPoliciesById, groupsByPackagePolicyId, groupIdByPolicyId } = {},
     isFetching,
@@ -938,14 +944,42 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                   defaultMessage: 'Shared integration includes additional agent policies',
                 }
               )}
-              text={i18n.translate(
-                'xpack.osquery.pack.form.sharedIntegration.partialSelectionDescription',
-                {
-                  defaultMessage:
-                    'These agent policies receive this pack because they share an integration with a selected agent policy: {policyNames}. Saving does not add them to this pack’s agent policies.',
-                  values: { policyNames: implicitPolicyNames },
-                }
-              )}
+              text={
+                <>
+                  <p>
+                    {i18n.translate(
+                      'xpack.osquery.pack.form.sharedIntegration.partialSelectionDescription',
+                      {
+                        defaultMessage:
+                          'These agent policies receive this pack because they share an integration with a selected agent policy: {policyNames}. Saving does not add them to this pack’s agent policies.',
+                        values: { policyNames: implicitPolicyNames },
+                      }
+                    )}
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.osquery.pack.form.sharedIntegration.splitIntegrationHint"
+                      defaultMessage="To run this pack on only some of these agent policies, give each its own Osquery Manager integration in {fleetLink}."
+                      values={{
+                        fleetLink: canReadIntegrations ? (
+                          <EuiLink
+                            data-test-subj="policyAssignmentSharedIntegrationFleetLink"
+                            href={getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
+                              path: pagePathGetters.integration_details_policies({
+                                pkgkey: OSQUERY_INTEGRATION_NAME,
+                              })[1],
+                            })}
+                          >
+                            {fleetLinkText}
+                          </EuiLink>
+                        ) : (
+                          fleetLinkText
+                        ),
+                      }}
+                    />
+                  </p>
+                </>
+              }
             />
             <EuiSpacer size="s" />
           </>
