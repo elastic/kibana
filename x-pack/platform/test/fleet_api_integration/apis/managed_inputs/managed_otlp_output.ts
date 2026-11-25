@@ -30,6 +30,7 @@ export default function (providerContext: FtrProviderContext) {
     const supertest = getService('supertest');
     const es = getService('es');
     const kibanaServer = getService('kibanaServer');
+    const retry = getService('retry');
 
     skipIfNoDockerRegistry(providerContext);
 
@@ -945,16 +946,24 @@ export default function (providerContext: FtrProviderContext) {
           return body.item;
         };
 
-        // the latest revision Fleet published for agents, rather than one compiled on request
+        // the policy as Fleet published it for agents, rather than one compiled on request. An update
+        // deploys the policy from a Task Manager task: wait until the current revision is published.
         const getPublishedPolicy = async (policyId: string) => {
-          const res = await es.search<{ revision_idx: number; data: Record<string, any> }>({
-            index: '.fleet-policies',
-            query: { bool: { filter: [{ term: { policy_id: policyId } }] } },
-            sort: [{ revision_idx: { order: 'desc' } }],
-            size: 1,
+          const {
+            body: { item: agentPolicy },
+          } = await supertest.get(`/api/fleet/agent_policies/${policyId}`).expect(200);
+
+          let published: { revision_idx: number; data: Record<string, any> } | undefined;
+          await retry.tryForTime(30_000, async () => {
+            const res = await es.search<{ revision_idx: number; data: Record<string, any> }>({
+              index: '.fleet-policies',
+              query: { bool: { filter: [{ term: { policy_id: policyId } }] } },
+              sort: [{ revision_idx: { order: 'desc' } }],
+              size: 1,
+            });
+            published = res.hits.hits[0]?._source;
+            expect(published?.revision_idx).to.be(agentPolicy.revision);
           });
-          const published = res.hits.hits[0]?._source;
-          expect(published).to.be.ok();
           return published!;
         };
 
@@ -1003,7 +1012,6 @@ export default function (providerContext: FtrProviderContext) {
             secrets: { auth: { credential: 'test-credential-value' } },
           });
           const policyId = await createOtelPolicy(outputId);
-          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
 
           const { body: updateBody } = await supertest
             .put(`/api/fleet/outputs/${outputId}`)
@@ -1013,11 +1021,8 @@ export default function (providerContext: FtrProviderContext) {
           const newCredentialId: string = updateBody.item.secrets.auth.credential.id;
           expect(newCredentialId).not.to.be(credentialId);
 
-          // the update publishes a new revision, so agents stop using the deleted secret
-          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
-            policyId
-          );
-          expect(revision).to.be.greaterThan(previousRevision);
+          // the update publishes a new revision, so agents stop using the replaced secret
+          const { data: publishedPolicy } = await getPublishedPolicy(policyId);
           expect(publishedPolicy.exporters[`otlp/${outputId}`].headers).to.eql({
             Authorization: `ApiKey $co.elastic.secret{${newCredentialId}}`,
           });
@@ -1031,7 +1036,6 @@ export default function (providerContext: FtrProviderContext) {
             secrets: { auth: { credential: 'test-credential-value' } },
           });
           const policyId = await createOtelPolicy(outputId);
-          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
 
           await supertest
             .put(`/api/fleet/outputs/${outputId}`)
@@ -1039,10 +1043,7 @@ export default function (providerContext: FtrProviderContext) {
             .send({ auth: null })
             .expect(200);
 
-          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
-            policyId
-          );
-          expect(revision).to.be.greaterThan(previousRevision);
+          const { data: publishedPolicy } = await getPublishedPolicy(policyId);
           expect(publishedPolicy.exporters[`otlp/${outputId}`]).to.eql({
             endpoint: 'otlp.example.com:4317',
           });
