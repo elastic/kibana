@@ -74,6 +74,21 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(queuePath).toMatch(/'security\.get_entity'/i);
   });
 
+  // Why: the shipped step 1 reused an attached alert. A set of attached alerts must not be replaced by
+  // live queue results.
+  it('keeps attached alerts, one or a set, out of the queue lookup', () => {
+    const { content } = alertAnalysisSkill;
+    const chooser = content.slice(
+      content.indexOf('## Choose a Path First'),
+      content.indexOf('### Queue path')
+    );
+
+    expect(chooser).toMatch(
+      /attached alerts[^\n]*\(one alert or a set\)[^\n]*do not fetch them again/i
+    );
+    expect(content).toMatch(/### Triage path \(specific alerts, attached or named by id\)/i);
+  });
+
   // Why: "prioritize" sat under the stop-after-security.alerts path and under the evidence step at the
   // same time, so the model had two opposite instructions for "which alert do I handle first".
   it('sends judgment questions out of the queue path instead of stopping', () => {
