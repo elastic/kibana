@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { EuiCallOut, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -78,22 +79,21 @@ const OutboundActionsFormSectionComponent: React.FC<OutboundActionsFormSectionPr
       {isEdit && wasEnabled && !switchOn ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             size="s"
-            color="danger"
-            iconType="warning"
             data-test-subj="outbound-actions-disable-warning"
             title={i18n.translate(
               'xpack.triggersActionsUI.sections.actionConnectorForm.outboundActionsDisableWarningTitle',
               { defaultMessage: 'Credentials will be removed' }
             )}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.actionConnectorForm.outboundActionsDisableWarningDescription"
-              defaultMessage="After save, the stored credentials are deleted. Rules, workflows and agents can no longer run actions with this connector. Turn Run actions on again and enter credentials to restore it."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.outboundActionsDisableWarningDescription"
+                defaultMessage="After save, the stored credentials are deleted. Rules, workflows and agents can no longer run actions with this connector. Turn Run actions on again and enter credentials to restore it."
+              />
+            }
+          />
         </>
       ) : null}
     </>
