@@ -24,6 +24,8 @@ import type { FleetRequestHandlerContext } from '../../types';
 import { hasFleetServers } from '../../services/fleet_server';
 import { createFleetAuthzMock } from '../../../common/mocks';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
+import { isOutputSecretStorageEnabled, isSecretStorageEnabled } from '../../services/secrets';
+import { isOtlpOutputFlagEnabled } from '../../services/outputs/helpers';
 
 import { fleetSetupHandler, getFleetStatusHandler } from './handlers';
 import { FleetSetupResponseSchema, GetAgentsSetupResponseSchema } from '.';
@@ -39,6 +41,9 @@ jest.mock('../../services/setup', () => {
 });
 
 jest.mock('../../services/fleet_server');
+jest.mock('../../services/outputs/helpers', () => ({
+  isOtlpOutputFlagEnabled: jest.fn().mockResolvedValue(true),
+}));
 jest.mock('../../services/secrets', () => ({
   isSecretStorageEnabled: jest.fn().mockResolvedValue(true),
   isSSLSecretStorageEnabled: jest.fn().mockResolvedValue(true),
@@ -216,6 +221,46 @@ describe('FleetStatusHandler', () => {
     };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
+  });
+
+  it('POST /status reports output secret storage separately from package policy secret storage', async () => {
+    jest
+      .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
+      .mockResolvedValue(true);
+    jest.mocked(hasFleetServers).mockResolvedValue(true);
+    // a Fleet Server between the two minimum versions
+    jest.mocked(isSecretStorageEnabled).mockResolvedValueOnce(true);
+    jest.mocked(isOutputSecretStorageEnabled).mockResolvedValueOnce(false);
+    await getFleetStatusWithErrorHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        is_secrets_storage_enabled: true,
+        is_output_secrets_storage_enabled: false,
+      }),
+    });
+  });
+
+  it('POST /status does not check output secret storage when the OTLP output is disabled', async () => {
+    jest
+      .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
+      .mockResolvedValue(true);
+    jest.mocked(hasFleetServers).mockResolvedValue(true);
+    jest.mocked(isOtlpOutputFlagEnabled).mockResolvedValueOnce(false);
+    await getFleetStatusWithErrorHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
+
+    expect(isOutputSecretStorageEnabled).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expect.not.objectContaining({ is_output_secrets_storage_enabled: expect.anything() }),
+    });
   });
 
   it('POST /status w/200 and body with missing requirements', async () => {

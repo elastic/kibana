@@ -1853,6 +1853,23 @@ class OutputService {
           updateData.service_token = typedFullUpdateData.secrets.service_token as string;
         }
       }
+
+      // the credential of an OTLP output is only stored as a secret: removing the authentication
+      // removes it too, so that it cannot be reused by an authentication added later
+      const storedCredential = isOtlpOutput(originalOutput)
+        ? originalOutput.secrets?.auth?.credential
+        : undefined;
+      const removesAuth = (updateData as Nullable<OutputSoOtlpAttributes>).auth === null;
+      if (removesAuth && typeof storedCredential === 'object' && storedCredential?.id) {
+        if (updateData.secrets !== null) {
+          const secrets = updateData.secrets as Record<string, unknown> | undefined;
+          updateData.secrets = {
+            ...secrets,
+            auth: { credential: null },
+          } as typeof updateData.secrets;
+        }
+        secretsToDelete.push({ id: storedCredential.id });
+      }
     }
 
     // The secrets that are no longer part of the output are deleted above. Their references have to

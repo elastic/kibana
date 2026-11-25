@@ -38,7 +38,7 @@ export async function isOtlpOutputSupported(
   });
 }
 
-const isOtlpOutputFlagEnabled = async (): Promise<boolean> => {
+export const isOtlpOutputFlagEnabled = async (): Promise<boolean> => {
   const featureFlags = appContextService.getFeatureFlags();
   if (!featureFlags) {
     return false;

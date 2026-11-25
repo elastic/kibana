@@ -18,6 +18,7 @@ import {
   isSSLSecretStorageEnabled,
 } from '../../services/secrets';
 import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
+import { isOtlpOutputFlagEnabled } from '../../services/outputs/helpers';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   const coreContext = await context.core;
@@ -40,7 +41,10 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     isSpaceAwarenessEnabled(),
     isActionSecretStorageEnabled(esClient, soClient),
     isSSLSecretStorageEnabled(esClient, soClient),
-    isOutputSecretStorageEnabled(esClient, soClient),
+    // only the OTLP output needs it in the UI: its credential is only stored as a secret
+    isOtlpOutputFlagEnabled().then((isOtlpOutputEnabled) =>
+      isOtlpOutputEnabled ? isOutputSecretStorageEnabled(esClient, soClient) : undefined
+    ),
   ]);
 
   const isFleetServerMissing = !hasFleetServersRes;
@@ -69,7 +73,9 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     is_secrets_storage_enabled: useSecretsStorage,
     is_space_awareness_enabled: isSpaceAwarenessEnabledRes,
     is_ssl_secrets_storage_enabled: useSSLSecretsStorage,
-    is_output_secrets_storage_enabled: useOutputSecretsStorage,
+    ...(useOutputSecretsStorage !== undefined && {
+      is_output_secrets_storage_enabled: useOutputSecretsStorage,
+    }),
     is_action_secrets_storage_enabled: isActionSecretStorageEnabledRes,
     is_fips_enabled: appContextService.getIsFipsEnabled(),
   };

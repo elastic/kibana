@@ -2515,6 +2515,10 @@ describe('EditOutputFlyout', () => {
 
         it('should require removing a saved authentication', async () => {
           const { utils } = renderFlyout(otlpOutputWithAuth);
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+            target: { value: 'renamed otlp output' },
+          });
+          expect(utils.getByTestId('saveApplySettingsBtn')).toBeEnabled();
           fireEvent.click(utils.getByText('Save and apply settings'));
 
           await waitFor(() => {

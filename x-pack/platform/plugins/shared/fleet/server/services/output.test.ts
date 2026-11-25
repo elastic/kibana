@@ -33,6 +33,7 @@ import {
 } from './outputs/helpers';
 import { outputSavedObjectToOutput, withRemovedOtlpHeaders } from './output';
 import {
+  deleteSecrets,
   extractAndWriteOutputSecrets,
   extractAndUpdateOutputSecrets,
   isOutputSecretStorageEnabled,
@@ -5519,6 +5520,25 @@ describe('Output Service', () => {
           } finally {
             mockedAppContextService.getCloud.mockReturnValue({} as any);
           }
+        });
+
+        it('removes the stored credential with the authentication when secret storage is not enabled', async () => {
+          mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output-with-auth', {
+            auth: null,
+          });
+
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-otlp-output-with-auth'),
+            expect.objectContaining({ auth: null, secrets: { auth: { credential: null } } })
+          );
+          expect(deleteSecrets).toHaveBeenCalledWith({
+            esClient: esClientMock,
+            ids: ['credential-secret-id'],
+          });
         });
       });
 
