@@ -151,6 +151,23 @@ const isExportProvidersEnabled = (
   experimentalFeatures.responseActionsEndpointFileExport;
 
 /**
+ * Fleet merges `overrides` into the agent policy after every callback check, so `response_actions`
+ * there would bypass them. Like the rest of the feature, checked only with export providers enabled.
+ */
+const rejectResponseActionsInOverridesIfEnabled = (
+  packagePolicy: NewPackagePolicy,
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
+): void => {
+  if (
+    isEndpointPackagePolicy(packagePolicy) &&
+    isExportProvidersEnabled(productFeatures, experimentalFeatures)
+  ) {
+    rejectResponseActionsInOverrides(packagePolicy);
+  }
+};
+
+/**
  * Callback to handle creation of PackagePolicies in Fleet
  */
 export const getPackagePolicyCreateCallback = (
@@ -171,14 +188,12 @@ export const getPackagePolicyCreateCallback = (
     context,
     request
   ): Promise<NewPackagePolicy> => {
-    // Both paths below keep `overrides` (with a request only `inputs` is replaced), and Fleet merges
-    // them into the agent policy after every other check
-    if (
-      isEndpointPackagePolicy(newPackagePolicy) &&
-      isExportProvidersEnabled(productFeatures, experimentalFeatures)
-    ) {
-      rejectResponseActionsInOverrides(newPackagePolicy);
-    }
+    // Both paths below keep `overrides` (with a request only `inputs` is replaced)
+    rejectResponseActionsInOverridesIfEnabled(
+      newPackagePolicy,
+      productFeatures,
+      experimentalFeatures
+    );
 
     // callback is called outside request context
     if (!context || !request) {
@@ -338,8 +353,11 @@ export const getPackagePolicyUpdateCallback = (
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
     try {
-      // overrides are merged into the agent policy after every other check in this callback
-      rejectResponseActionsInOverrides(newPackagePolicy);
+      rejectResponseActionsInOverridesIfEnabled(
+        newPackagePolicy,
+        productFeatures,
+        experimentalFeatures
+      );
 
       // The advanced settings UI may delete mac.ransomware.mode when cleared;
       // restore the default before validation so the typed field is never missing.

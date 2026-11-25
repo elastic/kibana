@@ -263,6 +263,28 @@ describe('Fleet integrations', () => {
           experimentalFeatures
         );
 
+      const createPackagePolicyWithCredentials = (): NewPackagePolicy => ({
+        ...createNewPackagePolicyMock(),
+        inputs: [
+          {
+            type: 'endpoint',
+            enabled: true,
+            streams: [],
+            config: {
+              policy: {
+                value: setExportProviders(policyFactory(), [
+                  { ...provider, credentials: { type: 'account_key', key_id: 'key-1' } },
+                ]),
+              },
+            },
+          },
+        ],
+      });
+
+      beforeEach(() => {
+        experimentalFeatures = { ...experimentalFeatures, responseActionsEndpointFileExport: true };
+      });
+
       it.each<[string, boolean, Record<string, unknown>]>([
         [
           'the nested form, with a request',
@@ -318,42 +340,71 @@ describe('Fleet integrations', () => {
         }
       );
 
-      it.each<[string, boolean]>([
-        ['with a request', true],
-        ['without a request', false],
-      ])('rejects credentials on a provider, %s', async (_, withRequest) => {
-        const newPackagePolicy = {
-          ...createNewPackagePolicyMock(),
-          inputs: [
-            {
-              type: 'endpoint',
-              enabled: true,
-              streams: [],
-              config: {
-                policy: {
-                  value: setExportProviders(policyFactory(), [
-                    { ...provider, credentials: { type: 'account_key', key_id: 'key-1' } },
-                  ]),
-                },
-              },
-            },
-          ],
-        };
-
+      it('rejects credentials on a provider without a request', async () => {
         await expect(
-          buildCallback()(
-            newPackagePolicy,
-            soClient,
-            esClient,
-            withRequest ? requestContextMock.convertContext(ctx) : undefined,
-            withRequest ? req : undefined
-          )
+          buildCallback()(createPackagePolicyWithCredentials(), soClient, esClient)
         ).rejects.toMatchObject({
           statusCode: 400,
           apiPassThrough: true,
           message:
             `export_providers[0] "azure-1": credentials can't be set when the policy is created; ` +
             `set the key with PUT ${EXPORT_PROVIDER_KEY_ROUTE}`,
+        });
+      });
+
+      it('replaces a provider with credentials by the default policy with a request', async () => {
+        const packagePolicy = await buildCallback()(
+          createPackagePolicyWithCredentials(),
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+        const policy: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os]).not.toHaveProperty('response_actions');
+        }
+      });
+
+      describe('when the feature flag is off', () => {
+        beforeEach(() => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            responseActionsEndpointFileExport: false,
+          };
+        });
+
+        it.each<[string, boolean]>([
+          ['with a request', true],
+          ['without a request', false],
+        ])('leaves response_actions in overrides alone, %s', async (_, withRequest) => {
+          const overrides = {
+            inputs: { endpoint: { policy: { windows: { response_actions: {} } } } },
+          };
+
+          const packagePolicy = await buildCallback()(
+            { ...createNewPackagePolicyMock(), overrides },
+            soClient,
+            esClient,
+            withRequest ? requestContextMock.convertContext(ctx) : undefined,
+            withRequest ? req : undefined
+          );
+
+          expect(packagePolicy.overrides).toEqual(overrides);
+        });
+
+        it('strips a provider with credentials without a request', async () => {
+          const packagePolicy = await buildCallback()(
+            createPackagePolicyWithCredentials(),
+            soClient,
+            esClient
+          );
+          const policy: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
+
+          for (const os of ['windows', 'mac', 'linux'] as const) {
+            expect(policy[os]).not.toHaveProperty('response_actions');
+          }
         });
       });
     });
@@ -2385,6 +2436,35 @@ describe('Fleet integrations', () => {
           apiPassThrough: true,
           message: `Package policy overrides can't set response_actions`,
         });
+      });
+
+      it('should leave response_actions in overrides alone when the feature flag is off', async () => {
+        experimentalFeatures = {
+          ...experimentalFeatures,
+          responseActionsEndpointFileExport: false,
+        };
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = policyFactory();
+        const overrides = {
+          inputs: { endpoint: { policy: { windows: { response_actions: {} } } } },
+        };
+        policyConfig.overrides = overrides;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(updatedPolicyConfig.overrides).toEqual(overrides);
       });
 
       describe('credentials key references', () => {
