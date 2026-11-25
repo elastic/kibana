@@ -182,6 +182,13 @@ export class UnitStatsClient {
     }
   }
 
+  /** Placeholder until the heartbeat query lands: every unit reports no heartbeat. */
+  async getUnitLiveness(_params: {
+    unitId: string;
+  }): Promise<StreamsUnit.HealthResponse['liveness']> {
+    return { state: 'no_heartbeat', last_seen: null };
+  }
+
   /** Every destination, processor and source in the unit, as long as one request can name them all. */
   private getAllUnitRefs(unit: StreamsUnit.Configuration): StreamsUnit.StatsComponentRef[] {
     const refs = [

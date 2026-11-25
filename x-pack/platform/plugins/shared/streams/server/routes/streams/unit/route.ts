@@ -16,6 +16,7 @@ import { createServerRoute } from '../../create_server_route';
 import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
 import { indexMetadataRoute } from './index_metadata';
 import { assertUnitPutEnvelope, parseUnitPutBody } from './parse_unit_put_body';
+import { unitHealthRoutes } from './health_route';
 import { resolveUnitIndicesRoute } from './resolve_indices';
 import { unitStatsRoutes } from './stats_route';
 
@@ -216,4 +217,5 @@ export const unitRoutes = {
   ...resolveUnitIndicesRoute,
   ...indexMetadataRoute,
   ...unitStatsRoutes,
+  ...unitHealthRoutes,
 };

@@ -58,7 +58,6 @@ export type {
   ResolvedDestinationIndexHealth,
   ResolveUnitIndicesResponse,
 } from './resolve_unit_indices';
-export type { UnitHealthResponse, UnitLivenessState } from './unit_health';
 
 export type { StreamSummary } from './stream_summary';
 export type { PaginatedResponse } from './pagination';

@@ -441,6 +441,24 @@ export const streamsUnitStatsResponseSchema = lazySchema(() =>
   })
 );
 
+/**
+ * Whether a unit is up, from the heartbeat its collector reports. It is read relative to now, so it
+ * does not depend on a time range or a config hash.
+ * - `up`: the newest heartbeat is recent.
+ * - `down`: a heartbeat exists in the lookback, but it is too old.
+ * - `no_heartbeat`: no heartbeat in the lookback. The unit may not have started yet, may have been
+ *   down longer than the lookback, or may not report metrics at all, so this is not `down`.
+ */
+export const streamsUnitHealthResponseSchema = lazySchema(() =>
+  z.object({
+    liveness: z.object({
+      state: z.enum(['up', 'down', 'no_heartbeat']),
+      /** `@timestamp` of the newest heartbeat within the lookback. Null when there is none. */
+      last_seen: z.string().nullable(),
+    }),
+  })
+);
+
 export const collectUnitComponentIds = (unit: StreamsUnit.Configuration): string[] => {
   const components: ReadonlyArray<{ id?: unknown }> = [
     ...(Array.isArray(unit.sources) ? unit.sources : []),
@@ -490,6 +508,8 @@ export namespace StreamsUnit {
   export type StatsSourceResult = z.infer<typeof streamsUnitStatsSourceResultSchema>;
   export type StatsMeta = z.infer<typeof streamsUnitStatsMetaSchema>;
   export type StatsResponse = z.infer<typeof streamsUnitStatsResponseSchema>;
+  export type HealthResponse = z.infer<typeof streamsUnitHealthResponseSchema>;
+  export type LivenessState = HealthResponse['liveness']['state'];
   export type ComponentValidationRequest = z.infer<typeof streamsComponentValidationRequestSchema>;
   export interface ConfigurationSavedObjectAttributes {
     unit_id: Identifier;
