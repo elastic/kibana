@@ -38,6 +38,19 @@ describe('AlertZeroPageHeader', () => {
     expect(heading()).toContain('1 action needs your approval');
   });
 
+  it('should not ask for the approval of a user who cannot decide proposals', () => {
+    setup({ eventCount: 3, canDecide: false });
+
+    expect(heading()).toContain('3 actions are awaiting approval');
+    expect(heading()).not.toContain('your approval');
+  });
+
+  it('should render the singular awaiting form for a user who cannot decide proposals', () => {
+    setup({ eventCount: 1, canDecide: false });
+
+    expect(heading()).toContain('1 action is awaiting approval');
+  });
+
   it('should say the queue is clear only when it has a count to back it up', () => {
     setup({ eventCount: 0 });
 

@@ -62,12 +62,14 @@ const getAlertZeroHeroTitle = ({
   hasError,
   hasNeedsAction,
   eventCount,
+  canDecide,
 }: {
   isQueueEmpty: boolean;
   isLoading: boolean;
   hasError: boolean;
   hasNeedsAction: boolean;
   eventCount: number;
+  canDecide: boolean;
 }): string => {
   if (isLoading) {
     return i18n.translate('xpack.alertzero.hero.checkingTitle', {
@@ -87,6 +89,16 @@ const getAlertZeroHeroTitle = ({
   if (isQueueEmpty) {
     return i18n.translate('xpack.alertzero.hero.noEventsTitle', {
       defaultMessage: 'No events found',
+    });
+  }
+
+  if (hasNeedsAction && !canDecide) {
+    return i18n.translate('xpack.alertzero.hero.awaitingApprovalTitle', {
+      defaultMessage:
+        '{eventCount, plural, one {# action is awaiting approval} other {# actions are awaiting approval}}',
+      values: {
+        eventCount,
+      },
     });
   }
 
@@ -111,6 +123,8 @@ export interface AlertZeroPageHeaderProps {
   /** The count could not be fetched, so `eventCount` says nothing about reality. */
   hasError?: boolean;
   eventCount?: number;
+  /** The user can approve or decline proposals; without it the count is not addressed to them. */
+  canDecide?: boolean;
   /** Replaces the time-of-day greeting. */
   greeting?: string;
   /** Replaces the title derived from the queue state. */
@@ -131,6 +145,7 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
   isLoading = false,
   hasError = false,
   eventCount = 0,
+  canDecide = true,
   greeting,
   title: titleOverride,
   subtitle,
@@ -145,6 +160,7 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
       hasError,
       hasNeedsAction: eventCount > 0,
       eventCount,
+      canDecide,
     });
   return (
     <>

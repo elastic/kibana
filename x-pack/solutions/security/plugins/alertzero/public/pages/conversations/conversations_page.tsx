@@ -11,7 +11,10 @@ import { css } from '@emotion/react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { PROPOSALS_UI_CAPABILITY_SHOW } from '@kbn/proposals-common';
+import {
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+  PROPOSALS_UI_CAPABILITY_SHOW,
+} from '@kbn/proposals-common';
 import {
   type BaseActionsProps,
   type CardActionType,
@@ -266,8 +269,10 @@ const ConversationsPageContent: React.FC = () => {
   );
 
   const {
-    services: { notifications },
+    services: { notifications, application },
   } = useKibana<CoreStart>();
+  const canDecideProposals =
+    application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
 
   const { mutateAsync: setInvestigationStatus } = useSetInvestigationStatus();
 
@@ -431,6 +436,7 @@ const ConversationsPageContent: React.FC = () => {
             // beside a populated header.
             isQueueEmpty={openCount === 0}
             eventCount={openCount}
+            canDecide={canDecideProposals}
             {...(isIdle && {
               greeting: IDLE_HEADER.greeting,
               title: IDLE_HEADER.title,
