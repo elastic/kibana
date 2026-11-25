@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/expect'
   - '@kbn/core-chrome-layout-constants'
-  - '@kbn/test-jest-helpers'
 tags:
   - test-helper
   - package

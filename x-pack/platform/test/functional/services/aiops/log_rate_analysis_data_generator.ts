@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

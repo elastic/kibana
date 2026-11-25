@@ -6,7 +6,7 @@
  */
 
 import { SolutionNavigationProvider } from '@kbn/test-suites-src/functional/page_objects';
-import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components/test_subjects';
 
 import { NavigationalSearchPageObject } from '../../../functional/page_objects/navigational_search';
 import type { FtrProviderContext } from '../ftr_provider_context';

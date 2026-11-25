@@ -15,6 +15,5 @@
     "@kbn/std",
     "@kbn/expect",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/test-jest-helpers",
   ]
 }

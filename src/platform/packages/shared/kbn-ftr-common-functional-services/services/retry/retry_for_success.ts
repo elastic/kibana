@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
-import { delay } from '@kbn/test-jest-helpers';
+import { delay } from './delay';
 
 const returnTrue = () => true;
 
