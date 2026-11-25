@@ -28,3 +28,10 @@ export const CUSTOM_CONTENT_LIQUID_OPTIONS = {
  * template, so a saved panel cannot get around either.
  */
 export const CUSTOM_CONTENT_FORBIDDEN_FILTERS: readonly string[] = ['raw'];
+
+/**
+ * Tags a template may not use. Only `{{ }}` applies `outputEscape`: `echo` (also inside a `liquid`
+ * block) and `cycle` write a value as it is, as markup, which would let data write elements of its
+ * own. The renderer turns each into a tag that writes nothing and the server rejects the template.
+ */
+export const CUSTOM_CONTENT_FORBIDDEN_TAGS: readonly string[] = ['echo', 'cycle'];

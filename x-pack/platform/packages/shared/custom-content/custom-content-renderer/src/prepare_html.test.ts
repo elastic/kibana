@@ -169,6 +169,27 @@ describe('sanitizeHtml interactions', () => {
   });
 });
 
+describe('sanitizeHtml form controls', () => {
+  // The browser clicks a button for the user when they click a label that points at it or press Enter
+  // in a form, and those clicks are trusted, so none of these may stay.
+  it.each(['form', 'input', 'textarea', 'select', 'label'])(
+    'removes <%s> and keeps its text',
+    (tag) => {
+      const html = sanitizeHtml(`<${tag}>kept text</${tag}><button>go</button>`);
+      expect(html).not.toContain(`<${tag}`);
+      expect(html).toContain('<button>go</button>');
+    }
+  );
+
+  it('removes the form around a button but not the button', () => {
+    const html = sanitizeHtml(
+      '<form><input type="text"><button data-cc-action="filter">Search</button></form>'
+    );
+    expect(html).not.toMatch(/<(form|input)/);
+    expect(html).toContain('<button data-cc-action="filter">Search</button>');
+  });
+});
+
 describe('sanitizeHtml', () => {
   it('strips inline event handlers', () => {
     const result = sanitizeHtml('<img src="x" onerror="alert(1)">');

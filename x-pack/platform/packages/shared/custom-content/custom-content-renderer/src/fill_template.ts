@@ -7,6 +7,7 @@
 
 import {
   CUSTOM_CONTENT_FORBIDDEN_FILTERS,
+  CUSTOM_CONTENT_FORBIDDEN_TAGS,
   CUSTOM_CONTENT_LIQUID_OPTIONS,
 } from '@kbn/custom-content-common';
 import type { ESQLColumn } from '@kbn/es-types';
@@ -22,6 +23,11 @@ const getEngine = async () => {
   // A panel saved through the API never met the server's check, so the engine itself must keep
   // escaping: a forbidden filter becomes the identity, and the output is escaped as for any value.
   CUSTOM_CONTENT_FORBIDDEN_FILTERS.forEach((name) => liquid.registerFilter(name, (value) => value));
+  // Only `{{ }}` escapes. `echo` (also inside `liquid`) and `cycle` write a value as markup, so they
+  // become tags that write nothing.
+  CUSTOM_CONTENT_FORBIDDEN_TAGS.forEach((name) =>
+    liquid.registerTag(name, { parse() {}, render() {} })
+  );
   return liquid;
 };
 

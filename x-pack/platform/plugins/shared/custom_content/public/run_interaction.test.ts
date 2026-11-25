@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import type { FilterableSource } from '@kbn/data-source';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { CustomContentInteraction } from '@kbn/custom-content-renderer';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { runInteraction } from './run_interaction';
 
+const fields: FilterableField[] = [{ name: 'host.name', type: 'string', filterable: true }];
 const source: FilterableSource = {
   id: 'logs',
   title: 'logs',
-  fields: [{ name: 'host.name', type: 'string', filterable: true }],
+  fields,
   isTimeBased: () => false,
+  getFieldByName: (name) => fields.find((field) => field.name === name),
 };
 
 describe('runInteraction', () => {

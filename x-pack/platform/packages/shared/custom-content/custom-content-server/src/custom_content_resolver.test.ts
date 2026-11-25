@@ -101,6 +101,26 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(withoutData).not.toContain('CLICK TO FILTER');
   });
 
+  it('tells the model which ways of writing a value are rejected', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('Write values with {{ }}');
+    expect(systemArg).toContain('"raw" filter and the "echo" and "cycle" tags');
+  });
+
+  it('tells the model that form controls are removed, and what to use instead', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
+
+    await resolve({ prompt: 'Show a KPI card' });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('Form controls (<form>, <input>, <textarea>, <select>, <label>)');
+    expect(systemArg).toContain('<details> with a <summary>');
+  });
+
   it('tells the model that links are only allowed to Dashboards and Discover', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
 

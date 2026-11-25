@@ -505,6 +505,8 @@ describe('customContentEmbeddableFactory', () => {
         id: 'logs',
         getIndexPattern: () => 'logs',
         fields: [{ name: 'host.name', type: 'string', filterable: true }],
+        getFieldByName: (name: string) =>
+          name === 'host.name' ? { name, type: 'string', filterable: true } : undefined,
       });
     });
 

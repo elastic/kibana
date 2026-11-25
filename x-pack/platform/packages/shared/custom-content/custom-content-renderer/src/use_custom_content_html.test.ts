@@ -312,6 +312,46 @@ describe('useCustomContentHtml', () => {
       expect(result.current.columns).toEqual(new Set(['fresh']));
     });
 
+    it('scopes the interaction attributes of the template with a token that stays for the panel', async () => {
+      const template = '<button data-cc-action="filter" data-cc-field="host">x</button>';
+      const { result, rerender } = renderHook(
+        ({ generationVersion }: { generationVersion: number }) =>
+          useCustomContentHtml({ ...esqlParams, savedTemplate: template, generationVersion }),
+        { initialProps: { generationVersion: 0 } }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      const { interactionNonce } = result.current;
+      expect(interactionNonce).toMatch(/^[0-9a-f]{16}$/);
+      // The data is filled into a template whose attributes already carry the token, so what the
+      // data writes cannot.
+      const [filledTemplate] = mockFillTemplate.mock.calls[0];
+      expect(filledTemplate).toContain(`data-cc-${interactionNonce}-action="filter"`);
+      expect(filledTemplate).not.toContain('data-cc-action');
+
+      // A refetch must not change it, or the frame would reload on every refresh.
+      rerender({ generationVersion: 1 });
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(result.current.interactionNonce).toBe(interactionNonce);
+    });
+
+    it('uses another token for every panel that is shown', () => {
+      const first = renderHook(() => useCustomContentHtml(baseParams)).result.current;
+      const second = renderHook(() => useCustomContentHtml(baseParams)).result.current;
+      expect(first.interactionNonce).not.toBe(second.interactionNonce);
+    });
+
+    it('scopes the attributes of a static panel too', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({
+          ...baseParams,
+          savedTemplate: '<button data-cc-action="filter">x</button>',
+        })
+      );
+      await waitFor(() => expect(result.current.html).toContain('<button'));
+      expect(result.current.html).toContain(`data-cc-${result.current.interactionNonce}-action`);
+    });
+
     it('refetches only when the additional queries change, not when the list is rebuilt', async () => {
       const { result, rerender } = renderHook(
         ({ queries }) =>

@@ -42,4 +42,23 @@ describe('getLiquidSyntaxError', () => {
   it('does not mistake the word raw in text or a column name for the filter', () => {
     expect(getLiquidSyntaxError('<p>raw data | raw</p>{{ r["raw"].value }}')).toBeUndefined();
   });
+
+  it.each([
+    ['echo', '<p>{% echo r.x %}</p>', 'echo'],
+    ['echo inside a liquid block', '{% liquid\n echo r.x\n%}', 'echo'],
+    ['cycle', '{% cycle "a", "b" %}', 'cycle'],
+    [
+      'echo inside a loop',
+      '{% for r in rows %}{% if r.a %}{% echo r.x %}{% endif %}{% endfor %}',
+      'echo',
+    ],
+  ])('rejects the %s tag', (_, template, name) => {
+    expect(getLiquidSyntaxError(template)).toContain(`"${name}" tag is not allowed`);
+  });
+
+  it('does not mistake the words echo and cycle in text or in a column name for the tags', () => {
+    expect(
+      getLiquidSyntaxError('<p>echo cycle</p>{{ r["echo"].value }}{{ r["cycle"].value }}')
+    ).toBeUndefined();
+  });
 });

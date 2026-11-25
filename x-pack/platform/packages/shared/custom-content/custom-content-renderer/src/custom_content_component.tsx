@@ -18,7 +18,10 @@ import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 import { CustomContentGeneratingPrompt } from './custom_content_generating_prompt';
 import type { CustomContentRendererServices } from './types';
-import { CUSTOM_CONTENT_IFRAME_SANDBOX } from './constants';
+import {
+  CUSTOM_CONTENT_IFRAME_SANDBOX_TOP_NAV_ONLY,
+  CUSTOM_CONTENT_IFRAME_SANDBOX_WITH_SAME_ORIGIN,
+} from './constants';
 import {
   readInteraction,
   type CustomContentInteraction,
@@ -79,6 +82,15 @@ const iframeCss = css({
   background: 'transparent',
 });
 
+// Same-origin only for a host that listens to clicks: the others, the chat card among them, show
+// content that no one has reviewed, and have no use for it.
+const getSandbox = (isInteractive: boolean, hasInteractions: boolean): string => {
+  if (!isInteractive) return '';
+  return hasInteractions
+    ? CUSTOM_CONTENT_IFRAME_SANDBOX_WITH_SAME_ORIGIN
+    : CUSTOM_CONTENT_IFRAME_SANDBOX_TOP_NAV_ONLY;
+};
+
 const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
   defaultMessage: 'Custom panel',
 });
@@ -108,7 +120,7 @@ export const CustomContentComponent = ({
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { html, columns, isLoading, error, noContent } = useCustomContentHtml({
+  const { html, columns, interactionNonce, isLoading, error, noContent } = useCustomContentHtml({
     services,
     embeddableId,
     esqlQueries,
@@ -131,7 +143,7 @@ export const CustomContentComponent = ({
 
   const hasInteractions = isInteractive && onInteraction !== undefined;
   // The listener outlives renders, so it reads what is current instead of closing over it.
-  const latest = useLatest({ columns, onInteraction, interactionActions });
+  const latest = useLatest({ columns, interactionNonce, onInteraction, interactionActions });
 
   // A new srcDoc is a new document, so the listener is attached on every load. It belongs to that
   // document and goes with it, on a reload and when the frame is removed: nothing removes it.
@@ -143,11 +155,11 @@ export const CustomContentComponent = ({
       if (!frameDocument) return;
       const onClick = (clickEvent: Event) => {
         if (!clickEvent.isTrusted) return;
-        const interaction = readInteraction(
-          clickEvent.target,
-          latest.current.columns,
-          latest.current.interactionActions
-        );
+        const interaction = readInteraction(clickEvent.target, {
+          columns: latest.current.columns,
+          nonce: latest.current.interactionNonce,
+          allowedActions: latest.current.interactionActions,
+        });
         if (interaction) latest.current.onInteraction?.(interaction);
       };
       // Through the prototype, so nothing in the frame can replace the method (DOM clobbering).
@@ -202,7 +214,7 @@ export const CustomContentComponent = ({
             <iframe
               css={iframeCss}
               srcDoc={html}
-              sandbox={isInteractive ? CUSTOM_CONTENT_IFRAME_SANDBOX : ''}
+              sandbox={getSandbox(isInteractive, hasInteractions)}
               onLoad={attachListener}
               title={IFRAME_TITLE}
             />

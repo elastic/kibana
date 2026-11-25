@@ -18,6 +18,7 @@ const createSource = (id: string, fields: FilterableField[]): FilterableSource =
   title: id,
   fields,
   isTimeBased: () => false,
+  getFieldByName: (name) => fields.find((field) => field.name === name),
 });
 
 const logs = createSource('logs', [

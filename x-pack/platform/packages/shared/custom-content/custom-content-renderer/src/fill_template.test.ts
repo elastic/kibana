@@ -86,6 +86,20 @@ describe('fillTemplateDatasets with one query', () => {
     expect(result).toContain('&#34;');
   });
 
+  it.each([
+    ['echo', '{% echo rows[0]["label"].value %}'],
+    ['echo inside a liquid block', '{% liquid\n echo rows[0]["label"].value\n%}'],
+    ['cycle', '{% cycle rows[0]["label"].value, "b" %}'],
+  ])('writes nothing for %s, which would not escape the value', async (_, tag) => {
+    const result = await fillTemplateDatasets(`<p>${tag}</p>`, [
+      {
+        columns: [{ name: 'label', type: 'keyword' }],
+        rows: [['<b data-cc-action="filter">x</b>']],
+      },
+    ]);
+    expect(result).toBe('<p></p>');
+  });
+
   it('rejects when a template exceeds the render limit (DoS guard)', async () => {
     const template = '{% for a in (1..5000) %}{% for b in (1..5000) %}x{% endfor %}{% endfor %}';
     await expect(fillTemplateDatasets(template, [])).rejects.toThrow();

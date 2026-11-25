@@ -26,7 +26,27 @@ export type CustomContentInteraction = FilterInteraction;
 
 export type CustomContentInteractionAction = CustomContentInteraction['action'];
 
-const ACTION_ATTRIBUTE = 'data-cc-action';
+const ATTRIBUTE_PREFIX = 'data-cc-';
+const NONCE_PATTERN = /^[0-9a-f]{8,}$/;
+
+/**
+ * A random token, made once for each panel that is shown. It scopes the interaction attributes to
+ * that panel's template: data cannot know it, so what the data writes into the page cannot be
+ * mistaken for what the author wrote.
+ */
+export const createInteractionNonce = (): string =>
+  Array.from(crypto.getRandomValues(new Uint8Array(8)), (byte) =>
+    byte.toString(16).padStart(2, '0')
+  ).join('');
+
+/**
+ * Renames `data-cc-` to `data-cc-<nonce>-` in the author's template, before any data is filled in.
+ * Authors keep writing `data-cc-action`; `readInteraction` reads only the renamed attributes. Without
+ * this, a value that reached the page as markup (any output path that skips escaping) could carry a
+ * working `data-cc-action` of its own, however it got there.
+ */
+export const scopeInteractionAttributes = (template: string, nonce: string): string =>
+  template.replaceAll(ATTRIBUTE_PREFIX, `${ATTRIBUTE_PREFIX}${nonce}-`);
 
 // The frame's document is untrusted input, so nothing is read through the node's own properties:
 // a form holding `<input name="getAttribute">` would replace that method with an element. The
@@ -35,13 +55,16 @@ const ACTION_ATTRIBUTE = 'data-cc-action';
 const getAttribute = (element: Element, name: string): string | null =>
   Element.prototype.getAttribute.call(element, name);
 
+/** Reads an attribute of the clicked element by the name the author wrote, without the prefix. */
+type ReadAttribute = (name: 'action' | 'field' | 'value' | 'op') => string | null;
+
 const parseFilter = (
-  element: Element,
+  read: ReadAttribute,
   columns: ReadonlySet<string>
 ): FilterInteraction | undefined => {
-  const field = getAttribute(element, 'data-cc-field');
-  const value = getAttribute(element, 'data-cc-value');
-  const operator = getAttribute(element, 'data-cc-op') ?? 'is';
+  const field = read('field');
+  const value = read('value');
+  const operator = read('op') ?? 'is';
 
   if (field === null || value === null) return undefined;
   if (field.length === 0 || field.length > MAX_INTERACTION_FIELD_LENGTH) return undefined;
@@ -54,7 +77,7 @@ const parseFilter = (
 };
 
 type Parser<A extends CustomContentInteractionAction> = (
-  element: Element,
+  read: ReadAttribute,
   columns: ReadonlySet<string>
 ) => Extract<CustomContentInteraction, { action: A }> | undefined;
 
@@ -67,25 +90,43 @@ const PARSERS: { [A in CustomContentInteractionAction]: Parser<A> } = {
 const isAction = (value: string | null): value is CustomContentInteractionAction =>
   value !== null && Object.prototype.hasOwnProperty.call(PARSERS, value);
 
+export interface ReadInteractionOptions {
+  /** The columns the panel's queries returned. */
+  columns: ReadonlySet<string>;
+  /** The token the template was scoped with, see `scopeInteractionAttributes`. */
+  nonce: string;
+  /** The actions the host runs; leave it out to accept them all. */
+  allowedActions?: readonly CustomContentInteractionAction[];
+}
+
 /**
  * Reads the interaction a click asks for, or undefined when it asks for nothing valid. The content
  * is generated, so every attribute is untrusted input: unknown actions, unknown columns, empty or
- * oversized values and unknown operators are all dropped without a trace for the template.
- * `allowedActions` lets a host accept fewer actions than exist; leave it out to accept them all.
+ * oversized values, unknown operators and attributes without this panel's token are all dropped
+ * without a trace for the template.
  */
 export const readInteraction = (
   target: unknown,
-  columns: ReadonlySet<string>,
-  allowedActions?: readonly CustomContentInteractionAction[]
+  { columns, nonce, allowedActions }: ReadInteractionOptions
 ): CustomContentInteraction | undefined => {
+  // The token goes into a selector, so it has to be the kind of token `createInteractionNonce` makes.
+  if (!NONCE_PATTERN.test(nonce)) return undefined;
+  const attribute = (name: string) => `${ATTRIBUTE_PREFIX}${nonce}-${name}`;
+
   try {
-    const element: Element | null = Element.prototype.closest.call(target, `[${ACTION_ATTRIBUTE}]`);
+    // Only a button: it is what the prompt asks for, and a `div` or a `span` is not something a
+    // viewer knows they can press.
+    const element: Element | null = Element.prototype.closest.call(
+      target,
+      `button[${attribute('action')}]`
+    );
     if (!element) return undefined;
 
-    const action = getAttribute(element, ACTION_ATTRIBUTE);
+    const read: ReadAttribute = (name) => getAttribute(element, attribute(name));
+    const action = read('action');
     if (!isAction(action)) return undefined;
     if (allowedActions && !allowedActions.includes(action)) return undefined;
-    return PARSERS[action](element, columns);
+    return PARSERS[action](read, columns);
   } catch {
     // Not an element (a text node, null, anything else): there is nothing to act on.
     return undefined;

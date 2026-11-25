@@ -68,6 +68,7 @@ const FRAME_FILL_GUIDANCE = `FRAME FILL — the dashboard layout decides the fin
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
 - If the prompt asks for hover interactivity (e.g. tooltips), this IS possible with CSS :hover alone — do NOT reach for JavaScript. Use a nested element that is invisible by default (\`opacity: 0\`) and reveal it with a \`:hover\` rule.
+- Form controls (<form>, <input>, <textarea>, <select>, <label>) are removed at render time, so do not write them. For an expandable section use <details> with a <summary>.
 - Links are only allowed to Dashboards and Discover, as <a href="/app/dashboards..."> or <a href="/app/discover..."> (for example /app/dashboards#/view/<id> or /app/discover). Never include a host, a protocol, or a base path. Any other href, including links to other apps and external URLs, is removed at render time, so do not write one. Use no other attribute on <a>.
 - Do NOT load any external resources. No CDN scripts, no Google Fonts, no image URLs.
 - Do NOT use <img> tags with an external \`src\` — the panel's CSP blocks all outbound network requests. For images, icons, or illustrations draw them with inline SVG, pure CSS shapes, or a Unicode emoji/symbol instead.
@@ -85,7 +86,7 @@ LIQUID SYNTAX:
 - Output value:  {{ row["column name"].value }}
 - Bar width:     <div style="width: {{ row["column name"].pct }}%; ..."></div>
 - Filters:       {{ row["column name"].value | round: 2 }}
-- Values are always HTML-escaped. Never use the "raw" filter; it is rejected.`;
+- Write values with {{ }}, which HTML-escapes them. The "raw" filter and the "echo" and "cycle" tags write them as they are, so they are rejected. For alternating rows use CSS (:nth-child).`;
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;

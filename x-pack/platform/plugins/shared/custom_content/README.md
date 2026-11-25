@@ -56,7 +56,7 @@ template + esqlQuery
 
 All paths bypass the LLM entirely at render time. Template generation happens once at creation or edit time, not on every render.
 
-The resulting HTML is rendered in an `<iframe srcDoc={...}>` whose `sandbox` is `CUSTOM_CONTENT_IFRAME_SANDBOX` (user-initiated top navigation and same-origin, never scripts). The preview, and a panel in a non-interactive view, use `sandbox=""`. "Run Preview" from the flyout pushes HTML through a separate `previewHtml$` subject that takes precedence over the saved template, so users can see a draft without saving it; it is cleared when the flyout closes or when a non-reload fetch arrives.
+The resulting HTML is rendered in an `<iframe srcDoc={...}>` whose `sandbox` is `CUSTOM_CONTENT_IFRAME_SANDBOX_TOP_NAV_ONLY` (user-initiated top navigation, never scripts), with `allow-same-origin` added (`CUSTOM_CONTENT_IFRAME_SANDBOX_WITH_SAME_ORIGIN`) only for a host that listens to clicks, which is the dashboard panel and not the chat card. The preview, and a panel in a non-interactive view, use `sandbox=""`. "Run Preview" from the flyout pushes HTML through a separate `previewHtml$` subject that takes precedence over the saved template, so users can see a draft without saving it; it is cleared when the flyout closes or when a non-reload fetch arrives.
 
 ### Unified search
 
@@ -100,7 +100,7 @@ JavaScript is explicitly blocked — the iframe sandbox, a strict CSP, and `DOMP
 
 ### Click to filter
 
-An element of the template can add a filter to the dashboard when it is clicked. The template only declares what it wants, with inert attributes on a `<button>` (a `<div>` or `<span>` cannot be used with the keyboard, and an `<a>` loses the attributes):
+An element of the template can add a filter to the dashboard when it is clicked. The template only declares what it wants, with inert attributes on a `<button>`. Only a button is read: a `<div>` or `<span>` cannot be used with the keyboard, and an `<a>` loses the attributes:
 
 ```html
 <button data-cc-action="filter" data-cc-field="host" data-cc-value="{{ row["host"].value }}">
@@ -227,8 +227,12 @@ Callers already surface this: the dashboard generation tool records a failure an
 
 Templates are rendered inside a sandboxed `<iframe>` with a strict CSP meta tag (`default-src 'none'; style-src 'unsafe-inline'`). JavaScript cannot execute inside a rendered panel regardless of template content, and the CSP blocks all outbound network requests, so external scripts, fonts, and images cannot load either. `DOMPurify` sanitizes the HTML before injection as an additional layer, and links are rewritten to point only at the Dashboards and Discover apps.
 
-The sandbox is `allow-top-navigation-by-user-activation allow-same-origin`. `allow-same-origin` is there so the host can listen to clicks inside the frame (click to filter); it is safe only because `allow-scripts` is absent, which the browser enforces whatever the content holds. Never add `allow-scripts` next to it: together they let the content remove its own sandbox. The host is the only code that touches the frame's document, and it reads attributes as text through prototype methods, so the content cannot replace what it calls.
+The sandbox is `allow-top-navigation-by-user-activation`, with `allow-same-origin` added only for a host that listens to clicks (click to filter). The chat card renders model output and listens to nothing, so it does not get the origin of Kibana. `allow-same-origin` is safe only because `allow-scripts` is absent, which the browser enforces whatever the content holds. Never add `allow-scripts` next to it: together they let the content remove its own sandbox. The host is the only code that touches the frame's document, and it reads attributes as text through prototype methods, so the content cannot replace what it calls.
 
-Values are always HTML-escaped. The Liquid `raw` filter turns that off, so it is rejected when a template is validated server-side and is a no-op in the renderer, which also covers a panel saved through the API.
+The sanitizer removes form controls (`<form>`, `<input>`, `<textarea>`, `<select>`, `<label>`), keeping their text. A browser clicks a button for the user when they click a `<label>` that points at it, or press Enter in a form, and those clicks are trusted, so `isTrusted` alone cannot tell them from a click on the button. For an expandable section use `<details>` with a `<summary>`. The host is the only code that touches the frame's document, and it reads attributes as text through prototype methods, so the content cannot replace what it calls.
+
+Only `{{ }}` HTML-escapes a value. The Liquid `raw` filter and the `echo` and `cycle` tags write one as markup, so they are rejected when a template is validated server-side and are neutralised in the renderer (the filter returns the value for `{{ }}` to escape, the tags write nothing), which also covers a panel saved through the API.
+
+Even so, data cannot create an interaction: the renderer renames `data-cc-` to `data-cc-<token>-` in the author's template, before the data is filled in, with a random token made once for each panel that is shown, and the reader accepts only the renamed attributes. A value that reached the page as markup, by whatever path, carries the plain name and is ignored. The token stays the same across refetches, so the frame does not reload on every refresh.
 
 LLM-generated templates are validated server-side before storage — any output matching `CUSTOM_CONTENT_SCRIPT_PATTERN` or exceeding `CUSTOM_CONTENT_MAX_TEMPLATE_BYTES` is rejected. Prompt, query, and template lengths are bounded by the schemas in `@kbn/custom-content-common`, and the LiquidJS renderer is configured with render, parse, and memory limits.

@@ -18,6 +18,6 @@ A host can pass `onInteraction` to let a click on the content ask for an action 
 filter). `interactions.ts` is the reading half: it validates the `data-cc-*` attributes of the clicked
 element against the columns the queries returned, and nothing else reaches the host. `interactionActions`
 lists the actions the host runs, so a host can accept fewer than exist. The frame is same-origin so the
-component can listen to it, and has no scripts (see `CUSTOM_CONTENT_IFRAME_SANDBOX`). The plugin's README
+component can listen to it, and has no scripts (see `CUSTOM_CONTENT_IFRAME_SANDBOX_WITH_SAME_ORIGIN`); a host that does not listen gets `CUSTOM_CONTENT_IFRAME_SANDBOX_TOP_NAV_ONLY`. The attributes are scoped with a random token for each panel (`scopeInteractionAttributes`), so only what the author wrote can be read as an interaction. The plugin's README
 describes the contract and how to add an action.
 

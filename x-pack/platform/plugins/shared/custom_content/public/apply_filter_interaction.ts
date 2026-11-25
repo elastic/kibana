@@ -31,23 +31,24 @@ export const buildInteractionFilters = (
   dataSources: readonly FilterableSource[],
   filterManager: FilterManager
 ): Filter[] => {
-  // A data view or an ES|QL dataset: all this reads is `fields`, and `generateFilters` takes the
-  // `DataViewBase` a source is, so the same code serves both.
-  const isFilterableField = ({ name, filterable, scripted }: FilterableSource['fields'][number]) =>
-    name === field && filterable === true && !scripted;
-
   // The click does not say which query it came from, so every source with the field is tried, in
   // order, and the first that can take the value wins: `status` can be a number in one query and a
-  // keyword in another.
+  // keyword in another. A data view or an ES|QL dataset: both give the field by name, and
+  // `generateFilters` takes the `DataViewBase` a source is, so the same code serves both.
   for (const source of dataSources) {
-    const sourceField = source.fields.find(isFilterableField);
-    const filterValue = sourceField && toFieldValue(sourceField, value);
+    const sourceField = source.getFieldByName(field);
+    const filterValue =
+      sourceField && isFilterable(sourceField) ? toFieldValue(sourceField, value) : undefined;
     if (sourceField && filterValue !== undefined) {
       return generateFilters(filterManager, sourceField, filterValue, negate ? '-' : '+', source);
     }
   }
   return [];
 };
+
+/** A plain field of the data that the query can filter on, not a scripted one. */
+const isFilterable = ({ filterable, scripted }: FilterableField): boolean =>
+  filterable === true && !scripted;
 
 /**
  * Whether text is a number the field can hold. `Number()` alone would turn " " into 0 and "0x10"
