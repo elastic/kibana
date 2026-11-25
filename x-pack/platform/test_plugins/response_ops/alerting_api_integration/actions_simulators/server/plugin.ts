@@ -18,6 +18,7 @@ import type {
 import type { ActionType } from '@kbn/actions-plugin/server';
 import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
+import { initPlugin as initRootlyAlerts } from './rootly_alerts_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
 import { initPlugin as initServiceNowOAuth } from './servicenow_oauth_simulation';
@@ -39,6 +40,7 @@ export const NAME = 'actions-FTS-external-service-simulators';
 export enum ExternalServiceSimulator {
   OPSGENIE = 'opsgenie',
   PAGERDUTY = 'pagerduty',
+  ROOTLY_ALERTS = 'rootly_alerts',
   SWIMLANE = 'swimlane',
   SERVICENOW = 'servicenow',
   SLACK = 'slack',
@@ -173,6 +175,10 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     initTorq(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.TORQ));
     initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
+    initRootlyAlerts(
+      router,
+      getExternalServiceSimulatorPath(ExternalServiceSimulator.ROOTLY_ALERTS)
+    );
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
     initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));

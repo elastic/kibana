@@ -1,0 +1,12 @@
+title: Connector request properties for a Rootly Alerts connector
+description: Defines properties for connectors when type is `.rootly_alerts`.
+type: object
+additionalProperties: false
+required:
+  - webhookUrl
+properties:
+  webhookUrl:
+    description: The webhook URL of the Rootly alert source, without the secret.
+    type: string
+    minLength: 1
+    maxLength: 2048

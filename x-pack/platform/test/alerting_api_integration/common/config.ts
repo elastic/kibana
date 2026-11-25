@@ -62,6 +62,7 @@ const enabledActionTypes = [
   '.jira',
   '.jira-service-management',
   '.resilient',
+  '.rootly_alerts',
   '.gen-ai',
   '.d3security',
   SENTINELONE_CONNECTOR_ID,

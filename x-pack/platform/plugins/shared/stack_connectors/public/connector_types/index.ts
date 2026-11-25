@@ -18,6 +18,7 @@ import { getGeminiConnectorType } from './gemini';
 import { getInferenceConnectorType } from './inference';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
+import { getRootlyAlertsConnectorType } from './rootly_alerts';
 import { getResilientConnectorType } from './resilient';
 import { getServerLogConnectorType } from './server_log';
 import { getServiceNowITOMConnectorType } from './servicenow_itom';
@@ -61,6 +62,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getEmailConnectorType(services));
   connectorTypeRegistry.register(getIndexConnectorType());
   connectorTypeRegistry.register(getPagerDutyConnectorType());
+  connectorTypeRegistry.register(getRootlyAlertsConnectorType());
   connectorTypeRegistry.register(getSwimlaneConnectorType());
   connectorTypeRegistry.register(getCasesWebhookConnectorType());
   connectorTypeRegistry.register(getWebhookConnectorType());

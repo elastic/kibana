@@ -56,6 +56,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.jira-service-management',
           '.observability-ai-assistant',
           '.resilient',
+          '.rootly_alerts',
           '.teams',
           '.thehive',
           '.tines',

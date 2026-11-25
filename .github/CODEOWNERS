@@ -3438,6 +3438,11 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/resilient @elastic/response-ops
 /src/platform/packages/shared/kbn-connector-schemas/resilient @elastic/response-ops
 
+# Rootly Alerts
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/rootly_alerts @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/rootly_alerts @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/rootly_alerts @elastic/response-ops
+
 # Server Log
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/server_log @elastic/response-ops
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/server_log @elastic/response-ops

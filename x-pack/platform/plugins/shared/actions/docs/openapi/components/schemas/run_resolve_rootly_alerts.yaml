@@ -1,0 +1,16 @@
+title: Rootly Alerts connector parameters
+description: Test an action that resolves a Rootly alert.
+type: object
+additionalProperties: false
+required:
+  - dedupKey
+  - event
+properties:
+  dedupKey:
+    description: The deduplication key of the Rootly alert.
+    type: string
+  event:
+    description: The type of event.
+    type: string
+    enum:
+      - resolve

@@ -191,6 +191,8 @@ actions:
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_config.yaml'
             # PagerDuty (.pagerduty)
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/pagerduty_config.yaml'
+            # Rootly Alerts (.rootly_alerts)
+            - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/rootly_alerts_config.yaml'
             # SentinelOne (.sentinelone)
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/sentinelone_config.yaml'
             # Server log (.server-log) N/A
@@ -247,6 +249,8 @@ actions:
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_secrets.yaml'
             # PagerDuty (.pagerduty)
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/pagerduty_secrets.yaml'
+            # Rootly Alerts (.rootly_alerts)
+            - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/rootly_alerts_secrets.yaml'
             # SentinelOne (.sentinelone)
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/sentinelone_secrets.yaml'
             # ServiceNow (.servicenow)
@@ -308,6 +312,8 @@ actions:
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_config.yaml'
             # PagerDuty (.pagerduty)
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/pagerduty_config.yaml'
+            # Rootly Alerts (.rootly_alerts)
+            - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/rootly_alerts_config.yaml'
             # SentinelOne (.sentinelone)
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/sentinelone_config.yaml'
             # Server log (.server-log) N/A
@@ -362,6 +368,8 @@ actions:
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_secrets.yaml'
             # PagerDuty (.pagerduty)
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/pagerduty_secrets.yaml'
+            # Rootly Alerts (.rootly_alerts)
+            - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/rootly_alerts_secrets.yaml'
             # SentinelOne (.sentinelone)
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/sentinelone_secrets.yaml'
             # ServiceNow (.servicenow)
@@ -402,6 +410,8 @@ actions:
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_message_serverlog.yaml'
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_message_slack.yaml'
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_trigger_pagerduty.yaml'
+            - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_resolve_rootly_alerts.yaml'
+            - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_trigger_rootly_alerts.yaml'
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_addevent.yaml'
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_closealert.yaml'
             - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_closeincident.yaml'

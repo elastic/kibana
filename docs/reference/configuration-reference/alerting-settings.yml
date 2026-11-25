@@ -242,7 +242,7 @@ groups:
 
       - setting: xpack.actions.enabledActionTypes
         description: |
-          A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, `.servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`, `.gen-ai`, `.bedrock`, `.gemini`, `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
+          A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.rootly_alerts`, `.server-log`, `.servicenow`, `.servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`, `.gen-ai`, `.bedrock`, `.gemini`, `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 
           Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in Kibana and will not function.
         important: "[Preconfigured connectors](/reference/connectors-kibana/pre-configured-connectors.md) are not affected by this setting."
@@ -1136,6 +1136,15 @@ groups:
           self: ga
           ech: unavailable
 
+      - setting: xpack.actions.preconfigured.<connector-id>.config.webhookUrl
+        description: |
+          For a [Rootly Alerts connector](/reference/connectors-kibana/rootly-alerts-action-type.md), specifies the webhook URL of the Rootly alert source, without the secret.
+        datatype: string
+        applies_to:
+          stack: preview
+          self: preview
+          ech: unavailable
+
       - setting: xpack.actions.preconfigured.<connector-id>.name
         description: |
           The name of the preconfigured connector.
@@ -1280,7 +1289,10 @@ groups:
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secret
         description: |
-          For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), specifies the AWS secret for authentication.
+          A secret that varies by connector:
+
+          * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), specifies the AWS secret for authentication.
+          * For a [Rootly Alerts connector](/reference/connectors-kibana/rootly-alerts-action-type.md), specifies the secret of the Rootly alert source.
         datatype: string
         applies_to:
           stack: ga

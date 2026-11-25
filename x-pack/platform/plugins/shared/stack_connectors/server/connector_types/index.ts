@@ -27,6 +27,7 @@ import {
   type InferenceConnectorDependencies,
 } from './inference';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
+import { getConnectorType as getRootlyAlertsConnectorType } from './rootly_alerts';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
 import { getConnectorType as getSlackWebhookConnectorType } from './slack';
@@ -82,6 +83,7 @@ export function registerConnectorTypes({
   actions.registerType(getJiraConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
+  actions.registerType(getRootlyAlertsConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());

@@ -1,0 +1,114 @@
+title: Rootly Alerts connector parameters
+description: Test an action that triggers a Rootly alert.
+type: object
+additionalProperties: false
+required:
+  - title
+properties:
+  alertId:
+    description: The ID of the Kibana alert, sent in the `kibana` block of the event.
+    type: string
+  customDetails:
+    description: Additional alert data, as a string that contains a JSON object.
+    type: string
+  dedupKey:
+    description: >
+      All actions sharing this key are associated with the same Rootly alert.
+      This value is used to correlate trigger and resolution.
+      If it is empty and both `ruleId` and `alertId` are set, the key is `<ruleId>:<alertId>`.
+      Otherwise the connector generates a key.
+    type: string
+  description:
+    description: A description of the alert.
+    type: string
+  evaluationTime:
+    description: The time the rule was evaluated, sent in the `kibana` block of the event.
+    type: string
+  event:
+    description: The type of event.
+    type: string
+    enum:
+      - trigger
+    default: trigger
+  labels:
+    description: A list of names and values to add to the event.
+    type: array
+    maxItems: 100
+    items:
+      type: object
+      additionalProperties: false
+      required:
+        - key
+        - value
+      properties:
+        key:
+          description: The name of the label.
+          type: string
+          maxLength: 1024
+        value:
+          description: The value of the label.
+          type: string
+  match:
+    description: >
+      A value for the alert routes of the Rootly alert source to match.
+      It is not sent when `target` is set.
+    type: object
+    additionalProperties: false
+    required:
+      - 'on'
+    properties:
+      catalog:
+        description: The slug of the catalog. Required when `on` is `catalog`.
+        type: string
+        maxLength: 1024
+      'on':
+        description: What the value names.
+        type: string
+        enum:
+          - service
+          - team
+          - functionality
+          - catalog
+          - custom
+      value:
+        description: The value to match.
+        type: string
+  ruleId:
+    description: The ID of the rule, sent in the `kibana` block of the event.
+    type: string
+  ruleName:
+    description: The name of the rule, sent in the `kibana` block of the event.
+    type: string
+  space:
+    description: The ID of the Kibana space, sent in the `kibana` block of the event.
+    type: string
+  target:
+    description: A target for Rootly to page instead of using the alert routes of the alert source.
+    type: object
+    additionalProperties: false
+    required:
+      - type
+      - id
+    properties:
+      id:
+        description: The ID of the target in Rootly.
+        type: string
+        maxLength: 512
+      type:
+        description: The type of the target.
+        type: string
+        enum:
+          - service
+          - team
+          - escalation_policy
+          - user
+          - functionality
+  title:
+    description: The title of the alert.
+    type: string
+  urgency:
+    description: The name of a Rootly alert urgency.
+    type: string
+  url:
+    description: A URL to open from the alert in Rootly.
+    type: string

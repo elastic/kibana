@@ -62,6 +62,7 @@ toc:
           - file: connectors-kibana/teams-action-type.md
           - file: connectors-kibana/opsgenie-action-type.md
           - file: connectors-kibana/pagerduty-action-type.md
+          - file: connectors-kibana/rootly-alerts-action-type.md
           - file: connectors-kibana/sentinelone-action-type.md
           - file: connectors-kibana/servicenow-action-type.md
           - file: connectors-kibana/servicenow-itom-action-type.md
