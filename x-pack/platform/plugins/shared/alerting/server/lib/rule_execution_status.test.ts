@@ -236,6 +236,42 @@ describe('RuleExecutionStatus', () => {
       });
     });
 
+    test('task state with mixed user and platform lastRun errors is not a configuration failure', () => {
+      const ruleResultService = new RuleResultService();
+      const lastRunSetters = ruleResultService.getLastRunSetters();
+      lastRunSetters.addLastRunError('invalid query', true);
+      lastRunSetters.addLastRunError('shard failure', false);
+
+      const { status } = executionStatusFromState({
+        runRuleResult: {
+          state: { alertInstances: {} },
+          metrics: executionMetrics,
+        },
+        ruleResultService,
+      });
+      expect(status.status).toBe('error');
+      expect(status.error).toEqual({
+        message: 'invalid query,shard failure',
+        reason: RuleExecutionStatusErrorReasons.Execute,
+      });
+    });
+
+    test('task state with only user lastRun errors is a configuration failure', () => {
+      const ruleResultService = new RuleResultService();
+      const lastRunSetters = ruleResultService.getLastRunSetters();
+      lastRunSetters.addLastRunError('invalid query', true);
+      lastRunSetters.addLastRunError('missing data view', true);
+
+      const { status } = executionStatusFromState({
+        runRuleResult: {
+          state: { alertInstances: {} },
+          metrics: executionMetrics,
+        },
+        ruleResultService,
+      });
+      expect(status.error?.reason).toBe(RuleExecutionStatusErrorReasons.Configuration);
+    });
+
     test('task state with framework warning and rule execution warning - only show framework warning', () => {
       const ruleResultService = new RuleResultService();
       const lastRunSetters = ruleResultService.getLastRunSetters();

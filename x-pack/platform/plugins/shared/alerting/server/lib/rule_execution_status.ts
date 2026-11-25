@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { reasonForReportedError } from './reason_for_reported_error';
+import { reasonForReportedErrors } from './reason_for_reported_error';
 import type { RuleResultService } from '../monitoring/rule_result_service';
 import type { RuleExecutionStatus, RawRuleExecutionStatus, RawRule, Rule } from '../types';
 import { RuleExecutionStatusValues, RuleExecutionStatusWarningReasons } from '../types';
@@ -71,10 +71,9 @@ export function executionStatusFromState({
   if (errorsFromLastRun.length > 0) {
     status = RuleExecutionStatusValues[2];
     // The executor finished and reported these via addLastRunError. One status reason is
-    // stored; the first reported reason wins. User errors are configuration failures.
-    const [firstError] = errorsFromLastRun;
+    // stored; it is a configuration failure only when every reported error is a user error.
     error = {
-      reason: reasonForReportedError(firstError.userError, firstError.reason),
+      reason: reasonForReportedErrors(errorsFromLastRun),
       message: addCloudApiKeyAuthErrorGuidance(
         errorsFromLastRun.map((lastRunError) => lastRunError.message).join(',')
       ),
