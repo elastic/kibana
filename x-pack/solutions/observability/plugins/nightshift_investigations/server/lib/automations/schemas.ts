@@ -10,7 +10,7 @@ import {
   investigationNotificationDestinationSchema,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from '../../../common';
-import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from './generate_workflow_yaml';
+import { isElasticAppSlackChannelCompletion } from './slack_completion';
 
 // Keep operator guidance bounded independently of trigger evidence in the final agent message.
 export const MAX_PROMPT_TEMPLATE_LENGTH = MAX_AUTOMATION_INSTRUCTIONS_LENGTH;
@@ -52,10 +52,7 @@ export const automationCompletionSchema = lazySchema(() =>
 export const savedAutomationCompletionSchema = lazySchema(() =>
   automationCompletionSchema.superRefine((completion, context) => {
     if (
-      completion.action === 'post_to_slack' &&
-      completion.targetMode === 'channel' &&
-      (completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID) ===
-        ELASTIC_APPS_SLACK_CONNECTOR_ID &&
+      isElasticAppSlackChannelCompletion(completion) &&
       SLACK_USER_OR_DM_ID_PATTERN.test(completion.destination?.trim() ?? '')
     ) {
       context.addIssue({

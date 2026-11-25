@@ -8,11 +8,10 @@
 import { badRequest, serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/core/server';
+import { isSlackChannelId } from '../../../common';
 import type { SlackChannelBindingChecker } from '../../types';
-import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from './generate_workflow_yaml';
+import { isElasticAppSlackChannelCompletion } from './slack_completion';
 import type { NightshiftAutomationAttributes } from './types';
-
-const SLACK_CHANNEL_ID_PATTERN = /^[CG][A-Z0-9]+$/;
 
 export const validateSlackChannelsBound = async ({
   automation,
@@ -28,14 +27,12 @@ export const validateSlackChannelsBound = async ({
   storedDestinations?: ReadonlySet<string>;
 }): Promise<void> => {
   const channels = new Set<string>();
-  for (const { action, targetMode, destination, connectorId } of automation.completions) {
-    const isElasticApp =
-      (connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID) === ELASTIC_APPS_SLACK_CONNECTOR_ID;
-    const channel = destination?.trim();
-    if (action !== 'post_to_slack' || targetMode !== 'channel' || !isElasticApp || !channel) {
+  for (const completion of automation.completions) {
+    const channel = completion.destination?.trim();
+    if (!isElasticAppSlackChannelCompletion(completion) || !channel) {
       continue;
     }
-    if (SLACK_CHANNEL_ID_PATTERN.test(channel)) {
+    if (isSlackChannelId(channel)) {
       channels.add(channel);
     } else if (!storedDestinations.has(channel)) {
       throw badRequest('Slack destinations must be a channel ID, not a channel name.');

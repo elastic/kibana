@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseSlackChannelInput } from './parse_slack_channel_input';
+import { parseSlackChannelInput } from './slack_channel';
 
 describe('parseSlackChannelInput', () => {
   it.each([

@@ -22,12 +22,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, type KbnCalloutProps } from '@kbn/ui-callout';
+import { parseSlackChannelInput } from '@kbn/nightshift-investigations-plugin/common';
 import {
   useAvailableChannels,
   useBindChannel,
   type BindFailure,
 } from '../../../../data/relay_apps/use_relay_app_bindings';
-import { parseSlackChannelInput } from '../../../../common/parse_slack_channel_input';
 
 const failureCopy = ({ reason, message }: BindFailure): string => {
   switch (reason) {

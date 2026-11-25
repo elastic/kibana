@@ -15,7 +15,7 @@ export class RelayRequestError extends Error {
     public readonly retryAfterSeconds?: number
   ) {
     super(
-      `Relay request to ${path} failed with status ${statusCode}${
+      `Relay request to ${path} failed with status ${statusCode}${reason ? ` (${reason})` : ''}${
         relayMessage ? `: ${relayMessage}` : ''
       }`
     );

@@ -8,10 +8,12 @@
 const CHANNEL_ID = /^[CG][A-Z0-9]{8,}$/;
 const CHANNEL_PATH_SEGMENTS = [/^archives$/, /^client$/];
 
+export const isSlackChannelId = (value: string): boolean => CHANNEL_ID.test(value);
+
 /** Extracts a Slack channel id from an id or a channel link. */
 export const parseSlackChannelInput = (input: string): string | undefined => {
   const value = input.trim();
-  if (CHANNEL_ID.test(value)) return value;
+  if (isSlackChannelId(value)) return value;
 
   let url: URL;
   try {
@@ -23,6 +25,6 @@ export const parseSlackChannelInput = (input: string): string | undefined => {
 
   const segments = url.pathname.split('/').filter(Boolean);
   if (!CHANNEL_PATH_SEGMENTS.some((pattern) => pattern.test(segments[0] ?? ''))) return undefined;
-  const channel = segments.find((segment, index) => index > 0 && CHANNEL_ID.test(segment));
+  const channel = segments.find((segment, index) => index > 0 && isSlackChannelId(segment));
   return channel;
 };
