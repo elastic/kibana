@@ -28,9 +28,15 @@ describe('slo-global-settings saved object type', () => {
   });
 
   describe('model version 1', () => {
-    describe('create schema', () => {
-      const validate = (attributes: object) =>
-        getModelVersion1().schemas?.create?.validate(attributes);
+    // `update` validates the merged document of update and upsert calls, the path the repository takes.
+    describe.each(['create', 'update'] as const)('%s schema', (schemaName) => {
+      const validate = (attributes: object) => {
+        const schemaToValidate = getModelVersion1().schemas?.[schemaName];
+        if (!schemaToValidate) {
+          throw new Error(`Expected the ${schemaName} schema to be defined`);
+        }
+        return schemaToValidate.validate(attributes);
+      };
 
       it('accepts an empty object', () => {
         expect(() => validate({})).not.toThrow();

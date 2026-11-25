@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { validateInteger } from '../../common/validate_integer';
 
 export const SO_SLO_GLOBAL_SETTINGS_TYPE = 'slo-global-settings';
 export const SLO_GLOBAL_SETTINGS_ID = 'slo-global-settings-singleton';
@@ -17,7 +18,7 @@ const sloGlobalSettingsAttributesSchema = {
       enabled: schema.boolean(),
       periodDays: schema.number({
         min: 1,
-        validate: (value) => (Number.isInteger(value) ? undefined : 'must be an integer'),
+        validate: validateInteger,
       }),
       updatedAt: schema.string({ maxLength: 64 }),
     })

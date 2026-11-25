@@ -12,6 +12,7 @@ import {
   SLI_RETENTION_MAX_PERIOD_DAYS,
   SLI_RETENTION_MIN_PERIOD_DAYS,
 } from '@kbn/slo-constants';
+import { validateInteger } from './validate_integer';
 
 export const configSchema = schema.object({
   sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
@@ -27,7 +28,7 @@ export const configSchema = schema.object({
         min: SLI_RETENTION_MIN_PERIOD_DAYS,
         max: SLI_RETENTION_MAX_PERIOD_DAYS,
         defaultValue: SLI_RETENTION_DEFAULT_PERIOD_DAYS,
-        validate: (value) => (Number.isInteger(value) ? undefined : 'must be an integer'),
+        validate: validateInteger,
       }),
     })
   ),
