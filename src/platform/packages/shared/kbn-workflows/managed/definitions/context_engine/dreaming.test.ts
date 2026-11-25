@@ -18,6 +18,7 @@ interface Step {
   condition?: string;
   'on-failure'?: { continue?: boolean };
   foreach?: string;
+  'max-iterations'?: number;
   steps?: Step[];
   with?: {
     memories?: string;
@@ -140,6 +141,113 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
         steps: { last_run: lastRun, last_output: lastOutput('2026-10-20T00:00:00.000Z', 'm-9') },
       })
     ).toEqual(after('2026-10-01T00:00:00.000Z', ''));
+  });
+
+  it('reads memories from the saved cursor before the last run output, unless given a time', () => {
+    const filters = findStep(render().steps, 'read_memories').with?.query?.bool
+      ?.filter as unknown[];
+    const window = filters.find((filter) => JSON.stringify(filter).includes('updated_at'));
+    const engine = createWorkflowLiquidEngine();
+    const lastRun = { output: { since: '2026-11-01T00:00:00.000Z' } };
+    const lastOutput = {
+      output: {
+        context: {
+          output: { resume_from: '2026-10-20T00:00:00.000Z', resume_after_id: 'm-old' },
+        },
+      },
+    };
+    const rendered = (scope: Record<string, unknown>) =>
+      engine.parseAndRenderSync(JSON.stringify(window), scope);
+
+    const withCursor = rendered({
+      inputs: {},
+      steps: {
+        last_run: lastRun,
+        last_output: lastOutput,
+        cursor: { output: { found: true, from: '2026-11-05T00:00:00.000Z', after: 'm-9' } },
+      },
+    });
+    expect(withCursor).toContain('2026-11-05T00:00:00.000Z');
+    expect(withCursor).toContain('"gt":"m-9"');
+    expect(withCursor).not.toContain('m-old');
+
+    const cursorWithoutTieBreaker = rendered({
+      inputs: {},
+      steps: {
+        last_run: lastRun,
+        last_output: lastOutput,
+        cursor: { output: { found: true, from: '2026-11-05T00:00:00.000Z' } },
+      },
+    });
+    expect(cursorWithoutTieBreaker).toContain('"gt":""');
+
+    const withoutCursor = rendered({
+      inputs: {},
+      steps: { last_run: lastRun, last_output: lastOutput, cursor: { output: { found: false } } },
+    });
+    expect(withoutCursor).toContain('2026-10-20T00:00:00.000Z');
+    expect(withoutCursor).toContain('"gt":"m-old"');
+
+    const given = rendered({
+      inputs: { since: '2026-10-01T00:00:00.000Z' },
+      steps: {
+        last_run: lastRun,
+        cursor: { output: { found: true, from: '2026-11-05T00:00:00.000Z', after: 'm-9' } },
+      },
+    });
+    expect(given).toContain('2026-10-01T00:00:00.000Z');
+    expect(given).not.toContain('m-9');
+    expect(given).not.toContain('2026-11-05');
+  });
+
+  it('reads the saved cursor of its AI index, never older than the longest window', () => {
+    expect(findStep(render().steps, 'cursor')).toEqual({
+      name: 'cursor',
+      type: 'context-engine.getDreamingCursor',
+      with: { ai_index_id: '{{ consts.ai_index_id }}', source: 'memories', max_hours: 720 },
+    });
+  });
+
+  it('saves the cursor once the page is written, so a later failure loses at most that page', () => {
+    const { steps } = render();
+    const names = steps.map(({ name }: { name: string }) => name);
+    const checkpoint = findStep(steps, 'checkpoint');
+    const engine = createWorkflowLiquidEngine();
+    const [save] = checkpoint.steps ?? [];
+    const render_ = (expression: unknown, variables: Record<string, unknown>) =>
+      engine.parseAndRenderSync(String(expression), {
+        variables,
+        execution: { startedAt: '2026-11-09T12:00:00.000Z' },
+      });
+
+    expect(names.indexOf('checkpoint')).toBeGreaterThan(names.indexOf('dream'));
+    expect(names.indexOf('checkpoint')).toBeLessThan(names.indexOf('output_result'));
+    expect(checkpoint.condition).toBe('${{ inputs.dry_run != true and inputs.since == blank }}');
+    expect(save).toEqual(expect.objectContaining({ type: 'context-engine.setDreamingCursor' }));
+    expect(save.with?.source).toBe('memories');
+    expect(
+      render_(save.with?.from, {
+        resume_from: '2026-11-05T00:00:00.000Z',
+        resume_after_id: 'm-9',
+      })
+    ).toBe('2026-11-05T00:00:00.000Z');
+    expect(render_(save.with?.after, { resume_after_id: 'm-9' })).toBe('m-9');
+    expect(render_(save.with?.from, { resume_from: '', resume_after_id: '' })).toBe(
+      '2026-11-09T12:00:00.000Z'
+    );
+  });
+
+  it('sets the step size, iteration and Liquid limits itself rather than taking the engine defaults', () => {
+    const workflow = render();
+    const dream = findStep(workflow.steps, 'dream');
+
+    expect(workflow.settings['max-step-size']).toBe('10mb');
+    expect(workflow.settings.liquid).toEqual({
+      parseLimit: 150000,
+      renderLimit: 2000,
+      memoryLimit: 30000000,
+    });
+    expect(findStep(dream.steps ?? [], 'batches')['max-iterations']).toBe(500);
   });
 
   it('reads the last run output only when it is not given a time and there is a last run', () => {
@@ -439,9 +547,11 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       'paused',
       'last_run',
       'resume',
+      'cursor',
       'read_memories',
       'active',
       'dream',
+      'checkpoint',
       'dry_run_result',
       'output_result',
     ]);

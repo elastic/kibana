@@ -10,6 +10,11 @@ tags:
   - scheduled
 settings:
   timeout: '30m'
+  max-step-size: '10mb'
+  liquid:
+    parseLimit: 150000
+    renderLimit: 2000
+    memoryLimit: 30000000
   concurrency:
     key: __CONCURRENCY_KEY__
     strategy: queue
@@ -87,12 +92,19 @@ steps:
             includeOutput: true
             omitStepExecutions: true
 
+  - name: cursor
+    type: context-engine.getDreamingCursor
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: traces
+      max_hours: 720
+
   - name: read_traces
     type: context-engine.readTraceTranscripts
     with:
       ai_index_id: '{{ consts.ai_index_id }}'
-      since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
-      after: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}'
+      since: '{{ inputs.since | default: steps.cursor.output.from | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+      after: '{% if inputs.since == blank %}{% if steps.cursor.output.found %}{{ steps.cursor.output.after }}{% else %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}{% endif %}'
       size: 1000
       max_tokens: 600000
       batch_tokens: 50000
@@ -116,6 +128,7 @@ steps:
     steps:
       - name: batches
         type: parallel
+        mode: fail-fast
         foreach: '{{ variables.batches | json }}'
         concurrency: 4
         steps:
@@ -131,6 +144,7 @@ steps:
 
       - name: tally
         type: foreach
+        max-iterations: 100
         foreach: '{{ steps.batches.output.results | json }}'
         steps:
           - name: add_batch
@@ -141,6 +155,18 @@ steps:
               deleted: '${{ variables.deleted | plus: foreach.item.output.deleted }}'
               rejected: '${{ variables.rejected | plus: foreach.item.output.rejected }}'
               would_write: '${{ variables.would_write | concat: foreach.item.output.would_write }}'
+
+  - name: checkpoint
+    type: if
+    condition: '${{ inputs.dry_run != true and inputs.since == blank }}'
+    steps:
+      - name: save_cursor
+        type: context-engine.setDreamingCursor
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          source: traces
+          from: '{{ variables.resume_from | default: execution.startedAt }}'
+          after: '{{ variables.resume_after }}'
 
   - name: dry_run_result
     type: if

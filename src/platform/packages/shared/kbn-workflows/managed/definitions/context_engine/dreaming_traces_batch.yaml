@@ -9,6 +9,11 @@ tags:
   - traces
 settings:
   timeout: '25m'
+  max-step-size: '10mb'
+  liquid:
+    parseLimit: 150000
+    renderLimit: 2000
+    memoryLimit: 30000000
 consts:
   ai_index_id: __AI_INDEX_ID__
   connector_id: __CONNECTOR_ID__

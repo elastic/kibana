@@ -10,6 +10,11 @@ tags:
   - scheduled
 settings:
   timeout: '30m'
+  max-step-size: '10mb'
+  liquid:
+    parseLimit: 150000
+    renderLimit: 2000
+    memoryLimit: 30000000
   concurrency:
     key: __CONCURRENCY_KEY__
     strategy: queue
@@ -187,6 +192,7 @@ steps:
     steps:
       - name: batches
         type: foreach
+        max-iterations: 500
         foreach: >-
           {%- assign batches = "" | split: "" -%}
           {%- assign audiences = variables.items | group_by_exp: "item", "item.permissions | json" -%}

@@ -7,15 +7,15 @@ Server-side plugin for the Context Engine.
 AI Indices attach a logical name to a single user index or data stream. AI Index records are stored in a hidden Kibana system index
 (`.contextengine-ai-indices`), separate from the backing data.
 
-| Method   | Path                                                            | Description                          |
-| -------- | --------------------------------------------------------------- | ------------------------------------ |
-| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI Index         |
-| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI Index by id                |
-| `GET`    | `/api/context_engine/ai_index`                                    | List AI Indices available to the caller (max 100) |
-| `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI Indices        |
-| `GET`    | `/api/context_engine/ai_index/{id}/_describe`                     | Describe an AI Index for querying    |
-| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI Index                   |
-| `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
+| Method   | Path                                                       | Description                                       |
+| -------- | ---------------------------------------------------------- | ------------------------------------------------- |
+| `PUT`    | `/api/context_engine/ai_index/{id}`                        | Create or update an AI Index                      |
+| `GET`    | `/api/context_engine/ai_index/{id}`                        | Get an AI Index by id                             |
+| `GET`    | `/api/context_engine/ai_index`                             | List AI Indices available to the caller (max 100) |
+| `POST`   | `/api/context_engine/ai_index/_query`                      | Run ES\|QL against AI Indices                     |
+| `GET`    | `/api/context_engine/ai_index/{id}/_describe`              | Describe an AI Index for querying                 |
+| `DELETE` | `/api/context_engine/ai_index/{id}`                        | Delete an AI Index                                |
+| `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis` | Update the feedback analysis config               |
 
 Notes:
 
@@ -39,7 +39,7 @@ Notes:
   - `{ "type": "connector", "value": "<connector id>" }` — an action-connector
     instance id (from Stack Management → Connectors). See
     [Connector sources](#connector-sources) below.
-  Required, may be empty.
+    Required, may be empty.
 - Deleting an AI Index deletes **only** the AI Index entry. Backing indices
   are left untouched and must be removed with the Delete index API if desired.
 - `feedback_analysis` configures this index's feedback loop. See
@@ -206,11 +206,11 @@ The `contextEngineAgentBuilder` plugin adds three read-only tools under
 `platform.context_engine.*`. Each one runs the same code as the matching route
 above, as the same user, so a tool and its route always return the same thing:
 
-| Tool                | Route                                             | Result                                                                            |
-| ------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `list_ai_indices`   | `GET /api/context_engine/ai_index`                | `{ id, esql_target, description, managed, assigned_to_agent? }` per listed entry  |
-| `describe_ai_index` | `GET /api/context_engine/ai_index/{id}/_describe` | `{ response }`, the text block describing the index                               |
-| `query_ai_indices`  | `POST /api/context_engine/ai_index/_query`        | `{ columns, values }`                                                             |
+| Tool                | Route                                             | Result                                                                           |
+| ------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `list_ai_indices`   | `GET /api/context_engine/ai_index`                | `{ id, esql_target, description, managed, assigned_to_agent? }` per listed entry |
+| `describe_ai_index` | `GET /api/context_engine/ai_index/{id}/_describe` | `{ response }`, the text block describing the index                              |
+| `query_ai_indices`  | `POST /api/context_engine/ai_index/_query`        | `{ columns, values }`                                                            |
 
 `assigned_to_agent` is only set when an Agent Builder agent calls the tool. It
 says whether that agent is configured with the index. Any other caller, such as
@@ -242,8 +242,8 @@ space and `/s/{spaceId}/api/agent_builder/mcp` is another space.
 
 ## Feedback analysis configuration
 
-Signal *generation* is global — one background task, one advanced setting.
-Signal *analysis* is per AI Index, because the improvement it proposes targets
+Signal _generation_ is global — one background task, one advanced setting.
+Signal _analysis_ is per AI Index, because the improvement it proposes targets
 that index's KI pipeline. The configuration therefore lives on the AI Index
 record:
 
@@ -258,7 +258,7 @@ record:
 }
 ```
 
-- `enabled` is *desired* state, reconciled onto the scheduler after the write.
+- `enabled` is _desired_ state, reconciled onto the scheduler after the write.
   Enabling it schedules the analysis under the credentials of whoever asked, so
   the scheduler stays authoritative for whether analysis is really running.
 - `agent_id` is the Agent Builder agent that analyzes this index's signals. It
@@ -372,8 +372,23 @@ POST /api/context_engine/memory/_save_event
   "session_id": "3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43",
   "ai_index_ids": ["ops-memory"],
   "events": [
-    { "id": "evt-001", "type": "user", "turn_id": "turn-1", "event_at": "2026-11-16T09:58:00.000Z", "content": "Why is checkout latency up?" },
-    { "id": "evt-002", "type": "tool", "turn_id": "turn-1", "event_at": "2026-11-16T09:58:32.000Z", "tool_call_id": "call-1", "tool_name": "search_logs", "status": "failed", "result": "Search timed out" }
+    {
+      "id": "evt-001",
+      "type": "user",
+      "turn_id": "turn-1",
+      "event_at": "2026-11-16T09:58:00.000Z",
+      "content": "Why is checkout latency up?"
+    },
+    {
+      "id": "evt-002",
+      "type": "tool",
+      "turn_id": "turn-1",
+      "event_at": "2026-11-16T09:58:32.000Z",
+      "tool_call_id": "call-1",
+      "tool_name": "search_logs",
+      "status": "failed",
+      "result": "Search timed out"
+    }
   ]
 }
 ```
@@ -589,9 +604,9 @@ signals, work out what would make it serve agents better, and record the
 proposals in the improvements store. Runs are scheduled per AI index by
 `feedback_analysis` (see [Feedback analysis configuration](#feedback-analysis-configuration)).
 
-| Step                                | Description              |
-| ----------------------------------- | ------------------------ |
-| `context-engine.getFeedbackContext` | Everything one run reads |
+| Step                                | Description                |
+| ----------------------------------- | -------------------------- |
+| `context-engine.getFeedbackContext` | Everything one run reads   |
 | `context-engine.recordImprovements` | Record what a run proposed |
 
 Both are workflow steps, not HTTP routes, and both reach plugin services
@@ -679,7 +694,7 @@ failure to reconcile does not fail the configuration write.
 
 A run selects over everything `signal_time_range` and `signal_filter` admit,
 with no restriction by signal type. A signal's type governs how it is
-*attributed* to an AI index. A signal is admitted by any of three paths:
+_attributed_ to an AI index. A signal is admitted by any of three paths:
 
 1. **Retrieval.** A `ki_retrieval` tool call names the KI index it read in
    `data.target_index`, matched exactly against the AI index's `dest.value`.
@@ -728,3 +743,30 @@ A bad proposal is skipped, not fatal. Every rejection comes back as a `skipped`
 entry with a reason: `invalid`, `action_not_allowed`, `duplicate`, `conflict`,
 or `limit_exceeded`.
 
+## Dreaming runs: cursor and failures
+
+Memory dreaming and trace dreaming each read one capped page per run. Where a page stopped is the
+cursor, kept on the AI index document (`dreaming_cursors.memories` and `dreaming_cursors.traces`)
+and never returned by the AI index API.
+
+- A run reads the cursor with `context-engine.getDreamingCursor`. With no cursor (before the first
+  save) it falls back to the output of the last successful run, then to the `workflow.getLastRun`
+  window. A cursor older than `max_hours` (720) moves forward to that age.
+- A run saves the cursor with `context-engine.setDreamingCursor` once its page is written. The
+  cursor is where a capped page stopped, or the start time of the run when the read was not capped.
+  A timeout or failure before that step leaves the cursor where it was, so the next run reads the
+  same page again and skips nothing. Writes are idempotent: memories a fact already cites are not
+  dreamed twice.
+- Dry runs and runs with `since` set never save the cursor, and a run with `since` set ignores it.
+- Relationships and maintenance runs still start from the last successful run.
+
+A failed branch of a `parallel` step (trace dreaming runs its batches with one) fails the whole
+step by default (`mode: fail-fast`): branches that have not started are skipped, branches in flight
+finish, and the step, and with it the run, ends failed. Trace dreaming sets the mode explicitly. The
+run's `checkpoint` step does not run, so the cursor does not move, and `workflow.getLastRun` does not
+count the failed run. A branch already written stays written, and the next run reads the whole page
+again. `mode: settled` would run every branch and complete the step with the failures in its output;
+dreaming does not use it, because a completed run would look green after dropping a batch.
+
+The workflow definitions set `max-step-size`, the Liquid limits and `max-iterations` themselves,
+so a change to the engine defaults does not change what a dreaming run can carry.

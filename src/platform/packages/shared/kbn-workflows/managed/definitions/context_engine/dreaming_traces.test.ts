@@ -18,6 +18,8 @@ interface Step {
   type: string;
   condition?: string;
   foreach?: string;
+  mode?: string;
+  'max-iterations'?: number;
   concurrency?: number;
   steps?: Step[];
   with?: Record<string, unknown>;
@@ -81,9 +83,11 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
       'paused',
       'last_run',
       'resume',
+      'cursor',
       'read_traces',
       'active',
       'dream',
+      'checkpoint',
       'dry_run_result',
       'output_result',
     ]);
@@ -137,6 +141,95 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
         steps: { last_run: lastRun, last_output: lastOutput },
       })
     ).toBe('');
+  });
+
+  it('reads rounds from the saved cursor before the last run output, unless given a time', () => {
+    const { since, after } = findStep(render().steps, 'read_traces').with as {
+      since: string;
+      after: string;
+    };
+    const engine = createWorkflowLiquidEngine();
+    const scope = {
+      inputs: {},
+      steps: {
+        last_run: { output: { since: '2026-11-01T00:00:00.000Z' } },
+        last_output: {
+          output: {
+            context: { output: { resume_from: '2026-11-03T00:00:00Z', resume_after: 'trace-old' } },
+          },
+        },
+        cursor: { output: { found: true, from: '2026-11-05T00:00:00Z', after: 'trace-9' } },
+      },
+    };
+
+    expect(engine.parseAndRenderSync(since, scope)).toBe('2026-11-05T00:00:00Z');
+    expect(engine.parseAndRenderSync(after, scope)).toBe('trace-9');
+    expect(
+      engine.parseAndRenderSync(since, {
+        ...scope,
+        steps: { ...scope.steps, cursor: { output: { found: false } } },
+      })
+    ).toBe('2026-11-03T00:00:00Z');
+    expect(
+      engine.parseAndRenderSync(after, {
+        ...scope,
+        steps: { ...scope.steps, cursor: { output: { found: false } } },
+      })
+    ).toBe('trace-old');
+    expect(
+      engine.parseAndRenderSync(since, { ...scope, inputs: { since: '2026-10-01T00:00:00Z' } })
+    ).toBe('2026-10-01T00:00:00Z');
+    expect(
+      engine.parseAndRenderSync(after, { ...scope, inputs: { since: '2026-10-01T00:00:00Z' } })
+    ).toBe('');
+  });
+
+  it('saves the cursor once the page is written, so a later failure loses at most that page', () => {
+    const { steps } = render();
+    const names = steps.map(({ name }: Step) => name);
+    const checkpoint = findStep(steps, 'checkpoint');
+    const [save] = checkpoint.steps ?? [];
+    const engine = createWorkflowLiquidEngine();
+    const evaluate = (expression: unknown, variables: Record<string, unknown>) =>
+      engine.parseAndRenderSync(String(expression), {
+        variables,
+        execution: { startedAt: '2026-11-09T12:00:00.000Z' },
+      });
+
+    expect(findStep(steps, 'cursor')).toEqual({
+      name: 'cursor',
+      type: 'context-engine.getDreamingCursor',
+      with: { ai_index_id: '{{ consts.ai_index_id }}', source: 'traces', max_hours: 720 },
+    });
+    expect(names.indexOf('checkpoint')).toBeGreaterThan(names.indexOf('dream'));
+    expect(names.indexOf('checkpoint')).toBeLessThan(names.indexOf('output_result'));
+    expect(checkpoint.condition).toBe('${{ inputs.dry_run != true and inputs.since == blank }}');
+    expect(save.type).toBe('context-engine.setDreamingCursor');
+    expect(save.with?.source).toBe('traces');
+    expect(
+      evaluate(save.with?.from, { resume_from: '2026-11-05T00:00:00Z', resume_after: 'trace-9' })
+    ).toBe('2026-11-05T00:00:00Z');
+    expect(evaluate(save.with?.after, { resume_after: 'trace-9' })).toBe('trace-9');
+    expect(evaluate(save.with?.from, { resume_from: '', resume_after: '' })).toBe(
+      '2026-11-09T12:00:00.000Z'
+    );
+  });
+
+  it('fails the run when a batch fails, so the page is not checkpointed and read again', () => {
+    expect(batches().mode).toBe('fail-fast');
+  });
+
+  it('sets the step size, iteration and Liquid limits itself rather than taking the engine defaults', () => {
+    const workflow = render();
+    const dream = findStep(workflow.steps, 'dream');
+
+    expect(workflow.settings['max-step-size']).toBe('10mb');
+    expect(workflow.settings.liquid).toEqual({
+      parseLimit: 150000,
+      renderLimit: 2000,
+      memoryLimit: 30000000,
+    });
+    expect(findStep(dream.steps ?? [], 'tally')['max-iterations']).toBe(100);
   });
 
   it('outputs where the read stopped, so the next run continues from there', () => {

@@ -16,6 +16,7 @@ import type {
   AiIndexTrace,
 } from '../../common/http_api/ai_indices';
 import type { AiIndexDreamingConfig, DreamingEntities } from '../../common/dreaming';
+import type { DreamingCursorSource } from '../../common/step_types/dreaming_cursor';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
 
@@ -63,14 +64,25 @@ const storageSettings = {
         },
       }),
       dreaming: types.object({ enabled: false }),
+      dreaming_cursors: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;
+
+/** Where the last dreaming page of one source stopped. */
+export interface StoredDreamingCursor {
+  /** ISO 8601 time to read from. */
+  from: string;
+  /** Tie-breaker within `from`: the id of the last item read. */
+  after?: string;
+  date_saved: string;
+}
 
 interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
   dreaming?: AiIndexDreamingConfig;
+  dreaming_cursors?: Partial<Record<DreamingCursorSource, StoredDreamingCursor>>;
   memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
