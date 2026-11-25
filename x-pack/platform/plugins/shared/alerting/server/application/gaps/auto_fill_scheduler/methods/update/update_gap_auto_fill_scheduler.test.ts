@@ -212,7 +212,7 @@ describe('updateGapAutoFillScheduler()', () => {
         schedule: { interval: '2h' },
         scope: ['scope-a'],
       }),
-      { request: params.request }
+      { request: params.request, regenerateApiKey: true }
     );
     expect(backfillClient.deleteBackfillsByInitiatorId).not.toHaveBeenCalled();
   });
@@ -305,7 +305,7 @@ describe('updateGapAutoFillScheduler()', () => {
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       expect.objectContaining({ id: existingSo.id, schedule: { interval: '2h' } }),
-      { request: params.request }
+      { request: params.request, regenerateApiKey: true }
     );
   });
 
@@ -322,8 +322,12 @@ describe('updateGapAutoFillScheduler()', () => {
       params.id,
       expect.objectContaining({ name: 'updated name', maxBackfills: 200 })
     );
+    // The task is not recreated, but its API key is refreshed for the new configuration
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
-    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: existingSo.id, schedule: { interval: '2h' } }),
+      { request: params.request, regenerateApiKey: true }
+    );
     expect(backfillClient.deleteBackfillsByInitiatorId).not.toHaveBeenCalled();
   });
 
@@ -338,7 +342,7 @@ describe('updateGapAutoFillScheduler()', () => {
     expect(taskManager.removeIfExists).toHaveBeenCalledWith(existingSo.id);
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       expect.objectContaining({ scope: ['scope-b'] }),
-      { request: params.request }
+      { request: params.request, regenerateApiKey: true }
     );
   });
 

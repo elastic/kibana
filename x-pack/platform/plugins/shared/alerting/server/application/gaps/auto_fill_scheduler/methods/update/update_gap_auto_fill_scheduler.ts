@@ -169,27 +169,28 @@ export async function updateGapAutoFillScheduler(
     const nextSchedulerName = updatedSo.attributes.name ?? schedulerName;
 
     if (updatedEnabled) {
-      if (!taskMatchesUpdate) {
-        if (ownedTask) {
-          await taskManager.removeIfExists(updatedSo.id);
-        }
-        await taskManager.ensureScheduled(
-          {
-            id: updatedSo.id,
-            taskType: GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
-            schedule: updatedSchedule,
-            scope: updatedScope ?? [],
-            params: {
-              configId: updatedSo.id,
-              spaceId: context.spaceId,
-            },
-            state: {},
-          },
-          {
-            request: params.request,
-          }
-        );
+      if (ownedTask && !taskMatchesUpdate) {
+        await taskManager.removeIfExists(updatedSo.id);
       }
+      await taskManager.ensureScheduled(
+        {
+          id: updatedSo.id,
+          taskType: GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
+          schedule: updatedSchedule,
+          scope: updatedScope ?? [],
+          params: {
+            configId: updatedSo.id,
+            spaceId: context.spaceId,
+          },
+          state: {},
+        },
+        {
+          request: params.request,
+          // A kept task keeps its next run but must take this caller's credentials, because the
+          // runner reads the updated configuration and would otherwise act with the previous caller's key
+          regenerateApiKey: true,
+        }
+      );
     } else {
       if (ownedTask) {
         await taskManager.removeIfExists(updatedSo.id);
