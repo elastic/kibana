@@ -30,8 +30,7 @@ import { GET_STARTED_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
-// Failing: See https://github.com/elastic/kibana/issues/287100
-describe.skip(
+describe(
   'Rule Migrations - Translated Rules Page',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
