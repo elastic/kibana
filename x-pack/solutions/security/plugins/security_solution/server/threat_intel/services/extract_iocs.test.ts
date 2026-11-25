@@ -1870,6 +1870,33 @@ describe('extract_iocs — adjudication context window', () => {
     expect(ioc?.context).not.toContain('Questions about this report');
   });
 
+  it('keeps the earlier email attribution when a later footer also carries a cue', () => {
+    const email = 'actor@evil-corp.com';
+    const result = extractIocs({
+      text:
+        `The phishing lure was sent from ${email} to finance staff. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `To report phishing related to this campaign, forward the message to ${email}.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'email');
+
+    expect(ioc?.context).toContain('phishing lure was sent from');
+    expect(ioc?.context).not.toContain('To report phishing');
+  });
+
+  it('still prefers the later occurrence on a cue tie for a url', () => {
+    const url = 'https://evil-corp.com/payload.bin';
+    const result = extractIocs({
+      text:
+        `The attacker hosted ${url} early on. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `The malware later downloaded ${url} again.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'url');
+
+    expect(ioc?.context).toContain('later downloaded');
+  });
+
   it('does not treat "registered" in a footer as an email attribution cue', () => {
     const email = 'actor@evil-corp.com';
     const result = extractIocs({

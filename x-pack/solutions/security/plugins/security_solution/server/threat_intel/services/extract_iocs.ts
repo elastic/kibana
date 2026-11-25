@@ -1329,10 +1329,15 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         const cue = hasAttributionCue(refangedText, ioc._offset, ioc.value.length, ioc.type);
         const existingOffset = existing._offset;
         const existingCue = existing._hasAttributionCue ?? false;
+        // On a cue tie an email keeps its earlier occurrence: reporting and contact footers
+        // ("report phishing to …") come after the attribution and still match a cue.
+        const offset = ioc._offset;
+        const winsTie = (other: number): boolean =>
+          ioc.type === 'email' ? offset < other : offset > other;
         if (
           existingOffset === undefined ||
           (cue && !existingCue) ||
-          (cue === existingCue && ioc._offset > existingOffset)
+          (cue === existingCue && winsTie(existingOffset))
         ) {
           existing._offset = ioc._offset;
           existing._hasAttributionCue = cue;

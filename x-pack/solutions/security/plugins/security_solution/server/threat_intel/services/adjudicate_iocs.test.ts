@@ -623,6 +623,19 @@ describe('prose email candidates', () => {
     expect(result.iocs[capacity - 1].deferred_unreviewed).toBe(true);
   });
 
+  it('keeps urls in the first overflow retry ahead of emails', () => {
+    const emails = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
+      email(`victim${index}@riverton-hospital.org`)
+    );
+    const url = candidate('https://evil-corp.com/payload.bin');
+    const bounded = boundIocAdjudicationForOverflow(
+      prepareIocAdjudication({ iocs: [...emails, url] })
+    );
+
+    expect(bounded.reviewable).toHaveLength(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
+    expect(bounded.reviewable[0].ioc.value).toBe(url.value);
+  });
+
   it('keeps tier ahead of type when ordering candidates', () => {
     const prepared = prepareIocAdjudication({
       iocs: [

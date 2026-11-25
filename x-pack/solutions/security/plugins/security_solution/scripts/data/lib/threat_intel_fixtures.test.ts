@@ -484,18 +484,20 @@ describe('seeded article bodies and email join keys', () => {
     const problems: string[] = [];
     for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       const emails = scenario.joinIocs.filter((entry) => entry.type === 'email');
-      for (const body of renderedBodies(scenario)) {
+      renderedBodies(scenario).forEach((body, index) => {
         const extracted = extractIocs({ text: body }).iocs.filter((ioc) => ioc.type === 'email');
         for (const email of emails) {
           const ioc = extracted.find((entry) => entry.value === email.value);
-          if (ioc && (ioc.tier !== 'discriminating' || ioc.tier_basis !== 'defanged_source')) {
+          if (!ioc) {
+            problems.push(`${scenario.reportIdSlug}#${index}:${email.value} -> not extracted`);
+          } else if (ioc.tier !== 'discriminating' || ioc.tier_basis !== 'defanged_source') {
             problems.push(
               `${scenario.reportIdSlug}:${email.value} -> ${ioc.tier}/${ioc.tier_basis}`
             );
           }
         }
         expect(extracted.filter((ioc) => ioc.tier === 'uncertain')).toEqual([]);
-      }
+      });
     }
     expect(problems).toEqual([]);
   });
