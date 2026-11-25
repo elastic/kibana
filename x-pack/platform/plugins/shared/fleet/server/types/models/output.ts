@@ -17,6 +17,7 @@ import {
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaVerificationModes,
+  KAFKA_KERBEROS_USERNAME_MAX_LENGTH,
   MAX_HOSTS,
   otlpCompressionType,
   otlpProtocol,
@@ -365,7 +366,7 @@ const KafkaKerberosSchema = schema.object({
   ),
   username: schema.string({
     minLength: 1,
-    maxLength: 256,
+    maxLength: KAFKA_KERBEROS_USERNAME_MAX_LENGTH,
     meta: {
       description:
         'Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.',
