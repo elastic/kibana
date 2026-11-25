@@ -1350,7 +1350,6 @@ export class ProposalsService {
   ): Promise<void> {
     const executionIds = new Set<string>();
     try {
-      // The helper streams every matching proposal, so no limit applies to how many are read.
       const proposals = this.deps.esClient.helpers.scrollDocuments<
         Pick<ProposalDocument, 'workflowExecutionId'>
       >({
