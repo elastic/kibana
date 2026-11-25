@@ -33,9 +33,8 @@ import {
 } from '../common/json_editor_flyout';
 import {
   isSingleMetricJobCreator,
-  isAdvancedJobCreator,
+  isAdvancedLikeJobCreator,
   isClassicJobCreator,
-  isEsqlAdvancedJobCreator,
   isEsqlBasicJobCreator,
 } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
@@ -73,12 +72,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [startDatafeed, setStartDatafeed] = useState(true);
   const [showJobAssignWarning, setShowJobAssignWarning] = useState(false);
 
-  const isAdvanced = isAdvancedJobCreator(jobCreator);
-  // the advanced ES|QL wizard creates and starts its job like the basic wizards, but its job
-  // JSON can be edited
-  const isEditable = isAdvanced || isEsqlAdvancedJobCreator(jobCreator);
-  const jobEditorMode = isEditable ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
-  const datafeedEditorMode = isEditable
+  // the advanced DSL and ES|QL wizards only create the job, and the datafeed is started from
+  // the jobs list
+  const isAdvanced = isAdvancedLikeJobCreator(jobCreator);
+  const jobEditorMode = isAdvanced ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
+  const datafeedEditorMode = isAdvanced
     ? getAdvancedDatafeedEditorMode(jobCreator)
     : EDITOR_MODE.READONLY;
 

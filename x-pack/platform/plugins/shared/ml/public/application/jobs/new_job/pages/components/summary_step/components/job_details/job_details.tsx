@@ -16,8 +16,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import {
   isMultiMetricLikeJobCreator,
   isPopulationJobCreator,
-  isAdvancedJobCreator,
-  isEsqlAdvancedJobCreator,
+  isAdvancedLikeJobCreator,
 } from '../../../../../common/job_creator';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import type { ListItems } from '../common';
@@ -32,8 +31,7 @@ export const JobDetails: FC = () => {
   const dateFormat: string = uiSettings.get('dateFormat');
   const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
 
-  const isAdvanced = isAdvancedJobCreator(jobCreator);
-  const isEsqlAdvanced = isEsqlAdvancedJobCreator(jobCreator);
+  const isAdvanced = isAdvancedLikeJobCreator(jobCreator);
 
   const modelMemoryLimitDefault = anomalyDetectors.model_memory_limit || '';
   const modelMemoryLimit =
@@ -132,7 +130,7 @@ export const JobDetails: FC = () => {
     });
   }
 
-  if ((isAdvanced || isEsqlAdvanced) && jobCreator.categorizationFieldName !== null) {
+  if (isAdvanced && jobCreator.categorizationFieldName !== null) {
     detectorDetails.push({
       title: i18n.translate(
         'xpack.ml.newJob.wizard.summaryStep.jobDetails.categorizationField.title',
