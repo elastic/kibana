@@ -44,11 +44,6 @@
       "repo": "github/gh-aw-actions/setup",
       "version": "v1.2.2",
       "sha": "53d0749e19424a918acd82b4d140264ce48f2f14"
-    },
-    "google-github-actions/auth@v3.0.0": {
-      "repo": "google-github-actions/auth",
-      "version": "v3.0.0",
-      "sha": "7c6bc770dae815cd3e89ee6cdf493a5fab2cc093"
     }
   }
 }
