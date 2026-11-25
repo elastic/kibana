@@ -498,7 +498,7 @@ describe('FormBased Data Panel', () => {
       });
 
       await renderFormBasedDataPanel({
-        query: { language: 'kuery', query: '@timestamp : NOT *' },
+        query: { language: 'kuery', query: '@timestamp : "unclosed' },
       });
 
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
