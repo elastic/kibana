@@ -23,14 +23,19 @@ const ES_TIME_ZONE_OF: Readonly<Record<string, string>> = {
   ROC: 'Asia/Taipei',
 };
 
+const COMPACT_NUMBER_PATTERN = '0,0.[0]';
+const COMPACT_PERCENT_PATTERN = '0,0.[0]%';
+
 export interface Formatters {
   /** A count or other number, with the `format:number:defaultPattern` advanced setting. */
   formatNumber: (value: number) => string;
   /** A share between 0 and 1, with the `format:percent:defaultPattern` advanced setting. */
   formatPercent: (share: number) => string;
-  /** `formatNumber` with a sign unless it rounds to 0, e.g. "+1.5", "-1.5" or "0". */
+  /** A share on a KPI tile, to one decimal at most, e.g. "42.4%": more reads as noise there. */
+  formatKpiPercent: (share: number) => string;
+  /** A change, to one decimal at most, with a sign unless it rounds to 0, e.g. "+1.5" or "0". */
   formatSignedNumber: (value: number) => string;
-  /** `formatPercent` with a sign unless it rounds to 0, e.g. "+20%", "-20%" or "0%". */
+  /** A relative change, to one decimal at most, with a sign unless it rounds to 0, e.g. "-4.9%". */
   formatSignedPercent: (share: number) => string;
   /** An absolute date, with the `dateFormat` and `dateFormat:tz` advanced settings. */
   formatDate: (date: string | number) => string;
@@ -47,8 +52,17 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
     uiSettings.get(key, defaultOverride);
   const number = new NumberFormat({}, getConfig);
   const percent = new PercentFormat({}, getConfig);
-  const signedNumber = new NumberFormat({ alwaysShowSign: true }, getConfig);
-  const signedPercent = new PercentFormat({ alwaysShowSign: true }, getConfig);
+  // Changes and KPI shares to one decimal at most, whatever the default patterns: "-4.949%" reads
+  // as noise on a tile.
+  const kpiPercent = new PercentFormat({ pattern: COMPACT_PERCENT_PATTERN }, getConfig);
+  const signedNumber = new NumberFormat(
+    { alwaysShowSign: true, pattern: COMPACT_NUMBER_PATTERN },
+    getConfig
+  );
+  const signedPercent = new PercentFormat(
+    { alwaysShowSign: true, pattern: COMPACT_PERCENT_PATTERN },
+    getConfig
+  );
   const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
   // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
   const userTimeZone = getUserTimeZone((key) => uiSettings.get(key));
@@ -57,6 +71,7 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   return {
     formatNumber: (value) => number.convertToText(value),
     formatPercent: (share) => percent.convertToText(share),
+    formatKpiPercent: (share) => kpiPercent.convertToText(share),
     formatSignedNumber: (value) => signedNumber.convertToText(value),
     formatSignedPercent: (share) => signedPercent.convertToText(share),
     formatDate: (date) => moment(date).tz(timeZone).format(dateFormat),
