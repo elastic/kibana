@@ -204,8 +204,27 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
     const { server: eventsServer } = this;
+    const slackCountsByRun = new WeakMap<
+      AbortSignal,
+      Promise<Partial<Awaited<ReturnType<typeof getSlackSnapshotCounts>>>>
+    >();
     plugins.nightshiftInvestigations?.registerDetectionSnapshotContributor(
       async ({ spaceId, request, signal }) => {
+        const readSlackCountsOncePerRun = () => {
+          const cached = slackCountsByRun.get(signal);
+          if (cached) return cached;
+          const counts = getSlackSnapshotCounts(
+            new SlackAppService(eventsServer),
+            request,
+            signal
+          ).catch((error: Error) => {
+            if (signal.aborted) throw error;
+            this.logger.warn(`Failed to read the Slack snapshot counts: ${error.message}`);
+            return {};
+          });
+          slackCountsByRun.set(signal, counts);
+          return counts;
+        };
         const [coreStart, pluginsStart] = await core.getStartServices();
         const [knowledgeCounts, slackCounts] = await Promise.all([
           getDetectionSnapshotKnowledgeCounts({
@@ -218,13 +237,7 @@ export class SignificantEventsPlugin
             space: spaceId,
             logger: this.logger.get('knowledge_indicators'),
           }),
-          getSlackSnapshotCounts(new SlackAppService(eventsServer), request, signal).catch(
-            (error: Error) => {
-              if (signal.aborted) throw error;
-              this.logger.warn(`Failed to read the Slack snapshot counts: ${error.message}`);
-              return {};
-            }
-          ),
+          readSlackCountsOncePerRun(),
         ]);
         return { ...knowledgeCounts, ...slackCounts };
       }

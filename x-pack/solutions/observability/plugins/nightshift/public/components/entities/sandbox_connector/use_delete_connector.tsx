@@ -11,13 +11,13 @@ import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
 import { useQueryClient } from '@kbn/react-query';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS } from '../../../common/ebt_constants';
 import { ConfirmModal } from '../../ui/confirm_modal';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useRefreshSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
 import { INVESTIGATION_AGENT_QUERY_KEY } from '../../../data/sandbox_connectors/use_agent_connectors';
 
-export function useDeleteConnector(): {
+export function useDeleteConnector(ebtElement: string): {
   requestDelete: (connector: SandboxConnector) => void;
   confirmModal: React.ReactElement | null;
 } {
@@ -65,7 +65,7 @@ export function useDeleteConnector(): {
       })}
       confirmEbt={{
         action: NIGHTSHIFT_EBT_ACTIONS.DELETE_CONNECTOR,
-        element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+        element: ebtElement,
       }}
       buttonColor="danger"
       data-test-subj="nightshiftDeleteConnectorConfirm"

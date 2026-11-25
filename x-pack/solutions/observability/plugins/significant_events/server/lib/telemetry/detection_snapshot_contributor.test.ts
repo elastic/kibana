@@ -112,4 +112,16 @@ describe('getSlackSnapshotCounts', () => {
     });
     expect(slack.listBindings).toHaveBeenLastCalledWith(request, { cursor: 'next' });
   });
+
+  it('rejects instead of returning a partial count when a later page fails', async () => {
+    const slack = {
+      getStatus: jest.fn().mockResolvedValue({ status: 'connected' }),
+      listBindings: jest
+        .fn()
+        .mockResolvedValueOnce({ bindings: [{}, {}], nextCursor: 'next' })
+        .mockRejectedValueOnce(new Error('relay down')),
+    };
+
+    await expect(getSlackSnapshotCounts(slack, request, signal)).rejects.toThrow('relay down');
+  });
 });

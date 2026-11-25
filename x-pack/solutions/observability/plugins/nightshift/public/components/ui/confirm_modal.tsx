@@ -47,6 +47,7 @@ export function ConfirmModal({
   return (
     <EuiModal
       onClose={onCancel}
+      role="alertdialog"
       maxWidth={448}
       aria-labelledby={titleId}
       data-test-subj={dataTestSubj}

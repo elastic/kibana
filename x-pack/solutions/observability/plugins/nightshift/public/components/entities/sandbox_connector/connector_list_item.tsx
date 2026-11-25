@@ -19,11 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import {
-  NIGHTSHIFT_EBT_ACTIONS,
-  NIGHTSHIFT_EBT_DETAILS,
-  NIGHTSHIFT_EBT_ELEMENTS,
-} from '../../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_DETAILS } from '../../../common/ebt_constants';
 
 const ACTIONS_CLASS = 'nightshiftConnectorListItem__actions';
 
@@ -37,6 +33,7 @@ export function ConnectorListItem({
   openDetailsDisabledReason,
   onDelete,
   deleteDisabledReason,
+  ebtElement,
 }: {
   connector: SandboxConnector;
   isAssigned: boolean;
@@ -47,6 +44,7 @@ export function ConnectorListItem({
   openDetailsDisabledReason?: string;
   onDelete: () => void;
   deleteDisabledReason?: string;
+  ebtElement: string;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const checkboxId = useGeneratedHtmlId({ prefix: 'nightshiftConnectorListItem' });
@@ -117,7 +115,7 @@ export function ConnectorListItem({
       data-test-subj={`nightshiftConnectorListToggle-${connector.id}`}
       {...getEbtProps({
         action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
-        element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+        element: ebtElement,
         detail: isAssigned ? NIGHTSHIFT_EBT_DETAILS.DISABLE : NIGHTSHIFT_EBT_DETAILS.ENABLE,
       })}
     />
@@ -146,7 +144,7 @@ export function ConnectorListItem({
             data-test-subj={`nightshiftConnectorListOpenDetails-${connector.id}`}
             {...getEbtProps({
               action: NIGHTSHIFT_EBT_ACTIONS.EDIT_CONNECTOR,
-              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              element: ebtElement,
             })}
           />
         </EuiToolTip>
@@ -160,7 +158,7 @@ export function ConnectorListItem({
             data-test-subj={`nightshiftConnectorListDelete-${connector.id}`}
             {...getEbtProps({
               action: NIGHTSHIFT_EBT_ACTIONS.OPEN_DELETE_CONNECTOR,
-              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              element: ebtElement,
             })}
           />
         </EuiToolTip>

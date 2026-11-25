@@ -205,7 +205,7 @@ function ConnectorTypeRow({
   const hasConnectors = connectors.length > 0;
 
   const createEbtProps = getEbtProps({
-    action: NIGHTSHIFT_EBT_ACTIONS.CREATE_SANDBOX_CONNECTOR,
+    action: NIGHTSHIFT_EBT_ACTIONS.OPEN_ADD_SANDBOX_CONNECTOR,
     element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
     detail: actionType.id,
   });

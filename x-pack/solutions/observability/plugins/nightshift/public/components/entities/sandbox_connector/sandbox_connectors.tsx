@@ -105,6 +105,10 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
                 <EuiLink
                   onClick={() => openEdit(connector)}
                   data-test-subj={`nightshiftConnectorName-${connector.id}`}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.EDIT_CONNECTOR,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
                 >
                   {name}
                 </EuiLink>
