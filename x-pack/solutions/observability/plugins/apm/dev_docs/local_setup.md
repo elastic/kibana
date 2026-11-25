@@ -113,6 +113,8 @@ xpack.fleet.agentless.api.tls.key: /path/to/kibana-client.key
 xpack.fleet.agentless.api.tls.ca: /path/to/agentless-ca.crt
 ```
 
+`xpack.fleet.agentless.enabled` is not required. It controls Agentless integrations, not managed RUM.
+
 For ECH deployments pinned to a different Agentless host, set `xpack.fleet.agentless.api.rumUrl` to the direct HTTPS origin (any path is ignored). The RUM client keeps mTLS requests on the configured origin.
 
 Use the default space and a user with APM settings write access in all spaces. Send requests through Kibana’s internal HTTP client, which sets the required headers.

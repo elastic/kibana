@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/core/server';
 
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
+import apm from 'elastic-apm-node';
 
 import { AgentlessAgentCreateFleetUnreachableError } from '../../../common/errors';
 import {
@@ -34,6 +35,7 @@ import { fleetServerHostService } from '../fleet_server_host';
 import { agentlessAgentService } from './agentless_agent';
 
 jest.mock('axios');
+jest.mock('elastic-apm-node', () => ({ currentTransaction: null }));
 
 jest.mock('../fleet_server_host');
 jest.mock('../api_keys');
@@ -2674,6 +2676,7 @@ describe('createRumClient', () => {
     client_tokens: [{ id: 'rum_client', sha256: 'b'.repeat(64), created_at: minted.created_at }],
   };
   const tls = { certificate: '/path/to/cert', key: '/path/to/key', ca: '/path/to/ca' };
+  const traceId = '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01';
 
   const configure = (api: Record<string, unknown> | undefined) =>
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({ agentless: { api } } as any);
@@ -2686,6 +2689,9 @@ describe('createRumClient', () => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     jest.mocked(axios).mockReset();
+    jest.replaceProperty(apm, 'currentTransaction', {
+      traceparent: traceId,
+    } as typeof apm.currentTransaction);
     // Earlier suites reset all mocks, including the module-level SslConfig implementation.
     jest.mocked(SslConfig).mockReset();
     jest
@@ -2719,6 +2725,9 @@ describe('createRumClient', () => {
       'Failed to publish the RUM policy to Agentless API'
     );
     expect(axios).not.toHaveBeenCalled();
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      `[Agentless API] Publishing the RUM policy skipped: the Agentless RUM API is not configured [Request Id: ${traceId}]`
+    );
   });
 
   it('prefers rumUrl, drops any base path, and falls back to url', async () => {
@@ -2784,7 +2793,7 @@ describe('createRumClient', () => {
       'Failed to publish the RUM policy to Agentless API'
     );
     expect(mockedLogger.warn).toHaveBeenCalledWith(
-      '[Agentless API] Publishing the RUM policy returned unexpected status 202'
+      `[Agentless API] Publishing the RUM policy returned unexpected status 202 [Request Id: ${traceId}]`
     );
   });
 
@@ -2797,6 +2806,9 @@ describe('createRumClient', () => {
     ).rejects.toThrow('Failed to publish the RUM policy to Agentless API');
     expect(lastRequest().signal).toBe(controller.signal);
     expect(mockedLogger.warn).not.toHaveBeenCalled();
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      `[Agentless API] Publishing the RUM policy was cancelled [Request Id: ${traceId}]`
+    );
   });
 
   it('mints a token on 201 and ignores unknown response fields', async () => {
@@ -2806,7 +2818,17 @@ describe('createRumClient', () => {
     expect(lastRequest()).toMatchObject({
       method: 'POST',
       url: 'https://agentless.example/api/v2/rum/client_tokens',
+      headers: { 'X-Request-ID': traceId },
     });
+  });
+
+  it('accepts fractional seconds in the minted token and stores whole seconds', async () => {
+    configure({ url: 'https://agentless.example', tls });
+    jest.mocked(axios).mockResolvedValueOnce({
+      status: 201,
+      data: { ...minted, created_at: '2026-11-25T10:00:00.123456789Z' },
+    });
+    await expect(agentlessAgentService.createRumClient().mintToken()).resolves.toEqual(minted);
   });
 
   it('rejects a mint response that is not 201', async () => {
@@ -2814,6 +2836,9 @@ describe('createRumClient', () => {
     jest.mocked(axios).mockResolvedValueOnce({ status: 200, data: minted });
     await expect(agentlessAgentService.createRumClient().mintToken()).rejects.toThrow(
       'Failed to mint a RUM token in Agentless API'
+    );
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      `[Agentless API] Minting a RUM token returned unexpected status 200 [Request Id: ${traceId}]`
     );
   });
 
@@ -2823,7 +2848,8 @@ describe('createRumClient', () => {
     ['sha256', { sha256: 'A'.repeat(64) }],
     ['sha256', { sha256: 'a'.repeat(63) }],
     ['created_at', { created_at: '0001-01-01T00:00:00Z' }],
-    ['created_at', { created_at: '2026-11-25T10:00:00.123Z' }],
+    ['created_at', { created_at: '2026-11-25T10:00:00.Z' }],
+    ['created_at', { created_at: '2026-02-30T10:00:00.123Z' }],
     ['created_at', { created_at: '2026-11-25T10:00:00+01:00' }],
     ['token', { token: '' }],
   ])('rejects a minted token with an invalid %s without leaking it', async (field, change) => {
@@ -2836,7 +2862,7 @@ describe('createRumClient', () => {
 
     expect(error.message).toBe('Failed to mint a RUM token in Agentless API');
     expect(mockedLogger.warn).toHaveBeenCalledWith(
-      `[Agentless API] Minting a RUM token returned an invalid response [field: ${field}]`
+      `[Agentless API] Minting a RUM token returned an invalid response [field: ${field}] [Request Id: ${traceId}]`
     );
     expect(`${error.message} ${JSON.stringify(error)} ${loggedCalls()}`).not.toContain(
       'SECRET_TOKEN'
@@ -2859,7 +2885,7 @@ describe('createRumClient', () => {
       .catch((e) => e);
 
     expect(mockedLogger.warn).toHaveBeenCalledWith(
-      '[Agentless API] Minting a RUM token failed [status: 503, code: ERR_BAD_RESPONSE]'
+      `[Agentless API] Minting a RUM token failed [status: 503, code: ERR_BAD_RESPONSE] [Request Id: ${traceId}]`
     );
     const exposed = `${thrown.message} ${JSON.stringify(thrown)} ${loggedCalls()}`;
     expect(exposed).not.toContain('SECRET_TOKEN');
@@ -2876,7 +2902,7 @@ describe('createRumClient', () => {
     );
     expect(axios).not.toHaveBeenCalled();
     expect(mockedLogger.warn).toHaveBeenCalledWith(
-      '[Agentless API] Publishing the RUM policy failed [code: ENOENT]'
+      `[Agentless API] Publishing the RUM policy failed [code: ENOENT] [Request Id: ${traceId}]`
     );
     expect(loggedCalls()).not.toContain(tls.key);
   });

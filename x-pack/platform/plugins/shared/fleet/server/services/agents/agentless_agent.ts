@@ -105,6 +105,11 @@ export interface AgentlessRumClient {
 
 const RUM_API_PATH = '/api/v2/rum';
 
+const RUM_NOT_CONFIGURED = 'AGENTLESS_RUM_NOT_CONFIGURED';
+
+// Drops any fractional seconds from an RFC 3339 UTC timestamp.
+const toWholeSeconds = (date: string) => `${date.slice(0, 19)}Z`;
+
 const mintedRumTokenSchema = schema.object(
   {
     id: schema.string({
@@ -119,13 +124,14 @@ const mintedRumTokenSchema = schema.object(
     }),
     created_at: schema.string({
       validate: (date) => {
-        const parsed = new Date(date);
-        // Agentless emits UTC timestamps at whole-second precision.
+        // Accept fractional seconds, but check the whole-second UTC value that is stored.
+        const wholeSeconds = toWholeSeconds(date);
+        const parsed = new Date(wholeSeconds);
         if (
-          date === '0001-01-01T00:00:00Z' ||
-          !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(date) ||
+          wholeSeconds === '0001-01-01T00:00:00Z' ||
+          !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$/.test(date) ||
           Number.isNaN(parsed.getTime()) ||
-          parsed.toISOString() !== `${date.slice(0, -1)}.000Z`
+          parsed.toISOString() !== `${wholeSeconds.slice(0, -1)}.000Z`
         ) {
           return 'Invalid token creation time';
         }
@@ -184,16 +190,22 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
   public createRumClient(): AgentlessRumClient {
     const logger = appContextService.getLogger();
     // Resolve the endpoint and TLS per request so config reloads and rotated certificates apply.
-    const request = (config: AxiosRequestConfig, options?: AgentlessRumRequestOptions) => {
+    const request = (
+      config: AxiosRequestConfig,
+      traceId: string | undefined,
+      options?: AgentlessRumRequestOptions
+    ) => {
       const endpoint = this.getRumEndpoint();
       if (!endpoint) {
-        throw new Error('Agentless RUM API is not configured');
+        throw Object.assign(new Error('Agentless RUM API is not configured'), {
+          code: RUM_NOT_CONFIGURED,
+        });
       }
       const tlsConfig = this.createTlsConfig(endpoint.agentlessConfig);
       tlsConfig.rejectUnauthorized = true;
       return axios({
         ...config,
-        ...this.getHeaders(tlsConfig, apm.currentTransaction?.traceparent),
+        ...this.getHeaders(tlsConfig, traceId),
         url: `${endpoint.url.href}${config.url ?? ''}`,
         maxRedirects: 0,
         timeout: 10_000,
@@ -204,34 +216,50 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     return {
       isConfigured: () => Boolean(this.getRumEndpoint()),
       mintToken: async () => {
+        const traceId = apm.currentTransaction?.traceparent;
         try {
-          const { data, status } = await request({ method: 'POST', url: '/client_tokens' });
+          const { data, status } = await request(
+            { method: 'POST', url: '/client_tokens' },
+            traceId
+          );
           if (status === 201) {
-            return mintedRumTokenSchema.validate(data);
+            const minted = mintedRumTokenSchema.validate(data);
+            return { ...minted, created_at: toWholeSeconds(minted.created_at) };
           }
-          logger.warn(`[Agentless API] Minting a RUM token returned unexpected status ${status}`);
+          logger.warn(
+            this.withRequestIdMessage(
+              `[Agentless API] Minting a RUM token returned unexpected status ${status}`,
+              traceId
+            )
+          );
         } catch (error) {
-          this.logRumError('Minting a RUM token', error);
+          this.logRumError('Minting a RUM token', error, traceId);
         }
         throw new Error('Failed to mint a RUM token in Agentless API');
       },
       publish: async (policy, options) => {
+        const traceId = apm.currentTransaction?.traceparent;
         try {
-          const { status } = await request({ method: 'PUT', data: policy }, options);
+          const { status } = await request({ method: 'PUT', data: policy }, traceId, options);
           if (status === 200 || status === 201 || status === 204) {
             return;
           }
           logger.warn(
-            `[Agentless API] Publishing the RUM policy returned unexpected status ${status}`
+            this.withRequestIdMessage(
+              `[Agentless API] Publishing the RUM policy returned unexpected status ${status}`,
+              traceId
+            )
           );
         } catch (error) {
-          this.logRumError('Publishing the RUM policy', error);
+          this.logRumError('Publishing the RUM policy', error, traceId);
         }
         throw new Error('Failed to publish the RUM policy to Agentless API');
       },
     };
   }
 
+  // RUM only needs the mTLS endpoint. It is turned on by xpack.apm.managedRumEnabled, not by
+  // agentless.enabled, which controls Agentless integrations.
   private getRumEndpoint() {
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const api = agentlessConfig?.api;
@@ -245,14 +273,15 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
   }
 
   /** Logs only non-sensitive failure details: errors can carry tokens, digests, or TLS material. */
-  private logRumError(action: string, error: unknown) {
+  private logRumError(action: string, error: unknown, traceId: string | undefined) {
     const logger = appContextService.getLogger();
+    const warn = (message: string) => logger.warn(this.withRequestIdMessage(message, traceId));
     if (axios.isAxiosError(error)) {
       if (error.code === 'ERR_CANCELED') {
-        logger.debug(`[Agentless API] ${action} was cancelled`);
+        logger.debug(this.withRequestIdMessage(`[Agentless API] ${action} was cancelled`, traceId));
         return;
       }
-      logger.warn(
+      warn(
         `[Agentless API] ${action} failed [status: ${error.response?.status ?? 'none'}, code: ${
           error.code ?? 'none'
         }]`
@@ -261,16 +290,18 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     }
     if (error instanceof ValidationError) {
       const field = error.cause instanceof SchemaTypeError ? error.cause.path.join('.') : '';
-      logger.warn(
-        `[Agentless API] ${action} returned an invalid response [field: ${field || 'unknown'}]`
-      );
+      warn(`[Agentless API] ${action} returned an invalid response [field: ${field || 'unknown'}]`);
       return;
     }
     const code =
       error instanceof Error && 'code' in error && typeof error.code === 'string'
         ? error.code
         : 'none';
-    logger.warn(`[Agentless API] ${action} failed [code: ${code}]`);
+    if (code === RUM_NOT_CONFIGURED) {
+      warn(`[Agentless API] ${action} skipped: the Agentless RUM API is not configured`);
+      return;
+    }
+    warn(`[Agentless API] ${action} failed [code: ${code}]`);
   }
 
   /** Fleet server host is chosen purely by cloud environment, independent of the policy. */
