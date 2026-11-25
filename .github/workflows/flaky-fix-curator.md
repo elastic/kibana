@@ -13,7 +13,6 @@ on:
   # One proposal at a time: wait until the previous curator PR is merged or closed.
   skip-if-match: 'is:pr is:open label:flaky-fix-curator'
 
-# Scheduled runs carry no `github.event.repository`, so a fork check on the event never matches.
 if: github.repository == 'elastic/kibana'
 
 permissions:
