@@ -122,10 +122,12 @@ const mockTelemetry = {
 
 jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
 
+const mockHttpPost = jest.fn();
+
 jest.mock('./services', () => ({
   getServices: () => ({
     agentBuilder: mockAgentBuilder,
-    core: { http: {} },
+    core: { http: { post: (...args: unknown[]) => mockHttpPost(...args) } },
     search: jest.fn(),
   }),
 }));
@@ -332,6 +334,28 @@ describe('customContentEmbeddableFactory', () => {
       await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
     });
 
+    // `ROW` and the like read no dataset, so there is no source to offer to the dashboard.
+    it('publishes no source for a query that reads no dataset, and keeps the others', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['ROW greeting = "hello"', 'FROM metrics | LIMIT 1'],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
+      expect(mockForDataset).toHaveBeenCalledTimes(1);
+    });
+
+    it('publishes none when no query reads a dataset', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['ROW greeting = "hello"'],
+      });
+
+      await act(async () => {});
+      expect(embeddable.api.dataSources$.getValue()).toBeUndefined();
+      expect(mockForDataset).not.toHaveBeenCalled();
+    });
+
     it('publishes none when the panel has no query', async () => {
       const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
 
@@ -373,6 +397,44 @@ describe('customContentEmbeddableFactory', () => {
     });
   });
 
+  // Only the HTTP requests are mocked, so the source goes through the real `EsqlSource` conversion.
+  describe('data sources of the real source conversion', () => {
+    const columns = [
+      { name: '@timestamp', esType: 'date' },
+      { name: 'host.name', esType: 'keyword' },
+      { name: 'bytes', esType: 'long' },
+    ];
+
+    beforeEach(() => {
+      mockHttpPost.mockImplementation(async (route: string) =>
+        route.endsWith('source_info') ? { columns } : { timeField: '@timestamp' }
+      );
+    });
+
+    afterEach(() => {
+      mockHttpPost.mockReset();
+    });
+
+    it('publishes the fields of the dataset of an aggregate query, not its output', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM real-conversion-logs | STATS total = COUNT(*) BY host.name'],
+      });
+
+      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toHaveLength(1));
+      const [source] = embeddable.api.dataSources$.getValue() as FilterableSource[];
+      const fieldNames = source.fields.map(({ name }) => name);
+
+      expect(source.title).toBe('real-conversion-logs');
+      expect(source.timeFieldName).toBe('@timestamp');
+      expect(fieldNames).toEqual(expect.arrayContaining(['host.name', 'bytes']));
+      expect(fieldNames).not.toContain('total');
+      const sourceInfoRequest = mockHttpPost.mock.calls.find(([route]) =>
+        String(route).endsWith('source_info')
+      );
+      expect(JSON.parse(sourceInfoRequest?.[1].body).query).toBe('FROM real-conversion-logs');
+    });
+  });
   describe('additional queries', () => {
     const multiQueryState = {
       ...baseState,

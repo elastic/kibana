@@ -72,6 +72,7 @@ import {
 } from '@kbn/custom-content-renderer';
 import { EsqlSource } from '@kbn/data-source';
 import type { FilterableSource } from '@kbn/data-source';
+import { getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import { compact, uniqBy } from 'lodash';
 import { getServices } from './services';
@@ -99,6 +100,8 @@ const resolveEsqlSources = async (
 ): Promise<FilterableSource[]> => {
   const sources = await Promise.all(
     queries.map(async (query) => {
+      // A query without a source command (e.g. `ROW`) reads no dataset, so there is nothing to publish.
+      if (!getSourceCommandQueryFromESQLQuery(query)) return undefined;
       // One query that cannot be resolved must not hide the sources of the others, or end the
       // subscription.
       try {
