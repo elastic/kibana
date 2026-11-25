@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parseEsqlQuery, topLevelCommands, whereExpression } from './esql_commands';
+
 /**
  * The tokens that matter when splitting: each string literal is consumed whole, so nothing
  * inside one can be read as a pipe. The alternatives, tried leftmost first:
@@ -33,14 +35,29 @@ function splitCommands(query: string): string[] {
 }
 
 /**
- * The expressions of the query's WHERE commands. String literals are respected: a pipe or
- * the word "where" inside a value stays part of its expression, so conditions carrying
- * arbitrary names (the latency map's operation clause, a user's own filters) round-trip.
+ * The WHERE expressions of a query that does not parse (half-typed, say), read as text:
+ * what is there is still worth showing, so the charts can follow a query being edited.
  */
-export function extractFilters(query: string) {
+function extractFiltersFromText(query: string) {
   return splitCommands(query)
     .map((command) => command.trim())
     .filter((command) => /^where\s/i.test(command))
     .map((command) => command.slice('where'.length).trim())
     .filter((item) => item !== '');
+}
+
+/**
+ * The expressions of the query's top-level WHERE commands, as the ES|QL parser reads them:
+ * a comment after a condition is not part of it, and a pipe or the word "where" inside a
+ * string literal (a span name, say) stays part of its expression. The parser prints each
+ * expression in its own shape (`and` as `AND`), with the parentheses of the source kept, so
+ * a condition the latency map wrote comes back as it was written. A query that does not
+ * parse falls back to its text.
+ */
+export function extractFilters(query: string) {
+  const root = parseEsqlQuery(query);
+  if (!root) return extractFiltersFromText(query);
+  return topLevelCommands(root, 'where')
+    .map(whereExpression)
+    .filter((expression): expression is string => Boolean(expression));
 }

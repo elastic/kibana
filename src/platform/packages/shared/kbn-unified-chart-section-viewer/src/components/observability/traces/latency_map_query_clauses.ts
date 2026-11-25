@@ -10,10 +10,12 @@
 /**
  * The latency map keeps its selection in the Discover ES|QL query, as a WHERE clause it
  * writes (`selectionToEsqlCondition`) and recognises (`parseSelectionCondition`, both from
- * `@kbn/trace-latency-map`). Appending uses `appendToESQLQuery` from `@kbn/esql-utils`;
- * removing the clause again has no shared helper, so it lives here.
+ * `@kbn/trace-latency-map`). The query is edited by its text, at places the ES|QL parser
+ * points to: the parser prints an expression only to compare it, never to rewrite the
+ * user's query, so everything the user typed stays byte for byte.
  */
 
+import { mutate } from '@elastic/esql';
 import { appendToESQLQuery } from '@kbn/esql-utils';
 import {
   isFailedOnlyCondition,
@@ -21,14 +23,26 @@ import {
   isSelectionCondition,
 } from '@kbn/trace-latency-map';
 import { extractFilters } from '../../../utils';
+import {
+  commandLeadStart,
+  parseEsqlQuery,
+  topLevelCommands,
+  whereExpression,
+} from '../../../utils/esql_commands';
 
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-/** Remove one `| WHERE <clause>`, wherever it sits in the query. */
-export const removeWhere = (query: string, clause: string) =>
-  query.replace(new RegExp(`\\s*\\|\\s*WHERE\\s+${escapeRegExp(clause)}`, 'i'), '');
-
-const UNMAPPED_FIELDS_SET = /\bSET\s+unmapped_fields\b/i;
+/**
+ * Remove one `| WHERE <clause>`, wherever it sits in the query: the first top-level WHERE
+ * whose expression is the clause, cut by its exact span. A user's clause that merely starts
+ * with the same text, or a WHERE inside a FORK branch, is left alone, as is a query that
+ * does not parse.
+ */
+export const removeWhere = (query: string, clause: string) => {
+  const root = parseEsqlQuery(query);
+  const command =
+    root && topLevelCommands(root, 'where').find((c) => whereExpression(c) === clause);
+  if (!command) return query;
+  return query.slice(0, commandLeadStart(query, command)) + query.slice(command.location.max + 1);
+};
 
 /** The exact prefix `appendMapClause` writes, which `removeMapSetResidue` takes back off. */
 const MAP_SET_PREFIX = 'SET unmapped_fields="NULLIFY";\n';
@@ -40,14 +54,27 @@ const MAP_SET_PREFIX = 'SET unmapped_fields="NULLIFY";\n';
  * the map's own queries have, unless it already sets it - or unless the host knows every
  * referenced field is mapped (`nullify: false`, from a field-caps check), which keeps the
  * user's query as short as it can be.
+ *
+ * The clause goes before the query's first LIMIT, when it has one: the map shows every span
+ * of the range, so a region drawn on it must select among all of them, not among the rows
+ * the limit happened to keep.
  */
 export const appendMapClause = (
   query: string,
   clause: string,
   { nullify = true }: { nullify?: boolean } = {}
 ) => {
-  const appended = appendToESQLQuery(query, `| WHERE ${clause}`);
-  return !nullify || UNMAPPED_FIELDS_SET.test(appended) ? appended : `${MAP_SET_PREFIX}${appended}`;
+  const root = parseEsqlQuery(query);
+  const [limit] = root ? topLevelCommands(root, 'limit') : [];
+  const appended = limit
+    ? `${query.slice(0, commandLeadStart(query, limit))}\n| WHERE ${clause}${query.slice(
+        commandLeadStart(query, limit)
+      )}`
+    : appendToESQLQuery(query, `| WHERE ${clause}`);
+  const hasSet = root
+    ? mutate.commands.set.findBySettingName(root, 'unmapped_fields') !== undefined
+    : /\bSET\s+unmapped_fields\b/i.test(query);
+  return !nullify || hasSet ? appended : `${MAP_SET_PREFIX}${appended}`;
 };
 
 const isMapClause = (condition: string) =>
@@ -58,7 +85,14 @@ const isMapClause = (condition: string) =>
 /**
  * Take the map's own `SET unmapped_fields` prefix back off once no clause of the map
  * remains to need it, so clearing the last map filter restores the user's query exactly.
- * Only the exact text `appendMapClause` wrote is touched: a SET the user typed stays.
+ * Only the exact text `appendMapClause` wrote is touched: a SET the user typed with any
+ * other spacing stays.
+ *
+ * The prefix is recognised by its text, not by remembering that the map wrote it: the query
+ * is the only state that survives a reload or a shared link, and the map's own SET left
+ * behind after Clear would read as the map corrupting the query. The cost is the rare case
+ * of a user typing the byte-exact prefix and then clearing the last map clause, which
+ * retyping the SET recovers.
  */
 export const removeMapSetResidue = (query: string) =>
   query.startsWith(MAP_SET_PREFIX) && !extractFilters(query).some(isMapClause)

@@ -9,7 +9,9 @@
 
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import { getESQLResults } from '@kbn/esql-utils';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { FilterStateStore } from '@kbn/es-query';
+import { ESQLVariableType } from '@kbn/esql-types';
 import {
   FAILED_SPAN_CONDITION,
   LatencyMap,
@@ -25,10 +27,6 @@ import type { TracesLatencyMapViewProps } from './latency_map_view';
 jest.mock('@kbn/trace-latency-map', () => ({
   ...jest.requireActual('@kbn/trace-latency-map'),
   LatencyMap: jest.fn(() => null),
-}));
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: jest.fn(),
 }));
 
 const selection = {
@@ -50,15 +48,19 @@ const cell = {
 
 // Unresolved by default: the SET stays until field caps has answered, as in the view.
 const getFieldsForWildcard = jest.fn((): Promise<Array<{ name: string }>> => new Promise(() => {}));
+/** Discover's ES|QL search method, as the view calls it for the map and the example span. */
+const esql = jest.fn();
+const answerWith = (rawResponse: ESQLSearchResponse) =>
+  esql.mockResolvedValue({ rawResponse } as Awaited<ReturnType<typeof esql>>);
 const services = {
   uiSettings: { get: jest.fn().mockReturnValue('Browser') },
-  data: { search: { search: jest.fn() } },
+  data: { search: { esql } },
   dataViews: { getFieldsForWildcard },
 } as unknown as TracesLatencyMapViewProps['services'];
 
 const renderView = (overrides: Partial<TracesLatencyMapViewProps> = {}) => {
   const actions = { updateESQLQuery: jest.fn(), setExpandedDoc: jest.fn() };
-  render(
+  const view = render(
     <TracesLatencyMapView
       indexPattern="traces-apm*"
       filters={['service.name == "cart"']}
@@ -70,7 +72,24 @@ const renderView = (overrides: Partial<TracesLatencyMapViewProps> = {}) => {
     />
   );
   const mapProps = jest.mocked(LatencyMap).mock.lastCall?.[0] as LatencyMapProps;
-  return { actions, mapProps };
+  return {
+    actions,
+    mapProps,
+    /** Renders again, as the host would, with new props. */
+    rerender: (next: Partial<TracesLatencyMapViewProps>) =>
+      view.rerender(
+        <TracesLatencyMapView
+          indexPattern="traces-apm*"
+          filters={['service.name == "cart"']}
+          timeFrom="2026-10-26T10:00:00.000Z"
+          timeTo="2026-10-26T11:00:00.000Z"
+          services={services}
+          actions={actions}
+          {...overrides}
+          {...next}
+        />
+      ),
+  };
 };
 
 // The clauses name fields of every trace family, so the query is told to null the unmapped ones.
@@ -80,7 +99,7 @@ describe('TracesLatencyMapView', () => {
   beforeEach(() => {
     getFieldsForWildcard.mockImplementation(() => new Promise(() => {}));
     jest.mocked(LatencyMap).mockClear();
-    jest.mocked(getESQLResults).mockReset();
+    esql.mockReset();
   });
 
   it('reads the selection from the query and keeps it out of the map source', () => {
@@ -290,23 +309,18 @@ describe('TracesLatencyMapView', () => {
   });
 
   it('opens the newest span of a clicked cell in the document flyout', async () => {
-    jest.mocked(getESQLResults).mockResolvedValue({
-      response: {
-        columns: [{ name: 'service.name', type: 'keyword' }],
-        values: [['cart']],
-      },
-    } as Awaited<ReturnType<typeof getESQLResults>>);
+    answerWith({ columns: [{ name: 'service.name', type: 'keyword' }], values: [['cart']] });
     const { actions, mapProps } = renderView({
       filters: ['service.name == "cart"', selectionClause],
     });
     await act(() => mapProps.onCellClick!(cell));
-    const call = jest.mocked(getESQLResults).mock.lastCall?.[0];
+    const [params] = esql.mock.lastCall ?? [];
     // The cell bounds the span, under the query's own filters but not the selection:
     // cells outside a committed selection must stay clickable.
-    expect(call?.esqlQuery).toContain(selectionToEsqlCondition(cell));
-    expect(call?.esqlQuery).toContain('service.name == "cart"');
-    expect(call?.esqlQuery).not.toContain(selectionClause);
-    expect(call?.dropNullColumns).toBe(true);
+    expect(params?.query).toContain(selectionToEsqlCondition(cell));
+    expect(params?.query).toContain('service.name == "cart"');
+    expect(params?.query).not.toContain(selectionClause);
+    expect(params?.dropNullColumns).toBe(true);
     expect(actions.setExpandedDoc).toHaveBeenCalledWith(
       expect.objectContaining({ flattened: { 'service.name': 'cart' } }),
       // The flyout opens on the traces Overview, not the field table.
@@ -314,17 +328,17 @@ describe('TracesLatencyMapView', () => {
     );
   });
 
+  const spanWithIdentity: ESQLSearchResponse = {
+    columns: [
+      { name: 'service.name', type: 'keyword' },
+      { name: '_id', type: 'keyword' },
+      { name: '_index', type: 'keyword' },
+    ],
+    values: [['cart', 'span-1', '.ds-traces-apm-000001']],
+  };
+
   it('gives the opened span its real identity when the metadata is there', async () => {
-    jest.mocked(getESQLResults).mockResolvedValue({
-      response: {
-        columns: [
-          { name: 'service.name', type: 'keyword' },
-          { name: '_id', type: 'keyword' },
-          { name: '_index', type: 'keyword' },
-        ],
-        values: [['cart', 'span-1', '.ds-traces-apm-000001']],
-      },
-    } as Awaited<ReturnType<typeof getESQLResults>>);
+    answerWith(spanWithIdentity);
     const { actions, mapProps } = renderView();
     await act(() => mapProps.onCellClick!(cell));
     // The identity lets the traces document profile recognize the record, and the flyout
@@ -338,11 +352,132 @@ describe('TracesLatencyMapView', () => {
     );
   });
 
+  it('opens a span outside the selection without an identity to link to', async () => {
+    // A link restores its document through the query, selection and all: this span could
+    // never come back that way. Its fields stay, the index among them, for the profile.
+    answerWith(spanWithIdentity);
+    const { actions, mapProps } = renderView({
+      filters: ['service.name == "cart"', selectionClause],
+    });
+    await act(() => mapProps.onCellClick!(cell));
+    const [record] = actions.setExpandedDoc.mock.lastCall ?? [];
+    expect(record?.id).toBe(`traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`);
+    expect(record?.raw).toEqual({ 'service.name': 'cart' });
+    expect(record?.flattened).toEqual(
+      expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' })
+    );
+  });
+
+  it('keeps the identity of a span inside the selection', async () => {
+    answerWith(spanWithIdentity);
+    const inside = { ...cell, from: selection.from, to: '2026-10-26T10:01:00.000Z' };
+    const { actions, mapProps } = renderView({
+      filters: ['service.name == "cart"', selectionClause],
+    });
+    await act(() =>
+      mapProps.onCellClick!({ ...inside, minDuration: 1_000_000, maxDuration: 2_000_000 })
+    );
+    expect(actions.setExpandedDoc.mock.lastCall?.[0]?.id).toBe('.ds-traces-apm-000001::span-1::');
+  });
+
   it('leaves the view as it is when the cell has no span to open', async () => {
-    jest.mocked(getESQLResults).mockRejectedValue(new Error('shards failed'));
+    esql.mockRejectedValue(new Error('shards failed'));
     const { actions, mapProps } = renderView();
     await act(() => mapProps.onCellClick!(cell));
     expect(actions.setExpandedDoc).not.toHaveBeenCalled();
+    expect(jest.mocked(LatencyMap).mock.lastCall?.[0].activeCell).toBeUndefined();
+  });
+
+  it('keeps the clicked cell active while its document is open, and releases it when the flyout closes', async () => {
+    answerWith(spanWithIdentity);
+    const view = renderView();
+    await act(() => view.mapProps.onCellClick!(cell));
+    const lastMapProps = () => jest.mocked(LatencyMap).mock.lastCall?.[0] as LatencyMapProps;
+    expect(lastMapProps().activeCell).toEqual(cell);
+
+    // Discover shows the document: the cell stays.
+    view.rerender({ expandedDocId: '.ds-traces-apm-000001::span-1::' });
+    expect(lastMapProps().activeCell).toEqual(cell);
+    // The flyout closed.
+    view.rerender({ expandedDocId: undefined });
+    expect(lastMapProps().activeCell).toBeUndefined();
+  });
+
+  it('releases the active cell when another document opens, or the map changes', async () => {
+    answerWith(spanWithIdentity);
+    const view = renderView();
+    await act(() => view.mapProps.onCellClick!(cell));
+    view.rerender({ expandedDocId: '.ds-traces-apm-000001::span-1::' });
+    const lastMapProps = () => jest.mocked(LatencyMap).mock.lastCall?.[0] as LatencyMapProps;
+    // A row of the table replaced it.
+    view.rerender({ expandedDocId: 'another' });
+    expect(lastMapProps().activeCell).toBeUndefined();
+
+    await act(() => lastMapProps().onCellClick!(cell));
+    view.rerender({ expandedDocId: '.ds-traces-apm-000001::span-1::' });
+    expect(lastMapProps().activeCell).toEqual(cell);
+    // The cells are elsewhere now.
+    view.rerender({
+      expandedDocId: '.ds-traces-apm-000001::span-1::',
+      filters: ['service.name == "checkout"'],
+    });
+    expect(lastMapProps().activeCell).toBeUndefined();
+  });
+
+  it('runs the map queries as Discover runs its own: under its filters, variables and session', async () => {
+    answerWith({ columns: [], values: [] });
+    const searchContext = {
+      filters: [{ meta: { key: 'host.name' }, query: { match_all: {} } }],
+      esqlVariables: [{ key: 'svc', value: 'cart', type: ESQLVariableType.VALUES }],
+      timeRange: { from: '2026-10-26T10:00:00.000Z', to: '2026-10-26T11:00:00.000Z' },
+      searchSessionId: 'session-1',
+    };
+    const { mapProps } = renderView({ searchContext });
+    const controller = new AbortController();
+    await mapProps.runEsql('FROM traces-apm*', { signal: controller.signal });
+    expect(esql).toHaveBeenCalledWith(
+      {
+        query: 'FROM traces-apm*',
+        dropNullColumns: undefined,
+        kibanaQueryContext: {
+          kibanaFilters: searchContext.filters,
+          esqlVariables: searchContext.esqlVariables,
+          timeRange: searchContext.timeRange,
+        },
+      },
+      expect.objectContaining({ abortSignal: controller.signal, sessionId: 'session-1' })
+    );
+  });
+
+  it('reports a failed map query by its reason', async () => {
+    esql.mockRejectedValue(new Error('shards failed'));
+    const { mapProps } = renderView();
+    await expect(mapProps.runEsql('FROM traces-apm*')).rejects.toThrow('shards failed');
+  });
+
+  it('keys the map source by the search context, ignoring disabled filters and pinning', () => {
+    const filter = { meta: { key: 'host.name', negate: false }, query: { match_all: {} } };
+    const { mapProps: first } = renderView({ searchContext: { filters: [filter] } });
+    const { mapProps: pinned } = renderView({
+      searchContext: { filters: [{ ...filter, $state: { store: FilterStateStore.GLOBAL_STATE } }] },
+    });
+    const { mapProps: disabled } = renderView({
+      searchContext: { filters: [filter, { ...filter, meta: { ...filter.meta, disabled: true } }] },
+    });
+    const { mapProps: negated } = renderView({
+      searchContext: { filters: [{ ...filter, meta: { ...filter.meta, negate: true } }] },
+    });
+    const { mapProps: variables } = renderView({
+      searchContext: {
+        filters: [filter],
+        esqlVariables: [{ key: 'svc', value: 'cart', type: ESQLVariableType.VALUES }],
+      },
+    });
+    expect(first.source.contextKey).toBeDefined();
+    expect(pinned.source.contextKey).toBe(first.source.contextKey);
+    expect(disabled.source.contextKey).toBe(first.source.contextKey);
+    expect(negated.source.contextKey).not.toBe(first.source.contextKey);
+    expect(variables.source.contextKey).not.toBe(first.source.contextKey);
   });
 
   it('offers no cell click without a document flyout to open', () => {

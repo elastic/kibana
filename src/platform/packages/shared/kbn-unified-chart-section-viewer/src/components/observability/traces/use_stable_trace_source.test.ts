@@ -15,6 +15,8 @@ const input = {
   filters: ['service.name == "cart"'],
   timeFrom: '2026-10-26T10:00:00.000Z',
   timeTo: '2026-10-26T11:00:00.000Z',
+  // As the time picker holds it: relative, so every fetch resolves it anew.
+  relativeTimeRange: { from: 'now-1h', to: 'now' },
 };
 
 describe('useStableTraceSource', () => {
@@ -27,7 +29,7 @@ describe('useStableTraceSource', () => {
     });
   });
 
-  it('keeps the previous object when the range only drifted by seconds', () => {
+  it('keeps the previous object when a relative range only drifted by seconds', () => {
     const { result, rerender } = renderHook(useStableTraceSource, { initialProps: input });
     const first = result.current;
     rerender({
@@ -37,6 +39,35 @@ describe('useStableTraceSource', () => {
       timeTo: '2026-10-26T11:00:30.000Z',
     });
     expect(result.current).toBe(first);
+  });
+
+  it('follows an absolute range moved by seconds: only the user moves such a range', () => {
+    const absolute = {
+      ...input,
+      relativeTimeRange: { from: input.timeFrom, to: input.timeTo },
+    };
+    const { result, rerender } = renderHook(useStableTraceSource, { initialProps: absolute });
+    const first = result.current;
+    rerender({ ...absolute, timeTo: '2026-10-26T11:00:30.000Z' });
+    expect(result.current).not.toBe(first);
+    expect(result.current?.timeRange.to).toBe('2026-10-26T11:00:30.000Z');
+    // Rendered again with the same inputs: still the same source.
+    const second = result.current;
+    rerender({ ...absolute, timeTo: '2026-10-26T11:00:30.000Z' });
+    expect(result.current).toBe(second);
+  });
+
+  it('treats a changed context key as a new source, and carries it', () => {
+    const { result, rerender } = renderHook(useStableTraceSource, {
+      initialProps: { ...input, contextKey: 'a' },
+    });
+    const first = result.current;
+    expect(first?.contextKey).toBe('a');
+    rerender({ ...input, contextKey: 'a' });
+    expect(result.current).toBe(first);
+    rerender({ ...input, contextKey: 'b' });
+    expect(result.current).not.toBe(first);
+    expect(result.current?.contextKey).toBe('b');
   });
 
   it('returns a new source when the filters change', () => {

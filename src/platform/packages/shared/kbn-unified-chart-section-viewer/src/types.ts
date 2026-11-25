@@ -33,6 +33,11 @@ interface ChartSectionActions {
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
   /**
+   * The id of the document the host shows in its flyout, if any, so a chart that opened it
+   * (the latency map, from a cell) can tell when it closes.
+   */
+  expandedDocId?: string;
+  /**
    * The profile ID of the data source profile that renders this grid.
    * Used for execution context labels in APM monitoring.
    */

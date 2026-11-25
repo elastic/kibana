@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel } from '@elastic/eui';
-import { getESQLResults } from '@kbn/esql-utils';
-import { getTimeZoneFromSettings } from '@kbn/es-query';
+import { cleanFilter, getTimeZoneFromSettings, isFilterDisabled } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
@@ -40,17 +41,52 @@ import { useStableTraceSource } from './use_stable_trace_source';
 /** How far outside the time range a selection may sit before it counts as left behind. */
 const RANGE_CLEAR_GRACE_MS = 60_000;
 
+/** What Discover applies to its own query besides the text, and the map's queries run under. */
+export interface TracesSearchContext {
+  /** The filter pills, pinned and not. */
+  filters?: Filter[];
+  /** The ES|QL controls' values. */
+  esqlVariables?: ESQLControlVariable[];
+  /** Fills `?_tstart` and `?_tend` for a user filter that names them. */
+  timeRange?: TimeRange;
+  searchSessionId?: string;
+}
+
 export interface TracesLatencyMapViewProps {
   indexPattern: string;
   /** WHERE expressions of the Discover query. */
   filters: string[];
   timeFrom?: string;
   timeTo?: string;
+  /** The range as the time picker holds it, relative or absolute. */
+  relativeTimeRange?: TimeRange;
+  searchContext?: TracesSearchContext;
   services: UnifiedMetricsGridProps['services'];
   actions: UnifiedMetricsGridProps['actions'];
   /** Discover's documents query is running, as after a committed selection rewrites it. */
   isChartLoading?: boolean;
+  /** The id of the document open in Discover's flyout, if any. */
+  expandedDocId?: string;
 }
+
+/**
+ * The search context as a key: a change loads the map again. Disabled filters apply to
+ * nothing, and pinning changes nothing of what a filter selects, so neither reloads.
+ */
+const getContextKey = ({ filters = [], esqlVariables = [] }: TracesSearchContext) =>
+  JSON.stringify({
+    filters: filters
+      .filter((filter) => !isFilterDisabled(filter))
+      .map((filter) => [Boolean(filter.meta?.negate), cleanFilter(filter)]),
+    variables: esqlVariables,
+  });
+
+/** Whether the cell lies within the selection: its spans are among the selection's. */
+const isCellWithin = (cell: LatencyMapCell, selection: LatencyMapSelection) =>
+  Date.parse(cell.from) >= Date.parse(selection.from) &&
+  Date.parse(cell.to) <= Date.parse(selection.to) &&
+  cell.minDuration >= selection.minDuration &&
+  cell.maxDuration <= selection.maxDuration;
 
 /**
  * The latency map in the Discover traces chart section. The selection lives in the ES|QL
@@ -62,17 +98,27 @@ export function TracesLatencyMapView({
   filters,
   timeFrom,
   timeTo,
+  relativeTimeRange,
+  searchContext = {},
   services,
   actions,
   isChartLoading,
+  expandedDocId,
 }: TracesLatencyMapViewProps) {
   const { updateESQLQuery, setExpandedDoc } = actions;
   const selectionClause = filters.find(isSelectionCondition);
-  const selection = selectionClause ? parseSelectionCondition(selectionClause) : undefined;
+  // One object per clause: parsed anew every render, the map would redraw for nothing.
+  const selection = useMemo(
+    () => (selectionClause ? parseSelectionCondition(selectionClause) : undefined),
+    [selectionClause]
+  );
   const failedOnly = filters.some(isFailedOnlyCondition);
   // The focused operation lives in the query too, so a reload or a shared link restores it.
   const operationClause = filters.find(isOperationCondition);
-  const focusedOperation = operationClause ? parseOperationCondition(operationClause) : undefined;
+  const focusedOperation = useMemo(
+    () => (operationClause ? parseOperationCondition(operationClause) : undefined),
+    [operationClause]
+  );
 
   // The map reads the query without its own clauses: the whole range, failed and not, so it
   // can paint "failed only" from the counts it has and show what a selection would catch.
@@ -80,7 +126,39 @@ export function TracesLatencyMapView({
     () => filters.filter((filter) => filter !== selectionClause && !isFailedOnlyCondition(filter)),
     [filters, selectionClause]
   );
-  const source = useStableTraceSource({ indexPattern, filters: baseFilters, timeFrom, timeTo });
+  const { filters: kibanaFilters, esqlVariables, timeRange, searchSessionId } = searchContext;
+  const contextKey = useMemo(
+    () => getContextKey({ filters: kibanaFilters, esqlVariables }),
+    [kibanaFilters, esqlVariables]
+  );
+  const source = useStableTraceSource({
+    indexPattern,
+    filters: baseFilters,
+    timeFrom,
+    timeTo,
+    relativeTimeRange,
+    contextKey,
+  });
+
+  // Every query of the map runs as Discover's own does: under its filter pills and its ES|QL
+  // controls, in its search session. The time range fills `?_tstart`/`?_tend` for a filter
+  // that names them, and clips nothing: the map's queries carry their own absolute range.
+  // The session is not part of the source's key: a refresh does not reload the map.
+  const searchEsql = useCallback(
+    (
+      query: string,
+      { signal, dropNullColumns }: { signal?: AbortSignal; dropNullColumns?: boolean }
+    ) =>
+      services.data.search.esql(
+        { query, dropNullColumns, kibanaQueryContext: { kibanaFilters, esqlVariables, timeRange } },
+        {
+          abortSignal: signal,
+          sessionId: searchSessionId,
+          executionContext: { type: 'discover', name: 'traces_latency_map' },
+        }
+      ),
+    [services.data, kibanaFilters, esqlVariables, timeRange, searchSessionId]
+  );
 
   // 'Browser' resolves to the browser's own zone, which is also what the map defaults to.
   const timeZone = getTimeZoneFromSettings(services.uiSettings.get<string>('dateFormat:tz'));
@@ -113,17 +191,13 @@ export function TracesLatencyMapView({
   const runEsql: RunEsql = useCallback(
     async (query, options) => {
       try {
-        const { response } = await getESQLResults({
-          esqlQuery: query,
-          search: services.data.search.search,
-          signal: options?.signal,
-        });
-        return response;
+        const { rawResponse } = await searchEsql(query, { signal: options?.signal });
+        return rawResponse;
       } catch (error) {
         throw new Error(getSearchErrorReason(error));
       }
     },
-    [services.data]
+    [searchEsql]
   );
 
   const commitSelection = useCallback(
@@ -143,7 +217,7 @@ export function TracesLatencyMapView({
     [updateESQLQuery]
   );
 
-  // Focusing an operation narrows the query itself, like the selection and "Failed only":
+  // Focusing an operation narrows the query itself, like the selection and "Errors only":
   // the documents table follows, and the map's source keeps the clause - unlike the other
   // two, it narrows what the map shows, which is the point.
   const focusOperation = useCallback(
@@ -181,7 +255,7 @@ export function TracesLatencyMapView({
     if (selectionOutOfRange) commitSelection(undefined, undefined);
   }, [selectionOutOfRange, commitSelection]);
 
-  // The "Failed only" switch is a filter of the query itself, like the selection: the
+  // The "Errors only" switch is a filter of the query itself, like the selection: the
   // documents table follows it, it survives a reload and a shared link carries it.
   const changeFailedOnly = useCallback(
     (next: boolean) => {
@@ -204,6 +278,19 @@ export function TracesLatencyMapView({
   const clickAbortRef = useRef<AbortController>();
   useEffect(() => () => clickAbortRef.current?.abort(), []);
 
+  // The cell whose span the flyout shows, outlined on the map while it does: from the click
+  // (at once, while the span loads) until the flyout closes or shows another document, or
+  // the map's cells change under it.
+  const [activeCell, setActiveCell] = useState<LatencyMapCell>();
+  const openedDocIdRef = useRef<string>();
+  useEffect(() => {
+    if (expandedDocId !== openedDocIdRef.current) {
+      openedDocIdRef.current = undefined;
+      setActiveCell(undefined);
+    }
+  }, [expandedDocId]);
+  useEffect(() => setActiveCell(undefined), [source]);
+
   // Opens the newest span of a clicked cell in Discover's document flyout, leaving the
   // query and the selection as they are. Without _id and _index Discover shows the span as
   // given, rather than looking it up in the current query, which may not read that metadata.
@@ -213,44 +300,50 @@ export function TracesLatencyMapView({
       clickAbortRef.current?.abort();
       const controller = new AbortController();
       clickAbortRef.current = controller;
-      let response;
+      setActiveCell(cell);
+      let rawResponse;
       try {
-        ({ response } = await getESQLResults({
-          esqlQuery: buildExampleSpanQuery({ indexPattern, filters: baseFilters, cell }),
-          search: services.data.search.search,
-          signal: controller.signal,
+        ({ rawResponse } = await searchEsql(
+          buildExampleSpanQuery({ indexPattern, filters: baseFilters, cell }),
           // One row of wide traces indices: without this every mapped field comes back null.
-          dropNullColumns: true,
-        }));
+          { signal: controller.signal, dropNullColumns: true }
+        ));
       } catch {
         // Without the span there is nothing to open; the view stays as it is.
+        if (!controller.signal.aborted) setActiveCell(undefined);
         return;
       }
       if (controller.signal.aborted) return;
-      const { columns, values } = response;
+      const { columns, values } = rawResponse;
       const [firstRow] = values;
-      if (!firstRow) return;
+      if (!firstRow) {
+        setActiveCell(undefined);
+        return;
+      }
       const row = Object.fromEntries(columns.map((column, i) => [column.name, firstRow[i]]));
       // With its real identity (METADATA _id, _index) the traces document profile
       // recognizes the record and the flyout can write a URL reference; the fallback id
-      // keeps a span without metadata openable, shown as given.
-      const raw = row as DataTableRecord['raw'];
+      // keeps a span without metadata openable, shown as given. A reference is restored
+      // through the Discover query itself, selection and all: a span outside the selection
+      // could never come back that way, so it is opened without the identity to link to,
+      // its fields (the index among them, for the profile) as they are.
+      const restorable = !selection || isCellWithin(cell, selection);
+      const { _id, _index, ...withoutIdentity } = row;
+      const raw = (restorable ? row : withoutIdentity) as DataTableRecord['raw'];
+      const id =
+        restorable && typeof _id === 'string' && typeof _index === 'string'
+          ? getDocId(raw)
+          : `traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`;
+      openedDocIdRef.current = id;
       setExpandedDoc(
-        {
-          id:
-            typeof row._id === 'string' && typeof row._index === 'string'
-              ? getDocId(raw)
-              : `traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`,
-          raw,
-          flattened: row,
-        },
+        { id, raw, flattened: row },
         // The traces Overview front and center, not the field table. The id is the traces
         // document profile's (discover traces_document_profile doc_viewer accessor); as a
         // package this cannot import it, and an unknown id just falls back to the default.
         { initialTabId: 'doc_view_obs_traces_overview' }
       );
     },
-    [setExpandedDoc, indexPattern, baseFilters, services.data]
+    [setExpandedDoc, indexPattern, baseFilters, searchEsql, selection]
   );
 
   if (!source) return null;
@@ -275,6 +368,7 @@ export function TracesLatencyMapView({
         onFailedOnlyChange={changeFailedOnly}
         onSelectionCommit={commitSelection}
         onCellClick={setExpandedDoc ? openExampleSpan : undefined}
+        activeCell={activeCell}
         onFocusOperation={updateESQLQuery ? focusOperation : undefined}
         focusedOperation={focusedOperation}
         onClearOperation={updateESQLQuery ? clearOperation : undefined}

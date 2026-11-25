@@ -71,6 +71,7 @@ function TraceMetricsGrid({
   isChartLoading,
   breakdownField,
   onBreakdownFieldChange,
+  expandedDocId,
 }: UnifiedMetricsGridProps) {
   const { query, dataSource, columns } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
@@ -170,6 +171,24 @@ function TraceMetricsGrid({
     ]
   );
 
+  // What Discover applies to its own query besides the text: its filter pills, its ES|QL
+  // controls, its search session. The map's queries run under the same, so its counts and
+  // its example spans are the documents' - and they are not refetched for a new object.
+  const searchContext = useMemo(
+    () => ({
+      filters: fetchParams.filters,
+      esqlVariables: fetchParams.esqlVariables,
+      timeRange: fetchParams.timeRange,
+      searchSessionId: fetchParams.searchSessionId,
+    }),
+    [
+      fetchParams.filters,
+      fetchParams.esqlVariables,
+      fetchParams.timeRange,
+      fetchParams.searchSessionId,
+    ]
+  );
+
   // The source's index pattern, including remote cluster prefixes (`remote:traces-*`).
   const indexPattern = dataSource.title || undefined;
 
@@ -190,9 +209,12 @@ function TraceMetricsGrid({
           filters={filters}
           timeFrom={fetchParams.timeRange?.from}
           timeTo={fetchParams.timeRange?.to}
+          relativeTimeRange={fetchParams.relativeTimeRange}
+          searchContext={searchContext}
           services={services}
           actions={actions}
           isChartLoading={isChartLoading}
+          expandedDocId={expandedDocId}
         />
       </ChartsGrid>
     );

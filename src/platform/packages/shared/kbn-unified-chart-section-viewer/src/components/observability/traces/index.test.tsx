@@ -67,7 +67,12 @@ const renderGrid = async ({
           dataSource,
           columns: [],
           timeRange: { from: '2026-10-26T10:00:00.000Z', to: '2026-10-26T11:00:00.000Z' },
+          relativeTimeRange: { from: 'now-1h', to: 'now' },
+          filters: [{ meta: { key: 'host.name' }, query: { match_all: {} } }],
+          esqlVariables: [{ key: 'svc', value: 'cart', type: 'values' }],
+          searchSessionId: 'session-1',
         },
+        expandedDocId: 'doc-1',
         services: {},
         renderToggleActions: () => null,
         actions: { updateESQLQuery: jest.fn() },
@@ -121,6 +126,19 @@ describe('TraceMetricsGrid', () => {
 
     expect(jest.mocked(TraceMetricsProvider)).toHaveBeenCalled();
     expect(screen.getByTestId('unifiedBreakdownSelector')).toBeInTheDocument();
+  });
+
+  it('hands the search context of the fetch params and the open document to the map view', async () => {
+    await renderGrid({ latencyMapEnabled: true });
+    const props = jest.mocked(TracesLatencyMapView).mock.lastCall?.[0];
+    expect(props?.searchContext).toEqual({
+      filters: [{ meta: { key: 'host.name' }, query: { match_all: {} } }],
+      esqlVariables: [{ key: 'svc', value: 'cart', type: 'values' }],
+      timeRange: { from: '2026-10-26T10:00:00.000Z', to: '2026-10-26T11:00:00.000Z' },
+      searchSessionId: 'session-1',
+    });
+    expect(props?.relativeTimeRange).toEqual({ from: 'now-1h', to: 'now' });
+    expect(props?.expandedDocId).toBe('doc-1');
   });
 
   it('starts on the latency map when the query arrives with a selection', async () => {
