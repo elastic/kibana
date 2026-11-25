@@ -54,6 +54,7 @@ import {
 } from './index_fleet_endpoint_policy';
 import {
   METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
   metadataCurrentIndexPattern,
   POLICY_RESPONSE_INDEX,
 } from '../constants';
@@ -364,20 +365,20 @@ export const deleteIndexedEndpointHosts = async (
     return response;
   }
 
-  if (indexedData.hosts.length) {
-    const query = {
-      bool: {
-        filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
-      },
-    };
+  const hostsQuery = {
+    bool: {
+      filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
+    },
+  };
 
+  if (indexedData.hosts.length) {
     response.hosts = await esClient
       .deleteByQuery({
         index: indexedData.metadataIndex,
         wait_for_completion: true,
         // The rollback in `indexEndpointHostDocs` can run before the bulk created this data stream.
         ignore_unavailable: true,
-        query,
+        query: hostsQuery,
       })
       .catch(wrapErrorAndRejectPromise);
 
@@ -386,7 +387,7 @@ export const deleteIndexedEndpointHosts = async (
       .deleteByQuery({
         index: metadataCurrentIndexPattern,
         wait_for_completion: true,
-        query,
+        query: hostsQuery,
       })
       .catch(wrapErrorAndRejectPromise);
   }
@@ -415,6 +416,21 @@ export const deleteIndexedEndpointHosts = async (
   }
 
   mergeAndAppendArrays(response, await deleteIndexedFleetAgents(esClient, indexedData));
+
+  // The united transform does not prune its destination when source docs are deleted.
+  // Delete after the Fleet agents so the transform has no active agent to re-materialize.
+  if (indexedData.hosts.length) {
+    await esClient
+      .deleteByQuery({
+        index: METADATA_UNITED_INDEX,
+        wait_for_completion: true,
+        ignore_unavailable: true,
+        conflicts: 'proceed',
+        query: hostsQuery,
+      })
+      .catch(wrapErrorAndRejectPromise);
+  }
+
   mergeAndAppendArrays(response, await deleteIndexedEndpointAndFleetActions(esClient, indexedData));
   mergeAndAppendArrays(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
 

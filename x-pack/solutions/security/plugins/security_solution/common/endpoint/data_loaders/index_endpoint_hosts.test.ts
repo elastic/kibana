@@ -11,7 +11,12 @@ import type { KbnClient } from '@kbn/test';
 import type { CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../generate_data';
 import { EndpointError } from '../errors';
-import { indexEndpointHostDocs } from './index_endpoint_hosts';
+import { METADATA_UNITED_INDEX } from '../constants';
+import {
+  buildIndexHostsResponse,
+  deleteIndexedEndpointHosts,
+  indexEndpointHostDocs,
+} from './index_endpoint_hosts';
 import type { IndexedFleetEndpointPolicyResponse } from './index_fleet_endpoint_policy';
 import {
   deleteIndexedFleetEndpointPolicies,
@@ -179,5 +184,52 @@ describe('indexEndpointHostDocs', () => {
       expect.anything(),
       expect.objectContaining(createdPolicies)
     );
+  });
+});
+
+describe('deleteIndexedEndpointHosts', () => {
+  beforeEach(() => {
+    jest.mocked(indexFleetEndpointPolicy).mockResolvedValue(createdPolicies);
+    jest.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
+      integrationPolicies: undefined,
+      agentPolicies: undefined,
+    });
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('deletes the seeded hosts from the united metadata index after the Fleet agents', async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({ deleted: 0, version_conflicts: 0 });
+    const client = createEsClient({
+      bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+      deleteByQuery,
+    });
+    const indexedData = await runIndexEndpointHostDocs(client, createKbnClient());
+    const agentIds = indexedData.hosts.map((host) => host.agent.id);
+
+    await deleteIndexedEndpointHosts(client, createKbnClient(), indexedData);
+
+    expect(deleteByQuery).toHaveBeenCalledWith({
+      index: METADATA_UNITED_INDEX,
+      wait_for_completion: true,
+      ignore_unavailable: true,
+      conflicts: 'proceed',
+      query: { bool: { filter: [{ terms: { 'agent.id': agentIds } }] } },
+    });
+    const indices = deletedIndices(deleteByQuery);
+    expect(indices.indexOf(METADATA_UNITED_INDEX)).toBeGreaterThan(
+      indices.findIndex((index) => Array.isArray(index) && index.includes(fleetAgentsIndex))
+    );
+  });
+
+  it('does not delete from the united metadata index when no hosts were indexed', async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({ deleted: 0, version_conflicts: 0 });
+    const client = createEsClient({ bulk: jest.fn(), deleteByQuery });
+
+    await deleteIndexedEndpointHosts(client, createKbnClient(), buildIndexHostsResponse());
+
+    expect(deletedIndices(deleteByQuery)).not.toContain(METADATA_UNITED_INDEX);
   });
 });
