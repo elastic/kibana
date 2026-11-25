@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { KAFKA_KERBEROS_USERNAME_MAX_LENGTH } from '../../../../../../../common/constants';
+
 import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 export { validateSslPathInput, validateSslPathsCombo };
 
@@ -373,12 +375,25 @@ export function validateKafkaKerberosKeytab(value: string) {
 }
 
 export function validateKafkaKerberosUsername(value: string) {
-  return requiredText(
+  const required = requiredText(
     value,
     i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsRequired', {
       defaultMessage: 'Username is required',
     })
   );
+  if (required) {
+    return required;
+  }
+
+  // the form trims the value before it is sent, so the trimmed length is the one the API checks
+  if (value.trim().length > KAFKA_KERBEROS_USERNAME_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsTooLong', {
+        defaultMessage: 'Username must be {maxLength} characters or fewer',
+        values: { maxLength: KAFKA_KERBEROS_USERNAME_MAX_LENGTH },
+      }),
+    ];
+  }
 }
 
 export function validateKafkaKerberosPassword(value: string) {
