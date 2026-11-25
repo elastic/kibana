@@ -18,6 +18,7 @@ import { createDiscoverServicesMock, discoverServiceMock } from './services';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 import type {
+  DiscoverAppState,
   InternalStateStore,
   RuntimeStateManager,
   TabActionInjector,
@@ -46,7 +47,13 @@ import { createCustomizationService } from '../customizations/customization_serv
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
-import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  type DataView,
+  type DataViewListItem,
+  type DataViewSpec,
+} from '@kbn/data-views-plugin/common';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { isObject, omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
@@ -142,15 +149,21 @@ export function getDiscoverInternalStateMock({
     searchSessionManager,
   } = createInternalStateStoreMock(options);
 
+  // Mirrors the error thrown by the data views service for a deleted data view
+  const createDataViewNotFoundError = (id: string) =>
+    new SavedObjectNotFound({
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+      id,
+      customMessage: `Data view with ID "${id}" not found in provided persistedDataViews mock array (available: ${persistedDataViews
+        ?.map((dv) => dv.id)
+        .join(', ')})`,
+    });
+
   jest.spyOn(services.dataViews, 'get').mockImplementation((id) => {
     const dataView = persistedDataViews?.find((dv) => dv.id === id);
 
     if (!dataView) {
-      throw new Error(
-        `Data view with ID "${id}" not found in provided persistedDataViews mock array (available: ${persistedDataViews
-          ?.map((dv) => dv.id)
-          .join(', ')})`
-      );
+      throw createDataViewNotFoundError(id);
     }
 
     return Promise.resolve(dataView);
@@ -187,9 +200,7 @@ export function getDiscoverInternalStateMock({
       const dataView = persistedDataViews?.find((dv) => dv.id === fields.index);
 
       if (!dataView) {
-        throw new Error(
-          `Data view with ID "${fields.index}" not found in provided persistedDataViews mock array`
-        );
+        throw createDataViewNotFoundError(fields.index);
       }
 
       return createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView });
@@ -256,11 +267,13 @@ export function getDiscoverInternalStateMock({
         skipWaitForDataFetching,
         profileState,
         dataViewSpec,
+        defaultUrlState,
       }: {
         tabId: string;
         skipWaitForDataFetching?: boolean;
         profileState?: ProfileStateMap;
         dataViewSpec?: DataViewSpec;
+        defaultUrlState?: DiscoverAppState;
       }) => {
         await toolkit.switchToTab({ tabId });
 
@@ -300,7 +313,7 @@ export function getDiscoverInternalStateMock({
               dataStateContainer,
               dataViewSpec,
               esqlControls: undefined,
-              defaultUrlState: undefined,
+              defaultUrlState,
               profileState,
             },
           })

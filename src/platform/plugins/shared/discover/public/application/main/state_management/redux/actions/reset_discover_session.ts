@@ -13,7 +13,7 @@ import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
 import {
   fromSavedObjectTabToAppState,
-  fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToDataView,
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
 import {
@@ -69,9 +69,9 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
         let initialAppState: DiscoverAppState | undefined;
 
         if (tabDataStateContainer) {
-          const searchSource = await fromSavedObjectTabToSearchSource({ tab, services });
-          const query = searchSource.getField('query');
-          let dataView = searchSource.getField('index');
+          const { query } = tab.serializedSearchSource;
+          // A deleted saved data view leaves `dataView` undefined, so the tab keeps its current one
+          let { dataView } = await fromSavedObjectTabToDataView({ tab, services });
 
           if (isNonEmptyEsqlQuery(query)) {
             const previousSource = tabRuntimeState.currentDataSource$.getValue();

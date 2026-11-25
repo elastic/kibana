@@ -14,7 +14,6 @@ import React, { useMemo } from 'react';
 import type { SerializedError } from '@reduxjs/toolkit';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
-import { useInternalStateSelector } from '../../state_management/redux';
 import { DiscoverError } from '../../../../components/common/error_alert';
 
 export const InitializationError = ({
@@ -43,7 +42,6 @@ const RedirectWhenSavedObjectNotFound = ({ error }: { error: SavedObjectNotFound
     toastNotifications,
     urlTracker,
   } = useDiscoverServices();
-  const discoverSessionId = useInternalStateSelector((state) => state.persistedDiscoverSession?.id);
 
   useMount(() => {
     const redirect = redirectWhenMissing({
@@ -52,10 +50,6 @@ const RedirectWhenSavedObjectNotFound = ({ error }: { error: SavedObjectNotFound
       basePath,
       mapping: {
         search: '/',
-        'index-pattern': {
-          app: 'management',
-          path: `kibana/objects/search/${discoverSessionId}`,
-        },
       },
       toastNotifications,
       onBeforeRedirect() {

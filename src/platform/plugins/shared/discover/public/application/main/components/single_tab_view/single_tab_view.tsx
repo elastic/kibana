@@ -46,6 +46,7 @@ import { DiscoverMainApp } from './main_app';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
+import { MissingDataViewPrompt } from './missing_data_view_prompt';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
 
 export interface SingleTabViewProps {
@@ -145,6 +146,22 @@ export const SingleTabView = ({
 
   if (currentTabInitializationState.initializationStatus === TabInitializationStatus.Error) {
     return <InitializationError error={currentTabInitializationState.error} />;
+  }
+
+  if (
+    currentTabInitializationState.initializationStatus === TabInitializationStatus.MissingDataView
+  ) {
+    return (
+      <MissingDataViewPrompt
+        missingDataViewId={currentTabInitializationState.missingDataViewId}
+        adHocDataViews={adHocDataViews}
+        onSelectDataView={(dataViewId) => {
+          initializeTab.current({
+            defaultUrlState: { dataSource: createDataViewDataSource({ dataViewId }) },
+          });
+        }}
+      />
+    );
   }
 
   if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NoData) {

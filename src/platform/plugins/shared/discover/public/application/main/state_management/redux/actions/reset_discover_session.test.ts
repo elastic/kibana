@@ -20,7 +20,7 @@ import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_wi
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
-import { DataSourceType } from '../../../../../../common/data_sources';
+import { createDataViewDataSource, DataSourceType } from '../../../../../../common/data_sources';
 import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
@@ -263,6 +263,32 @@ describe('resetDiscoverSession', () => {
     expect(
       selectTabRuntimeState(runtimeStateManager, updatedDiscoverSession.tabs[0].id)
     ).toBeDefined();
+  });
+
+  it('should keep the replacement data view of a tab whose saved data view no longer exists', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    // The saved data view is not among the persisted ones, like a data view deleted after saving
+    const persistedTab = getPersistedTabMock({ dataView: dataViewWithNoTimefieldMock, services });
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({ id: 'test-id', tabs: [persistedTab] }),
+    });
+    await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+    await toolkit.initializeSingleTab({
+      tabId: persistedTab.id,
+      defaultUrlState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataViewWithTimefieldMock.id! }),
+      },
+    });
+
+    await toolkit.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+
+    const tabRuntimeState = selectTabRuntimeState(toolkit.runtimeStateManager, persistedTab.id);
+    expect(getTabDataView(tabRuntimeState)).toBe(dataViewWithTimefieldMock);
   });
 
   it('resolves an ES|QL tab with its control variables', async () => {

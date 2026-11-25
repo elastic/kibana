@@ -614,9 +614,20 @@ const internalStateSliceDef = createSlice({
 
     builder.addCase(initializeSingleTab.fulfilled, (state, action) =>
       withTab(state, action.meta.arg, (tab) => {
-        if (tab.initializationState.initializationStatus !== TabInitializationStatus.Disconnected) {
+        if (tab.initializationState.initializationStatus === TabInitializationStatus.Disconnected) {
+          return;
+        }
+
+        const { showNoDataPage, missingDataViewId } = action.payload;
+
+        if (missingDataViewId) {
           tab.initializationState = {
-            initializationStatus: action.payload.showNoDataPage
+            initializationStatus: TabInitializationStatus.MissingDataView,
+            missingDataViewId,
+          };
+        } else {
+          tab.initializationState = {
+            initializationStatus: showNoDataPage
               ? TabInitializationStatus.NoData
               : TabInitializationStatus.Complete,
           };
