@@ -36,6 +36,7 @@ import type { SLORoutesDependencies } from './routes/utils/types';
 import {
   slo,
   sloComposite,
+  sloGlobalSettings,
   sloSettings,
   SO_SLO_COMPOSITE_TYPE,
   SO_SLO_SETTINGS_TYPE,
@@ -161,6 +162,7 @@ export class SLOPlugin
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
     core.savedObjects.registerType(sloComposite);
+    core.savedObjects.registerType(sloGlobalSettings);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.isCpsEnabled);
     registerSloUsageCollector(

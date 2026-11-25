@@ -15,7 +15,6 @@ import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
-import { agentActions } from './support/agent_actions';
 import { usageTracker } from '../../../common/endpoint/data_loaders/usage_tracker';
 
 export const getCypressBaseConfig = (
@@ -90,8 +89,6 @@ export const getCypressBaseConfig = (
 
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
-
-          agentActions(on);
 
           responseActionTasks(on, config);
 

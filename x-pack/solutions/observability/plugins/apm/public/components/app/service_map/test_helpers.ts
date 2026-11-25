@@ -22,3 +22,9 @@ export const mkEdge = (id: string, source: string, target: string): ServiceMapEd
     },
     data: { isBidirectional: false },
   } as ServiceMapEdge);
+
+/** A call between two members of the same open group. */
+export const mkIntraGroupEdge = (id: string, source: string, target: string): ServiceMapEdge => {
+  const edge = mkEdge(id, source, target);
+  return { ...edge, data: { ...edge.data, isIntraGroup: true } } as ServiceMapEdge;
+};

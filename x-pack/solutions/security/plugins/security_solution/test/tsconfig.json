@@ -39,6 +39,7 @@
     "@kbn/alertzero-common",
     "@kbn/proposals-common",
     "@kbn/deeplinks-security",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/std"
   ]
 }
