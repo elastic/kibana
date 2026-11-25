@@ -33,6 +33,16 @@ export interface EsqlQueryExecution {
   run: (params: RunParams) => void;
 }
 
+interface EsqlQueryResults {
+  readonly columns: EsqlResultColumn[];
+  readonly rows: EsqlResultRow[];
+  readonly error: string | null;
+}
+
+// The latest results of each wizard, keyed by its job creator, so they are still shown when the
+// user comes back to the query step. Results are dropped with the job creator.
+const resultsCache = new WeakMap<object, EsqlQueryResults>();
+
 const formatCellValue = (value: unknown): string | null => {
   if (value === null || value === undefined) {
     return null;
@@ -40,16 +50,20 @@ const formatCellValue = (value: unknown): string | null => {
   return typeof value === 'object' ? JSON.stringify(value) : String(value);
 };
 
-/** Runs an ES|QL query over a time range on demand and keeps the latest results. */
-export const useEsqlQueryExecution = (): EsqlQueryExecution => {
+/**
+ * Runs an ES|QL query over a time range on demand and keeps the latest results. The results are
+ * kept for the given cache key, e.g. the wizard's job creator, and restored when the hook mounts.
+ */
+export const useEsqlQueryExecution = (cacheKey: object): EsqlQueryExecution => {
   const {
     services: { data },
   } = useMlKibana();
-  const [columns, setColumns] = useState<EsqlResultColumn[]>([]);
-  const [rows, setRows] = useState<EsqlResultRow[]>([]);
+  const [cached] = useState(() => resultsCache.get(cacheKey));
+  const [columns, setColumns] = useState<EsqlResultColumn[]>(cached?.columns ?? []);
+  const [rows, setRows] = useState<EsqlResultRow[]>(cached?.rows ?? []);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasRun, setHasRun] = useState(false);
+  const [error, setError] = useState<string | null>(cached?.error ?? null);
+  const [hasRun, setHasRun] = useState(cached !== undefined);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => () => abortControllerRef.current?.abort(), []);
@@ -69,6 +83,7 @@ export const useEsqlQueryExecution = (): EsqlQueryExecution => {
       setIsLoading(true);
       setError(null);
 
+      let results: EsqlQueryResults;
       try {
         const { rawResponse: response } = await data.search.esql(
           {
@@ -82,31 +97,32 @@ export const useEsqlQueryExecution = (): EsqlQueryExecution => {
         if (abortController.signal.aborted) {
           return;
         }
-        setColumns(
-          response.columns.map(({ name, type }) => ({
+        results = {
+          columns: response.columns.map(({ name, type }) => ({
             id: name,
             displayAsText: name,
             esType: type,
-          }))
-        );
-        setRows(
-          response.values.map((row) =>
+          })),
+          rows: response.values.map((row) =>
             Object.fromEntries(
               response.columns.map(({ name }, i) => [name, formatCellValue(row[i])])
             )
-          )
-        );
+          ),
+          error: null,
+        };
       } catch (e) {
         if (abortController.signal.aborted) {
           return;
         }
-        setColumns([]);
-        setRows([]);
-        setError(e instanceof Error ? e.message : String(e));
+        results = { columns: [], rows: [], error: e instanceof Error ? e.message : String(e) };
       }
+      resultsCache.set(cacheKey, results);
+      setColumns(results.columns);
+      setRows(results.rows);
+      setError(results.error);
       setIsLoading(false);
     },
-    [data.search]
+    [data.search, cacheKey]
   );
 
   return { columns, rows, isLoading, error, hasRun, run };

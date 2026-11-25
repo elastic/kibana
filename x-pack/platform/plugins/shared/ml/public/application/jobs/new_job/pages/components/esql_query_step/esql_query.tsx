@@ -207,7 +207,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
   const queryProblems = useMemo(() => validateEsqlQuery(query.esql), [query.esql]);
 
-  const execution = useEsqlQueryExecution();
+  const execution = useEsqlQueryExecution(jobCreator);
   const { run, isLoading } = execution;
 
   const runQueryForRange = useCallback(
@@ -366,6 +366,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         onTextLangQuerySubmit={runQuery}
         hideRunQueryButton
         editorIsInline
+        hasOutline
         isLoading={isLoading}
         dataTestSubj="mlJobWizardEsqlQueryEditor"
       />
