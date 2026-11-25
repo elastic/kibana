@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RegionOption } from '../../types';
+import type { RegionOption } from '../../../types';
 
 interface RegionOptionsProps {
   options: RegionOption[];

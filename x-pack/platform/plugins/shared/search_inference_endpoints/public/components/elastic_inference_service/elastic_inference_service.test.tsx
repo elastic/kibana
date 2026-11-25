@@ -8,14 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ElasticInferenceService } from './elastic_inference_service';
-import { useEisPageState } from '../hooks/use_eis_page_state';
+import { useEisPageState } from '../../hooks/use_eis_page_state';
 
-jest.mock('../hooks/use_breadcrumbs');
-jest.mock('../hooks/use_eis_page_state');
-jest.mock('./elastic_inference_service/header', () => ({
+jest.mock('../../hooks/use_breadcrumbs');
+jest.mock('../../hooks/use_eis_page_state');
+jest.mock('./header', () => ({
   ElasticInferenceServiceModelsHeader: () => <div data-test-subj="eisModelsHeaderMock" />,
 }));
-jest.mock('./elastic_inference_service/elastic_inference_service_models_page', () => ({
+jest.mock('./elastic_inference_service_models_page', () => ({
   ElasticInferenceServiceModelsPage: ({
     pageState,
     isCloudConnectPromoVisible,

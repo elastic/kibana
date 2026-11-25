@@ -18,8 +18,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EisInferenceEndpoint } from '../../../common/types';
-import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
+import type { EisInferenceEndpoint } from '../../../../common/types';
+import { isEndpointPreconfigured } from '../../../utils/preconfigured_endpoint_helper';
 
 export interface ModelEndpointRowProps {
   endpoint: EisInferenceEndpoint;

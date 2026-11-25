@@ -31,9 +31,9 @@ import {
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useInferenceEndpointMutation } from '@kbn/inference-endpoint-ui-common';
-import { CHAT_COMPLETION_TASK_TYPE } from '../../../common/constants';
-import type { ReasoningEffortLevel } from '../../../common/types';
-import { useKibana } from '../../hooks/use_kibana';
+import { CHAT_COMPLETION_TASK_TYPE } from '../../../../common/constants';
+import type { ReasoningEffortLevel } from '../../../../common/types';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ReasoningEffortSection } from './reasoning_effort_section';
 
 export interface TaskTypeOption {

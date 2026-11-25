@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReasoningEffortLevel } from '../../../common/types';
+import type { ReasoningEffortLevel } from '../../../../common/types';
 import { ReasoningEffortSelector } from './reasoning_effort_selector';
 
 export interface ReasoningEffortSectionProps {

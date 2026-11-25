@@ -14,7 +14,7 @@ import { AddEndpointModal } from './add_endpoint_modal';
 
 const mockMutate = jest.fn();
 
-jest.mock('../../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: {},

@@ -28,18 +28,18 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { SERVICE_PROVIDERS, TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
-import { docLinks } from '../../../common/doc_links';
+import { docLinks } from '../../../../common/doc_links';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
   isReasoningEffortLevel,
-} from '../../../common/type_guards';
-import { getModelId } from '../../utils/get_model_id';
+} from '../../../../common/type_guards';
+import { getModelId } from '../../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
-import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import { EventType } from '../../analytics/constants';
+import { useUsageTracker } from '../../../contexts/usage_tracker_context';
+import { EventType } from '../../../analytics/constants';
 import {
   getModelEOLDate,
   getModelReleaseDate,
@@ -47,14 +47,14 @@ import {
   getModelTitle,
   getProviderKeyForCreator,
   getRegionOptions,
-} from '../../utils/eis_utils';
-import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_unavailable_under_region_policy';
+} from '../../../utils/eis_utils';
+import { isModelUnavailableUnderRegionPolicy } from '../../../utils/is_unavailable_under_region_policy';
 import { ModelEolCallout } from './model_eol_callout';
 import { ModelInfoCallout } from './model_info_callout';
 import { ModelUnavailableCallout } from './model_unavailable_callout';
 import { RegionOptions } from './region_options';
-import type { EisInferenceEndpoint } from '../../../common/types';
-import { EisModelStatus } from '../../types';
+import type { EisInferenceEndpoint } from '../../../../common/types';
+import { EisModelStatus } from '../../../types';
 import { DataRetention } from './data_retention';
 
 export interface ModelDetailFlyoutProps {

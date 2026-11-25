@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { AppPluginStartDependencies } from './types';
-import { ElasticInferenceService } from './components/elastic_inference_service';
+import { ElasticInferenceService } from './components/elastic_inference_service/elastic_inference_service';
 import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
 import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
 

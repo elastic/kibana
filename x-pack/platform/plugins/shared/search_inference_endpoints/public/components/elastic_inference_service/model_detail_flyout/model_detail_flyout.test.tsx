@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import type { EisInferenceEndpoint } from '../../../common/types';
+import type { EisInferenceEndpoint } from '../../../../common/types';
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { ModelDetailFlyout } from './model_detail_flyout';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../hooks/use_kibana');
 jest.mock('@kbn/inference-endpoint-ui-common', () => ({
   ...jest.requireActual('@kbn/inference-endpoint-ui-common'),
   useInferenceEndpointMutation: () => ({ mutate: jest.fn(), isLoading: false }),
