@@ -17,6 +17,7 @@ import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
+import { EsqlRuleFormPage } from './esql_rule_form_page';
 import { RuleCreateWizardPage } from './rule_create_wizard';
 import { RuleDetailsPage } from './rule_details_page';
 import { RulesManagementPage } from './rules_management_page';
@@ -41,6 +42,7 @@ import { RuleEditPage } from './rule_edit_page';
 import { WatchlistEditFlyout } from './watchlist_edit_flyout';
 import { OnboardingPage } from './onboarding_page';
 
+export type { EsqlRuleFormPage } from './esql_rule_form_page';
 export type { RuleCreateWizardPage } from './rule_create_wizard';
 export type { RuleDetailsPage } from './rule_details_page';
 export type { RulesManagementPage } from './rules_management_page';
@@ -61,6 +63,8 @@ export interface SecurityPageObjects extends PageObjects {
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
   /** Custom query rule create wizard — Define → About → Schedule → Actions. */
   ruleCreateWizard: RuleCreateWizardPage;
+  /** ES|QL rule creation — ES|QL query bar of the Define step and the ES|QL fields of the About step. */
+  esqlRuleForm: EsqlRuleFormPage;
   /** Detection rules management page: rules table, row actions and bulk actions. */
   rulesManagementPage: RulesManagementPage;
   /** Rule details page: about/definition/schedule sections, execution status and alerts tab. */
@@ -127,6 +131,7 @@ export function extendPageObjects(
       config
     ),
     ruleCreateWizard: createLazyPageObject(RuleCreateWizardPage, page),
+    esqlRuleForm: createLazyPageObject(EsqlRuleFormPage, page),
     rulesManagementPage: createLazyPageObject(RulesManagementPage, page),
     ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),

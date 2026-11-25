@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -65,7 +64,7 @@ describe.each([
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { search: { search: jest.fn() } } },
+      services: { data: { search: { esql: jest.fn() } } },
     });
     (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
       data: { indexName: '.entities-v1' },
@@ -178,14 +177,14 @@ describe.each([
   });
 
   it('runs its query in the local project only', async () => {
-    const search = jest.fn().mockReturnValue(of({ rawResponse: { columns: [], values: [] } }));
-    (useKibana as jest.Mock).mockReturnValue({ services: { data: { search: { search } } } });
+    const search = jest.fn().mockResolvedValue({ rawResponse: { columns: [], values: [] } });
+    (useKibana as jest.Mock).mockReturnValue({ services: { data: { search: { esql: search } } } });
     renderHook(() => useCount({ spaceId: 'default' }));
     const [key, queryFn] = mockUseQuery.mock.calls[mockUseQuery.mock.calls.length - 1];
     await queryFn({ signal: undefined });
     expect(search).toHaveBeenCalledWith(
-      { params: { query: key[1] } },
-      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+      { query: key[1], projectRouting: '_alias:_origin' },
+      expect.anything()
     );
   });
 
@@ -228,7 +227,7 @@ describe('useEntitiesWithAnomaliesCount', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { search: { search: jest.fn() } } },
+      services: { data: { search: { esql: jest.fn() } } },
     });
     (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
       data: { indexName: '.entities-v1' },
@@ -310,7 +309,7 @@ describe('useAlertBasedTiles in a space with no alerts index', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { search: { search: jest.fn() } } },
+      services: { data: { search: { esql: jest.fn() } } },
     });
     (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
       data: { indexName: '.entities-v1' },
@@ -347,7 +346,7 @@ describe.each([
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { search: { search: jest.fn() } } },
+      services: { data: { search: { esql: jest.fn() } } },
     });
     mockUseQuery.mockReturnValue({ data: undefined, isFetching: false, error: undefined });
   });
