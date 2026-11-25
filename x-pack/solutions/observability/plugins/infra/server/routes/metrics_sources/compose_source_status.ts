@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { MetricsSourceStatus } from '../../../common/metrics_sources';
@@ -24,15 +25,6 @@ export const defaultSourceStatus: MetricsSourceStatus = {
  * interpolated into a single-line log message.
  */
 const toSingleLine = (value: string): string => value.replace(/[\r\n]+/g, ' ');
-
-/**
- * The Elasticsearch client throws `RequestAbortedError` both when the caller actually cancels the
- * request and when `elasticsearch.maxResponseSize` / `maxCompressedResponseSize` is exceeded. Only
- * the first is a cancelled check; the response-size overrun is a real failure the caller is still
- * waiting on, so it carries a distinctive message we must not downgrade to debug.
- */
-const isResponseSizeOverrun = (err: errors.RequestAbortedError): boolean =>
-  err.message.includes('is bigger than the maximum allowed');
 
 interface ComposeSourceStatusParams {
   logger: Logger;
@@ -72,7 +64,7 @@ export const composeSourceStatus = async ({
       return defaultSourceStatus;
     }
 
-    if (err instanceof errors.RequestAbortedError && !isResponseSizeOverrun(err)) {
+    if (err instanceof errors.RequestAbortedError && !isMaximumResponseSizeExceededError(err)) {
       // The client disconnected (for example the user navigated away) and the adapter aborted
       // the probe. That is a cancelled check, not an infrastructure failure, so it must not be
       // logged at error level. A response-size overrun also surfaces as a RequestAbortedError but
