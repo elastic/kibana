@@ -17,41 +17,41 @@ import {
 } from '../../../common/constants';
 
 describe('useLensExtraActions', () => {
+  const createSaveToDashboardAction = jest.fn((options?: { displayName?: string }) => ({
+    id: 'lens-save-to-dashboard',
+    order: 16,
+    type: 'lens-save',
+    getDisplayName: () => options?.displayName ?? '',
+    getIconType: () => 'save',
+    isCompatible: async () => true,
+    execute: jest.fn(),
+  }));
+  const lensActions = { createSaveToDashboardAction } as never;
+
   it('should return an empty array when no config is provided', () => {
     const { result } = renderHook(() => useLensExtraActions({}));
     expect(result.current).toEqual([]);
   });
 
   describe('copyToDashboard', () => {
-    it('should return copyToDashboard action when config is provided', () => {
-      const onClick = jest.fn();
-      const { result } = renderHook(() => useLensExtraActions({ copyToDashboard: { onClick } }));
+    beforeEach(() => createSaveToDashboardAction.mockClear());
+
+    it('should return the Lens save action as the copyToDashboard action', () => {
+      const { result } = renderHook(() => useLensExtraActions({ copyToDashboard: lensActions }));
 
       expect(result.current).toHaveLength(1);
-      const action = result.current[0];
-
-      expect(action).toEqual(
-        expect.objectContaining({
-          id: ACTION_COPY_TO_DASHBOARD,
-          order: 1,
-          type: 'actionButton',
-        })
+      expect(result.current[0]).toEqual(
+        expect.objectContaining({ id: ACTION_COPY_TO_DASHBOARD, order: 1 })
       );
-
-      expect(action.getIconType({} as ActionExecutionContext)).toBe('addToDashboard');
+      expect(createSaveToDashboardAction).toHaveBeenCalledWith({
+        displayName: 'Copy to dashboard',
+      });
     });
 
-    it('should call onClick when execute is invoked', async () => {
-      const onClick = jest.fn();
-      const { result } = renderHook(() => useLensExtraActions({ copyToDashboard: { onClick } }));
+    it('should not return the action when it is not enabled', () => {
+      const { result } = renderHook(() => useLensExtraActions({}));
 
-      const action = result.current[0];
-
-      await act(async () => {
-        await action.execute({} as ActionExecutionContext);
-      });
-
-      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(result.current).toEqual([]);
     });
   });
 
@@ -139,12 +139,11 @@ describe('useLensExtraActions', () => {
 
   describe('multiple actions', () => {
     it('should return all actions when all configs are provided', () => {
-      const copyOnClick = jest.fn();
       const viewOnClick = jest.fn();
       const exploreOnClick = jest.fn();
       const { result } = renderHook(() =>
         useLensExtraActions({
-          copyToDashboard: { onClick: copyOnClick },
+          copyToDashboard: lensActions,
           viewDetails: { onClick: viewOnClick },
           exploreInDiscoverTab: { onClick: exploreOnClick },
         })

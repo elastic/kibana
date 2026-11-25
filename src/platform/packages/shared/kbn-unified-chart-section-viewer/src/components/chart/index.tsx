@@ -9,7 +9,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback, useRef } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useLensProps, type ChartLensConfig } from './hooks/use_lens_props';
@@ -67,9 +66,6 @@ export const Chart = ({
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
 
-  const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
-  const { SaveModalComponent } = services.lens;
-
   const lensProps = useLensProps({
     chartId: id,
     lensConfig,
@@ -105,32 +101,21 @@ export const Chart = ({
       ref={chartRef}
     >
       {lensProps && !isLoading ? (
-        <>
-          <LensWrapperMemo
-            lensProps={lensProps}
-            services={services}
-            onBrushEnd={onBrushEnd}
-            onFilter={handleFilter}
-            abortController={fetchParams.abortController}
-            onViewDetails={onViewDetails}
-            onCopyToDashboard={toggleSaveModalVisible}
-            onExploreInDiscoverTab={onExploreInDiscoverTab}
-            syncCursor={syncCursor}
-            titleHighlight={titleHighlight}
-            syncTooltips={syncTooltips}
-            extraDisabledActions={extraDisabledActions}
-            quickActionIds={quickActionIds}
-          />
-          {isSaveModalVisible && (
-            <SaveModalComponent
-              initialInput={{ attributes: lensProps.attributes }}
-              onClose={toggleSaveModalVisible}
-              // Disables saving ESQL charts to the library.
-              // it will only copy it to a dashboard
-              isSaveable={false}
-            />
-          )}
-        </>
+        <LensWrapperMemo
+          lensProps={lensProps}
+          services={services}
+          onBrushEnd={onBrushEnd}
+          onFilter={handleFilter}
+          abortController={fetchParams.abortController}
+          onViewDetails={onViewDetails}
+          canCopyToDashboard
+          onExploreInDiscoverTab={onExploreInDiscoverTab}
+          syncCursor={syncCursor}
+          titleHighlight={titleHighlight}
+          syncTooltips={syncTooltips}
+          extraDisabledActions={extraDisabledActions}
+          quickActionIds={quickActionIds}
+        />
       ) : (
         <EuiFlexGroup
           style={{ height: '100%' }}

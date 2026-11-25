@@ -332,7 +332,7 @@ describe('LensWrapper', () => {
 
     it('does not auto-promote actions to the visible row just because a handler is wired', () => {
       const view = renderAndCaptureViewList({
-        onCopyToDashboard: jest.fn(),
+        canCopyToDashboard: true,
         onViewDetails: jest.fn(),
       });
 

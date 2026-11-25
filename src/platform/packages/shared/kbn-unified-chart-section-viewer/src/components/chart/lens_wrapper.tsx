@@ -27,7 +27,7 @@ export type LensWrapperProps = {
   lensProps: LensProps;
   titleHighlight?: string | string[];
   onViewDetails?: () => void;
-  onCopyToDashboard?: () => void;
+  canCopyToDashboard?: boolean;
   onExploreInDiscoverTab?: UnifiedMetricsGridProps['actions']['openInNewTab'];
   syncTooltips?: boolean;
   syncCursor?: boolean;
@@ -52,7 +52,7 @@ export function LensWrapper({
   abortController,
   titleHighlight,
   onViewDetails,
-  onCopyToDashboard,
+  canCopyToDashboard,
   onExploreInDiscoverTab,
   syncTooltips,
   syncCursor,
@@ -129,7 +129,7 @@ export function LensWrapper({
   );
 
   const extraActions = useLensExtraActions({
-    copyToDashboard: onCopyToDashboard ? { onClick: onCopyToDashboard } : undefined,
+    copyToDashboard: canCopyToDashboard ? services.lens.actions : undefined,
     viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
     exploreInDiscoverTab: onExploreInDiscoverTab
       ? { onClick: handleExploreInDiscoverTab }
