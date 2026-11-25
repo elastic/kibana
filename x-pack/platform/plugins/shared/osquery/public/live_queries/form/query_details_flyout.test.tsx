@@ -72,6 +72,10 @@ describe('QueryDetailsFlyout', () => {
 
     expectDetailsShown();
     expect(getFlyoutManagerStore().getState().flyouts).toHaveLength(0);
+    // size m, not the narrower nested size s: EUI encodes the size in the emotion class name
+    const { className } = screen.getByTestId('osquery-query-details-flyout');
+    expect(className).toMatch(/-m-/);
+    expect(className).not.toMatch(/-s-/);
   });
 
   it('close button calls onClose once', () => {

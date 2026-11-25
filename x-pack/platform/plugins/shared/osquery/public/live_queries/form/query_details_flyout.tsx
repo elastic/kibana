@@ -58,12 +58,7 @@ const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h2 id={titleId}>
-              <FormattedMessage
-                id="xpack.osquery.liveQueryActions.details.title"
-                defaultMessage="Query Details"
-              />
-            </h2>
+            <h2 id={titleId}>{QUERY_DETAILS_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

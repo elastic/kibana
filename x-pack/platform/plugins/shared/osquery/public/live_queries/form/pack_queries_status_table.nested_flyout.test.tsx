@@ -21,14 +21,6 @@ jest.mock('@elastic/eui', () =>
   )
 );
 jest.mock('../../common/hooks/use_error_toast');
-jest.mock('../../results/export_filters_context', () => {
-  const actual = jest.requireActual('../../results/export_filters_context');
-
-  return {
-    ...actual,
-    useExportFiltersContext: jest.fn(actual.useExportFiltersContext),
-  };
-});
 jest.mock('../../routes/saved_queries/edit/tabs', () => ({
   ResultTabs: () => <div data-test-subj="mock-result-tabs" />,
 }));
@@ -103,6 +95,15 @@ describe('PackQueriesStatusTable inside a managed flyout', () => {
     );
     expect(setErrorToast).not.toHaveBeenCalled();
     expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+    fireEvent.click(within(details).getByTestId('euiFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('osquery-query-details-flyout')).not.toBeInTheDocument();
+    expect(screen.getByRole('table')).toBe(table);
+    expect(screen.getByRole('row', { name: /q1/ })).toBe(row);
+    const { sessions, flyouts } = getFlyoutManagerStore().getState();
+    expect(sessions).toEqual([expect.objectContaining({ childFlyoutId: null })]);
+    expect(flyouts).toEqual([expect.objectContaining({ level: 'main' })]);
   });
 
   it('contains an EUI size validation failure without leaving a child flyout registered', () => {

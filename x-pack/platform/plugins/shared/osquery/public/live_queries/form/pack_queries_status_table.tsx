@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiErrorBoundary,
   EuiText,
   formatDate,
 } from '@elastic/eui';
@@ -23,7 +24,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryDetailsFlyout } from './query_details_flyout';
-import { QueryDetailsFlyoutErrorBoundary } from './query_details_flyout_error_boundary';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
@@ -662,9 +662,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       />
       {queryDetailsFlyoutOpen ? (
-        <QueryDetailsFlyoutErrorBoundary onError={handleQueryFlyoutError}>
+        <EuiErrorBoundary onError={handleQueryFlyoutError}>
           <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
-        </QueryDetailsFlyoutErrorBoundary>
+        </EuiErrorBoundary>
       ) : null}
     </>
   );
