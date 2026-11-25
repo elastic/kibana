@@ -120,7 +120,7 @@ export interface ProposalUpdateCaller {
   request: KibanaRequest;
   /** The release mark a gateless approval started this resolve run for, as its `releasedAt` input. */
   releasedAt?: string;
-  /** How the run was started, as the engine recorded it. No route lets a user choose it. */
+  /** How the run was started, as the step's context reports it. A step test can override it. */
   triggeredBy?: string;
 }
 
@@ -230,9 +230,11 @@ const isReleasedGatelessAction = (
 /**
  * Whether `caller` is the resolve run a gateless approval started. The run can
  * write before the approval records it, so until then it is known by how it was
- * started — by this plugin, which no route can claim to be — and by the mark it
- * was started for: a run of an earlier, lifted approval carries another. Its
- * first write records it (see `update`), so the window ends there.
+ * started (by this plugin) and by the mark it was started for: a run of an
+ * earlier, lifted approval carries another. Its first write records it (see
+ * `update`), so the window ends there. Every field comes from the step's
+ * context, which a step test can override, so this refuses ordinary runs, not
+ * a deliberate impersonation (see the README's "Gateless proposals may carry an action").
  */
 const isOwningResolveRun = (
   proposal: Pick<Proposal, 'actionWorkflowId' | 'gateReleasedAt' | 'resolveExecutionId'>,

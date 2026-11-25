@@ -65,6 +65,8 @@ export class WorkflowRunFixture {
   public readonly taskManagerMock = TaskManagerMock.create();
   public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
   public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);
+  /** The execution the last run started, which the resume helpers continue. */
+  private executionId = 'fake_workflow_execution_id';
 
   constructor({ spaceId = DEFAULT_FIXTURE_SPACE_ID }: WorkflowRunFixtureOptions = {}) {
     this.spaceId = spaceId;
@@ -123,6 +125,7 @@ export class WorkflowRunFixture {
   }) {
     // clean up before running workflow
     this.cleanup();
+    this.executionId = executionId;
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: executionId,
@@ -176,8 +179,8 @@ export class WorkflowRunFixture {
   public async driveToTerminal(maxGuard = 10): Promise<void> {
     let guard = 0;
     while (
-      this.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
-        ?.status === ExecutionStatus.WAITING &&
+      this.workflowExecutionRepositoryMock.workflowExecutions.get(this.executionId)?.status ===
+        ExecutionStatus.WAITING &&
       guard < maxGuard
     ) {
       const resumeTask = this.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
@@ -192,7 +195,7 @@ export class WorkflowRunFixture {
 
   public resumeWorkflow() {
     return resumeWorkflow({
-      workflowRunId: 'fake_workflow_execution_id',
+      workflowRunId: this.executionId,
       spaceId: this.spaceId,
       signal: this.taskAbortController.signal,
       logger: this.loggerMock,
@@ -217,6 +220,7 @@ export class WorkflowRunFixture {
   }) {
     // clean up before running workflow
     this.cleanup();
+    this.executionId = 'fake_workflow_execution_id';
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',

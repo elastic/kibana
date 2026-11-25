@@ -10,8 +10,9 @@ import type { WorkflowContext } from '@kbn/workflows';
 import type { ProposalUpdateCaller } from '../services/proposals_service';
 
 /**
- * The run a step writes from. `releasedAt` is read from the run's own inputs
- * rather than the step's, so a step cannot claim a mark its run was not started with.
+ * The run a step writes from, as the step's context reports it. `releasedAt` is
+ * read from the run's own inputs rather than the step's, so a step cannot claim a
+ * mark its run was not started with. A step test can override every field here.
  */
 export const getWorkflowCaller = (
   { workflow, execution, inputs }: WorkflowContext,
