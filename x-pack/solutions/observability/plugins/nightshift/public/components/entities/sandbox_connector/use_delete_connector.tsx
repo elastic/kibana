@@ -67,6 +67,10 @@ export function useDeleteConnector(ebtElement: string): {
         action: NIGHTSHIFT_EBT_ACTIONS.DELETE_CONNECTOR,
         element: ebtElement,
       }}
+      cancelEbt={{
+        action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_DELETE_CONNECTOR,
+        element: ebtElement,
+      }}
       buttonColor="danger"
       data-test-subj="nightshiftDeleteConnectorConfirm"
     >

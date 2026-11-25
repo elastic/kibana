@@ -543,6 +543,10 @@ function WorkspaceMenu({ canEdit, isMutating, workspaceName, onDisconnect }: Wor
             action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DISCONNECT_SLACK,
             element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
           }}
+          cancelEbt={{
+            action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_DISCONNECT_SLACK,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          }}
           buttonColor="danger"
           data-test-subj="streamsSlackAppDisconnectConfirmModal"
         >

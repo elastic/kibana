@@ -372,6 +372,10 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
             action: NIGHTSHIFT_EBT_ACTIONS.DISCONNECT_SLACK_CHANNEL,
             element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
           }}
+          cancelEbt={{
+            action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_DISCONNECT_SLACK_CHANNEL,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          }}
           buttonColor="danger"
           data-test-subj="streamsSlackAppUnbindConfirmModal"
         >

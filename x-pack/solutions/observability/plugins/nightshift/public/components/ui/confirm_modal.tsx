@@ -24,6 +24,7 @@ interface ConfirmModalProps {
   cancelButtonText: string;
   confirmButtonText: string;
   confirmEbt: EbtClickAttrs;
+  cancelEbt: EbtClickAttrs;
   buttonColor?: EuiButtonProps['color'];
   onCancel: () => void;
   onConfirm: () => void;
@@ -36,6 +37,7 @@ export function ConfirmModal({
   cancelButtonText,
   confirmButtonText,
   confirmEbt,
+  cancelEbt,
   buttonColor = 'primary',
   onCancel,
   onConfirm,
@@ -59,7 +61,11 @@ export function ConfirmModal({
       </EuiModalHeader>
       <EuiModalBody id={bodyId}>{children}</EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="confirmModalCancelButton">
+        <EuiButtonEmpty
+          onClick={onCancel}
+          data-test-subj="confirmModalCancelButton"
+          {...getEbtProps(cancelEbt)}
+        >
           {cancelButtonText}
         </EuiButtonEmpty>
         <EuiButton
