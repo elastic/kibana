@@ -3202,6 +3202,28 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
+      it('should not accept an update that replaces the keytab settings without a username', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        // leaving the whole Kerberos block out is allowed, but replacing it with incomplete settings is not
+        await updateOutput(
+          body.item.id,
+          {
+            type: 'kafka',
+            auth_type: 'kerberos',
+            kerberos: { ...keytabKerberos, keytab: '/etc/other.keytab', username: undefined },
+          },
+          400
+        );
+
+        // the previous settings, and the principal, are still stored
+        const { body: stored } = await supertest
+          .get(`/api/fleet/outputs/${body.item.id}`)
+          .expect(200);
+        expect(stored.item.kerberos).to.eql(keytabKerberos);
+        expect(stored.item.kerberos.username).to.eql('kafka');
+      });
+
       it('should keep the settings and the secret when an update does not name the auth type', async () => {
         const body = await createOutput(
           kerberosOutput({
