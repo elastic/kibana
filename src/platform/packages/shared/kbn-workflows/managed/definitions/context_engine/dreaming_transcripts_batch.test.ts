@@ -8,8 +8,8 @@
  */
 
 import { parse } from 'yaml';
-import type { ContextEngineTraceDreamingBatchWorkflowTemplateValues } from '.';
-import { CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW } from '.';
+import type { ContextEngineTranscriptDreamingBatchWorkflowTemplateValues } from '.';
+import { CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { convertToWorkflowGraph } from '../../../graph';
 
@@ -28,7 +28,7 @@ const findStep = (steps: Step[], name: string): Step => {
   return step;
 };
 
-const values: ContextEngineTraceDreamingBatchWorkflowTemplateValues = {
+const values: ContextEngineTranscriptDreamingBatchWorkflowTemplateValues = {
   aiIndexId: 'support-cases',
   instanceKey: 'support-cases-0123456789abcdef',
   memoriesIndex: 'ai-index-idx-support-cases',
@@ -40,9 +40,9 @@ const values: ContextEngineTraceDreamingBatchWorkflowTemplateValues = {
   relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
 };
 
-const render = () => parse(CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW.yamlTemplate(values));
+const render = () => parse(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW.yamlTemplate(values));
 
-describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
+describe('CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW', () => {
   it('builds as an execution graph, as the workflow engine runs it', () => {
     expect(() => convertToWorkflowGraph(render())).not.toThrow();
   });
@@ -50,7 +50,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
   it('writes the dreaming config into the consts exactly as given, and has no schedule of its own', () => {
     const workflow = render();
 
-    expect(workflow.name).toBe('Trace dreaming batch: support-cases');
+    expect(workflow.name).toBe('Transcript dreaming batch: support-cases');
     expect(workflow.consts).toEqual({
       ai_index_id: 'support-cases',
       connector_id: 'my-connector',
@@ -81,7 +81,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
       'apply_changes',
       'batch_output',
     ]);
-    expect(CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW.yamlTemplate(values)).not.toMatch(
+    expect(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW.yamlTemplate(values)).not.toMatch(
       /relationship/i
     );
     expect(findStep(steps, 'apply_changes').with).toEqual({
@@ -124,10 +124,10 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     const prompt = String(findStep(render().steps, 'extract').with?.prompt);
     const round = {
       id: 'trace:51fff8a2',
-      type: 'trace.round',
+      type: 'session.turn',
       title: 'Agent conversation with Elastic AI Agent, round ending 2026-11-11T13:12:03.357Z',
       content: 'User: I always want vegetarian meals.\nAssistant: Noted.',
-      attributes: { 'trace.conversation_id': 'conv-1' },
+      attributes: { 'session.id': 'conv-1' },
       permissions: { kibana: { privileges: [{ space: 'default' }] } },
     };
 
@@ -139,8 +139,8 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     expect(rendered).toContain(
       'You extract long-term memory from the conversations users had with agents'
     );
-    expect(rendered).toContain('whole conversations at a time');
-    expect(rendered).toContain('attributes["trace.conversation_id"]');
+    expect(rendered).toContain('whole sessions at a time');
+    expect(rendered).toContain('attributes["session.id"]');
     expect(rendered).toContain('A tool result is evidence');
     expect(rendered).toContain(JSON.stringify(round));
     expect(rendered).toContain('- preference: Something a customer likes.');
