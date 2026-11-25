@@ -121,6 +121,12 @@ describe('elasticsearch.search params schema', () => {
     expect(result.data).toEqual(params);
   });
 
+  it('rejects span_term with neither value nor its term alias', () => {
+    const result = paramsSchema.safeParse({ index: 'logs', query: { span_term: { message: {} } } });
+
+    expect(result.success).toBe(false);
+  });
+
   it('rejects the function_score array form, which Elasticsearch rejects', () => {
     const result = paramsSchema.safeParse({
       index: 'logs',

@@ -33,10 +33,8 @@ const getValueAtPath = (root: unknown, path: PropertyKey[]): { found: boolean; v
  * A failed union reports one issue on the parent, so it counts when one branch fails only at template values.
  */
 const isTemplateValueIssue = (issue: ZodError['issues'][number], root: unknown): boolean => {
-  if (!issue.path || issue.path.length === 0) {
-    return false;
-  }
-  const { found, value } = getValueAtPath(root, issue.path);
+  // An empty path is the value itself, for example a union nested in a union branch.
+  const { found, value } = getValueAtPath(root, issue.path ?? []);
   if (!found) {
     return false;
   }

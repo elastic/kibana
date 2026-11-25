@@ -162,32 +162,65 @@ describe('parseWorkflowYamlToJSON', () => {
         });
       });
 
-      it('should accept templated fields in the full form of generated Elasticsearch shortcut types', () => {
+      describe('with the generated Elasticsearch schema', () => {
         const esSchema = generateYamlSchemaFromConnectors(getElasticsearchConnectors(), []);
-        const yaml = [
-          'name: templated-shortcut-types',
-          'enabled: true',
-          'triggers:',
-          '  - type: manual',
-          'steps:',
-          '  - name: search',
-          '    type: elasticsearch.search',
-          '    with:',
-          '      index: logs',
-          '      query:',
-          '        bool:',
-          '          filter:',
-          '            - prefix:',
-          '                host.name:',
-          '                  value: web',
-          '                  case_insensitive: "{{ inputs.ci }}"',
-          '            - match_phrase:',
-          '                message:',
-          '                  query: connection refused',
-          '                  slop: "{{ inputs.slop }}"',
-        ].join('\n');
-        const result = parseWorkflowYamlToJSON(yaml, esSchema);
-        expect(result.success ? undefined : result.error.message).toBeUndefined();
+        const toWorkflowYaml = (withLines: string[]) =>
+          [
+            'name: templated-union-fields',
+            'enabled: true',
+            'triggers:',
+            '  - type: manual',
+            'steps:',
+            '  - name: search',
+            '    type: elasticsearch.search',
+            '    with:',
+            '      index: logs',
+            ...withLines.map((line) => `      ${line}`),
+          ].join('\n');
+
+        // Each case has one templated field, so it cannot hide behind another template.
+        it.each([
+          [
+            'prefix full form',
+            [
+              'query:',
+              '  prefix:',
+              '    host.name:',
+              '      value: web',
+              '      case_insensitive: VALUE',
+            ],
+          ],
+          [
+            'match_phrase full form',
+            [
+              'query:',
+              '  match_phrase:',
+              '    message:',
+              '      query: refused',
+              '      slop: VALUE',
+            ],
+          ],
+          [
+            // `_source` is a union whose source filter branch is a union at the same value.
+            '_source filter inside two nested unions',
+            ['_source:', '  includes: ["host.*"]', '  exclude_vectors: VALUE'],
+          ],
+        ])('%s: accepts a template and rejects a wrong literal', (_name, withLines) => {
+          const templated = parseWorkflowYamlToJSON(
+            toWorkflowYaml(withLines.map((line) => line.replace('VALUE', '"{{ inputs.value }}"'))),
+            esSchema
+          );
+          expect(templated.success ? undefined : templated.error.message).toBeUndefined();
+          expect(JSON.stringify(templated.success && templated.data)).toContain(
+            '{{ inputs.value }}'
+          );
+
+          const wrongLiteral = parseWorkflowYamlToJSON(
+            toWorkflowYaml(withLines.map((line) => line.replace('VALUE', '"not-a-valid-value"'))),
+            esSchema
+          );
+          expect(wrongLiteral.success).toBe(false);
+        });
       });
 
       it('should keep the union error when a branch also fails at a non-template value', () => {

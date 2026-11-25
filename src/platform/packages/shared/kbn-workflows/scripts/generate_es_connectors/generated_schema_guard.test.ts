@@ -25,6 +25,8 @@ describe('generated Elasticsearch zod schemas', () => {
   // under one changes a value, zod throws "Unmergable intersection" instead of returning an issue.
   it('have no schema that changes values, which open records cannot merge', () => {
     expect(source).toContain('.and(z.record(z.string(), z.unknown()))');
-    expect(source).not.toMatch(/\.transform\(|z\.coerce\.|\.pipe\(|\.preprocess\(|\.overwrite\(/);
+    expect(source).not.toMatch(
+      /\.transform\(|z\.coerce\.|\.pipe\(|\.preprocess\(|\.overwrite\(|\.trim\(|\.toLowerCase\(|\.toUpperCase\(|\.normalize\(/
+    );
   });
 });
