@@ -17,7 +17,6 @@ import {
   EuiBottomBar,
   EuiAccordion,
   EuiSteps,
-  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -73,10 +72,14 @@ const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
 });
 
 // Tighter step padding, following Fleet's single-page package policy layout.
+// Non-final steps get 40px below the content so the next step title has room.
 const packFormStepsCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiStep__content': {
     paddingBlockStart: euiTheme.size.xs,
     paddingBlockEnd: euiTheme.size.m,
+  },
+  '.euiStep:not(:last-child) .euiStep__content': {
+    paddingBlockEnd: euiTheme.size.xxl,
   },
 });
 
@@ -669,21 +672,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         title: QUERIES_STEP_TITLE,
         'data-test-subj': 'osqueryPackFormStep-queries',
         children: (
-          <>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.osquery.pack.form.queriesStepDescription"
-                  defaultMessage="These queries inherit the pack's settings, but you can customize the defaults by editing them individually."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <QueriesField
-              euiFieldProps={euiFieldProps}
-              packHasExplicitSchedule={packHasExplicitSchedule}
-            />
-          </>
+          <QueriesField
+            euiFieldProps={euiFieldProps}
+            packHasExplicitSchedule={packHasExplicitSchedule}
+          />
         ),
       },
       {
