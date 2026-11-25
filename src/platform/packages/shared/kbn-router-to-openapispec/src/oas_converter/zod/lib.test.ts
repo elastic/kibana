@@ -936,20 +936,40 @@ describe('zod', () => {
         });
       });
 
-      test('omits discriminator when a variant makes the property optional', () => {
-        const plain = z4.object({ color: z4.literal('value').optional() }).meta({
-          id: 'AutoDiscOptional_Plain',
-        });
+      test.each([
+        ['optional', z4.literal('value').optional()],
+        ['default', z4.literal('value').default('value')],
+      ])('omits discriminator when a variant makes the property %s', (label, color) => {
+        const plain = z4.object({ color }).meta({ id: `AutoDiscNotRequired_${label}_Plain` });
         const bar = z4.object({ color: z4.literal('bar'), max: z4.number() }).meta({
-          id: 'AutoDiscOptional_Bar',
+          id: `AutoDiscNotRequired_${label}_Bar`,
         });
         const column = z4.discriminatedUnion('color', [plain, bar]).meta({
-          id: 'AutoDiscOptional_Column',
+          id: `AutoDiscNotRequired_${label}_Column`,
         });
 
         const result = convert(z4.object({ column }) as any);
 
-        expect(result.shared.AutoDiscOptional_Column).not.toHaveProperty('discriminator');
+        expect(result.shared[`AutoDiscNotRequired_${label}_Column`]).not.toHaveProperty(
+          'discriminator'
+        );
+      });
+
+      test.each([
+        ['nullable', z4.literal('one').nullable(), z4.literal('two')],
+        ['numeric', z4.literal(1), z4.literal('1')],
+      ])('omits discriminator when a value is not a string (%s)', (label, first, second) => {
+        const a = z4.object({ kind: first }).meta({ id: `AutoDiscNonString_${label}_A` });
+        const b = z4.object({ kind: second }).meta({ id: `AutoDiscNonString_${label}_B` });
+        const union = z4.discriminatedUnion('kind', [a, b]).meta({
+          id: `AutoDiscNonString_${label}_Union`,
+        });
+
+        const result = convert(z4.object({ union }) as any);
+
+        expect(result.shared[`AutoDiscNonString_${label}_Union`]).not.toHaveProperty(
+          'discriminator'
+        );
       });
 
       test('explicit .meta({ openapi }) takes precedence over auto-detection', () => {
