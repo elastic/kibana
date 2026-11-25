@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { PlaintextStacktrace } from '@kbn/event-stacktrace';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { SESSIONS_MAX_SESSION_HOURS } from '../../../../common/sessions';
 import type { MobileCrash, MobileCrashGroup } from '../../../../common/types/mobile';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
@@ -50,6 +50,14 @@ const LOAD_ERROR_TITLE = i18n.translate('xpack.digitalExperience.mobile.crashes.
 const NO_CRASH_TITLE = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.noCrash', {
   defaultMessage: 'This crash group has no crash in the selected time range and filters',
 });
+
+const PARTIAL_ACCESS_TITLE = i18n.translate(
+  'xpack.digitalExperience.mobile.crashes.flyout.partialAccess',
+  {
+    defaultMessage:
+      "You can't read all of the mobile logs and traces indices, so crashes and the session's requests and screens may be missing. Ask an administrator for read access to them.",
+  }
+);
 
 const NO_STACKTRACE_TITLE = i18n.translate(
   'xpack.digitalExperience.mobile.crashes.flyout.noStacktrace',
@@ -125,11 +133,12 @@ function SectionTitle({ title }: { title: string }) {
 }
 
 /**
- * The latest crash's session in Discover: its events up to the longest a session lasts before the
- * crash, which the session page of #72 replaces.
+ * The latest crash's session in Discover: its events from the longest a session lasts before the
+ * crash up to when the crash was sent, so a crash EDOT iOS sent on the next launch is in it too.
+ * The session page of #72 replaces it.
  */
 function OpenSessionButton({ serviceName, crash }: { serviceName: string; crash: MobileCrash }) {
-  const { sessionId, time } = crash;
+  const { sessionId, time, reportedAt } = crash;
   const esql = useMemo(
     () => (sessionId ? sessionEsqlQuery({ serviceName, sessionId }) : undefined),
     [serviceName, sessionId]
@@ -138,9 +147,9 @@ function OpenSessionButton({ serviceName, crash }: { serviceName: string; crash:
     () =>
       sessionTimeRange({
         startTime: new Date(Date.parse(time) - MAX_SESSION_MS).toISOString(),
-        endTime: time,
+        endTime: Date.parse(reportedAt) > Date.parse(time) ? reportedAt : time,
       }),
-    [time]
+    [time, reportedAt]
   );
   const href = useDiscoverHref(esql, timeRange);
   const noHrefReason = href ? undefined : OPEN_SESSION_NO_DISCOVER;
@@ -234,6 +243,16 @@ export function MobileCrashFlyout({
     }
     return (
       <>
+        {detail.isPartial && (
+          <>
+            <KbnWarningCallout
+              data-test-subj="digitalExperienceMobileCrashPartialAccess"
+              size="s"
+              title={PARTIAL_ACCESS_TITLE}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <OpenSessionButton serviceName={serviceName} crash={latestCrash} />
         <EuiSpacer size="l" />
         <SectionTitle title={STACKTRACE_TITLE} />

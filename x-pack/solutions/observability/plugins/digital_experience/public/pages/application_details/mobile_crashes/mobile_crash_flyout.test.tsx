@@ -46,6 +46,7 @@ const event = (fields: Partial<SessionTimelineEvent>): SessionTimelineEvent => (
   offsetMs: 0,
   page: 'Map',
   detail: null,
+  clickCount: null,
   stacktrace: null,
   traceId: null,
   spanId: null,
@@ -56,6 +57,8 @@ const event = (fields: Partial<SessionTimelineEvent>): SessionTimelineEvent => (
 
 const LATEST_CRASH: MobileCrash = {
   time: CRASH_TIME,
+  // EDOT iOS sends a crash on the next launch, long after it happened.
+  reportedAt: '2021-01-18T14:30:00.000Z',
   type: 'java.lang.NullPointerException',
   message: 'TrackRecorder is null',
   stacktrace:
@@ -98,12 +101,16 @@ const mockDetail = (state: Partial<MobileCrashGroupState>) =>
     ...state,
   });
 
-const renderFlyout = (group: MobileCrashGroup | undefined = GROUP, onClose = jest.fn()) =>
+/** `group: null` renders the flyout of a group the list lacks. */
+const renderFlyout = ({
+  group = GROUP,
+  onClose = jest.fn(),
+}: { group?: MobileCrashGroup | null; onClose?: () => void } = {}) =>
   render(
     <MobileCrashFlyout
       serviceName="trailmap-android"
       fingerprint="npe"
-      group={group}
+      group={group ?? undefined}
       onClose={onClose}
     />,
     {
@@ -169,7 +176,7 @@ describe('MobileCrashFlyout', () => {
     expect(rows[0]).toHaveTextContent('https://api.example.com/tracks');
     expect(rows[0]).not.toHaveTextContent('?id=1');
     expect(rows[0]).toHaveTextContent('503');
-    expect(rows[0]).toHaveTextContent(/before$/);
+    expect(within(rows[0]).getAllByRole('cell')[0]).toHaveTextContent(/ before$/);
     expect(rows[1]).toHaveTextContent('Tap');
     expect(rows[1]).toHaveTextContent('Map');
     expect(rows[2]).toHaveTextContent('Crash');
@@ -186,8 +193,12 @@ describe('MobileCrashFlyout', () => {
     const [esql, timeRange] = jest.mocked(useDiscoverHref).mock.calls.at(-1) ?? [];
     expect(esql).toContain('session.id == "7f4b0c7e"');
     expect(esql).toContain('service.name == "trailmap-android"');
-    // From the longest a session lasts before the crash, to just after it.
-    expect(timeRange?.from).toBe('2021-01-17T12:29:00.000Z');
+    // From the longest a session lasts before the crash to just after it was sent, so the crash
+    // is in it.
+    expect(timeRange).toEqual({
+      from: '2021-01-17T12:29:00.000Z',
+      to: '2021-01-18T14:35:00.000Z',
+    });
   });
 
   it('disables Open session without a session, and says no session was recorded', () => {
@@ -202,12 +213,19 @@ describe('MobileCrashFlyout', () => {
   });
 
   it('reads the type from the latest crash when the list lacks the group', () => {
-    renderFlyout(undefined);
+    renderFlyout({ group: null });
 
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
       'java.lang.NullPointerException'
     );
     expect(screen.queryByText('New in 4.2.0')).toBeNull();
+  });
+
+  it("says the session may miss events when the user can't read every index", () => {
+    mockDetail({ detail: { ...DETAIL, isPartial: true } });
+    renderFlyout();
+
+    expect(screen.getByTestId('digitalExperienceMobileCrashPartialAccess')).toBeInTheDocument();
   });
 
   it('shows the error with a retry', () => {
@@ -221,7 +239,7 @@ describe('MobileCrashFlyout', () => {
 
   it('closes', () => {
     const onClose = jest.fn();
-    renderFlyout(GROUP, onClose);
+    renderFlyout({ onClose });
 
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalledTimes(1);

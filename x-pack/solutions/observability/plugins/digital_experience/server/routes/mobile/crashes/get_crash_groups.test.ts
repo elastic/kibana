@@ -129,4 +129,25 @@ describe('getCrashGroups', () => {
     expect(group.newInRelease).toBeNull();
     expect(group.firstSeen.release).toBeNull();
   });
+
+  it('looks for older releases over the whole range when it is longer than the lookback', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(esqlResponse([groupRow('npe')]))
+      .mockResolvedValueOnce(esqlResponse([{ fingerprint: 'npe', releases: '4.2.0' }]))
+      .mockResolvedValueOnce(esqlResponse([{ latest_release: '4.2.0' }]));
+    const start = END - 90 * DAY;
+
+    await getCrashGroups({
+      esClient,
+      filters: { serviceName: 'trailmap-android' },
+      start,
+      end: END,
+    });
+
+    const [, [releasesRequest]] = client.esql.query.mock.calls;
+    expect(releasesRequest.params).toEqual(
+      expect.arrayContaining([{ crash_start: new Date(start).toISOString() }])
+    );
+  });
 });

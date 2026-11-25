@@ -113,6 +113,19 @@ describe('DigitalExperienceLocatorDefinition', () => {
     });
   });
 
+  it('keeps the crash group whose detail the Crashes tab has open', async () => {
+    const path = await pathOf({
+      serviceName: 'shop-mobile',
+      tab: 'crashes',
+      source: 'otel',
+      applicationType: 'mobile',
+      crashGroup: 'abc123',
+    });
+
+    expect(path.split('?')[0]).toBe('/shop-mobile/crashes');
+    expect(new URLSearchParams(path.split('?')[1]).get('crashGroup')).toBe('abc123');
+  });
+
   it('keeps the state of the Sessions list, with its numbers and booleans', async () => {
     const path = await pathOf({
       serviceName: 'storefront-web',

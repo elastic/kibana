@@ -59,7 +59,8 @@ const eventKind = () =>
 
 /**
  * The latest events of a mobile session before a time, newest first: requests, screens, taps,
- * handled errors and logs. EDOT iOS writes `session.id` in uppercase, so both cases match.
+ * handled errors and logs. The id as the crash has it, and in either case: EDOT iOS writes
+ * `session.id` in uppercase.
  */
 export const sessionEventsBefore = ({
   serviceName,
@@ -71,7 +72,7 @@ export const sessionEventsBefore = ({
   const is = (value: MobileSessionEventKind) => esql.exp`${eventKindColumn} == ${value}`;
   return mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} == ${{
     service_name: serviceName,
-  }}`.pipe`WHERE ${mobileColumn('sessionId')} IN (${{
+  }}`.pipe`WHERE ${mobileColumn('sessionId')} IN (${{ session_id: sessionId }}, ${{
     session_id_lower: sessionId.toLowerCase(),
   }}, ${{ session_id_upper: sessionId.toUpperCase() }})`.pipe`WHERE @timestamp < TO_DATETIME(${{
     before,

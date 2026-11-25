@@ -8,6 +8,7 @@
 import { sumBy } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
+  CRASH_BREAKDOWN_TOP,
   CRASH_DELAY_MS,
   crashEvents,
   withCrashBreakdown,
@@ -33,9 +34,6 @@ import type {
 } from '../../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../../lib/esql';
 
-/** Values a breakdown shows before "Other". */
-export const CRASH_BREAKDOWN_TOP = 5;
-
 const MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
 
 export interface GetCrashGroupParams {
@@ -48,19 +46,17 @@ export interface GetCrashGroupParams {
 }
 
 const toBreakdown = (rows: CrashBreakdownRow[]): CrashBreakdown => {
-  const withValue = rows.filter((row) => row[RESULT_COLUMNS.value] != null);
-  const top = withValue.slice(0, CRASH_BREAKDOWN_TOP).map((row) => ({
-    key: String(row[RESULT_COLUMNS.value]),
-    count: row[RESULT_COLUMNS.count],
-  }));
-  return {
-    top,
-    other: sumBy(rows, (row) => row[RESULT_COLUMNS.count]) - sumBy(top, ({ count }) => count),
-  };
+  const top = rows
+    .filter((row) => row[RESULT_COLUMNS.value] != null)
+    .slice(0, CRASH_BREAKDOWN_TOP)
+    .map((row) => ({ key: String(row[RESULT_COLUMNS.value]), count: row[RESULT_COLUMNS.count] }));
+  const total = rows[0]?.[RESULT_COLUMNS.total] ?? 0;
+  return { top, other: total - sumBy(top, ({ count }) => count) };
 };
 
 const toCrash = (row: LatestCrashRow): MobileCrash => ({
   time: row[RESULT_COLUMNS.crashTime],
+  reportedAt: row[RESULT_COLUMNS.reportedAt],
   type: row[RESULT_COLUMNS.exceptionType] ?? null,
   message: row[RESULT_COLUMNS.message] ?? null,
   stacktrace: row[RESULT_COLUMNS.stacktrace] ?? null,
@@ -76,6 +72,8 @@ const toTimelineEvent = (row: SessionEventRow, firstMs: number): SessionTimeline
   offsetMs: Math.max(0, Date.parse(row['@timestamp']) - firstMs),
   page: row[RESULT_COLUMNS.page] ?? null,
   detail: row[RESULT_COLUMNS.detail] ?? null,
+  // A browser's rage clicks; mobile taps are listed one by one.
+  clickCount: null,
   stacktrace: row[RESULT_COLUMNS.stacktrace] ?? null,
   traceId: row[RESULT_COLUMNS.traceId] ?? null,
   spanId: row[RESULT_COLUMNS.spanId] ?? null,

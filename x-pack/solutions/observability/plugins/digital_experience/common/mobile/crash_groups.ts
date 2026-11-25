@@ -21,7 +21,7 @@ import { mobilePanelQuery, type MobilePanelFilters } from './filters';
  */
 export const CRASH_DELAY_MS = MOBILE_MAX_CRASH_DELAY_HOURS * 60 * 60 * 1000;
 
-/** How far back from the end of the range a group is looked for in older releases. */
+/** How far back from the end of the range, at least, a group is looked for in older releases. */
 export const CRASH_NEW_LOOKBACK_DAYS = 30;
 
 export interface CrashEventsParams extends MobilePanelFilters {
@@ -120,8 +120,10 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
       ${resultColumn('message')} = ${mobileColumn('exceptionMessage')},
       ${resultColumn('stacktrace')} = ${mobileColumn('exceptionStacktrace')},
       ${resultColumn('release')} = ${mobileColumn('serviceVersion')},
-      ${resultColumn('sessionId')} = ${mobileColumn('sessionId')}`.pipe`KEEP ${[
+      ${resultColumn('sessionId')} = ${mobileColumn('sessionId')},
+      ${resultColumn('reportedAt')} = @timestamp`.pipe`KEEP ${[
     resultColumn('crashTime'),
+    resultColumn('reportedAt'),
     resultColumn('exceptionType'),
     resultColumn('message'),
     resultColumn('stacktrace'),
@@ -141,20 +143,31 @@ export const CRASH_BREAKDOWNS = {
 
 export type CrashBreakdownName = keyof typeof CRASH_BREAKDOWNS;
 
-/** Values a breakdown counts before the rest is "Other". */
-const MAX_BREAKDOWN_ROWS = 1000;
+/** Values a breakdown shows before "Other". */
+export const CRASH_BREAKDOWN_TOP = 5;
 
-/** The crashes per value of a breakdown, most first; crashes without one have a `null` value. */
-export const withCrashBreakdown = (query: ComposerQuery, name: CrashBreakdownName): ComposerQuery =>
-  query.pipe`STATS ${resultColumn('count')} = COUNT(*) BY ${resultColumn(
-    'value'
-  )} = ${CRASH_BREAKDOWNS[name]()}`.pipe`SORT ${resultColumn('count')} DESC, ${resultColumn(
-    'value'
-  )}`.pipe`LIMIT ${MAX_BREAKDOWN_ROWS}`;
+/**
+ * The crashes per value of a breakdown, most first, each row with the group's crashes in all, so
+ * "Other" holds every crash the top values leave out. Crashes without a value have a `null` one,
+ * which can take a row: one more than the top values leaves room for it.
+ */
+export const withCrashBreakdown = (
+  query: ComposerQuery,
+  name: CrashBreakdownName
+): ComposerQuery => {
+  const count = resultColumn('count');
+  const value = resultColumn('value');
+  const total = resultColumn('total');
+  return query.pipe`INLINE STATS ${total} = COUNT(*)`
+    .pipe`STATS ${count} = COUNT(*), ${total} = MAX(${total}) BY ${value} = ${CRASH_BREAKDOWNS[
+    name
+  ]()}`.pipe`SORT ${count} DESC, ${value}`.pipe`LIMIT ${CRASH_BREAKDOWN_TOP + 1}`;
+};
 
 /** The row of `withLatestCrash`. */
 export interface LatestCrashRow {
   [RESULT_COLUMNS.crashTime]: string;
+  [RESULT_COLUMNS.reportedAt]: string;
   [RESULT_COLUMNS.exceptionType]?: string | null;
   [RESULT_COLUMNS.message]?: string | null;
   [RESULT_COLUMNS.stacktrace]?: string | null;
@@ -165,5 +178,6 @@ export interface LatestCrashRow {
 /** The row of `withCrashBreakdown`. */
 export interface CrashBreakdownRow {
   [RESULT_COLUMNS.count]: number;
+  [RESULT_COLUMNS.total]: number;
   [RESULT_COLUMNS.value]?: string | null;
 }

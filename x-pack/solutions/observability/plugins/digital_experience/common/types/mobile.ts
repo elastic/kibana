@@ -110,6 +110,8 @@ export interface CrashBreakdown {
 export interface MobileCrash {
   /** ISO 8601, when it happened rather than when the next launch sent it. */
   time: string;
+  /** ISO 8601, when the SDK sent it: EDOT iOS sends a crash on the next launch. */
+  reportedAt: string;
   type: string | null;
   message: string | null;
   stacktrace: string | null;
@@ -125,5 +127,6 @@ export interface MobileCrashGroupDetailResponse {
   deviceModels: CrashBreakdown;
   /** The latest crash's session up to the crash, oldest first; empty without a session. */
   beforeCrash: SessionTimelineEvent[];
+  /** Whether the user can't read every OTel logs and traces index, so events may be missing. */
   isPartial: boolean;
 }

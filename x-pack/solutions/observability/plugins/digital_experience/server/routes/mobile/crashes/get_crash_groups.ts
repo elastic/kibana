@@ -78,7 +78,8 @@ export const getCrashGroups = async ({
 
   // A group the newest release brought can't be told apart on that release alone.
   const allReleases = omit(filters, 'release');
-  const lookbackStart = end - CRASH_NEW_LOOKBACK_DAYS * DAY_MS;
+  // The whole range too, so a group the range shows on an older release is never new.
+  const lookbackStart = Math.min(start, end - CRASH_NEW_LOOKBACK_DAYS * DAY_MS);
   const [releaseRows, [latest]] = await Promise.all([
     runEsql<CrashGroupReleasesRow>(
       esClient,

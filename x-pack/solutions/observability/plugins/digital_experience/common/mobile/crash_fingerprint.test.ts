@@ -18,6 +18,8 @@ const fingerprintOf = (name: keyof typeof CRASH_FINGERPRINT_CASES) =>
   crashFingerprintOf(CRASH_FINGERPRINT_CASES[name]);
 
 describe('crash fingerprint rules', () => {
+  // The expected fingerprints are Elasticsearch's: the Scout API spec `mobile_crashes.spec.ts`
+  // indexes these cases and checks the ES|QL computes them, so this copy can't drift from it.
   it.each(Object.keys(CRASH_FINGERPRINT_CASES) as Array<keyof typeof CRASH_FINGERPRINT_CASES>)(
     'gives %s the fingerprint Elasticsearch computes',
     (name) => {

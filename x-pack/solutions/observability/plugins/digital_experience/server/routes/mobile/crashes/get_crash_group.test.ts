@@ -18,6 +18,7 @@ const CRASH_TIME = '2021-01-18T12:30:00.000Z';
 
 const LATEST = {
   crash_time: CRASH_TIME,
+  reported_at: '2021-01-18T12:45:00.000Z',
   exception_type: 'SIGTRAP',
   message: 'TRAP_BRKPT at 4385823488',
   stacktrace: 'Thread 0 Crashed:\n0   RideIos   0x1 0x0 + 1',
@@ -95,6 +96,7 @@ describe('getCrashGroup', () => {
 
     expect(detail.latestCrash).toEqual({
       time: CRASH_TIME,
+      reportedAt: '2021-01-18T12:45:00.000Z',
       type: 'SIGTRAP',
       message: 'TRAP_BRKPT at 4385823488',
       stacktrace: LATEST.stacktrace,
@@ -117,6 +119,7 @@ describe('getCrashGroup', () => {
     const event = (fields: Record<string, unknown>) => ({
       page: null,
       detail: null,
+      clickCount: null,
       stacktrace: null,
       traceId: null,
       spanId: null,

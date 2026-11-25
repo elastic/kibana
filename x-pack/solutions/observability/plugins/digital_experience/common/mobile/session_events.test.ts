@@ -15,11 +15,14 @@ describe('sessionEventsBefore', () => {
     limit: 20,
   }).toRequest();
 
-  it('reads the logs and the traces of the session, in either case of its id', () => {
+  it('reads the logs and the traces of the session, by its id as sent or in either case', () => {
     expect(query).toContain('FROM traces-*.otel-*, logs-*.otel-*');
-    expect(query).toContain('`attributes.session.id` IN (?session_id_lower, ?session_id_upper)');
+    expect(query).toContain(
+      '`attributes.session.id` IN (?session_id, ?session_id_lower, ?session_id_upper)'
+    );
     expect(params).toEqual([
       { service_name: 'ride-ios' },
+      { session_id: 'Df831c22-A367' },
       { session_id_lower: 'df831c22-a367' },
       { session_id_upper: 'DF831C22-A367' },
       { before: '2021-01-18T12:30:00.000Z' },

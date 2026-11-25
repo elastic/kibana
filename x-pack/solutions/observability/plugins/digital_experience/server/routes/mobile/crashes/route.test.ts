@@ -148,6 +148,17 @@ describe('mobile crash group route', () => {
     );
   });
 
+  it("reports partial values when the user can't read every logs and traces index", async () => {
+    jest.mocked(hasPartialReadAccess).mockResolvedValue(true);
+
+    const response = await runDetailHandler('npe');
+
+    expect(response.isPartial).toBe(true);
+    await expect(
+      jest.mocked(hasPartialReadAccess).mock.calls[0][0].getIndices()
+    ).resolves.toStrictEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+  });
+
   it('bounds the fingerprint', () => {
     const schema = mobileCrashesRouteRepository[MOBILE_CRASH_GROUP_ENDPOINT].params as unknown as {
       shape: { path: { safeParse: (path: unknown) => { success: boolean } } };
