@@ -581,12 +581,14 @@ export class UiamService implements UiamServicePublic {
   });
   // Keyed by a hash of the refresh token, so the token itself is never held as a key. It holds
   // the refreshes themselves, so concurrent requests for the same session share one call to UIAM.
+  // Expired tokens are removed at once, so they do not stay in memory until the key is read again.
   readonly #sessionTokenRefreshes = new LRUCache<
     string,
     Promise<{ accessToken: string; refreshToken: string }>
   >({
     max: SESSION_TOKEN_REFRESH_CACHE_MAX_SIZE,
     ttl: SESSION_TOKEN_REFRESH_CACHE_TTL_MS,
+    ttlAutopurge: true,
   });
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
