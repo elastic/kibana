@@ -126,6 +126,8 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   unprivileged_agents?: number;
   fips_agents?: number;
   agents_per_version?: Array<{ version: string; count: number }>;
+  /** Active agents per version, excluding OpAMP agents: the agents agent version conditions apply to. */
+  active_agents_per_version?: Array<{ version: string; count: number }>;
   is_protected: boolean;
   version?: string;
   min_agent_version?: string | null;

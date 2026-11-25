@@ -96,15 +96,35 @@
  * - dead clicks are clicks that fire no request
  * - error clicks are clicks followed by an uncaught exception within a second, or by the failure
  *   of the request they fired, and carry its `exception.type` and `exception.message`
- * - the slower and more erroring the app, the more of them: a click turns into a rage click with a
- *   probability of 1% in a healthy app and 10% in a critical one, before its repeats are added,
- *   and a click that fires no request is dead with a probability of 2% and 12%
+ * - signals follow their causes, so they gather on a few elements of a few pages: slow responses
+ *   get rage clicks (search of storefront-web, comments of media-portal-web), elements that don't
+ *   react get dead clicks (images, prices, a sold-out size, a video poster), more often on mobile,
+ *   and elements that throw or whose request fails get error clicks, retried a few times
+ * - most sessions have none, about a quarter one or two, and a few 5 to 15 or more: a few users
+ *   are far more impatient than the rest
+ *
+ * Versions, traffic and incidents:
+ * - storefront-web runs 4.12.0 (a `ChunkLoadError` now and then on add to cart) and 4.13.0, whose
+ *   add to cart throws reading `variant.sku` for a fifth of its users. checkout-web runs 2.3.1 and
+ *   2.4.0, whose Continue to payment throws reading `address.postalCode` for a third of its users.
+ *   Errors are worded the way each browser engine does
+ * - traffic follows the day, peaking at 16:00 UTC with about a third of it at night, with the same
+ *   number of sessions a day as without the curve
+ * - every 3 hours, `POST /api/cart/items` of storefront-web and `POST /api/payment` of
+ *   checkout-web are down for 10 to 25 minutes. Times come from the seed, the same in `--live` and
+ *   in a backfill
  *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID
  *   and `session.start` that come with sessions. Set to false to match EDOT Browser 0.3.0 and
  *   earlier, which don't emit them (elastic/elastic-otel-rum-js#120 added them). The apps then
  *   report distro version 0.3.0 instead of 0.4.0.
+ * - withPageRoute (boolean, default: true): write the route of the page as `attributes.url.template`
+ *   on every log but the resource timings, like EDOT Browser does. storefront-web and
+ *   media-portal-web tell their routes (`/products/{slug}`), as an app that calls `setPageRoute()`
+ *   does. checkout-web and docs-web leave it to the SDK, which only turns ID-like segments into
+ *   `{id}`, so the slugs of docs-web stay in its routes. support-center-web sets `pageRoute: false`,
+ *   so its logs have no route. Set to false to match an SDK without page routes
  * - includeRawAttribution (boolean, default: false): write the web-vitals attribution as a JSON
  *   body on `browser.web_vital` events, like the instrumentation's experimental opt-in option
  * - environments (boolean, default: false): spread every app over the environments listed above
