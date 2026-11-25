@@ -1325,6 +1325,28 @@ describe('LatencyMap', () => {
       expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('10 failed');
     });
 
+    it("reads out a new region with the outcome Enter would commit, not the old selection's", async () => {
+      // An errors-only selection under a host filter that is off: a region extended from
+      // it is a new one, about every span, and so is its readout.
+      const { onSelectionCommit } = renderMap({
+        selection: {
+          ...geometry.rangeToSelection({ x0: 3, x1: 4, y0: 5, y1: 6 }),
+          failedOnly: true,
+        },
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      // From the selection's cell, Shift+Right takes in the quiet cell beside it too.
+      press(layer, 'ArrowRight', true);
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('60 spans');
+      press(layer, 'Enter');
+      const [committed, condition] = onSelectionCommit.mock.calls[0];
+      expect(committed.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+
     it('opens the cell under the cursor with Enter, as the pointer click does', async () => {
       const onCellClick = jest.fn();
       renderMap({

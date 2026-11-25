@@ -404,14 +404,53 @@ export function LatencyMap({
     [grid, timeGrid, stats, failedOnly]
   );
 
-  // What a keyboard region would commit: its bounds, with the counts of the cells it covers.
+  // The outcome a region is about, as a commit resolves it. With a host filter the failure
+  // clause is the host's, never the selection's - unless the selection carries its own
+  // (inferred, or from a shared URL) while the host filter is off: moving or resizing that
+  // region keeps it about failures. A new region (drawn, from the keyboard, a shortcut)
+  // starts afresh: where failures concentrate it is about them, as long as the user has not
+  // chosen an outcome with the errors filter - on its own under a host filter too, so that
+  // clearing the region takes the inference away with it.
+  const resolveRegion = useCallback(
+    (range: CellRange, { ofSelection = false } = {}): LatencyMapSelection => {
+      const ownFailedOnly = ofSelection ? displaySelection?.failedOnly : undefined;
+      const next = geometry!.rangeToSelection(
+        range,
+        controlled ? (hostFailedOnly ? undefined : ownFailedOnly) : failedOnly
+      );
+      const filterOn = controlled ? Boolean(hostFailedOnly) : failedOnly;
+      if (filterOn || next.failedOnly || outcomeChosen.current || !grid || !timeGrid || !stats) {
+        return next;
+      }
+      const counts = getSelectionCounts({ grid, timeGrid, stats, selection: next });
+      return gridTotals && isFailureRegion(counts, gridTotals)
+        ? { ...next, failedOnly: true }
+        : next;
+    },
+    [
+      geometry,
+      displaySelection,
+      controlled,
+      hostFailedOnly,
+      failedOnly,
+      grid,
+      timeGrid,
+      stats,
+      gridTotals,
+    ]
+  );
+
+  // What a keyboard region would commit: its bounds, with the counts of the cells it covers,
+  // over the outcome Enter would commit it with (and the host filter's, which counts failed
+  // spans alone whatever the region says).
   const describeRange = (range: CellRange) => {
-    const rangeSelection = geometry!.rangeToSelection(range);
+    const rangeSelection = resolveRegion(range);
     const counts = getSelectionCounts({
       grid: grid!,
       timeGrid: timeGrid!,
       stats: stats!,
-      selection: failedOnly ? { ...rangeSelection, failedOnly: true } : rangeSelection,
+      selection:
+        controlled && hostFailedOnly ? { ...rangeSelection, failedOnly: true } : rangeSelection,
     });
     return {
       fromMs: Date.parse(rangeSelection.from),
@@ -446,48 +485,10 @@ export function LatencyMap({
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
       if (displaySelection && committedRange && isSameRange(range, committedRange)) return;
-      // With a host filter the failure clause is the host's, never the selection's - unless
-      // the selection carries its own (inferred, or from a shared URL) while the host filter
-      // is off: moving or resizing that region keeps it about failures. A new region (drawn,
-      // from the keyboard, a shortcut) starts afresh.
-      const ownFailedOnly = ofSelection ? displaySelection?.failedOnly : undefined;
-      let next = geometry.rangeToSelection(
-        range,
-        controlled ? (hostFailedOnly ? undefined : ownFailedOnly) : failedOnly
-      );
-      // A region where failures concentrate is about them: the selection says so on its
-      // own, as long as the user has not chosen an outcome with the errors filter. On its
-      // own, under a host filter too: the inference is part of the region drawn, and
-      // clearing the region takes it away, where a host filter turned on in passing would
-      // outlive the selection that caused it.
-      const filterOn = controlled ? Boolean(hostFailedOnly) : failedOnly;
-      if (
-        !filterOn &&
-        !next.failedOnly &&
-        !outcomeChosen.current &&
-        grid &&
-        timeGrid &&
-        stats &&
-        gridTotals
-      ) {
-        const counts = getSelectionCounts({ grid, timeGrid, stats, selection: next });
-        if (isFailureRegion(counts, gridTotals)) next = { ...next, failedOnly: true };
-      }
+      const next = resolveRegion(range, { ofSelection });
       commit(label ? { ...next, label } : next);
     },
-    [
-      geometry,
-      displaySelection,
-      committedRange,
-      commit,
-      failedOnly,
-      hostFailedOnly,
-      controlled,
-      grid,
-      gridTotals,
-      timeGrid,
-      stats,
-    ]
+    [geometry, displaySelection, committedRange, commit, resolveRegion]
   );
 
   const clickCell = useCallback(

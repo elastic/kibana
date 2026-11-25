@@ -355,11 +355,22 @@ describe('useLatencyGrid', () => {
     it('loads the histograms again with fresh statistics, which bin the rows anew', async () => {
       const now = jest.spyOn(Date, 'now');
       try {
-        now.mockReturnValue(1_000_000);
-        let spans = 100;
-        const runEsql = jest.fn(async (query: string) => {
-          if (query.includes('PERCENTILE')) return statsTable(spans);
-          if (isOperationsQuery(query)) return operationsTable;
+        const started = 1_000_000;
+        now.mockReturnValue(started);
+        let p90 = 5_000_000;
+        const runEsql = jest.fn(async (query: string): Promise<ESQLSearchResponse> => {
+          if (query.includes('PERCENTILE')) {
+            return {
+              ...statsTable(100),
+              values: [[100_000, p90, 8_000_000, 10_000_000, 2_000_000_000, 100]],
+            };
+          }
+          if (isOperationsQuery(query)) {
+            // Answered a while after the statistics and the grid: the histograms outlive them.
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            now.mockReturnValue(started + 120_000);
+            return operationsTable;
+          }
           return gridTable([[1, 2, 7, 3]]);
         });
         const first = renderHook(() =>
@@ -367,9 +378,10 @@ describe('useLatencyGrid', () => {
         );
         await waitFor(() => expect(first.result.current.operations).toHaveLength(1));
         first.unmount();
-        // Past the statistics' age the range has more spans, and other percentiles.
-        now.mockReturnValue(1_000_000 + LATENCY_GRID_CACHE_MAX_AGE_MS + 1000);
-        spans = 500;
+        // The statistics are past their age, the histograms are not - but the range's
+        // percentiles moved, so the rows they were binned by are not these.
+        now.mockReturnValue(started + LATENCY_GRID_CACHE_MAX_AGE_MS + 1000);
+        p90 = 6_000_000;
         const again = renderHook(() =>
           useLatencyGrid({ source, runEsql, targetBins: 60, loadOperations: true })
         );
