@@ -145,6 +145,7 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
           detections: output.skipped_count + output.needs_agent_count,
           skipped: output.skipped_count,
           held_back: output.held_back_count,
+          held_reasons: output.held_reason_counts,
           failed: output.failed,
           needs_agent: output.needs_agent_count,
           reasons: output.reason_counts,

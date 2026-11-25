@@ -38,6 +38,7 @@ describe('classifyBatch', () => {
       expect(output.row_count).toBe(0);
       expect(output.needs_agent_count).toBe(0);
       expect(output.held_back_count).toBe(1);
+      expect(output.held_reason_counts).toEqual({ series_too_old: 1 });
       expect(output.skipped_rule_uuids).toEqual([]);
     });
 
@@ -170,6 +171,7 @@ describe('classifyBatch', () => {
         expect(agentBatchOf(output)).toContain('rule-D');
         expect(output.row_count).toBe(batchMax);
         expect(output.held_back_count).toBe(4 - batchMax);
+        expect(output.held_reason_counts).toEqual({ batch_cap: 4 - batchMax });
       }
     );
 

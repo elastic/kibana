@@ -240,6 +240,7 @@ describe('classifyDetectionsStepDefinition', () => {
         failed: true,
         row_count: 2,
         held_back_count: 1,
+        held_reason_counts: { flaky_rule: 1 },
         needs_agent_count: 2,
         skips: [],
         skipped_detection_ids: [],

@@ -96,7 +96,7 @@ const decideOutcome = ({
   const { entry, index, heldBack, reviewedAt, waitingSince } = row;
   const { rule_uuid: ruleUuid, detection_id: detectionId } = entry;
   if (!ruleUuid) {
-    return heldBack ? { kind: 'held' } : { kind: 'passthrough', entry };
+    return heldBack ? { kind: 'held', reason: 'flaky_rule' } : { kind: 'passthrough', entry };
   }
   const breached = breachedRuleUuids.has(ruleUuid);
   const series = memberships.get(ruleUuid) ?? [];
@@ -109,7 +109,7 @@ const decideOutcome = ({
     context,
   });
   if (heldBack && staysHeldBack({ decision, entry, reviewedAt, ...context })) {
-    return { kind: 'held' };
+    return { kind: 'held', reason: 'flaky_rule' };
   }
   const isFlakyLive = entry.flaky_probe === true && isInLiveEvent(series);
   if (decision.decision === 'needs_agent') {
@@ -187,7 +187,7 @@ const capBatch = ({
     ].slice(0, batchMax)
   );
   return outcomes.map((outcome) =>
-    isForAgent(outcome) && !kept.has(outcome) ? { kind: 'held' } : outcome
+    isForAgent(outcome) && !kept.has(outcome) ? { kind: 'held', reason: 'batch_cap' } : outcome
   );
 };
 
@@ -210,7 +210,9 @@ const holdWaiting = ({
   if (hasChange || waiting.some((outcome) => hasWaitedHold({ outcome, now, holdMs }))) {
     return outcomes;
   }
-  return outcomes.map((outcome) => (isWaiting(outcome) ? { kind: 'held' } : outcome));
+  return outcomes.map((outcome) =>
+    isWaiting(outcome) ? { kind: 'held', reason: outcome.reason } : outcome
+  );
 };
 
 /**

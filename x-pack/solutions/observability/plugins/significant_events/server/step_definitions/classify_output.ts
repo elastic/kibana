@@ -25,6 +25,12 @@ import type { RowDecision } from './classify_decide_row';
 
 export const MAX_INPUT_ROWS = 1_000;
 
+/**
+ * Why a row stays pending: the flaky-rule gate holds it back, the batch cap leaves it for a later
+ * run, or it is a waiting detection, held for the reason that makes it wait.
+ */
+export type HeldReason = 'flaky_rule' | 'batch_cap' | NeedsAgentReason;
+
 const countsSchema = lazySchema(() => z.record(z.string().max(64), z.number().int().min(0)));
 
 export const outputSchema = lazySchema(() =>
@@ -45,6 +51,8 @@ export const outputSchema = lazySchema(() =>
      * detection that waits for a run with a change. They stay pending.
      */
     held_back_count: z.number().int().min(0),
+    /** The held detections by why they stay pending: `flaky_rule`, `batch_cap`, or the waiting reason. */
+    held_reason_counts: countsSchema,
     needs_agent_count: z.number().int().min(0),
     reason_counts: countsSchema,
     /** The decisions on `flaky_probe` rows of rules already in a live event, skips included. */
@@ -122,7 +130,7 @@ export const toSkipMarker = ({
  * (`held`); every other row either reaches the agent or is skipped, with the reason it was decided on.
  */
 export type RowOutcome =
-  | { kind: 'held' }
+  | { kind: 'held'; reason: HeldReason }
   | { kind: 'passthrough'; entry: BatchEntry }
   | {
       kind: 'agent';
@@ -147,6 +155,7 @@ export const summarizeOutcomes = (outcomes: readonly RowOutcome[]): ClassifyDete
     outcome.kind === 'agent' || outcome.kind === 'skip' ? [outcome] : []
   );
   const skips = decided.flatMap((outcome) => (outcome.kind === 'skip' ? [outcome] : []));
+  const held = outcomes.flatMap((outcome) => (outcome.kind === 'held' ? [outcome] : []));
   const batch = outcomes.flatMap((outcome) =>
     outcome.kind === 'agent' || outcome.kind === 'passthrough' ? [outcome.entry] : []
   );
@@ -156,7 +165,8 @@ export const summarizeOutcomes = (outcomes: readonly RowOutcome[]): ClassifyDete
     skipped_rule_uuids: [...new Set(skips.map(({ ruleUuid }) => ruleUuid))],
     skips: skips.map(({ ruleUuid, skip }) => ({ rule_uuid: ruleUuid, skip })),
     skipped_count: skips.length,
-    held_back_count: outcomes.filter(({ kind }) => kind === 'held').length,
+    held_back_count: held.length,
+    held_reason_counts: countBy(held.map(({ reason }) => reason)),
     needs_agent_count: decided.length - skips.length,
     reason_counts: countBy(decided.map(({ reason }) => reason)),
     // The decisions on flaky rules already in a live event, which used to go to the agent unjudged.
@@ -184,6 +194,7 @@ export const failOpen = ({
   columns: readonly string[];
   batchMax: number;
 }): ClassifyDetectionsOutput => {
+  const flakyHeld = rows.filter((row) => isHeldBack({ columns, row })).length;
   const open = rows.filter((row) => !isHeldBack({ columns, row })).slice(0, batchMax);
   return {
     batch: open.map((row) => toBatchEntry({ columns, row })),
@@ -192,6 +203,12 @@ export const failOpen = ({
     row_count: open.length,
     skipped_count: 0,
     held_back_count: rows.length - open.length,
+    held_reason_counts: {
+      ...(flakyHeld > 0 ? { flaky_rule: flakyHeld } : {}),
+      ...(rows.length - flakyHeld - open.length > 0
+        ? { batch_cap: rows.length - flakyHeld - open.length }
+        : {}),
+    },
     needs_agent_count: open.length,
     reason_counts: {},
     flaky_live_reason_counts: {},
