@@ -33,6 +33,12 @@ export interface DetectionSnapshotEvent extends Partial<DetectionSnapshotKnowled
   rules_truncated: boolean;
   automations_total: number;
   automations_enabled: number;
+  automations_alert_total: number;
+  automations_alert_enabled: number;
+  automations_schedule_total: number;
+  automations_schedule_enabled: number;
+  automations_slack_total: number;
+  automations_slack_enabled: number;
   external_connectors_configured: number;
   external_connectors_active_24h: number;
   external_sources_active_24h: number;
@@ -74,6 +80,14 @@ const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
   },
   automations_total: count('Automations in the space.'),
   automations_enabled: count('Enabled automations in the space.'),
+  automations_alert_total: count(
+    'Automations with an alert trigger. An automation counts once under each trigger kind it has, so the kinds can sum above automations_total.'
+  ),
+  automations_alert_enabled: count('Enabled automations with an alert trigger.'),
+  automations_schedule_total: count('Automations with a schedule trigger.'),
+  automations_schedule_enabled: count('Enabled automations with a schedule trigger.'),
+  automations_slack_total: count('Automations with a Slack trigger.'),
+  automations_slack_enabled: count('Enabled automations with a Slack trigger.'),
   external_connectors_configured: count(
     'Connectors of a type that imports alerts from an external system.'
   ),
