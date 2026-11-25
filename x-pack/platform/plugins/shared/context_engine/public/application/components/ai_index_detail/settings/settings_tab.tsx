@@ -8,6 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
 import { useMemoryEnabled } from '../../../hooks/use_memory_enabled';
 import { AutomationsSection } from '../automations_section';
 import { AdvancedSection } from './advanced_section';
@@ -32,6 +33,9 @@ export const SettingsTab = ({
   indexManagementHref,
 }: SettingsTabProps) => {
   const isMemoryEnabled = useMemoryEnabled();
+  const { isLoading: isDreamingLoading } = useAiIndexDreaming(aiIndex?.id ?? aiIndexId, {
+    enabled: isMemoryEnabled && aiIndex !== undefined,
+  });
 
   return (
     <div data-test-subj="contextAiIndexSettingsTab">
@@ -49,6 +53,7 @@ export const SettingsTab = ({
         aiIndexId={aiIndexId}
         onSaved={onSaved}
         isUnlocked={isAutomationsUnlocked}
+        isContentAboveLoading={isDreamingLoading}
       />
       {aiIndex && (
         <>

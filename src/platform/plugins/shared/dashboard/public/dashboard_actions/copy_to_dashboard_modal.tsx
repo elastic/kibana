@@ -17,6 +17,7 @@ import {
   EuiModalHeaderTitle,
   EuiRadio,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -53,6 +54,10 @@ export function CopyToDashboardModal({
   );
 
   const dashboardId = parentApi.savedObjectId$.value;
+  const isNewDashboardDisabled = !dashboardId;
+  const newDashboardDisabledTooltip = isNewDashboardDisabled
+    ? dashboardCopyToDashboardActionStrings.getNewDashboardDisabledTooltip()
+    : undefined;
 
   const onSubmit = useCallback(() => {
     const state: EmbeddablePackageState[] = [];
@@ -135,15 +140,21 @@ export function CopyToDashboardModal({
               )}
               {canCreateNew && (
                 <>
-                  <EuiRadio
-                    checked={dashboardOption === 'new'}
-                    data-test-subj="add-to-new-dashboard-option"
-                    id="new-dashboard-option"
-                    name="dashboard-option"
-                    disabled={!dashboardId}
-                    label={dashboardCopyToDashboardActionStrings.getNewDashboardOption()}
-                    onChange={() => setDashboardOption('new')}
-                  />
+                  <EuiToolTip
+                    content={newDashboardDisabledTooltip}
+                    disableScreenReaderOutput={!newDashboardDisabledTooltip}
+                    position="top"
+                  >
+                    <EuiRadio
+                      checked={dashboardOption === 'new'}
+                      data-test-subj="add-to-new-dashboard-option"
+                      id="new-dashboard-option"
+                      name="dashboard-option"
+                      disabled={isNewDashboardDisabled}
+                      label={dashboardCopyToDashboardActionStrings.getNewDashboardOption()}
+                      onChange={() => setDashboardOption('new')}
+                    />
+                  </EuiToolTip>
                   <EuiSpacer size="s" />
                 </>
               )}

@@ -7,6 +7,10 @@
 
 import { buildPolicyBaseIdsWithFallbackKuery } from '../../../common/services';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../constants';
+import {
+  AGENT_FIELDS_TO_EXPORT,
+  INITIAL_AGENT_FIELDS_TO_EXPORT,
+} from '../../../public/applications/fleet/sections/agents/components/agent_export_csv_modal/columns';
 
 import {
   AGENT_ID_MAX_LENGTH,
@@ -15,6 +19,7 @@ import {
   BulkMigrateAgentsRequestSchema,
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
+  PostGenerateAgentsReportRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkAgentRestartRequestSchema,
   PostBulkAgentRollbackRequestSchema,
@@ -212,5 +217,78 @@ describe('PostAgentRestartRequestSchema', () => {
     expect(() =>
       PostAgentRestartRequestSchema.params.validate({ agentId: 'a'.repeat(513) })
     ).toThrow();
+  });
+});
+
+describe('GetAgentsRequestSchema sortField validation', () => {
+  it.each(['default_api_key', 'access_api_key', 'default_api_key.keyword', 'not_a_field'])(
+    'rejects sorting by the field %s, which is not in the agent mappings',
+    (sortField) => {
+      expect(() => GetAgentsRequestSchema.query.validate({ sortField })).toThrow(
+        /is not supported/
+      );
+    }
+  );
+
+  it.each([
+    'enrolled_at',
+    'local_metadata.host.hostname',
+    'local_metadata.host.hostname.keyword',
+    'local_metadata.elastic.agent.version.keyword',
+    'default_api_key_id',
+    'policy_id',
+  ])('allows sorting by the mapped field %s', (sortField) => {
+    expect(() => GetAgentsRequestSchema.query.validate({ sortField })).not.toThrow();
+  });
+});
+
+describe('PostGenerateAgentsReportRequestSchema field validation', () => {
+  it.each([...INITIAL_AGENT_FIELDS_TO_EXPORT, ...AGENT_FIELDS_TO_EXPORT].map(({ field }) => field))(
+    'allows exporting the export modal column %s',
+    (field) => {
+      expect(() =>
+        PostGenerateAgentsReportRequestSchema.body.validate({ agents: '*', fields: [field] })
+      ).not.toThrow();
+    }
+  );
+
+  it.each(['default_api_key', 'access_api_key', 'not_a_field'])(
+    'rejects a report that exports the field %s, which is not in the agent mappings',
+    (field) => {
+      expect(() =>
+        PostGenerateAgentsReportRequestSchema.body.validate({ agents: '*', fields: [field] })
+      ).toThrow(/is not supported/);
+    }
+  );
+
+  it.each(['default_api_key', 'access_api_key', 'not_a_field'])(
+    'rejects a report sorted by the field %s, which is not in the agent mappings',
+    (field) => {
+      expect(() =>
+        PostGenerateAgentsReportRequestSchema.body.validate({
+          agents: '*',
+          fields: ['agent.id'],
+          sort: { field, direction: 'asc' },
+        })
+      ).toThrow(/is not supported/);
+    }
+  );
+
+  it('allows a report that exports and sorts by allowed fields', () => {
+    expect(() =>
+      PostGenerateAgentsReportRequestSchema.body.validate({
+        agents: '*',
+        fields: [
+          'agent.id',
+          'status',
+          'local_metadata.host.hostname',
+          'default_api_key_id',
+          'audit_unenrolled_reason',
+          'audit_unenrolled_time',
+          'user_provided_metadata',
+        ],
+        sort: { field: 'enrolled_at', direction: 'desc' },
+      })
+    ).not.toThrow();
   });
 });

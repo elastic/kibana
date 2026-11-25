@@ -11,6 +11,10 @@ import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/alerts';
 
+// The alerts page persists its table state in local storage under the `id` it passes to the shared
+// alerts table: `detection-engine-alert-table-<tableId>-<viewMode>`.
+const ALERTS_TABLE_STATE_STORAGE_KEY = 'detection-engine-alert-table-alerts-page-gridView';
+
 export class AlertsTablePage {
   public detectionsAlertsWrapper: Locator;
   public alertRow: Locator;
@@ -48,7 +52,20 @@ export class AlertsTablePage {
     this.bulkActionsHeaderCheckbox = this.page.testSubj.locator('bulk-actions-header');
   }
 
-  async navigate() {
+  /**
+   * Opens the alerts page, optionally restricting the alerts table to `visibleColumns` (field names)
+   * so that columns the ~16 defaults would push outside the horizontally virtualized viewport are
+   * rendered on first paint.
+   */
+  async navigate({ visibleColumns }: { visibleColumns?: string[] } = {}) {
+    if (visibleColumns) {
+      await this.page.addInitScript(
+        ({ key, columns }) => {
+          window.localStorage.setItem(key, JSON.stringify({ visibleColumns: columns }));
+        },
+        { key: ALERTS_TABLE_STATE_STORAGE_KEY, columns: visibleColumns }
+      );
+    }
     await this.page.gotoApp(PAGE_URL);
   }
 
@@ -106,28 +123,11 @@ export class AlertsTablePage {
     await ruleNameLink.click();
   }
 
+  /** Requires `source.ip` / `destination.ip` to be visible, see `navigate`'s `visibleColumns`. */
   async clickNetworkIpCell(ip: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
-    // The source.ip / destination.ip columns sit at the far right of the grid and are
-    // column-virtualized, so their cells are not in the DOM until scrolled into view. Scroll the
-    // virtualized body fully right to mount them before clicking. EUI's react-window scroll
-    // container exposes no stable data-test-subj, so the `.euiDataGrid__virtualized` class is a
-    // deliberate, documented exception (a stable test-subj on this container would be a good
-    // follow-up in EUI/Kibana).
-    // The grid can still re-render (refetch, remount, late column widths) after it first reports
-    // loaded, which resets or shortens the scroll; re-apply it until the IP cell is mounted.
     const ipCell = this.alertsTable.getByTestId('network-details').filter({ hasText: ip });
-    const virtualized = this.alertsTable.locator('.euiDataGrid__virtualized');
-    await expect
-      .poll(
-        async () => {
-          if ((await ipCell.count()) > 0) return true;
-          await virtualized.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
-          return false;
-        },
-        { intervals: [250] }
-      )
-      .toBe(true);
+    await expect(ipCell, `IP '${ip}' is not displayed in the alerts table`).toBeVisible();
     await ipCell.click();
   }
 

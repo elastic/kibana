@@ -68,6 +68,15 @@ ruleTester.run('@kbn/eslint/scout_prefer_both_arch_tags', rule, {
         });
       `,
     },
+    // tags.local.* covering both archs
+    {
+      code: dedent`
+        import { tags } from '@kbn/scout';
+        test.describe('my suite', { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] }, () => {
+          test('works', () => {});
+        });
+      `,
+    },
     // Performance-only — no arch requirement
     {
       code: dedent`
@@ -148,6 +157,24 @@ ruleTester.run('@kbn/eslint/scout_prefer_both_arch_tags', rule, {
   ],
 
   invalid: [
+    {
+      code: dedent`
+        import { tags } from '@kbn/scout';
+        test.describe('my suite', { tag: tags.local.stateful.classic }, () => {
+          test('works', () => {});
+        });
+      `,
+      errors: [{ messageId: 'statefulOnly' }],
+    },
+    {
+      code: dedent`
+        import { tags } from '@kbn/scout';
+        test.describe('my suite', { tag: tags.local.serverless.observability.complete }, () => {
+          test('works', () => {});
+        });
+      `,
+      errors: [{ messageId: 'serverlessOnly' }],
+    },
     // Stateful only via MemberExpression
     {
       code: dedent`

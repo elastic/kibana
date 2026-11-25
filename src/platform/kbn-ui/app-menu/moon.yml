@@ -31,4 +31,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+    - '!packaging/target/**/*'
+    - '!packaging/example/**/*'
 tasks: {}
