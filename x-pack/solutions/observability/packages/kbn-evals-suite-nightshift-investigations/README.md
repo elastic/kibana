@@ -1190,16 +1190,20 @@ scores 0 on both when the investigation found nothing at all and its report is e
 
 **Re-grading.** `NIGHTSHIFT_DATASETS=orcabench-regrade` with `NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT=<id>`
 re-scores a stored ORCA experiment without new investigations. It reads each run's stored output,
-takes its task's metadata (and so `orca_expected`) from the release `NIGHTSHIFT_ORCA_RELEASE`
-names, writes `report.md` for runs stored before the report step, and records the ORCA scores as a
-new experiment on the dataset `<release>/regrade-<id>`. The connector must be the model that ran
-the experiment: the new experiment is recorded under it, and it writes any missing reports. It
-needs no sandbox and no ORCA cluster.
+keeps the question the run was asked, takes its task's metadata (and so `orca_expected`) from the
+release `NIGHTSHIFT_ORCA_RELEASE` names, writes `report.md` for runs stored before the report step,
+and records the ORCA scores as a new experiment on the dataset `<release>/regrade-<id>`. Pass the
+model that ran the experiment as `--model`: the new experiment is recorded under it, and it writes
+any missing reports. It needs no sandbox and no ORCA cluster, so the Scout hook sets up no
+connector set for it. Use a fresh `TEST_RUN_ID` for each re-grade, since the run ID names the new
+experiment. A source experiment with 10,000 or more score documents is refused, since the score
+API returns no more.
 
 ```bash
 NIGHTSHIFT_DATASETS=orcabench-regrade NIGHTSHIFT_ORCA_RELEASE=public755 \
   NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT=<experiment id> \
-  node scripts/evals start --suite nightshift-investigations --profile dev-vault
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault \
+  --model <the experiment's model, e.g. eis-anthropic-claude-5-5-sonnet>
 ```
 
 `goal_pass` is unchanged: it scores the single best hypothesis and passes at 4/5.

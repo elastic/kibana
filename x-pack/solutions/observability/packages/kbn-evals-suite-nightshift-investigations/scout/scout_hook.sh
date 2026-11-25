@@ -123,6 +123,10 @@ if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcaben
   es_url="$(config_value '.nightshiftOrcaEs.url')"
   orca_username="$(config_value '.nightshiftOrcaEs.username')"
   orca_password="$(config_value '.nightshiftOrcaEs.password')"
+elif [[ "${NIGHTSHIFT_DATASETS:-}" == orcabench-regrade ]]; then
+  # The ORCA re-grade reads stored runs from Golden and starts no investigation, so it needs no
+  # connector set, and so no sandbox credentials.
+  :
 else
   # The Elasticsearch URL and key come from one source, so a partial profile block is never
   # completed from the shell. The Vault field keeps its original name, `nightshift.telemetry`.

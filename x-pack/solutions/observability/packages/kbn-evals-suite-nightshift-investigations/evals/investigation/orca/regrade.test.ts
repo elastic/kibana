@@ -6,6 +6,7 @@
  */
 
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
+import { MAX_SCORES_PER_QUERY } from '@kbn/evals-common';
 import type { InvestigationExample, InvestigationTaskOutput } from '../types';
 import { NO_CONCLUSION_ERROR } from '../task';
 import {
@@ -28,7 +29,7 @@ const clientWith = (outputs: Array<Partial<InvestigationTaskOutput>>, datasetIds
       totalRepetitions: 1,
     }),
     getExperimentDatasetExamples: jest.fn().mockResolvedValue({
-      examples: outputs.map((_, index) => ({ example_id: `example-${index}` })),
+      examples: outputs.map((_, index) => ({ example_id: `example-${index}`, scores: [{}] })),
     }),
     getExperimentExampleDetails: jest.fn(
       async (_experimentId: string, _datasetId: string, exampleId: string) => ({
@@ -55,6 +56,16 @@ describe('ORCA re-grade', () => {
     );
   });
 
+  it('refuses a source read that reached the score API cap, since runs may be missing', async () => {
+    const client = clientWith([{ case_id: 'a', query: 'Why?' }]);
+    jest.mocked(client.getExperimentDatasetExamples).mockResolvedValue({
+      examples: [{ example_id: 'example-0', scores: Array(MAX_SCORES_PER_QUERY).fill({}) }],
+    } as unknown as Awaited<ReturnType<Client['getExperimentDatasetExamples']>>);
+    await expect(loadStoredOrcaRuns(client, 'experiment')).rejects.toThrow(
+      'some runs may be missing'
+    );
+  });
+
   it('refuses an experiment over several datasets', async () => {
     await expect(loadStoredOrcaRuns(clientWith([], ['one', 'two']), 'experiment')).rejects.toThrow(
       'one dataset'
@@ -70,10 +81,12 @@ describe('ORCA re-grade', () => {
         metadata: { case_id: caseId, orca_expected: { events: [] } },
       })),
     } as EvaluationDataset<InvestigationExample>;
-    const outputs = new Map([['b', { case_id: 'b', query: 'b' }]]);
+    // An earlier release's run was asked a different question than the pinned release's.
+    const outputs = new Map([['b', { case_id: 'b', query: 'b, as v1 asked it' }]]);
     const dataset = buildOrcaRegradeDataset(release, outputs, 'experiment');
     expect(dataset.name).toBe('nightshift/orca-bench-public755-v2/regrade-experiment');
     expect(dataset.examples.map(({ metadata }) => metadata.case_id)).toEqual(['b']);
+    expect(dataset.examples[0].input.question).toBe('b, as v1 asked it');
     expect(() =>
       buildOrcaRegradeDataset(release, new Map([['z', { case_id: 'z', query: 'z' }]]), 'x')
     ).toThrow('no task for 1 stored runs');

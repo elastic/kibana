@@ -326,6 +326,15 @@ describe('nightshift-investigations scout hook', () => {
     }
   );
 
+  it('sets up no connector set, so needs no sandbox, for the ORCA re-grade', () => {
+    const { status, output } = runHook(
+      { nightshift: { telemetry: { url: 'https://remote.example.com', apiKey: 'key' } } },
+      { NIGHTSHIFT_DATASETS: 'orcabench-regrade' }
+    );
+    expect(status).toBe(0);
+    expect(output.env?.NIGHTSHIFT_CONNECTOR_SET).toBeUndefined();
+  });
+
   it('requires sandbox credentials for a connector set', () => {
     const result = runHook({
       nightshift: { telemetry: { url: 'https://remote.example.com', apiKey: 'key' } },

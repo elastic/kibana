@@ -9,6 +9,7 @@ import assert from 'assert';
 import pMap from 'p-map';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
+import { MAX_SCORES_PER_QUERY } from '@kbn/evals-common';
 import type { InvestigationExample, InvestigationTaskOutput } from '../types';
 import { orcaRunUnscoredReason } from './report';
 
@@ -45,6 +46,12 @@ export const loadStoredOrcaRuns = async (
   const [datasetId] = datasetIds;
   assert(stats.totalRepetitions <= 1, 'ORCA runs each task once; re-grade one repetition');
   const { examples } = await client.getExperimentDatasetExamples(experimentId, datasetId);
+  // The endpoint reads at most this many score documents, so a full read may have dropped runs.
+  const scores = examples.reduce((total, { scores: each }) => total + each.length, 0);
+  assert(
+    scores < MAX_SCORES_PER_QUERY,
+    `Experiment ${experimentId} reached the ${MAX_SCORES_PER_QUERY} score documents the API returns, so some runs may be missing; re-grade a smaller experiment`
+  );
   const outputs = await pMap(
     examples,
     async ({ example_id: exampleId }) => {
@@ -66,14 +73,18 @@ export const loadStoredOrcaRuns = async (
 
 /**
  * The release's examples for the stored runs, under a dataset of their own: each example's
- * metadata comes from the pinned release, so runs of an earlier release get its `orca_expected`.
+ * metadata comes from the pinned release, so runs of an earlier release get its `orca_expected`,
+ * and its question is the one the run was given.
  */
 export const buildOrcaRegradeDataset = (
   release: EvaluationDataset<InvestigationExample>,
   outputs: ReadonlyMap<string, InvestigationTaskOutput>,
   experimentId: string
 ): EvaluationDataset<InvestigationExample> => {
-  const examples = release.examples.filter(({ metadata }) => outputs.has(metadata.case_id));
+  const examples = release.examples.flatMap((example) => {
+    const output = outputs.get(example.metadata.case_id);
+    return output ? [{ ...example, input: { ...example.input, question: output.query } }] : [];
+  });
   const missing = [...outputs.keys()].filter(
     (caseId) => !examples.some(({ metadata }) => metadata.case_id === caseId)
   );
