@@ -18,7 +18,7 @@ import { RuleSearchField } from './rule_search_field';
 import { GapFillStatusSelector } from './gap_fill_status_selector';
 import { RulesGroupByButton } from '../../../../rule_sets/components/rules_group_by_control';
 import { ShowFacetPanelButton } from '../../../../rule_sets/facets/facet_panel_visibility';
-import { SearchModeSwitch } from '../../../../rule_sets/search/search_mode_switch';
+import { AiSearchToggle } from '../../../../rule_sets/search/ai_search_toggle';
 import {
   searchBoxMode,
   useRuleSearchStatus,
@@ -84,7 +84,7 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
         placeholder={boxMode === 'ai' ? AI_PLACEHOLDER : undefined}
         prepend={
           searchStatus === 'unavailable' ? undefined : (
-            <SearchModeSwitch
+            <AiSearchToggle
               status={searchStatus}
               mode={boxMode}
               onChange={handleSearchModeChange}

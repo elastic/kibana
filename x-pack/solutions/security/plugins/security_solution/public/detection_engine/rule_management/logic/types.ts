@@ -110,7 +110,7 @@ export const SortingOptions = lazySchema(() =>
 
 export interface FilterOptions {
   filter: string;
-  /** How the search box searches; unset means AI when search by meaning is ready in the space. */
+  /** AI search on or off (`keyword`); unset means on when it is ready in the space. */
   searchMode?: RuleSearchBoxMode;
   showCustomRules: boolean;
   showElasticRules: boolean;
