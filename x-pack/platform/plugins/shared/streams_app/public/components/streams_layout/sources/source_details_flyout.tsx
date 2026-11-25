@@ -36,8 +36,6 @@ import type { SourcesController } from './sources_context';
 import { DeleteSourcesConfirmation } from './delete_sources_confirmation';
 import type { SourceApiKeyPrivilegeFailure } from './source_api_keys';
 
-const SOURCE_DETAILS_FLYOUT_MIN_WIDTH = 384;
-
 const getSourceApiKeyPrivilegeHint = (
   failure: SourceApiKeyPrivilegeFailure,
   sourceId: string
@@ -133,9 +131,8 @@ export const SourceDetailsFlyout = ({
         ownFocus
         aria-labelledby={flyoutTitleId}
         onClose={onClose}
-        size="m"
+        size="s"
         resizable
-        minWidth={SOURCE_DETAILS_FLYOUT_MIN_WIDTH}
         data-test-subj="streamsSourceDetailsFlyout"
       >
         <EuiFlyoutHeader hasBorder>
