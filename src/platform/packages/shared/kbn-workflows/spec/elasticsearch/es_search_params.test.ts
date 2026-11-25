@@ -1,0 +1,73 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { SEARCH_CONTRACT } from './overrides/elasticsearch.search';
+
+// Every case is a body that Elasticsearch accepts. The parsed output must equal the input:
+// zod strips unknown keys, and the server stores and runs the parsed output.
+const ACCEPTED_BODIES: Record<string, Record<string, unknown>> = {
+  'term full form': { query: { term: { status_code: { value: 500 } } } },
+  'term shortcut, string': { query: { term: { 'host.name': 'web-01' } } },
+  'term shortcut, number': { query: { term: { status_code: 500 } } },
+  'term shortcut, boolean': { query: { term: { success: true } } },
+  'match shortcut, string': { query: { match: { message: 'connection' } } },
+  'match shortcut, number': { query: { match: { status_code: 500 } } },
+  'match shortcut, boolean': { query: { match: { success: false } } },
+  'match_phrase shortcut': { query: { match_phrase: { message: 'connection refused' } } },
+  'match_phrase_prefix shortcut': { query: { match_phrase_prefix: { message: 'conn ref' } } },
+  'match_bool_prefix shortcut': { query: { match_bool_prefix: { message: 'conn ti' } } },
+  'prefix shortcut': { query: { prefix: { 'host.name': 'web' } } },
+  'wildcard shortcut': { query: { wildcard: { 'host.name': 'web-*' } } },
+  'regexp shortcut': { query: { regexp: { 'host.name': 'db-[0-9]+' } } },
+  'fuzzy shortcut': { query: { fuzzy: { 'user.name': 'kiril' } } },
+  'span_term shortcut': { query: { span_term: { message: 'connection' } } },
+  'script shortcut in a script query': {
+    query: { bool: { filter: { script: { script: "doc['bytes'].value > 1000" } } } },
+  },
+  'script shortcut in script_fields': {
+    script_fields: { kb: { script: "doc['bytes'].value / 1024.0" } },
+  },
+  'fields shortcut': { fields: ['host.name', 'status_code'] },
+  'runtime_mappings script, full form': {
+    runtime_mappings: {
+      kb: {
+        type: 'double',
+        script: { source: "emit(doc['bytes'].value / 1024.0)", lang: 'painless' },
+      },
+    },
+  },
+  'aggs alias': { size: 0, aggs: { by_host: { terms: { field: 'host.name' } } } },
+  'aggs alias in sub-aggregations': {
+    size: 0,
+    aggregations: {
+      by_host: { terms: { field: 'host.name' }, aggs: { avg_bytes: { avg: { field: 'bytes' } } } },
+    },
+  },
+};
+
+describe('elasticsearch.search params schema', () => {
+  const { paramsSchema } = SEARCH_CONTRACT;
+
+  it.each(Object.entries(ACCEPTED_BODIES))('keeps the body intact: %s', (_name, body) => {
+    const params = { index: 'logs', ...body };
+    const result = paramsSchema.safeParse(params);
+
+    expect(result.error).toBeUndefined();
+    expect(result.data).toEqual(params);
+  });
+
+  it('rejects the function_score array form, which Elasticsearch rejects', () => {
+    const result = paramsSchema.safeParse({
+      index: 'logs',
+      query: { function_score: [{ weight: 2 }] },
+    });
+
+    expect(result.success).toBe(false);
+  });
+});

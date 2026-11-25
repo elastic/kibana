@@ -10,8 +10,9 @@ import {
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
+import { createAddPropertyAliases } from '../shared/oas_add_property_aliases';
 import { alignDefaultWithEnum } from '../shared/oas_align_default_with_enum';
-import { allowShortQuerySyntax } from '../shared/oas_allow_short_query_syntax';
+import { createAllowShortcutProperties } from '../shared/oas_allow_shortcut_properties';
 import { removeDiscriminatorsWithoutMapping } from '../shared/oas_remove_discriminators_without_mapping';
 import { createRemoveServerDefaults } from '../shared/oas_remove_server_defaults';
 
@@ -20,7 +21,10 @@ const openApiSpec = JSON.parse(fs.readFileSync(ES_SPEC_OPENAPI_PATH, 'utf8')) as
 console.log('Preprocessing OpenAPI spec...');
 const preprocessedOpenApiSpec = [
   removeDiscriminatorsWithoutMapping,
-  allowShortQuerySyntax,
+  // Restore `@aliases` and `@shortcut_property` from schema.json; the OpenAPI spec drops both.
+  // Aliases go first: the shortcut patch wraps schemas in `anyOf`, which hides their properties.
+  createAddPropertyAliases(ES_SPEC_SCHEMA_PATH),
+  createAllowShortcutProperties(ES_SPEC_SCHEMA_PATH),
   alignDefaultWithEnum,
   // Remove server-side defaults from OpenAPI spec to prevent Zod from applying them client-side
   // This uses schema.json from elasticsearch-specification to identify fields with @server_default
