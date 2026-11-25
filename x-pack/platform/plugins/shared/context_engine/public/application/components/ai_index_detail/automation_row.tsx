@@ -11,7 +11,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
@@ -19,13 +18,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal, requiresUserSuppliedInputs } from '@kbn/workflows-ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { useAutomationRowMenuItems } from '../../hooks/use_automation_row_menu_items';
@@ -39,6 +36,7 @@ import { ItemRow } from '../item_row';
 import { ItemRowIcon } from '../item_row_icon';
 import { AutomationDeleteConfirmModal } from './automation_delete_confirm_modal';
 import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
+import { WorkflowLastExecution } from './workflow_last_execution';
 
 const runLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.runAction', {
   defaultMessage: 'Run',
@@ -46,112 +44,6 @@ const runLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.r
 const runningLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.running', {
   defaultMessage: 'Running. Open the execution.',
 });
-const statusIcon = (
-  status: ExecutionStatus
-): { type: string; color: 'success' | 'danger' | 'subdued'; label: string } | undefined => {
-  switch (status) {
-    case ExecutionStatus.COMPLETED:
-      return {
-        type: 'checkCircleFill',
-        color: 'success',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.completed', {
-          defaultMessage: 'Succeeded',
-        }),
-      };
-    case ExecutionStatus.FAILED:
-      return {
-        type: 'errorFill',
-        color: 'danger',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.failed', {
-          defaultMessage: 'Failed',
-        }),
-      };
-    case ExecutionStatus.TIMED_OUT:
-      return {
-        type: 'errorFill',
-        color: 'danger',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.timedOut', {
-          defaultMessage: 'Timed out',
-        }),
-      };
-    case ExecutionStatus.CANCELLED:
-      return {
-        type: 'minusCircle',
-        color: 'subdued',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.cancelled', {
-          defaultMessage: 'Cancelled',
-        }),
-      };
-    case ExecutionStatus.SKIPPED:
-      return {
-        type: 'minusCircle',
-        color: 'subdued',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.skipped', {
-          defaultMessage: 'Skipped',
-        }),
-      };
-    default:
-      return undefined;
-  }
-};
-
-const LastExecution = ({
-  execution,
-  href,
-}: {
-  execution: WorkflowExecutionListItemDto | null;
-  href?: string;
-}) => {
-  if (!execution) {
-    return (
-      <EuiText size="xs" color="subdued" data-test-subj="contextAutomationLastExecution">
-        {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.neverRun', {
-          defaultMessage: 'Never run',
-        })}
-      </EuiText>
-    );
-  }
-  const icon = statusIcon(execution.status);
-  const when = execution.startedAt ? (
-    <FormattedRelative value={new Date(execution.startedAt)} />
-  ) : (
-    icon?.label
-  );
-  return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      responsive={false}
-      data-test-subj="contextAutomationLastExecution"
-    >
-      {icon ? (
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type={icon.type}
-            color={icon.color}
-            size="s"
-            content={icon.label}
-            aria-label={icon.label}
-            iconProps={{
-              'data-test-subj': `contextAutomationLastExecutionStatus-${execution.status}`,
-            }}
-          />
-        </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued" className="eui-textTruncate">
-          {href ? (
-            <EuiLink href={href} color="text">
-              {when}
-            </EuiLink>
-          ) : (
-            when
-          )}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 interface AutomationRowProps {
   aiIndexId?: string;
@@ -179,6 +71,7 @@ export const AutomationRow = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = useState(false);
   const [startedExecutionId, setStartedExecutionId] = useState<string>();
+  const clearStartedExecutionId = useCallback(() => setStartedExecutionId(undefined), []);
   const { runAutomation, isLoading } = useRunAutomation({ onStarted: setStartedExecutionId });
   const {
     services: { application },
@@ -187,11 +80,14 @@ export const AutomationRow = ({
   const enabled = workflowSummary?.enabled;
   const definition = workflowSummary?.definition;
   const hasWorkflowDefinition = hasReadableWorkflow(workflowSummary);
-  const latest = useLatestWorkflowExecution(automation.value, {
+  const awaitedExecutionIds = startedExecutionId === undefined ? undefined : [startedExecutionId];
+  const latest = useLatestWorkflowExecution([automation.value], {
     enabled: hasWorkflowDefinition,
-    awaitedExecutionId: startedExecutionId,
+    awaitedExecutionIds,
+    onAwaitedObserved: clearStartedExecutionId,
   });
   useRefreshKnowledgeDocumentsAfterRun(aiIndexId, latest.isRunning);
+  const latestExecution = latest.executions?.[0]?.execution;
   const isRunning = isLoading || latest.isRunning;
   const runningExecutionId = latest.activeExecutionId ?? startedExecutionId;
   const runningHref = runningExecutionId
@@ -199,21 +95,12 @@ export const AutomationRow = ({
         path: getWorkflowExecutionPath(automation.value, runningExecutionId),
       })
     : undefined;
-  const latestExecutionHref = latest.execution
+  const latestExecutionHref = latestExecution
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
-        path: getWorkflowExecutionPath(automation.value, latest.execution.id),
+        path: getWorkflowExecutionPath(automation.value, latestExecution.id),
       })
     : undefined;
 
-  useEffect(() => {
-    if (
-      startedExecutionId !== undefined &&
-      (latest.execution?.id === startedExecutionId ||
-        latest.activeExecutionId === startedExecutionId)
-    ) {
-      setStartedExecutionId(undefined);
-    }
-  }, [latest.execution?.id, latest.activeExecutionId, startedExecutionId]);
   const actionsAriaLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.actionsAriaLabel',
     { defaultMessage: 'Actions for {name}', values: { name: displayName } }
@@ -351,9 +238,18 @@ export const AutomationRow = ({
                 })}
               </EuiText>
             </EuiFlexItem>
-          ) : hasWorkflowDefinition && latest.execution !== undefined ? (
+          ) : hasWorkflowDefinition && latest.executions !== undefined ? (
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-              <LastExecution execution={latest.execution} href={latestExecutionHref} />
+              <WorkflowLastExecution
+                {...(latestExecution
+                  ? {
+                      status: latestExecution.status,
+                      startedAt: latestExecution.startedAt,
+                    }
+                  : { hasExecution: false })}
+                href={latestExecution ? latestExecutionHref : undefined}
+                data-test-subj="contextAutomationLastExecution"
+              />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

@@ -36,7 +36,7 @@ export const ConnectAgentPanel = ({ prompt }: ConnectAgentPanelProps) => {
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextOnboardingConnectAgentPanel">
       <EuiFlexGroup gutterSize="xl" responsive wrap alignItems="center">
         <EuiFlexItem grow={3}>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h2>
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.onboarding.connectAgent.title"

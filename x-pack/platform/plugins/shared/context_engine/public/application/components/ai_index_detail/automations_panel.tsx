@@ -233,7 +233,7 @@ export const AutomationsPanel = ({
     <EuiPanel hasBorder paddingSize="l" id={AUTOMATIONS_PANEL_ID}>
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h2 id={AUTOMATIONS_HEADING_ID} tabIndex={-1}>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
                 defaultMessage: 'Automations',

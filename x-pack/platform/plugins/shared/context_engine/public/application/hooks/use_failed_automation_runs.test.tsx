@@ -131,7 +131,7 @@ describe('useFailedAutomationRuns', () => {
     const { result } = renderHook(
       () => ({
         failedRuns: useFailedAutomationRuns(['wf-failed']),
-        latest: useLatestWorkflowExecution('wf-failed'),
+        latest: useLatestWorkflowExecution(['wf-failed']),
       }),
       { wrapper: createWrapper() }
     );
@@ -139,7 +139,7 @@ describe('useFailedAutomationRuns', () => {
     await waitFor(() => {
       expect(result.current.failedRuns).toHaveLength(1);
     });
-    expect(result.current.latest.execution?.id).toBe('wf-failed-run');
+    expect(result.current.latest.executions?.[0]?.execution.id).toBe('wf-failed-run');
     expect(latestRunCalls('wf-failed')).toBe(1);
   });
 });

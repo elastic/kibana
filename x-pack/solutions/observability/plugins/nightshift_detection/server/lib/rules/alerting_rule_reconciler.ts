@@ -28,6 +28,7 @@ import {
   getWatchedSource,
 } from './rule_identity';
 import { DetectionRulesClient } from './tokens';
+import type { ReconcileRulesResult, RuleOperation, StrategyError } from '../../../common/reconcile';
 
 /** An `alerting_rule` resource and the strategy that wants it. */
 export interface StrategyAlertingRule {
@@ -35,34 +36,11 @@ export interface StrategyAlertingRule {
   resource: AlertingRuleResource;
 }
 
-/** A strategy whose `resources()` failed; it keeps everything it owns. */
-export interface StrategyError {
-  strategy: string;
-  message: string;
-}
-
 /** A source a strategy cannot watch for now; its rules stay as they are. */
 export interface SkippedSource {
   strategy: string;
   source_id: string;
 }
-
-/** What one reconciliation changed, and what it could not. */
-export interface ReconcileRulesResult {
-  created: number;
-  deleted: number;
-  enabled: number;
-  disabled: number;
-  /**
-   * Rules not created or turned on because Alerting's schedule budget is spent; the next run tries
-   * again.
-   */
-  skipped: Array<{ rule_id: string; reason: string }>;
-  failures: Array<{ rule_id: string; operation: RuleOperation; message: string }>;
-  strategy_errors: StrategyError[];
-}
-
-type RuleOperation = 'create' | 'delete' | 'enable' | 'disable';
 
 /** A desired rule with the identity the engine gives it. */
 interface DesiredRule {

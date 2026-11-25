@@ -40,6 +40,7 @@ import { AiIndexDetailPage } from './ai_index_detail_page';
 import { RECENT_KNOWLEDGE_DOCUMENTS_QUERY } from '../components/ai_index_detail';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
+import type { LatestWorkflowExecution } from '../hooks/use_latest_workflow_execution';
 
 const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
@@ -128,6 +129,20 @@ jest.mock('../hooks/use_memory_enabled', () => ({
 
 jest.mock('../hooks/use_ai_index_dreaming', () => ({
   useAiIndexDreaming: jest.fn(),
+}));
+
+const mockDefaultLatestWorkflowExecution = (): LatestWorkflowExecution => ({
+  executions: undefined,
+  unavailableWorkflowIds: [],
+  isRunning: false,
+  activeExecutionId: undefined,
+  isError: false,
+  isLoading: false,
+});
+
+jest.mock('../hooks/use_latest_workflow_execution', () => ({
+  ...jest.requireActual('../hooks/use_latest_workflow_execution'),
+  useLatestWorkflowExecution: jest.fn(() => mockDefaultLatestWorkflowExecution()),
 }));
 
 jest.mock('../hooks/use_agent_builder_agents', () => ({
@@ -272,7 +287,11 @@ describe('AiIndexDetailPage', () => {
     mockGetWorkflowExecutions.mockResolvedValue({ results: [] });
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
-    mockUseAiIndexDreaming.mockReturnValue({ dreaming: undefined, isLoading: false });
+    mockUseAiIndexDreaming.mockReturnValue({
+      dreaming: undefined,
+      workflowIds: [],
+      isLoading: false,
+    });
   });
 
   afterEach(() => {
@@ -442,7 +461,11 @@ describe('AiIndexDetailPage', () => {
   });
 
   it('opens the dreaming settings from the Settings tab when memory is globally enabled', async () => {
-    mockUseAiIndexDreaming.mockReturnValue({ dreaming: preferenceDreaming, isLoading: false });
+    mockUseAiIndexDreaming.mockReturnValue({
+      dreaming: preferenceDreaming,
+      workflowIds: [],
+      isLoading: false,
+    });
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
