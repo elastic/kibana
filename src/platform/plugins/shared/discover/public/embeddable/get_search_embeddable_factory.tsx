@@ -346,7 +346,11 @@ export const getSearchEmbeddableFactory = ({
         toolkit,
       });
 
-      const { cleanup: cleanupFetch, cancelRequests: _cancelRequests } = initializeFetch({
+      const {
+        cleanup: cleanupFetch,
+        cancelRequests: _cancelRequests,
+        fetchMore,
+      } = initializeFetch({
         api: {
           ...api,
           parentApi,
@@ -523,6 +527,7 @@ export const getSearchEmbeddableFactory = ({
                         api={{ ...api, fetchWarnings$, fetchContext$, abortSignal$, viewMode$ }}
                         dataView={dataView!}
                         esqlSource$={searchEmbeddable.esqlSource$}
+                        onFetchMoreRecords={fetchMore}
                         onAddFilter={enableFilters && !disableTriggers ? addFilter : undefined}
                         enableDocumentViewer={enableDocumentViewer && !disableTriggers}
                         expandedDoc={

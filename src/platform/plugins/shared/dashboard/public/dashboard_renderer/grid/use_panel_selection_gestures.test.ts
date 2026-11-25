@@ -205,6 +205,22 @@ describe('usePanelSelectionGestures', () => {
       expect(onPanelContentClick).not.toHaveBeenCalled();
     });
 
+    it('treats a Ctrl+Shift drag as a rectangle selection when a panel is already selected', () => {
+      const onPanelContentMouseDown = jest.fn();
+      panelContent.addEventListener('mousedown', onPanelContentMouseDown);
+      const { result } = renderGestures();
+      const init = { button: 0, ctrlKey: true, shiftKey: true };
+
+      const notPrevented = fireEvent.mouseDown(panelContent, { ...init, clientX: 50, clientY: 50 });
+      fireEvent.mouseMove(document, { ...init, clientX: 250, clientY: 60 });
+      expect(result.current.marqueeRect).toEqual({ left: 50, top: 50, right: 250, bottom: 60 });
+      fireEvent.mouseUp(document, { ...init, clientX: 250, clientY: 60 });
+
+      expect(notPrevented).toBe(false);
+      expect(onPanelContentMouseDown).not.toHaveBeenCalled();
+      expect(getSelection()).toEqual(['panel1', 'panel2']);
+    });
+
     it('clears the selection on a click on the grid background', () => {
       renderGestures();
 
@@ -329,6 +345,22 @@ describe('usePanelSelectionGestures', () => {
       fireEvent.mouseUp(document, { button: 0, ctrlKey: true, clientX: 252, clientY: 51 });
 
       expect(getSelection()).toEqual(['panel2']);
+    });
+
+    it('leaves a Ctrl+Shift drag to the panel content when nothing is selected, e.g. a map box zoom', () => {
+      const onPanelContentMouseDown = jest.fn();
+      panelContent.addEventListener('mousedown', onPanelContentMouseDown);
+      const { result } = renderGestures();
+      const init = { button: 0, ctrlKey: true, shiftKey: true };
+
+      const notPrevented = fireEvent.mouseDown(panelContent, { ...init, clientX: 50, clientY: 50 });
+      fireEvent.mouseMove(document, { ...init, clientX: 250, clientY: 60 });
+      expect(result.current.marqueeRect).toBeUndefined();
+      fireEvent.mouseUp(document, { ...init, clientX: 250, clientY: 60 });
+
+      expect(notPrevented).toBe(true);
+      expect(onPanelContentMouseDown).toHaveBeenCalledTimes(1);
+      expect(getSelection()).toEqual([]);
     });
   });
 

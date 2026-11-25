@@ -114,6 +114,7 @@ actions:
         | `image` | Image |
         | `markdown` | Markdown text |
         | `links` | Navigation links to dashboards and external URLs |
+        | `vega` | Vega or Vega-Lite visualization |
         | `esql_control` | ES&#124;QL variable control |
         | `options_list_control` | Dropdown filter by field value |
         | `range_slider_control` | Slider filter by numeric range |
@@ -162,14 +163,14 @@ actions:
         | Synthetics | Since 9.4 | N/A |
         | APM service map | Since 9.5 | N/A |
         | Machine learning and AIOps | Since 9.5 | N/A |
+        | Vega | Since 9.7 | Since 9.7 |
         | Maps | Coming soon | Coming soon |
-        | Vega | Coming soon | Coming soon |
         | Alerts table | Coming soon | N/A |
         | Legacy visualizations | N/A | N/A |
 
         ### Embedding library items
 
-        `vis`, `discover_session`, `markdown`, and `links` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
+        `vis`, `discover_session`, `markdown`, `links`, and `vega` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
         For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization).
 
@@ -258,3 +259,24 @@ actions:
         description: Dashboards documentation
         url: https://www.elastic.co/docs/explore-analyze/dashboards
       x-displayName: Dashboards
+  # ──────────────────────────────────────────────
+  # Temporary: hide the `lens-dashboard-app` panel type
+  # It is registered only while the `lens.apiFormat` flag is on (dev mode defaults to on, which is how
+  # the OAS snapshot is captured), and is not part of the public Dashboards API.
+  # Route validation still accepts it. Remove these actions once the `lens.apiFormat` flag is removed.
+  # ──────────────────────────────────────────────
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app']"
+    description: Remove the lens-dashboard-app panel schema
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].properties.panels.items.anyOf[0].discriminator.mapping['lens-dashboard-app']"
+    description: Remove lens-dashboard-app from the dashboard panel discriminator mapping
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].properties.panels.items.anyOf[0].oneOf[?(@['$ref']=='#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app')]"
+    description: Remove lens-dashboard-app from the dashboard panel oneOf
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-section'].properties.panels.items.discriminator.mapping['lens-dashboard-app']"
+    description: Remove lens-dashboard-app from the section panel discriminator mapping
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-section'].properties.panels.items.oneOf[?(@['$ref']=='#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app')]"
+    description: Remove lens-dashboard-app from the section panel oneOf
+    remove: true

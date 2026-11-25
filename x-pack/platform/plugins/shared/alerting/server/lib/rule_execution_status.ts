@@ -13,6 +13,7 @@ import type { RuleExecutionStatus, RawRuleExecutionStatus, RawRule, Rule } from 
 import { RuleExecutionStatusValues, RuleExecutionStatusWarningReasons } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
+import { addCloudApiKeyAuthErrorGuidance } from './cloud_api_key_auth_error_guidance';
 import { normalizeExecutionStatusErrorReason } from './normalize_rule_execution_reasons';
 import type { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
@@ -74,7 +75,9 @@ export function executionStatusFromState({
     const [firstError] = errorsFromLastRun;
     error = {
       reason: reasonForReportedError(firstError.userError, firstError.reason),
-      message: errorsFromLastRun.map((lastRunError) => lastRunError.message).join(','),
+      message: addCloudApiKeyAuthErrorGuidance(
+        errorsFromLastRun.map((lastRunError) => lastRunError.message).join(',')
+      ),
     };
   }
 
@@ -108,7 +111,7 @@ export function executionStatusFromError(
       status: 'error',
       error: {
         reason: getReasonFromError(error),
-        message: getEsErrorMessage(error),
+        message: addCloudApiKeyAuthErrorGuidance(getEsErrorMessage(error)),
       },
     },
     metrics: null,

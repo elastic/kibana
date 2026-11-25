@@ -28,7 +28,7 @@ import {
   initSavedObjects,
   getConfiguration,
   getDefaultRiskEngineConfiguration,
-} from '../../risk_engine/utils/saved_object_configuration';
+} from '../configuration/saved_object_configuration';
 import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
