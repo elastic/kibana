@@ -20,6 +20,8 @@ export const MAX_DREAMING_ENTITY_TYPES = 50;
 export const MAX_DREAMING_ENTITY_ATTRIBUTES = 50;
 export const MAX_DREAMING_RELATIONSHIP_TYPES = 50;
 export const MAX_DREAMING_CONNECTOR_ID_LENGTH = 256;
+/** Max length of managed dreaming workflow ids in run, GET, and PUT responses. */
+export const MAX_DREAMING_WORKFLOW_ID_LENGTH = 1024;
 
 /** Type prefixes of the KIs dreaming writes: `fact.<fact type>` and `entity.<entity type>`. */
 export const FACT_TYPE_PREFIX = 'fact.';
@@ -165,6 +167,20 @@ export type DreamingTypesConfig = Pick<
 /** Response of `GET` and `PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming`. */
 export interface GetAiIndexDreamingResponse {
   dreaming: AiIndexDreamingConfig;
+  /**
+   * Ids of the workflows dreaming runs for the AI index, in the order their runs are shown.
+   * Empty while dreaming is off.
+   */
+  workflow_ids: string[];
+}
+
+/** Response of `POST /internal/context_engine/ai_index/{aiIndexId}/dreaming/run`. */
+export interface RunAiIndexDreamingResponse {
+  executions: Array<{ workflow_id: string; execution_id: string }>;
+  /** Ids of the workflows that failed to start. */
+  failed: string[];
+  /** Ids of workflows skipped because a run was already in progress. */
+  skipped: string[];
 }
 
 /** The dreaming config of an AI index that never configured it. */
@@ -213,6 +229,10 @@ export const dreamingBuildsAnything = (config: DreamingTypesConfig): boolean => 
   const { facts, entities } = dreamingTypesOf(config);
   return facts.length > 0 || entities.length > 0;
 };
+
+/** Whether a dreaming config is on and builds something, so its workflows are installed and can run. */
+export const isDreamingOn = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
 
 const findDuplicate = (values: readonly string[]): string | undefined =>
   values.find((value, position) => values.indexOf(value) !== position);

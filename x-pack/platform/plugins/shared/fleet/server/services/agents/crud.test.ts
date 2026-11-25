@@ -277,6 +277,79 @@ describe('Agents CRUD test', () => {
   });
 
   describe('getAgentsByKuery', () => {
+    it.each(['default_api_key', 'access_api_key', 'not_a_field'])(
+      'rejects sorting by the field %s, which is not in the agent mappings, before searching',
+      async (sortField) => {
+        await expect(
+          getAgentsByKuery(esClientMock, soClientMock, {
+            showAgentless: true,
+            showInactive: false,
+            sortField,
+          })
+        ).rejects.toThrow(/is not supported/);
+        expect(searchMock).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      'default_api_key:d*',
+      'agent.id:1 and access_api_key:a*',
+      'agent.id:1 and default_api*:d*',
+      'not_a_field:abc',
+      'fleet-agents.default_api_key:abc*',
+      'fleet-agents.attributes.default_api_key > "a"',
+      'agent.id:1 and default_api_key:*',
+      'agent.id:1 and true:x',
+    ])(
+      'rejects a kuery with a field not in the agent mappings (%s) before searching',
+      async (kuery) => {
+        await expect(
+          getAgentsByKuery(esClientMock, soClientMock, {
+            showAgentless: true,
+            showInactive: false,
+            kuery,
+          })
+        ).rejects.toThrow(/is not supported/);
+        expect(searchMock).not.toHaveBeenCalled();
+      }
+    );
+
+    it('allows a prefixed mapped field, a field-less kuery term and a mapped sort field', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+      await expect(
+        getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+          sortField: 'local_metadata.host.hostname.keyword',
+          kuery: 'fleet-agents.agent.id:1 and d*',
+        })
+      ).resolves.toBeDefined();
+      expect(searchMock).toHaveBeenCalled();
+    });
+
+    it('allows the agent search kuery the Osquery agent picker sends', async () => {
+      // Composed by `/internal/osquery/fleet_wrapper/agents` from `buildAgentSearchKuery('web')`,
+      // once its `policy_name` clause is resolved to policy ids.
+      const policyScope = 'policy_id:("policy-1" or policy-1#*)';
+      const kuery = [
+        '((local_metadata.host.hostname.keyword:*web* or local_metadata.host.hostname.keyword:*WEB*',
+        'or local_metadata.host.name.keyword:*web* or local_metadata.host.hostname:*web*',
+        'or local_metadata.host.hostname:"web" or local_metadata.elastic.agent.id:*web*',
+        `or policy_id: *web* or local_metadata.os.platform: *web*) or (${policyScope}))`,
+        `and (${policyScope})`,
+      ].join(' ');
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+
+      await expect(
+        getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+          kuery,
+        })
+      ).resolves.toBeDefined();
+      expect(searchMock).toHaveBeenCalled();
+    });
+
     it('should roll forward PIT id from search responses', async () => {
       searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online', () => ({}), 'pit-2'));
 
@@ -760,12 +833,12 @@ describe('Agents CRUD test', () => {
       it('should not replace identifying_attributes in kuery', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
           showInactive: true,
-          kuery: 'agent.identifying_attributes.agent.id:agent1',
+          kuery: 'identifying_attributes.service.name:agent1',
         });
 
         const query = searchMock.mock.calls.at(-1)[0].query;
         expect(query.bool.filter[0].bool.should[0].match).toEqual({
-          'agent.identifying_attributes.agent.id': 'agent1',
+          'identifying_attributes.service.name': 'agent1',
         });
       });
     });
