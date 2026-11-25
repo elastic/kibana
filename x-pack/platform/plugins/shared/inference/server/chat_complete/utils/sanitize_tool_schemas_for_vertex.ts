@@ -71,7 +71,7 @@ interface SchemaPart {
  * Rebuilds a tool schema keeping only the fields Vertex AI accepts, so that
  * JSON Schema keywords zod v4 (or user-provided tool schemas) emit never reach
  * Vertex's parser. Conversions preserve the intent of dropped fields:
- * `const: 'x'` becomes `enum: ['x']`, `oneOf` branches become `anyOf`, and a
+ * `const: 'x'` becomes `type: 'string', enum: ['x']`, `oneOf` branches become `anyOf`, and a
  * `null` branch in `anyOf` (zod's representation of nullable values) becomes
  * `nullable: true`.
  */
@@ -87,6 +87,8 @@ const toVertexSchema = <T extends ToolSchemaType>(schemaPart: T): T => {
 
   if (typeof source.const === 'string' && schema.enum === undefined) {
     schema.enum = [source.const];
+    // Vertex requires a type on every property and only accepts `enum` on strings
+    schema.type ??= 'string';
   }
 
   if (source.oneOf) {
