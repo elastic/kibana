@@ -8,6 +8,7 @@
 import { OAuthAuthorizationService } from './oauth_authorization_service';
 import { actionsClientMock } from '../actions_client/actions_client.mock';
 import { createMockConnector } from '../application/connector/mocks';
+import { OUTBOUND_ACTIONS_DISABLED_MESSAGE } from './outbound_actions_enabled';
 
 const mockActionsClient = actionsClientMock.create();
 
@@ -216,6 +217,23 @@ describe('OAuthAuthorizationService', () => {
         scope: undefined,
         scopeParamName: undefined,
       });
+    });
+
+    it('rejects with the outbound-off error before reading secrets when outbound is off', async () => {
+      const service = createService();
+      mockActionsClient.get.mockResolvedValue(
+        createMockConnector({
+          id: 'connector-1',
+          actionTypeId: '.slack',
+          isOutboundActionsEnabled: false,
+          config: { authType: 'oauth_authorization_code' },
+        })
+      );
+
+      await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
+        OUTBOUND_ACTIONS_DISABLED_MESSAGE
+      );
+      expect(mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('throws when connector does not use OAuth Authorization Code flow', async () => {

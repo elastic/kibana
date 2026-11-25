@@ -6,9 +6,11 @@
  */
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import Boom from '@hapi/boom';
 import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionsClient } from '../actions_client';
 import { BASE_ACTION_API_PATH } from '../../common';
+import { OUTBOUND_ACTIONS_DISABLED_MESSAGE } from './outbound_actions_enabled';
 
 /**
  * OAuth connector secrets stored in encrypted saved objects
@@ -154,6 +156,12 @@ export class OAuthAuthorizationService {
     // Get connector to verify it exists and check auth type
     const connector = await this.actionsClient.get({ id: connectorId });
     const config = connector.config as OAuthConnectorConfig;
+
+    // A connector with outbound off does not start an OAuth flow, even when secrets are stored.
+    // The response config has no reserved key, so the top-level field is used.
+    if (connector.isOutboundActionsEnabled === false) {
+      throw Boom.badRequest(OUTBOUND_ACTIONS_DISABLED_MESSAGE);
+    }
 
     // Fetch connector with decrypted secrets
     const rawAction =

@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeIsDual: jest.fn((actionTypeId: string) => actionTypeId === '.dual'),
+  };
+});
 jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
@@ -14,6 +21,7 @@ jest.mock('../lib/request_oauth_authorization_code_token');
 jest.mock('../lib/ears/request_ears_token');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { connectorTypeIsDual } from '@kbn/connector-specs';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { actionsConfigMock } from '../actions_config.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
@@ -121,6 +129,9 @@ describe('oauthCallbackRoute', () => {
     (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
 
     // Restore mock implementations cleared by resetAllMocks
+    (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (actionTypeId: string) => actionTypeId === '.dual'
+    );
     (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
     mockRateLimiter.isRateLimited.mockReturnValue(false);
     mockSpacesService.spaceIdToNamespace.mockReturnValue(undefined);
@@ -757,6 +768,49 @@ describe('oauthCallbackRoute', () => {
       headers: {
         location:
           'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=OAuth+authorization+failed',
+      },
+    });
+  });
+
+  it('does not exchange the code when the connector has outbound off', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: asSpaceId('default'),
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
+    });
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          actionTypeId: '.dual',
+          config: { outboundEnabled: false },
+          secrets: {
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+            tokenUrl: 'https://provider.example.com/token',
+          },
+        },
+      }),
+    });
+
+    const [, handler] = registerRoute();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(createMockContext(), req, res);
+
+    expect(mockRequestOAuthAuthorizationCodeToken).not.toHaveBeenCalled();
+    expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location: expect.stringContaining('status_code=400'),
       },
     });
   });

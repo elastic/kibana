@@ -26,6 +26,10 @@ import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAUTH_API_TAG } from '../feature';
 import { OAuthStateClient } from '../lib/oauth_state_client';
+import {
+  isOutboundActionsDisabledInConfig,
+  OUTBOUND_ACTIONS_DISABLED_MESSAGE,
+} from '../lib/outbound_actions_enabled';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { buildTokenResponseOptions } from '../lib/request_oauth_token';
 import { requestEarsToken } from '../lib/ears/request_ears_token';
@@ -626,6 +630,15 @@ export const oauthCallbackRoute = (
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType || config?.authType;
           connectorTypeId = rawAction.attributes.actionTypeId;
+          // A connector with outbound off sends no stored credentials to the provider.
+          if (
+            isOutboundActionsDisabledInConfig({
+              actionTypeId: rawAction.attributes.actionTypeId,
+              config: config as Record<string, unknown> | undefined,
+            })
+          ) {
+            throw Boom.badRequest(OUTBOUND_ACTIONS_DISABLED_MESSAGE);
+          }
           connectorAuthType = getConnectorAuthType({ config, secrets });
           const provider = secrets.provider;
 
