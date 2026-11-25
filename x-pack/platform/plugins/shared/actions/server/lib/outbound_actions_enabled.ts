@@ -222,5 +222,4 @@ export const isOutboundActionsDisabledInConfig = ({
 }: {
   actionTypeId: string;
   config: Record<string, unknown> | undefined;
-}): boolean =>
-  connectorTypeIsDual(actionTypeId) && config?.[OUTBOUND_ENABLED_CONFIG_KEY] === false;
+}): boolean => connectorTypeIsDual(actionTypeId) && config?.[OUTBOUND_ENABLED_CONFIG_KEY] === false;
