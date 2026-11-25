@@ -81,6 +81,10 @@ describe('useFormatters', () => {
     expect(renderFormatters({ 'dateFormat:tz': 'ROC' }).timeZone).toBe('Asia/Taipei');
   });
 
+  it('names a time zone, never a UTC offset, which moment-timezone and the charts read as UTC', () => {
+    expect(renderFormatters({ 'dateFormat:tz': '+05:30' }).timeZone).toBe(moment.tz.guess(true));
+  });
+
   it("uses the browser's time zone, by its IANA name, when Kibana follows the browser", () => {
     const { formatDate, timeZone } = renderFormatters({ 'dateFormat:tz': 'Browser' });
 

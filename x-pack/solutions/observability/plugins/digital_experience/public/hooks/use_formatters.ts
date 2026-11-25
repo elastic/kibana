@@ -8,10 +8,10 @@
 import { useMemo } from 'react';
 import moment from 'moment-timezone';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { getUserTimeZone } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { NumberFormat, PercentFormat } from '@kbn/field-formats-plugin/common';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { toElasticsearchTimeZone } from '../../common/time_zone';
 import { useKibanaServices } from './use_kibana_services';
 
@@ -60,9 +60,9 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
     getConfig
   );
   const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
-  // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
-  const userTimeZone = getUserTimeZone((key) => uiSettings.get(key));
-  const timeZone = toElasticsearchTimeZone(userTimeZone);
+  // As Lens charts do: always a zone name, `Browser` the browser's, never a UTC offset moment.tz
+  // can't use
+  const timeZone = toElasticsearchTimeZone(getTimeZone(uiSettings));
 
   return {
     formatNumber: (value) => number.convertToText(value),
