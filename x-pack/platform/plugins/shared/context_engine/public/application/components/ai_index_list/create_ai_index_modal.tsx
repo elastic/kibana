@@ -92,6 +92,10 @@ export const CreateAiIndexModal = ({ onClose }: CreateAiIndexModalProps) => {
             value={id}
             isInvalid={nameError !== undefined}
             onChange={(event) => setId(event.target.value)}
+            // Ids must be lowercase, so stop the OS or browser from capitalizing or correcting them.
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             data-test-subj="contextAiIndexNameInput"
             placeholder={i18n.translate('xpack.contextEngine.createAiIndex.name.placeholder', {
               defaultMessage: 'e.g. support-ticket-triage',
