@@ -39,6 +39,23 @@ describe('findElementByDataId', () => {
     expect(findElementByDataId(root, 'service.namespace:"quoted"]')).toBe(element);
   });
 
+  it('finds the node, not the SVG element of an edge that has the same id before it', () => {
+    const edge = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    edge.setAttribute('data-id', 'shared');
+    root.appendChild(edge);
+    const node = addElement('shared');
+
+    expect(findElementByDataId(root, 'shared')).toBe(node);
+  });
+
+  it('returns nothing when only an edge has the id', () => {
+    const edge = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    edge.setAttribute('data-id', 'only-edge');
+    root.appendChild(edge);
+
+    expect(findElementByDataId(root, 'only-edge')).toBeUndefined();
+  });
+
   it('returns nothing when no element has the id, or there is no root', () => {
     addElement('a');
 

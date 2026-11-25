@@ -37,23 +37,31 @@ const CENTER_ZOOM = 1.2;
 
 /**
  * A "by calls" group is named after its busiest member, so its open box has the same name as that
- * member: searching for it would give two matches, the box and the service. Such a box is left out.
+ * member: searching for it would give two matches, the box and the service. Such a box is left out,
+ * but only while that member is shown: when a filter hides it, the name on the box has to find the
+ * box.
  */
-function isBoxNamedAfterMember(node: ServiceMapNode): boolean {
+function isBoxNamedAfterVisibleMember(
+  node: ServiceMapNode,
+  visibleNodeIds: ReadonlySet<string>
+): boolean {
   if (!isServiceGroupBoxNodeData(node.data)) {
     return false;
   }
   const label = String(node.data.label ?? '').toLowerCase();
-  return node.data.memberServiceIds.some((memberId) => memberId.toLowerCase() === label);
+  return node.data.memberServiceIds.some(
+    (memberId) => memberId.toLowerCase() === label && visibleNodeIds.has(memberId)
+  );
 }
 
 function getSearchableNodes(nodes: ServiceMapNode[]): ServiceMapNode[] {
+  const visibleNodeIds = new Set(nodes.filter((n) => !n.hidden).map((n) => n.id));
   return nodes.filter(
     (n) =>
       !n.hidden &&
       ((n.type === 'service' && isServiceNodeData(n.data)) ||
         isServiceGroupNode(n) ||
-        (isServiceGroupBoxNode(n) && !isBoxNamedAfterMember(n)) ||
+        (isServiceGroupBoxNode(n) && !isBoxNamedAfterVisibleMember(n, visibleNodeIds)) ||
         n.type === 'dependency')
   );
 }

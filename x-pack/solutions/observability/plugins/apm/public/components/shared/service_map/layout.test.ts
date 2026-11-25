@@ -806,6 +806,32 @@ describe('applyServiceMapLayout with open groups', () => {
     });
   });
 
+  it('keeps two different calls apart when their ids hold the same delimiter', () => {
+    // `b->c` calling `a` and `a->b` calling `c` must not be taken for the same pair of nodes.
+    const result = byId(
+      applyServiceMapLayout(
+        [
+          box('box'),
+          member('m1', 'box'),
+          createNode('a', 'a'),
+          createNode('b->c', 'b->c'),
+          createNode('a->b', 'a->b'),
+          createNode('c', 'c'),
+        ],
+        [createEdge('b->c', 'a'), createEdge('a->b', 'c')],
+        { rankdir: 'LR' }
+      )
+    );
+
+    // Each caller is laid out before the service it calls.
+    expect((result.get('b->c') as Node).position.x).toBeLessThan(
+      (result.get('a') as Node).position.x
+    );
+    expect((result.get('a->b') as Node).position.x).toBeLessThan(
+      (result.get('c') as Node).position.x
+    );
+  });
+
   describe('with many members', () => {
     const memberIds = (count: number) => Array.from({ length: count }, (_, i) => `m${i}`);
     const openGroup = (count: number, groupEdges: Edge[], rankdir: 'LR' | 'TB' = 'LR') => {
@@ -892,19 +918,30 @@ describe('applyServiceMapLayout with open groups', () => {
     });
 
     it('leaves a group that is already close to square as it is laid out', () => {
-      // Six members in three ranks of two: about as tall as it is wide.
+      // Six members in two ranks of three: about as tall as it is wide. A grid would have a different
+      // shape, so the positions are compared with those of the same members and calls laid out on
+      // their own, not in a group.
       const edgesBetweenRanks = [
-        createEdge('m0', 'm2'),
         createEdge('m0', 'm3'),
-        createEdge('m1', 'm2'),
-        createEdge('m1', 'm3'),
-        createEdge('m2', 'm4'),
-        createEdge('m3', 'm5'),
+        createEdge('m1', 'm4'),
+        createEdge('m2', 'm5'),
       ];
+      const plainLayout = applyServiceMapLayout(
+        memberIds(6).map((id) => createNode(id, id)),
+        edgesBetweenRanks,
+        { rankdir: 'LR' }
+      );
+      const relativeToTopLeft = (placed: Node[]) => {
+        const minX = Math.min(...placed.map(({ position }) => position.x));
+        const minY = Math.min(...placed.map(({ position }) => position.y));
+        return new Map(
+          placed.map(({ id, position }) => [id, { x: position.x - minX, y: position.y - minY }])
+        );
+      };
 
       const { members } = openGroup(6, edgesBetweenRanks);
 
-      expect(distinctValues(members.map(({ position }) => position.x))).toBe(3);
+      expect(relativeToTopLeft(members)).toEqual(relativeToTopLeft(plainLayout));
     });
   });
 });

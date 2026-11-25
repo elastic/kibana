@@ -291,6 +291,25 @@ describe('ServiceMapFindInPage', () => {
       );
     });
 
+    it('finds the box by its name when a filter hides the member it is named after', async () => {
+      const user = userEvent.setup();
+      const callsBox: ServiceMapNode = {
+        ...box,
+        data: { ...box.data, label: 'search' },
+      } as ServiceMapNode;
+      render(<ServiceMapFindInPage nodes={[callsBox, { ...search, hidden: true }, indexer]} />);
+
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'search');
+      await user.click(screen.getByTestId('serviceMapFindNext'));
+
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
+      expect(mockSetCenter).toHaveBeenLastCalledWith(
+        box.position.x + 300,
+        box.position.y + 150,
+        expect.any(Object)
+      );
+    });
+
     it('skips members that are hidden by a filter', async () => {
       const user = userEvent.setup();
       render(<ServiceMapFindInPage nodes={[box, search, { ...indexer, hidden: true }]} />);

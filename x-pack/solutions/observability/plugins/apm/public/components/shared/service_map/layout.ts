@@ -563,11 +563,12 @@ function layoutWithOpenGroups<T extends Node>(
 
   // Calls both ways between a box and another node are one edge, in the direction of the first, as
   // they are for a closed group. Two edges would be a cycle that Dagre can break either way.
+  // The key is the pair as JSON, as an id can hold any delimiter.
   const outerEdges = new Map<string, Edge>();
   for (const edge of edges) {
     const source = boxIdByMemberId.get(edge.source) ?? edge.source;
     const target = boxIdByMemberId.get(edge.target) ?? edge.target;
-    const key = [source, target].sort().join('->');
+    const key = JSON.stringify([source, target].sort());
     if (source !== target && !outerEdges.has(key)) {
       outerEdges.set(key, { ...edge, source, target });
     }
