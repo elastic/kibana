@@ -728,3 +728,77 @@ A bad proposal is skipped, not fatal. Every rejection comes back as a `skipped`
 entry with a reason: `invalid`, `action_not_allowed`, `duplicate`, `conflict`,
 or `limit_exceeded`.
 
+## Dreaming execution history size
+
+Every step of a workflow run persists its input and its output to the
+`.workflows-executions-io-data-stream` data stream, one `input:<id>` and one
+`output:<id>` document per step execution, with no deduplication between them.
+Eviction only drops a value from the engine's memory after it was flushed. A
+value a dreaming run passes from step to step is therefore stored once per step
+that holds it. The three workflow data streams share the one
+`xpack.workflows_execution_engine.storage.dataRetention` (default `90d`), which
+is not configurable per workflow.
+
+### Measured and estimated
+
+Nothing here was measured against a running Kibana and Elasticsearch.
+
+| What                                                              | Basis                                                      | Value                          |
+| ----------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------ |
+| Output of `readTraceTranscripts` at the managed cap (600k tokens) | Measured offline, ASCII synthetic rounds, see below        | about 4.7 MiB                  |
+| Same output with `size` and `max_tokens` doubled and a bit more   | Measured offline                                           | passes the 10mb step limit     |
+| Copies of the transcripts stored per run                          | Estimate, read from `dreaming_traces*.yaml` and the engine | about 10                       |
+| Execution history per run at the cap                              | Estimate (copies times transcript size)                    | about 20 to 25 MiB             |
+| Execution history per run on a typical run                        | Not measured                                               | unknown, scales with the reads |
+
+The measured part is `trace_read_output_size.test.ts`: the step returns every round
+twice (`memories` and `batches`), so its output is about twice the transcript
+text. Real transcripts hold JSON escapes and non-ASCII text, so they will be larger
+than the synthetic ASCII rounds.
+
+The copies, per run that reads `P` bytes of transcripts, are persisted as:
+
+| Step                                        | Persisted                    |
+| ------------------------------------------- | ---------------------------- |
+| `read_traces` output                        | `memories` and `batches`: 2P |
+| `active` (`data.set`) input                 | 2P                           |
+| `active` (`data.set`) output, the variables | 2P                           |
+| `batches` (`parallel`) input                | `batches`: 1P                |
+| `dream_batch` (`workflow.execute`) inputs   | the batches again: 1P        |
+| Batch workflow `memories` input and prompt  | 1P to 2P                     |
+
+The ten copies make a 10MB run about 1MB of transcript, a run at the 600k token cap
+more. A 15 minute interval only costs that much when every run finds a full read.
+A run that finds no rounds stores almost nothing. To measure, run trace dreaming
+over a seeded backlog and compare `GET _data_stream/.workflows-executions-io-data-stream/_stats`
+(or `_cat/indices?v&h=index,store.size,docs.count`) before and after a run.
+
+### Do `variables` count against a size limit?
+
+`variables` are not stored as a document of their own. The engine rebuilds them on
+every read from the outputs of the completed `data.set` steps
+(`StepIoService.getDataSetVariables`). The only limit is the per step output
+limit (`max-step-size`, default `10mb`), checked against the output of each
+`data.set` step on its own, not against the sum of the variables. A `data.set`
+whose rendered values exceed it fails that step. The variables still cost storage:
+the values of a `data.set` are stored as its input and again as its output, and each
+step that renders `variables.x` into its own input stores them again.
+
+### Recommendation
+
+1. Pass references instead of payloads (the trace dreaming reference change).
+   The read step returns batch boundaries, the batch workflow loads its own
+   transcripts. The copies drop from about ten to the one each batch loads, and the
+   10mb step limit stops bounding the read.
+2. Until then, do not raise `max_tokens` or `size` past the managed cap: the read
+   output reaches the 10mb step limit at about 1.3M tokens, and each copy grows with it.
+3. Do not put transcripts in `data.set` or workflow `outputs` when a step output
+   can be read in place (`steps.<name>.output`): a `data.set` stores its values twice.
+4. Keep the default 90 day retention for the executions data streams, because it is
+   shared with every other workflow, and size the cluster for it: at one full run a
+   day and about 25 MiB a run this is about 2.2 GiB, at one a 15 minutes about 210 GiB,
+   both estimates. If storage matters before the references change lands, lower
+   `storage.dataRetention` (for example `14d`), which divides these numbers by
+   the same ratio but also shortens the history of every other workflow.
+5. Measure before changing the retention: the stats call above, on a run over a
+   seeded backlog, replaces every estimate in the table.
