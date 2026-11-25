@@ -2393,23 +2393,44 @@ describe('UiamService', () => {
       );
     });
 
-    it('reproduces the UIAM status code and payload when the exchange fails', async () => {
+    it('preserves the UIAM status code and payload when the exchange fails', async () => {
+      const payload = {
+        error: {
+          code: 'FORBIDDEN',
+          type: 'authorization',
+          message: 'Principal is not authorized to assume this service account',
+        },
+      };
+
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 403,
-        headers: new Headers(),
-        json: async () => ({
-          error: {
-            code: 'FORBIDDEN',
-            type: 'authorization',
-            message: 'Principal is not authorized to assume this service account',
-          },
-        }),
+        headers: new Headers({ 'Content-Type': 'application/json' }),
+        json: async () => payload,
       });
 
       await expect(
         uiamService.exchangeServiceAccountToken('service-account-id')
-      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      ).rejects.toHaveProperty('output', { statusCode: 403, payload, headers: {} });
+    });
+
+    it('keeps only the Retry-After header when UIAM rate limits the exchange', async () => {
+      const payload = { error: { message: 'Too many requests' } };
+
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 429,
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          'Content-Length': String(JSON.stringify(payload).length),
+          'Retry-After': '30',
+        }),
+        json: async () => payload,
+      });
+
+      await expect(
+        uiamService.exchangeServiceAccountToken('service-account-id')
+      ).rejects.toHaveProperty('output.headers', { 'retry-after': '30' });
     });
 
     it('logs and rethrows transport errors', async () => {

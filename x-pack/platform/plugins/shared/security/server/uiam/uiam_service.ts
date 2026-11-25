@@ -1719,11 +1719,13 @@ export class UiamService implements UiamServicePublic {
     const summary = `${prefix}${message ?? 'Unknown error'}${suffix}`;
 
     const err = new Boom.Boom(summary);
+    // Keep the retry hint for callers that retry. The other headers describe UIAM's response.
+    const retryAfter = response.headers.get('retry-after');
 
     err.output = {
       statusCode: response.status,
       payload,
-      headers: Object.fromEntries(response.headers.entries()),
+      headers: retryAfter === null ? {} : { 'retry-after': retryAfter },
     };
 
     throw err;
