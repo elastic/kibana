@@ -21,6 +21,11 @@ const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
  * `alert-analysis-extra` and `pre-alert-analysis` do not satisfy `alert-analysis`.
  * Whitespace around the name is tolerated because `resolveSkill` trims its input:
  * `{"skill":" alert-analysis "}` is a successful activation, not a miss.
+ *
+ * The metric means "the agent selected the skill", not "the skill was loaded": it reads the
+ * span's raw `load_skill` arguments before validation and before the availability check in
+ * `load_skill.ts`, so a failed `load_skill` call for the right name still counts. Confirming the
+ * load succeeded would need the span's result or status, which this arguments-only query can't see.
  */
 export function createSkillInvocationEvaluator({
   traceEsClient,
