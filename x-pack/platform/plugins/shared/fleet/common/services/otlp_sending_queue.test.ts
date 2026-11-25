@@ -122,11 +122,21 @@ describe('getOtlpSendingQueueSizeError', () => {
   });
 
   it.each([
+    ['queue_size', { queue_size: 0, batch: null }],
+    ['num_consumers', { num_consumers: -1 }],
+  ])('returns an error for a %s that is not positive, with or without batching', (key, queue) => {
+    expect(getOtlpSendingQueueSizeError(queue as any)).toMatch(
+      new RegExp(`^sending_queue\\.${key} \\(-?\\d+\\) must be more than 0$`)
+    );
+  });
+
+  it.each([
     ['sizes that fit', { sizer: 'items', queue_size: 10_000, batch: { sizer: 'items' } }],
     ['batch units that differ', { sizer: 'bytes', queue_size: 100, batch: { sizer: 'items' } }],
     ['a queue that counts requests', { queue_size: 100, batch: {} }],
     ['no maximum', { batch: { min_size: 100, max_size: 0 } }],
     ['a queue that is off', { enabled: false, sizer: 'items', batch: { sizer: 'items' } }],
+    ['a queue that is off with no size', { enabled: false, queue_size: 0 }],
     ['no batching', { sizer: 'items', queue_size: 100, batch: null }],
     ['no queue', null],
   ])('returns nothing for %s', (_label, queue) => {

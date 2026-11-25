@@ -4095,6 +4095,32 @@ describe('EditOutputFlyout', () => {
       });
     });
 
+    it('should rename a preconfigured output whose locked queue the form would reject', async () => {
+      const { utils } = renderFlyout({
+        ...otlpOutput,
+        is_preconfigured: true,
+        allow_edit: ['name'],
+        otlp_exporter: {
+          ...otlpOutput.otlp_exporter,
+          sending_queue: { queue_size: 0 },
+        },
+      } as any);
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'renamed otlp output' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith('outputOtlp', {
+          name: 'renamed otlp output',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+        });
+      });
+    });
+
     it('should not send the exporter of a preconfigured output that only allows renaming', async () => {
       const { utils } = renderFlyout({
         ...otlpOutput,

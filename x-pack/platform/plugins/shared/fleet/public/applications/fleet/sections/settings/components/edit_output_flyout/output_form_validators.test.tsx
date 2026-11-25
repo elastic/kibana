@@ -763,7 +763,7 @@ describe('OTLP validators', () => {
       expect(validateOtlpPositiveDuration(value)).toBeUndefined();
     });
 
-    it.each(['0', '0s', '0.0s', '0m0s', '0.5ns'])('should reject %p', (value) => {
+    it.each(['0', '0s', '0.0s', '0m0s', '0.5ns', '0.5ns0.5ns'])('should reject %p', (value) => {
       expect(validateOtlpPositiveDuration(value)).toEqual([
         'Specify a duration longer than zero, such as 200ms, 1s',
       ]);
@@ -797,6 +797,7 @@ describe('OTLP validators', () => {
       ['1m30s', 90e9],
       ['1h', 3600e9],
       ['.5s', 500e6],
+      ['1.5ns2.5ns', 3],
       ['0', 0],
     ])('should parse %p', (value, expected) => {
       expect(parseOtlpDurationNs(value)).toBe(expected);

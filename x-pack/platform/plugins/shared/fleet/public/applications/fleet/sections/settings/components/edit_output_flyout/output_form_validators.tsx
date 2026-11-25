@@ -848,7 +848,8 @@ export function parseOtlpDurationNs(value: string): number | undefined {
     return undefined;
   }
   return [...duration.matchAll(GO_DURATION_COMPONENT_REGEX)].reduce(
-    (total, [, amount, unit]) => total + Number(amount) * GO_DURATION_UNIT_NS[unit],
+    // like the collector, each component is truncated to whole nanoseconds
+    (total, [, amount, unit]) => total + Math.trunc(Number(amount) * GO_DURATION_UNIT_NS[unit]),
     0
   );
 }

@@ -107,15 +107,25 @@ export const omitRemovedOtlpQueueSettings = <T extends OtlpSendingQueue | null |
 
 /**
  * The error of the sizes of a sending queue that the collector rejects, with the spec defaults for
- * the sizes that are not set: a minimum batch size that does not fit in the queue when both use the
- * same unit, or a maximum batch size below the minimum.
+ * the sizes that are not set: a queue size or number of consumers that is not positive, a minimum
+ * batch size that does not fit in the queue when both use the same unit, or a maximum batch size
+ * below the minimum.
  */
 export const getOtlpSendingQueueSizeError = (
   queue: OtlpSendingQueue | null | undefined
 ): string | undefined => {
-  const batch = queue?.batch;
-  // the collector does not check a queue that is off, nor a queue without batching
-  if (!queue || queue.enabled === false || !batch) {
+  // the collector does not check a queue that is off
+  if (!queue || queue.enabled === false) {
+    return;
+  }
+  for (const key of ['queue_size', 'num_consumers'] as const) {
+    const value = queue[key];
+    if (typeof value === 'number' && value <= 0) {
+      return `sending_queue.${key} (${value}) must be more than 0`;
+    }
+  }
+  const batch = queue.batch;
+  if (!batch) {
     return;
   }
   const queueSizer = queue.sizer ?? OTLP_QUEUE_SPEC_DEFAULTS.sizer;
