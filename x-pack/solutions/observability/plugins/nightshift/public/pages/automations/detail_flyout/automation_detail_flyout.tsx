@@ -234,7 +234,7 @@ export const AutomationDetailFlyout = ({
     isRunsTab ? selectedRunId : undefined
   );
   const runs = runsQuery.runs as Run[];
-  const selectedRun = runs.find(({ id }) => id === selectedRunId);
+  const selectedRun = selectedRunId ? runs.find(({ id }) => id === selectedRunId) : undefined;
   const runCounts = useAutomationsRunCounts(
     [automation.id],
     runRange.startedAfter,
