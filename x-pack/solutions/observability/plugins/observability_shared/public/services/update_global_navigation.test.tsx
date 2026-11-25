@@ -134,7 +134,7 @@ describe('classic rules and alerts read', () => {
   it('treats machine learning alert read plus security rules read as alert read', () => {
     const mlAndSecurityRules = capabilities({
       navLinks: { ml: true },
-      ml: { canUseMlAlerts: true },
+      ml: { canUseMlAlerts: true, isADEnabled: true },
       securitySolutionRulesV4: { read_rules: true },
     });
 

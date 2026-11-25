@@ -33,8 +33,9 @@ export const hasPlatformRuleReadCapabilities = (capabilities: Capabilities): boo
   capabilities.navLinks?.[ML_APP_ID] === true ||
   capabilities[DATA_QUALITY_FEATURE_ID]?.show === true;
 
-// ML Read sets this UI capability. It grants anomaly-detection alert read and not `rac`.
+// ML Read sets canUseMlAlerts even when anomaly detection is disabled and its rule type is not registered.
 const ML_ANOMALY_ALERT_READ_CAPABILITY = 'canUseMlAlerts';
+const ML_ANOMALY_DETECTION_ENABLED_CAPABILITY = 'isADEnabled';
 
 /**
  * UI capabilities whose privileges include the `rac` API.
@@ -55,7 +56,8 @@ const RAC_UI_CAPABILITIES = [
 ] as const;
 
 const hasMlAnomalyAlertRead = (capabilities: Capabilities): boolean =>
-  capabilities.ml?.[ML_ANOMALY_ALERT_READ_CAPABILITY] === true;
+  capabilities.ml?.[ML_ANOMALY_ALERT_READ_CAPABILITY] === true &&
+  capabilities.ml?.[ML_ANOMALY_DETECTION_ENABLED_CAPABILITY] === true;
 
 const hasRacFromAnotherFeature = (capabilities: Capabilities): boolean =>
   RAC_UI_CAPABILITIES.some(
@@ -64,8 +66,8 @@ const hasRacFromAnotherFeature = (capabilities: Capabilities): boolean =>
 
 /**
  * True when the user can read classic alerts and call `rac`.
- * Stack Alerts grants both. Machine Learning grants alert read only, so it counts when another
- * feature in the same space grants `rac`, such as Security Rules and Exceptions Read.
+ * Stack Alerts grants both. Machine Learning grants anomaly-detection alert read only while
+ * anomaly detection is enabled, and only when another feature grants `rac`.
  */
 export const hasPlatformAlertReadCapabilities = (capabilities: Capabilities): boolean =>
   capabilities[STACK_ALERTS_FEATURE_ID]?.[STACK_ALERTS_SHOW_UI_CAPABILITY] === true ||

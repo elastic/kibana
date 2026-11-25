@@ -150,11 +150,22 @@ describe('hasPlatformAlertReadCapabilities', () => {
     expect(
       hasPlatformAlertReadCapabilities(
         capabilities({
-          ml: { canUseMlAlerts: true },
+          ml: { canUseMlAlerts: true, isADEnabled: true },
           ...features,
         })
       )
     ).toBe(true);
+  });
+
+  it('returns false when anomaly detection is disabled even with rac', () => {
+    expect(
+      hasPlatformAlertReadCapabilities(
+        capabilities({
+          ml: { canUseMlAlerts: true, isADEnabled: false },
+          securitySolutionRulesV4: { read_rules: true },
+        })
+      )
+    ).toBe(false);
   });
 
   it('returns false when data set quality is combined with rac but has no alert read', () => {

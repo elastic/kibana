@@ -97,7 +97,7 @@ describe('hasObservabilityAlertingCapabilities', () => {
     it('returns alerts v1 when machine learning alert read is combined with security rules read', () => {
       const mlAndSecurityRules = capabilities({
         navLinks: { ml: true },
-        ml: { canUseMlAlerts: true },
+        ml: { canUseMlAlerts: true, isADEnabled: true },
         securitySolutionRulesV4: { read_rules: true },
       });
 

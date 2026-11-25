@@ -191,7 +191,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
       const visibleIn = visibleInById(
         capabilities({
           navLinks: { ml: true },
-          ml: { canUseMlAlerts: true },
+          ml: { canUseMlAlerts: true, isADEnabled: true },
           securitySolutionRulesV4: { read_rules: true },
         })
       );

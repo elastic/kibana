@@ -382,7 +382,7 @@ describe('getAlertsNavPanel', () => {
     it('shows Alerts when machine learning alert read is combined with security rules read', () => {
       setCapabilities(core, {
         navLinks: { ml: true },
-        ml: { canUseMlAlerts: true },
+        ml: { canUseMlAlerts: true, isADEnabled: true },
         securitySolutionRulesV4: { read_rules: true },
       });
 
