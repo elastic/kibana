@@ -39,14 +39,13 @@ export class SerializerHelper {
 
   /**
    * Converts a raw document to a saved object for a repository result. The result has no `acl`
-   * unless the caller sets `includeAcl`.
+   * unless the caller sets `includeAcl` in `options`.
    */
   public rawToSavedObject<T = unknown>(
     raw: SavedObjectsRawDoc,
-    options?: SavedObjectsRawDocParseOptions,
-    { includeAcl = false }: { includeAcl?: boolean } = {}
+    options?: SavedObjectsRawDocParseOptions
   ): SavedObject<T> {
-    const savedObject = this.serializer.rawToSavedObject(raw, { ...options, includeAcl });
+    const savedObject = this.serializer.rawToSavedObject(raw, options);
     const { namespace, type } = savedObject;
     if (this.registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
