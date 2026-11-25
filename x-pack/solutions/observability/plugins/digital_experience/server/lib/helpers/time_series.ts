@@ -6,7 +6,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { range } from 'lodash';
 import moment from 'moment-timezone';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { TARGET_BUCKETS } from '../../../common/histogram';
@@ -26,62 +25,6 @@ export const getHistogramInterval = (start: number, end: number): HistogramInter
   }
 
   return { value: Math.max(Math.round(interval?.asSeconds() ?? 0), 1), unit: 's' };
-};
-
-/** Far above what `getHistogramInterval` picks, so no interval expands without bound. */
-const MAX_BUCKETS = 2_000;
-
-const inTimeZone = (time: number, timeZone: string): moment.Moment =>
-  moment.tz.zone(timeZone) ? moment.tz(time, timeZone) : moment.utc(time).utcOffset(timeZone);
-
-// Elasticsearch aligns a fixed interval in local time: across a daylight saving change, buckets
-// keep their wall-clock times (00:00, then 03:00), so the one spanning it is shorter or longer.
-const fixedBucketTimestamps = (
-  start: number,
-  end: number,
-  step: number,
-  timeZone: string
-): number[] => {
-  const offset = inTimeZone(start, timeZone).utcOffset() * 60_000;
-  const firstWallClock = Math.floor((start + offset) / step) * step;
-  if (!moment.tz.zone(timeZone)) {
-    const first = firstWallClock - offset;
-    return range(first, Math.min(end, first + MAX_BUCKETS * step), step);
-  }
-  const timestamps: number[] = [];
-  for (let wallClock = firstWallClock; timestamps.length < MAX_BUCKETS; wallClock += step) {
-    // A wall-clock time the change skips lands on the next bucket's
-    const time = moment.tz(moment.utc(wallClock).toArray(), timeZone).valueOf();
-    if (time >= end) {
-      break;
-    }
-    if (time !== timestamps[timestamps.length - 1]) {
-      timestamps.push(time);
-    }
-  }
-  return timestamps;
-};
-
-/** The start of each bucket of `interval` over `[start, end)`, aligned as `TBUCKET` aligns them. */
-export const getBucketTimestamps = (
-  start: number,
-  end: number,
-  { value, unit }: HistogramInterval,
-  timeZone: string = 'UTC'
-): number[] => {
-  if (start >= end || value <= 0) {
-    return [];
-  }
-  if (unit === 's') {
-    return fixedBucketTimestamps(start, end, value * 1000, timeZone);
-  }
-  const timestamps: number[] = [];
-  const bucket = inTimeZone(start, timeZone).startOf(unit === 'w' ? 'isoWeek' : unit);
-  while (bucket.valueOf() < end && timestamps.length < MAX_BUCKETS) {
-    timestamps.push(bucket.valueOf());
-    bucket.add(value, unit);
-  }
-  return timestamps;
 };
 
 /** The buckets of a request's date histograms, built once per request for every search. */

@@ -30,8 +30,9 @@ import type {
   MobileReleaseSeries,
   MobileReleasesResponse,
 } from '../../../common/types/mobile';
+import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
 import { runEsql, timeFilter } from '../../lib/esql';
-import { getBucketTimestamps, getHistogramInterval } from '../../lib/helpers/time_series';
+import { dateHistogram, getHistogramInterval } from '../../lib/helpers/time_series';
 
 export interface GetMobileReleasesParams {
   esClient: TracedElasticsearchClient;
@@ -50,13 +51,19 @@ interface ReleaseDetails {
   otherRows: OtherReleaseStatsRow[];
   seriesRows: ReleaseSeriesRow[];
   seenRows: ReleaseSeenRow[];
+  bucketTimestamps: number[];
 }
 
 interface ReleaseRows extends ReleaseDetails {
   statsRows: ReleaseStatsRow[];
 }
 
-const NO_DETAILS: ReleaseDetails = { otherRows: [], seriesRows: [], seenRows: [] };
+const NO_DETAILS: ReleaseDetails = {
+  otherRows: [],
+  seriesRows: [],
+  seenRows: [],
+  bucketTimestamps: [],
+};
 
 const errorRateOf = (sessions: number, exceptions: number): number | null =>
   sessions > 0 ? exceptions / sessions : null;
@@ -83,8 +90,29 @@ export const getMobileReleases = async ({
       rangeFilter
     );
 
+  // TBUCKET leaves out empty buckets; a date histogram has them all, aligned the same way
+  const getBucketTimestamps = async (): Promise<number[]> => {
+    const { aggregations } = await esClient.search('get_mobile_release_buckets', {
+      index: [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX],
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size: 0,
+      track_total_hits: false,
+      query: { match_none: {} },
+      aggs: {
+        buckets: dateHistogram({
+          start,
+          // `extended_bounds` includes its max, the range doesn't
+          end: end - 1,
+          histogram: { interval: histogram.interval, timeZone },
+        }),
+      },
+    });
+    return aggregations?.buckets.buckets.map(({ key }) => key) ?? [];
+  };
+
   const detailsOf = async (releases: string[], hasOther: boolean): Promise<ReleaseDetails> => {
-    const [otherRows, seriesRows, seenRows] = await Promise.all([
+    const [otherRows, seriesRows, seenRows, bucketTimestamps] = await Promise.all([
       hasOther
         ? runEsql<OtherReleaseStatsRow>(
             esClient,
@@ -107,8 +135,9 @@ export const getMobileReleases = async ({
         withReleasesSeen(query(), releases),
         timeFilter(start - FIRST_SEEN_LOOKBACK_MS, start, environment)
       ),
+      getBucketTimestamps(),
     ]);
-    return { otherRows, seriesRows, seenRows };
+    return { otherRows, seriesRows, seenRows, bucketTimestamps };
   };
 
   // The release filter is the only group, so every query runs at once
@@ -128,7 +157,7 @@ export const getMobileReleases = async ({
     return { statsRows, ...(await detailsOf(releases, rows.length > TOP_RELEASES)) };
   };
 
-  const { statsRows, otherRows, seriesRows, seenRows } = filters.release
+  const { statsRows, otherRows, seriesRows, seenRows, bucketTimestamps } = filters.release
     ? await fetchRelease(filters.release)
     : await fetchTopReleases();
   if (statsRows.length === 0) {
@@ -155,7 +184,6 @@ export const getMobileReleases = async ({
   // The stats query's order, so equal releases keep their order and colours; "Other" last
   const releases = orderBy(rows, ['isOther', 'sessions', 'release'], ['asc', 'desc', 'desc']);
 
-  // TBUCKET leaves out empty buckets, which the charts would draw across, so fill them
   const pointRows = seriesRows.map((row) => {
     const sessions = row[RESULT_COLUMNS.sessions] ?? 0;
     const point: MobileReleasePoint = {
@@ -169,15 +197,11 @@ export const getMobileReleases = async ({
     };
     return { release: row[RESULT_COLUMNS.releaseGroup] ?? OTHER_RELEASE_KEY, point };
   });
+  // Every bucket, so the charts don't draw across the empty ones
   const timestamps =
     pointRows.length === 0
       ? []
-      : sortedUniq(
-          sortBy([
-            ...getBucketTimestamps(start, end, histogram.interval, timeZone),
-            ...pointRows.map(({ point }) => point.timestamp),
-          ])
-        );
+      : sortedUniq(sortBy([...bucketTimestamps, ...pointRows.map(({ point }) => point.timestamp)]));
   const pointsByRelease = groupBy(pointRows, 'release');
 
   const series: MobileReleaseSeries[] = releases.map(({ release, isOther }) => {

@@ -137,7 +137,7 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
 
       expect(response).toHaveStatusCode(200);
       const { releases, series } = response.body as MobileReleasesResponse;
-      // An exception in every tenth of its sessions, all in the same minute
+      // An exception in every tenth of its sessions, all in the same minute, one with two events
       expect(releases).toStrictEqual([
         {
           release: BUSY_RELEASE,
@@ -171,20 +171,19 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
       const { histogram, series } = response.body as MobileReleasesResponse;
       // 12-hour buckets from New York's midnight and noon (05:00 and 17:00 UTC in January)
       expect(histogram.interval).toStrictEqual({ value: 12 * 60 * 60, unit: 's' });
-      const [{ points }] = series;
-      expect(points.filter(({ sessions }) => sessions > 0)).toStrictEqual([
-        {
-          timestamp: Date.parse('2021-01-18T05:00:00.000Z'),
-          sessions: BUSY_SESSIONS,
-          errorRate: 0.1,
-        },
-      ]);
       const twelveHours = 12 * 60 * 60 * 1000;
-      expect(
-        points.every(
-          ({ timestamp }) => (timestamp - Date.parse(THIRTY_DAYS.start)) % twelveHours === 0
+      const populated = Date.parse('2021-01-18T05:00:00.000Z');
+      // All 60 buckets of the 30 days, the empty ones with no sessions nor rate
+      expect(series[0].points).toStrictEqual(
+        Array.from(
+          { length: 60 },
+          (_, index) => Date.parse(THIRTY_DAYS.start) + index * twelveHours
+        ).map((timestamp) =>
+          timestamp === populated
+            ? { timestamp, sessions: BUSY_SESSIONS, errorRate: 0.1 }
+            : { timestamp, sessions: 0, errorRate: null }
         )
-      ).toBe(true);
+      );
     }
   );
 

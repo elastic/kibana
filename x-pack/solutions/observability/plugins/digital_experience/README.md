@@ -147,8 +147,9 @@ on serverless and stateful.
   `timeZone` and sends it as the ES|QL request's `time_zone`, which `TBUCKET` follows (local
   midnight for days, weeks and months, local alignment for fixed intervals); the series counts
   sessions and exceptions only. Every release gets every bucket of the range: `TBUCKET` leaves out
-  the empty ones, which the route fills, in the same time zone, with no sessions and no error rate,
-  so the charts never draw across them. A release **first appears** at its first document with
+  the empty ones, so a `size: 0` date histogram (`min_doc_count: 0`, `extended_bounds`, same time
+  zone) lists them all, both of an hour repeated when clocks fall back included, and the route fills
+  them with no sessions and no error rate, so the charts never draw across them. A release **first appears** at its first document with
   that `service.version` in the selected environment: its first one in the range, which comes
   with its stats, unless it has one in the 30 days before the range, which a separate query checks
   over those days only; one seen before the range start gets no marker, and releases first seen in the same bucket

@@ -34,12 +34,18 @@ const kindOf = (query: string): QueryKind => {
   return 'stats';
 };
 
-/** Answers each query with its rows, whatever order the parallel ones run in. */
-const setup = (rows: Partial<Record<QueryKind, Row[]>>) => {
+/** Answers each query with its rows, whatever order the parallel ones run in, and the buckets. */
+const setup = ({
+  buckets = [],
+  ...rows
+}: Partial<Record<QueryKind, Row[]>> & { buckets?: number[] }) => {
   const { client, esClient } = createTracedEsClientMock();
   client.esql.query.mockImplementation(
     async (request) => esqlResponse(rows[kindOf(String(request.query))] ?? []) as never
   );
+  client.search.mockResolvedValue({
+    aggregations: { buckets: { buckets: buckets.map((key) => ({ key, doc_count: 0 })) } },
+  } as never);
   const run = (release?: string) =>
     getMobileReleases({
       esClient,
@@ -192,6 +198,7 @@ describe('getMobileReleases', () => {
 
   it('gives every release every bucket of the range, an empty one with no sessions nor rate', async () => {
     const { run } = setup({
+      buckets: [START, START + HOUR, START + 2 * HOUR],
       stats: [stats('1', 300), stats('2', 200)],
       // Release 2 has no documents in the first bucket, release 1 none in the second
       series: [
@@ -205,25 +212,45 @@ describe('getMobileReleases', () => {
       ],
     });
 
-    const { series, histogram } = await run();
+    const { series } = await run();
 
-    expect(histogram.interval.unit).toBe('s');
-    const step = histogram.interval.value * 1000;
-    const timestamps = series[0].points.map(({ timestamp }) => timestamp);
-    expect(series[1].points.map(({ timestamp }) => timestamp)).toEqual(timestamps);
-    const pointAt = (index: number, timestamp: number) =>
-      series[index].points.find((point) => point.timestamp === timestamp);
-    expect(pointAt(1, START)).toEqual({ timestamp: START, sessions: 0, errorRate: null });
-    expect(pointAt(0, START + HOUR)).toEqual({
-      timestamp: START + HOUR,
-      sessions: 0,
-      errorRate: null,
-    });
-    expect(pointAt(0, START + step)).toEqual({
-      timestamp: START + step,
-      sessions: 0,
-      errorRate: null,
-    });
+    const empty = (timestamp: number) => ({ timestamp, sessions: 0, errorRate: null });
+    expect(series.map(({ points }) => points)).toEqual([
+      [
+        { timestamp: START, sessions: 50, errorRate: 0.1 },
+        empty(START + HOUR),
+        empty(START + 2 * HOUR),
+      ],
+      [
+        empty(START),
+        { timestamp: START + HOUR, sessions: 20, errorRate: 0 },
+        empty(START + 2 * HOUR),
+      ],
+    ]);
+  });
+
+  it('asks Elasticsearch for the buckets of the range in the time zone, the empty ones too', async () => {
+    const { client, run } = setup({ stats: [stats('1', 300)] });
+
+    await run();
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        size: 0,
+        query: { match_none: {} },
+        aggs: {
+          buckets: {
+            date_histogram: expect.objectContaining({
+              time_zone: 'America/New_York',
+              min_doc_count: 0,
+              // The range is half-open; `extended_bounds` includes its max
+              extended_bounds: { min: START, max: END - 1 },
+            }),
+          },
+        },
+      }),
+      expect.anything()
+    );
   });
 
   it("buckets the series in the user's time zone, sorted and capped, and only the series", async () => {

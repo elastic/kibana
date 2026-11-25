@@ -211,6 +211,16 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     sessionId: `busy-${index}`,
     exception: index % 10 === 0,
   })),
+  // A second event of a session without an exception: the error rate still counts it once.
+  {
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.busyAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    version: BUSY_RELEASE,
+    installationId: 'installation-busy-1',
+    sessionId: 'busy-1',
+  },
   {
     serviceName: MOBILE_APPS.backendJava,
     sdkLanguage: 'java',
