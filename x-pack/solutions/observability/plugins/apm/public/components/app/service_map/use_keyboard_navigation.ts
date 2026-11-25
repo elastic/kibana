@@ -14,6 +14,7 @@ import {
   type ServiceMapEdge,
 } from '../../../../common/service_map';
 import { DIRECTION_THRESHOLD, NODE_HEIGHT, NODE_WIDTH } from './constants';
+import { findElementByDataId } from './find_element_by_data_id';
 import { getAbsoluteNodePosition } from './get_absolute_node_position';
 
 type ArrowDirection = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight';
@@ -33,6 +34,8 @@ interface UseKeyboardNavigationOptions {
 
 interface UseKeyboardNavigationResult {
   screenReaderAnnouncement: string;
+  /** Replaces the screen reader announcement, for things that happen outside the keyboard. */
+  announce: (message: string) => void;
   findNodeInDirection: (currentNodeId: string, direction: ArrowDirection) => ServiceMapNode | null;
 }
 
@@ -45,12 +48,6 @@ const getOpenGroupBox = (
     ? node
     : nodes.find((candidate) => candidate.id === node.parentId && isServiceGroupBoxNode(candidate));
 
-const getGroupClosedAnnouncement = (box: ServiceMapNode): string =>
-  i18n.translate('xpack.apm.serviceMap.groupClosed', {
-    defaultMessage: 'Closed group {groupLabel}.',
-    values: { groupLabel: box.data.label || box.id },
-  });
-
 /**
  * Hook that provides keyboard navigation for the service map.
  *
@@ -59,7 +56,8 @@ const getGroupClosedAnnouncement = (box: ServiceMapNode): string =>
  * - Enter/Space: Open popover for focused node; open a group, or close an open one
  * - Escape: Close popover; close the open group the focus is in
  *
- * Also manages screen reader announcements for navigation events.
+ * Also manages screen reader announcements for navigation events. Opening and closing a group is
+ * announced by the graph once it has happened, however it was done.
  */
 export function useKeyboardNavigation({
   nodes,
@@ -144,7 +142,6 @@ export function useKeyboardNavigation({
         if (box) {
           event.preventDefault();
           onNodeSelect(box);
-          setScreenReaderAnnouncement(getGroupClosedAnnouncement(box));
           return;
         }
       }
@@ -185,17 +182,8 @@ export function useKeyboardNavigation({
           if (selectedNodeId === nodeId) {
             onPopoverClose();
           } else if (isServiceGroupNode(focusedNode) || isServiceGroupBoxNode(focusedNode)) {
-            // Groups open and close instead of being selected.
+            // Groups open and close instead of being selected, and the graph announces it.
             onNodeSelect(focusedNode);
-            setScreenReaderAnnouncement(
-              isServiceGroupNode(focusedNode)
-                ? i18n.translate('xpack.apm.serviceMap.groupOpened', {
-                    defaultMessage:
-                      'Opened group {groupLabel}. Press Enter or Escape on it to close.',
-                    values: { groupLabel: focusedNode.data.label || nodeId },
-                  })
-                : getGroupClosedAnnouncement(focusedNode)
-            );
           } else {
             onNodeSelect(focusedNode);
             setScreenReaderAnnouncement(
@@ -219,8 +207,8 @@ export function useKeyboardNavigation({
 
           event.preventDefault();
 
-          const nextElement = document.querySelector(`[data-id="${nextNode.id}"]`);
-          if (nextElement instanceof HTMLElement) {
+          const nextElement = findElementByDataId(document, nextNode.id);
+          if (nextElement) {
             nextElement.focus();
             const nextNodeLabel = nextNode.data.label || nextNode.id;
             const nextNodeBox = getOpenGroupBox(nextNode, nodes);
@@ -263,6 +251,7 @@ export function useKeyboardNavigation({
 
   return {
     screenReaderAnnouncement,
+    announce: setScreenReaderAnnouncement,
     findNodeInDirection,
   };
 }

@@ -35,13 +35,25 @@ export const SERVICE_MAP_FIND_INPUT_ID = 'serviceMapFindInPageInput';
 
 const CENTER_ZOOM = 1.2;
 
+/**
+ * A "by calls" group is named after its busiest member, so its open box has the same name as that
+ * member: searching for it would give two matches, the box and the service. Such a box is left out.
+ */
+function isBoxNamedAfterMember(node: ServiceMapNode): boolean {
+  if (!isServiceGroupBoxNodeData(node.data)) {
+    return false;
+  }
+  const label = String(node.data.label ?? '').toLowerCase();
+  return node.data.memberServiceIds.some((memberId) => memberId.toLowerCase() === label);
+}
+
 function getSearchableNodes(nodes: ServiceMapNode[]): ServiceMapNode[] {
   return nodes.filter(
     (n) =>
       !n.hidden &&
       ((n.type === 'service' && isServiceNodeData(n.data)) ||
         isServiceGroupNode(n) ||
-        isServiceGroupBoxNode(n) ||
+        (isServiceGroupBoxNode(n) && !isBoxNamedAfterMember(n)) ||
         n.type === 'dependency')
   );
 }

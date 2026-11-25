@@ -271,6 +271,26 @@ describe('ServiceMapFindInPage', () => {
       expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
     });
 
+    it('finds the service once, not also its box, when the box is named after it', async () => {
+      const user = userEvent.setup();
+      // A "by calls" group is named after its busiest member.
+      const callsBox: ServiceMapNode = {
+        ...box,
+        data: { ...box.data, label: 'search' },
+      } as ServiceMapNode;
+      render(<ServiceMapFindInPage nodes={[callsBox, search, indexer]} />);
+
+      await user.type(screen.getByTestId('serviceMapControlsSearch'), 'search');
+      await user.click(screen.getByTestId('serviceMapFindNext'));
+
+      expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
+      expect(mockSetCenter).toHaveBeenLastCalledWith(
+        box.position.x + search.position.x + NODE_WIDTH / 2,
+        box.position.y + search.position.y + NODE_HEIGHT / 2,
+        expect.any(Object)
+      );
+    });
+
     it('skips members that are hidden by a filter', async () => {
       const user = userEvent.setup();
       render(<ServiceMapFindInPage nodes={[box, search, { ...indexer, hidden: true }]} />);

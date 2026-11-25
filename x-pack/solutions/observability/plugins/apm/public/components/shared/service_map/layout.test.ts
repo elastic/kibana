@@ -779,6 +779,33 @@ describe('applyServiceMapLayout with open groups', () => {
     });
   });
 
+  describe('with a service that calls and is called by members of the group', () => {
+    // As when the group is closed, one call between the group and the service is laid out, in the
+    // direction of the first one, not a cycle that Dagre can break either way.
+    const layOutWithOrder = (edgesInOrder: Edge[]) => {
+      const result = byId(
+        applyServiceMapLayout(
+          [box('box'), member('m1', 'box'), member('m2', 'box'), createNode('x', 'x')],
+          edgesInOrder,
+          { rankdir: 'LR' }
+        )
+      );
+      return { boxNode: result.get('box') as Node, x: result.get('x') as Node };
+    };
+
+    it('puts the service after the box when the first call is from a member to it', () => {
+      const { boxNode, x } = layOutWithOrder([createEdge('m1', 'x'), createEdge('x', 'm2')]);
+
+      expect(x.position.x).toBeGreaterThanOrEqual(boxNode.position.x + (boxNode.width ?? 0));
+    });
+
+    it('puts the service before the box when the first call is from it to a member', () => {
+      const { boxNode, x } = layOutWithOrder([createEdge('x', 'm1'), createEdge('m2', 'x')]);
+
+      expect(x.position.x + NODE_WIDTH).toBeLessThanOrEqual(boxNode.position.x);
+    });
+  });
+
   describe('with many members', () => {
     const memberIds = (count: number) => Array.from({ length: count }, (_, i) => `m${i}`);
     const openGroup = (count: number, groupEdges: Edge[], rankdir: 'LR' | 'TB' = 'LR') => {

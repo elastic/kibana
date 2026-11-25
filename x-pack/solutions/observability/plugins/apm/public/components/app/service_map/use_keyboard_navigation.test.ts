@@ -574,7 +574,7 @@ describe('useKeyboardNavigation', () => {
 
     it('closes the group on Escape when its box has the focus', () => {
       const onNodeSelect = jest.fn();
-      const { result } = renderHook(() =>
+      renderHook(() =>
         useKeyboardNavigation({ ...defaultProps, nodes: [box, member], onNodeSelect })
       );
       focusNode('shop');
@@ -582,7 +582,6 @@ describe('useKeyboardNavigation', () => {
       press('Escape');
 
       expect(onNodeSelect).toHaveBeenCalledWith(box);
-      expect(result.current.screenReaderAnnouncement).toBe('Closed group shop.');
     });
 
     it('closes the group on Escape when one of its members has the focus', () => {
@@ -646,26 +645,39 @@ describe('useKeyboardNavigation', () => {
       expect(event.defaultPrevented).toBe(true);
     });
 
-    it('announces an opened group instead of a selection when Enter is pressed on it', () => {
+    // The graph announces a group that opened or closed, once it has, whatever way it was done.
+    it('does not announce a selection when Enter is pressed on a group', () => {
+      const onNodeSelect = jest.fn();
       const { result } = renderHook(() =>
-        useKeyboardNavigation({ ...defaultProps, nodes: [closedGroup] })
+        useKeyboardNavigation({ ...defaultProps, nodes: [closedGroup], onNodeSelect })
       );
       focusNode('shop');
 
       press('Enter');
 
-      expect(result.current.screenReaderAnnouncement).toBe(
-        'Opened group shop. Press Enter or Escape on it to close.'
-      );
+      expect(onNodeSelect).toHaveBeenCalledWith(closedGroup);
+      expect(result.current.screenReaderAnnouncement).toBe('');
     });
 
-    it('announces a closed group when Enter is pressed on its box', () => {
-      const { result } = renderHook(() => useKeyboardNavigation({ ...defaultProps, nodes: [box] }));
+    it('does not announce a selection when Enter is pressed on the box of a group', () => {
+      const onNodeSelect = jest.fn();
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [box], onNodeSelect })
+      );
       focusNode('shop');
 
       press('Enter');
 
-      expect(result.current.screenReaderAnnouncement).toBe('Closed group shop.');
+      expect(onNodeSelect).toHaveBeenCalledWith(box);
+      expect(result.current.screenReaderAnnouncement).toBe('');
+    });
+
+    it('announces what the graph says through announce', () => {
+      const { result } = renderHook(() => useKeyboardNavigation({ ...defaultProps }));
+
+      act(() => result.current.announce('Opened group shop.'));
+
+      expect(result.current.screenReaderAnnouncement).toBe('Opened group shop.');
     });
   });
 
@@ -775,6 +787,20 @@ describe('useKeyboardNavigation', () => {
 
         expect(document.activeElement).toBe(payElement);
         expect(result.current.screenReaderAnnouncement).toBe('Focused on pay, in group shop');
+      });
+
+      it('moves to a node whose id would break a selector', () => {
+        const quoted = createNode('say "hi"]', 400, 0);
+        const { result } = renderHook(() =>
+          useKeyboardNavigation({ ...defaultProps, nodes: [createNode('a', 0, 0), quoted] })
+        );
+        addElement('a').focus();
+        const quotedElement = addElement('say "hi"]');
+
+        pressArrowRight();
+
+        expect(document.activeElement).toBe(quotedElement);
+        expect(result.current.screenReaderAnnouncement).toBe('Focused on say "hi"]');
       });
 
       it('does not mention a group for a node outside it', () => {

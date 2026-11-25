@@ -49,6 +49,7 @@ import {
   MAX_ZOOM,
   OPENED_GROUP_MAX_ZOOM,
 } from './constants';
+import { findElementByDataId } from './find_element_by_data_id';
 import { getServiceMapViewTarget } from './get_service_map_view_target';
 import { ServiceNode } from '../../shared/service_map/service_node';
 import { ServiceGroupNode } from '../../shared/service_map/service_group_node';
@@ -513,36 +514,6 @@ function GraphInner({
     highlightedNodeIds,
   ]);
 
-  // A group keeps its id when it opens or closes, and React Flow keeps the element of a node with the
-  // same id, but the button or shape inside it that had the focus is replaced and the focus would be
-  // lost with it. So when a group switches between closed and open, the focus moves to its element.
-  const groupNodeTypesRef = useRef(new Map<string, string>());
-  useEffect(() => {
-    const previousTypes = groupNodeTypesRef.current;
-    const currentTypes = new Map<string, string>();
-    let switchedGroupId: string | undefined;
-    for (const { id, type } of nodes) {
-      if (type !== 'serviceGroup' && type !== 'serviceGroupBox') {
-        continue;
-      }
-      currentTypes.set(id, type);
-      const previousType = previousTypes.get(id);
-      if (previousType && previousType !== type) {
-        switchedGroupId = id;
-      }
-    }
-    groupNodeTypesRef.current = currentTypes;
-
-    if (switchedGroupId) {
-      const element = mapRegionRef.current?.querySelector(
-        `.react-flow__node[data-id="${switchedGroupId}"]`
-      );
-      if (element instanceof HTMLElement) {
-        element.focus();
-      }
-    }
-  }, [nodes]);
-
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
       // The box of an open group is only a frame: it closes from its button or the keyboard.
@@ -645,15 +616,19 @@ function GraphInner({
     }
   }, [selectedEdgeForFlyout, edgeFlyoutConnection, handlePopoverClose]);
 
-  // Close the edge flyout when the source or the target of its edge is filtered out.
+  // Close the edge flyout when the source or the target of its edge is filtered out, or the edge is
+  // gone, such as a call inside a group that was closed. Not while the map is empty, e.g. when it
+  // reloads.
   useEffect(() => {
     if (!selectedEdgeForFlyout) return;
-    const { source, target } = selectedEdgeForFlyout;
+    const { id, source, target } = selectedEdgeForFlyout;
     const isHidden = nodesAfterFilters.some(
       (n) => (n.id === source || n.id === target) && n.hidden
     );
-    if (isHidden) handlePopoverClose();
-  }, [nodesAfterFilters, selectedEdgeForFlyout, handlePopoverClose]);
+    const isGone =
+      nodesAfterFilters.length > 0 && !edgesAfterFilters.some((edge) => edge.id === id);
+    if (isHidden || isGone) handlePopoverClose();
+  }, [nodesAfterFilters, edgesAfterFilters, selectedEdgeForFlyout, handlePopoverClose]);
 
   const requestFlyoutDeps = useMemo(
     () => ({ core, share, lens, dataViews }),
@@ -757,7 +732,7 @@ function GraphInner({
   );
 
   // Use keyboard navigation hook for accessibility
-  const { screenReaderAnnouncement } = useKeyboardNavigation({
+  const { screenReaderAnnouncement, announce } = useKeyboardNavigation({
     nodes,
     edges,
     selectedNodeId,
@@ -768,6 +743,47 @@ function GraphInner({
     onPopoverClose: handlePopoverClose,
     isInteractive,
   });
+
+  // A group keeps its id when it opens or closes, and React Flow keeps the element of a node with the
+  // same id, but the button or shape inside it that had the focus is replaced and the focus would be
+  // lost with it. So when a group switches between closed and open, the focus moves to its element.
+  // It is announced here, from the state that was committed, so it is also for a group opened with
+  // the pointer or closed with the button of its box, and not only for the keys.
+  const groupNodeTypesRef = useRef(new Map<string, string>());
+  useEffect(() => {
+    const previousTypes = groupNodeTypesRef.current;
+    const currentTypes = new Map<string, string>();
+    let switchedGroup: ServiceMapNode | undefined;
+    for (const node of nodes) {
+      if (!isServiceGroupNode(node) && !isServiceGroupBoxNode(node)) {
+        continue;
+      }
+      const type = node.type ?? '';
+      currentTypes.set(node.id, type);
+      const previousType = previousTypes.get(node.id);
+      if (previousType && previousType !== type) {
+        switchedGroup = node;
+      }
+    }
+    groupNodeTypesRef.current = currentTypes;
+
+    if (!switchedGroup) {
+      return;
+    }
+    const groupLabel = switchedGroup.data.label || switchedGroup.id;
+    announce(
+      isServiceGroupBoxNode(switchedGroup)
+        ? i18n.translate('xpack.apm.serviceMap.groupOpened', {
+            defaultMessage: 'Opened group {groupLabel}. Press Enter or Escape on it to close.',
+            values: { groupLabel },
+          })
+        : i18n.translate('xpack.apm.serviceMap.groupClosed', {
+            defaultMessage: 'Closed group {groupLabel}.',
+            values: { groupLabel },
+          })
+    );
+    findElementByDataId(mapRegionRef.current, switchedGroup.id)?.focus();
+  }, [nodes, announce]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
