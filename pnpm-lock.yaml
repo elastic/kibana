@@ -3446,6 +3446,9 @@ importers:
       '@kbn/secrets':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-secrets
+      '@kbn/secrets-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/secrets
       '@kbn/security-ai-prompts':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/security-ai-prompts
@@ -9635,6 +9638,8 @@ importers:
   x-pack/platform/plugins/shared/search_inference_endpoints: {}
 
   x-pack/platform/plugins/shared/searchprofiler: {}
+
+  x-pack/platform/plugins/shared/secrets: {}
 
   x-pack/platform/plugins/shared/security: {}
 

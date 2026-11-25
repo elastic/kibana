@@ -1543,6 +1543,7 @@ packages:
   - 'x-pack/platform/plugins/shared/screenshotting'
   - 'x-pack/platform/plugins/shared/search_inference_endpoints'
   - 'x-pack/platform/plugins/shared/searchprofiler'
+  - 'x-pack/platform/plugins/shared/secrets'
   - 'x-pack/platform/plugins/shared/security'
   - 'x-pack/platform/plugins/shared/serverless'
   - 'x-pack/platform/plugins/shared/slo_shared'
