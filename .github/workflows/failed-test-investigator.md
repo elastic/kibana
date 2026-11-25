@@ -141,7 +141,7 @@ safe-outputs:
     # The detection job can't request an OIDC token, so it runs on Copilot.
     engine:
       id: copilot
-      model: sonnet
+      model: claude-opus-5
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
     # a detection failure blocks the outputs instead of passing with a warning
