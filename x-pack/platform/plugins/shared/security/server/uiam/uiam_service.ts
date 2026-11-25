@@ -246,6 +246,17 @@ const API_KEY_CREATOR_CACHE_TTL_MS = 5 * 60 * 1000;
 const API_KEY_CREATOR_REQUEST_TIMEOUT_MS = 5 * 1000;
 
 /**
+ * Requests that arrive together just after a session's access token expired all present the same
+ * refresh token, and share one refresh. Its tokens are kept for a short while after it completes,
+ * because the session is only updated once the user profile is activated: until then, later
+ * requests still read the old refresh token. The TTL stays well under the grace period in which
+ * UIAM accepts a used refresh token again, so a request never gets tokens here that UIAM would
+ * refuse. `max` only bounds memory, and a refresh that is evicted costs one more call to UIAM.
+ */
+const SESSION_TOKEN_REFRESH_CACHE_MAX_SIZE = 1000;
+const SESSION_TOKEN_REFRESH_CACHE_TTL_MS = 10 * 1000;
+
+/**
  * Response containing a list of OAuth clients.
  */
 export interface OAuthClientsResponse {
@@ -285,7 +296,8 @@ export interface UiamServicePublic {
   getClientAuthentication(request?: Pick<KibanaRequest, 'headers'>): ClientAuthentication;
 
   /**
-   * Refreshes the UIAM user session and returns new access and refresh session tokens.
+   * Refreshes the UIAM user session and returns new access and refresh session tokens. Calls that
+   * present the same refresh token within a short window share one refresh and get the same tokens.
    * @param refreshToken UIAM session refresh token.
    */
   refreshSessionTokens(
@@ -567,6 +579,15 @@ export class UiamService implements UiamServicePublic {
     max: API_KEY_CREATOR_CACHE_MAX_SIZE,
     ttl: API_KEY_CREATOR_CACHE_TTL_MS,
   });
+  // Keyed by a hash of the refresh token, so the token itself is never held as a key. It holds
+  // the refreshes themselves, so concurrent requests for the same session share one call to UIAM.
+  readonly #sessionTokenRefreshes = new LRUCache<
+    string,
+    Promise<{ accessToken: string; refreshToken: string }>
+  >({
+    max: SESSION_TOKEN_REFRESH_CACHE_MAX_SIZE,
+    ttl: SESSION_TOKEN_REFRESH_CACHE_TTL_MS,
+  });
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
@@ -681,6 +702,26 @@ export class UiamService implements UiamServicePublic {
    * See {@link UiamServicePublic.refreshSessionTokens}.
    */
   async refreshSessionTokens(refreshToken: string) {
+    const cacheKey = createHash('sha256').update(refreshToken).digest('hex');
+    const cached = this.#sessionTokenRefreshes.get(cacheKey);
+    if (cached) {
+      this.#logger.debug('Reusing the session tokens of a refresh that has already been started.');
+      return cached;
+    }
+
+    const refresh = this.#refreshSessionTokens(refreshToken);
+    this.#sessionTokenRefreshes.set(cacheKey, refresh);
+    // A failed refresh is not kept, so the next request tries again. A refresh that outlasts the
+    // TTL may have been replaced by a newer one, which must stay.
+    refresh.catch(() => {
+      if (this.#sessionTokenRefreshes.peek(cacheKey) === refresh) {
+        this.#sessionTokenRefreshes.delete(cacheKey);
+      }
+    });
+    return refresh;
+  }
+
+  async #refreshSessionTokens(refreshToken: string) {
     try {
       this.#logger.debug('Attempting to refresh session tokens.');
 

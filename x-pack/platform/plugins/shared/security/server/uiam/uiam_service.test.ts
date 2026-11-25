@@ -750,6 +750,103 @@ describe('UiamService', () => {
         dispatcher: AGENT_MOCK,
       });
     });
+
+    describe('for requests that present the same refresh token', () => {
+      const newTokens = { accessToken: 'new-token', refreshToken: 'new-refresh' };
+      const respondWithNewTokens = () =>
+        fetchSpy.mockResolvedValue({
+          ok: true,
+          json: async () => ({ access_token: 'new-token', refresh_token: 'new-refresh' }),
+        });
+
+      it('shares one refresh between concurrent requests', async () => {
+        respondWithNewTokens();
+
+        await expect(
+          Promise.all([
+            uiamService.refreshSessionTokens('old-refresh'),
+            uiamService.refreshSessionTokens('old-refresh'),
+            uiamService.refreshSessionTokens('old-refresh'),
+          ])
+        ).resolves.toEqual(Array(3).fill(newTokens));
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('gives a request that arrives after the refresh completed the same tokens', async () => {
+        respondWithNewTokens();
+
+        await expect(uiamService.refreshSessionTokens('old-refresh')).resolves.toEqual(newTokens);
+        await expect(uiamService.refreshSessionTokens('old-refresh')).resolves.toEqual(newTokens);
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('refreshes again once the tokens have been kept for 10 seconds', async () => {
+        // The cache reads the time from `performance`, and re-reads it at most once a millisecond.
+        jest.useFakeTimers({ doNotFake: ['performance'] });
+        const nowSpy = jest.spyOn(performance, 'now').mockReturnValue(1_000);
+        const letTheCacheReadTheTimeAgain = () => jest.advanceTimersByTime(1);
+        try {
+          respondWithNewTokens();
+          await uiamService.refreshSessionTokens('old-refresh');
+
+          letTheCacheReadTheTimeAgain();
+          nowSpy.mockReturnValue(1_000 + 10_000);
+          await uiamService.refreshSessionTokens('old-refresh');
+          expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+          letTheCacheReadTheTimeAgain();
+          nowSpy.mockReturnValue(1_000 + 10_001);
+          await uiamService.refreshSessionTokens('old-refresh');
+          expect(fetchSpy).toHaveBeenCalledTimes(2);
+        } finally {
+          nowSpy.mockRestore();
+          jest.useRealTimers();
+        }
+      });
+
+      it('fails every waiting request when the refresh fails, and refreshes again for the next one', async () => {
+        fetchSpy.mockResolvedValueOnce({
+          ok: false,
+          status: 503,
+          headers: new Headers(),
+          json: async () => ({ error: { message: 'Service unavailable' } }),
+        });
+
+        const [first, second] = await Promise.allSettled([
+          uiamService.refreshSessionTokens('old-refresh'),
+          uiamService.refreshSessionTokens('old-refresh'),
+        ]);
+        expect(first).toEqual(
+          expect.objectContaining({ status: 'rejected', reason: expect.any(Error) })
+        );
+        expect(second).toEqual(first);
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+        respondWithNewTokens();
+        await expect(uiamService.refreshSessionTokens('old-refresh')).resolves.toEqual(newTokens);
+        expect(fetchSpy).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('refreshes each refresh token separately', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ access_token: 'new-token', refresh_token: 'new-refresh' }),
+      });
+
+      await Promise.all([
+        uiamService.refreshSessionTokens('old-refresh'),
+        uiamService.refreshSessionTokens('another-old-refresh'),
+      ]);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(fetchSpy.mock.calls.map(([, init]) => init.body)).toEqual([
+        JSON.stringify({ refresh_token: 'old-refresh' }),
+        JSON.stringify({ refresh_token: 'another-old-refresh' }),
+      ]);
+    });
   });
 
   describe('#invalidateSessionTokens', () => {

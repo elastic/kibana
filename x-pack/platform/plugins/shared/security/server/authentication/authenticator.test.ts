@@ -2524,6 +2524,95 @@ describe('Authenticator', () => {
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
 
+    describe('when requests that return a user profile grant arrive at the same time', () => {
+      const userProfileGrant: UserProfileGrant = { type: 'accessToken', accessToken: 'new-token' };
+      const newState = { authorization: 'Basic yyy' };
+      const userProfile = { ...userProfileMock.createWithSecurity(), uid: 'new-profile-uid' };
+
+      // Starts one request per given session, all before any of them completes.
+      const authenticateWithSessions = async (...sessionValues: SessionValue[]) => {
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(mockAuthenticatedUser(), {
+            userProfileGrant,
+            state: newState,
+          })
+        );
+        for (const sessionValue of sessionValues) {
+          mockOptions.session.get.mockResolvedValueOnce({ error: null, value: sessionValue });
+        }
+
+        return Promise.allSettled(
+          sessionValues.map(() => authenticator.authenticate(httpServerMock.createKibanaRequest()))
+        );
+      };
+
+      it('activates the user profile once for requests with the same session', async () => {
+        let completeActivation: (profile: typeof userProfile) => void;
+        mockOptions.userProfileService.activate.mockReturnValue(
+          new Promise((resolve) => (completeActivation = resolve))
+        );
+
+        const results = authenticateWithSessions(mockSessVal, mockSessVal, mockSessVal);
+        // Lets every request get as far as it can while the activation is still in flight.
+        await new Promise((resolve) => setImmediate(resolve));
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
+
+        completeActivation!(userProfile);
+        for (const result of await results) {
+          expect(result).toEqual(
+            expect.objectContaining({
+              status: 'fulfilled',
+              value: expect.objectContaining({ status: 'succeeded' }),
+            })
+          );
+        }
+
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.update).toHaveBeenCalledTimes(3);
+        expect(mockOptions.session.update).toHaveBeenCalledWith(
+          expect.anything(),
+          { ...mockSessVal, userProfileId: 'new-profile-uid', state: newState },
+          { extend: true }
+        );
+      });
+
+      it('activates the user profile separately for requests with different sessions', async () => {
+        mockOptions.userProfileService.activate.mockResolvedValue(userProfile);
+
+        await authenticateWithSessions(mockSessVal, { ...mockSessVal, sid: 'another-sid' });
+
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(2);
+      });
+
+      it('activates the user profile again for a request that arrives after the activation completed', async () => {
+        mockOptions.userProfileService.activate.mockResolvedValue(userProfile);
+
+        await authenticateWithSessions(mockSessVal);
+        await authenticateWithSessions(mockSessVal);
+
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(2);
+      });
+
+      it('fails every waiting request when the activation fails, and activates again for the next one', async () => {
+        const failureReason = new Error('Activation failed');
+        mockOptions.userProfileService.activate.mockRejectedValueOnce(failureReason);
+
+        const results = await authenticateWithSessions(mockSessVal, mockSessVal);
+        expect(results).toEqual([
+          { status: 'rejected', reason: failureReason },
+          { status: 'rejected', reason: failureReason },
+        ]);
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.update).not.toHaveBeenCalled();
+
+        mockOptions.userProfileService.activate.mockResolvedValue(userProfile);
+        await authenticateWithSessions(mockSessVal);
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(2);
+        expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('clears session if provider failed to authenticate system API request with 401 with active session.', async () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { 'kbn-system-request': 'true' },
