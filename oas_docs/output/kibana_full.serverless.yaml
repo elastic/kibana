@@ -37986,7 +37986,7 @@ paths:
                   description: High risk vendor watchlist
                   entitySources:
                     - name: High Risk Vendors-store
-                      queryRule: 'entity.attributes.watchlists: *'
+                      queryRule: 'entity.name: *-vendor'
                       type: store
                   name: High Risk Vendors
                   riskModifier: 1.5
@@ -37998,7 +37998,7 @@ paths:
                   maxLength: 1000
                   type: string
                 entitySources:
-                  description: The rule-based data sources (entity store or index) the watchlist should have after the update, at most one of each type. Omit it to leave the data sources as they are; an empty array removes them. A watchlist that is not managed can have only one data source. Integration and managed data sources are not changed.
+                  description: The rule-based data sources (entity store or index) the watchlist should have after the update, at most one of each type. Omit it to leave the data sources as they are; an empty array removes them. A watchlist that is not managed can have only one rule-based source in this array; its integration sources are not counted and are not changed. An entity store source requires a non-empty `queryRule`. An index source requires Elasticsearch `read` privileges on its `indexPattern` (and encrypted saved objects to be configured on self-managed deployments), and accepts a `range`; `range` is ignored for entity store sources. Managed data sources are not changed.
                   items:
                     additionalProperties: false
                     type: object
@@ -38016,7 +38016,7 @@ paths:
                         maxLength: 256
                         type: string
                       queryRule:
-                        description: KQL query used to filter data from the provided index patterns
+                        description: KQL query. For an index source, it filters the documents read from the index pattern. For an entity store source, it filters the entity store and is required.
                         maxLength: 4096
                         type: string
                       range:
