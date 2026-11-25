@@ -137,7 +137,7 @@ describe('DreamingPanel setup (real dreaming hooks)', () => {
 
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
     await waitFor(() =>
-      expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeInTheDocument()
+      expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeEnabled()
     );
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupSave'));
 
@@ -166,7 +166,7 @@ describe('DreamingPanel setup (real dreaming hooks)', () => {
 
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
     await waitFor(() =>
-      expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeInTheDocument()
+      expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeEnabled()
     );
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupSave'));
 

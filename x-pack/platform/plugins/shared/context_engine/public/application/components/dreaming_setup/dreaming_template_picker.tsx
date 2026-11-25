@@ -50,6 +50,7 @@ const Pill = ({
 };
 
 export interface DreamingTemplatePickerProps {
+  ariaLabel: string;
   templates: DreamingTemplateSummary[];
   selectedId: string | undefined;
   isLoading: boolean;
@@ -57,6 +58,7 @@ export interface DreamingTemplatePickerProps {
 }
 
 export const DreamingTemplatePicker = ({
+  ariaLabel,
   templates,
   selectedId,
   isLoading,
@@ -69,7 +71,7 @@ export const DreamingTemplatePicker = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" wrap responsive={false} role="group">
+    <EuiFlexGroup gutterSize="s" wrap responsive={false} role="group" aria-label={ariaLabel}>
       {templates.map(({ id, name }) => (
         <EuiFlexItem grow={false} key={id}>
           <Pill

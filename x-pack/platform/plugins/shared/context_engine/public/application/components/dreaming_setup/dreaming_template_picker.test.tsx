@@ -27,22 +27,26 @@ const LEGAL: DreamingTemplateSummary = {
 };
 
 const onSelect = jest.fn();
+const groupAriaLabel = 'What are you building?';
 
 const renderPicker = ({
   templates = [SUPPORT, LEGAL],
   selectedId = SUPPORT.id,
   isLoading = false,
   onSelectProp = onSelect,
+  ariaLabel = groupAriaLabel,
 }: {
   templates?: DreamingTemplateSummary[];
   selectedId?: string;
   isLoading?: boolean;
   onSelectProp?: (id: string) => void;
+  ariaLabel?: string;
 } = {}) =>
   render(
     <I18nProvider>
       <EuiProvider>
         <DreamingTemplatePicker
+          ariaLabel={ariaLabel}
           templates={templates}
           selectedId={selectedId}
           isLoading={isLoading}
@@ -68,6 +72,12 @@ describe('DreamingTemplatePicker', () => {
       screen.queryByTestId('contextDreamingTemplateOption-legal_assistant')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextDreamingTemplateOption-custom')).not.toBeInTheDocument();
+  });
+
+  it('names the option group for assistive tech', () => {
+    renderPicker();
+
+    expect(screen.getByRole('group', { name: groupAriaLabel })).toBeInTheDocument();
   });
 
   it('renders one option per template plus Custom with template names', () => {

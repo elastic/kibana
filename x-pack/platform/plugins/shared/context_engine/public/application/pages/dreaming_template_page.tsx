@@ -173,6 +173,7 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
                 helpText={isCustom ? customHelpText : selected?.description}
               >
                 <DreamingTemplatePicker
+                  ariaLabel={examplesLabel}
                   templates={templates}
                   selectedId={selectedId}
                   isLoading={isLoading}

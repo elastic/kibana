@@ -84,6 +84,7 @@ export const DreamingSetupForm = ({ isSaving, onApply, onDiscard }: DreamingSetu
         description={isCustom ? customHelpText : selected?.description ?? ''}
       >
         <DreamingTemplatePicker
+          ariaLabel={startFromLabel}
           templates={templates}
           selectedId={selectedId}
           isLoading={isLoading}
