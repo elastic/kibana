@@ -8,7 +8,8 @@
  */
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { FunctionDefinitionTypes } from '../../../commands/definitions/types';
-import { Location } from '../../../commands/registry/types';
+import { Location, type ISuggestionItem } from '../../../commands/registry/types';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../../commands/registry/constants';
 import { setTestFunctions } from '../../../commands/definitions/utils/test_functions';
 import { setup } from './helpers';
 
@@ -87,16 +88,29 @@ describe('time series sources in subqueries', () => {
     return suggestions.find(({ label }) => label === 'tsdb_index');
   };
 
-  it('suggests a time series index and rewrites the subquery FROM to TS', async () => {
-    const suggestion = await suggestTsdbIndex('FROM index, (FROM tsdb_i/)');
+  const getTextReplacement = (suggestion?: ISuggestionItem) => {
+    const commands: Array<{ id: string; arguments?: Array<Record<string, string>> }> = JSON.parse(
+      suggestion?.command?.arguments?.[0]?.commands ?? '[]'
+    );
 
-    expect(JSON.stringify(suggestion?.command)).toContain('TS tsdb_index');
-  });
+    return commands.find(({ id }) => id === ESQL_APPLY_TEXT_REPLACEMENT_COMMAND)?.arguments?.[0];
+  };
+
+  it.each(['FROM index, (FROM /)', 'FROM index, (FROM tsdb_i/)'])(
+    'rewrites only the subquery FROM to TS: %s',
+    async (query) => {
+      expect(getTextReplacement(await suggestTsdbIndex(query))).toEqual({
+        replacementText: 'TS tsdb_index',
+        replaceStart: String('FROM index, ('.length),
+        replaceEnd: String('FROM index, (FROM tsdb_index'.length),
+      });
+    }
+  );
 
   it('keeps FROM when the subquery has another source', async () => {
     const suggestion = await suggestTsdbIndex('FROM index, (FROM (ROW x = 1), tsdb_i/)');
 
     expect(suggestion).toBeDefined();
-    expect(JSON.stringify(suggestion?.command)).not.toContain('TS tsdb_index');
+    expect(getTextReplacement(suggestion)).toBeUndefined();
   });
 });
