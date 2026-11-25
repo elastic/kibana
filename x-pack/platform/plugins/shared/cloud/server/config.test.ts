@@ -33,6 +33,11 @@ describe('Cloud plugin config', () => {
       );
     });
 
+    test('Coerces a numeric created_at, which YAML reads from an unquoted year, to a string', () => {
+      const output = config.schema.validate({ serverless: { created_at: 2026 } });
+      expect(output.serverless?.created_at).toBe('2026');
+    });
+
     test('Fails on invalid project_type', () => {
       expect(() =>
         config.schema.validate({

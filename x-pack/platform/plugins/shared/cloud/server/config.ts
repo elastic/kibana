@@ -113,7 +113,9 @@ const configSchema = schema.object({
         product_tier: schema.maybe(createProductTiersSchema()),
         orchestrator_target: schema.maybe(schema.string()),
         in_trial: schema.maybe(schema.boolean()),
-        created_at: schema.maybe(schema.string()),
+        // YAML reads an unquoted `created_at: 2026` as a number; coerce it so parseCreatedAt can ignore it with a
+        // warning instead of failing validation.
+        created_at: schema.maybe(schema.string({ coerceFromNumber: true })),
       },
       // avoid future chicken-and-egg situation with the component populating the config
       { unknowns: 'ignore' }
