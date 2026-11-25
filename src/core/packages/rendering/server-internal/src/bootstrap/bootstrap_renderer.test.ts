@@ -498,6 +498,7 @@ describe('bootstrapRenderer', () => {
         allChunks: ['fallback.js'],
         entrypointChunks: {
           core: ['plugin-core.js', 'shared.js'],
+          discover: ['plugin-discover.js', 'shared.js'],
           security: ['plugin-security.js', 'shared.js'],
         },
       })
