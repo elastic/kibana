@@ -15,7 +15,7 @@ import { configurationsLinks, getConfigurationsLinks } from '../../configuration
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';
 import { siemReadinessLinks } from '../../siem_readiness/links';
-import type { AppLinkItems } from '../../common/links/types';
+import type { AppLinkItems, LinkItem } from '../../common/links/types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
 import { alertDetectionsLinks, alertsLink, alertSummaryLink } from '../../detections/links';
 import { links as rulesLinks } from '../../rules/links';
@@ -51,6 +51,41 @@ export const appLinks: AppLinkItems = Object.freeze([
   aiValueLinks,
 ]);
 
+const getAlertsLink = ({ enableAlertsAndAttacksAlignment }: ExperimentalFeatures): LinkItem =>
+  enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink;
+
+// When the new Attacks page is enabled, we hide the legacy Attack Discovery link from the
+// side navigation, the global navigation, and global search. However, we keep it in the
+// appLinks array so that SecurityRoutePageWrapper still considers the route
+// authorized/available, allowing the redirect logic in attack_discovery/routes.tsx to run.
+const getAttackDiscoveryLink = ({
+  enableAlertsAndAttacksAlignment,
+}: ExperimentalFeatures): LinkItem =>
+  enableAlertsAndAttacksAlignment
+    ? {
+        ...attackDiscoveryLinks,
+        sideNavDisabled: true,
+        globalNavPosition: undefined,
+        globalSearchDisabled: true,
+      }
+    : attackDiscoveryLinks;
+
+/**
+ * Returns the static app links with the same alerts and attacks links as `getFilteredLinks`, so the navigation does not change once the filtered links are published.
+ */
+export const getAppLinks = (experimentalFeatures: ExperimentalFeatures): AppLinkItems =>
+  Object.freeze(
+    appLinks.map((link) => {
+      if (link === alertsLink) {
+        return getAlertsLink(experimentalFeatures);
+      }
+      if (link === attackDiscoveryLinks) {
+        return getAttackDiscoveryLink(experimentalFeatures);
+      }
+      return link;
+    })
+  );
+
 export const getFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins,
@@ -68,26 +103,12 @@ export const getFilteredLinks = async (
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
-  const { enableAlertsAndAttacksAlignment } = experimentalFeatures;
 
   return Object.freeze([
     dashboardsLinks,
-    enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
+    getAlertsLink(experimentalFeatures),
     alertSummaryLink,
-    // When the new Attacks page is enabled, we hide the legacy Attack Discovery link from the
-    // side navigation, the global navigation, and global search. However, we keep it in the
-    // appLinks array so that SecurityRoutePageWrapper still considers the route
-    // authorized/available, allowing the redirect logic in attack_discovery/routes.tsx to run.
-    ...(enableAlertsAndAttacksAlignment
-      ? [
-          {
-            ...attackDiscoveryLinks,
-            sideNavDisabled: true,
-            globalNavPosition: undefined,
-            globalSearchDisabled: true,
-          },
-        ]
-      : [attackDiscoveryLinks]),
+    getAttackDiscoveryLink(experimentalFeatures),
     findingsLinks,
     casesLinks,
     filteredConfigurationsLinks,
