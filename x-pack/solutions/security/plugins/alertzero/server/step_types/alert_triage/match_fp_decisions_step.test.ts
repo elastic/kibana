@@ -935,6 +935,24 @@ describe('triage match decisions step in on mode', () => {
     expect(tags()).toEqual([]);
   });
 
+  it('takes no notes for a revoked dismissal, so its alerts are not counted as left for notes', async () => {
+    const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+    const many = Array.from(
+      { length: DECISION_NOTES_PER_SWEEP + 5 },
+      (_unused, i): [string, Record<string, unknown>] => [`a${i}`, source('C:\\x.exe')]
+    );
+    const { run } = setup({
+      mode: 'on',
+      alerts: many,
+      decisions: { [id]: stored('do_not_propose') },
+      revokedDuringSweep: [id],
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ skipped: 0, left_for_notes: 0 }));
+  });
+
   describe('what moves while the sweep writes', () => {
     const skipTag = (id: string) => `az:skipped_by_decision:${id}`;
 

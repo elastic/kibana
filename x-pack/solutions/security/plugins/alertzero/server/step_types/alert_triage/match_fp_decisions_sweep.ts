@@ -477,8 +477,6 @@ export const createDecisionSweep = ({
 
   /** Keeps the open alerts of one dismissed pattern out of analysis, chunk by chunk. */
   const skipDecision = async (id: string, alertIds: string[]) => {
-    const allowed = withinNotes(alertIds);
-    if (allowed.length === 0) return;
     const skipTag = skippedByDecisionTag(id);
     const skipTags = [VERDICT_INCONCLUSIVE_TAG, skipTag];
     const kept: string[] = [];
@@ -487,6 +485,7 @@ export const createDecisionSweep = ({
         logger.debug(`Decision ${id} was revoked or expired during the sweep: it skips nothing`);
         return;
       }
+      const allowed = withinNotes(alertIds);
       for (const chunk of chunked(allowed)) {
         kept.push(
           ...(await tagSkippedChunk({ api: contextManager, write, chunk, skipTags, skipTag, warn }))
