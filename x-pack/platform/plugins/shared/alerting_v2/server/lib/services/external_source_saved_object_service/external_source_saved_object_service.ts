@@ -32,6 +32,8 @@ export type {
 
 const SEARCH_FIELDS = ['metadata.name', 'metadata.description'];
 const DEFAULT_SORT_FIELD = 'metadata.name.keyword';
+/** Breaks ties in the requested sort, so a page never repeats or skips a source. */
+const SORT_TIE_BREAKER_FIELD = 'created_at';
 
 /** Reads and writes external source saved objects. Saved object errors propagate to the caller. */
 @injectable()
@@ -111,8 +113,10 @@ export class ExternalSourceSavedObjectService implements ExternalSourceSavedObje
       type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      sortField,
-      sortOrder,
+      sort: [
+        { field: sortField, order: sortOrder },
+        { field: SORT_TIE_BREAKER_FIELD, order: 'asc' },
+      ],
       ...(search
         ? { search, searchFields: SEARCH_FIELDS, defaultSearchOperator: 'AND' as const }
         : {}),

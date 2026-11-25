@@ -168,13 +168,37 @@ describe('ExternalSourceSavedObjectService', () => {
         type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'metadata.name.keyword',
-        sortOrder: 'asc',
+        sort: [
+          { field: 'metadata.name.keyword', order: 'asc' },
+          { field: 'created_at', order: 'asc' },
+        ],
       });
       expect(result).toEqual({
         saved_objects: [{ id: 'import-1', attributes, version: 'WzEsMV0=', references }],
         total: 1,
       });
+    });
+
+    it('sorts by the requested field and breaks ties by creation time', async () => {
+      const { externalSourceSavedObjectService, mockSavedObjectsClient } =
+        createExternalSourceSavedObjectService();
+      mockSavedObjectsClient.find.mockResolvedValue(emptyFindResult);
+
+      await externalSourceSavedObjectService.find({
+        page: 1,
+        perPage: 20,
+        sortField: 'type',
+        sortOrder: 'desc',
+      });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [
+            { field: 'type', order: 'desc' },
+            { field: 'created_at', order: 'asc' },
+          ],
+        })
+      );
     });
 
     it('searches the name and description fields', async () => {
