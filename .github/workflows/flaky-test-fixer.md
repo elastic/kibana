@@ -101,7 +101,8 @@ steps:
       corepack prepare "pnpm@${PNPM_VERSION}" --activate
       pnpm --version
   - name: Bootstrap Kibana
-    run: pnpm kbn bootstrap
+    # `id-token: write` covers the whole job: keep the OIDC request variables away from install scripts
+    run: exec env -u ACTIONS_ID_TOKEN_REQUEST_TOKEN -u ACTIONS_ID_TOKEN_REQUEST_URL pnpm kbn bootstrap
   - name: Expose Kibana's Node.js path to the agent
     # the sandbox rebuilds PATH from every `bin` dir under RUNNER_TOOL_CACHE, so the agent's
     # `node` is whichever version the runner cached first, not the one setup-node just
