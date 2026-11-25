@@ -18,7 +18,7 @@ import type {
   OverviewPercentileParam,
   OverviewSearchParams,
 } from '../../../../common/overview_filters';
-import { PAGE_FILTER_NAMES } from '../../../../common/overview_filters';
+import { PAGE_FILTER_NOTE_NAMES } from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
   ApplicationOverviewKpisResponse,
@@ -57,7 +57,7 @@ import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
 const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
   defaultMessage:
-    'The page filters apply to page loads, with their load time, trend, pages and breakdowns, and to frustration signals only: web vitals, JS errors, other clicks and HTTP requests carry no page URL yet.',
+    'Page applies to every browser event but HTTP requests, which carry the URL they request. URL contains applies to page loads and frustration signals only: web vitals, JS errors and other clicks carry no URL.',
 });
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
@@ -334,7 +334,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onClose={() => setIsFlyoutOpen(false)}
         />
       )}
-      {PAGE_FILTER_NAMES.some((name) => (filters[name] ?? []).length > 0) && (
+      {PAGE_FILTER_NOTE_NAMES.some((name) => (filters[name] ?? []).length > 0) && (
         <>
           <EuiSpacer size="s" />
           <EuiText

@@ -119,6 +119,12 @@
  *   and `session.start` that come with sessions. Set to false to match EDOT Browser 0.3.0 and
  *   earlier, which don't emit them (elastic/elastic-otel-rum-js#120 added them). The apps then
  *   report distro version 0.3.0 instead of 0.4.0.
+ * - withPageRoute (boolean, default: true): write the route of the page as `attributes.url.template`
+ *   on every log but the resource timings, like EDOT Browser does. storefront-web and
+ *   media-portal-web tell their routes (`/products/{slug}`), as an app that calls `setPageRoute()`
+ *   does. checkout-web and docs-web leave it to the SDK, which only turns ID-like segments into
+ *   `{id}`, so the slugs of docs-web stay in its routes. support-center-web sets `pageRoute: false`,
+ *   so its logs have no route. Set to false to match an SDK without page routes
  * - includeRawAttribution (boolean, default: false): write the web-vitals attribution as a JSON
  *   body on `browser.web_vital` events, like the instrumentation's experimental opt-in option
  * - environments (boolean, default: false): spread every app over the environments listed above
