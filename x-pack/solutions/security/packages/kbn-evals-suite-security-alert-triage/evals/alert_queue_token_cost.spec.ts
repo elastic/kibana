@@ -372,10 +372,18 @@ const EVIDENCE_RUN_ID = randomUUID().slice(0, 8);
 const EVIDENCE_ALERT_ID_PREFIX = `${EVIDENCE_ALERT_ID_BASE}${EVIDENCE_RUN_ID}-`;
 const EVIDENCE_EVENTS_INDEX = `logs-queue_evidence_eval_${EVIDENCE_RUN_ID}`;
 const EVIDENCE_RULE_ID = 'queue-evidence-failed-logon';
-// The alerts point at logs-*, so the user names carry the run suffix. Another run's events or a
-// leftover index then cannot add to this run's logon counts.
+// The alerts point at logs-*, so the users, hosts and IPs come from the run id. Another run's events
+// or a leftover index then cannot add to this run's logon counts, whichever field the agent filters by.
 const EVIDENCE_USER_COMPROMISED = `svc_eval_backup_${EVIDENCE_RUN_ID}`;
 const EVIDENCE_USER_BENIGN = `evalusr_jdoe_${EVIDENCE_RUN_ID}`;
+const EVIDENCE_HOST_COMPROMISED = `srv-eval-db-${EVIDENCE_RUN_ID}`;
+const EVIDENCE_HOST_BENIGN = `wks-eval-${EVIDENCE_RUN_ID}`;
+// shortcut: two octets from the run id give 65,536 values, so two runs can share an IP. Fine for leftovers.
+const [EVIDENCE_IP_HIGH, EVIDENCE_IP_LOW] = [0, 2].map((at) =>
+  parseInt(EVIDENCE_RUN_ID.slice(at, at + 2), 16)
+);
+const EVIDENCE_IP_EXTERNAL = `198.18.${EVIDENCE_IP_HIGH}.${EVIDENCE_IP_LOW}`;
+const EVIDENCE_IP_INTERNAL = `10.${EVIDENCE_IP_HIGH}.${EVIDENCE_IP_LOW}.5`;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Evidence alerts that a crashed run left behind would count as open alerts in the queue tests. This
@@ -413,11 +421,23 @@ const buildEvidenceEvents = () => {
 
   return [
     ...Array.from({ length: 20 }, (_, i) =>
-      event(i * 20, EVIDENCE_USER_COMPROMISED, 'srv-eval-db-01', '198.18.0.7', 'failure')
+      event(
+        i * 20,
+        EVIDENCE_USER_COMPROMISED,
+        EVIDENCE_HOST_COMPROMISED,
+        EVIDENCE_IP_EXTERNAL,
+        'failure'
+      )
     ),
-    event(20 * 20 + 5, EVIDENCE_USER_COMPROMISED, 'srv-eval-db-01', '198.18.0.7', 'success'),
+    event(
+      20 * 20 + 5,
+      EVIDENCE_USER_COMPROMISED,
+      EVIDENCE_HOST_COMPROMISED,
+      EVIDENCE_IP_EXTERNAL,
+      'success'
+    ),
     ...Array.from({ length: 6 }, (_, i) =>
-      event(i * 30, EVIDENCE_USER_BENIGN, 'wks-eval-02', '10.250.0.5', 'failure')
+      event(i * 30, EVIDENCE_USER_BENIGN, EVIDENCE_HOST_BENIGN, EVIDENCE_IP_INTERNAL, 'failure')
     ),
   ];
 };
@@ -512,7 +532,7 @@ evaluate.describe(
                   'I have five minutes. Is anything in this alert queue actually on fire? Give me the shortest honest answer.',
               },
               output: {
-                expected: `Yes, ${EVIDENCE_USER_COMPROMISED}: 20 failed logons from external IP 198.18.0.7 on srv-eval-db-01 followed by a successful logon from the same IP, so this is a suspected compromise that needs urgent investigation. ${EVIDENCE_USER_BENIGN} only has 6 failed logons from internal 10.250.0.5 and no success, so it can wait.`,
+                expected: `Yes, ${EVIDENCE_USER_COMPROMISED}: 20 failed logons from external IP ${EVIDENCE_IP_EXTERNAL} on ${EVIDENCE_HOST_COMPROMISED} followed by a successful logon from the same IP, so this is a suspected compromise that needs urgent investigation. ${EVIDENCE_USER_BENIGN} only has 6 failed logons from internal ${EVIDENCE_IP_INTERNAL} and no success, so it can wait.`,
               },
               // Built-in tools are off when skill_ids is set, so grant the ES|QL tool the evidence step uses.
               metadata: { skillIds: ['alert-analysis'], toolIds: ['platform.core.execute_esql'] },
