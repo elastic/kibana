@@ -32,11 +32,10 @@ import {
   defaultUdtHeaders,
 } from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
+import { getUserPrivilegesMockDefaultValue } from '../../../../../common/components/user_privileges/__mocks__';
 import * as timelineActions from '../../../../store/actions';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
-import { userEvent } from '@testing-library/user-event';
 import * as notesApi from '../../../../../notes/api/api';
 import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mock_timeline_search_service';
 import * as useTimelineEventsModule from '../../../../containers';
@@ -189,8 +188,7 @@ const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
 
-// Failing: See https://github.com/elastic/kibana/issues/224186
-describe.skip('query tab with unified timeline', () => {
+describe('query tab with unified timeline', () => {
   const fetchNotesSpy = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
   beforeAll(() => {
@@ -253,13 +251,14 @@ describe.skip('query tab with unified timeline', () => {
       useIsExperimentalFeatureEnabledMock
     );
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      notesPrivileges: { crud: true, read: true },
-      timelinePrivileges: { crud: true, read: true },
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
-      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
-    });
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      getUserPrivilegesMockDefaultValue({
+        notesPrivileges: { crud: true, read: true },
+        timelinePrivileges: { crud: true, read: true },
+        kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+        detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      })
+    );
 
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
@@ -967,29 +966,6 @@ describe.skip('query tab with unified timeline', () => {
       );
     });
 
-    // Flaky: https://github.com/elastic/kibana/issues/189794
-    it.skip(
-      'should have the notification dot & correct tooltip',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
-        expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-
-        expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
-
-        userEvent.hover(screen.getByTestId('timeline-notes-button-small'));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-notes-tool-tip')).toBeInTheDocument();
-          expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-            '1 Note available. Click to view it & add more.'
-          );
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
     it(
       'should open the notes flyout',
       async () => {
@@ -1048,11 +1024,11 @@ describe.skip('query tab with unified timeline', () => {
 
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-        expect(screen.getAllByTestId('pin')).toHaveLength(1);
+        expect(screen.getAllByTestId('timeline-pin-event-button')).toHaveLength(1);
         // disabled because it is already pinned
-        expect(screen.getByTestId('pin')).toBeDisabled();
+        expect(screen.getByTestId('timeline-pin-event-button')).toBeDisabled();
 
-        fireEvent.mouseOver(screen.getByTestId('pin'));
+        fireEvent.mouseOver(screen.getByTestId('timeline-pin-event-button'));
 
         await waitFor(() => {
           expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
@@ -1077,10 +1053,10 @@ describe.skip('query tab with unified timeline', () => {
         renderTestComponents();
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-        expect(screen.getAllByTestId('pin')).toHaveLength(1);
-        expect(screen.getByTestId('pin')).not.toBeDisabled();
+        expect(screen.getAllByTestId('timeline-pin-event-button')).toHaveLength(1);
+        expect(screen.getByTestId('timeline-pin-event-button')).not.toBeDisabled();
 
-        fireEvent.mouseOver(screen.getByTestId('pin'));
+        fireEvent.mouseOver(screen.getByTestId('timeline-pin-event-button'));
         await waitFor(() => {
           expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
           expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent('Pin event');

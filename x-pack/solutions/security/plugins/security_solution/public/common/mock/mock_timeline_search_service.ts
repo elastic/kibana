@@ -34,7 +34,13 @@ export const getMockTimelineSearchSubscription = () => {
               activePage: args.pagination.activePage,
               querySize: args.pagination.querySize,
             },
-            rawResponse: {},
+            rawResponse: {
+              hits: {
+                hits: mockEvents
+                  .slice(start, end)
+                  .map(({ _id, _index }) => ({ _id, _index, _source: {} })),
+              },
+            },
             totalCount: mockEvents.length,
           });
         }, 50);
