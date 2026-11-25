@@ -7,7 +7,8 @@
 
 import { MAX_DREAMING_STEP_MEMORIES } from '../../common/dreaming';
 import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
-import { batchByConversation, estimateTokens, splitRound } from './trace_batches';
+import { batchByConversation, estimateTokens, refsOfBatches, splitRound } from './trace_batches';
+import { DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS } from '../../common/step_types/read_trace_transcripts';
 
 const round = (
   id: string,
@@ -140,5 +141,95 @@ describe('batchByConversation', () => {
 
     expect(ids(batchByConversation(rounds, 1000))).toEqual([['a1', 'a2', 'x'], ['b1']]);
     expect(batchByConversation([], 1000)).toEqual([]);
+  });
+});
+
+describe('estimateTokens against the prompt the model reads', () => {
+  const withContent = (content: string): TraceTranscriptMemory => ({
+    ...round('r', 'c', 1),
+    title: 'Agent conversation, round ending 2026-11-12T08:00:00.000Z',
+    content,
+  });
+  const promptTokensAtLeast = (memory: TraceTranscriptMemory) =>
+    Buffer.byteLength(JSON.stringify([memory.title, memory.content])) / 4;
+  const samples: Record<string, string> = {
+    english: 'User: How do I rotate the API keys of my deployment?\n'.repeat(400),
+    'escape heavy': 'Tool result: {"a":"b\\n\\"c\\""}\n\t'.repeat(600),
+    cjk: '用户：请帮我检查部署的索引生命周期策略。'.repeat(300),
+    cyrillic: 'Пользователь: покажи ошибки за последний час.\n'.repeat(300),
+    emoji: '🚀🔥✅ deploy done '.repeat(500),
+  };
+
+  it.each(Object.keys(samples))('does not underestimate %s text', (name) => {
+    const memory = withContent(samples[name]);
+    expect(estimateTokens(memory)).toBeGreaterThanOrEqual(
+      Math.floor(promptTokensAtLeast(memory)) - 2
+    );
+  });
+
+  it('counts escapes and non-ASCII characters at more than a quarter token', () => {
+    expect(estimateTokens({ title: '', content: '\n\n\n\n' })).toBe(2);
+    expect(estimateTokens({ title: '', content: '用户' })).toBe(2);
+  });
+
+  it.each(Object.keys(samples))(
+    'keeps every batch of %s rounds within the default batch budget',
+    (name) => {
+      const rounds = Array.from({ length: 60 }, (_, i) => ({
+        ...withContent(samples[name]),
+        id: `r${i}`,
+        attributes: { 'trace.conversation_id': `c${i % 3}` },
+      }));
+      const batches = batchByConversation(rounds, DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS);
+
+      expect(batches.length).toBeGreaterThan(0);
+      for (const batch of batches) {
+        const tokens = batch.reduce((sum, memory) => sum + estimateTokens(memory), 0);
+        expect(tokens).toBeLessThanOrEqual(DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS);
+      }
+    }
+  );
+});
+
+describe('refsOfBatches', () => {
+  const found = (id: string) => ({
+    traceId: id,
+    lastAt: '2026-11-12T08:00:00.000Z',
+    target: 'traces',
+  });
+
+  it('references the rounds of each batch in order, without their transcripts', () => {
+    const batches = batchByConversation(
+      [round('trace:a', 'a', 60), round('trace:b', 'b', 60)],
+      100
+    );
+
+    expect(refsOfBatches(batches, [found('a'), found('b')])).toEqual([
+      [{ trace_id: 'a', last_at: '2026-11-12T08:00:00.000Z', target: 'traces' }],
+      [{ trace_id: 'b', last_at: '2026-11-12T08:00:00.000Z', target: 'traces' }],
+    ]);
+  });
+
+  it('names the parts of a round split across batches, so each batch loads its own', () => {
+    const batches = batchByConversation(
+      [round('trace:a', 'a', 60), round('trace:big', 'a', 250), round('trace:z', 'a', 10)],
+      100
+    );
+    const refs = refsOfBatches(batches, [found('a'), found('big'), found('z')]);
+
+    const partsOfBig = refs.flatMap((batch) =>
+      batch.filter(({ trace_id: id }) => id === 'big').map(({ parts }) => parts)
+    );
+    expect(partsOfBig.length).toBeGreaterThan(1);
+    expect(partsOfBig[0]).toEqual({ from: 0, to: expect.any(Number) });
+    expect(partsOfBig.map((parts) => parts?.to)).toEqual(
+      [...partsOfBig.map((parts) => parts?.to)].sort((a, b) => (a ?? 0) - (b ?? 0))
+    );
+    const covered = partsOfBig.reduce(
+      (sum, parts) => sum + ((parts?.to ?? 0) - (parts?.from ?? 0)),
+      0
+    );
+    expect(covered).toBe(batches.flat().filter(({ id }) => id === 'trace:big').length);
+    expect(refs[0][0].parts).toBeUndefined();
   });
 });

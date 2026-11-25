@@ -5,16 +5,39 @@
  * 2.0.
  */
 
+import { TRACE_ROUND_ID_PREFIX } from './ids';
 import { MAX_DREAMING_STEP_MEMORIES } from '../../common/dreaming';
-import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
+import type {
+  TraceRoundRef,
+  TraceTranscriptMemory,
+} from '../../common/step_types/read_trace_transcripts';
 
 const CHARS_PER_TOKEN = 4;
 
-export const estimateTokens = ({
+/**
+ * Estimates the tokens a round takes in the model prompt, which carries it as JSON: characters
+ * count as they are escaped there, a quarter token each, and a non-ASCII character counts as a
+ * whole token, as scripts such as CJK and emoji tokenize far denser than English text.
+ */
+export const estimateTokens = (round: Pick<TraceTranscriptMemory, 'title' | 'content'>) =>
+  Math.ceil(estimateExactTokens(round));
+
+const estimateExactTokens = ({
   title,
   content,
-}: Pick<TraceTranscriptMemory, 'title' | 'content'>) =>
-  Math.ceil((title.length + content.length) / CHARS_PER_TOKEN);
+}: Pick<TraceTranscriptMemory, 'title' | 'content'>) => {
+  const escaped = JSON.stringify(title + content);
+  let ascii = 0;
+  let wide = 0;
+  for (let i = 1; i < escaped.length - 1; i++) {
+    if (escaped.charCodeAt(i) < 128) {
+      ascii++;
+    } else {
+      wide++;
+    }
+  }
+  return ascii / CHARS_PER_TOKEN + wide;
+};
 
 const groupInOrder = <T>(items: T[], keyOf: (item: T) => string): T[][] => {
   const groups = new Map<string, T[]>();
@@ -39,7 +62,11 @@ export const splitRound = (
   if (estimateTokens(round) <= batchTokens) {
     return [round];
   }
-  const budget = batchTokens * CHARS_PER_TOKEN - round.title.length;
+  const charsPerToken = Math.min(
+    CHARS_PER_TOKEN,
+    (round.title.length + round.content.length) / estimateExactTokens(round)
+  );
+  const budget = Math.floor(batchTokens * charsPerToken) - round.title.length;
   const lines = round.content.split('\n');
   const opening = lines[0].slice(0, Math.min(PART_OPENING_CHARS, Math.floor(budget / 4)));
   const partChars = Math.max(1, budget - opening.length - PART_HEADER_CHARS);
@@ -133,4 +160,46 @@ export const batchByConversation = (
     flush();
   }
   return batches;
+};
+
+/**
+ * The boundaries of batches made by {@link batchByConversation}, as references: each round with
+ * where it was found, and for a round split across batches, which of its parts the batch holds.
+ * `rounds` are the rounds the batched memories were read from.
+ */
+export const refsOfBatches = (
+  batches: TraceTranscriptMemory[][],
+  rounds: Array<{ traceId: string; lastAt: string; target: string }>
+): TraceRoundRef[][] => {
+  const byId = new Map(rounds.map((round) => [`${TRACE_ROUND_ID_PREFIX}${round.traceId}`, round]));
+  const partsOf = new Map<string, number>();
+  for (const { id } of batches.flat()) {
+    partsOf.set(id, (partsOf.get(id) ?? 0) + 1);
+  }
+  const nextPart = new Map<string, number>();
+  return batches.map((batch) => {
+    const refs: TraceRoundRef[] = [];
+    const indexOf = new Map<string, number>();
+    for (const { id } of batch) {
+      const round = byId.get(id);
+      if (!round) {
+        continue;
+      }
+      const part = nextPart.get(id) ?? 0;
+      nextPart.set(id, part + 1);
+      const existing = indexOf.get(id);
+      if (existing !== undefined) {
+        refs[existing].parts = { from: refs[existing].parts?.from ?? part, to: part + 1 };
+        continue;
+      }
+      indexOf.set(id, refs.length);
+      refs.push({
+        trace_id: round.traceId,
+        last_at: round.lastAt,
+        target: round.target,
+        ...((partsOf.get(id) ?? 1) > 1 && { parts: { from: part, to: part + 1 } }),
+      });
+    }
+    return refs;
+  });
 };

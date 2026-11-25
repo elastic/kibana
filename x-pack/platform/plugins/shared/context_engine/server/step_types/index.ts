@@ -20,7 +20,10 @@ import { getRecordImprovementsStepDefinition } from './record_improvements';
 import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
 import { getApplyDreamRelationshipsStepDefinition } from './apply_dream_relationships';
 import { getDreamingStatusStepDefinition } from './get_dreaming_status';
-import { getReadTraceTranscriptsStepDefinition } from './read_trace_transcripts';
+import {
+  getLoadTraceTranscriptsStepDefinition,
+  getReadTraceTranscriptsStepDefinition,
+} from './read_trace_transcripts';
 import { getGatherMaintenanceStepDefinition } from './gather_maintenance';
 import { getApplyMaintenanceChangesStepDefinition } from './apply_maintenance_changes';
 import { getRecordMaintenanceRunStepDefinition } from './record_maintenance_run';
@@ -45,6 +48,7 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getRecordImprovementsStepDefinition(feedbackAnalysis));
   workflowsExtensions.registerStepDefinition(getDreamingStatusStepDefinition(dreaming));
   workflowsExtensions.registerStepDefinition(getReadTraceTranscriptsStepDefinition(dreaming));
+  workflowsExtensions.registerStepDefinition(getLoadTraceTranscriptsStepDefinition(dreaming));
   workflowsExtensions.registerStepDefinition(getApplyDreamChangesStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getApplyDreamRelationshipsStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getGatherMaintenanceStepDefinition(deps));

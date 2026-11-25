@@ -61,7 +61,11 @@ const SPAN_END = 'TO_DATETIME(TO_LONG(@timestamp) + duration / 1000000)';
 const isUnknownDurationError = (error: unknown): boolean =>
   /unknown column \[duration\]/i.test(formatErrorMessage(error));
 
-/** Finds the rounds of a trace source query that ended after the cursor and by `until`. */
+/**
+ * Finds the rounds of a trace source query that ended after the cursor and by `until`. Only the
+ * spans that started between a lookback before the cursor and a lookback after `until` are
+ * scanned, so the cost follows the window, not the backlog behind it.
+ */
 export const findTraceRounds = async ({
   esClient,
   query,
@@ -79,11 +83,12 @@ export const findTraceRounds = async ({
 }): Promise<TraceRound[]> => {
   const target = targetOfTraceQuery(query);
   const lookback = new Date(Date.parse(since) - ROUND_LOOKBACK_MS).toISOString();
+  const ceiling = new Date(Date.parse(until) + ROUND_LOOKBACK_MS).toISOString();
   const run = (spanEnd: string) =>
     esClient.esql.query({
       query: [
         query,
-        '| WHERE @timestamp >= TO_DATETIME(?lookback)',
+        '| WHERE @timestamp >= TO_DATETIME(?lookback) AND @timestamp <= TO_DATETIME(?ceiling)',
         `| EVAL ended_at = ${spanEnd}`,
         '| STATS last_at = MAX(ended_at) BY trace_id',
         '| WHERE last_at <= TO_DATETIME(?until)',
@@ -91,7 +96,7 @@ export const findTraceRounds = async ({
         '| SORT last_at ASC, trace_id ASC',
         `| LIMIT ${size}`,
       ].join('\n'),
-      params: [{ lookback }, { until }, { since }, { after }],
+      params: [{ lookback }, { ceiling }, { until }, { since }, { after }],
     });
   let response;
   try {
@@ -245,8 +250,49 @@ const toMemory = (
   permissions: { kibana: { privileges: [{ space: spaceId }] } },
 });
 
+/** The span a read first scans: it doubles while a window holds too few rounds to fill the read. */
+export const INITIAL_TRACE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Loads the transcripts of rounds found earlier, in the order given. A round whose spans hold no
+ * conversation text, or that is no longer there, is left out.
+ */
+export const loadTraceTranscripts = async ({
+  esClient,
+  spaceId,
+  rounds,
+}: {
+  /** Scoped to the workflow user: traces are read with their Elasticsearch privileges. */
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  rounds: TraceRound[];
+}): Promise<TraceTranscriptMemory[]> => {
+  const byTarget = new Map<string, TraceRound[]>();
+  for (const round of rounds) {
+    byTarget.set(round.target, [...(byTarget.get(round.target) ?? []), round]);
+  }
+  const loaded = new Map<string, LoadedRound>();
+  for (const [target, targetRounds] of byTarget) {
+    const spans = await loadTraceRounds(
+      esClient,
+      target,
+      targetRounds.map(({ traceId }) => traceId)
+    );
+    spans.forEach((round, traceId) => loaded.set(traceId, round));
+  }
+  return rounds.flatMap((round) => {
+    const spans = loaded.get(round.traceId) ?? {};
+    const transcript = buildRoundTranscript({
+      lastChat: { inputMessages: spans.inputMessages, outputMessages: spans.outputMessages },
+    });
+    return transcript === undefined ? [] : [toMemory(round, spans, transcript, spaceId)];
+  });
+};
+
 /**
  * Reads the rounds of an AI index's trace sources since the cursor as transcripts, oldest first.
+ * The sources are scanned one window at a time, so a read costs about one window however large
+ * the backlog is. Transcripts are loaded only until `maxTokens` is reached.
  * A source that fails is reported in `sources` and does not stop the others from being read.
  */
 export const readTraceTranscripts = async ({
@@ -258,6 +304,7 @@ export const readTraceTranscripts = async ({
   until,
   size,
   maxTokens = Infinity,
+  windowMs = INITIAL_TRACE_WINDOW_MS,
 }: {
   /** Scoped to the workflow user: traces are read with their Elasticsearch privileges. */
   esClient: ElasticsearchClient;
@@ -269,10 +316,20 @@ export const readTraceTranscripts = async ({
   size: number;
   /** The read stops before its transcripts exceed this many estimated tokens. */
   maxTokens?: number;
-}): Promise<Omit<ReadTraceTranscriptsOutput, 'batches'>> => {
+  /** How far past the cursor the first scan reaches. */
+  windowMs?: number;
+}): Promise<
+  Omit<ReadTraceTranscriptsOutput, 'batches' | 'rounds'> & {
+    /** One transcript per round, oldest first. */
+    memories: TraceTranscriptMemory[];
+    /** The rounds of `memories`, with where each was found. */
+    found: TraceRound[];
+  }
+> => {
   if (Date.parse(until) <= Date.parse(since)) {
     return {
       memories: [],
+      found: [],
       resume_from: since,
       ...(after && { resume_after: after }),
       sources: [],
@@ -280,22 +337,53 @@ export const readTraceTranscripts = async ({
     };
   }
 
-  const sources: ReadTraceTranscriptsOutput['sources'] = [];
+  const untilMs = Date.parse(until);
+  const sourceRounds = traces.map(() => 0);
+  const sourceErrors = new Map<number, string>();
   const found: TraceRound[] = [];
   let boundary: TraceRound | undefined;
-  for (const { type, value, query } of traces) {
-    try {
-      const rounds = await findTraceRounds({ esClient, query, since, after, until, size });
-      sources.push({ type, value, rounds: rounds.length });
-      found.push(...rounds);
-      const last = rounds[rounds.length - 1];
-      if (rounds.length === size && last && (!boundary || compareRounds(last, boundary) < 0)) {
-        boundary = last;
+  let windowStart = since;
+  let windowAfter = after;
+  let span = Math.max(1, windowMs);
+  let windowEnd = since;
+  for (;;) {
+    windowEnd = new Date(Math.min(untilMs, Date.parse(windowStart) + span)).toISOString();
+    for (const [index, { query }] of traces.entries()) {
+      if (sourceErrors.has(index)) {
+        continue;
       }
-    } catch (error) {
-      sources.push({ type, value, rounds: 0, error: formatErrorMessage(error) });
+      try {
+        const rounds = await findTraceRounds({
+          esClient,
+          query,
+          since: windowStart,
+          after: windowAfter,
+          until: windowEnd,
+          size,
+        });
+        sourceRounds[index] += rounds.length;
+        found.push(...rounds);
+        const last = rounds[rounds.length - 1];
+        if (rounds.length === size && last && (!boundary || compareRounds(last, boundary) < 0)) {
+          boundary = last;
+        }
+      } catch (error) {
+        sourceErrors.set(index, formatErrorMessage(error));
+      }
     }
+    if (boundary || found.length >= size || Date.parse(windowEnd) >= untilMs) {
+      break;
+    }
+    windowStart = windowEnd;
+    windowAfter = '';
+    span *= 2;
   }
+  const sources: ReadTraceTranscriptsOutput['sources'] = traces.map(({ type, value }, index) => ({
+    type,
+    value,
+    rounds: sourceRounds[index],
+    ...(sourceErrors.has(index) && { error: sourceErrors.get(index) }),
+  }));
 
   const seen = new Set<string>();
   const eligible = found
@@ -304,51 +392,46 @@ export const readTraceTranscripts = async ({
     .filter((round) => !boundary || compareRounds(round, boundary) <= 0);
   const taken = eligible.slice(0, size);
 
-  const byTarget = new Map<string, TraceRound[]>();
-  for (const round of taken) {
-    byTarget.set(round.target, [...(byTarget.get(round.target) ?? []), round]);
-  }
-  const loaded = new Map<string, LoadedRound>();
-  for (const [target, rounds] of byTarget) {
-    const spans = await loadTraceRounds(
-      esClient,
-      target,
-      rounds.map(({ traceId }) => traceId)
-    );
-    spans.forEach((round, traceId) => loaded.set(traceId, round));
-  }
-
   let skipped = 0;
   let tokens = 0;
   let read = 0;
+  let full = false;
   const memories: TraceTranscriptMemory[] = [];
-  for (const round of taken) {
-    const spans = loaded.get(round.traceId) ?? {};
-    const transcript = buildRoundTranscript({
-      lastChat: { inputMessages: spans.inputMessages, outputMessages: spans.outputMessages },
-    });
-    if (transcript === undefined) {
-      skipped++;
+  const readRounds: TraceRound[] = [];
+  for (let start = 0; start < taken.length && !full; start += SPAN_LOAD_BATCH) {
+    const chunk = taken.slice(start, start + SPAN_LOAD_BATCH);
+    const chunkMemories = new Map(
+      (await loadTraceTranscripts({ esClient, spaceId, rounds: chunk })).map(
+        (memory) => [memory.id, memory] as const
+      )
+    );
+    for (const round of chunk) {
+      const memory = chunkMemories.get(`${TRACE_ROUND_ID_PREFIX}${round.traceId}`);
+      if (memory === undefined) {
+        skipped++;
+        read++;
+        continue;
+      }
+      const memoryTokens = estimateTokens(memory);
+      if (memories.length > 0 && tokens + memoryTokens > maxTokens) {
+        full = true;
+        break;
+      }
+      memories.push(memory);
+      readRounds.push(round);
+      tokens += memoryTokens;
       read++;
-      continue;
     }
-    const memory = toMemory(round, spans, transcript, spaceId);
-    const memoryTokens = estimateTokens(memory);
-    if (memories.length > 0 && tokens + memoryTokens > maxTokens) {
-      break;
-    }
-    memories.push(memory);
-    tokens += memoryTokens;
-    read++;
   }
   const capped = boundary !== undefined || eligible.length > size || read < taken.length;
   const last = taken[read - 1];
 
   return {
     memories,
+    found: readRounds,
     ...(capped && last
       ? { resume_from: last.lastAt, resume_after: last.traceId }
-      : { resume_from: until }),
+      : { resume_from: windowEnd }),
     sources,
     skipped,
   };

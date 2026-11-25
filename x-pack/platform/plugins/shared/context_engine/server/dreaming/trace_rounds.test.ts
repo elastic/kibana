@@ -11,6 +11,7 @@ import type { AiIndexTraceWithQuery } from '../../common/http_api/ai_indices';
 import { estimateTokens } from './trace_batches';
 import {
   findTraceRounds,
+  loadTraceTranscripts,
   readTraceTranscripts,
   ROUND_LOOKBACK_MS,
   targetOfTraceQuery,
@@ -107,6 +108,10 @@ describe('findTraceRounds', () => {
     expect(query).toContain(
       '| EVAL ended_at = COALESCE(TO_DATETIME(TO_LONG(@timestamp) + duration / 1000000), @timestamp)'
     );
+    expect(query).toContain(
+      '| WHERE @timestamp >= TO_DATETIME(?lookback) AND @timestamp <= TO_DATETIME(?ceiling)'
+    );
+    expect(query.indexOf('?ceiling')).toBeLessThan(query.indexOf('| STATS'));
     expect(query).toContain('| STATS last_at = MAX(ended_at) BY trace_id');
     expect(query).toContain('| LIMIT 50');
     expect(params).toEqual([
@@ -114,6 +119,9 @@ describe('findTraceRounds', () => {
         lookback: new Date(
           Date.parse('2026-11-11T12:00:00.000Z') - ROUND_LOOKBACK_MS
         ).toISOString(),
+      },
+      {
+        ceiling: new Date(Date.parse('2026-11-11T13:15:00.000Z') + ROUND_LOOKBACK_MS).toISOString(),
       },
       { until: '2026-11-11T13:15:00.000Z' },
       { since: '2026-11-11T12:00:00.000Z' },
@@ -192,6 +200,13 @@ describe('readTraceTranscripts', () => {
     });
 
     expect(output).toEqual({
+      found: [
+        {
+          traceId: 'trace-1',
+          lastAt: '2026-11-11T13:12:03.357Z',
+          target: 'traces-agent_builder.otel-default',
+        },
+      ],
       memories: [
         {
           id: 'trace:trace-1',
@@ -282,6 +297,67 @@ describe('readTraceTranscripts', () => {
     expect(tiny.resume_after).toBe('trace-a');
   });
 
+  it('loads the spans of only the rounds the token budget reads', async () => {
+    esClient.esql.query.mockResolvedValue(
+      roundsResponse(
+        Array.from({ length: 30 }, (_, i): [string, string] => [
+          `2026-11-11T12:${String(10 + i).padStart(2, '0')}:00.000Z`,
+          `trace-${String(i).padStart(2, '0')}`,
+        ])
+      ) as never
+    );
+
+    const output = await readTraceTranscripts({
+      esClient,
+      traces: [agentTrace],
+      spaceId: 'default',
+      size: 30,
+      maxTokens: 1,
+      ...window,
+    });
+
+    expect(output.memories).toHaveLength(1);
+    const loadedIds = esClient.search.mock.calls.flatMap(
+      ([request]) =>
+        (request as { query: { bool: { filter: Array<{ terms: { trace_id: string[] } }> } } }).query
+          .bool.filter[0].terms.trace_id
+    );
+    expect(new Set(loadedIds).size).toBeLessThanOrEqual(10);
+  });
+
+  it('scans the backlog one window at a time, widening while a window holds too few rounds', async () => {
+    const hour = 60 * 60 * 1000;
+    const since = '2026-11-01T00:00:00.000Z';
+    const until = '2026-11-10T00:00:00.000Z';
+    esClient.esql.query
+      .mockResolvedValueOnce(roundsResponse([]) as never)
+      .mockResolvedValueOnce(roundsResponse([['2026-11-02T10:00:00.000Z', 'trace-a']]) as never)
+      .mockResolvedValueOnce(roundsResponse([['2026-11-04T10:00:00.000Z', 'trace-b']]) as never);
+
+    const output = await readTraceTranscripts({
+      esClient,
+      traces: [agentTrace],
+      spaceId: 'default',
+      size: 2,
+      since,
+      until,
+      windowMs: 24 * hour,
+    });
+
+    const windows = esClient.esql.query.mock.calls.map(
+      ([request]) => (request as { params: Array<Record<string, string>> }).params
+    );
+    expect(windows.map((params) => [params[2].until, params[3].since])).toEqual([
+      ['2026-11-02T00:00:00.000Z', since],
+      ['2026-11-04T00:00:00.000Z', '2026-11-02T00:00:00.000Z'],
+      ['2026-11-08T00:00:00.000Z', '2026-11-04T00:00:00.000Z'],
+    ]);
+    expect(output.memories.map(({ id }) => id)).toEqual(['trace:trace-a', 'trace:trace-b']);
+    expect(output.sources[0].rounds).toBe(2);
+    expect(output.resume_from).toBe('2026-11-08T00:00:00.000Z');
+    expect(output.resume_after).toBeUndefined();
+  });
+
   it('reports a source that fails, reads the others, and skips rounds with nothing to read', async () => {
     esClient.esql.query
       .mockRejectedValueOnce(new Error('no such index'))
@@ -319,10 +395,46 @@ describe('readTraceTranscripts', () => {
     expect(esClient.esql.query).not.toHaveBeenCalled();
     expect(output).toEqual({
       memories: [],
+      found: [],
       resume_from: window.until,
       resume_after: 'trace-z',
       sources: [],
       skipped: 0,
     });
+  });
+});
+
+describe('loadTraceTranscripts', () => {
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
+
+  it('loads the transcripts of the rounds given, in their order, leaving out rounds with none', async () => {
+    esClient.search.mockImplementation(async (request) => {
+      const filters = (request as { query: { bool: { filter: Array<Record<string, any>> } } }).query
+        .bool.filter;
+      const traceIds: string[] = filters[0].terms.trace_id;
+      const operation = filters[1].term['attributes.gen_ai.operation.name'];
+      const present = traceIds.filter((id) => id !== 'trace-gone');
+      return {
+        hits: {
+          hits: present.map((id) =>
+            operation === 'chat' ? chatHit(id, `Q ${id}`, `A ${id}`) : agentHit(id)
+          ),
+        },
+      } as never;
+    });
+    const target = 'traces-agent_builder.otel-default';
+
+    const memories = await loadTraceTranscripts({
+      esClient,
+      spaceId: 'default',
+      rounds: ['trace-z', 'trace-gone', 'trace-a'].map((traceId) => ({
+        traceId,
+        lastAt: '2026-11-11T13:12:03.357Z',
+        target,
+      })),
+    });
+
+    expect(memories.map(({ id }) => id)).toEqual(['trace:trace-z', 'trace:trace-a']);
+    expect(memories[0].content).toBe('User: Q trace-z\nAssistant: A trace-z');
   });
 });
