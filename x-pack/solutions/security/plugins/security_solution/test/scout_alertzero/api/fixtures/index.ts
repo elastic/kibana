@@ -40,3 +40,30 @@ export {
 } from './helpers';
 export { type SupplyWorkflowKey } from './supply_workflow_ids';
 export { findStepOutput, runWorkflow, waitForExecution } from './workflow_runs';
+export {
+  APPLIED_TAG,
+  cancelExecution,
+  createWorkerServiceAccount,
+  decidePendingProposal,
+  deleteServiceAccount,
+  DISMISSED_TAG,
+  FP_ALERT_COUNT,
+  FP_PROCESS_NAME,
+  pinModelToProxy,
+  pollFor,
+  readAlertTags,
+  readBacktest,
+  readRule,
+  readRuleExceptionItems,
+  SEEDED_EVENT_COUNT,
+  seedRuleWithFalsePositives,
+  setRuleTuningWorker,
+  TP_EVENT_COUNT,
+  waitForInvestigation,
+  waitForReviewEnd,
+  waitForReviewExecution,
+  type BacktestOutcome,
+  type RuleState,
+  type SeededRule,
+} from './rule_tuning_review';
+export { startScriptedModel, type ScriptedModel } from './scripted_model';
