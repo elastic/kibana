@@ -142,7 +142,7 @@
     "@aws-sdk/client-bedrock-runtime": "3.1156.0",
     "@babel/plugin-transform-class-static-block": "7.28.3",
     "@babel/runtime": "7.29.7",
-    "@cfworker/json-schema": "4.1.1",
+    "@cfworker/json-schema": "4.1.6",
     "@codemirror/autocomplete": "6.20.4",
     "@codemirror/language": "6.13.1",
     "@codemirror/lint": "6.9.8",
