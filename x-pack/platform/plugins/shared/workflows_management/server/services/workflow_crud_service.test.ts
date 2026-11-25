@@ -1029,7 +1029,7 @@ describe('WorkflowCrudService', () => {
       expect(document).not.toHaveProperty('templateOrigin');
     });
 
-    it('stores a workflow that uses a managed-only step as invalid', async () => {
+    it('stores a workflow that uses a managed-only step as invalid and disabled', async () => {
       jest
         .mocked(getStepExposure)
         .mockImplementation((stepType: string) =>
@@ -1044,7 +1044,7 @@ describe('WorkflowCrudService', () => {
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          document: expect.objectContaining({ valid: false, definition: null }),
+          document: expect.objectContaining({ valid: false, enabled: false, definition: null }),
         })
       );
     });

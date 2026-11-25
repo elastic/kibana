@@ -152,6 +152,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
     workflowToCreate.valid = false;
     workflowToCreate.definition = undefined;
+    workflowToCreate.enabled = false;
   }
 
   const id = providedId || generateWorkflowId(workflowToCreate.name);

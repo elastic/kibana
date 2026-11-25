@@ -751,6 +751,38 @@ steps:
       ]);
     });
 
+    it('reports managed-only steps in the workflow-level failure fallback', async () => {
+      const fallbackYaml = `
+version: '1'
+name: exposure
+settings:
+  on-failure:
+    fallback:
+      - name: notify
+        type: console
+        with:
+          message: failed
+triggers:
+  - type: manual
+steps:
+  - name: pause
+    type: wait
+    with:
+      duration: 1s
+`;
+
+      const result = await validateWorkflowYaml(fallbackYaml, schema, { isManaged: false });
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({
+          message:
+            'Step type "console" is an internal step and can\'t be used in custom workflows.',
+          ruleId: 'managedOnlyStepType',
+        }),
+      ]);
+    });
+
     it('accepts managed-only steps in a managed workflow', async () => {
       const result = await validateWorkflowYaml(yaml, schema, { isManaged: true });
 

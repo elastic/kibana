@@ -1168,24 +1168,48 @@ steps:
         }
       );
 
+      const changedWorkflowYaml = `${mockWorkflowYaml}\ndescription: changed`;
+
       it.each([
-        { managed: true, isManaged: true },
-        { managed: undefined, isManaged: false },
+        {
+          testCase: 'the stored YAML of a managed workflow',
+          managed: true,
+          workflowYaml: mockWorkflowYaml,
+          isManaged: true,
+        },
+        {
+          testCase: 'a managed workflow without YAML in the request',
+          managed: true,
+          workflowYaml: undefined,
+          isManaged: true,
+        },
+        {
+          testCase: 'other YAML with the id of a managed workflow',
+          managed: true,
+          workflowYaml: changedWorkflowYaml,
+          isManaged: false,
+        },
+        {
+          testCase: 'the stored YAML of a workflow that is not managed',
+          managed: undefined,
+          workflowYaml: mockWorkflowYaml,
+          isManaged: false,
+        },
       ])(
-        'validates the tested YAML with isManaged=$isManaged when the saved workflow has managed=$managed',
-        async ({ managed, isManaged }) => {
+        'validates $testCase with isManaged=$isManaged',
+        async ({ managed, workflowYaml, isManaged }) => {
           mockWorkflowsService.getWorkflow.mockResolvedValue({ ...mockWorkflowDetailDto, managed });
 
           await api.testWorkflow({
             workflowId: mockWorkflowDetailDto.id,
-            workflowYaml: mockWorkflowYaml,
+            workflowYaml,
             inputs,
             spaceId,
             request: mockRequest,
           });
 
           expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
-            mockWorkflowYaml,
+            workflowYaml ?? mockWorkflowYaml,
             spaceId,
             mockRequest,
             { includeVariableRules: false, includeEsqlRules: false, isManaged }
@@ -1508,7 +1532,18 @@ steps:
       );
     });
 
-    it('validates the YAML as managed when the step belongs to a managed workflow', async () => {
+    it.each([
+      {
+        testCase: 'the stored YAML of a managed workflow',
+        yaml: 'name: Test Workflow',
+        isManaged: true,
+      },
+      {
+        testCase: 'other YAML with the id of a managed workflow',
+        yaml: 'name: Changed Workflow',
+        isManaged: false,
+      },
+    ])('validates $testCase with isManaged=$isManaged', async ({ yaml, isManaged }) => {
       mockWorkflowsService.validateWorkflow.mockResolvedValue({
         valid: true,
         diagnostics: [],
@@ -1522,6 +1557,7 @@ steps:
       });
       mockWorkflowsService.getWorkflow.mockResolvedValue({
         id: 'existing-workflow-id',
+        yaml: 'name: Test Workflow',
         managed: true,
       } as WorkflowDetailDto);
       mockWorkflowsExecutionEngine.executeWorkflowStep.mockResolvedValue({
@@ -1529,7 +1565,7 @@ steps:
       });
 
       await api.testStep(
-        'name: Test Workflow',
+        yaml,
         'step1',
         'existing-workflow-id',
         undefined,
@@ -1539,10 +1575,10 @@ steps:
       );
 
       expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
-        'name: Test Workflow',
+        yaml,
         'default',
         mockRequest,
-        { includeVariableRules: false, includeEsqlRules: false, isManaged: true }
+        { includeVariableRules: false, includeEsqlRules: false, isManaged }
       );
     });
   });
@@ -2195,6 +2231,19 @@ steps:
         { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
       expect(result).toEqual(expectedResult);
+    });
+
+    it('validates the YAML as managed when the caller says it is', async () => {
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+
+      await api.validateWorkflow('name: Test', 'default', mockRequest, { isManaged: true });
+
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test',
+        'default',
+        mockRequest,
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: true }
+      );
     });
   });
 

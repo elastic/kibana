@@ -692,7 +692,7 @@ describe('managed-only steps on save', () => {
     jest.mocked(getStepExposure).mockImplementation(() => 'open');
   });
 
-  it('stores a workflow that is not managed as invalid', async () => {
+  it('stores a workflow that is not managed as invalid and disabled', async () => {
     const { workflowData } = await prepareWorkflowDocumentFromYaml({
       yaml,
       zodSchema,
@@ -703,6 +703,7 @@ describe('managed-only steps on save', () => {
     });
 
     expect(workflowData.valid).toBe(false);
+    expect(workflowData.enabled).toBe(false);
     expect(workflowData.definition).toBeNull();
   });
 
@@ -717,6 +718,7 @@ describe('managed-only steps on save', () => {
     });
 
     expect(workflowData.valid).toBe(true);
+    expect(workflowData.enabled).toBe(true);
     expect(workflowData.definition).not.toBeNull();
   });
 

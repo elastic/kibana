@@ -36,9 +36,14 @@ export const collectStepExposureDiagnostics = (
   if (isManaged) {
     return [];
   }
-
+  let steps = workflow.steps ?? [];
+  // The workflow-level fallback runs when the workflow fails, so its steps count too.
+  const workflowFallbackSteps = workflow.settings?.['on-failure']?.fallback;
+  if (workflowFallbackSteps) {
+    steps = [...steps, ...workflowFallbackSteps];
+  }
   const managedOnlyStepTypes = new Set(
-    collectAllSteps(workflow.steps ?? [])
+    collectAllSteps(steps)
       .map(({ type }) => type)
       .filter((stepType) => getStepExposure(stepType) === 'managed_only')
   );

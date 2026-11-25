@@ -358,6 +358,15 @@ const withEnabledState = ({
 const hasServiceAccount = (definition: unknown): boolean =>
   isRecord(definition) && isRecord(definition.settings) && Boolean(definition.settings.run_as);
 
+/**
+ * Whether the YAML is a managed workflow's stored YAML. Users can't save other YAML to a
+ * managed workflow, so YAML that differs from it isn't managed.
+ */
+const isStoredManagedYaml = (
+  workflow: Pick<WorkflowDetailDto, 'managed' | 'yaml'> | null,
+  yaml: string
+): boolean => workflow?.managed === true && workflow.yaml === yaml;
+
 export class WorkflowsManagementApi {
   private smlClient: Pick<
     AgentBuilderSmlPluginStart,
@@ -1285,7 +1294,7 @@ export class WorkflowsManagementApi {
       {
         includeVariableRules: false,
         includeEsqlRules: false,
-        isManaged: existingWorkflow?.managed === true,
+        isManaged: isStoredManagedYaml(existingWorkflow, resolvedYaml),
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1351,7 +1360,7 @@ export class WorkflowsManagementApi {
       });
       const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
       workflowUid = existingWorkflow?.workflowUid;
-      isManaged = existingWorkflow?.managed === true;
+      isManaged = isStoredManagedYaml(existingWorkflow, workflowYaml);
     }
     const validation = await this.workflowsService.validateWorkflow(
       workflowYaml,
@@ -1929,17 +1938,20 @@ export class WorkflowsManagementApi {
     return getWorkflowJsonSchema(zodSchema);
   }
 
-  /** Backs `POST /api/workflows/validate`, which reports and does not gate. */
+  /**
+   * Backs `POST /api/workflows/validate`, which reports and does not gate. Set `isManaged` only
+   * for the stored YAML of a managed workflow; the route never sets it.
+   */
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    { isManaged = false }: { isManaged?: boolean } = {}
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
       includeVariableRules: true,
       includeEsqlRules: true,
-      // The YAML comes without a saved workflow, so it can't be a managed one.
-      isManaged: false,
+      isManaged,
     });
   }
 
