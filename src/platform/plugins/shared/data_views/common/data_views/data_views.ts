@@ -13,6 +13,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { PersistenceAPI } from '../types';
 import { DataViewLazy } from './data_view_lazy';
 import { DEFAULT_DATA_VIEW_ID } from '../constants';
@@ -106,13 +107,11 @@ interface NotFoundLike {
   body?: { statusCode?: number };
 }
 
-// Saved object "not found" surfaces differently on server (Boom output) and browser (HTTP / KbnError)
+// Saved object "not found" surfaces differently on server (Boom output) and browser (SavedObjectNotFound, no status)
 const isNotFoundError = (e: unknown): boolean => {
+  if (e instanceof SavedObjectNotFound) return true;
   const err = e as NotFoundLike | null;
-  return (
-    err?.name === 'SavedObjectNotFound' ||
-    [err?.statusCode, err?.output?.statusCode, err?.body?.statusCode].includes(404)
-  );
+  return [err?.statusCode, err?.output?.statusCode, err?.body?.statusCode].includes(404);
 };
 
 export interface DataViewsServiceDeps {

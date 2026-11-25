@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
 import { defaults } from 'lodash';
 import { DataViewsService, DataView, DataViewLazy } from '.';
@@ -995,6 +996,15 @@ describe('IndexPatterns', () => {
       savedObjectsClient.get = jest
         .fn()
         .mockRejectedValue(Object.assign(new Error('Not Found'), { statusCode: 404 }));
+
+      expect(await indexPatterns.getDefault()).toBeNull();
+    });
+
+    test('returns null when the browser wrapper throws SavedObjectNotFound', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue('deleted-id');
+      savedObjectsClient.get = jest
+        .fn()
+        .mockRejectedValue(new SavedObjectNotFound({ type: 'data view', id: 'deleted-id' }));
 
       expect(await indexPatterns.getDefault()).toBeNull();
     });

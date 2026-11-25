@@ -67,8 +67,10 @@ export class ServerlessSearchPlugin
           id: 'default_all_data_id',
         });
         // data views no longer become the default on creation, so set it explicitly
-        // (force: defaultExists was false, so any existing setting is stale)
-        await dataViewsService.setDefault(dataView.id!, true);
+        // (getDefault is null for a stale setting only, so a valid default set meanwhile is kept)
+        if (!(await dataViewsService.getDefault(false))) {
+          await dataViewsService.setDefault(dataView.id!, true);
+        }
       }
     }
     return;

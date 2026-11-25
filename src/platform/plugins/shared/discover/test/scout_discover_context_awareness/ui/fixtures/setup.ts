@@ -22,7 +22,7 @@ import {
 export async function setupContextAwareness(scoutSpace: ScoutParallelWorkerFixtures['scoutSpace']) {
   const importedSavedObjects = await scoutSpace.savedObjects.load(CONTEXT_AWARENESS_KBN_ARCHIVE);
   // imports no longer pick a default data view, and the oldest-view fallback would open `my-example-logs`
-  await scoutSpace.savedObjects.setDefaultIndex(CONTEXT_AWARENESS_DATA_VIEWS.ALL);
+  await scoutSpace.uiSettings.setDefaultIndex(CONTEXT_AWARENESS_DATA_VIEWS.ALL);
   await scoutSpace.uiSettings.setDefaultTime(CONTEXT_AWARENESS_TIME_RANGE);
 
   return importedSavedObjects;
