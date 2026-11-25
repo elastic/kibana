@@ -116,6 +116,19 @@ export class PanelActions {
   }
 
   /**
+   * Asserts that a quick action is visible in the panel's hover actions row (throws if not found).
+   * Waits for the action to render, so this is safe right after a view mode change, when quick
+   * actions are still being resolved.
+   *
+   * @param actionTestSubj - `data-test-subj` of the quick action that must be in the hover row.
+   * @param title - Panel title. If omitted, uses the first panel.
+   */
+  async expectHasHoverAction(actionTestSubj: string, title?: string) {
+    const panelWrapper = await this.hoverPanel(title);
+    await expect(panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`)).toBeVisible();
+  }
+
+  /**
    * Opens the panel's context menu and waits until all of the given actions are visible in it.
    *
    * On success the menu is left open so the caller can check it further, and the caller must

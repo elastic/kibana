@@ -123,7 +123,7 @@ spaceTest.describe(
         await spaceTest.step('the action is available to a viewer', async () => {
           await browserAuth.loginAsViewer();
           await dashboard.openDashboardWithId(dashboardId);
-          expect(await dashboard.panelHasHoverAction(SHOW_CONFIG_ACTION)).toBe(true);
+          await dashboard.expectHasHoverAction(SHOW_CONFIG_ACTION);
         });
       }
     );

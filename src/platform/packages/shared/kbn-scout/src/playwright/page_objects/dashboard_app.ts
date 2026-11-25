@@ -981,6 +981,16 @@ export class DashboardApp {
     await this.expectLinkedToLibrary(newTitle);
   }
 
+  /**
+   * Asserts that a quick action is visible in the panel's hover actions row (throws if not found).
+   *
+   * @param actionTestSubj - `data-test-subj` of the quick action that must be in the hover row.
+   * @param title - Panel title. If omitted, uses the first panel.
+   */
+  async expectHasHoverAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.expectHasHoverAction(actionTestSubj, title);
+  }
+
   /** Checks if a quick action is currently visible in the panel's hover actions row. */
   async panelHasHoverAction(actionTestSubj: string, title?: string): Promise<boolean> {
     return this.panelActions.panelHasHoverAction(actionTestSubj, title);

@@ -59,12 +59,10 @@ spaceTest.describe('TSVB migration smoke (7.13.3)', { tag: tags.stateful.classic
         await pageObjects.dashboard.switchToEditMode();
         const panelTitles = await pageObjects.dashboard.getPanelTitles();
         for (const title of panelTitles) {
-          expect(
-            await pageObjects.dashboard.panelHasHoverAction(
-              DASHBOARD_EDIT_PANEL_ACTION_TEST_SUBJ,
-              title || undefined
-            )
-          ).toBe(true);
+          await pageObjects.dashboard.expectHasHoverAction(
+            DASHBOARD_EDIT_PANEL_ACTION_TEST_SUBJ,
+            title || undefined
+          );
         }
       });
     }
