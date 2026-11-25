@@ -96,7 +96,10 @@ describe('classifyDetectionsStepDefinition', () => {
     const { output } = await definition.handler({
       input,
       rawInput: input,
-      contextManager: { getScopedEsClient: jest.fn(() => esClient) },
+      contextManager: {
+        getScopedEsClient: jest.fn(() => esClient),
+        getContext: jest.fn(() => ({ workflow: { spaceId: 'default' } })),
+      },
       abortSignal: new AbortController().signal,
     } as never);
     if (!output) throw new Error('The step returned no output');

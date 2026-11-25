@@ -78,7 +78,7 @@ triggers:
           default: 240
           minimum: 15
           maximum: 1440
-          description: "How long the gate keeps a detection from the agent. A held-back rule's change waits while a review of the rule that covers it is newer than this. A detection that reaches the agent only for a reason that shows no observable change (its series is old, another rule is joining the event, a member has no verdict, or its rule is flaky and in no live event) waits for a run that has a detection that does: a rule whose breach state disagrees with its stored verdict, or a rule in no live event that is not flaky. It goes once its rule's oldest unprocessed detection is this old."
+          description: "How long the gate keeps a detection from the agent. A held-back rule's change waits while a review of the rule that covers it is newer than this. A detection that reaches the agent only for a reason that shows no observable change (its series is old, another rule is joining the event, a member has no verdict, or its rule is flaky and in no live event) waits for a run that has a detection that does: a rule whose breach state disagrees with its stored verdict, or a rule in no live event that is not flaky. It goes once its rule's oldest unprocessed detection is this old. Keep it below `detectionLookback`: a detection that only waits and leaves the `get_detections` window before this age is never released."
         rootTriggeredBy:
           type: string
           description: 'Root workflow trigger type propagated by a managed driver.'

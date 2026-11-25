@@ -277,7 +277,7 @@ describe('classifyBatch', () => {
     it.each([
       ['is missing', undefined],
       ['cannot be read', 'not a time'],
-      ['lies in the future', new Date(Date.now() + 3_600_000).toISOString()],
+      ['lies in the future', hoursAgo(-1)],
     ])(
       'routes a series whose verdict time cannot be trusted and whose creation time %s',
       async (_name, createdAt) => {

@@ -1031,7 +1031,8 @@ export class RuleEventsClient {
    * query on a schedule and writes a `breached` signal whenever the query matches, so a recent one says
    * the query returns rows now. A rule with none is absent: it matched nothing, or did not run. The two
    * are the same input, so a stopped or failing rule reads as quiet and a healthy verdict resting on it
-   * is not distinguishable from a fresh one.
+   * is not distinguishable from a fresh one. A shard failure fails the lookup, because the rows of the
+   * shards that answered would read as rules that recorded no breach.
    */
   async findLatestBreachedSignals({
     ruleUuids,
@@ -1052,7 +1053,7 @@ export class RuleEventsClient {
     }})`.pipe`STATS latest = MAX(@timestamp) BY ${esql.col('rule.id')}`;
 
     const rows = esqlToObjects<Record<string, unknown>>(
-      await queryEsql({ esClient: this.clients.esClient, query })
+      await queryEsql({ esClient: this.clients.esClient, query, allowPartialResults: false })
     );
 
     for (const row of rows) {

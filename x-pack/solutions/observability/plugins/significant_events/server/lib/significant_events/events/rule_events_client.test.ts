@@ -1706,6 +1706,17 @@ describe('RuleEventsClient', () => {
       expect(query).not.toHaveBeenCalled();
     });
 
+    it('rejects partial results, so a failed shard cannot read as rules with no breach', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A'],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      expect(query).toHaveBeenCalledWith(expect.objectContaining({ allow_partial_results: false }));
+    });
+
     it('asks for the newest breached signal of each requested rule since the bound', async () => {
       const { client, query } = createClient(async () => latestResponse([]));
 

@@ -201,6 +201,35 @@ const REASON_STATES: Readonly<Record<string, string>> = {
   still_healthy: VERDICT_STATES.refutes,
 };
 
+/** What the rule's own breach record says: a quiet rule recorded no breach, which is not "matches nothing". */
+const breachSentence = ({
+  breached,
+  minutes,
+}: {
+  breached: boolean;
+  minutes: number | undefined;
+}): string => {
+  if (minutes === undefined) {
+    return breached
+      ? i18n.translate('xpack.significantEvents.detectionSkip.breach.recorded', {
+          defaultMessage: 'The rule recorded a breach.',
+        })
+      : i18n.translate('xpack.significantEvents.detectionSkip.breach.none', {
+          defaultMessage: 'The rule recorded no breach.',
+        });
+  }
+  return breached
+    ? i18n.translate('xpack.significantEvents.detectionSkip.breach.recordedInWindow', {
+        defaultMessage: 'The rule recorded a breach (last {minutes} min).',
+        values: { minutes },
+      })
+    : i18n.translate('xpack.significantEvents.detectionSkip.breach.noneInWindow', {
+        defaultMessage: 'The rule recorded no breach (last {minutes} min).',
+        values: { minutes },
+      });
+};
+
+/** A marker written before the breach record was read stores the probe result under the old names. */
 const matchSentence = ({
   matches,
   minutes,
@@ -261,12 +290,18 @@ export const describeSkip = (
     lines.push(skip.reason);
   } else {
     // A marker stored before the rule's own breaches were read says the same under the old names.
-    const matches = skip.rule_breached ?? skip.probe_has_rows;
-    if (matches !== undefined) {
+    if (skip.rule_breached !== undefined) {
+      lines.push(
+        breachSentence({
+          breached: skip.rule_breached,
+          minutes: skip.breach_window_minutes ?? skip.probe_window_minutes,
+        })
+      );
+    } else if (skip.probe_has_rows !== undefined) {
       lines.push(
         matchSentence({
-          matches,
-          minutes: skip.breach_window_minutes ?? skip.probe_window_minutes,
+          matches: skip.probe_has_rows,
+          minutes: skip.probe_window_minutes,
         })
       );
     }

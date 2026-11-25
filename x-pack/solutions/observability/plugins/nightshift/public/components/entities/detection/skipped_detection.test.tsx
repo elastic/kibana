@@ -36,7 +36,7 @@ describe('SkippedDetectionBadge', () => {
     fireEvent.mouseOver(screen.getByTestId('nightshiftSkippedDetectionBadge'));
 
     expect(await screen.findByText('Skipped: no new analysis needed')).toBeInTheDocument();
-    expect(screen.getByText(/The rule still matches \(last 10 min\)/)).toBeInTheDocument();
+    expect(screen.getByText(/The rule recorded a breach \(last 10 min\)/)).toBeInTheDocument();
     expect(
       screen.getByText(/"Checkout — request failures" already records it as breaching/)
     ).toBeInTheDocument();

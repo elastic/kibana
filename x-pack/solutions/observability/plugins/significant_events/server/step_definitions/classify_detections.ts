@@ -108,14 +108,14 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
       const {
         rows = [],
         columns,
-        space_id: spaceId,
         max_skip_age_hours: maxSkipAgeHours,
         live_lookback_days: liveLookbackDays,
         review_fresh_minutes: reviewFreshMinutes,
         batch_max: batchMax,
       } = context.input;
       const esClient = context.contextManager.getScopedEsClient();
-      const ruleEventsClient = new RuleEventsClient({ esClient, space: spaceId });
+      const { workflow } = context.contextManager.getContext();
+      const ruleEventsClient = new RuleEventsClient({ esClient, space: workflow.spaceId });
 
       const now = Date.now();
       const output = await classifyBatch({

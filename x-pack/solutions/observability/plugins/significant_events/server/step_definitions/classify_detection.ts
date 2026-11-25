@@ -41,8 +41,11 @@ export const classifyDetection = ({
   if (memberships.length === 0) return needsAgent('not_live_member');
 
   const states = memberships.map(({ verdict }) => toMemberState(verdict));
-  if (states.includes('unjudged')) return needsAgent('unjudged_member');
 
+  // A change seen in any judged membership is observable whatever the others say, so it is checked
+  // before the unjudged ones: a recovery candidate must reach the agent, not wait behind a member
+  // whose verdict cannot be read.
+  //
   // A healthy verdict reached on found rows cannot be revalidated by row presence alone, because the
   // breach record does not say what the rows were.
   if (memberships.some(({ verdict, evidenceFound }) => verdict === 'refutes' && evidenceFound)) {
@@ -50,9 +53,11 @@ export const classifyDetection = ({
   }
 
   // A breach expects rows; a healthy verdict expects none.
-  if (states.some((state) => (state === 'breaching') !== breached)) {
+  if (states.some((state) => state !== 'unjudged' && (state === 'breaching') !== breached)) {
     return needsAgent('state_changed');
   }
+
+  if (states.includes('unjudged')) return needsAgent('unjudged_member');
 
   // The rule agrees with every member, so they all expect what it recorded.
   return { decision: 'skip', reason: breached ? 'still_breaching' : 'still_healthy' };

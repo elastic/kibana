@@ -54,7 +54,7 @@ describe('describeSkip', () => {
         formatTime
       )
     ).toEqual([
-      'The rule still matches (last 10 min).',
+      'The rule recorded a breach (last 10 min).',
       '"Checkout — request failures" already records it as breaching, so nothing changed.',
     ]);
   });
@@ -71,7 +71,7 @@ describe('describeSkip', () => {
         formatTime
       )
     ).toEqual([
-      'The rule matches nothing (last 10 min).',
+      'The rule recorded no breach (last 10 min).',
       'A live event already records it as healthy, so nothing changed.',
     ]);
   });
@@ -108,7 +108,7 @@ describe('describeSkip', () => {
         formatTime
       )
     ).toEqual([
-      'The rule matches nothing (last 10 min).',
+      'The rule recorded no breach (last 10 min).',
       'A live event already records it as healthy, so nothing changed.',
     ]);
   });

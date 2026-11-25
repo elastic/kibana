@@ -29,6 +29,13 @@ describe('classifyDetection', () => {
     ['healthy with a breach recorded', [member('refutes')], true, 'needs_agent', 'state_changed'],
     ['healthy with none recorded', [member('refutes')], false, 'skip', 'still_healthy'],
     ['an unjudged member', [member('off_topic')], true, 'needs_agent', 'unjudged_member'],
+    [
+      'a change in a judged member beside an unjudged one',
+      [member('confirms'), member('off_topic')],
+      false,
+      'needs_agent',
+      'state_changed',
+    ],
     ['no live series', [], true, 'needs_agent', 'not_live_member'],
     [
       'series that agree',
