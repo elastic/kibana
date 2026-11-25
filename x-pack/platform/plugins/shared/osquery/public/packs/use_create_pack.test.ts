@@ -10,8 +10,25 @@ import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../common/lib/kibana';
 import { useCreatePack } from './use_create_pack';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 jest.mock('../common/lib/kibana');
+jest.mock('./shared_integration_warning_toast', () => {
+  const actual = jest.requireActual('./shared_integration_warning_toast');
+
+  // Keep the real behavior, but make the call observable.
+  return {
+    ...actual,
+    addSharedIntegrationWarningToasts: jest.fn(actual.addSharedIntegrationWarningToasts),
+  };
+});
+
+const addWarningsMock = addSharedIntegrationWarningToasts as jest.MockedFunction<
+  typeof addSharedIntegrationWarningToasts
+>;
+const getUrlForApp = jest.fn(
+  (app: string, { path }: { path?: string } = {}) => `/app/${app}${path}`
+);
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -44,7 +61,10 @@ describe('useCreatePack shared integration warnings', () => {
 
     useKibanaMock.mockReturnValue({
       services: {
-        application: { navigateToApp: jest.fn() },
+        application: { navigateToApp: jest.fn(), getUrlForApp },
+        analytics: {},
+        i18n: {},
+        theme: {},
         http: mockHttp,
         notifications: { toasts: mockToasts },
       },
@@ -55,18 +75,18 @@ describe('useCreatePack shared integration warnings', () => {
     });
   });
 
-  it('shows a warning toast naming the additional agent policies', async () => {
-    queryClient.setQueryData(['agentPolicies'], [{ id: 'policy-b', name: 'Policy B' }]);
+  it('hands the warnings and the created pack id to the warning toast helper', async () => {
+    const warnings = [
+      {
+        code: 'shared_integration_overdelivery',
+        package_policy_id: 'pp-shared',
+        package_policy_name: 'Shared osquery',
+        additional_policy_ids: ['policy-b'],
+      },
+    ];
     mockHttp.post.mockResolvedValue({
-      data: { name: 'new-pack' },
-      warnings: [
-        {
-          code: 'shared_integration_overdelivery',
-          package_policy_id: 'pp-shared',
-          package_policy_name: 'Shared osquery',
-          additional_policy_ids: ['policy-b'],
-        },
-      ],
+      data: { name: 'new-pack', saved_object_id: 'pack-new' },
+      warnings,
     });
 
     const { result } = renderHook(() => useCreatePack({ withRedirect: false }), {
@@ -77,11 +97,18 @@ describe('useCreatePack shared integration warnings', () => {
       result.current.mutate({ name: 'new-pack', policy_ids: ['policy-a'] } as never);
     });
 
-    await waitFor(() => expect(mockToasts.addWarning).toHaveBeenCalledTimes(1));
-    const [toast] = mockToasts.addWarning.mock.calls[0];
-    expect(toast.text).toBe(
-      'The integration "Shared osquery" is shared, so this pack also runs on: Policy B.'
+    await waitFor(() => expect(addWarningsMock).toHaveBeenCalledTimes(1));
+    expect(addWarningsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        warnings,
+        packId: 'pack-new',
+        toasts: mockToasts,
+        queryClient,
+        getUrlForApp,
+        startServices: { analytics: {}, i18n: {}, theme: {} },
+      })
     );
+    expect(mockToasts.addWarning).toHaveBeenCalledTimes(1);
     expect(mockToasts.addSuccess).toHaveBeenCalledTimes(1);
   });
 

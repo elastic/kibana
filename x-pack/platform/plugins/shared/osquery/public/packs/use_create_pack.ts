@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
@@ -25,10 +26,17 @@ interface UseCreatePackProps {
 export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   const queryClient = useQueryClient();
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp },
     http,
     notifications: { toasts },
+    analytics,
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
+  const startServices = useMemo(
+    () => ({ analytics, i18n: i18nStart, theme }),
+    [analytics, i18nStart, theme]
+  );
   const setErrorToast = useErrorToast();
 
   return useMutation<
@@ -61,7 +69,14 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
             },
           })
         );
-        addSharedIntegrationWarningToasts(payload.warnings, toasts, queryClient);
+        addSharedIntegrationWarningToasts({
+          warnings: payload.warnings,
+          packId: payload.data?.saved_object_id,
+          toasts,
+          queryClient,
+          getUrlForApp,
+          startServices,
+        });
       },
     }
   );

@@ -20,6 +20,9 @@ import type { OsqueryAgentPolicy } from '../agent_policies/types';
 
 const MAX_POLICY_NAMES = 3;
 
+const resolveNames = (ids: string[], nameById: Map<string, string>) =>
+  ids.map((id) => nameById.get(id) ?? id);
+
 interface SharedIntegrationWarningToastContentProps {
   integrationName: string;
   policyNames: string[];
@@ -96,6 +99,8 @@ export const addSharedIntegrationWarningToasts = ({
   for (const warning of warnings) {
     if (!warning.additional_policy_ids?.length) continue;
 
+    const policyNames = resolveNames(warning.additional_policy_ids, nameById);
+
     toasts.addWarning({
       title: i18n.translate('xpack.osquery.pack.sharedIntegrationWarningToast.title', {
         defaultMessage: 'Pack also runs on other agent policies',
@@ -103,7 +108,7 @@ export const addSharedIntegrationWarningToasts = ({
       text: toMountPoint(
         <SharedIntegrationWarningToastContent
           integrationName={warning.package_policy_name || warning.package_policy_id}
-          policyNames={warning.additional_policy_ids.map((id) => nameById.get(id) ?? id)}
+          policyNames={policyNames}
           packUrl={packUrl}
         />,
         startServices

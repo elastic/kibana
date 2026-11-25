@@ -17,6 +17,10 @@ import type { PackSavedObject } from './types';
 
 let mockWritePacks = true;
 const mockAddSuccess = jest.fn();
+const mockAddWarning = jest.fn();
+const mockGetUrlForApp = jest.fn(
+  (app: string, { path }: { path?: string } = {}) => `/app/${app}${path}`
+);
 const mockMutateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack', enabled: true } });
 
 jest.mock('../common/lib/kibana', () => ({
@@ -26,8 +30,12 @@ jest.mock('../common/lib/kibana', () => ({
         capabilities: {
           osquery: { writePacks: mockWritePacks },
         },
+        getUrlForApp: mockGetUrlForApp,
       },
-      notifications: { toasts: { addSuccess: mockAddSuccess } },
+      analytics: {},
+      i18n: {},
+      theme: {},
+      notifications: { toasts: { addSuccess: mockAddSuccess, addWarning: mockAddWarning } },
     },
   }),
 }));
@@ -111,6 +119,8 @@ describe('ActiveStateSwitch', () => {
     mockWritePacks = true;
     mockMutateAsync.mockClear();
     mockAddSuccess.mockClear();
+    mockAddWarning.mockClear();
+    mockGetUrlForApp.mockClear();
   });
 
   it('disables the toggle and blocks mutation for a not-enabled pack with zero policies', async () => {
@@ -177,6 +187,26 @@ describe('ActiveStateSwitch', () => {
 
     expect(mockMutateAsync).not.toHaveBeenCalled();
     expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+  });
+
+  it('passes the pack id to the shared integration warning toast on activation', async () => {
+    mockMutateAsync.mockResolvedValueOnce({
+      data: { name: 'Test Pack', enabled: true },
+      warnings: [
+        {
+          code: 'shared_integration_overdelivery',
+          package_policy_id: 'pp-shared',
+          package_policy_name: 'Shared osquery',
+          additional_policy_ids: ['shared-b'],
+        },
+      ],
+    });
+    renderSwitch(basePack({ enabled: false, policy_ids: ['policy-no-agents'] }));
+
+    fireEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => expect(mockAddWarning).toHaveBeenCalledTimes(1));
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('osquery', { path: '/packs/pack-1/edit' });
   });
 
   describe('shared integrations', () => {

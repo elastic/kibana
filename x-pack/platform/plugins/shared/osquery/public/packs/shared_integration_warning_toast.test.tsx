@@ -18,7 +18,9 @@ jest.mock('@kbn/react-kibana-mount', () => ({
   toMountPoint: (node: React.ReactNode) => node,
 }));
 
-const getUrlForApp = jest.fn((app: string, { path }: { path?: string } = {}) => `/app/${app}${path}`);
+const getUrlForApp = jest.fn(
+  (app: string, { path }: { path?: string } = {}) => `/app/${app}${path}`
+);
 
 const names: Record<string, string> = {
   'policy-a': 'Policy A',
@@ -118,7 +120,10 @@ describe('addSharedIntegrationWarningToasts', () => {
         warning(['policy-a', 'policy-b', 'policy-c', 'policy-d'], {
           package_policy_name: 'Integration One',
         }),
-        warning(['policy-e'], { package_policy_id: 'pp-2', package_policy_name: 'Integration Two' }),
+        warning(['policy-e'], {
+          package_policy_id: 'pp-2',
+          package_policy_name: 'Integration Two',
+        }),
       ],
       'pack-1'
     );

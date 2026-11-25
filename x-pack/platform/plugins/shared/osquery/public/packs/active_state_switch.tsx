@@ -35,9 +35,17 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const {
     application: {
       capabilities: { osquery: permissions },
+      getUrlForApp,
     },
     notifications: { toasts },
+    analytics,
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
+  const startServices = useMemo(
+    () => ({ analytics, i18n: i18nStart, theme }),
+    [analytics, i18nStart, theme]
+  );
   const setErrorToast = useErrorToast();
   const [confirmationModal, setConfirmationModal] = useState(false);
 
@@ -87,7 +95,14 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
                 },
               })
         );
-        addSharedIntegrationWarningToasts(response?.warnings, toasts, queryClient);
+        addSharedIntegrationWarningToasts({
+          warnings: response?.warnings,
+          packId: item.saved_object_id,
+          toasts,
+          queryClient,
+          getUrlForApp,
+          startServices,
+        });
       },
     },
   });

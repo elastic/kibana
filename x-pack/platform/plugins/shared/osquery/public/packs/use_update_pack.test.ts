@@ -10,8 +10,25 @@ import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../common/lib/kibana';
 import { useUpdatePack } from './use_update_pack';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 jest.mock('../common/lib/kibana');
+jest.mock('./shared_integration_warning_toast', () => {
+  const actual = jest.requireActual('./shared_integration_warning_toast');
+
+  // Keep the real behavior, but make the call observable.
+  return {
+    ...actual,
+    addSharedIntegrationWarningToasts: jest.fn(actual.addSharedIntegrationWarningToasts),
+  };
+});
+
+const addWarningsMock = addSharedIntegrationWarningToasts as jest.MockedFunction<
+  typeof addSharedIntegrationWarningToasts
+>;
+const getUrlForApp = jest.fn(
+  (app: string, { path }: { path?: string } = {}) => `/app/${app}${path}`
+);
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -44,7 +61,10 @@ describe('useUpdatePack error toast (6.9)', () => {
 
     useKibanaMock.mockReturnValue({
       services: {
-        application: { navigateToApp: jest.fn() },
+        application: { navigateToApp: jest.fn(), getUrlForApp },
+        analytics: {},
+        i18n: {},
+        theme: {},
         http: mockHttp,
         notifications: { toasts: mockToasts },
       },
@@ -139,8 +159,16 @@ describe('useUpdatePack error toast (6.9)', () => {
     await waitFor(() => expect(mockToasts.addWarning).toHaveBeenCalledTimes(1));
     const [toast] = mockToasts.addWarning.mock.calls[0];
     expect(toast.title).toBe('Pack also runs on other agent policies');
-    expect(toast.text).toBe(
-      'The integration "Shared osquery" is shared, so this pack also runs on: Policy B, policy-missing.'
+    expect(typeof toast.text).toBe('function');
+    expect(addWarningsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        packId: 'pack-1',
+        warnings: [expect.objectContaining({ package_policy_id: 'pp-shared' })],
+        toasts: mockToasts,
+        queryClient,
+        getUrlForApp,
+        startServices: { analytics: {}, i18n: {}, theme: {} },
+      })
     );
     expect(mockToasts.addSuccess).toHaveBeenCalledTimes(1);
   });
