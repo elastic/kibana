@@ -47,6 +47,10 @@ describe('toInlineAttachment', () => {
   it('returns undefined when the version does not exist', () => {
     expect(toInlineAttachment(attachment, 3)).toBeUndefined();
   });
+
+  it('carries the read-only flag onto the inline card', () => {
+    expect(toInlineAttachment({ ...attachment, readonly: true }, 2)?.readonly).toBe(true);
+  });
 });
 
 describe('getScreenContext', () => {

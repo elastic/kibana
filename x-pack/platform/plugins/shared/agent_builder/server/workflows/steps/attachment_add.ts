@@ -30,6 +30,7 @@ export const addAttachmentStepDefinition = ({ getAttachmentClient }: AttachmentS
           origin: input.origin,
           description: input.description,
           hidden: input.hidden,
+          readonly: input.readonly,
           render_inline: input.render_inline,
         });
 

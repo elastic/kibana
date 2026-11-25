@@ -591,9 +591,10 @@ describe('createDetectionRuleTool', () => {
     });
 
     // -----------------------------------------------------------------
-    // Branch 1 fail-closed guards — attachment_id provided but unusable.
-    // A hallucinated/stale id, a non-rule target, or a versionless record
-    // must error rather than silently no-op or overwrite the wrong card.
+    // Branch 1 guards — attachment_id provided but unusable.
+    // The tool must return an error when the id doesn't match any card, or the card
+    // is not a rule card, is read-only, or has no version. It must not skip the write
+    // silently or overwrite another card.
     // -----------------------------------------------------------------
     describe('fail-closed guards — attachment_id provided but unusable', () => {
       const expectFailClosed = (
@@ -646,6 +647,34 @@ describe('createDetectionRuleTool', () => {
         );
 
         expectFailClosed(result, `is not a ${SecurityAgentBuilderAttachments.rule} attachment`);
+        expect(context.attachments.update).not.toHaveBeenCalled();
+        expect(context.attachments.add).not.toHaveBeenCalled();
+      });
+
+      it('errors when the rule attachment is read-only', async () => {
+        const readonlyId = 'tuned-rule';
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents,
+        });
+        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+          id === readonlyId
+            ? {
+                id: readonlyId,
+                type: SecurityAgentBuilderAttachments.rule,
+                readonly: true,
+                current_version: 1,
+                versions: [{ version: 1, data: { text: '{}' } }],
+              }
+            : undefined
+        );
+
+        const result = await tool.handler(
+          { user_query: userQuery, attachment_id: readonlyId },
+          context
+        );
+
+        expectFailClosed(result, 'is read-only');
         expect(context.attachments.update).not.toHaveBeenCalled();
         expect(context.attachments.add).not.toHaveBeenCalled();
       });

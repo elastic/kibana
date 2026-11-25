@@ -31,6 +31,7 @@ export const toInlineAttachment = (
     type: attachment.type,
     data: versionData.data,
     hidden: attachment.hidden,
+    readonly: attachment.readonly,
     origin: attachment.origin,
     versionData: {
       version,

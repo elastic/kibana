@@ -61,11 +61,40 @@ describe('addAttachmentStepDefinition', () => {
       origin: undefined,
       description: undefined,
       hidden: undefined,
+      readonly: undefined,
       render_inline: undefined,
     });
     expect(result).toEqual({
       output: { attachment_id: 'att-1', type: 'text', current_version: 1 },
     });
+  });
+
+  it('forwards readonly to the client', async () => {
+    const { create, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
+      create: jest
+        .fn()
+        .mockResolvedValue({ id: 'att-1', type: 'text', current_version: 1, versions: [] }),
+    });
+    const definition = addAttachmentStepDefinition({
+      getAttachmentClient,
+    });
+
+    expect(
+      definition.inputSchema.safeParse({
+        conversation_id: 'conv-1',
+        type: 'text',
+        data: {},
+        readonly: true,
+      }).success
+    ).toBe(true);
+
+    await definition.handler(
+      createStepHandlerContext({
+        input: { conversation_id: 'conv-1', type: 'text', data: {}, readonly: true },
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ readonly: true }));
   });
 
   it('forwards render_inline to the client', async () => {

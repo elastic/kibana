@@ -76,7 +76,7 @@ When you determine a rule cannot be created:
 
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 
-**You MUST apply changes directly to the attachment.** Do NOT just describe or suggest what fields to change in your response text. Every create or edit request requires you to actually call the tools (\`security.create_detection_rule\` for creation and query rewrites, \`attachment_update\` for other field edits) to persist the result. Describing the change without applying it is not acceptable.
+**Unless the rule attachment is read-only, you MUST apply changes directly to the attachment.** For a read-only rule attachment, follow its own instructions instead. Do NOT just describe or suggest what fields to change in your response text. Every create or edit request requires you to actually call the tools (\`security.create_detection_rule\` for creation and query rewrites, \`attachment_update\` for other field edits) to persist the result. Describing the change without applying it is not acceptable.
 
 ## Core Workflow
 

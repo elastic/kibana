@@ -24,6 +24,8 @@ export interface Attachment<
   description?: string;
   /** should the attachment be hidden from the user - e.g. for screen context */
   hidden?: boolean;
+  /** Whether the attachment is read-only in this conversation */
+  readonly?: boolean;
   /**
    * Origin/reference info for attachments created from external sources.
    * For saved-object-backed types this is the saved object ID.

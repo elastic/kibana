@@ -504,8 +504,8 @@ steps:
   # By-reference security.rule attachment: the framework resolves the rule once
   # from its saved-object id and snapshots it, recording the rule as it was when
   # this review ran. The rule card reads `origin` as the saved-object id for View
-  # rule, Update rule and Apply to rule form, so `origin` must not be the rule_id.
-  # The fixed attachment id makes the refresh below deterministic.
+  # rule and its saved-rule diff, so `origin` must not be the rule_id. The fixed
+  # attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
     if: >-
@@ -517,6 +517,8 @@ steps:
       type: security.rule
       origin: "{{ steps.resolve_rule.output.id }}"
       description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
+      # The rule changes only through proposals: the agent can't edit the card, and it has no save buttons.
+      readonly: true
       render_inline: true
     on-failure:
       continue: true
@@ -946,6 +948,8 @@ steps:
       type: security.rule
       origin: "{{ steps.refetch_rule.output.id }}"
       description: "Prebuilt rule installed for the detection gap: {{ steps.refetch_rule.output.name }}"
+      # The rule changes only through proposals: the agent can't edit the card, and it has no save buttons.
+      readonly: true
       render_inline: true
     on-failure:
       continue: true

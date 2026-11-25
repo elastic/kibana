@@ -178,10 +178,9 @@ steps:
         workflow_execution_ids: ["{{ execution.id }}"]
 
   # A snapshot of the rule as it was when this review started. The rule card reads
-  # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
-  # and `origin` survives the agent's edits to the card while the ids in `text` do
-  # not. The content is passed by value from fetch_rule, so the rule is not read a
-  # second time. The fixed attachment id makes the refresh below deterministic.
+  # `origin` as the saved-object id for View rule and its saved-rule diff. The
+  # content is passed by value from fetch_rule, so the rule is not read a second
+  # time. The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
@@ -194,6 +193,8 @@ steps:
         text: "{{ steps.fetch_rule.output | json }}"
         attachmentLabel: "{{ steps.fetch_rule.output.name }}"
       description: "Rule under tuning: {{ steps.fetch_rule.output.name }}"
+      # The rule changes only through proposals: the agent can't edit the card, and it has no save buttons.
+      readonly: true
       render_inline: true
     on-failure:
       continue: true

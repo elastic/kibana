@@ -1212,6 +1212,7 @@ describe('RuleInlineContent integration', () => {
       savedRule,
       origin = 'saved-rule-id',
       versionData,
+      readonly,
       application = makeApplication(),
       uiSettings = makeUiSettings(),
       registerActionButtons = jest.fn(),
@@ -1221,6 +1222,7 @@ describe('RuleInlineContent integration', () => {
       savedRule?: Record<string, unknown>;
       origin?: string;
       versionData?: { version: number; versionCount: number; createdAt: string };
+      readonly?: boolean;
       application?: ApplicationStart;
       uiSettings?: IUiSettingsClient;
       registerActionButtons?: jest.Mock;
@@ -1240,6 +1242,7 @@ describe('RuleInlineContent integration', () => {
               type: 'security.rule',
               origin,
               ...(versionData ? { versionData } : {}),
+              ...(readonly === undefined ? {} : { readonly }),
               data: { text: JSON.stringify(rule) },
             },
             isSidebar: false,
@@ -1279,6 +1282,27 @@ describe('RuleInlineContent integration', () => {
       });
 
       expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+    });
+
+    it('registers no buttons for a read-only card, even when it differs from the saved rule', () => {
+      const { registerActionButtons } = renderCard({
+        savedRule: changedSavedRule,
+        readonly: true,
+      });
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+    });
+
+    it('registers the buttons for a card that is explicitly not read-only', () => {
+      const { registerActionButtons } = renderCard({
+        savedRule: changedSavedRule,
+        readonly: false,
+      });
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([
+        'Apply to rule form',
+        'Update rule',
+      ]);
     });
 
     it('registers no buttons when the card matches the saved rule', () => {

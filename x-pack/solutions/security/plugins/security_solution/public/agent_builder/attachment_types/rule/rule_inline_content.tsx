@@ -161,8 +161,9 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   }, [originalRule, rule]);
 
   const savedRuleId = getRuleIdFromAttachment(attachment);
-  // Offer save actions only on the latest card version.
-  const hasPendingChanges = hasDiff && isLatestAttachmentVersion(attachment);
+  // Offer save actions only on the latest card version, and never on a read-only card.
+  const hasPendingChanges =
+    hasDiff && isLatestAttachmentVersion(attachment) && attachment.readonly !== true;
 
   const pendingChangeButtons = useMemo(
     () =>
