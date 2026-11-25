@@ -9,7 +9,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RuleParams } from '../../../../rule_schema';
 
 /** The format of the rule card; a new value re-embeds every rule on the next sync. */
-export const RULE_CARD_VERSION = '2';
+export const RULE_CARD_VERSION = '3';
 
 export interface RuleSearchDocument {
   card_version: string;
@@ -23,6 +23,9 @@ export interface RuleSearchDocument {
   mitre_names: string[];
   tags: string[];
   query: string;
+  index_patterns: string;
+  note: string;
+  setup: string;
   card: string;
   rule_card: string;
 }
@@ -34,9 +37,10 @@ const unique = (values: Array<string | undefined>) => [
 ];
 
 /**
- * The rule card: what the rule detects, in the words a person would use. Name, description,
- * MITRE names, integrations and false positives; the query and the investigation guide stay
- * out of the vector (they are code and long text) but the query is searchable by words.
+ * Everything about the rule goes to the vector and to the words search; `semantic_text` splits
+ * long text into chunks and a rule scores by its best chunk. The reranker reads a short card,
+ * what the rule detects and which data it reads, for each of the top 100 rules on every search:
+ * the guide and the query there make a search seconds slower.
  */
 export const buildRuleSearchDocument = (
   spaceId: string,
@@ -67,8 +71,9 @@ export const buildRuleSearchDocument = (
   const integrations = unique((params.relatedIntegrations ?? []).map(({ package: pkg }) => pkg));
   const falsePositives = params.falsePositives ?? [];
   const query = 'query' in params && typeof params.query === 'string' ? params.query : '';
+  const indexPatterns = 'index' in params && Array.isArray(params.index) ? params.index : [];
 
-  const card = [
+  const shortCard = [
     rule.name,
     params.description,
     mitreLabels.length ? `MITRE ATT&CK: ${mitreLabels.join(', ')}` : '',
@@ -77,6 +82,17 @@ export const buildRuleSearchDocument = (
   ]
     .filter(Boolean)
     .join('\n');
+  const indexLine = indexPatterns.length ? `Index patterns: ${indexPatterns.join(', ')}` : '';
+  const card = [shortCard, indexLine].filter(Boolean).join('\n');
+  const fullCard = [
+    card,
+    rule.tags.length ? `Tags: ${rule.tags.join(', ')}` : '',
+    query ? `Query (${params.type}):\n${query}` : '',
+    params.note ? `Investigation guide:\n${params.note}` : '',
+    params.setup ? `Setup:\n${params.setup}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 
   return {
     card_version: RULE_CARD_VERSION,
@@ -90,7 +106,10 @@ export const buildRuleSearchDocument = (
     mitre_names: mitreNames,
     tags: rule.tags,
     query,
+    index_patterns: indexPatterns.join(' '),
+    note: params.note ?? '',
+    setup: params.setup ?? '',
     card,
-    rule_card: card,
+    rule_card: fullCard,
   };
 };

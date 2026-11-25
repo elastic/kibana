@@ -52,7 +52,16 @@ export const searchRelevantRuleIds = async ({
             {
               multi_match: {
                 query: term,
-                fields: ['name^3', 'mitre_names^2', 'description', 'tags', 'query'],
+                fields: [
+                  'name^3',
+                  'mitre_names^2',
+                  'description',
+                  'tags',
+                  'query',
+                  'index_patterns',
+                  'note',
+                  'setup',
+                ],
               },
             },
             { match: { ids: { query: term, boost: 5 } } },

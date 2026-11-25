@@ -22,8 +22,12 @@ export const RULE_SEARCH_INDEX = '.kibana-security-rule-search';
 export const RULE_SEARCH_EMBEDDING_ID = '.jina-embeddings-v5-text-small';
 export const RULE_SEARCH_RERANK_ID = '.jina-reranker-v3.5';
 
+/** A new value rebuilds the index: analyzers and field types cannot change in place. */
+const MAPPING_VERSION = '2';
+
 const MAPPINGS: MappingTypeMapping = {
   dynamic: 'strict',
+  _meta: { version: MAPPING_VERSION },
   properties: {
     card_version: { type: 'keyword' },
     space_id: { type: 'keyword' },
@@ -37,7 +41,12 @@ const MAPPINGS: MappingTypeMapping = {
     mitre_names: { type: 'text' },
     tags: { type: 'text' },
     query: { type: 'text' },
-    // The text of the rule card twice: for the reranker (plain text) and for meaning (vector).
+    // "logs-windows.sysmon_operational-*" must match "sysmon" and "windows".
+    index_patterns: { type: 'text', analyzer: 'rule_parts' },
+    note: { type: 'text' },
+    setup: { type: 'text' },
+    // The reranker reads this text for each of the top 100 rules on every search, so it stays
+    // short; the vector gets the whole rule.
     card: { type: 'text', index: false },
     rule_card: { type: 'semantic_text', inference_id: RULE_SEARCH_EMBEDDING_ID },
   },
@@ -79,7 +88,12 @@ export const getRuleSearchModels = async (
 
 export const ensureRuleSearchIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
   if (await esClient.indices.exists({ index: RULE_SEARCH_INDEX })) {
-    return;
+    const current = await esClient.indices.getMapping({ index: RULE_SEARCH_INDEX });
+    if (current[RULE_SEARCH_INDEX]?.mappings._meta?.version === MAPPING_VERSION) {
+      return;
+    }
+    logger.info(`Rebuilding ${RULE_SEARCH_INDEX} for mapping version ${MAPPING_VERSION}`);
+    await esClient.indices.delete({ index: RULE_SEARCH_INDEX });
   }
   try {
     await esClient.indices.create({
@@ -91,7 +105,9 @@ export const ensureRuleSearchIndex = async (esClient: ElasticsearchClient, logge
         analysis: {
           analyzer: {
             rule_ids: { type: 'custom', tokenizer: 'whitespace', filter: ['lowercase'] },
+            rule_parts: { type: 'custom', tokenizer: 'rule_parts', filter: ['lowercase'] },
           },
+          tokenizer: { rule_parts: { type: 'pattern', pattern: '[^A-Za-z0-9]+' } },
         },
       },
       mappings: MAPPINGS,
