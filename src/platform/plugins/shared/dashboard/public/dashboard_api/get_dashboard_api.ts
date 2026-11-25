@@ -12,6 +12,7 @@ import { BehaviorSubject, combineLatest, concatMap, map, merge, of, Subject } fr
 import { v4 } from 'uuid';
 
 import type { EuiFlyoutProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
@@ -260,7 +261,14 @@ export function getDashboardApi({
   if (incomingEmbeddables?.length) {
     // allow incoming embeddables to be undone
     initialState$.next(getHistoryState());
-    void layoutManager.internalApi.addIncomingEmbeddables(incomingEmbeddables);
+    layoutManager.internalApi.addIncomingEmbeddables(incomingEmbeddables).catch((error) => {
+      coreServices.notifications.toasts.addDanger({
+        title: i18n.translate('dashboard.addIncomingEmbeddablesError', {
+          defaultMessage: 'Unable to add all incoming panels to the dashboard',
+        }),
+        text: error instanceof Error ? error.message : String(error),
+      });
+    });
   }
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
@@ -440,7 +448,7 @@ export function getDashboardApi({
     ...layoutManager.internalApi,
     addIncomingEmbeddables: async (embeddables?: EmbeddablePackageState[]) => {
       await layoutManager.internalApi.addIncomingEmbeddables(
-        await prepareIncomingEmbeddables(embeddables, getState())
+        await prepareIncomingEmbeddables(embeddables, getState)
       );
     },
     ...unifiedSearchManager.internalApi,

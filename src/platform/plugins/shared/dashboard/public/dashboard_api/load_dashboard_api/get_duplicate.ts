@@ -8,9 +8,11 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddablePackageState,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import { isDashboardPanel } from '../../../common';
-import { embeddableService } from '../../services/kibana_services';
 
 export interface CachedPanel {
   readonly type: string;
@@ -21,36 +23,31 @@ export interface CachedPanel {
 export type PanelsCache = Map<string, CachedPanel[]>;
 
 /** Returns the existing grid or pinned panel that the incoming embeddable duplicates, if any. */
-export const getDuplicate = async (
-  embeddable: EmbeddablePackageState,
-  initialState: Pick<DashboardState, 'panels' | 'pinned_panels'>,
+export const getDuplicate = (
+  { embeddableId, serializedState, type }: EmbeddablePackageState,
+  embeddableDefinition: EmbeddablePublicDefinition | undefined,
+  dashboardState: Pick<DashboardState, 'panels' | 'pinned_panels'>,
   cache: PanelsCache
-): Promise<CachedPanel | undefined> => {
-  const { embeddableId, serializedState, type } = embeddable;
-  if (embeddableId) {
-    return undefined;
-  }
+): CachedPanel | undefined => {
+  // An embeddableId already targets a panel, so it needs no duplicate check.
+  const isDuplicate = embeddableDefinition?.isDuplicate;
+  if (embeddableId || !isDuplicate) return undefined;
 
-  // A failed definition load or isDuplicate error means no duplicate, so the dashboard still opens.
+  // An isDuplicate error means no duplicate, so the dashboard still opens.
   try {
-    const embeddableDefinition = await embeddableService.getEmbeddableDefinition(type);
-    if (!embeddableDefinition?.isDuplicate) {
-      return undefined;
-    }
-
     let panels = cache.get(type);
     if (!panels) {
       // Incoming panels are placed at the top level, so panels scoped to a section are not valid duplicate targets.
       panels = [
-        ...(initialState.pinned_panels ?? []),
-        ...(initialState.panels ?? []).filter(isDashboardPanel),
+        ...(dashboardState.pinned_panels ?? []),
+        ...(dashboardState.panels ?? []).filter(isDashboardPanel),
       ]
         .filter((panel) => panel.type === type)
         .map(({ type: panelType, id, config }) => ({ type: panelType, id, state: config }));
       cache.set(type, panels);
     }
 
-    return panels.find(({ state }) => embeddableDefinition.isDuplicate?.(serializedState, state));
+    return panels.find(({ state }) => isDuplicate(serializedState, state));
   } catch {
     return undefined;
   }

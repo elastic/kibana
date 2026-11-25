@@ -87,7 +87,7 @@ export async function loadDashboardApi({
 
   const incomingEmbeddables = await prepareIncomingEmbeddables(
     creationOptions?.getIncomingEmbeddables?.(),
-    initialState
+    () => initialState
   );
 
   const { api, cleanup, internalApi } = getDashboardApi({
