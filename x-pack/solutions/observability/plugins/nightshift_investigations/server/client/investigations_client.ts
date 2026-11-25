@@ -1215,7 +1215,8 @@ export class NightshiftInvestigationsClient {
     }
     const investigationId = asString(inputs?.investigation_id) ?? executionId;
     if (investigationId.length > 500) throw new InvestigationNotFoundError(executionId);
-    if (await this.isStartedByEntryPoint(execution)) return undefined;
+    const entryPointId = await this.getEntryPointExecutionId(execution);
+    if (entryPointId) return this.getUnsuccessfulRun(entryPointId);
     const child =
       execution.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
         ? await this.readInvestigationChild(investigationId, execution.id)
@@ -1236,16 +1237,18 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
-   * Whether a space's entry point waits on this run. The entry point then fails with it and
-   * reports it. Other workflows that run the investigation, such as the Slack thread workflow,
-   * keep going when it fails, so their runs are reported on their own.
+   * The space's entry point execution that waits on this run, if any. The entry point then fails
+   * with it and reports it. Other workflows that run the investigation, such as the Slack thread
+   * workflow, keep going when it fails, so their runs are reported on their own.
    */
-  private async isStartedByEntryPoint(execution: WorkflowExecutionDto): Promise<boolean> {
+  private async getEntryPointExecutionId(
+    execution: WorkflowExecutionDto
+  ): Promise<string | undefined> {
     if (
       execution.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID ||
       !isSyncParentInvocation(execution.context)
     ) {
-      return false;
+      return undefined;
     }
     const { workflowsManagement } = this.requireWriteDeps();
     const parent = await workflowsManagement.management.getWorkflowExecution(
@@ -1253,10 +1256,10 @@ export class NightshiftInvestigationsClient {
       this.getSpaceId(),
       { includeOutput: false, omitStepExecutions: true, request: this.request }
     );
-    return (
-      parent?.spaceId === this.getSpaceId() &&
+    return parent?.spaceId === this.getSpaceId() &&
       parent.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
-    );
+      ? parent.id
+      : undefined;
   }
 
   /** The latest shared investigation run a space's entry point started, if it started one. */
@@ -1272,11 +1275,16 @@ export class NightshiftInvestigationsClient {
     );
     const latest = children.filter(isInvestigationWorkflowExecution).at(-1);
     if (!latest) return undefined;
-    const { execution } = await this.readInvestigationExecution(
-      investigationId,
-      latest.executionId
-    );
-    return execution;
+    try {
+      const { execution } = await this.readInvestigationExecution(
+        investigationId,
+        latest.executionId
+      );
+      return execution;
+    } catch (error) {
+      if (error instanceof InvestigationNotFoundError) return undefined;
+      throw error;
+    }
   }
 
   /** Prevents a delayed outcome from replacing the aggregate state of a newer investigation run. */

@@ -2196,7 +2196,11 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
     it('leaves the investigation to the entry point waiting on it, but not to the Slack thread workflow', async () => {
       withRun(entryPoint(ExecutionStatus.CANCELLED), investigation(ExecutionStatus.CANCELLED));
-      expect(await makeClient().getUnsuccessfulRun('child-1')).toBeUndefined();
+      const run = await makeClient().getUnsuccessfulRun('child-1');
+      expect(run && { execution: run.execution.id, cause: run.cause.id }).toEqual({
+        execution: 'child-1',
+        cause: 'child-1',
+      });
 
       const slackThreadRun = execution(
         'slack-1',
@@ -2207,10 +2211,23 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       mockManagement.getWorkflowExecution.mockImplementation(async (id: string) =>
         id === slackThreadRun.id ? slackThreadRun : slackInvestigation
       );
-      const run = await makeClient().getUnsuccessfulRun('child-1');
-      expect(run && { execution: run.execution.id, cause: run.cause.id }).toEqual({
+      const slackRun = await makeClient().getUnsuccessfulRun('child-1');
+      expect(slackRun && { execution: slackRun.execution.id, cause: slackRun.cause.id }).toEqual({
         execution: 'child-1',
         cause: 'child-1',
+      });
+    });
+
+    it('reports the entry point when its investigation can no longer be read', async () => {
+      const parent = entryPoint(ExecutionStatus.FAILED);
+      withRun(parent, investigation(ExecutionStatus.FAILED));
+      mockManagement.getWorkflowExecution.mockImplementation(async (id: string) =>
+        id === parent.id ? parent : undefined
+      );
+      const run = await makeClient().getUnsuccessfulRun('parent-1');
+      expect(run && { execution: run.execution.id, cause: run.cause.id }).toEqual({
+        execution: 'parent-1',
+        cause: 'parent-1',
       });
     });
 
