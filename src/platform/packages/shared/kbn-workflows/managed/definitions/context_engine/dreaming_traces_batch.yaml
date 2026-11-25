@@ -29,18 +29,28 @@ triggers:
     inputs:
       additionalProperties: false
       required:
-        - memories
+        - rounds
       properties:
-        memories:
+        rounds:
           type: array
           description: The rounds of the batch, as readTraceTranscripts batched them.
           items:
             type: object
+        batch_tokens:
+          type: number
+          description: The batch_tokens readTraceTranscripts batched with.
         dry_run:
           type: boolean
           default: false
           description: Report what the batch would write and reject, and write nothing.
 steps:
+  - name: load
+    type: context-engine.loadTraceTranscripts
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      rounds: '${{ inputs.rounds }}'
+      batch_tokens: '${{ inputs.batch_tokens }}'
+
   - name: extract
     type: ai.prompt
     connector-id: '{{ consts.connector_id }}'
@@ -120,7 +130,7 @@ steps:
         {{ consts.instructions }}
 
         ROUNDS (one per line; each conversation's rounds are together and in order, with its id in attributes["trace.conversation_id"]; updated_at is when the round ended):
-        {%- for round in inputs.memories %}
+        {%- for round in steps.load.output.memories %}
         {{ round | json }}
         {%- endfor %}
       schema:
@@ -238,7 +248,7 @@ steps:
     type: context-engine.applyDreamChanges
     with:
       ai_index_id: '{{ consts.ai_index_id }}'
-      memories: '${{ inputs.memories }}'
+      memories: '${{ steps.load.output.memories }}'
       changes: '${{ steps.extract.output.content }}'
       dry_run: '${{ inputs.dry_run == true }}'
 

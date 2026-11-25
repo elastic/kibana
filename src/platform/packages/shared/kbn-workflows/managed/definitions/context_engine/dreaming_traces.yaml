@@ -100,7 +100,7 @@ steps:
   - name: active
     type: data.set
     with:
-      memories: '${{ steps.read_traces.output.memories }}'
+      rounds: '${{ steps.read_traces.output.rounds }}'
       batches: '${{ steps.read_traces.output.batches }}'
       resume_from: '{{ steps.read_traces.output.resume_from }}'
       resume_after: '{{ steps.read_traces.output.resume_after }}'
@@ -112,7 +112,7 @@ steps:
 
   - name: dream
     type: if
-    condition: '${{ variables.memories.size > 0 }}'
+    condition: '${{ variables.rounds > 0 }}'
     steps:
       - name: batches
         type: parallel
@@ -126,7 +126,8 @@ steps:
             with:
               workflow-id: '{{ consts.batch_workflow_id }}'
               inputs:
-                memories: '${{ foreach.item }}'
+                rounds: '${{ foreach.item }}'
+                batch_tokens: 50000
                 dry_run: '${{ inputs.dry_run == true }}'
 
       - name: tally
@@ -150,7 +151,7 @@ steps:
         type: workflow.output
         status: cancelled
         with:
-          rounds: '${{ variables.memories | size | default: 0 }}'
+          rounds: '${{ variables.rounds | default: 0 }}'
           created: '${{ variables.created | default: 0 }}'
           updated: '${{ variables.updated | default: 0 }}'
           deleted: '${{ variables.deleted | default: 0 }}'
@@ -161,7 +162,7 @@ steps:
   - name: output_result
     type: workflow.output
     with:
-      rounds: '${{ variables.memories | size | default: 0 }}'
+      rounds: '${{ variables.rounds | default: 0 }}'
       created: '${{ variables.created | default: 0 }}'
       updated: '${{ variables.updated | default: 0 }}'
       deleted: '${{ variables.deleted | default: 0 }}'

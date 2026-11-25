@@ -124,7 +124,7 @@ export type ContextEngineTraceDreamingWorkflowTemplateValues =
 export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 6,
+  version: 7,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRACE_DREAMING_YAML, {
@@ -151,7 +151,7 @@ export type ContextEngineTraceDreamingBatchWorkflowTemplateValues =
 export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRACE_DREAMING_BATCH_YAML, {

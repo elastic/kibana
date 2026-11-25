@@ -9,6 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
+import { MAX_DREAMING_STEP_MEMORIES } from '../dreaming';
 import { aiIndexIdSchema } from './ki';
 
 export const READ_TRACE_TRANSCRIPTS_STEP_ID = 'context-engine.readTraceTranscripts' as const;
@@ -16,6 +17,10 @@ export const READ_TRACE_TRANSCRIPTS_STEP_ID = 'context-engine.readTraceTranscrip
 /** The most rounds one read returns: each becomes a transcript the model reads. */
 export const MAX_TRACE_TRANSCRIPTS_READ_SIZE = 2000;
 export const DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE = 50;
+/** The most batches one read returns: the workflow engine runs at most this many in parallel. */
+export const MAX_TRACE_TRANSCRIPTS_BATCHES = 100;
+/** The workflow engine's limit on what one step returns, in bytes. */
+export const MAX_WORKFLOW_STEP_OUTPUT_BYTES = 10 * 1024 * 1024;
 /** The most a read holds, in estimated tokens, across all its batches. */
 export const MAX_TRACE_TRANSCRIPTS_READ_TOKENS = 10_000_000;
 export const DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS = 600_000;
@@ -26,6 +31,21 @@ export const DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS = 50_000;
 export const DEFAULT_TRACE_SETTLE_MINUTES = 5;
 const MAX_TIMESTAMP_LENGTH = 64;
 const MAX_CURSOR_LENGTH = 512;
+
+/**
+ * What is wrong with a read budget, or `undefined`: it must fit in at most
+ * {@link MAX_TRACE_TRANSCRIPTS_BATCHES} batches.
+ */
+export const validateTraceTranscriptsBudget = ({
+  maxTokens,
+  batchTokens,
+}: {
+  maxTokens: number;
+  batchTokens: number;
+}): string | undefined =>
+  Math.ceil(maxTokens / batchTokens) > MAX_TRACE_TRANSCRIPTS_BATCHES
+    ? `max_tokens (${maxTokens}) over batch_tokens (${batchTokens}) makes more than ${MAX_TRACE_TRANSCRIPTS_BATCHES} batches: raise batch_tokens or lower max_tokens.`
+    : undefined;
 
 export const readTraceTranscriptsInputSchema = lazySchema(() =>
   z.object({
@@ -98,27 +118,42 @@ export const traceTranscriptMemorySchema = lazySchema(() =>
 
 export type TraceTranscriptMemory = z.infer<typeof traceTranscriptMemorySchema>;
 
+/** A round a batch holds, as found by a read: enough for `loadTraceTranscripts` to load it. */
+export const traceRoundRefSchema = lazySchema(() =>
+  z.object({
+    trace_id: z.string(),
+    last_at: z.string().describe('When the last span of the round ended'),
+    target: z.string().describe('The index expression the spans of the round are read from'),
+    parts: z
+      .object({ from: z.number().int().min(0), to: z.number().int().min(1) })
+      .optional()
+      .describe(
+        'Set when the round is too long for one batch: the parts of it this batch holds, from inclusive, to exclusive'
+      ),
+  })
+);
+
+export type TraceRoundRef = z.infer<typeof traceRoundRefSchema>;
+
 export const readTraceTranscriptsOutputSchema = lazySchema(() =>
   z.object({
-    memories: z
-      .array(traceTranscriptMemorySchema)
-      .describe(
-        'One transcript per round, oldest first, shaped as the memories applyDreamChanges takes'
-      ),
+    rounds: z.number().describe('How many rounds the batches hold'),
     batches: z
-      .array(z.array(traceTranscriptMemorySchema))
+      .array(z.array(traceRoundRefSchema))
       .describe(
-        'The memories in batches for the model, a call each: rounds that share permissions, each conversation together and in order, whole conversations up to batch_tokens'
+        'The rounds in batches for the model, a call each: rounds that share permissions, each conversation together and in order, whole conversations up to batch_tokens. Pass each to loadTraceTranscripts for its transcripts'
       ),
     resume_from: z
       .string()
       .describe(
-        'Where the next read starts: the end of the last round read when size or max_tokens cut the read, else the end of the window read'
+        'Where the next read starts: the end of the last round read when size, max_tokens or the batch limit cut the read, else the end of the window read'
       ),
     resume_after: z
       .string()
       .optional()
-      .describe('Set when size or max_tokens cut the read: the trace id to pass as after'),
+      .describe(
+        'Set when size, max_tokens or the batch limit cut the read: the trace id to pass as after'
+      ),
     sources: z
       .array(
         z.object({
@@ -167,6 +202,72 @@ export const readTraceTranscriptsStepCommonDefinition: CommonStepDefinition<
           'no conversation text, because the tracing privacy settings leave it out, is skipped. ' +
           'Each round is shaped as a dreaming memory of type trace.round with an id that starts ' +
           'with trace:, visible only in this space.',
+      }
+    ),
+  },
+};
+
+export const LOAD_TRACE_TRANSCRIPTS_STEP_ID = 'context-engine.loadTraceTranscripts' as const;
+
+export const loadTraceTranscriptsInputSchema = lazySchema(() =>
+  z.object({
+    ai_index_id: aiIndexIdSchema,
+    rounds: z
+      .array(traceRoundRefSchema)
+      .min(1)
+      .max(MAX_DREAMING_STEP_MEMORIES)
+      .describe('The rounds of one batch, as readTraceTranscripts returned them'),
+    batch_tokens: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS)
+      .optional()
+      .describe(
+        `The batch_tokens the batches were made with. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS}.`
+      ),
+  })
+);
+
+export const loadTraceTranscriptsOutputSchema = lazySchema(() =>
+  z.object({
+    memories: z
+      .array(traceTranscriptMemorySchema)
+      .describe(
+        'One transcript per round of the batch, in the order given, shaped as the memories applyDreamChanges takes'
+      ),
+  })
+);
+
+export type LoadTraceTranscriptsOutput = z.infer<typeof loadTraceTranscriptsOutputSchema>;
+
+export const loadTraceTranscriptsStepCommonDefinition: CommonStepDefinition<
+  typeof loadTraceTranscriptsInputSchema,
+  typeof loadTraceTranscriptsOutputSchema
+> = {
+  id: LOAD_TRACE_TRANSCRIPTS_STEP_ID,
+  label: i18n.translate('xpack.contextEngine.workflows.steps.loadTraceTranscripts.label', {
+    defaultMessage: 'Load trace transcripts',
+  }),
+  description: i18n.translate(
+    'xpack.contextEngine.workflows.steps.loadTraceTranscripts.description',
+    {
+      defaultMessage:
+        'Rebuild the transcripts of the rounds of one batch that readTraceTranscripts made.',
+    }
+  ),
+  category: StepCategory.Kibana,
+  stability: 'tech_preview',
+  inputSchema: loadTraceTranscriptsInputSchema,
+  outputSchema: loadTraceTranscriptsOutputSchema,
+  documentation: {
+    details: i18n.translate(
+      'xpack.contextEngine.workflows.steps.loadTraceTranscripts.documentation.details',
+      {
+        defaultMessage:
+          'Loads the spans of each round of a batch as the workflow user and rebuilds its ' +
+          'transcript the way readTraceTranscripts does, so that a read carries no transcripts ' +
+          'between steps. The rounds must come from the trace sources of the AI index.',
       }
     ),
   },

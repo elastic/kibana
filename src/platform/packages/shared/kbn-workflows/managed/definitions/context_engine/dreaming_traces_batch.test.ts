@@ -63,9 +63,10 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
       {
         type: 'manual',
         inputs: expect.objectContaining({
-          required: ['memories'],
+          required: ['rounds'],
           properties: expect.objectContaining({
-            memories: expect.objectContaining({ type: 'array' }),
+            rounds: expect.objectContaining({ type: 'array' }),
+            batch_tokens: expect.objectContaining({ type: 'number' }),
             dry_run: expect.objectContaining({ type: 'boolean' }),
           }),
         }),
@@ -73,10 +74,11 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     ]);
   });
 
-  it('extracts from the rounds it is given alone and applies the changes citing them, building no relationships', () => {
+  it('loads the transcripts of the rounds it is given, extracts from them alone and applies the changes citing them, building no relationships', () => {
     const { steps } = render();
 
     expect(steps.map(({ name }: Step) => name)).toEqual([
+      'load',
       'extract',
       'apply_changes',
       'batch_output',
@@ -84,9 +86,19 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     expect(CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW.yamlTemplate(values)).not.toMatch(
       /relationship/i
     );
+    expect(findStep(steps, 'load')).toEqual(
+      expect.objectContaining({
+        type: 'context-engine.loadTraceTranscripts',
+        with: {
+          ai_index_id: '{{ consts.ai_index_id }}',
+          rounds: '${{ inputs.rounds }}',
+          batch_tokens: '${{ inputs.batch_tokens }}',
+        },
+      })
+    );
     expect(findStep(steps, 'apply_changes').with).toEqual({
       ai_index_id: '{{ consts.ai_index_id }}',
-      memories: '${{ inputs.memories }}',
+      memories: '${{ steps.load.output.memories }}',
       changes: '${{ steps.extract.output.content }}',
       dry_run: '${{ inputs.dry_run == true }}',
     });
@@ -133,7 +145,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
 
     const rendered = createWorkflowLiquidEngine().parseAndRenderSync(prompt, {
       consts: render().consts,
-      inputs: { memories: [round] },
+      steps: { load: { output: { memories: [round] } } },
     });
 
     expect(rendered).toContain(

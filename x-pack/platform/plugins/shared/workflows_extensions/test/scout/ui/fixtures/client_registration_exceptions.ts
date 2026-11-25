@@ -61,6 +61,7 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   'context-engine.deleteKi',
   'context-engine.getDreamingStatus',
   'context-engine.getFeedbackContext',
+  'context-engine.loadTraceTranscripts',
   'context-engine.readTraceTranscripts',
   'context-engine.recordImprovements',
   'context-engine.updateKi',

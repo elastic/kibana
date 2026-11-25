@@ -146,7 +146,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     const scope = {
       steps: {
         read_traces: {
-          output: { memories: [], resume_from: '2026-11-05T00:00:00Z', resume_after: 'trace-9' },
+          output: { rounds: 0, resume_from: '2026-11-05T00:00:00Z', resume_after: 'trace-9' },
         },
       },
     };
@@ -157,7 +157,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     expect(engine.parseAndRenderSync(String(active?.resume_after), scope)).toBe('trace-9');
     expect(findStep(steps, 'output_result').with).toEqual(
       expect.objectContaining({
-        rounds: '${{ variables.memories | size | default: 0 }}',
+        rounds: '${{ variables.rounds | default: 0 }}',
         resume_from: '{{ variables.resume_from }}',
         resume_after: '{{ variables.resume_after }}',
       })
@@ -185,7 +185,8 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
         with: {
           'workflow-id': '{{ consts.batch_workflow_id }}',
           inputs: {
-            memories: '${{ foreach.item }}',
+            rounds: '${{ foreach.item }}',
+            batch_tokens: 50000,
             dry_run: '${{ inputs.dry_run == true }}',
           },
         },
