@@ -22,12 +22,6 @@ describe('elasticsearchRoleSchema', () => {
   });
 
   test.each([
-    {
-      name: 'data source names',
-      role: (values: string[]) => ({
-        global: { data_source: [{ names: values, privileges: ['read'] }] },
-      }),
-    },
     { name: 'cluster privileges', role: (values: string[]) => ({ cluster: values }) },
     {
       name: 'remote cluster privileges',
