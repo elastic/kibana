@@ -20,6 +20,12 @@ const slackNotificationParamsSchema = z.strictObject({
     .describe('Parent message ID identifying the reply thread'),
 });
 
+/** The Slack destination's channel and thread, or undefined when its params are invalid. */
+export const readSlackNotificationParams = (params: JsonObject) => {
+  const parsed = slackNotificationParamsSchema.safeParse(params);
+  return parsed.success ? parsed.data : undefined;
+};
+
 const parseSlackNotificationParams = (params: JsonObject) => {
   const parsed = slackNotificationParamsSchema.safeParse(params);
   if (!parsed.success) {
@@ -85,6 +91,8 @@ export const slackNotificationHandler: NotificationHandler = {
           data && typeof data === 'object' && 'externalConversationId' in data
             ? data.externalConversationId
             : undefined;
+        const workspace =
+          data && typeof data === 'object' && 'workspace' in data ? data.workspace : undefined;
         return {
           status: 'sent',
           message_ts: messageTs,
@@ -92,6 +100,9 @@ export const slackNotificationHandler: NotificationHandler = {
           externalConversationId.length > 0 &&
           externalConversationId.length <= 500
             ? { external_conversation_id: externalConversationId }
+            : {}),
+          ...(typeof workspace === 'string' && workspace.length > 0 && workspace.length <= 500
+            ? { workspace }
             : {}),
           sent_at: new Date().toISOString(),
           channel:

@@ -59,6 +59,7 @@ import type {
   ConversationTemplatesServiceStart,
 } from './conversation/templates';
 import type { DeploymentInfo } from '../utils/deployment_info';
+import type { PinnedBaselineService } from './eval_baselines/pinned_baseline_service';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -99,6 +100,7 @@ export interface InternalStartServices {
   callbackDeliveryService: CallbackDeliveryService;
   spaceSettings: SpaceSettingsService;
   conversationTemplates: ConversationTemplatesServiceStart;
+  evalBaselines: PinnedBaselineService;
 }
 
 export interface ServiceSetupDeps {

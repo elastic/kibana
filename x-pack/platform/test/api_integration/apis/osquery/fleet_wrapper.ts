@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { buildAgentSearchKuery } from '@kbn/osquery-plugin/common/utils/build_agent_search_kuery';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -110,6 +111,16 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.total).to.be.greaterThan(0);
       expect(response.body).to.have.property('agents');
       expect(response.body).to.have.property('groups');
+    });
+
+    it('lists agents for a picker search, whose policy_name clause Fleet does not map', async () => {
+      const kuery = encodeURIComponent(buildAgentSearchKuery('Osquery policy'));
+      const response = await getWithInternalHeaders(
+        `/internal/osquery/fleet_wrapper/agents?page=1&perPage=20&showInactive=false&kuery=${kuery}`
+      );
+
+      expect(response.status).to.be(200);
+      expect(response.body.agents.map(({ id }: { id: string }) => id)).to.contain(agentId);
     });
 
     it('returns bulk agent details', async () => {

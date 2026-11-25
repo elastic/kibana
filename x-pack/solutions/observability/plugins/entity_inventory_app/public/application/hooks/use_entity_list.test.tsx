@@ -221,3 +221,119 @@ describe('useEntityList', () => {
     expect(result.current.result.data).toBe(INITIAL_LIST_RESPONSE);
   });
 });
+
+describe('useEntityList when it is not enabled', () => {
+  const renderLazyEntityList = (inventoryApi: EntityInventoryApiClient, enabled: boolean) => {
+    // Created once: the committed range lives in the URL, so a history per render would reset it.
+    const history = createMemoryHistory();
+
+    return renderHook(
+      ({ isEnabled }: { isEnabled: boolean }) => ({
+        search: useEntityInventorySearch(),
+        result: useEntityList('host', { enabled: isEnabled }),
+      }),
+      {
+        initialProps: { isEnabled: enabled },
+        wrapper: ({ children }) => (
+          <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+            <Router history={history}>
+              <EntityInventorySearchProvider entityCategory="hosts">
+                {children}
+              </EntityInventorySearchProvider>
+            </Router>
+          </KibanaContextProvider>
+        ),
+      }
+    );
+  };
+
+  it('does not list until it is enabled, and reports loading with no rows meanwhile', () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderLazyEntityList(inventoryApi, false);
+
+    expect(inventoryApi.getEntities).not.toHaveBeenCalled();
+    expect(result.current.result.loading).toBe(true);
+    expect(result.current.result.data).toBe(INITIAL_LIST_RESPONSE);
+  });
+
+  it('lists once when it becomes enabled, and not again when it is disabled and enabled again', async () => {
+    const inventoryApi = createClientMock();
+    const { result, rerender } = renderLazyEntityList(inventoryApi, false);
+
+    rerender({ isEnabled: true });
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1);
+    const loadedRows = result.current.result.data.rows;
+
+    rerender({ isEnabled: false });
+    rerender({ isEnabled: true });
+
+    expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1);
+    expect(result.current.result.data.rows).toBe(loadedRows);
+  });
+
+  it('does not list when the range changes before it was ever enabled, and lists once it is', async () => {
+    const inventoryApi = createClientMock();
+    const { result, rerender } = renderLazyEntityList(inventoryApi, false);
+
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+    });
+    expect(inventoryApi.getEntities).not.toHaveBeenCalled();
+
+    rerender({ isEnabled: true });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1));
+    const [[, request]] = inventoryApi.getEntities.mock.calls;
+    expect(Date.parse(request.to) - Date.parse(request.from)).toBe(60 * 60 * 1000);
+  });
+
+  it('keeps its rows and does not list when the range changes while it is disabled, and lists when it is enabled again', async () => {
+    const inventoryApi = createClientMock();
+    const { result, rerender } = renderLazyEntityList(inventoryApi, true);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    const loadedRows = result.current.result.data.rows;
+    expect(loadedRows.length).toBeGreaterThan(0);
+
+    rerender({ isEnabled: false });
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+    });
+
+    expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1);
+    expect(result.current.result.data.rows).toBe(loadedRows);
+
+    rerender({ isEnabled: true });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    const [, request] = inventoryApi.getEntities.mock.calls[1];
+    expect(Date.parse(request.to) - Date.parse(request.from)).toBe(60 * 60 * 1000);
+  });
+
+  it('lists again when the range changes while it is enabled', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderLazyEntityList(inventoryApi, true);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+  });
+
+  it('aborts the pending request and lists again when the range changes mid-load', async () => {
+    const inventoryApi = createClientMock();
+    inventoryApi.getEntities.mockImplementationOnce(() => new Promise(() => {}));
+    const { result } = renderLazyEntityList(inventoryApi, true);
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1));
+    const [[, , { signal: firstSignal }]] = inventoryApi.getEntities.mock.calls;
+
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    expect(firstSignal?.aborted).toBe(true);
+  });
+});
