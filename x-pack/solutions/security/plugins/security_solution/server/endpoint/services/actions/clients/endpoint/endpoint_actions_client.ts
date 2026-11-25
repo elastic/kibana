@@ -139,32 +139,29 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     // requires is checked up front in `validateCommandCapabilities()`.)
     if (
       (actionRequest.command === 'get-file' || actionRequest.command === 'memory-dump') &&
-      actionRequest.parameters?.export !== undefined &&
-      !this.options.endpointService.experimentalFeatures.responseActionsEndpointFileExport
+      actionRequest.parameters?.export !== undefined
     ) {
-      return {
-        isValid: false,
-        error: new ResponseActionsClientError(
-          `${actionRequest.command} \`export\` parameter is not enabled`,
-          400
-        ),
-      };
-    }
+      if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointFileExport) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `${actionRequest.command} \`export\` parameter is not enabled`,
+            400
+          ),
+        };
+      }
 
-    // An exported file goes to a single blob, so it cannot be shared by several hosts in one action
-    // (also checked by the route schemas, which don't cover the other callers of this client)
-    if (
-      (actionRequest.command === 'get-file' || actionRequest.command === 'memory-dump') &&
-      actionRequest.parameters?.export !== undefined &&
-      actionRequest.endpoint_ids.length > 1
-    ) {
-      return {
-        isValid: false,
-        error: new ResponseActionsClientError(
-          `${actionRequest.command} \`export\` supports one host per request`,
-          400
-        ),
-      };
+      // An exported file goes to a single blob, so it cannot be shared by several hosts in one
+      // action (also checked by the route schemas, which don't cover the other callers of this client)
+      if (actionRequest.endpoint_ids.length > 1) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `${actionRequest.command} \`export\` supports one host per request`,
+            400
+          ),
+        };
+      }
     }
 
     // Memory Dump: ensure that agents/Endpoint support this command

@@ -102,7 +102,8 @@ export default function ({ getService }: FtrProviderContext) {
         headers: { 'elastic-api-version': '2023-10-31' },
       });
       const endpointInput = fullAgentPolicy.item.inputs.find(
-        (input) => input.package_policy_id === testData.packagePolicy.id && input.type === 'endpoint'
+        (input) =>
+          input.package_policy_id === testData.packagePolicy.id && input.type === 'endpoint'
       );
       expect(endpointInput).to.be.ok();
       for (const os of ['windows', 'mac', 'linux'] as const) {
