@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiDelayRender,
@@ -39,14 +39,13 @@ import { clampRange, isSameRange } from '../geometry/cell_range';
 import type { Cell, CellRange } from '../geometry/cell_range';
 import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
-import type { PlotArea, Point } from '../geometry/map_geometry';
+import type { PlotArea } from '../geometry/map_geometry';
 import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { useLatencyGrid } from '../hooks/use_latency_grid';
 import { useLatencyMapColors } from '../hooks/use_latency_map_colors';
 import { usePlotCalibration } from '../hooks/use_plot_calibration';
+import { useSelectionGestures } from '../hooks/use_selection_gestures';
 import { useSettledWidth } from '../hooks/use_settled_width';
-import { endGesture, moveGesture, startGesture } from '../selection/gesture';
-import type { Gesture } from '../selection/gesture';
 import { getMapBands } from '../operations/operation_bands';
 import type { LatencyMapOperation } from '../operations/operation_bands';
 import { operationToEsqlCondition } from '../operations/to_esql';
@@ -62,7 +61,7 @@ import { LatencyMapLegend } from './legend';
 import { MapHeader, percentileDuration } from './map_header';
 import type { SlowestPercentile } from './map_header';
 import { SelectionSummary } from './selection_summary';
-import { OVERLAY_CONTROL_ATTRIBUTE, SelectionOverlay } from './selection_overlay';
+import { SelectionOverlay } from './selection_overlay';
 import { getCountText, getSlowestLabel } from './unit_text';
 
 export interface LatencyMapProps {
@@ -155,12 +154,6 @@ const isSameSelection = (a?: LatencyMapSelection, b?: LatencyMapSelection) =>
       a.maxDuration === b.maxDuration &&
       Boolean(a.failedOnly) === Boolean(b.failedOnly)
   );
-
-/** A window pointer event in the pixels of the chart, whose box the layer shares. */
-const toLayerPoint = (event: globalThis.PointerEvent, box: DOMRect): Point => ({
-  x: event.clientX - box.left,
-  y: event.clientY - box.top,
-});
 
 /** Until the chart tells where its cells are, the pixels of the geometry mean nothing. */
 const UNCALIBRATED: PlotArea = { left: 0, top: 0, colWidth: 1, rowHeight: 1 };
@@ -309,29 +302,11 @@ export function LatencyMap({
     [onSelectionCommit, unit, selectionCondition]
   );
 
-  const gestureRef = useRef<Gesture>();
   // The percentile the user picked on the menu: when several percentiles coincide on the same
   // rows (a spike holding most spans), the committed range alone cannot tell them apart.
   const [chosenSlowest, setChosenSlowest] = useState<SlowestPercentile>();
-  const [draft, setDraft] = useState<CellRange>();
   const [keyboard, setKeyboard] = useState<KeyboardState>();
   const [hoverCell, setHoverCell] = useState<Cell>();
-  // A press on the map draws a new region, a press on the selection's own grip or handles
-  // moves or resizes it.
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [isMoving, setIsMoving] = useState(false);
-
-  // A new grid puts cells elsewhere: a cursor, an anchor or a move in progress would point at
-  // cells that are no longer there, or past the new edge.
-  useEffect(() => {
-    setKeyboard(undefined);
-    setDraft(undefined);
-    setHoverCell(undefined);
-    gestureRef.current = undefined;
-    setIsMoving(false);
-    setIsDrawing(false);
-    setPendingCommit(undefined);
-  }, [gridKey]);
 
   // The same object for as long as it covers the same cells: a host handing the selection in
   // a new object each render (parsed from its query, say) must not redraw the chart.
@@ -355,10 +330,6 @@ export function LatencyMap({
   // Every span of the map, failed and not: the errors switch needs to know whether there are
   // any, and a drawn region is read against them.
   const gridTotals = useMemo(() => (grid ? getGridTotals(grid) : undefined), [grid]);
-  // The selection as the chart draws it, by what is on: a move, the keyboard, the selection.
-  const highlight = draft ?? (keyboard ? getKeyboardRange(keyboard) : undefined) ?? committedRange;
-  const overlayRange = draft ?? committedRange;
-
   const describeCell = useCallback(
     (cell: Cell) => {
       const counts = grid?.cells.get(getCellKey(cell.xi, cell.yi, grid.bins));
@@ -497,43 +468,41 @@ export function LatencyMap({
     [geometry, onCellClick, describeCell, failedOnly]
   );
 
-  const getPoint = (event: PointerEvent<SVGSVGElement>): Point => {
-    const box = event.currentTarget.getBoundingClientRect();
-    return { x: event.clientX - box.left, y: event.clientY - box.top };
-  };
-  const cancelGesture = () => {
-    gestureRef.current = undefined;
-    setDraft(undefined);
-    setIsMoving(false);
-    setIsDrawing(false);
-  };
+  // The map's wrapper takes the keyboard, and gives it up on focus loss or a pointer press.
+  const [layer, setLayer] = useState<HTMLDivElement | null>(null);
+  const commitGesture = useCallback(
+    (range: CellRange, options?: { ofSelection?: boolean }) =>
+      commitRange(range, undefined, options),
+    [commitRange]
+  );
+  // Any press takes the keyboard cursor away, as a click takes the focus.
+  const dropCursor = useCallback(() => setKeyboard(undefined), []);
+  const { draft, isDrawing, isMoving, cancelGesture, resetGestures, overlayHandlers } =
+    useSelectionGestures({
+      container,
+      layer,
+      geometry,
+      plot,
+      committedRange,
+      width,
+      height,
+      onCommitRange: commitGesture,
+      onClickCell: clickCell,
+      onPress: dropCursor,
+    });
 
-  const onOverlayPointerDown = (event: PointerEvent<SVGSVGElement>) => {
-    if (!geometry || !plot || event.button !== 0) return;
-    const gesture = startGesture(getPoint(event), geometry, committedRange);
-    // Only the grip and the handles reach the overlay; drawing starts on the layer below.
-    if (gesture.kind === 'drawing') return;
-    gestureRef.current = gesture;
-    setIsMoving(true);
-    (event.target as Element).setPointerCapture?.(event.pointerId);
-  };
+  // A new grid puts cells elsewhere: a cursor, an anchor or a move in progress would point at
+  // cells that are no longer there, or past the new edge.
+  useEffect(() => {
+    setKeyboard(undefined);
+    setHoverCell(undefined);
+    resetGestures();
+    setPendingCommit(undefined);
+  }, [gridKey, resetGestures]);
 
-  const onOverlayPointerMove = (event: PointerEvent<SVGSVGElement>) => {
-    if (!geometry || !gestureRef.current) return;
-    const range = moveGesture(gestureRef.current, getPoint(event), geometry);
-    setDraft((previous) => (previous && isSameRange(previous, range) ? previous : range));
-  };
-
-  const onOverlayPointerUp = (event: PointerEvent<SVGSVGElement>) => {
-    const gesture = gestureRef.current;
-    if (!geometry || !gesture) return;
-    const end = endGesture(gesture, getPoint(event), geometry);
-    cancelGesture();
-    (event.target as Element).releasePointerCapture?.(event.pointerId);
-    // The overlay's gestures move or resize the selection: the region stays the same one.
-    if (end.type === 'range') commitRange(end.range, undefined, { ofSelection: true });
-    else if (end.type === 'click') clickCell(end.cell);
-  };
+  // The selection as the chart draws it, by what is on: a move, the keyboard, the selection.
+  const highlight = draft ?? (keyboard ? getKeyboardRange(keyboard) : undefined) ?? committedRange;
+  const overlayRange = draft ?? committedRange;
 
   const focusOperation = useCallback(
     (operation: LatencyMapOperation) =>
@@ -581,8 +550,7 @@ export function LatencyMap({
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (!geometry) return;
-    if (event.key === 'Escape' && gestureRef.current) {
-      cancelGesture();
+    if (event.key === 'Escape' && cancelGesture()) {
       event.preventDefault();
       return;
     }
@@ -617,10 +585,9 @@ export function LatencyMap({
     }
   };
 
-  // The map's wrapper takes the keyboard, and gives it up on focus loss or a pointer press. The
-  // listeners are added to the element, not as props, which jsx-a11y reads as a static element
-  // taking events. They read the latest handler through a ref, so they are added only once.
-  const [layer, setLayer] = useState<HTMLDivElement | null>(null);
+  // The keyboard listeners are added to the element, not as props, which jsx-a11y reads as a
+  // static element taking events. They read the latest handler through a ref, so they are
+  // added only once.
   const latestKeyDown = useRef(onKeyDown);
   latestKeyDown.current = onKeyDown;
   useEffect(() => {
@@ -637,123 +604,10 @@ export function LatencyMap({
     };
   }, [layer]);
 
-  // Drawing a region is the map's own gesture, not the chart's brush: it then also starts on
-  // the margins and just above the chart (clamped to the plot, so the top row is easy to catch
-  // from the top), and an existing selection never swallows it mid-drag. The chart's brush
-  // stays wired as the fallback until its first cell calibrates the geometry. Capturing on the
-  // wrapper, so that the chart below cannot stop it.
-  const latestDraw = useRef({
-    geometry,
-    plot,
-    layer,
-    committedRange,
-    commitRange,
-    clickCell,
-    width,
-    height,
-  });
-  latestDraw.current = {
-    geometry,
-    plot,
-    layer,
-    committedRange,
-    commitRange,
-    clickCell,
-    width,
-    height,
-  };
   // Stable, so renders that change nothing of the chart do not reach the memoized heatmap.
-  const onBrush = useCallback((range: CellRange) => latestDraw.current.commitRange(range), []);
-  useEffect(() => {
-    if (!container) return;
-    const handlePointerDown = (event: globalThis.PointerEvent) => {
-      // Any press takes the keyboard cursor away, as a click takes the focus.
-      setKeyboard(undefined);
-      const target = event.target as Element;
-      if (event.button !== 0 || target.closest?.(`[${OVERLAY_CONTROL_ATTRIBUTE}], button, a`)) {
-        return;
-      }
-      const latest = latestDraw.current;
-      if (!latest.geometry || !latest.plot || !latest.layer) return;
-      // The chart's own box (the layer), and the grab band just above it, under the header.
-      const point = toLayerPoint(event, latest.layer.getBoundingClientRect());
-      if (
-        point.x < 0 ||
-        point.x > latest.width ||
-        point.y < -LAYOUT.grabAbovePx ||
-        point.y > latest.height
-      ) {
-        return;
-      }
-      const gesture = startGesture(point, latest.geometry, latest.committedRange);
-      // The grip and the handles take their presses on the overlay instead.
-      if (gesture.kind !== 'drawing') return;
-      gestureRef.current = gesture;
-      drawingPointerId.current = event.pointerId;
-      setIsDrawing(true);
-      // The chart reads mouse events for its own brush and click: swallow this press's
-      // compatibility mousedown, which follows the pointer event, so only one of us draws.
-      const suppress = (mouseEvent: Event) => mouseEvent.stopPropagation();
-      container.addEventListener('mousedown', suppress, true);
-      setTimeout(() => container.removeEventListener('mousedown', suppress, true));
-    };
-    container.addEventListener('pointerdown', handlePointerDown, true);
-    return () => container.removeEventListener('pointerdown', handlePointerDown, true);
-  }, [container]);
-
-  // The drawing pointer may leave the map, so its moves and its release are the window's. Only
-  // that pointer's: a second finger, wherever it lands, neither moves nor ends the drawing.
-  const drawingPointerId = useRef<number>();
-  useEffect(() => {
-    const isDrawingPointer = (event: globalThis.PointerEvent) =>
-      gestureRef.current?.kind === 'drawing' && event.pointerId === drawingPointerId.current;
-    const handlePointerMove = (event: globalThis.PointerEvent) => {
-      const gesture = gestureRef.current;
-      const { geometry: current, layer: layerEl } = latestDraw.current;
-      if (!isDrawingPointer(event) || gesture?.kind !== 'drawing' || !current || !layerEl) return;
-      const range = moveGesture(
-        gesture,
-        toLayerPoint(event, layerEl.getBoundingClientRect()),
-        current
-      );
-      setDraft((previous) => (previous && isSameRange(previous, range) ? previous : range));
-    };
-    const handlePointerUp = (event: globalThis.PointerEvent) => {
-      const gesture = gestureRef.current;
-      const {
-        geometry: current,
-        layer: layerEl,
-        commitRange: commitDrawn,
-        clickCell: click,
-      } = latestDraw.current;
-      if (!isDrawingPointer(event) || gesture?.kind !== 'drawing') return;
-      gestureRef.current = undefined;
-      setDraft(undefined);
-      setIsDrawing(false);
-      if (!current || !layerEl) return;
-      const end = endGesture(
-        gesture,
-        toLayerPoint(event, layerEl.getBoundingClientRect()),
-        current
-      );
-      if (end.type === 'range') commitDrawn(end.range);
-      else if (end.type === 'click') click(end.cell);
-    };
-    const handlePointerCancel = (event: globalThis.PointerEvent) => {
-      if (!isDrawingPointer(event)) return;
-      gestureRef.current = undefined;
-      setDraft(undefined);
-      setIsDrawing(false);
-    };
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('pointercancel', handlePointerCancel);
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerCancel);
-    };
-  }, []);
+  const latestCommitRange = useRef(commitRange);
+  latestCommitRange.current = commitRange;
+  const onBrush = useCallback((range: CellRange) => latestCommitRange.current(range), []);
 
   // The keyboard's readout: the cursor's cell or, while Shift is extending a region, the whole
   // region - the bounds and counts that Enter would commit, as the summary will say them.
@@ -900,10 +754,7 @@ export function LatencyMap({
               height={height}
               showHandles={!isDrawing}
               isMoving={isMoving}
-              onPointerDown={onOverlayPointerDown}
-              onPointerMove={onOverlayPointerMove}
-              onPointerUp={onOverlayPointerUp}
-              onPointerCancel={cancelGesture}
+              {...overlayHandlers}
             />
           )}
         </div>
