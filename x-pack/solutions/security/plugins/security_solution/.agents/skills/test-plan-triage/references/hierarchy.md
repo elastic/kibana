@@ -18,7 +18,7 @@ An entry with `unreadable: true` is a parent the user's `gh` cannot read (privat
    - **Not a functionality:** the ancestor itself matches N1 or N2 in `rules.md` (for example a "Tech debt" or "Bug fixes" epic whose other children are refactors and bugs). Stop, and do not suggest it or anything above it.
    - **Unclear:** stop climbing. The decision becomes Need your input (A4), whatever the target's own rule (a Yes, an N3 or an N4): show the whole chain, say which rule the target matched, and ask which level they want. Propose no label and no comment until they answer.
    - **Unreadable:** stop climbing. You cannot tell what it is, so never suggest it; say the chain continues above it and that you could not read it.
-3. The suggested level is the last ancestor you reached before stopping. If you stopped at the first ancestor, there is no suggested level: the target stands on its own.
+3. The suggested level is the last ancestor you reached before stopping. If you stopped at the first ancestor, there is no suggested level; the table below says what that means for each decision.
 4. Adjust for state:
    - A **closed** ancestor is never suggested. If the one you reached is closed, suggest the highest **open** one-functionality ancestor below it, and mention the closed one.
    - An ancestor with `has_label: true` is reported as "already labeled", with no label change.

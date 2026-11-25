@@ -216,15 +216,11 @@ def _has_label(issue: dict) -> bool:
 def summarize(issue: dict, *, body_limit: int) -> dict:
     repo = repo_from_issue(issue)
     summary = {
-        "ref": f"{repo}#{issue['number']}",
+        **_sub_issue(issue),
         "url": issue.get("html_url"),
-        "title": issue.get("title") or "",
-        "state": issue.get("state"),
-        "type": (issue.get("type") or {}).get("name"),
         "labels": _labels(issue),
         "has_label": _has_label(issue),
         "is_pull_request": bool(issue.get("pull_request")),
-        "sub_issues_total": (issue.get("sub_issues_summary") or {}).get("total", 0),
         "allowed_repo": repo in ALLOWED_REPOS,
         "private": repo not in PUBLIC_REPOS,
     }
