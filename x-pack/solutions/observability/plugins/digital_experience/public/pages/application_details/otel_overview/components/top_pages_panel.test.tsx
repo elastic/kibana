@@ -15,9 +15,16 @@ import { TopPagesPanel } from './top_pages_panel';
 
 jest.mock('../../../../hooks/use_kibana_services');
 
+const NO_SIGNALS = { lcpP75Ms: null, inpP75Ms: null, clsP75: null, jsErrors: null };
+
 const PAGES: TopPage[] = [
-  { url: 'https://shop.example.com/', pageLoads: 1533, loadTimeP75Ms: 2412.5 },
-  { url: 'https://shop.example.com/cart?step=2', pageLoads: 40, loadTimeP75Ms: null },
+  { url: 'https://shop.example.com/', pageLoads: 1533, loadTimeP75Ms: 2412.5, ...NO_SIGNALS },
+  {
+    url: 'https://shop.example.com/cart?step=2',
+    pageLoads: 40,
+    loadTimeP75Ms: null,
+    ...NO_SIGNALS,
+  },
 ];
 
 const onSelectPage = jest.fn();
@@ -50,10 +57,52 @@ describe('TopPagesPanel', () => {
     expect(screen.getByText('2.41 s')).toBeInTheDocument();
   });
 
+  it('colors the web vitals of a page by their rating, and shows its JS errors', () => {
+    renderPanel([
+      {
+        url: '/products/{slug}',
+        pageLoads: 148,
+        loadTimeP75Ms: 2080,
+        lcpP75Ms: 2100,
+        inpP75Ms: 260,
+        clsP75: 0.31,
+        jsErrors: 12,
+      },
+    ]);
+
+    expect(screen.getByTestId('digitalExperienceTopPageVital-lcp')).toHaveTextContent('2.10 s');
+    expect(screen.getByTestId('digitalExperienceTopPageVital-lcp')).toHaveAttribute(
+      'data-rating',
+      'good'
+    );
+    expect(screen.getByTestId('digitalExperienceTopPageVital-inp')).toHaveAttribute(
+      'data-rating',
+      'needsImprovement'
+    );
+    expect(screen.getByTestId('digitalExperienceTopPageVital-cls')).toHaveTextContent('0.310');
+    expect(screen.getByTestId('digitalExperienceTopPageVital-cls')).toHaveAttribute(
+      'data-rating',
+      'poor'
+    );
+    expect(screen.getByText('12')).toBeInTheDocument();
+  });
+
+  it('leaves the vitals and errors empty for a page without them, e.g. without a route', () => {
+    renderPanel([PAGES[0]]);
+
+    expect(screen.queryByTestId('digitalExperienceTopPageVital-lcp')).not.toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'JS errors' })).toBeInTheDocument();
+  });
+
   it('labels each page like the sessions do, with its full URL in the title', () => {
     renderPanel([
       ...PAGES,
-      { url: 'https://shop.example.com/#/checkout?step=2', pageLoads: 3, loadTimeP75Ms: null },
+      {
+        url: 'https://shop.example.com/#/checkout?step=2',
+        pageLoads: 3,
+        loadTimeP75Ms: null,
+        ...NO_SIGNALS,
+      },
     ]);
 
     expect(screen.getByText('/cart')).toBeInTheDocument();

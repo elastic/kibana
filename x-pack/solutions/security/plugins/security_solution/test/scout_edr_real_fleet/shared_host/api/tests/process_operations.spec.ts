@@ -6,10 +6,10 @@
  */
 
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-security';
-import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { ProcessesEntry } from '../../../../../common/endpoint/types';
 import { getEndpointOperationsAnalyst } from '../../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
+import { buildRequestHeaders } from '../../../fixtures/request_headers';
 import { startLongRunningSleep } from '../../ui/fixtures/host_sleep';
 import { captureHostVmAgentDiagnostics } from '../fixtures/agent_diagnostics';
 import { killProcess, listRunningProcesses, suspendProcess } from '../fixtures/process_actions';
@@ -115,12 +115,7 @@ apiTest.describe(
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
         endpointOperationsAnalystRole()
       );
-      requestHeaders = {
-        ...apiKeyHeader,
-        ...PUBLIC_API_HEADERS,
-        'kbn-xsrf': 'scout-edr-real-fleet',
-        'Content-Type': 'application/json',
-      };
+      requestHeaders = buildRequestHeaders(apiKeyHeader);
     });
 
     apiTest.afterEach(async ({ enrolledEndpoint, log }, testInfo) => {
