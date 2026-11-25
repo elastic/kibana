@@ -39,14 +39,41 @@
                 "field": "@timestamp"
               }
             },
-            "bytes_out_max": {
-              "max": {
-                "field": "system.network.out.bytes"
+            "interfaces": {
+              "terms": {
+                "field": "system.network.name",
+                "size": 100
+              },
+              "aggregations": {
+                "bytes_out_max": {
+                  "max": {
+                    "field": "system.network.out.bytes"
+                  }
+                }
+              }
+            },
+            "bytes_out_sum": {
+              "sum_bucket": {
+                "buckets_path": "interfaces>bytes_out_max"
+              }
+            },
+            "bytes_out_sum_derivative": {
+              "derivative": {
+                "buckets_path": "bytes_out_sum"
+              }
+            },
+            "interface_count_derivative": {
+              "derivative": {
+                "buckets_path": "interfaces._bucket_count"
               }
             },
             "bytes_out_derivative": {
-              "derivative": {
-                "buckets_path": "bytes_out_max"
+              "bucket_script": {
+                "buckets_path": {
+                  "sum_derivative": "bytes_out_sum_derivative",
+                  "count_derivative": "interface_count_derivative"
+                },
+                "script": "params.count_derivative == 0.0 ? params.sum_derivative : null"
               }
             },
             "positive_only": {
