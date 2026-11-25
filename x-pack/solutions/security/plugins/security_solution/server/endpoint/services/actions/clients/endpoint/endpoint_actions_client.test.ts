@@ -57,6 +57,29 @@ describe('EndpointActionsClient', () => {
     };
   };
 
+  /** Two hosts that support `export` for get-file and memory-dump, so only the host count can fail */
+  const mockTwoExportCapableHosts = (): string[] => {
+    const generator = new EndpointMetadataGenerator('seed');
+    const agentIds = ['agent-1', 'agent-2'];
+
+    applyEsClientSearchMock({
+      esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+      index: metadataCurrentIndexPattern,
+      response: generator.toEsSearchResponse(
+        agentIds.map((id) =>
+          generator.toEsSearchHit(
+            generator.generate({
+              elastic: { agent: { id } },
+              Endpoint: { capabilities: ['memdump_process', 'file_export'] },
+            })
+          )
+        )
+      ),
+    });
+
+    return agentIds;
+  };
+
   beforeEach(() => {
     classConstructorOptions = endpointActionClientMock.createConstructorOptions();
     endpointActionsClient = new EndpointActionsClient(classConstructorOptions);
@@ -824,6 +847,23 @@ describe('EndpointActionsClient', () => {
           });
         });
 
+        it('should reject more than one host without dispatching the action', async () => {
+          await expect(
+            endpointActionsClient.getFile(
+              responseActionsClientMock.createGetFileOptions({
+                endpoint_ids: mockTwoExportCapableHosts(),
+                parameters: { path: 'C:\\file.txt', export: 'provider-1' },
+              })
+            )
+          ).rejects.toMatchObject({
+            message: 'get-file `export` supports one host per request',
+            statusCode: 400,
+          });
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient()).create
+          ).not.toHaveBeenCalled();
+        });
+
         it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports the `file_export` capability', async () => {
           const generator = new EndpointMetadataGenerator('seed');
 
@@ -1383,6 +1423,23 @@ describe('EndpointActionsClient', () => {
             ),
             statusCode: 400,
           });
+        });
+
+        it('should reject more than one host without dispatching the action', async () => {
+          await expect(
+            endpointActionsClient.memoryDump(
+              responseActionsClientMock.createMemoryDumpActionOption({
+                endpoint_ids: mockTwoExportCapableHosts(),
+                parameters: { type: 'process', pid: 123, export: 'provider-1' },
+              })
+            )
+          ).rejects.toMatchObject({
+            message: 'memory-dump `export` supports one host per request',
+            statusCode: 400,
+          });
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient()).create
+          ).not.toHaveBeenCalled();
         });
 
         it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports both `memdump_process` and `file_export`', async () => {
