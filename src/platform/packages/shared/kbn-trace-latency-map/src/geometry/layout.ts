@@ -22,6 +22,11 @@ export const LAYOUT = {
   cellGap: 1,
   /** Space above the plot, so that the label of the top row is not cut by the chart's edge. */
   plotTopMargin: 8,
+  /**
+   * Height the chart gives the time labels under the plot: their 10px text, the 5px the chart
+   * pads above it and half the text again.
+   */
+  xAxisHeight: 20,
   /** Room the chart keeps beside and around the plot for the axes, to count columns and rows. */
   plotInset: { horizontal: 72, vertical: 36 },
   /** Target cell width; the number of time columns follows the plot width. */

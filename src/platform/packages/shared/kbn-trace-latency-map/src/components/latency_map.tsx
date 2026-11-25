@@ -42,6 +42,7 @@ import type { Cell, CellRange } from '../geometry/cell_range';
 import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
 import type { MapGeometry, PlotArea } from '../geometry/map_geometry';
+import { estimatePlot } from '../geometry/plot_calibration';
 import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { useLatencyGrid } from '../hooks/use_latency_grid';
 import { useLatencyMapColors } from '../hooks/use_latency_map_colors';
@@ -253,6 +254,25 @@ export function LatencyMap({
         ? createMapGeometry({ plot: plot ?? UNCALIBRATED, timeGrid, stats })
         : undefined,
     [stats, timeGrid, plot]
+  );
+  // The bands are read with the map, not found under the pointer: until the chart has told
+  // where its cells are, they go by where its layout puts the plot.
+  const bandGeometry = useMemo(
+    () =>
+      plot || !focusedBands || !stats || !timeGrid
+        ? geometry
+        : createMapGeometry({
+            plot: estimatePlot({
+              // The chart is as wide as the map is measured, below the map's least width too.
+              width: measuredWidth || width,
+              height,
+              rightMargin,
+              bins: timeGrid.bins,
+            }),
+            timeGrid,
+            stats,
+          }),
+    [plot, focusedBands, stats, timeGrid, geometry, measuredWidth, width, height, rightMargin]
   );
 
   // With `onFailedOnlyChange` the host's query filter owns the outcome and the prop is the
@@ -715,10 +735,10 @@ export function LatencyMap({
             onPlot={handlePlot}
             onCellHover={setHoverCell}
           />
-          {plot && focusedBands && (
+          {focusedBands && bandGeometry && (
             <BandMarkers
               operationBands={focusedBands}
-              geometry={geometry}
+              geometry={bandGeometry}
               colors={colors}
               width={width}
               height={height}

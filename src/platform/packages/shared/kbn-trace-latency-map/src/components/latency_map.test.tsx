@@ -722,6 +722,25 @@ describe('LatencyMap', () => {
       expect(selection.label).toBe('Fast group');
     });
 
+    it('draws the bands with the map, before the pointer has been over a cell', async () => {
+      renderMap({ onFocusOperation: jest.fn() }, gridTable(CELLS), focusedOperations);
+      await waitForChart();
+      // The chart has told of no cell: the bands go by its layout, left of the label gutter.
+      const band = await screen.findByTestId('traceLatencyMapBand-1');
+      const estimatedRight = mockWidth - LAYOUT.bandLabelsWidth - LAYOUT.cellGap / 2;
+      expect(band.querySelector('path')).toHaveAttribute(
+        'd',
+        expect.stringMatching(new RegExp(`^M ${estimatedRight + 4} `))
+      );
+
+      // Once it tells of one, the bands are where the chart has its plot.
+      hover(4, 5);
+      expect(screen.getByTestId('traceLatencyMapBand-1').querySelector('path')).toHaveAttribute(
+        'd',
+        expect.stringMatching(new RegExp(`^M ${geometry.plotRight + 4} `))
+      );
+    });
+
     it('reserves no label gutter for a dominant operation without duration groups', async () => {
       /** One operation holds every span, in one group: nothing to mark. */
       const singleGroup = {

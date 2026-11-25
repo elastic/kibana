@@ -16,9 +16,7 @@ import {
   teardownTracesExperience,
 } from '../fixtures';
 
-/** How long the chart gets to answer one hover with the bands it draws from it. */
-const HOVER_ANSWER_MS = 1000;
-/** How long the hovers are repeated while the focused map loads and the chart takes it in. */
+/** How long the focused map gets to load and draw its bands. */
 const BANDS_TIMEOUT_MS = 15_000;
 
 spaceTest.describe(
@@ -157,13 +155,9 @@ spaceTest.describe(
 
         await spaceTest.step('the focused operation draws its duration groups', async () => {
           await charts.waitForLatencyMapReady();
-          // The chart tells the map where its cells are from the first cell hovered. The map
-          // keeps the previous grid while the focused one loads, so a hover may land before
-          // the chart has its new cells: hovered again until the chart has answered.
-          await expect(async () => {
-            await charts.hoverLatencyMap();
-            await expect(charts.latencyMapBand(1)).toBeVisible({ timeout: HOVER_ANSWER_MS });
-          }).toPass({ timeout: BANDS_TIMEOUT_MS });
+          // With the focused map itself: the groups are there to read, and do not wait for
+          // the pointer to come over a cell.
+          await expect(charts.latencyMapBand(1)).toBeVisible({ timeout: BANDS_TIMEOUT_MS });
         });
 
         await spaceTest.step('clicking a band selects the group', async () => {

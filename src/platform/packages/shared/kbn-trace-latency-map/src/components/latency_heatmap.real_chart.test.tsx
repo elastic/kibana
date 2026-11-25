@@ -22,7 +22,7 @@ import { getDensityLevel, getFailureLevel } from '../chart/encoding';
 import { LAYOUT } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
 import type { PlotArea } from '../geometry/map_geometry';
-import { GRID_ORIGIN } from '../geometry/plot_calibration';
+import { GRID_ORIGIN, estimatePlot } from '../geometry/plot_calibration';
 import type { CellRange } from '../geometry/cell_range';
 import type { DurationStats } from '../types';
 import type { LatencyMapColors } from '../hooks/use_latency_map_colors';
@@ -109,7 +109,7 @@ interface Rect {
   h: number;
 }
 
-function renderChart(initial: { highlight?: CellRange } = {}) {
+function renderChart(initial: { highlight?: CellRange; rightMargin?: number } = {}) {
   const onPlot = jest.fn();
   const onCellHover = jest.fn();
   const onBrush = jest.fn();
@@ -125,6 +125,7 @@ function renderChart(initial: { highlight?: CellRange } = {}) {
       colors={colors}
       failedOnly={false}
       height={HEIGHT}
+      rightMargin={initial.rightMargin}
       summary="Latency map"
       onBrush={onBrush}
       onCellClick={jest.fn()}
@@ -260,6 +261,29 @@ describe('LatencyHeatmap on the real chart', () => {
       expect(real.h).toBeCloseTo(slot.y1 - slot.y0 - gap, 3);
     });
   });
+
+  it.each([
+    ['with no margin', 0],
+    ['with the band gutter', LAYOUT.bandLabelsWidth],
+  ])(
+    'lays its plot out where the package puts it before a cell is reported, %s',
+    async (_name, rightMargin) => {
+      const chart = renderChart({ rightMargin });
+      const plot = await hoverAndCalibrate(chart);
+      const estimate = estimatePlot({
+        width: WIDTH,
+        height: HEIGHT,
+        rightMargin,
+        bins: timeGrid.bins,
+      });
+      // What draws with the map (the duration bands) is placed by the estimate: it has to be
+      // the plot the chart then reports.
+      expect(estimate.left).toBeCloseTo(plot.left, 3);
+      expect(estimate.top).toBeCloseTo(plot.top, 3);
+      expect(estimate.colWidth).toBeCloseTo(plot.colWidth, 3);
+      expect(estimate.rowHeight).toBeCloseTo(plot.rowHeight, 3);
+    }
+  );
 
   it('puts the first row at the top and the last column at the right, as the geometry assumes', async () => {
     const chart = renderChart();
