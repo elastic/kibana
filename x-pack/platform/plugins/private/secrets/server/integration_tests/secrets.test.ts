@@ -53,6 +53,10 @@ describe('secrets on Elasticsearch', () => {
       encryptedSavedObjects: pluginDependencies.encryptedSavedObjects,
     })({ spaceId });
 
+  /** The id of the Elasticsearch document of a secret of the default space. */
+  const getDocumentId = (name: string): string =>
+    `${SECRET_SAVED_OBJECT_TYPE}:${getSecretSavedObjectId({ spaceId: DEFAULT_SPACE_ID, name })}`;
+
   /** Reads a secret of a space as stored, value included. */
   const getStored = async (name: string, spaceId = DEFAULT_SPACE_ID) =>
     (await createStorage(spaceId).get({ name }))?.entry;
@@ -115,10 +119,7 @@ describe('secrets on Elasticsearch', () => {
       Record<string, { value: string }>
     >({
       index: MAIN_SAVED_OBJECT_INDEX,
-      id: `${SECRET_SAVED_OBJECT_TYPE}:${getSecretSavedObjectId({
-        spaceId: DEFAULT_SPACE_ID,
-        name,
-      })}`,
+      id: getDocumentId(name),
     });
 
     expect(document?.[SECRET_SAVED_OBJECT_TYPE].value).toEqual(expect.any(String));
@@ -219,6 +220,27 @@ describe('secrets on Elasticsearch', () => {
       await client.update({ name: 'cleared_description_token', description: '' });
 
       expect((await getStored('cleared_description_token'))?.description).toBeUndefined();
+    });
+
+    it('replaces a value that no longer decrypts, and keeps who created the secret', async () => {
+      const name = 'undecryptable_token';
+      const { client, created } = await createSecret(name);
+      const { createdBy, createdAt } = created;
+      // Stands for a value encrypted with a key that Kibana no longer has.
+      await coreStart.elasticsearch.client.asInternalUser.update({
+        index: MAIN_SAVED_OBJECT_INDEX,
+        id: getDocumentId(name),
+        doc: { [SECRET_SAVED_OBJECT_TYPE]: { value: 'not-a-ciphertext' } },
+        refresh: true,
+      });
+
+      await expect(client.update({ name, description: 'Rotated monthly' })).rejects.toThrow(
+        /Unable to decrypt/
+      );
+      const updated = await client.update({ name, value: NEW_VALUE });
+
+      expect(updated).toMatchObject({ createdBy, createdAt });
+      expect(await getStored(name)).toMatchObject({ value: NEW_VALUE, description: DESCRIPTION });
     });
 
     it('keeps who created the secret and when', async () => {

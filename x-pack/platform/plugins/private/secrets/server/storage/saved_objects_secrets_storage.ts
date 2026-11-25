@@ -31,7 +31,7 @@ export interface CreateSavedObjectsSecretsStorageParams {
   /** Must include the hidden secret type and must not apply the spaces extension. */
   readonly savedObjectsClient: Pick<
     SavedObjectsClientContract,
-    'create' | 'createPointInTimeFinder' | 'delete'
+    'create' | 'createPointInTimeFinder' | 'delete' | 'get'
   >;
   readonly encryptedClient: Pick<EncryptedSavedObjectsClient, 'getDecryptedAsInternalUser'>;
 }
@@ -84,6 +84,26 @@ export const createSavedObjectsSecretsStorage = ({
           throw new Error(`Secret "${name}" has no version`);
         }
         return { entry: toEntry(attributes), version };
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          return undefined;
+        }
+        throw error;
+      }
+    },
+
+    getMetadata: async ({ name }) => {
+      try {
+        // A read that does not decrypt never returns the encrypted `value`.
+        const { attributes, version } = await savedObjectsClient.get<ListedSecretAttributes>(
+          SECRET_SAVED_OBJECT_TYPE,
+          idOf(name),
+          { namespace }
+        );
+        if (version === undefined) {
+          throw new Error(`Secret "${name}" has no version`);
+        }
+        return { metadata: attributes, version };
       } catch (error) {
         if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           return undefined;

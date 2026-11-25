@@ -15,12 +15,21 @@ export interface StoredSecret {
   readonly version: string;
 }
 
+/** A secret as read from storage without its value, with the version to pass back. */
+export interface StoredSecretMetadata {
+  readonly metadata: SecretMetadata;
+  /** Opaque. Changes on every write. */
+  readonly version: string;
+}
+
 /** Persistence for the secrets of one space. */
 export interface SecretsStorage {
   /** Lists the secrets without their values. */
   list(): Promise<SecretMetadata[]>;
   /** Returns the secret with its value, or `undefined` when no secret has this name. */
   get(params: { name: string }): Promise<StoredSecret | undefined>;
+  /** Returns the secret without decrypting its value, or `undefined` when no secret has this name. */
+  getMetadata(params: { name: string }): Promise<StoredSecretMetadata | undefined>;
   /** Throws `SecretAlreadyExistsError` when the name is taken. */
   create(params: { entry: SecretEntry }): Promise<void>;
   /**

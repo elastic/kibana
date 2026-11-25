@@ -6,7 +6,7 @@
  */
 
 import { SecretConflictError, SecretNotFoundError, SecretValidationError } from '@kbn/secrets';
-import type { SecretMetadata } from '@kbn/secrets';
+import type { SecretMetadata, UpdateSecretParams } from '@kbn/secrets';
 import type { SecretsStorage, StoredSecret } from './storage';
 import type { SecretEntry, SecretsClient } from './types';
 import { validateSecret } from './validate_secret';
@@ -37,6 +37,18 @@ export const createSecretsClient = ({
     return stored;
   };
 
+  // Replacing the value does not read the current one, which may no longer decrypt.
+  const readForUpdate = async ({ name, value }: UpdateSecretParams): Promise<StoredSecret> => {
+    if (value === undefined) {
+      return findOrThrow(name);
+    }
+    const stored = await storage.getMetadata({ name });
+    if (!stored) {
+      throw new SecretNotFoundError(name);
+    }
+    return { entry: { ...stored.metadata, value }, version: stored.version };
+  };
+
   return {
     list: async () => storage.list(),
 
@@ -63,7 +75,7 @@ export const createSecretsClient = ({
         throw new SecretValidationError('Updating a secret needs a value or a description');
       }
       validateSecret(secret);
-      const { entry: existing, version } = await findOrThrow(name);
+      const { entry: existing, version } = await readForUpdate(secret);
       // An omitted value or description keeps the current one: changing one must not require
       // sending the other again.
       const entry: SecretEntry = {
@@ -78,7 +90,7 @@ export const createSecretsClient = ({
         await storage.replace({ entry, version });
       } catch (error) {
         // A secret deleted meanwhile is reported as missing, not as a conflict.
-        if (error instanceof SecretConflictError && !(await storage.get({ name }))) {
+        if (error instanceof SecretConflictError && !(await storage.getMetadata({ name }))) {
           throw new SecretNotFoundError(name);
         }
         throw error;
