@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { countBy } from 'lodash';
 import { apiTest, type ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { EXPECTED_CRASH_FINGERPRINTS } from '../../../../common/mobile/crash_fingerprint.test_helpers';
@@ -17,7 +18,8 @@ import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const { COMMON_HEADERS, mobileCrashGroupsPath } = testData;
+const { APM_ONLY_ROLE, COMMON_HEADERS, DIGITAL_EXPERIENCE_ONLY_ROLE, mobileCrashGroupsPath } =
+  testData;
 
 apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
   let headers: Record<string, string>;
@@ -66,7 +68,7 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       expect(isPartial).toBe(false);
       // A crash at line 88 or 91 of the same frames is one group; the crash loop on one device has
       // more events but fewer users.
-      expect(crashGroups).toHaveLength(2);
+      expect(crashGroups).toHaveLength(3);
       expect(crashGroups[0]).toMatchObject({
         type: 'java.lang.NullPointerException',
         message: 'TrackRecorder is null',
@@ -84,6 +86,12 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
         sessions: 1,
         newInRelease: null,
       });
+      // In the range on the newest release only, but the older release had it before the range.
+      expect(crashGroups[2]).toMatchObject({
+        type: 'java.lang.IllegalArgumentException',
+        firstSeen: { release: '4.2.0' },
+        newInRelease: null,
+      });
     }
   );
 
@@ -96,8 +104,15 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       ]);
       expect(older.crashGroups[0].newInRelease).toBeNull();
 
+      // The crash the older release had before the range stays not new with the newest release
+      // picked: the new check looks at every release.
       const newest = await getGroups(apiClient, CRASH_APPS.android, { release: '4.2.0' });
-      expect(newest.crashGroups.map(({ newInRelease }) => newInRelease)).toStrictEqual(['4.2.0']);
+      expect(
+        newest.crashGroups.map(({ type, newInRelease }) => ({ type, newInRelease }))
+      ).toStrictEqual([
+        { type: 'java.lang.NullPointerException', newInRelease: '4.2.0' },
+        { type: 'java.lang.IllegalArgumentException', newInRelease: null },
+      ]);
     }
   );
 
@@ -125,9 +140,12 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
     async ({ apiClient }) => {
       const { crashGroups } = await getGroups(apiClient, CRASH_APPS.fingerprints);
 
-      expect(crashGroups.map(({ fingerprint }) => fingerprint).sort()).toStrictEqual(
-        [...new Set(Object.values(EXPECTED_CRASH_FINGERPRINTS))].sort()
-      );
+      // One crash per case, so each fingerprint has as many crashes as the cases that share it:
+      // both crashes of a pair grouped, none dropped.
+      const casesPerFingerprint = countBy(Object.values(EXPECTED_CRASH_FINGERPRINTS));
+      expect(
+        Object.fromEntries(crashGroups.map(({ fingerprint, events }) => [fingerprint, events]))
+      ).toStrictEqual(casesPerFingerprint);
     }
   );
 
@@ -154,7 +172,7 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
         other: 0,
       });
       expect(detail.deviceModels.top.map(({ key }) => key)).toStrictEqual(['Pixel 8', 'SM-S911B']);
-      // Oldest first, and never the tap after the crash.
+      // Oldest first, never the tap after the crash, nor another session's tap just before it.
       expect(
         detail.beforeCrash.map(({ kind, name, page, statusCode }) => ({
           kind,
@@ -175,14 +193,16 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
   );
 
   apiTest(
-    "finds an iOS session's events, whose id EDOT iOS writes in uppercase",
+    "finds an iOS session's events whatever the case of its id, which EDOT iOS writes in uppercase",
     async ({ apiClient }) => {
       const [group] = (await getGroups(apiClient, CRASH_APPS.ios)).crashGroups;
 
       const detail = await getDetail(apiClient, CRASH_APPS.ios, group.fingerprint);
 
+      // The crash's id is uppercase; the earlier screen's is lowercase.
       expect(detail.latestCrash?.sessionId).toBe('CRASH-IOS-SESSION-2');
       expect(detail.beforeCrash.map(({ kind, name }) => ({ kind, name }))).toStrictEqual([
+        { kind: 'screen', name: 'Accounts - view appearing' },
         { kind: 'screen', name: 'Transfer - view appearing' },
       ]);
     }
@@ -203,4 +223,29 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
 
     expect(response).toHaveStatusCode(400);
   });
+
+  // The detail returns stack traces and session events: both routes need both privileges.
+  for (const [privilege, role] of [
+    ['Digital Experience', APM_ONLY_ROLE],
+    ['APM', DIGITAL_EXPERIENCE_ONLY_ROLE],
+  ] as const) {
+    apiTest(
+      `answers 403 to the crash routes without the ${privilege} privilege`,
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(role);
+        const paths = [
+          mobileCrashGroupsPath(CRASH_APPS.android),
+          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint: 'any-group' }),
+        ];
+
+        for (const path of paths) {
+          const response = await apiClient.get(path, {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(403);
+        }
+      }
+    );
+  }
 });

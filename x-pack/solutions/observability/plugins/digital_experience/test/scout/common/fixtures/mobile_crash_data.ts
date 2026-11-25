@@ -97,6 +97,23 @@ const CRASHES: Crash[] = [
     deviceModel,
     osVersion,
   })),
+  // A crash both releases have: the older release's before the range but in the lookback, so it is
+  // not new, even with the newest release picked.
+  ...[
+    { time: '11:30:00', version: '4.1.0' },
+    { time: '12:45:00', version: '4.2.0' },
+  ].map(({ time, version }) => ({
+    ...android,
+    version,
+    installationId: 'crash-recurring-device',
+    sessionId: `crash-recurring-session-${version}`,
+    timestamp: at(time),
+    type: 'java.lang.IllegalArgumentException',
+    message: 'Invalid route id: null',
+    stacktrace: jvmTrace('java.lang.IllegalArgumentException', 'com.example.RouteLoader.load', 17),
+    deviceModel: 'Pixel 8',
+    osVersion: '15',
+  })),
   // The same iOS crash with different load addresses: sent on the next launch with the legacy
   // name, sent after the range ended, and without a session.
   {
@@ -154,7 +171,10 @@ const npeSession = {
   'os.name': 'Android',
 };
 
-/** Events of the NPE's latest session, and one of the iOS session, which writes its id in uppercase. */
+/**
+ * Events of the NPE's latest session and of another session of the app, and of the iOS session in
+ * uppercase, as EDOT iOS writes its id, and in lowercase.
+ */
 const SESSION_EVENTS = [
   {
     index: TRACES_INDEX,
@@ -201,6 +221,16 @@ const SESSION_EVENTS = [
       },
     },
   },
+  // Another user's tap just before the crash, in the same app: never listed in this session.
+  {
+    index: LOGS_INDEX,
+    resource: npeSession,
+    document: {
+      '@timestamp': at('12:39:59'),
+      event_name: 'app.widget.click',
+      attributes: { 'session.id': 'crash-npe-session-2', 'app.widget.name': 'Another session' },
+    },
+  },
   // After the crash: never listed before it.
   {
     index: LOGS_INDEX,
@@ -223,6 +253,21 @@ const SESSION_EVENTS = [
       span_id: 'd'.repeat(16),
       duration: 57_000_000,
       attributes: { 'session.id': 'CRASH-IOS-SESSION-2' },
+    },
+  },
+  // The same iOS session with its id in lowercase, as an SDK that doesn't uppercase it writes it.
+  {
+    index: TRACES_INDEX,
+    resource: { 'service.name': CRASH_APPS.ios, 'service.version': '8.5.0', 'os.name': 'iOS' },
+    document: {
+      '@timestamp': at('12:54:40'),
+      name: 'Accounts - view appearing',
+      kind: 'Client',
+      scope: { name: 'UIViewController' },
+      trace_id: 'e'.repeat(32),
+      span_id: 'e'.repeat(16),
+      duration: 57_000_000,
+      attributes: { 'session.id': 'crash-ios-session-2' },
     },
   },
 ];

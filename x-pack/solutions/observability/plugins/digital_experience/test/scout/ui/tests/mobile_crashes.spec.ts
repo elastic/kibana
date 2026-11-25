@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
-import { CRASH_APPS } from '../../common/fixtures/mobile_crash_data';
+import { CRASH_APPS, NPE_LATEST_SESSION } from '../../common/fixtures/mobile_crash_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
@@ -26,7 +26,7 @@ test.describe('Digital Experience mobile crashes', { tag: DIGITAL_EXPERIENCE_TAG
 
   test("lists a mobile application's crash groups and opens one's detail", async ({
     page,
-    pageObjects: { digitalExperience },
+    pageObjects: { digitalExperience, discover },
   }) => {
     await test.step('ranks the groups by affected users, the newest release marked', async () => {
       await digitalExperience.gotoMobileCrashes(CRASH_APPS.android);
@@ -36,6 +36,7 @@ test.describe('Digital Experience mobile crashes', { tag: DIGITAL_EXPERIENCE_TAG
       await expect(digitalExperience.mobileCrashGroupLinks).toHaveText([
         'java.lang.NullPointerException',
         'java.lang.IllegalStateException',
+        'java.lang.IllegalArgumentException',
       ]);
       await expect(digitalExperience.mobileCrashGroupNewBadges).toHaveText(['New in 4.2.0']);
     });
@@ -56,11 +57,11 @@ test.describe('Digital Experience mobile crashes', { tag: DIGITAL_EXPERIENCE_TAG
       await expect(digitalExperience.mobileCrashStacktrace).toContainText('MainActivity.onResume');
     });
 
-    await test.step('lists the session before the crash, ending with the crash', async () => {
-      const rows = digitalExperience.mobileCrashTimeline.rows;
-      await expect(rows).toHaveCount(4);
-      await expect(rows).toContainText(['Screen', '503', 'Start recording', 'At the crash']);
-      await expect(digitalExperience.mobileCrashOpenSession).toHaveAttribute('href', /discover/);
+    // The API spec and the flyout's component tests check each row.
+    await test.step('lists the session before the crash, with the crash', async () => {
+      await expect(
+        digitalExperience.mobileCrashTimeline.rows.filter({ hasText: 'At the crash' })
+      ).toHaveCount(1);
     });
 
     await test.step('has no accessibility violations in the detail', async () => {
@@ -75,6 +76,18 @@ test.describe('Digital Experience mobile crashes', { tag: DIGITAL_EXPERIENCE_TAG
 
       await expect(digitalExperience.mobileCrashFlyout).toBeHidden();
       await expect(page).not.toHaveURL(/crashGroup=/);
+    });
+
+    await test.step("opens the crash's session in Discover", async () => {
+      await digitalExperience.mobileCrashGroupLinks
+        .filter({ hasText: 'java.lang.NullPointerException' })
+        .click();
+      await digitalExperience.mobileCrashOpenSession.click();
+
+      await expect(page).toHaveURL(/\/app\/discover/);
+      await expect(page.testSubj.locator('ESQLEditor')).toContainText(NPE_LATEST_SESSION);
+      // Its screen, request and two taps, and the crash itself.
+      await expect(discover.getHitCountLocator()).toHaveText('5');
     });
   });
 
