@@ -87,6 +87,13 @@ export const gridCache = createBoundedCache<CachedGrid>(
 export const getGridCacheKey = (sourceKey: string, targetBins: number) =>
   `${sourceKey}|${targetBins}`;
 
+/**
+ * Histograms are binned by the statistics of their load: reused with those statistics
+ * only, never with fresher ones that scale the rows differently.
+ */
+export const getOperationsCacheKey = (sourceKey: string, stats: DurationStats) =>
+  `${sourceKey}|${JSON.stringify(stats)}`;
+
 /** Forgets every loaded map, for tests that load the same source again and again. */
 export function clearLatencyGridCaches() {
   statsCache.clear();

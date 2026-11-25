@@ -33,6 +33,7 @@ import type {
 } from '@kbn/trace-latency-map';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractFilters } from '../../../utils';
+import { expressionReadsParams } from '../../../utils/esql_commands';
 import { appendMapClause, removeMapSetResidue, removeWhere } from './latency_map_query_clauses';
 import { buildExampleSpanQuery } from './example_span_query';
 import { getSearchErrorReason } from './search_error';
@@ -84,7 +85,9 @@ const getContextKey = (
       .filter((filter) => !isFilterDisabled(filter))
       .map((filter) => [Boolean(filter.meta?.negate), cleanFilter(filter)]),
     variables: esqlVariables,
-    ...(queryFilters.some((filter) => TIME_PARAMS.test(filter)) ? { timeRange } : {}),
+    ...(queryFilters.some((filter) => expressionReadsParams(filter, TIME_PARAMS))
+      ? { timeRange }
+      : {}),
   });
 
 /**
@@ -98,8 +101,8 @@ const isCellWithin = (cell: LatencyMapCell, selection: LatencyMapSelection) =>
   Math.ceil(cell.minDuration) >= Math.ceil(selection.minDuration) &&
   Math.ceil(cell.maxDuration) <= Math.ceil(selection.maxDuration);
 
-/** Whether a query filter reads the time range through its named params. */
-const TIME_PARAMS = /\?_t(start|end)\b/;
+/** The named params a query filter reads the time range through. */
+const TIME_PARAMS = ['_tstart', '_tend'];
 
 /**
  * The latency map in the Discover traces chart section. The selection lives in the ES|QL

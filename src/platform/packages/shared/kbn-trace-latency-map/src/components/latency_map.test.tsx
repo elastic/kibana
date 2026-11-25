@@ -1192,6 +1192,28 @@ describe('LatencyMap', () => {
       expect(condition).toContain('event.outcome == "failure"');
     });
 
+    it('starts a new region afresh beside an errors-only selection', async () => {
+      // The old region's failure clause is its own: a region drawn elsewhere, with no
+      // failures of its own, must not inherit it and hide its successful spans.
+      const selection = {
+        ...geometry.rangeToSelection({ x0: 30, x1: 31, y0: 20, y1: 21 }),
+        failedOnly: true,
+      };
+      const { onSelectionCommit } = renderMap({
+        selection,
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      brush([4, 5], [5]);
+      const [drawn, condition] = onSelectionCommit.mock.calls[0];
+      expect(drawn.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+      // A new region where failures concentrate is still read as about them.
+      brush([30, 31], [20]);
+      expect(onSelectionCommit.mock.calls[1][0].failedOnly).toBe(true);
+    });
+
     it('keeps the errors switch usable while the filter is on, whatever it left to show', async () => {
       // The host's filter emptied the map: the switch is the way back to the spans.
       renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() }, gridTable([]));

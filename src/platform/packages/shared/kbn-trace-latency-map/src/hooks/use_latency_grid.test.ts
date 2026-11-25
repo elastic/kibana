@@ -234,6 +234,35 @@ describe('useLatencyGrid', () => {
       }
     });
 
+    it('keeps the age of statistics it reuses, so a resize does not prolong them', async () => {
+      const now = jest.spyOn(Date, 'now');
+      try {
+        now.mockReturnValue(1_000_000);
+        const runEsql = createRunner(statsTable(100), gridTable([[1, 2, 7, 3]]));
+        const { result, rerender, unmount } = renderHook(
+          (props: { targetBins: number }) => useLatencyGrid({ source, runEsql, ...props }),
+          { initialProps: { targetBins: 60 } }
+        );
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        // Resized late in the statistics' life: they are reused, not written anew.
+        now.mockReturnValue(1_000_000 + LATENCY_GRID_CACHE_MAX_AGE_MS - 1000);
+        rerender({ targetBins: 120 });
+        await waitFor(() => expect(result.current.timeGrid?.bins).toBe(120));
+        unmount();
+        // Past the age of the first load: its grid and its statistics are gone, the latter
+        // despite the resize that reused them.
+        now.mockReturnValue(1_000_000 + LATENCY_GRID_CACHE_MAX_AGE_MS + 1000);
+        const again = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
+        await waitFor(() => expect(again.result.current.isLoading).toBe(false));
+        // Statistics asked twice in all: once at first, once past their age.
+        expect(runEsql.mock.calls.filter(([query]) => query.includes('PERCENTILE'))).toHaveLength(
+          2
+        );
+      } finally {
+        now.mockRestore();
+      }
+    });
+
     it('keeps the newest sources only', async () => {
       const runEsql = createRunner(statsTable(100), gridTable([[1, 2, 7, 3]]));
       const sources = Array.from({ length: LATENCY_GRID_CACHE_SIZE + 1 }, (_, i) => ({
@@ -321,6 +350,34 @@ describe('useLatencyGrid', () => {
       );
       await waitFor(() => expect(plain.current.isLoading).toBe(false));
       expect(withoutFeature.mock.calls.some(([query]) => isOperationsQuery(query))).toBe(false);
+    });
+
+    it('loads the histograms again with fresh statistics, which bin the rows anew', async () => {
+      const now = jest.spyOn(Date, 'now');
+      try {
+        now.mockReturnValue(1_000_000);
+        let spans = 100;
+        const runEsql = jest.fn(async (query: string) => {
+          if (query.includes('PERCENTILE')) return statsTable(spans);
+          if (isOperationsQuery(query)) return operationsTable;
+          return gridTable([[1, 2, 7, 3]]);
+        });
+        const first = renderHook(() =>
+          useLatencyGrid({ source, runEsql, targetBins: 60, loadOperations: true })
+        );
+        await waitFor(() => expect(first.result.current.operations).toHaveLength(1));
+        first.unmount();
+        // Past the statistics' age the range has more spans, and other percentiles.
+        now.mockReturnValue(1_000_000 + LATENCY_GRID_CACHE_MAX_AGE_MS + 1000);
+        spans = 500;
+        const again = renderHook(() =>
+          useLatencyGrid({ source, runEsql, targetBins: 60, loadOperations: true })
+        );
+        await waitFor(() => expect(again.result.current.operations).toHaveLength(1));
+        expect(runEsql.mock.calls.filter(([query]) => isOperationsQuery(query))).toHaveLength(2);
+      } finally {
+        now.mockRestore();
+      }
     });
 
     it('keeps the histograms of the source when only the columns change', async () => {

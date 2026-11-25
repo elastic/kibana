@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstQueryExpression, ESQLCommand } from '@elastic/esql/types';
-import { BasicPrettyPrinter, Parser } from '@elastic/esql';
+import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
 
 /**
  * The query as the ES|QL parser reads it, with the parentheses of the source kept: printed
@@ -18,6 +18,21 @@ import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 export function parseEsqlQuery(query: string): ESQLAstQueryExpression | undefined {
   const { root, errors } = Parser.parse(query, { withParens: true });
   return errors.length > 0 ? undefined : root;
+}
+
+/**
+ * Whether a WHERE expression reads any of the named params, as the parser sees it: a
+ * `?name` inside a string literal is text, not a param. An expression that does not parse
+ * is read as text, so a half-typed filter errs on the side of naming them.
+ */
+export function expressionReadsParams(expression: string, names: string[]): boolean {
+  const { root, errors } = Parser.parse(`FROM a | WHERE ${expression}`, { withParens: true });
+  if (errors.length > 0) {
+    return names.some((name) => new RegExp(`\\?${name}\\b`).test(expression));
+  }
+  return Walker.params(root).some(
+    (param) => param.paramType === 'named' && names.includes(String(param.value))
+  );
 }
 
 /** The top-level commands of a name: a command inside a FORK branch is not one of them. */

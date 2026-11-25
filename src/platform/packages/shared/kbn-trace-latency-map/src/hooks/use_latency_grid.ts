@@ -24,7 +24,13 @@ import { getTimeGrid } from '../query/time_grid';
 import type { TimeGrid } from '../query/time_grid';
 import { parseOperationHistograms } from '../operations/operation_bands';
 import type { OperationHistogram } from '../operations/operation_bands';
-import { getGridCacheKey, gridCache, operationsCache, statsCache } from './latency_grid_cache';
+import {
+  getGridCacheKey,
+  getOperationsCacheKey,
+  gridCache,
+  operationsCache,
+  statsCache,
+} from './latency_grid_cache';
 
 export interface LatencyGridState {
   isLoading: boolean;
@@ -57,7 +63,9 @@ const fromCache = (
 ): LatencyGridState | undefined => {
   const cached = gridCache.get(getGridCacheKey(sourceKey, targetBins));
   if (!cached) return undefined;
-  const operations = loadOperations ? operationsCache.get(sourceKey) : undefined;
+  const operations = loadOperations
+    ? operationsCache.get(getOperationsCacheKey(sourceKey, cached.stats))
+    : undefined;
   return { isLoading: false, ...cached, ...(operations ? { operations } : {}) };
 };
 
@@ -112,14 +120,15 @@ export function useLatencyGrid({
     (async () => {
       // The statistics of a source do not depend on the columns: a resize into another tier
       // reloads the grid with the stats it already has, not the percentiles again.
+      const knownStats = cached?.stats ?? statsCache.get(sourceKey);
       const stats =
-        cached?.stats ??
-        statsCache.get(sourceKey) ??
-        parseDurationStats(await run(buildDurationStatsQuery(stableSource)));
+        knownStats ?? parseDurationStats(await run(buildDurationStatsQuery(stableSource)));
       // Nothing of a cancelled load reaches the cache: an older answer resolving after a
-      // newer load of the same source must not overwrite it.
+      // newer load of the same source must not overwrite it. Statistics known before keep
+      // their age: written again, they would outlive the spans that arrived since.
       const cacheable = () => !controller.signal.aborted;
-      if (cacheable()) statsCache.set(sourceKey, stats);
+      const fetchedStats = knownStats === undefined;
+      if (fetchedStats && cacheable()) statsCache.set(sourceKey, stats);
       const timeGrid = getTimeGrid(
         stableSource.timeRange.from,
         stableSource.timeRange.to,
@@ -127,7 +136,10 @@ export function useLatencyGrid({
       );
       if (!stats.spans) {
         const empty = { isEmpty: true, stats, timeGrid, loadedSource: stableSource };
-        if (cacheable()) gridCache.set(getGridCacheKey(sourceKey, targetBins), empty);
+        // An empty range costs no grid query: only one just asked is worth remembering.
+        if (fetchedStats && cacheable()) {
+          gridCache.set(getGridCacheKey(sourceKey, targetBins), empty);
+        }
         return { isLoading: false, ...empty };
       }
       const sampling = getMapSampling(stats);
@@ -135,15 +147,16 @@ export function useLatencyGrid({
       // failure the map just loses its bands, and nothing is cached, so the next load
       // retries after a transient error; an aborted run is discarded with the rest.
       // Neither the histograms depend on the columns, which they have none of.
+      const operationsKey = getOperationsCacheKey(sourceKey, stats);
       const operationsPromise =
-        loadOperations && !operationsCache.get(sourceKey)
+        loadOperations && !operationsCache.get(operationsKey)
           ? run(buildOperationHistogramQuery(stableSource, stats, sampling)).then(
               (table) => {
                 const operations = parseOperationHistograms(
                   table,
                   sampling ? 1 / sampling.probability : 1
                 );
-                if (cacheable()) operationsCache.set(sourceKey, operations);
+                if (cacheable()) operationsCache.set(operationsKey, operations);
                 return operations;
               },
               () => undefined
@@ -182,7 +195,7 @@ export function useLatencyGrid({
       }
       if (!loadOperations) return gridState;
       if (!operationsPromise) {
-        return { ...gridState, operations: operationsCache.get(sourceKey) ?? [] };
+        return { ...gridState, operations: operationsCache.get(operationsKey) ?? [] };
       }
       // The map shows while the histograms finish; the bands join it when they arrive.
       if (!controller.signal.aborted) setState(gridState);

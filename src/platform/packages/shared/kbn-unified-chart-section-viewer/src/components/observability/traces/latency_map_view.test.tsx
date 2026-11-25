@@ -531,6 +531,14 @@ describe('TracesLatencyMapView', () => {
       ...at('2026-10-26T11:00:10.000Z'),
     });
     expect(paramsLater.source.contextKey).not.toBe(params.source.contextKey);
+    // The param's name inside a string literal is text, not a param.
+    const quoted = { filters: ['transaction.name == "GET ?_tstart"'] };
+    const { mapProps: quotedFirst } = renderView({ ...quoted, ...at('2026-10-26T11:00:00.000Z') });
+    const { mapProps: quotedLater } = renderView({
+      ...quoted,
+      ...at('2026-10-26T11:00:10.000Z'),
+    });
+    expect(quotedLater.source.contextKey).toBe(quotedFirst.source.contextKey);
   });
 
   it('offers no cell click without a document flyout to open', () => {
