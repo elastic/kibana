@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { ServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isOneShotStepDefinition, isPollStepDefinition } from '@kbn/workflows-extensions/server';
 
 import { OneShotStepDefinitionHandler, PollPolicyStepHandler } from './step_definition_handlers';
-import type { CustomStepDefinitionHandler } from './types';
+import type { CustomStepDefinitionHandler, CustomStepGraphNode } from './types';
 import type { ConnectorExecutor } from '../../connector_executor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -37,7 +36,7 @@ export class CustomStepImpl
   private stepHandler: CustomStepDefinitionHandler | undefined;
 
   constructor(
-    private node: AtomicGraphNode,
+    private node: CustomStepGraphNode,
     private stepDefinition: ServerStepDefinition,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,

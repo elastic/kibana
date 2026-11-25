@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
 import {
-  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   ALERTING_V2_ENABLED_SETTING_ID,
   DATA_FEDERATION_ENABLED_SETTING_ID,
   OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID,
@@ -54,10 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           continue;
         }
         // This setting is read only for the time being
-        if (
-          settingId === OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS ||
-          settingId === OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
-        ) {
+        if (settingId === OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS) {
           continue;
         }
 

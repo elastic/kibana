@@ -10,7 +10,7 @@
 import type { ComponentType } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CopyToDashboardParentApi } from './copy_to_dashboard_action';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
@@ -69,7 +69,6 @@ describe('CopyToDashboardModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
     // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../services/kibana_services').embeddableService = {
       getStateTransfer: () => ({
@@ -108,6 +107,11 @@ describe('CopyToDashboardModal', () => {
 
       await waitFor(() =>
         expect(result.container.querySelector('#new-dashboard-option')).toBeDisabled()
+      );
+
+      fireEvent.mouseOver(screen.getByText('New dashboard'));
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'You can copy to a new dashboard only from a saved dashboard.'
       );
     });
 
