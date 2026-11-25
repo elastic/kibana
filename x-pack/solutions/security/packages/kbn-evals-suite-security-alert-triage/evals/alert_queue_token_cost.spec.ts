@@ -17,6 +17,7 @@
  * not the evidence step for judgment questions.
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -363,8 +364,11 @@ evaluate.describe(
   }
 );
 
-const EVIDENCE_ALERT_ID_PREFIX = 'queue-evidence-eval-alert-';
-const EVIDENCE_EVENTS_INDEX = 'logs-queue_evidence_eval';
+const EVIDENCE_ALERT_ID_BASE = 'queue-evidence-eval-alert-';
+// A per-run suffix keeps two runs on one cluster from deleting each other's fixtures.
+const EVIDENCE_RUN_ID = randomUUID().slice(0, 8);
+const EVIDENCE_ALERT_ID_PREFIX = `${EVIDENCE_ALERT_ID_BASE}${EVIDENCE_RUN_ID}-`;
+const EVIDENCE_EVENTS_INDEX = `logs-queue_evidence_eval_${EVIDENCE_RUN_ID}`;
 const EVIDENCE_RULE_ID = 'queue-evidence-failed-logon';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -427,8 +431,20 @@ evaluate.describe(
     evaluate.beforeAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
       log.info(`Indexing evidence events into ${EVIDENCE_EVENTS_INDEX} and 2 alerts`);
 
-      // A crashed earlier run can leave the index behind, and create would then fail.
-      await esClient.indices.delete({ index: EVIDENCE_EVENTS_INDEX, ignore_unavailable: true });
+      // Alerts that a crashed run left behind would count as open alerts in the queue tests.
+      await esClient.deleteByQuery({
+        index: ALERTS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { prefix: { 'kibana.alert.uuid': EVIDENCE_ALERT_ID_BASE } },
+              { range: { '@timestamp': { lt: 'now-1h' } } },
+            ],
+          },
+        },
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+      });
       await esClient.indices.create({
         index: EVIDENCE_EVENTS_INDEX,
         mappings: {
