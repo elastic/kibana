@@ -9453,7 +9453,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a gap auto fill scheduler that periodically fills detected gaps for the given rule types in the Kibana space of the request. Only one scheduler can exist per rule type and consumer pair. To manage the automatic gap filling setting shown in the Elastic Security detection rules settings, use the ID `security-solution-gap-auto-fill-scheduler-<space-id>`.
+        Create a gap auto fill scheduler that periodically fills detected gaps for the given rule types in the Kibana space of the request. Only one scheduler can exist per rule type and consumer pair. To manage the automatic gap filling setting shown in the Elastic Security detection rules settings, use the ID `security-solution-gap-auto-fill-scheduler-<space-id>`. This API requires an Enterprise license.
       operationId: post-alerting-rules-gaps-auto-fill-scheduler
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9528,7 +9528,7 @@ paths:
                   type: string
                 max_backfills:
                   default: 1000
-                  description: The maximum number of backfills the scheduler creates per run.
+                  description: The maximum number of backfills that can exist for the scheduler at the same time. Backfills that are still running count toward this limit, so a run schedules fewer backfills, or none, until existing backfills finish. Reaching the limit is not a scheduler failure.
                   maximum: 5000
                   minimum: 1
                   type: number
@@ -9648,7 +9648,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a gap auto fill scheduler and stop its scheduled task. Automatic gap filling stops for the rule types the scheduler covered.
+        Delete a gap auto fill scheduler and stop its scheduled task. Automatic gap filling stops for the rule types the scheduler covered. This API requires an Enterprise license.
       operationId: delete-alerting-rules-gaps-auto-fill-scheduler-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9688,7 +9688,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the configuration of a gap auto fill scheduler, including whether automatic gap filling is enabled. Schedulers are scoped to the Kibana space of the request. The Elastic Security detection rules settings use the scheduler with the ID `security-solution-gap-auto-fill-scheduler-<space-id>`.
+        Get the configuration of a gap auto fill scheduler, including whether automatic gap filling is enabled. Schedulers are scoped to the Kibana space of the request. The Elastic Security detection rules settings use the scheduler with the ID `security-solution-gap-auto-fill-scheduler-<space-id>`. This API requires an Enterprise license.
       operationId: get-alerting-rules-gaps-auto-fill-scheduler-id
       parameters:
         - description: The identifier for the gap auto fill scheduler.
@@ -9762,7 +9762,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Replace the configuration of a gap auto fill scheduler. The request body must contain the full configuration. Set `enabled` to `true` to turn automatic gap filling on and to `false` to turn it off. The call is idempotent: repeating it with the same body leaves the scheduler in the same state.
+        Replace the configuration of a gap auto fill scheduler. The request body must contain the full configuration; if `excluded_reasons` is omitted, the current value is kept. Set `enabled` to `true` to turn automatic gap filling on and to `false` to turn it off. The call is idempotent: repeating it with the same body leaves the scheduler in the same state and does not reset the next scheduled run. This API requires an Enterprise license.
       operationId: put-alerting-rules-gaps-auto-fill-scheduler-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9836,7 +9836,7 @@ paths:
                   type: string
                 max_backfills:
                   default: 1000
-                  description: The maximum number of backfills the scheduler creates per run.
+                  description: The maximum number of backfills that can exist for the scheduler at the same time. Backfills that are still running count toward this limit, so a run schedules fewer backfills, or none, until existing backfills finish. Reaching the limit is not a scheduler failure.
                   maximum: 5000
                   minimum: 1
                   type: number
@@ -173629,6 +173629,7 @@ components:
           description: The gap reasons that the scheduler skips. Gaps caused by a rule being disabled are excluded by default.
           items:
             type: string
+          maxItems: 2
           type: array
         gap_fill_range:
           description: How far back in time the scheduler looks for gaps, as a date math expression relative to now, for example `now-90d`.
@@ -173637,7 +173638,7 @@ components:
           description: The identifier for the gap auto fill scheduler.
           type: string
         max_backfills:
-          description: The maximum number of backfills the scheduler creates per run.
+          description: The maximum number of backfills that can exist for the scheduler at the same time. Backfills that are still running count toward this limit, so a run schedules fewer backfills, or none, until existing backfills finish. Reaching the limit is not a scheduler failure.
           type: number
         name:
           description: A name for the gap auto fill scheduler.
@@ -173660,6 +173661,7 @@ components:
             required:
               - type
               - consumer
+          maxItems: 100
           type: array
         schedule:
           additionalProperties: false
@@ -173674,6 +173676,7 @@ components:
           description: The scopes of the scheduler task, for example `security_solution`.
           items:
             type: string
+          maxItems: 100
           type: array
         updated_at:
           description: The date and time that the scheduler was last updated.
