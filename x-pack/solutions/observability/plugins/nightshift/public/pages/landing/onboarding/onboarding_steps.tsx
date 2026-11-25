@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
 import React from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 
 export type OnboardingStepId = 'enable' | 'addData' | 'connectSources' | 'investigate' | 'automate';
 
@@ -161,6 +163,11 @@ export function OnboardingStepsCard({
                       color="text"
                       onClick={onClick}
                       data-test-subj={`nightshiftOnboardingStepLink-${stepId}`}
+                      {...getEbtProps({
+                        action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ONBOARDING_STEP,
+                        element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_STEPS,
+                        detail: stepId,
+                      })}
                     >
                       {title}
                     </EuiLink>

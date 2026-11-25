@@ -11,13 +11,18 @@ import {
   EuiBadge,
   EuiBanner,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiIllustration,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -25,10 +30,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { connectedPowerPlug } from '@elastic/eui-illustrations';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { InvestigationCardActions } from '../../../components/entities/investigation/investigation_card_actions';
 import { useInvestigationAssignees } from '../../../components/entities/investigation/use_investigation_assignees';
 import { SourceCard } from '../../../components/entities/sandbox_connector/source_card';
@@ -405,6 +411,10 @@ function TrialInvestigationCard({
               isDisabled={isSelected}
               onClick={() => onOpenInvestigation(investigation)}
               data-test-subj="nightshiftOnboardingTrialInvestigationOpen"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_TRIAL_INVESTIGATION,
+              })}
             >
               {i18n.translate('xpack.nightshift.onboarding.automate.viewResultsButton', {
                 defaultMessage: 'View results',
@@ -453,6 +463,10 @@ function FirstAutomationCard({
           onClick={onCreate}
           isDisabled={!canManage}
           data-test-subj="nightshiftOnboardingCreateAutomation"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CREATE_AUTOMATION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_AUTOMATION,
+          })}
         >
           {CREATE_AUTOMATION}
         </EuiButton>
@@ -505,6 +519,10 @@ function AutomationCards({
             icon: 'pencil',
             onClick: () => onEdit(automation),
             'data-test-subj': 'nightshiftOnboardingEditAutomation',
+            ebt: {
+              action: NIGHTSHIFT_EBT_ACTIONS.EDIT_AUTOMATION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_AUTOMATION,
+            },
           }}
         />
       ))}
@@ -530,6 +548,10 @@ function AutomationCards({
                 defaultMessage: 'You cannot create automations right now.',
               }),
           'data-test-subj': 'nightshiftOnboardingCreateAutomation',
+          ebt: {
+            action: NIGHTSHIFT_EBT_ACTIONS.CREATE_AUTOMATION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_AUTOMATION,
+          },
         }}
       />
     </div>
@@ -600,28 +622,54 @@ function EditAutomationFlyout({
         onDelete={setAutomationToDelete}
       />
       {automationToDelete && (
-        <EuiConfirmModal
-          title={getDeleteConfirmTitle(automationToDelete.name)}
-          onCancel={() => setAutomationToDelete(undefined)}
-          onConfirm={() => {
-            deleteAutomation.mutate(
-              { id: automationToDelete.id, name: automationToDelete.name },
-              {
-                onSuccess: () => {
-                  setAutomationToDelete(undefined);
-                  onClose();
-                },
-              }
-            );
-          }}
-          cancelButtonText={listLabels.cancel}
-          confirmButtonText={listLabels.delete}
-          buttonColor="danger"
-          isLoading={deleteAutomation.isLoading}
+        <EuiModal
+          onClose={() => setAutomationToDelete(undefined)}
           aria-label={getDeleteConfirmTitle(automationToDelete.name)}
         >
-          <p>{listLabels.deleteBody}</p>
-        </EuiConfirmModal>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              {getDeleteConfirmTitle(automationToDelete.name)}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <p>{listLabels.deleteBody}</p>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              onClick={() => setAutomationToDelete(undefined)}
+              data-test-subj="nightshiftOnboardingDeleteAutomationCancel"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_AUTOMATION_DELETE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
+              })}
+            >
+              {listLabels.cancel}
+            </EuiButtonEmpty>
+            <EuiButton
+              fill
+              color="danger"
+              isLoading={deleteAutomation.isLoading}
+              onClick={() => {
+                deleteAutomation.mutate(
+                  { id: automationToDelete.id, name: automationToDelete.name },
+                  {
+                    onSuccess: () => {
+                      setAutomationToDelete(undefined);
+                      onClose();
+                    },
+                  }
+                );
+              }}
+              data-test-subj="nightshiftOnboardingDeleteAutomationConfirm"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.DELETE_AUTOMATION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
+              })}
+            >
+              {listLabels.delete}
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       )}
     </>
   );

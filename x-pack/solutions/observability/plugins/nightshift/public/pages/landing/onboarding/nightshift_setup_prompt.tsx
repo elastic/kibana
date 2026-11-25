@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { css } from '@emotion/react';
 import {
@@ -21,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
 import { getNightshiftCapabilities, getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSetUpNightshiftServiceAccount } from '../../../data/service_accounts/use_investigator_service_account';
 
@@ -158,6 +160,10 @@ export const NightshiftSetupPrompt = ({
             isLoading={setUp.isLoading}
             onClick={() => setUp.mutate()}
             data-test-subj="nightshiftSetUpServiceAccount"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.ENABLE_NIGHTSHIFT,
+              element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_SETUP_PROMPT,
+            })}
           >
             {i18n.translate('xpack.nightshift.setup.enableButton', {
               defaultMessage: 'Enable Elastic nightshift',

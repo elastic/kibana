@@ -168,9 +168,17 @@ describe('NightshiftOnboarding', () => {
       mockConnectors({ '.elasticsearch': 0, '.new_relic': 1, '.http': 2 });
 
       renderOnboarding();
+      expect(screen.getByTestId('nightshiftOnboardingAddDataProceedButton')).toHaveAttribute(
+        'data-ebt-detail',
+        'addData'
+      );
       fireEvent.click(screen.getByTestId('nightshiftOnboardingAddDataProceedButton'));
 
       expect(currentStep()).toBe('connectSources');
+      expect(screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton')).toHaveAttribute(
+        'data-ebt-detail',
+        'connectSources'
+      );
       expect(screen.getByTestId('nightshiftOnboardingStepTitle')).toHaveTextContent(
         'Connect other sources'
       );

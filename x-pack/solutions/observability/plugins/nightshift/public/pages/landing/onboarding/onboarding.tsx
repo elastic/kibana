@@ -16,9 +16,15 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NightshiftHeader } from '../header';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
 import { useFlyoutShareUrlCustomAction } from '../../../components/ui/flyout_share_url_button';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
@@ -277,6 +283,7 @@ export function NightshiftOnboarding({
     step === 'addData' ? (
       hasTelemetrySource && (
         <EuiButton
+          key={step}
           fill
           fullWidth
           size="s"
@@ -284,6 +291,11 @@ export function NightshiftOnboarding({
           iconSide="right"
           onClick={() => setStepOverride('connectSources')}
           data-test-subj="nightshiftOnboardingAddDataProceedButton"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.PROCEED_ONBOARDING,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_STEPS,
+            detail: step,
+          })}
         >
           {PROCEED_LABEL}
         </EuiButton>
@@ -291,6 +303,7 @@ export function NightshiftOnboarding({
     ) : step === 'connectSources' ? (
       // The first pass starts looking for first investigations; a revisit just returns to them.
       <EuiButton
+        key={step}
         fill={hasAdditionalSource}
         fullWidth
         size="s"
@@ -299,30 +312,47 @@ export function NightshiftOnboarding({
         isLoading={startSuggestions.isLoading}
         onClick={() => (isConnected ? setStepOverride(undefined) : startSuggestions.mutate())}
         data-test-subj="nightshiftOnboardingConnectSourcesProceedButton"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.PROCEED_ONBOARDING,
+          element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_STEPS,
+          detail: step,
+        })}
       >
         {hasAdditionalSource ? PROCEED_LABEL : SKIP_LABEL}
       </EuiButton>
     ) : step === 'investigate' ? (
       latestInvestigation && (
         <EuiButton
+          key={step}
           fullWidth
           size="s"
           iconType="sortRight"
           iconSide="right"
           onClick={() => setStepOverride(undefined)}
           data-test-subj="nightshiftOnboardingProceedToAutomationButton"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.PROCEED_ONBOARDING,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_STEPS,
+            detail: step,
+          })}
         >
           {SKIP_LABEL}
         </EuiButton>
       )
     ) : step === 'automate' ? (
       <EuiButton
+        key={step}
         fullWidth
         size="s"
         fill={hasAutomation}
         iconType={hasAutomation ? 'check' : 'sortRight'}
         iconSide={hasAutomation ? 'left' : 'right'}
         onClick={onFinish}
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.FINISH_ONBOARDING,
+          element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_STEPS,
+          detail: hasAutomation ? NIGHTSHIFT_EBT_DETAILS.DONE : NIGHTSHIFT_EBT_DETAILS.SKIPPED,
+        })}
         data-test-subj={
           hasAutomation ? 'nightshiftOnboardingDoneButton' : 'nightshiftOnboardingFinishButton'
         }

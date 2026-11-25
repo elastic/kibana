@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -29,6 +30,7 @@ import type {
   OnboardingSuggestion,
   OnboardingSuggestionsExecution,
 } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { ShowMoreButton } from '../../../components/ui/show_more_button';
 import { useStartInvestigation } from '../../../data/investigations/use_start_investigation';
 import {
@@ -213,6 +215,10 @@ export function OnboardingFirstInvestigationStep({
                 isLoading={retry.isLoading}
                 onClick={() => retry.mutate()}
                 data-test-subj="nightshiftOnboardingRetryButton"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.RETRY_ONBOARDING_SUGGESTIONS,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_FIRST_INVESTIGATION,
+                })}
               >
                 {i18n.translate('xpack.nightshift.onboarding.investigate.retryButton', {
                   defaultMessage: 'Try again',
@@ -428,6 +434,10 @@ function SuggestionRow({
             onClick={onInvestigate}
             aria-label={`${INVESTIGATE_LABEL}: ${suggestion.title}`}
             data-test-subj="nightshiftOnboardingSuggestionInvestigateButton"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_FIRST_INVESTIGATION,
+            })}
           >
             {INVESTIGATE_LABEL}
           </EuiButtonEmpty>
@@ -564,6 +574,10 @@ function ComposeCard({
               margin-top: -2px;
             `}
             data-test-subj="nightshiftOnboardingInvestigateButton"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_FIRST_INVESTIGATION,
+            })}
           >
             {INVESTIGATE_LABEL}
           </EuiButtonEmpty>

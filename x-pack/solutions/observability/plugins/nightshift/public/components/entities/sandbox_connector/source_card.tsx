@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -19,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 interface SourceCardAction {
+  ebt?: EbtClickAttrs;
   label: string;
   icon: IconType;
   onClick: () => void;
@@ -107,6 +110,7 @@ export function SourceCard({
         isDisabled={action.disabledReason !== undefined}
         aria-label={`${action.label} ${title}`}
         data-test-subj={action['data-test-subj']}
+        {...(action.ebt && getEbtProps(action.ebt))}
       >
         {action.label}
       </EuiButton>

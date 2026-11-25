@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -21,6 +22,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import nightshiftPromoPoster from './nightshift_promo_poster.jpg';
 import nightshiftPromoPosterDark from './nightshift_promo_poster_dark.jpg';
 
@@ -276,6 +278,10 @@ export function IntroBannerVideo(): React.ReactElement {
         tabIndex={0}
         aria-label={previewAriaLabel}
         data-test-subj="nightshiftOnboardingIntroVideoPreview"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.PLAY_INTRO_VIDEO,
+          element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_INTRO_BANNER,
+        })}
         onClick={handleMediaClick}
         onMouseEnter={handlePreviewHighlight}
         onMouseLeave={handlePreviewUnhighlight}
@@ -342,6 +348,10 @@ export function IntroBannerVideo(): React.ReactElement {
                   iconType="cross"
                   aria-label={closeButtonAriaLabel}
                   data-test-subj="nightshiftOnboardingIntroVideoClose"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_INTRO_VIDEO,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_INTRO_BANNER,
+                  })}
                   onClick={closeExpanded}
                 />
               </EuiToolTip>
