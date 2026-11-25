@@ -9,8 +9,6 @@
 
 declare module 'axios/lib/adapters/xhr';
 
-declare module 'find-cypress-specs';
-
 declare module '@cypress/grep' {
   export function register(): void;
 }

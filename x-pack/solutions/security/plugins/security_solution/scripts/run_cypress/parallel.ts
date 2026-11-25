@@ -12,7 +12,7 @@ import { globbySync } from 'globby';
 import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
-import { findChangedFiles } from 'find-cypress-specs';
+import { execFileSync } from 'child_process';
 import path from 'path';
 import { plugin as grep } from '@cypress/grep/plugin';
 
@@ -51,6 +51,16 @@ import {
   routeGroupFailure,
 } from './group_failure_routing';
 import { hasFailedTests, routeRunResult, runWithAssertionRetry } from './cypress_run_result';
+
+// find-cypress-specs registers tsx's CommonJS hooks globally when imported, which then breaks
+// loading ESM-only dependencies such as del in this process, so ask git directly.
+const findChangedFiles = (branch: string): string[] =>
+  execFileSync('git', ['diff', '--name-only', '--diff-filter=AMR', `origin/${branch}`], {
+    encoding: 'utf8',
+  })
+    .split('\n')
+    .map((filePath) => filePath.trim())
+    .filter(Boolean);
 
 const filterCompletedSpecs = async (
   specFiles: string[],
@@ -183,7 +193,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       log.info('Resolved spec files after retrieveIntegrations:', files);
 
       if (argv.changedSpecsOnly) {
-        files = (findChangedFiles('main', false) as string[]).reduce((acc, itemPath) => {
+        files = findChangedFiles('main').reduce((acc, itemPath) => {
           const existing = files.find((grepFilePath) => grepFilePath.includes(itemPath));
           if (existing) {
             acc.push(existing);

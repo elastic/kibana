@@ -12,7 +12,7 @@ import { cpus } from 'os';
 import Path from 'path';
 import { promisify } from 'util';
 
-import del from 'del';
+import { deleteAsync } from 'del';
 import { globby } from 'globby';
 import zlib from 'zlib';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -36,7 +36,7 @@ export async function brotliCompressBundles({ buildDir, log, plugin }: TaskConte
   );
 
   try {
-    await del(['**/*.br'], { cwd: compressDir });
+    await deleteAsync(['**/*.br'], { cwd: compressDir });
     const files = await globby(['**/*.{js,css}'], { cwd: compressDir, absolute: true });
     await asyncForEachWithLimit(files, PARALLEL_CONCURRENCY, compressFile);
   } catch (e) {

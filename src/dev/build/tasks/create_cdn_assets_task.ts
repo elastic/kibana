@@ -19,7 +19,7 @@ import {
 } from '@kbn/core-i18n-server-internal';
 import { i18n, i18nLoader } from '@kbn/i18n';
 
-import del from 'del';
+import { deleteAsync } from 'del';
 import { globbySync } from 'globby';
 
 import type { Task } from '../lib';
@@ -35,7 +35,7 @@ export const CreateCdnAssets: Task = {
     const assets = config.resolveFromRepo('build', 'cdn-assets');
     const bundles = resolve(assets, buildSha, 'bundles');
 
-    await del(assets);
+    await deleteAsync(assets);
     await mkdirp(assets);
 
     const plugins = globbySync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);

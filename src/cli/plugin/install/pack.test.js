@@ -12,7 +12,7 @@ import { join } from 'path';
 
 import sinon from 'sinon';
 import { globbySync } from 'globby';
-import del from 'del';
+import { deleteSync } from 'del';
 
 import { Logger } from '../../logger';
 import { extract, getPackData } from './pack';
@@ -30,7 +30,7 @@ describe('kibana cli', function () {
 
     beforeEach(function () {
       //These tests are dependent on the file system, and I had some inconsistent
-      //behavior with del.sync show up. Until these tests are re-written to not
+      // behavior with deleteSync show up. Until these tests are re-written to not
       //depend on the file system, I make sure that each test uses a different
       //working directory.
       testNum += 1;
@@ -54,7 +54,7 @@ describe('kibana cli', function () {
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      del.sync(workingPathRoot);
+      deleteSync(workingPathRoot);
     });
 
     function copyReplyFile(filename) {

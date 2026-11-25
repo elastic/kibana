@@ -12,7 +12,7 @@ import Path from 'path';
 import { Writable } from 'stream';
 import { DatabaseSync } from 'node:sqlite';
 
-import del from 'del';
+import { deleteAsync } from 'del';
 
 import { SqliteCache } from './sqlite_cache';
 
@@ -84,10 +84,10 @@ const makeCache = (...options: ConstructorParameters<typeof SqliteCache>) => {
   return cache;
 };
 
-beforeEach(async () => await del(DIR));
+beforeEach(async () => await deleteAsync(DIR));
 afterEach(async () => {
   await Promise.all(caches.splice(0).map((cache) => cache.close()));
-  await del(DIR);
+  await deleteAsync(DIR);
 });
 
 it('returns undefined until values are set', async () => {

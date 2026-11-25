@@ -10,7 +10,7 @@
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import del from 'del';
+import { deleteAsync } from 'del';
 
 import type { TaskContext } from '../task_context';
 
@@ -18,7 +18,7 @@ const asyncMkdir = promisify(Fs.mkdir);
 
 export async function initTargets({ log, sourceDir, buildDir }: TaskContext) {
   log.info('deleting the build and target directories');
-  await del(['build', 'target'], {
+  await deleteAsync(['build', 'target'], {
     cwd: sourceDir,
   });
 
@@ -28,7 +28,7 @@ export async function initTargets({ log, sourceDir, buildDir }: TaskContext) {
 
 export async function initDev({ log, sourceDir }: TaskContext) {
   log.info('deleting the target folder');
-  await del(['target'], {
+  await deleteAsync(['target'], {
     cwd: sourceDir,
   });
 }

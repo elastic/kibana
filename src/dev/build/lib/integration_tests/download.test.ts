@@ -13,7 +13,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { readFileSync } from 'fs';
 
-import del from 'del';
+import { deleteAsync } from 'del';
 import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
@@ -31,13 +31,13 @@ expect.addSnapshotSerializer(
 );
 
 beforeEach(async () => {
-  await del(TMP_DIR, { force: true });
+  await deleteAsync(TMP_DIR, { force: true });
   await mkdirp(TMP_DIR);
   jest.clearAllMocks();
 });
 
 afterEach(async () => {
-  await del(TMP_DIR, { force: true });
+  await deleteAsync(TMP_DIR, { force: true });
 });
 
 const logWritter = new ToolingLogCollectingWriter('verbose');

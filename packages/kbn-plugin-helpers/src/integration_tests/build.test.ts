@@ -15,7 +15,7 @@ import { loadJsonFile } from '@kbn/utils';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import AdmZip from 'adm-zip';
-import del from 'del';
+import { deleteAsync } from 'del';
 import { globby } from 'globby';
 
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
@@ -25,10 +25,10 @@ const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 
 describe('scripts/generate_plugin', () => {
   beforeEach(async () => {
-    await del([PLUGIN_DIR, TMP_DIR]);
+    await deleteAsync([PLUGIN_DIR, TMP_DIR]);
     Fs.mkdirSync(TMP_DIR);
   });
-  afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
+  afterEach(async () => await deleteAsync([PLUGIN_DIR, TMP_DIR]));
 
   const generatePlugin = async () => {
     await execa(process.execPath, ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'], {

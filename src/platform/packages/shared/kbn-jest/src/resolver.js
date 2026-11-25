@@ -91,7 +91,7 @@ module.exports = (request, options) => {
     });
   }
 
-  if (request === 'unicorn-magic/node') {
+  if (request === 'unicorn-magic' || request === 'unicorn-magic/node') {
     return resolve.sync('unicorn-magic/node.js', {
       basedir: options.basedir,
       extensions: options.extensions,
