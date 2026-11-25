@@ -52,7 +52,7 @@ const CHART_VIEW_OPTIONS: Array<EuiButtonGroupOptionProps & { id: TracesChartVie
     label: i18n.translate('metricsExperience.traces.healthMetricsView', {
       defaultMessage: 'Health metrics',
     }),
-    iconType: 'visLine',
+    iconType: 'chartLine',
     'data-test-subj': 'tracesHealthMetricsToggle',
   },
 ];
@@ -113,9 +113,9 @@ function TraceMetricsGrid({
     [onBreakdownFieldChange]
   );
 
-  // When the flag is on, the latency map can be chosen next to the RED charts, which stay
-  // the default. When it is off, the RED charts only, as before. The map keeps its
-  // selection in the ES|QL query, so only an ES|QL session that can be rewritten gets it.
+  // When the flag is on, the latency map sits next to the RED charts and is the default
+  // view. When it is off, the RED charts only, as before. The map keeps its selection in
+  // the ES|QL query, so only an ES|QL session that can be rewritten gets it.
   const latencyMapEnabled = useFeatureFlag(FEATURE_FLAGS.IS_TRACES_LATENCY_MAP_ENABLED, false);
   const latencyMapAvailable =
     latencyMapEnabled && !!query && 'esql' in query && !!actions.updateESQLQuery;
