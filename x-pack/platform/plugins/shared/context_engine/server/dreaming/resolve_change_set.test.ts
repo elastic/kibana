@@ -10,7 +10,7 @@ import {
   type DreamChangeSet,
 } from '../../common/step_types/apply_dream_changes';
 import type { DreamedKi } from './dreamed_ki';
-import { batchKeyOf, factId } from './ids';
+import { batchKeyOf, factId, runFactId } from './ids';
 import { audienceKeyOf } from './permissions';
 import {
   referencedIds,
@@ -113,7 +113,7 @@ describe('resolveChangeSet', () => {
     });
     expect(operations[1]).toEqual({
       op: 'upsert_fact',
-      id: factId('exec-1', batchKeyOf(['m-1', 'm-2']), 'new:2'),
+      id: runFactId('exec-1', 'preference', 'Bob prefers tea'),
       type: 'preference',
       title: 'Bob prefers tea',
       content: 'Bob prefers tea.',
@@ -122,27 +122,79 @@ describe('resolveChangeSet', () => {
     });
   });
 
-  it('gives the same new key in two batches of one run two different facts', () => {
-    const newFact = changeSet({
-      facts: [
-        { ref: 'new:1', type: 'preference', title: 'T', content: 'C', source_memory_ids: ['m-1'] },
-      ],
-    });
-    const secondBatch = changeSet({
-      facts: [
-        { ref: 'new:1', type: 'preference', title: 'T', content: 'C', source_memory_ids: ['m-3'] },
-      ],
-    });
+  it('gives a fact of the same type and title in two batches of one run the same id, and another run another', () => {
+    const newFact = (title: string, source: string) =>
+      changeSet({
+        facts: [
+          { ref: 'new:1', type: 'preference', title, content: 'C', source_memory_ids: [source] },
+        ],
+      });
+    const resolved = (title: string, source: string, executionId = 'exec-1') =>
+      resolveChangeSet(
+        newFact(title, source),
+        context({ executionId, memories: new Map([[source, '2026-10-03T10:00:00.000Z']]) })
+      ).operations[0] as UpsertFactOperation;
 
-    const first = resolveChangeSet(newFact, context()).operations[0] as UpsertFactOperation;
-    const second = resolveChangeSet(
-      secondBatch,
-      context({ memories: new Map([['m-3', '2026-10-03T10:00:00.000Z']]) })
-    ).operations[0] as UpsertFactOperation;
-    const retried = resolveChangeSet(newFact, context()).operations[0] as UpsertFactOperation;
+    expect(resolved('Bob  prefers tea', 'm-3').id).toBe(resolved('bob prefers TEA', 'm-1').id);
+    expect(resolved('Bob prefers tea', 'm-1').id).not.toBe(resolved('Bob prefers milk', 'm-1').id);
+    expect(resolved('Bob prefers tea', 'm-1').id).not.toBe(
+      resolved('Bob prefers tea', 'm-1', 'exec-2').id
+    );
+  });
 
-    expect(second.id).not.toBe(first.id);
-    expect(retried.id).toBe(first.id);
+  it('keeps apart the facts of one batch that share a type and title', () => {
+    const { operations } = resolveChangeSet(
+      changeSet({
+        facts: [
+          {
+            ref: 'new:1',
+            type: 'preference',
+            title: 'T',
+            content: 'A',
+            source_memory_ids: ['m-1'],
+          },
+          {
+            ref: 'new:2',
+            type: 'preference',
+            title: 'T',
+            content: 'B',
+            source_memory_ids: ['m-1'],
+          },
+        ],
+      }),
+      context()
+    );
+
+    expect(operations[0]).toMatchObject({ id: runFactId('exec-1', 'preference', 'T') });
+    expect(operations[1]).toMatchObject({
+      id: factId('exec-1', batchKeyOf(['m-1', 'm-2']), 'new:2'),
+    });
+  });
+
+  it('keeps facts of different audiences apart even with the same type and title', () => {
+    const audience = (name: string) => ({
+      kibana: { privileges: [{ space: 'default', name: [name], count: 1 }] },
+    });
+    const resolved = (source: string) =>
+      resolveChangeSet(
+        changeSet({
+          facts: [
+            {
+              ref: 'new:1',
+              type: 'preference',
+              title: 'T',
+              content: 'C',
+              source_memory_ids: [source],
+            },
+          ],
+        }),
+        context({
+          memories: new Map([[source, undefined]]),
+          memoryPermissions: new Map([[source, audience(`ai_index:${source}/read`)]]),
+        })
+      ).operations[0] as UpsertFactOperation;
+
+    expect(resolved('m-a').id).not.toBe(resolved('m-b').id);
   });
 
   it('updates an existing item under its own id, keeping what the change leaves out', () => {
@@ -319,7 +371,7 @@ describe('resolveChangeSet', () => {
     expect(operations).toEqual([
       expect.objectContaining({
         op: 'upsert_fact',
-        id: factId('exec-1', batchKeyOf(['m-1', 'm-2']), 'fact:1'),
+        id: runFactId('exec-1', 'preference', 'T'),
       }),
     ]);
   });

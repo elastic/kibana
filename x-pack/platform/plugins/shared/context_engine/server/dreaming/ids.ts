@@ -42,6 +42,17 @@ export const entityId = (type: string, name: string, audience?: string): string 
 export const factId = (executionId: string, batchKey: string, ref: string): string =>
   `fact-${shortHash(executionId, batchKey, ref)}`;
 
+/**
+ * The KI id of a new fact, from the run, its audience, type and title, so batches of one run that
+ * write the same fact at once write one KI.
+ */
+export const runFactId = (
+  executionId: string,
+  type: string,
+  title: string,
+  audience?: string
+): string => `fact-${shortHash(executionId, audience ?? '', type, identityOf(title))}`;
+
 /** A relationship's `memory.key`: `<from id>|<relationship type>|<to id>`. */
 export const relationshipKey = (from: string, relation: string, to: string): string =>
   `${from}|${relation}|${to}`;

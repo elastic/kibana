@@ -9,8 +9,10 @@ import { createHash } from 'crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -30,6 +32,8 @@ import {
   shouldDream,
   shouldMaintain,
   traceDreamingBatchWorkflowIdFor,
+  dreamingBatchWorkflowIdFor,
+  relationshipsBatchWorkflowIdFor,
   traceDreamingWorkflowIdFor,
 } from './schedule';
 
@@ -226,7 +230,7 @@ describe('createDreamingScheduleService', () => {
       });
 
       expect(traceDreamingWorkflowIdFor('support', SPACE)).toBe(traceWorkflowId);
-      const [[dreamingId, dreamingInstall], [batchId, batchInstall], [traceId, traceInstall]] =
+      const [[dreamingId, dreamingInstall], , [batchId, batchInstall], [traceId, traceInstall]] =
         client.install.mock.calls;
       expect([dreamingId, batchId, traceId]).toEqual([
         CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
@@ -268,6 +272,34 @@ describe('createDreamingScheduleService', () => {
       });
     });
 
+    it('enables the batch workflows of dreaming and relationships without making them automations', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      for (const [batchDefinitionId, batchWorkflowId] of [
+        [CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID, dreamingBatchWorkflowIdFor('support', SPACE)],
+        [
+          CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID,
+          relationshipsBatchWorkflowIdFor('support', SPACE),
+        ],
+      ]) {
+        expect(batchWorkflowId).toBe(`${batchDefinitionId}-${suffix}`);
+        expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+          batchWorkflowId,
+          { enabled: true },
+          SPACE,
+          request
+        );
+        expect(aiIndexService.addAutomation).not.toHaveBeenCalledWith('support', SPACE, {
+          type: 'workflow',
+          value: batchWorkflowId,
+        });
+      }
+    });
+
     it('installs and attaches the relationships workflow last, to link what dreaming wrote', async () => {
       await createService(workflowsManagement).reconcile({
         aiIndex: aiIndex(),
@@ -279,8 +311,10 @@ describe('createDreamingScheduleService', () => {
       expect(relationshipsWorkflowId).toBe(`${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${suffix}`);
       expect(client.install.mock.calls.map(([definitionId]) => definitionId)).toEqual([
         CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID,
         CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
         CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID,
         CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
       ]);
       expect(aiIndexService.addAutomation.mock.calls.map(([, , { value }]) => value)).toEqual([
@@ -352,7 +386,7 @@ describe('createDreamingScheduleService', () => {
       });
 
       expect(maintenanceWorkflowIdFor('support', SPACE)).toBe(maintenanceWorkflowId);
-      const [definitionId, install] = client.install.mock.calls[4];
+      const [definitionId, install] = client.install.mock.calls[6];
       expect(definitionId).toBe(CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID);
       expect(install.values).toEqual(
         expect.objectContaining({ maintenanceIntervalMinutes: 720, maintenanceMode: 'apply' })
@@ -438,7 +472,7 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    expect(client.uninstall).toHaveBeenCalledTimes(7);
+    expect(client.uninstall).toHaveBeenCalledTimes(9);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {

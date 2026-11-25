@@ -9,6 +9,7 @@ import {
   batchKeyOf,
   entityId,
   factId,
+  runFactId,
   kiIdFromUri,
   kiUri,
   memoryIdFromUri,
@@ -73,6 +74,15 @@ describe('dreaming ids', () => {
     expect(factId('exec-1', batch, 'new:1')).not.toBe(
       factId('exec-1', batchKeyOf(['m-3']), 'new:1')
     );
+  });
+
+  it('gives a new fact one id per run, audience, type and title, however the title is spelled', () => {
+    const id = runFactId('exec-1', 'note', 'Refund  Policy');
+
+    expect(id).toBe(runFactId('exec-1', 'note', 'refund policy'));
+    expect(id).not.toBe(runFactId('exec-2', 'note', 'refund policy'));
+    expect(id).not.toBe(runFactId('exec-1', 'rule', 'refund policy'));
+    expect(id).not.toBe(runFactId('exec-1', 'note', 'refund policy', 'team-a'));
   });
 
   it('gives a relationship one id per from, type and to', () => {

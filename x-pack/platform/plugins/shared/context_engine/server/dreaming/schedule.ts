@@ -8,8 +8,10 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import {
+  CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -108,6 +110,17 @@ export interface DreamingScheduleService {
 export const dreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
+/** The id of the workflow dreaming runs each batch of an AI index with. */
+export const dreamingBatchWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
+
+/** The id of the workflow relationships runs each batch of an AI index with. */
+export const relationshipsBatchWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(
+    aiIndexId,
+    spaceId
+  )}`;
+
 /** The id of the trace dreaming workflow of an AI index. */
 export const traceDreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
@@ -169,6 +182,12 @@ const DREAMING_WORKFLOWS = [
     attach: true,
   },
   {
+    definitionId: CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID,
+    label: 'the dreaming batch workflow',
+    workflowIdFor: dreamingBatchWorkflowIdFor,
+    attach: false,
+  },
+  {
     definitionId: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
     label: 'the trace dreaming batch workflow',
     workflowIdFor: traceDreamingBatchWorkflowIdFor,
@@ -179,6 +198,12 @@ const DREAMING_WORKFLOWS = [
     label: 'trace dreaming',
     workflowIdFor: traceDreamingWorkflowIdFor,
     attach: true,
+  },
+  {
+    definitionId: CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID,
+    label: 'the relationships batch workflow',
+    workflowIdFor: relationshipsBatchWorkflowIdFor,
+    attach: false,
   },
   {
     definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,

@@ -24,9 +24,11 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -44,10 +46,12 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import CONTEXT_ENGINE_DREAMING_YAML from './definitions/context_engine/dreaming.yaml';
+import CONTEXT_ENGINE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_batch.yaml';
 import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dreaming_traces.yaml';
 import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
 import CONTEXT_ENGINE_MAINTENANCE_YAML from './definitions/context_engine/maintenance.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
+import CONTEXT_ENGINE_RELATIONSHIPS_BATCH_YAML from './definitions/context_engine/relationships_batch.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
 import { visitNestedSteps } from '../definition/definition_utils';
@@ -118,6 +122,28 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
   },
   [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
     instanceKey: 'my-ai-index-0123456789abcdef',
     memoriesIndex: 'ai-index-idx-my-ai-index',
@@ -284,8 +310,14 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '7:9200b8aa'],
-  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '4:8a38fbe6'],
+  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '8:5b33dd59'],
+  [CONTEXT_ENGINE_DREAMING_BATCH_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_BATCH_YAML, '1:528963d9'],
+  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '5:804563f4'],
+  [
+    CONTEXT_ENGINE_RELATIONSHIPS_BATCH_WORKFLOW_ID,
+    CONTEXT_ENGINE_RELATIONSHIPS_BATCH_YAML,
+    '1:2af5e965',
+  ],
   [CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID, CONTEXT_ENGINE_MAINTENANCE_YAML, '1:0ba262e3'],
   [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_TRACE_DREAMING_YAML, '6:5bda8559'],
   [
