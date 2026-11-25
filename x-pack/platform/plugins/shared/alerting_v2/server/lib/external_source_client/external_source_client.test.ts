@@ -409,6 +409,26 @@ describe('ExternalSourceClient', () => {
       });
     });
 
+    it('throws EXTERNAL_SOURCE_NOT_FOUND when the import is deleted before the write', async () => {
+      savedObjectService.get.mockResolvedValue(storedDoc());
+      savedObjectService.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
+          'import-1'
+        )
+      );
+
+      const error = await client
+        .updateExternalSource({ id: 'import-1', data: { metadata: { name: 'Renamed' } } })
+        .catch((e) => e);
+
+      expect(error.output.statusCode).toBe(404);
+      expect(getBoomData(error)).toEqual({
+        code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_NOT_FOUND,
+        details: { external_source_id: 'import-1' },
+      });
+    });
+
     it('throws EXTERNAL_SOURCE_VERSION_CONFLICT when another writer updated the import', async () => {
       savedObjectService.get.mockResolvedValue(storedDoc());
       savedObjectService.update.mockRejectedValue(

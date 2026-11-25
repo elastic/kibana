@@ -177,7 +177,7 @@ export class ExternalSourceClient {
           details: { external_source_id: params.id },
         });
       }
-      throw e;
+      throw this.mapNotFound(params.id, e);
     }
 
     return transformExternalSourceToApiResponse({
