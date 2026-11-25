@@ -6,6 +6,7 @@
  */
 
 import type { LayerDescriptor } from '../../../common/descriptor_types';
+import type { SourcePropName } from '../../classes/sources/source';
 import type { MapState } from './types';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../copy_persistent_state';
 
@@ -75,7 +76,7 @@ export function updateLayerInList(
 export function updateLayerSourceDescriptorProp(
   state: MapState,
   layerId: string,
-  propName: string,
+  propName: SourcePropName,
   value: unknown
 ): MapState {
   const { layerList } = state;

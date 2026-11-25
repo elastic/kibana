@@ -40,6 +40,7 @@ import type {
 } from '../../../data/investigations/use_investigation_sections';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationCardActions } from './investigation_card_actions';
+import { AiGradientBadge } from './investigation_status_badge';
 import { useInvestigationAssignees } from './use_investigation_assignees';
 
 export interface InvestigationSectionProps {
@@ -96,6 +97,13 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
         ...anchors,
         title: i18n.translate('xpack.nightshift.investigations.notRatedSectionTitle', {
           defaultMessage: 'Not rated',
+        }),
+      };
+    case 'closed':
+      return {
+        ...anchors,
+        title: i18n.translate('xpack.nightshift.investigations.closedSectionTitle', {
+          defaultMessage: 'Closed',
         }),
       };
     case 'critical':
@@ -255,12 +263,21 @@ const SectionHeading = ({
     </EuiFlexItem>
     {showCount && (
       <EuiFlexItem grow={false}>
-        <EuiBadge
-          color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
-          data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
-        >
-          {total}
-        </EuiBadge>
+        {id === 'in-progress' ? (
+          <AiGradientBadge
+            testSubj={`nightshiftInvestigationSectionCount-${id}`}
+            forcedColorsForeground="button"
+          >
+            {total}
+          </AiGradientBadge>
+        ) : (
+          <EuiBadge
+            color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
+            data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
+          >
+            {total}
+          </EuiBadge>
+        )}
       </EuiFlexItem>
     )}
   </EuiFlexGroup>
@@ -278,7 +295,7 @@ const RetryCallout = ({
   const actionProps = {
     primary: {
       children: RETRY_BUTTON_LABEL,
-      // Six sections each render a "Retry", so the accessible name has to say which one.
+      // Each section can render a "Retry", so the accessible name has to say which one.
       'aria-label': i18n.translate('xpack.nightshift.investigations.sectionRetryAriaLabel', {
         defaultMessage: 'Retry loading {sectionTitle} investigations',
         values: { sectionTitle: title },
@@ -392,7 +409,7 @@ const SectionRows = ({
           isLoading={isLoadingMore}
           onClick={onShowMore}
           data-test-subj={`nightshiftInvestigationSectionShowMore-${presentation.id}`}
-          // Six sections each render a "Show more", so the accessible name has to say which one.
+          // Each section can render a "Show more", so the accessible name has to say which one.
           aria-label={i18n.translate('xpack.nightshift.investigations.sectionShowMoreAriaLabel', {
             defaultMessage: 'Show {count} more {sectionTitle} investigations',
             values: {
@@ -435,6 +452,9 @@ export const InvestigationSection = ({
     hasError: error != null,
   });
 
+  // Closed starts collapsed, but a failed request must still be visible and retryable.
+  const showCollapsedError = id === 'closed' && !isOpen && error != null;
+
   const renderBody = (visibleView: VisibleSectionView): React.ReactNode => {
     switch (visibleView) {
       case 'loading':
@@ -444,7 +464,7 @@ export const InvestigationSection = ({
           </SectionBlock>
         );
       case 'unloadable':
-        return (
+        return showCollapsedError ? null : (
           <SectionBlock>
             <RetryCallout presentation={presentation} isUnloadable onRetry={onRetry} />
           </SectionBlock>
@@ -452,7 +472,7 @@ export const InvestigationSection = ({
       case 'rows':
         return (
           <>
-            {error != null && (
+            {error != null && !showCollapsedError && (
               <SectionBlock>
                 <RetryCallout presentation={presentation} isUnloadable={false} onRetry={onRetry} />
               </SectionBlock>
@@ -530,7 +550,7 @@ export const InvestigationSection = ({
             <SectionHeading
               presentation={presentation}
               total={total}
-              showCount={view !== 'loading'}
+              showCount={view !== 'loading' && !(id === 'closed' && view === 'unloadable')}
               isOpen={isOpen}
             />
           }
@@ -557,6 +577,15 @@ export const InvestigationSection = ({
         >
           {renderBody(view)}
         </EuiAccordion>
+        {showCollapsedError && (
+          <SectionBlock>
+            <RetryCallout
+              presentation={presentation}
+              isUnloadable={view === 'unloadable'}
+              onRetry={onRetry}
+            />
+          </SectionBlock>
+        )}
       </SectionCard>
     </EuiFlexGroup>
   );

@@ -7,8 +7,7 @@
 
 import { Parser } from '@elastic/esql';
 import { appendLimitToQuery, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
-import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import { withAllProjectsRouting } from './project_routing';
+import { PROJECT_ROUTING_ALL, withAllProjectsRouting } from '@kbn/cps-server-utils';
 
 const BREACH_QUERY = 'FROM logs-*\n| WHERE level == "error"';
 

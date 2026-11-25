@@ -12,6 +12,7 @@
       "ignore_unavailable": "__flag__",
       "preference": "",
       "routing": [],
+      "_slice": [],
       "expand_wildcards": [
         "all",
         "open",

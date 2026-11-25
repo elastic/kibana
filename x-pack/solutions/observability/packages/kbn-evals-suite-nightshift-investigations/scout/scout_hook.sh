@@ -128,7 +128,19 @@ else
   # completed from the shell. The Vault field keeps its original name, `nightshift.telemetry`.
   es_url="$(config_value '.nightshift.telemetry.url')"
   es_key="$(config_value '.nightshift.telemetry.apiKey')"
-  if [[ -z "$es_url$es_key" ]]; then
+  # An explicit override beats the profile's block, so one run can use a key the profile does not
+  # hold. Both variables are required, and neither is ever echoed.
+  override_url="${NIGHTSHIFT_ES_URL_OVERRIDE:-}"
+  override_key="${NIGHTSHIFT_ES_API_KEY_OVERRIDE:-}"
+  if [[ -n "$override_url$override_key" ]]; then
+    if [[ -z "$override_url" || -z "$override_key" ]]; then
+      echo "nightshift-investigations scout hook: NIGHTSHIFT_ES_URL_OVERRIDE and" \
+        "NIGHTSHIFT_ES_API_KEY_OVERRIDE must be set together" >&2
+      exit 1
+    fi
+    es_url="$override_url"
+    es_key="$override_key"
+  elif [[ -z "$es_url$es_key" ]]; then
     es_url="${NIGHTSHIFT_ES_URL:-}"
     es_key="${NIGHTSHIFT_ES_API_KEY:-}"
   fi
