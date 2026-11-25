@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { KAFKA_KERBEROS_USERNAME_MAX_LENGTH } from '../../../../../../../common/constants';
+import {
+  findOtlpAuthHeaderConflict,
+  isValidOtlpAuthCredential,
+  isValidOtlpGrpcMetadataKey,
+  isValidOtlpHeaderName,
+  OTLP_AUTH_CREDENTIAL_MAX_LENGTH,
+  OTLP_HEADER_NAME_MAX_LENGTH,
+} from '../../../../../../../common/services/otlp_auth';
+
 import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 export { validateSslPathInput, validateSslPathsCombo };
 
@@ -373,12 +383,25 @@ export function validateKafkaKerberosKeytab(value: string) {
 }
 
 export function validateKafkaKerberosUsername(value: string) {
-  return requiredText(
+  const required = requiredText(
     value,
     i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsRequired', {
       defaultMessage: 'Username is required',
     })
   );
+  if (required) {
+    return required;
+  }
+
+  // the form trims the value before it is sent, so the trimmed length is the one the API checks
+  if (value.trim().length > KAFKA_KERBEROS_USERNAME_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsTooLong', {
+        defaultMessage: 'Username must be {maxLength} characters or fewer',
+        values: { maxLength: KAFKA_KERBEROS_USERNAME_MAX_LENGTH },
+      }),
+    ];
+  }
 }
 
 export function validateKafkaKerberosPassword(value: string) {
@@ -855,8 +878,34 @@ export function validateOtlpShortString(value: string) {
   }
 }
 
-export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>) {
+/**
+ * Validates the headers of the OTLP output. `authHeaderName` is the header that the authentication
+ * sets, which the headers cannot set too.
+ */
+export function validateOtlpHeaders(
+  pairs: Array<{ key: string; value: string }>,
+  authHeaderName?: string
+) {
   const errors = [...(validateKafkaHeaders(pairs) ?? [])];
+
+  if (authHeaderName) {
+    const conflict = findOtlpAuthHeaderConflict(
+      pairs.map(({ key }) => key),
+      authHeaderName
+    );
+    const index = conflict === undefined ? -1 : pairs.findIndex(({ key }) => key === conflict);
+    if (index >= 0) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpHeaderSetByAuth', {
+          defaultMessage: 'The {header} header is set by the authentication',
+          values: { header: conflict },
+        }),
+        index,
+        hasKeyError: true,
+        hasValueError: false,
+      });
+    }
+  }
 
   pairs.forEach(({ key, value }, index) => {
     if (key.length > 256 || value.length > 1000) {
@@ -875,3 +924,64 @@ export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>
 
   return errors.length ? errors : undefined;
 }
+
+export function validateOtlpAuthHeaderName(value: string) {
+  const name = value?.trim() ?? '';
+  if (!name) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameRequired', {
+        defaultMessage: 'Header name is required',
+      }),
+    ];
+  }
+  if (!isValidOtlpHeaderName(name)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameInvalid', {
+        defaultMessage:
+          'Header name must be at most {max} characters and only contain letters, digits and {chars}',
+        values: { max: OTLP_HEADER_NAME_MAX_LENGTH, chars: "!#$%&'*+-.^_`|~" },
+      }),
+    ];
+  }
+}
+
+/** The gRPC exporter sends the custom header as metadata, which allows fewer characters. */
+export function validateOtlpAuthGrpcHeaderName(value: string) {
+  if (!isValidOtlpGrpcMetadataKey(value.trim())) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthGrpcHeaderNameInvalid', {
+        defaultMessage:
+          'With gRPC, the header name can only contain letters, digits, "-", "_" and ".", cannot start with "grpc-" or end with "-bin"',
+      }),
+    ];
+  }
+}
+
+export function validateOtlpAuthCredential(value: string) {
+  // the credential is sent trimmed
+  const credential = value?.trim() ?? '';
+  if (!credential) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialRequired', {
+        defaultMessage: 'Credential is required',
+      }),
+    ];
+  }
+  if (credential.length > OTLP_AUTH_CREDENTIAL_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialTooLong', {
+        defaultMessage: 'Credential must be at most {max} characters',
+        values: { max: OTLP_AUTH_CREDENTIAL_MAX_LENGTH },
+      }),
+    ];
+  }
+  if (!isValidOtlpAuthCredential(credential)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialInvalid', {
+        defaultMessage: 'Credential cannot contain line breaks or other control characters',
+      }),
+    ];
+  }
+}
+
+export const validateOtlpAuthCredentialSecret = toSecretValidator(validateOtlpAuthCredential);

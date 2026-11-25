@@ -15,6 +15,7 @@ import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-se
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import { registerSessionEventsRoutes } from './session_events';
+import { registerSessionMemoryRoutes } from './session_memory';
 
 interface ExampleMediaType {
   content: { 'application/json': { examples: Record<string, { value: unknown }> } };
@@ -74,6 +75,7 @@ registerAiIndexRoutes({
   getActions: jest.fn(),
   getAgentBuilder: jest.fn(),
   getWorkflowsManagementApi: jest.fn(),
+  getDreamingScheduleService: jest.fn(),
   getSpaces: jest.fn(),
 });
 
@@ -83,6 +85,15 @@ registerSessionEventsRoutes({
   getSessionEventsService: jest.fn(),
   getAiIndexService: jest.fn(),
   isMemoryEnabled: async () => false,
+});
+
+registerSessionMemoryRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getSessionMemoryService: jest.fn(),
+  getAiIndexService: jest.fn(),
+  isMemoryEnabled: async () => false,
+  logger: loggerMock.create(),
 });
 
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
@@ -109,7 +120,7 @@ const codeSampleBody = ({ lang, source }: CodeSample) =>
 const codeSampleRequest = ({ lang, source }: CodeSample) => {
   const match =
     lang === 'curl'
-      ? /-X (\w+) "https:\/\/\$\{KIBANA_URL\}(\/[^"?]*)/.exec(source)
+      ? /-X (\w+) "\$\{KIBANA_URL\}(\/[^"?]*)/.exec(source)
       : /^(\w+) kbn:(\/[^\s?]*)/.exec(source);
   return match ? `${match[1]} ${match[2]}` : undefined;
 };
@@ -121,7 +132,7 @@ const routePattern = (route: string) =>
 
 describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(8);
+    expect(routesWithExamples).toHaveLength(10);
   });
 
   describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {

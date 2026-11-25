@@ -427,10 +427,113 @@ needs the Elasticsearch `write` privilege on each backing index, checked with `h
 or the route returns 403. If any AI index fails, the route rejects the request and saves
 nothing.
 
-Each request writes one `memory_save_event` audit event. It records the user the events belong
-to in `user.target.id`, the session in `kibana.saved_object`, and how many events were saved
-and failed. It records rejected requests, failed writes, and batches where every event fails as
-failures. Core adds the caller, the space and the request id.
+After route authorization, request validation, and feature-flag checks pass, each request writes
+one `memory_save_event` audit event. It records the user the events belong to in `user.target.id`,
+the session in `kibana.saved_object`, and how many events were saved and failed. Requests
+rejected by user-resolution or AI-index checks, failed writes, and batches where every event
+fails are recorded as failures. Core adds the caller, the space and the request id.
+
+## Session memory
+
+Context Engine can remember and forget session memories over HTTP. Both routes are public
+and experimental.
+
+### Remember
+
+```
+POST /api/context_engine/memory/_remember
+```
+
+```json
+{
+  "session_id": "8f3c2a1e",
+  "ai_index_ids": ["ops-memory"],
+  "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
+  "attributes": { "incident": "INC-4211" }
+}
+```
+
+`session_id` and `content` are required. Pass `id` to revise an existing memory. The revision
+replaces the memory in full, and the route does not check whether the id exists. Without `id`,
+the route generates one. `ai_index_ids` lists the AI indices that dreaming promotes the memory
+into. `attributes` is a map of string hints for dreaming.
+
+The route returns `202` with `{ "id": "..." }` and writes the memory in the background, because
+`semantic_text` inference runs inside the index request. The memory becomes searchable after
+the background write completes. The route does not report a failed write in the response.
+Instead, it logs the error to the Kibana logs and writes a failure audit event.
+
+The space comes from the request URL. The route returns 404 while `contextEngine:enabled` or
+the memory setting is off. Each AI index in `ai_index_ids` must exist in the request space, or
+the route returns 404. The caller must hold the Elasticsearch `write` privilege on each
+backing index, or the route returns 403. A rejected request writes nothing.
+
+### Forget
+
+```
+POST /api/context_engine/memory/_forget
+```
+
+```json
+{ "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"] }
+```
+
+`ids` takes 1 to 100 ids, and the route collapses duplicates. Forgetting writes a tombstone and
+keeps the memory's revisions until retention removes them.
+
+The response lists one outcome per unique id, in request order: `forgotten`,
+`already_forgotten`, `not_found`, or `failed`. A `failed` entry includes `error` when
+Elasticsearch rejects the tombstone.
+
+The space comes from the request URL. The route reports a memory of another user or another
+space as `not_found`, so it never reveals that the memory exists. It returns 404 while
+`contextEngine:enabled` is off, and does not check the memory setting, so forgetting still
+works after memory is turned off.
+
+### Privileges and audit
+
+Both routes require `contextEngine:write`. Without `user_id`, they act on the caller's own
+memories. A caller without a user profile gets a 403.
+
+Naming another user in `user_id` also requires `contextEngine:manage_memory`. That privilege
+is not part of All, so an administrator must grant it. Without it, the request gets a 403
+and the route audits the attempt as a failure. On `_forget`, when `user_id` does not match a
+memory's owner, the route returns `not_found`.
+
+After authorization (`contextEngine:write`), schema validation, and feature-flag checks pass,
+`_remember` writes one `memory_remember` audit event per request when the background write
+finishes or when the handler rejects the request, and `_forget` writes one `memory_forget`
+audit event per unique id. Requests rejected before the handler (for example, missing
+`contextEngine:write`, invalid request body, or Context Engine disabled) do not emit these
+events. Because `_remember` does not check whether a supplied `id` exists, a request with an
+unknown `id` creates a memory while auditing with `event.type` set to `change`. Both events
+record the authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the
+memory in `kibana.saved_object`. Because memories are scoped by space and user and the caller
+can choose `id`, two users can share the same id; combine the space, `user.target.id`, and
+`kibana.saved_object.id` to identify a single memory. The routes record in-handler rejections,
+background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
+
+## Dreaming input
+
+Dreaming reads what agents saved in the two session stores, and nothing from the AI index it
+writes to or from traces.
+
+- The dreaming workflow reads **session memories** with `context-engine.readSessionMemories`.
+  It reads the memories that list the AI index in `ai_index_ids` and were remembered or revised
+  since the last run, across all users of the space. A memory revised since is read once, as its
+  latest revision. A forgotten memory, or one whose latest revision no longer lists the AI index,
+  is left out.
+- The transcript dreaming workflow reads **transcripts** with `context-engine.readSessionTranscripts`.
+  It finds the events that list the AI index and were saved since the last run, then rebuilds
+  each turn they belong to from all its events. A turn that continues after a run is read again,
+  whole, by a later run. Reasoning and meta events are left out of a transcript, and a turn
+  nobody said anything in is skipped. Events saved in the last 5 minutes wait for the next run,
+  by default, so a turn still running is not read half way.
+
+Both steps read as the internal user once they check that the workflow user can read AI
+indices in the space, and the memories they return are visible to the space, not to the user
+who saved them. A fact or entity cites the memories it came from as `session-memory://<id>`
+and `session://<session id>/<turn id>`.
 
 ## Improvements
 

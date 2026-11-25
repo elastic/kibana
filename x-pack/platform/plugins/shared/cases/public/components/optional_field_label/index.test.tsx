@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import { OptionalFieldLabel } from '.';
 
 describe('OptionalFieldLabel', () => {
   it('it renders correctly', async () => {
-    const wrapper = mount(OptionalFieldLabel);
-    expect(wrapper.find('[data-test-subj="form-optional-field-label"]').first().text()).toBe(
-      'Optional'
-    );
+    render(OptionalFieldLabel);
+    expect(screen.getByTestId('form-optional-field-label')).toHaveTextContent('Optional');
   });
 });

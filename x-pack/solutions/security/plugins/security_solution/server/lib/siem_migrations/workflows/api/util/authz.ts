@@ -6,7 +6,11 @@
  */
 
 import { SIEM_MIGRATIONS_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 
 export const authz = {
-  requiredPrivileges: [SIEM_MIGRATIONS_API_ACTION_ALL],
+  requiredPrivileges: [
+    SIEM_MIGRATIONS_API_ACTION_ALL,
+    ...WorkflowsManagementOperationPrivileges.read,
+  ],
 };
