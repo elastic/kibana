@@ -89,7 +89,11 @@ export const AutomationsPanel = ({
     isLoading: isLoadingSummaries,
     missingReadPrivilege,
   } = useWorkflowSummaries(visibleWorkflowIds);
-  const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
+  const { canSuggest, isSuggesting, suggestAutomation } = useSuggestAutomation({
+    aiIndex,
+    isManaged,
+    onSaved,
+  });
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
@@ -195,7 +199,8 @@ export const AutomationsPanel = ({
           fill={fill}
           iconType="chevronSingleDown"
           iconSide="right"
-          isDisabled={isBusy || aiIndex === undefined}
+          isLoading={isSuggesting}
+          isDisabled={isBusy || isSuggesting || aiIndex === undefined}
           data-test-subj="contextAddAutomationButton"
           onClick={() => setIsAddMenuOpen((open) => !open)}
           {...getEbtProps({
@@ -222,7 +227,7 @@ export const AutomationsPanel = ({
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h2>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
                 defaultMessage: 'Automations',

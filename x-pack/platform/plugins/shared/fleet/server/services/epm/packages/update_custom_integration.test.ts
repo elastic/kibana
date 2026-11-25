@@ -14,6 +14,7 @@ import { createAppContextStartContractMock } from '../../../mocks';
 import { FleetUnauthorizedError } from '../../../errors';
 
 import { appContextService } from '../../app_context';
+import { packagePolicyService } from '../../package_policy';
 
 import { getInstalledPackageWithAssets } from './get';
 import { installPackageWithStateMachine } from './install';
@@ -148,6 +149,28 @@ describe('updateCustomIntegration', () => {
 
     expect(mockInstallPackageWithStateMachine).toHaveBeenCalledWith(
       expect.objectContaining({ installSource: 'custom', request: undefined })
+    );
+  });
+
+  it('logs the package policies that failed to upgrade, without throwing', async () => {
+    const mockPackagePolicyService = packagePolicyService as jest.Mocked<
+      typeof packagePolicyService
+    >;
+    mockPackagePolicyService.listIds.mockResolvedValueOnce({
+      items: ['policy-1', 'policy-2'],
+    } as any);
+    mockPackagePolicyService.bulkUpgrade.mockResolvedValueOnce([
+      { id: 'policy-1', success: true },
+      { id: 'policy-2', success: false, statusCode: 400, body: { message: 'Invalid input' } },
+    ]);
+
+    await updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
+      readMeData: '# Updated',
+      categories: ['custom'],
+    });
+
+    expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+      'Failed to upgrade 1 of 2 package policies of package test-integration: policy-2: Invalid input'
     );
   });
 

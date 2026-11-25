@@ -54,6 +54,13 @@ export const isRuleDraftAttachment = (attachment: Pick<RuleAttachment, 'id'>): b
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
 
+export const isLatestAttachmentVersion = (
+  attachment: Pick<RuleAttachment, 'versionData'>
+): boolean => {
+  const { versionData } = attachment;
+  return !versionData || versionData.version === versionData.versionCount;
+};
+
 export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   const text = attachment?.data?.text;
   if (!text) {
