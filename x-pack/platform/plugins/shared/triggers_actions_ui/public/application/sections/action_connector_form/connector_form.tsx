@@ -12,10 +12,11 @@ import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import {
   Form,
   useForm,
+  useFormData,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
-import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { RUN_ACTIONS_FIELD_PATH, type ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
@@ -28,6 +29,8 @@ export interface ConnectorFormState {
   isSubmitting: boolean;
   submit: FormHook<ConnectorFormSchema>['submit'];
   preSubmitValidator: ConnectorValidationFunc | null;
+  /** True when the Run actions switch is present and off, so outbound test cannot succeed. */
+  runActionsOff: boolean;
 }
 
 export type ResetForm = (
@@ -56,6 +59,22 @@ interface Props {
   showInboundEvents?: boolean;
 }
 
+/** Reports the Run actions switch so flyouts can hide test controls that require outbound keys. */
+const RunActionsOffReporter: React.FC<{ onRunActionsOff: (off: boolean) => void }> = ({
+  onRunActionsOff,
+}) => {
+  const [{ __internal__: internalFields }] = useFormData<{
+    __internal__?: { runActions?: boolean };
+  }>({ watch: [RUN_ACTIONS_FIELD_PATH] });
+  const runActionsOff = internalFields?.runActions === false;
+
+  useEffect(() => {
+    onRunActionsOff(runActionsOff);
+  }, [onRunActionsOff, runActionsOff]);
+
+  return null;
+};
+
 const ConnectorFormComponent: React.FC<Props> = ({
   actionTypeModel,
   connector,
@@ -76,6 +95,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
   const [preSubmitValidator, setPreSubmitValidator] = useState<ConnectorValidationFunc | null>(
     null
   );
+  const [runActionsOff, setRunActionsOff] = useState(false);
 
   const registerPreSubmitValidator = useCallback((validator: ConnectorValidationFunc) => {
     setPreSubmitValidator(() => validator);
@@ -88,9 +108,16 @@ const ConnectorFormComponent: React.FC<Props> = ({
 
   useEffect(() => {
     if (onChange) {
-      onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator });
+      onChange({
+        isValid: isFormValid,
+        isSubmitted,
+        isSubmitting,
+        submit,
+        preSubmitValidator,
+        runActionsOff,
+      });
     }
-  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator]);
+  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator, runActionsOff]);
 
   useEffect(() => {
     if (onFormModifiedChange) {
@@ -107,6 +134,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
 
   return (
     <Form form={form}>
+      <RunActionsOffReporter onRunActionsOff={setRunActionsOff} />
       <ConnectorFormFields
         actionTypeModel={actionTypeModel}
         isEdit={isEdit}

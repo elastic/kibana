@@ -61,12 +61,15 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
     await expect(connectorFlyout.receiveEventsSwitch).not.toBeChecked();
     await expect(connectorFlyout.runActionsSwitch).toBeChecked();
     await expect(connectorFlyout.outboundSettings).toBeVisible();
+    await expect(connectorFlyout.saveAndTestButton).toBeVisible();
 
     await connectorFlyout.secretsField('username').fill(DATADOG_SECRETS.username);
 
     await connectorFlyout.runActionsSwitch.click();
     await expect(connectorFlyout.runActionsSwitch).not.toBeChecked();
     await expect(connectorFlyout.outboundSettings).toBeHidden();
+    await expect(connectorFlyout.saveAndTestButton).toBeHidden();
+    await expect(connectorFlyout.createSaveButton).toBeVisible();
 
     await connectorFlyout.runActionsSwitch.click();
     await expect(connectorFlyout.runActionsSwitch).toBeChecked();
@@ -175,9 +178,11 @@ test.describe('Dual connector form', { tag: tags.stateful.classic }, () => {
     await expect(connectorFlyout.runActionsSwitch).not.toBeChecked();
     await expect(connectorFlyout.outboundSettings).toBeHidden();
     await expect(connectorFlyout.editSecretsCallout).toBeHidden();
+    await expect(connectorFlyout.testTab).toBeHidden();
 
     await connectorFlyout.runActionsSwitch.click();
     await expect(connectorFlyout.outboundSettings).toBeVisible();
+    await expect(connectorFlyout.testTab).toBeVisible();
     await expect(connectorFlyout.editSecretsCallout).toBeVisible();
     await expect(connectorFlyout.authTypeCard('none')).toHaveCount(0);
     await connectorFlyout.secretsField('username').fill(DATADOG_SECRETS.username);

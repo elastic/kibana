@@ -60,6 +60,7 @@ describe('ConnectorForm', () => {
       isSubmitting: false,
       isValid: undefined,
       preSubmitValidator: null,
+      runActionsOff: false,
       submit: expect.anything(),
     });
     expect(onFormModifiedChange).toHaveBeenCalledWith(false);
@@ -116,6 +117,7 @@ describe('ConnectorForm', () => {
         isSubmitting: false,
         isValid: false,
         preSubmitValidator: expect.anything(),
+        runActionsOff: false,
         submit: expect.anything(),
       });
     });
@@ -142,6 +144,7 @@ describe('ConnectorForm', () => {
         isSubmitting: false,
         isValid: undefined,
         preSubmitValidator: expect.anything(),
+        runActionsOff: false,
         submit: expect.anything(),
       });
     });
@@ -197,5 +200,29 @@ describe('ConnectorForm', () => {
     });
 
     expect(formSerializer).toHaveBeenCalled();
+  });
+
+  it('reports Run actions off so flyouts can hide outbound test controls', async () => {
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.datadog',
+      actionConnectorFields: lazy(() => import('./connector_mock')),
+    });
+
+    appMockRenderer.render(
+      <ConnectorForm
+        actionTypeModel={actionTypeModel}
+        isEdit={false}
+        connector={{ ...connector, actionTypeId: '.datadog' }}
+        onChange={onChange}
+        onFormModifiedChange={onFormModifiedChange}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('outbound-actions-enabled-switch'));
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ runActionsOff: true }));
+    });
   });
 });

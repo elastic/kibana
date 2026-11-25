@@ -30,6 +30,8 @@ export class ConnectorFlyout {
   readonly outboundSettings;
   readonly editSecretsCallout;
   readonly createSaveButton;
+  readonly saveAndTestButton;
+  readonly testTab;
   readonly editSaveButton;
   readonly toastTitle;
 
@@ -40,6 +42,8 @@ export class ConnectorFlyout {
     this.outboundSettings = page.testSubj.locator('outbound-settings');
     this.editSecretsCallout = page.testSubj.locator('edit-connector-secrets-callout');
     this.createSaveButton = page.testSubj.locator('create-connector-flyout-save-btn');
+    this.saveAndTestButton = page.testSubj.locator('create-connector-flyout-save-test-btn');
+    this.testTab = page.testSubj.locator('testConnectorTab');
     this.editSaveButton = page.testSubj.locator('edit-connector-flyout-save-btn');
     this.toastTitle = page.testSubj.locator('euiToastHeader__title');
   }
