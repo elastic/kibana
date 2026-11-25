@@ -1281,6 +1281,40 @@ describe('triage match decisions step in on mode', () => {
         expect(output).toEqual(expect.objectContaining({ close_failures: 1, notes_missing: 1 }));
       });
 
+      it('counts a closed alert the lookup cannot find, because it lost the decision tag, as missing a note', async () => {
+        const { run, callKibanaApi, notes } = setup({
+          mode: 'on',
+          movedOn: ['b'],
+          alerts: [
+            ['a', source('C:\\x.exe')],
+            ['b', source('C:\\x.exe')],
+          ],
+          decisions: approved('C:\\x.exe'),
+        });
+        failingRelease(callKibanaApi);
+        const inner = callKibanaApi.getMockImplementation()!;
+        callKibanaApi.mockImplementation(
+          async (params: { path: string; body?: Record<string, any> }) => {
+            const filter = params.body?.query?.bool?.filter;
+            // `a` was closed, but its decision tag is gone, so the lookup does not find it.
+            if (
+              params.path.endsWith('/signals/search') &&
+              filter?.[1]?.term?.['kibana.alert.workflow_status'] === 'closed'
+            ) {
+              return { body: { hits: { hits: [] } } };
+            }
+            return inner(params);
+          }
+        );
+
+        const { output } = await run();
+
+        expect(notes()).toEqual([]);
+        expect(output).toEqual(
+          expect.objectContaining({ closed: 1, close_failures: 1, notes_missing: 1 })
+        );
+      });
+
       it('counts every alert of the chunk as missing a note when the close itself threw and nothing is known', async () => {
         const { run, callKibanaApi, notes } = setup({
           mode: 'on',

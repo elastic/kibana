@@ -344,11 +344,14 @@ export const createDecisionSweep = ({
     const { unknownIds, unknownReported } = progress;
     if (unknownIds.length === 0) return [];
     try {
-      return await findAlertsClosedAsFalsePositive(
+      const found = await findAlertsClosedAsFalsePositive(
         contextManager,
         unknownIds,
         closedByDecisionTag(id)
       );
+      // A closed alert that lost the decision tag is not found, but the route counted its close.
+      totals.notes_missing += Math.max(0, (unknownReported ?? 0) - found.length);
+      return found;
     } catch (error) {
       totals.notes_missing += unknownReported ?? unknownIds.length;
       warn('Could not read which alerts of a failed close were closed; they get no note', error);
