@@ -26,6 +26,7 @@ export const getBoostTestData = (namespace: string) => {
   const hiddenIndex = `${namespace}-boost-hidden`;
   const priorityIndex = `${namespace}-priority-orders`;
   const dataStream = `${namespace}-stream-default`;
+  const deletableDataStream = `${namespace}-stream-deletable`;
   // The project's `logs-*-*` template can't be used here, so the data stream has its own.
   const dataStreamTemplate = `${namespace}-stream`;
   // In hours, since Elasticsearch returns a retention in the unit it was set in.
@@ -89,7 +90,9 @@ export const getBoostTestData = (namespace: string) => {
         { ignore: [404] }
       );
     }
-    await esClient.indices.deleteDataStream({ name: dataStream }, { ignore: [404] });
+    for (const name of [dataStream, deletableDataStream]) {
+      await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+    }
     await esClient.indices.deleteIndexTemplate({ name: dataStreamTemplate }, { ignore: [404] });
     // Without `ignore_unavailable`, one missing index leaves the others in place.
     await esClient.indices.delete(
@@ -141,6 +144,7 @@ export const getBoostTestData = (namespace: string) => {
     hiddenIndex,
     priorityIndex,
     dataStream,
+    deletableDataStream,
     dataStreamRetention,
     /** Removes anything a previous run left, then creates the data. */
     setUp: async (esClient: EsClient) => {
