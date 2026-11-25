@@ -5,15 +5,13 @@
  * 2.0.
  */
 
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { inject, injectable } from 'inversify';
 import type { ExternalSourceSavedObjectAttributes } from '../../../saved_objects';
-import {
-  CONNECTOR_SAVED_OBJECT_TYPE,
-  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
-} from '../../../saved_objects';
+import { EXTERNAL_SOURCE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { SpacesService } from '../spaces_service/spaces_service';
 import { ExternalSourceSavedObjectsClientToken } from './tokens';
 import type {
@@ -118,9 +116,7 @@ export class ExternalSourceSavedObjectService implements ExternalSourceSavedObje
       ...(search
         ? { search, searchFields: SEARCH_FIELDS, defaultSearchOperator: 'AND' as const }
         : {}),
-      ...(connectorId
-        ? { hasReference: { type: CONNECTOR_SAVED_OBJECT_TYPE, id: connectorId } }
-        : {}),
+      ...(connectorId ? { hasReference: { type: ACTION_SAVED_OBJECT_TYPE, id: connectorId } } : {}),
       ...(type
         ? {
             filter: nodeBuilder.is(

@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-/**
- * Saved object type of a connector. Owned by the actions plugin, which this plugin does not depend
- * on, so the value is repeated here.
- */
-export const CONNECTOR_SAVED_OBJECT_TYPE = 'action';
-
 /** Name of the external source's saved object reference to its connector. */
 export const EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME = 'connector';

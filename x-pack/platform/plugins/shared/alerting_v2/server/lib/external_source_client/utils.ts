@@ -10,9 +10,9 @@ import type {
   FindExternalSourcesSortField,
   ExternalSourceResponse,
 } from '@kbn/alerting-v2-schemas';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import {
-  CONNECTOR_SAVED_OBJECT_TYPE,
   EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME,
   type ExternalSourceSavedObjectAttributes,
 } from '../../saved_objects';
@@ -25,7 +25,7 @@ export type ExternalSourceData = Omit<CreateExternalSourceData, 'id'>;
 export const buildExternalSourceReferences = (connectorId: string): SavedObjectReference[] => [
   {
     name: EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME,
-    type: CONNECTOR_SAVED_OBJECT_TYPE,
+    type: ACTION_SAVED_OBJECT_TYPE,
     id: connectorId,
   },
 ];
@@ -36,7 +36,7 @@ export const getConnectorIdFromReferences = (
 ): string | undefined =>
   references.find(
     ({ name, type }) =>
-      name === EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME && type === CONNECTOR_SAVED_OBJECT_TYPE
+      name === EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME && type === ACTION_SAVED_OBJECT_TYPE
   )?.id;
 
 const toStoredMetadata = (

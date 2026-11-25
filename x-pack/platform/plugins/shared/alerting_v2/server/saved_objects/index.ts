@@ -183,8 +183,5 @@ export function registerSavedObjects({
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 export type { ExternalSourceSavedObjectAttributes } from './schemas/external_source_attributes';
-export {
-  CONNECTOR_SAVED_OBJECT_TYPE,
-  EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME,
-} from './external_source_references';
+export { EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NAME } from './external_source_references';
 export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
