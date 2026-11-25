@@ -12,8 +12,58 @@ import { CONNECTOR_SPEC_VERSION_MAX_LENGTH } from '../../common';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getConnectorType } from '../fixtures';
 import type { ActionType } from '../types';
-import { resolveConnectorSpecVersion } from './resolve_connector_spec_version';
+import { parseSpecVersion, resolveConnectorSpecVersion } from './resolve_connector_spec_version';
 import { validateConfig, validateSecrets } from './validate_with_schema';
+
+describe('parseSpecVersion', () => {
+  test.each([
+    ['1', { major: 1 }],
+    ['12', { major: 12 }],
+    [String(Number.MAX_SAFE_INTEGER), { major: Number.MAX_SAFE_INTEGER }],
+    ['1.0', { major: 1, minor: 0 }],
+    ['1.3', { major: 1, minor: 3 }],
+    ['2.10', { major: 2, minor: 10 }],
+    [
+      `1.${'9'.repeat(CONNECTOR_SPEC_VERSION_MAX_LENGTH - 2)}`,
+      { major: 1, minor: Number('9'.repeat(CONNECTOR_SPEC_VERSION_MAX_LENGTH - 2)) },
+    ],
+  ])('parses %j as %j', (value, expected) => {
+    expect(parseSpecVersion(value)).toEqual(expected);
+  });
+
+  test.each([
+    '',
+    'latest',
+    '*',
+    '0',
+    '0.1',
+    '^1',
+    '1.x',
+    '1.3.0',
+    '1..3',
+    '.1',
+    '1.3-beta',
+    '1.3+build',
+    '01',
+    '1.03',
+    '-1',
+    '1.-1',
+    '+1',
+    '1.',
+    '1e3',
+    '1.1e1',
+    '0x1',
+    'Infinity',
+    ' 1',
+    '1 ',
+    '1\n',
+    '1\r\n',
+    String(Number.MAX_SAFE_INTEGER + 1),
+    `1.${'9'.repeat(CONNECTOR_SPEC_VERSION_MAX_LENGTH - 1)}`,
+  ])('rejects %j', (value) => {
+    expect(parseSpecVersion(value)).toBeUndefined();
+  });
+});
 
 describe('resolveConnectorSpecVersion', () => {
   const firstSpec: ConnectorSpec = {
@@ -109,45 +159,13 @@ describe('resolveConnectorSpecVersion', () => {
     expect(resolvedSpecVersion).toBe('1.10');
   });
 
-  test('accepts an exact version at the maximum length', () => {
-    const specVersion = `1.${'9'.repeat(CONNECTOR_SPEC_VERSION_MAX_LENGTH - 2)}`;
-    specs.set(specVersion, firstSpec);
-
-    const { resolvedSpecVersion } = resolveConnectorSpecVersion({
-      actionType,
-      specVersion,
-      configurationUtilities,
-    });
-
-    expect(resolvedSpecVersion).toBe(specVersion);
-  });
-
-  test.each([
-    '',
-    'latest',
-    '*',
-    '0',
-    '0.1',
-    '^1',
-    '1.x',
-    '1.3.0',
-    '1.3-beta',
-    '1.3+build',
-    '01',
-    '1.03',
-    '-1',
-    '1.',
-    ' 1',
-    '1 ',
-    '1\n',
-    '1\r\n',
-    `1.${'9'.repeat(CONNECTOR_SPEC_VERSION_MAX_LENGTH - 1)}`,
-  ])('rejects invalid selector %j with a bad request', (specVersion) => {
+  test('rejects an invalid selector with a bad request naming it', () => {
     expect(() =>
-      resolveConnectorSpecVersion({ actionType, specVersion, configurationUtilities })
+      resolveConnectorSpecVersion({ actionType, specVersion: '1.x', configurationUtilities })
     ).toThrow(
       expect.objectContaining({
-        message: expect.stringContaining('Invalid spec_version'),
+        message:
+          'Invalid spec_version "1.x". Use a major version such as "1" or an exact version such as "1.3".',
         output: expect.objectContaining({ statusCode: 400 }),
       })
     );

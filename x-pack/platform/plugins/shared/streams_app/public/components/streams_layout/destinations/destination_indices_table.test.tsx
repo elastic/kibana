@@ -52,6 +52,82 @@ const renderWithoutIndices = ({
     </I18nProvider>
   );
 
+describe('DestinationIndicesTable with indices', () => {
+  it('shows what the destination wrote to every index, regular ones too, and index stats only for data streams', () => {
+    render(
+      <I18nProvider>
+        <DestinationIndicesTable
+          destinationId="es-logs"
+          indices={[
+            { name: 'logs-regular', documents: 1234, ingestion_rate: 2, is_data_stream: false },
+          ]}
+          indicesStatus="ready"
+          onShowDestinationDetail={jest.fn()}
+          onHideDestinationDetail={jest.fn()}
+          hasConnectedSource
+        />
+      </I18nProvider>
+    );
+
+    const row = screen.getByRole('row', { name: /logs-regular/ });
+    expect(row).toHaveTextContent('1,234');
+    expect(screen.getByTestId('streamsDestinationIndexIngestion')).toHaveTextContent('2.0 docs/s');
+    expect(screen.getAllByTestId('streamsDestinationIndexDataStreamOnly').length).toBeGreaterThan(
+      0
+    );
+  });
+
+  it.each([
+    ['a rate too small to show', 0.001, '<0.01 docs/s'],
+    ['no writes per second', 0, '0 docs/s'],
+    ['a rate below 1', 0.5, '0.50 docs/s'],
+  ])('shows %s', (_description, ingestionRate, expected) => {
+    render(
+      <I18nProvider>
+        <DestinationIndicesTable
+          destinationId="es-logs"
+          indices={[
+            {
+              name: 'logs-regular',
+              documents: 3,
+              ingestion_rate: ingestionRate,
+              is_data_stream: false,
+            },
+          ]}
+          indicesStatus="ready"
+          onShowDestinationDetail={jest.fn()}
+          onHideDestinationDetail={jest.fn()}
+          hasConnectedSource
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('streamsDestinationIndexIngestion')).toHaveTextContent(expected);
+  });
+
+  it('keeps the rows while indices reload, and shows what they wrote as loading', () => {
+    render(
+      <I18nProvider>
+        <DestinationIndicesTable
+          destinationId="es-logs"
+          indices={[
+            { name: 'logs-regular', documents: 1234, ingestion_rate: 2, is_data_stream: false },
+          ]}
+          indicesStatus="loading"
+          onShowDestinationDetail={jest.fn()}
+          onHideDestinationDetail={jest.fn()}
+          hasConnectedSource
+        />
+      </I18nProvider>
+    );
+
+    const row = screen.getByRole('row', { name: /logs-regular/ });
+    expect(row).not.toHaveTextContent('1,234');
+    expect(screen.queryByTestId('streamsDestinationIndexIngestion')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('streamsDestinationIndexWritesLoading')).toHaveLength(2);
+  });
+});
+
 describe('DestinationIndicesTable without indices', () => {
   beforeEach(() => {
     mockRouterLink.mockClear();
@@ -59,11 +135,11 @@ describe('DestinationIndicesTable without indices', () => {
     mockCanManage.mockReturnValue(true);
   });
 
-  it('keeps the write scope text when a source is connected', () => {
+  it('says nothing was written in the time range when a source is connected', () => {
     renderWithoutIndices({ hasConnectedSource: true, showMapLink: true });
 
     expect(screen.getByTestId('streamsDestinationIndicesEmpty')).toHaveTextContent(
-      "No indices match this destination's write scope yet."
+      "This destination didn't write to any indices in the selected time range."
     );
     expect(screen.queryByTestId('streamsDestinationIndicesMapLink')).not.toBeInTheDocument();
   });

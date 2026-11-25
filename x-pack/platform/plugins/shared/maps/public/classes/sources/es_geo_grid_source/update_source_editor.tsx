@@ -20,7 +20,7 @@ import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { isMetricCountable } from '../../util/is_metric_countable';
 import { RenderAsSelect } from './render_as_select';
-import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { AggDescriptor, ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 import { isMvt } from './is_mvt';
@@ -30,7 +30,7 @@ interface Props {
   currentLayerType?: string;
   geoFieldName: string;
   indexPatternId: string;
-  onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
+  onChange: (...args: OnSourceChangeArgs<ESGeoGridSourceDescriptor>[]) => Promise<void>;
   metrics: AggDescriptor[];
   renderAs: RENDER_AS;
   resolution: GRID_RESOLUTION;
