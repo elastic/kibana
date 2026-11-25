@@ -44,7 +44,12 @@ import {
   NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT,
   type DecisionTreeCausalCheckEvent,
 } from './decision_tree_causal_check_event';
-import { NIGHTSHIFT_ALERT_OUTCOME_EVENT, type AlertOutcomeEvent } from './alert_outcome_events';
+import {
+  NIGHTSHIFT_ALERT_OUTCOME_CHECKS_EVENT,
+  NIGHTSHIFT_ALERT_OUTCOME_EVENT,
+  type AlertOutcomeChecksEvent,
+  type AlertOutcomeEvent,
+} from './alert_outcome_events';
 
 export class NightshiftTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
@@ -91,6 +96,10 @@ export class NightshiftTelemetryClient {
 
   reportAlertOutcome(event: AlertOutcomeEvent): void {
     this.report(NIGHTSHIFT_ALERT_OUTCOME_EVENT, event);
+  }
+
+  reportAlertOutcomeChecks(event: AlertOutcomeChecksEvent): void {
+    this.report(NIGHTSHIFT_ALERT_OUTCOME_CHECKS_EVENT, event);
   }
 
   private report(eventType: string, event: object): void {

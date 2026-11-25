@@ -91,16 +91,62 @@ export class AlertOutcomeTrackingStore {
     return hit;
   }
 
+  /** Tracking records whose next check is due, oldest first, so a cut-short run resumes fairly. */
+  findDue({
+    spaceId,
+    now,
+    size,
+  }: {
+    spaceId: string;
+    now: string;
+    size: number;
+  }): Promise<StoredTrackingRecord[]> {
+    return this.search(
+      spaceId,
+      [{ term: { state: 'tracking' } }, { range: { next_check_at: { lte: now } } }],
+      size,
+      [{ next_check_at: { order: 'asc' } }]
+    );
+  }
+
+  /**
+   * Applies `patch` only if nobody wrote the record since it was read. Resolves to the new stored
+   * record, or undefined when another writer got there first.
+   */
+  async update(
+    stored: StoredTrackingRecord,
+    patch: Partial<TrackingRecord>
+  ): Promise<StoredTrackingRecord | undefined> {
+    const record: TrackingRecord = { ...stored.record, ...patch };
+    try {
+      const response = await this.adapter.getClient().index({
+        id: record.investigation_id,
+        document: record,
+        if_seq_no: stored.seqNo,
+        if_primary_term: stored.primaryTerm,
+      });
+      if (response._seq_no === undefined || response._primary_term === undefined) {
+        throw new Error('The tracking record write returned no sequence number');
+      }
+      return { record, seqNo: response._seq_no, primaryTerm: response._primary_term };
+    } catch (error) {
+      if (isConflict(error)) return undefined;
+      throw error;
+    }
+  }
+
   private async search(
     spaceId: string,
     filter: estypes.QueryDslQueryContainer[],
-    size: number
+    size: number,
+    sort?: estypes.Sort
   ): Promise<StoredTrackingRecord[]> {
     const response = await this.adapter.getClient().search({
       track_total_hits: false,
       size,
       seq_no_primary_term: true,
       query: { bool: { filter: [{ term: { space_id: spaceId } }, ...filter] } },
+      ...(sort ? { sort } : {}),
     });
     return response.hits.hits.flatMap((hit) =>
       hit._source && hit._seq_no !== undefined && hit._primary_term !== undefined

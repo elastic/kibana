@@ -11,12 +11,14 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { NIGHTSHIFT_ALERT_OUTCOMES_USAGE_ID } from '@kbn/nightshift-shared';
+import { findInvestigationConversations } from '../client/investigation_conversation';
 import type { RawRoundStep } from '../investigation_round';
 import {
   createInvestigationBackgroundTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
 import type { NightshiftTelemetryClient } from '../telemetry';
+import type { PollAlertOutcomesDeps } from './poll';
 import type { TrackInvestigationDeps } from './track_investigation';
 import { AlertOutcomeTrackingStore } from './tracking_store';
 
@@ -39,6 +41,8 @@ export interface AlertOutcomeServices {
     request: KibanaRequest,
     options: { investigationId: string; roundConnectorId?: string }
   ) => Promise<TrackInvestigationDeps>;
+  /** Deps of the poller, scoped to the failure sweep's request. */
+  getPollDeps: (request: KibanaRequest) => Promise<PollAlertOutcomesDeps>;
 }
 
 /** Builds alert outcome dependencies lazily, since they read plugin start contracts. */
@@ -104,6 +108,28 @@ export const createAlertOutcomeServices = (
               logger: deps.logger,
             })
           )?.inferenceClient,
+        telemetry: deps.telemetry,
+        logger: deps.logger,
+      };
+    },
+
+    async getPollDeps(request) {
+      const { actions, agentBuilder } = requireStart();
+      const [actionsClient, conversations] = await Promise.all([
+        actions.getActionsClientWithRequest(request),
+        agentBuilder.conversations.getScopedClient({ request }),
+      ]);
+      return {
+        trackingStore: getTrackingStore(),
+        isEnabled: deps.isEnabled,
+        adapterContext: { actionsClient },
+        getInvestigationStatuses: async (ids) =>
+          new Map(
+            (await findInvestigationConversations(conversations, ids)).map(({ id, status }) => [
+              id,
+              status,
+            ])
+          ),
         telemetry: deps.telemetry,
         logger: deps.logger,
       };

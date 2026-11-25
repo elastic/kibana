@@ -6,7 +6,13 @@
  */
 
 import type { ActionsClient } from '../../tools/sandbox_bash/agent_connectors';
-import type { AlertOutcomeSource, IdentityProposal, ResolveResult } from '../types';
+import type {
+  AlertOutcomeSource,
+  AlertRef,
+  CheckResult,
+  IdentityProposal,
+  ResolveResult,
+} from '../types';
 
 export interface AdapterContext {
   actionsClient: Pick<ActionsClient, 'get' | 'execute'>;
@@ -21,4 +27,6 @@ export interface ProviderAdapter {
     timing: { postReceivedAt: string },
     context: AdapterContext
   ): Promise<ResolveResult>;
+  /** Checks refs in as few source calls as possible; results are keyed by `alert_uuid`. */
+  check(refs: AlertRef[], context: AdapterContext, now: number): Promise<Map<string, CheckResult>>;
 }
