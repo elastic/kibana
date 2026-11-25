@@ -420,3 +420,81 @@ describe('createNlToEsqlGraph — execute_query node', () => {
     });
   });
 });
+
+describe('createNlToEsqlGraph — source pin', () => {
+  const buildPinnedGraph = (
+    chatModel: ReturnType<typeof createMockModel>['chatModel'],
+    sourcePin: { sourceCommand?: string; projectRouting?: string } = {}
+  ) =>
+    createNlToEsqlGraph({
+      model: { chatModel } as unknown as ScopedModel,
+      esClient: {} as ElasticsearchClient,
+      docBase: createDocBase() as any,
+      documentation: {
+        getDocContent: jest.fn().mockReturnValue(''),
+      } as unknown as EsqlLoadedDocumentation,
+      esqlCallbacks: {} as any,
+      sourcePin,
+    });
+
+  beforeEach(() => {
+    mockResolveResource.mockResolvedValue(fakeResource);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('fails validation and retries when the query reads another source', async () => {
+    const { chatModel, generateModelInvoke } = createMockModel();
+    generateModelInvoke
+      .mockResolvedValueOnce({ content: '```esql\nFROM logz-* | LIMIT 10\n```' })
+      .mockResolvedValueOnce({ content: GENERATE_RESPONSE });
+    const graph = buildPinnedGraph(chatModel);
+
+    const result = await graph.invoke({ ...BASE_INPUT, maxRetries: 2 }, { recursionLimit: 25 });
+
+    expect(generateModelInvoke).toHaveBeenCalledTimes(2);
+    expect(result.query).toContain('FROM logs-test');
+    expect(result.error).toBeFalsy();
+  });
+
+  it('reports the pin error when the retries run out', async () => {
+    const { chatModel } = createMockModel('```esql\nFROM logz-* | LIMIT 10\n```');
+    const graph = buildPinnedGraph(chatModel);
+
+    const result = await graph.invoke({ ...BASE_INPUT, maxRetries: 1 }, { recursionLimit: 25 });
+
+    expect(result.error).toContain('"logz-*"');
+  });
+
+  it('enforces a pinned source command', async () => {
+    const { chatModel } = createMockModel();
+    const graph = buildPinnedGraph(chatModel, { sourceCommand: 'TS' });
+
+    const result = await graph.invoke({ ...BASE_INPUT, maxRetries: 1 }, { recursionLimit: 25 });
+
+    expect(result.error).toContain('TS source command');
+  });
+
+  it('resolves the target with the given resolver', async () => {
+    const { chatModel } = createMockModel();
+    const resolveResource = jest.fn().mockResolvedValue(fakeResource);
+    const graph = createNlToEsqlGraph({
+      model: { chatModel } as unknown as ScopedModel,
+      esClient: {} as ElasticsearchClient,
+      docBase: createDocBase() as any,
+      documentation: {
+        getDocContent: jest.fn().mockReturnValue(''),
+      } as unknown as EsqlLoadedDocumentation,
+      esqlCallbacks: {} as any,
+      resolveResource,
+    });
+
+    await graph.invoke(BASE_INPUT, { recursionLimit: 25 });
+
+    expect(mockResolveResource).toHaveBeenCalledWith(
+      expect.objectContaining({ resourceName: 'logs-test', resolve: resolveResource })
+    );
+  });
+});
