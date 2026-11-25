@@ -170,7 +170,8 @@ export interface IndexTemplateFlyoutProps {
 
 export interface DatastreamFlyoutProps {
   datastreamName: string;
-  onClose: () => void;
+  /** `shouldReload` is true once the data stream was edited or deleted. */
+  onClose: (shouldReload?: boolean) => void;
 }
 
 export interface IndexMappingProps {

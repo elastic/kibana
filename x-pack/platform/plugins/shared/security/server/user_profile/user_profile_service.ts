@@ -69,6 +69,17 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
    * @param data Application data to be written (merged with existing data).
    */
   update<D extends UserProfileData>(uid: string, data: D): Promise<void>;
+
+  /**
+   * Resolves the profile ID of the user who created the API key a request carries: a Stack key
+   * through Elasticsearch, and a UIAM key through UIAM. Unlike `getCurrentProfileId`, it reads only
+   * the key, never a session or the user bound to a fake request.
+   * @param request The request that carries the API key.
+   * @returns The profile ID, or `undefined` when the request carries no API key, the key no longer
+   *   authenticates or can't read itself, or no user created it.
+   * @throws When the lookup fails for any other reason.
+   */
+  getApiKeyProfileId(request: KibanaRequest): Promise<string | undefined>;
 }
 
 export interface UserProfileServiceSetupParams {
@@ -171,6 +182,7 @@ export class UserProfileService {
         getCurrentUser
       ),
       bulkGet: this.bulkGet.bind(this, clusterClient),
+      getApiKeyProfileId: this.getApiKeyProfileId.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
     } as UserProfileServiceStartInternal;
@@ -331,7 +343,8 @@ export class UserProfileService {
 
   /**
    * Retrieves the user profile ID from an API key authenticated request. A UIAM API key is resolved through UIAM, which
-   * derives the ID from the key's creator, and any other key by retrieving the API Key itself.
+   * derives the ID from the key's creator, and any other key by retrieving the API Key itself. A failed lookup is logged
+   * and gives no ID.
    * @param clusterClient The cluster client
    * @param request The HTTP request
    * @returns The profile ID if found, and whether it was derived from the creator of a UIAM API key
@@ -340,42 +353,85 @@ export class UserProfileService {
     clusterClient: IClusterClient,
     request: UserProfileGetCurrentParams['request']
   ): Promise<Pick<ResolvedCurrentUserProfileId, 'profileId' | 'profileIdIsDerived'>> {
+    const isUiamApiKey = this.isUiamApiKeyRequest(request);
+    try {
+      return {
+        profileId: await this.getApiKeyProfileId(clusterClient, request),
+        profileIdIsDerived: isUiamApiKey,
+      };
+    } catch (error) {
+      const message = getDetailedErrorMessage(error);
+      this.logger.error(
+        isUiamApiKey
+          ? `Failed to resolve the creator of a UIAM API key for user profile retrieval: ${message}`
+          : `Failed to retrieve API key for user profile retrieval: ${message}`
+      );
+      return {};
+    }
+  }
+
+  /**
+   * See {@link UserProfileServiceStartInternal} for documentation.
+   */
+  private async getApiKeyProfileId(
+    clusterClient: IClusterClient,
+    request: KibanaRequest
+  ): Promise<string | undefined> {
     // Elasticsearch authenticates UIAM API keys but can't look them up (`with_profile_uid`), so
     // those are resolved through UIAM instead.
-    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (this.resolveUiamApiKeyProfileId && authorization && isUiamCredential(authorization)) {
-      return {
-        profileId: await this.resolveUiamApiKeyProfileId(request),
-        profileIdIsDerived: true,
-      };
+    if (this.isUiamApiKeyRequest(request)) {
+      return await this.resolveUiamApiKeyProfileId?.(request);
+    }
+
+    const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+    if (!id) {
+      this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+      return;
     }
 
     try {
-      const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-      if (!id) {
-        this.logger.debug(`Failed to decode API key ID from Authorization header.`);
-        return {};
-      }
-
-      const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
-        with_profile_uid: true,
-        id,
-      });
-
-      if (response.api_keys && response.api_keys.length > 0) {
-        return { profileId: response.api_keys[0].profile_uid };
-      } else {
+      const { api_keys: apiKeys } = await clusterClient
+        .asScoped(request)
+        .asCurrentUser.security.getApiKey({ with_profile_uid: true, id });
+      if (!apiKeys || apiKeys.length === 0) {
         this.logger.debug(
           `No API keys were returned from query, cannot retrieve associated profile id.`
         );
+        return;
       }
+      return apiKeys[0].profile_uid;
     } catch (error) {
-      this.logger.error(
-        `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
-      );
-    }
+      // A key that no longer authenticates, for example because it was invalidated, has no profile.
+      // That is expected for a task that outlives its key, and the task's own calls fail the same way.
+      const statusCode = getErrorStatusCode(error);
+      if (statusCode === 401) {
+        this.logger.debug(`The API key no longer authenticates, cannot retrieve profile id.`);
+        return;
+      }
 
-    return {};
+      // An API key can always read itself, so this is unexpected. The request itself still works,
+      // but without a profile, so it is logged where an operator can see it.
+      if (statusCode === 403 || statusCode === 404) {
+        this.logger.warn(
+          `API key cannot read itself to retrieve its profile id: ${getDetailedErrorMessage(error)}`
+        );
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Whether a request carries a UIAM API key that UIAM can resolve.
+   */
+  private isUiamApiKeyRequest(request: KibanaRequest) {
+    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+    return (
+      !!this.resolveUiamApiKeyProfileId &&
+      !!authorization &&
+      authorization.scheme.toLowerCase() === 'apikey' &&
+      isUiamCredential(authorization)
+    );
   }
 
   private recordGetCurrentSuccess(params: GetCurrentTelemetry) {

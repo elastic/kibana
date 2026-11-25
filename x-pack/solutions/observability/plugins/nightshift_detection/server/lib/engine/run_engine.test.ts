@@ -7,13 +7,14 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { AvailabilityUnavailableReason } from '../availability/availability_service';
+import type { AvailabilityUnavailableReason } from '../../../common/tick';
 import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { InMemorySignalStore } from '../../test_utils/in_memory_signal_store';
 import { InMemorySavedObjectsRepository } from '../../test_utils/in_memory_saved_objects_repository';
 import { createTestStrategy, TEST_STRATEGY_ID } from '../../test_utils/test_strategy';
+import type { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { EngineRunner, RUN_BUDGET_MS } from './run_engine';
 import type { SpaceRunLock } from './space_run_lock';
 
@@ -67,7 +68,10 @@ function createRunner({
     signals,
     { list: async () => [] },
     elasticsearchServiceMock.createElasticsearchClient(),
-    loggingSystemMock.createLogger()
+    { listQueries: async () => [], listFeatures: async () => [] },
+    { listManaged: async () => [], readRows: async () => [] } as unknown as ManagedRuleReader,
+    loggingSystemMock.createLogger(),
+    undefined
   );
 
   return { runner, state, signals };

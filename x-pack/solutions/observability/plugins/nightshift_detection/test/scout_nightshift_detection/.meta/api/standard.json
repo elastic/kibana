@@ -1,5 +1,5 @@
 {
-  "sha1": "6cbf3d153a41b50c61cdbd5c2008c95e9e841a58",
+  "sha1": "28922a026161060b638e2bd9b36337f2c1252925",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,6 +18,54 @@
         "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "0d71ea9d8ce7c23-44db3bd16ada2c7",
+      "title": "POST /internal/nightshift/detection/_reconcile the space setup installs and turns on the reconcile workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/reconcile.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d71ea9d8ce7c23-aceea886f65222e",
+      "title": "POST /internal/nightshift/detection/_reconcile deletes a managed rule no strategy wants, as the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/reconcile.spec.ts",
+        "line": 108,
+        "column": 44
+      }
+    },
+    {
+      "id": "0d71ea9d8ce7c23-040e45b6a116c2a",
+      "title": "POST /internal/nightshift/detection/_reconcile a source change reconciles the space through the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/reconcile.spec.ts",
+        "line": 130,
+        "column": 61
       }
     },
     {

@@ -104,6 +104,7 @@ describe('relaySendMessage', () => {
       channel: CHANNEL_ID,
       ts: '1700.0001',
       timestamp: '1700.0001',
+      workspace: 'team-A',
     });
     expect(trigger).toHaveBeenCalledWith({
       tenantKey: 'team-A',
@@ -127,6 +128,7 @@ describe('relaySendMessage', () => {
       channel: CHANNEL_ID,
       ts: '1700.0003',
       timestamp: '1700.0003',
+      workspace: 'team-A',
     });
     expect(trigger).toHaveBeenCalledWith({
       tenantKey: 'team-A',
@@ -148,6 +150,7 @@ describe('relaySendMessage', () => {
       channel: CHANNEL_ID,
       ts: '1700.0001',
       timestamp: '1700.0001',
+      workspace: 'team-A',
       externalConversationId: `slack:team-A:${CHANNEL_ID}:1700.0001`,
     });
   });
