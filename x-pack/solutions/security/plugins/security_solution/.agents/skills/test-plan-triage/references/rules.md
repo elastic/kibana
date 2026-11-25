@@ -1,6 +1,6 @@
 # Decision rules
 
-Decide on the issue passed in (the `target` in the `context` JSON). Use its title, type, labels, body and comments. If it has sub-issues, decide on the whole: its body plus the titles, types and labels in `descendants`.
+Decide on the issue passed in (the `target` in the `context` JSON). Use its title, type, labels, body and comments. If it has sub-issues, decide on the whole: its body plus the titles, types and labels in `descendants`. Descendants have no body.
 
 **Cut text.** `context` cuts long text and says so: `body_truncated` on the target, on a comment or on an ancestor, `comments_truncated` when older comments are missing, and `descendants_truncated` when the sub-issue tree is cut. Decide with what you can read. Only when text cut from the target itself (its body or its comments) leaves the decision open, for example a comment that announces a change of scope and is cut before it says what changed, the decision is A4: quote the last words before the cut and ask what the rest says.
 
@@ -9,7 +9,7 @@ Apply the rules **in this order** and stop at the first one that matches. Quote 
 | Order | ID | Matches when | Decision |
 |---|---|---|---|
 | 1 | N1 | It is a bug: type `Bug`, a `bug` label, `[Bug]` in the title, or a body that reports broken behavior (steps, current vs expected) | No |
-| 2 | N3 | The issue is itself the testing work: "Test plan for …", "Create test plan", upgrade testing, a manual test pass | No |
+| 2 | N3 | The issue is itself the testing work: "Test plan for …", "Create test plan", upgrade testing, a manual test pass | No. If it has ancestors, suggest a level with `hierarchy.md`. |
 | 3 | N5 | It only adds, flips or removes a feature flag; the behavior behind the flag is tracked elsewhere | No |
 | 4 | N2 | It is not a functionality: refactor, technical debt, telemetry, CI, automated test coverage (Scout, Cypress, Jest), cleanup, dependency bump, CODEOWNERS, docs or a docs request, research, spike, "discuss", design-only work | No |
 | 5 | A5 | The issue is itself an umbrella, with the signals in `hierarchy.md` (a bucket title such as "Meta Task" or "roadmap", type `Initiative`, or sub-issues that are different functionalities) | Need your input: say a plan belongs to one functionality, list the sub-issues that look like one, and ask which to triage |
@@ -40,7 +40,7 @@ Apply the rules **in this order** and stop at the first one that matches. Quote 
 |---|---|---|
 | New row action that opens a panel, runs a workflow and shows a toast; 4 ACs | S1 | Yes |
 | Bug report with steps to reproduce | N1 | No |
-| "Test plan for the native Dashboards migration" sub-issue | N3 | No |
+| "Test plan for the native Dashboards migration" sub-issue | N3 | No, suggest an ancestor |
 | Title only, empty body ("Dashboard Studio 2.0 support") | A1 | Ask |
 | Title only, empty body ("Bump the charts library") | N2 | No |
 | "Feature flag for the native Dashboards migration" | N5 | No |

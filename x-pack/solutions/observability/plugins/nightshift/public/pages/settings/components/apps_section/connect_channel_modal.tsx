@@ -21,6 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KbnDangerCallout, type KbnCalloutProps } from '@kbn/ui-callout';
 import { parseSlackChannelInput } from '@kbn/nightshift-investigations-plugin/common';
 import {
@@ -28,6 +29,7 @@ import {
   useBindChannel,
   type BindFailure,
 } from '../../../../data/relay_apps/use_relay_app_bindings';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 
 const failureCopy = ({ reason, message }: BindFailure): string => {
   switch (reason) {
@@ -212,6 +214,10 @@ export function ConnectChannelModal({ onClose, onConnected }: ConnectChannelModa
           isLoading={isLoading}
           onClick={onBind}
           data-test-subj="streamsSlackAppBindChannelButton"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CONNECT_SLACK_CHANNEL,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          })}
         >
           {i18n.translate('xpack.nightshift.settings.apps.slackConnectChannelConfirm', {
             defaultMessage: 'Connect',

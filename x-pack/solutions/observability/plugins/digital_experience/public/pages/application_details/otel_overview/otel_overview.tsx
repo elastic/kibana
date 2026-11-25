@@ -197,27 +197,25 @@ function UsageAndErrorsPanels({
           onRetry={refresh}
         />
       ) : (
-        <EuiFlexGroup gutterSize="m" alignItems="stretch">
-          <EuiFlexItem grow={3}>
-            <TopPagesPanel
-              pages={topPages}
-              isLoading={isLoading}
-              selectedUrls={(filters.pageUrl ?? [])
-                .filter(({ exclude }) => !exclude)
-                .map(({ value }) => value)}
-              onSelectPage={(url) => onSelectFilter('pageUrl', url)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <BreakdownsPanel
-              breakdowns={breakdowns}
-              isLoading={isLoading}
-              sessionsHref={sessionsHref}
-              filters={filters}
-              onSelectFilter={onSelectFilter}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        // Full width each: the pages have a column per metric, and the breakdowns one per list.
+        <>
+          <TopPagesPanel
+            pages={topPages}
+            isLoading={isLoading}
+            selectedUrls={(filters.pageUrl ?? [])
+              .filter(({ exclude }) => !exclude)
+              .map(({ value }) => value)}
+            onSelectPage={(url) => onSelectFilter('pageUrl', url)}
+          />
+          <EuiSpacer size="m" />
+          <BreakdownsPanel
+            breakdowns={breakdowns}
+            isLoading={isLoading}
+            sessionsHref={sessionsHref}
+            filters={filters}
+            onSelectFilter={onSelectFilter}
+          />
+        </>
       )}
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="stretch">
