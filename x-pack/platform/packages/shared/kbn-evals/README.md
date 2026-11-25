@@ -229,56 +229,32 @@ shard, so they show at the top of the build. Logged URLs never include credentia
 
 #### Requiring an evals decision on PRs
 
-A suite can require PR authors to decide whether its evals run when their PR changes code the suite
-depends on. Opt in with `requireDecisionOnPaths` in the suite's
-[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) entry, plus
-`defaultModelGroups` so the run label alone starts a run:
+A suite can make PRs that touch its code decide whether to run its evals. Add
+`requireDecisionOnPaths` and `defaultModelGroups` to its
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) entry:
 
 ```json
 "defaultModelGroups": ["eis/anthropic-claude-5.5-sonnet"],
 "requireDecisionOnPaths": {
   "include": ["x-pack/solutions/my_solution/plugins/my_plugin/server/**"],
-  "exclude": [
-    "**/*.test.ts",
-    "**/__snapshots__/**",
-    "x-pack/solutions/my_solution/plugins/my_plugin/server/routes/**"
-  ]
+  "exclude": ["**/*.test.ts", "x-pack/solutions/my_solution/plugins/my_plugin/server/routes/**"]
 }
 ```
 
-The [`evals-gate`](../../../../../.github/workflows/evals-gate.yml) workflow matches the PR's
-changed files against these globs and posts the `evals gate` commit status. When files match and the
-PR has neither label, the status fails with "Evals decision required" and a comment lists the
-matched files. The comment is removed once the PR has a decision:
+A matching PR gets a failing `evals gate` check until it has `evals:<suite-id>` (run) or
+`evals:skip` (skip every gated suite; doesn't affect `smoke-tests`). A run label counts if it's added
+before the PR's Kibana build finishes; after that, push or comment `/ci`.
 
-- `evals:<suite-id>` runs the suite.
-- `evals:skip` skips every suite that requires a decision. It doesn't affect other suites, such as
-  `smoke-tests`. A skip wins over a run label, but not over a regression already measured on the
-  head commit (see [Regression gate](#regression-gate)).
-
-Include whole plugins and exclude the folders that don't change agent behaviour (routes, telemetry,
-saved objects), rather than listing the folders that do. A new folder, say one holding prompts, is
-then gated by default, and a forgotten exclude costs one extra label instead of a missed
-regression. Config tests fail when an include glob stops matching any tracked file, and when a
-folder exclude covers a prompt file (`*.text`, `*prompt*`, or anything under `instructions/`).
-The weekly runs catch what the globs miss, such as prompts in a new package outside the plugin. `**` doesn't match dot directories or dotfiles (e.g. `server/.agents/` or
-`server/.prompt.md`), so list those with their own glob. Opting in needs no new GitHub labels.
-
-The `nightshift-investigations` entry is a worked example of both fields; its suite README explains
-[which paths it gates and why](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/README.md#pr-evals-gate).
-Owners of agents whose behaviour spans several plugins (for example Agent Builder) are welcome to
-opt in the same way; suites that don't opt in are never flagged. When you opt in, add your suite
-and a few real paths to
-[`evals_gate_scenarios.test.ts`](../../../../../.buildkite/pipelines/evals/evals_gate_scenarios.test.ts),
-which runs the gate against the real config.
-
-The eval trigger step reads the labels again once the PR's Kibana build step finishes, so a run
-label added before then takes effect. A label added after that needs a new push or a `/ci` comment.
+Include whole plugins and exclude only folders that don't change agent behaviour, so new folders are
+gated by default. Config tests fail if an include matches nothing or an exclude hides a prompt file.
+`**` skips dot folders and dotfiles, so list those separately. When you opt in, add a few real paths
+to [`evals_gate_scenarios.test.ts`](../../../../../.buildkite/pipelines/evals/evals_gate_scenarios.test.ts).
+See [Nightshift Investigations](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/README.md#pr-evals-gate)
+for a worked example.
 
 ##### Regression gate
 
-A suite can also block merging when its run regresses. Add `regressionGate`, naming one
-pre-registered dataset and evaluator:
+To also block merging on a regression, add `regressionGate` with one pre-registered metric:
 
 ```json
 "regressionGate": {
@@ -290,24 +266,14 @@ pre-registered dataset and evaluator:
 }
 ```
 
-The comparison against the latest `main` baseline for the suite's first `defaultModelGroups` model
-posts a `kibana-evals/<suite-id>` status, which the `evals gate` reads:
+The run is compared with the latest `main` baseline for the suite's first default model. It blocks
+only if the metric drops by at least `minAbsoluteDrop` with p < `alpha`; fix it or add
+`evals:accept-regression` (`evals:skip` doesn't clear a regression on the same commit). A missing or
+stale baseline, too few examples, or an infra failure counts as inconclusive and never blocks. Other
+evaluators stay advisory.
 
-- **Regression**: the metric got worse by at least `minAbsoluteDrop`, with p < `alpha`. The gate
-  fails until the regression is fixed or the PR gets `evals:accept-regression`. Adding `evals:skip`
-  or removing the run label doesn't clear a regression measured on the PR's head commit. A new
-  push while `evals:skip` is on the PR does: the new head has no verdict, and the suite is skipped.
-- **Pass**: anything else. All other evaluators stay advisory in the comparison comment.
-- **Inconclusive**: no baseline, a baseline older than `maxBaselineAgeDays`, too few paired
-  examples, a PR run with no scores, a failed comparison, or an eval build that finished without a
-  verdict. The gate passes and says the result was not enforced; infra problems never block a PR.
-  A run with no scores can't be told apart from an infra failure, so it doesn't block; a broken
-  agent that still runs scores low and does block.
-
-`models:*` labels add models to a gated suite's run instead of replacing its default model, so they
-can't bypass the gate. A passing verdict from an earlier PR commit is reused when no file under
-`requireDecisionOnPaths` changed since, so unrelated pushes don't re-run the suite. A regression is
-never reused: the next commit re-runs the suite, so a noisy result can clear.
+A passing verdict carries over to later pushes that don't touch the suite's paths, and `models:*`
+labels add to the default model rather than replace it.
 
 #### Per-spec model groups
 
