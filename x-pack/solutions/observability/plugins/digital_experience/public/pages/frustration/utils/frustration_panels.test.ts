@@ -492,6 +492,32 @@ describe('buildFrustrationPanels', () => {
     ]);
   });
 
+  const timeFieldsOf = (sessionSource: FrustrationQueryParams['sessionSource']) =>
+    Object.fromEntries(
+      buildFrustrationPanels({ ...params, sessionSource }, colors)
+        .flatMap(({ panels }) => panels.filter(({ type }) => type === 'lens'))
+        .map(({ id, config }) => [
+          id,
+          textBasedLayers((config as { attributes: LensAttributes }).attributes).map(
+            ({ timeField }) => timeField
+          ),
+        ])
+    );
+
+  it('filters every panel on the time range by @timestamp when it reads the events', () => {
+    Object.values(timeFieldsOf('events')).forEach((timeFields) =>
+      expect(timeFields).toEqual(['@timestamp'])
+    );
+  });
+
+  it('gives the summary panels no time field, so Lens keeps sessions that started before the range', () => {
+    const timeFields = timeFieldsOf('summaries');
+
+    expect(timeFields['frustration-signals-per-session']).toEqual([undefined]);
+    expect(timeFields['frustration-by-device']).toEqual([undefined]);
+    expect(timeFields['frustration-top-actions']).toEqual(['@timestamp']);
+  });
+
   it('keeps the partial time bucket that Lens would drop, only on the time column', () => {
     expect(
       textBasedColumns(attributesOf('frustration-over-time')).map(

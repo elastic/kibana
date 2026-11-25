@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useRef } from 'react';
 import type { SessionsStatus } from '../../../common/sessions';
 import { useSessionsStatus } from '../../application/sessions_status_provider';
 import type { FrustrationSessionSource } from './utils/frustration_esql';
@@ -29,13 +30,20 @@ export const sessionSourceOf = (
     ? 'summaries'
     : 'events';
 
-/** Where the per-session panels read sessions; `undefined` until the sessions status is known. */
+/**
+ * Where the per-session panels read sessions; `undefined` until the sessions status is known. It is
+ * resolved once per `scope` (time range, environment, refresh), as another source remounts the
+ * dashboard: a status that changes while the page is open waits for the next one.
+ */
 export const useFrustrationSessionSource = (
-  rangeStart: number
+  rangeStart: number,
+  scope: string
 ): FrustrationSessionSource | undefined => {
   const { status, error } = useSessionsStatus();
-  if (status) {
-    return sessionSourceOf(status, rangeStart);
+  const resolved = useRef<{ scope: string; source: FrustrationSessionSource }>();
+  const current = status ? sessionSourceOf(status, rangeStart) : error ? 'events' : undefined;
+  if (current && resolved.current?.scope !== scope) {
+    resolved.current = { scope, source: current };
   }
-  return error ? 'events' : undefined;
+  return resolved.current?.source;
 };

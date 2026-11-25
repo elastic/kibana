@@ -47,6 +47,7 @@ import {
   type SessionAttribute,
 } from '../../../common/session_attribute_fields';
 import {
+  NULLIFY_UNMAPPED_FIELDS,
   SOURCE_CSS_SELECTOR_FIELD,
   SOURCE_LOAD_EVENT_END_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
@@ -76,8 +77,6 @@ export interface SummaryQuery {
   params: estypes.EsqlNamedValue[];
 }
 
-// OTel attributes that some index doesn't map read as null instead of failing the query.
-export const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
 const SOURCES = SESSIONS_SOURCE_INDICES.join(', ');
 
 export const texts = (values: readonly string[]): string =>

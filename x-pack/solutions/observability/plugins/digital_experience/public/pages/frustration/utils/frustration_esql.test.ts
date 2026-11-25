@@ -117,7 +117,7 @@ describe('frustration ES|QL', () => {
         const query = build(summaries);
         expect(query).toContain(`FROM ${SESSIONS_INDEX_PATTERN}\n`);
         expect(query).toContain('service.name == "media-portal-web"');
-        expect(query).toContain('start_time <= ?_tend AND end_time >= ?_tstart');
+        expect(query).toContain('TO_DATETIME(start_time) <= ?_tend AND end_time >= ?_tstart');
         expect(query).not.toContain(OTEL_LOGS_INDEX);
         expect(query).not.toContain('COUNT_DISTINCT');
       }
@@ -264,9 +264,9 @@ describe('frustration ES|QL', () => {
       const query = frustratedSessionsQuery(params);
       expect(query).toContain(`${SOURCE_SERVICE_NAME_FIELD} == "media-portal-web"`);
       expect(query).toContain(
-        `frustrated = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${SOURCE_EVENT_NAME_FIELD} IN (`
+        `frustrated = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}, 40000) WHERE ${SOURCE_EVENT_NAME_FIELD} IN (`
       );
-      expect(query).toContain(`sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})`);
+      expect(query).toContain(`sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}, 40000)`);
     });
 
     it('guards the share against no sessions and divides as decimals', () => {
@@ -289,14 +289,14 @@ describe('frustration ES|QL', () => {
     it('counts the sessions with a signal of the given types among all sessions', () => {
       const query = frustratedSessionsQuery(params, [EVENT_RAGE_CLICK]);
       expect(query).toContain(
-        `frustrated = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${SOURCE_EVENT_NAME_FIELD} IN ("${EVENT_RAGE_CLICK}"),`
+        `frustrated = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}, 40000) WHERE ${SOURCE_EVENT_NAME_FIELD} IN ("${EVENT_RAGE_CLICK}"),`
       );
-      expect(query).toContain(`sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})\n`);
+      expect(query).toContain(`sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}, 40000)\n`);
     });
   });
 
   describe('signalsPerSessionQuery', () => {
-    const sessions = `sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})\n`;
+    const sessions = `sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}, 40000)\n`;
 
     it('divides the signals of sessions with an id by those sessions, as decimals', () => {
       const query = signalsPerSessionQuery(params);
@@ -439,7 +439,7 @@ describe('frustration ES|QL', () => {
         const query = build(params);
         expect(statsOf(query)).toHaveLength(1);
         expect(query).not.toContain('INLINE STATS');
-        expect(query).toContain(`sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})`);
+        expect(query).toContain(`sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}, 40000)`);
         expect(query).toContain(`BY ${column}`);
         // Values without signals stay, as a baseline
         expect(query).not.toContain('| WHERE signals');
@@ -472,7 +472,7 @@ describe('frustration ES|QL', () => {
       expect(query).not.toContain(EVENT_RAGE_CLICK);
       expect(query).not.toContain(EVENT_DEAD_CLICK);
       expect(query).toContain(
-        `STATS signals = COUNT(*), sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, "No exception"), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}`
+        `STATS signals = COUNT(*),\n        sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${SOURCE_SESSION_ID_FIELD} IS NOT NULL AND ${SOURCE_SESSION_ID_FIELD} != ""\n    BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, "No exception"), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}`
       );
     });
 

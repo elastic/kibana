@@ -28,6 +28,7 @@ import {
   EMPTY_USAGE,
   usageRequestOf,
 } from '../application_details/otel_overview/utils/usage_request';
+import { FRUSTRATION_DESCRIPTION } from './frustration_description';
 import { useFrustrationSessionSource } from './use_frustration_session_source';
 import { useSaveAsDashboardMenu } from './use_save_as_dashboard_menu';
 
@@ -43,10 +44,6 @@ const FRUSTRATION_LABEL = i18n.translate('xpack.digitalExperience.frustration.la
 
 const TITLE = i18n.translate('xpack.digitalExperience.frustration.title', {
   defaultMessage: 'Frustration signals',
-});
-
-const DESCRIPTION = i18n.translate('xpack.digitalExperience.frustration.description', {
-  defaultMessage: 'Rage, dead and error clicks reported by EDOT Browser.',
 });
 
 const classicUnavailablePrompt = (
@@ -118,10 +115,11 @@ function FrustrationBody({
   const { environment } = useEnvironment();
   const isDashboardAvailable = useFrustrationDashboardAvailable();
   const { sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
-  const sessionSource = useFrustrationSessionSource(
-    Date.parse(getDateISORange({ from: timeRange.rangeFrom, to: timeRange.rangeTo }).startDate)
-  );
   const [refreshCount, setRefreshCount] = useState(0);
+  const sessionSource = useFrustrationSessionSource(
+    Date.parse(getDateISORange({ from: timeRange.rangeFrom, to: timeRange.rangeTo }).startDate),
+    [timeRange.rangeFrom, timeRange.rangeTo, environment, refreshCount].join('|')
+  );
 
   const refreshAll = () => {
     usage.refresh();
@@ -197,7 +195,7 @@ export function FrustrationPage({
     <>
       <AppHeader
         title={TITLE}
-        description={DESCRIPTION}
+        description={FRUSTRATION_DESCRIPTION}
         back={{ href: overviewHref, label: serviceName }}
         menu={menu}
       />

@@ -29,6 +29,7 @@ import {
   SOURCE_CSS_SELECTOR_FIELD,
   SOURCE_EVENT_NAME_FIELD,
   SOURCE_EXCEPTION_MESSAGE_FIELD,
+  NULLIFY_UNMAPPED_FIELDS,
   SOURCE_EXCEPTION_TYPE_FIELD,
   SOURCE_MOBILE_FIELDS,
   SOURCE_SERVICE_NAME_FIELD,
@@ -76,8 +77,9 @@ const TIME_BUCKETS = 50;
 /** Sessions with at least this many signals share the last bucket of the distribution. */
 export const MAX_SIGNALS_BUCKET = 10;
 
-// OTel attributes that some index doesn't map read as null instead of failing the query.
-const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
+// The exact count up to this many sessions, as the summaries count them, instead of ~3,000.
+const SESSION_COUNT_PRECISION = 40000;
+const COUNT_SESSIONS = `COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}, ${SESSION_COUNT_PRECISION})`;
 const eventsList = (events: readonly string[]): string => events.map(escapeStringValue).join(', ');
 const eventList = eventsList(FRUSTRATION_EVENTS);
 const pageViewList = eventsList(PAGE_VIEW_EVENTS);
@@ -139,21 +141,29 @@ const summarySignals = (events: readonly FrustrationEvent[]): string =>
 /**
  * The summaries of the application's sessions that overlap the dashboard's time range, as the
  * Sessions list reads them. Summaries have no `@timestamp`, so the range is on their own times.
+ * Lens takes the column compared with the first `?_tstart`/`?_tend` as the time field and filters
+ * it on the range too, which would drop the sessions that started before it: `TO_DATETIME` keeps
+ * the first comparison off a bare column, so there is no time field.
  */
 const sessionSummaries = ({ serviceName, environment }: FrustrationQueryParams): string =>
   `FROM ${SESSIONS_INDEX_PATTERN}
 | WHERE service.name == ${escapeStringValue(serviceName)}
-  AND start_time <= ?_tend AND end_time >= ?_tstart${environmentClause(
+  AND TO_DATETIME(start_time) <= ?_tend AND end_time >= ?_tstart${environmentClause(
     environment,
     [SUMMARY_ENVIRONMENT],
     SUMMARY_ENVIRONMENT
   )}`;
 
-/** The browser SDK events of the service and environment, as the server's usage reads them. */
+/**
+ * The browser SDK events of the service and environment in the dashboard's time range, as the
+ * server's usage reads them. The range comes first so that Lens takes `@timestamp` as the time
+ * field: the Lens API has no other way to set it for ES|QL, and without one the range isn't applied.
+ */
 const applicationEvents = ({ serviceName, environment }: FrustrationQueryParams): string =>
   `${NULLIFY_UNMAPPED_FIELDS}
 FROM ${OTEL_LOGS_INDEX}
-| WHERE ${TELEMETRY_SDK_LANGUAGE} == ${escapeStringValue(BROWSER_SDK_LANGUAGE)}
+| WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
+  AND ${TELEMETRY_SDK_LANGUAGE} == ${escapeStringValue(BROWSER_SDK_LANGUAGE)}
   AND ${SOURCE_SERVICE_NAME_FIELD} == ${escapeStringValue(serviceName)}${environmentClause(
     environment
   )}`;
@@ -187,10 +197,8 @@ export const frustratedSessionsQuery = (
 | STATS frustrated = COUNT(*) WHERE ${summarySignals(events)} > 0,
         sessions = COUNT(*)`
       : `${sessionEvents(params)}
-| STATS frustrated = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${SOURCE_EVENT_NAME_FIELD} IN (${eventsList(
-          events
-        )}),
-        sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})`;
+| STATS frustrated = ${COUNT_SESSIONS} WHERE ${SOURCE_EVENT_NAME_FIELD} IN (${eventsList(events)}),
+        sessions = ${COUNT_SESSIONS}`;
   return `${stats}
 | EVAL share = CASE(sessions > 0, TO_DOUBLE(frustrated) / sessions, 0.0)`;
 };
@@ -210,7 +218,7 @@ export const signalsPerSessionQuery = (
         sessions = COUNT(*)`
       : `${sessionEvents(params)}
 | STATS signals = COUNT(*) WHERE ${SOURCE_EVENT_NAME_FIELD} IN (${eventsList(events)}),
-        sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})`;
+        sessions = ${COUNT_SESSIONS}`;
   return `${stats}
 | EVAL per_session = CASE(sessions > 0, TO_DOUBLE(signals) / sessions, 0.0)`;
 };
@@ -337,7 +345,7 @@ const signalsByDimensionQuery = (
 | WHERE ${column} IS NOT NULL
 | STATS ${COUNTS_BY_TYPE},
         signals = COUNT(*) WHERE ${SOURCE_EVENT_NAME_FIELD} IN (${eventList}),
-        sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})
+        sessions = ${COUNT_SESSIONS}
     BY ${column}`;
   return `${stats}
 | SORT sessions DESC, ${column}
@@ -396,7 +404,9 @@ const NO_EXCEPTION_LABEL = i18n.translate(
 export const errorClicksQuery = (params: FrustrationQueryParams): string =>
   `${applicationEvents(params)}
   AND ${SOURCE_EVENT_NAME_FIELD} == ${escapeStringValue(EVENT_ERROR_CLICK)}
-| STATS signals = COUNT(*), sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, ${escapeStringValue(
+| STATS signals = COUNT(*),
+        sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${NON_EMPTY_SESSION}
+    BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, ${escapeStringValue(
     NO_EXCEPTION_LABEL
   )}), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}
 | SORT signals DESC

@@ -48,7 +48,10 @@ export interface ApplicationLinks {
   errorsHref: string;
   networkHref: string;
   reportsHref: string;
-  /** The frustration dashboard, in the selected time range and environment. */
+  /**
+   * The frustration dashboard, in the selected time range and environment, with the Overview's
+   * filters and query, which it doesn't apply but its back link restores.
+   */
   frustrationHref: string;
   sessionsHref: (sessionsQuery?: SessionsListUrlQuery) => string;
   sessionHref: (sessionId: string, sessionsQuery?: SessionsListUrlQuery) => string;
@@ -110,10 +113,7 @@ export const useApplicationLinks = (
         router.link('/{serviceName}/reports', { path: { serviceName }, query: tabQuery })
       ),
       frustrationHref: toHref(
-        router.link('/{serviceName}/frustration', {
-          path: { serviceName },
-          query: { ...listQuery, source },
-        })
+        router.link('/{serviceName}/frustration', { path: { serviceName }, query: tabQuery })
       ),
       sessionsHref: (sessionsQuery = {}) =>
         toHref(

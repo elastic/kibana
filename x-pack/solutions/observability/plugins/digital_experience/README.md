@@ -394,7 +394,10 @@ Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcr
   read the events, which the summaries don't keep. Before that, every panel reads the events:
   sessions are the distinct non-empty `session.id` of the page views and signals of the
   application, as every session has a page view, so a session whose page views fall before the
-  time range can be in the list and not on the dashboard. Shares have one decimal. Page views are
+  time range can be in the list and not on the dashboard. Sessions are counted exactly up to
+  40,000 (`COUNT_DISTINCT` precision), as the summaries count them. The source is picked once per
+  time range, environment and **Refresh**, so a status change doesn't remount the dashboard.
+  Shares have one decimal. Page views are
   `PAGE_VIEW_EVENTS` (`common/otel_data.ts`) in the logs. A page is labeled in ES|QL as
   `toPagePath` labels it for the Overview's frustrated pages (hash route, else path, without
   query), and its views are counted with `INLINE STATS ... BY page` before the signals are grouped.
@@ -406,7 +409,11 @@ Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcr
   for any time range, which its description says: ranges older than the summaries keep have no
   sessions there, and once sessions are turned off they stop updating.
 - **Queries:** every panel filters on the application and, unless all environments are picked, the
-  environment, in the ES|QL `WHERE` (escaped); the time range goes through the dashboard. The field
+  environment, in the ES|QL `WHERE` (escaped). The time range goes through `?_tstart`/`?_tend`:
+  Lens takes the column compared with the first of them as the panel's time field and filters it
+  on the range too (the Lens API can't set it for ES|QL), so the events compare `@timestamp` first,
+  and the summaries wrap `start_time` in `TO_DATETIME` so that there's no time field to filter
+  out sessions that started before the range. The field
   names are shared with the summary query (`common/otel_source_fields.ts`) and the event names come
   from `common/otel_data.ts`.
 - **Native panel:** above the dashboard, the Overview's **Elements** / **Pages** panel from

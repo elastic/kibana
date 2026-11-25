@@ -12,6 +12,7 @@ import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { TimeRange } from '../../../hooks/use_time_range';
+import { FRUSTRATION_DESCRIPTION } from '../frustration_description';
 import type { FrustrationSessionSource } from '../utils/frustration_esql';
 import type { FrustrationColors } from '../utils/frustration_panels';
 import { buildFrustrationPanels } from '../utils/frustration_panels';
@@ -33,15 +34,18 @@ const savedTitleOf = (serviceName: string, environment: string | undefined): str
         values: { serviceName },
       });
 
-const SAVED_DESCRIPTIONS: Record<FrustrationSessionSource, string> = {
-  events: i18n.translate('xpack.digitalExperience.frustration.savedDescription', {
-    defaultMessage: 'Rage, dead and error clicks reported by EDOT Browser.',
-  }),
-  // The saved panels keep reading the summaries whatever range the dashboard is opened with.
-  summaries: i18n.translate('xpack.digitalExperience.frustration.savedDescriptionSummaries', {
+// The saved panels keep reading the summaries whatever range the dashboard is opened with.
+const SUMMARIES_CAVEAT = i18n.translate(
+  'xpack.digitalExperience.frustration.savedDescriptionSummariesCaveat',
+  {
     defaultMessage:
-      'Rage, dead and error clicks reported by EDOT Browser. The per-session panels read the session summaries, so they have no sessions older than the summaries keep, and stop updating once sessions are turned off.',
-  }),
+      'The per-session panels read the session summaries, so they have no sessions older than the summaries keep, and stop updating once sessions are turned off.',
+  }
+);
+
+const SAVED_DESCRIPTIONS: Record<FrustrationSessionSource, string> = {
+  events: FRUSTRATION_DESCRIPTION,
+  summaries: `${FRUSTRATION_DESCRIPTION} ${SUMMARIES_CAVEAT}`,
 };
 
 const toError = (error: unknown): Error => (error instanceof Error ? error : new Error(`${error}`));

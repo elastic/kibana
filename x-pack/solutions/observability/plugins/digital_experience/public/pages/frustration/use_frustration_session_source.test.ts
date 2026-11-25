@@ -81,7 +81,23 @@ describe('sessionSourceOf', () => {
 
 describe('useFrustrationSessionSource', () => {
   const sourceOf = () =>
-    renderHook(() => useFrustrationSessionSource(Date.now() - DAY_MS)).result.current;
+    renderHook(() => useFrustrationSessionSource(Date.now() - DAY_MS, 'scope')).result.current;
+
+  it('keeps the source while the status changes, until the scope does', () => {
+    mockStatus({ status: status() });
+    const { result, rerender } = renderHook(
+      ({ scope }) => useFrustrationSessionSource(Date.now() - DAY_MS, scope),
+      { initialProps: { scope: 'now-24h|now|production|0' } }
+    );
+    expect(result.current).toBe('summaries');
+
+    mockStatus({ status: status({ rebuilding: true }) });
+    rerender({ scope: 'now-24h|now|production|0' });
+    expect(result.current).toBe('summaries');
+
+    rerender({ scope: 'now-24h|now|production|1' });
+    expect(result.current).toBe('events');
+  });
 
   it('waits for the status', () => {
     mockStatus({ loading: true });
