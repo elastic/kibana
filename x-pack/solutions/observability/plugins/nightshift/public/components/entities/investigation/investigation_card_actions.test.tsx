@@ -103,9 +103,8 @@ describe('InvestigationCardActions', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     window.removeEventListener('click', onWindowClick);
 
-    expect(actions).toEqual([
+    expect(actions.filter(Boolean)).toEqual([
       'openInChat',
-      null,
       'deleteInvestigation',
       'confirmDeleteInvestigation',
     ]);

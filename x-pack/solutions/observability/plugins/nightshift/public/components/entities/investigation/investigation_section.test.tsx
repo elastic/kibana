@@ -20,13 +20,14 @@ jest.mock('../../../hooks/use_kibana', () => ({
           investigation: item,
           onClick,
           actions,
+          ...ebtProps
         }: {
           investigation: InvestigationSummary;
           onClick?: (investigation: InvestigationSummary) => void;
           actions?: React.ReactNode;
         }) => (
           <div data-test-subj="investigationCard">
-            <button type="button" onClick={() => onClick?.(item)}>
+            <button type="button" onClick={() => onClick?.(item)} {...ebtProps}>
               {item.title}
             </button>
             {actions}
@@ -236,6 +237,28 @@ describe('InvestigationSection', () => {
 
     fireEvent.click(screen.getByText('Checkout errors'));
     expect(onInvestigationClick).toHaveBeenCalledWith(investigation);
+  });
+
+  it('tags only the card button as viewInvestigation, not the list item that holds the actions', () => {
+    render(
+      <I18nProvider>
+        <InvestigationSection
+          id="critical"
+          investigations={[investigation]}
+          total={1}
+          hasMore={false}
+          onShowMore={jest.fn()}
+          onRetry={jest.fn()}
+          onInvestigationClick={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Checkout errors')).toHaveAttribute(
+      'data-ebt-action',
+      'viewInvestigation'
+    );
+    expect(screen.getByTestId('assignees-investigation-1').closest('[data-ebt-action]')).toBeNull();
   });
 
   it('retries a failed section load', () => {
