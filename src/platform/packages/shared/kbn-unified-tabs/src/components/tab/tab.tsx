@@ -184,6 +184,18 @@ export const Tab: React.FC<TabProps> = (props) => {
     [isSelected, isDragging, onSelectEvent, setActionPopover, onSelectedTabKeyDown]
   );
 
+  // The actions are not part of the tab element, so Escape returns focus to the tab,
+  // where the arrow keys switch between tabs.
+  const onActionsKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    // ignore events bubbling from portaled content, e.g. the actions popover
+    if (event.key !== keys.ESCAPE || !event.currentTarget.contains(event.target as Node)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    tabInteractiveElementRef.current?.focus();
+  }, []);
+
   const fontWeight = isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular;
 
   const { tabLabelRef, tabLabelWidth, tabLabelTextWidth } = useTabLabelWidth({
@@ -294,7 +306,7 @@ export const Tab: React.FC<TabProps> = (props) => {
         </div>
       </div>
       {!isInlineEditActive && (
-        <div className="unifiedTabs__tabActions">
+        <div className="unifiedTabs__tabActions" onKeyDown={onActionsKeyDown}>
           <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
             {!!getTabMenuItems && (
               <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">

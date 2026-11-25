@@ -409,6 +409,36 @@ describe('Tab', () => {
     expect(defaultMenuButton).toBeInTheDocument();
   });
 
+  it.each([
+    ['close button', `unifiedTabs_closeTabBtn_${tabItem.id}`],
+    ['actions button', `unifiedTabs_tabMenuBtn_${tabItem.id}`],
+  ])('moves focus back to the tab on Escape from the %s', async (_, testSubj) => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected
+        services={servicesMock}
+        getTabMenuItems={() => []}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={jest.fn()}
+        onSelect={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    const button = screen.getByTestId(testSubj);
+    act(() => button.focus());
+    expect(button).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.getByTestId(tabButtonTestSubj)).toHaveFocus();
+  });
+
   it('renders custom menu button when customMenuButton is provided', () => {
     const customButton = <button data-test-subj="custom-menu-button">Custom Menu</button>;
     const tabItemWithCustomButton = {
