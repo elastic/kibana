@@ -584,6 +584,85 @@ describe('createChatCompleteApi', () => {
       );
     });
 
+    it('flushes the terminal attempt chunks before the error when no retry is allowed', async () => {
+      // API-level regression: with no retry budget, the terminal attempt's
+      // already-streamed chunks must surface before the error, exactly like
+      // token-count events do. If the callback API discarded chunks on every
+      // error (regardless of retry outcome), the chunk would be missing here.
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        const partial = chunkEvent('partial');
+        return concat(
+          of(partial),
+          throwError(() => createInferenceProviderError('Inference stream idle', { status: 504 }))
+        );
+      });
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+        retryConfiguration: {
+          retryOn: 'all',
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      const emitted: unknown[] = [];
+      let caughtError: any;
+      await new Promise<void>((resolve) => {
+        events$.subscribe({
+          next: (event) => emitted.push(event),
+          error: (err) => {
+            caughtError = err;
+            resolve();
+          },
+        });
+      });
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+      expect(emitted.filter(isChatCompletionChunkEvent).map((e) => e.content)).toEqual(['partial']);
+    });
+
+    it('does not concatenate a stalled attempt chunks with the retry when maxRetries is fractional', async () => {
+      // Regression: `maxRetries: 0.5` — RxJS retries because its pre-increment
+      // count is 0 < 0.5, so the first error IS retried. The discard decision
+      // must use the same budget as the actual retry, otherwise the failed
+      // attempt's chunks are flushed and concatenated with the retry's answer.
+      let count = 0;
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        count++;
+        if (count === 1) {
+          return concat(
+            of(chunkEvent('partial')),
+            throwError(() => createInferenceProviderError('Inference stream idle', { status: 504 }))
+          );
+        }
+        return of(chunkEvent('full answer'));
+      });
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0.5,
+        retryConfiguration: {
+          retryOn: 'all',
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      const events = await firstValueFrom(
+        events$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(2);
+      expect(events.map((event) => event.content)).toEqual(['full answer']);
+    });
+
     it('implicitly retries errors when configured to', async () => {
       let count = 0;
       inferenceAdapter.chatComplete.mockImplementation(() => {

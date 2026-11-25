@@ -155,6 +155,12 @@ export function createChatCompleteCallbackApi({
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
     const errorFilter = getRetryFilter(retryConfiguration.retryOn);
+    // `maxRetries` is not guaranteed to be an integer (the request schema only
+    // bounds its range), and RxJS `retry({ count })` retries while its
+    // pre-increment count is strictly below it — e.g. for 0.5 the first error
+    // triggers a retry. Compute the budget once and use the same decision for
+    // chunk discarding and actual retrying so the two can never disagree.
+    const maxRetryCount = Math.ceil(maxRetries);
 
     // Knowing whether an error will be retried is needed to decide whether the
     // failed attempt's buffered chunks are discarded or flushed. The counter
@@ -165,7 +171,7 @@ export function createChatCompleteCallbackApi({
     ).pipe(
       switchMap(({ connectorId, ...parameters }) => {
         let errorCount = 0;
-        const willRetry = (error: Error) => errorCount <= maxRetries && errorFilter(error);
+        const willRetry = (error: Error) => errorCount <= maxRetryCount && errorFilter(error);
         return defer(() =>
           resolveAndCreatePipeline({
             connectorId,
@@ -202,7 +208,7 @@ export function createChatCompleteCallbackApi({
             },
           }),
           retryHoldingTokenCountEvents({
-            maxRetry: maxRetries,
+            maxRetry: maxRetryCount,
             backoffMultiplier: retryConfiguration.backoffMultiplier,
             initialDelay: retryConfiguration.initialDelay,
             errorFilter,
