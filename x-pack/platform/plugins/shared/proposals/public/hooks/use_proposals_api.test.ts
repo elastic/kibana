@@ -809,6 +809,29 @@ describe('useProposal', () => {
       expect(http.get).toHaveBeenCalledTimes(3);
     });
 
+    it('does not refetch a card because a later revision of another chain is already cached', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'q-3': {
+          id: 'q-3',
+          rootProposalId: 'q-1',
+          revision: 3,
+          supersedes: 'q-2',
+          status: 'pending',
+        },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const other = renderHook(() => useProposal('q-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(other.result.current.isSuccess).toBe(true));
+      const unrelated = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(unrelated.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'))).toHaveLength(1);
+    });
+
     it('refreshes a decided card that is not marked replaced when its successor is already cached', async () => {
       const proposals: Record<string, object> = {
         'p-1': {
