@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { OUTBOUND_ENABLED_CONFIG_KEY } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { validateSecrets } from '../lib';
 import type { RawAction, ActionType, ActionTypeRegistryContract } from '../types';
@@ -50,8 +51,13 @@ function transformConnectorForExport(
     ...exportAttributes
   } = connector.attributes;
   // Legacy config.ingestTokenHash is ignored and must not be exported.
-  const { ingestTokenHash: _ingestTokenHash, ...exportConfig } = (exportAttributes.config ??
-    {}) as Record<string, unknown>;
+  const { ingestTokenHash: _ingestTokenHash, ...configWithoutLegacyKeys } =
+    (exportAttributes.config ?? {}) as Record<string, unknown>;
+  // The export clears the inbound identity, so keeping outbound off would import as both off.
+  const { [OUTBOUND_ENABLED_CONFIG_KEY]: outboundEnabled, ...configWithoutOutboundKey } =
+    configWithoutLegacyKeys;
+  const exportConfig =
+    outboundEnabled === false ? configWithoutOutboundKey : configWithoutLegacyKeys;
 
   return {
     ...connector,

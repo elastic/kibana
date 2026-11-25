@@ -299,4 +299,26 @@ describe('transform connector for export', () => {
       transformConnectorsForExport([connector], actionTypeRegistry)[0].attributes
     ).not.toHaveProperty('uiamApiKeyExternal');
   });
+
+  it('drops outboundEnabled false so the import does not have both directions off', () => {
+    actionTypeRegistry.get.mockReturnValue(connectorType);
+    const connector = {
+      id: 'dual-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.dual',
+        name: 'dual',
+        isMissingSecrets: false,
+        config: { outboundEnabled: false, instanceUrl: 'https://example.com' },
+        secrets: {},
+        hasInboundEventIdentity: true,
+      },
+      references: [],
+    };
+
+    const [exported] = transformConnectorsForExport([connector], actionTypeRegistry);
+
+    expect(exported.attributes.config).toEqual({ instanceUrl: 'https://example.com' });
+    expect(exported.attributes.hasInboundEventIdentity).toBe(false);
+  });
 });
