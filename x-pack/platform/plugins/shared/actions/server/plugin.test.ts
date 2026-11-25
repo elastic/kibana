@@ -798,14 +798,15 @@ describe('Actions Plugin', () => {
           );
         });
 
-        it('does not load a connector that is not dual and sets the key', async () => {
+        it('loads a connector that is not dual without the key and logs a warning', async () => {
           setup(preconfiguredWithKey('.server-log', { outboundEnabled: false }));
           await plugin.setup(coreSetup as any, pluginsSetup);
           const pluginStart = await plugin.start(coreStart, pluginsStart);
 
-          expect(pluginStart.inMemoryConnectors).toEqual([]);
+          expect(pluginStart.inMemoryConnectors.map(({ id }) => id)).toEqual(['withKey']);
+          expect(pluginStart.inMemoryConnectors[0].config).toEqual({});
           expect(context.logger.get().warn).toHaveBeenCalledWith(
-            expect.stringContaining('can only be set on connectors that both send and receive')
+            expect.stringContaining('The key is ignored')
           );
         });
 

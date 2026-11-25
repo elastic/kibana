@@ -187,6 +187,7 @@ export const getOutboundDisabledValidationType = ({
 
 /**
  * Checks the reserved key of a preconfigured connector (`kibana.yml`).
+ * Types that are not dual ignore the key (see `hasIgnoredOutboundKey`), so they are valid here.
  * A `kibana.yml` connector cannot turn inbound events on, so outbound off always leaves both directions off.
  * Returns an error text, or `undefined` when the connector is valid.
  */
@@ -204,7 +205,7 @@ export const getPreconfiguredOutboundConfigError = ({
     return undefined;
   }
   if (!connectorTypeIsDual(actionTypeId)) {
-    return `config.${OUTBOUND_ENABLED_CONFIG_KEY} can only be set on connectors that both send and receive.`;
+    return undefined;
   }
   if (typeof value !== 'boolean') {
     return `config.${OUTBOUND_ENABLED_CONFIG_KEY} must be a boolean.`;
@@ -214,6 +215,16 @@ export const getPreconfiguredOutboundConfigError = ({
   }
   return undefined;
 };
+
+/** True when a connector that is not dual sets the reserved key. The key has no effect there. */
+export const hasIgnoredOutboundKey = ({
+  actionTypeId,
+  config,
+}: {
+  actionTypeId: string;
+  config: Record<string, unknown> | undefined;
+}): boolean =>
+  !connectorTypeIsDual(actionTypeId) && config?.[OUTBOUND_ENABLED_CONFIG_KEY] !== undefined;
 
 /** True when a connector of this type has outbound actions turned off in its raw config. */
 export const isOutboundActionsDisabledInConfig = ({

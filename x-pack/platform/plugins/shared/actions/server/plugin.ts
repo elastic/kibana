@@ -48,6 +48,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-specs';
+import { OUTBOUND_ENABLED_CONFIG_KEY } from '@kbn/connector-specs';
+import { omit } from 'lodash';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
@@ -106,7 +108,10 @@ import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
-import { getPreconfiguredOutboundConfigError } from './lib/outbound_actions_enabled';
+import {
+  getPreconfiguredOutboundConfigError,
+  hasIgnoredOutboundKey,
+} from './lib/outbound_actions_enabled';
 import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profile_id';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -407,8 +412,22 @@ export class ActionsPlugin
           continue;
         }
 
+        // The key only applies to dual connectors. Other types load without it.
+        const ignoresOutboundKey = hasIgnoredOutboundKey({
+          actionTypeId: preconfiguredConnector.actionTypeId,
+          config: preconfiguredConnector.config as Record<string, unknown> | undefined,
+        });
+        if (ignoresOutboundKey) {
+          this.logger.warn(
+            `Preconfigured connector "${preconfiguredId}" sets config.${OUTBOUND_ENABLED_CONFIG_KEY}, which only applies to connectors that both send and receive. The key is ignored.`
+          );
+        }
+
         const rawPreconfiguredConnector: ConnectorWithOptionalDeprecation = {
-          ...this.actionsConfig.preconfigured[preconfiguredId],
+          ...preconfiguredConnector,
+          ...(ignoresOutboundKey
+            ? { config: omit(preconfiguredConnector.config, OUTBOUND_ENABLED_CONFIG_KEY) }
+            : {}),
           id: preconfiguredId,
           isPreconfigured: true,
           isSystemAction: false,
