@@ -564,6 +564,38 @@ describe('Session service', () => {
     expect(mockedAddInProgressSessionId).toHaveBeenNthCalledWith(1, sessionId);
   });
 
+  test('save() does not change the session start time used by nowProvider', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+    sessionsClient.create.mockResolvedValue({
+      ...mockSavedObject,
+      attributes: {
+        ...mockSavedObject.attributes,
+        created: new Date(Date.now() + 60_000).toISOString(),
+      },
+    });
+
+    sessionService.start();
+    sessionService.trackSearch({
+      poll: jest.fn().mockResolvedValue(undefined),
+      abort: jest.fn().mockResolvedValue(undefined),
+    });
+
+    expect(nowProvider.set).toHaveBeenCalledTimes(1);
+    const [startTime] = nowProvider.set.mock.calls[0];
+
+    await sessionService.save({ entryPoint: 'test' });
+
+    expect(nowProvider.set).toHaveBeenCalledTimes(1);
+    expect(nowProvider.set).toHaveBeenLastCalledWith(startTime);
+  });
+
   describe("user doesn't have access to search session", () => {
     beforeAll(() => {
       userHasAccessToSearchSessions = false;
