@@ -15,11 +15,14 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 // DynamoDB limits expression strings (key condition, filter, projection, condition) to 4 KB.
 const MAX_EXPRESSION_LENGTH = 4096;
-// DynamoDB limits an item to 400 KB; the same cap is applied to any value map that can carry one.
-const MAX_ITEM_BYTES = 400 * 1024;
+// DynamoDB limits an item to 400 KB and enforces that itself. This caps the serialized request value,
+// which is larger than the item DynamoDB measures: binary is base64 text (a third larger) and every
+// typed value adds a wrapper. The same cap applies to any value map that can carry an item.
+const MAX_ITEM_BYTES = 1024 * 1024;
 // A primary key holds a partition key value (up to 2048 bytes) and an optional sort key value (up to
-// 1024 bytes), so this sits above any valid key or pagination token.
-const MAX_KEY_BYTES = 8 * 1024;
+// 1024 bytes). A pagination token from an index holds both the table key and the index key, which is
+// about 8 KiB as base64 binary at the maximum, so this sits above any valid key or pagination token.
+const MAX_KEY_BYTES = 16 * 1024;
 // DynamoDB documents no entry cap and a much larger attribute name limit (64 KB); these sit well above
 // any realistic request.
 const MAX_ATTRIBUTE_NAME_LENGTH = 1024;
@@ -109,7 +112,15 @@ export const GetItemInputSchema = lazySchema(() =>
       .optional()
       .describe(
         'A comma-separated list of attribute names to return. Limits the response to only the specified attributes. ' +
-          'Example: "userId, name, email". Use this to reduce response size. Maximum 4096 characters.'
+          'Example: "userId, #n, email" with expressionAttributeNames {"#n": "name"}. ' +
+          'Use this to reduce response size. Maximum 4096 characters.'
+      ),
+    expressionAttributeNames: attributeNameMap()
+      .optional()
+      .describe(
+        'A map of expression attribute name placeholders (starting with "#") to actual attribute names. ' +
+          'Required when a projected attribute name conflicts with a DynamoDB reserved word, such as "name" or "status". ' +
+          'Example: {"#n": "name"}.'
       ),
   })
 );
@@ -264,6 +275,7 @@ export const PutItemInputSchema = lazySchema(() =>
         '"L" (list), "M" (map), "SS" (string set), "NS" (number set), "BS" (binary set).'
     ),
     conditionExpression: expression()
+      .min(1)
       .optional()
       .describe(
         'An optional condition that must be met for the write to succeed. ' +
@@ -297,6 +309,7 @@ export const DeleteItemInputSchema = lazySchema(() =>
         'Example: {"sessionId": {"S": "sess-abc-123"}}.'
     ),
     conditionExpression: expression()
+      .min(1)
       .optional()
       .describe(
         'An optional condition that must be met for the delete to succeed. ' +

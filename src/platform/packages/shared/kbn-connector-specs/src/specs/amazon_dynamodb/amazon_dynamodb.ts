@@ -217,6 +217,9 @@ export const AmazonDynamoDB: ConnectorSpec = {
         if (input.projectionExpression) {
           body.ProjectionExpression = input.projectionExpression;
         }
+        if (input.expressionAttributeNames) {
+          body.ExpressionAttributeNames = input.expressionAttributeNames;
+        }
 
         const data = await callDynamoDbApi(ctx, 'GetItem', body);
 

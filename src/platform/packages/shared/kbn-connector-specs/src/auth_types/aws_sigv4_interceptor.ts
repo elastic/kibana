@@ -21,6 +21,12 @@ export interface AwsSigningRequestConfig {
   awsSigningName?: string;
 }
 
+/** What the interceptor knows about the request being signed. */
+export interface AwsSigningRequest {
+  /** The AWS Region parsed from the request hostname. */
+  region: string;
+}
+
 export interface AwsSigningCredentials {
   accessKeyId: string;
   secretAccessKey: string;
@@ -33,9 +39,14 @@ export interface AwsSigningCredentials {
  * Signature V4. Non-AWS URLs pass through unsigned and never ask for credentials.
  *
  * Service and region are extracted from the URL hostname pattern: {service}.{region}.amazonaws.com
+ * The region is also handed to `getCredentials`, for credentials that are issued per Region.
  */
 export const createAwsSigV4Interceptor =
-  (getCredentials: () => Promise<AwsSigningCredentials> | AwsSigningCredentials) =>
+  (
+    getCredentials: (
+      request: AwsSigningRequest
+    ) => Promise<AwsSigningCredentials> | AwsSigningCredentials
+  ) =>
   async (
     config: InternalAxiosRequestConfig & AwsSigningRequestConfig
   ): Promise<InternalAxiosRequestConfig> => {
@@ -55,7 +66,9 @@ export const createAwsSigV4Interceptor =
       return config;
     }
 
-    const { accessKeyId, secretAccessKey, sessionToken } = await getCredentials();
+    const { accessKeyId, secretAccessKey, sessionToken } = await getCredentials({
+      region: awsInfo.region,
+    });
 
     const method = (config.method || 'GET').toUpperCase();
     // `fullUrl.pathname` may already contain `%XX` escapes from the

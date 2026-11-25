@@ -130,7 +130,7 @@ describe('AwsIamRoleAuth', () => {
       await interceptor(makeRequest());
 
       const [url, body, options] = mockStsPost.mock.calls[0];
-      expect(url).toBe('https://sts.amazonaws.com/');
+      expect(url).toBe('https://sts.us-east-1.amazonaws.com/');
       expect(body).toContain('Action=AssumeRole');
       expect(body).toContain(`RoleArn=${encodeURIComponent(ROLE_ARN)}`);
       expect(body).toContain('RoleSessionName=kibana-connector');
@@ -148,6 +148,29 @@ describe('AwsIamRoleAuth', () => {
       const [, body] = mockStsPost.mock.calls[0];
       expect(body).toContain(`ExternalId=${encodeURIComponent('ext/id+1')}`);
       expect(body).toContain(`RoleSessionName=${encodeURIComponent('session@example')}`);
+    });
+
+    it.each([
+      ['us-east-1', 'https://dynamodb.us-east-1.amazonaws.com/'],
+      ['af-south-1', 'https://dynamodb.af-south-1.amazonaws.com/'],
+      ['us-gov-west-1', 'https://dynamodb.us-gov-west-1.amazonaws.com/'],
+    ])('calls the regional STS endpoint and signs for %s', async (region, requestUrl) => {
+      const interceptor = await getInterceptor(makeSecret());
+
+      await interceptor(makeRequest(requestUrl));
+
+      const [url, , options] = mockStsPost.mock.calls[0];
+      expect(url).toBe(`https://sts.${region}.amazonaws.com/`);
+      expect(options.headers.Authorization).toContain(`/${region}/sts/aws4_request`);
+    });
+
+    it('does not send the base credentials to a host built from a malformed Region', async () => {
+      const interceptor = await getInterceptor(makeSecret());
+
+      await expect(
+        interceptor(makeRequest('https://dynamodb.bad_region.amazonaws.com/'))
+      ).rejects.toThrow('not a valid AWS Region');
+      expect(mockStsPost).not.toHaveBeenCalled();
     });
 
     it('does not put the base secret access key in the request body', async () => {
@@ -178,6 +201,37 @@ describe('AwsIamRoleAuth', () => {
       await second(makeRequest());
 
       expect(mockStsPost).toHaveBeenCalledTimes(1);
+    });
+
+    it('makes one AssumeRole call for concurrent requests on a cold cache', async () => {
+      const interceptor = await getInterceptor(makeSecret());
+
+      await Promise.all([interceptor(makeRequest()), interceptor(makeRequest())]);
+
+      expect(mockStsPost).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not share credentials between Regions', async () => {
+      const interceptor = await getInterceptor(makeSecret());
+
+      await interceptor(makeRequest('https://dynamodb.us-east-1.amazonaws.com/'));
+      await interceptor(makeRequest('https://dynamodb.eu-west-1.amazonaws.com/'));
+
+      expect(mockStsPost).toHaveBeenCalledTimes(2);
+    });
+
+    it('lets the next request retry after a concurrent AssumeRole failed', async () => {
+      const interceptor = await getInterceptor(makeSecret());
+      mockStsPost.mockRejectedValueOnce(stsFailure(403, 'AccessDenied', 'denied'));
+
+      const results = await Promise.allSettled([
+        interceptor(makeRequest()),
+        interceptor(makeRequest()),
+      ]);
+      await interceptor(makeRequest());
+
+      expect(results.map(({ status }) => status)).toEqual(['rejected', 'rejected']);
+      expect(mockStsPost).toHaveBeenCalledTimes(2);
     });
 
     it('refreshes credentials that are close to expiring', async () => {
@@ -317,7 +371,6 @@ describe('AwsIamRoleAuth', () => {
       'arn:aws:iam::123456789012:role/MyRole',
       'arn:aws:iam::123456789012:role/service-role/My_Role+=,.@-',
       'arn:aws-us-gov:iam::123456789012:role/GovRole',
-      'arn:aws-cn:iam::123456789012:role/CnRole',
     ])('accepts the role ARN %s', (roleArn) => {
       expect(parse({ roleArn }).success).toBe(true);
     });
@@ -327,6 +380,7 @@ describe('AwsIamRoleAuth', () => {
       'MyRole',
       'arn:aws:iam::12345:role/MyRole',
       'arn:aws:iam::123456789012:user/MyUser',
+      'arn:aws-cn:iam::123456789012:role/CnRole',
       'arn:aws:iam::123456789012:role/',
       'arn:aws:iam::123456789012:role/My Role',
       `arn:aws:iam::123456789012:role/${'a'.repeat(2048)}`,

@@ -355,7 +355,7 @@ export const AWS_IAM_ROLE_ARN_INVALID_MESSAGE = i18n.translate(
   'connectorSpecs.awsIamRole.roleArn.invalidMessage',
   {
     defaultMessage:
-      'Role ARN must look like arn:aws:iam::123456789012:role/RoleName (12-digit account ID)',
+      'Role ARN must look like arn:aws:iam::123456789012:role/RoleName (12-digit account ID). Roles in the AWS China partition are not supported.',
   }
 );
 

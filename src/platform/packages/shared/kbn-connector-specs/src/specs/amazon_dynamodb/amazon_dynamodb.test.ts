@@ -187,6 +187,20 @@ describe('AmazonDynamoDB', () => {
       const body = JSON.parse(mockPost.mock.calls[0][1]);
       expect(body.ProjectionExpression).toBe('userId, name');
     });
+
+    it('should pass expressionAttributeNames so reserved words can be projected', async () => {
+      mockPost.mockResolvedValue({ data: { Item: { name: { S: 'Alice' } } } });
+
+      await AmazonDynamoDB.actions.getItem.handler(mockContext, {
+        tableName: 'users',
+        key: { userId: { S: 'user-123' } },
+        projectionExpression: 'userId, #n',
+        expressionAttributeNames: { '#n': 'name' },
+      });
+
+      const body = JSON.parse(mockPost.mock.calls[0][1]);
+      expect(body.ExpressionAttributeNames).toEqual({ '#n': 'name' });
+    });
   });
 
   // ===========================================================================
@@ -536,10 +550,10 @@ describe('AmazonDynamoDB', () => {
     });
 
     it('measures an item in bytes, so multi-byte text cannot slip past a character count', () => {
-      // 150,000 euro signs are 150,000 characters but about 450,000 bytes, over the 400 KB item limit.
-      const multiByteItem = { userId: { S: '€'.repeat(150_000) } };
-      // Plain ASCII of the same character count is well under the limit.
-      const asciiItem = { userId: { S: 'a'.repeat(150_000) } };
+      // 400,000 euro signs are 400,000 characters but about 1.2 MB, over the 1 MiB request cap.
+      const multiByteItem = { userId: { S: '€'.repeat(400_000) } };
+      // Plain ASCII of the same character count is well under the cap.
+      const asciiItem = { userId: { S: 'a'.repeat(400_000) } };
 
       expect(
         inputSchema('putItem').safeParse({ tableName: 'users', item: multiByteItem }).success
@@ -549,10 +563,19 @@ describe('AmazonDynamoDB', () => {
       ).toBe(true);
     });
 
-    it('accepts an item just under 400 KB and rejects one just over', () => {
+    it('accepts a valid item whose base64 form exceeds 400 KB', () => {
+      // 350 KiB of binary is a valid DynamoDB item, but about 467 KiB once base64-encoded.
+      const binaryItem = { blob: { B: Buffer.alloc(350 * 1024, 1).toString('base64') } };
+
+      expect(
+        inputSchema('putItem').safeParse({ tableName: 'users', item: binaryItem }).success
+      ).toBe(true);
+    });
+
+    it('accepts a request value just under 1 MiB and rejects one just over', () => {
       const overhead = JSON.stringify({ userId: { S: '' } }).length;
-      const justUnder = { userId: { S: 'a'.repeat(400 * 1024 - overhead) } };
-      const justOver = { userId: { S: 'a'.repeat(400 * 1024 - overhead + 1) } };
+      const justUnder = { userId: { S: 'a'.repeat(1024 * 1024 - overhead) } };
+      const justOver = { userId: { S: 'a'.repeat(1024 * 1024 - overhead + 1) } };
 
       expect(
         inputSchema('putItem').safeParse({ tableName: 'users', item: justUnder }).success
@@ -575,12 +598,43 @@ describe('AmazonDynamoDB', () => {
     });
 
     it('limits a primary key far below the item size', () => {
-      const oversizedKey = { userId: { S: 'a'.repeat(9 * 1024) } };
+      const oversizedKey = { userId: { S: 'a'.repeat(17 * 1024) } };
 
       expect(
         inputSchema('getItem').safeParse({ tableName: 'users', key: oversizedKey }).success
       ).toBe(false);
       expect(inputSchema('getItem').safeParse({ tableName: 'users', key }).success).toBe(true);
+    });
+
+    it('accepts the largest pagination token an index can return', () => {
+      // Maximum-length binary partition and sort keys for both the table and the index, as base64.
+      const binaryKey = (bytes: number) => ({ B: Buffer.alloc(bytes, 1).toString('base64') });
+      const cursor = {
+        pk: binaryKey(2048),
+        sk: binaryKey(1024),
+        gsiPk: binaryKey(2048),
+        gsiSk: binaryKey(1024),
+      };
+
+      expect(
+        inputSchema('query').safeParse({
+          tableName: 'orders',
+          keyConditionExpression: 'userId = :uid',
+          expressionAttributeValues: values,
+          exclusiveStartKey: cursor,
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects a blank conditionExpression instead of dropping the guard', () => {
+      expect(
+        inputSchema('putItem').safeParse({ tableName: 'users', item: key, conditionExpression: '' })
+          .success
+      ).toBe(false);
+      expect(
+        inputSchema('deleteItem').safeParse({ tableName: 'users', key, conditionExpression: '' })
+          .success
+      ).toBe(false);
     });
 
     it('limits how many entries a map can hold', () => {

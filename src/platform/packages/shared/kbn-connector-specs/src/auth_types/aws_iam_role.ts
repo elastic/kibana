@@ -19,8 +19,11 @@ import { createAwsSigV4Interceptor } from './aws_sigv4_interceptor';
 
 const DEFAULT_ROLE_SESSION_NAME = 'kibana-connector';
 
-// IAM role ARN: partition, 12-digit account id, and a role name with an optional path.
-const ROLE_ARN_PATTERN = /^arn:aws[a-z-]*:iam::\d{12}:role\/[\w+=,.@/-]+$/;
+// IAM role ARN: partition, 12-digit account id, and a role name with an optional path. The AWS China
+// partition (aws-cn) is left out: the DynamoDB endpoint the connector calls does not exist there.
+const ROLE_ARN_PATTERN = /^arn:aws(-us-gov)?:iam::\d{12}:role\/[\w+=,.@/-]+$/;
+// The Region comes from the request hostname and is used to build the STS hostname.
+const REGION_PATTERN = /^[a-z][a-z0-9-]*-\d+$/;
 // STS limits: RoleArn up to 2048 characters, ExternalId up to 1224, RoleSessionName up to 64.
 const EXTERNAL_ID_PATTERN = /^[\w+=,.@:/-]*$/;
 const ROLE_SESSION_NAME_PATTERN = /^[\w+=,.@-]*$/;
@@ -44,6 +47,9 @@ interface TempCredentials {
  */
 const credentialCache = new Map<string, TempCredentials>();
 
+/** AssumeRole calls in flight, keyed like the cache, so a burst of requests makes one STS call. */
+const pendingRefreshes = new Map<string, Promise<TempCredentials>>();
+
 /** Bounds memory when many connectors are created and deleted over the life of the process. */
 const MAX_CACHED_CREDENTIALS = 100;
 
@@ -51,6 +57,7 @@ const MAX_CACHED_CREDENTIALS = 100;
 const REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
 
 const getCacheKey = (
+  region: string,
   accessKeyId: string,
   secretAccessKey: string,
   roleArn: string,
@@ -58,7 +65,14 @@ const getCacheKey = (
   externalId?: string
 ): Promise<string> =>
   sha256Hash(
-    JSON.stringify([accessKeyId, secretAccessKey, roleArn, roleSessionName, externalId ?? null])
+    JSON.stringify([
+      region,
+      accessKeyId,
+      secretAccessKey,
+      roleArn,
+      roleSessionName,
+      externalId ?? null,
+    ])
   );
 
 /** Drops expired entries, then the oldest ones, so the cache stays under its cap. */
@@ -101,18 +115,22 @@ const describeStsError = (error: unknown): string => {
 
 /**
  * Call AWS STS AssumeRole and return temporary credentials.
- * Uses the global STS endpoint (us-east-1) which works for all accounts/regions.
+ * Uses the regional STS endpoint, because tokens from the global endpoint are not accepted in Regions
+ * that are not enabled by default, and the global endpoint cannot assume GovCloud roles.
  */
 async function callAssumeRole(
   httpClient: AxiosInstance,
+  region: string,
   accessKeyId: string,
   secretAccessKey: string,
   roleArn: string,
   roleSessionName: string,
   externalId?: string
 ): Promise<TempCredentials> {
-  const host = 'sts.amazonaws.com';
-  const region = 'us-east-1'; // Global STS endpoint region for signing
+  if (!REGION_PATTERN.test(region)) {
+    throw new Error(`AWS STS AssumeRole failed: "${region}" is not a valid AWS Region`);
+  }
+  const host = `sts.${region}.amazonaws.com`;
   const method = 'POST';
   const path = '/';
 
@@ -190,6 +208,7 @@ async function callAssumeRole(
  */
 async function getTemporaryCredentials(
   httpClient: AxiosInstance,
+  region: string,
   accessKeyId: string,
   secretAccessKey: string,
   roleArn: string,
@@ -197,6 +216,7 @@ async function getTemporaryCredentials(
   externalId?: string
 ): Promise<TempCredentials> {
   const cacheKey = await getCacheKey(
+    region,
     accessKeyId,
     secretAccessKey,
     roleArn,
@@ -209,16 +229,30 @@ async function getTemporaryCredentials(
     return cached;
   }
 
-  const creds = await callAssumeRole(
+  // Concurrent requests on a cold or expiring entry share one AssumeRole call.
+  const pending = pendingRefreshes.get(cacheKey);
+  if (pending) {
+    return pending;
+  }
+
+  const refresh = callAssumeRole(
     httpClient,
+    region,
     accessKeyId,
     secretAccessKey,
     roleArn,
     roleSessionName,
     externalId
-  );
-  storeCredentials(cacheKey, creds);
-  return creds;
+  )
+    .then((creds) => {
+      storeCredentials(cacheKey, creds);
+      return creds;
+    })
+    .finally(() => {
+      pendingRefreshes.delete(cacheKey);
+    });
+  pendingRefreshes.set(cacheKey, refresh);
+  return refresh;
 }
 
 // ============================================================================
@@ -275,8 +309,9 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  *
  * Assumes the specified IAM role via AWS STS and signs every outgoing request
  * to *.amazonaws.com using the resulting temporary credentials (SigV4 +
- * X-Amz-Security-Token). Temporary credentials are cached in memory and
- * refreshed automatically 5 minutes before expiry.
+ * X-Amz-Security-Token). The STS call goes to the regional endpoint of the Region being
+ * requested. Temporary credentials are cached in memory per Region and refreshed
+ * automatically 5 minutes before expiry.
  *
  * Use for: connectors that require cross-account access or role-based permissions
  * rather than long-lived IAM user credentials.
@@ -300,9 +335,10 @@ export const AwsIamRoleAuth: AuthTypeSpec<AuthSchemaType> = {
     const stsClient = axios.create(axiosInstance.defaults);
 
     axiosInstance.interceptors.request.use(
-      createAwsSigV4Interceptor(() =>
+      createAwsSigV4Interceptor(({ region }) =>
         getTemporaryCredentials(
           stsClient,
+          region,
           accessKeyId,
           secretAccessKey,
           roleArn,

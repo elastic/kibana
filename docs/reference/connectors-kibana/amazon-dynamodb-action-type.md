@@ -48,13 +48,19 @@ AWS Secret Access Key
 :   The Secret Access Key of the IAM user.
 
 Role ARN
-:   The Amazon Resource Name (ARN) of the IAM role to assume (for example, `arn:aws:iam::123456789012:role/MyDynamoDBRole`).
+:   The Amazon Resource Name (ARN) of the IAM role to assume (for example, `arn:aws:iam::123456789012:role/MyDynamoDBRole`). Roles in the standard (`aws`) and AWS GovCloud (US) (`aws-us-gov`) partitions are supported. Roles in the AWS China partition are not.
 
 External ID
 :   (Optional) An external ID required by the role's trust policy. Needed when the role enforces a `sts:ExternalId` condition for cross-account access.
 
 Session name
 :   (Optional) A name for the assumed-role session that appears in AWS CloudTrail logs. Defaults to `kibana-connector`.
+
+### Connector networking configuration [amazon-dynamodb-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+These settings apply to the requests to DynamoDB. They do not apply to the AWS STS `AssumeRole` request that the **AWS IAM Role** authentication type makes. That request goes directly to the regional STS endpoint, `sts.<region>.amazonaws.com`, so {{kib}} must be able to reach it without a proxy. If your deployment requires a proxy or custom certificates to reach AWS, use **AWS Credentials** instead.
 
 ## Test connectors [amazon-dynamodb-action-configuration]
 
@@ -78,6 +84,7 @@ Get item
     - **tableName** (required): The name of the table to read from.
     - **key** (required): The primary key as a map of attribute name to DynamoDB typed value (for example, `{"userId": {"S": "user-123"}}`).
     - **projectionExpression** (optional): Comma-separated list of attribute names to return.
+    - **expressionAttributeNames** (optional): Map of expression attribute name placeholders (starting with `#`) to actual attribute names. Required for reserved words.
 
 Query
 :   Query a DynamoDB table or index using a key condition expression. The partition key must be specified with `=` comparison; the sort key is optional. Queries are efficient and only read items matching the key condition.
