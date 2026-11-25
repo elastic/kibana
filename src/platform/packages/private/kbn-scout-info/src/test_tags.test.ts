@@ -19,7 +19,12 @@ describe('testTags', () => {
   });
 
   it('keeps limit tags out of the selection tags', () => {
-    expect(testTags.limit).toEqual(['@limit/only-fips', '@limit/except-fips']);
+    expect(testTags.limit).toEqual([
+      '@limit/only-fips',
+      '@limit/only-upgradeAssistant',
+      '@limit/except-fips',
+      '@limit/except-upgradeAssistant',
+    ]);
     testTags.limit.forEach((tag) => expect(testTags.selection).not.toContain(tag));
   });
 

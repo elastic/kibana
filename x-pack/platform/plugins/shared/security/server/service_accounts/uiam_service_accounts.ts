@@ -523,6 +523,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         retryAfterMs: retryDelay ?? 0,
         statusCode: Boom.isBoom(cause) ? cause.output.statusCode : undefined,
         errorCode: getUiamErrorCode(cause),
+        notSent: hasTransportCode(cause, CONNECT_FAILURE_CODES),
       });
     }
 
@@ -611,6 +612,14 @@ const RETRYABLE_TRANSPORT_CODES = new Set([
   'UND_ERR_BODY_TIMEOUT',
   'UND_ERR_SOCKET',
 ]);
+/** The transport failures that happen before the request is sent, so UIAM never saw it. */
+const CONNECT_FAILURE_CODES = new Set([
+  'ECONNREFUSED',
+  'EAI_AGAIN',
+  'ENETUNREACH',
+  'EHOSTUNREACH',
+  'UND_ERR_CONNECT_TIMEOUT',
+]);
 
 /**
  * Rewords a UIAM create refusal listed in {@link CREATE_REFUSALS} as a 400 the caller can act on,
@@ -649,6 +658,18 @@ const getUiamErrorCode = (error: Error): string | undefined => {
   return parsed.success ? parsed.data.error.code : undefined;
 };
 
+/** Whether a transport failure carries one of the given socket error codes. */
+const hasTransportCode = (error: Error, codes: ReadonlySet<string>): boolean =>
+  // Native fetch wraps transport failures in a TypeError with the socket error as its cause.
+  [error, error.cause].some(
+    (cause) =>
+      typeof cause === 'object' &&
+      cause !== null &&
+      'code' in cause &&
+      typeof cause.code === 'string' &&
+      codes.has(cause.code)
+  );
+
 const getExchangeRetryDelay = (error: Error): number | null => {
   if (Boom.isBoom(error)) {
     const { statusCode, payload, headers } = error.output;
@@ -671,15 +692,5 @@ const getExchangeRetryDelay = (error: Error): number | null => {
     return Number.isFinite(delay) && delay > 0 ? delay : 0;
   }
 
-  // Native fetch wraps transport failures in a TypeError with the socket error as its cause.
-  return [error, error.cause].some(
-    (cause) =>
-      typeof cause === 'object' &&
-      cause !== null &&
-      'code' in cause &&
-      typeof cause.code === 'string' &&
-      RETRYABLE_TRANSPORT_CODES.has(cause.code)
-  )
-    ? 0
-    : null;
+  return hasTransportCode(error, RETRYABLE_TRANSPORT_CODES) ? 0 : null;
 };

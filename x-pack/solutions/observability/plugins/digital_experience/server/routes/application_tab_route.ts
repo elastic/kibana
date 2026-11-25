@@ -13,11 +13,15 @@ import type { estypes } from '@elastic/elasticsearch';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../common/feature';
 import type { OverviewSearchParams, OverviewFilters } from '../../common/overview_filters';
 import { readOverviewFilters } from '../../common/overview_filters_param';
-import { MAX_SERVICE_NAME_LENGTH } from '../lib/constants';
 import { createDigitalExperienceTracedEsClient } from '../lib/create_digital_experience_traced_es_client';
 import { kueryToQuery } from '../lib/helpers/kuery';
 import type { DigitalExperienceRouteHandlerResources } from './create_digital_experience_server_route';
-import { documentFilteredTimeRangeQuery, filteredTimeRangeQuery, timeRangeQuery } from './params';
+import {
+  documentFilteredTimeRangeQuery,
+  filteredTimeRangeQuery,
+  serviceNameParam,
+  timeRangeQuery,
+} from './params';
 
 // The routes of one application's tabs (e.g. its errors) share the Overview route's params and
 // privileges.
@@ -48,7 +52,7 @@ export const APPLICATION_TAB_ROUTE_SECURITY = {
 export const applicationTabRouteParams = lazySchema(() => {
   return z.object({
     path: z.object({
-      serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
+      serviceName: serviceNameParam(),
     }),
     query: timeRangeQuery(),
   });
@@ -58,7 +62,7 @@ export const applicationTabRouteParams = lazySchema(() => {
 export const filteredApplicationTabRouteParams = lazySchema(() => {
   return z.object({
     path: z.object({
-      serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
+      serviceName: serviceNameParam(),
     }),
     query: filteredTimeRangeQuery(),
   });
@@ -68,7 +72,7 @@ export const filteredApplicationTabRouteParams = lazySchema(() => {
 export const documentFilteredApplicationTabRouteParams = lazySchema(() => {
   return z.object({
     path: z.object({
-      serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
+      serviceName: serviceNameParam(),
     }),
     query: documentFilteredTimeRangeQuery(),
   });

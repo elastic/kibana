@@ -14,10 +14,7 @@ import { MatchesBadge } from './matches_badge';
 
 const defaultProps: MatchesBadgeProps = {
   type: 'indices',
-  matches: [
-    { name: 'products', isHidden: false },
-    { name: 'users', isHidden: false },
-  ],
+  matches: [{ name: 'products' }, { name: 'users' }],
   getOnClickAriaLabel: (count) => `Show ${count} matches`,
   'data-test-subj': 'matchesBadge',
 };
@@ -40,10 +37,7 @@ describe('MatchesBadge', () => {
     render(
       <MatchesBadge
         {...defaultProps}
-        matches={[
-          ...defaultProps.matches,
-          { name: 'archive', isHidden: false, outrankedByRuleName: 'catalog' },
-        ]}
+        matches={[...defaultProps.matches, { name: 'archive', outrankedByRuleName: 'catalog' }]}
       />
     );
 
