@@ -862,7 +862,7 @@ describe('mergeIncidents handler', () => {
     const client = makeClient();
     client.post = jest
       .fn()
-      .mockResolvedValue({ data: { id: '1', redirectedIncidentIds: ['2', '3'] } });
+      .mockResolvedValue({ data: { targetIncidentId: '1' } });
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.mergeIncidents;
     const result = await action?.handler(ctx as never, {
@@ -877,12 +877,12 @@ describe('mergeIncidents handler', () => {
       }),
       expect.any(Object)
     );
-    expect(result).toMatchObject({ id: '1' });
+    expect(result).toMatchObject({ targetIncidentId: '1' });
   });
 
   it('maps comment input field to incidentComment in the request body', async () => {
     const client = makeClient();
-    client.post = jest.fn().mockResolvedValue({ data: { id: '10' } });
+    client.post = jest.fn().mockResolvedValue({ data: { targetIncidentId: '10' } });
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.mergeIncidents;
     await action?.handler(ctx as never, {
@@ -896,7 +896,7 @@ describe('mergeIncidents handler', () => {
 
   it('includes mergeReasons as comma-joined string when provided', async () => {
     const client = makeClient();
-    client.post = jest.fn().mockResolvedValue({ data: { id: '5' } });
+    client.post = jest.fn().mockResolvedValue({ data: { targetIncidentId: '5' } });
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.mergeIncidents;
     await action?.handler(ctx as never, {

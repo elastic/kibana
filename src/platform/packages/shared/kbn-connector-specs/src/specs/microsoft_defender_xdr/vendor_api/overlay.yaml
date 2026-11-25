@@ -150,15 +150,11 @@ actions:
                   schema:
                     type: object
                     description: >-
-                      mergeIncidentsResponse — contains the ID of the surviving incident
-                      and the list of redirected incident IDs.
+                      mergeIncidentsResponse — contains the ID of the surviving (target)
+                      incident after the merge.
                     properties:
-                      id:
+                      targetIncidentId:
                         type: string
-                      redirectedIncidentIds:
-                        type: array
-                        items:
-                          type: string
             4XX:
               $ref: '#/components/responses/error'
             5XX:
