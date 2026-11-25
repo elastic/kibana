@@ -152,12 +152,12 @@ const PresetsRecentTabs = () => {
   );
 };
 
-/** Auto-refresh status shown in the nav item, e.g. "Every 10 sec" or "Off". */
+/** Auto-refresh status shown in the nav item, e.g. "Every 10 sec" or "Disabled". */
 const AutoRefreshBadge = ({ autoRefresh }: { autoRefresh: AutoRefreshSettings }) => {
   if (!autoRefresh.isEnabled) {
     return (
       <EuiBadge color="default" data-test-subj="dateRangePickerAutoRefreshBadge">
-        {mainPanelTexts.autoRefreshOffLabel}
+        {mainPanelTexts.autoRefreshDisabledLabel}
       </EuiBadge>
     );
   }

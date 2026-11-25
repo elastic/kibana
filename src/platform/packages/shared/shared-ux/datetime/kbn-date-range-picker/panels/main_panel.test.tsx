@@ -52,7 +52,7 @@ describe('MainPanel', () => {
     });
 
     it.each<[string, AutoRefreshSettings]>([
-      ['Off', { isEnabled: false, isPaused: true, intervalMs: 10_000 }],
+      ['Disabled', { isEnabled: false, isPaused: true, intervalMs: 10_000 }],
       ['Every 10 sec', { isEnabled: true, isPaused: false, intervalMs: 10_000 }],
       ['Every 10 sec', { isEnabled: true, isPaused: true, intervalMs: 10_000 }],
       ['Every 5 min', { isEnabled: true, isPaused: false, intervalMs: 300_000 }],

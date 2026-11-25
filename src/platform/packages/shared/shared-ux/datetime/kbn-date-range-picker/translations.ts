@@ -371,9 +371,9 @@ export const mainPanelTexts = {
       defaultMessage: 'Every {count} {unit, select, s {sec} m {min} h {hr} other {}}',
       values: { count, unit },
     }),
-  autoRefreshOffLabel: i18n.translate(
-    'sharedUXPackages.dateRangePicker.mainPanel.autoRefreshOffLabel',
-    { defaultMessage: 'Off' }
+  autoRefreshDisabledLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.autoRefreshDisabledLabel',
+    { defaultMessage: 'Disabled' }
   ),
   savePresetTooltip: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',
