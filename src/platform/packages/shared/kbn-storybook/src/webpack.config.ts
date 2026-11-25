@@ -24,6 +24,8 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       // Mirrors the externals added for kbn-optimizer and kbn-rspack-optimizer.
       mongodb: 'commonjs mongodb',
       'mongodb-connection-string-url': 'commonjs mongodb-connection-string-url',
+      // pg uses Node.js TCP/TLS and Node-only modules (util/types) — never bundle for browser.
+      pg: 'commonjs pg',
     },
     module: {
       rules: [

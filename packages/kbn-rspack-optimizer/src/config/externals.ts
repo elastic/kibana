@@ -51,5 +51,7 @@ export function getExternals(): Record<string, string> {
     // Native MySQL driver — keep out of the browser bundle (mirrors webpack).
     mysql2: 'commonjs mysql2',
     'mysql2/promise': 'commonjs mysql2/promise',
+    // Native PostgreSQL driver — server-only, keep out of the browser bundle.
+    pg: 'commonjs pg',
   };
 }

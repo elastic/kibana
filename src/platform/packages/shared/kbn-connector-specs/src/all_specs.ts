@@ -100,3 +100,4 @@ export * from './specs/solarwinds_platform/solarwinds_platform';
 export { SSF } from './specs/ssf/ssf';
 export * from './specs/sentinelone/sentinelone';
 export * from './specs/microsoft_sql_server/microsoft_sql_server';
+export * from './specs/postgresql/postgresql';
