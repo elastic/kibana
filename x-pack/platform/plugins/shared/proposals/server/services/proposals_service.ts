@@ -26,6 +26,7 @@ import {
   isGatelessProposal,
   isTodoProposal,
   isTerminal,
+  OPEN_PROPOSAL_STATUSES,
   PROPOSAL_CATEGORY_TODO,
   PROPOSAL_ATTACHMENT_TYPE,
   PROPOSALS_RESUME_CHANNEL,
@@ -376,6 +377,8 @@ export class ProposalsService {
     /** Replaces the default priority sort; the queues page by recency instead. */
     sort?: SortCombinations[]
   ): Promise<ListProposalsResponse> {
+    const swept = await this.sweepOrphans(query, spaceId, request);
+
     const response = await this.deps.storage.search({
       track_total_hits: true,
       size: query.size,
@@ -384,16 +387,16 @@ export class ProposalsService {
       sort: sort ?? (query.order === 'newest' ? NEWEST_SORT : PRIORITY_SORT),
     });
 
-    const current = await this.settleOrphans(
-      response.hits.hits.reduce<Proposal[]>((proposals, hit) => {
-        if (hit._id !== undefined) {
-          proposals.push(toProposal(hit._id, hit._source));
-        }
-        return proposals;
-      }, []),
-      spaceId,
-      request
-    );
+    const read = response.hits.hits.reduce<Proposal[]>((proposals, hit) => {
+      if (hit._id !== undefined) {
+        proposals.push(toProposal(hit._id, hit._source));
+      }
+      return proposals;
+    }, []);
+    // A complete sweep already read every gate on this page.
+    const current = swept
+      ? read.map((proposal) => swept.get(proposal.id) ?? proposal)
+      : await this.settleOrphans(read, spaceId, request);
     // A proposal settled on this read no longer matches the status it was searched by.
     const matching = current.filter(
       ({ status }) =>
@@ -1718,37 +1721,103 @@ export class ProposalsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<Proposal[]> {
-    const settlements = new Map<string, ExecutionStatus>();
-    const awaitingGate: Array<{ proposal: Proposal; executionId: string }> = [];
+    const awaitingGate: GateCandidate[] = [];
     for (const proposal of proposals) {
       if (isUnsettled(proposal) && proposal.workflowExecutionId) {
-        awaitingGate.push({ proposal, executionId: proposal.workflowExecutionId });
+        awaitingGate.push({ id: proposal.id, executionId: proposal.workflowExecutionId });
       }
     }
 
+    const settled = await this.settleEndedGates(awaitingGate, spaceId, request);
+    return proposals.map((proposal) => settled.get(proposal.id) ?? proposal);
+  }
+
+  /**
+   * Settles every orphan a list read could count, not just the page it returns:
+   * a count-only read returns no rows, so settling the page alone would leave a
+   * collapsed queue counting proposals that opening it then settles away.
+   *
+   * Returns the proposals it settled, or undefined when it did not see every
+   * candidate (more than `MAX_ORPHAN_SWEEP`, or a failed search), in which case
+   * the caller still settles its own page.
+   */
+  private async sweepOrphans(
+    query: ListProposalsQuery & InProcessProposalFilters,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<Map<string, Proposal> | undefined> {
+    if (!admitsUnsettled(query)) {
+      return new Map();
+    }
+    let hits;
+    try {
+      ({ hits } = await this.deps.storage.search({
+        track_total_hits: false,
+        size: MAX_ORPHAN_SWEEP,
+        _source: ['status', 'supersededBy', 'workflowExecutionId'],
+        query: {
+          bool: {
+            filter: [
+              ...toFilterClauses(query, spaceId),
+              { terms: { status: OPEN_PROPOSAL_STATUSES } },
+              { exists: { field: 'workflowExecutionId' } },
+              { bool: { must_not: { exists: { field: 'supersededBy' } } } },
+            ],
+          },
+        },
+      }));
+    } catch (error) {
+      this.deps.logger.warn(`Could not look up unsettled proposals to settle: ${error}`);
+      return undefined;
+    }
+
+    const awaitingGate: GateCandidate[] = [];
+    for (const { _id: id, _source: source } of hits.hits) {
+      const { status, supersededBy, workflowExecutionId } = (source ?? {}) as Partial<Proposal>;
+      if (
+        id !== undefined &&
+        workflowExecutionId &&
+        status !== undefined &&
+        isUnsettled({ status, supersededBy })
+      ) {
+        awaitingGate.push({ id, executionId: workflowExecutionId });
+      }
+    }
+
+    const settled = await this.settleEndedGates(awaitingGate, spaceId, request);
+    return hits.hits.length < MAX_ORPHAN_SWEEP ? settled : undefined;
+  }
+
+  /** Settles each candidate whose gate has ended; returns the records it wrote or found settled. */
+  private async settleEndedGates(
+    awaitingGate: GateCandidate[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<Map<string, Proposal>> {
     const endedGates = await this.findEndedGates(
       awaitingGate.map(({ executionId }) => executionId),
       spaceId,
       request
     );
-    for (const { proposal, executionId } of awaitingGate) {
+    const settlements: Array<[string, ExecutionStatus]> = [];
+    for (const { id, executionId } of awaitingGate) {
       const gateStatus = endedGates.get(executionId);
       if (gateStatus !== undefined) {
-        settlements.set(proposal.id, gateStatus);
+        settlements.push([id, gateStatus]);
       }
     }
 
-    if (settlements.size === 0) {
-      return proposals;
+    const settled = new Map<string, Proposal>();
+    if (settlements.length === 0) {
+      return settled;
     }
-    const settled = new Map(
-      await asyncMapWithLimit(
-        [...settlements],
-        10,
-        async ([id, gateStatus]) => [id, await this.settleOrphan(id, gateStatus, spaceId)] as const
-      )
-    );
-    return proposals.map((proposal) => settled.get(proposal.id) ?? proposal);
+    await asyncMapWithLimit(settlements, 10, async ([id, gateStatus]) => {
+      const proposal = await this.settleOrphan(id, gateStatus, spaceId);
+      if (proposal !== undefined) {
+        settled.set(id, proposal);
+      }
+    });
+    return settled;
   }
 
   /** The terminal status of each readable gate execution among `executionIds`. */
@@ -1964,8 +2033,30 @@ const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });
 
 /** Still waiting on its gate: undecided, or approved with the action running. */
-const isUnsettled = ({ status, supersededBy }: Proposal): boolean =>
+const isUnsettled = ({
+  status,
+  supersededBy,
+}: Pick<Proposal, 'status' | 'supersededBy'>): boolean =>
   (status === 'pending' || status === 'executing') && supersededBy === undefined;
+
+/**
+ * How many unsettled proposals a list read checks the gates of. Past it, the
+ * rest settle as the pages that show them are read.
+ */
+const MAX_ORPHAN_SWEEP = 1_000;
+
+interface GateCandidate {
+  id: string;
+  executionId: string;
+}
+
+/** Whether a list read's status filters let an unsettled proposal through. */
+const admitsUnsettled = ({
+  status,
+  statuses,
+}: ProposalFilters & InProcessProposalFilters): boolean =>
+  (status === undefined || OPEN_PROPOSAL_STATUSES.includes(status)) &&
+  (statuses === undefined || statuses.some((value) => OPEN_PROPOSAL_STATUSES.includes(value)));
 
 /** Only an undecided proposal has a deadline to pass: an executing action runs past it. */
 const isPastDeadline = ({ status, expiresAt }: Proposal, now: number): boolean =>

@@ -525,7 +525,8 @@ A cancelled or timed-out gate execution runs no handler, so nothing in the workf
 What follows from settling on read:
 
 - A read can write, and the write records no actor. `decidedAt` is when the read settled the proposal, not when its gate ended, so `chartsSummary` counts the close then.
-- A status-filtered `list` drops the rows it settled and lowers `total` by as many, so that page comes back short.
+- A `list` whose status filters let `pending` or `executing` through first sweeps every orphan it could count, not just its page: it looks up the matching unsettled proposals with a gate (up to 1,000), reads their gates in one `getWorkflowExecutionStatuses` and settles the ended ones before it searches. A count-only read (`size: 0`) returns no rows to settle, so without the sweep a collapsed queue would count orphans that opening it then settles away ([#20922](https://github.com/elastic/security-team/issues/20922)). Each orphan settles once, so the sweep's cost after that is one search and one bulk read.
+- Past the sweep's cap, or when its lookup fails, a status-filtered `list` still settles its own page, drops the rows it settled and lowers `total` by as many, so that page comes back short.
 - `countPendingByConversationIds` is an aggregation and settles nothing. An orphan whose deadline is still ahead keeps counting as pending until a `get` or `list` reads it.
 - A `pending` proposal past its deadline whose gate is still live, or cannot be read, keeps reading `pending` until the gate settles it. The queues already treat it as closed through `excludeExpired`.
 
