@@ -1635,7 +1635,7 @@ describe('SlackAppService', () => {
       expect(isChannelBound).not.toHaveBeenCalled();
     });
 
-    it('logs the status and reason of a Relay failure before rethrowing', async () => {
+    it('logs the status, reason and error message of a Relay failure before rethrowing', async () => {
       const { server, logger } = createConnectedHarness();
       isChannelBound.mockRejectedValue(
         new RelayRequestError('/bindings', 503, 'down', 'relay_busy')
@@ -1644,10 +1644,12 @@ describe('SlackAppService', () => {
       await expect(
         new SlackAppService(server).isChannelBound(request, 'C1')
       ).rejects.toBeInstanceOf(RelayRequestError);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('relay_busy'));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('status 503, reason relay_busy, down')
+      );
     });
 
-    it('logs the Relay message when the failure has no reason', async () => {
+    it('logs the status and error message when the failure has no reason', async () => {
       const { server, logger } = createConnectedHarness();
       isChannelBound.mockRejectedValue(new RelayRequestError('/bindings', 502, 'upstream down'));
 
@@ -1655,7 +1657,9 @@ describe('SlackAppService', () => {
         new SlackAppService(server).isChannelBound(request, 'C1')
       ).rejects.toBeInstanceOf(RelayRequestError);
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('message upstream down'));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('status 502, upstream down')
+      );
     });
 
     it('rethrows a Relay failure and logs it once', async () => {
