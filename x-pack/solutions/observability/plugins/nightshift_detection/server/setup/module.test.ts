@@ -160,7 +160,13 @@ describe('module', () => {
       abortSignal: new AbortController().signal,
     });
 
-    expect(result).toMatchObject({ status: 'completed', strategies: [] });
+    // Known failures is due on a first tick and finds nothing: no managed rule, no knowledge.
+    expect(result).toMatchObject({
+      status: 'completed',
+      strategies: [expect.objectContaining({ id: 'known_failures', signals: 0, notes: [] })],
+    });
+    // A failed strategy also stores nothing and leaves no note; only `error` tells them apart.
+    expect(result).not.toHaveProperty('strategies.0.error');
   });
 
   // Same reason as the tick: the reconciler and its rule reader are bound in the fork.
