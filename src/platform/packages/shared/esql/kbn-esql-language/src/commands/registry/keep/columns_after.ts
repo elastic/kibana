@@ -9,31 +9,41 @@
 import type { ESQLCommand } from '@elastic/esql/types';
 import { walk } from '@elastic/esql';
 import type { ESQLColumnData } from '../types';
+import { getFieldPatternMatcher } from '../../definitions/utils/regex';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
   query: string
 ) => {
-  const columnsToKeep: string[] = [];
+  const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
+  const columns = [...columnsByName.values()];
+  const selections: ESQLColumnData[][] = [];
+  const winners = new Map<string, { precedence: number; index: number }>();
 
   walk(command, {
     visitColumn: (node) => {
-      columnsToKeep.push(node.parts.join('.'));
+      const matcher = getFieldPatternMatcher(node.text);
+      const precedence = node.text === '*' ? 0 : matcher ? 1 : 2;
+      const column = columnsByName.get(node.parts.join('.'));
+      const selected = matcher
+        ? columns.filter((field) => matcher(field.name))
+        : column
+        ? [column]
+        : [];
+      const index = selections.push(selected) - 1;
+
+      // Exact names outrank partial patterns, which outrank '*'. Ties go to the rightmost selector.
+      for (const { name } of selected) {
+        const prior = winners.get(name);
+        if (!prior || precedence >= prior.precedence) {
+          winners.set(name, { precedence, index });
+        }
+      }
     },
   });
 
-  const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
-  const uniqueColumnsToKeep = columnsToKeep.filter(
-    (name, index) => columnsToKeep.lastIndexOf(name) === index
+  return selections.flatMap((selected, index) =>
+    selected.filter(({ name }) => winners.get(name)?.index === index)
   );
-
-  // KEEP follows the written order and keeps the last occurrence of repeated columns.
-  // For example, `KEEP a, b, a` returns `[b, a]`.
-  // Multi-column IN uses this order to compare the fields on each side.
-  return uniqueColumnsToKeep.flatMap((name) => {
-    const column = columnsByName.get(name);
-
-    return column ? [column] : [];
-  });
 };

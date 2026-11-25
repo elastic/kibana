@@ -78,6 +78,17 @@ describe('DESCRIBE editor support', () => {
     expect(columns.map(({ name }) => name)).not.toContain('message');
   });
 
+  it('retains aggregate columns selected by a KEEP wildcard in a FORK branch', async () => {
+    const query =
+      'SET unmapped_fields="LOAD"; FROM (FROM logs | FORK (DESCRIBE) (STATS total = COUNT(*) | KEEP tot*))';
+    const callbacks = { getColumnsFor: () => Promise.resolve([]) };
+
+    expect((await validateQuery(`${query} | KEEP total`, callbacks)).errors).toEqual([]);
+    expect((await validateQuery(`${query} | KEEP message`, callbacks)).errors).toEqual([
+      expect.objectContaining({ code: 'unknownColumn', text: 'Unknown column "message"' }),
+    ]);
+  });
+
   it('still loads unmapped columns after a plain STATS subquery', async () => {
     const query =
       'SET unmapped_fields="LOAD"; FROM (FROM logs | STATS n = COUNT(*)) | WHERE message IS NULL';
