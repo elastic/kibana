@@ -179,6 +179,12 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({
           }}
         />
         <EuiSpacer size="s" />
+        {isTokenTypeEnabled && (
+          <>
+            <TokenTypeField readOnly={readOnly} />
+            <EuiSpacer size="s" />
+          </>
+        )}
         <UseField
           path="config.additionalFields"
           config={{
@@ -199,12 +205,6 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({
           }}
         />
         <EuiSpacer size="s" />
-        {isTokenTypeEnabled && (
-          <>
-            <TokenTypeField readOnly={readOnly} />
-            <EuiSpacer size="s" />
-          </>
-        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
