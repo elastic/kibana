@@ -379,17 +379,20 @@ describe('OtelOverview', () => {
     };
     await waitFor(() => expectFetchedWith(query));
     await waitFor(() => expectFetchedWith(query, USAGE_ENDPOINT));
-    // The errors carry no page URL, so the page is not sent for them.
+    // The errors carry the route of their page, so the page narrows them too.
+    await waitFor(() => expectFetchedWith(query, ERRORS_ENDPOINT));
+  });
+
+  it('leaves the URL text out of the errors request, as errors carry no URL', async () => {
+    mockFilters({ browser: include('Chrome'), pageContains: include('/cart') });
+    renderOverview();
+
     await waitFor(() =>
       expectFetchedWith(
         {
           start: timeRange.rangeFrom,
           end: timeRange.rangeTo,
-          filters:
-            encodeOverviewFilters({
-              browser: [...include('Chrome'), ...exclude('Safari')],
-              country: include('DE'),
-            }) ?? '',
+          filters: encodeOverviewFilters({ browser: include('Chrome') }) ?? '',
         },
         ERRORS_ENDPOINT
       )
@@ -584,7 +587,7 @@ describe('OtelOverview', () => {
     await findPageLoads('1,533');
 
     expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toHaveTextContent(
-      'apply to page loads, with their load time, trend, pages and breakdowns, and to frustration signals only'
+      'Page applies to every browser event but HTTP requests'
     );
     unmount();
 

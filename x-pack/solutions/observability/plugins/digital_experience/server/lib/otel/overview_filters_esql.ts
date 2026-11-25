@@ -9,7 +9,7 @@ import { escapeStringValue } from '@kbn/esql-utils';
 import { partitionFilterValues } from '../../../common/filter_values';
 import {
   OVERVIEW_FILTER_NAMES,
-  PAGE_FILTER_NAMES,
+  URL_FILTER_NAMES,
   isFreeTextFilter,
   type OverviewFilterName,
   type OverviewFilters,
@@ -71,8 +71,17 @@ const filterConditions = (name: OverviewFilterName, filters: OverviewFilters): s
   ];
 };
 
-const isPageFilter = (name: OverviewFilterName): boolean =>
-  PAGE_FILTER_NAMES.some((page) => page === name);
+/**
+ * The filters that narrow the logs only: the HTTP request spans carry the URL they request, not
+ * the route of the page they were sent from.
+ */
+const LOG_FILTER_NAMES = ['pageUrl'] as const satisfies readonly OverviewFilterName[];
+
+const isUrlFilter = (name: OverviewFilterName): boolean =>
+  URL_FILTER_NAMES.some((url) => url === name);
+
+const isLogFilter = (name: OverviewFilterName): boolean =>
+  LOG_FILTER_NAMES.some((log) => log === name);
 
 const isSelected = (name: OverviewFilterName, filters: OverviewFilters): boolean =>
   (filters[name] ?? []).length > 0;
@@ -91,12 +100,19 @@ export const esqlFilterEvals = (filters: OverviewFilters): string[] =>
         .join(', ')})`
   );
 
-/** The selected filters that narrow every document, as `WHERE` conditions; the page ones aside. */
+/**
+ * The selected filters that narrow every document, spans included, as `WHERE` conditions; the page
+ * and the URL text aside.
+ */
 export const esqlDocumentConditions = (filters: OverviewFilters): string[] =>
-  OVERVIEW_FILTER_NAMES.filter((name) => !isPageFilter(name)).flatMap((name) =>
+  OVERVIEW_FILTER_NAMES.filter((name) => !isUrlFilter(name) && !isLogFilter(name)).flatMap((name) =>
     filterConditions(name, filters)
   );
 
-/** The selected page filters, which narrow the page loads only, as `WHERE` conditions. */
+/** The selected page filter, which narrows the logs only, as `WHERE` conditions. */
+export const esqlLogConditions = (filters: OverviewFilters): string[] =>
+  LOG_FILTER_NAMES.flatMap((name) => filterConditions(name, filters));
+
+/** The selected filters on the URL text, which narrow the page loads only, as `WHERE` conditions. */
 export const esqlPageLoadConditions = (filters: OverviewFilters): string[] =>
-  PAGE_FILTER_NAMES.flatMap((name) => filterConditions(name, filters));
+  URL_FILTER_NAMES.flatMap((name) => filterConditions(name, filters));
