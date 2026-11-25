@@ -19142,7 +19142,6 @@
     "xpack.alertingV2EpisodesUi.details.flyout.badge.acknowledged": "已确认",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.flapping": "摆动",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.snoozed": "已暂停",
-    "xpack.alertingV2EpisodesUi.details.flyout.close": "关闭",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertId": "告警 ID",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertIdCopied": "告警 ID 已复制",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.assignee": "被分配人",

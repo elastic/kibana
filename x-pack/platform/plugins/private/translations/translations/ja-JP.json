@@ -19149,7 +19149,6 @@
     "xpack.alertingV2EpisodesUi.details.flyout.badge.acknowledged": "認識",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.flapping": "フラップ中",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.snoozed": "スヌーズ済み",
-    "xpack.alertingV2EpisodesUi.details.flyout.close": "閉じる",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertId": "アラートID",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertIdCopied": "アラートIDをコピーしました",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.assignee": "担当者",

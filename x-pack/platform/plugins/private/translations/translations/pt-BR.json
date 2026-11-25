@@ -19168,7 +19168,6 @@
     "xpack.alertingV2EpisodesUi.details.flyout.badge.acknowledged": "Reconhecido",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.flapping": "Oscilação",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.snoozed": "Suspensos",
-    "xpack.alertingV2EpisodesUi.details.flyout.close": "Fechar",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertId": "ID do alerta",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertIdCopied": "ID do alerta copiado",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.assignee": "Responsável",
