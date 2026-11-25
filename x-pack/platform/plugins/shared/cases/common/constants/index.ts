@@ -47,6 +47,7 @@ export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
+export const CASE_OBSERVABLE_SAVED_OBJECT = 'cases-observables' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -507,6 +508,12 @@ export const MIN_BULK_DELETE_OBSERVABLE_IDS = 1;
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
+
+/**
+ * Lucene's maximum term length in bytes. The case field maps observable values and descriptions as
+ * keywords without `ignore_above`, so no stored one is longer, in bytes or in characters.
+ */
+export const MAX_STORED_OBSERVABLE_FIELD_LENGTH = 32766;
 
 /**
  * EBT events
