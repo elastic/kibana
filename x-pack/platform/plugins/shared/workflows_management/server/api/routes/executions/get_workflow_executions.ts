@@ -173,8 +173,7 @@ export function registerGetWorkflowExecutionsRoute({
                     ],
                     {
                       meta: {
-                        description:
-                          'Field to collapse execution results by. Use page and size to paginate collapsed results. The total field counts matching executions before collapsing, so offset pagination can return empty trailing pages. Collapsed responses omit the searchAfter cursor, and requests that combine collapse with searchAfter return HTTP 400.',
+                        description: 'Field to collapse execution results by.',
                         availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                       },
                     }
@@ -243,15 +242,10 @@ export function registerGetWorkflowExecutionsRoute({
                 ),
               },
               {
-                validate: (query) => {
-                  if (query.collapse && query.searchAfter !== undefined) {
-                    return 'collapse cannot be combined with searchAfter. Use page and size to paginate collapsed results.';
-                  }
-
-                  return hasSearchAfterCursor(query.searchAfter)
+                validate: (query) =>
+                  hasSearchAfterCursor(query.searchAfter)
                     ? undefined
-                    : validatePaginationWindow(MAX_PAGE_SIZE)(query);
-                },
+                    : validatePaginationWindow(MAX_PAGE_SIZE)(query),
               }
             ),
           },

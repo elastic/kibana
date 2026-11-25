@@ -192,11 +192,9 @@ describe('Execution Routes', () => {
   it.each([
     '/api/workflows/workflow/executions',
     '/api/workflows/workflow/{workflowId}/executions',
-  ])('accepts workflowId as a collapse field on GET %s', (path) => {
+  ])('rejects workflowId as a collapse field on GET %s', (path) => {
     const { querySchema } = routeHandlers[`GET:${path}`];
-    expect(querySchema?.validate({ collapse: 'workflowId' })).toMatchObject({
-      collapse: 'workflowId',
-    });
+    expect(() => querySchema?.validate({ collapse: 'workflowId' })).toThrow();
   });
 
   describe('POST /api/workflows/workflow/{id}/run (run_workflow)', () => {
@@ -532,18 +530,11 @@ describe('Execution Routes', () => {
   describe('GET /api/workflows/workflow/{workflowId}/executions (get_workflow_executions)', () => {
     const path = '/api/workflows/workflow/{workflowId}/executions';
 
-    it('requires offset pagination for collapsed executions', () => {
+    it('accepts an empty first-page cursor for collapsed executions', () => {
       const { querySchema } = routeHandlers[`GET:${path}`];
-      expect(() =>
-        querySchema?.validate({
-          collapse: 'workflowId',
-          searchAfter: '["2026-11-23T12:00:00.000Z","exec-1"]',
-        })
-      ).toThrow('collapse cannot be combined with searchAfter');
-      expect(querySchema?.validate({ collapse: 'workflowId', page: 2, size: 1 })).toMatchObject({
-        collapse: 'workflowId',
-        page: 2,
-        size: 1,
+      expect(querySchema?.validate({ collapse: 'status', searchAfter: '[]' })).toMatchObject({
+        collapse: 'status',
+        searchAfter: '[]',
       });
     });
 

@@ -109,12 +109,12 @@ export const searchWorkflowExecutions = async ({
         : {}),
     });
 
-    return transformToWorkflowExecutionListModel(response, {
+    return transformToWorkflowExecutionListModel(
+      response,
       page,
       size,
-      includeNamedExecution: Boolean(namedExecutionQuery),
-      includeSearchAfter: !collapse,
-    });
+      Boolean(namedExecutionQuery)
+    );
   } catch (error) {
     if (isIndexNotFoundError(error)) {
       return {
@@ -160,12 +160,9 @@ function readHasNamedExecution(response: SearchResponse<EsWorkflowExecution>): b
 
 function transformToWorkflowExecutionListModel(
   response: SearchResponse<EsWorkflowExecution>,
-  {
-    page,
-    size,
-    includeNamedExecution,
-    includeSearchAfter,
-  }: { page: number; size: number; includeNamedExecution: boolean; includeSearchAfter: boolean }
+  page: number,
+  size: number,
+  includeNamedExecution: boolean
 ): WorkflowExecutionListDto {
   const total =
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
@@ -204,9 +201,7 @@ function transformToWorkflowExecutionListModel(
 
   const lastHit = response.hits.hits[response.hits.hits.length - 1];
   const nextSearchAfter =
-    includeSearchAfter && results.length >= size && lastHit?.sort != null
-      ? [...lastHit.sort]
-      : undefined;
+    results.length >= size && lastHit?.sort != null ? [...lastHit.sort] : undefined;
 
   const hasNamedExecution = includeNamedExecution
     ? readHasNamedExecution(response) ?? false

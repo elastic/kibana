@@ -147,7 +147,7 @@ export interface SearchExecutionsViewParams {
   startedBefore?: string;
   finishedAfter?: string;
   finishedBefore?: string;
-  collapse?: WorkflowExecutionCollapseField;
+  collapse?: WorkflowExecutionCollapseField | 'workflowId';
   sortField?: string;
   sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
