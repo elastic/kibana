@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 

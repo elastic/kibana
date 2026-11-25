@@ -9,7 +9,7 @@ import type { ApiServicesFixture, SamlAuth } from '@kbn/scout-security';
 import { apiTest, ELASTIC_INTERNAL_ORIGIN_HEADER, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { CaseStatuses } from '@kbn/cases-components';
+import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/server';
 import { API_VERSIONS } from '../../../../../../common/constants';
 import { ENTITY_CASE_COUNTS_INTERNAL_URL } from '../../../../../../common/entity_analytics/entity_analytics/constants';

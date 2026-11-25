@@ -41,7 +41,7 @@ export interface WalkResult {
  * node modules. Reports every source file that imports a banned node module, together with the
  * shortest chain of imports that makes it reachable.
  */
-export const walkServerImportGraph = ({
+export const walkImportGraph = ({
   entryPaths,
   getImports,
   bannedNodeModules,

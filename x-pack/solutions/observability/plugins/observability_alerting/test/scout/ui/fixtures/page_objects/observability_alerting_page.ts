@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/test_subjects';
 // Imported from the id module (not the `actions` barrel) to keep the React action code out of the Node-side Playwright load.
 import { ADD_TO_CASE_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui/actions/add_to_case_action_id';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';

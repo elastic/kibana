@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components/test_subjects';
 import { FtrService } from '../ftr_provider_context';
 
 /**

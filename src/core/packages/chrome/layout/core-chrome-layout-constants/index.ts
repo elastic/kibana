@@ -18,7 +18,7 @@ export {
   SIDE_PANEL_CONTENT_GAP,
   euiIncludeSelectorInFocusTrap,
   APP_FIXED_VIEWPORT_ID,
-} from '@kbn/core-chrome-layout';
+} from '@kbn/core-chrome-layout/constants';
 
 /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
 export type {
@@ -28,4 +28,4 @@ export type {
   LayoutProperty,
   ApplicationComponent,
   ApplicationVarName,
-} from '@kbn/core-chrome-layout';
+} from '@kbn/core-chrome-layout/constants';

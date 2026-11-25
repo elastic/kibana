@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { kibanaSampleDataLogsSignificantTermsBase } from '@kbn/aiops-test-utils/kibana_sample_data_logs/significant_terms';
 
 import type { TestData } from '../../types';

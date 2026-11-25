@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import { walkServerImportGraph, type ImportTarget } from './walk_server_import_graph';
+import { walkImportGraph, type ImportTarget } from './walk_import_graph';
 
 const bannedNodeModules = new Set(['@elastic/eui']);
 
@@ -24,9 +24,9 @@ const getImports =
       return absolute in files ? [{ request, kind: 'source', absolute }] : [];
     });
 
-describe('walkServerImportGraph', () => {
+describe('walkImportGraph', () => {
   it('reports banned imports reachable from an entry with the shortest chain', () => {
-    const result = walkServerImportGraph({
+    const result = walkImportGraph({
       entryPaths: ['/repo/plugin/server/index'],
       bannedNodeModules,
       getImports: getImports({
@@ -54,7 +54,7 @@ describe('walkServerImportGraph', () => {
   });
 
   it('does not report banned imports that are not reachable from any entry', () => {
-    const result = walkServerImportGraph({
+    const result = walkImportGraph({
       entryPaths: ['/repo/plugin/server/index'],
       bannedNodeModules,
       getImports: getImports({
@@ -69,7 +69,7 @@ describe('walkServerImportGraph', () => {
   });
 
   it('handles cycles and reports each importer/module pair once', () => {
-    const result = walkServerImportGraph({
+    const result = walkImportGraph({
       entryPaths: ['/repo/a', '/repo/b', '/repo/a'],
       bannedNodeModules,
       getImports: getImports({
@@ -86,7 +86,7 @@ describe('walkServerImportGraph', () => {
 
   it('does not descend into node modules', () => {
     const getImportsMock = jest.fn(getImports({ '/repo/entry': ['lodash'] }));
-    const result = walkServerImportGraph({
+    const result = walkImportGraph({
       entryPaths: ['/repo/entry'],
       bannedNodeModules,
       getImports: getImportsMock,

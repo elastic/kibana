@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components/test_subjects';
 import type { ScoutPage, Locator } from '@kbn/scout';
 
 const SEARCH_MODAL = 'globalSearchModal';

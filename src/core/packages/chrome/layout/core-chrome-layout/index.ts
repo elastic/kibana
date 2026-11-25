@@ -20,7 +20,8 @@ export {
   MAIN_CONTENT_SELECTORS,
   SIDE_PANEL_CONTENT_GAP,
   euiIncludeSelectorInFocusTrap,
-} from '@kbn/ui-chrome-layout';
+  APP_FIXED_VIEWPORT_ID,
+} from './constants';
 export type {
   LayoutVarName,
   CSSVarName,
@@ -28,7 +29,7 @@ export type {
   LayoutProperty,
   ApplicationComponent,
   ApplicationVarName,
-} from '@kbn/ui-chrome-layout';
+} from './constants';
 
 export {
   type ScrollContainer,
@@ -48,5 +49,3 @@ export {
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
 } from '@kbn/ui-chrome-layout';
-
-export { APP_FIXED_VIEWPORT_ID } from './kibana_layout_constants';
