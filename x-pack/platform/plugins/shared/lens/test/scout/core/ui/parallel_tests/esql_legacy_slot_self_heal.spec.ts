@@ -151,7 +151,7 @@ spaceTest.describe(
         await spaceTest.step(
           'inline flyout seeds from the layer query, not the stale slot',
           async () => {
-            await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+            await dashboard.openEditPanel();
             await esqlEditor.waitReady();
             await expect.poll(() => esqlEditor.getQuery()).toBe(LAYER_QUERY);
           }
@@ -186,7 +186,7 @@ spaceTest.describe(
             // clearing storage also dropped the view-mode backup — the dashboard
             // reloads in view mode, so re-enter edit mode for the panel action
             await dashboard.ensureEditMode();
-            await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+            await dashboard.openEditPanel();
             await esqlEditor.waitReady();
             await expect.poll(() => esqlEditor.getQuery()).toBe(UPDATED_QUERY);
           }

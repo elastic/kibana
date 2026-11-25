@@ -31,7 +31,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
     const { dashboard } = pageObjects;
 
     await dashboard.openTryEsqlDashboard();
-    await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+    await dashboard.openEditPanel();
     await dashboard.waitForRenderComplete();
   });
 
@@ -153,7 +153,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
       await spaceTest.step(
         'add limit and verify line chart type and red color persist',
         async () => {
-          await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+          await dashboard.openEditPanel();
           await expect(lens.workspace.inlineEditor).toBeVisible();
 
           await setEsqlQueryAndRun(

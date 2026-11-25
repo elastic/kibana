@@ -100,7 +100,7 @@ spaceTest.describe('Vega panels linked to the library', { tag: '@local-stateful-
 
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addPanelFromLibrary(title);
-      await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', title);
+      await pageObjects.dashboard.openEditPanel(title);
 
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
       // A copy couldn't replace the item the panel references.

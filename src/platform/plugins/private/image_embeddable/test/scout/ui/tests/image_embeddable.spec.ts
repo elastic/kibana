@@ -58,7 +58,7 @@ test.describe('Image embeddable', { tag: '@local-stateful-classic' }, () => {
       await pageObjects.dashboard.expectExistsPanelAction(
         'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN'
       );
-      await pageObjects.dashboard.clickPanelAction(
+      await pageObjects.dashboard.clickContextMenuAction(
         'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN'
       );
       await expect(page.testSubj.locator('createDrilldownFlyout')).toBeVisible();

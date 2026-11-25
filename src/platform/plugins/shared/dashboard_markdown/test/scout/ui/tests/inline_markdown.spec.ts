@@ -83,7 +83,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('discards unsaved edits and toggles preview/editor', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await dashboard.openEditPanel();
         await expect(editor).toBeVisible();
         await editor.fill('text that wont be saved');
         await previewTab.click();
@@ -96,7 +96,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('edits the panel and applies', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await dashboard.openEditPanel();
         await expect(editor).toBeVisible();
         await editor.fill(MODIFIED.markdown);
         await applyButton.click();

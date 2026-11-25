@@ -191,7 +191,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
     await test.step('click Explore in Discover and validate navigation', async () => {
       const newPagePromise = page.context().waitForEvent('page');
-      await pageObjects.dashboard.clickPanelAction(
+      await pageObjects.dashboard.clickHoverAction(
         'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER',
         panelTitle
       );
@@ -452,7 +452,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await pageObjects.toasts.closeAll();
 
     await test.step('open drilldown creation flyout', async () => {
-      await pageObjects.dashboard.clickPanelAction(
+      await pageObjects.dashboard.clickContextMenuAction(
         'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN',
         panelTitle
       );

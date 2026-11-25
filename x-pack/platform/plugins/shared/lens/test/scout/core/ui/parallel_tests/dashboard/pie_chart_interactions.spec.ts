@@ -79,7 +79,7 @@ spaceTest.describe(
         await dashboard.openDashboardWithIdInEditMode(dashboardId);
         await dashboard.waitForPanelsToLoad(1);
 
-        await dashboard.clickPanelAction(CREATE_DRILLDOWN_ACTION, pieTitle);
+        await dashboard.clickContextMenuAction(CREATE_DRILLDOWN_ACTION, pieTitle);
         await page.testSubj.click('drilldownFactoryItem-discover_drilldown');
         await page.testSubj.click('drilldownWizardSubmit');
         await expect(page.testSubj.locator('drilldownWizardSubmit')).toBeHidden();

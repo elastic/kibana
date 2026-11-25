@@ -90,7 +90,7 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
       await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveCount(0);
 
       await dashboard.ensureEditMode();
-      await dashboard.clickPanelAction('embeddablePanelAction-editPanel', FIRST_VIS_TITLE);
+      await dashboard.openEditPanel(FIRST_VIS_TITLE);
       await expect(lens.workspace.inlineEditor).toBeVisible();
 
       // Unlike the standalone editor, the inline flyout mounts a fresh Lens editor frame

@@ -42,7 +42,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
 
   const openMapEditorAndAddLayer = async (pageObjects: PageObjects) => {
     const [panelTitle] = await pageObjects.dashboard.getPanelTitles();
-    await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
+    await pageObjects.dashboard.openEditPanel(panelTitle);
     await pageObjects.maps.waitForLayersToLoad();
 
     await pageObjects.maps.addLayerButton.click();

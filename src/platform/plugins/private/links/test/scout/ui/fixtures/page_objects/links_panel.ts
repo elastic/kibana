@@ -48,7 +48,7 @@ export class LinksPanel {
 
   /** Opens the links panel editor for the panel with the given title on a dashboard in edit mode. */
   async openPanelEditor(panelTitle: string) {
-    await this.dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
+    await this.dashboard.openEditPanel(panelTitle);
     await this.panelEditorFlyout.waitFor({ state: 'visible' });
   }
 

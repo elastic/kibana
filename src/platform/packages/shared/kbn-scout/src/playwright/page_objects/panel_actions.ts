@@ -85,25 +85,32 @@ export class PanelActions {
   }
 
   /**
-   * Clicks a panel action from the hover actions or context menu.
+   * Clicks a quick action in the panel's hover actions row.
    *
-   * Checks if the action is a DESCENDANT of the panel wrapper, not just globally visible.
-   * This prevents clicking the wrong panel's actions.
+   * The action is scoped to the panel wrapper so another panel's actions are never clicked.
+   * Playwright's click waits for the action to render, so this is safe right after a view mode
+   * change, when quick actions are still being resolved. Fails if the action is not a quick action
+   * for the current view mode; use `clickContextMenuAction` for context menu actions.
    */
-  async clickPanelAction(actionTestSubj: string, title?: string) {
+  async clickHoverAction(actionTestSubj: string, title?: string) {
     const panelWrapper = await this.hoverPanel(title);
+    await panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`).click();
+  }
 
-    if (await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper)) {
-      await panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`).click();
-    } else {
-      // Open context menu and click action. The menu renders in a portal outside the panel, so it
-      // cannot be panel-scoped; filtering to the visible match skips the hidden quick-action
-      // buttons that every other panel renders under the same test subject.
-      await this.openPanelContextMenu(title);
-      await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
-      // Wait for context menu to close after clicking the action
-      await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
-    }
+  /**
+   * Opens the panel's context menu and clicks an action in it.
+   *
+   * Fails if the action is not a context menu action for the current view mode; use
+   * `clickHoverAction` for quick actions.
+   */
+  async clickContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.openPanelContextMenu(title);
+    // The menu renders in a portal outside the panel, so it cannot be panel-scoped; filtering to
+    // the visible match skips the hidden quick-action buttons that every other panel renders
+    // under the same test subject.
+    await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
+    // Wait for context menu to close after clicking the action
+    await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
   }
 
   /**

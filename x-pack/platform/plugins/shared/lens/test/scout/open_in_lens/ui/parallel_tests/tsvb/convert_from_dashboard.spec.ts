@@ -52,7 +52,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await dashboard.expectTimeRangeBadgeExists();
 
       // Convert to Lens
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'My TSVB to Lens vis 1'
       );
@@ -103,7 +103,10 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await dashboard.expectTimeRangeBadgeExists();
 
       // Convert to Lens
-      await dashboard.clickPanelAction(testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, visTitle);
+      await dashboard.clickContextMenuAction(
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
+        visTitle
+      );
       await lens.waitForVisualization('xyVisChart');
 
       const dimensions = page.testSubj.locator('lns-dimensionTrigger');

@@ -182,7 +182,9 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     createdSavedObjects.push({ type: 'search', id: searchId });
     await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
     await page.testSubj.locator('savedSearchTotalDocuments').waitFor({ state: 'visible' });
-    await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN');
+    await pageObjects.dashboard.clickContextMenuAction(
+      'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN'
+    );
     await pageObjects.dashboard.createUrlDrilldown(
       drilldownName,
       urlTemplate,
@@ -226,7 +228,7 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     await expect(pageObjects.dataGrid.getColumnHeader('@timestamp')).toBeVisible();
     await expect(pageObjects.dataGrid.getColumnHeader('agent')).toBeVisible();
 
-    await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', searchTitle);
+    await pageObjects.dashboard.openEditPanel(searchTitle);
     await pageObjects.dashboard.selectDiscoverEmbeddableTab('Filtered tab');
     await pageObjects.dashboard.applyDiscoverEmbeddableInlineEdits();
 
@@ -279,7 +281,7 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     await pageObjects.dashboard.openNewDashboard();
     await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
     await page.testSubj.locator('savedSearchTotalDocuments').waitFor({ state: 'visible' });
-    await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', searchTitle);
+    await pageObjects.dashboard.openEditPanel(searchTitle);
     await pageObjects.dashboard.selectDiscoverEmbeddableTab('Filtered tab');
     await pageObjects.dashboard.applyDiscoverEmbeddableInlineEdits();
     await pageObjects.dashboard.saveDashboard(dashboardTitle);
@@ -296,7 +298,7 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     await pageObjects.dashboard.openDashboardWithId(dashboardId);
     await expect(page.testSubj.locator('discoverEmbeddableDeletedTabCallout')).toBeVisible();
     await pageObjects.dashboard.ensureEditMode();
-    await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', searchTitle);
+    await pageObjects.dashboard.openEditPanel(searchTitle);
     await expect(page.testSubj.locator('discoverEmbeddableInlineEditSelectTabAction')).toHaveText(
       '(Deleted tab)'
     );

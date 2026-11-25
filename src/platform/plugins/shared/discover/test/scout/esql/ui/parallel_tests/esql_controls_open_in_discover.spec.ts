@@ -57,7 +57,7 @@ spaceTest.describe(
         // "Open in Discover" opens a new browser tab.
         const [openedPage] = await Promise.all([
           page.context().waitForEvent('page'),
-          pageObjects.dashboard.clickPanelAction('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'),
+          pageObjects.dashboard.clickHoverAction('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'),
         ]);
 
         const discoverPage = extendPlaywrightPage({ page: openedPage, kbnUrl });

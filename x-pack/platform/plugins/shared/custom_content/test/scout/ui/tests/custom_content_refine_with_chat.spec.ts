@@ -71,7 +71,7 @@ test.describe(
       mockTemplateGeneration(llmProxy, '<p id="greeting">{{ rows[0]["greeting"].value }}</p>');
       mockFinalAnswer(llmProxy, 'I updated the panel.');
 
-      await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+      await dashboard.openEditPanel();
       await customContentPanel.refineWithChatButton.click();
       await customContentPanel.sendChatMessage('Change the greeting');
 

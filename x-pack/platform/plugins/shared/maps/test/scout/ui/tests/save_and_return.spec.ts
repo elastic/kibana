@@ -47,7 +47,7 @@ test.describe('Maps - save and return work flow', { tag: '@local-stateful-classi
 
   const editJoinExampleMapFromDashboard = async (pageObjects: PageObjects) => {
     await pageObjects.dashboard.openDashboardWithIdInEditMode(MAP_EMBEDDABLE_EXAMPLE_DASHBOARD_ID);
-    await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', 'join example');
+    await pageObjects.dashboard.openEditPanel('join example');
     await pageObjects.maps.waitForLayersToLoad();
   };
 

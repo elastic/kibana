@@ -88,7 +88,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     'should convert basic count aggregation table to Lens',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Table - Basic'
       );
@@ -105,7 +105,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     'should convert last value mode to reduced time range',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Table - Last value mode'
       );
@@ -122,7 +122,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     'should convert static value to the metric dimension',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Table - Static value'
       );
@@ -137,7 +137,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should convert aggregate by to split row dimension', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Table - Agg by'
     );
@@ -157,7 +157,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should convert group by field with custom label', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Table - GroupBy label'
     );
@@ -171,7 +171,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Table - Color ranges'
     );
@@ -199,7 +199,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     'should bring the ignore global filters configured at panel level over',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Table - Ignore global filters panel'
       );

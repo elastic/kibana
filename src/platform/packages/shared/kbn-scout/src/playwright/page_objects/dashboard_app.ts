@@ -268,6 +268,13 @@ export class DashboardApp {
   }
 
   /**
+   * Checks if the dashboard is in edit mode.
+   */
+  async getIsInEditMode(): Promise<boolean> {
+    return (await this.getViewMode()) === 'edit';
+  }
+
+  /**
    * Switches the dashboard to edit mode.
    */
   async switchToEditMode() {
@@ -752,7 +759,12 @@ export class DashboardApp {
   }
 
   async openCustomizePanel(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
+    // The customize panel hover action is only available in edit mode.
+    if (await this.getIsInEditMode()) {
+      await this.clickHoverAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
+    } else {
+      await this.clickContextMenuAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
+    }
     await expect(this.customizePanelFlyout).toBeVisible();
   }
 
@@ -857,14 +869,28 @@ export class DashboardApp {
   }
 
   /**
-   * Clicks a panel action from the hover actions or context menu.
+   * Clicks a quick action in the panel's hover actions row.
+   * Fails if the action is not a quick action for the current view mode.
    */
-  async clickPanelAction(actionTestSubj: string, title?: string) {
-    await this.panelActions.clickPanelAction(actionTestSubj, title);
+  async clickHoverAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.clickHoverAction(actionTestSubj, title);
+  }
+
+  /**
+   * Opens the panel's context menu and clicks an action in it.
+   * Fails if the action is not a context menu action for the current view mode.
+   */
+  async clickContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.clickContextMenuAction(actionTestSubj, title);
+  }
+
+  /** Clicks the Edit hover action, which is only available in edit mode. */
+  async openEditPanel(title?: string) {
+    await this.clickHoverAction('embeddablePanelAction-editPanel', title);
   }
 
   async editLinkedDiscoverPanel(title: string) {
-    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+    await this.openEditPanel(title);
     await this.editInDiscoverLink.waitFor({ state: 'visible' });
     await this.editInDiscoverLink.click();
   }
@@ -872,7 +898,7 @@ export class DashboardApp {
   /** Generates and downloads a CSV report for a Discover session panel. */
   async exportPanelAsCsv(title?: string): Promise<Download> {
     await this.toasts.dismissAll();
-    await this.clickPanelAction('embeddablePanelAction-generateCsvReport', title);
+    await this.clickContextMenuAction('embeddablePanelAction-generateCsvReport', title);
 
     const downloadButton = this.page.testSubj.locator('downloadCompletedReportButton');
     // Report generation runs asynchronously and can be slow on shared CI workers.
@@ -891,7 +917,7 @@ export class DashboardApp {
     const panels = this.page.testSubj.locator('embeddablePanel');
     const initialCount = await panels.count();
 
-    await this.clickPanelAction('embeddablePanelAction-clonePanel', title);
+    await this.clickContextMenuAction('embeddablePanelAction-clonePanel', title);
     await this.page.waitForFunction(
       (expectedCount) =>
         document.querySelectorAll('[data-test-subj="embeddablePanel"]').length > expectedCount,
@@ -904,7 +930,7 @@ export class DashboardApp {
    * Unlinks a panel from the library and verifies it is unlinked.
    */
   async unlinkFromLibrary(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-unlinkFromLibrary', title);
+    await this.clickContextMenuAction('embeddablePanelAction-unlinkFromLibrary', title);
     await expect(this.page.testSubj.locator('unlinkPanelSuccess')).toBeVisible();
     // Verify the panel is now unlinked
     await this.expectNotLinkedToLibrary(title);
@@ -912,7 +938,12 @@ export class DashboardApp {
 
   /** Opens the inspector flyout for the given panel (or the first panel if omitted). */
   async openInspector(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-openInspector', title);
+    // The inspector hover action is only available in view mode.
+    if (await this.getIsInViewMode()) {
+      await this.clickHoverAction('embeddablePanelAction-openInspector', title);
+    } else {
+      await this.clickContextMenuAction('embeddablePanelAction-openInspector', title);
+    }
     await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'visible' });
   }
 
@@ -938,7 +969,7 @@ export class DashboardApp {
    * Saves a panel to the library and verifies it is linked.
    */
   async saveToLibrary(newTitle: string, currentTitle?: string) {
-    await this.clickPanelAction('embeddablePanelAction-saveToLibrary', currentTitle);
+    await this.clickContextMenuAction('embeddablePanelAction-saveToLibrary', currentTitle);
 
     // Fill in the new title
     await this.savedObjectTitleInput.fill(newTitle);
@@ -1145,24 +1176,11 @@ export class DashboardApp {
    * expansion that asserts the maximized layout, use `maximizePanel`.
    */
   async togglePanelExpand(title?: string) {
-    if (title) {
-      await this.clickPanelAction('embeddablePanelAction-togglePanel', title);
-      return;
-    }
-    const panelWrapper = this.page.locator('.embPanel__hoverActionsAnchor >> nth=0');
-    await panelWrapper.scrollIntoViewIfNeeded();
-    await panelWrapper.hover();
-    const toggleAction = panelWrapper.locator(
-      '[data-test-subj="embeddablePanelAction-togglePanel"]'
-    );
-    if (await toggleAction.isVisible()) {
-      await toggleAction.click();
+    // The expand/minimize hover action is only available in view mode.
+    if (await this.getIsInViewMode()) {
+      await this.clickHoverAction('embeddablePanelAction-togglePanel', title);
     } else {
-      await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
-      await expect(
-        panelWrapper.locator('[data-test-subj="embeddablePanelContextMenuOpen"]')
-      ).toBeVisible();
-      await this.page.testSubj.click('embeddablePanelAction-togglePanel');
+      await this.clickContextMenuAction('embeddablePanelAction-togglePanel', title);
     }
   }
 

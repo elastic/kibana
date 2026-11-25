@@ -322,12 +322,17 @@ export class CanvasPage {
     await this.panelActions.openPanelContextMenu(title);
   }
 
+  /** Click a quick action in the panel's hover actions row. */
+  async clickHoverAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.clickHoverAction(actionTestSubj, title);
+  }
+
   /**
-   * Click a panel action, preferring the hover action if it is present and
-   * falling back to the context menu otherwise.
+   * Open the panel's context menu and click an action in it.
+   * Fails if the action is not a context menu action for the current view mode.
    */
-  async clickPanelAction(actionTestSubj: string, title?: string) {
-    await this.panelActions.clickPanelAction(actionTestSubj, title);
+  async clickContextMenuAction(actionTestSubj: string, title?: string) {
+    await this.panelActions.clickContextMenuAction(actionTestSubj, title);
   }
 
   /** Whether a panel offers an action, via hover actions or the context menu. */
@@ -336,8 +341,8 @@ export class CanvasPage {
   }
 
   /** Click the "Edit" panel action to open the embeddable's editor (inline or full). */
-  async editPanel(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+  async openEditPanel(title?: string) {
+    await this.clickHoverAction('embeddablePanelAction-editPanel', title);
   }
 
   /** Within a saved-search inline-edit flyout, click "Edit in Discover". */

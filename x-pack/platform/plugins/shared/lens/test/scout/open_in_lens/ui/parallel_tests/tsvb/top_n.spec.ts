@@ -67,7 +67,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should convert to horizontal bar', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - Horizontal bar'
     );
@@ -84,7 +84,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should convert group by to vertical axis', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - Group by'
     );
@@ -104,7 +104,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     'should convert last value mode to reduced time range',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Top N - Last value'
       );
@@ -129,7 +129,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     'should convert static value to separate layer with y dimension',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Top N - Static value'
       );
@@ -159,7 +159,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should visualize field to Lens', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - Basic'
     );
@@ -173,7 +173,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should preserve app filters in Lens', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - With filter'
     );
@@ -184,7 +184,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest('should preserve query in Lens', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - With query'
     );
@@ -198,7 +198,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     'should bring ignore global filters at series level over',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Top N - Ignore global filters series'
       );
@@ -211,7 +211,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     'should bring ignore global filters at panel level over',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Top N - Ignore global filters panel'
       );

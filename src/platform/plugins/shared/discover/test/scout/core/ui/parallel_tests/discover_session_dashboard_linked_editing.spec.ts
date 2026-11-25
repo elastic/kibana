@@ -33,10 +33,7 @@ spaceTest.describe(
         await dashboard.openNewDashboard();
         await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
         await dashboard.waitForRenderComplete();
-        await dashboard.clickPanelAction(
-          'embeddablePanelAction-editPanel',
-          testData.SAVED_SEARCH_TITLE
-        );
+        await dashboard.openEditPanel(testData.SAVED_SEARCH_TITLE);
         await discover.openInlineEditorInDiscover();
 
         expect(await discover.getCurrentQueryName()).toBe(`Editing ${testData.SAVED_SEARCH_TITLE}`);
@@ -56,10 +53,7 @@ spaceTest.describe(
         await dashboard.waitForRenderComplete();
         await dataGrid.waitForLoad();
         expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
-        await dashboard.clickPanelAction(
-          'embeddablePanelAction-editPanel',
-          testData.SAVED_SEARCH_TITLE
-        );
+        await dashboard.openEditPanel(testData.SAVED_SEARCH_TITLE);
         await discover.openInlineEditorInDiscover();
 
         expect(await discover.getCurrentQueryName()).toBe(`Editing ${testData.SAVED_SEARCH_TITLE}`);
@@ -86,10 +80,7 @@ spaceTest.describe(
         await dashboard.openNewDashboard();
         await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
         await dashboard.waitForRenderComplete();
-        await dashboard.clickPanelAction(
-          'embeddablePanelAction-editPanel',
-          testData.SAVED_SEARCH_TITLE
-        );
+        await dashboard.openEditPanel(testData.SAVED_SEARCH_TITLE);
         await discover.openInlineEditorInDiscover();
 
         expect(await discover.getCurrentQueryName()).toBe(`Editing ${testData.SAVED_SEARCH_TITLE}`);

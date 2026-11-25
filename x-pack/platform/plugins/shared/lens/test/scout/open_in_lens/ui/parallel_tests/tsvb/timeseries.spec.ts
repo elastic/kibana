@@ -45,7 +45,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest('should convert basic timeseries to Lens', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Timeseries -  Basic'
     );
@@ -57,7 +57,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest('should preserve app filters in Lens', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Timeseries - With filter'
     );
@@ -68,7 +68,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest('should preserve query in Lens', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Timeseries - With query'
     );
@@ -79,7 +79,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest('should draw a reference line', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Timeseries -  Reference line'
     );
@@ -107,7 +107,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest('should convert metric agg with params', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
-    await dashboard.clickPanelAction(
+    await dashboard.clickContextMenuAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Timeseries -  Agg with params'
     );
@@ -121,7 +121,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     'should convert parent pipeline aggregation with terms',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries -  Parent pipeline agg'
       );
@@ -140,7 +140,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     'should convert sibling pipeline aggregation with terms',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries - Sibling pipeline agg'
       );
@@ -159,7 +159,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     'should bring ignore global filters at series level over',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries - Ignore global filters series'
       );
@@ -172,7 +172,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     'should bring ignore global filters at panel level over',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      await dashboard.clickPanelAction(
+      await dashboard.clickContextMenuAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries - Ignore global filters panel'
       );
@@ -193,7 +193,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
       const { dashboard, lens, visualize } = pageObjects;
 
       await spaceTest.step('open TSVB panel in Visualize editor', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel', 'Timeseries -  Basic');
+        await dashboard.openEditPanel('Timeseries -  Basic');
         await expect(page.testSubj.locator('tvbVisEditor')).toBeVisible();
       });
 

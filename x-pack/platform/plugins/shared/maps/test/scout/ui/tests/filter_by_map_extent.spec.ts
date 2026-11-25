@@ -54,7 +54,7 @@ test.describe(
       });
 
       await test.step('metric filters to current extent when filter is enabled', async () => {
-        await pageObjects.dashboard.clickPanelAction(
+        await pageObjects.dashboard.clickContextMenuAction(
           FILTER_BY_MAP_EXTENT_ACTION,
           'document example'
         );
@@ -73,7 +73,7 @@ test.describe(
       });
 
       await test.step('metric returns to all records when filter is disabled', async () => {
-        await pageObjects.dashboard.clickPanelAction(
+        await pageObjects.dashboard.clickContextMenuAction(
           FILTER_BY_MAP_EXTENT_ACTION,
           'document example'
         );

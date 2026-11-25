@@ -32,7 +32,6 @@ const DROPPED_FIELDS = ['bytes', 'clientip', 'extension', 'response'];
 const METRIC_VIS = 'mtrVis';
 const EDIT_FLYOUT_HEADER = 'editFlyoutHeader';
 const CANCEL_FLYOUT_BUTTON = 'cancelFlyoutButton';
-const PANEL_ACTION_EDIT = 'embeddablePanelAction-editPanel';
 const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 
 const tracker = new SavedObjectsTracker();
@@ -173,7 +172,7 @@ test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
       // Saving an ES|QL viz from Discover lands the dashboard already in edit mode,
       // so only switch when the Edit button is actually present (view mode).
       await pageObjects.dashboard.ensureEditMode();
-      await pageObjects.dashboard.clickPanelAction(PANEL_ACTION_EDIT, visName);
+      await pageObjects.dashboard.openEditPanel(visName);
       await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeVisible();
       await page.testSubj.click(CANCEL_FLYOUT_BUTTON);
       await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeHidden();
@@ -181,7 +180,7 @@ test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
 
     await test.step('explore the panel in Discover and verify the ES|QL query is preserved', async () => {
       const newPagePromise = page.context().waitForEvent('page');
-      await pageObjects.dashboard.clickPanelAction(
+      await pageObjects.dashboard.clickHoverAction(
         'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER',
         visName
       );
@@ -192,7 +191,7 @@ test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
     });
 
     await test.step('copy the panel to a new dashboard', async () => {
-      await pageObjects.dashboard.clickPanelAction(
+      await pageObjects.dashboard.clickContextMenuAction(
         'embeddablePanelAction-copyToDashboard',
         visName
       );
@@ -294,7 +293,7 @@ test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
       // Saving an ES|QL viz from Discover lands the dashboard already in edit mode,
       // so only switch when the Edit button is actually present (view mode).
       await pageObjects.dashboard.ensureEditMode();
-      await pageObjects.dashboard.clickPanelAction(PANEL_ACTION_EDIT, visName);
+      await pageObjects.dashboard.openEditPanel(visName);
       await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeVisible();
       await page.testSubj.click(CANCEL_FLYOUT_BUTTON);
       await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeHidden();

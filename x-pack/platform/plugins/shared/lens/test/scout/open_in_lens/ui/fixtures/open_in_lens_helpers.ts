@@ -130,7 +130,7 @@ export async function convertToLensByTitle(
   { dashboard }: Pick<PageObjects, 'dashboard'>,
   panelTitle: string
 ): Promise<void> {
-  await dashboard.clickPanelAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
+  await dashboard.clickContextMenuAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
 }
 
 /**
