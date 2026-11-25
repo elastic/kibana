@@ -27,6 +27,7 @@ export const IntegratedHomeHeader = () => {
   const getTelemetryId = useTelemetryId();
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const projectName = cloud?.serverless.projectName;
+  const isServerless = cloud?.isServerlessEnabled === true;
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="elasticsearchHomeHeader">
@@ -40,9 +41,13 @@ export const IntegratedHomeHeader = () => {
       )}
       <EuiTitle size="m">
         <h1>
-          {i18n.translate('xpack.elasticsearchHome.integratedHome.header.title', {
-            defaultMessage: 'Your project is ready for data.',
-          })}
+          {isServerless
+            ? i18n.translate('xpack.elasticsearchHome.integratedHome.header.projectTitle', {
+                defaultMessage: 'Your project is ready for data.',
+              })
+            : i18n.translate('xpack.elasticsearchHome.integratedHome.header.clusterTitle', {
+                defaultMessage: 'Your cluster is ready for data.',
+              })}
         </h1>
       </EuiTitle>
       <EuiSpacer size="m" />

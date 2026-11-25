@@ -29,16 +29,12 @@ export const WizardPlaceholder = ({ title, testSubj }: WizardPlaceholderProps) =
     <KibanaPageTemplate solutionNav={solutionNav} data-test-subj={testSubj}>
       <AppHeader
         title={title}
-        back={
-          homeHref
-            ? {
-                href: homeHref,
-                label: i18n.translate('xpack.elasticsearchHome.wizards.header.backLabel', {
-                  defaultMessage: 'Home',
-                }),
-              }
-            : undefined
-        }
+        back={{
+          href: homeHref,
+          label: i18n.translate('xpack.elasticsearchHome.wizards.header.backLabel', {
+            defaultMessage: 'Home',
+          }),
+        }}
       />
       <KibanaPageTemplate.EmptyPrompt
         iconType="rocket"

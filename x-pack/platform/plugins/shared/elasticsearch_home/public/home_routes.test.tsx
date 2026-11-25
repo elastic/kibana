@@ -8,8 +8,6 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { BehaviorSubject } from 'rxjs';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
 import { HOME_PATHS } from '../common/constants';
@@ -21,18 +19,13 @@ jest.mock('./integrated_home_page', () => ({
 }));
 
 const setBreadcrumbs = jest.fn((_breadcrumbs: ChromeBreadcrumb[]) => {});
-const TEST_APP_ID = 'testHost';
-const application = applicationServiceMock.createStartContract();
-application.currentAppId$ = new BehaviorSubject<string | undefined>(TEST_APP_ID);
-application.getUrlForApp.mockImplementation((appId, options) => `/app/${appId}${options?.path}`);
 
 const renderRoutes = (path: string, withBreadcrumbs = true) => {
   const history = createMemoryHistory({ initialEntries: [path] });
   renderWithHomeContext(
     <Router history={history}>
       <HomeRoutes setBreadcrumbs={withBreadcrumbs ? setBreadcrumbs : undefined} />
-    </Router>,
-    { services: { application } }
+    </Router>
   );
   return history;
 };
@@ -55,15 +48,12 @@ describe('HomeRoutes', () => {
     [HOME_PATHS.sampleApp, 'elasticsearchHomeSampleAppWizard', 'Clone a sample app'],
     [HOME_PATHS.guidedApi, 'elasticsearchHomeGuidedApiWizard', 'Guided API setup'],
     [HOME_PATHS.uploadFile, 'elasticsearchHomeUploadFileWizard', 'Upload a file'],
-  ])('renders the wizard at %s below a Home breadcrumb', async (path, testSubj, title) => {
+  ])('renders the wizard at %s below a Home breadcrumb', (path, testSubj, title) => {
     renderRoutes(path);
 
-    expect(await screen.findByTestId(testSubj)).toBeInTheDocument();
+    expect(screen.getByTestId(testSubj)).toBeInTheDocument();
     expect(screen.queryByTestId('integratedHomePage')).not.toBeInTheDocument();
-    expect(lastBreadcrumbs()).toEqual([
-      { text: 'Home', href: `/app/${TEST_APP_ID}${HOME_PATHS.home}` },
-      { text: title },
-    ]);
+    expect(lastBreadcrumbs()).toEqual([{ text: 'Home', href: HOME_PATHS.home }, { text: title }]);
   });
 
   it('redirects unknown sub-paths to the home page', () => {

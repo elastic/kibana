@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { ElasticsearchHomeAppProps } from '@kbn/elasticsearch-home/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { getSearchHomeConfig } from '../../home_config';
@@ -22,7 +23,16 @@ export const IntegratedHomeApp = () => {
   );
 
   const solutionNav = searchNavigation?.useClassicNavigation(history);
-  const setBreadcrumbs = searchNavigation?.breadcrumbs.setSearchBreadCrumbs;
+  const setBreadcrumbs = useMemo(
+    () =>
+      searchNavigation
+        ? (breadcrumbs: ChromeBreadcrumb[]) =>
+            searchNavigation.breadcrumbs.setSearchBreadCrumbs(breadcrumbs, {
+              forClassicChromeStyle: true,
+            })
+        : undefined,
+    [searchNavigation]
+  );
   const props: ElasticsearchHomeAppProps = useMemo(
     () => ({
       ...getSearchHomeConfig({ application }),

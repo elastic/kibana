@@ -9,9 +9,11 @@ import React, { useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { HOME_PATHS } from '../common/constants';
 import { useHomeAppHref } from './hooks/use_home_app_href';
+import { GuidedApiWizard } from './wizards/guided_api_wizard';
+import { SampleAppWizard } from './wizards/sample_app_wizard';
+import { UploadFileWizard } from './wizards/upload_file_wizard';
 import {
   GUIDED_API_WIZARD_TITLE,
   SAMPLE_APP_WIZARD_TITLE,
@@ -25,27 +27,9 @@ const HOME_BREADCRUMB_TEXT = i18n.translate('xpack.elasticsearchHome.breadcrumbs
 });
 
 const WIZARD_ROUTES = [
-  {
-    path: HOME_PATHS.sampleApp,
-    title: SAMPLE_APP_WIZARD_TITLE,
-    Wizard: dynamic(async () => ({
-      default: (await import('./wizards/sample_app_wizard')).SampleAppWizard,
-    })),
-  },
-  {
-    path: HOME_PATHS.guidedApi,
-    title: GUIDED_API_WIZARD_TITLE,
-    Wizard: dynamic(async () => ({
-      default: (await import('./wizards/guided_api_wizard')).GuidedApiWizard,
-    })),
-  },
-  {
-    path: HOME_PATHS.uploadFile,
-    title: UPLOAD_FILE_WIZARD_TITLE,
-    Wizard: dynamic(async () => ({
-      default: (await import('./wizards/upload_file_wizard')).UploadFileWizard,
-    })),
-  },
+  { path: HOME_PATHS.sampleApp, title: SAMPLE_APP_WIZARD_TITLE, Wizard: SampleAppWizard },
+  { path: HOME_PATHS.guidedApi, title: GUIDED_API_WIZARD_TITLE, Wizard: GuidedApiWizard },
+  { path: HOME_PATHS.uploadFile, title: UPLOAD_FILE_WIZARD_TITLE, Wizard: UploadFileWizard },
 ];
 
 type HomeRoutesProps = Pick<ElasticsearchHomeAppProps, 'setBreadcrumbs'>;

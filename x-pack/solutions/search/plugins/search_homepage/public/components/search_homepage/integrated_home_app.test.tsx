@@ -52,13 +52,6 @@ describe('IntegratedHomeApp', () => {
     );
   });
 
-  it('applies breadcrumbs through search navigation', () => {
-    renderApp();
-
-    const [[{ setBreadcrumbs }]] = sharedHomeApp.mock.calls;
-    expect(setBreadcrumbs).toBe(searchNavigation.breadcrumbs.setSearchBreadCrumbs);
-  });
-
   it('renders the embeddable console when the console plugin is available', () => {
     renderApp({
       console: { EmbeddableConsole: () => <div data-test-subj="embeddableConsole" /> },

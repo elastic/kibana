@@ -77,45 +77,23 @@ Host-supplied "Add data" links carry a complete `telemetryId`, because the host 
 
 ### Routes
 
-`HomeApp` takes the same props as `HomePage`, plus an optional `setBreadcrumbs`, and renders
-`HomeRoutes` inside the host's `Router`, so its paths are relative to the host's app root. Links
-between the home page and the wizards are plain `href`s built with `application.getUrlForApp` for
-the current app (`application.currentAppId$`). Core navigates them in-app, so they don't touch the
-router's `history`.
+With integrated onboarding enabled, render `HomeApp` instead of `HomePage`. It takes the same props
+and must be rendered inside the host's `Router`, since its paths are relative to the host's app root.
+
+```tsx
+<Router history={history}>
+  <HomeApp {...homeConfig} />
+</Router>
+```
 
 | Path (`HOME_PATHS`) | Renders |
 | --- | --- |
-| `home` (`/`) | The home page with integrated onboarding (`IntegratedHomePage`) |
+| `home` (`/`) | The integrated home page |
 | `sampleApp` (`/sample_app`) | The sample app wizard |
 | `guidedApi` (`/guided_api`) | The guided API setup wizard |
 | `uploadFile` (`/upload_file`) | The upload a file wizard |
 
-Any other path redirects to `/`. Each wizard is lazy-loaded on its own, so the home page does not
-download wizard code. The wizards are placeholders until they are built.
-
-```tsx
-const { HomeApp } = elasticsearchHome;
-
-<Router history={history}>
-  <HomeApp {...homeConfig} />
-</Router>;
-```
-
-Each wizard renders an `AppHeader` (from `@kbn/app-header`) with its title and a back link to `Home`,
-so project chrome gets back navigation without breadcrumb overrides.
-
-For classic chrome, which still shows breadcrumbs, pass the host's breadcrumb API as `setBreadcrumbs`,
-e.g. `searchNavigation.breadcrumbs.setSearchBreadCrumbs`. On every route change `HomeApp` calls it
-with `Home` on the home page, and `Home` (linking back) followed by the wizard's title on a wizard. Don't
-pass `serverless.setBreadcrumbs`, which is deprecated.
-
-Hosts don't register deep links for the wizards, so they stay out of global search for now.
-`serverless_vectordb` drops its `getting_started` deep link through its app's `updater$` when the
-flag is on.
-
-`HomePage` stays available for the flag-off path, where the host owns its routes. The two pages
-are separate components, `public/home_page.tsx` and `public/integrated_home_page.tsx`, so the
-integrated page can change behind the flag without affecting the current one.
+Any other path redirects to `/`.
 
 ### Connection details
 
@@ -172,12 +150,7 @@ home page with integrated onboarding, which is still in development. It defaults
 it off both hosts keep their current home page and onboarding. The flag lives here rather than in a
 solution package so that hosts in any solution group can import it.
 
-With it on, both hosts render `HomeApp` at their app root for new and existing users alike:
-
-- `serverless_vectordb` no longer redirects first-time users into the `@kbn/vectordb-onboarding`
-  getting started onboarding or hides the chrome, and removes its `getting_started` deep link and
-  the "Getting started" side nav item.
-- `search_homepage` skips the redirect to the `searchGettingStarted` app.
+With it on, both hosts render `HomeApp` at their app root for new and existing users alike.
 
 Hosts read it through the start contract, so every caller uses the same flag and fallback:
 

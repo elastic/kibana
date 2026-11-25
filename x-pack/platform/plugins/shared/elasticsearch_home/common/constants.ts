@@ -23,10 +23,13 @@ export const HOME_PATHS = {
   sampleApp: '/sample_app',
   guidedApi: '/guided_api',
   uploadFile: '/upload_file',
-} as const;
+};
+
 export const DEPLOYMENT_STATS_PATH = '/internal/elasticsearch_home/deployment_stats';
+
 export const STARRED_DASHBOARDS_COUNT_PATH =
   '/internal/elasticsearch_home/starred_dashboards_count';
+
 export const WORKFLOWS_STATS_PATH = '/api/workflows/stats';
 
 /**

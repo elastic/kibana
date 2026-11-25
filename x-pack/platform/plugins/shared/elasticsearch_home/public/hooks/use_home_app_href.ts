@@ -6,20 +6,15 @@
  */
 
 import { useCallback } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { useHomeServices } from '../context';
+import { useHistory } from 'react-router-dom';
 
 /**
  * Builds the URL of a path under the hosting app's root. Core routes clicks on an `href` to it within
- * the app, without a page reload, so links need no `onClick`. Returns `undefined` until the current
- * app is known.
+ * the app, without a page reload, so links need no `onClick`. Requires the host's scoped history in
+ * the surrounding `Router`.
  */
-export const useHomeAppHref = (): ((path: string) => string | undefined) => {
-  const { application } = useHomeServices();
-  const appId = useObservable(application.currentAppId$);
+export const useHomeAppHref = (): ((path: string) => string) => {
+  const history = useHistory();
 
-  return useCallback(
-    (path: string) => (appId ? application.getUrlForApp(appId, { path }) : undefined),
-    [application, appId]
-  );
+  return useCallback((path: string) => history.createHref({ pathname: path }), [history]);
 };
