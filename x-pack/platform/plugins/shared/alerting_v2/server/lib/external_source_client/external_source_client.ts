@@ -63,9 +63,9 @@ const DEFAULT_PER_PAGE = 20;
  * Datadog connector that receives events.
  *
  * The connector is stored twice: as the `connector_id` attribute and as a `connector` saved object
- * reference. Every write sets both. Every read takes the connector id from the reference, which
- * saved object import and copy to space keep up to date, and falls back to the attribute only when
- * the reference is missing.
+ * reference. Every write sets both. Every read takes the connector id from the reference, and falls
+ * back to the attribute only when the reference is missing. The reference lets Kibana know the
+ * connector is in use, so the connectors management page can warn before it is deleted.
  */
 @injectable()
 export class ExternalSourceClient {
