@@ -895,6 +895,139 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      describe('with authentication', () => {
+        const createOutput = async (output: Record<string, unknown>) => {
+          const { body } = await supertest
+            .post('/api/fleet/outputs')
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `otlp-compile-auth-${uuidv4()}`, type: 'otlp', ...output })
+            .expect(200);
+          return { id: body.item.id as string, credentialId: body.item.secrets.auth.credential.id };
+        };
+
+        const createOtelPolicy = async (outputId: string) => {
+          const { body: policyBody } = await supertest
+            .post('/api/fleet/agent_policies')
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `otlp-compile-auth-${uuidv4()}`,
+              namespace: 'default',
+              data_output_id: outputId,
+              monitoring_enabled: [],
+            })
+            .expect(200);
+          const policyId: string = policyBody.item.id;
+
+          await supertest
+            .post('/api/fleet/package_policies')
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `otel-pkg-${uuidv4()}`,
+              namespace: 'default',
+              policy_id: policyId,
+              package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+              inputs: {
+                'otlpreceiver-otelcol': {
+                  enabled: true,
+                  streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+                },
+              },
+            })
+            .expect(200);
+          return policyId;
+        };
+
+        const getFullPolicy = async (policyId: string) => {
+          const { body } = await supertest
+            .get(`/api/fleet/agent_policies/${policyId}/full`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+          return body.item;
+        };
+
+        it('compiles the Authorization header with a reference to the credential secret', async () => {
+          const { id: outputId, credentialId } = await createOutput({
+            otlp_exporter: {
+              endpoint: 'otlp.example.com:4317',
+              protocol: 'grpc',
+              headers: { 'x-tenant': 'tenant-1' },
+            },
+            auth: { type: 'auth_header', scheme: 'bearer_token' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const fullPolicy = await getFullPolicy(await createOtelPolicy(outputId));
+
+          expect(fullPolicy.exporters[`otlp/${outputId}`]).to.eql({
+            endpoint: 'otlp.example.com:4317',
+            headers: {
+              'x-tenant': 'tenant-1',
+              Authorization: `Bearer $co.elastic.secret{${credentialId}}`,
+            },
+          });
+          expect(fullPolicy.secret_references).to.eql([{ id: credentialId }]);
+          // the credential value never reaches the policy
+          expect(JSON.stringify(fullPolicy)).not.to.contain('test-credential-value');
+        });
+
+        it('compiles a custom header with a reference to the credential secret', async () => {
+          const { id: outputId, credentialId } = await createOutput({
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4318', protocol: 'http/protobuf' },
+            auth: { type: 'custom_header', name: 'x-api-key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const fullPolicy = await getFullPolicy(await createOtelPolicy(outputId));
+
+          expect(fullPolicy.exporters[`otlphttp/${outputId}`].headers).to.eql({
+            'x-api-key': `$co.elastic.secret{${credentialId}}`,
+          });
+          expect(fullPolicy.secret_references).to.eql([{ id: credentialId }]);
+        });
+
+        it('references the new secret after the credential is replaced', async () => {
+          const { id: outputId, credentialId } = await createOutput({
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'auth_header', scheme: 'api_key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const policyId = await createOtelPolicy(outputId);
+
+          const { body: updateBody } = await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ secrets: { auth: { credential: 'new-credential-value' } } })
+            .expect(200);
+          const newCredentialId: string = updateBody.item.secrets.auth.credential.id;
+          expect(newCredentialId).not.to.be(credentialId);
+
+          const fullPolicy = await getFullPolicy(policyId);
+          expect(fullPolicy.exporters[`otlp/${outputId}`].headers).to.eql({
+            Authorization: `ApiKey $co.elastic.secret{${newCredentialId}}`,
+          });
+          expect(fullPolicy.secret_references).to.eql([{ id: newCredentialId }]);
+        });
+
+        it('compiles neither the header nor the reference once the authentication is removed', async () => {
+          const { id: outputId } = await createOutput({
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'auth_header', scheme: 'api_key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const policyId = await createOtelPolicy(outputId);
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ auth: null })
+            .expect(200);
+
+          const fullPolicy = await getFullPolicy(policyId);
+          expect(fullPolicy.exporters[`otlp/${outputId}`]).to.eql({
+            endpoint: 'otlp.example.com:4317',
+          });
+          expect(fullPolicy.secret_references).to.eql([]);
+        });
+      });
+
       it('does not include null HTTP-only fields in the compiled exporter after an HTTP→gRPC protocol switch', async () => {
         // Create an HTTP output with several HTTP-exclusive fields set.
         const { body: createBody } = await supertest
