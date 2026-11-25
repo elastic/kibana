@@ -6137,7 +6137,7 @@ importers:
         version: link:packages/kbn-yarn-lock-validator
       '@msw/serve':
         specifier: 0.11.0
-        version: 0.11.0(express@5.2.1(supports-color@10.2.2))(hono@4.13.19)(msw@3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3))
+        version: 0.11.0(express@5.2.1(supports-color@10.2.2))(hono@4.13.19)(msw@3.0.5(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3))
       '@octokit/rest':
         specifier: 22.0.1
         version: 22.0.1
@@ -6802,8 +6802,8 @@ importers:
         specifier: 5.5.0
         version: 5.5.0
       msw:
-        specifier: 3.0.4
-        version: 3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
+        specifier: 3.0.5
+        version: 3.0.5(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
       nock:
         specifier: 14.0.17
         version: 14.0.17
@@ -21093,8 +21093,8 @@ packages:
     engines: {node: '>=18.19.0'}
     hasBin: true
 
-  msw@3.0.4:
-    resolution: {integrity: sha512-lrILj+WEoJ4pp3SZHdEDnnZvP6jfWrNua+v2jgXz82RAaATAVqOqMNMxj2n2TUMNR9JP/eWG5tBry3mKnxPNbA==}
+  msw@3.0.5:
+    resolution: {integrity: sha512-RkzyWIaG+T2jYf9KOUrNOZuXl4sCpz35m13nVlt1ACFQhl/WjHU9zKMwlrR/6NatgKjL5U84UmVXOz9/+mvGsw==}
     engines: {node: '>=22.12.0'}
     hasBin: true
     peerDependencies:
@@ -28694,9 +28694,9 @@ snapshots:
   '@moonrepo/core-windows-x64-msvc@2.6.2':
     optional: true
 
-  '@msw/serve@0.11.0(express@5.2.1(supports-color@10.2.2))(hono@4.13.19)(msw@3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3))':
+  '@msw/serve@0.11.0(express@5.2.1(supports-color@10.2.2))(hono@4.13.19)(msw@3.0.5(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3))':
     dependencies:
-      msw: 3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
+      msw: 3.0.5(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
       ws: 8.23.0
     optionalDependencies:
       express: 5.2.1(supports-color@10.2.2)
@@ -38384,7 +38384,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  msw@3.0.4(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3):
+  msw@3.0.5(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3):
     dependencies:
       '@inquirer/confirm': 6.3.2(@types/node@24.10.13)
       '@msw/url': 0.1.3
