@@ -214,15 +214,10 @@ describe('discovery workflow detection classifier wiring', () => {
         rows: '${{ steps.get_detections.output.values }}',
         columns: "${{ steps.get_detections.output.columns | map: 'name' }}",
         space_id: '{{ variables.spaceId }}',
-        probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}',
-        probe_timeout_ms: '${{ inputs.classifierProbeTimeoutMs }}',
-        probe_concurrency: '${{ inputs.classifierProbeConcurrency }}',
-        budget_ms: '${{ inputs.classifierBudgetMs }}',
         max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}',
         live_lookback_days: '${{ inputs.classifierLiveLookbackDays }}',
         review_fresh_minutes: '${{ inputs.classifierReviewFreshMinutes }}',
-        baseline_bucket_minutes: '${{ inputs.classifierBaselineBucketMinutes }}',
-        baseline_window_minutes: '${{ inputs.classifierBaselineWindowMinutes }}',
+        batch_max: '${{ inputs.detectionBatchMax }}',
       });
     });
   });
@@ -263,16 +258,11 @@ describe('discovery workflow detection classifier wiring', () => {
     const inputs = discovery.triggers[0].inputs;
 
     it.each([
-      // At most the rows the classifier step accepts, so a batch never fails its input schema.
-      ['detectionBatchMax', 'number', 10, 1, 1000],
-      ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
-      ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
-      ['classifierProbeConcurrency', 'number', 5, 1, 10],
-      ['classifierBudgetMs', 'number', 20000, 2000, 60000],
+      // At most the pool the query returns (the classifier's MAX_CLASSIFIED_ROWS), so a batch is never
+      // larger than the rows the classifier reads.
+      ['detectionBatchMax', 'number', 10, 1, 100],
       ['classifierReviewFreshMinutes', 'number', 240, 15, 1440],
       ['classifierLiveLookbackDays', 'number', 90, 1, 90],
-      ['classifierBaselineBucketMinutes', 'number', 5, 1, 60],
-      ['classifierBaselineWindowMinutes', 'number', 300, 60, 1440],
     ])('declares %s with its default and bounds', (name, type, def, minimum, maximum) => {
       const property = inputs?.properties?.[name];
 
@@ -463,8 +453,8 @@ describe('discovery workflow detection classifier wiring', () => {
           rule_uuid: 'rule-B',
           skip: {
             reason: 'still_breaching',
-            probe_status: 'ok',
-            baseline: { decision: 'background', value: 150, samples: 60 },
+            rule_breached: true,
+            breach_window_minutes: 10,
           },
         },
       ];
@@ -506,7 +496,6 @@ describe('discovery workflow detection classifier wiring', () => {
       ['skippedCount', 'number'],
       ['needsAgentCount', 'number'],
       ['classifierReasonCounts', 'string'],
-      ['classifierProbeStatusCounts', 'string'],
       ['classifierFailed', 'boolean'],
     ] as const;
 
@@ -548,7 +537,6 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(evaluate(outputs.skippedCount, context)).toBe(0);
       expect(evaluate(outputs.needsAgentCount, context)).toBe(0);
       expect(evaluate(outputs.classifierReasonCounts, context)).toBe('{}');
-      expect(evaluate(outputs.classifierProbeStatusCounts, context)).toBe('{}');
     });
 
     it('reports the classifier counts', () => {
@@ -559,7 +547,6 @@ describe('discovery workflow detection classifier wiring', () => {
             skipped_count: 2,
             needs_agent_count: 1,
             reason_counts: { still_breaching: 2, possible_recovery: 1 },
-            probe_status_counts: { ok: 3 },
           },
         }),
       };
@@ -569,9 +556,6 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(JSON.parse(String(evaluate(outputs.classifierReasonCounts, context)))).toEqual({
         still_breaching: 2,
         possible_recovery: 1,
-      });
-      expect(JSON.parse(String(evaluate(outputs.classifierProbeStatusCounts, context)))).toEqual({
-        ok: 3,
       });
     });
   });
