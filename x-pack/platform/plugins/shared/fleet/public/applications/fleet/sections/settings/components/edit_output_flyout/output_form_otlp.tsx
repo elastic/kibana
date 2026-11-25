@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -91,7 +91,16 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
 }) => {
   const isGrpc = isOtlpGrpc(inputs);
   const { cloud } = useStartServices();
-  const { isOutputSecretsStorageEnabled } = useFleetStatus();
+  const { isOutputSecretsStorageEnabled, isLoading, refetch } = useFleetStatus();
+  // the status leaves out output secret storage while the OTLP output is disabled: when the flag
+  // turns on with Fleet already open, the cached status does not have it, so fetch it once more
+  const hasRefetchedStatus = useRef(false);
+  useEffect(() => {
+    if (!isLoading && isOutputSecretsStorageEnabled === undefined && !hasRefetchedStatus.current) {
+      hasRefetchedStatus.current = true;
+      refetch();
+    }
+  }, [isLoading, isOutputSecretsStorageEnabled, refetch]);
   const isAuthAvailable = isOtlpAuthAvailable(
     getOtlpInputEndpoints(inputs),
     cloud?.managedOtlp?.url

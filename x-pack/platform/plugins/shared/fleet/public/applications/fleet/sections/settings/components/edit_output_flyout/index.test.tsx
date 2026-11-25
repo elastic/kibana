@@ -2122,8 +2122,11 @@ describe('EditOutputFlyout', () => {
         target: { value: '' },
       });
 
+    const mockRefetchFleetStatus = jest.fn();
+
     beforeEach(() => {
       mockUseOtlpOutputEnabled.mockReturnValue(true);
+      mockedUseFleetStatus.mockReturnValue({ refetch: mockRefetchFleetStatus } as any);
       mockSendPutOutput.mockResolvedValue({ data: {} } as any);
       mockSendPostOutput.mockResolvedValue({ data: {} } as any);
     });
@@ -2496,14 +2499,28 @@ describe('EditOutputFlyout', () => {
 
       describe('without output secret storage', () => {
         beforeEach(() => {
-          mockedUseFleetStatus.mockReturnValue({ isOutputSecretsStorageEnabled: false } as any);
+          mockedUseFleetStatus.mockReturnValue({
+            isOutputSecretsStorageEnabled: false,
+            refetch: mockRefetchFleetStatus,
+          } as any);
         });
 
-        it('should only allow None and explain why', () => {
+        it('should only allow None and explain why', async () => {
           const { utils } = renderFlyout();
           selectOtlpType(utils);
 
-          expect(utils.getByTestId('otlpAuthSecretStorageCallout')).toBeInTheDocument();
+          const callout = utils.getByTestId('otlpAuthSecretStorageCallout');
+          // announced to screen readers when it appears
+          await waitFor(() => {
+            expect(
+              within(callout)
+                .getAllByRole('status')
+                .some((region) =>
+                  region.textContent?.includes('Authentication requires secret storage')
+                )
+            ).toBe(true);
+          });
+          expect(mockRefetchFleetStatus).not.toHaveBeenCalled();
           const options = utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput')
             .children as HTMLCollectionOf<HTMLOptionElement>;
           expect(Array.from(options).map((option) => [option.value, option.disabled])).toEqual([
@@ -2536,6 +2553,16 @@ describe('EditOutputFlyout', () => {
           });
           expect((mockSendPutOutput.mock.calls[0][1] as any).auth).toBeNull();
         });
+      });
+
+      it('should fetch the Fleet status again once when it does not report output secret storage', () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+
+        expect(mockRefetchFleetStatus).toHaveBeenCalledTimes(1);
       });
 
       it('should drop a replacement credential when the authentication is turned off and on', async () => {
