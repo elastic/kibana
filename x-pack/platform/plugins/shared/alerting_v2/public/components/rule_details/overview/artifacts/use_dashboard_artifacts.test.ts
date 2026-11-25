@@ -13,14 +13,14 @@ import { useDashboardArtifacts } from './use_dashboard_artifacts';
 const mockResolveDashboardsByIds = jest.fn();
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   getDashboardId: (artifact: { data: Record<string, unknown> }) =>
-    typeof artifact.data.dashboardId === 'string' ? artifact.data.dashboardId : undefined,
+    typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
   resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
 }));
 
 const mockDashboard = {} as DashboardStart;
 
 const dashboardArtifacts = [
-  { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+  { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
   { id: 'artifact-2', type: 'runbook', data: { content: 'runbook-content' } },
 ];
 
@@ -45,7 +45,7 @@ describe('useDashboardArtifacts', () => {
 
     rerender({
       artifacts: [
-        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
         { id: 'artifact-2', type: 'runbook', data: { content: 'updated-runbook' } },
       ],
     });
@@ -103,8 +103,8 @@ describe('useDashboardArtifacts', () => {
 
   it('collapses duplicate dashboard artifact ids to the last artifact id', async () => {
     const duplicateArtifacts = [
-      { id: 'artifact-first', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
-      { id: 'artifact-last', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+      { id: 'artifact-first', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
+      { id: 'artifact-last', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
     ];
 
     const { result } = renderHook(() => useDashboardArtifacts(duplicateArtifacts, mockDashboard));

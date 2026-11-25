@@ -97,7 +97,7 @@ describe('ExpressionType', () => {
 
     test('throws when casting from type that is not supported', async () => {
       const type = new ExpressionType(boolean);
-      expect(() => type.from(emptyDatatableValue, {})).toThrowError();
+      expect(() => type.from(emptyDatatableValue, {})).toThrow();
       expect(() => type.from(emptyDatatableValue, {})).toThrowErrorMatchingInlineSnapshot(
         `"Can not cast 'boolean' from datatable"`
       );
@@ -126,7 +126,7 @@ describe('ExpressionType', () => {
 
     test('throws when casting to type that is not supported', async () => {
       const type = new ExpressionType(boolean);
-      expect(() => type.to(emptyDatatableValue, 'number', {})).toThrowError();
+      expect(() => type.to(emptyDatatableValue, 'number', {})).toThrow();
       expect(() => type.to(emptyDatatableValue, 'number', {})).toThrowErrorMatchingInlineSnapshot(
         `"Can not cast object of type 'datatable' using 'boolean'"`
       );

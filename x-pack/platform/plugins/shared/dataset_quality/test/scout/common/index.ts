@@ -31,6 +31,9 @@ export {
 
 export { indexLogs } from './synthtrace';
 
+export { ensurePackageInstalled } from './fleet_helpers';
+export type { FleetIntegrationApi } from './fleet_helpers';
+
 export { logsSynthMalformedMappings, logsSynthMappings } from './custom_synth_mappings';
 export { logsNginxMappings } from './custom_integration_mappings';
 export { logsApmAppMappings } from './custom_apm_mappings';
@@ -47,6 +50,7 @@ export {
   deleteDataStreamIfExists,
   deleteIndexTemplateIfExists,
   deletePipelineIfExists,
+  disableFailureStoreIfExists,
   getBackingIndexNames,
   getDataStreamSettingsOfEarliestIndex,
   getWriteBackingIndexName,

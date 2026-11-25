@@ -1,5 +1,9 @@
 type: array
+deprecated: true
 x-state: Technical preview
+description: >
+  Configuration-embedded templates.
+  Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.
 items:
   type: object
   properties:

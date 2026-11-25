@@ -56,6 +56,44 @@ describe('UserForm', () => {
     );
   };
 
+  it('renders an avatar when editing an existing user', () => {
+    const { unmount } = renderUserForm({ isNewUser: false });
+    expect(screen.getByTestId('userFormAvatar')).toBeInTheDocument();
+    unmount();
+  });
+
+  it('renders an avatar when creating a user', () => {
+    const { unmount } = renderUserForm({ isNewUser: true });
+    expect(screen.getByTestId('userFormAvatar')).toBeInTheDocument();
+    unmount();
+  });
+
+  it('gives the empty create-user avatar an accessible name', () => {
+    const { unmount } = renderUserForm({
+      isNewUser: true,
+      defaultValues: { ...userMock, username: '', full_name: '', email: '' },
+    });
+    expect(screen.getByTestId('userFormAvatar')).toHaveAttribute('aria-label', 'User avatar');
+    unmount();
+  });
+
+  it('uses email for the avatar when the user has no full name', () => {
+    const { unmount } = renderUserForm({
+      isNewUser: false,
+      defaultValues: { ...userMock, email: 'alice@example.com' },
+    });
+    const avatar = screen.getByTestId('userFormAvatar');
+    expect(avatar).toHaveTextContent('a');
+    expect(avatar).toHaveAttribute('aria-label', 'alice@example.com');
+    unmount();
+  });
+
+  it('keeps an accessible name when the avatar has a username', () => {
+    const { unmount } = renderUserForm({ isNewUser: false });
+    expect(screen.getByTestId('userFormAvatar')).toHaveAttribute('aria-label', 'jdoe');
+    unmount();
+  });
+
   it('prevents editing username when disabled', async () => {
     const { unmount } = renderUserForm({ disabled: true });
     const usernameInput = screen.getByTestId<HTMLInputElement>('userFormUserNameInput');
@@ -68,7 +106,7 @@ describe('UserForm', () => {
     const { unmount } = renderUserForm({ disabled: true });
     expect(() => {
       screen.getByTestId('editUserFormSubmitButton');
-    }).toThrowError();
+    }).toThrow();
     unmount();
   });
 

@@ -37,7 +37,7 @@ export const workpadTypeFactory = (
   migrations: () => workpadMigrationsFactory(deps),
   management: {
     importableAndExportable: true,
-    icon: 'canvasApp',
+    icon: 'productCanvas',
     defaultSearchField: 'name',
     getTitle(obj) {
       return obj.attributes.name;

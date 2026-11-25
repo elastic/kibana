@@ -12,6 +12,7 @@ import {
   type AddCommentStepInput,
 } from '../../../common/workflows/steps/add_comment';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 
@@ -22,7 +23,7 @@ export const addCommentStepDefinition = (
     ...addCommentStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddCommentStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
-        const updatedCase = await client.attachments.add({
+        const updatedCase = await client.attachments.addAndGetCase({
           caseId: input.case_id,
           comment: {
             type: COMMENT_ATTACHMENT_TYPE,
@@ -31,9 +32,11 @@ export const addCommentStepDefinition = (
           },
         });
 
+        // The output schema mirrors the public (legacy) wire shape, so convert
+        // back before validating.
         return safeParseCaseForWorkflowOutput(
           addCommentStepCommonDefinition.outputSchema.shape.case,
-          updatedCase
+          toLegacyCaseResponse(updatedCase)
         );
       });
     }),

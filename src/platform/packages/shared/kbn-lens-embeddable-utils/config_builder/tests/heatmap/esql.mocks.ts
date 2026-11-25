@@ -61,9 +61,7 @@ export const simple: LensAttributes = {
       },
     },
     filters: [],
-    query: {
-      esql: 'FROM kibana_sample_data_logs\n| STATS count() BY extension.keyword, geo.dest | LIMIT 10',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       shape: 'heatmap',
       layerId: 'cce2e334-74f6-4cd3-a04c-3a889f66e2de',
@@ -165,9 +163,7 @@ export const withXAndYAxes = {
       },
     },
     filters: [],
-    query: {
-      esql: 'FROM kibana_sample_data_logs\n| STATS count() BY extension.keyword, geo.dest | LIMIT 10',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       shape: 'heatmap',
       layerId: 'cce2e334-74f6-4cd3-a04c-3a889f66e2de',

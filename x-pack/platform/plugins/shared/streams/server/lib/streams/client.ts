@@ -28,19 +28,20 @@ import {
   LOGS_ECS_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamSummary } from '../../../common';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
+import { RemovedStreamTypeError } from './errors/removed_stream_type_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 import { createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
+import { RemovedStreamTypeNotFoundError } from './storage/removed_stream_types';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
 import { shouldIncludeFromStreamsList } from './data_streams/should_include_from_streams_list';
@@ -84,7 +85,6 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
-      getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
@@ -485,13 +485,11 @@ export class StreamsClient {
     name,
     where: condition,
     status,
-    draft,
   }: {
     parent: string;
     name: string;
     where: Condition;
     status: RoutingStatus;
-    draft?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -517,7 +515,6 @@ export class StreamsClient {
                   destination: name,
                   where: condition,
                   status,
-                  ...(draft ? { draft: true } : {}),
                 }),
               },
             },
@@ -530,7 +527,6 @@ export class StreamsClient {
             name,
             description: '',
             updated_at: now,
-            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [], updated_at: now },
@@ -538,42 +534,9 @@ export class StreamsClient {
               wired: {
                 fields: {},
                 routing: [],
-                ...(draft ? { draft: true } : {}),
               },
               failure_store: { inherit: {} },
             },
-          },
-        },
-      ],
-      { ...this.dependencies, streamsClient: this }
-    );
-
-    return { acknowledged: true, result: 'created' };
-  }
-
-  async createQueryStream({
-    name,
-    query,
-    field_descriptions,
-    description = '',
-  }: {
-    name: string;
-    query: Streams.QueryStream.UpsertRequest['stream']['query'];
-    field_descriptions?: Record<string, string>;
-    description?: string;
-  }): Promise<UpsertStreamResponse> {
-    await State.attemptChanges(
-      [
-        {
-          type: 'upsert',
-          definition: {
-            type: 'query',
-            name,
-            description,
-            updated_at: new Date().toISOString(),
-            query_streams: [],
-            query,
-            ...(field_descriptions && { field_descriptions }),
           },
         },
       ],
@@ -660,7 +623,9 @@ export class StreamsClient {
         throw error;
       } catch (e) {
         if (isNotFoundError(e)) {
-          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
+          throw error instanceof RemovedStreamTypeNotFoundError
+            ? new RemovedStreamTypeError(`Cannot find stream ${name}`)
+            : new DefinitionNotFoundError(`Cannot find stream ${name}`);
         }
         throw e;
       }
@@ -668,22 +633,11 @@ export class StreamsClient {
   }
 
   private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
-    return await Promise.all([
-      this.dependencies.storageClient.get({ id: name }).then((response) => {
-        return this.getStreamDefinitionFromSource(response._source);
-      }),
-      checkAccess({
-        name,
-        esClient: this.dependencies.esClient,
-        isSecurityEnabled: this.dependencies.isSecurityEnabled,
-      }).then((privileges) => {
-        if (!privileges.read) {
-          throw new SecurityError(`Cannot read stream, insufficient privileges`);
-        }
-      }),
-    ]).then(([wiredDefinition]) => {
-      return wiredDefinition;
-    });
+    // Privilege check first so a storage 404 cannot race hasPrivileges and skip the 403.
+    await this.assertReadAccess(name);
+
+    const response = await this.dependencies.storageClient.get({ id: name });
+    return this.getStreamDefinitionFromSource(response._source);
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
@@ -793,6 +747,46 @@ export class StreamsClient {
     });
 
     return result;
+  }
+
+  /**
+   * Throws if the current user does not have Elasticsearch read access to the stream.
+   */
+  async assertReadAccess(name: string): Promise<void> {
+    if (!this.dependencies.isSecurityEnabled) {
+      return;
+    }
+
+    const privileges = await checkAccess({
+      name,
+      esClient: this.dependencies.esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
+    });
+
+    if (!privileges.read) {
+      throw new SecurityError('Cannot read stream, insufficient privileges');
+    }
+  }
+
+  /**
+   * Returns the subset of the given stream names the current user can read.
+   */
+  async getReadableStreamNames(names: string[]): Promise<string[]> {
+    if (names.length === 0) {
+      return [];
+    }
+
+    if (!this.dependencies.isSecurityEnabled) {
+      return names;
+    }
+
+    const privileges = await checkAccessBulk({
+      names,
+      esClient: this.dependencies.esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
+    });
+
+    return names.filter((name) => privileges[name]?.read === true);
   }
 
   private getRequiredManagePrivileges(): string[] {
@@ -1005,17 +999,12 @@ export class StreamsClient {
     }
 
     const privileges = await checkAccessBulk({
-      names: streams
-        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
-        .map((stream) => stream.name),
+      names: streams.map((stream) => stream.name),
       esClient,
       isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
-    return streams.filter((stream) => {
-      if (Streams.QueryStream.Definition.is(stream)) return true;
-      return privileges[stream.name]?.read === true;
-    });
+    return streams.filter((stream) => privileges[stream.name]?.read === true);
   }
 
   /**

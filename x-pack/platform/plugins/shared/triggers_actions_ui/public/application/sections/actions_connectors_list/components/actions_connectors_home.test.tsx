@@ -6,15 +6,30 @@
  */
 
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
+import { useKibana } from '../../../../common/lib/kibana';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ReactActual = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiIcon: ({ type, ...props }: { type?: React.ElementType; [key: string]: unknown }) =>
+      ReactActual.createElement(typeof type === 'string' ? 'span' : type ?? 'span', props),
+  };
+});
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
@@ -23,7 +38,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadConnectorAuthStatus: jest.fn(),
 }));
-const { loadAllActions, loadConnectorAuthStatus } = jest.requireMock(
+const { loadAllActions, loadActionTypes, loadConnectorAuthStatus } = jest.requireMock(
   '../../../lib/action_connector_api'
 );
 jest.mock('../../../../common/lib/kibana');
@@ -60,6 +75,41 @@ jest.mock('./actions_connectors_event_log_list_table', () => {
 
 const queryClient = new QueryClient();
 
+const renderHome = (props: RouteComponentProps<MatchParams>) =>
+  render(
+    <React.Suspense fallback={<div data-test-subj="outer-fallback" />}>
+      <IntlProvider locale="en">
+        <Router history={props.history}>
+          <QueryClientProvider client={queryClient}>
+            <MockAppHeaderProvider>
+              <ActionsConnectorsHome {...props} />
+            </MockAppHeaderProvider>
+          </QueryClientProvider>
+        </Router>
+      </IntlProvider>
+    </React.Suspense>
+  );
+
+const expectDocumentationInOverflow = async () => {
+  await openAppMenuOverflow();
+  expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+};
+
+const connectorsTabProps = (): RouteComponentProps<MatchParams> => ({
+  history: createMemoryHistory({
+    initialEntries: ['/connectors'],
+  }),
+  location: createLocation('/connectors'),
+  match: {
+    isExact: true,
+    path: '/connectors',
+    url: '',
+    params: {
+      section: 'connectors',
+    },
+  },
+});
+
 describe('ActionsConnectorsHome', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -70,60 +120,14 @@ describe('ActionsConnectorsHome', () => {
   });
 
   it('renders Actions connectors list component', async () => {
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory({
-        initialEntries: ['/connectors'],
-      }),
-      location: createLocation('/connectors'),
-      match: {
-        isExact: true,
-        path: '/connectors',
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
-    };
-
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(connectorsTabProps());
 
     expect(loadAllActions).toHaveBeenCalled();
     expect(await screen.findByTestId('actionsConnectorsListComponent')).toBeInTheDocument();
   });
 
   it('there are Connectors and Logs tabs', async () => {
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory({
-        initialEntries: ['/connectors'],
-      }),
-      location: createLocation('/connectors'),
-      match: {
-        isExact: true,
-        path: '/connectors',
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
-    };
-
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(connectorsTabProps());
 
     const tabs = await screen.findAllByRole('tab');
     expect(tabs).toHaveLength(2);
@@ -132,36 +136,10 @@ describe('ActionsConnectorsHome', () => {
   });
 
   it('show "Create connector" and "Documentation" buttons when on Connectors tab', async () => {
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory({
-        initialEntries: ['/connectors'],
-      }),
-      location: createLocation('/connectors'),
-      match: {
-        isExact: true,
-        path: '/connectors',
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
-    };
+    renderHome(connectorsTabProps());
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
-
-    const createConnectorButton = await screen.findByRole('button', { name: 'Create connector' });
-    expect(createConnectorButton).toBeEnabled();
-
-    const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
-    expect(documentationButton).toBeEnabled();
+    expect(await screen.findByTestId('createConnectorButton')).toBeEnabled();
+    await expectDocumentationInOverflow();
   });
 
   it('show "Create connector" and "Documentation" buttons when on Connectors Edit tab', async () => {
@@ -180,21 +158,10 @@ describe('ActionsConnectorsHome', () => {
       },
     };
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(props);
 
-    const createConnectorButton = await screen.findByRole('button', { name: 'Create connector' });
-    expect(createConnectorButton).toBeEnabled();
-
-    const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
-    expect(documentationButton).toBeEnabled();
+    expect(await screen.findByTestId('createConnectorButton')).toBeEnabled();
+    await expectDocumentationInOverflow();
   });
 
   it('hide "Create connector" button when on Logs tab', async () => {
@@ -213,48 +180,16 @@ describe('ActionsConnectorsHome', () => {
       },
     };
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(props);
 
-    const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
-    expect(documentationButton).toBeEnabled();
-    expect(screen.queryByRole('button', { name: 'Create connector' })).not.toBeInTheDocument();
+    await expectDocumentationInOverflow();
+    expect(screen.queryByTestId('createConnectorButton')).not.toBeInTheDocument();
   });
 
   it('show "Select a connector" flyout when "Create connector" button pressed', async () => {
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory({
-        initialEntries: ['/connectors'],
-      }),
-      location: createLocation('/connectors'),
-      match: {
-        isExact: true,
-        path: '/connectors',
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
-    };
+    renderHome(connectorsTabProps());
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
-
-    const createConnectorButton = await screen.findByRole('button', { name: 'Create connector' });
+    const createConnectorButton = await screen.findByTestId('createConnectorButton');
     await userEvent.click(createConnectorButton);
     const selectConnectorFlyout = await screen.findByRole('heading', {
       name: 'Select a connector',
@@ -262,37 +197,46 @@ describe('ActionsConnectorsHome', () => {
     expect(selectConnectorFlyout).toBeInTheDocument();
   });
 
+  it('keeps the flyout open while connector icons load', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: 'lazy-icon-type',
+      iconClass: React.lazy(
+        () => new Promise<{ default: React.ComponentType<React.SVGProps<SVGSVGElement>> }>(() => {})
+      ),
+      selectMessage: 'test',
+      actionConnectorFields: null,
+    });
+    const { actionTypeRegistry } = useKibana().services;
+    (actionTypeRegistry.has as jest.Mock).mockReturnValue(true);
+    (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+    loadActionTypes.mockResolvedValue([
+      {
+        id: actionType.id,
+        enabled: true,
+        name: 'Lazy icon',
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+    ]);
+
+    renderHome(connectorsTabProps());
+    await userEvent.click(await screen.findByTestId('createConnectorButton'));
+    await waitFor(() => expect(actionTypeRegistry.get).toHaveBeenCalledWith(actionType.id));
+
+    const flyout = screen.getByTestId('create-connector-flyout');
+    expect(flyout).toHaveTextContent('Select a connector');
+    expect(flyout).toHaveTextContent('Loading connector types');
+    expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
+  });
+
   it('hide "Create connector" button when the user only has read access', async () => {
     hasSaveActionsCapability.mockReturnValue(false);
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory({
-        initialEntries: ['/connectors'],
-      }),
-      location: createLocation('/connectors'),
-      match: {
-        isExact: true,
-        path: '/connectors',
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
-    };
+    renderHome(connectorsTabProps());
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
-
-    expect(screen.queryByRole('button', { name: 'Create connector' })).not.toBeInTheDocument();
-
-    const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
-    expect(documentationButton).toBeEnabled();
+    expect(screen.queryByTestId('createConnectorButton')).not.toBeInTheDocument();
+    await expectDocumentationInOverflow();
   });
 
   it('passes auth-status load failure to connectors list', async () => {
@@ -300,30 +244,7 @@ describe('ActionsConnectorsHome', () => {
       body: { message: 'Auth status endpoint failed' },
     });
 
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory({
-        initialEntries: ['/connectors'],
-      }),
-      location: createLocation('/connectors'),
-      match: {
-        isExact: true,
-        path: '/connectors',
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
-    };
-
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(connectorsTabProps());
 
     await screen.findByTestId('actionsConnectorsListComponent');
 

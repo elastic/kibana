@@ -6,7 +6,10 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentFormatContext,
+  TextAttachmentRepresentation,
+} from '@kbn/agent-builder-server/attachments';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { createCaseAttachmentType } from './case_attachment_type';
 import { createCasesAttachmentType } from './cases_attachment_type';
@@ -62,10 +65,11 @@ describe('case attachment type', () => {
     const formatted = await def.format(buildCaseAttachment(buildCaseData()), formatContext);
     const repr = await formatted.getRepresentation!();
     expect(repr.type).toBe('text');
-    expect(repr.value).toContain('Threat Intel Filebeat');
-    expect(repr.value).toContain('#125');
-    expect(repr.value).toContain('in-progress');
-    expect(repr.value).toContain('critical');
+    const textRepr = repr as TextAttachmentRepresentation;
+    expect(textRepr.value).toContain('Threat Intel Filebeat');
+    expect(textRepr.value).toContain('#125');
+    expect(textRepr.value).toContain('in-progress');
+    expect(textRepr.value).toContain('critical');
   });
 });
 

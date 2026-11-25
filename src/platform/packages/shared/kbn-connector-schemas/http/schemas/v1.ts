@@ -76,6 +76,16 @@ export const HttpFormDataFieldSchema = lazySchema(() =>
   )
 );
 
+export const QueryParamScalarSchema = z.union([z.string(), z.number(), z.boolean()]);
+
+type QueryParamScalar = z.infer<typeof QueryParamScalarSchema>;
+export type QueryParamValue = QueryParamScalar | QueryParamScalar[];
+
+export const QueryParamValueSchema = z.union([
+  QueryParamScalarSchema,
+  z.array(QueryParamScalarSchema),
+]);
+
 export const ParamsSchema = lazySchema(() =>
   z
     .object({
@@ -84,7 +94,7 @@ export const ParamsSchema = lazySchema(() =>
       method: HttpMethodSchema,
       body: HttpRequestBodySchema.optional(),
       form_data: HttpFormDataFieldSchema.optional(),
-      query: z.record(z.string(), z.string()).optional(),
+      query: z.record(z.string(), QueryParamValueSchema).optional(),
       headers: z.record(z.string(), z.string()).optional(),
       fetcher: z
         .object({

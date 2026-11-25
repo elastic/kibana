@@ -12,6 +12,7 @@ import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-intern
 import { KBN_LOAD_MARKS } from './events';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
+import { EdotBrowserSystem } from './edot_browser_system';
 
 import { LOAD_BOOTSTRAP_START } from './events';
 
@@ -32,6 +33,15 @@ export async function __kbnBootstrap__() {
     injectedMetadata.apmConfig ?? undefined,
     injectedMetadata.basePath
   );
+
+  const edotBrowserSystem = new EdotBrowserSystem(
+    injectedMetadata.edotBrowserConfig,
+    injectedMetadata.version
+  );
+
+  // Not awaited: a stalled optional chunk must not block Core startup.
+  // eslint-disable-next-line no-console
+  edotBrowserSystem.setup().catch(console.warn);
 
   await Promise.all([
     // eslint-disable-next-line no-console
@@ -83,27 +93,37 @@ export async function __kbnBootstrap__() {
 
     const err = document.createElement('div');
     err.style.textAlign = 'center';
-    err.style.padding = '120px 20px';
+    err.style.padding = '240px 20px';
     err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
+    err.style.maxInlineSize = '420px';
+    err.style.margin = '0 auto';
 
     const errorTitleEl = document.createElement('h1');
+    errorTitleEl.className = 'kbnBootstrapErrorTitle';
     errorTitleEl.innerText = errorTitle;
-    errorTitleEl.style.margin = '20px';
-    errorTitleEl.style.color = '#1a1c21';
+    errorTitleEl.style.fontSize = '24px';
+    errorTitleEl.style.fontWeight = '600';
+    errorTitleEl.style.lineHeight = '2rem';
+    errorTitleEl.style.letterSpacing = '-0.2px';
+    errorTitleEl.style.margin = '0 0 8px';
 
     const errorTextEl = document.createElement('p');
+    errorTextEl.className = 'kbnBootstrapErrorText';
     errorTextEl.innerText = errorText;
-    errorTextEl.style.margin = '20px';
-    errorTextEl.style.color = '#343741';
+    errorTextEl.style.fontSize = '14px';
+    errorTextEl.style.fontWeight = '400';
+    errorTextEl.style.lineHeight = '1.5';
+    errorTextEl.style.margin = '0 auto 24px';
 
     const errorReloadEl = document.createElement('button');
+    errorReloadEl.className = 'kbnBootstrapErrorButton';
     errorReloadEl.innerText = errorReload;
     errorReloadEl.onclick = function () {
       location.reload();
     };
     errorReloadEl.setAttribute(
       'style',
-      'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; color: rgb(255, 255, 255); background-color: rgb(0, 119, 204); outline-color: rgb(0, 0, 0); border:none'
+      'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 14px; font-weight: 450; line-height: 40px; border-radius: 8px; border:none'
     );
 
     err.appendChild(errorTitleEl);

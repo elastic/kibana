@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversation, useAgentId } from '../../hooks/use_conversation';
 import { useConversationId } from './use_conversation_id';
-import { useStreamingContext } from '../streaming/streaming_context';
+import { useIsCurrentConversationStreaming } from '../../hooks/use_is_current_conversation_streaming';
 import { useConversationListMutations } from '../../hooks/use_conversation_list_mutations';
 
 /**
@@ -22,7 +22,6 @@ export const ConversationChangeNotifier = (): null => {
   const { eventsService } = useAgentBuilderServices();
   const conversationId = useConversationId();
   const { conversation, isError, isFetched } = useConversation();
-  const { activeStreams } = useStreamingContext();
   const agentId = useAgentId();
 
   const { markAsRead } = useConversationListMutations({
@@ -30,7 +29,7 @@ export const ConversationChangeNotifier = (): null => {
     agentId: agentId ?? '',
   });
 
-  const isStreaming = Boolean(conversationId && activeStreams.has(conversationId));
+  const isStreaming = useIsCurrentConversationStreaming();
 
   useEffect(() => {
     if (!conversationId) {

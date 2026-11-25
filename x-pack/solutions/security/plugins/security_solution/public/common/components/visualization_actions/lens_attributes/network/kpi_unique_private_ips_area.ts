@@ -57,6 +57,7 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ eu
           yRight: true,
         },
         preferredSeriesType: 'area',
+        areaFill: 'solid',
         layers: [
           {
             layerId: layerSourceIp,

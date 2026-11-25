@@ -28,6 +28,7 @@ import {
   useUIExtension,
   useAuthz,
   sendBulkGetAgentPoliciesForRq,
+  useBulkGetAgentPoliciesQuery,
   useIsAgentlessQueryParam,
 } from '../../../hooks';
 import {
@@ -55,11 +56,13 @@ import {
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
+import type { AgentVersionBlock } from '../../../../../../common/types';
+import { getAgentVersionBlockFromError, pkgKeyFromPackageInfo } from '../../../services';
 
 import {
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
+  inferVarGroupSelections,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
 import { useMultipleAgentPolicies } from '../../../hooks';
@@ -72,7 +75,7 @@ import { useAgentless } from '../create_package_policy_page/single_page_layout/h
 
 import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
-import { UpgradeStatusCallout } from './components';
+import { ManagedByOnboardingCallout, UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
@@ -177,15 +180,18 @@ export const EditPackagePolicyForm = memo<{
   );
 
   // Derive var_group_selections from policy for edit mode
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
+    // The policy predates the package's var_groups: prefer inferring the selection
+    // from its populated vars over the first-visible-option default, so an existing
+    // configuration (e.g. direct access keys) is not presented as a different one
+    const defaults = computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+    const inferred = inferVarGroupSelections(varGroups, packagePolicy.vars);
+    return inferred ? { ...defaults, ...inferred } : defaults;
+  }, [packagePolicy.var_group_selections, packagePolicy.vars, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -253,10 +259,70 @@ export const EditPackagePolicyForm = memo<{
       agentPolicies.find((policy) => policy.id === existingPolicy.id)
     );
   }, [agentPolicies, existingAgentPolicies]);
+  const addedAgentPolicyIds = useMemo(
+    () =>
+      agentPolicies
+        .filter(
+          (policy) =>
+            !existingAgentPolicies.find((existingPolicy) => existingPolicy.id === policy.id)
+        )
+        .map((policy) => policy.id),
+    [agentPolicies, existingAgentPolicies]
+  );
+  const { data: addedAgentPoliciesData, isInitialLoading: isLoadingAddedAgentPolicies } =
+    useBulkGetAgentPoliciesQuery(addedAgentPolicyIds, {
+      ignoreMissing: true,
+      enabled: addedAgentPolicyIds.length > 0,
+    });
+  // Upgrading checks every agent policy, while adding agent policies only checks the added ones,
+  // as Fleet does on save. Other edits are not checked, the callout is only informative then.
+  const requiresAgentVersionAcknowledgement =
+    !hasAgentlessAgentPolicy && (isUpgrade || addedAgentPolicyIds.length > 0);
+  const agentPoliciesToCheck = useMemo(() => {
+    const addedAgentPolicies = addedAgentPolicyIds.length
+      ? addedAgentPoliciesData?.items ?? []
+      : [];
+    if (isUpgrade) {
+      return [...selectedExistingPolicies, ...addedAgentPolicies];
+    }
+    return addedAgentPolicyIds.length ? addedAgentPolicies : selectedExistingPolicies;
+  }, [isUpgrade, selectedExistingPolicies, addedAgentPolicyIds, addedAgentPoliciesData]);
+  // Set when Fleet rejected the change because some agents don't satisfy the package's agent
+  // version condition, so that it can be acknowledged even if the agent counts don't show it
+  const [serverAgentVersionBlock, setServerAgentVersionBlock] = useState<AgentVersionBlock>();
+  const currentAgentVersionCondition = originalPackagePolicy?.package_agent_version_condition;
+  const currentCondition = useMemo(
+    () =>
+      isUpgrade && currentAgentVersionCondition
+        ? {
+            versionCondition: currentAgentVersionCondition,
+            agentPolicyIds: selectedExistingPolicies.map(({ id }) => id),
+          }
+        : undefined,
+    [isUpgrade, currentAgentVersionCondition, selectedExistingPolicies]
+  );
   const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
-    selectedExistingPolicies
+    agentPoliciesToCheck,
+    serverAgentVersionBlock,
+    currentCondition
   );
+  const [acknowledgeAgentVersionIncompatibility, setAcknowledgeAgentVersionIncompatibility] =
+    useState<boolean>(false);
+  const canAcknowledgeAgentVersionIncompatibility =
+    requiresAgentVersionAcknowledgement &&
+    incompatibleAgentVersion.status !== 'NONE' &&
+    incompatibleAgentVersion.requiresAcknowledgement;
+  // Until the added agent policies are loaded, their agents can't be checked
+  const isAgentVersionAcknowledgementMissing =
+    (requiresAgentVersionAcknowledgement && isLoadingAddedAgentPolicies) ||
+    (canAcknowledgeAgentVersionIncompatibility && !acknowledgeAgentVersionIncompatibility);
+  // An acknowledgement only applies to the agent policies and package version it was given for
+  const agentVersionGuardKey = `${packagePolicy.package?.version}|${addedAgentPolicyIds.join(',')}`;
+  useEffect(() => {
+    setAcknowledgeAgentVersionIncompatibility(false);
+    setServerAgentVersionBlock(undefined);
+  }, [agentVersionGuardKey]);
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
@@ -313,7 +379,7 @@ export const EditPackagePolicyForm = memo<{
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
   //  if `from === 'installed-integrations'` then it links back to the Installed Integrations tab
   const cancelUrl = useMemo((): string => {
-    if (from === 'installed-integrations') {
+    if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
       return getHref('integrations_installed', {});
     }
     return from === 'package-edit' && packageInfo
@@ -325,7 +391,7 @@ export const EditPackagePolicyForm = memo<{
       : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
-    if (from === 'installed-integrations') {
+    if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
       return getHref('integrations_installed', {});
     }
     return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
@@ -378,11 +444,17 @@ export const EditPackagePolicyForm = memo<{
       return;
     }
 
-    const { error } = await savePackagePolicy({
-      policy_ids: newPolicyId
-        ? [...packagePolicy.policy_ids, newPolicyId]
-        : packagePolicy.policy_ids,
-    });
+    const { error } = await savePackagePolicy(
+      {
+        policy_ids: newPolicyId
+          ? [...packagePolicy.policy_ids, newPolicyId]
+          : packagePolicy.policy_ids,
+      },
+      {
+        acknowledgeAgentVersionIncompatibility:
+          requiresAgentVersionAcknowledgement && acknowledgeAgentVersionIncompatibility,
+      }
+    );
     if (!error) {
       if (packageInfo) {
         await applyNamespaceCustomizationChange(
@@ -442,6 +514,11 @@ export const EditPackagePolicyForm = memo<{
           ),
         });
       } else {
+        const agentVersionBlock = getAgentVersionBlockFromError(error);
+        if (agentVersionBlock) {
+          setServerAgentVersionBlock(agentVersionBlock);
+          setAcknowledgeAgentVersionIncompatibility(false);
+        }
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
             defaultMessage: `Error updating ''{packagePolicyName}''`,
@@ -475,7 +552,12 @@ export const EditPackagePolicyForm = memo<{
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
-    from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
+    from:
+      from === 'installed-integrations' && isUpgrade
+        ? 'upgrade-from-installed-integrations'
+        : extensionView?.useLatestPackageVersion && isUpgrade
+        ? 'upgrade-from-extension'
+        : from,
     cancelUrl,
     agentPolicies,
     packageInfo,
@@ -631,7 +713,11 @@ export const EditPackagePolicyForm = memo<{
   });
 
   return (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="editPackagePolicy"
+    >
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
@@ -650,6 +736,22 @@ export const EditPackagePolicyForm = memo<{
               })
             }
           />
+        ) : originalPackagePolicy?.onboarding_deployment_id ? (
+          // Covers direct links to the edit and upgrade pages: the policy can only be changed from
+          // the onboarding flow, and the server rejects changes made here.
+          <>
+            <Breadcrumb
+              agentPolicyName={agentPolicyBreadcrumb.name}
+              from={from}
+              packagePolicyName={packagePolicy.name}
+              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+              pkgTitle={packageInfo.title}
+              policyId={agentPolicyBreadcrumb.id}
+            />
+            <ManagedByOnboardingCallout
+              onboardingDeploymentId={originalPackagePolicy.onboarding_deployment_id}
+            />
+          </>
         ) : (
           <>
             <Breadcrumb
@@ -681,13 +783,30 @@ export const EditPackagePolicyForm = memo<{
                 <IncompatibleAgentVersionCallout
                   incompatibility={incompatibleAgentVersion.status}
                   versionCondition={incompatibleAgentVersion.versionCondition}
+                  blockedCount={incompatibleAgentVersion.blockedCount}
+                  observedVersions={incompatibleAgentVersion.observedVersions}
+                  minVersion={incompatibleAgentVersion.minVersion}
+                  agentPolicyCount={incompatibleAgentVersion.agentPolicyCount}
+                  acknowledged={acknowledgeAgentVersionIncompatibility}
+                  onAcknowledgeChange={
+                    canAcknowledgeAgentVersionIncompatibility
+                      ? setAcknowledgeAgentVersionIncompatibility
+                      : undefined
+                  }
                 />
                 <EuiSpacer size="m" />
               </>
             )}
             {isUpgrade && upgradeDryRunData && (
               <>
-                <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />
+                <UpgradeStatusCallout
+                  dryRunData={upgradeDryRunData}
+                  newSecrets={newSecrets}
+                  hasAgentVersionIncompatibility={
+                    incompatibleAgentVersion.status !== 'NONE' &&
+                    incompatibleAgentVersion.requiresAcknowledgement
+                  }
+                />
                 <EuiSpacer size="xxl" />
               </>
             )}
@@ -748,7 +867,8 @@ export const EditPackagePolicyForm = memo<{
                           formState !== 'VALID' ||
                           hasAgentPolicyError ||
                           !validationResults ||
-                          (!isEdited && !isUpgrade)
+                          (!isEdited && !isUpgrade) ||
+                          isAgentVersionAcknowledgementMissing
                         }
                         tooltip={
                           !canWriteIntegrationPolicies
@@ -815,7 +935,7 @@ const Breadcrumb = memo<{
     );
   } else if (from === 'upgrade-from-fleet-policy-list') {
     breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
-  } else if (from === 'installed-integrations') {
+  } else if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
     breadcrumb = <InstalledIntegrationsBreadcrumb policyName={packagePolicyName} />;
   }
 

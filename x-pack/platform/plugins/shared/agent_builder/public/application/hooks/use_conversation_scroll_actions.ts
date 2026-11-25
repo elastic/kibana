@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const AT_BOTTOM_THRESHOLD = 50;
 const SMOOTH_SCROLL_TIMEOUT_MS = 2000;
@@ -14,11 +14,18 @@ const isAtBottom = (el: HTMLElement) =>
   el.scrollHeight - el.scrollTop - el.clientHeight <= AT_BOTTOM_THRESHOLD;
 
 export const useConversationScrollActions = ({
-  conversationId,
   scrollContainer,
+  scrollContainerHeight,
+  timelineContent,
+  anchoredItemKey,
+  anchoredItemGap = 0,
 }: {
-  conversationId: string;
   scrollContainer: HTMLDivElement | null;
+  scrollContainerHeight: number;
+  timelineContent: HTMLDivElement | null;
+  anchoredItemKey?: string;
+  /** Space in pixels left between the top of the container and the anchored item. */
+  anchoredItemGap?: number;
 }) => {
   const stuckToBottomRef = useRef(true);
   const smoothScrollingRef = useRef(false);
@@ -44,6 +51,19 @@ export const useConversationScrollActions = ({
     setShowScrollButton(false);
   }, [scrollContainer, cancelSmoothScroll]);
 
+  // Whether a timeline item extends below the visible area. Unlike `isAtBottom`, this ignores the
+  // space reserved under the anchored item, which is not content to scroll to.
+  const hasContentBelow = useCallback(() => {
+    if (!scrollContainer) return false;
+    const items = timelineContent?.querySelectorAll<HTMLElement>('[data-timeline-item-key]');
+    const lastItem = items?.[items.length - 1];
+    if (!lastItem) return !isAtBottom(scrollContainer);
+    return (
+      lastItem.getBoundingClientRect().bottom - scrollContainer.getBoundingClientRect().bottom >
+      AT_BOTTOM_THRESHOLD
+    );
+  }, [scrollContainer, timelineContent]);
+
   const doSmoothScroll = useCallback(() => {
     if (!scrollContainer) return;
 
@@ -65,7 +85,7 @@ export const useConversationScrollActions = ({
         setShowScrollButton(false);
       } else {
         stuckToBottomRef.current = false;
-        setShowScrollButton(true);
+        setShowScrollButton(hasContentBelow());
       }
     };
 
@@ -89,7 +109,32 @@ export const useConversationScrollActions = ({
       if (gen !== scrollGenRef.current) return;
       onComplete();
     }, SMOOTH_SCROLL_TIMEOUT_MS);
-  }, [scrollContainer]);
+  }, [scrollContainer, hasContentBelow]);
+
+  // The timeline is kept at least one viewport tall from the anchored item down, so "scrolled to
+  // the bottom" puts that item at the top of the container, `anchoredItemGap` below its edge. The answer fills the reserved space
+  // without changing the timeline's size; once it outgrows it, the view follows as usual. The
+  // reserve sits on an inner wrapper, not on the observed content item: an explicit min-height
+  // would replace that item's automatic minimum size and it would stop growing with the answer.
+  const reserveAnchorSpace = useCallback(() => {
+    if (!scrollContainer || !timelineContent) return;
+    const anchored = anchoredItemKey
+      ? timelineContent.querySelector<HTMLElement>(`[data-timeline-item-key="${anchoredItemKey}"]`)
+      : null;
+    if (!anchored) {
+      timelineContent.style.minHeight = '';
+      return;
+    }
+    const anchoredTop =
+      anchored.getBoundingClientRect().top - timelineContent.getBoundingClientRect().top;
+    timelineContent.style.minHeight = `${Math.ceil(
+      anchoredTop - anchoredItemGap + scrollContainer.clientHeight
+    )}px`;
+  }, [scrollContainer, timelineContent, anchoredItemKey, anchoredItemGap]);
+
+  useLayoutEffect(() => {
+    reserveAnchorSpace();
+  }, [reserveAnchorSpace, scrollContainerHeight]);
 
   useEffect(() => {
     cancelSmoothScroll();
@@ -98,18 +143,20 @@ export const useConversationScrollActions = ({
     if (!scrollContainer) return;
     const onScroll = () => {
       if (smoothScrollingRef.current) return;
-      const atBottom = isAtBottom(scrollContainer);
-      stuckToBottomRef.current = atBottom;
-      setShowScrollButton(!atBottom);
+      stuckToBottomRef.current = isAtBottom(scrollContainer);
+      setShowScrollButton(hasContentBelow());
     };
     scrollContainer.addEventListener('scroll', onScroll, { passive: true });
     return () => scrollContainer.removeEventListener('scroll', onScroll);
-  }, [scrollContainer, cancelSmoothScroll]);
+  }, [scrollContainer, cancelSmoothScroll, hasContentBelow]);
 
   useEffect(() => {
     if (!scrollContainer) return;
     const observer = new ResizeObserver(() => {
-      if (!stuckToBottomRef.current) return;
+      if (!stuckToBottomRef.current) {
+        setShowScrollButton(hasContentBelow());
+        return;
+      }
       if (smoothScrollingRef.current) {
         pendingSmoothScrollRef.current = false;
         return;
@@ -126,12 +173,7 @@ export const useConversationScrollActions = ({
     const inner = scrollContainer.firstElementChild;
     if (inner) observer.observe(inner);
     return () => observer.disconnect();
-  }, [scrollContainer, doSmoothScroll]);
-
-  useEffect(() => {
-    if (!scrollContainer || !conversationId) return;
-    stickToBottom();
-  }, [conversationId, scrollContainer, stickToBottom]);
+  }, [scrollContainer, doSmoothScroll, hasContentBelow]);
 
   const smoothScrollToBottom = useCallback(() => {
     if (!scrollContainer) return;
@@ -145,6 +187,15 @@ export const useConversationScrollActions = ({
     doSmoothScroll();
   }, [scrollContainer, doSmoothScroll]);
 
+  // Releases the view from the bottom even while pinned there, so the ResizeObserver leaves it
+  // alone as content grows, and offers the scroll button instead.
+  const stopFollowingBottom = useCallback(() => {
+    cancelSmoothScroll();
+    pendingSmoothScrollRef.current = false;
+    stuckToBottomRef.current = false;
+    setShowScrollButton(hasContentBelow());
+  }, [cancelSmoothScroll, hasContentBelow]);
+
   const onMessageSent = useCallback(() => {
     if (!scrollContainer) return;
     stuckToBottomRef.current = true;
@@ -155,6 +206,7 @@ export const useConversationScrollActions = ({
   return {
     showScrollButton,
     onMessageSent,
+    stopFollowingBottom,
     smoothScrollToBottom,
     stickToBottom,
   };

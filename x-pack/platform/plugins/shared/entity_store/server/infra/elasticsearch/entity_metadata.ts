@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { BulkDropAggregator } from './bulk_drop_aggregator';
 import type { BulkDropTypeSummary } from './bulk_drop_aggregator';
 
@@ -90,18 +91,23 @@ export const getLatestEntityMetadataDoc = async <TDoc>(
     index: string;
     entityId: string;
     eventAction: string;
+    filter?: QueryDslQueryContainer[];
   }
 ): Promise<TDoc | null> => {
   try {
     const response = await esClient.search<TDoc>({
       index: params.index,
       size: 1,
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      // `unmapped_type` keeps this a graceful "no hits" instead of a hard
+      // search_phase_execution_exception on a backing index where `@timestamp`
+      // has no mapping yet (e.g. a freshly auto-created index that never received a document).
+      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       query: {
         bool: {
           filter: [
             { term: { 'event.action': params.eventAction } },
             { term: { 'entity.id': params.entityId } },
+            ...(params.filter ?? []),
           ],
         },
       },

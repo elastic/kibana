@@ -29,6 +29,12 @@ export interface BulkCreateWorkflowsResponse {
   failed: Array<{ index: number; id: string; error: string }>;
 }
 
+export interface BulkDeleteWorkflowsResponse {
+  total: number;
+  deleted: number;
+  failures: Array<{ id: string; error: string }>;
+}
+
 export interface CreateWorkflowParams {
   [key: string]: unknown;
 }
@@ -104,6 +110,7 @@ export interface GetWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   omitStepRuns?: boolean;
   /** Datemath lower bound for filtering executions by finishedAt (applied to finishedAt). */
   finishedAfter?: string;
@@ -117,6 +124,11 @@ export interface GetWorkflowExecutionsParams {
   startedAfter?: string;
   /** Datemath upper bound for filtering executions by startedAt. */
   startedBefore?: string;
+  /**
+   * Opaque cursor from a prior response's `searchAfter` (JSON-encoded sort values).
+   * Prefer over `page` for deep infinite scroll.
+   */
+  searchAfter?: string;
 }
 
 export interface GetWorkflowStepExecutionsParams {
@@ -134,6 +146,12 @@ export interface GetWorkflowStepExecutionsParams {
 export interface GetExecutionParams {
   includeInput?: boolean;
   includeOutput?: boolean;
+  omitStepExecutions?: boolean;
+}
+
+export interface GetExecutionStepsParams {
+  page?: number;
+  size?: number;
 }
 
 export interface GetExecutionLogsParams {
@@ -165,10 +183,17 @@ export interface WorkflowExecutionLogsResponse {
 
 export interface ResumeExecutionParams {
   input: Record<string, unknown>;
+  /** HITL step execution to claim. When omitted, the server looks up the waiting step. */
+  stepExecutionId?: string;
 }
 
 export interface WorkflowsConfig {
   eventDrivenExecutionEnabled: boolean;
+}
+
+/** Workflows the caller can read, or `undefined` when no workflow is hidden from them. */
+export interface ReadableWorkflowIdsResponse {
+  workflowIds?: string[];
 }
 
 export interface SearchTriggerEventLogParams {
@@ -189,6 +214,19 @@ export interface SearchTriggerEventLogResult {
   total: number;
   page: number;
   size: number;
+}
+
+export interface LinkedRule {
+  id: string;
+  name: string;
+  ruleTypeId: string;
+}
+
+export interface GetLinkedRulesResponse {
+  total: number;
+  /** Linked rules in the space that the user cannot read. */
+  hiddenTotal: number;
+  rules: LinkedRule[];
 }
 
 export interface RestoreWorkflowVersionParams {

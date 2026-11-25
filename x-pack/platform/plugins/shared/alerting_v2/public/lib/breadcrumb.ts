@@ -17,7 +17,8 @@ export type AlertingV2BreadcrumbPage =
   | 'action_policy_edit'
   | 'episodes_list'
   | 'episode_details'
-  | 'execution_history_list';
+  | 'execution_history_list'
+  | 'imports_list';
 
 export const getAlertingV2Breadcrumb = (
   page: AlertingV2BreadcrumbPage,
@@ -27,7 +28,7 @@ export const getAlertingV2Breadcrumb = (
     case 'root':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.rootTitle', {
-          defaultMessage: 'Alerting V2',
+          defaultMessage: 'Universal Alerting',
         }),
       };
     case 'rules_list':
@@ -67,7 +68,7 @@ export const getAlertingV2Breadcrumb = (
     case 'episodes_list':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.episodesListTitle', {
-          defaultMessage: 'Alert episodes',
+          defaultMessage: 'Alerts',
         }),
       };
     case 'episode_details':
@@ -78,6 +79,12 @@ export const getAlertingV2Breadcrumb = (
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.executionHistoryListTitle', {
           defaultMessage: 'Execution history',
+        }),
+      };
+    case 'imports_list':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.importsListTitle', {
+          defaultMessage: 'Import alerts',
         }),
       };
   }

@@ -295,4 +295,73 @@ describe('conversation access control', () => {
       }
     });
   });
+
+  describe('service accounts', () => {
+    const serviceAccount: CurrentUser = {
+      id: 'service_account:kibana/automation',
+      username: 'kibana/automation',
+      type: 'service_account',
+      isAdmin: false,
+    };
+
+    it('owns the conversations it created', () => {
+      const own = conversation({
+        user: { id: serviceAccount.id, username: serviceAccount.username, type: 'service_account' },
+      });
+
+      expect(
+        isConversationOwner({
+          owner: { userId: own.user.id, username: own.user.username },
+          user: serviceAccount,
+        })
+      ).toBe(true);
+      expect(hasConversationOwnerAccess({ conversation: own, user: serviceAccount })).toBe(true);
+    });
+
+    it('can converse in a public conversation it does not own', () => {
+      const shared = conversation({
+        access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
+      });
+
+      expect(hasConversationConverseAccess({ conversation: shared, user: serviceAccount })).toBe(
+        true
+      );
+    });
+
+    it('cannot converse in a private conversation it does not own', () => {
+      const private_ = conversation({
+        access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
+      });
+
+      expect(hasConversationConverseAccess({ conversation: private_, user: serviceAccount })).toBe(
+        false
+      );
+    });
+
+    it('cannot rename or delete a public conversation it does not own', () => {
+      const shared = conversation({
+        access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
+      });
+
+      expect(hasConversationRenameAccess({ conversation: shared, user: serviceAccount })).toBe(
+        false
+      );
+      expect(hasConversationDeleteAccess({ conversation: shared, user: serviceAccount })).toBe(
+        false
+      );
+    });
+
+    it('does not let another principal own its conversations', () => {
+      const own = conversation({
+        user: { id: serviceAccount.id, username: serviceAccount.username, type: 'service_account' },
+      });
+
+      expect(
+        isConversationOwner({
+          owner: { userId: own.user.id, username: own.user.username },
+          user: { id: 'user-profile-id', username: 'kibana/automation', isAdmin: false },
+        })
+      ).toBe(false);
+    });
+  });
 });

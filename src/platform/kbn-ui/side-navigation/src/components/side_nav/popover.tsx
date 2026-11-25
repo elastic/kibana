@@ -36,7 +36,7 @@ import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useHoverTimeout } from '../../hooks/use_hover_timeout';
-import { useScroll } from '../../hooks/use_scroll';
+import { scrollLayoutStyles } from '../../hooks/use_scroll';
 
 export interface PopoverIds {
   popoverNavigationInstructionsId: string;
@@ -65,6 +65,7 @@ export interface PopoverProps {
     ref?: Ref<HTMLElement>;
     onClick?: (e: MouseEvent) => void;
     onKeyDown?: (e: KeyboardEvent) => void;
+    onMouseDown?: (e: MouseEvent) => void;
     tabIndex?: number;
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     'aria-expanded'?: boolean;
@@ -104,6 +105,9 @@ export const Popover = ({
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
+  // Clicking the trigger means navigate, not open the hover menu. Keep hover
+  // closed until mouseleave so the click's focus cannot reopen it.
+  const suppressHoverRef = useRef(false);
 
   const [isOpenedByClick, setIsOpenedByClick] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -136,6 +140,9 @@ export const Popover = ({
   }, [clearHoverTimeout, close]);
 
   const handleMouseEnter = useCallback(() => {
+    if (suppressHoverRef.current) {
+      return;
+    }
     if ((!persistent || !isOpenedByClick) && (!isAnyPopoverLocked || isOpen)) {
       clearHoverTimeout();
       if (!isSidePanelOpen) {
@@ -154,12 +161,20 @@ export const Popover = ({
   ]);
 
   const handleMouseLeave = useCallback(() => {
+    suppressHoverRef.current = false;
     if (!persistent || !isOpenedByClick) {
       setHoverTimeout(handleClose, POPOVER_HOVER_DELAY);
     }
   }, [persistent, isOpenedByClick, setHoverTimeout, handleClose]);
 
-  const scrollStyles = useScroll(true);
+  const handleTriggerMouseDown = useCallback(() => {
+    if (persistent) {
+      return;
+    }
+    suppressHoverRef.current = true;
+    clearHoverTimeout();
+    close();
+  }, [persistent, clearHoverTimeout, close]);
 
   const handleTriggerClick = useCallback(() => {
     if (persistent) {
@@ -191,6 +206,15 @@ export const Popover = ({
     },
     [trigger, hasContent, open]
   );
+
+  // Clicking inside pins a persistent popover like a trigger click does, so content that shrinks
+  // out from under the cursor (e.g. a shorter nested panel) does not close it on mouseleave.
+  // Capture phase lets an item's own `closePopover` call run after and win.
+  const handlePopoverClickCapture = useCallback(() => {
+    if (persistent) {
+      setOpenedByClick();
+    }
+  }, [persistent, setOpenedByClick]);
 
   const handlePopoverKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback(
     (e) => {
@@ -253,6 +277,10 @@ export const Popover = ({
         trigger.props.onClick?.(e);
         handleTriggerClick();
       },
+      onMouseDown: (e: MouseEvent) => {
+        trigger.props.onMouseDown?.(e);
+        handleTriggerMouseDown();
+      },
       onKeyDown: handleTriggerKeyDown,
     });
   }, [
@@ -261,6 +289,7 @@ export const Popover = ({
     isOpen,
     handleTriggerKeyDown,
     handleTriggerClick,
+    handleTriggerMouseDown,
     isSidePanelOpen,
     popoverEnterAndExitInstructionsId,
   ]);
@@ -272,8 +301,12 @@ export const Popover = ({
   const popoverContentStyles = css`
     --popover-max-height: 37.5rem;
     width: ${SIDE_PANEL_WIDTH}px;
-    max-height: var(--popover-max-height);
-    ${scrollStyles};
+    // Caps short viewports to the space EUI can position the popover in, between the popover buffers
+    max-height: min(
+      var(--popover-max-height),
+      calc(100dvh - ${TOP_BAR_HEIGHT + TOP_BAR_POPOVER_GAP + BOTTOM_POPOVER_GAP}px)
+    );
+    ${scrollLayoutStyles};
   `;
 
   const maskStyles = css`
@@ -332,6 +365,7 @@ export const Popover = ({
               }
             }
           }}
+          onClickCapture={handlePopoverClickCapture}
           onKeyDown={handlePopoverKeyDown}
           css={popoverContentStyles}
         >

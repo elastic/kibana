@@ -11,8 +11,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiHorizontalRule,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -21,7 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
+  EuiSplitPanel,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,14 +49,12 @@ export const ConfirmRegionSelectionModal: React.FC<ConfirmRegionSelectionModalPr
 }) => {
   const modalTitleId = useGeneratedHtmlId();
   const ignoreCheckboxId = useGeneratedHtmlId({ prefix: 'confirmRegionSelectionIgnore' });
-  const { euiTheme } = useEuiTheme();
   const [ignoreErrors, setIgnoreErrors] = useState(false);
 
   const hasConflict = Boolean(conflictArtifacts?.length);
   const unresolvedConflict = hasConflict && !ignoreErrors;
   const isConfirmSaveDisabled = isSaving || unresolvedConflict;
-  const isIgnoreCheckboxDisabled = !hasConflict || isSaving;
-  const isGeoMode = mode === 'geo';
+  const isIgnoreCheckboxDisabled = isSaving;
 
   useEffect(() => {
     if (hasConflict) {
@@ -74,13 +71,12 @@ export const ConfirmRegionSelectionModal: React.FC<ConfirmRegionSelectionModalPr
     <EuiModal
       onClose={onCancel}
       aria-labelledby={modalTitleId}
-      maxWidth={euiTheme.base * 45}
       data-test-subj="confirmRegionSelectionModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.searchInferenceEndpoints.confirmRegionSelection.modalTitle', {
-            defaultMessage: 'Confirm region selection',
+            defaultMessage: 'Review region preferences',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -88,21 +84,10 @@ export const ConfirmRegionSelectionModal: React.FC<ConfirmRegionSelectionModalPr
       <EuiModalBody>
         <EuiText size="s">
           <p>
-            {isGeoMode
-              ? i18n.translate(
-                  'xpack.searchInferenceEndpoints.confirmRegionSelection.policyUpdateGeoDescription',
-                  {
-                    defaultMessage:
-                      'Your region policy will be updated to only allow from the selected geography. This will apply to all spaces in your project.',
-                  }
-                )
-              : i18n.translate(
-                  'xpack.searchInferenceEndpoints.confirmRegionSelection.policyUpdateRegionDescription',
-                  {
-                    defaultMessage:
-                      'Your region policy will be updated to only allow from the selected region. This will apply to all spaces in your project.',
-                  }
-                )}
+            {i18n.translate('xpack.searchInferenceEndpoints.confirmRegionSelection.description', {
+              defaultMessage:
+                'Your region policy will be updated to the selected locations. This will apply to all spaces.',
+            })}
           </p>
         </EuiText>
 
@@ -133,28 +118,28 @@ export const ConfirmRegionSelectionModal: React.FC<ConfirmRegionSelectionModalPr
 
         <EuiSpacer size="m" />
 
-        <EuiTitle size="xs">
+        <EuiTitle size="xxs">
           <h3 data-test-subj="confirmRegionSelectionReviewChangesTitle">
             {i18n.translate(
               'xpack.searchInferenceEndpoints.confirmRegionSelection.reviewChangesTitle',
-              { defaultMessage: 'Review changes' }
+              { defaultMessage: 'Pending changes' }
             )}
           </h3>
         </EuiTitle>
 
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
 
-        <ConfirmRegionSelectionTabs
-          mode={mode}
-          selectedRegions={selectedRegions}
-          selectedGeos={selectedGeos}
-          conflictArtifacts={conflictArtifacts}
-        />
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
+        <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+          <EuiSplitPanel.Inner paddingSize="m">
+            <ConfirmRegionSelectionTabs
+              mode={mode}
+              selectedRegions={selectedRegions}
+              selectedGeos={selectedGeos}
+              conflictArtifacts={conflictArtifacts}
+            />
+          </EuiSplitPanel.Inner>
+          <EuiHorizontalRule margin="none" />
+          <EuiSplitPanel.Inner paddingSize="m" color="plain">
             <EuiCheckbox
               id={ignoreCheckboxId}
               checked={ignoreErrors}
@@ -183,38 +168,32 @@ export const ConfirmRegionSelectionModal: React.FC<ConfirmRegionSelectionModalPr
               }
               data-test-subj="confirmRegionSelectionIgnoreCheckbox"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={onCancel}
-                  isDisabled={isSaving}
-                  data-test-subj="confirmRegionSelectionCancelButton"
-                >
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.confirmRegionSelection.cancelButtonLabel',
-                    { defaultMessage: 'Cancel' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={handleConfirm}
-                  isDisabled={isConfirmSaveDisabled}
-                  isLoading={isSaving}
-                  data-test-subj="confirmRegionSelectionSaveButton"
-                >
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.confirmRegionSelection.saveButtonLabel',
-                    { defaultMessage: 'Save policy' }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          onClick={onCancel}
+          isDisabled={isSaving}
+          data-test-subj="confirmRegionSelectionCancelButton"
+        >
+          {i18n.translate(
+            'xpack.searchInferenceEndpoints.confirmRegionSelection.cancelButtonLabel',
+            { defaultMessage: 'Cancel' }
+          )}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          onClick={handleConfirm}
+          isDisabled={isConfirmSaveDisabled}
+          isLoading={isSaving}
+          data-test-subj="confirmRegionSelectionSaveButton"
+        >
+          {i18n.translate('xpack.searchInferenceEndpoints.confirmRegionSelection.saveButtonLabel', {
+            defaultMessage: 'Save policy',
+          })}
+        </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );

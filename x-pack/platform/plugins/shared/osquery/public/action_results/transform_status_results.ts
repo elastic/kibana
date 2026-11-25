@@ -17,7 +17,7 @@ interface TransformStatusEdgesOptions {
   error?: string;
 }
 
-export function computeStatus(edge: ResultEdges[number], expired: boolean, error?: string): string {
+function computeStatus(edge: ResultEdges[number], expired: boolean, error?: string): string {
   if (edge.fields?.['error.skipped'] || (error && !edge.fields?.completed_at)) {
     return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {
       defaultMessage: 'skipped',

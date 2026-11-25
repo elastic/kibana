@@ -18,6 +18,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT,
 } from '@kbn/management-settings-ids';
 import {
   initSecurityManagedWorkflowsClient,
@@ -37,6 +38,7 @@ export interface SecurityAlertAnalysisWorkflowSettings {
   connectorId: string;
   agentId: string;
   createConversation: boolean;
+  usePrompt: boolean;
   tagPrefix: string;
 }
 
@@ -65,6 +67,9 @@ export const readSecurityAlertAnalysisWorkflowSettings = async (
   agentId: await uiSettingsClient.get<string>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID),
   createConversation: await uiSettingsClient.get<boolean>(
     SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION
+  ),
+  usePrompt: await uiSettingsClient.get<boolean>(
+    SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT
   ),
   tagPrefix: await uiSettingsClient.get<string>(
     SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX

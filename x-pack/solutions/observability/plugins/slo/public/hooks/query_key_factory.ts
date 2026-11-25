@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Indicator, Objective } from '@kbn/slo-schema';
+import type { CreateSLOInput, Indicator, Objective } from '@kbn/slo-schema';
 
 interface SloListFilter {
   kqlQuery: string;
@@ -78,6 +78,7 @@ export const sloKeys = {
     remoteName?: string;
   }) => [...sloKeys.all, 'searchDefinitions', params] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
+  inspect: (slo: CreateSLOInput | undefined) => [...sloKeys.all, 'inspect', slo] as const,
   allHealth: () => [...sloKeys.all, 'health'] as const,
   health: (list: Array<{ id: string; instanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
@@ -96,6 +97,7 @@ export const sloKeys = {
       to: Date;
     };
     groupBy?: string[];
+    projectRoutings?: string | null;
   }) => [...sloKeys.all, 'preview', params] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
   instances: (params: {

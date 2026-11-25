@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-jest.mock('./send_email', () => ({
-  sendEmail: jest.fn(),
-}));
+jest.mock('./send_email', () => {
+  const actual = jest.requireActual('./send_email');
+  return {
+    ...actual,
+    sendEmail: jest.fn(),
+  };
+});
 
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -25,7 +29,10 @@ import {
   WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from '@kbn/actions-plugin/server/lib';
 
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import {
+  type ActionTypeExecutorOptions,
+  ConnectorUsageCollector,
+} from '@kbn/actions-plugin/server/types';
 import { sendEmail } from './send_email';
 import type { EmailConnectorType, EmailConnectorTypeExecutorOptions } from '.';
 import type {
@@ -599,7 +606,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has invalid format (leading hyphen in domain)', () => {
@@ -616,7 +623,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has invalid format (trailing hyphen in domain)', () => {
@@ -633,7 +640,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email starts with @ sign', () => {
@@ -650,7 +657,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has double @ sign', () => {
@@ -667,7 +674,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has double dots in domain', () => {
@@ -684,7 +691,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has space in domain', () => {
@@ -701,7 +708,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation accepts email with single-label domain (on-prem MTA)', () => {
@@ -718,7 +725,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('params validation fails when email has path traversal characters', () => {
@@ -735,7 +742,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation succeeds for valid email with hyphens and subdomains', () => {
@@ -810,7 +817,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities }
       );
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('error when using a service that is not enabled', async () => {
@@ -853,7 +860,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities: configUtils }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('does not throw when fetching service enabled in config', () => {
@@ -873,7 +880,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities: configUtils }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('throws for too long "to" address ', async () => {
@@ -1199,6 +1206,101 @@ describe('execute()', () => {
     `);
   });
 
+  test('ensure subject and message pass through using HTTP_REQUEST and __json service', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    await connectorType.executor(executorOptionsWithHTTP);
+    const emailSent = sendEmailMock.mock.calls[0][1];
+    expect(emailSent.content.subject).toBe('the subject');
+    expect(emailSent.content.message).toBe(
+      'a message to you\n\n---\n\nThis message was sent by Elastic.'
+    );
+    expect(emailSent.content.messageHTML).toBe(null);
+  });
+
+  test('ensure fixed subject and message and no footer using HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        kibanaFooterLink: {
+          path: '/some-url',
+          text: 'Click this link',
+        },
+      },
+      config: { ...executorOptions.config, service: 'gmail' },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    await connectorType.executor(executorOptionsWithHTTP);
+    const emailSent = sendEmailMock.mock.calls[0][1];
+    expect(emailSent.content.subject).toBe('This is a test email from Kibana');
+    expect(emailSent.content.message).toBe('This is a test email from Kibana');
+    expect(emailSent.content.messageHTML).toBe(null);
+  });
+
+  test('ensure fixed messageHTML using HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP: ActionTypeExecutorOptions<
+      ConnectorTypeConfigType,
+      ConnectorTypeSecretsType,
+      ActionParamsType
+    > = {
+      ...executorOptions,
+      params: { ...executorOptions.params, messageHTML: 'this html should be replaced' },
+      config: { ...executorOptions.config, service: 'gmail', allowHtml: true },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTTP);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "attachments": undefined,
+        "connectorId": "some-id",
+        "content": Object {
+          "message": "This is a test email from Kibana",
+          "messageHTML": "This is a test email from Kibana",
+          "subject": "This is a test email from Kibana",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "gmail",
+          "user": "bob",
+        },
+      }
+    `);
+  });
+
   test('ensure parameters are as expected with HTML message from trusted notifications source', async () => {
     sendEmailMock.mockReset();
 
@@ -1291,7 +1393,7 @@ describe('execute()', () => {
         ...executorOptions.config,
         allowHtml: true,
       },
-      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      source: { type: ActionExecutionSourceType.BACKGROUND_TASK, source: null },
       params: {
         ...executorOptions.params,
         messageHTML: '<html><body><span>My HTML message</span></body></html>',
@@ -2161,7 +2263,7 @@ describe('execute()', () => {
     );
 
     const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('message parameter is trimmed to 0 length if configured', async () => {
@@ -2188,7 +2290,7 @@ describe('execute()', () => {
     expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(additionalTextWeAdded);
 
     const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('messageHTML parameter is trimmed to the maximum allowed length', async () => {
@@ -2216,7 +2318,7 @@ describe('execute()', () => {
     );
 
     const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('messageHTML parameter is trimmed to 0 length if configured', async () => {
@@ -2242,7 +2344,7 @@ describe('execute()', () => {
     expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(additionalTextWeAdded);
 
     const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('includes replyTo in routing when provided', async () => {

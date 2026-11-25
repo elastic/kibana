@@ -108,6 +108,8 @@ export interface ActionResultsStrategyResponse
 export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
   agentIds?: string[];
+  /** Targeted agents; sizes the exact distinct-responder count of the response aggregation. */
+  agentsCount?: number;
   startDate?: string;
   useNewDataStream?: boolean;
   integrationNamespaces?: string[];

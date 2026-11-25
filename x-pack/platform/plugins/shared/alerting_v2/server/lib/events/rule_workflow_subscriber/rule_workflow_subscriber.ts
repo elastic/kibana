@@ -20,6 +20,7 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 import { RULE_WORKFLOW_TRIGGERS, type RuleWorkflowTriggerBinding } from './triggers';
 
 /**
@@ -27,42 +28,23 @@ import { RULE_WORKFLOW_TRIGGERS, type RuleWorkflowTriggerBinding } from './trigg
  * workflows-extensions emit path via {@link WorkflowServiceContract}.
  */
 @injectable()
-export class RuleWorkflowSubscriber {
-  #subscriptions: Subscription[] = [];
-
+export class RuleWorkflowSubscriber extends BaseEventBusSubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
-
-  public start(): void {
-    if (this.#subscriptions.length > 0) {
-      this.logger.debug({
-        message: () =>
-          '[RuleWorkflowSubscriber] start() called more than once. Ignoring. Subscriptions already active.',
-      });
-
-      return;
-    }
-
-    for (const trigger of RULE_WORKFLOW_TRIGGERS) {
-      const subscription = this.bus.subscribe(trigger.eventType, (event, context) =>
-        this.#dispatch(trigger, event as RuleEvent, context)
-      );
-
-      this.#subscriptions.push(subscription);
-    }
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    super(bus, loggerService.forSubsystem('events'));
   }
 
-  public stop(): void {
-    for (const subscription of this.#subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    this.#subscriptions = [];
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
+    return RULE_WORKFLOW_TRIGGERS.map((trigger) =>
+      bus.subscribe(trigger.eventType, (event, context) => this.#dispatch(trigger, event, context))
+    );
   }
 
   async #dispatch(
@@ -70,6 +52,16 @@ export class RuleWorkflowSubscriber {
     event: RuleEvent,
     context: AlertingPublisherContext
   ): Promise<void> {
+    // Scheduling a triggered workflow needs the caller's credentials, which an
+    // internal-user change does not have.
+    if (context.origin.actor === 'internal') {
+      this.logger.debug({
+        message: () =>
+          `Skipping workflow trigger "${trigger.triggerId}" for rule ${event.payload.ruleId}: changed by the internal user`,
+      });
+      return;
+    }
+
     try {
       const payload = trigger.toPayload(event);
       await this.workflows.emitEvent(context.request, trigger.triggerId, payload);

@@ -23,15 +23,19 @@ export const RiskScoresEntityCalculationRequest = lazySchema(() =>
     /**
      * Used to identify the entity.
      */
-    identifier: z.string(),
+    identifier: z.string().describe('Used to identify the entity.'),
     /**
      * Used to define the type of entity.
      */
-    identifier_type: IdentifierType,
+    identifier_type: IdentifierType.describe('Used to define the type of entity.'),
     /**
      * V2-only, the canonical Entity Store EUID.
      */
-    entity_id: z.string().max(1000).optional(),
+    entity_id: z
+      .string()
+      .max(1000)
+      .optional()
+      .describe('V2-only, the canonical Entity Store EUID.'),
   })
 );
 export type RiskScoresEntityCalculationRequest = z.infer<typeof RiskScoresEntityCalculationRequest>;
@@ -44,38 +48,4 @@ export const RiskScoresEntityCalculationResponse = lazySchema(() =>
 );
 export type RiskScoresEntityCalculationResponse = z.infer<
   typeof RiskScoresEntityCalculationResponse
->;
-
-export const DeprecatedTriggerRiskScoreCalculationRequestBody = lazySchema(
-  () => RiskScoresEntityCalculationRequest
-);
-export type DeprecatedTriggerRiskScoreCalculationRequestBody = z.infer<
-  typeof DeprecatedTriggerRiskScoreCalculationRequestBody
->;
-export type DeprecatedTriggerRiskScoreCalculationRequestBodyInput = z.input<
-  typeof DeprecatedTriggerRiskScoreCalculationRequestBody
->;
-
-export const DeprecatedTriggerRiskScoreCalculationResponse = lazySchema(
-  () => RiskScoresEntityCalculationResponse
-);
-export type DeprecatedTriggerRiskScoreCalculationResponse = z.infer<
-  typeof DeprecatedTriggerRiskScoreCalculationResponse
->;
-
-export const TriggerRiskScoreCalculationRequestBody = lazySchema(
-  () => RiskScoresEntityCalculationRequest
-);
-export type TriggerRiskScoreCalculationRequestBody = z.infer<
-  typeof TriggerRiskScoreCalculationRequestBody
->;
-export type TriggerRiskScoreCalculationRequestBodyInput = z.input<
-  typeof TriggerRiskScoreCalculationRequestBody
->;
-
-export const TriggerRiskScoreCalculationResponse = lazySchema(
-  () => RiskScoresEntityCalculationResponse
-);
-export type TriggerRiskScoreCalculationResponse = z.infer<
-  typeof TriggerRiskScoreCalculationResponse
 >;

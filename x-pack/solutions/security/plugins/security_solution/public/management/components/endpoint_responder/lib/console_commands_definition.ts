@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getMemoryDumpHelpUsage } from './get_memory_dump_help_usage';
 import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -39,6 +38,7 @@ import type {
   ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
+  GET_FILE_MAX_PATHS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
 } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -239,10 +239,10 @@ export const getEndpointConsoleCommands = ({
 
   // `kill-process --kill-descendants` applies only to the Elastic Defend Endpoint, is gated behind
   // a feature flag and requires that the host's Endpoint version supports it (reported via the
-  // `kill_process_descendents` capability).
+  // `kill_process_descendants` capability).
   const isKillDescendantsSupportedByEndpoint = (
     endpointCapabilities as EndpointCapabilities[]
-  ).includes('kill_process_descendents');
+  ).includes('kill_process_descendants');
   const killDescendantsArg: Record<string, CommandArgDefinition> =
     agentType === 'endpoint' && responseActionsEndpointKillProcessDescendants
       ? {
@@ -262,6 +262,35 @@ export const getEndpointConsoleCommands = ({
 
               return true;
             },
+          },
+        }
+      : {};
+
+  // `get-file` with multiple `--path` arguments applies only to the Elastic Defend Endpoint and
+  // requires that the host's Endpoint supports it (via the `get_file_multi_path` capability).
+  const getFileAllowsMultiplePaths = agentType === 'endpoint';
+  const isGetFileMultiPathSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('get_file_multi_path');
+  // The "can be used multiple times" help text is only shown when the Endpoint reports support for it
+  const getFilePathAbout =
+    getFileAllowsMultiplePaths && isGetFileMultiPathSupportedByEndpoint
+      ? CONSOLE_COMMANDS.getFile.args.path.aboutMultiple
+      : CONSOLE_COMMANDS.getFile.args.path.about;
+
+  // `get-file --force` applies only to the Elastic Defend Endpoint and is only offered when the
+  // host's Endpoint supports it (reported via the `get_file_force` capability, Windows only).
+  const isGetFileForceSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('get_file_force');
+  const getFileForceArg: Record<string, CommandArgDefinition> =
+    agentType === 'endpoint' && isGetFileForceSupportedByEndpoint
+      ? {
+          force: {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: false,
+            about: CONSOLE_COMMANDS.getFile.args.force.about,
           },
         }
       : {};
@@ -321,22 +350,22 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        ...commandCommentArgument(),
         entityId: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
           validate: emptyArgumentValidator,
         },
         pid: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.killProcess.args.pid.about,
           validate: pidValidator,
         },
         ...killDescendantsArg,
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -357,21 +386,21 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        ...commandCommentArgument(),
         entityId: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.suspendProcess.args.entityId.about,
           validate: emptyArgumentValidator,
         },
         pid: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
           validate: pidValidator,
         },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -426,12 +455,24 @@ export const getEndpointConsoleCommands = ({
       args: {
         path: {
           required: true,
-          allowMultiples: false,
-          about: CONSOLE_COMMANDS.getFile.args.path.about,
+          allowMultiples: getFileAllowsMultiplePaths,
+          mustHaveValue: 'non-empty-string',
+          about: getFilePathAbout,
           validate: (argData) => {
-            return emptyArgumentValidator(argData);
+            if (argData.length > 1) {
+              if (!isGetFileMultiPathSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.getFile.args.path.multipleNotSupported;
+              }
+
+              if (argData.length > GET_FILE_MAX_PATHS) {
+                return CONSOLE_COMMANDS.getFile.args.path.tooManyPaths(GET_FILE_MAX_PATHS);
+              }
+            }
+
+            return true;
           },
         },
+        ...getFileForceArg,
         ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -837,7 +878,7 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'memoryDumpType',
           validate: () => {
             if (!endpointSupportsProcessDump) {
               return getMemoryDumpTypeNotSupportedMessage('process');
@@ -853,7 +894,7 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'memoryDumpType',
           validate: () => {
             if (!endpointSupportsKernelDump) {
               return getMemoryDumpTypeNotSupportedMessage('kernel');
@@ -871,18 +912,22 @@ export const getEndpointConsoleCommands = ({
                 required: false,
                 allowMultiples: false,
                 mustHaveValue: false,
-                exclusiveOr: true,
+                exclusiveOrGroupId: 'memoryDumpType',
               },
             }
           : {}),
         entityId: {
           required: false,
+          conditionallyRequired: ['process'],
+          exclusiveOrGroupId: 'processIdentifier',
           allowMultiples: false,
           mustHaveValue: 'non-empty-string',
           about: CONSOLE_COMMANDS.memoryDump.entityIdArgAbout,
         },
         pid: {
           required: false,
+          conditionallyRequired: ['process'],
+          exclusiveOrGroupId: 'processIdentifier',
           allowMultiples: false,
           mustHaveValue: 'number-greater-than-zero',
           about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
@@ -894,9 +939,6 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
-      helpUsage: getMemoryDumpHelpUsage(
-        agentType === 'endpoint' && responseActionsEndpointMemoryDumpRaw && endpointSupportsRawDump
-      ),
     });
   }
 
@@ -1138,14 +1180,14 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
               mustHaveValue: 'non-empty-string',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
             },
             CloudFile: {
               required: false,
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -1160,7 +1202,7 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
               mustHaveValue: 'non-empty-string',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
             },
             Timeout: {
               required: false,

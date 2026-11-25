@@ -37,9 +37,7 @@ test.describe('index based actions panel on trial license', { tag: tags.stateful
     const { mlDataVisualizerActions, mlJobWizard } = pageObjects;
 
     await scoutTest.step('loads the source data in the data visualizer', async () => {
-      await mlDataVisualizerActions.navigateToDataVisualizer();
-      await mlDataVisualizerActions.navigateToDataViewSelection();
-      await mlDataVisualizerActions.selectDataView(testData.DATA_VIEW_TITLE);
+      await mlDataVisualizerActions.navigateToIndexDataVisualizer({ index: dataViewId });
     });
 
     await scoutTest.step('opens the advanced job wizard', async () => {
@@ -60,9 +58,9 @@ test.describe('index based actions panel on trial license', { tag: tags.stateful
     const { mlDataVisualizerActions, discover, queryBar } = pageObjects;
 
     await scoutTest.step('loads the source data in the data visualizer', async () => {
-      await mlDataVisualizerActions.navigateToDataVisualizer();
-      await mlDataVisualizerActions.navigateToDataViewSelection();
-      await mlDataVisualizerActions.selectSavedSearch(testData.SAVED_SEARCH_TITLE);
+      await mlDataVisualizerActions.navigateToIndexDataVisualizer({
+        savedSearchId: testData.FAREQUOTE_KUERY_SAVED_SEARCH_ID,
+      });
 
       await expect(mlDataVisualizerActions.timeRangeSelectorSection).toBeVisible();
       await mlDataVisualizerActions.clickUseFullDataButton(testData.DOC_COUNT_FORMATTED);

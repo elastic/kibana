@@ -11,21 +11,23 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  GENERATE_VECTORS_INGEST_SNIPPETS,
-  GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS,
-  GENERATE_VECTORS_SEARCH_SNIPPETS,
   HAVE_VECTORS_INGEST_SNIPPETS,
   HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS,
   HAVE_VECTORS_SEARCH_SNIPPETS,
-} from './language_snippets';
+} from '../constants/have_vectors_language_snippets';
 import {
-  GENERATE_VECTORS_INGEST,
-  GENERATE_VECTORS_SEARCH,
-  GENERATE_VECTORS_SEARCH_HYBRID,
-  HAVE_VECTORS_INGEST,
-  HAVE_VECTORS_SEARCH,
-  HAVE_VECTORS_SEARCH_HYBRID,
-} from './console_snippets';
+  GENERATE_VECTORS_INGEST_SNIPPETS,
+  GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS,
+  GENERATE_VECTORS_SEARCH_SNIPPETS,
+} from '../constants/generate_vectors_language_snippets';
+import {
+  GENERATE_VECTORS_INGEST_CONSOLE_SNIPPET,
+  GENERATE_VECTORS_SEARCH_CONSOLE_SNIPPET,
+  GENERATE_VECTORS_SEARCH_HYBRID_CONSOLE_SNIPPET,
+  HAVE_VECTORS_INGEST_CONSOLE_SNIPPET,
+  HAVE_VECTORS_SEARCH_CONSOLE_SNIPPET,
+  HAVE_VECTORS_SEARCH_HYBRID_CONSOLE_SNIPPET,
+} from '../constants/console_snippets';
 
 const docsLabel = i18n.translate('vectordbOnboarding.docsLabel', {
   defaultMessage: 'View documentation',
@@ -55,7 +57,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
                 defaultMessage: 'Ingest',
               }),
               snippets: GENERATE_VECTORS_INGEST_SNIPPETS,
-              consoleRequest: GENERATE_VECTORS_INGEST,
+              consoleRequest: GENERATE_VECTORS_INGEST_CONSOLE_SNIPPET,
             },
           ],
         },
@@ -164,7 +166,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
                 defaultMessage: 'Semantic',
               }),
               snippets: GENERATE_VECTORS_SEARCH_SNIPPETS,
-              consoleRequest: GENERATE_VECTORS_SEARCH,
+              consoleRequest: GENERATE_VECTORS_SEARCH_CONSOLE_SNIPPET,
             },
             {
               id: 'hybrid',
@@ -172,7 +174,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
                 defaultMessage: 'Hybrid',
               }),
               snippets: GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS,
-              consoleRequest: GENERATE_VECTORS_SEARCH_HYBRID,
+              consoleRequest: GENERATE_VECTORS_SEARCH_HYBRID_CONSOLE_SNIPPET,
             },
           ],
         },
@@ -252,7 +254,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
                 defaultMessage: 'Ingest',
               }),
               snippets: HAVE_VECTORS_INGEST_SNIPPETS,
-              consoleRequest: HAVE_VECTORS_INGEST,
+              consoleRequest: HAVE_VECTORS_INGEST_CONSOLE_SNIPPET,
             },
           ],
         },
@@ -331,7 +333,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
                 defaultMessage: 'kNN',
               }),
               snippets: HAVE_VECTORS_SEARCH_SNIPPETS,
-              consoleRequest: HAVE_VECTORS_SEARCH,
+              consoleRequest: HAVE_VECTORS_SEARCH_CONSOLE_SNIPPET,
             },
             {
               id: 'hybrid',
@@ -339,7 +341,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
                 defaultMessage: 'Hybrid',
               }),
               snippets: HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS,
-              consoleRequest: HAVE_VECTORS_SEARCH_HYBRID,
+              consoleRequest: HAVE_VECTORS_SEARCH_HYBRID_CONSOLE_SNIPPET,
             },
           ],
         },

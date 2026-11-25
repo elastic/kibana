@@ -158,7 +158,7 @@ describe('setTLSRecoveredAlertsContext', () => {
         } as TLSLatestPing,
       ],
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       context: {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         viewInAppUrl:
@@ -223,7 +223,7 @@ describe('setTLSRecoveredAlertsContext', () => {
         } as TLSLatestPing,
       ],
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       context: {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         viewInAppUrl:
@@ -273,7 +273,7 @@ describe('setTLSRecoveredAlertsContext', () => {
       spaceId: 'default',
       latestPings: [],
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: 'alert-id',
       context: expect.objectContaining({
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',

@@ -19,9 +19,9 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 import { useSynonymsBreadcrumbs } from '../../hooks/use_synonyms_breadcrumbs';
-import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { CreateSynonymsSetModal } from '../synonym_sets/create_new_set_modal';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
+import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { isPermissionError } from '../../utils/synonyms_utils';
 
 export const SearchSynonymsOverview = () => {

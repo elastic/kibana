@@ -25,8 +25,17 @@ import type {
   PageInfoPaginated,
 } from '../../../../../common/search_strategy';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export const ID = 'networkTlsQuery';
+
+const NETWORK_TLS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_NETWORK_PAGE,
+  'network_tls'
+);
 
 export interface NetworkTlsArgs {
   id: string;
@@ -104,6 +113,7 @@ export const useNetworkTls = ({
     },
     errorMessage: i18n.FAIL_NETWORK_TLS,
     abort: skip,
+    executionContext: NETWORK_TLS_CONTEXT,
   });
 
   const networkTlsResponse = useMemo(

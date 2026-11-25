@@ -10,15 +10,11 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
-import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { isArtifactByPolicy } from '../../../common/endpoint/service/artifacts';
+import { ensureArtifactListExists } from '../common/endpoint_artifact_services';
 
 export const cli = () => {
   run(
@@ -62,7 +58,7 @@ const createBlocklists: RunFn = async ({ flags, log }) => {
   const eventGenerator = new ExceptionsListItemGenerator();
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
-  await ensureCreateEndpointBlocklistsList(kbn);
+  await ensureArtifactListExists(kbn, 'blocklists');
 
   const randomPolicyId = await randomPolicyIdGenerator(kbn, log);
 
@@ -87,30 +83,4 @@ const createBlocklists: RunFn = async ({ flags, log }) => {
     },
     { concurrency: 10 }
   );
-};
-
-const ensureCreateEndpointBlocklistsList = async (kbn: KbnClient) => {
-  const newListDefinition: CreateExceptionListSchema = {
-    description: ENDPOINT_ARTIFACT_LISTS.blocklists.description,
-    list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
-    meta: undefined,
-    name: ENDPOINT_ARTIFACT_LISTS.blocklists.name,
-    os_types: [],
-    tags: [],
-    type: 'endpoint',
-    namespace_type: 'agnostic',
-  };
-
-  await kbn
-    .request({
-      method: 'POST',
-      path: EXCEPTION_LIST_URL,
-      body: newListDefinition,
-    })
-    .catch((e) => {
-      // Ignore if list was already created
-      if (e.status !== 409) {
-        handleThrowHttpError(e);
-      }
-    });
 };

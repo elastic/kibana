@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { map } from 'rxjs';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperUpdateButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   ApplicationStart,
@@ -24,9 +24,11 @@ import {
   type AutoRefreshSettings,
   type DateRangePickerOnChangeProps,
   type DateRangePickerSettings,
+  type FirstDayOfWeek,
   type TimeWindowButtonsConfig,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets, type PresetItem } from '@kbn/date-range-picker-presets';
+import moment from 'moment';
 import { LegacyDateRangePicker } from './legacy_date_range_picker';
 
 const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
@@ -48,6 +50,10 @@ const REFRESH_LABEL = i18n.translate('xpack.alertingV2.dateRangePicker.refreshBu
   defaultMessage: 'Refresh',
 });
 
+const UPDATE_LABEL = i18n.translate('xpack.alertingV2.dateRangePicker.updateButtonLabel', {
+  defaultMessage: 'Update',
+});
+
 export interface AlertingDateRangePickerServices {
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
@@ -63,10 +69,16 @@ export interface AlertingDateRangePickerProps {
   onChange: (range: { from: string; to: string }) => void;
   services: AlertingDateRangePickerServices;
   onRefresh?: () => void;
+  onManualRefresh?: () => void;
   isLoading?: boolean;
+  needsUpdate?: boolean;
+  isRefreshDisabled?: boolean;
+  refreshTooltip?: string;
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
   width?: 'auto' | 'restricted' | 'full';
   compressed?: boolean;
+  /** Hide the date range label and show only the duration badge. @default false */
+  collapsed?: boolean;
   persistPresets?: boolean;
   'data-test-subj'?: string;
 }
@@ -77,10 +89,15 @@ export const AlertingDateRangePicker = ({
   onChange,
   services: { data, notifications, http, application, uiSettings, featureFlags },
   onRefresh,
+  onManualRefresh,
   isLoading = false,
+  needsUpdate = false,
+  isRefreshDisabled = false,
+  refreshTooltip,
   showTimeWindowButtons = false,
   width = 'auto',
   compressed = true,
+  collapsed = false,
   persistPresets = true,
   'data-test-subj': dataTestSubj,
 }: AlertingDateRangePickerProps) => {
@@ -90,16 +107,9 @@ export const AlertingDateRangePicker = ({
   const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>(DEFAULT_AUTO_REFRESH);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
-  const isDateRangePickerEnabled$ = useMemo(
-    () =>
-      featureFlags
-        .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
-        .pipe(distinctUntilChanged()),
-    [featureFlags]
-  );
-  const isDateRangePickerEnabled = useObservable(
-    isDateRangePickerEnabled$,
-    featureFlags.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+  const isDateRangePickerEnabled = featureFlags.useBooleanValue(
+    DATE_RANGE_PICKER_FEATURE_FLAG,
+    true
   );
 
   const dateRangePickerPresets = useDateRangePickerPresets({
@@ -115,13 +125,22 @@ export const AlertingDateRangePicker = ({
 
   const value = `${from} to ${to}`;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
+  const dayOfWeekSetting = uiSettings.get<string>('dateFormat:dow');
   const dateFormat = uiSettings.get<string>('dateFormat');
+  const inputDateFormats = useMemo(() => (dateFormat ? [dateFormat] : undefined), [dateFormat]);
   const canAccessAdvancedSettings =
     (application.capabilities.advancedSettings?.save as boolean | undefined) ?? false;
 
   const settings = useMemo(
     () => (onRefresh ? { ...dateRangePickerSettings, autoRefresh } : dateRangePickerSettings),
     [dateRangePickerSettings, autoRefresh, onRefresh]
+  );
+
+  const calendarOptions = useMemo(
+    () => ({
+      firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+    }),
+    [dayOfWeekSetting]
   );
 
   const handleChange = useCallback(
@@ -140,6 +159,10 @@ export const AlertingDateRangePicker = ({
     setIsDateRangeInvalid(false);
   }, []);
 
+  const handleManualRefresh = useCallback(() => {
+    (onManualRefresh ?? onRefresh)?.();
+  }, [onManualRefresh, onRefresh]);
+
   const handleSettingsChange = useCallback(
     (next: DateRangePickerSettings) => {
       const { autoRefresh: nextAutoRefresh, ...rest } = next;
@@ -156,7 +179,7 @@ export const AlertingDateRangePicker = ({
     [onRefresh]
   );
 
-  const canManuallyRefresh = Boolean(onRefresh);
+  const canManuallyRefresh = Boolean(onManualRefresh ?? onRefresh);
 
   if (!isDateRangePickerEnabled) {
     return (
@@ -166,7 +189,11 @@ export const AlertingDateRangePicker = ({
         onChange={onChange}
         timeHistory={timeHistory}
         onRefresh={onRefresh}
+        onManualRefresh={onManualRefresh}
         isLoading={isLoading}
+        needsUpdate={needsUpdate}
+        isRefreshDisabled={isRefreshDisabled}
+        refreshTooltip={refreshTooltip}
         width={width}
         compressed={compressed}
         dateFormat={dateFormat}
@@ -192,8 +219,10 @@ export const AlertingDateRangePicker = ({
       onRefresh={onRefresh}
       width={width}
       compressed={compressed}
-      dateFormat={dateFormat}
+      collapsed={collapsed}
+      inputDateFormats={inputDateFormats}
       timeZone={timeZone}
+      calendarOptions={calendarOptions}
       prependBasePath={http.basePath.prepend}
       canAccessAdvancedSettings={canAccessAdvancedSettings}
       data-test-subj={dataTestSubj}
@@ -208,17 +237,22 @@ export const AlertingDateRangePicker = ({
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{picker}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={REFRESH_LABEL} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="refresh"
-            display="base"
-            size="s"
-            aria-label={REFRESH_LABEL}
-            onClick={onRefresh}
-            isLoading={isLoading}
-            data-test-subj={dataTestSubj ? `${dataTestSubj}-refresh` : 'alertingDateRangeRefresh'}
-          />
-        </EuiToolTip>
+        <EuiSuperUpdateButton
+          iconOnly
+          fill={false}
+          size="s"
+          aria-label={needsUpdate ? undefined : REFRESH_LABEL}
+          onClick={handleManualRefresh}
+          isLoading={isLoading}
+          isDisabled={isRefreshDisabled}
+          needsUpdate={needsUpdate}
+          showTooltip={false}
+          toolTipProps={{
+            content: refreshTooltip ?? (needsUpdate ? UPDATE_LABEL : REFRESH_LABEL),
+            disableScreenReaderOutput: true,
+          }}
+          data-test-subj={dataTestSubj ? `${dataTestSubj}-refresh` : 'alertingDateRangeRefresh'}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

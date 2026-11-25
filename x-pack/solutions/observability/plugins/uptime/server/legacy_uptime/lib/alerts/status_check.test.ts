@@ -288,7 +288,7 @@ describe('status check alert', () => {
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(alertsClient.report).toHaveBeenCalledTimes(2);
       mockMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(
+        expect(alertsClient.report).toHaveBeenCalledWith(
           mockStatusAlertDocument(
             monitor,
             false,
@@ -403,7 +403,7 @@ describe('status check alert', () => {
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(alertsClient.report).toHaveBeenCalledTimes(2);
       mockMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(
+        expect(alertsClient.report).toHaveBeenCalledWith(
           mockStatusAlertDocument(
             monitor,
             true,
@@ -519,7 +519,7 @@ describe('status check alert', () => {
       );
 
       mockMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(
+        expect(alertsClient.report).toHaveBeenCalledWith(
           mockStatusAlertDocument(
             monitor,
             false,
@@ -597,7 +597,7 @@ describe('status check alert', () => {
       } = options;
 
       mockMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(
+        expect(alertsClient.report).toHaveBeenCalledWith(
           mockStatusAlertDocument(
             monitor,
             false,
@@ -947,7 +947,7 @@ describe('status check alert', () => {
       } = options;
       const executorResult = await alert.executor(options);
       mockAvailabilityMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(mockAvailabilityAlertDocument(monitor));
+        expect(alertsClient.report).toHaveBeenCalledWith(mockAvailabilityAlertDocument(monitor));
       });
       expect(alertsClient.report).toHaveBeenCalledTimes(4);
       expect(alertsClient.report).toHaveBeenNthCalledWith(

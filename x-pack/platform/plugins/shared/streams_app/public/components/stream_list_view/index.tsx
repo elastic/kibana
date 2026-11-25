@@ -6,13 +6,8 @@
  */
 
 import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
-import type { AppHeaderMenu } from '@kbn/app-header';
-import {
-  SIGNIFICANT_EVENTS_APP_ID,
-  SIGNIFICANT_EVENTS_APP_LOCATOR_ID,
-} from '@kbn/deeplinks-observability';
-import type { SignificantEventsAppLocatorParams } from '@kbn/significant-events-app-plugin/common';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
@@ -23,23 +18,20 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
-import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
-import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
+import { NewExperienceCallout } from './new_experience_callout';
 import { getFormattedError } from '../../util/errors';
-import { useSignificantEventsApp } from '../../hooks/use_significant_events_app';
 
-export function StreamListView() {
+export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
   const context = useKibana();
   const {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient, getClassicStatus, getWiredStatus },
-        share,
       },
     },
     core,
@@ -62,9 +54,7 @@ export function StreamListView() {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { queryStreams },
   } = useStreamsPrivileges();
-  const { isAvailable: isSignificantEventsAvailable } = useSignificantEventsApp();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
     useState<boolean>(false);
@@ -105,17 +95,6 @@ export function StreamListView() {
     refreshWiredStatus();
   }, [refreshWiredStatus]);
 
-  const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
-    const allStreams = streamsListFetch.value?.streams ?? [];
-    const classicStreams = allStreams.filter(
-      (item) => item.stream && Streams.ClassicStream.Definition.is(item.stream)
-    );
-    return {
-      hasClassicStreams: classicStreams.length > 0,
-      firstClassicStreamName: classicStreams[0]?.stream?.name,
-    };
-  }, [streamsListFetch.value?.streams]);
-
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
@@ -143,8 +122,6 @@ export function StreamListView() {
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
   const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
     React.useState(false);
-  const [isQueryStreamCreationFlyoutOpen, setIsQueryStreamCreationFlyoutOpen] =
-    React.useState(false);
 
   const pageTitle = i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
     defaultMessage: 'Streams',
@@ -156,29 +133,8 @@ export function StreamListView() {
     'xpack.streams.streamsListView.createClassicStreamButtonLabel',
     { defaultMessage: 'Create classic stream' }
   );
-  const significantEventsLabel = i18n.translate(
-    'xpack.streams.streamsListView.sigEventsButtonLabel',
-    { defaultMessage: 'Significant Events' }
-  );
-  const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
-    defaultMessage: 'Create',
-  });
-  const queryStreamMenuItemLabel = i18n.translate(
-    'xpack.streams.streamsListView.queryStreamMenuItemLabel',
-    { defaultMessage: 'Query stream' }
-  );
-  const classicStreamMenuItemLabel = i18n.translate(
-    'xpack.streams.streamsListView.classicStreamMenuItemLabel',
-    { defaultMessage: 'Classic stream' }
-  );
-
-  const showSignificantEvents = isSignificantEventsAvailable;
-  const showQueryStreams = Boolean(queryStreams?.enabled);
+  const mapHref = tabs?.find(({ id }) => id === 'map')?.href;
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
-  const significantEventsHref =
-    share.url.locators
-      .get<SignificantEventsAppLocatorParams>(SIGNIFICANT_EVENTS_APP_LOCATOR_ID)
-      ?.getRedirectUrl({}) ?? core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID);
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [
@@ -193,46 +149,6 @@ export function StreamListView() {
       },
     ];
 
-    if (showSignificantEvents) {
-      items.push({
-        id: 'significantEvents',
-        order: 2,
-        label: significantEventsLabel,
-        iconType: 'significantEvents',
-        href: significantEventsHref,
-        testId: 'streamsSignificantEventsButton',
-      });
-    }
-
-    if (showQueryStreams) {
-      return {
-        primaryActionItem: {
-          id: 'createStream',
-          label: createLabel,
-          iconType: 'plus',
-          testId: 'streamsAppCreateStreamButton',
-          items: [
-            {
-              id: 'createClassicStream',
-              order: 1,
-              label: classicStreamMenuItemLabel,
-              run: () => setIsClassicStreamCreationFlyoutOpen(true),
-              disableButton: !canCreateClassicStream,
-              testId: 'streamsAppCreateClassicStreamButton',
-            },
-            {
-              id: 'createQueryStream',
-              order: 2,
-              label: queryStreamMenuItemLabel,
-              run: () => setIsQueryStreamCreationFlyoutOpen(true),
-              testId: 'streamsAppCreateQueryStreamButton',
-            },
-          ],
-        },
-        items,
-      };
-    }
-
     return {
       primaryActionItem: {
         id: 'createClassicStream',
@@ -244,23 +160,13 @@ export function StreamListView() {
       },
       items,
     };
-  }, [
-    canCreateClassicStream,
-    classicStreamMenuItemLabel,
-    createClassicStreamLabel,
-    createLabel,
-    queryStreamMenuItemLabel,
-    settingsLabel,
-    showQueryStreams,
-    showSignificantEvents,
-    significantEventsHref,
-    significantEventsLabel,
-  ]);
+  }, [canCreateClassicStream, createClassicStreamLabel, settingsLabel]);
 
   return (
     <>
-      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} />
+      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} tabs={tabs} />
       <StreamsAppPageTemplate.Body grow paddingSize="m">
+        {mapHref && <NewExperienceCallout mapHref={mapHref} />}
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
             icon={<EuiLoadingElastic size="xl" />}
@@ -276,10 +182,6 @@ export function StreamListView() {
           <StreamsListEmptyPrompt />
         ) : (
           <>
-            <WelcomeTourCallout
-              hasClassicStreams={hasClassicStreams}
-              firstClassicStreamName={firstClassicStreamName}
-            />
             <LegacyLogsDeprecationCallout
               streamsStatus={wiredStreamsStatus}
               openFlyout={() => setIsSettingsFlyoutOpen(true)}
@@ -303,12 +205,6 @@ export function StreamListView() {
       )}
       {isClassicStreamCreationFlyoutOpen && (
         <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
-      )}
-      {isQueryStreamCreationFlyoutOpen && (
-        <CreateQueryStreamFlyoutContent
-          onClose={() => setIsQueryStreamCreationFlyoutOpen(false)}
-          onQueryStreamCreated={streamsListFetch.refresh}
-        />
       )}
     </>
   );

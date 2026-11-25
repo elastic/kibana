@@ -16,7 +16,7 @@ This page lists the fastest ways to debug Scout tests locally and in CI.
 After a run, Playwright generates an HTML report. The console output includes the report path. To open the latest report:
 
 ```bash
-node scripts/playwright show-report <plugin-path>/test/scout/ui/output/reports
+node scripts/playwright show-report <plugin-path>/test/scout/ui/.scout/reports
 ```
 
 ::::::{note}

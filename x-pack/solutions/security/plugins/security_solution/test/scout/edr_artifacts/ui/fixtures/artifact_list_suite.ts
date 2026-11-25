@@ -1,0 +1,267 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect } from '@kbn/scout-security/ui';
+import { spaceTest, tags } from '.';
+import type { ArtifactTabTestFixtures } from '.';
+import type { ArtifactTabCase } from './artifact_tabs_test_data';
+import { getArtifactMinimalWriteRole, getArtifactRole } from './roles';
+
+export const ARTIFACT_LIST_PAGE_TAGS = [
+  ...tags.stateful.classic,
+  ...tags.serverless.security.complete,
+];
+
+/**
+ * Local only. Same reason as `ARTIFACT_TAB_POLICY_DETAILS_LOCAL_TAGS`: EE
+ * opt-in is an internal route with no MKI-safe revert. The factory uses this
+ * when the caller omits `options.tag` and `artifact.kind` is endpoint
+ * exceptions so the next list-page migration cannot fail open on cloud/MKI.
+ * Blocklists and other types keep `ARTIFACT_LIST_PAGE_TAGS`.
+ */
+export const ARTIFACT_LIST_PAGE_LOCAL_TAGS = ARTIFACT_LIST_PAGE_TAGS.filter((tag) =>
+  tag.startsWith('@local-')
+);
+
+const STATEFUL_ONLY_REASON =
+  'There is no serverless role that can read artifacts without write privilege';
+
+// Create + edit + delete after a role login. Precautionary, not measured
+// flake; the shorter policy-tab ALL path uses 90s.
+const WRITE_FLOW_TIMEOUT_MS = 120_000;
+
+const MINIMAL_WRITE_STATEFUL_ONLY_REASON =
+  'No predefined serverless role has only Security read plus the artifact all privilege (Cypress on serverless used the predefined endpoint_policy_manager)';
+
+/**
+ * Administration list-page RBAC for one artifact type. Call from the same
+ * spec file that already owns that agnostic list id so WRITE create cannot
+ * race NONE / READ empty-state assertions.
+ *
+ * `beforeAll` / `afterEach` wipe the whole agnostic list, which spaces do not
+ * isolate. Only use this suite when no other spec file writes to the list;
+ * otherwise use `describeArtifactListPageItemScoped`, which deletes only the
+ * items it created (blocklists do, since their operator suites have their
+ * own spec files).
+ *
+ * Does not port the Cypress SIEM version matrix — that belongs in API
+ * `role_migrations`.
+ */
+export const describeArtifactListPage = (
+  artifact: ArtifactTabCase,
+  options?: { tag?: string[]; minimalWriteRole?: boolean }
+): void => {
+  const { pagePrefix } = artifact;
+  const editedName = `${artifact.artifactName} edited`;
+  const editedDescription = 'Edited description';
+
+  spaceTest.describe(
+    `Artifact list page — ${artifact.title}`,
+    {
+      tag:
+        options?.tag ??
+        (artifact.kind === 'endpointExceptions'
+          ? ARTIFACT_LIST_PAGE_LOCAL_TAGS
+          : ARTIFACT_LIST_PAGE_TAGS),
+    },
+    () => {
+      spaceTest.beforeAll(async ({ apiServices }) => {
+        if (artifact.kind === 'endpointExceptions') {
+          await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
+        }
+        await apiServices.endpointArtifacts.deleteList(artifact.listId);
+      });
+
+      spaceTest.afterEach(async ({ apiServices }) => {
+        await apiServices.endpointArtifacts.deleteList(artifact.listId);
+      });
+
+      spaceTest(
+        `T1 analyst sees no privileges on the list page`,
+        async ({ browserAuth, pageObjects }) => {
+          // T1 is Security-read with no artifact sub-privilege. If it ever
+          // gained one, waitForNoPrivileges / noPrivilegesPage would fail.
+          await browserAuth.loginAsT1Analyst();
+
+          await pageObjects.artifactListPage.goto(artifact.urlPath);
+          await pageObjects.artifactListPage.waitForNoPrivileges();
+
+          await expect(pageObjects.artifactListPage.noPrivilegesPage).toBeVisible();
+          await expect(pageObjects.artifactListPage.emptyPageFeatureAction).toBeVisible();
+          await expect(pageObjects.artifactListPage.emptyState(pagePrefix)).toHaveCount(0);
+          await expect(pageObjects.artifactListPage.emptyStateAddButton(pagePrefix)).toHaveCount(0);
+        }
+      );
+
+      spaceTest(
+        `READ user sees empty state without add`,
+        async ({ browserAuth, pageObjects, config }) => {
+          spaceTest.skip(Boolean(config.serverless), STATEFUL_ONLY_REASON);
+
+          await browserAuth.loginWithCustomRole(getArtifactRole(artifact.privilegePrefix, 'read'));
+          await pageObjects.artifactListPage.goto(artifact.urlPath);
+          await pageObjects.artifactListPage.waitForEmpty(pagePrefix);
+
+          await expect(pageObjects.artifactListPage.emptyState(pagePrefix)).toBeVisible();
+          await expect(pageObjects.artifactListPage.emptyStateAddButton(pagePrefix)).toHaveCount(0);
+        }
+      );
+
+      spaceTest(
+        `READ user can view artifacts but cannot add, edit, or delete`,
+        async ({ browserAuth, pageObjects, apiServices, config }) => {
+          spaceTest.skip(Boolean(config.serverless), STATEFUL_ONLY_REASON);
+
+          await apiServices.endpointArtifacts.createList({
+            listId: artifact.listId,
+            type: artifact.listType,
+          });
+          await apiServices.endpointArtifacts.createItem({
+            name: artifact.artifactName,
+            listId: artifact.listId,
+            entries: artifact.entries,
+            osTypes: artifact.osTypes,
+          });
+
+          await browserAuth.loginWithCustomRole(getArtifactRole(artifact.privilegePrefix, 'read'));
+          await pageObjects.artifactListPage.goto(artifact.urlPath);
+          await pageObjects.artifactListPage.waitForList(pagePrefix);
+
+          await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(
+            artifact.artifactName
+          );
+          await expect(pageObjects.artifactListPage.pageAddButton(pagePrefix)).toHaveCount(0);
+          await expect(pageObjects.artifactListPage.cardActionsButton(pagePrefix)).toHaveCount(0);
+          await expect(pageObjects.artifactListPage.cardEditAction(pagePrefix)).toHaveCount(0);
+          await expect(pageObjects.artifactListPage.cardDeleteAction(pagePrefix)).toHaveCount(0);
+        }
+      );
+
+      const assertWriteFlow = async (
+        pageObjects: ArtifactTabTestFixtures['pageObjects'],
+        login: () => Promise<void>,
+        afterCreate?: () => Promise<void>
+      ): Promise<void> => {
+        await login();
+        await pageObjects.artifactListPage.goto(artifact.urlPath);
+        await pageObjects.artifactListPage.waitForEmpty(pagePrefix);
+
+        await spaceTest.step('empty state shows add', async () => {
+          await expect(pageObjects.artifactListPage.emptyState(pagePrefix)).toBeVisible();
+          await expect(pageObjects.artifactListPage.emptyStateAddButton(pagePrefix)).toBeVisible();
+        });
+
+        await spaceTest.step('create from the empty state', async () => {
+          await pageObjects.artifactListPage.openCreateFromEmpty(pagePrefix);
+          await pageObjects.policyArtifactsPage.fillCreateForm(artifact.kind);
+          await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+          await expect(
+            pageObjects.artifactListPage.criteria(artifact.createCriteria.selector)
+          ).toHaveText(artifact.createCriteria.value);
+          await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(
+            artifact.artifactName
+          );
+          await afterCreate?.();
+          await pageObjects.toasts.dismissAll();
+        });
+
+        await spaceTest.step('update name and description', async () => {
+          await pageObjects.artifactListPage.openEdit(pagePrefix);
+          await pageObjects.policyArtifactsPage.fillNameAndDescription(
+            artifact.kind,
+            editedName,
+            editedDescription
+          );
+          await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+          await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(
+            editedName
+          );
+          await expect(pageObjects.artifactListPage.cardDescription(pagePrefix)).toHaveText(
+            editedDescription
+          );
+          await pageObjects.toasts.dismissAll();
+        });
+
+        await spaceTest.step('delete the artifact', async () => {
+          await pageObjects.artifactListPage.deleteArtifact(pagePrefix);
+          await expect(pageObjects.artifactListPage.card(pagePrefix)).toHaveCount(0);
+          await expect(pageObjects.artifactListPage.emptyState(pagePrefix)).toBeVisible();
+        });
+      };
+
+      spaceTest(
+        `WRITE user can create, update, and delete`,
+        async ({ browserAuth, pageObjects }) => {
+          spaceTest.setTimeout(WRITE_FLOW_TIMEOUT_MS);
+
+          await assertWriteFlow(pageObjects, () => browserAuth.loginAsEndpointPolicyManager());
+        }
+      );
+
+      if (options?.minimalWriteRole) {
+        spaceTest(
+          `WRITE user with only Security read and artifact all can create, update, and delete`,
+          async ({ browserAuth, pageObjects, config }) => {
+            spaceTest.skip(Boolean(config.serverless), MINIMAL_WRITE_STATEFUL_ONLY_REASON);
+            spaceTest.setTimeout(WRITE_FLOW_TIMEOUT_MS);
+
+            await assertWriteFlow(
+              pageObjects,
+              () =>
+                browserAuth.loginWithCustomRole(
+                  getArtifactMinimalWriteRole(artifact.privilegePrefix)
+                ),
+              async () => {
+                // Without global artifact management the form defaults to per-policy.
+                await expect(pageObjects.artifactListPage.cardEffectScope(pagePrefix)).toHaveText(
+                  'Applied to 0 policies'
+                );
+              }
+            );
+          }
+        );
+      }
+
+      const { updateCriteria } = artifact;
+      if (updateCriteria) {
+        spaceTest(
+          `WRITE user can change the condition field`,
+          async ({ browserAuth, pageObjects, apiServices }) => {
+            await apiServices.endpointArtifacts.ensureList({
+              listId: artifact.listId,
+              type: artifact.listType,
+            });
+            await apiServices.endpointArtifacts.createItem({
+              name: artifact.artifactName,
+              listId: artifact.listId,
+              entries: artifact.entries,
+              osTypes: artifact.osTypes,
+            });
+
+            await browserAuth.loginAsEndpointPolicyManager();
+            await pageObjects.artifactListPage.goto(artifact.urlPath);
+            await pageObjects.artifactListPage.waitForList(pagePrefix);
+            await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(
+              artifact.artifactName
+            );
+
+            await pageObjects.artifactListPage.openEdit(pagePrefix);
+            await pageObjects.policyArtifactsPage.replaceEventFiltersCondition(
+              updateCriteria.field,
+              updateCriteria.value
+            );
+            await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+
+            await expect(pageObjects.artifactListPage.criteria(updateCriteria.selector)).toHaveText(
+              updateCriteria.expected
+            );
+          }
+        );
+      }
+    }
+  );
+};

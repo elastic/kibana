@@ -16,6 +16,10 @@
     "@kbn/transpiler-config",
     "@kbn/core-ui-settings-common",
     "@kbn/repo-packages",
+    "@kbn/projects-solutions-groups",
     "@kbn/ci-stats-reporter",
+    "@kbn/std",
+    "@kbn/monaco",
+    "@kbn/vega-sandbox"
   ]
 }

@@ -28,7 +28,7 @@ export { createSidebarStore } from './src/create_sidebar_store';
 // ============================================================================
 
 /** Production sidebar app IDs */
-export const VALID_SIDEBAR_APP_IDS = ['agentBuilder'] as const;
+export const VALID_SIDEBAR_APP_IDS = ['agentBuilder', 'newsfeed'] as const;
 
 /** Prefix for example/test app IDs */
 export const EXAMPLE_APP_ID_PREFIX = 'sidebarExample';
@@ -126,6 +126,10 @@ export interface SidebarApp<TState = undefined, TActions = undefined> {
   open: () => void;
   /** Close sidebar */
   close: () => void;
+  /** Whether this app is currently active in the sidebar */
+  isOpen: () => boolean;
+  /** Observable of whether this app is currently active in the sidebar */
+  isOpen$: () => Observable<boolean>;
   /** Bound actions to modify state. Undefined for stateless apps. */
   actions: TActions;
   /** Get current state. Returns undefined for stateless apps. */

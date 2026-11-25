@@ -8,7 +8,9 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { execa, type Result } from 'execa';
+import { execa, type Options, type Result } from 'execa';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 import { resolveEdotCollectorVersion } from './resolve_edot_collector_version';
 
 jest.mock('execa', () => ({
@@ -120,6 +122,51 @@ describe('resolveEdotCollectorVersion', () => {
       ['manifest', 'inspect', 'docker.elastic.co/elastic-agent/elastic-otel-collector:9.1.0'],
       expect.anything()
     );
+  });
+
+  it('inspects manifests without a credential helper and removes the config afterwards', async () => {
+    let dockerConfigDir: string | undefined;
+    (mockExeca as unknown as jest.Mock).mockImplementation(
+      (_file: string, _args: readonly string[], options?: Options) => {
+        const configDir = options?.env?.DOCKER_CONFIG;
+        if (typeof configDir !== 'string') {
+          throw new Error('DOCKER_CONFIG was not set');
+        }
+        const config = JSON.parse(readFileSync(join(configDir, 'config.json'), 'utf8')) as {
+          auths?: Record<string, unknown>;
+          credsStore?: string;
+          credHelpers?: Record<string, string>;
+        };
+        expect(config.credsStore).toBeUndefined();
+        expect(config.credHelpers).toBeUndefined();
+        expect(config.auths).toEqual({ 'edot-collector.invalid': {} });
+        dockerConfigDir = configDir;
+        // execa returns a thenable subprocess. The caller only awaits it.
+        return Promise.resolve(mockExecaResult);
+      }
+    );
+
+    const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
+
+    if (!dockerConfigDir) {
+      throw new Error('DOCKER_CONFIG was not set');
+    }
+    expect(version).toBe('9.1.0');
+    expect(dockerConfigDir).toEqual(expect.stringContaining('edot-collector-docker-config-'));
+    expect(existsSync(dockerConfigDir)).toBe(false);
+  });
+
+  it('keeps walking when the registry returns HTTP 500', async () => {
+    const error = Object.assign(new Error('command failed'), {
+      stderr:
+        'Get "https://docker.elastic.co/v2/elastic-agent/elastic-otel-collector/manifests/9.1.0": received unexpected HTTP status: 500 Internal Server Error',
+    });
+    mockExeca.mockRejectedValueOnce(error).mockResolvedValueOnce(mockExecaResult);
+
+    const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
+
+    expect(version).toBe('9.0.0');
+    expect(mockExeca).toHaveBeenCalledTimes(2);
   });
 
   it('should fall back to Kibana version when no image is found', async () => {

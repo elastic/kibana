@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ESQLEditorProps } from '@kbn/esql-editor';
+import type { ESQLEditorApi, ESQLEditorProps } from '@kbn/esql-editor';
 import { untilPluginStartServicesReady } from './kibana_services';
 
-export const ESQLLangEditor = (props: ESQLEditorProps) => {
+export const ESQLLangEditor = forwardRef<ESQLEditorApi, ESQLEditorProps>(function ESQLLangEditor(
+  props,
+  ref
+) {
   const { loading, value } = useAsync(() => {
     const startServicesPromise = untilPluginStartServicesReady();
     const modulePromise = import('@kbn/esql-editor');
@@ -32,7 +35,7 @@ export const ESQLLangEditor = (props: ESQLEditorProps) => {
         ...deps,
       }}
     >
-      <ESQLEditor {...props} />
+      <ESQLEditor ref={ref} {...props} />
     </KibanaContextProvider>
   );
-};
+});

@@ -64,12 +64,12 @@ import { FeedbackTriggerButton } from '@kbn/ui-feedback';
 | `showToast` | Surfaces success and error toasts to the user. |
 | `checkTelemetryOptIn` | Resolves whether usage collection is opted in (`FeedbackTriggerButton` only). |
 
-Questions are defined per application in the `@kbn/feedback-registry` package. See the One Feedback plugin docs for how to register them.
+Questions are defined per application in `@kbn/feedback-registry`. See [Register application feedback questions](../feedback/index.md) for instructions.
 
 ## Development [kbn-ui-feedback-development]
 
 See [Development](index.md#kbn-ui-development) for how to run the shared Storybook and preview these docs. Run this package's tests with:
 
 ```bash
-yarn test:jest src/platform/kbn-ui/feedback
+pnpm test:jest src/platform/kbn-ui/feedback
 ```

@@ -11,7 +11,8 @@ import type { FileLayer } from '@elastic/ems-client';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
-import type { LayerDescriptor } from '../../../common';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { VectorLayerDescriptor } from '../../../common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
@@ -20,7 +21,7 @@ import {
   COLOR_MAP_TYPE,
   VECTOR_STYLES,
 } from '../../../common';
-import { emsWorldLayerId } from '../../../common/constants';
+import { emsWorldLayerId, LAYER_STYLE_TYPE } from '../../../common/constants';
 import type { ChoroplethChartProps } from './types';
 import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';
@@ -30,6 +31,8 @@ interface Props extends ChoroplethChartProps {
   uiSettings: IUiSettingsClient;
   emsFileLayers: FileLayer[];
   onRenderComplete: () => void;
+  interactive?: boolean;
+  viewMode: ViewMode;
 }
 
 export function ChoroplethChart({
@@ -39,6 +42,8 @@ export function ChoroplethChart({
   uiSettings,
   emsFileLayers,
   onRenderComplete,
+  interactive = true,
+  viewMode,
 }: Props) {
   if (!args.regionAccessor || !args.valueAccessor) {
     return null;
@@ -56,7 +61,7 @@ export function ChoroplethChart({
 
   const emsLayerLabel = getEmsLayerLabel(emsLayerId, emsFileLayers);
 
-  const choroplethLayer = {
+  const choroplethLayer: VectorLayerDescriptor = {
     id: args.layerId,
     label: emsLayerLabel
       ? i18n.translate('xpack.maps.lens.choroplethChart.choroplethLayerLabel', {
@@ -97,21 +102,20 @@ export function ChoroplethChart({
       tooltipProperties: [emsField],
     },
     style: {
-      type: 'VECTOR',
-      // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
+      type: LAYER_STYLE_TYPE.VECTOR,
       properties: {
         [VECTOR_STYLES.FILL_COLOR]: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             color: 'Blue to Red',
-            colorCategory: 'palette_0',
-            fieldMetaOptions: { isEnabled: true, sigma: 3 },
+            color_category: 'palette_0',
+            field_meta_options: { is_enabled: true, sigma: 3 },
             type: COLOR_MAP_TYPE.ORDINAL,
             field: {
               name: args.valueAccessor,
               origin: FIELD_ORIGIN.JOIN,
             },
-            useCustomColorRamp: false,
+            use_custom_color_ramp: false,
           },
         },
         [VECTOR_STYLES.LINE_COLOR]: {
@@ -122,12 +126,19 @@ export function ChoroplethChart({
         },
         [VECTOR_STYLES.LINE_WIDTH]: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       },
-      isTimeAware: false,
+      is_time_aware: false,
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
-  } as LayerDescriptor;
+  };
 
-  return <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />;
+  return (
+    <PassiveMap
+      passiveLayer={choroplethLayer}
+      onRenderComplete={onRenderComplete}
+      interactive={interactive}
+      viewMode={viewMode}
+    />
+  );
 }
 
 function getAccessorLabel(table: Datatable, accessor: string) {

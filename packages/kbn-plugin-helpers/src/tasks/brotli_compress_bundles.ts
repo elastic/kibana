@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fsp from 'fs/promises';
+import { cpus } from 'os';
 import Path from 'path';
-import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import vfs from 'vinyl-fs';
 import del from 'del';
-import gulpBrotli from 'gulp-brotli';
+import { globby } from 'globby';
 import zlib from 'zlib';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { asyncForEachWithLimit } from '@kbn/std';
 
 import type { TaskContext } from '../task_context';
 
-const asyncPipeline = promisify(pipeline);
+const brotliCompressAsync = promisify(zlib.brotliCompress);
+// each pending brotliCompress call holds a quality-11 encoder, so unbounded concurrency balloons memory
+const PARALLEL_CONCURRENCY = cpus().length;
 
 export async function brotliCompressBundles({ buildDir, log, plugin }: TaskContext) {
   if (!plugin.manifest.ui) {
@@ -34,16 +37,18 @@ export async function brotliCompressBundles({ buildDir, log, plugin }: TaskConte
 
   try {
     await del(['**/*.br'], { cwd: compressDir });
-    await asyncPipeline(
-      vfs.src(['**/*.{js,css}'], { cwd: compressDir, encoding: false }),
-      gulpBrotli({
-        params: {
-          [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
-        },
-      }),
-      vfs.dest(compressDir)
-    );
+    const files = await globby(['**/*.{js,css}'], { cwd: compressDir, absolute: true });
+    await asyncForEachWithLimit(files, PARALLEL_CONCURRENCY, compressFile);
   } catch (e) {
     log.error(e);
   }
+}
+
+async function compressFile(file: string) {
+  const compressed = await brotliCompressAsync(await Fsp.readFile(file), {
+    params: {
+      [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
+    },
+  });
+  await Fsp.writeFile(`${file}.br`, compressed);
 }

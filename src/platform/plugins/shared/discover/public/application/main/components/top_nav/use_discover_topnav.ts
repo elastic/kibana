@@ -9,7 +9,6 @@
 
 import { useMemo } from 'react';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { getTopNavBadges } from './get_top_nav_badges';
@@ -19,7 +18,6 @@ import {
   useCurrentDataView,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
   onOpenSaveModal,
@@ -32,22 +30,18 @@ export const useDiscoverTopNav = ({
 }) => {
   const services = useDiscoverServices();
   const hasUnsavedChanges = useInternalStateSelector((state) => state.hasUnsavedChanges);
-  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const topNavBadges = useMemo(
     () =>
       getTopNavBadges({
-        isMobile,
         isManaged: Boolean(persistedDiscoverSession?.managed),
-        services,
       }),
-    [services, isMobile, persistedDiscoverSession?.managed]
+    [persistedDiscoverSession?.managed]
   );
 
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
-  const hasShareIntegration = useHasShareIntegration(services);
 
   const { menu: topNavMenu, shareAction } = useTopNavLinks({
     dataView,
@@ -55,7 +49,6 @@ export const useDiscoverTopNav = ({
     hasUnsavedChanges,
     isEsqlMode,
     adHocDataViews,
-    hasShareIntegration,
     persistedDiscoverSession,
     onOpenSaveModal,
     onOpenSaveAsModal,

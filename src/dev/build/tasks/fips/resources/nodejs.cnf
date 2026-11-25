@@ -1,0 +1,20 @@
+# The provider is built from pinned upstream OpenSSL sources. Its integrity
+# configuration runs self-tests on load. Paths resolve in the Kibana launchers.
+nodejs_conf = nodejs_init
+config_diagnostics = 1
+
+.include $ENV::OPENSSL_CONF_INCLUDE/fipsmodule.cnf
+
+[nodejs_init]
+providers = provider_sect
+alg_section = algorithm_sect
+
+[provider_sect]
+fips = fips_sect
+base = base_sect
+
+[base_sect]
+activate = 1
+
+[algorithm_sect]
+default_properties = fips=yes

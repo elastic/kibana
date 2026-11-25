@@ -11,6 +11,7 @@ import {
   ruleDeletedTriggerCommonDefinition,
 } from '../../../../../common/workflows/triggers';
 import { RULE_DELETED_EVENT_TYPE, type RuleDeletedEvent } from '../../rule_event_publisher/events';
+import { toLifecycleWorkflowPayload } from './to_lifecycle_payload';
 import type { RuleWorkflowTriggerBinding } from './types';
 
 export { RuleDeletedTriggerId } from '../../../../../common/workflows/triggers';
@@ -18,7 +19,7 @@ export { RuleDeletedTriggerId } from '../../../../../common/workflows/triggers';
 /**
  * Binding from the bus `rule.deleted` event to the `alerting.ruleDeleted`
  * workflow trigger. The internal event payload also carries the full domain
- * rule; `toPayload` projects only the rule ref so that state never reaches
+ * rule; `toPayload` projects identity plus tags so the snapshot never reaches
  * workflows.
  */
 export const ruleDeletedTrigger: RuleWorkflowTriggerBinding<
@@ -28,7 +29,5 @@ export const ruleDeletedTrigger: RuleWorkflowTriggerBinding<
   eventType: RULE_DELETED_EVENT_TYPE,
   triggerId: RuleDeletedTriggerId,
   definition: ruleDeletedTriggerCommonDefinition,
-  toPayload: (event) => ({
-    rule: { ruleId: event.payload.ruleId, spaceId: event.payload.spaceId },
-  }),
+  toPayload: toLifecycleWorkflowPayload,
 };

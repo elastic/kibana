@@ -7,7 +7,14 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSelectable,
+  useEuiTheme,
+} from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
 import { caseInsensitiveSort } from '../helpers';
@@ -35,6 +42,7 @@ const TagsFilterPopoverComponent = ({
     () => caseInsensitiveSort(Array.from(new Set([...tags, ...selectedTags]))),
     [selectedTags, tags]
   );
+  const { euiTheme } = useEuiTheme();
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>(() => {
     const selectedTagsSet = new Set(selectedTags);
@@ -101,12 +109,19 @@ const TagsFilterPopoverComponent = ({
         onChange={handleSelectableOptionsChange}
         emptyMessage={i18n.NO_TAGS_AVAILABLE}
         noMatchesMessage={i18n.NO_TAGS_AVAILABLE}
-        listProps={{ paddingSize: 's' }}
+        listProps={{ paddingSize: 'none' }}
       >
         {(list, search) => (
-          <div css={{ width: TAGS_POPOVER_WIDTH }}>
-            <EuiPopoverTitle>{search}</EuiPopoverTitle>
-            {list}
+          <div
+            css={{
+              width: TAGS_POPOVER_WIDTH,
+              padding: euiTheme.size.s,
+            }}
+          >
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>{search}</EuiFlexItem>
+              <EuiFlexItem>{list}</EuiFlexItem>
+            </EuiFlexGroup>
           </div>
         )}
       </EuiSelectable>

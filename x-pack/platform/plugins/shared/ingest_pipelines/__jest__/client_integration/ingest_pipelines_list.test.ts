@@ -19,6 +19,8 @@ import {
 } from '@testing-library/react';
 import { Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { PipelinesList } from '../../public/application/sections/pipelines_list';
 import { getListPath, ROUTES } from '../../public/application/services/navigation';
@@ -136,13 +138,13 @@ describe('<PipelinesList />', () => {
       httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
       await renderPipelinesList(httpSetup, '', { expectedTestId: 'pipelinesTable' });
 
-      // Verify app title
-      expect(screen.getByTestId('appTitle')).toHaveTextContent('Ingest pipelines');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Ingest pipelines'
+      );
 
-      // Verify documentation link
-      expect(screen.getByTestId('documentationLink')).toHaveTextContent('Documentation');
+      await openAppMenuOverflow();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
 
-      // Verify create dropdown exists
       expect(screen.getByTestId('createPipelineDropdown')).toBeInTheDocument();
 
       // Verify table content

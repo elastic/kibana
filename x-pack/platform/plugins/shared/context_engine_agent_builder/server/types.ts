@@ -7,7 +7,9 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
+import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -19,9 +21,11 @@ export interface ContextEngineAgentBuilderPluginStart {}
 export interface ContextEngineAgentBuilderSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface ContextEngineAgentBuilderStartDependencies {
   contextEngine: ContextEnginePluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }

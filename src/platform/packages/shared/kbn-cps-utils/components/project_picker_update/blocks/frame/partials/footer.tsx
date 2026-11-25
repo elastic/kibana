@@ -67,6 +67,7 @@ export function ProjectPickerFrameFooter() {
               onClick={includeAllVisibleProjects}
               flush="right"
               size="xs"
+              data-test-subj="projectPickerIncludeAllVisibleBtn"
             >
               {i18n.translate('cpsUtils.projectPicker.frameFooter.addProject', {
                 defaultMessage: 'Include all visible',

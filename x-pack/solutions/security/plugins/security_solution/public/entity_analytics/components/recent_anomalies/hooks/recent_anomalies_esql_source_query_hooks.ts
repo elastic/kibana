@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
@@ -26,7 +26,7 @@ const BASE_RECORD_FILTER = `| WHERE result_type == "record" AND is_interim == fa
 
 /**
  * Time-range filter applied inside the query text via ?_tstart/?_tend named
- * params (populated by getESQLResults when given a timeRange) instead of the
+ * params (populated by the esql search when given a `kibanaQueryContext.timeRange`) instead of the
  * request-level `filter` DSL. A request-level filter that matches no data
  * makes the FROM pattern resolve to zero indices, which trips an
  * Elasticsearch bug in LOOKUP JOIN lookup-index resolution and fails the
@@ -53,15 +53,20 @@ const ENTITY_NAME_FIELD: Record<(typeof ANOMALY_ENTITY_TYPES)[number], string> =
  * - entity_type: "user" | "host" | "service" (based on which EUID matched)
  * - entity_name: the display name from the winning entity type's name field
  */
-const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
+const getEuidEvaluationBlock = ({ euid, getBuiltInEntityDefinition }: EntityStoreEuidApi) => {
   const parts: string[] = [];
 
   for (const entityType of ANOMALY_ENTITY_TYPES) {
-    const fieldEvals = euidApi.esql.getFieldEvaluations(entityType);
+    const fieldEvals = euid.esql.getFieldEvaluations(getBuiltInEntityDefinition(entityType));
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
-    parts.push(`| EVAL ${euidApi.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
+    parts.push(
+      `| EVAL ${euid.esql.getEuidEvaluation(
+        getBuiltInEntityDefinition(entityType),
+        `${entityType}_euid`
+      )}`
+    );
   }
 
   parts.push(
@@ -149,7 +154,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
-    ${getEuidEvaluationBlock(euidApi.euid)}
+    ${getEuidEvaluationBlock(euidApi)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
     ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
@@ -166,7 +171,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
-    ${getEuidEvaluationBlock(euidApi.euid)}
+    ${getEuidEvaluationBlock(euidApi)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
     ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
@@ -201,7 +206,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
     FROM ${ML_ANOMALIES_INDEX}
     ${BASE_RECORD_FILTER} AND job_id IN (${formattedLabels})
     ${TIME_RANGE_FILTER}
-    ${getEuidEvaluationBlock(euidApi.euid)}
+    ${getEuidEvaluationBlock(euidApi)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
     ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
@@ -223,7 +228,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
-    ${getEuidEvaluationBlock(euidApi.euid)}
+    ${getEuidEvaluationBlock(euidApi)}
     | WHERE entity_id IN (${formattedLabels})
     ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}

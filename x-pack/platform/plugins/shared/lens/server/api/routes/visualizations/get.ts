@@ -30,6 +30,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
     summary: 'Get visualization',
+    operationId: 'get-visualization',
     description: 'Returns a single Lens visualization by its ID.',
     options: {
       tags: [LENS_API_TAG],
@@ -91,7 +92,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
           const responseItem = getLensResponseItem(builder, result.item);
 
           return res.ok<z.output<typeof lensGetResponseBodySchema>>({
-            body: responseItem,
+            body: lensGetResponseBodySchema.parse(responseItem),
           });
         } catch (error) {
           if (isBoom(error)) {

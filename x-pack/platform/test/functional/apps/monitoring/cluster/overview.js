@@ -192,14 +192,16 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should show a toast when alerts are created successfully', async () => {
-          expect(await testSubjects.exists('alertsCreatedToast', { timeout: 10000 })).to.be(true);
+          expect(await testSubjects.waitForExists('alertsCreatedToast', { timeout: 10000 })).to.be(
+            true
+          );
         });
 
         it('should show badges when entering setup mode', async () => {
           await setupMode.clickSetupModeBtn();
           await PageObjects.timePicker.startAutoRefresh(1);
 
-          expect(await testSubjects.exists('alertsBadge')).to.be(true);
+          await testSubjects.existOrFail('alertsBadge', { timeout: 10000 });
           await PageObjects.timePicker.pauseAutoRefresh();
           await setupMode.clickExitSetupModeBtn();
         });

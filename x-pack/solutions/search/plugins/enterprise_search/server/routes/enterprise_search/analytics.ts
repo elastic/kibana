@@ -59,7 +59,7 @@ export function registerAnalyticsRoutes({
       },
       validate: {
         query: schema.object({
-          query: schema.maybe(schema.string()),
+          query: schema.maybe(schema.string({ maxLength: 1000 })),
         }),
       },
     },
@@ -90,7 +90,7 @@ export function registerAnalyticsRoutes({
       },
       validate: {
         params: schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -125,7 +125,7 @@ export function registerAnalyticsRoutes({
           keyName: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -205,7 +205,7 @@ export function registerAnalyticsRoutes({
       },
       validate: {
         params: schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -234,7 +234,7 @@ export function registerAnalyticsRoutes({
       },
       validate: {
         params: schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 1024 }),
         }),
       },
     },

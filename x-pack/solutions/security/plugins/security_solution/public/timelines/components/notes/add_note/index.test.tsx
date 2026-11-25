@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
@@ -45,22 +45,22 @@ describe('AddNote', () => {
   };
 
   test('renders correctly', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...props} />
       </TestProviders>
     );
-    expect(wrapper.find('AddNote').exists()).toBeTruthy();
+    expect(screen.getByTestId('add-a-note')).toBeInTheDocument();
   });
 
   test('it renders the Cancel button when onCancelAddNote is provided', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...props} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="cancel"]').exists()).toEqual(true);
+    expect(screen.getByTestId('cancel')).toBeInTheDocument();
   });
 
   test('it invokes onCancelAddNote when the Cancel button is clicked', () => {
@@ -70,15 +70,15 @@ describe('AddNote', () => {
       onCancelAddNote,
     };
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...testProps} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
+    fireEvent.click(screen.getByTestId('cancel'));
 
-    expect(onCancelAddNote).toBeCalled();
+    expect(onCancelAddNote).toHaveBeenCalled();
   });
 
   test('it does NOT invoke associateNote when the Cancel button is clicked', () => {
@@ -88,15 +88,15 @@ describe('AddNote', () => {
       associateNote,
     };
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...testProps} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
+    fireEvent.click(screen.getByTestId('cancel'));
 
-    expect(associateNote).not.toBeCalled();
+    expect(associateNote).not.toHaveBeenCalled();
   });
 
   test('it does NOT render the Cancel button when onCancelAddNote is NOT provided', () => {
@@ -104,25 +104,23 @@ describe('AddNote', () => {
       ...props,
       onCancelAddNote: undefined,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="cancel"]').exists()).toEqual(false);
+    expect(screen.queryByTestId('cancel')).not.toBeInTheDocument();
   });
 
   test('it renders the contents of the note', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...props} />
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="add-a-note"] .euiMarkdownEditorDropZone').first().text()
-    ).toEqual(note);
+    expect(screen.getByTestId('add-a-note')).toHaveTextContent(note);
   });
 
   test('it invokes associateNote when the Add Note button is clicked', () => {
@@ -132,30 +130,16 @@ describe('AddNote', () => {
       newNote: note,
       associateNote,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...testProps} />
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
+    fireEvent.click(screen.getByTestId('add-note'));
 
-    expect(associateNote).toBeCalled();
+    expect(associateNote).toHaveBeenCalled();
   });
-
-  // test('it invokes getNewNoteId when the Add Note button is clicked', () => {
-  //   const getNewNoteId = jest.fn();
-  //   const testProps = {
-  //     ...props,
-  //     getNewNoteId,
-  //   };
-
-  //   const wrapper = mount(<AddNote {...testProps} />);
-
-  //   wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
-
-  //   expect(getNewNoteId).toBeCalled();
-  // });
 
   test('it invokes updateNewNote when the Add Note button is clicked', () => {
     const updateNewNote = jest.fn();
@@ -164,26 +148,26 @@ describe('AddNote', () => {
       updateNewNote,
     };
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...testProps} />
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
+    fireEvent.click(screen.getByTestId('add-note'));
 
-    expect(updateNewNote).toBeCalled();
+    expect(updateNewNote).toHaveBeenCalled();
   });
 
   test('it invokes updateNote when the Add Note button is clicked', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddNote {...props} />
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
+    fireEvent.click(screen.getByTestId('add-note'));
 
-    expect(mockDispatch).toBeCalled();
+    expect(mockDispatch).toHaveBeenCalled();
   });
 });

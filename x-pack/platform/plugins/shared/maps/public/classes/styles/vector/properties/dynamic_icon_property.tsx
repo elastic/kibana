@@ -26,7 +26,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   }
 
   getNumberOfCategories() {
-    const palette = getIconPalette(this._options.iconPaletteId);
+    const palette = getIconPalette(this._options.icon_palette_id);
     return palette.length;
   }
 
@@ -41,10 +41,10 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   }
 
   _getPaletteStops() {
-    if (this._options.useCustomIconMap && this._options.customIconStops) {
+    if (this._options.use_custom_icon_map && this._options.custom_icon_stops) {
       const stops = [];
-      for (let i = 1; i < this._options.customIconStops.length; i++) {
-        const { stop, icon, iconSource } = this._options.customIconStops[i];
+      for (let i = 1; i < this._options.custom_icon_stops.length; i++) {
+        const { stop, icon, icon_source: iconSource } = this._options.custom_icon_stops[i];
         stops.push({
           stop,
           style: icon,
@@ -54,14 +54,16 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
       return {
         fallbackSymbolId:
-          this._options.customIconStops.length > 0 ? this._options.customIconStops[0].icon : null,
+          this._options.custom_icon_stops.length > 0
+            ? this._options.custom_icon_stops[0].icon
+            : null,
         stops,
       };
     }
 
     return assignCategoriesToPalette({
       categories: this.getCategoryFieldMeta(),
-      paletteValues: getIconPalette(this._options.iconPaletteId),
+      paletteValues: getIconPalette(this._options.icon_palette_id),
     });
   }
 

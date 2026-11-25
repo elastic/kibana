@@ -277,7 +277,7 @@ describe('data_fetching related hooks', () => {
         availableCascadeGroups: ['category'],
         selectedCascadeGroups: ['category'],
         cascadedDocumentsFetcher: createMockFetcher(),
-        cascadedColumnsMeta: {},
+        cascadedLeafDataSource: undefined,
         esqlQuery,
         esqlVariables: undefined,
         timeRange: undefined,

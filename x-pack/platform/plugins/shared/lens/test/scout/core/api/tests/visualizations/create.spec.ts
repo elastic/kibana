@@ -13,10 +13,12 @@ import { COMMON_HEADERS, LENS_API_PATH, apiTest, getExampleLensBody } from '../.
 
 apiTest.describe('lens visualizations - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let testTagId: string;
 
   apiTest.beforeAll(async ({ lensHelper, requestAuth }) => {
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     await lensHelper.createSampleDataView();
+    testTagId = await lensHelper.createTag('lens-create-test-tag');
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -37,6 +39,35 @@ apiTest.describe('lens visualizations - create', { tag: tags.deploymentAgnostic 
 
     expect(response).toHaveStatusCode(201);
     expect(response.body.data.description).toBe(description);
+  });
+
+  apiTest('should create without a tags field (backward compatibility)', async ({ apiClient }) => {
+    const { tags: _, ...bodyWithoutTags } = getExampleLensBody();
+
+    const response = await apiClient.post(LENS_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: bodyWithoutTags,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(201);
+  });
+
+  apiTest('should persist tags through the create response', async ({ apiClient }) => {
+    const response = await apiClient.post(LENS_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: getExampleLensBody(undefined, undefined, [testTagId]),
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.data.tags).toStrictEqual([testTagId]);
   });
 
   apiTest('validation - returns 400 when body is empty', async ({ apiClient }) => {

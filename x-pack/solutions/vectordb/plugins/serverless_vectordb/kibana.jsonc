@@ -17,11 +17,12 @@
       "vectordb"
     ],
     "requiredPlugins": [
+      "agentBuilder",
       "dataViews",
+      "elasticsearchHome",
       "navigation",
       "serverless",
-      "share",
-      "agentBuilder"
+      "share"
     ],
     "optionalPlugins": [
       "console",

@@ -12,11 +12,11 @@ import { expect } from '@kbn/scout/api';
 import {
   apiTest,
   SESSION_API_PATH,
-  ESE_API_PATH,
   COMMON_HEADERS,
   waitFor,
   randomSessionId,
-  randomHash,
+  submitSearch,
+  saveSession,
 } from '../fixtures';
 
 apiTest.describe(
@@ -147,47 +147,15 @@ apiTest.describe(
       const sessionId = randomSessionId();
 
       // Run search before session is saved (will not be persisted)
-      const search1 = await apiClient.post(ESE_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {
-          sessionId,
-          params: {
-            body: { query: { term: { agent: '1' } } },
-            wait_for_completion_timeout: '1ms',
-          },
-          requestHash: randomHash(),
-        },
+      const id1 = await submitSearch(apiClient, sessionId, cookieHeader, {
+        query: { term: { agent: '1' } },
       });
-      expect(search1).toHaveStatusCode(200);
-      const id1 = search1.body.id;
 
       // Save session
-      await apiClient.post(SESSION_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {
-          sessionId,
-          name: 'My Session',
-          appId: 'discover',
-          expires: '123',
-          locatorId: 'discover',
-        },
-      });
+      await saveSession(apiClient, sessionId, cookieHeader);
 
       // Run search after session is saved (should be persisted)
-      const search2 = await apiClient.post(ESE_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {
-          sessionId,
-          isStored: true,
-          params: {
-            body: { query: { match_all: {} } },
-            wait_for_completion_timeout: '1ms',
-          },
-          requestHash: randomHash(),
-        },
-      });
-      expect(search2).toHaveStatusCode(200);
-      const id2 = search2.body.id;
+      const id2 = await submitSearch(apiClient, sessionId, cookieHeader, { isStored: true });
 
       await waitFor(
         async () => {

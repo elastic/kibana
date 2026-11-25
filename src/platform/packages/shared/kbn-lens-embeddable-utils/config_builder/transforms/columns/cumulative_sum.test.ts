@@ -37,7 +37,6 @@ describe('Cumulative Sum Transforms', () => {
         customLabel: false,
         isBucketed: false,
         dataType: 'number',
-        params: {},
       };
 
       expect(fromCumulativeSumAPItoLensState(input)).toEqual(expected);

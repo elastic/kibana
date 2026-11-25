@@ -8,13 +8,25 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
+import zlib from 'zlib';
 
 import {
   createCloudSession,
+  createCustomRealmSAMLSession,
   createSAMLRequest,
   createSAMLResponse,
   finishSAMLHandshake,
 } from './saml_auth';
+
+jest.mock('@kbn/mock-idp-utils', () => ({
+  ...jest.requireActual('@kbn/mock-idp-utils'),
+  createSAMLResponse: jest.fn(),
+}));
+
+const createMockedSAMLResponseMock = createMockedSAMLResponse as jest.MockedFunction<
+  typeof createMockedSAMLResponse
+>;
 
 const fetchMock = jest.spyOn(global, 'fetch');
 
@@ -52,7 +64,7 @@ describe('saml_auth', () => {
         log,
       });
       expect(sessionToken).toBe('mocked_token');
-      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     test('retries until response has the token value', async () => {
@@ -75,7 +87,7 @@ describe('saml_auth', () => {
       );
 
       expect(sessionToken).toBe('mocked_token');
-      expect(fetchMock).toBeCalledTimes(3);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
     });
 
     test('retries and throws error when response code is not 200', async () => {
@@ -98,7 +110,7 @@ describe('saml_auth', () => {
       ).rejects.toThrow(
         `Failed to create the new cloud session: 'POST https://cloud/api/v1/saas/auth/_login' returned 503`
       );
-      expect(fetchMock).toBeCalledTimes(2);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     test('retries and throws error when response has no token value', async () => {
@@ -123,7 +135,7 @@ describe('saml_auth', () => {
       ).rejects.toThrow(
         `Failed to create the new cloud session: token is missing in response data\n{"user_id":"REDACTED","okta_session_id":"REDACTED","authenticated":false}`
       );
-      expect(fetchMock).toBeCalledTimes(3);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
     });
 
     test(`throws error when retry 'attemptsCount' is below 1`, async () => {
@@ -168,7 +180,7 @@ describe('saml_auth', () => {
       ).rejects.toThrow(
         'Failed to create the new cloud session: MFA must be disabled for the test account'
       );
-      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -227,6 +239,130 @@ describe('saml_auth', () => {
         `Failed to get location from SAML response data: ${JSON.stringify(data)}`
       );
     });
+
+    test(`uses 'cloud-saml-kibana' provider by default`, async () => {
+      fetchMock.mockResolvedValue(
+        responseWithSetCookie(
+          { location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F' },
+          [`sid=Fe26.2**1234567890; Secure; HttpOnly; Path=/`],
+          200
+        )
+      );
+
+      await createSAMLRequest('https://kbn.test.co', '8.12.0', log);
+      expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toMatchObject({
+        providerType: 'saml',
+        providerName: 'cloud-saml-kibana',
+      });
+    });
+
+    test('uses the provided provider name', async () => {
+      fetchMock.mockResolvedValue(
+        responseWithSetCookie(
+          { location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F' },
+          [`sid=Fe26.2**1234567890; Secure; HttpOnly; Path=/`],
+          200
+        )
+      );
+
+      await createSAMLRequest('https://kbn.test.co', '8.12.0', log, 'qaf');
+      expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toMatchObject({
+        providerType: 'saml',
+        providerName: 'qaf',
+      });
+    });
+  });
+
+  describe('createCustomRealmSAMLSession', () => {
+    const kbnHost = 'https://kbn.test.co';
+    const acsUrl = `${kbnHost}/api/security/saml/callback`;
+    const requestId = '_a1b2c3d4e5';
+    const samlRequest = zlib
+      .deflateRawSync(
+        `<saml2p:AuthnRequest xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol" ID="${requestId}" AssertionConsumerServiceURL="${acsUrl}" Version="2.0"><saml2:Issuer xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">${kbnHost}/</saml2:Issuer></saml2p:AuthnRequest>`
+      )
+      .toString('base64');
+    const location = `http://localhost:5601/mock_idp/login?SAMLRequest=${encodeURIComponent(
+      samlRequest
+    )}`;
+    const params = {
+      providerName: 'qaf',
+      kbnHost,
+      kbnVersion: '9.3.0',
+      username: 'elastic_custom_role_worker_1',
+      email: 'elastic_custom_role_worker_1@elastic.co',
+      fullname: 'test custom_role_worker_1',
+      role: 'custom_role_worker_1',
+      log,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      createMockedSAMLResponseMock.mockResolvedValue('mockedSAMLResponse');
+    });
+
+    test('completes SP-initiated login through the given provider', async () => {
+      fetchMock
+        .mockResolvedValueOnce(
+          responseWithSetCookie(
+            { location },
+            [`sid=intermediate_sid; Secure; HttpOnly; Path=/`],
+            200
+          )
+        )
+        .mockResolvedValueOnce(
+          responseWithSetCookie({}, [`sid=session_sid; Secure; HttpOnly; Path=/`], 302)
+        );
+
+      const session = await createCustomRealmSAMLSession(params);
+
+      expect(session.getCookieValue()).toBe('session_sid');
+      expect(session.email).toBe(params.email);
+      expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toMatchObject({
+        providerName: 'qaf',
+      });
+      expect(createMockedSAMLResponseMock).toHaveBeenCalledWith({
+        authnRequestId: requestId,
+        acsUrl,
+        username: params.username,
+        full_name: params.fullname,
+        email: params.email,
+        roles: [params.role],
+      });
+      expect(fetchMock.mock.calls[1][0]).toBe(acsUrl);
+      expect(fetchMock.mock.calls[1][1]!.headers).toMatchObject({ Cookie: 'sid=intermediate_sid' });
+    });
+
+    test('throws error when the redirect has no SAML AuthnRequest', async () => {
+      fetchMock.mockResolvedValueOnce(
+        responseWithSetCookie(
+          { location: 'http://localhost:5601/mock_idp/login' },
+          [`sid=intermediate_sid; Secure; HttpOnly; Path=/`],
+          200
+        )
+      );
+
+      await expect(createCustomRealmSAMLSession(params)).rejects.toThrow(
+        `Failed to parse SAML AuthnRequest from 'qaf' redirect: http://localhost:5601/mock_idp/login`
+      );
+      expect(createMockedSAMLResponseMock).not.toHaveBeenCalled();
+    });
+
+    test('adds a signing certificate hint when the realm rejects the response', async () => {
+      fetchMock
+        .mockResolvedValueOnce(
+          responseWithSetCookie(
+            { location },
+            [`sid=intermediate_sid; Secure; HttpOnly; Path=/`],
+            200
+          )
+        )
+        .mockResolvedValueOnce(new Response(null, { status: 401 }));
+
+      await expect(createCustomRealmSAMLSession(params)).rejects.toThrow(
+        /SAML callback failed: expected 302, got 401\nThe 'qaf' SAML realm rejected the mock IdP response/
+      );
+    });
   });
 
   describe('createSAMLResponse', () => {
@@ -264,7 +400,7 @@ describe('saml_auth', () => {
       );
 
       await expect(createSAMLResponse(createSAMLResponseParams)).rejects
-        .toThrowError(`Failed to parse SAML response value.\nMost likely the 'viewer@elastic.co' user has no access to the cloud deployment.
+        .toThrow(`Failed to parse SAML response value.\nMost likely the 'viewer@elastic.co' user has no access to the cloud deployment.
 Login to ${
         new URL(location).hostname
       } with the user from '.ftr/role_users.json' file and try to load

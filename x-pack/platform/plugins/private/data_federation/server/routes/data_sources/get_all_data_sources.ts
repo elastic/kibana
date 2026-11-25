@@ -6,11 +6,12 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { License } from '@kbn/license-api-guard-plugin/server';
 
 import { DATA_SOURCES_LIST_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
 
-export function registerGetAllDataSources(router: IRouter): void {
+export function registerGetAllDataSources(router: IRouter, license: License): void {
   router.get(
     {
       path: DATA_SOURCES_LIST_ROUTE_PATH,
@@ -25,13 +26,15 @@ export function registerGetAllDataSources(router: IRouter): void {
       },
       validate: false,
     },
-    router.handleLegacyErrors(async (context, _request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
-      // ES redacts secret/credential fields before returning them here, replacing
-      // their values with "::es_redacted::", so it's safe to pass the body through as-is.
-      const body = await dataSourcesClient.getAll();
-      return response.ok({ body });
-    })
+    router.handleLegacyErrors(
+      license.guardApiRoute(async (context, _request, response) => {
+        const { client } = (await context.core).elasticsearch;
+        const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
+        // ES redacts secret/credential fields before returning them here, replacing
+        // their values with "::es_redacted::", so it's safe to pass the body through as-is.
+        const body = await dataSourcesClient.getAll();
+        return response.ok({ body });
+      })
+    )
   );
 }

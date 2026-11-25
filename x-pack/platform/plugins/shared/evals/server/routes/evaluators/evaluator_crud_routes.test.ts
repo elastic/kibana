@@ -26,6 +26,7 @@ import { InvalidJudgeConfigError } from '../../evaluators/user_defined/validate_
 import { BuiltInEvaluatorNameError } from '../../storage/evaluators/built_in_evaluator_name_error';
 import { EvaluatorAlreadyExistsError } from '../../storage/evaluators/evaluator_already_exists_error';
 import { EvaluatorNotFoundError } from '../../storage/evaluators/evaluator_not_found_error';
+import { EvaluatorVersionConflictError } from '../../storage/evaluators/evaluator_version_conflict_error';
 import type { RouteDependencies } from '../register_routes';
 import { registerCreateEvaluatorRoute } from './create_evaluator';
 import { registerDeleteEvaluatorRoute } from './delete_evaluator';
@@ -60,6 +61,7 @@ const evaluatorRegistry = createEvaluatorRegistryMock([
     kind: 'llm',
     origin: 'built_in',
     description: 'Built-in correctness evaluator',
+    direction: 'maximize',
     evaluate: jest.fn(),
   },
 ]);
@@ -251,7 +253,7 @@ describe('evaluator CRUD routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual({ message: 'Failed to create evaluator' });
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to create evaluator: sensitive storage failure'
+        expect.stringContaining('Failed to create evaluator: Error: sensitive storage failure')
       );
     });
 
@@ -429,8 +431,33 @@ describe('evaluator CRUD routes', () => {
         kibanaResponseFactory
       );
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(client.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses an edit made from a superseded version with a conflict', async () => {
+      const { handler, context, client } = setup();
+      client.update.mockRejectedValueOnce(
+        new EvaluatorVersionConflictError('tone', '1.0.0', '1.0.1')
+      );
+
+      const response = await handler(
+        context,
+        httpServerMock.createKibanaRequest({
+          method: 'put',
+          path: EVALS_EVALUATOR_URL.replace('{name}', 'tone'),
+          params: { name: 'tone' },
+          body: { description: 'Changed', base_version: '1.0.0' },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(client.update).toHaveBeenCalledWith(
+        'tone',
+        expect.objectContaining({ baseVersion: '1.0.0' })
+      );
+      expect(response.status).toBe(409);
+      expect(response.payload.message).toContain('changed to version 1.0.1');
     });
 
     it('maps a missing update target to 404', async () => {
@@ -500,7 +527,7 @@ describe('evaluator CRUD routes', () => {
         kibanaResponseFactory
       );
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(client.delete).not.toHaveBeenCalled();
     });
 

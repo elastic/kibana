@@ -11,7 +11,14 @@ import {
   ResourceManager,
   type ResourceManagerContract,
 } from '../../services/resource_service/resource_manager';
+import { ALERT_ACTIONS_RESOURCE_KEY } from '../../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_RESOURCE_KEY } from '../../../resources/datastreams/alert_events';
 import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } from '../types';
+
+export const DISPATCHER_RESOURCE_KEYS = [
+  ALERT_EVENTS_RESOURCE_KEY,
+  ALERT_ACTIONS_RESOURCE_KEY,
+] as const;
 
 @injectable()
 export class WaitForResourcesStep implements DispatcherStep {
@@ -23,11 +30,11 @@ export class WaitForResourcesStep implements DispatcherStep {
     _: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    logger.debug({ message: `Waiting for resources to be ready` });
+    logger.debug({ message: 'Waiting for resources to be ready' });
 
-    await this.resourceManager.waitUntilReady();
+    await this.resourceManager.waitForResources(DISPATCHER_RESOURCE_KEYS);
 
-    logger.debug({ message: `Resources ready` });
+    logger.debug({ message: 'Resources ready' });
 
     return { type: 'continue' };
   }

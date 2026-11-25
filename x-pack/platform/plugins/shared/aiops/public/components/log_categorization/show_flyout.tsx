@@ -32,7 +32,8 @@ export async function showCategorizeFlyout(
   plugins: AiopsPluginStartDeps,
   originatingApp: string,
   additionalFilter?: CategorizationAdditionalFilter,
-  focusTrapProps?: EuiFlyoutProps['focusTrapProps']
+  focusTrapProps?: EuiFlyoutProps['focusTrapProps'],
+  projectRouting?: string
 ): Promise<void> {
   const { overlays, i18n } = coreStart;
 
@@ -78,6 +79,7 @@ export async function showCategorizeFlyout(
                     selectedField={field}
                     onClose={onFlyoutClose}
                     additionalFilter={additionalFilter}
+                    projectRouting={projectRouting}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>

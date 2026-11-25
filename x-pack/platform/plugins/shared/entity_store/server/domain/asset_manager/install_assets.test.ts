@@ -20,18 +20,24 @@ import {
 import {
   getUpdatesEntitiesDataStreamName,
   getLegacySecurityUpdatesEntitiesDataStreamName,
+  getLegacySecurityUpdatesIndexTemplateId,
 } from './updates_data_stream';
+import { getUpdatesComponentTemplateName } from './component_templates';
 import {
   getMetadataEntitiesDataStreamName,
   getLegacySecurityMetadataEntitiesDataStreamName,
 } from './metadata_data_stream';
+import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
 jest.mock('../../infra/elasticsearch');
 
-const { deleteIndex, deleteDataStream } = jest.requireMock('../../infra/elasticsearch') as {
-  deleteIndex: jest.Mock;
-  deleteDataStream: jest.Mock;
-};
+const { deleteIndex, deleteDataStream, deleteIndexTemplate, deleteComponentTemplate } =
+  jest.requireMock('../../infra/elasticsearch') as {
+    deleteIndex: jest.Mock;
+    deleteDataStream: jest.Mock;
+    deleteIndexTemplate: jest.Mock;
+    deleteComponentTemplate: jest.Mock;
+  };
 
 describe('uninstallElasticsearchAssets', () => {
   const namespace = 'default';
@@ -60,6 +66,8 @@ describe('uninstallElasticsearchAssets', () => {
     jest.clearAllMocks();
     deleteIndex.mockResolvedValue(undefined);
     deleteDataStream.mockResolvedValue(undefined);
+    deleteIndexTemplate.mockResolvedValue(undefined);
+    deleteComponentTemplate.mockResolvedValue(undefined);
   });
 
   it('deletes the latest entities index', async () => {
@@ -137,6 +145,34 @@ describe('uninstallElasticsearchAssets', () => {
     );
   });
 
+  it('deletes the updates index template', async () => {
+    await uninstallElasticsearchAssets({
+      esClient: createEsClient() as unknown as ElasticsearchClient,
+      logger: loggerMock.create(),
+      namespace,
+    });
+
+    expect(deleteIndexTemplate).toHaveBeenCalledWith(
+      expect.anything(),
+      getLegacySecurityUpdatesIndexTemplateId(namespace)
+    );
+  });
+
+  it('deletes the updates component templates for all entity types', async () => {
+    await uninstallElasticsearchAssets({
+      esClient: createEsClient() as unknown as ElasticsearchClient,
+      logger: loggerMock.create(),
+      namespace,
+    });
+
+    for (const type of ALL_ENTITY_TYPES) {
+      expect(deleteComponentTemplate).toHaveBeenCalledWith(
+        expect.anything(),
+        getUpdatesComponentTemplateName(type, namespace)
+      );
+    }
+  });
+
   it('deletes the metadata data stream so Clear Entity Data removes relationship history', async () => {
     await uninstallElasticsearchAssets({
       esClient: createEsClient() as unknown as ElasticsearchClient,
@@ -166,5 +202,7 @@ describe('uninstallElasticsearchAssets', () => {
 
     expect(deleteIndex).toHaveBeenCalledTimes(4);
     expect(deleteDataStream).toHaveBeenCalledTimes(4);
+    expect(deleteIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(deleteComponentTemplate).toHaveBeenCalledTimes(ALL_ENTITY_TYPES.length);
   });
 });

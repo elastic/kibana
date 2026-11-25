@@ -125,6 +125,72 @@ describe('LayerHeader', () => {
     ]);
   });
 
+  it('keeps the subtype switch mounted when the header re-renders', async () => {
+    let mounts = 0;
+    function StableSwitch() {
+      const [open, setOpen] = React.useState(false);
+      React.useEffect(() => {
+        mounts++;
+      }, []);
+      return (
+        <button type="button" data-test-subj="subtypeSwitch" onClick={() => setOpen(true)}>
+          {open ? 'open' : 'closed'}
+        </button>
+      );
+    }
+
+    function Host() {
+      const [tick, setTick] = React.useState(0);
+      const datasourceMap = { formBased: createMockDatasource() };
+      const visualizationMap: VisualizationMap = {
+        testVis: {
+          ...createMockVisualization(),
+          // A new element on every call matches XY chart's getSubtypeSwitch.
+          getSubtypeSwitch: () => <StableSwitch />,
+        },
+        testVis2: createMockVisualization('testVis2'),
+      };
+      return (
+        <EditorFrameServiceProvider
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMap}
+        >
+          <button type="button" onClick={() => setTick((value) => value + 1)}>
+            {`rerender ${tick}`}
+          </button>
+          <LayerHeader
+            activeVisualizationId="testVis"
+            layerConfigProps={{
+              layerId: 'myLayer',
+              state: {},
+              frame: createMockFramePublicAPI(),
+              setState: jest.fn(),
+              onChangeIndexPattern: jest.fn(),
+            }}
+          />
+        </EditorFrameServiceProvider>
+      );
+    }
+
+    renderWithReduxStore(<Host />, undefined, {
+      storeDeps: mockStoreDeps({
+        datasourceMap: { formBased: createMockDatasource() },
+        visualizationMap: {
+          testVis: createMockVisualization(),
+          testVis2: createMockVisualization('testVis2'),
+        },
+      }),
+    });
+
+    await userEvent.click(screen.getByTestId('subtypeSwitch'));
+    expect(screen.getByTestId('subtypeSwitch')).toHaveTextContent('open');
+
+    await userEvent.click(screen.getByRole('button', { name: /rerender/ }));
+
+    expect(mounts).toBe(1);
+    expect(screen.getByTestId('subtypeSwitch')).toHaveTextContent('open');
+  });
+
   it('should render chart switch if custom layer header was not passed', () => {
     renderLayerSettings();
     expect(screen.getByTestId('lnsChartSwitchPopover')).toBeInTheDocument();

@@ -74,15 +74,17 @@ function buildRelationshipMetadata(
 export interface WriteRelationshipMetadatasResult {
   docsAttempted: number;
   docsApplied: number;
+  docsFailed: number;
 }
 
 export const writeRelationshipMetadatas = async (
   entityMetadataClient: EntityMetadataClient,
   logger: Logger,
   records: EntityRelationshipRecord[],
-  context: WriteRelationshipMetadataContext
+  context: WriteRelationshipMetadataContext,
+  logPrefix = ''
 ): Promise<WriteRelationshipMetadatasResult> => {
-  if (records.length === 0) return { docsAttempted: 0, docsApplied: 0 };
+  if (records.length === 0) return { docsAttempted: 0, docsApplied: 0, docsFailed: 0 };
 
   const validRecords = records.filter(
     (r): r is EntityRelationshipRecord & { entityId: string } => r.entityId !== null
@@ -96,8 +98,9 @@ export const writeRelationshipMetadatas = async (
     }
   }
 
-  if (docs.length === 0) return { docsAttempted: 0, docsApplied: 0 };
+  if (docs.length === 0) return { docsAttempted: 0, docsApplied: 0, docsFailed: 0 };
 
+  const prefix = logPrefix ? `${logPrefix} ` : '';
   const { successful, failed, dropsByType } = await entityMetadataClient.bulkAppendMetadata(docs);
 
   if (failed > 0) {
@@ -107,10 +110,12 @@ export const writeRelationshipMetadatas = async (
     const reasons = dropsByType?.length
       ? ` Failures by type: ${formatBulkDropSummary(dropsByType)}`
       : '';
-    logger.error(`Failed to append ${failed} of ${docs.length} relationship metadata.${reasons}`);
+    logger.error(
+      `${prefix}Failed to append ${failed} of ${docs.length} relationship metadata.${reasons}`
+    );
   } else {
-    logger.info(`Appended ${docs.length} relationship metadata to metadata datastream`);
+    logger.info(`${prefix}Appended ${docs.length} relationship metadata to metadata datastream`);
   }
 
-  return { docsAttempted: docs.length, docsApplied: successful };
+  return { docsAttempted: docs.length, docsApplied: successful, docsFailed: failed };
 };

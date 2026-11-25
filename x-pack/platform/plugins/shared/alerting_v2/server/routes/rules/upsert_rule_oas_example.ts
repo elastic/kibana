@@ -11,7 +11,6 @@ import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
   CREATE_RULE_REQUEST,
-  RULE_NOT_FOUND_RESPONSE,
   RULE_RESPONSE,
   ruleResponseExample,
 } from './rule_oas_shared_examples';
@@ -44,7 +43,6 @@ export const upsertRuleOasExamples = (): AlertingOasOperationObject =>
       200: ruleResponseExample('upsertRuleReplacedResponse', 'Replaced an existing rule'),
       201: ruleResponseExample('upsertRuleCreatedResponse', 'Created a new rule with the given ID'),
       400: INVALID_UPSERT_RULE_RESPONSE,
-      404: RULE_NOT_FOUND_RESPONSE,
       409: RULE_UPSERT_CONFLICT_RESPONSE,
     },
   });

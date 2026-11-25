@@ -38,12 +38,14 @@ test.describe('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, (
     });
 
     await test.step('open save lens visualization', async () => {
-      const sparklines = page.testSubj.locator('overviewErrorsSparklines');
-      const menuIcon = sparklines.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
+      // The old per-monitor error sparklines panel (`overviewErrorsSparklines`)
+      // was replaced by the combined "Pings over time" chart.
+      const activityChart = page.testSubj.locator('overviewActivityChart');
+      const menuIcon = activityChart.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
       // Hover the stable panel wrapper (not the transient hover-actions row) and wait for the
       // toggle to be visible before clicking, so the reveal animation can't leave a spacer
       // intercepting the pointer.
-      await sparklines.hover();
+      await activityChart.hover();
       await menuIcon.waitFor({ state: 'visible' });
       await menuIcon.click();
       await page.testSubj.click('embeddablePanelAction-expViewSave');

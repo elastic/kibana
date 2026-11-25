@@ -164,8 +164,10 @@ export const mockNlToEsql = ({
     }),
   });
 
-  // generate esql - generate query call
-  void llmProxy.interceptors.toolMessage({
+  // generate esql - generate query call.
+  // The documentation round is replayed into this request as an [assistant, user] exchange rather
+  // than a tool call (see `formatAction`), so the last message is a user message, not a tool one.
+  void llmProxy.interceptors.userMessage({
     name: 'generate_esql:generate_query',
     when: ({ messages }) => {
       const systemMessage = messages.find((message) => message.role === 'system');

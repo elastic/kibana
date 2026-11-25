@@ -73,6 +73,7 @@ export const updateTestConfigStats: Command<void> = {
       configPaths: [],
       lookbackDays,
       buildkite: { branch, pipelineSlug },
+      log,
     });
 
     // Write stats

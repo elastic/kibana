@@ -8,8 +8,10 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
+  ConversationAttachmentSummary,
   ConversationWithoutRounds,
   CurrentUser,
   ToolResult,
@@ -17,18 +19,32 @@ import type {
   SerializedMetadataValue,
   ConversationParentRelation,
 } from '@kbn/agent-builder-common';
-import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import { isAttachmentActive } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
+  CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolOrigin,
   ToolResultType,
+  isEventsNativeVersion,
+  isLegacyTodosStep,
+  isTimelineEvent,
   normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
+import { TimelineEventType } from '@kbn/agent-builder-common/chat/timeline_events';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import type { ConversationPermissions } from '../../../../common/http_api/conversations';
+import type { ExecutionPeek } from '../../execution/persistence';
+import type {
+  ConversationPermissions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '../../../../common/http_api/conversations';
 import {
   hasConversationDeleteAccess,
   hasConversationRenameAccess,
@@ -40,8 +56,13 @@ import type {
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
+  NormalizedConversation,
 } from './types';
 import type { ConversationProperties } from './storage';
+import { isReadBy, migrateReadBy } from './read_by';
+import { isPinnedBy, migratePinnedBy } from './pinned_by';
+import type { ConversationTemplateResolver } from '../templates/serialize';
+import { withDeserializedMetadata } from '../templates/serialize';
 import {
   createAttachmentRefs,
   migrateRoundAttachments,
@@ -49,6 +70,8 @@ import {
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
 import { roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
+import { reconcileEvents } from './round_writes';
 
 export type Document = Omit<
   Required<
@@ -68,7 +91,10 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
-const convertBaseFromEs = (document: Document) => {
+export const fromEsWithoutRounds = (
+  document: Document,
+  user: CurrentUser
+): Omit<ConversationWithoutRounds, 'attachments'> => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -79,13 +105,14 @@ const convertBaseFromEs = (document: Document) => {
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
+      type: document._source.user_type,
     },
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
     status: document._source.status,
-    read: document._source.read,
-    pinned: document._source.pinned,
+    read: isReadBy({ source: document._source, user }),
+    pinned: isPinnedBy({ source: document._source, user }),
     read_only: document._source.read_only ?? false,
     access_control: normalizeConversationAccessControl(document._source.access_control),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
@@ -98,6 +125,7 @@ const convertBaseFromEs = (document: Document) => {
           },
         }
       : {}),
+    ...(document._source.feedback ? { feedback: document._source.feedback } : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
     ...(document._source.template_version !== undefined
@@ -137,6 +165,29 @@ const migrateToolResultType = (result: ToolResult): ToolResult => {
   return result;
 };
 
+const withoutLegacySteps = <T extends { type: string }>(steps: T[]): T[] =>
+  steps.filter((step) => !isLegacyTodosStep(step));
+
+/**
+ * Drops the steps written by the removed todo tool from stored events, both as `execution_step`
+ * events and inside `execution_terminated` snapshots. Together with the same filter on `rounds`,
+ * this is the only place that knows the step type existed: readers above the converter never see
+ * it, and the document is rewritten without it on its next write.
+ */
+const dropLegacySteps = (events: ConversationEvent[]): ConversationEvent[] =>
+  events.flatMap((event) => {
+    if (!isTimelineEvent(event)) {
+      return [event];
+    }
+    if (event.type === TimelineEventType.executionStep) {
+      return isLegacyTodosStep(event.data.step) ? [] : [event];
+    }
+    if (event.type === TimelineEventType.executionTerminated && event.data.steps) {
+      return [{ ...event, data: { ...event.data, steps: withoutLegacySteps(event.data.steps) } }];
+    }
+    return [event];
+  });
+
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map<ConversationRound>((round) => {
     // Migration: pending_prompt (singular) -> pending_prompts (array)
@@ -157,7 +208,7 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
         input_tokens: 0,
         output_tokens: 0,
       },
-      steps: round.steps.map<ConversationRoundStep>((step) => {
+      steps: withoutLegacySteps(round.steps).map<ConversationRoundStep>((step) => {
         if (step.type === ConversationRoundStepType.toolCall) {
           return {
             ...step,
@@ -177,6 +228,13 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
     };
   });
 }
+
+type ConversationAttachmentSource = Pick<VersionedAttachment, 'id' | 'type' | 'active'>;
+
+export const toAttachmentSummaries = (
+  attachments: ConversationAttachmentSource[] | undefined
+): ConversationAttachmentSummary[] =>
+  (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
 
 /**
  * Migrates legacy RoundState format.
@@ -209,8 +267,16 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const fromEs = (document: Document): Conversation => {
-  const base = convertBaseFromEs(document);
+export const fromEs = (
+  document: Document,
+  user: CurrentUser,
+  execution?: ExecutionPeek
+): NormalizedConversation => {
+  const base = fromEsWithoutRounds(document, user);
+  const perUserFlags = {
+    read_by: migrateReadBy(document._source),
+    pinned_by: migratePinnedBy(document._source),
+  };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
@@ -232,43 +298,30 @@ export const fromEs = (document: Document): Conversation => {
 
   const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
 
-  // The timeline is a derived projection of the rounds, which stay the source of truth. It is
-  // exposed on the conversation object but never persisted (this PR writes rounds only).
-  const withEvents = (conversation: Conversation): Conversation => ({
-    ...conversation,
-    events: roundsToEvents(conversation),
-  });
+  const storedSchemaVersion = document._source!.schema_version;
+  const storedEvents = document._source!.events;
+  const isEventsNative = isEventsNativeVersion(storedSchemaVersion);
 
-  if (existingAttachments && existingAttachments.length > 0) {
-    return withEvents({
-      ...base,
-      rounds: roundsWithRefs,
-      attachments: existingAttachments,
-      ...(document._source!.state && { state: document._source!.state }),
-    });
-  }
-
-  if (hasLegacyRoundAttachments) {
-    return withEvents({
-      ...base,
-      rounds: roundsWithRefs,
-      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
-      ...(document._source!.state && { state: document._source!.state }),
-    });
-  }
-
-  return withEvents({
+  const conversation: NormalizedConversation = {
     ...base,
+    ...perUserFlags,
     rounds: roundsWithRefs,
-    ...(document._source!.state && { state: document._source!.state }),
-  });
+    ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
+    ...(document._source!.state ? { state: document._source!.state } : {}),
+    ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
+    active_execution: document._source!.active_execution,
+    ...(execution ? { execution } : {}),
+  };
+
+  const events =
+    isEventsNative && storedEvents != null && storedEvents.length > 0
+      ? dropLegacySteps(storedEvents)
+      : roundsToEvents(conversation);
+
+  return { ...conversation, events };
 };
 
-export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
-  return convertBaseFromEs(document);
-};
-
-export const withPermissions = <T extends ConversationWithoutRounds>({
+const withPermissions = <T extends ConversationWithoutRounds>({
   conversation,
   user,
 }: {
@@ -288,11 +341,106 @@ export const withPermissions = <T extends ConversationWithoutRounds>({
   };
 };
 
-export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
+/**
+ * Read-path round-trip verification. When on, a conversation's rounds are replaced by
+ * `eventsToRounds(roundsToEvents(...))` so every test suite that reads a conversation asserts the
+ * rounds<->events conversion is an identity — a fidelity regression fails CI. Applied at the
+ * response boundary only (never `fromEs`, which also feeds the OCC write path), so writes always
+ * persist the real rounds.
+ *
+ * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
+ * via `CI=true`. Always OFF in production: a deployed Kibana never sets
+ * `CI`, so real reads return the stored rounds untouched.
+ */
+const shouldVerifyRoundTrip = process.env.CI === 'true';
+
+const verifyRoundTrip = (conversation: Conversation): Conversation =>
+  shouldVerifyRoundTrip
+    ? {
+        ...conversation,
+        rounds: eventsToRounds(roundsToEvents(conversation)),
+      }
+    : conversation;
+
+const stripInternalFields = (conversation: NormalizedConversation): Conversation => {
+  const {
+    read_by: _readBy,
+    pinned_by: _pinnedBy,
+    execution: _execution,
+    ...conversationWithoutInternalFields
+  } = conversation;
+
+  return conversationWithoutInternalFields;
+};
+
+export const toConversationResponse = ({
+  conversation,
+  resolveTemplate,
+}: {
+  conversation: NormalizedConversation;
+  resolveTemplate: ConversationTemplateResolver;
+}): Conversation => withDeserializedMetadata(stripInternalFields(conversation), resolveTemplate);
+
+export const toConversationResponseFromDocument = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): Conversation =>
+  withDeserializedMetadata(
+    verifyRoundTrip(stripInternalFields(fromEs(document, user))),
+    resolveTemplate
+  );
+
+export const toResponseConversation = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): ConversationWithPermissions => {
+  const conversation = toConversationResponseFromDocument({ document, user, resolveTemplate });
+
+  return withPermissions({ conversation, user });
+};
+
+export const toResponseConversationWithoutRounds = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): ConversationWithoutRoundsWithPermissions => {
+  const attachments = toAttachmentSummaries(document._source?.attachments);
+  const conversation = withDeserializedMetadata(
+    {
+      ...fromEsWithoutRounds(document, user),
+      ...(attachments.length > 0 ? { attachments } : {}),
+    },
+    resolveTemplate
+  );
+
+  return withPermissions({ conversation, user });
+};
+
+export const toEs = (
+  conversation: NormalizedConversation,
+  space: string
+): ConversationProperties => {
+  const isEventsNative = isEventsNativeVersion(conversation.schema_version);
+
   return {
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
+    user_type: conversation.user.type,
     space,
     title: conversation.title,
     created_at: conversation.created_at,
@@ -303,8 +451,12 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     attachments: conversation.attachments ?? [],
     state: conversation.state,
     status: conversation.status,
-    read: conversation.read,
-    pinned: conversation.pinned,
+    // Explicitly omit read to ensure migration
+    read: undefined,
+    read_by: conversation.read_by ?? [],
+    // Explicitly omit pinned to ensure migration
+    pinned: undefined,
+    pinned_by: conversation.pinned_by ?? [],
     read_only: conversation.read_only,
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
@@ -312,7 +464,18 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
-    // The timeline is derived from rounds on read (see fromEs), never persisted here.
+    active_execution: conversation.active_execution,
+    // Only events-native conversations persist their timeline; legacy ones keep deriving it
+    // from rounds on read (see fromEs).
+    ...(isEventsNative
+      ? {
+          events: conversation.events ?? [],
+          schema_version: conversation.schema_version,
+        }
+      : {}),
+    ...(conversation.feedback && Object.keys(conversation.feedback).length > 0
+      ? { feedback: conversation.feedback }
+      : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.
@@ -332,19 +495,47 @@ export const updateConversation = ({
   space,
   updateDate,
 }: {
-  conversation: Conversation;
+  conversation: NormalizedConversation;
   update: ConversationUpdatableFields;
   space: string;
   updateDate: Date;
 }) => {
-  const updated = {
-    ...conversation,
-    ...update,
-    space,
-    updated_at: updateDate.toISOString(),
+  const {
+    events: updateEvents,
+    schema_version: _ignoredSchemaVersion,
+    ...safeUpdate
+  } = update as ConversationUpdatableFields & {
+    events?: Conversation['events'];
+    schema_version?: Conversation['schema_version'];
   };
 
-  return updated;
+  const merged: Conversation = {
+    ...conversation,
+    ...safeUpdate,
+    space,
+    updated_at: updateDate.toISOString(),
+    schema_version: conversation.schema_version,
+  } as Conversation;
+
+  if (updateEvents !== undefined) {
+    return {
+      ...merged,
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      events: updateEvents,
+      rounds: safeUpdate.rounds ?? eventsToRounds(updateEvents),
+    };
+  }
+
+  if (!isEventsNativeVersion(merged.schema_version) || safeUpdate.rounds === undefined) {
+    return merged;
+  }
+
+  return {
+    ...merged,
+    schema_version: CONVERSATION_SCHEMA_VERSION,
+    // `conversation.rounds` are the document's rounds at write time: what the caller could see.
+    events: reconcileEvents(merged, conversation.rounds),
+  };
 };
 
 export const createRequestToEs = ({
@@ -352,29 +543,56 @@ export const createRequestToEs = ({
   space,
   currentUser,
   creationDate,
+  leadingEvents = [],
 }: {
-  conversation: ConversationCreateRequest;
+  /** `active_execution` comes from the create request's `activeExecution`, never from the request itself. */
+  conversation: ConversationCreateRequest & Pick<Conversation, 'active_execution'>;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;
+  leadingEvents?: ConversationEvent[];
 }): ConversationProperties => {
   // Honor conversation.user override if provided (used for persistent sub-agent
   // creations where ownership is snapshotted from the parent conversation).
   const effectiveUser = conversation.user ?? currentUser;
+  const createdAt = creationDate.toISOString();
+
+  const forEvents: Conversation = {
+    id: '',
+    agent_id: conversation.agent_id,
+    user: { id: effectiveUser.id, username: effectiveUser.username, type: effectiveUser.type },
+    title: conversation.title,
+    created_at: createdAt,
+    updated_at: createdAt,
+    rounds: conversation.rounds,
+    ...(conversation.origin ? { origin: conversation.origin } : {}),
+  };
+  // `leadingEvents` (the `conversation_created` activity) stay outside the caller-events-else-rounds
+  // choice, so a caller who sent none still gets the rounds projection.
+  const events = [
+    ...leadingEvents,
+    ...(conversation.events && conversation.events.length > 0
+      ? conversation.events
+      : roundsToEvents(forEvents)),
+  ];
+
   return {
     agent_id: conversation.agent_id,
     user_id: effectiveUser.id,
     user_name: effectiveUser.username,
+    user_type: effectiveUser.type,
     space,
     title: conversation.title,
-    created_at: creationDate.toISOString(),
-    updated_at: creationDate.toISOString(),
+    created_at: createdAt,
+    updated_at: createdAt,
     conversation_rounds: serializeStepResults(conversation.rounds),
+    events,
+    schema_version: CONVERSATION_SCHEMA_VERSION,
     attachments: conversation.attachments ?? [],
     state: conversation.state,
     status: conversation.status,
-    read: false,
-    pinned: false,
+    read_by: [],
+    pinned_by: [],
     read_only: conversation.read_only ?? false,
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
@@ -390,5 +608,6 @@ export const createRequestToEs = ({
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
+    active_execution: conversation.active_execution,
   };
 };

@@ -69,7 +69,7 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
     });
     expect(response.body.meta.managed).toBe(false);
     expect(response.body.meta.version).toBeDefined();
-    expect(response.body.meta.namespaces).toBeDefined();
+    expect(response.body.meta.spaces).toBeDefined();
   });
 
   apiTest(

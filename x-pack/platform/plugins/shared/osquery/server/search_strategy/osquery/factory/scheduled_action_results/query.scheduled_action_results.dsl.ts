@@ -6,7 +6,10 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../../../common/constants';
+import {
+  ACTION_RESPONSES_DATA_STREAM_INDEX,
+  AGENT_CARDINALITY_PRECISION,
+} from '../../../../../common/constants';
 import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
 import { buildIndexNamesWithNamespaces } from '../../../../utils/build_index_name_with_namespace';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
@@ -25,6 +28,11 @@ export const buildScheduledActionResultsQuery = ({
   // Top-level hit scoping is enforced centrally in the search strategy
   // (enforceSpaceScope). The aggregation below is a separate filter context that
   // the top-level query does not constrain, so it is scoped explicitly here.
+  //
+  // No `action_data.space_id` fallback here: scheduled executions come from the
+  // agent policy rather than a Fleet action, so these documents have no
+  // `action_data` and already carry the top-level `space_id`. See
+  // ID_BOUND_FACTORY_QUERY_TYPES.
   const spaceIdFilter = buildSpaceIdFilter(spaceId, {
     matchMissingSpaceId: matchMissingSpaceId ?? true,
   });
@@ -63,13 +71,34 @@ export const buildScheduledActionResultsQuery = ({
                   field: 'action_response.osquery.count',
                 },
               },
-              responses: {
-                terms: {
-                  script: {
-                    lang: 'painless',
-                    source:
-                      "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                  } as const,
+              // Agent cardinality, not `doc_count`: a bucket can hold many
+              // response docs per agent, which rendered as inflated agent counts.
+              responded_agents: {
+                cardinality: {
+                  field: 'agent_id',
+                  precision_threshold: AGENT_CARDINALITY_PRECISION,
+                },
+              },
+              success_agents: {
+                filter: { bool: { must_not: { exists: { field: 'error' } } } },
+                aggs: {
+                  agents: {
+                    cardinality: {
+                      field: 'agent_id',
+                      precision_threshold: AGENT_CARDINALITY_PRECISION,
+                    },
+                  },
+                },
+              },
+              error_agents: {
+                filter: { exists: { field: 'error' } },
+                aggs: {
+                  agents: {
+                    cardinality: {
+                      field: 'agent_id',
+                      precision_threshold: AGENT_CARDINALITY_PRECISION,
+                    },
+                  },
                 },
               },
             },

@@ -61,7 +61,7 @@ export const useAppHeaderStaticItems = ({
   const chrome = useChromeService();
   const basePath = useBasePath();
   const canAccessIntegrations = useCanAccessIntegrations();
-  const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
+  const feedbackHandler = useObservable(chrome.help.getFeedbackHandler$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
   return useMemo(() => {

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IncomingMessage } from 'http';
+import type { Http2ServerRequest } from 'http2';
 import { Socket } from 'net';
 import type { DetailedPeerCertificate } from 'tls';
 import { TLSSocket } from 'tls';
-import { KibanaSocket } from './socket';
+import { KibanaSocket, resolveRawSocket } from './socket';
 
 describe('KibanaSocket', () => {
   describe('getPeerCertificate', () => {
@@ -27,8 +29,8 @@ describe('KibanaSocket', () => {
       const socket = new KibanaSocket(tlsSocket);
       const result = socket.getPeerCertificate(true);
 
-      expect(spy).toBeCalledTimes(1);
-      expect(spy).toBeCalledWith(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(true);
       expect(result).toBe(cert);
     });
 
@@ -63,7 +65,7 @@ describe('KibanaSocket', () => {
       const socket = new KibanaSocket(tlsSocket);
       const result = socket.getProtocol();
 
-      expect(spy).toBeCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
       expect(result).toBe(protocol);
     });
 
@@ -95,7 +97,7 @@ describe('KibanaSocket', () => {
       const socket = new KibanaSocket(tlsSocket);
 
       await expect(socket.renegotiate({})).rejects.toBe(result);
-      expect(spy).toBeCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('throws error if tls.Socket renegotiate returns error', async () => {
@@ -206,5 +208,77 @@ describe('KibanaSocket', () => {
       const socket = new KibanaSocket(new Socket());
       expect(socket.authorizationError).toBeUndefined();
     });
+  });
+});
+
+describe('resolveRawSocket', () => {
+  it('returns req.socket for HTTP/1.1 requests (no stream property)', () => {
+    const netSocket = new Socket();
+    const req = { socket: netSocket } as unknown as IncomingMessage;
+
+    expect(resolveRawSocket(req)).toBe(netSocket);
+  });
+
+  it('returns the session-level socket for HTTP/2 requests', () => {
+    const streamSocket = new Socket();
+    const sessionSocket = new TLSSocket(new Socket());
+    const req = {
+      socket: streamSocket,
+      stream: { session: { socket: sessionSocket } },
+    } as unknown as Http2ServerRequest;
+
+    expect(resolveRawSocket(req)).toBe(sessionSocket);
+  });
+
+  it('falls back to req.socket when stream.session is undefined (stream destroyed before request)', () => {
+    const streamSocket = new Socket();
+    const req = {
+      socket: streamSocket,
+      stream: { session: undefined },
+    } as unknown as Http2ServerRequest;
+
+    expect(resolveRawSocket(req)).toBe(streamSocket);
+  });
+
+  // The end-to-end counterpart of this lives in the Scout pki_stress suite. Keeping a unit lock
+  // here means a regression surfaces without booting a PKI-over-HTTP/2 stack. See kibana#258232.
+  it('keeps reporting the peer certificate after the HTTP/2 stream is destroyed', () => {
+    const sessionSocket = new TLSSocket(new Socket());
+    const peerCertificate = { subject: 'CN=first_client' } as unknown as DetailedPeerCertificate;
+    jest.spyOn(sessionSocket, 'getPeerCertificate').mockReturnValue(peerCertificate);
+
+    const req = {
+      socket: new Socket(),
+      stream: { session: { socket: sessionSocket } },
+    } as unknown as Http2ServerRequest;
+
+    // Resolved once, eagerly, exactly as CoreKibanaRequest does in its constructor.
+    const socket = new KibanaSocket(resolveRawSocket(req));
+
+    // Simulate RST_STREAM: Node clears `stream.session` when the stream is destroyed. Had we
+    // captured `req.socket` (the stream-level Proxy) this is the point at which every TLS
+    // accessor would start returning null/undefined.
+    (req as unknown as { stream: { session: undefined } }).stream.session = undefined;
+
+    expect(socket.getPeerCertificate(true)).toBe(peerCertificate);
+    expect(socket.authorized).toBe(sessionSocket.authorized);
+  });
+
+  it('falls back to req.socket when session.socket throws ERR_HTTP2_SOCKET_UNBOUND', () => {
+    const streamSocket = new Socket();
+    const req = {
+      socket: streamSocket,
+      stream: {
+        session: {
+          get socket(): Socket {
+            throw Object.assign(new Error('Session socket unbound'), {
+              code: 'ERR_HTTP2_SOCKET_UNBOUND',
+            });
+          },
+        },
+      },
+    } as unknown as Http2ServerRequest;
+
+    expect(resolveRawSocket(req)).toBe(streamSocket);
   });
 });

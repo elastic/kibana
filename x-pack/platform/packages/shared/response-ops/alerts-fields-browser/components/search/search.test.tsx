@@ -42,6 +42,6 @@ describe('Search', () => {
 
     await userEvent.type(screen.getByRole('searchbox'), 'timestamp');
 
-    expect(onSearchInputChange).toBeCalled();
+    expect(onSearchInputChange).toHaveBeenCalled();
   });
 });

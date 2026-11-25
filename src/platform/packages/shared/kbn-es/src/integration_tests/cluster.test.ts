@@ -72,7 +72,7 @@ const mockEsBin = (
     ssl?: boolean;
   } = { start: false, ssl: false }
 ) => {
-  execaMock.mockImplementationOnce((args: string[], options: {}) =>
+  execaMock.mockImplementationOnce((_file: string, args: string[], options: { cwd?: string }) =>
     jest.requireActual('execa').execa(
       process.execPath,
       [
@@ -84,7 +84,8 @@ const mockEsBin = (
           ssl: ssl || args.includes('xpack.security.http.ssl.enabled=true'),
         }),
       ],
-      options
+      // the tests pass fake install paths, which execa rejects as `cwd`
+      { ...options, cwd: undefined }
     )
   );
 };
@@ -175,7 +176,7 @@ describe('#downloadSnapshot()', () => {
   test('rejects if downloadSnapshot() rejects', async () => {
     downloadSnapshotMock.mockRejectedValue(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.downloadSnapshot({ version: '8.10.0' })).rejects.toThrowError('foo');
+    await expect(cluster.downloadSnapshot({ version: '8.10.0' })).rejects.toThrow('foo');
   });
 });
 
@@ -225,7 +226,7 @@ describe('#installSource()', () => {
   test('rejects if installSource() rejects', async () => {
     installSourceMock.mockRejectedValue(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.installSource({ sourcePath: 'bar' })).rejects.toThrowError('foo');
+    await expect(cluster.installSource({ sourcePath: 'bar' })).rejects.toThrow('foo');
   });
 });
 
@@ -276,7 +277,7 @@ describe('#installSnapshot()', () => {
   test('rejects if installSnapshot() rejects', async () => {
     installSnapshotMock.mockRejectedValue(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.installSnapshot({ version: '8.10.0' })).rejects.toThrowError('foo');
+    await expect(cluster.installSnapshot({ version: '8.10.0' })).rejects.toThrow('foo');
   });
 });
 
@@ -327,7 +328,7 @@ describe('#installArchive()', () => {
   test('rejects if installArchive() rejects', async () => {
     installArchiveMock.mockRejectedValue(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.installArchive('bar')).rejects.toThrowError('foo');
+    await expect(cluster.installArchive('bar')).rejects.toThrow('foo');
   });
 });
 
@@ -335,33 +336,46 @@ describe('#start(installPath)', () => {
   test('rejects when bin/elasticsearch exists with 0 before starting', async () => {
     mockEsBin({ exitCode: 0, start: false });
 
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrowError('ES exited without starting');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ES exited without starting'
+    );
   });
 
   test('rejects when bin/elasticsearch exists with 143 before starting', async () => {
     mockEsBin({ exitCode: 143, start: false });
 
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrowError('ES exited without starting');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ES exited without starting'
+    );
   });
 
   test('rejects when bin/elasticsearch exists with 130 before starting', async () => {
     mockEsBin({ exitCode: 130, start: false });
 
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrowError('ES exited without starting');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ES exited without starting'
+    );
   });
 
   test('rejects when bin/elasticsearch exists with 1 before starting', async () => {
     mockEsBin({ exitCode: 1, start: false });
 
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrowError('ES exited with code 1');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ES exited with code 1'
+    );
+  });
+
+  test('rejects when bin/elasticsearch cannot be spawned', async () => {
+    execaMock.mockImplementationOnce((_file: string, args: string[], options: {}) =>
+      jest.requireActual('execa').execa('kbn-es-missing-elasticsearch-bin', args, {
+        ...options,
+        cwd: undefined,
+      })
+    );
+
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ENOENT'
+    );
   });
 
   test('resolves when bin/elasticsearch logs "started"', async () => {
@@ -409,9 +423,9 @@ describe('#start(installPath)', () => {
   test(`rejects if waitUntilClusterReady() rejects`, async () => {
     mockEsBin({ start: true });
     waitUntilClusterReadyMock.mockRejectedValue(new Error('foo'));
-    await expect(
-      new Cluster({ log }).start(installPath, esClusterExecOptions)
-    ).rejects.toThrowError('foo');
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'foo'
+    );
   });
 
   test('rejects if #start() was called previously', async () => {
@@ -419,7 +433,7 @@ describe('#start(installPath)', () => {
 
     const cluster = new Cluster({ log });
     await cluster.start(installPath, esClusterExecOptions);
-    await expect(cluster.start(installPath, esClusterExecOptions)).rejects.toThrowError(
+    await expect(cluster.start(installPath, esClusterExecOptions)).rejects.toThrow(
       'ES has already been started'
     );
   });
@@ -429,7 +443,7 @@ describe('#start(installPath)', () => {
 
     const cluster = new Cluster({ log });
     await cluster.run(installPath, esClusterExecOptions);
-    await expect(cluster.start(installPath, esClusterExecOptions)).rejects.toThrowError(
+    await expect(cluster.start(installPath, esClusterExecOptions)).rejects.toThrow(
       'ES has already been started'
     );
   });
@@ -536,7 +550,7 @@ describe('#run()', () => {
   test('rejects when bin/elasticsearch exists with 1', async () => {
     mockEsBin({ exitCode: 1 });
 
-    await expect(new Cluster({ log }).run(installPath, esClusterExecOptions)).rejects.toThrowError(
+    await expect(new Cluster({ log }).run(installPath, esClusterExecOptions)).rejects.toThrow(
       'ES exited with code 1'
     );
   });
@@ -546,7 +560,7 @@ describe('#run()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.start(installPath, esClusterExecOptions);
-    await expect(cluster.run(installPath, esClusterExecOptions)).rejects.toThrowError(
+    await expect(cluster.run(installPath, esClusterExecOptions)).rejects.toThrow(
       'ES has already been started'
     );
   });
@@ -556,7 +570,7 @@ describe('#run()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.run(installPath, esClusterExecOptions);
-    await expect(cluster.run(installPath, esClusterExecOptions)).rejects.toThrowError(
+    await expect(cluster.run(installPath, esClusterExecOptions)).rejects.toThrow(
       'ES has already been started'
     );
   });
@@ -707,7 +721,7 @@ describe('#configureKeystoreWithSecureSettingsFiles()', () => {
 describe('#stop()', () => {
   test('rejects if #run() or #start() was not called', async () => {
     const cluster = new Cluster({ log });
-    await expect(cluster.stop()).rejects.toThrowError('ES has not been started');
+    await expect(cluster.stop()).rejects.toThrow('ES has not been started');
   });
 
   test('resolves when ES exits with 0', async () => {
@@ -738,17 +752,17 @@ describe('#stop()', () => {
     mockEsBin({ exitCode: 1, start: true });
 
     const cluster = new Cluster({ log });
-    await expect(cluster.run(installPath, esClusterExecOptions)).rejects.toThrowError(
+    await expect(cluster.run(installPath, esClusterExecOptions)).rejects.toThrow(
       'ES exited with code 1'
     );
-    await expect(cluster.stop()).rejects.toThrowError('ES exited with code 1');
+    await expect(cluster.stop()).rejects.toThrow('ES exited with code 1');
   });
 });
 
 describe('#kill()', () => {
   test('rejects if #run() or #start() was not called', async () => {
     const cluster = new Cluster({ log });
-    await expect(cluster.kill()).rejects.toThrowError('ES has not been started');
+    await expect(cluster.kill()).rejects.toThrow('ES has not been started');
   });
 
   test('resolves when ES exits with 0', async () => {
@@ -770,7 +784,7 @@ describe('#runServerless()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.start(installPath, esClusterExecOptions);
-    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrow(
       'ES stateful cluster has already been started'
     );
   });
@@ -780,7 +794,7 @@ describe('#runServerless()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.run(installPath, esClusterExecOptions);
-    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrow(
       'ES stateful cluster has already been started'
     );
   });
@@ -810,7 +824,7 @@ describe('#runServerless()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.runServerless(defaultOptions);
-    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrow(
       'ES serverless docker cluster has already been started'
     );
   });
@@ -818,7 +832,7 @@ describe('#runServerless()', () => {
   test('rejects if #runServerlessCluster() rejects', async () => {
     runServerlessClusterMock.mockRejectedValueOnce(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError('foo');
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrow('foo');
   });
 
   test('passes through all options+log to #runServerlessCluster()', async () => {
@@ -847,7 +861,7 @@ describe('#runDocker()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.start(installPath, esClusterExecOptions);
-    await expect(cluster.runDocker(dockerOptions)).rejects.toThrowError(
+    await expect(cluster.runDocker(dockerOptions)).rejects.toThrow(
       'ES stateful cluster has already been started'
     );
   });
@@ -856,7 +870,7 @@ describe('#runDocker()', () => {
     mockEsBin({ start: true });
     const cluster = new Cluster({ log });
     await cluster.run(installPath, esClusterExecOptions);
-    await expect(cluster.runDocker(dockerOptions)).rejects.toThrowError(
+    await expect(cluster.runDocker(dockerOptions)).rejects.toThrow(
       'ES stateful cluster has already been started'
     );
   });
@@ -881,7 +895,7 @@ describe('#runDocker()', () => {
   test('rejects if #runDockerContainer() rejects', async () => {
     runDockerContainerMock.mockRejectedValueOnce(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.runDocker(dockerOptions)).rejects.toThrowError('foo');
+    await expect(cluster.runDocker(dockerOptions)).rejects.toThrow('foo');
   });
 
   test('passes through all options+log to #runDockerContainer()', async () => {

@@ -15,21 +15,20 @@ import {
   externalReferenceAttachment,
 } from '../../../containers/mock';
 import type { CaseUI } from '../../../../common';
-import { renderWithTestingProviders } from '../../../common/mock';
+import { noDeleteCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { CaseViewAttachments } from './case_view_attachments';
 import { screen, waitFor } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import userEvent from '@testing-library/user-event';
-import { KibanaServices } from '../../../common/lib/kibana';
 
 jest.mock('../../../containers/use_get_case_file_stats');
 jest.mock('../../../common/navigation/hooks');
 jest.mock('../use_case_observables', () => ({
   useCaseObservables: jest.fn(() => ({ observables: [], isLoading: false })),
 }));
-jest.mock('../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button', () => ({
+jest.mock('./sidebar/sidebar_toggle_button', () => ({
   SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
 }));
 
@@ -268,6 +267,57 @@ describe('Case View Attachments tab', () => {
     expect(
       screen.queryByTestId('case-view-attachment-accordion-security.event')
     ).not.toBeInTheDocument();
+  });
+
+  describe('removal', () => {
+    const buildRemovableRegistry = () => {
+      const registry = new UnifiedAttachmentTypeRegistry();
+      registry.register({
+        id: 'security.alert',
+        getLabel: () => 'Alerts',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an alert' }),
+        getAttachmentList: () => ({
+          children: ({ onRemove }) => (
+            <div data-test-subj="test-alerts-table">{onRemove ? 'removable' : 'read-only'}</div>
+          ),
+        }),
+        schema: z.object({}),
+      });
+      return registry;
+    };
+    const caseWithAlert: CaseUI = { ...basicCase, comments: [alertComment] };
+
+    it('passes onRemove to the sections when the user can delete', () => {
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseWithAlert}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />,
+        { wrapperProps: { unifiedAttachmentTypeRegistry: buildRemovableRegistry() } }
+      );
+
+      expect(screen.getByTestId('test-alerts-table')).toHaveTextContent('removable');
+    });
+
+    it('does not pass onRemove to the sections without the delete permission', () => {
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseWithAlert}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />,
+        {
+          wrapperProps: {
+            unifiedAttachmentTypeRegistry: buildRemovableRegistry(),
+            permissions: noDeleteCasesPermissions(),
+          },
+        }
+      );
+
+      expect(screen.getByTestId('test-alerts-table')).toHaveTextContent('read-only');
+    });
   });
 
   it('collapses and expands every visible attachment section', async () => {
@@ -739,39 +789,15 @@ describe('Case View Attachments tab', () => {
     ]);
   });
 
-  describe('sidebar toggle button', () => {
-    it('does not render the sidebar toggle button when redesign is disabled', () => {
-      renderWithTestingProviders(
-        <CaseViewAttachments
-          caseData={caseData}
-          onSearch={onSearchMock}
-          onUpdateField={onUpdateFieldMock}
-        />
-      );
+  it('renders the sidebar toggle button', () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />
+    );
 
-      expect(screen.queryByTestId('case-view-sidebar-toggle')).not.toBeInTheDocument();
-    });
-
-    it('renders the sidebar toggle button when redesign is enabled', () => {
-      const spy = jest
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ casesRedesign: { details: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
-
-      try {
-        renderWithTestingProviders(
-          <CaseViewAttachments
-            caseData={caseData}
-            onSearch={onSearchMock}
-            onUpdateField={onUpdateFieldMock}
-          />
-        );
-
-        expect(screen.getByTestId('case-view-sidebar-toggle')).toBeInTheDocument();
-      } finally {
-        spy.mockRestore();
-      }
-    });
+    expect(screen.getByTestId('case-view-sidebar-toggle')).toBeInTheDocument();
   });
 });

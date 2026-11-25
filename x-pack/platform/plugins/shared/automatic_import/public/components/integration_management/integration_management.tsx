@@ -7,9 +7,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { SuppressChromeBackButton } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
@@ -19,6 +21,7 @@ import { MINIMUM_LICENSE_TYPE } from '../../../common/constants';
 import { ManagementContents } from './management_contents/management_contents';
 import { ButtonsFooter } from '../../common/components/button_footer';
 import { ConnectorSelector } from '../../common/components/connector_selector';
+import { useAiConnectors } from '../../common/hooks/use_ai_connectors';
 import { IntegrationFormProvider, useIntegrationForm } from './forms/integration_form';
 import type { IntegrationFormData } from './forms/types';
 import { PAGE_RESTRICT_WIDTH } from './constants';
@@ -30,6 +33,12 @@ import {
   useKibana,
 } from '../../common';
 import { normalizeTitleName } from '../../common/lib/helper_functions';
+import { useAuthorization } from '../../common/hooks/use_authorization';
+import {
+  readReturnParams,
+  getCreateBackLinkLabel,
+  shouldShowCreateBackLink,
+} from '../../common/read_return_params';
 import { useTelemetry } from '../telemetry_context';
 import { LicensePaywallCard } from '../license_paywall/license_paywall_card';
 import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/types';
@@ -45,8 +54,10 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   navigateToManage,
 }) => {
   const { integrationId } = useParams<{ integrationId?: string }>();
-  const { state: locationState } = useLocation<{ isNew?: boolean }>();
+  const { state: locationState, search } = useLocation<{ isNew?: boolean }>();
   const isNewlyCreated = locationState?.isNew === true;
+  const { application } = useKibana().services;
+  const returnParams = useMemo(() => readReturnParams(search), [search]);
   const { integration } = useGetIntegrationById(integrationId);
   const { deleteIntegrationMutation } = useDeleteIntegration();
   const { submit, isFormModified } = useIntegrationForm();
@@ -65,12 +76,28 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
 
   const performCancelNavigation = useCallback(() => {
     reportCancelButtonClicked({ integrationId });
+    if (returnParams) {
+      application.navigateToApp(returnParams.returnAppId, { path: returnParams.returnPath });
+      return;
+    }
     if (window.history.length > 1) {
       window.history.back();
     } else {
       navigateToManage();
     }
-  }, [integrationId, navigateToManage, reportCancelButtonClicked]);
+  }, [application, integrationId, navigateToManage, reportCancelButtonClicked, returnParams]);
+
+  const showCreateBackLink = shouldShowCreateBackLink({
+    returnParams,
+    integrationId,
+  });
+
+  const handleCreateBackLink = useCallback(() => {
+    if (!returnParams) {
+      return;
+    }
+    application.navigateToApp(returnParams.returnAppId, { path: returnParams.returnPath });
+  }, [application, returnParams]);
 
   const handleCancel = useCallback(() => {
     if (shouldOfferIntegrationDelete) {
@@ -117,7 +144,29 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   return (
     <>
       <KibanaPageTemplate restrictWidth={PAGE_RESTRICT_WIDTH}>
-        <KibanaPageTemplate.Header pageTitle={pageTitle} />
+        <KibanaPageTemplate.Header
+          pageTitle={
+            <>
+              {showCreateBackLink && returnParams ? (
+                <>
+                  <SuppressChromeBackButton />
+                  <span css={{ display: 'block' }}>
+                    <EuiButtonEmpty
+                      iconType="chevronSingleLeft"
+                      size="xs"
+                      flush="left"
+                      onClick={handleCreateBackLink}
+                      data-test-subj="automaticImportCreateBackLink"
+                    >
+                      {getCreateBackLinkLabel()}
+                    </EuiButtonEmpty>
+                  </span>
+                </>
+              ) : null}
+              {pageTitle}
+            </>
+          }
+        />
         <KibanaPageTemplate.Section>
           <ConnectorSelector />
           <ManagementContents onDataStreamReanalyzeSuccess={handleDataStreamReanalyzeSuccess} />
@@ -167,10 +216,16 @@ export const IntegrationManagement = React.memo(() => {
 
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
+  const { data: connectors, isLoading: isLoadingConnectors } = useAiConnectors();
   const { reportCancelButtonClicked, sessionId } = useTelemetry();
   const { telemetry } = services;
+  const { canCreateIntegration, canEditIntegration } = useAuthorization();
+  const hasRequiredPrivilege = integrationId ? canEditIntegration : canCreateIntegration;
 
   useEffect(() => {
+    if (!hasRequiredPrivilege) {
+      return;
+    }
     if (integrationId) {
       telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditIntegrationPageLoaded, {
         sessionId,
@@ -181,7 +236,7 @@ export const IntegrationManagement = React.memo(() => {
         sessionId,
       });
     }
-  }, [telemetry, sessionId, integrationId]);
+  }, [telemetry, sessionId, integrationId, hasRequiredPrivilege]);
   const { createUpdateIntegrationMutation } = useCreateUpdateIntegration();
 
   const integrationsHomeHref = useMemo(
@@ -201,14 +256,18 @@ export const IntegrationManagement = React.memo(() => {
   const initialFormData = useMemo(() => {
     if (!integration) return undefined;
 
+    const { connectorId = '' } = integration;
+    const isConnectorMissing =
+      connectors !== undefined && !connectors.some(({ id }) => id === connectorId);
+
     return {
       integrationId: integration.integrationId,
       title: integration.title,
       description: integration.description,
       logo: integration.logo,
-      connectorId: integration.connectorId ?? '',
+      connectorId: isConnectorMissing ? '' : connectorId,
     };
-  }, [integration]);
+  }, [integration, connectors]);
 
   const handleSubmit = useCallback(
     async (data: IntegrationFormData) => {
@@ -250,8 +309,24 @@ export const IntegrationManagement = React.memo(() => {
     );
   }
 
+  if (!hasRequiredPrivilege) {
+    return (
+      <EuiEmptyPrompt
+        iconType="lock"
+        title={<h2>{i18n.INSUFFICIENT_PRIVILEGES_TITLE}</h2>}
+        body={<p>{i18n.INSUFFICIENT_PRIVILEGES_DESCRIPTION}</p>}
+        data-test-subj="automaticImportInsufficientPrivileges"
+        actions={
+          <EuiButton color="primary" fill onClick={navigateToManage}>
+            {i18n.GO_BACK_BUTTON}
+          </EuiButton>
+        }
+      />
+    );
+  }
+
   // Loading state when fetching existing integration
-  if (integrationId && isLoading) {
+  if (integrationId && (isLoading || isLoadingConnectors)) {
     return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />;
   }
 

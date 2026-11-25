@@ -20,6 +20,7 @@ import {
   testIndexName,
   testIndexMappings,
   testUserStartPrivilegesResponse,
+  testIndexDocumentsSampleResponse,
 } from '../../../../../../../__jest__/client_integration/index_details_page/mocks';
 
 jest.mock('@kbn/code-editor');
@@ -84,7 +85,8 @@ describe('DetailsPageOverview', () => {
       indexDetails?: Index;
       sampleDocuments?: SearchHit[];
       isDocumentsLoading?: boolean;
-      documentsError?: unknown;
+      documentsError?: { message?: string } | null;
+      onRefreshDocuments?: () => void;
       appDeps?: Record<string, unknown>;
     } = {}
   ) => {
@@ -92,7 +94,8 @@ describe('DetailsPageOverview', () => {
       indexDetails: overrides.indexDetails ?? testIndexMock,
       sampleDocuments: overrides.sampleDocuments ?? [],
       isDocumentsLoading: overrides.isDocumentsLoading ?? false,
-      documentsError: overrides.documentsError ?? undefined,
+      documentsError: overrides.documentsError ?? null,
+      onRefreshDocuments: overrides.onRefreshDocuments ?? jest.fn(),
     };
 
     const Comp = WithAppDependencies(() => <DetailsPageOverview {...defaultProps} />, httpSetup, {
@@ -227,6 +230,82 @@ describe('DetailsPageOverview', () => {
       await waitFor(() => {
         expect(screen.getByTestId('updateElserMappingsModal')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Data preview', () => {
+    const sampleDocuments = testIndexDocumentsSampleResponse.results as SearchHit[];
+
+    it('does not render when there are no documents', async () => {
+      renderComponent();
+      await waitFor(() => {
+        expect(screen.getByText('Add data to this index')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('Data preview')).not.toBeInTheDocument();
+    });
+
+    it('renders sample documents and reloads them when Refresh is clicked', async () => {
+      const onRefreshDocuments = jest.fn();
+      renderComponent({ sampleDocuments, onRefreshDocuments });
+
+      await waitFor(() => {
+        expect(screen.getByText('Data preview')).toBeInTheDocument();
+      });
+
+      screen.getByTestId('indexDetailsDataPreviewRefreshButton').click();
+      expect(onRefreshDocuments).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the preview visible while documents are reloading', async () => {
+      renderComponent({ sampleDocuments, isDocumentsLoading: true });
+
+      await waitFor(() => {
+        expect(screen.getByText('Data preview')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('indexDetailsDataPreviewProgress')).toBeInTheDocument();
+      expect(screen.getByTestId('indexDetailsDataPreviewRefreshButton')).toBeDisabled();
+      expect(screen.queryByTestId('indexDetailsDataPreviewError')).not.toBeInTheDocument();
+    });
+
+    it('shows a stale-data banner and keeps the documents when refresh fails', async () => {
+      renderComponent({
+        sampleDocuments,
+        documentsError: { message: 'Connection refused' },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('indexDetailsDataPreviewError')).toBeInTheDocument();
+      });
+      expect(screen.getByText('Unable to load documents')).toBeInTheDocument();
+      expect(
+        screen.getByText('Data preview may show stale data. Connection refused')
+      ).toBeInTheDocument();
+      expect(screen.getByText('Data preview')).toBeInTheDocument();
+    });
+
+    it('shows an error banner when the initial load fails', async () => {
+      renderComponent({ documentsError: { message: 'Index not found' } });
+
+      await waitFor(() => {
+        expect(screen.getByText('Add data to this index')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('indexDetailsDataPreviewError')).toBeInTheDocument();
+      expect(screen.getByText('Unable to load documents')).toBeInTheDocument();
+      expect(screen.getByText('Index not found')).toBeInTheDocument();
+    });
+
+    it('shows the progress bar instead of the error banner while a failed load retries', async () => {
+      renderComponent({
+        sampleDocuments,
+        isDocumentsLoading: true,
+        documentsError: { message: 'Connection refused' },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('indexDetailsDataPreviewProgress')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('indexDetailsDataPreviewError')).not.toBeInTheDocument();
+      expect(screen.getByText('Data preview')).toBeInTheDocument();
     });
   });
 });

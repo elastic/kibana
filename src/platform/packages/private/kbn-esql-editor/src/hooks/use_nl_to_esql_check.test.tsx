@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useNlToEsqlCheck } from './use_nl_to_esql_check';
+import { clearNlToEsqlLicenseCache, useNlToEsqlCheck } from './use_nl_to_esql_check';
 
 describe('useNlToEsqlCheck', () => {
   const coreStart = coreMock.createStart();
@@ -29,7 +29,7 @@ describe('useNlToEsqlCheck', () => {
   const getLicenseMock = jest.fn();
 
   const createWrapper =
-    (esqlService?: { getLicense: typeof getLicenseMock }) =>
+    (esqlService?: { getLicense: typeof getLicenseMock; isInferenceAvailable?: boolean }) =>
     ({ children }: { children: React.ReactNode }) =>
       (
         <KibanaContextProvider services={{ core: coreStart, esql: esqlService }}>
@@ -39,6 +39,7 @@ describe('useNlToEsqlCheck', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearNlToEsqlLicenseCache();
     getLicenseMock.mockResolvedValue(validLicense);
   });
 
@@ -51,9 +52,20 @@ describe('useNlToEsqlCheck', () => {
     expect(getLicenseMock).not.toHaveBeenCalled();
   });
 
-  it('should return true when license is enterprise', async () => {
+  it('should return false when inference is unavailable', async () => {
     const { result } = renderHook(() => useNlToEsqlCheck(), {
-      wrapper: createWrapper({ getLicense: getLicenseMock }),
+      wrapper: createWrapper({ getLicense: getLicenseMock, isInferenceAvailable: false }),
+    });
+
+    await act(async () => {});
+
+    expect(result.current).toBe(false);
+    expect(getLicenseMock).not.toHaveBeenCalled();
+  });
+
+  it('should return true when license is enterprise and inference is available', async () => {
+    const { result } = renderHook(() => useNlToEsqlCheck(), {
+      wrapper: createWrapper({ getLicense: getLicenseMock, isInferenceAvailable: true }),
     });
 
     await act(async () => {});
@@ -66,11 +78,23 @@ describe('useNlToEsqlCheck', () => {
     getLicenseMock.mockResolvedValue(invalidLicense);
 
     const { result } = renderHook(() => useNlToEsqlCheck(), {
-      wrapper: createWrapper({ getLicense: getLicenseMock }),
+      wrapper: createWrapper({ getLicense: getLicenseMock, isInferenceAvailable: true }),
     });
 
     await act(async () => {});
 
     expect(result.current).toBe(false);
+  });
+
+  it('reuses the license result for the next editor', async () => {
+    const wrapper = createWrapper({ getLicense: getLicenseMock, isInferenceAvailable: true });
+    const first = renderHook(() => useNlToEsqlCheck(), { wrapper });
+
+    await act(async () => {});
+    expect(first.result.current).toBe(true);
+
+    const second = renderHook(() => useNlToEsqlCheck(), { wrapper });
+    expect(second.result.current).toBe(true);
+    expect(getLicenseMock).toHaveBeenCalledTimes(1);
   });
 });

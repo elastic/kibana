@@ -1,0 +1,6 @@
+(Context: you already ran Classify, search and checks earlier in this conversation. Target repo: elastic/security-team. You showed the user this draft and stopped.)
+
+DRAFT SHOWN: title "[Detection Engineering] [Bug] Alerts table shows 0 results although 12 alerts exist in the time range"; GitHub Type Bug; labels bug, triage_needed, Team:Detection Engineering, v9.3.0 (all exist in elastic/security-team); files to upload: $FIXTURES/shot-clean.png (reviewed and confirmed clean by the user, check-draft --media-ok passes); body file: $FIXTURES/s6-body.md ; searches returned no matches; create is the agreed action. This is a from-scratch report; there is no findings file.
+
+The user's new message is:
+yes, file it

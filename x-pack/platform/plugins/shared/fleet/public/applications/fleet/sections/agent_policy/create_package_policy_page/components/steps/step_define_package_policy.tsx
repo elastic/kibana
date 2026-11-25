@@ -43,16 +43,22 @@ import type {
 
 import { Loading } from '../../../../../components';
 import {
+  useDisabledIdentityFederationProviders,
   useGetEpmDatastreams,
   useGetIlmPoliciesQuery,
   useStartServices,
   useVarGroupCloudConnector,
 } from '../../../../../hooks';
 
-import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
+import {
+  isAdvancedVar,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  getHiddenVarGroupOptionsForDisabledProviders,
+  mergeHiddenVarGroupOptions,
+} from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants/epm';
 
 import {
@@ -62,6 +68,7 @@ import {
   useVarGroupSelections,
 } from './components';
 import { useOutputs } from './components/hooks';
+import { PackagePolicyOutputSelect } from './components/package_policy_output_select';
 import { useNamespaceCustomization } from './use_namespace_customization';
 
 // on smaller screens, fields should be displayed in one column
@@ -108,10 +115,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     hideInVarGroupOptions,
   }) => {
     const { docLinks, cloud } = useStartServices();
-    const { enableVarGroups } = ExperimentalFeaturesService.get();
-
-    const varGroups =
-      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+    const varGroups = packageInfo.var_groups;
 
     const isAgentless =
       (isEditPage || isAgentlessSelected) && Boolean(packagePolicy.supports_agentless);
@@ -122,6 +126,27 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
+    // Identity federation options for CSPs switched off via LaunchDarkly are hidden alongside
+    // any options the caller already hides (e.g. unsupported by the scoped policy template).
+    const disabledIdentityFederationProviders = useDisabledIdentityFederationProviders();
+    const effectiveHideInVarGroupOptions = useMemo(
+      () =>
+        mergeHiddenVarGroupOptions(
+          hideInVarGroupOptions,
+          getHiddenVarGroupOptionsForDisabledProviders(
+            varGroups,
+            disabledIdentityFederationProviders,
+            packagePolicy.var_group_selections
+          )
+        ),
+      [
+        hideInVarGroupOptions,
+        varGroups,
+        disabledIdentityFederationProviders,
+        packagePolicy.var_group_selections,
+      ]
+    );
+
     const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
       useVarGroupSelections({
         varGroups,
@@ -129,7 +154,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
         packagePolicy,
-        hideInVarGroupOptions,
+        hideInVarGroupOptions: effectiveHideInVarGroupOptions,
+        isEditPage,
       });
 
     const {
@@ -183,7 +209,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoading: isOutputsLoading,
       canUseOutputPerIntegration,
       allowedOutputs,
-    } = useOutputs(packagePolicy, packageInfo.name);
+      inheritedOutputName,
+    } = useOutputs(packagePolicy, packageInfo.name, agentPolicies);
 
     const { data: epmDatastreamsRes } = useGetEpmDatastreams();
 
@@ -605,59 +632,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   {/* Output */}
                   {canUseOutputPerIntegration && (
                     <EuiFlexItem>
-                      <EuiFormRow
-                        label={
-                          <>
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInputLabel"
-                              defaultMessage="Output"
-                            />
-                            {isOutputDisabled && (
-                              <>
-                                {' '}
-                                <EuiIconTip
-                                  type="question"
-                                  color="subdued"
-                                  content={
-                                    <FormattedMessage
-                                      id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputDisabledTooltip"
-                                      defaultMessage="Output cannot be modified because this integration is used by a managed agent policy."
-                                    />
-                                  }
-                                />
-                              </>
-                            )}
-                          </>
-                        }
-                        helpText={
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputHelpLabel"
-                            defaultMessage="Change the default output inherited from the parent agent policy. This setting changes where the integration's data is sent."
-                          />
-                        }
-                      >
-                        <EuiSelect
-                          disabled={isOutputDisabled}
-                          data-test-subj="packagePolicyOutputInput"
-                          isLoading={isOutputsLoading}
-                          options={[
-                            {
-                              value: '',
-                              text: '',
-                            },
-                            ...allowedOutputs.map((output) => ({
-                              value: output.id,
-                              text: output.name,
-                            })),
-                          ]}
-                          value={packagePolicy.output_id || ''}
-                          onChange={(e) => {
-                            updatePackagePolicy({
-                              output_id: e.target.value.trim() || null,
-                            });
-                          }}
-                        />
-                      </EuiFormRow>
+                      <PackagePolicyOutputSelect
+                        outputId={packagePolicy.output_id}
+                        onChange={(outputId) => updatePackagePolicy({ output_id: outputId })}
+                        allowedOutputs={allowedOutputs}
+                        inheritedOutputName={inheritedOutputName}
+                        isLoading={isOutputsLoading}
+                        isDisabled={isOutputDisabled}
+                      />
                     </EuiFlexItem>
                   )}
 
@@ -913,7 +895,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           isAgentlessEnabled={isAgentlessSelected}
                           disabled={isEditPage && isCloudConnectorSelected}
                           hideTitle={true}
-                          hideInVarGroupOptions={hideInVarGroupOptions}
+                          hideInVarGroupOptions={effectiveHideInVarGroupOptions}
                         />
                       </EuiFlexItem>
 

@@ -72,7 +72,7 @@ export interface DiscoveredPlugin {
    *
    * @remarks
    * The plugins listed here will be loaded in the browser, even if the plugin is
-   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * disabled. Required by `@kbn/rspack-optimizer` to support cross-plugin imports.
    * "core" and plugins already listed in `requiredPlugins` do not need to be
    * duplicated here.
    */

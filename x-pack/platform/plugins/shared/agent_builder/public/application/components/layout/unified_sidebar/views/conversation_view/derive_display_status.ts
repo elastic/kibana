@@ -10,14 +10,10 @@ import { ConversationDisplayStatus, ConversationRoundStatus } from '@kbn/agent-b
 export const deriveDisplayStatus = (
   conversation: { read?: boolean; status?: ConversationRoundStatus },
   isStreaming: boolean,
-  hasError: boolean,
   isActive: boolean
 ): ConversationDisplayStatus | undefined => {
   if (isStreaming || conversation.status === ConversationRoundStatus.inProgress) {
     return ConversationDisplayStatus.inProgress;
-  }
-  if (hasError) {
-    return ConversationDisplayStatus.error;
   }
   if (conversation.status === ConversationRoundStatus.awaitingPrompt) {
     return ConversationDisplayStatus.awaitingPrompt;
@@ -25,5 +21,5 @@ export const deriveDisplayStatus = (
   if (conversation.read === false && !isActive) {
     return ConversationDisplayStatus.unread;
   }
-  return undefined;
+  return isActive ? undefined : ConversationDisplayStatus.read;
 };

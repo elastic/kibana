@@ -78,6 +78,9 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
       malware: {
         quarantine: null,
       },
+      ransomware: {
+        diagnostic: null,
+      },
       memory_protection: {
         memory_scan_collect_sample: null,
         memory_scan: null,

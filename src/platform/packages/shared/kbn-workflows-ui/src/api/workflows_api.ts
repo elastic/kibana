@@ -34,6 +34,7 @@ import type { z } from '@kbn/zod/v4';
 import type {
   BulkCreateWorkflowsParams,
   BulkCreateWorkflowsResponse,
+  BulkDeleteWorkflowsResponse,
   CheckWorkflowIdConflictsParams,
   CheckWorkflowIdConflictsResponse,
   ExportWorkflowsParams,
@@ -43,12 +44,15 @@ import type {
   GetCatalogResponse,
   GetExecutionLogsParams,
   GetExecutionParams,
+  GetExecutionStepsParams,
   GetLibraryHealthResponse,
+  GetLinkedRulesResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
   InstallTemplateResponse,
   MgetWorkflowsParams,
+  ReadableWorkflowIdsResponse,
   RestoreWorkflowVersionParams,
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
@@ -62,6 +66,7 @@ import type {
   WorkflowExecutionLogsResponse,
   WorkflowsConfig,
 } from './types';
+import type { WorkflowsCreateRouteTemplate } from '../navigation/create_route_state';
 
 const BASE = '/api/workflows';
 const INTERNAL_BASE = '/internal/workflows';
@@ -126,7 +131,7 @@ export class WorkflowApi {
     });
   }
 
-  async bulkDeleteWorkflows(ids: string[]): Promise<void> {
+  async bulkDeleteWorkflows(ids: string[]): Promise<BulkDeleteWorkflowsResponse> {
     return this.http.delete(BASE, {
       body: JSON.stringify({ ids }),
       version: API_VERSION,
@@ -274,6 +279,16 @@ export class WorkflowApi {
     });
   }
 
+  async getExecutionSteps(
+    executionId: string,
+    params?: GetExecutionStepsParams
+  ): Promise<WorkflowStepExecutionListDto> {
+    return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/steps`, {
+      query: params as HttpFetchQuery,
+      version: API_VERSION,
+    });
+  }
+
   async cancelExecution(executionId: string): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/cancel`, {
       version: API_VERSION,
@@ -298,9 +313,15 @@ export class WorkflowApi {
     );
   }
 
-  async resumeExecution(executionId: string, { input }: ResumeExecutionParams): Promise<void> {
+  async resumeExecution(
+    executionId: string,
+    { input, stepExecutionId }: ResumeExecutionParams
+  ): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/resume`, {
-      body: JSON.stringify({ input }),
+      body: JSON.stringify({
+        input,
+        ...(stepExecutionId ? { stepExecutionId } : {}),
+      }),
       version: API_VERSION,
     });
   }
@@ -331,6 +352,12 @@ export class WorkflowApi {
     });
   }
 
+  async getReadableWorkflowIds(): Promise<ReadableWorkflowIdsResponse> {
+    return this.http.get(`${INTERNAL_BASE}/readable_workflow_ids`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   async searchTriggerEvents(
     params: SearchTriggerEventLogParams
   ): Promise<SearchTriggerEventLogResult> {
@@ -340,8 +367,15 @@ export class WorkflowApi {
     });
   }
 
+  async getLinkedRules(ids: string[]): Promise<GetLinkedRulesResponse> {
+    return this.http.post(`${INTERNAL_BASE}/_linked_rules`, {
+      body: JSON.stringify({ ids }),
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   // ---------------------------------------------------------------------------
-  // Workflow Template Library
+  // Workflow Template library
   // ---------------------------------------------------------------------------
 
   async getCatalog(params: GetCatalogParams = {}): Promise<GetCatalogResponse> {
@@ -388,6 +422,26 @@ export class WorkflowApi {
       body: JSON.stringify({ yaml, values }),
       version: INTERNAL_API_VERSION,
     });
+  }
+
+  /**
+   * Creates a workflow from YAML edited after "Remix with AI", recording the
+   * template it started from.
+   */
+  async createWorkflowFromTemplateRemix({
+    yaml,
+    template,
+  }: {
+    yaml: string;
+    template: WorkflowsCreateRouteTemplate;
+  }): Promise<WorkflowDetailDto> {
+    return this.http.post(
+      `${INTERNAL_BASE}/library/templates/${encodeURIComponent(template.slug)}/remix`,
+      {
+        body: JSON.stringify({ yaml, version: template.version }),
+        version: INTERNAL_API_VERSION,
+      }
+    );
   }
 
   async restoreWorkflowVersion(

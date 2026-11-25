@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import { type Error } from '@kbn/apm-types';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { compactMap } from '../../utils/compact_map';
+import { createApmEventFieldsAccessor } from '../../utils/create_apm_event_fields_accessor';
 import {
   ID,
   ERROR_CULPRIT,
@@ -35,18 +37,23 @@ import { RollupInterval } from '../../../common/rollup';
 
 export async function getApmTraceError(params: {
   apmEventClient: APMEventClient;
+  logger: Logger;
   traceId: string;
   docId?: string;
   start: number;
   end: number;
 }) {
+  const { logger } = params;
   const response = await getApmTraceErrorQuery(params);
+
+  // Error documents can be OTel-native or partial/legacy APM docs that do not always populate
+  // every required field. Skipping a malformed hit keeps the whole request from failing with a
+  // 500.
+  const accessor = createApmEventFieldsAccessor({ logger, operation: 'get_apm_trace_error' });
 
   return compactMap(response.hits.hits, (hit): Error | undefined => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
-    const event = hit.fields
-      ? accessKnownApmEventFields(hit.fields).requireFields(requiredFields)
-      : undefined;
+    const event = accessor.tryAccess(hit, requiredFields);
 
     if (!event) {
       return undefined;
@@ -54,8 +61,16 @@ export async function getApmTraceError(params: {
 
     const { _id: id, parent, error, ...unflattened } = event.unflatten();
 
+    // `error.id` is not guaranteed to be present on every error document in the error index
+    // (e.g. OTel-native exception/error events). Skip such documents instead of throwing so a
+    // single error doc without `error.id` cannot fail the entire trace request with a 500.
+    if (!error?.id) {
+      return undefined;
+    }
+
     return {
       id,
+      source: 'apm' as const,
       parent: {
         id: parent?.id ?? unflattened.span?.id,
       },
@@ -83,17 +98,19 @@ const requiredFields = asMutableArray([
   TIMESTAMP_US,
   TRACE_ID,
   SERVICE_NAME,
-  ERROR_ID,
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   ID,
 ] as const);
 
+// `ERROR_ID` is optional: OTel-native exception/error events are not guaranteed to carry
+// `error.id`. Documents without it are skipped in the mapping above rather than throwing.
 const optionalFields = asMutableArray([
   PARENT_ID,
   TRANSACTION_ID,
   SPAN_ID,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  ERROR_ID,
   ERROR_CULPRIT,
   ERROR_LOG_MESSAGE,
   ERROR_EXC_MESSAGE,
@@ -102,6 +119,32 @@ const optionalFields = asMutableArray([
 ] as const);
 
 const excludedLogLevels = ['debug', 'info', 'warning'];
+
+// Waterfall items key errors by `span.id ?? transaction.id` (see `getErrorsByDocId`), so an error
+// carrying only a transaction ref belongs to the transaction doc. Mirroring that here keeps the
+// error badge count and the fetched errors in sync for classic APM transaction errors.
+function docIdQuery(docId?: string): QueryDslQueryContainer[] {
+  if (!docId) {
+    return [];
+  }
+
+  return [
+    {
+      bool: {
+        should: [
+          ...termQuery(SPAN_ID, docId),
+          {
+            bool: {
+              filter: termQuery(TRANSACTION_ID, docId),
+              must_not: { exists: { field: SPAN_ID } },
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+}
 
 function getApmTraceErrorQuery({
   apmEventClient,
@@ -129,11 +172,7 @@ function getApmTraceErrorQuery({
     size: 1000,
     query: {
       bool: {
-        filter: [
-          ...termQuery(TRACE_ID, traceId),
-          ...termQuery(SPAN_ID, docId),
-          ...rangeQuery(start, end),
-        ],
+        filter: [...termQuery(TRACE_ID, traceId), ...docIdQuery(docId), ...rangeQuery(start, end)],
         must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
     },

@@ -12,9 +12,6 @@ import {
   type EsqlViewDefinition,
 } from '../../lib/services/resource_service/esql_view_initializer';
 import type { ResourceManagerContract } from '../../lib/services/resource_service/resource_manager';
-import { getAlertEventsViewDefinition } from './alert_events';
-import { getAlertActionsViewDefinition } from './alert_actions';
-import { getAlertEpisodesViewDefinition } from './alert_episodes';
 
 export interface RegisterEsqlViewsOptions {
   resourceManager: ResourceManagerContract;
@@ -30,14 +27,10 @@ export function registerEsqlViews({
   for (const viewDefinition of getEsqlViewDefinitions()) {
     const initializer = new ESQLViewInitializer(logger, esClient, viewDefinition);
 
-    resourceManager.registerResource(viewDefinition.key, initializer, { optional: true });
+    resourceManager.registerResource(viewDefinition.key, initializer);
   }
 }
 
 function getEsqlViewDefinitions(): EsqlViewDefinition[] {
-  return [
-    getAlertEventsViewDefinition(),
-    getAlertActionsViewDefinition(),
-    getAlertEpisodesViewDefinition(),
-  ];
+  return [];
 }

@@ -11,6 +11,8 @@ applies_to:
 
 The OneDrive connector enables searching files and folders, browsing drives, reading file content, and listing files shared with you in Microsoft OneDrive.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-one-drive-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

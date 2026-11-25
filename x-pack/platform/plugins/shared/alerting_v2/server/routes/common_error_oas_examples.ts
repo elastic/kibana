@@ -45,7 +45,7 @@ export const getCommonErrorOasOperationObject = (): OASOperationObject => ({
       error: 'Internal Server Error',
       message: 'An unexpected error occurred.',
     }),
-    503: jsonExample('alertingDisabled', 'Alerting engine is disabled', {
+    503: jsonExample('alertingDisabled', 'Kibana Universal Alerting is disabled', {
       code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
       error: 'Service Unavailable',
       message: 'Alerting is disabled.',

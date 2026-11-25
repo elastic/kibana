@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import axios from 'axios';
+import type { ActionContext, AuthContext, AuthTypeDef } from '../../connector_spec';
+import { OAuthAuthorizationCode } from '../../auth_types/oauth_authorization_code';
 import { ZendeskConnector } from './zendesk';
 
 describe('ZendeskConnector', () => {
@@ -24,6 +26,37 @@ describe('ZendeskConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('auth', () => {
+    const findType = (type: string) =>
+      ZendeskConnector.auth?.types.find(
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === type
+      );
+
+    it('sends the client credentials in the token request body instead of a Basic header', async () => {
+      const defaults = findType('oauth_authorization_code')?.defaults;
+      const getToken = jest.fn().mockResolvedValue('Bearer access-token');
+      const ctx = {
+        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        getCustomHostSettings: () => undefined,
+        getToken,
+        proxySettings: undefined,
+        sslSettings: { verificationMode: 'full' as const },
+      } as unknown as AuthContext;
+
+      await OAuthAuthorizationCode.configure(ctx, axios.create(), {
+        authorizationUrl: 'https://test-company.zendesk.com/oauth/authorizations/new',
+        tokenUrl: 'https://test-company.zendesk.com/oauth/tokens',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        ...defaults,
+      });
+
+      expect(getToken).toHaveBeenCalledWith(
+        expect.objectContaining({ tokenEndpointAuthMethod: 'client_secret_post' })
+      );
+    });
   });
 
   describe('search action', () => {
@@ -55,7 +88,7 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets.json',
+        'https://test-company.zendesk.com/api/v2/tickets',
         expect.objectContaining({
           params: { page: 1, per_page: 25 },
         })
@@ -73,7 +106,7 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets/123.json',
+        'https://test-company.zendesk.com/api/v2/tickets/123',
         expect.objectContaining({
           params: { include: 'comment_count' },
         })
@@ -82,14 +115,14 @@ describe('ZendeskConnector', () => {
   });
 
   describe('whoAmI action', () => {
-    it('should call Zendesk users/me.json API', async () => {
+    it('should call Zendesk users/me API', async () => {
       const mockResponse = { data: { user: { id: 1, email: 'agent@test.com' } } };
       mockClient.get.mockResolvedValue(mockResponse);
 
       await ZendeskConnector.actions.whoAmI.handler(mockContext, {});
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/users/me.json'
+        'https://test-company.zendesk.com/api/v2/users/me'
       );
     });
   });
@@ -104,7 +137,7 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets/456/comments.json',
+        'https://test-company.zendesk.com/api/v2/tickets/456/comments',
         expect.objectContaining({
           params: {},
         })
@@ -124,7 +157,7 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets/789/comments.json',
+        'https://test-company.zendesk.com/api/v2/tickets/789/comments',
         expect.objectContaining({
           params: {
             page: 2,
@@ -144,13 +177,13 @@ describe('ZendeskConnector', () => {
   describe('test handler', () => {
     const testSpec = ZendeskConnector.test;
 
-    it('should call /users/me.json and return {}', async () => {
+    it('should call /users/me and return {}', async () => {
       mockClient.get.mockResolvedValue({ data: { user: { id: 1, name: 'Alice' } } });
 
       const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/users/me.json'
+        'https://test-company.zendesk.com/api/v2/users/me'
       );
       expect(result).toEqual({});
     });

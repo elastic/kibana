@@ -16,49 +16,20 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { initUiSettings } from './ui_settings';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
+  DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING,
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
-  ENABLE_NEW_FLYOUT_SETTING,
 } from '../common/constants';
 
 describe('initUiSettings', () => {
   let mockUiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
   const mockExperimentalFeatures = {
-    enableAlertsAndAttacksAlignment: false,
     extendedRuleExecutionLoggingEnabled: false,
-    newFlyoutSystemDisabled: false,
     ruleChangesHistoryEnabled: false,
   } as ExperimentalFeatures;
 
   beforeEach(() => {
     mockUiSettings = coreMock.createSetup().uiSettings;
-  });
-
-  it('does NOT register ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING when feature flag is disabled', () => {
-    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).not.toHaveProperty(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
-  });
-
-  it('registers ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING when feature flag is enabled', () => {
-    const enabledFeatures = {
-      ...mockExperimentalFeatures,
-      enableAlertsAndAttacksAlignment: true,
-    };
-
-    initUiSettings(mockUiSettings, enabledFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).toHaveProperty(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
-    expect(registeredSettings[ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]).toEqual(
-      expect.objectContaining({
-        name: 'Enable alerts and attacks alignment',
-        value: true,
-        type: 'boolean',
-      })
-    );
   });
 
   it('registers ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING synchronously', () => {
@@ -82,18 +53,7 @@ describe('initUiSettings', () => {
     expect(registeredSettings[ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING].readonly).toBeUndefined();
   });
 
-  it('positions ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING immediately after ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING when alignment is enabled', () => {
-    const enabledFeatures = { ...mockExperimentalFeatures, enableAlertsAndAttacksAlignment: true };
-
-    initUiSettings(mockUiSettings, enabledFeatures, false);
-
-    const keys = Object.keys((mockUiSettings.register as jest.Mock).mock.calls[0][0]);
-    expect(keys.indexOf(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING)).toBe(
-      keys.indexOf(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) + 1
-    );
-  });
-
-  it('positions ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING immediately before ENABLE_ASSET_INVENTORY_SETTING when alignment is disabled', () => {
+  it('positions ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING immediately before ENABLE_ASSET_INVENTORY_SETTING', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
 
     const keys = Object.keys((mockUiSettings.register as jest.Mock).mock.calls[0][0]);
@@ -143,30 +103,36 @@ describe('initUiSettings', () => {
     );
   });
 
-  it('registers ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is disabled', () => {
-    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
+  it('registers the universal troubleshooting skill setting as readonly in the UI when enabled', () => {
+    initUiSettings(
+      mockUiSettings,
+      { ...mockExperimentalFeatures, automaticTroubleshootingUniversalSkill: true },
+      false
+    );
 
     const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
-    expect(registeredSettings[ENABLE_NEW_FLYOUT_SETTING]).toEqual(
+    expect(
+      registeredSettings[DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING]
+    ).toEqual(
       expect.objectContaining({
-        name: 'Enable new flyout',
         value: true,
         type: 'boolean',
-        requiresPageReload: true,
+        readonly: true,
+        readonlyMode: 'ui',
       })
     );
   });
 
-  it('does NOT register ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is enabled', () => {
-    const disabledFeatures = {
-      ...mockExperimentalFeatures,
-      newFlyoutSystemDisabled: true,
-    };
-
-    initUiSettings(mockUiSettings, disabledFeatures, false);
+  it('does not register the universal troubleshooting skill setting when disabled', () => {
+    initUiSettings(
+      mockUiSettings,
+      { ...mockExperimentalFeatures, automaticTroubleshootingUniversalSkill: false },
+      false
+    );
 
     const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).not.toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
+    expect(registeredSettings).not.toHaveProperty(
+      DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING
+    );
   });
 });

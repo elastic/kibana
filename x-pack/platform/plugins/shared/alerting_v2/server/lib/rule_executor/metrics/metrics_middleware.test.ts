@@ -191,9 +191,13 @@ describe('MetricsMiddleware', () => {
     const results = await collectStreamResults(output);
     expect(results).toEqual([{ type: 'continue', state }]);
     expect(ok).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('recorder "boom" failed at step "step1"'),
-      { labels: { code: ALERTING_LOG_CODES.RULE_EXECUTION_METRICS_RECORDER_FAILED } }
-    );
+    expect(mockLogger.warn).toHaveBeenCalledWith('Metrics recorder failed', {
+      labels: {
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_METRICS_RECORDER_FAILED,
+        step: 'step1',
+        resource: 'boom',
+      },
+      error: expect.objectContaining({ message: 'recorder failure' }),
+    });
   });
 });

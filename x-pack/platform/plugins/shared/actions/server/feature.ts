@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -60,6 +61,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
       savedObject: {
         all: [
           ACTION_SAVED_OBJECT_TYPE,
+          CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
           ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
           OAUTH_STATE_SAVED_OBJECT_TYPE,

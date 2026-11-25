@@ -9,22 +9,27 @@ import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { CaseSeverity, UserActionTypes, CaseSchema } from '../../../common/types/domain';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import { resolveExtractObservables } from '../../../common/utils/case_settings';
+import type { CaseCreateAttributes } from '../../common/types/case';
+import { getExtractObservablesSource } from '../../common/extract_observables_source';
 import type { CasePostRequest } from '../../../common/types/api';
-import { CasePostRequestRt } from '../../../common/types/api';
+import { CasePostRequestSchema } from '../../../common/types/api';
 import {
   validateCustomFieldsStructure,
   validateRequiredCustomFields,
-  resolveGlobalFields,
+  resolveGlobalFieldsWithoutStaleMirrorRequired,
   validateCaseExtendedFields,
+  validateRequiredGlobalFields,
 } from './validators';
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
@@ -51,6 +56,11 @@ import {
   ensureTemplateVersionIsPinned,
   resolveTemplateForCreate,
 } from './expand_template_defaults';
+import {
+  CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
+  CREATE_CASE_WITH_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 
 /**
  * Creates a new case.
@@ -76,7 +86,7 @@ export const create = async (
   } = clientArgs;
 
   try {
-    const rawQuery = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const rawQuery = decodeWithExcessOrThrowZod(CasePostRequestSchema)(data);
     let query = emptyCaseAssigneesSanitizer(rawQuery);
     const configurations = await casesClient.configure.get({ owner: data.owner });
     const customFieldsConfiguration = configurations[0]?.customFields;
@@ -103,6 +113,14 @@ export const create = async (
       });
     }
 
+    // Only a value the caller sent is rejected. Values from a template, the space configuration
+    // or the owner default are coerced to false below, so stored data never causes a 400.
+    // Runs after authorization and before any template read or write.
+    assertCanStoreExtractObservables({
+      owner: query.owner,
+      extractObservables: query.settings.extractObservables,
+    });
+
     // Expand the template's case defaults and extended_fields defaults into the request
     // (caller-wins), and pin the resolved template version. Runs AFTER the createCase
     // authorization so the unsecured template read never becomes an existence oracle for
@@ -113,6 +131,8 @@ export const create = async (
     // point-in-time name) the case was created from. Field values that differ from defaults are
     // audited separately; the create_case user action itself does not carry template or fields.
     let appliedTemplateName: string | undefined;
+    // The template's own `settings.extractObservables`, used as the baseline for the source.
+    let templateExtractObservables: boolean | undefined;
     // Resolved lazily and reused: template expansion needs it to decide whether to apply template
     // assignees, and the license-enforcement block below needs it again — resolve at most once.
     let hasPlatinumLicenseOrGreater: boolean | undefined;
@@ -130,6 +150,7 @@ export const create = async (
         fieldDefinitionsService,
       });
       appliedTemplateName = resolvedTemplate.parsed.name;
+      templateExtractObservables = resolvedTemplate.parsed.definition.settings?.extractObservables;
 
       const callerSentAssignees = query.assignees !== undefined;
 
@@ -143,7 +164,7 @@ export const create = async (
       // The initial decode validated the raw request; template defaults are merged in afterwards
       // and a template's definition tags are unbounded, so re-decode the expanded request to
       // enforce the wire limits (e.g. MAX_TAGS_PER_CASE) on the merged result.
-      query = decodeWithExcessOrThrow(CasePostRequestRt)(query);
+      query = decodeWithExcessOrThrowZod(CasePostRequestSchema)(query);
       resolvedTemplateFields = resolvedTemplate.resolvedFields;
 
       // The assignees authorization above ran against the raw request; if the template just
@@ -155,6 +176,37 @@ export const create = async (
         });
       }
     }
+
+    // The value the case gets when nobody chooses: the space configuration, then the owner default.
+    const defaultExtractObservables = resolveExtractObservables(
+      query.owner,
+      configurations[0]?.extractObservables
+    );
+
+    // Where the extractObservables value came from. A caller value that equals the template or the
+    // space default is not a choice: the create form always sends it. Stored as a server-owned
+    // top-level attribute, so it never enters the request, the response, or the user action payload.
+    const extractObservablesSource = getExtractObservablesSource({
+      chosenValue: rawQuery.settings.extractObservables,
+      chosenSource: 'explicit',
+      templateValue: templateExtractObservables,
+      defaultValue: defaultExtractObservables,
+    });
+
+    // Resolve the final extractObservables value.
+    // Precedence: caller-explicit > template definition > space config > owner default > false.
+    // An owner that cannot store true always gets false, so an inherited true never reaches the
+    // write (a caller-sent true was already rejected above).
+    query = {
+      ...query,
+      settings: {
+        ...query.settings,
+        extractObservables: resolveExtractObservables(
+          query.owner,
+          query.settings.extractObservables ?? configurations[0]?.extractObservables
+        ),
+      },
+    };
 
     // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
     // before submission, so UI-created cases persist them — but API and workflow-step callers
@@ -176,11 +228,17 @@ export const create = async (
     // exists, defeating the point of this flag.
     const hadExtendedFieldsBeforeDefaults = query.extended_fields !== undefined;
     let globalFields: InlineField[] | undefined;
+    const resolveGlobals = (owner: string) =>
+      resolveGlobalFieldsWithoutStaleMirrorRequired(
+        owner,
+        fieldDefinitionsService,
+        customFieldsConfiguration
+      );
     // Hoisted for create-time Activity filtering: compare persisted fields against the same
     // template ∪ global default baseline used for injection (global wins on key collision).
     let globalFieldsDefaults: Record<string, string> = {};
     if (clientArgs.config.templates.enabled) {
-      globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      globalFields = await resolveGlobals(query.owner);
       globalFieldsDefaults = Object.fromEntries(
         // A field without a default produces '' — writing that adds no information and, for a
         // required field, would immediately fail its own validation. Only inject real defaults.
@@ -289,8 +347,7 @@ export const create = async (
     });
 
     if (normalizedCase.extended_fields) {
-      globalFields =
-        globalFields ?? (await resolveGlobalFields(query.owner, fieldDefinitionsService));
+      globalFields = globalFields ?? (await resolveGlobals(query.owner));
       await validateCaseExtendedFields({
         extendedFields: normalizedCase.extended_fields,
         templateId: query.template?.id,
@@ -303,10 +360,27 @@ export const create = async (
       });
     }
 
-    const attributes = transformNewCase({
-      user,
-      newCase: normalizedCase,
-    });
+    // v1-parity `required` enforcement: a required global field with no default and no value
+    // fails the create with a 400, exactly like a required v1 custom field does through
+    // validateRequiredCustomFields. Runs AFTER defaults injection and pairing so the map is
+    // the one that will be persisted — a linked customFields value (or a v1 configuration
+    // defaultValue pairing copied across) satisfies the global field. Must run even when
+    // extended_fields is absent: that is the no-value path this check exists to reject.
+    if (clientArgs.config.templates.enabled) {
+      globalFields = globalFields ?? (await resolveGlobals(query.owner));
+      validateRequiredGlobalFields({
+        globalFields,
+        extendedFields: normalizedCase.extended_fields ?? {},
+      });
+    }
+
+    const attributes: CaseCreateAttributes = {
+      ...transformNewCase({
+        user,
+        newCase: normalizedCase,
+      }),
+      extract_observables_source: extractObservablesSource,
+    };
 
     // Server-derived assignee identity: resolve profile uids to username /
     // full_name / email so downstream consumers (e.g. cases-as-data analytics)
@@ -346,7 +420,7 @@ export const create = async (
     });
 
     // The create_case user action payload does not carry `template` or `extended_fields`
-    // (CreateCaseUserActionRt strips them), so dedicated entries are needed for the activity log
+    // (CreateCaseUserActionSchema strips them), so dedicated entries are needed for the activity log
     // to reflect what was actually persisted: which template (if any) the case came from, and
     // which extended_fields values differ from resolved defaults. Pairing and default injection
     // both run independently of the templates flag (addendum A1), so this must too — a plain
@@ -422,12 +496,21 @@ export const create = async (
       });
     }
 
-    if (query.template?.id) {
+    // Bucketed on what was persisted, not on the request, so this reads the same way as the bulk
+    // path and stays true if template pinning ever stops mirroring the request one-for-one.
+    const persistedTemplateId = newCase.attributes.template?.id;
+
+    incrementCasesClientCounter(
+      clientArgs,
+      persistedTemplateId ? CREATE_CASE_WITH_TEMPLATE_COUNTER : CREATE_CASE_WITHOUT_TEMPLATE_COUNTER
+    );
+
+    if (persistedTemplateId) {
       try {
-        await templatesService.incrementUsageStats(query.template.id);
+        await templatesService.incrementUsageStats(persistedTemplateId);
       } catch (error) {
         logger.warn(
-          `Failed to update template usage stats for template ${query.template.id}: ${error}`
+          `Failed to update template usage stats for template ${persistedTemplateId}: ${error}`
         );
       }
     }
@@ -436,7 +519,7 @@ export const create = async (
       savedObject: newCase,
     });
 
-    const createdCase = decodeOrThrow(CaseRt)(res);
+    const createdCase = decodeOrThrowZod(CaseSchema)(res);
 
     clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
       caseId: createdCase.id,

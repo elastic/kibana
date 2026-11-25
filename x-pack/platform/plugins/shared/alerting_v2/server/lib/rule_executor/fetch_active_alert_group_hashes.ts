@@ -12,10 +12,11 @@ import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from './que
 export async function fetchActiveAlertGroupHashes(
   internalQueryService: QueryServiceContract,
   ruleId: string,
-  executionContext: ExecutionContext
+  executionContext: ExecutionContext,
+  limit: number
 ): Promise<ActiveAlertGroupHash[]> {
-  const request = getActiveAlertGroupHashesQuery({ ruleId }).toRequest();
-  return internalQueryService.executeQueryRows<ActiveAlertGroupHash>({
+  const request = getActiveAlertGroupHashesQuery({ ruleId, limit }).toRequest();
+  return internalQueryService.executeQuery<ActiveAlertGroupHash>({
     query: request.query,
     // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
     params: request.params,
