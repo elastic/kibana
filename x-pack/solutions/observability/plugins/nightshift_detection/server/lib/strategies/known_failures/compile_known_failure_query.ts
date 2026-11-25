@@ -8,7 +8,7 @@
 import { uniq } from 'lodash';
 import { Parser, Walker } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
-import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import { withAllProjectsRouting } from '@kbn/cps-server-utils';
 import { KNOWN_FAILURES_SETTINGS } from './constants';
 
 /** Commands that decide which lines a knowledge indicator matches. */
@@ -223,7 +223,7 @@ export function compileKnownFailureQuery({
   ]);
 
   // Elasticsearch rejects the setting when cross-project search is off, so it goes in only when on.
-  return cpsEnabled ? `SET project_routing="${PROJECT_ROUTING_ALL}";\n${query}` : query;
+  return cpsEnabled ? withAllProjectsRouting(query) : query;
 }
 
 /**
