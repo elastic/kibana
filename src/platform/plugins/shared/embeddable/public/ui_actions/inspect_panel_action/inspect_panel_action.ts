@@ -15,9 +15,10 @@ import type {
   HasParentApi,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
-import { apiHasUniqueId, getTitle } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import { apiHasUniqueId, apiPublishesPhaseEvents, getTitle } from '@kbn/presentation-publishing';
+import type { Action, FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { filter, map, take } from 'rxjs';
 import { inspector } from '../../kibana_services';
 import { EXPORT_ACTION_GROUP } from '../constants';
 import { ACTION_INSPECT_PANEL } from './constants';
@@ -27,7 +28,9 @@ const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
   return Boolean(api) && apiHasInspectorAdapters(api);
 };
 
-export class InspectPanelAction implements Action<EmbeddableApiContext> {
+export class InspectPanelAction
+  implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
+{
   public readonly type = ACTION_INSPECT_PANEL;
   public readonly id = ACTION_INSPECT_PANEL;
   public order = 19; // right after Explore in Discover which is 20
@@ -47,6 +50,28 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
     return inspector.isAvailable(embeddable.getInspectorAdapters());
+  }
+
+  /** Re-checks compatibility the first time the panel has rendered. */
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable) && apiPublishesPhaseEvents(embeddable)
+      ? embeddable.phase$.pipe(
+          // TODO: the render phase is only a proxy for "the adapters may have changed". Replace it
+          // by making `getInspectorAdapters` an observable (e.g. `inspectorAdapters$` on
+          // `HasInspectorAdapters`) and re-check when that emits.
+          filter((phase) => phase?.status === 'rendered'),
+          take(1),
+          map(() => undefined)
+        )
+      : undefined;
+  }
+
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return (
+      isApiCompatible(embeddable) &&
+      apiPublishesPhaseEvents(embeddable) &&
+      !inspector.isAvailable(embeddable.getInspectorAdapters())
+    );
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
