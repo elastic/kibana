@@ -234,14 +234,17 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
 
     const change = { id: 'fact-2', change: 'superseded', reason: 'Same' };
     const plan = { batch, changes: { merges: [] } };
+    const heldBack = { reason: 'Too many', changes: [change] };
     expect(
       renderWith(findStep(batchStepList, 'tally').with, {
         variables: {
           plans: [],
-          written: 1,
-          changes: [],
-          needs_review: [],
+          model_written: 1,
+          model_changes: [],
+          model_needs_review: [],
+          model_removals: 2,
           rejected: [],
+          held_back: [],
         },
         steps: {
           plan_batch: {
@@ -251,17 +254,59 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
               changes: [change],
               needs_review: [],
               rejected: [{ item: 'x', reason: 'y' }],
+              held_back: [heldBack],
+              removals: 1,
             },
           },
         },
       })
     ).toEqual({
       plans: [plan],
-      written: 2,
-      changes: [change],
-      needs_review: [],
+      model_written: 2,
+      model_changes: [change],
+      model_needs_review: [],
+      model_removals: 3,
       rejected: [{ item: 'x', reason: 'y' }],
+      held_back: [heldBack],
     });
+  });
+
+  it('starts the model tally at nothing, apart from the fixes and what gather held back', () => {
+    const heldBack = { reason: 'Too many stale items', changes: [] };
+
+    expect(
+      renderWith(findStep(steps(), 'planned').with, {
+        steps: {
+          gather: { output: { needs_review: [], held_back: [heldBack] } },
+          plan_fixes: { output: { written: 1, changes: [], rejected: [] } },
+        },
+      })
+    ).toEqual({
+      plans: [],
+      written: 1,
+      changes: [],
+      needs_review: [],
+      rejected: [],
+      held_back: [heldBack],
+      model_written: 0,
+      model_changes: [],
+      model_needs_review: [],
+      model_removals: 0,
+    });
+  });
+
+  it('reviews again the items the last successful run held back', () => {
+    expect(
+      renderWith(findStep(steps(), 'gather').with, {
+        consts: render().consts,
+        inputs: {},
+        variables: { restart: false },
+        steps: {
+          last_run: { output: { since: '2026-11-01T00:00:00Z' } },
+          last_output: { output: { context: { output: { held_back_ids: ['fact-3'] } } } },
+        },
+      })
+    ).toEqual(expect.objectContaining({ retry_ids: ['fact-3'] }));
   });
 
   it('shows the model the batch, the instructions and the rules', () => {
@@ -348,9 +393,84 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
     expect(findStep(steps(), 'record').with?.mode).toBe('apply');
     expect(findStep(steps(), 'output_result').with).toEqual(
       expect.objectContaining({
-        changes: '${{ variables.changes | concat: variables.needs_review }}',
+        changes: '${{ steps.record.output.changes }}',
+        held_back_ids: '${{ steps.record.output.held_back_ids }}',
         sweep_after_id: '{{ steps.gather.output.sweep_after_id }}',
       })
     );
+  });
+
+  it('applies none of the model changes when they would remove more items than one run may', () => {
+    const { condition } = findStep(steps(), 'apply');
+    const scope = (modelRemovals: number) => ({
+      variables: { plans: [{}], model_removals: modelRemovals },
+      steps: { gather: { output: { max_model_removals: 3 } } },
+    });
+
+    expect(evaluate(condition, scope(3))).toBe(true);
+    expect(evaluate(condition, scope(4))).toBe(false);
+    expect(evaluate(condition, { ...scope(0), variables: { plans: [], model_removals: 0 } })).toBe(
+      false
+    );
+  });
+
+  it('tallies the applied model changes afresh, apart from the fixes', () => {
+    const apply = findStep(steps(), 'apply');
+    const change = { id: 'fact-2', change: 'superseded', reason: 'Same' };
+
+    expect(findStep(apply.steps ?? [], 'applying').with).toEqual({
+      model_written: 0,
+      model_changes: [],
+      model_needs_review: [],
+    });
+    expect(
+      renderWith(findStep(findStep(apply.steps ?? [], 'plans').steps ?? [], 'tally_applied').with, {
+        variables: {
+          model_written: 0,
+          model_changes: [],
+          model_needs_review: [],
+          rejected: [],
+          held_back: [],
+        },
+        steps: {
+          apply_batch: {
+            output: {
+              written: 2,
+              changes: [change],
+              needs_review: [],
+              rejected: [],
+              held_back: [],
+            },
+          },
+        },
+      })
+    ).toEqual({
+      model_written: 2,
+      model_changes: [change],
+      model_needs_review: [],
+      rejected: [],
+      held_back: [],
+    });
+  });
+
+  it('hands the record step everything it needs to hold back the model changes', () => {
+    const recordSteps = [
+      findStep(steps(), 'record'),
+      findStep(findStep(steps(), 'report_result').steps ?? [], 'record_report'),
+      findStep(findStep(steps(), 'dry_run_result').steps ?? [], 'record_dry_run'),
+    ];
+
+    for (const { with: inputs } of recordSteps) {
+      expect(inputs).toEqual(
+        expect.objectContaining({
+          model_written: '${{ variables.model_written }}',
+          model_changes: '${{ variables.model_changes }}',
+          model_needs_review: '${{ variables.model_needs_review }}',
+          max_model_removals: '${{ steps.gather.output.max_model_removals }}',
+          held_back: '${{ variables.held_back }}',
+          retried: '${{ steps.gather.output.retried }}',
+        })
+      );
+    }
   });
 });

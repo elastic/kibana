@@ -57,7 +57,94 @@ describe('getRecordMaintenanceRunStepDefinition', () => {
       tombstoned: 1,
       needs_review: 1,
       rejected: 0,
+      held_back: 0,
+      changes: [...input.changes, ...input.needs_review],
+      held_back_changes: [],
+      held_back_ids: [],
     });
+  });
+
+  const fix = { id: 'f-9', change: 'tombstoned', reason: 'Its memories were deleted' };
+  const modelInput = {
+    ...input,
+    written: 1,
+    changes: [fix],
+    needs_review: [],
+    model_written: 3,
+    model_changes: input.changes,
+    model_needs_review: input.needs_review,
+  };
+
+  it('counts the model changes with the fixes when they remove no more than the run may', async () => {
+    const context = createMockStepContext({
+      input: { ...modelInput, max_model_removals: 2 },
+      esClient: {},
+    });
+
+    const { output } = await definition().handler(context);
+
+    expect(output).toEqual(
+      expect.objectContaining({
+        written: 4,
+        superseded: 2,
+        tombstoned: 2,
+        needs_review: 1,
+        held_back: 0,
+        changes: [fix, ...input.changes, ...input.needs_review],
+      })
+    );
+  });
+
+  it('holds back all the model changes when they would remove more than the run may', async () => {
+    const context = createMockStepContext({
+      input: { ...modelInput, max_model_removals: 1 },
+      esClient: {},
+    });
+
+    const { output } = await definition().handler(context);
+
+    expect(output).toEqual(
+      expect.objectContaining({
+        written: 1,
+        superseded: 0,
+        tombstoned: 1,
+        needs_review: 0,
+        held_back: 5,
+        changes: [fix],
+        held_back_changes: [
+          {
+            reason:
+              'The model would remove 2 items, more than the 1 one run may, so none of its changes were made.',
+            changes: [...input.changes, ...input.needs_review],
+          },
+        ],
+        held_back_ids: ['e-1', 'e-2', 'f-1', 'rel-1', 'f-3'],
+      })
+    );
+  });
+
+  it('lists the held-back items for the next run, once', async () => {
+    const heldBack = {
+      reason: 'Too many stale items',
+      changes: [
+        { id: 'f-4', change: 'tombstoned', reason: 'Its memories were deleted' },
+        { id: 'f-5', change: 'tombstoned', reason: 'Its memories were deleted' },
+      ],
+    };
+    const context = createMockStepContext({
+      input: { ...input, held_back: [heldBack, heldBack], retried: ['f-5'] },
+      esClient: {},
+    });
+
+    const { output } = await definition().handler(context);
+
+    expect(output).toEqual(
+      expect.objectContaining({
+        held_back: 4,
+        held_back_changes: [heldBack, heldBack],
+        held_back_ids: ['f-4'],
+      })
+    );
   });
 
   it.each([

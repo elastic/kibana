@@ -156,6 +156,24 @@ describe('resolveMaintenanceChanges', () => {
       );
     });
 
+    it('leaves for review a merge that would absorb more than three items', () => {
+      const kis = ['f-1', 'f-2', 'f-3', 'f-4', 'f-5'].map((id) => fact(id));
+
+      const resolved = resolve(kis, {
+        merges: [{ survivor: 'f-1', absorbed: ['f-2', 'f-3', 'f-4', 'f-5'], reason: 'Same plan' }],
+      });
+
+      expect(resolved.groups).toEqual([]);
+      expect(resolved.needsReview).toEqual(
+        ['f-1', 'f-2', 'f-3', 'f-4', 'f-5'].map((id) => ({
+          id,
+          change: 'needs_review',
+          reason:
+            'They look like duplicates, but one merge may absorb 3 items at most, and this one would absorb 4: Same plan',
+        }))
+      );
+    });
+
     it('moves the relationships of the absorbed items, skipping links to itself', () => {
       const kis = [entity('e-1'), entity('e-2'), entity('e-3')];
       const knows = link('e-2', 'knows', 'e-3');

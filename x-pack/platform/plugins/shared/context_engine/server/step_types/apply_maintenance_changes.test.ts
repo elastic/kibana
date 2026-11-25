@@ -45,6 +45,10 @@ const stored = new Map<string, DreamedKi>([
   ['f-old', fact('f-old', '2026-02-01T00:00:00.000Z')],
   ['f-new', fact('f-new', '2026-05-01T00:00:00.000Z')],
   ['f-gone', fact('f-gone', '2026-01-01T00:00:00.000Z')],
+  ...['f-1', 'f-2', 'f-3', 'f-4', 'f-5', 'f-6'].map((id, index): [string, DreamedKi] => [
+    id,
+    fact(id, `2026-03-0${index + 1}T00:00:00.000Z`),
+  ]),
 ]);
 
 const batch = {
@@ -126,7 +130,65 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
       ],
       needs_review: [],
       rejected: [],
+      held_back: [],
+      removals: 1,
       plans: [{ batch, changes }],
+    });
+  });
+
+  describe('when the model would remove more than half of a batch', () => {
+    const largeBatch = {
+      ...batch,
+      items: ['f-1', 'f-2', 'f-3', 'f-4', 'f-5', 'f-6'].map((id) => ({
+        ...toMaintenanceItem(stored.get(id)!),
+        reasons: ['changed' as const],
+      })),
+    };
+    const manyRemovals = {
+      merges: [
+        { survivor: 'f-1', absorbed: ['f-2', 'f-3', 'f-4'], title: 'Plan', reason: 'Same plan' },
+      ],
+      contradictions: [{ ids: ['f-5', 'f-6'], label: 'conflict', reason: 'Both claim the plan' }],
+    };
+
+    it.each([
+      ['plans', true],
+      ['applies', false],
+    ])('%s none of its changes, holding them back', async (_, planOnly) => {
+      const context = createMockStepContext({
+        input: {
+          ai_index_id: 'support',
+          batch: largeBatch,
+          changes: manyRemovals,
+          plan_only: planOnly,
+        },
+        esClient: {},
+      });
+
+      const { output } = await definition().handler(context);
+
+      expect(putKiRevision).not.toHaveBeenCalled();
+      expect(softDeleteKi).not.toHaveBeenCalled();
+      expect(output).toEqual(
+        expect.objectContaining({
+          written: 0,
+          changes: [],
+          needs_review: [],
+          removals: 0,
+          held_back: [
+            {
+              reason:
+                'The model would remove 4 items for a batch of 6, more than the 3 one batch may.',
+              changes: expect.arrayContaining([
+                expect.objectContaining({ id: 'f-1', change: 'merged' }),
+                expect.objectContaining({ id: 'f-5', change: 'superseded' }),
+              ]),
+            },
+          ],
+        })
+      );
+      expect(output?.held_back[0].changes).toHaveLength(5);
+      expect(output?.plans).toEqual(planOnly ? [] : undefined);
     });
   });
 

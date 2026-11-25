@@ -12,12 +12,19 @@ import {
   type ApplyMaintenanceChangesOutput,
   type MaintenanceChangeSet,
 } from '../../common/step_types/apply_maintenance_changes';
+import {
+  MAX_MAINTENANCE_BATCH_REMOVALS_PERCENT,
+  MAX_MAINTENANCE_LISTED_CHANGES,
+  MIN_MAINTENANCE_BATCH_REMOVALS,
+  type MaintenanceHeldBack,
+} from '../../common/step_types/gather_maintenance';
 import { isKiDeleted } from '../ai_indices/ki_revision';
 import type { ApplyContext, PlannedWrite } from '../dreaming/apply';
 import type { DreamedKi } from '../dreaming/dreamed_ki';
 import { kiUri } from '../dreaming/ids';
 import { applyMaintenanceGroups, emptyApplyResult } from '../maintenance/apply_maintenance';
 import { audienceOf, parseRelationship } from '../maintenance/gather';
+import { modelRemovalsOf, removalLimitOf } from '../maintenance/limits';
 import { parseMaintenanceChanges } from '../maintenance/parse_changes';
 import { createMaintenanceReader } from '../maintenance/reader';
 import { resolveMaintenanceChanges, type MaintenanceGroup } from '../maintenance/resolve_changes';
@@ -144,6 +151,22 @@ export const getApplyMaintenanceChangesStepDefinition = ({
         );
         resolved.groups = [];
       }
+      const heldBack: MaintenanceHeldBack[] = [];
+      const planned = resolved.groups.flatMap(({ changes }) => changes);
+      const removals = modelRemovalsOf(planned);
+      const removalLimit = removalLimitOf(
+        batch?.items.length ?? 0,
+        MAX_MAINTENANCE_BATCH_REMOVALS_PERCENT,
+        MIN_MAINTENANCE_BATCH_REMOVALS
+      );
+      if (batch && removals > removalLimit) {
+        heldBack.push({
+          reason: `The model would remove ${removals} items for a batch of ${batch.items.length}, more than the ${removalLimit} one batch may.`,
+          changes: [...planned, ...resolved.needsReview].slice(0, MAX_MAINTENANCE_LISTED_CHANGES),
+        });
+        resolved.groups = [];
+        resolved.needsReview = [];
+      }
 
       const dryRun = planOnly ? new Map<string, PlannedWrite>() : undefined;
       const applyContext: ApplyContext = {
@@ -184,17 +207,19 @@ export const getApplyMaintenanceChangesStepDefinition = ({
           result.written
         } KIs and tombstoned ${result.tombstoned.length}; ${
           resolved.needsReview.length
-        } for review, ${rejected.length} rejected`
+        } for review, ${rejected.length} rejected${heldBack.length > 0 ? '; batch held back' : ''}`
       );
       const output: ApplyMaintenanceChangesOutput = {
         written: result.written,
         changes: result.changes,
         needs_review: resolved.needsReview,
         rejected,
+        held_back: heldBack,
+        removals: modelRemovalsOf(result.changes),
         ...(planOnly &&
           batch &&
           context.input.changes && {
-            plans: [{ batch, changes: context.input.changes }],
+            plans: heldBack.length > 0 ? [] : [{ batch, changes: context.input.changes }],
           }),
       };
       return { output };

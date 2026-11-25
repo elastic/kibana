@@ -25,6 +25,16 @@ export const MAX_MAINTENANCE_BATCHES = 100;
 export const MAX_MAINTENANCE_LISTED_CHANGES = 1000;
 /** Neighbors, facts and relationships one batch shows, at most, of each. */
 export const MAX_BATCH_RELATED = 500;
+/** A merge that would absorb more items is left for review. */
+export const MAX_MAINTENANCE_MERGE_ABSORBED = 3;
+/** The removals the model may make in one batch, at least, whatever its size. */
+export const MIN_MAINTENANCE_BATCH_REMOVALS = 3;
+/** The percent of a batch's items the model may remove. */
+export const MAX_MAINTENANCE_BATCH_REMOVALS_PERCENT = 50;
+/** The stale items one run may remove, at least, whatever the size of the AI index. */
+export const MIN_MAINTENANCE_STALE_REMOVALS = 10;
+/** The held-back items one run passes to the next, at most. */
+export const MAX_MAINTENANCE_RETRY_IDS = MAINTENANCE_BATCH_SIZE * MAX_MAINTENANCE_BATCHES;
 const MAX_TIMESTAMP_LENGTH = 64;
 
 export const MAINTENANCE_REVIEW_REASONS = [
@@ -32,6 +42,7 @@ export const MAINTENANCE_REVIEW_REASONS = [
   'lost_sources',
   'about_facts_changed',
   'sweep',
+  'retry',
 ] as const;
 export type MaintenanceReviewReason = (typeof MAINTENANCE_REVIEW_REASONS)[number];
 
@@ -133,6 +144,16 @@ export const maintenanceChangeSchema = lazySchema(() =>
 
 export type MaintenanceChange = z.infer<typeof maintenanceChangeSchema>;
 
+/** Changes held back together because there were too many removals, with why. */
+export const maintenanceHeldBackSchema = lazySchema(() =>
+  z.object({
+    reason: z.string(),
+    changes: z.array(maintenanceChangeSchema).max(MAX_MAINTENANCE_LISTED_CHANGES),
+  })
+);
+
+export type MaintenanceHeldBack = z.infer<typeof maintenanceHeldBackSchema>;
+
 export const gatherMaintenanceInputSchema = lazySchema(() =>
   z.object({
     ai_index_id: aiIndexIdSchema,
@@ -146,6 +167,11 @@ export const gatherMaintenanceInputSchema = lazySchema(() =>
     sweep_after_id: idSchema
       .optional()
       .describe('Sweep the items with a greater id. Empty: start from the first item'),
+    retry_ids: z
+      .array(idSchema)
+      .max(MAX_MAINTENANCE_RETRY_IDS)
+      .optional()
+      .describe('Items the last run held back, to review once more'),
   })
 );
 
@@ -161,11 +187,27 @@ export const gatherMaintenanceOutputSchema = lazySchema(() =>
       .array(maintenanceChangeSchema)
       .max(MAX_MAINTENANCE_LISTED_CHANGES)
       .describe('Items left for a person, each with why'),
+    held_back: z
+      .array(maintenanceHeldBackSchema)
+      .max(1)
+      .describe(
+        'Fixes held back because more items lost all their memories than one run may remove'
+      ),
+    retried: z
+      .array(idSchema)
+      .max(MAX_MAINTENANCE_RETRY_IDS)
+      .describe('The items the last run held back, reviewed once more'),
+    max_model_removals: z
+      .number()
+      .describe(
+        'The removals the model may make in this run; over it, none of its changes are made'
+      ),
     counts: z.object({
       changed: z.number(),
       lost_sources: z.number(),
       about_facts_changed: z.number(),
       sweep: z.number(),
+      retry: z.number(),
     }),
     resume_from: z
       .string()
@@ -204,7 +246,9 @@ export const gatherMaintenanceStepCommonDefinition: CommonStepDefinition<
           'relationships and, for an entity, the facts about it, in batches of one audience. ' +
           'Items whose memories were all deleted, and relationships that link a deleted item or ' +
           'whose permissions differ from their ends, are listed as fixes. Items a person ' +
-          'edited, or that also came from traces, are listed for review instead of rewritten.',
+          'edited, or that also came from traces, are listed for review instead of rewritten. ' +
+          'When more items lost all their memories than one run may remove, the rest are held ' +
+          'back for the next runs, and the items the last run held back are reviewed once more.',
       }
     ),
   },

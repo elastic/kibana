@@ -12,9 +12,10 @@ import {
   RELATIONSHIP_KI_TYPE,
 } from '../../common/dreaming';
 import type { MaintenanceChangeSet } from '../../common/step_types/apply_maintenance_changes';
-import type {
-  MaintenanceBatch,
-  MaintenanceChange,
+import {
+  MAX_MAINTENANCE_MERGE_ABSORBED,
+  type MaintenanceBatch,
+  type MaintenanceChange,
 } from '../../common/step_types/gather_maintenance';
 import { isKiDeleted } from '../ai_indices/ki_revision';
 import { isPersonEdited } from '../ai_indices/ki_write';
@@ -332,6 +333,13 @@ export const resolveMaintenanceChanges = (
     const group = ids.map(kiOf);
     if (new Set(group.map(kindOf)).size > 1) {
       rejected.push({ item, reason: 'facts and entities cannot be merged together' });
+      continue;
+    }
+    if (absorbedIds.length > MAX_MAINTENANCE_MERGE_ABSORBED) {
+      leaveForReview(
+        ids,
+        `They look like duplicates, but one merge may absorb ${MAX_MAINTENANCE_MERGE_ABSORBED} items at most, and this one would absorb ${absorbedIds.length}: ${reason}`
+      );
       continue;
     }
     if (group.some((ki) => isPersonEdited(ki))) {

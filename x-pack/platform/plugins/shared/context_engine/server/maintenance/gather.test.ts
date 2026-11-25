@@ -93,6 +93,8 @@ const fakeReader = (
         .slice(0, size),
     similar: async (items) =>
       new Map(items.map((ki) => [ki.id, (similar[ki.id] ?? []).map((id) => byId.get(id)!)])),
+    countLiveItems: async () =>
+      stored.filter((ki) => kindOf(ki) !== undefined && ki.governance !== deleted).length,
   };
 };
 
@@ -101,6 +103,8 @@ const options: GatherOptions = {
   writerUri: WRITER,
   neighbors: 5,
   sweepSize: 0,
+  maxStaleRemovalsPercent: 50,
+  maxModelRemovalsPercent: 30,
   since: '2026-11-01T00:00:00.000Z',
 };
 
@@ -235,7 +239,77 @@ describe('gatherMaintenance', () => {
       lost_sources: 1,
       about_facts_changed: 0,
       sweep: 0,
+      retry: 0,
     });
+    expect(output.held_back).toEqual([]);
+  });
+
+  it('removes no more items for losing their memories than one run may, holding back the rest', async () => {
+    const stale = Array.from({ length: 13 }, (_, index) =>
+      fact(`fact-${String(index).padStart(2, '0')}`)
+    );
+    const stored = [
+      memory('m-1', { governance: deleted }),
+      ...stale,
+      ...Array.from({ length: 7 }, (_, index) =>
+        fact(`fact-live-${index}`, { references: derivedFrom('m-2') })
+      ),
+    ];
+
+    const output = await gatherMaintenance(fakeReader(stored, { changed: [stored[0]] }), options);
+
+    expect(output.fixes.map(({ id }) => id)).toEqual(stale.slice(0, 10).map(({ id }) => id));
+    expect(output.held_back).toEqual([
+      {
+        reason:
+          '13 items lost all their memories, more than the 10 one run may remove (50% of 20 facts and entities). The others wait for the next runs.',
+        changes: stale
+          .slice(10)
+          .map(({ id }) => expect.objectContaining({ id, change: 'tombstoned' })),
+      },
+    ]);
+  });
+
+  it('removes all the items that lost their memories when few enough did', async () => {
+    const stored = [
+      memory('m-1', { governance: deleted }),
+      ...Array.from({ length: 11 }, (_, index) => fact(`fact-${index}`)),
+      ...Array.from({ length: 12 }, (_, index) =>
+        fact(`fact-live-${index}`, { references: derivedFrom('m-2') })
+      ),
+    ];
+
+    const output = await gatherMaintenance(fakeReader(stored, { changed: [stored[0]] }), options);
+
+    expect(output.fixes).toHaveLength(11);
+    expect(output.held_back).toEqual([]);
+  });
+
+  it('reviews again the items the last run held back', async () => {
+    const stored = [memory('m-1'), fact('fact-a'), fact('fact-b', { user_id: 'u-1' })];
+
+    const output = await gatherMaintenance(fakeReader(stored), {
+      ...options,
+      retryIds: ['fact-a', 'fact-b', 'fact-missing'],
+    });
+
+    expect(output.batches.flatMap(({ items }) => items)).toEqual([
+      expect.objectContaining({ id: 'fact-a', reasons: ['retry'] }),
+    ]);
+    expect(output.counts.retry).toBe(1);
+    expect(output.retried).toEqual(['fact-a', 'fact-b', 'fact-missing']);
+  });
+
+  it('lets the model remove a share of the reviewed items, and always a few', async () => {
+    const stored = [
+      memory('m-1'),
+      ...Array.from({ length: 20 }, (_, index) => fact(`fact-${index}`)),
+    ];
+    const reviewing = (count: number) =>
+      gatherMaintenance(fakeReader(stored, { changed: stored.slice(1, count + 1) }), options);
+
+    expect((await reviewing(20)).max_model_removals).toBe(6);
+    expect((await reviewing(2)).max_model_removals).toBe(3);
   });
 
   it('lists for review items that lost memories but also came from traces', async () => {

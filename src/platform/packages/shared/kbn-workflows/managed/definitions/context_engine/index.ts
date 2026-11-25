@@ -217,7 +217,7 @@ export interface ContextEngineMaintenanceWorkflowTemplateValues
 export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW = {
   id: CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(MAINTENANCE_YAML, {

@@ -32,6 +32,8 @@ describe('maintenanceConfigOf', () => {
       schedule: { interval: '24h' },
       neighbors: 5,
       sweep_size: 200,
+      max_stale_removals_percent: 50,
+      max_model_removals_percent: 30,
     });
   });
 
