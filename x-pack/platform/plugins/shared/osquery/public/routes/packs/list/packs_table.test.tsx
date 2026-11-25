@@ -179,7 +179,7 @@ describe('PacksTable', () => {
       { effectiveIds: [], count: '0', warning: false },
       { effectiveIds: undefined, count: '1', warning: false },
     ])(
-      'renders effective targets $effectiveIds with fallback and drift tooltip',
+      'renders effective targets $effectiveIds with fallback and shared integration info icon',
       async ({ effectiveIds, count, warning }) => {
         mockUsePacks.mockReturnValue({
           data: { data: [createPack({ effective_policy_ids: effectiveIds })], total: 1 },
@@ -191,14 +191,14 @@ describe('PacksTable', () => {
         expect(row).not.toBeNull();
         const cells = within(row as HTMLElement).getAllByRole('cell');
         expect(cells[2]).toHaveTextContent(count);
-        const tooltipTrigger = within(cells[2]).queryByText(count, {
-          selector: 'span[tabindex="0"]',
-        });
-        expect(!!tooltipTrigger).toBe(warning);
-        if (tooltipTrigger) {
-          fireEvent.mouseOver(tooltipTrigger);
+        const infoIcon = within(cells[2]).queryByTestId('packEffectivePoliciesInfo');
+        expect(!!infoIcon).toBe(warning);
+        if (infoIcon) {
+          expect(infoIcon).toHaveTextContent('1 selected + 1 via shared integration');
+          expect(infoIcon).toHaveAttribute('tabindex', '0');
+          fireEvent.focus(infoIcon);
           expect(await screen.findByRole('tooltip')).toHaveTextContent(
-            'Includes agent policies receiving this pack via shared integrations.'
+            '1 selected + 1 via shared integration'
           );
         }
       }
@@ -230,7 +230,7 @@ describe('PacksTable', () => {
         expect(row).not.toBeNull();
         const cells = within(row as HTMLElement).getAllByRole('cell');
         expect(cells[2]).toHaveTextContent(count);
-        expect(within(cells[2]).queryByText(count, { selector: 'span[tabindex="0"]' })).toBeNull();
+        expect(within(cells[2]).queryByTestId('packEffectivePoliciesInfo')).not.toBeInTheDocument();
       }
     );
 
@@ -253,9 +253,10 @@ describe('PacksTable', () => {
       const row = screen.getByText('test-pack').closest('tr');
       expect(row).not.toBeNull();
       const cells = within(row as HTMLElement).getAllByRole('cell');
-      expect(
-        within(cells[2]).getByText('2', { selector: 'span[tabindex="0"]' })
-      ).toBeInTheDocument();
+      expect(cells[2]).toHaveTextContent('2');
+      expect(within(cells[2]).getByTestId('packEffectivePoliciesInfo')).toHaveTextContent(
+        '1 selected + 1 via shared integration'
+      );
     });
   });
 

@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiSkeletonText,
   EuiSpacer,
@@ -290,21 +291,33 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
               : policyIds;
           const effectiveCount = effectiveIds?.length ?? 0;
 
-          return effectiveCount > (policyIds?.length ?? 0) ? (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.osquery.pack.form.sharedIntegration.effectivePoliciesTooltip',
-                {
-                  defaultMessage:
-                    'Includes agent policies receiving this pack via shared integrations.',
-                }
-              )}
-            >
-              <span tabIndex={0}>{effectiveCount}</span>
-            </EuiToolTip>
-          ) : (
-            <>{effectiveCount}</>
-          );
+          if (effectiveCount > (policyIds?.length ?? 0)) {
+            const breakdown = i18n.translate(
+              'xpack.osquery.packs.table.effectivePoliciesBreakdownTooltip',
+              {
+                defaultMessage: '{selected} selected + {extra} via shared integration',
+                values: {
+                  selected: policyIds.length,
+                  extra: effectiveCount - policyIds.length,
+                },
+              }
+            );
+
+            return (
+              <>
+                {effectiveCount}{' '}
+                <EuiIconTip
+                  type="info"
+                  size="s"
+                  content={breakdown}
+                  aria-label={breakdown}
+                  iconProps={{ 'data-test-subj': 'packEffectivePoliciesInfo' }}
+                />
+              </>
+            );
+          }
+
+          return <>{effectiveCount}</>;
         },
       });
     }
