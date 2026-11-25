@@ -41,11 +41,6 @@ export const getToolErrors = (steps: Step[]): ToolError[] =>
       : []
   );
 
-/**
- * Attachment id written by the last successful `generate_dashboard` call. The
- * tool result only carries a compact summary; the full dashboard (panel
- * configs, ES|QL, controls, time range) lives on the conversation.
- */
 /** Every dashboard attachment the steps' `generate_dashboard` calls wrote, without duplicates. */
 export const getWrittenDashboardIds = (steps: Step[]): string[] => {
   const ids = steps.flatMap((step) => {
@@ -62,6 +57,11 @@ export const getWrittenDashboardIds = (steps: Step[]): string[] => {
   return [...new Set(ids)];
 };
 
+/**
+ * Attachment id written by the last successful `generate_dashboard` call. The
+ * tool result only carries a compact summary; the full dashboard (panel
+ * configs, ES|QL, controls, time range) lives on the conversation.
+ */
 export const getLastWrittenDashboardId = (steps: Step[]): string | undefined => {
   for (const step of steps.toReversed()) {
     if (step.type !== 'tool_call' || step.tool_id !== GENERATE_DASHBOARD_TOOL_ID) {
