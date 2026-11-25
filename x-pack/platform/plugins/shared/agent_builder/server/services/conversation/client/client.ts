@@ -190,7 +190,6 @@ export interface ConversationClient {
     options: ConversationWriteOptions
   ): Promise<AppendSteerResult>;
   exists(conversationId: string): Promise<boolean>;
-  /** The current user's own conversation for an external origin, if any. */
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
     conversation: ConversationCreateRequest,
