@@ -64,14 +64,14 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     const { content } = alertAnalysisSkill;
     const queuePath = content.slice(
       content.indexOf('### Queue path'),
-      content.indexOf('### Triage path')
+      content.indexOf('### Judgment questions')
     );
 
     expect(queuePath).toMatch(/call only 'security\.alerts'/i);
-    expect(queuePath).toMatch(/stop/i);
-    expect(queuePath).toMatch(/do NOT call 'security\.alert-analysis\.get-related-alerts'/i);
-    expect(queuePath).toMatch(/'security\.security_labs_search'/i);
-    expect(queuePath).toMatch(/'security\.get_entity'/i);
+    expect(queuePath).toMatch(/\bStop\./);
+    expect(queuePath).toMatch(
+      /do NOT call 'security\.alert-analysis\.get-related-alerts', 'security\.security_labs_search', or 'security\.get_entity'/i
+    );
   });
 
   // Why: the shipped step 1 reused an attached alert. A set of attached alerts must not be replaced by
