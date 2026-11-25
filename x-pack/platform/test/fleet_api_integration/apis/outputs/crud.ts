@@ -3206,15 +3206,21 @@ export default function (providerContext: FtrProviderContext) {
         const body = await createOutput(kerberosOutput());
 
         // leaving the whole Kerberos block out is allowed, but replacing it with incomplete settings is not
-        await updateOutput(
+        const rejected = await updateOutput(
           body.item.id,
           {
+            // name is required by the update schema; without it the request would fail for that reason
+            name: body.item.name,
             type: 'kafka',
+            hosts: ['test.fr:2000'],
             auth_type: 'kerberos',
             kerberos: { ...keytabKerberos, keytab: '/etc/other.keytab', username: undefined },
           },
           400
         );
+        // it fails because of the username, not because of another missing field
+        // the schema names the field with the index of the union member, e.g. `kerberos.1.username`
+        expect(rejected.message).to.match(/kerberos(\.\d+)?\.username/);
 
         // the previous settings, and the principal, are still stored
         const { body: stored } = await supertest
