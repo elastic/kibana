@@ -64,7 +64,7 @@ const MOBILE_KPIS: ReadonlyArray<
     'title' | 'tooltip' | 'changeUnit' | 'higherIsBetter' | 'data-test-subj'
   > & {
     kpi: MobileKpi;
-    /** How the value shows; the user's number format unless set. */
+    /** The user's number format unless set. */
     formatValue?: (value: number) => string;
   }
 > = [
@@ -105,7 +105,6 @@ const HEALTH_SUMMARY_TITLE = i18n.translate('xpack.digitalExperience.mobile.heal
   defaultMessage: 'Health summary',
 });
 
-/** Compare to the previous period, in the URL, so a reload or Share keeps it. */
 const CompareSwitch = ({
   isComparing,
   onToggle,
@@ -177,7 +176,7 @@ const ClearFiltersButton = ({ onClear }: { onClear: () => void }) => (
 
 /**
  * The body of a mobile application's page, all its platforms: the toolbar its tabs share, with the
- * OS and release filters, the health summary (the KPI row, with Compare) and the release health. The sibling issues add their
+ * OS and release filters, the health summary and the release health. The sibling issues add their
  * sections below it as they fill them.
  */
 export function MobileOverview({
@@ -202,7 +201,7 @@ export function MobileOverview({
   const { value: compare, setValue: setCompare } = useQueryParam('compare');
   const isComparing = compare === 'true';
   const healthSummaryTitleId = useGeneratedHtmlId({ prefix: 'healthSummaryTitle' });
-  // Every release of the OS, most sessions first, whatever the release filter: the colours' order
+  // Every release of the OS whatever the release filter, so colours don't change when filtering
   const rankedReleases = useMemo(
     () => (kpis?.releases ?? []).map(({ key }) => key),
     [kpis?.releases]

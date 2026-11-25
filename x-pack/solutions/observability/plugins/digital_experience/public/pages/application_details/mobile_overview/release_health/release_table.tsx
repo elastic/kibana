@@ -24,6 +24,7 @@ import {
   MOBILE_USERS_DESCRIPTION,
   NOT_ENOUGH_DATA_LABEL,
   OTHER_RELEASE_LABEL,
+  valueWithShareLabel,
 } from '../../../../labels';
 import { metricColumnPreset } from '../../../../utils/column_presets';
 import { formatErrorRate } from '../../../../utils/format_error_rate';
@@ -77,17 +78,11 @@ const filterLabel = (release: string, isSelected: boolean): string =>
         values: { release },
       });
 
-/** The table's sort: a column and its direction. */
 export type ReleaseSort = NonNullable<Criteria<MobileReleaseRow>['sort']>;
 
-/** Most sessions first, as the route returns them. */
 export const DEFAULT_RELEASE_SORT: ReleaseSort = { field: 'sessions', direction: 'desc' };
 
-/**
- * The rows by `sort`, "Other" always last; a release without an error rate comes after those with
- * one, as it can't be compared, and equal ones by release, highest first, as the route ranks them,
- * so they keep their order across reloads.
- */
+/** The rows by `sort`, "Other" last, then those without an error rate, then by release. */
 export const sortReleases = (
   releases: readonly MobileReleaseRow[],
   { field, direction }: ReleaseSort
@@ -98,22 +93,16 @@ export const sortReleases = (
     ['asc', 'asc', direction, 'desc']
   );
 
-/**
- * The sessions with their share of every release's sessions, e.g. `1,200 (60%)`; without a total,
- * e.g. when filtered to one release, whose share would always read 100%.
- */
+// Without a total, e.g. filtered to one release, the share would always read 100%
 const formatSessions = (
   sessions: number,
   totalSessions: number | undefined,
   { formatNumber, formatKpiPercent }: Formatters
 ): string =>
   totalSessions !== undefined && totalSessions > 0
-    ? `${formatNumber(sessions)} (${formatKpiPercent(sessions / totalSessions)})`
+    ? valueWithShareLabel(formatNumber(sessions), formatKpiPercent(sessions / totalSessions))
     : formatNumber(sessions);
 
-/**
- * The table's columns, in order. The crash rate (#64) and the cold start (#68) join them here.
- */
 const releaseColumns = ({
   colors,
   formatters,
@@ -135,7 +124,7 @@ const releaseColumns = ({
       if (isOther) {
         return <EuiHealth color={colors.get(release)}>{OTHER_RELEASE_LABEL}</EuiHealth>;
       }
-      // The selected release as a removable filter pill, so it's clear a click takes it off.
+      // A removable pill, so it's clear a click takes the filter off
       if (release === selectedRelease) {
         return (
           <EuiHealth color={colors.get(release)}>
@@ -208,10 +197,7 @@ const releaseColumns = ({
   },
 ];
 
-/**
- * The releases of the time range with their sessions, users and error rate, sortable, "Other"
- * always last. A release filters the page by it, or takes the filter off when it's selected.
- */
+/** The releases with their sessions, users and error rate; a release filters the page by it. */
 export function ReleaseTable({
   releases,
   colors,
@@ -222,10 +208,8 @@ export function ReleaseTable({
 }: {
   releases: MobileReleaseRow[];
   colors: ReadonlyMap<string, string>;
-  /** The release the page is filtered by, if any. */
   selectedRelease: string | undefined;
   onSelectRelease: (release: string | undefined) => void;
-  /** Its sort, which its parent keeps across reloads. */
   sort: ReleaseSort;
   onSort: (sort: ReleaseSort) => void;
 }) {

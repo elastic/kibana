@@ -8,7 +8,7 @@
 import type { FacetBucket } from '../sessions';
 import type { ComparedValue, HistogramBuckets, MobilePlatform } from './applications';
 
-/** A release's values over the time range; the key is `OTHER_RELEASE_KEY` for the "Other" group. */
+/** A release's totals over the time range; `OTHER_RELEASE_KEY` for "Other". */
 export interface MobileReleaseRow {
   release: string;
   isOther: boolean;
@@ -18,7 +18,6 @@ export interface MobileReleaseRow {
   errorRate: number | null;
 }
 
-/** A release's values in one bucket of the histogram. */
 export interface MobileReleasePoint {
   /** Start of the bucket, in epoch milliseconds. */
   timestamp: number;
@@ -33,17 +32,16 @@ export interface MobileReleaseSeries {
   points: MobileReleasePoint[];
 }
 
-/** Where a release first appears in the time range. */
 export interface MobileReleaseMarker {
   release: string;
   /** Epoch milliseconds. */
   firstSeen: number;
 }
 
-/** The release health of a mobile application: its releases, their trends and first appearances. */
+/** The release health of a mobile application. */
 export interface MobileReleasesResponse {
   histogram: HistogramBuckets;
-  /** The top releases by sessions, then "Other" when more have data; most sessions first. */
+  /** The top releases by sessions, then "Other" when more have data. */
   releases: MobileReleaseRow[];
   series: MobileReleaseSeries[];
   /** The top releases first seen in the time range. */

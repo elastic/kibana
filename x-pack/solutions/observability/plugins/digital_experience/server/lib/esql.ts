@@ -34,7 +34,7 @@ export const runEsql = async <TRow extends object>(
   operationName: string,
   query: ComposerQuery,
   filter: estypes.QueryDslQueryContainer,
-  /** The time zone the query's date buckets (`TBUCKET`, `BUCKET`) line up with; UTC unless set. */
+  /** The time zone of the query's date buckets; UTC unless set. */
   timeZone?: string
 ): Promise<TRow[]> => {
   const { query: esqlQuery, params } = query.toRequest();

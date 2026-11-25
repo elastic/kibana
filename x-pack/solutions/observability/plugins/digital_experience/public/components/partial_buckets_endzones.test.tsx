@@ -88,6 +88,27 @@ describe('PartialBucketsEndzones', () => {
     expect(lastShadedZones()).toEqual([]);
   });
 
+  it('shades the rest of a last month longer than the shortest one', () => {
+    // February sets the shortest bucket; the range ends inside March, the last one
+    const months = ['2026-01-01', '2026-02-01', '2026-03-01'].map((day) => ({
+      timestamp: Date.parse(`${day}T00:00:00.000Z`),
+    }));
+    const end = Date.parse('2026-03-30T00:00:00.000Z');
+    const xDomain = getTimeChartXDomain({
+      points: months,
+      histogram: {
+        interval: { value: 1, unit: 'M' },
+        start: Date.parse('2026-01-01T00:00:00.000Z'),
+        end,
+      },
+      timeZone: 'UTC',
+      hasBars: true,
+    });
+    render(<PartialBucketsEndzones xDomain={xDomain} />, { wrapper: EuiProvider });
+
+    expect(lastShadedZones()).toEqual([{ coordinates: { x0: end } }]);
+  });
+
   it('renders nothing without buckets', () => {
     renderEndzones({ start: 0, end: HOUR }, { points: [] });
 

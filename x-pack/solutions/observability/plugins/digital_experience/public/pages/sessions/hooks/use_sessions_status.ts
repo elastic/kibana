@@ -36,9 +36,7 @@ interface Versioned {
 
 /**
  * Whether sessions are set up and healthy, and a way to set them up. Sets them up by itself, once,
- * when the status says the current user can, and checks back while they rebuild. Nothing is
- * fetched until `isRequested`, and nothing is checked back while `isWatched` is off, e.g. while
- * only mobile pages, which have no sessions, are shown.
+ * when the status says the current user can, and checks back while they rebuild and `isWatched`.
  */
 export const useSessionsStatusState = ({
   isRequested = true,

@@ -27,6 +27,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -50,12 +51,10 @@ import { onBrushTimeRange } from '../../../../utils/brush_time_range';
 import { formatErrorRate } from '../../../../utils/format_error_rate';
 import { getTimeChartXDomain } from '../../../../utils/histogram_interval';
 
-/** Room for the plot and the legend below it. */
 const CHART_HEIGHT = 240;
 
 const HIDDEN_AXIS_LINES = { tickLine: { visible: false }, axisLine: { visible: false } };
 
-// Static chart props, so a render of the page around the charts doesn't redraw them
 const CHART_SIZE = { height: '100%' };
 const GRID_LINE = { visible: true };
 const ERROR_RATE_ACCESSORS = ['errorRate'];
@@ -63,7 +62,6 @@ const SESSIONS_ACCESSORS = ['sessions'];
 const STACK_ACCESSORS = ['timestamp'];
 const AREA_STYLE = { area: { opacity: 0.6 }, point: { visible: 'never' as const } };
 
-/** Room above the plot for the release markers' labels, which would be clipped at its edge. */
 const MARKER_LABEL_ROOM: PartialTheme = { chartMargins: { top: 20 } };
 
 const ERROR_RATE_TITLE = i18n.translate('xpack.digitalExperience.mobile.releases.errorRate.title', {
@@ -114,14 +112,10 @@ interface ReleaseChartProps {
   markers: MobileReleaseMarker[];
   histogram: HistogramBuckets;
   colors: ReadonlyMap<string, string>;
-  /** Narrows the page's time range to the one dragged over the chart. */
   onTimeRangeSelect: TimeRangeSelect;
 }
 
-/**
- * A chart's bordered panel: an `h3` under the section's title, with the calculation in an info
- * tip, so both panels' headers are one line and their plots line up side by side.
- */
+// A one-line header (an `h3` and an info tip), so both charts' plots line up side by side
 function ChartPanel({
   title,
   tooltip,
@@ -162,7 +156,6 @@ function ChartPanel({
   );
 }
 
-/** The releases of markers that share a line, e.g. "2.3.0, 2.2.1" or "2.3.0 +2". */
 const markerLabel = (releases: readonly string[]): string =>
   releases.length <= 2
     ? releases.join(', ')
@@ -171,26 +164,32 @@ const markerLabel = (releases: readonly string[]): string =>
         values: { release: releases[0], count: releases.length - 1 },
       });
 
-/** One line, so a label never wraps past the room above the plot. */
 const MARKER_LABEL_CSS = { whiteSpace: 'nowrap' } as const;
 
-/** Every release of a marker and when they first appear, e.g. "First seen Jan 1, …: 2.3.0, 2.2.1". */
-const firstSeenDetails = (releases: readonly string[], date: string): string =>
+const firstSeenDetails = (
+  markers: ReadonlyArray<{ release: string; firstSeen: number }>,
+  formatDate: (date: number) => string
+): string =>
   i18n.translate('xpack.digitalExperience.mobile.releases.markerDetails', {
-    defaultMessage: 'First seen {date}: {releases}',
-    values: { date, releases: releases.join(', ') },
+    defaultMessage: 'First seen: {releases}',
+    values: {
+      releases: markers
+        .map(({ release, firstSeen }) =>
+          i18n.translate('xpack.digitalExperience.mobile.releases.markerRelease', {
+            defaultMessage: '{release} ({date})',
+            values: { release, date: formatDate(firstSeen) },
+          })
+        )
+        .join(', '),
+    },
   });
 
-/**
- * A line where releases first appear, labelled with them. Releases first seen in the same bucket
- * share one line, in the colour of the first, so their labels don't overlap.
- */
+// Releases first seen in the same bucket share one line, so their labels don't overlap
 function FirstSeenMarkers({
   markers,
   colors,
   bucketTimestamps,
 }: Pick<ReleaseChartProps, 'markers' | 'colors'> & {
-  /** The start of every bucket, sorted. */
   bucketTimestamps: readonly number[];
 }) {
   const { formatDate } = useFormatters();
@@ -204,9 +203,7 @@ function FirstSeenMarkers({
     <>
       {groups.map((group) => {
         const [{ release, firstSeen }] = group;
-        const releases = group.map((marker) => marker.release);
-        // Every release and when, for the tooltip and screen readers; the label may shorten them
-        const details = firstSeenDetails(releases, formatDate(firstSeen));
+        const details = firstSeenDetails(group, formatDate);
         return (
           <LineAnnotation
             key={release}
@@ -218,10 +215,13 @@ function FirstSeenMarkers({
               <EuiText
                 size="xs"
                 css={MARKER_LABEL_CSS}
-                aria-label={details}
                 data-test-subj="digitalExperienceMobileReleaseMarker"
               >
-                {markerLabel(releases)}
+                {/* The label may shorten the releases; screen readers get them all */}
+                <span aria-hidden={true}>{markerLabel(group.map((marker) => marker.release))}</span>
+                <EuiScreenReaderOnly>
+                  <span>{details}</span>
+                </EuiScreenReaderOnly>
               </EuiText>
             }
             markerPosition={Position.Top}
@@ -252,7 +252,6 @@ function ReleaseChart({
 }) {
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
-  // Derived once per response, not on every render of the page around it
   const buckets = useMemo(
     () =>
       sortBy(
@@ -277,7 +276,7 @@ function ReleaseChart({
 
   return (
     <Chart size={CHART_SIZE}>
-      {/* The legend below the plot keeps its width: hover a release to spotlight it, click to hide it. */}
+      {/* Below the plot, so the legend doesn't take its width */}
       <Settings
         baseTheme={baseTheme}
         theme={MARKER_LABEL_ROOM}
@@ -306,18 +305,22 @@ function ReleaseChart({
   );
 }
 
-/** The error rate of each release with enough sessions, one line per release. */
-export function ReleaseErrorRateChart({ releases, ...props }: ReleaseChartProps) {
+/** The error rate of each release with enough sessions, over time. */
+export function ReleaseErrorRateChart({
+  releases,
+  series: allSeries,
+  ...props
+}: ReleaseChartProps) {
   const series = useMemo(() => {
     const withRate = new Set(
       releases.filter(({ errorRate }) => errorRate !== null).map(({ release }) => release)
     );
-    // A release over the range's floor can still have every bucket below the bucket's, so no point
-    return props.series.filter(
+    // Over the range's floor, a release can still have no bucket over the bucket's
+    return allSeries.filter(
       ({ release, points }) =>
         withRate.has(release) && points.some(({ errorRate }) => errorRate !== null)
     );
-  }, [releases, props.series]);
+  }, [releases, allSeries]);
 
   return (
     <ChartPanel
@@ -352,7 +355,7 @@ export function ReleaseErrorRateChart({ releases, ...props }: ReleaseChartProps)
   );
 }
 
-/** The sessions of each release over time, stacked, to show how fast users move to a release. */
+/** The sessions of each release over time, stacked. */
 export function ReleaseAdoptionChart(props: Omit<ReleaseChartProps, 'releases'>) {
   const { formatNumber } = useFormatters();
   const { series } = props;

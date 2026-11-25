@@ -55,7 +55,6 @@ export const timeZoneShape = () => ({
       message: 'Unknown time zone',
     })
     .default('UTC')
-    // A name Elasticsearch rejects, though moment-timezone knows it, as the zone it links to
     .transform(toElasticsearchTimeZone),
 });
 

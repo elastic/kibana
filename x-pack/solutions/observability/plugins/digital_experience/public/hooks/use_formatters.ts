@@ -38,9 +38,6 @@ export interface Formatters {
   timeZone: string;
 }
 
-/** One decimal at most, for change badges and compact shares. */
-const COMPACT_PERCENT_PATTERN = '0,0.[0]%';
-
 /** The formatters of `uiSettings`, with Kibana's number and percent field formats. */
 export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   const getConfig: FieldFormatsGetConfigFn = (key, defaultOverride) =>

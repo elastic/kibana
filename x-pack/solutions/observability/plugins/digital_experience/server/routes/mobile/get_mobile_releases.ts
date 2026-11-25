@@ -39,21 +39,19 @@ export interface GetMobileReleasesParams {
   start: number;
   end: number;
   environment?: string;
-  /** The time zone the series' buckets line up with: a moment-timezone name or a UTC offset. */
+  /** The time zone of the series' buckets. */
   timeZone: string;
 }
 
-/** How far before the range a release's documents are looked for: one seen there has no marker. */
+/** A release seen this long before the range gets no marker. */
 const FIRST_SEEN_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000;
 
-/** What the queries after the release stats answer. */
 interface ReleaseDetails {
   otherRows: OtherReleaseStatsRow[];
   seriesRows: ReleaseSeriesRow[];
   seenRows: ReleaseSeenRow[];
 }
 
-/** Every query's rows. */
 interface ReleaseRows extends ReleaseDetails {
   statsRows: ReleaseStatsRow[];
 }
@@ -63,10 +61,7 @@ const NO_DETAILS: ReleaseDetails = { otherRows: [], seriesRows: [], seenRows: []
 const errorRateOf = (sessions: number, exceptions: number): number | null =>
   sessions > 0 ? exceptions / sessions : null;
 
-/**
- * The release health of an application: its top releases by sessions and "Other", their totals
- * and trends, and where each top release first appears in the range.
- */
+/** The release health of an application: its top releases and "Other", their trends and markers. */
 export const getMobileReleases = async ({
   esClient,
   filters,
@@ -88,7 +83,6 @@ export const getMobileReleases = async ({
       rangeFilter
     );
 
-  /** The rest of the queries, once the releases to show are known. */
   const detailsOf = async (releases: string[], hasOther: boolean): Promise<ReleaseDetails> => {
     const [otherRows, seriesRows, seenRows] = await Promise.all([
       hasOther
@@ -106,8 +100,7 @@ export const getMobileReleases = async ({
         rangeFilter,
         timeZone
       ),
-      // Only whether they were seen before the range: when they first appear in it comes with
-      // their stats
+      // Before the range only: the stats query has their first document in it
       runEsql<ReleaseSeenRow>(
         esClient,
         'get_mobile_release_seen_before',
@@ -118,13 +111,13 @@ export const getMobileReleases = async ({
     return { otherRows, seriesRows, seenRows };
   };
 
-  /** The release filter is the only group, so its stats and the rest run at once. */
+  // The release filter is the only group, so every query runs at once
   const fetchRelease = async (release: string): Promise<ReleaseRows> => {
     const [statsRows, details] = await Promise.all([statsOf(1), detailsOf([release], false)]);
     return { statsRows, ...details };
   };
 
-  /** The top releases first: one more of them tells whether any are left for "Other". */
+  // One more than the top releases tells whether any are left for "Other"
   const fetchTopReleases = async (): Promise<ReleaseRows> => {
     const rows = await statsOf(TOP_RELEASES + 1);
     const statsRows = rows.slice(0, TOP_RELEASES);
@@ -159,12 +152,10 @@ export const getMobileReleases = async ({
     ...statsRows.map((row) => toRow(row[RESULT_COLUMNS.release], row)),
     ...otherRows.map((row) => toRow(OTHER_RELEASE_KEY, row)),
   ];
-  // Most sessions first, then the highest release, as the stats query ranks them, so equal
-  // releases keep their order and colours; "Other" always last.
+  // The stats query's order, so equal releases keep their order and colours; "Other" last
   const releases = orderBy(rows, ['isOther', 'sessions', 'release'], ['asc', 'desc', 'desc']);
 
-  // The query leaves out a bucket a release has no documents in: charts would draw across it, so
-  // every release gets every bucket, an empty one with no sessions and no error rate.
+  // TBUCKET leaves out empty buckets, which the charts would draw across, so fill them
   const pointRows = seriesRows.map((row) => {
     const sessions = row[RESULT_COLUMNS.sessions] ?? 0;
     const point: MobileReleasePoint = {

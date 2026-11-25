@@ -6,11 +6,11 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { range } from 'lodash';
 import type { MobileReleaseRow } from '../../../../../common/types/mobile';
 
 type VisColors = EuiThemeComputed['colors']['vis'];
 
-/** The theme's categorical colours, in order. */
 const categoricalColors = (vis: VisColors): string[] => [
   vis.euiColorVis0,
   vis.euiColorVis1,
@@ -24,25 +24,23 @@ const categoricalColors = (vis: VisColors): string[] => [
   vis.euiColorVis9,
 ];
 
-/**
- * A colour per release, from the theme, so the table and both charts agree; "Other" is grey. Each
- * release takes the colour of its place in `rankedReleases`, every release with data most sessions
- * first, so it keeps it when the page is filtered to it; one missing from it takes its place in
- * `releases`.
- */
+/** A colour per release, by its rank among every release so it keeps it when filtered. */
 export const getReleaseColors = (
   releases: readonly MobileReleaseRow[],
   vis: VisColors,
   rankedReleases: readonly string[] = []
 ): Map<string, string> => {
   const palette = categoricalColors(vis);
+  const named = releases.filter(({ isOther }) => !isOther).map(({ release }) => release);
+  const rankOf = (release: string) => rankedReleases.indexOf(release) % palette.length;
+  const used = new Set(named.map(rankOf).filter((rank) => rank >= 0));
+  // A release the ranking misses, e.g. while the OS changes, takes a colour no ranked one has
+  const free = range(palette.length).filter((index) => !used.has(index));
   const colors = new Map<string, string>();
-  releases
-    .filter(({ isOther }) => !isOther)
-    .forEach(({ release }, index) => {
-      const rank = rankedReleases.indexOf(release);
-      colors.set(release, palette[(rank === -1 ? index : rank) % palette.length]);
-    });
+  named.forEach((release) => {
+    const rank = rankOf(release);
+    colors.set(release, palette[rank >= 0 ? rank : free.shift() ?? 0]);
+  });
   releases
     .filter(({ isOther }) => isOther)
     .forEach(({ release }) => colors.set(release, vis.euiColorVisGrey2));

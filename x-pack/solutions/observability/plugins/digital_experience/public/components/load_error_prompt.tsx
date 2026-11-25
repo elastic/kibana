@@ -32,7 +32,7 @@ export function LoadErrorPrompt({
   retryEbtElement: string;
   'data-test-subj': string;
   retryDataTestSubj: string;
-  /** `h3`, smaller, for the error of a section under its own `h2`. */
+  /** `h3` for a section's error, under the section's `h2`. */
   headingLevel?: 'h2' | 'h3';
 }) {
   const Heading = headingLevel;

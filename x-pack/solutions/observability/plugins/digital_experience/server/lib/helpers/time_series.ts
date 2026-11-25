@@ -28,21 +28,14 @@ export const getHistogramInterval = (start: number, end: number): HistogramInter
   return { value: Math.max(Math.round(interval?.asSeconds() ?? 0), 1), unit: 's' };
 };
 
-/**
- * The most buckets `getBucketTimestamps` lists, far above what `getHistogramInterval` picks, so a
- * hand-made interval over a long range can't expand without bound.
- */
+/** Far above what `getHistogramInterval` picks, so no interval expands without bound. */
 const MAX_BUCKETS = 2_000;
 
-/** `time` in `timeZone`: a moment-timezone name, or a UTC offset such as `+05:30`. */
 const inTimeZone = (time: number, timeZone: string): moment.Moment =>
   moment.tz.zone(timeZone) ? moment.tz(time, timeZone) : moment.utc(time).utcOffset(timeZone);
 
-/**
- * Buckets of `step` milliseconds aligned in local time, as Elasticsearch rounds a fixed interval
- * in a time zone. A zone keeps local wall-clock times across a daylight saving change (e.g. 00:00
- * then 03:00), so the bucket that spans it is shorter or longer; a UTC offset has none.
- */
+// Elasticsearch aligns a fixed interval in local time: across a daylight saving change, buckets
+// keep their wall-clock times (00:00, then 03:00), so the one spanning it is shorter or longer.
 const fixedBucketTimestamps = (
   start: number,
   end: number,
@@ -52,13 +45,12 @@ const fixedBucketTimestamps = (
   const offset = inTimeZone(start, timeZone).utcOffset() * 60_000;
   const firstWallClock = Math.floor((start + offset) / step) * step;
   if (!moment.tz.zone(timeZone)) {
-    // A fixed offset has no daylight saving: every bucket is `step` long
     const first = firstWallClock - offset;
     return range(first, Math.min(end, first + MAX_BUCKETS * step), step);
   }
   const timestamps: number[] = [];
   for (let wallClock = firstWallClock; timestamps.length < MAX_BUCKETS; wallClock += step) {
-    // This local wall-clock time in the zone; one a change skips moves on to the next bucket's
+    // A wall-clock time the change skips lands on the next bucket's
     const time = moment.tz(moment.utc(wallClock).toArray(), timeZone).valueOf();
     if (time >= end) {
       break;
@@ -70,11 +62,7 @@ const fixedBucketTimestamps = (
   return timestamps;
 };
 
-/**
- * The start of every bucket of `interval` that covers `[start, end)` in `timeZone`, as an ES|QL
- * `TBUCKET` with that `time_zone` lines them up (local midnight for calendar units), so a series
- * can fill the buckets its query left out for having no documents.
- */
+/** The start of each bucket of `interval` over `[start, end)`, aligned as `TBUCKET` aligns them. */
 export const getBucketTimestamps = (
   start: number,
   end: number,

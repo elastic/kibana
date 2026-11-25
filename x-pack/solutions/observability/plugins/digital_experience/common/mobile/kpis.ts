@@ -37,7 +37,7 @@ const exceptionsStat = () =>
 /** The KPIs as `STATS` fields: sessions, users and exceptions; an unmapped field counts 0. */
 export const kpiStats = (): ESQLSingleAstItem[] => [sessionsStat(), usersStat(), exceptionsStat()];
 
-/** What an error rate needs, as `kpiStats` defines it: sessions and exceptions, without users. */
+/** The sessions and exceptions of `kpiStats`, for an error rate. */
 export const errorRateStats = (): ESQLSingleAstItem[] => [sessionsStat(), exceptionsStat()];
 
 /** The KPIs of the documents, and their count, which tells whether there is any data. */

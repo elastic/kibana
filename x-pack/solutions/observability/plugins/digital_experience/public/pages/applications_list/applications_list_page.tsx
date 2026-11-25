@@ -285,9 +285,8 @@ export function ApplicationsListPage() {
   const selectedType = applicationType ?? typeWithData;
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
 
-  // Sessions are web only: the Mobile tab the URL picks requests no status. The one the list
-  // opens by itself, with only mobile rows, does: while sessions rebuild, it checks back so the list
-  // fetches again, with their Web applications, once they're built.
+  // Sessions are web only, so the Mobile tab the URL picks requests no status; the one the list
+  // opens by itself does, to fetch again once sessions are built
   const {
     status: sessionsStatus,
     refresh: refreshSessionsStatus,
@@ -299,8 +298,7 @@ export function ApplicationsListPage() {
   const sessionsReady = sessionsStatus
     ? sessionsStatus.installed && !sessionsStatus.rebuilding
     : undefined;
-  // Unknown on the Mobile tab the URL picks, which requests no status, unless an earlier visit to
-  // the Web tab has it: sessions may still need setting up there.
+  // Unknown on the Mobile tab the URL picks, where sessions may still need setting up
   const mayNeedSessionsSetup =
     sessionsReady === false ||
     (sessionsReady === undefined && applicationType === APPLICATION_TYPE.mobile);
@@ -321,8 +319,8 @@ export function ApplicationsListPage() {
   const showsMobileUnreadableDataPrompt =
     mobileAvailability === 'partial' && !hasMobileApplications;
   // Web and mobile applications have their own tab when both have something to show (web rows, a
-  // web retry or sessions still to set up or build, or maybe so, and mobile rows), for the mobile
-  // retry or unreadable data prompt whatever the web, and
+  // web retry or sessions maybe still to set up or build, and mobile rows), for the mobile retry or
+  // unreadable data prompt whatever the web, and
   // when the URL picks the type without data, e.g. for the mobile setup docs, with a tab back. The
   // type that alone has data shows no empty tab, e.g. back from a mobile application.
   const showsTabs =
@@ -330,8 +328,7 @@ export function ApplicationsListPage() {
     showsMobileUnreadableDataPrompt ||
     ((hasWebApplications || hasWebFailures || mayNeedSessionsSetup) && hasMobileApplications) ||
     (response !== undefined && applicationType !== undefined && applicationType !== typeWithData);
-  // The status only refreshes by itself while sessions rebuild, so a refresh also checks it again,
-  // on the Web tab only: sessions are web only.
+  // A refresh checks the sessions status again, on the Web tab only: sessions are web only
   const refreshAll = useCallback(() => {
     refresh();
     if (!isMobileTab) {

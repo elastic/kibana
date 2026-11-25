@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { MobileReleasesResponse } from '../../../../../common/types/mobile';
 import { useApiClient } from '../../../../hooks/use_api_client';
@@ -18,7 +17,6 @@ import { toTimeRangeQuery } from '../../../../utils/time_range_query';
 export interface MobileReleasesState {
   /** The response of the current filters, `undefined` while they load. */
   releases: MobileReleasesResponse | undefined;
-  /** Until the response of the current filters, or an error. */
   isLoading: boolean;
   error: Error | undefined;
   refresh: () => void;
@@ -33,13 +31,15 @@ export const useMobileReleases = (serviceName: string): MobileReleasesState => {
   const { value: release } = useQueryParam('release');
   const { timeZone } = useFormatters();
 
-  const query = useMemo(
-    // The charts' buckets line up with the user's time zone, as the other time charts'
-    () => ({ ...toTimeRangeQuery(timeRange, environment, timeZone), osName, release }),
-    [timeRange, environment, timeZone, osName, release]
-  );
-  // Which params a response is for: a new filter's first render still has the last response
-  const paramsKey = JSON.stringify([serviceName, query]);
+  // The URL's params, not the times they resolve to, so a refresh resolves "now" again
+  const paramsKey = JSON.stringify([
+    serviceName,
+    timeRange,
+    environment,
+    timeZone,
+    osName,
+    release,
+  ]);
 
   const {
     value: fetched,
@@ -51,14 +51,19 @@ export const useMobileReleases = (serviceName: string): MobileReleasesState => {
       paramsKey,
       response: await apiClient.fetch(
         'GET /internal/digital_experience/mobile_applications/{serviceName}/releases',
-        { signal, params: { path: { serviceName }, query } }
+        {
+          signal,
+          params: {
+            path: { serviceName },
+            query: { ...toTimeRangeQuery(timeRange, environment, timeZone), osName, release },
+          },
+        }
       ),
     }),
-    [apiClient, serviceName, query, paramsKey],
+    [apiClient, serviceName, timeRange, environment, timeZone, osName, release, paramsKey],
     { unsetValueOnError: true }
   );
-  // Loading from the render the params change in, not only once the request starts, so the table
-  // never shows the last response with the new filter, e.g. its rows with a new release's pill
+  // Loading from the render the params change in, so no frame shows the last response's rows
   const isCurrent = fetched?.paramsKey === paramsKey;
   const isLoading = loading || (!isCurrent && !error);
   return {

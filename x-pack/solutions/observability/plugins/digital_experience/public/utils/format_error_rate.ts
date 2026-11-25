@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-/** An error rate (errors per session or page load) with two decimals, as the lists show it. */
+/** An error rate with two decimals, as the applications list shows it. */
 export const formatErrorRate = (rate: number): string => rate.toFixed(2);

@@ -33,4 +33,12 @@ describe('getReleaseColors', () => {
 
     expect(colors.get('1.0.0')).toBe('euiColorVis1');
   });
+
+  it('gives a release the ranking misses a colour no ranked release has', () => {
+    // The releases of a new OS before the ranking catches up
+    const colors = getReleaseColors([row('B'), row('C')], TEST_VIS_COLORS, ['A', 'B']);
+
+    expect(colors.get('B')).toBe('euiColorVis1');
+    expect(colors.get('C')).toBe('euiColorVis0');
+  });
 });

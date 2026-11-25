@@ -168,7 +168,7 @@ on serverless and stateful.
   the filter off. Each chart has a one-line header (an `h3` and an info tip with the
   calculation), so both plots line up, and a legend below it (hover a release to spotlight it,
   click to hide it); dragging over one narrows the time range. Session shares show one decimal at
-  most (`formatShare`). The crash rate (#64) and the cold start (#68) join the table's columns and
+  most (`formatKpiPercent`). The crash rate (#64) and the cold start (#68) join the table's columns and
   the charts later.
 
 ## Pages

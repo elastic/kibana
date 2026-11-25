@@ -14,18 +14,12 @@ import {
 
 interface SessionsStatusContextValue {
   state: SessionsStatusState;
-  /** Marks a page that shows the status as open; returns what marks it closed. */
   watch: () => () => void;
 }
 
 const SessionsStatusContext = createContext<SessionsStatusContextValue | undefined>(undefined);
 
-/**
- * Holds the sessions status for every page of the app, so the applications list and the Sessions
- * tab read the same one, and sessions are set up at most once a visit. It's only fetched once a
- * page asks for it, and only checked back while one is open, so mobile pages, which have no
- * sessions, request none.
- */
+/** Holds the sessions status for every page of the app, fetched once a page asks for it. */
 export function SessionsStatusProvider({ children }: { children: ReactNode }) {
   const [watchers, setWatchers] = useState(0);
   const [isRequested, setRequested] = useState(false);
@@ -41,10 +35,7 @@ export function SessionsStatusProvider({ children }: { children: ReactNode }) {
   return <SessionsStatusContext.Provider value={value}>{children}</SessionsStatusContext.Provider>;
 }
 
-/**
- * The sessions status of `SessionsStatusProvider`, fetched for the calling page unless `enabled`
- * is off, e.g. on the applications list's Mobile tab the URL picks.
- */
+/** The sessions status of `SessionsStatusProvider`, fetched unless `enabled` is off. */
 export const useSessionsStatus = ({
   enabled = true,
 }: { enabled?: boolean } = {}): SessionsStatusState => {

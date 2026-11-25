@@ -28,7 +28,6 @@ import { getReleaseColors } from './release_colors';
 import { DEFAULT_RELEASE_SORT, ReleaseTable, type ReleaseSort } from './release_table';
 import type { MobileReleasesState } from './use_mobile_releases';
 
-/** The height of the loading state, so the page doesn't jump much when the section loads. */
 const LOADING_HEIGHT = 240;
 
 const TITLE = i18n.translate('xpack.digitalExperience.mobile.releases.title', {
@@ -43,24 +42,21 @@ const NO_RELEASES = i18n.translate('xpack.digitalExperience.mobile.releases.empt
   defaultMessage: 'No release reported sessions in the selected time range',
 });
 
-/** Filters the page by a release, or by none with `undefined`. */
 type SelectRelease = (release: string | undefined) => void;
 
 interface ReleaseFilterProps {
-  /** The release the page is filtered by, if any. */
   selectedRelease: string | undefined;
   onSelectRelease: SelectRelease;
-  /** Every release with data, most sessions first, whatever the filter: the colours' order. */
+  /** Every release with data, whatever the filter, so colours don't change when filtering. */
   rankedReleases: readonly string[];
 }
 
 interface ContentProps extends ReleaseFilterProps {
-  /** The table's sort, kept here so a reload or a new filter doesn't reset it. */
+  /** Kept here, so a reload doesn't reset it. */
   sort: ReleaseSort;
   onSort: (sort: ReleaseSort) => void;
 }
 
-/** The table, and the two charts side by side below it. */
 const ReleaseHealthContent = React.memo(function ReleaseHealthContent({
   response: { releases, series, markers, histogram },
   selectedRelease,
@@ -71,7 +67,6 @@ const ReleaseHealthContent = React.memo(function ReleaseHealthContent({
 }: ContentProps & { response: MobileReleasesResponse }) {
   const { euiTheme } = useEuiTheme();
   const { setTimeRange } = useTimeRange();
-  // One colour per release, shared by the table and both charts.
   const colors = useMemo(
     () => getReleaseColors(releases, euiTheme.colors.vis, rankedReleases),
     [releases, euiTheme.colors.vis, rankedReleases]
@@ -92,7 +87,6 @@ const ReleaseHealthContent = React.memo(function ReleaseHealthContent({
         onSort={onSort}
       />
       <EuiSpacer size="m" />
-      {/* Side by side, one under the other on narrow screens. */}
       <EuiFlexGrid columns={2} gutterSize="m">
         <EuiFlexItem>
           <ReleaseErrorRateChart releases={releases} {...chartProps} />
@@ -106,7 +100,7 @@ const ReleaseHealthContent = React.memo(function ReleaseHealthContent({
 });
 
 const sectionBody = (
-  { releases, isLoading, error, refresh }: MobileReleasesState,
+  { releases: response, isLoading, error, refresh }: MobileReleasesState,
   contentProps: ContentProps
 ): ReactNode => {
   if (error) {
@@ -122,7 +116,7 @@ const sectionBody = (
       />
     );
   }
-  if (isLoading || !releases) {
+  if (isLoading || !response) {
     return (
       <EuiFlexGroup
         css={{ blockSize: LOADING_HEIGHT }}
@@ -134,20 +128,17 @@ const sectionBody = (
       </EuiFlexGroup>
     );
   }
-  if (releases.releases.length === 0) {
+  if (response.releases.length === 0) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="digitalExperienceMobileReleasesEmpty">
         {NO_RELEASES}
       </EuiText>
     );
   }
-  return <ReleaseHealthContent response={releases} {...contentProps} />;
+  return <ReleaseHealthContent response={response} {...contentProps} />;
 };
 
-/**
- * The release health of the application: its releases in a table, and over time in two charts. A
- * release in the table filters the page by it; dragging over a chart narrows the time range.
- */
+/** The release health of the application: its releases in a table, and over time in two charts. */
 export function ReleaseHealth({
   releasesState,
   ...releaseFilter

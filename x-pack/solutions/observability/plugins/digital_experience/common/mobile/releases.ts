@@ -11,28 +11,21 @@ import type { RESULT_COLUMNS } from './fields';
 import { inValues, mobileColumn, resultColumn } from './fields';
 import { errorRateStats, kpiStats } from './kpis';
 
-/** The releases shown by name; the others are grouped as "Other". */
 export const TOP_RELEASES = 5;
 
-/** The sessions a release needs in the range for its error rate to be shown. */
+/** Sessions a release needs in the range to show an error rate. */
 export const MIN_RELEASE_SESSIONS = 100;
 
-/** The sessions a bucket of the time series needs for its error rate to be drawn. */
+/** Sessions a time bucket needs to draw an error rate. */
 export const MIN_BUCKET_SESSIONS = 10;
 
-/**
- * The rows the time series may have, above ES|QL's default of 1,000, which a long range of daily
- * buckets for six groups passes; the histogram keeps the buckets far below it.
- */
+/** Above ES|QL's default of 1,000 rows, which a long range of daily buckets passes. */
 export const MAX_SERIES_ROWS = 10_000;
 
-/**
- * The key of the "Other" group. A real release is never empty (`withRelease` drops those), so no
- * `service.version` can collide with it.
- */
+/** Empty, so no real release can collide with it: `withRelease` drops empty ones. */
 export const OTHER_RELEASE_KEY = '';
 
-/** Documents with a release: an empty `service.version` names none. */
+/** Documents with a non-empty release. */
 export const withRelease = (query: ComposerQuery): ComposerQuery =>
   query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL AND ${mobileColumn(
     'serviceVersion'
@@ -50,7 +43,6 @@ const DURATION_UNITS: Readonly<Record<HistogramInterval['unit'], string>> = {
 export const toEsqlDuration = ({ value, unit }: HistogramInterval): string =>
   `${value} ${DURATION_UNITS[unit]}${value === 1 ? '' : 's'}`;
 
-/** The releases of `releases` as their own group, the rest as `OTHER_RELEASE_KEY`. */
 const withReleaseGroup = (query: ComposerQuery, releases: readonly string[]): ComposerQuery =>
   withRelease(query).pipe`EVAL ${resultColumn('releaseGroup')} = CASE(
     ${inValues('serviceVersion', releases)},
@@ -58,17 +50,14 @@ const withReleaseGroup = (query: ComposerQuery, releases: readonly string[]): Co
     ${OTHER_RELEASE_KEY}
   )`;
 
-/**
- * Sessions, users and exceptions per release, as the KPI row defines them, and when each first
- * has a document in the range: the releases with most sessions (then the highest), up to `limit`.
- */
+/** The KPIs and first document of each release in the range, most sessions first. */
 export const withReleaseStats = (query: ComposerQuery, limit: number): ComposerQuery =>
   withRelease(query).pipe`STATS ${kpiStats()}, ${resultColumn('firstSeen')} = MIN(@timestamp)
       BY ${resultColumn('release')} = ${mobileColumn('serviceVersion')}`.pipe`SORT ${resultColumn(
     'sessions'
   )} DESC, ${resultColumn('release')} DESC`.pipe`LIMIT ${limit}`;
 
-/** The same stats for every release but `releases`, together: the "Other" group. */
+/** The KPIs of every release but `releases` together: the "Other" group. */
 export const withOtherReleaseStats = (
   query: ComposerQuery,
   releases: readonly string[]
@@ -76,10 +65,7 @@ export const withOtherReleaseStats = (
   withRelease(query).pipe`WHERE NOT (${inValues('serviceVersion', releases)})`
     .pipe`STATS ${kpiStats()}`;
 
-/**
- * Sessions and exceptions per bucket of `interval` and group, for the charts, which show no users.
- * The buckets follow the request's `time_zone`.
- */
+/** Sessions and exceptions per time bucket and group, in the request's `time_zone`. */
 export const withReleaseSeries = (
   query: ComposerQuery,
   releases: readonly string[],
@@ -90,7 +76,7 @@ export const withReleaseSeries = (
     'releaseGroup'
   )}`.pipe`SORT ${resultColumn('bucket')} ASC`.pipe`LIMIT ${MAX_SERIES_ROWS}`;
 
-/** Which of `releases` have a document, e.g. before the range, so they don't first appear in it. */
+/** Which of `releases` have documents, e.g. before the range. */
 export const withReleasesSeen = (
   query: ComposerQuery,
   releases: readonly string[]
@@ -98,29 +84,25 @@ export const withReleasesSeen = (
   withRelease(query).pipe`WHERE ${inValues('serviceVersion', releases)}`
     .pipe`STATS BY ${resultColumn('release')} = ${mobileColumn('serviceVersion')}`;
 
-/** The KPIs of a row of the release queries; a column every row has null for is dropped. */
+/** Optional: ES|QL drops a column that is null in every row. */
 interface ReleaseKpis {
   [RESULT_COLUMNS.sessions]?: number;
   [RESULT_COLUMNS.users]?: number;
   [RESULT_COLUMNS.exceptions]?: number;
 }
 
-/** The row of `withReleaseStats`. */
 export interface ReleaseStatsRow extends ReleaseKpis {
   [RESULT_COLUMNS.release]: string;
   [RESULT_COLUMNS.firstSeen]: string;
 }
 
-/** The row of `withOtherReleaseStats`. */
 export type OtherReleaseStatsRow = ReleaseKpis;
 
-/** The row of `withReleaseSeries`. */
 export interface ReleaseSeriesRow extends Omit<ReleaseKpis, typeof RESULT_COLUMNS.users> {
   [RESULT_COLUMNS.releaseGroup]: string;
   [RESULT_COLUMNS.bucket]: string;
 }
 
-/** The row of `withReleasesSeen`. */
 export interface ReleaseSeenRow {
   [RESULT_COLUMNS.release]: string;
 }

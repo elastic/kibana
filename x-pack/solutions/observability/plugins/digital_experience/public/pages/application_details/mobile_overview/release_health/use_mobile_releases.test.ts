@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useApiClient } from '../../../../hooks/use_api_client';
 import { useEnvironment } from '../../../../hooks/use_environment';
 import { createFormatters, useFormatters } from '../../../../hooks/use_formatters';
@@ -78,5 +78,24 @@ describe('useMobileReleases', () => {
         params: expect.objectContaining({ query: expect.objectContaining({ release: '1.0.0' }) }),
       })
     );
+  });
+
+  it('resolves a relative range again on refresh, so it reads up to the new now', async () => {
+    jest.useFakeTimers({ now: Date.parse('2021-01-18T13:00:00.000Z') });
+    jest.mocked(useTimeRange).mockReturnValue({
+      timeRange: { rangeFrom: 'now-1h', rangeTo: 'now' },
+      isTimeRangeInUrl: true,
+      setTimeRange: jest.fn(),
+    });
+    const { result } = renderHook(() => useMobileReleases('shop-mobile'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    jest.setSystemTime(Date.parse('2021-01-18T13:05:00.000Z'));
+    act(() => result.current.refresh());
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+
+    const ends = fetch.mock.calls.map(([, { params }]) => params.query.end);
+    expect(ends).toEqual(['2021-01-18T13:00:00.000Z', '2021-01-18T13:05:00.000Z']);
+    jest.useRealTimers();
   });
 });
