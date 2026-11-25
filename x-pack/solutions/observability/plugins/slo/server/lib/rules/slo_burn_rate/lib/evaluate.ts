@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { chunk, get } from 'lodash';
+import { get } from 'lodash';
 import { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
@@ -14,7 +14,6 @@ import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import {
   buildCandidatesQuery,
   buildQuery,
-  EVALUATION_PAGE_SIZE,
   EvaluationAfterKey,
   generateAboveThresholdKey,
   generateBurnRateKey,
@@ -72,6 +71,24 @@ interface InstancesAggResults<TBucket> {
   };
 }
 
+interface CandidatesAggResults {
+  instances?: {
+    after_key?: EvaluationAfterKey;
+    buckets?: Array<Pick<EvaluationBucket, 'key'>>;
+  };
+}
+
+export type BurnRateEvaluationResult = ReturnType<typeof transformBucketToResults>[number];
+
+interface EvaluateOptions {
+  maxResults?: number;
+}
+
+export interface EvaluationResult {
+  results: BurnRateEvaluationResult[];
+  hasReachedLimit: boolean;
+}
+
 interface EvaluationContext {
   esClient: ElasticsearchClient;
   slo: SLODefinition;
@@ -94,48 +111,66 @@ async function searchInstances<TBucket>(
   return results.aggregations.instances;
 }
 
-async function searchAllPages<TBucket>(
+async function* searchPages<TBucket>(
   context: EvaluationContext,
   buildRequest: (afterKey?: EvaluationAfterKey) => Omit<SearchRequest, 'index'>
-): Promise<TBucket[]> {
-  const buckets: TBucket[] = [];
+): AsyncGenerator<TBucket[]> {
   let afterKey: EvaluationAfterKey | undefined;
   do {
     const instances = await searchInstances<TBucket>(context, buildRequest(afterKey));
-    buckets.push(...instances.buckets);
+    yield instances.buckets;
     afterKey = instances.after_key;
   } while (afterKey);
-
-  return buckets;
 }
 
-async function evaluateCandidates(context: EvaluationContext): Promise<EvaluationBucket[]> {
+async function searchCandidates(
+  { esClient, slo, params, startedAt }: EvaluationContext,
+  afterKey?: EvaluationAfterKey
+): Promise<{ instanceIds: string[]; afterKey?: EvaluationAfterKey }> {
+  const results = await esClient.search<undefined, CandidatesAggResults>({
+    index: SLI_DESTINATION_INDEX_PATTERN,
+    ...buildCandidatesQuery(startedAt, slo, params, afterKey),
+  });
+
+  // The filter_path drops the empty objects, so an empty page can come without its buckets or aggregations.
+  const instances = results.aggregations?.instances;
+  return {
+    instanceIds: (instances?.buckets ?? []).map(({ key }) => key.instanceId),
+    afterKey: instances?.after_key,
+  };
+}
+
+async function* evaluateCandidatePages(
+  context: EvaluationContext
+): AsyncGenerator<EvaluationBucket[]> {
   const { slo, params, startedAt } = context;
-  const candidates = await searchAllPages<Pick<EvaluationBucket, 'key'>>(context, (afterKey) =>
-    buildCandidatesQuery(startedAt, slo, params, afterKey)
-  );
-  const candidateIds = candidates.map(({ key }) => key.instanceId);
-  const buckets: EvaluationBucket[] = [];
-  // Chunks match the composite page size, so each chunk is evaluated in a single page.
-  for (const instanceIds of chunk(candidateIds, EVALUATION_PAGE_SIZE)) {
-    const instances = await searchInstances<EvaluationBucket>(
-      context,
-      buildQuery(startedAt, slo, params, undefined, instanceIds)
-    );
-    buckets.push(...instances.buckets);
-  }
-
-  return buckets;
+  let afterKey: EvaluationAfterKey | undefined;
+  do {
+    const candidates = await searchCandidates(context, afterKey);
+    if (candidates.instanceIds.length > 0) {
+      // Candidates pages match the composite page size, so each page is evaluated in a single query.
+      const instances = await searchInstances<EvaluationBucket>(
+        context,
+        buildQuery(startedAt, slo, params, undefined, candidates.instanceIds)
+      );
+      yield instances.buckets;
+    }
+    afterKey = candidates.afterKey;
+  } while (afterKey);
 }
 
+/**
+ * Evaluates the SLO instances breaching the burn rate windows, stopping once more than `maxResults` breach.
+ */
 export async function evaluate(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
   params: BurnRateRuleParams,
-  startedAt: Date
-) {
+  startedAt: Date,
+  { maxResults = Number.POSITIVE_INFINITY }: EvaluateOptions = {}
+): Promise<EvaluationResult> {
   if (params.windows.length === 0) {
-    return [];
+    return { results: [], hasReachedLimit: false };
   }
 
   const context: EvaluationContext = { esClient, slo, params, startedAt };
@@ -143,12 +178,24 @@ export async function evaluate(
   const canPrefilterCandidates = params.windows.every(
     ({ burnRateThreshold }) => burnRateThreshold > 0
   );
-  const buckets = canPrefilterCandidates
-    ? await evaluateCandidates(context)
-    : await searchAllPages<EvaluationBucket>(context, (afterKey) =>
+  const pages = canPrefilterCandidates
+    ? evaluateCandidatePages(context)
+    : searchPages<EvaluationBucket>(context, (afterKey) =>
         buildQuery(startedAt, slo, params, afterKey)
       );
-  return transformBucketToResults(buckets, params);
+
+  const results: BurnRateEvaluationResult[] = [];
+  for await (const buckets of pages) {
+    results.push(...transformBucketToResults(buckets, params));
+    if (results.length > maxResults) {
+      break;
+    }
+  }
+
+  return {
+    results: results.slice(0, maxResults),
+    hasReachedLimit: results.length > maxResults,
+  };
 }
 
 function transformBucketToResults(buckets: EvaluationBucket[], params: BurnRateRuleParams) {
