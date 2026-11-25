@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/esql-server-utils'
   - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
   - '@kbn/cloud-plugin'
   - '@kbn/projects-solutions-groups'
   - '@kbn/esql-language'
