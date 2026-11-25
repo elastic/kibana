@@ -48,8 +48,9 @@ export class KnownFailuresStrategy implements DetectionStrategy {
     const enabledSourceIds = new Set(sources.filter(({ enabled }) => enabled).map(({ id }) => id));
     const result: Required<DesiredResources> = { resources: [], skipped: [], notes: [] };
 
-    queries.forEach(({ query, source_id: sourceId }) => {
-      const reason = getUnwatchableReason(query);
+    queries.forEach((link) => {
+      const { query, source_id: sourceId } = link;
+      const reason = getUnwatchableReason(link);
       if (reason) {
         result.notes.push(`${sourceId}: ${reason}`);
         return;

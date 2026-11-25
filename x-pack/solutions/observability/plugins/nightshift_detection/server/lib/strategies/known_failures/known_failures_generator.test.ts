@@ -16,7 +16,11 @@ const MINUTE_MS = 60_000;
 const WINDOW = { from: Date.UTC(2026, 10, 20, 10, 0), to: Date.UTC(2026, 10, 20, 10, 5) };
 const SERIES_KEY = getSeriesKey({ fingerprint: 'known_failures:watched', source_id: 'source-1' });
 
-const createQuery = (id: string, esql: string): QueryLink => ({
+const createQuery = (
+  id: string,
+  esql: string,
+  { severityScore = 70, isRuleBacked = false } = {}
+): QueryLink => ({
   query: {
     id,
     title: id,
@@ -24,10 +28,10 @@ const createQuery = (id: string, esql: string): QueryLink => ({
     esql: { query: esql },
     type: 'match',
     features: [{ id: 'checkout' }],
-    severity_score: 70,
+    severity_score: severityScore,
   },
   source_id: 'source-1',
-  rule_backed: false,
+  rule_backed: isRuleBacked,
   rule_id: `rule-${id}`,
 });
 
@@ -112,17 +116,28 @@ describe('KnownFailuresGenerator', () => {
   // A wrong id reads another indicator's rows, or none.
   it('reads the window of the enabled rules that watch a current knowledge indicator', async () => {
     const offRule = createQuery('off', 'FROM logs | WHERE message : "refused"');
+    // Scored down since the last reconcile: its rule is still on until the next one deletes it.
+    const downgraded = createQuery('downgraded', 'FROM logs | WHERE message : "reset"', {
+      severityScore: 40,
+    });
+    // Promoted by hand in significant events, whatever its score.
+    const promoted = createQuery('promoted', 'FROM logs | WHERE message : "denied"', {
+      severityScore: 40,
+      isRuleBacked: true,
+    });
     const getId = (query: QueryLink) =>
       getKnownFailureRuleId({ spaceId: 'default', query, cpsEnabled: false });
     const readRows = jest.fn().mockResolvedValue([]);
 
     const result = await new KnownFailuresGenerator().generate({
       ...createContext({ rows: [] }),
-      knowledge: { listQueries: async () => [WATCHED, offRule] },
+      knowledge: { listQueries: async () => [WATCHED, offRule, downgraded, promoted] },
       rules: {
         listManaged: async () => [
           { id: getId(WATCHED), enabled: true, created_at: CREATED_AT },
           { id: getId(offRule), enabled: false, created_at: CREATED_AT },
+          { id: getId(downgraded), enabled: true, created_at: CREATED_AT },
+          { id: getId(promoted), enabled: true, created_at: CREATED_AT },
           // The rule of a knowledge indicator deleted since: nothing to describe its rows.
           { id: 'orphan', enabled: true, created_at: CREATED_AT },
         ],
@@ -131,7 +146,11 @@ describe('KnownFailuresGenerator', () => {
     } as unknown as GeneratorContext);
 
     expect(readRows).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'default', ruleIds: [getId(WATCHED)], ...WINDOW })
+      expect.objectContaining({
+        spaceId: 'default',
+        ruleIds: [getId(WATCHED), getId(promoted)],
+        ...WINDOW,
+      })
     );
     // A rule that wrote nothing did not run, and a disabled rule watches nothing: silence must not
     // read as a quiet indicator.
@@ -139,7 +158,8 @@ describe('KnownFailuresGenerator', () => {
       readings: [],
       notes: [
         expect.stringMatching(/\[off\] has a disabled Known failures rule/),
-        expect.stringMatching(/wrote no row in the window/),
+        expect.stringMatching(/of knowledge indicator \[watched\] wrote no row in the window/),
+        expect.stringMatching(/of knowledge indicator \[promoted\] wrote no row in the window/),
       ],
       truncated: false,
     });

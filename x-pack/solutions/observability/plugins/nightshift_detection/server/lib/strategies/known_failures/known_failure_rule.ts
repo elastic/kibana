@@ -17,18 +17,22 @@ import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants
  * Why a knowledge indicator gets no Known failures rule, or `undefined` when it gets one. Only match
  * queries made of `FROM` and `WHERE`, with at most `KEEP`, `DROP` or `SORT` beside them, can be
  * counted per minute, and only while the rule query stays within the rules API's length limit. And
- * only from the severity score significant events needs to back a query with a rule: each rule
- * scans six hours every five minutes, too much for an indicator nobody would be paged for.
+ * only the indicators significant events backs with a rule: those scored high enough for it to
+ * create one, and those an operator promoted by hand. Each rule scans six hours every five minutes,
+ * too much for an indicator nobody would be paged for.
  */
-export function getUnwatchableReason(
-  query: Pick<StreamQuery, 'id' | 'type' | 'esql' | 'severity_score'>
-): string | undefined {
-  // Unscored counts as 0, as it does for significant events.
-  if (query.severity_score === undefined) {
-    return `knowledge indicator [${query.id}] has no severity score, and Known failures watches only from ${HIGH_SEVERITY_THRESHOLD}`;
-  }
-  if (query.severity_score < HIGH_SEVERITY_THRESHOLD) {
-    return `knowledge indicator [${query.id}] has a severity score of ${query.severity_score}, below ${HIGH_SEVERITY_THRESHOLD}, the score significant events needs to back a query with a rule`;
+export function getUnwatchableReason({
+  query,
+  rule_backed: isRuleBacked,
+}: Pick<QueryLink, 'query' | 'rule_backed'>): string | undefined {
+  if (!isRuleBacked) {
+    // Unscored counts as 0, as it does for significant events.
+    if (query.severity_score === undefined) {
+      return `knowledge indicator [${query.id}] has no severity score and no rule, and Known failures watches only from ${HIGH_SEVERITY_THRESHOLD} or a promoted indicator`;
+    }
+    if (query.severity_score < HIGH_SEVERITY_THRESHOLD) {
+      return `knowledge indicator [${query.id}] has a severity score of ${query.severity_score} and no rule; Known failures watches from ${HIGH_SEVERITY_THRESHOLD}, the score significant events backs with a rule, or a promoted indicator`;
+    }
   }
   if (query.type !== 'match') {
     return `knowledge indicator [${query.id}] is a STATS query, which Known failures does not count yet`;

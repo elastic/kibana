@@ -101,10 +101,9 @@ export class KnownFailuresGenerator implements DetectionSignalGenerator {
 }
 
 /**
- * 1. Joins the strategy's enabled rules with the knowledge indicators they watch.
- * 2. Reads the rows those rules wrote in the window.
- * 3. Decodes each rule's rows. A rule without a row ran no query in the window, which is noted, not
- *    read as a quiet indicator; a row the rule query could not have written is noted and left out.
+ * Each watched knowledge indicator with its Known failures rule's measurements in the window,
+ * newest first, the notes on what could not be read, and whether the reader hit its cap. A rule
+ * without a row ran no query in the window, which is noted, not read as a quiet indicator.
  */
 async function readMeasuredFailures(context: GeneratorContext): Promise<{
   measured: MeasuredKnownFailure[];
@@ -113,7 +112,7 @@ async function readMeasuredFailures(context: GeneratorContext): Promise<{
 }> {
   const { spaceId, window, rules, abortSignal } = context;
 
-  // 1.
+  // 1. Joins the strategy's enabled rules with the knowledge indicators they watch.
   const { knowledgeIndicatorByRuleId, createdAtByRuleId, unwatched } =
     await readWatchedKnowledgeIndicators(context);
   const notes = unwatched.map(
@@ -126,7 +125,7 @@ async function readMeasuredFailures(context: GeneratorContext): Promise<{
     return { measured: [], notes, truncated: false };
   }
 
-  // 2.
+  // 2. Reads the rows those rules wrote in the window, grouped by rule.
   const rows = await rules.readRows({
     spaceId,
     ruleIds: [...knowledgeIndicatorByRuleId.keys()],
@@ -137,7 +136,7 @@ async function readMeasuredFailures(context: GeneratorContext): Promise<{
   // The reader returns rows newest first, and grouping keeps that order within each rule.
   const rowsByRuleId = groupBy(rows, ({ rule_id: ruleId }) => ruleId);
 
-  // 3.
+  // 3. Decodes each rule's rows; a row the rule query could not have written is noted and left out.
   const measured = [...knowledgeIndicatorByRuleId].flatMap(([ruleId, knowledgeIndicator]) => {
     const ruleRows = rowsByRuleId[ruleId] ?? [];
     if (ruleRows.length === 0) {
@@ -193,7 +192,7 @@ async function readWatchedKnowledgeIndicators({
   );
 
   const countable = queries
-    .filter(({ query }) => getUnwatchableReason(query) === undefined)
+    .filter((link) => getUnwatchableReason(link) === undefined)
     .map((query) => ({ query, ruleId: getKnownFailureRuleId({ spaceId, query, cpsEnabled }) }));
   return {
     knowledgeIndicatorByRuleId: new Map(
