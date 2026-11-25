@@ -258,10 +258,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const generateCsv = async (
-          params: JobParamsCsvFromSavedObject['locatorParams'][number]['params']
+          params: JobParamsCsvFromSavedObject['locatorParams'][number]['params'],
+          jobParams: Pick<JobParamsCsvFromSavedObject, 'forceNow'> = {}
         ) => {
           const { text, status } = await requestCsvFromSavedSearch({
             locatorParams: [{ id: DISCOVER_APP_LOCATOR, version: 'reporting', params }],
+            ...jobParams,
           });
           expect(status).to.eql(200);
           const { job, path }: { job: ReportApiJSON; path: string } = JSON.parse(text);
@@ -342,20 +344,55 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
+        describe('relative time range, as in a scheduled report', () => {
+          const params = {
+            dataViewId: ECOM_DATA_VIEW_ID,
+            columns: ['category', 'order_id'],
+            sort: [
+              ['order_date', 'asc'],
+              ['order_id', 'asc'],
+            ],
+            filters: [],
+          };
+          const getRows = (csvFile: string) => csvFile.trim().split('\n').slice(1);
+
+          it('is anchored to forceNow, so it exports the rows of the equivalent absolute time range', async () => {
+            const absolute = await generateCsv({ ...params, timeRange });
+            // the scheduled report resolves "now" to the time it runs at, which is the end of the absolute range
+            const relative = await generateCsv(
+              { ...params, timeRange: { from: 'now-1d', to: 'now' } },
+              { forceNow: timeRange.to }
+            );
+
+            expect(getRows(absolute.csvFile).length).to.be.greaterThan(1);
+            expect(relative.csvFile).to.eql(absolute.csvFile);
+          });
+
+          it('is not anchored to the current time without forceNow', async () => {
+            // the data is from 2019, so the last day before now does not have rows
+            const { csvFile } = await generateCsv({
+              ...params,
+              timeRange: { from: 'now-1d', to: 'now' },
+            });
+
+            expect(getRows(csvFile)).to.eql([]);
+          });
+        });
+
         describe('filters of the locator params, over the ones of the saved search', () => {
           const savedSearchWithFilterId = 'csv-v2-saved-search-with-filter';
-          const maleFilter = {
+          const genderFilter = (gender: 'MALE' | 'FEMALE') => ({
             meta: {
               alias: null,
               disabled: false,
               negate: false,
               key: 'customer_gender',
-              params: { query: 'MALE' },
+              params: { query: gender },
               type: 'phrase',
               index: ECOM_DATA_VIEW_ID,
             },
-            query: { match_phrase: { customer_gender: 'MALE' } },
-          };
+            query: { match_phrase: { customer_gender: gender } },
+          });
 
           const getGenders = (csvFile: string) => {
             const [header, ...rows] = csvFile.trim().split('\n');
@@ -383,9 +420,9 @@ export default ({ getService }: FtrProviderContext) => {
                           query: { query: '', language: 'kuery' },
                           filter: [
                             {
-                              ...maleFilter,
+                              ...genderFilter('MALE'),
                               meta: {
-                                ...maleFilter.meta,
+                                ...genderFilter('MALE').meta,
                                 index: undefined,
                                 indexRefName:
                                   'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
@@ -430,14 +467,37 @@ export default ({ getService }: FtrProviderContext) => {
             expect(getGenders(csvFile)).to.eql(new Set(['MALE']));
           });
 
-          it('does not use the filters of the saved search if they were removed in the locator params', async () => {
+          it('adds the filters of the locator params to the ones of the saved search, if there is no data view', async () => {
             const { csvFile } = await generateCsv({
               savedSearchId: savedSearchWithFilterId,
+              filters: [genderFilter('FEMALE')],
+              timeRange,
+            });
+
+            // the saved filter is still applied, so there are no rows that match both genders
+            expect(getGenders(csvFile)).to.eql(new Set());
+          });
+
+          it('does not use the filters of the saved search if they were removed, with a data view in the locator params', async () => {
+            const { csvFile } = await generateCsv({
+              savedSearchId: savedSearchWithFilterId,
+              dataViewId: ECOM_DATA_VIEW_ID,
               filters: [],
               timeRange,
             });
 
             expect(getGenders(csvFile)).to.eql(new Set(['MALE', 'FEMALE']));
+          });
+
+          it('uses the filters of the locator params instead of the ones of the saved search, with a data view in the locator params', async () => {
+            const { csvFile } = await generateCsv({
+              savedSearchId: savedSearchWithFilterId,
+              dataViewId: ECOM_DATA_VIEW_ID,
+              filters: [genderFilter('FEMALE')],
+              timeRange,
+            });
+
+            expect(getGenders(csvFile)).to.eql(new Set(['FEMALE']));
           });
         });
       });

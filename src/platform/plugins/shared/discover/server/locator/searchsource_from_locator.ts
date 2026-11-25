@@ -42,9 +42,18 @@ function normalizeFilter(savedSearchFilterTmp?: FilterResponse) {
 }
 
 /*
- * Combine the time range filter with the filters of the search. The filters in the locator params (the current
- * state of the search, which already includes the saved ones that were not removed) replace the filters that have
- * been saved into the saved search object. Without them, the saved filters are used.
+ * Whether the filters of the locator params replace the filters that have been saved into the saved search.
+ * Discover sends the full current state of the search, which includes an explicit data view (`dataViewId`) and
+ * the saved filters that were not removed, so its filters replace the saved ones. The params that only have a
+ * saved search and some filters (for example, of an API script) add them to the saved ones.
+ * TODO: also consider `dataViewSpec`, when the ad hoc data views are supported.
+ */
+const replacesSavedFilters = (params: DiscoverAppLocatorParams): boolean =>
+  params.filters !== undefined && Boolean(params.dataViewId);
+
+/*
+ * Combine the time range filter with the filters of the search: the filters in the locator params and the ones
+ * that have been saved into the saved search object (see `replacesSavedFilters`).
  * NOTE: if the filters that were saved into the search are NOT an array, it may be a function, and can not be supported.
  */
 const getFilters = (
@@ -79,13 +88,15 @@ const getFilters = (
     }
   }
 
-  // Adding the saved filters to the ones of the params would apply the filters that were removed in the UI, or
-  // that are for fields of a data view that was replaced.
-  const sourceFilters =
-    params.filters !== undefined ? params.filters : searchSource.getField('filter');
-  const normalizedFilters = normalizeFilter(sourceFilters);
-  if (normalizedFilters) {
-    filters.push(...normalizedFilters);
+  const savedFilters = replacesSavedFilters(params)
+    ? undefined
+    : normalizeFilter(searchSource.getField('filter'));
+  if (savedFilters) {
+    filters.push(...savedFilters);
+  }
+  const paramsFilters = normalizeFilter(params.filters);
+  if (paramsFilters) {
+    filters.push(...paramsFilters);
   }
 
   return filters;
@@ -154,9 +165,9 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
       searchSource,
       params
     );
-    // `filters` is the full list of filters, so the ones of the saved search are always removed when the
-    // locator params have filters, even if they are empty
-    if (filters.length > 0 || params.filters !== undefined) {
+    // `filters` has the full list of filters, so the ones of the saved search are removed when they are replaced,
+    // even if there are no filters left
+    if (filters.length > 0 || replacesSavedFilters(params)) {
       searchSource.removeField('filter');
     }
     if (filters.length > 0) {

@@ -9,7 +9,7 @@
 
 import Boom from '@hapi/boom';
 import dateMath from '@kbn/datemath';
-import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
@@ -31,6 +31,9 @@ const isString = (value: unknown): value is string => typeof value === 'string';
 const isDateOrDateMath = (value: unknown, roundUp = false): boolean =>
   isString(value) && dateMath.parse(value, { roundUp })?.isValid() === true;
 
+const isFilterObject = (item: unknown): boolean =>
+  typeof item === 'object' && item !== null && !Array.isArray(item);
+
 const isSortOrderPair = (item: unknown): boolean =>
   Array.isArray(item) &&
   item.length === 2 &&
@@ -42,7 +45,7 @@ const isSortOrderPair = (item: unknown): boolean =>
  * that are used to build the request are validated here. An invalid value fails the report: skipping
  * it would silently export more data than requested, for example without a time range filter.
  */
-const validateParams = ({ columns, sort, timeRange }: DiscoverAppLocatorParams): void => {
+const validateParams = ({ columns, sort, timeRange, filters }: DiscoverAppLocatorParams): void => {
   if (columns !== undefined && !(Array.isArray(columns) && columns.every(isString))) {
     throw new Error('Invalid DiscoverAppLocatorParams: "columns" must be an array of strings');
   }
@@ -58,12 +61,30 @@ const validateParams = ({ columns, sort, timeRange }: DiscoverAppLocatorParams):
     );
   }
 
+  // Filters can replace the ones of the saved search, so a malformed value must not be read as "no filters"
+  if (filters !== undefined && !(Array.isArray(filters) && filters.every(isFilterObject))) {
+    throw new Error('Invalid DiscoverAppLocatorParams: "filters" must be an array of filters');
+  }
+
   if (sort !== undefined && !(Array.isArray(sort) && sort.every(isSortOrderPair))) {
     throw new Error(
       'Invalid DiscoverAppLocatorParams: "sort" must be an array of [field, "asc" | "desc"] pairs'
     );
   }
 };
+
+/**
+ * Creates the search sources with the requested data view, instead of the one that is referenced by the
+ * saved search. The latter would be loaded first, so a saved search whose data view was deleted could not be
+ * exported with another data view.
+ */
+const withDataView = (
+  searchSourceStart: ISearchStartSearchSource,
+  dataViewId: string
+): ISearchStartSearchSource => ({
+  ...searchSourceStart,
+  create: (fields) => searchSourceStart.create({ ...fields, index: dataViewId }),
+});
 
 /**
  * Resolves the saved search, data view and a base search source from DiscoverAppLocatorParams.
@@ -92,17 +113,18 @@ export const resolveLocatorSearch = async (
   validateParams(params);
 
   try {
-    const savedSearch = savedSearchId ? await getSavedSearch(savedSearchId, services) : undefined;
+    const searchSourceStart = dataViewId
+      ? withDataView(services.searchSourceStart, dataViewId)
+      : services.searchSourceStart;
+
+    const savedSearch = savedSearchId
+      ? await getSavedSearch(savedSearchId, { ...services, searchSourceStart })
+      : undefined;
     const searchSource = savedSearch
       ? savedSearch.searchSource.createCopy()
-      : await services.searchSourceStart.create();
+      : await searchSourceStart.create();
 
-    let dataView = searchSource.getField('index');
-
-    if (dataViewId && dataView?.id !== dataViewId) {
-      dataView = await services.dataViewsService.get(dataViewId);
-      searchSource.setField('index', dataView);
-    }
+    const dataView = searchSource.getField('index');
 
     if (!dataView) {
       throw new Error(`Search Source is missing the "index" field`);

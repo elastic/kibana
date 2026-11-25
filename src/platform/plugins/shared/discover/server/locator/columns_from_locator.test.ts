@@ -107,7 +107,16 @@ beforeEach(() => {
 
   mockSearchSource = createSearchSourceMock();
   mockSearchSource.setField('index', mockDataView);
-  searchSourceStart.create = jest.fn().mockResolvedValue(mockSearchSource);
+  dataViewsService.get.mockReset();
+
+  // like the real one, the index is loaded from its id (the data views that are not mocked are ignored)
+  searchSourceStart.create = jest.fn().mockImplementation(async (fields?: { index?: string }) => {
+    const dataView = fields?.index ? await dataViewsService.get(fields.index) : undefined;
+    if (dataView) {
+      mockSearchSource.setField('index', dataView);
+    }
+    return mockSearchSource;
+  });
 
   const uiSettingsGet = uiSettingsClient.get;
   uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
