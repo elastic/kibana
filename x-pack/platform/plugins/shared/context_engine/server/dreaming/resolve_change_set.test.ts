@@ -73,6 +73,17 @@ describe('referencedIds', () => {
       )
     ).toEqual(['entity-person--bob', 'fact-abc']);
   });
+
+  it('leaves out the items past the limit of a change set', () => {
+    const facts = Array.from({ length: MAX_DREAMING_CHANGE_SET_ITEMS + 1 }, (_, index) => ({
+      ref: `fact-${index + 1}`,
+      delete: true,
+    }));
+
+    expect(referencedIds(changeSet({ entities: [], facts }))).toEqual(
+      facts.slice(0, MAX_DREAMING_CHANGE_SET_ITEMS).map(({ ref }) => ref)
+    );
+  });
 });
 
 describe('resolveChangeSet', () => {
@@ -418,7 +429,7 @@ describe('resolveChangeSet', () => {
     expect(operations).toHaveLength(1);
   });
 
-  it('applies the first 200 facts and entities of a change set and rejects the rest', () => {
+  it('applies 200 facts and entities of a change set, changes to existing ones first, and rejects the rest', () => {
     const fact = (index: number) => ({
       ref: `new:f${index}`,
       type: 'preference',
@@ -436,16 +447,34 @@ describe('resolveChangeSet', () => {
 
     const { operations, rejected } = resolveChangeSet(
       changeSet({
-        entities: Array.from({ length: count }, (_, index) => entity(index + 1)),
-        facts: Array.from({ length: count }, (_, index) => fact(index + 1)),
+        entities: [
+          ...Array.from({ length: count }, (_, index) => entity(index + 1)),
+          {
+            ref: existingEntity.id,
+            content: 'Bob leads the platform team.',
+            source_memory_ids: ['m-1'],
+          },
+        ],
+        facts: [
+          ...Array.from({ length: count }, (_, index) => fact(index + 1)),
+          { ref: existingFact.id, delete: true },
+        ],
       }),
       context()
     );
 
     expect(rejected).toEqual([
+      { item: `entity new:e${count - 1}`, reason: 'over the limit of 200 entities a change set' },
       { item: `entity new:e${count}`, reason: 'over the limit of 200 entities a change set' },
+      { item: `fact new:f${count - 1}`, reason: 'over the limit of 200 facts a change set' },
       { item: `fact new:f${count}`, reason: 'over the limit of 200 facts a change set' },
     ]);
     expect(operations).toHaveLength(MAX_DREAMING_CHANGE_SET_ITEMS * 2);
+    expect(operations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ op: 'upsert_entity', id: existingEntity.id }),
+        { op: 'delete', id: existingFact.id },
+      ])
+    );
   });
 });
