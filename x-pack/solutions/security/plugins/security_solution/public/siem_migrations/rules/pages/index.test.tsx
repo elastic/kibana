@@ -9,6 +9,7 @@ import React from 'react';
 import hash from 'object-hash';
 import { createMemoryHistory } from 'history';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -122,9 +123,11 @@ const startServicesMock = {
 };
 
 const TestProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
-  <MockAppHeaderProvider>
-    <TestProviders startServices={startServicesMock}>{children}</TestProviders>
-  </MockAppHeaderProvider>
+  <MemoryRouter>
+    <MockAppHeaderProvider>
+      <TestProviders startServices={startServicesMock}>{children}</TestProviders>
+    </MockAppHeaderProvider>
+  </MemoryRouter>
 );
 
 function renderTestComponent(args?: { migrationId?: string; wrapper?: React.ComponentType }) {
