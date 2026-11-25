@@ -82,7 +82,7 @@ describe('Processor: Common Fields with a script object condition', () => {
   const ifScript = {
     source: "ctx['_dataId'] == params.dataId",
     lang: 'painless',
-    params: { dataId: 'fastly-signalsciences-waf' },
+    params: { dataId: 'data-abc-123' },
   };
 
   let onUpdate: jest.Mock;
