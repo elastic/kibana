@@ -21,7 +21,9 @@ export {
 } from './constants';
 export {
   cleanupThreatReportsByIds,
+  deleteSpaceAlertsIndex,
   enableAlertZeroInSpace,
+  pollFor,
   readAlertZeroEnabledInSpace,
   readSupplyStatus,
   runCleanupSteps,
@@ -50,7 +52,6 @@ export {
   FP_ALERT_COUNT,
   FP_PROCESS_NAME,
   pinModelToProxy,
-  pollFor,
   readAlertTags,
   readBacktest,
   readRule,
@@ -60,7 +61,6 @@ export {
   setRuleTuningWorker,
   TP_EVENT_COUNT,
   waitForInvestigation,
-  waitForReviewEnd,
   waitForReviewExecution,
   type BacktestOutcome,
   type RuleState,

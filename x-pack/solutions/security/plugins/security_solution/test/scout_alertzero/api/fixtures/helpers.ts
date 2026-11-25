@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { ApiClientFixture } from '@kbn/scout-security';
+import type { ApiClientFixture, EsClient } from '@kbn/scout-security';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
@@ -58,6 +58,42 @@ export const runCleanupSteps = async (
   if (failures.length > 0) {
     throw new Error(`Cleanup failed:\n${failures.join('\n')}`);
   }
+};
+
+/**
+ * Polls `read` until it returns a value, or throws with `what` after `timeoutMs`. Unlike
+ * `expect.poll`, it hands back the value it found.
+ */
+export const pollFor = async <T>(
+  what: string,
+  read: () => Promise<T | undefined>,
+  { timeoutMs, intervalMs = 2_000 }: { timeoutMs: number; intervalMs?: number }
+): Promise<T> => {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const value = await read();
+    if (value !== undefined) {
+      return value;
+    }
+    if (Date.now() > deadline) {
+      throw new Error(`Timed out after ${timeoutMs}ms waiting for ${what}`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+};
+
+/**
+ * Deletes the alerts index of a space. Deleting the space leaves it behind. Resolved by name,
+ * because wildcard deletes are refused by default.
+ */
+export const deleteSpaceAlertsIndex = async (esClient: EsClient, spaceId: string) => {
+  const backing = Object.keys(
+    await esClient.indices.get({
+      index: `.alerts-security.alerts-${spaceId}`,
+      ignore_unavailable: true,
+    })
+  );
+  if (backing.length > 0) await esClient.indices.delete({ index: backing });
 };
 
 /**

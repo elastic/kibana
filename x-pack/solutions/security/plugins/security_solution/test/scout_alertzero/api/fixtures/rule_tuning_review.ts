@@ -18,9 +18,13 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   WORKER_SERVICE_ACCOUNT_NAMES,
 } from '@kbn/alertzero-common';
+import {
+  createDetectionsApi,
+  createExceptionsApi,
+} from '@kbn/security-solution-test-api-clients/scout';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
-import { spaceUrl } from './helpers';
+import { pollFor, spaceUrl } from './helpers';
 import { findStepOutput } from './workflow_runs';
 
 // Inlined: Playwright's esbuild cannot load the managed YAML behind @kbn/workflows/managed.
@@ -28,7 +32,6 @@ export const RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-revie
 export const APPLIED_TAG = 'detection-watch:tuning-applied';
 export const DISMISSED_TAG = 'detection-watch:tuning-dismissed';
 
-const RULE_HEADERS = { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' };
 const INTERNAL_V1_HEADERS = {
   'kbn-xsrf': 'true',
   'x-elastic-internal-origin': 'kibana',
@@ -49,8 +52,6 @@ export const TP_EVENT_COUNT = 2;
 const HISTORY_AGE_MS = 2 * 60 * 60_000;
 const HISTORY_SPACING_MS = 20_000;
 
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
-
 const expectStatus = (
   what: string,
   { statusCode, body }: { statusCode: number; body: unknown },
@@ -58,25 +59,6 @@ const expectStatus = (
 ): void => {
   if (!accepted.includes(statusCode)) {
     throw new Error(`${what}: status ${statusCode} ${JSON.stringify(body)}`);
-  }
-};
-
-/** Polls `read` until it returns a value, or throws with `what` after `timeoutMs`. */
-export const pollFor = async <T>(
-  what: string,
-  read: () => Promise<T | undefined>,
-  { timeoutMs, intervalMs = 2_000 }: { timeoutMs: number; intervalMs?: number }
-): Promise<T> => {
-  const deadline = Date.now() + timeoutMs;
-  for (;;) {
-    const value = await read();
-    if (value !== undefined) {
-      return value;
-    }
-    if (Date.now() > deadline) {
-      throw new Error(`Timed out after ${timeoutMs}ms waiting for ${what}`);
-    }
-    await sleep(intervalMs);
   }
 };
 
@@ -249,24 +231,25 @@ export const seedRuleWithFalsePositives = async ({
   // Matches the `logs-*-*` template, so ES creates a data stream with ECS mappings, and the
   // worker's role can read `logs-*`.
   const eventsIndex = `logs-${name}-events`;
-  const created = await apiClient.post(spaceUrl('api/detection_engine/rules', spaceId), {
-    headers: { ...headers, ...RULE_HEADERS },
-    responseType: 'json',
-    body: {
-      rule_id: ruleId,
-      name,
-      description: `Scout rule tuning review rule ${name}.`,
-      type: 'query',
-      language: 'kuery',
-      query,
-      index: [eventsIndex],
-      severity: 'medium',
-      risk_score: 40,
-      interval: '5m',
-      from: 'now-6m',
-      enabled: true,
+  const created = await createDetectionsApi(apiClient).createRule(
+    {
+      body: {
+        rule_id: ruleId,
+        name,
+        description: `Scout rule tuning review rule ${name}.`,
+        type: 'query',
+        language: 'kuery',
+        query,
+        index: [eventsIndex],
+        severity: 'medium',
+        risk_score: 40,
+        interval: '5m',
+        from: 'now-6m',
+        enabled: true,
+      },
     },
-  });
+    { headers, kibanaSpace: spaceId }
+  );
   expectStatus(`Create rule ${name}`, created);
   await pollFor(
     `the alerts alias of space ${spaceId}`,
@@ -366,7 +349,11 @@ export interface RuleState {
   query: string;
   risk_score: number;
   severity: string;
-  exceptions_list: Array<{ list_id: string; namespace_type: string; type: string }>;
+  exceptions_list: Array<{
+    list_id: string;
+    namespace_type: 'single' | 'agnostic';
+    type: string;
+  }>;
 }
 
 export const readRule = async ({
@@ -375,9 +362,9 @@ export const readRule = async ({
   spaceId,
   id,
 }: RuleTuningSpaceArgs & { id: string }): Promise<RuleState> => {
-  const response = await apiClient.get(
-    spaceUrl(`api/detection_engine/rules?id=${encodeURIComponent(id)}`, spaceId),
-    { headers: { ...headers, ...RULE_HEADERS }, responseType: 'json' }
+  const response = await createDetectionsApi(apiClient).readRule(
+    { query: { id } },
+    { headers, kibanaSpace: spaceId }
   );
   expectStatus(`Read rule ${id}`, response);
   return response.body as RuleState;
@@ -399,17 +386,17 @@ export const readRuleExceptionItems = async ({
   if (!list) {
     return [];
   }
-  const response = await apiClient.get(
-    spaceUrl(
-      `api/exception_lists/items/_find?list_id=${encodeURIComponent(list.list_id)}&namespace_type=${
-        list.namespace_type
-      }`,
-      spaceId
-    ),
-    { headers: { ...headers, ...RULE_HEADERS }, responseType: 'json' }
+  const response = await createExceptionsApi(apiClient).findExceptionListItems(
+    {
+      query: {
+        list_id: [list.list_id],
+        namespace_type: [list.namespace_type],
+      },
+    },
+    { headers, kibanaSpace: spaceId }
   );
   expectStatus(`Read the exception items of list ${list.list_id}`, response);
-  return (response.body as { data: ExceptionItem[] }).data;
+  return response.body.data as ExceptionItem[];
 };
 
 /** Workflow tags of the rule's alerts, one array per alert. */
@@ -547,25 +534,6 @@ export const decidePendingProposal = ({
       }
       expectStatus(`${decision} proposal ${proposal.id}`, decided);
       return proposal.id;
-    },
-    { timeoutMs }
-  );
-
-export const waitForReviewEnd = async ({
-  apiClient,
-  headers,
-  spaceId,
-  executionId,
-  timeoutMs,
-}: RuleTuningSpaceArgs & {
-  executionId: string;
-  timeoutMs: number;
-}): Promise<WorkflowExecutionDto> =>
-  pollFor(
-    `review ${executionId} to end`,
-    async () => {
-      const execution = await getExecution({ apiClient, headers, spaceId, executionId });
-      return isTerminalStatus(execution.status) ? execution : undefined;
     },
     { timeoutMs }
   );

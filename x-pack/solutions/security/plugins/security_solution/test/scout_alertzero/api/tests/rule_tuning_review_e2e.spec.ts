@@ -17,6 +17,7 @@ import {
   createWorkerServiceAccount,
   decidePendingProposal,
   deleteServiceAccount,
+  deleteSpaceAlertsIndex,
   DISMISSED_TAG,
   enableAlertZeroInSpace,
   FP_ALERT_COUNT,
@@ -34,8 +35,8 @@ import {
   startScriptedModel,
   tags,
   TP_EVENT_COUNT,
+  waitForExecution,
   waitForInvestigation,
-  waitForReviewEnd,
   waitForReviewExecution,
   type BacktestOutcome,
   type RuleState,
@@ -198,11 +199,13 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
           })
         );
       }
-      const review = await waitForReviewEnd({
-        ...space,
-        executionId: reviewId,
-        timeoutMs: STEP_TIMEOUT_MS,
-      });
+      const review = await waitForExecution(
+        apiClient,
+        adminHeaders,
+        reviewId,
+        STEP_TIMEOUT_MS,
+        spaceId
+      );
 
       expect(review.status, JSON.stringify(review.error)).toBe(ExecutionStatus.COMPLETED);
       // A dismissed entry gate ends the review before the agent is asked for a proposal.
@@ -236,15 +239,7 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
         { name: `delete space ${spaceId}`, run: () => apiServices.spaces.delete(spaceId) },
         {
           name: 'delete the space alerts index',
-          run: async () => {
-            const backing = Object.keys(
-              await esClient.indices.get({
-                index: `.alerts-security.alerts-${spaceId}`,
-                ignore_unavailable: true,
-              })
-            );
-            if (backing.length > 0) await esClient.indices.delete({ index: backing });
-          },
+          run: () => deleteSpaceAlertsIndex(esClient, spaceId),
         },
         {
           name: 'delete the source events',

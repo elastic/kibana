@@ -26,6 +26,7 @@
     "@kbn/rule-data-utils",
     "@kbn/security-mitre-attack-common",
     "@kbn/security-solution-features",
+    "@kbn/security-solution-test-api-clients",
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-list-constants",
