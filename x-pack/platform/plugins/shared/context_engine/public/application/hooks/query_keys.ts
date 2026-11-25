@@ -7,6 +7,7 @@
 
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
 import type { KiStatus } from '../../../common/ki_lifecycle_status';
+import type { KiListSort } from '../../../common/ki_list_sort';
 
 export const contextEngineQueryKeys = {
   aiIndex: {
@@ -18,7 +19,9 @@ export const contextEngineQueryKeys = {
       size: number,
       type: string | undefined,
       query: string | undefined,
-      status?: readonly KiStatus[]
+      status?: readonly KiStatus[],
+      sort?: KiListSort,
+      excludeTypes?: readonly string[]
     ) =>
       [
         'context_engine',
@@ -29,7 +32,42 @@ export const contextEngineQueryKeys = {
         type ?? '',
         query ?? '',
         status?.join(',') ?? '',
+        sort ?? '',
+        // An array, not a joined string: type names may contain commas.
+        excludeTypes !== undefined ? [...excludeTypes].sort() : [],
       ] as const,
+    // Under the `list_ki` prefix, so the KI edit / delete / restore invalidation refreshes it too.
+    listKiGroups: (
+      aiIndexId: string,
+      maxGroups: number,
+      previewSize: number,
+      query: string | undefined,
+      status: readonly KiStatus[],
+      sort: KiListSort,
+      types?: readonly string[],
+      excludeTypes?: readonly string[]
+    ) =>
+      [
+        'context_engine',
+        'ai_index',
+        aiIndexId,
+        'list_ki',
+        '_groups',
+        maxGroups,
+        previewSize,
+        query ?? '',
+        status.join(','),
+        sort,
+        // Arrays, not joined strings: type names may contain commas.
+        types !== undefined ? [...types] : [],
+        excludeTypes !== undefined ? [...excludeTypes].sort() : [],
+      ] as const,
+    // Prefix of every `list_ki` key, for invalidation.
+    listKiPrefix: (aiIndexId: string) =>
+      ['context_engine', 'ai_index', aiIndexId, 'list_ki'] as const,
+    // Under the `list_ki` prefix, so the KI edit / delete / restore invalidation refreshes it too.
+    kiHistogram: (aiIndexId: string) =>
+      ['context_engine', 'ai_index', aiIndexId, 'list_ki', '_histogram'] as const,
     viewKi: (
       aiIndexId: string,
       index: string,
@@ -48,8 +86,9 @@ export const contextEngineQueryKeys = {
   },
   dreamingTemplates: {
     list: () => ['context_engine', 'dreaming_templates', 'list'] as const,
-    all: () => ['context_engine', 'dreaming_templates', 'all'] as const,
-    detail: (id: string) => ['context_engine', 'dreaming_templates', id] as const,
+  },
+  spend: {
+    aiIndex: (aiIndexId: string) => ['context_engine', 'spend', 'ai_index', aiIndexId] as const,
   },
   connectors: {
     list: () => ['context_engine', 'connectors', 'list'] as const,

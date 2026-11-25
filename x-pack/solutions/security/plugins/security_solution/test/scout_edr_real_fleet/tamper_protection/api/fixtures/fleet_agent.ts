@@ -8,14 +8,21 @@
 import type { GetOneAgentResponse } from '@kbn/fleet-plugin/common';
 import { agentRouteService } from '@kbn/fleet-plugin/common';
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services/routes';
-import type { PostAgentReassignResponse } from '@kbn/fleet-plugin/common/types/rest_spec/agent';
+import type {
+  PostAgentReassignResponse,
+  PostAgentUnenrollResponse,
+} from '@kbn/fleet-plugin/common/types/rest_spec/agent';
 import type {
   GetUninstallTokenResponse,
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import type { ApiClientFixture } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
 
 type RequestHeaders = Record<string, string>;
+
+const AGENT_POLICY_TIMEOUT_MS = 120_000;
+const AGENT_UNENROLL_TIMEOUT_MS = 120_000;
 
 export interface FleetApiResponse<T> {
   statusCode: number;
@@ -34,7 +41,7 @@ export const reassignAgent = async (
     body: { policy_id: agentPolicyId },
   });
 
-export const readAgent = async (
+const readAgent = async (
   apiClient: ApiClientFixture,
   headers: RequestHeaders,
   agentId: string
@@ -43,6 +50,75 @@ export const readAgent = async (
     headers,
     responseType: 'json',
   });
+
+/** Polls until the agent reports `agentPolicyId` at `revision` or later and is not updating. */
+export const waitForAgentOnPolicy = async (
+  apiClient: ApiClientFixture,
+  headers: RequestHeaders,
+  agentId: string,
+  { agentPolicyId, revision }: { agentPolicyId: string; revision: number }
+): Promise<void> => {
+  await expect
+    .poll(
+      async () => {
+        const { statusCode, body } = await readAgent(apiClient, headers, agentId);
+        if (statusCode !== 200) {
+          return `status ${statusCode}: ${JSON.stringify(body)}`;
+        }
+
+        const { policy_id: policyId, policy_revision: policyRevision, status } = body.item;
+        return {
+          policyId,
+          revisionApplied: (policyRevision ?? 0) >= revision,
+          updating: status === 'updating',
+        };
+      },
+      {
+        message: `agent ${agentId} reports policy ${agentPolicyId} at revision ${revision} or later`,
+        timeout: AGENT_POLICY_TIMEOUT_MS,
+        intervals: [5_000],
+      }
+    )
+    .toStrictEqual({ policyId: agentPolicyId, revisionApplied: true, updating: false });
+};
+
+/** Sends a graceful unenroll (no `revoke`): Fleet waits for the agent to acknowledge it. */
+export const unenrollAgent = async (
+  apiClient: ApiClientFixture,
+  headers: RequestHeaders,
+  agentId: string
+): Promise<FleetApiResponse<PostAgentUnenrollResponse>> =>
+  apiClient.post<PostAgentUnenrollResponse>(agentRouteService.getUnenrollPath(agentId), {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+/** Polls until Fleet reports the agent's ack: unenrolled, inactive and unenrolled_at set. */
+export const waitForAgentUnenrolled = async (
+  apiClient: ApiClientFixture,
+  headers: RequestHeaders,
+  agentId: string
+): Promise<void> => {
+  await expect
+    .poll(
+      async () => {
+        const { statusCode, body } = await readAgent(apiClient, headers, agentId);
+        if (statusCode !== 200) {
+          return `status ${statusCode}: ${JSON.stringify(body)}`;
+        }
+
+        const { status, active, unenrolled_at: unenrolledAt } = body.item;
+        return { status, active, unenrolledAtSet: Boolean(unenrolledAt) };
+      },
+      {
+        message: `agent ${agentId} acknowledges the unenroll`,
+        timeout: AGENT_UNENROLL_TIMEOUT_MS,
+        intervals: [5_000],
+      }
+    )
+    .toStrictEqual({ status: 'unenrolled', active: false, unenrolledAtSet: true });
+};
 
 /** Decrypted uninstall token of `agentPolicyId`. Throws when Fleet does not return it. */
 export const getUninstallToken = async (

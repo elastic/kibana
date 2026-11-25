@@ -219,6 +219,61 @@ describe('createEmulatorFetch', () => {
     expect((await response.json()).detail).toContain('GET https://api.example.com/v1/unknown');
   });
 
+  it('answers 404 naming a left-out broken operation, rather than one its request also fits', async () => {
+    const ok = { '200': { description: 'ok' } };
+    const { fetch, calls, invalidOperations } = createEmulatorFetch({
+      specs: [
+        {
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1' },
+          servers: [{ url: 'https://api.example.com/v1' }],
+          paths: {
+            '/items/{id}': {
+              get: {
+                parameters: [
+                  { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+                ],
+                responses: ok,
+              },
+            },
+            '/items/latest': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    content: {
+                      'application/json': { schema: { $ref: '#/components/schemas/Missing' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+      invalidSchemas: 'skip',
+    });
+
+    const latest = await fetch(`${BASE_URL}/items/latest`);
+    const byId = await fetch(`${BASE_URL}/items/a`);
+
+    expect(invalidOperations).toEqual([
+      expect.objectContaining({ operation: 'GET /items/latest' }),
+    ]);
+    expect(latest.status).toBe(404);
+    expect((await latest.json()).detail).toContain(
+      'GET /items/latest is left out, as its schema in the spec is invalid'
+    );
+    // Recorded like an unmatched request, which a recorder reports with the broken schema.
+    const [{ status, operation, matched }] = calls;
+    expect({ status, operation, matched }).toEqual({
+      status: 404,
+      operation: undefined,
+      matched: undefined,
+    });
+    expect(byId.status).toBe(200);
+  });
+
   it.each([
     ['out of bounds', 'limit=500', ['query', 'limit'], 'maximum'],
     ['undeclared', 'offset=1', ['query', 'offset'], 'undeclared'],
@@ -452,14 +507,18 @@ describe('createEmulatorFetch with capture', () => {
     });
   });
 
-  it('passes calls with their capture to onCall', async () => {
+  it('passes calls with their capture, and the request that made them, to onCall', async () => {
     const onCall = jest.fn();
     const { fetch } = createEmulatorFetch({ specs: [spec], capture: true, onCall });
 
     await sendItem(fetch, 'a');
 
     expect(onCall).toHaveBeenCalledWith(
-      expect.objectContaining({ captured: expect.objectContaining({ request: expect.anything() }) })
+      expect.objectContaining({
+        captured: expect.objectContaining({ request: expect.anything() }),
+      }),
+      // The `fetch` input the call came from, which ties it to its own request.
+      'https://api.example.com/v1/items'
     );
   });
 

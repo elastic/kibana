@@ -6,16 +6,30 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { AlertsTableFilterGroup } from '.';
 
 describe('AlertsTableFilterGroup', () => {
-  it('renders correctly', () => {
-    const wrapper = shallow(
-      <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
-    );
+  it('renders the status options with the current status selected', () => {
+    render(<AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />);
 
-    expect(wrapper.find('EuiFilterButton')).toBeTruthy();
+    expect(screen.getByTestId('alerts-table-filter-group')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Acknowledged' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(screen.getByRole('button', { name: 'Closed' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('calls onFilterGroupChanged with the selected status', async () => {
+    const onFilterGroupChanged = jest.fn();
+    render(<AlertsTableFilterGroup status={'open'} onFilterGroupChanged={onFilterGroupChanged} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Closed' }));
+
+    expect(onFilterGroupChanged).toHaveBeenCalledWith('closed');
   });
 });

@@ -1,0 +1,278 @@
+{
+  "10.16.0": [
+    {
+      "name": "Test rule",
+      "enabled": true,
+      "consumer": "alerts",
+      "tags": [
+        "test"
+      ],
+      "alertTypeId": ".index-threshold",
+      "apiKeyOwner": "elastic",
+      "apiKey": null,
+      "apiKeyCreatedByUser": false,
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdByProfileUid": "u_created_by",
+      "updatedByProfileUid": "u_updated_by",
+      "apiKeyOwnerProfileUid": "u_api_key_owner",
+      "updatedAt": "2025-11-21T12:00:00.000Z",
+      "createdAt": "2025-11-20T12:00:00.000Z",
+      "muteAll": false,
+      "mutedInstanceIds": [],
+      "snoozedInstances": [],
+      "throttle": null,
+      "revision": 1,
+      "running": false,
+      "legacyId": null,
+      "scheduledTaskId": "8f6a5c2e-4d7b-4e21-9c1f-2b3a4d5e6f70",
+      "isSnoozedUntil": null,
+      "snoozeSchedule": [],
+      "lastEnabledAt": "2025-11-20T12:00:00.000Z",
+      "schedule": {
+        "interval": "1m"
+      },
+      "meta": {
+        "versionApiKeyLastmodified": "9.3.0"
+      },
+      "actions": [
+        {
+          "uuid": "1f0e9d8c-7b6a-4f5e-8d4c-3b2a1f0e9d8c",
+          "group": "threshold met",
+          "actionRef": "action_0",
+          "actionTypeId": ".server-log",
+          "params": {
+            "message": "Threshold met"
+          },
+          "frequency": {
+            "summary": false,
+            "notifyWhen": "onActionGroupChange",
+            "throttle": null
+          }
+        }
+      ],
+      "notifyWhen": "onActionGroupChange",
+      "executionStatus": {
+        "status": "error",
+        "lastExecutionDate": "2025-11-21T12:00:00.000Z",
+        "lastDuration": 1000,
+        "error": {
+          "reason": "execute",
+          "message": "index_not_found_exception"
+        },
+        "warning": null
+      },
+      "lastRun": {
+        "outcome": "failed",
+        "outcomeOrder": 20,
+        "outcomeMsg": [
+          "index_not_found_exception"
+        ],
+        "warning": "execute",
+        "alertsCount": {
+          "new": 0,
+          "active": 0,
+          "recovered": 0,
+          "ignored": 0
+        }
+      },
+      "nextRun": "2025-11-21T12:01:00.000Z",
+      "params": {
+        "index": [
+          "test-index"
+        ],
+        "timeField": "@timestamp",
+        "aggType": "count",
+        "groupBy": "all",
+        "timeWindowSize": 5,
+        "timeWindowUnit": "m",
+        "thresholdComparator": ">",
+        "threshold": [
+          1000
+        ]
+      },
+      "typeVersion": 1,
+      "alertDelay": {
+        "active": 1
+      },
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "artifacts": {
+        "dashboards": [],
+        "investigation_guide": {
+          "blob": ""
+        }
+      },
+      "monitoring": {
+        "run": {
+          "history": [
+            {
+              "success": false,
+              "timestamp": 1763726400000,
+              "duration": 1000,
+              "outcome": "failed"
+            }
+          ],
+          "calculated_metrics": {
+            "p50": 1000,
+            "p95": 1000,
+            "p99": 1000,
+            "success_ratio": 0
+          },
+          "last_run": {
+            "timestamp": "2025-11-21T12:00:00.000Z",
+            "metrics": {
+              "duration": 1000,
+              "total_search_duration_ms": null,
+              "total_indexing_duration_ms": null,
+              "total_alerts_detected": null,
+              "total_alerts_created": null,
+              "gap_duration_s": null,
+              "gap_range": null
+            }
+          }
+        }
+      }
+    }
+  ],
+  "10.17.0": [
+    {
+      "name": "Test rule",
+      "enabled": true,
+      "consumer": "alerts",
+      "tags": [
+        "test"
+      ],
+      "alertTypeId": ".index-threshold",
+      "apiKeyOwner": "elastic",
+      "apiKey": null,
+      "apiKeyCreatedByUser": false,
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdByProfileUid": "u_created_by",
+      "updatedByProfileUid": "u_updated_by",
+      "apiKeyOwnerProfileUid": "u_api_key_owner",
+      "updatedAt": "2025-11-21T12:00:00.000Z",
+      "createdAt": "2025-11-20T12:00:00.000Z",
+      "muteAll": false,
+      "mutedInstanceIds": [],
+      "snoozedInstances": [],
+      "throttle": null,
+      "revision": 1,
+      "running": false,
+      "legacyId": null,
+      "scheduledTaskId": "8f6a5c2e-4d7b-4e21-9c1f-2b3a4d5e6f70",
+      "isSnoozedUntil": null,
+      "snoozeSchedule": [],
+      "lastEnabledAt": "2025-11-20T12:00:00.000Z",
+      "schedule": {
+        "interval": "1m"
+      },
+      "meta": {
+        "versionApiKeyLastmodified": "9.3.0"
+      },
+      "actions": [
+        {
+          "uuid": "1f0e9d8c-7b6a-4f5e-8d4c-3b2a1f0e9d8c",
+          "group": "threshold met",
+          "actionRef": "action_0",
+          "actionTypeId": ".server-log",
+          "params": {
+            "message": "Threshold met"
+          },
+          "frequency": {
+            "summary": false,
+            "notifyWhen": "onActionGroupChange",
+            "throttle": null
+          }
+        }
+      ],
+      "notifyWhen": "onActionGroupChange",
+      "executionStatus": {
+        "status": "error",
+        "lastExecutionDate": "2025-11-21T12:00:00.000Z",
+        "lastDuration": 1000,
+        "error": {
+          "reason": "execute",
+          "message": "index_not_found_exception"
+        },
+        "warning": null
+      },
+      "lastRun": {
+        "outcome": "failed",
+        "outcomeOrder": 20,
+        "outcomeMsg": [
+          "index_not_found_exception"
+        ],
+        "warning": "execute",
+        "alertsCount": {
+          "new": 0,
+          "active": 0,
+          "recovered": 0,
+          "ignored": 0
+        }
+      },
+      "nextRun": "2025-11-21T12:01:00.000Z",
+      "params": {
+        "index": [
+          "test-index"
+        ],
+        "timeField": "@timestamp",
+        "aggType": "count",
+        "groupBy": "all",
+        "timeWindowSize": 5,
+        "timeWindowUnit": "m",
+        "thresholdComparator": ">",
+        "threshold": [
+          1000
+        ]
+      },
+      "typeVersion": 1,
+      "alertDelay": {
+        "active": 1
+      },
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "artifacts": {
+        "dashboards": [],
+        "investigation_guide": {
+          "blob": ""
+        }
+      },
+      "monitoring": {
+        "run": {
+          "history": [
+            {
+              "success": false,
+              "timestamp": 1763726400000,
+              "duration": 1000,
+              "outcome": "failed"
+            }
+          ],
+          "calculated_metrics": {
+            "p50": 1000,
+            "p95": 1000,
+            "p99": 1000,
+            "success_ratio": 0
+          },
+          "last_run": {
+            "timestamp": "2025-11-21T12:00:00.000Z",
+            "metrics": {
+              "duration": 1000,
+              "total_search_duration_ms": null,
+              "total_indexing_duration_ms": null,
+              "total_alerts_detected": null,
+              "total_alerts_created": null,
+              "gap_duration_s": null,
+              "gap_range": null
+            }
+          }
+        }
+      }
+    }
+  ]
+}

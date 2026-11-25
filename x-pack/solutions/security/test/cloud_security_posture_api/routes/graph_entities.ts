@@ -10,7 +10,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
-import { expect as expectExpect } from 'expect';
 import type { Agent } from 'supertest';
 import type { EntitiesRequest } from '@kbn/cloud-security-posture-common/types/graph_entities/latest';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
@@ -221,37 +220,6 @@ export default function (providerContext: FtrProviderContext) {
           // Ignore if already unloaded or replaced by another archive
           logger.debug(`Could not unload logs_gcp_audit: ${e.message}`);
         }
-      });
-
-      it.skip('should return entities for known entity IDs', async () => {
-        const response = await postGraphEntities(supertest, {
-          query: {
-            entityIds: ['partial-host-instance-1', 'admin@example.com'],
-            start: '2024-09-01T00:00:00.000Z',
-            end: '2024-09-02T00:00:00.000Z',
-            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
-          },
-          page: { index: 0, size: 10 },
-        }).expect(result(200, logger));
-
-        expect(response.body).to.have.property('entities');
-        expect(response.body).to.have.property('totalRecords');
-        expect(response.body.totalRecords).to.equal(2);
-        expect(response.body.entities).to.have.length(2);
-        expectExpect(response.body.entities).toContainEqual(
-          expectExpect.objectContaining({
-            id: 'partial-host-instance-1',
-            availableInEntityStore: true,
-            ecsParentField: expectExpect.stringMatching(/host|entity/),
-          })
-        );
-        expectExpect(response.body.entities).toContainEqual(
-          expectExpect.objectContaining({
-            id: 'admin@example.com',
-            ecsParentField: 'user',
-          })
-        );
-        expect(response.body).not.to.have.property('messages');
       });
 
       it('should return a fallback entity when an entity is not found', async () => {

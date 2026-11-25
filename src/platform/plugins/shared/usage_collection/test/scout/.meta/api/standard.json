@@ -1,9 +1,35 @@
 {
-  "sha1": "afe0c48636660a11aa1e4e415cee38f351a6a6b1",
+  "sha1": "4211e276959afadd6cb8e0ab47f7d646a4758f03",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "cf10b253d41f9cc-c7a449ef541dd81",
+      "title": "kibana extended stats api returns extended stats payload for authenticated requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 19,
+        "column": 30
+      }
+    },
+    {
+      "id": "cf10b253d41f9cc-5dcc682558a1175",
+      "title": "kibana extended stats api returns extended stats payload for unauthenticated requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
+        "line": 25,
+        "column": 27
+      }
+    },
     {
       "id": "a0cf3da280571d3-471bfa9f5786e88",
       "title": "ui_metric savedObject data increments the count field in the document defined by the app/action_type path",

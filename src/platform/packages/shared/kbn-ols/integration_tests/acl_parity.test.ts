@@ -15,7 +15,6 @@ import {
   ACL_FIELD,
   ACL_MAPPING,
   buildAclReadFilter,
-  compareLevels,
   evaluateAcl,
   getAclState,
   normalizeAclSource,
@@ -23,9 +22,10 @@ import {
   prepareInitialAcl,
   toAclSource,
   type AccessPolicy,
-  type EntryLevel,
+  type EntryAccess,
   type Principal,
 } from '..';
+import { compareLevels } from '../src/levels';
 import {
   ACL_SHAPE_FIXTURES,
   FIXTURE_POLICY,
@@ -47,7 +47,7 @@ const NUMBERS_INDEX = 'ols-acl-numbers';
 /**
  * Levels a fixture's expectations are checked at. `manage` stands for access management.
  */
-const FIXTURE_LEVELS: EntryLevel[] = ['view', 'use', 'edit', 'manage'];
+const FIXTURE_LEVELS: EntryAccess[] = ['view', 'use', 'edit', 'manage'];
 const PROBES = Object.keys(FIXTURE_PROBES) as FixtureProbe[];
 const ADMIN: Principal = { type: 'user', id: 'u_admin' };
 const NOW = '2026-11-16T00:00:00.000Z';
@@ -84,10 +84,10 @@ type Fixture = (typeof fixtures)[number];
 const indexableFixtures = fixtures.filter(({ indexable }) => indexable);
 const fixturePolicies = [...new Set(indexableFixtures.map(({ policy }) => policy))];
 
-const toOperation = (level: EntryLevel) => (level === 'manage' ? 'manage_access' : level);
+const toOperation = (level: EntryAccess) => (level === 'manage' ? 'manage_access' : level);
 
 /** Whether the fixture says the probe reaches the level, with ordinary access only. */
-const reaches = ({ access }: Fixture, probe: FixtureProbe, level: EntryLevel) => {
+const reaches = ({ access }: Fixture, probe: FixtureProbe, level: EntryAccess) => {
   const probeLevel = access[probe];
   return !!probeLevel && compareLevels(probeLevel, level) >= 0;
 };
@@ -108,7 +108,7 @@ const expectedMatch = (
   layout: SpaceLayout,
   scenario: Scenario,
   probe: FixtureProbe,
-  level: EntryLevel
+  level: EntryAccess
 ) => {
   const spaces = SPACE_LAYOUTS[layout];
   const inRecovery = isIn(spaces, scenario.recoverySpaces);
@@ -121,13 +121,13 @@ const expectedMatch = (
 const buildFilter = (
   policy: AccessPolicy,
   probe: FixtureProbe,
-  level: EntryLevel,
+  level: EntryAccess,
   { ordinarySpaces, recoverySpaces }: Pick<Scenario, 'ordinarySpaces' | 'recoverySpaces'>
 ) =>
   buildAclReadFilter({
     policy,
     principal: FIXTURE_PROBES[probe],
-    level,
+    access: level,
     ordinarySpaces: [...ordinarySpaces],
     recoverySpaces: [...recoverySpaces],
   });
@@ -311,11 +311,11 @@ describe('ACLs in Elasticsearch', () => {
       for (const { raw } of NUMBERS) {
         await indexRaw(
           `owner-${raw}`,
-          `{"namespaces":["space-a"],"acl":{"version":1,"owner":{"type":"user","id":${raw}},"general_access":"none"}}`
+          `{"namespaces":["space-a"],"acl":{"version":1,"owner":{"type":"user","id":${raw}},"general":{"access":"none"}}}`
         );
         await indexRaw(
           `entry-${raw}`,
-          `{"namespaces":["space-a"],"acl":{"version":1,"owner":{"type":"user","id":"u_owner"},"general_access":"none","entries":[{"type":"user","id":${raw},"access":"use"}]}}`
+          `{"namespaces":["space-a"],"acl":{"version":1,"owner":{"type":"user","id":"u_owner"},"general":{"access":"none"},"entries":[{"type":"user","id":${raw},"access":"use"}]}}`
         );
       }
     });
@@ -361,7 +361,7 @@ describe('ACLs in Elasticsearch', () => {
               buildAclReadFilter({
                 policy: FIXTURE_POLICY,
                 principal,
-                level,
+                access: level,
                 ordinarySpaces: ['space-a'],
                 recoverySpaces: [],
               })
@@ -518,7 +518,7 @@ describe('ACLs in Elasticsearch', () => {
         policy: FIXTURE_POLICY,
         principal: FIXTURE_PROBES.owner,
         requested: {
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [{ ...FIXTURE_PROBES.grantee, access: 'use' }],
         },
         enabled: true,
@@ -531,7 +531,7 @@ describe('ACLs in Elasticsearch', () => {
         refresh: 'wait_for',
       });
 
-      const expected: Partial<Record<FixtureProbe, EntryLevel>> = {
+      const expected: Partial<Record<FixtureProbe, EntryAccess>> = {
         owner: 'manage',
         grantee: 'use',
       };
@@ -561,7 +561,7 @@ describe('ACLs in Elasticsearch', () => {
         stored: {
           version: 1,
           owner: { type: 'user', id: 'u_owner' },
-          general_access: 'view',
+          general: { access: 'view' },
           entries: [
             { type: 'user', id: 'u_owner', access: 'use', added_at: NOW },
             { type: 'user', id: 'u_grantee', access: 'edit', added_at: NOW },
@@ -583,7 +583,7 @@ describe('ACLs in Elasticsearch', () => {
         stored: {
           version: 1,
           owner: { type: 'user', id: 'u_owner' },
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [
             { type: 'user', id: 'u_owner', access: 'use', added_at: NOW },
             { type: 'user', id: 'u_grantee', access: 'use', added_at: NOW },
@@ -598,7 +598,7 @@ describe('ACLs in Elasticsearch', () => {
         stored: {
           version: 1,
           owner: { type: 'user', id: 'u_owner' },
-          general_access: 'view',
+          general: { access: 'view' },
           entries: [
             { type: 'user', id: 'u_owner', access: 'manage', added_at: NOW },
             { type: 'user', id: 'u_grantee', access: 'manage', added_at: NOW },
@@ -618,7 +618,7 @@ describe('ACLs in Elasticsearch', () => {
       name: string;
       policy: AccessPolicy;
       stored: Record<string, unknown>;
-      expected: Partial<Record<FixtureProbe, EntryLevel>>;
+      expected: Partial<Record<FixtureProbe, EntryAccess>>;
     }>)(
       'indexes a transfer that keeps exactly the other grants: $name',
       async ({ name, policy, stored, expected }) => {

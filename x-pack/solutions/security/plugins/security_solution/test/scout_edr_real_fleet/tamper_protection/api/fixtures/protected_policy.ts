@@ -17,12 +17,13 @@ import {
 import {
   createEndpointPolicy,
   deleteEndpointPolicy,
+  enableAllPolicyProtections,
   getCreatedPackagePolicy,
 } from '../../../shared_host/ui/fixtures/endpoint_policy';
 
-export interface ProtectedEndpointPolicy {
+export interface EndpointAgentPolicy {
   agentPolicyId: string;
-  /** Agent policy revision once tamper protection is on. */
+  /** Agent policy revision once its tamper protection setting is read back. */
   revision: number;
   indexedPolicy: IndexedFleetEndpointPolicyResponse;
 }
@@ -46,10 +47,11 @@ const isProtectionEnabledInFullPolicy = async (
  * Fleet turns `is_protected` off when the policy has no Elastic Defend, so read the
  * agent policy and the full policy the agent receives back before the test relies on it.
  */
-const readBackProtectedRevision = async (
+const readBackRevision = async (
   kbnClient: KbnClient,
   log: ScoutLogger,
-  agentPolicyId: string
+  agentPolicyId: string,
+  expectedProtection: boolean
 ): Promise<number> => {
   const { is_protected: isProtected, revision } = await fetchAgentPolicy(kbnClient, agentPolicyId);
   const protectionEnabled = await isProtectionEnabledInFullPolicy(kbnClient, agentPolicyId);
@@ -57,9 +59,11 @@ const readBackProtectedRevision = async (
     `[edr_real_fleet] agent policy ${agentPolicyId}: is_protected=${isProtected}, full policy agent.protection.enabled=${protectionEnabled}, revision=${revision}`
   );
 
-  if (!isProtected || !protectionEnabled) {
+  if (Boolean(isProtected) !== expectedProtection || protectionEnabled !== expectedProtection) {
     throw new Error(
-      `Tamper protection is not enabled on agent policy ${agentPolicyId} (is_protected=${isProtected}, agent.protection.enabled=${protectionEnabled})`
+      `Expected tamper protection ${
+        expectedProtection ? 'on' : 'off'
+      } on agent policy ${agentPolicyId} (is_protected=${isProtected}, agent.protection.enabled=${protectionEnabled})`
     );
   }
 
@@ -67,7 +71,7 @@ const readBackProtectedRevision = async (
 };
 
 /** Deletes the agent and Endpoint package policies, logging instead of throwing. */
-export const deleteProtectedEndpointPolicy = async (
+export const deleteEndpointAgentPolicy = async (
   kbnClient: KbnClient,
   log: ScoutLogger,
   indexedPolicy: IndexedFleetEndpointPolicyResponse
@@ -78,29 +82,71 @@ export const deleteProtectedEndpointPolicy = async (
 };
 
 /**
- * Creates an agent policy with Elastic Defend and turns tamper protection on.
+ * Creates an agent policy with Elastic Defend and applies `configure` to it.
  * If a later step fails, the policy is deleted before the error is rethrown.
  */
-export const createProtectedEndpointPolicy = async (
+const createConfiguredEndpointPolicy = async (
   kbnClient: KbnClient,
   log: ScoutLogger,
-  name: string
-): Promise<ProtectedEndpointPolicy> => {
+  name: string,
+  {
+    expectedProtection,
+    configure,
+  }: {
+    expectedProtection: boolean;
+    configure: (ids: { agentPolicyId: string; packagePolicyId: string }) => Promise<void>;
+  }
+): Promise<EndpointAgentPolicy> => {
   const indexedPolicy = await createEndpointPolicy(kbnClient, log, name);
 
   try {
-    const [agentPolicyId] = getCreatedPackagePolicy(indexedPolicy).policy_ids;
+    const {
+      id: packagePolicyId,
+      policy_ids: [agentPolicyId],
+    } = getCreatedPackagePolicy(indexedPolicy);
     if (!agentPolicyId) {
       throw new Error(`Endpoint package policy of '${name}' has no agent policy id`);
     }
 
-    log.info(`[edr_real_fleet] enabling tamper protection on agent policy ${agentPolicyId}`);
-    await updateAgentPolicy(kbnClient, agentPolicyId, { is_protected: true }, true);
-    const revision = await readBackProtectedRevision(kbnClient, log, agentPolicyId);
+    await configure({ agentPolicyId, packagePolicyId });
+    const revision = await readBackRevision(kbnClient, log, agentPolicyId, expectedProtection);
 
     return { agentPolicyId, revision, indexedPolicy };
   } catch (error) {
-    await deleteProtectedEndpointPolicy(kbnClient, log, indexedPolicy);
+    await deleteEndpointAgentPolicy(kbnClient, log, indexedPolicy);
     throw error;
   }
 };
+
+/** Creates an agent policy with Elastic Defend and turns tamper protection on. */
+export const createProtectedEndpointPolicy = async (
+  kbnClient: KbnClient,
+  log: ScoutLogger,
+  name: string
+): Promise<EndpointAgentPolicy> =>
+  createConfiguredEndpointPolicy(kbnClient, log, name, {
+    expectedProtection: true,
+    configure: async ({ agentPolicyId }) => {
+      log.info(`[edr_real_fleet] enabling tamper protection on agent policy ${agentPolicyId}`);
+      await updateAgentPolicy(kbnClient, agentPolicyId, { is_protected: true }, true);
+    },
+  });
+
+/**
+ * Creates an agent policy with Elastic Defend in prevent mode for every protection
+ * and tamper protection off.
+ */
+export const createUnprotectedEndpointPolicy = async (
+  kbnClient: KbnClient,
+  log: ScoutLogger,
+  name: string
+): Promise<EndpointAgentPolicy> =>
+  createConfiguredEndpointPolicy(kbnClient, log, name, {
+    expectedProtection: false,
+    configure: async ({ packagePolicyId }) => {
+      log.info(
+        `[edr_real_fleet] enabling all Endpoint protections on package policy ${packagePolicyId}`
+      );
+      await enableAllPolicyProtections(kbnClient, packagePolicyId);
+    },
+  });
