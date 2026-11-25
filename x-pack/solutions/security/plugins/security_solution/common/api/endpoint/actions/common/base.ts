@@ -94,7 +94,7 @@ export const ExportParameterSchema = schema.maybe(
     minLength: 1,
     maxLength: EXPORT_PROVIDER_ID_MAX_LENGTH,
     validate: (value) => {
-      // Must match an export provider `id` in the policy (see `EXPORT_PROVIDER_ID_PATTERN`)
+      // Must have the format of an export provider `id` (see `EXPORT_PROVIDER_ID_PATTERN`)
       if (!EXPORT_PROVIDER_ID_PATTERN.test(value)) {
         return 'export can only contain letters, digits, "_" and "-"';
       }

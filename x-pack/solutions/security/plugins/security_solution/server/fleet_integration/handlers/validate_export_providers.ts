@@ -12,6 +12,7 @@ import type {
   ExportProviderFieldName,
 } from '../../../common/endpoint/service/response_actions/export_providers';
 import {
+  AZURE_BLOB_SERVICE_URL_HOST_SUFFIXES,
   EXPORT_PROVIDER_ID_MAX_LENGTH,
   EXPORT_PROVIDER_SERVICE_URL_MAX_LENGTH,
   EXPORT_PROVIDER_TYPES,
@@ -51,6 +52,11 @@ const MAX_LENGTHS: Readonly<Partial<Record<ExportProviderFieldName, number>>> = 
   service_url: EXPORT_PROVIDER_SERVICE_URL_MAX_LENGTH,
 };
 
+const AZURE_BLOB_HOST_PATTERNS = AZURE_BLOB_SERVICE_URL_HOST_SUFFIXES.map((suffix) => `*${suffix}`);
+const AZURE_BLOB_HOSTS_TEXT = `${AZURE_BLOB_HOST_PATTERNS.slice(0, -1).join(
+  ', '
+)} or ${AZURE_BLOB_HOST_PATTERNS.at(-1)}`;
+
 const getFieldErrorMessage = (
   field: ExportProviderFieldName,
   error: ExportProviderFieldError
@@ -67,7 +73,7 @@ const getFieldErrorMessage = (
     case 'not_https':
       return `${field} must use https`;
     case 'not_azure_blob_host':
-      return `${field} must be an Azure Blob Storage endpoint (*.blob.core.windows.net, *.blob.core.usgovcloudapi.net or *.blob.core.chinacloudapi.cn)`;
+      return `${field} must be an Azure Blob Storage endpoint (${AZURE_BLOB_HOSTS_TEXT})`;
     case 'unsupported':
       return `${field} must be one of: ${EXPORT_PROVIDER_TYPES.join(', ')}`;
   }
