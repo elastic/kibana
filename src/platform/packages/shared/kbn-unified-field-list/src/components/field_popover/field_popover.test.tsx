@@ -94,4 +94,59 @@ describe('UnifiedFieldList <FieldPopover />', () => {
     expect(mockClose).toHaveBeenCalled();
     expect(mockEdit).toHaveBeenCalledWith(fieldName);
   });
+
+  describe('when the anchor scrolls out of view', () => {
+    const originalIntersectionObserver = global.IntersectionObserver;
+    let intersectionCallback: (entries: Array<{ isIntersecting: boolean }>) => void;
+    const observe = jest.fn();
+    const disconnect = jest.fn();
+
+    beforeEach(() => {
+      observe.mockClear();
+      disconnect.mockClear();
+      global.IntersectionObserver = jest.fn((callback) => {
+        intersectionCallback = callback;
+        return { observe, unobserve: jest.fn(), disconnect, takeRecords: () => [] };
+      }) as unknown as typeof IntersectionObserver;
+    });
+
+    afterEach(() => {
+      global.IntersectionObserver = originalIntersectionObserver;
+    });
+
+    const renderOpenPopover = (isOpen: boolean, closePopover: () => void) =>
+      renderWithKibanaRenderContext(
+        <FieldPopover
+          isOpen={isOpen}
+          closePopover={closePopover}
+          button={<EuiButton title="test" />}
+          renderHeader={() => <EuiText>{'header'}</EuiText>}
+        />
+      );
+
+    it('should stay open while the anchor is visible', () => {
+      const closePopover = jest.fn();
+      renderOpenPopover(true, closePopover);
+
+      expect(observe).toHaveBeenCalled();
+      intersectionCallback([{ isIntersecting: true }]);
+
+      expect(closePopover).not.toHaveBeenCalled();
+    });
+
+    it('should close once the anchor is fully clipped', () => {
+      const closePopover = jest.fn();
+      renderOpenPopover(true, closePopover);
+
+      intersectionCallback([{ isIntersecting: false }]);
+
+      expect(closePopover).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not observe the anchor while the popover is closed', () => {
+      renderOpenPopover(false, jest.fn());
+
+      expect(observe).not.toHaveBeenCalled();
+    });
+  });
 });

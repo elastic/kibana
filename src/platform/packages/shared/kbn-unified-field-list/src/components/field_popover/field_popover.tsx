@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import type { EuiPopoverProps } from '@elastic/eui';
 import {
@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
+  setMultipleRefs,
   type UseEuiTheme,
 } from '@elastic/eui';
 
@@ -30,8 +31,38 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   renderHeader,
   renderContent,
   renderFooter,
+  popoverRef,
   ...otherPopoverProps
 }) => {
+  const anchorRef = useRef<HTMLDivElement | null>(null);
+  const setAnchorRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      anchorRef.current = node;
+      setMultipleRefs([popoverRef], node);
+    },
+    [popoverRef]
+  );
+
+  // The panel is portaled to the document and follows scroll until EUI clamps it
+  // to the window. Close once the field row is fully clipped by its scroll container.
+  useEffect(() => {
+    const anchorNode = anchorRef.current;
+    if (!isOpen || !anchorNode || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry && !entry.isIntersecting) {
+        closePopover();
+      }
+    });
+    observer.observe(anchorNode);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [closePopover, isOpen]);
+
   let header: React.ReactNode | null = null;
   let content: React.ReactNode | null = null;
   let footer: React.ReactNode | null = null;
@@ -72,6 +103,7 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
         css: styles.fieldPopoverPanel,
       }}
       {...otherPopoverProps}
+      popoverRef={setAnchorRef}
     >
       {isOpen && (
         <EuiFlexGroup gutterSize="none" direction="column" css={styles.popoverContentContainer}>
