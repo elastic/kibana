@@ -23,6 +23,8 @@ interface CreateMissingEntitiesParams {
   logger: ScopedLogger;
   /** Base scores whose `id_value` had no entity store record as of `fetchEntitiesByIds`. */
   missingScores: EntityRiskScoreRecord[];
+  /** Whether base scoring read EUIDs from the stamped field; the representative alert lookup follows it. */
+  stamped: boolean;
   abortSignal?: AbortSignal;
 }
 
@@ -60,6 +62,7 @@ export const createMissingEntities = async ({
   alertFilters,
   logger,
   missingScores,
+  stamped,
   abortSignal,
 }: CreateMissingEntitiesParams): Promise<CreateMissingEntitiesResult> => {
   if (missingScores.length === 0) {
@@ -74,6 +77,7 @@ export const createMissingEntities = async ({
     alertsIndex,
     alertFilters,
     euids,
+    stamped,
     logger,
     abortSignal,
   });

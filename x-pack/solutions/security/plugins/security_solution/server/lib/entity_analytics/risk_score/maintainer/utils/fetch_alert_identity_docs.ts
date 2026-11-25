@@ -11,6 +11,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { isEntityTypeCreatableFromSingleDocument } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ScopedLogger } from './with_log_context';
 
@@ -24,6 +25,8 @@ interface FetchAlertIdentityDocsParams {
   alertFilters: QueryDslQueryContainer[];
   /** EUIDs (`entity_id`) that scored in this page but have no entity store record. */
   euids: string[];
+  /** Base scoring's once-per-run decision: whether it read EUIDs from the stamped `kibana.alert.entity.id` field. */
+  stamped: boolean;
   logger: ScopedLogger;
   abortSignal?: AbortSignal;
 }
@@ -46,13 +49,14 @@ export interface AlertIdentityDoc {
   firstSeen?: string;
 }
 
-/** Fetches the latest non-failure alert and window-bounded first-seen per EUID under base-scoring identity semantics; non-creatable types return no documents. */
+/** Fetches the latest non-failure alert and window-bounded first-seen per EUID, matching alerts by the same stamped or derived EUID base scoring used; non-creatable types return no documents. */
 export const fetchAlertIdentityDocs = async ({
   esClient,
   entityType,
   alertsIndex,
   alertFilters,
   euids,
+  stamped,
   logger,
   abortSignal,
 }: FetchAlertIdentityDocsParams): Promise<Map<string, AlertIdentityDoc>> => {
@@ -61,12 +65,18 @@ export const fetchAlertIdentityDocs = async ({
     return result;
   }
 
-  // Keep this runtime mapping and `alertFilters` aligned with base scoring so each bucket
-  // legitimately computes its requested EUID.
+  // Keep the identity field and `alertFilters` aligned with base scoring so each bucket
+  // legitimately holds its requested EUID. When some alerts have no stamp, base scoring derives the
+  // EUID with a Painless runtime mapping, and so does this query.
   // TODO: Reconsider this coupling after elastic/security-team#18624 is resolved.
-  const runtimeMapping = euid.painless.getEuidRuntimeMapping(
-    getBuiltInEntityDefinition(entityType)
-  );
+  const identityField = stamped ? ALERT_ENTITY_ID : 'entity_id';
+  const runtimeMappings = stamped
+    ? {}
+    : {
+        runtime_mappings: {
+          entity_id: euid.painless.getEuidRuntimeMapping(getBuiltInEntityDefinition(entityType)),
+        },
+      };
 
   for (const euidsChunk of chunk(euids, ALERT_IDENTITY_DOCS_CHUNK_SIZE)) {
     if (abortSignal?.aborted) {
@@ -79,16 +89,23 @@ export const fetchAlertIdentityDocs = async ({
         {
           index: alertsIndex,
           size: 0,
-          runtime_mappings: { entity_id: runtimeMapping },
+          ...runtimeMappings,
           query: {
             bool: {
-              filter: [...alertFilters, { terms: { entity_id: euidsChunk } }],
+              filter: [...alertFilters, { terms: { [identityField]: euidsChunk } }],
               must_not: [{ term: { 'event.outcome': 'failure' } }],
             },
           },
           aggs: {
             by_entity_id: {
-              terms: { field: 'entity_id', size: euidsChunk.length },
+              terms: {
+                field: identityField,
+                size: euidsChunk.length,
+                // The stamped field holds every entity type's EUIDs for an alert (a host and a user
+                // alike), so without `include` the same alerts would also open buckets for EUIDs
+                // that were not requested. Exact values, not a regex: EUIDs contain `.` and `@`.
+                ...(stamped ? { include: euidsChunk } : {}),
+              },
               aggs: {
                 latest: {
                   top_hits: {

@@ -241,6 +241,15 @@ describe('score_base_entities', () => {
         })
       );
 
+    it('marks every page as scored from stamped EUIDs', async () => {
+      mockCompositeAggPage(esClient, ['user:a@okta']);
+      esClient.esql.query = jest.fn().mockResolvedValue({ values: [esqlRow('user:a@okta')] });
+
+      const pages = await run();
+
+      expect(pages.map(({ stamped }) => stamped)).toEqual([true]);
+    });
+
     it('checks for unstamped alerts of the type being scored', async () => {
       mockCompositeAggPage(esClient, []);
 
@@ -348,6 +357,24 @@ describe('score_base_entities', () => {
   });
 
   describe('when some alerts have no stamped EUID', () => {
+    it('marks every page as scored from derived EUIDs', async () => {
+      mockCompositeAggPage(esClient, ['user:a@okta']);
+      esClient.esql.query = jest.fn().mockResolvedValue({ values: [esqlRow('user:a@okta')] });
+
+      const pages = await collectPages(
+        calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
+          esClient,
+          crudClient,
+          logger,
+          createMissingEntities: false,
+          ...baseParams,
+        })
+      );
+
+      expect(pages.map(({ stamped }) => stamped)).toEqual([false]);
+    });
+
     it('derives EUIDs with the runtime mapping and reads every alert in range', async () => {
       mockCompositeAggPage(esClient, ['user:a@okta']);
       (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
@@ -670,6 +697,111 @@ describe('score_base_entities', () => {
       expect(summary.entitiesCreated).toBe(1);
       expect(summary.entityCreationsSkipped).toBe(0);
       expect(summary.entityCreationsFailed).toBe(0);
+    });
+
+    describe('representative alert lookup', () => {
+      const MISSING_EUID = 'user:new@okta';
+
+      const scoreOneMissingEntity = async (unstampedAlertCount: number) => {
+        esClient.count = jest.fn().mockResolvedValue({ count: unstampedAlertCount });
+        const search = jest
+          .fn()
+          .mockResolvedValueOnce({
+            aggregations: { by_entity_id: { buckets: [{ key: { entity_id: MISSING_EUID } }] } },
+          })
+          .mockResolvedValueOnce({
+            aggregations: {
+              by_entity_id: {
+                buckets: [
+                  {
+                    key: MISSING_EUID,
+                    latest: { hits: { hits: [{ _source: { user: { name: 'new' } } }] } },
+                    first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
+                  },
+                ],
+              },
+            },
+          });
+        esClient.search = search;
+        esClient.esql.query = jest.fn().mockResolvedValue({ values: [esqlRow(MISSING_EUID)] });
+        crudClient.createEntitiesFromSource = jest.fn().mockResolvedValue({
+          created: [MISSING_EUID],
+          alreadyExists: [],
+          skipped: [],
+          failed: [],
+        });
+
+        const summary = await scoreBaseEntities({
+          pageTimings: createPageStepTimings(),
+          esClient,
+          crudClient,
+          logger,
+          writer: buildWriter(),
+          createMissingEntities: true,
+          ...baseParams,
+        });
+
+        return { search, summary };
+      };
+
+      it('looks the alert up by the stored entity ID when base scoring paged by it', async () => {
+        const { search, summary } = await scoreOneMissingEntity(0);
+
+        expect(search).toHaveBeenCalledTimes(2);
+        expect(search).toHaveBeenNthCalledWith(
+          2,
+          expect.not.objectContaining({ runtime_mappings: expect.anything() }),
+          expect.anything()
+        );
+        expect(search).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: [{ terms: { 'kibana.alert.entity.id': [MISSING_EUID] } }],
+              }),
+            }),
+            aggs: {
+              by_entity_id: expect.objectContaining({
+                terms: { field: 'kibana.alert.entity.id', size: 1, include: [MISSING_EUID] },
+              }),
+            },
+          }),
+          expect.anything()
+        );
+        expect(summary.entitiesCreated).toBe(1);
+      });
+
+      it('looks the alert up by the derived entity ID when base scoring derived it', async () => {
+        const { search, summary } = await scoreOneMissingEntity(1);
+
+        expect(search).toHaveBeenCalledTimes(2);
+        expect(search).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            runtime_mappings: { entity_id: expect.objectContaining({ type: 'keyword' }) },
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: [{ terms: { entity_id: [MISSING_EUID] } }],
+              }),
+            }),
+            aggs: {
+              by_entity_id: expect.objectContaining({
+                terms: { field: 'entity_id', size: 1 },
+              }),
+            },
+          }),
+          expect.anything()
+        );
+        expect(summary.entitiesCreated).toBe(1);
+      });
+
+      it('does not re-check for unstamped alerts when creating entities', async () => {
+        const { search } = await scoreOneMissingEntity(0);
+
+        expect(search).toHaveBeenCalledTimes(2);
+        expect(esClient.count).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('routes a 409 race to the entity store update path in addition to the risk index', async () => {
