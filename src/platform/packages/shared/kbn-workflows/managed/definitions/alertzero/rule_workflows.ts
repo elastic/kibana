@@ -70,7 +70,7 @@ export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
   id: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 36,
+  version: 37,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'rule_tuning_review.yaml');
   },

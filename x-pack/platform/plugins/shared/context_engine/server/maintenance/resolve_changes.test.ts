@@ -536,7 +536,7 @@ describe('resolveMaintenanceChanges', () => {
       entity('e-1', {
         references: [
           ...derivedFrom('m-1', 'm-2'),
-          { uri: 'trace://abc', relation: 'derived_from' },
+          { uri: 'session://abc', relation: 'derived_from' },
         ],
       }),
     ];
@@ -550,7 +550,7 @@ describe('resolveMaintenanceChanges', () => {
     expect(build(resolved, kis)).toEqual(
       expect.objectContaining({
         content: 'Bob runs on-call.',
-        references: [...derivedFrom('m-2'), { uri: 'trace://abc', relation: 'derived_from' }],
+        references: [...derivedFrom('m-2'), { uri: 'session://abc', relation: 'derived_from' }],
       })
     );
   });

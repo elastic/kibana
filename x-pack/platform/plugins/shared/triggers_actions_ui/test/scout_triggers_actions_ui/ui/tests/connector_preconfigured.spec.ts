@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { KibanaRole, KibanaUrl, ScoutPage } from '@kbn/scout';
+import type { KibanaRole, ScoutPage } from '@kbn/scout';
 import { euiSelectors, test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-const CONNECTORS_APP_PATH =
-  '/app/management/insightsAndAlerting/triggersActionsConnectors' as const;
+const CONNECTORS_APP_NAME = 'management/insightsAndAlerting/triggersActionsConnectors' as const;
 
 const CONNECTORS_LIST_SELECTORS = {
   SEARCH_INPUT: '[data-test-subj="actionsList"] .euiFieldSearch',
   TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)',
-  EMPTY_STATE: '[data-test-subj="createFirstConnectorEmptyPrompt"]',
 } as const;
 
 const CONNECTORS_ROLE: KibanaRole = {
@@ -41,12 +39,10 @@ const CONNECTORS_ROLE: KibanaRole = {
   ],
 };
 
-const navigateToConnectors = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
-  await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-  await page
-    .locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED)
-    .or(page.locator(CONNECTORS_LIST_SELECTORS.EMPTY_STATE))
-    .waitFor();
+const navigateToConnectors = async (page: ScoutPage) => {
+  await page.gotoApp(CONNECTORS_APP_NAME, {
+    readyWhen: page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED),
+  });
 };
 
 const searchConnectors = async (page: ScoutPage, name: string) => {
@@ -76,8 +72,8 @@ test.describe('Preconfigured connector functionality', { tag: tags.stateful.clas
     await browserAuth.loginWithCustomRole(CONNECTORS_ROLE);
   });
 
-  test('should not be able to delete a preconfigured connector', async ({ page, kbnUrl }) => {
-    await navigateToConnectors(page, kbnUrl);
+  test('should not be able to delete a preconfigured connector', async ({ page }) => {
+    await navigateToConnectors(page);
     await searchConnectors(page, 'Serverlog');
 
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
@@ -88,8 +84,8 @@ test.describe('Preconfigured connector functionality', { tag: tags.stateful.clas
     ).toBeDisabled();
   });
 
-  test('should not be able to edit a preconfigured connector', async ({ page, kbnUrl }) => {
-    await navigateToConnectors(page, kbnUrl);
+  test('should not be able to edit a preconfigured connector', async ({ page }) => {
+    await navigateToConnectors(page);
     await searchConnectors(page, 'test-preconfigured-email');
 
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);

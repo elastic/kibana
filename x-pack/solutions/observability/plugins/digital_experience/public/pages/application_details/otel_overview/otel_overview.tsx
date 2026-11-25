@@ -18,7 +18,7 @@ import type {
   OverviewPercentileParam,
   OverviewSearchParams,
 } from '../../../../common/overview_filters';
-import { PAGE_FILTER_NAMES } from '../../../../common/overview_filters';
+import { PAGE_FILTER_NOTE_NAMES } from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
   ApplicationOverviewKpisResponse,
@@ -57,7 +57,7 @@ import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
 const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
   defaultMessage:
-    'The page filters apply to page loads, with their load time, trend, pages and breakdowns, and to frustration signals only: web vitals, JS errors, other clicks and HTTP requests carry no page URL yet.',
+    'Page applies to every browser event but HTTP requests, which carry the URL they request. URL contains applies to page loads and frustration signals only: web vitals, JS errors and other clicks carry no URL.',
 });
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
@@ -197,27 +197,25 @@ function UsageAndErrorsPanels({
           onRetry={refresh}
         />
       ) : (
-        <EuiFlexGroup gutterSize="m" alignItems="stretch">
-          <EuiFlexItem grow={3}>
-            <TopPagesPanel
-              pages={topPages}
-              isLoading={isLoading}
-              selectedUrls={(filters.pageUrl ?? [])
-                .filter(({ exclude }) => !exclude)
-                .map(({ value }) => value)}
-              onSelectPage={(url) => onSelectFilter('pageUrl', url)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <BreakdownsPanel
-              breakdowns={breakdowns}
-              isLoading={isLoading}
-              sessionsHref={sessionsHref}
-              filters={filters}
-              onSelectFilter={onSelectFilter}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        // Full width each: the pages have a column per metric, and the breakdowns one per list.
+        <>
+          <TopPagesPanel
+            pages={topPages}
+            isLoading={isLoading}
+            selectedUrls={(filters.pageUrl ?? [])
+              .filter(({ exclude }) => !exclude)
+              .map(({ value }) => value)}
+            onSelectPage={(url) => onSelectFilter('pageUrl', url)}
+          />
+          <EuiSpacer size="m" />
+          <BreakdownsPanel
+            breakdowns={breakdowns}
+            isLoading={isLoading}
+            sessionsHref={sessionsHref}
+            filters={filters}
+            onSelectFilter={onSelectFilter}
+          />
+        </>
       )}
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="stretch">
@@ -334,7 +332,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onClose={() => setIsFlyoutOpen(false)}
         />
       )}
-      {PAGE_FILTER_NAMES.some((name) => (filters[name] ?? []).length > 0) && (
+      {PAGE_FILTER_NOTE_NAMES.some((name) => (filters[name] ?? []).length > 0) && (
         <>
           <EuiSpacer size="s" />
           <EuiText
