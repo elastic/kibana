@@ -14,6 +14,7 @@ export const METADATA_FIELDS = [
   '_ignored',
   '_index_mode',
   '_score',
+  '_tsid',
   '_size',
   '_slice',
   '_name',
