@@ -242,12 +242,10 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
       })
     : undefined;
 
-  // With the catalog disabled the update is unversioned, so a previously pinned version is dropped.
   const attributesWithoutIdentity = omit(attributes, [
     'apiKey',
     'uiamApiKey',
     'uiamApiKeyExternal',
-    ...(configurationUtilities.isCatalogEnabled() ? [] : ['specVersion']),
   ]);
 
   const result = await tryCatch(

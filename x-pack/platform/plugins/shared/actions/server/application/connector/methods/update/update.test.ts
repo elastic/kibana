@@ -233,14 +233,8 @@ describe('update()', () => {
       jest.mocked(actionTypeRegistry.getUtils).mockReturnValue(originalConfigurationUtilities);
     });
 
-    test('ignores the version pinned on the saved object when the connector catalog is disabled', async () => {
+    test('does not overwritethe version pinned on the saved object with a newer minor when the connector catalog is disabled', async () => {
       configurationUtilities.isCatalogEnabled.mockReturnValue(false);
-      const unversionedAction = {
-        name: action.name,
-        config: { unrelated: 'config' },
-        secrets: { unrelated: 'secret' },
-      };
-
       const storedConnector = {
         ...existingRawAction,
         attributes: { ...existingRawAction.attributes, specVersion: '1.3' },
@@ -250,13 +244,15 @@ describe('update()', () => {
       const result = await update({
         context: mockContext,
         id: 'connector-id',
-        action: unversionedAction,
+        action: {
+          name: action.name,
+          config: { unrelated: 'config' },
+          secrets: { unrelated: 'secret' },
+          specVersion: '1.5',
+        },
       });
 
-      // The type is versioned and the fetched connector is pinned, yet neither is used because the catalog config is off.
-      expect(result).not.toHaveProperty('specVersion');
-      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
-      expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).not.toHaveProperty('specVersion');
+      expect(result.specVersion).toEqual('1.3');
     });
 
     test('does not default to major 1 when the saved object has no version and the connector catalog is disabled', async () => {
