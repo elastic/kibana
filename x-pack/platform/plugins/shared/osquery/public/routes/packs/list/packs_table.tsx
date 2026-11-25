@@ -311,6 +311,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
                   size="s"
                   content={breakdown}
                   aria-label={breakdown}
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                   iconProps={{ 'data-test-subj': 'packEffectivePoliciesInfo' }}
                 />
               </>

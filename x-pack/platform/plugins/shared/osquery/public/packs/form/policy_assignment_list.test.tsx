@@ -204,7 +204,9 @@ describe('PolicyAssignmentList', () => {
         );
 
         expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
-        expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('2 of 3 agent policies selected');
+        expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
+          '2 of 3 agent policies selected'
+        );
         await openSharedPolicies();
         const marker = await screen.findByText('Included via shared integration');
         expect(marker.closest('li')).toHaveTextContent('Beta Policy');
@@ -358,7 +360,9 @@ describe('PolicyAssignmentList', () => {
       );
       fireEvent.click(screen.getByRole('checkbox', { name: groupName }));
       expect(onFormChange).toHaveBeenLastCalledWith(expect.objectContaining({ policy_ids: [] }));
-      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('0 of 3 agent policies selected');
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
+        '0 of 3 agent policies selected'
+      );
     });
 
     it('lists members as plain text when the user cannot read Fleet agent policies', async () => {
@@ -398,7 +402,9 @@ describe('PolicyAssignmentList', () => {
       fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
       expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
       expect(screen.getByRole('checkbox', { name: 'Select policy Gamma Policy' })).toBeChecked();
-      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('3 of 3 agent policies selected');
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
+        '3 of 3 agent policies selected'
+      );
       fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
       screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).not.toBeChecked());
     });
@@ -991,7 +997,9 @@ describe('PolicyAssignmentList', () => {
     it('excludes shard-targeted policies from the selectable total', () => {
       render(<FormWrapper defaultValues={{ policy_ids: [], shards: { 'policy-2': 50 } }} />);
 
-      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('0 of 2 agent policies selected');
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
+        '0 of 2 agent policies selected'
+      );
     });
 
     it('explains why a shard-targeted policy cannot be selected', () => {

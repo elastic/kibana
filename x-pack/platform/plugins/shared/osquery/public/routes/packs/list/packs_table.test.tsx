@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
@@ -196,7 +196,7 @@ describe('PacksTable', () => {
         if (infoIcon) {
           expect(infoIcon).toHaveTextContent('1 selected + 1 via shared integration');
           expect(infoIcon).toHaveAttribute('tabindex', '0');
-          fireEvent.focus(infoIcon);
+          act(() => infoIcon.focus());
           expect(await screen.findByRole('tooltip')).toHaveTextContent(
             '1 selected + 1 via shared integration'
           );

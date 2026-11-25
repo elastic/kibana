@@ -488,16 +488,6 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     [selectedSet, agentPoliciesById]
   );
 
-  const selectedAgentPoliciesLabelValues = useMemo(
-    () => ({
-      selected: allSelectedCount,
-      total: allAssignable.length,
-      implicit: implicitPolicyIds.size,
-      agents: totalAgents,
-    }),
-    [allSelectedCount, allAssignable.length, implicitPolicyIds.size, totalAgents]
-  );
-
   const togglePolicy = useCallback(
     (policyId: string) => {
       const row = allPolicies.find(({ id }) => id === policyId);
@@ -545,8 +535,10 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   const handleToggleAll = useCallback(() => {
     if (allVisibleSelected) {
       handleUnselectAll();
+
       return;
     }
+
     handleSelectAll();
   }, [allVisibleSelected, handleUnselectAll, handleSelectAll]);
   const selectAllCheckboxId = useGeneratedHtmlId({ prefix: 'policyAssignmentSelectAll' });
@@ -960,6 +952,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                     <FormattedMessage
                       id="xpack.osquery.pack.form.sharedIntegration.splitIntegrationHint"
                       defaultMessage="To run this pack on only some of these agent policies, give each its own Osquery Manager integration in {fleetLink}."
+                      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                       values={{
                         fleetLink: canReadIntegrations ? (
                           <EuiLink
@@ -1008,11 +1001,16 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiText size="xs" color="subdued" data-test-subj="policyAssignmentCount">
-              <FormattedMessage
-                id="xpack.osquery.pack.policyList.selectedAgentPoliciesLabel"
-                defaultMessage="{selected} of {total} agent policies selected{implicit, plural, =0 {} other { · includes # via a shared integration}} · {agents, plural, one {# agent} other {# agents}} enrolled"
-                values={selectedAgentPoliciesLabelValues}
-              />
+              {i18n.translate('xpack.osquery.pack.policyList.selectedAgentPoliciesLabel', {
+                defaultMessage:
+                  '{selected} of {total} agent policies selected{implicit, plural, =0 {} other { · includes # via a shared integration}} · {agents, plural, one {# agent} other {# agents}} enrolled',
+                values: {
+                  selected: allSelectedCount,
+                  total: allAssignable.length,
+                  implicit: implicitPolicyIds.size,
+                  agents: totalAgents,
+                },
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
