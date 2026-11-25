@@ -11,9 +11,15 @@ import { z } from '@kbn/zod/v4';
 import type { ActionTypeConfig, ValidatorType } from '../../types';
 import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';
 
+export interface GenerateConfigSchemaOptions {
+  /** Outbound is off: every spec config field is optional. Sent fields keep their validation. */
+  allFieldsOptional?: boolean;
+}
+
 export const generateConfigSchema = (
   schema: ConnectorSpec['schema'],
-  actionNames: readonly string[] = []
+  actionNames: readonly string[] = [],
+  options: GenerateConfigSchemaOptions = {}
 ): ValidatorType<ActionTypeConfig> => {
   const authType = z.string().optional();
   // null/absent = recommended (isTool) actions; non-empty array = explicit allowlist.
@@ -25,8 +31,12 @@ export const generateConfigSchema = (
     selectedActions,
     [OUTBOUND_ENABLED_CONFIG_KEY]: outboundEnabled,
   };
-  const configSchema = schema ? schema.extend(frameworkKeys) : z.object(frameworkKeys);
-  const allowedHostsKeys = getAllowedHostsKeysFromShape(configSchema.shape);
+  const strictConfigSchema = schema ? schema.extend(frameworkKeys) : z.object(frameworkKeys);
+  // The allowed hosts keys come from the strict shape, because `partial()` wraps each field.
+  const allowedHostsKeys = getAllowedHostsKeysFromShape(strictConfigSchema.shape);
+  const configSchema = options.allFieldsOptional
+    ? strictConfigSchema.partial()
+    : strictConfigSchema;
   const knownActionNames = new Set(actionNames);
 
   return {

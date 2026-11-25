@@ -8,6 +8,9 @@
 import Boom from '@hapi/boom';
 import { OUTBOUND_ENABLED_CONFIG_KEY, connectorTypeIsDual } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { ActionType } from '../types';
+import { generateConfigSchema } from './single_file_connectors/generate_config_schema';
 
 /**
  * Rejects `is_outbound_actions_enabled` on types that are not dual.
@@ -144,3 +147,32 @@ export const attachOutboundActionsEnabled = <
       : connector.config?.[OUTBOUND_ENABLED_CONFIG_KEY] !== false;
     return { ...connector, isOutboundActionsEnabled: isEnabled };
   });
+
+/** True when the request sent no secrets at all. An empty object counts as omitted. */
+export const areSecretsOmitted = (secrets: Record<string, unknown> | undefined): boolean =>
+  secrets === undefined || Object.keys(secrets).length === 0;
+
+/**
+ * The same action type with a config validator where every spec field is optional.
+ * Used when outbound is off. Sent fields keep their validation.
+ */
+export const getOutboundDisabledValidationType = ({
+  actionType,
+  spec,
+}: {
+  actionType: ActionType;
+  spec: ConnectorSpec | undefined;
+}): ActionType => {
+  if (spec === undefined) {
+    return actionType;
+  }
+  return {
+    ...actionType,
+    validate: {
+      ...actionType.validate,
+      config: generateConfigSchema(spec.schema, Object.keys(spec.actions ?? {}), {
+        allFieldsOptional: true,
+      }),
+    },
+  };
+};

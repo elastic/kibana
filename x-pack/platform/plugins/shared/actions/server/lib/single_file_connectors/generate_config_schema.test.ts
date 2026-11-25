@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import { connectorsSpecs, isDualConnectorSpec } from '@kbn/connector-specs';
 
 import { generateConfigSchema } from './generate_config_schema';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -244,6 +246,80 @@ describe('generateConfigSchema', () => {
       expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith('https://allowed.example.com');
       expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalledWith(
         'https://not-allowed.example.com/webhook'
+      );
+    });
+  });
+
+  describe('allFieldsOptional', () => {
+    const dualSpecs = (Object.values(connectorsSpecs) as ConnectorSpec[]).filter(
+      isDualConnectorSpec
+    );
+
+    it('covers the 5 dual specs', () => {
+      expect(dualSpecs.map((spec) => spec.metadata.id).sort()).toEqual([
+        '.datadog',
+        '.github',
+        '.microsoft-teams',
+        '.servicenow_search',
+        '.slack2',
+      ]);
+    });
+
+    it.each(dualSpecs.map((spec) => [spec.metadata.id, spec] as const))(
+      'accepts an empty config for %s',
+      (_id, spec) => {
+        const validator = generateConfigSchema(spec.schema, Object.keys(spec.actions), {
+          allFieldsOptional: true,
+        });
+
+        expect(() => validator.schema.parse({})).not.toThrow();
+        expect(() => validator.customValidator?.({}, validatorServices)).not.toThrow();
+      }
+    );
+
+    it('keeps the required fields strict without the option', () => {
+      const spec = (Object.values(connectorsSpecs) as ConnectorSpec[]).find(
+        ({ metadata }) => metadata.id === '.servicenow_search'
+      )!;
+      const validator = generateConfigSchema(spec.schema, Object.keys(spec.actions));
+
+      expect(() => validator.schema.parse({})).toThrow();
+    });
+
+    it('still rejects a field that is sent and not valid', () => {
+      const validator = generateConfigSchema(z.object({ instanceUrl: z.url() }), [], {
+        allFieldsOptional: true,
+      });
+
+      expect(() => validator.schema.parse({ instanceUrl: 'not a url' })).toThrow();
+    });
+
+    it('still checks the allowed hosts of fields that are sent', () => {
+      mockConfigUtils.ensureUriAllowed.mockImplementation((uri: string) => {
+        throw new Error(`target url "${uri}" is not added to the Kibana config`);
+      });
+      const validator = generateConfigSchema(
+        z.object({ serviceUrl: z.url().meta({ validate: { allowedHosts: true } }) }),
+        [],
+        { allFieldsOptional: true }
+      );
+
+      expect(() =>
+        validator.customValidator?.(
+          { serviceUrl: 'https://not-allowed.example.com' },
+          validatorServices
+        )
+      ).toThrow('is not added to the Kibana config');
+      expect(() => validator.customValidator?.({}, validatorServices)).not.toThrow();
+    });
+
+    it('still rejects an empty selectedActions array', () => {
+      const validator = generateConfigSchema(z.object({ apiUrl: z.string() }), ['a'], {
+        allFieldsOptional: true,
+      });
+
+      expect(() => validator.customValidator?.({ selectedActions: [] }, validatorServices)).toThrow(
+        'selectedActions must include at least one action when set.'
       );
     });
   });

@@ -52,7 +52,9 @@ import {
 import {
   applyOutboundEnabledToConfig,
   assertInboundOrOutboundEnabled,
+  areSecretsOmitted,
   assertOutboundActionsToggleAllowed,
+  getOutboundDisabledValidationType,
   resolveCreateOutboundActionsEnabled,
 } from '../../../../lib/outbound_actions_enabled';
 
@@ -167,18 +169,28 @@ async function createConnector({
   });
 
   const configurationUtilities = context.actionTypeRegistry.getUtils();
-  const { resolvedSpecVersion, actionTypeForValidation: actionType } = resolveConnectorSpecVersion({
+  const { resolvedSpecVersion, actionTypeForValidation } = resolveConnectorSpecVersion({
     actionType: context.actionTypeRegistry.get(actionTypeId),
     specVersion,
     configurationUtilities,
   });
+  // With outbound off, spec config fields are optional and secrets can be omitted.
+  const actionType = isOutboundActionsEnabled
+    ? actionTypeForValidation
+    : getOutboundDisabledValidationType({
+        actionType: actionTypeForValidation,
+        spec: context.actionTypeRegistry.getSpec(actionTypeId, resolvedSpecVersion),
+      });
 
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
-  const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
-    configurationUtilities,
-  });
+  const validatedActionTypeSecrets =
+    !isOutboundActionsEnabled && areSecretsOmitted(secrets)
+      ? {}
+      : validateSecrets(actionType, secrets, {
+          configurationUtilities,
+        });
   if (actionType.validate?.connector) {
     validateConnector(actionType, { config, secrets });
   }

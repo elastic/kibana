@@ -2181,6 +2181,130 @@ describe('create()', () => {
       expect(savedAction().config).toEqual({});
     });
 
+    describe('lenient validation', () => {
+      const dualSpec = {
+        metadata: { id: '.dual' },
+        schema: z4.object({ instanceUrl: z4.url() }),
+        actions: { ping: {} },
+      } as unknown as ConnectorSpec;
+
+      beforeEach(() => {
+        (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+          getConnectorType({
+            id: '.dual',
+            source: ACTION_TYPE_SOURCES.spec,
+            validate: {
+              config: { schema: z4.object({ instanceUrl: z4.url() }) },
+              secrets: { schema: z4.object({ token: z4.string() }) },
+              params: { schema: z.object({}) },
+            },
+          })
+        );
+        (actionTypeRegistry.getSpec as jest.Mock).mockReturnValue(dualSpec);
+      });
+
+      afterEach(() => {
+        (actionTypeRegistry.getSpec as jest.Mock).mockReset();
+      });
+
+      test('saves with no secrets and no required config field (like instanceUrl) when outbound is off', async () => {
+        const result = await create({
+          context: dualContext,
+          action: {
+            name: 'Dual',
+            actionTypeId: '.dual',
+            config: {},
+            secrets: {},
+            isInboundEventsEnabled: true,
+            isOutboundActionsEnabled: false,
+          },
+        });
+
+        expect(result.isOutboundActionsEnabled).toBe(false);
+        const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+          (call) => call[0] === 'action'
+        )?.[1] as { config: Record<string, unknown>; secrets: Record<string, unknown> };
+        expect(saved.secrets).toEqual({});
+        expect(saved.config).toEqual({ outboundEnabled: false });
+      });
+
+      test('validates and saves secrets that are sent when outbound is off', async () => {
+        await create({
+          context: dualContext,
+          action: {
+            name: 'Dual',
+            actionTypeId: '.dual',
+            config: {},
+            secrets: { token: 'abc' },
+            isInboundEventsEnabled: true,
+            isOutboundActionsEnabled: false,
+          },
+        });
+
+        const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+          (call) => call[0] === 'action'
+        )?.[1] as { secrets: Record<string, unknown> };
+        expect(saved.secrets).toEqual({ token: 'abc' });
+      });
+
+      test('rejects secrets that are sent and not valid when outbound is off', async () => {
+        await expect(
+          create({
+            context: dualContext,
+            action: {
+              name: 'Dual',
+              actionTypeId: '.dual',
+              config: {},
+              secrets: { token: 42 } as never,
+              isInboundEventsEnabled: true,
+              isOutboundActionsEnabled: false,
+            },
+          })
+        ).rejects.toThrow(/error validating connector type secrets/);
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      test('rejects a config field that is sent and not valid when outbound is off', async () => {
+        await expect(
+          create({
+            context: dualContext,
+            action: {
+              name: 'Dual',
+              actionTypeId: '.dual',
+              config: { instanceUrl: 'not a url' },
+              secrets: {},
+              isInboundEventsEnabled: true,
+              isOutboundActionsEnabled: false,
+            },
+          })
+        ).rejects.toThrow(/error validating connector type config/);
+      });
+
+      test('still needs config and secrets when outbound is on', async () => {
+        await expect(
+          create({
+            context: dualContext,
+            action: { name: 'Dual', actionTypeId: '.dual', config: {}, secrets: {} },
+          })
+        ).rejects.toThrow(/error validating connector type config/);
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      test('needs secrets when outbound is on and config is valid', async () => {
+        await expect(
+          create({
+            context: dualContext,
+            action: {
+              name: 'Dual',
+              actionTypeId: '.dual',
+              config: { instanceUrl: 'https://example.com' },
+              secrets: {},
+            },
+          })
+        ).rejects.toThrow(/error validating connector type secrets/);
+      });
+    });
+
     test('does not write the config key for a type that is not dual', async () => {
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(
         getConnectorType({

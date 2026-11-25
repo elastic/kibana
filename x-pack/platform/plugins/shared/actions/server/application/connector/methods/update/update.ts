@@ -42,7 +42,9 @@ import {
 import {
   applyOutboundEnabledToConfig,
   assertInboundOrOutboundEnabled,
+  areSecretsOmitted,
   assertOutboundActionsToggleAllowed,
+  getOutboundDisabledValidationType,
   readOutboundActionsEnabled,
   resolveUpdateOutboundActionsEnabled,
 } from '../../../../lib/outbound_actions_enabled';
@@ -52,6 +54,16 @@ const getAuthTypeId = (
   config?: Record<string, unknown>
 ): string | undefined =>
   (secrets as { authType?: string })?.authType ?? (config as { authType?: string })?.authType;
+
+/** Forces `authType` of the saved config, or removes it when the saved config has none. */
+const withSavedAuthType = (
+  config: Record<string, unknown>,
+  savedConfig: Record<string, unknown> | undefined
+): Record<string, unknown> => {
+  const { authType: _omit, ...rest } = config;
+  const savedAuthType = savedConfig?.authType;
+  return savedAuthType === undefined ? rest : { ...rest, authType: savedAuthType };
+};
 
 export async function update({ context, id, action }: ConnectorUpdateParams): Promise<Connector> {
   try {
@@ -144,40 +156,54 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isOutboundActionsEnabled,
   });
 
-  const requestedAuthMode = inferAuthMode({
-    authTypeRegistry: context.authTypeRegistry,
-    secrets,
-    config,
-  });
+  // Outbound off with no secrets sent: the saved auth type is kept, so it is not checked.
+  const isOutboundOffWithoutSecrets = !isOutboundActionsEnabled && areSecretsOmitted(secrets);
 
-  if (currentAuthMode === 'per-user') {
-    if (requestedAuthTypeId !== currentAuthTypeId) {
+  if (!isOutboundOffWithoutSecrets) {
+    const requestedAuthMode = inferAuthMode({
+      authTypeRegistry: context.authTypeRegistry,
+      secrets,
+      config,
+    });
+
+    if (currentAuthMode === 'per-user') {
+      if (requestedAuthTypeId !== currentAuthTypeId) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.actions.serverSideErrors.perUserConnectorAuthTypeChangeForbidden', {
+            defaultMessage:
+              'Authentication type cannot be changed for per-user connectors. Connector: {id}.',
+            values: { id },
+          })
+        );
+      }
+    } else if (requestedAuthMode === 'per-user') {
       throw Boom.badRequest(
-        i18n.translate('xpack.actions.serverSideErrors.perUserConnectorAuthTypeChangeForbidden', {
+        i18n.translate('xpack.actions.serverSideErrors.sharedConnectorPerUserAuthTypeForbidden', {
           defaultMessage:
-            'Authentication type cannot be changed for per-user connectors. Connector: {id}.',
+            'Authentication type cannot be changed to a per-user type for shared connectors. Connector: {id}.',
           values: { id },
         })
       );
     }
-  } else if (requestedAuthMode === 'per-user') {
-    throw Boom.badRequest(
-      i18n.translate('xpack.actions.serverSideErrors.sharedConnectorPerUserAuthTypeForbidden', {
-        defaultMessage:
-          'Authentication type cannot be changed to a per-user type for shared connectors. Connector: {id}.',
-        values: { id },
-      })
-    );
   }
 
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
+  const registeredActionType = context.actionTypeRegistry.get(actionTypeId);
+  // With outbound off, spec config fields are optional and secrets can be omitted.
+  const actionType = isOutboundActionsEnabled
+    ? registeredActionType
+    : getOutboundDisabledValidationType({
+        actionType: registeredActionType,
+        spec: context.actionTypeRegistry.getSpec(actionTypeId, attributes.specVersion),
+      });
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
-  const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
-    configurationUtilities,
-  });
+  const validatedActionTypeSecrets = isOutboundOffWithoutSecrets
+    ? {}
+    : validateSecrets(actionType, secrets, {
+        configurationUtilities,
+      });
   if (actionType.validate?.connector) {
     validateConnector(actionType, { config, secrets });
   }
@@ -221,10 +247,15 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
 
   const configWithAuthType =
     actionType.source === ACTION_TYPE_SOURCES.spec
-      ? ensureConfigAuthType(
-          validatedActionTypeConfig as Record<string, unknown>,
-          validatedActionTypeSecrets as Record<string, unknown>
-        )
+      ? isOutboundOffWithoutSecrets
+        ? withSavedAuthType(
+            validatedActionTypeConfig as Record<string, unknown>,
+            attributes.config as Record<string, unknown> | undefined
+          )
+        : ensureConfigAuthType(
+            validatedActionTypeConfig as Record<string, unknown>,
+            validatedActionTypeSecrets as Record<string, unknown>
+          )
       : validatedActionTypeConfig;
   const configForSave = connectorTypeIsDual(actionTypeId)
     ? applyOutboundEnabledToConfig(

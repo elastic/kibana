@@ -6,6 +6,7 @@
  */
 
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
@@ -59,6 +60,7 @@ const getAxiosInstanceWithAuth = jest.fn();
 
 const actionTypeRegistry: ActionTypeRegistry = {
   get: jest.fn(),
+  getSpec: jest.fn(),
   isSystemActionType: jest.fn().mockReturnValue(false),
   ensureActionTypeEnabled: jest.fn(),
   isDeprecated: jest.fn().mockReturnValue(false),
@@ -1625,6 +1627,209 @@ describe('update()', () => {
 
       expect(result.isOutboundActionsEnabled).toBe(true);
       expect(savedAction().config).toEqual({});
+    });
+
+    describe('lenient validation and auth type', () => {
+      const dualSpec = {
+        metadata: { id: '.dual' },
+        schema: z.object({ instanceUrl: z.url() }),
+        actions: { ping: {} },
+      } as unknown as ConnectorSpec;
+
+      const PER_USER = 'oauth_authorization_code';
+
+      const buildPerUserExisting = ({ outboundEnabled }: { outboundEnabled: boolean }) => ({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.dual',
+          authMode: 'per-user',
+          config: {
+            instanceUrl: 'https://saved.example.com',
+            authType: PER_USER,
+            ...(outboundEnabled ? {} : { outboundEnabled: false }),
+          },
+          secrets: outboundEnabled ? { authType: PER_USER } : {},
+          hasInboundEventIdentity: true,
+        },
+      });
+
+      beforeEach(() => {
+        (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+          getConnectorType({
+            id: '.dual',
+            source: ACTION_TYPE_SOURCES.spec,
+            validate: {
+              config: { schema: z.object({ instanceUrl: z.url() }) },
+              secrets: { schema: z.object({ authType: z.string(), token: z.string().optional() }) },
+              params: { schema: z.object({}) },
+            },
+          })
+        );
+        (actionTypeRegistry.getSpec as jest.Mock).mockReturnValue(dualSpec);
+      });
+
+      afterEach(() => {
+        (actionTypeRegistry.getSpec as jest.Mock).mockReset();
+      });
+
+      test('turning outbound off deletes the tokens of a per-user connector', async () => {
+        arrangeExisting(buildPerUserExisting({ outboundEnabled: true }) as never);
+
+        await update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: false },
+        });
+
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: 'connector-id',
+          authMode: 'per-user',
+          skipRevocation: true,
+        });
+        const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+          (call) => call[0] === 'action'
+        )?.[1] as { secrets: Record<string, unknown>; authMode?: string };
+        expect(saved.secrets).toEqual({});
+        expect(saved.authMode).toBe('per-user');
+      });
+
+      test('off with no secrets saves with no config fields', async () => {
+        arrangeExisting(buildExisting({ hasInboundEventIdentity: true }));
+
+        await update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: false },
+        });
+
+        expect(savedAction().config).toEqual({ outboundEnabled: false });
+      });
+
+      test('off with no secrets keeps the saved config.authType when another one is sent', async () => {
+        arrangeExisting(buildPerUserExisting({ outboundEnabled: true }) as never);
+
+        await update({
+          context: dualContext,
+          id: 'connector-id',
+          action: {
+            name: 'renamed',
+            config: { instanceUrl: 'https://saved.example.com', authType: 'bearer' },
+            secrets: {},
+            isOutboundActionsEnabled: false,
+          },
+        });
+
+        expect(savedAction().config).toEqual({
+          instanceUrl: 'https://saved.example.com',
+          authType: PER_USER,
+          outboundEnabled: false,
+        });
+      });
+
+      test('off with no secrets removes config.authType when the saved config has none', async () => {
+        arrangeExisting(buildExisting({ hasInboundEventIdentity: true }));
+
+        await update({
+          context: dualContext,
+          id: 'connector-id',
+          action: {
+            name: 'renamed',
+            config: { authType: 'bearer' },
+            secrets: {},
+            isOutboundActionsEnabled: false,
+          },
+        });
+
+        expect(savedAction().config).toEqual({ outboundEnabled: false });
+      });
+
+      test('off with secrets sent validates them and keeps the auth type check', async () => {
+        arrangeExisting(buildPerUserExisting({ outboundEnabled: true }) as never);
+
+        await expect(
+          update({
+            context: dualContext,
+            id: 'connector-id',
+            action: {
+              name: 'renamed',
+              config: {},
+              secrets: { authType: 'bearer' },
+              isOutboundActionsEnabled: false,
+            },
+          })
+        ).rejects.toThrow('Authentication type cannot be changed for per-user connectors.');
+      });
+
+      test('off with invalid secrets is rejected', async () => {
+        arrangeExisting(buildExisting({ hasInboundEventIdentity: true }));
+
+        await expect(
+          update({
+            context: dualContext,
+            id: 'connector-id',
+            action: {
+              name: 'renamed',
+              config: {},
+              secrets: { token: 42 } as never,
+              isOutboundActionsEnabled: false,
+            },
+          })
+        ).rejects.toThrow(/error validating connector type secrets/);
+      });
+
+      test('a per-user connector goes off and on again with the same auth type', async () => {
+        arrangeExisting(buildPerUserExisting({ outboundEnabled: false }) as never);
+
+        const result = await update({
+          context: dualContext,
+          id: 'connector-id',
+          action: {
+            name: 'renamed',
+            config: { instanceUrl: 'https://saved.example.com', authType: PER_USER },
+            secrets: { authType: PER_USER },
+            isOutboundActionsEnabled: true,
+          },
+        });
+
+        expect(result.isOutboundActionsEnabled).toBe(true);
+        expect(result.authMode).toBe('per-user');
+        expect(savedAction().config).toEqual({
+          instanceUrl: 'https://saved.example.com',
+          authType: PER_USER,
+        });
+      });
+
+      test('turning on a per-user connector with another auth type is rejected', async () => {
+        arrangeExisting(buildPerUserExisting({ outboundEnabled: false }) as never);
+
+        await expect(
+          update({
+            context: dualContext,
+            id: 'connector-id',
+            action: {
+              name: 'renamed',
+              config: { instanceUrl: 'https://saved.example.com' },
+              secrets: { authType: 'bearer' },
+              isOutboundActionsEnabled: true,
+            },
+          })
+        ).rejects.toThrow('Authentication type cannot be changed for per-user connectors.');
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      test('turning on with no secrets and no config is rejected as today', async () => {
+        arrangeExisting(buildExisting({ outboundEnabled: false, hasInboundEventIdentity: true }));
+
+        await expect(
+          update({
+            context: dualContext,
+            id: 'connector-id',
+            action: { name: 'renamed', config: {}, secrets: {}, isOutboundActionsEnabled: true },
+          })
+        ).rejects.toThrow(/error validating connector type config/);
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
     });
 
     test('rejects the field on a non-dual type', async () => {

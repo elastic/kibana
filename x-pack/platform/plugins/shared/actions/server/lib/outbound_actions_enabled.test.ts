@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { ActionType } from '../types';
 import {
   applyOutboundEnabledToConfig,
   assertInboundOrOutboundEnabled,
   assertOutboundActionsToggleAllowed,
+  areSecretsOmitted,
   attachOutboundActionsEnabled,
+  getOutboundDisabledValidationType,
   readOutboundActionsEnabled,
   resolveCreateOutboundActionsEnabled,
   resolveUpdateOutboundActionsEnabled,
@@ -220,5 +225,50 @@ describe('attachOutboundActionsEnabled', () => {
     expect(
       result.map((c) => (c as { isOutboundActionsEnabled?: boolean }).isOutboundActionsEnabled)
     ).toEqual([false, true]);
+  });
+});
+
+describe('areSecretsOmitted', () => {
+  it('is true for undefined and an empty object', () => {
+    expect(areSecretsOmitted(undefined)).toBe(true);
+    expect(areSecretsOmitted({})).toBe(true);
+  });
+
+  it('is false when any key is sent', () => {
+    expect(areSecretsOmitted({ authType: 'none' })).toBe(false);
+    expect(areSecretsOmitted({ token: '' })).toBe(false);
+  });
+});
+
+describe('getOutboundDisabledValidationType', () => {
+  const spec = {
+    metadata: { id: '.dual' },
+    schema: z.object({ instanceUrl: z.url() }),
+    actions: { ping: {} },
+  } as unknown as ConnectorSpec;
+
+  const strictConfig = { schema: z.object({ instanceUrl: z.url() }) };
+  const actionType = {
+    id: '.dual',
+    validate: { config: strictConfig, secrets: { schema: z.any() }, params: { schema: z.any() } },
+  } as unknown as ActionType;
+
+  it('replaces the config validator with one that has optional fields', () => {
+    const result = getOutboundDisabledValidationType({ actionType, spec });
+
+    expect(result).not.toBe(actionType);
+    expect(result.validate.secrets).toBe(actionType.validate.secrets);
+    expect(() => result.validate.config.schema.parse({})).not.toThrow();
+    expect(() => actionType.validate.config.schema.parse({})).toThrow();
+  });
+
+  it('still validates a field that is sent', () => {
+    const result = getOutboundDisabledValidationType({ actionType, spec });
+
+    expect(() => result.validate.config.schema.parse({ instanceUrl: 'nope' })).toThrow();
+  });
+
+  it('returns the same type when there is no spec', () => {
+    expect(getOutboundDisabledValidationType({ actionType, spec: undefined })).toBe(actionType);
   });
 });
