@@ -212,16 +212,15 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // Place incoming embeddables (used at init and for late arrivals on the same dashboard)
   // --------------------------------------------------------------------------------------
-  const addIncomingEmbeddables = (embeddables?: EmbeddablePackageState[]) => {
+  const addIncomingEmbeddables = async (embeddables?: EmbeddablePackageState[]) => {
     if (!embeddables?.length) return;
-    const first = embeddables[0];
-    if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
+    const firstId = embeddables[0].embeddableId ?? v4(); // give first panel an ID so we can place others around it
     const applyStateThunks: Array<() => MaybePromise<void>> = [];
     let anchorId: string | undefined;
 
-    for (const incomingEmbeddable of embeddables) {
+    for (const [index, incomingEmbeddable] of embeddables.entries()) {
       const { serializedState, size, type } = incomingEmbeddable;
-      const uuid = incomingEmbeddable.embeddableId ?? v4();
+      const uuid = incomingEmbeddable.embeddableId ?? (index === 0 ? firstId : v4());
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
       const existingPinnedPanel = layout$.value.pinnedPanels[uuid];
 
@@ -281,15 +280,15 @@ export function initializeLayoutManager(
       layout$.next(updatedLayout);
     }
 
-    if (applyStateThunks.length) {
-      void setApplyingChildStateWhile(() =>
-        Promise.allSettled(applyStateThunks.map(async (applyState) => applyState()))
-      );
-    }
-
     if (anchorId) {
       trackPanel.setScrollToPanelId(anchorId);
       trackPanel.setHighlightPanelId(anchorId);
+    }
+
+    if (applyStateThunks.length) {
+      await setApplyingChildStateWhile(() =>
+        Promise.allSettled(applyStateThunks.map(async (applyState) => applyState()))
+      );
     }
   };
 
@@ -523,6 +522,7 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
+      addIncomingEmbeddables,
       anyStateChange$: merge(
         layout$.pipe(skip(1)),
         latestChildrenState$.pipe(debounceTime(UNSAVED_CHANGES_DEBOUNCE))
@@ -621,7 +621,6 @@ export function initializeLayoutManager(
       children$,
       getChildApi,
       addNewPanel,
-      addIncomingEmbeddables,
       removePanel,
       removePanels,
       replacePanel,

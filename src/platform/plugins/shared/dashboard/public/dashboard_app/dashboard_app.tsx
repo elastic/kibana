@@ -13,7 +13,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime } from 'rxjs';
+import { concatMap, debounceTime, filter } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { DashboardApi } from '..';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -25,6 +25,7 @@ import {
   embeddableService,
   shareService,
 } from '../services/kibana_services';
+import { getIncomingEmbeddablesErrorTitle } from './_dashboard_app_strings';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../utils/urls';
 import { useCreationOptions } from './hooks/use_creation_options';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
@@ -124,23 +125,34 @@ export function DashboardApp({
    * but it tries to add them to the dashboard the user is already looking at. e.g. the AI agent chat sidebar works this way
    */
   useEffect(() => {
-    if (!dashboardApi) return;
+    if (!dashboardApi || !dashboardInternalApi) return;
     const embeddableStateTransferSubscription = embeddableService
       .getStateTransfer()
       .onTransferEmbeddablePackage$(DASHBOARD_APP_ID, true)
-      .subscribe((lateEmbeddables) => {
-        if (lateEmbeddables?.length) {
+      .pipe(
+        filter((lateEmbeddables) => Boolean(lateEmbeddables?.length)),
+        // Apply packages in the order received, each one only after the previous has settled
+        concatMap(async (lateEmbeddables) => {
           // If a panel is expanded, minimize it so that the user can see the newly added embeddables
           if (dashboardApi.expandedPanelId$.value) {
             dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
           }
-          dashboardApi.addIncomingEmbeddables(lateEmbeddables);
           dashboardApi.setViewMode('edit');
-        }
-      });
+          try {
+            await dashboardInternalApi.addIncomingEmbeddables(lateEmbeddables);
+          } catch (error) {
+            coreServices.notifications.toasts.addDanger({
+              title: getIncomingEmbeddablesErrorTitle(),
+              text: error instanceof Error ? error.message : String(error),
+              'data-test-subj': 'dashboardIncomingEmbeddablesError',
+            });
+          }
+        })
+      )
+      .subscribe();
 
     return () => embeddableStateTransferSubscription.unsubscribe();
-  }, [dashboardApi, history, savedDashboardId]);
+  }, [dashboardApi, dashboardInternalApi, history, savedDashboardId]);
 
   /**
    * Validate saved object load outcome

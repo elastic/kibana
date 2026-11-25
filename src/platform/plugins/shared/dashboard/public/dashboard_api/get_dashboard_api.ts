@@ -20,6 +20,7 @@ import { getLastSavedState } from '../../common/default_dashboard_state';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializeAccessControlManager } from './access_control_manager';
+import { prepareIncomingEmbeddables } from './load_dashboard_api/prepare_incoming_embeddables';
 import { initializeApproximationManager } from './approximation_manager';
 import { initializeChangeSourceTracker, type LatestChangeBySource } from './change_source_tracker';
 import { initializeDataLoadingManager } from './data_loading_manager';
@@ -259,7 +260,7 @@ export function getDashboardApi({
   if (incomingEmbeddables?.length) {
     // allow incoming embeddables to be undone
     initialState$.next(getHistoryState());
-    layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
+    void layoutManager.internalApi.addIncomingEmbeddables(incomingEmbeddables);
   }
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
@@ -437,6 +438,11 @@ export function getDashboardApi({
   const internalApi: DashboardInternalApi = {
     ...historyManager.internalApi,
     ...layoutManager.internalApi,
+    addIncomingEmbeddables: async (embeddables?: EmbeddablePackageState[]) => {
+      await layoutManager.internalApi.addIncomingEmbeddables(
+        await prepareIncomingEmbeddables(embeddables, getState())
+      );
+    },
     ...unifiedSearchManager.internalApi,
     ...unsavedChangesManager.internalApi,
     ...esqlVariablesManager.api,

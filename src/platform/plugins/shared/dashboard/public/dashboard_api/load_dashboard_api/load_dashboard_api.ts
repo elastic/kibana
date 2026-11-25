@@ -9,11 +9,9 @@
 
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { asyncForEach } from '@kbn/std';
 
 import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { dashboardClient } from '../../dashboard_client';
-import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { getAccessControlClient } from '../../services/access_control_service';
 import {
   getDashboardBackupService,
@@ -27,7 +25,7 @@ import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import type { DashboardCreationOptions } from '../types';
-import { getDuplicate, type PanelsCache } from './get_duplicate';
+import { prepareIncomingEmbeddables } from './prepare_incoming_embeddables';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { showWarningToast } from './show_warning_toast';
 import { transformPanels } from './transform_panels';
@@ -87,21 +85,10 @@ export async function loadDashboardApi({
     ...overrideState,
   };
 
-  // --------------------------------------------------------------------------------------
-  // Prepare incoming embeddables. Done here due to async fetching.
-  // --------------------------------------------------------------------------------------
-  const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  const panelsCache: PanelsCache = new Map();
-  await asyncForEach(incomingEmbeddables ?? [], async (embeddable) => {
-    const duplicate = await getDuplicate(embeddable, initialState, panelsCache);
-    if (duplicate?.id) {
-      embeddable.embeddableId = duplicate.id;
-    }
-
-    if (!embeddable.size) {
-      embeddable.size = await getPlacementHints(embeddable.type, embeddable.serializedState);
-    }
-  });
+  const incomingEmbeddables = await prepareIncomingEmbeddables(
+    creationOptions?.getIncomingEmbeddables?.(),
+    initialState
+  );
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
