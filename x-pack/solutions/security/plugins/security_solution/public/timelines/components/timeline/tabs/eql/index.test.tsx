@@ -63,13 +63,6 @@ jest.mock('../../../../../common/components/user_privileges');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
 
-/**
- * Mounting the real `UnifiedTimelineBody` (`UnifiedDataTable` / `EuiDataGrid`) costs about 30s
- * per test in jsdom on CI, which made this file time out. The stub renders the header and the
- * real leading control column for each event, and the tests assert the props the EQL tab hands
- * it and drive its `onUpdatePageIndex` callback. The grid's own pagination controls are
- * `UnifiedDataTable`'s to test.
- */
 jest.mock('../../body/unified_timeline_body', () => ({
   UnifiedTimelineBody: jest.fn(
     ({ header, events, rowAdditionalLeadingControls }: UnifiedTimelineBodyProps) => (
