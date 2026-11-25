@@ -10,9 +10,25 @@ import {
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
+  savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import type { RequestHandler } from '@kbn/core/server';
+import type { AgentlessRumPolicy } from '@kbn/fleet-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { RUM_POLICY_TYPE } from './rum_policy_service';
 import { setupRum } from './setup_rum';
+
+const TASK_TYPE = 'apm:republish_rum_policy';
+
+const policy: AgentlessRumPolicy = {
+  revision: 1,
+  enabled: true,
+  deleted: false,
+  allowed_origins: ['https://example.org'],
+  client_tokens: [],
+};
 
 describe('setupRum', () => {
   let stop: (() => void) | undefined;
@@ -22,26 +38,71 @@ describe('setupRum', () => {
     jest.useRealTimers();
   });
 
-  const setup = (enabled: boolean) => {
+  const setup = (enabled: boolean, { hasAllRequested = true, rumClient = true } = {}) => {
     const core = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     const router = httpServiceMock.createRouter();
+    const taskSetup = taskManagerMock.createSetup();
     const taskStart = taskManagerMock.createStart();
     const logger = loggingSystemMock.createLogger();
     const agentless = { mintToken: jest.fn(), publish: jest.fn() };
+    const savedObjects = savedObjectsClientMock.create();
+    const globally = jest.fn().mockResolvedValue({ hasAllRequested });
+    const authz = {
+      mode: { useRbacForRequest: () => true },
+      actions: { api: { get: (operation: string) => `api:${operation}` } },
+      checkPrivilegesWithRequest: jest.fn(() => ({ globally })),
+    } as unknown as SecurityPluginStart['authz'];
 
+    savedObjects.get.mockResolvedValue({
+      type: RUM_POLICY_TYPE,
+      id: 'default',
+      attributes: policy,
+      references: [],
+      version: 'version-1',
+    });
+    coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(savedObjects);
     core.http.createRouter.mockReturnValue(router);
     core.getStartServices.mockResolvedValue([
       coreStart,
-      { fleet: { agentless: { createRumClient: () => agentless } }, taskManager: taskStart },
+      {
+        fleet: { agentless: { createRumClient: () => (rumClient ? agentless : undefined) } },
+        taskManager: taskStart,
+        security: { authz },
+      },
       {},
     ]);
+
+    const runTask = (signal = new AbortController().signal) => {
+      const [[definitions]] = taskSetup.registerTaskDefinitions.mock.calls;
+      return definitions[TASK_TYPE].createTaskRunner({
+        taskInstance: {},
+        signal,
+      } as unknown as RunContext).run();
+    };
+
+    const callRoute = async (handler: RequestHandler, params = {}, body = {}) => {
+      const response = httpServerMock.createResponseFactory();
+      await handler(
+        coreMock.createCustomRequestHandlerContext(coreMock.createRequestHandlerContext()),
+        httpServerMock.createKibanaRequest({ params, body }),
+        response
+      );
+      return response;
+    };
+
     return {
       router,
       logger,
+      taskSetup,
       taskStart,
+      agentless,
+      savedObjects,
+      globally,
+      runTask,
+      callRoute,
       start: () => {
-        stop = setupRum(core, taskManagerMock.createSetup(), enabled, logger);
+        stop = setupRum(core, taskSetup, enabled, logger);
       },
     };
   };
@@ -94,5 +155,108 @@ describe('setupRum', () => {
     await jest.advanceTimersByTimeAsync(60_000);
     expect(taskStart.ensureScheduled).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenCalledTimes(1);
+  });
+
+  describe('authorization', () => {
+    it('rejects every write without APM settings write access in all spaces', async () => {
+      const { router, taskStart, savedObjects, agentless, globally, callRoute, start } = setup(
+        true,
+        { hasAllRequested: false }
+      );
+      start();
+      // Let the startup scheduling settle before checking that requests do not schedule.
+      await new Promise(process.nextTick);
+      taskStart.ensureScheduled.mockClear();
+      savedObjects.get.mockClear();
+
+      const writes = [
+        router.put.mock.calls[0][1],
+        router.post.mock.calls[0][1],
+        ...router.delete.mock.calls.map(([, handler]) => handler),
+      ];
+      expect(writes).toHaveLength(4);
+      for (const handler of writes) {
+        await expect(callRoute(handler, { id: 'rum_client' }, policy)).rejects.toMatchObject({
+          output: { statusCode: 403 },
+        });
+      }
+      expect(globally).toHaveBeenCalledTimes(4);
+      expect(globally).toHaveBeenCalledWith({ kibana: ['api:apm', 'api:apm_settings_write'] });
+      expect(taskStart.ensureScheduled).not.toHaveBeenCalled();
+      expect(savedObjects.get).not.toHaveBeenCalled();
+      expect(agentless.mintToken).not.toHaveBeenCalled();
+      expect(agentless.publish).not.toHaveBeenCalled();
+    });
+
+    it('allows reads without the global write check', async () => {
+      const { router, globally, callRoute, start } = setup(true, { hasAllRequested: false });
+      start();
+
+      const response = await callRoute(router.get.mock.calls[0][1]);
+      expect(response.ok).toHaveBeenCalled();
+      expect(globally).not.toHaveBeenCalled();
+    });
+
+    it('allows writes with APM settings write access in all spaces', async () => {
+      const { router, agentless, callRoute, start } = setup(true);
+      start();
+
+      const response = await callRoute(
+        router.put.mock.calls[0][1],
+        {},
+        {
+          enabled: true,
+          allowed_origins: ['https://example.org'],
+        }
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { published: true } });
+      expect(agentless.publish).toHaveBeenCalled();
+    });
+  });
+
+  describe('recovery task', () => {
+    it('republishes the latest saved policy', async () => {
+      const { agentless, runTask, start } = setup(true);
+      start();
+      const { signal } = new AbortController();
+
+      await runTask(signal);
+      expect(agentless.publish).toHaveBeenCalledWith(policy, { signal });
+    });
+
+    it('fails so Task Manager retries when publishing fails', async () => {
+      const { agentless, runTask, start } = setup(true);
+      agentless.publish.mockRejectedValue(new Error('Agentless unavailable'));
+      start();
+
+      await expect(runTask()).rejects.toThrow('Could not republish the RUM policy');
+    });
+
+    it('does not publish once the task is cancelled', async () => {
+      const { agentless, savedObjects, runTask, start } = setup(true);
+      const controller = new AbortController();
+      savedObjects.get.mockImplementation(async () => {
+        controller.abort();
+        return { type: RUM_POLICY_TYPE, id: 'default', attributes: policy, references: [] };
+      });
+      start();
+
+      await expect(runTask(controller.signal)).resolves.toBeUndefined();
+      expect(agentless.publish).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['Managed RUM is disabled', false, true],
+      ['the Agentless client is unavailable', true, false],
+    ])('is registered and does nothing when %s', async (_, enabled, rumClient) => {
+      const { agentless, taskSetup, runTask, start } = setup(enabled, { rumClient });
+      start();
+
+      expect(taskSetup.registerTaskDefinitions).toHaveBeenCalledWith({
+        [TASK_TYPE]: expect.objectContaining({ timeout: '30s' }),
+      });
+      await expect(runTask()).resolves.toBeUndefined();
+      expect(agentless.publish).not.toHaveBeenCalled();
+    });
   });
 });

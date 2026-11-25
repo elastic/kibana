@@ -8,7 +8,7 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { AgentlessRumClient, AgentlessRumPolicy } from '@kbn/fleet-plugin/server';
-import { RUM_POLICY_TYPE, RumPolicyService } from './rum_policy_service';
+import { RUM_POLICY_TYPE, RumPolicyService, rumPolicySavedObject } from './rum_policy_service';
 
 const tokenRecord = {
   id: 'rum_client',
@@ -77,7 +77,7 @@ describe('RumPolicyService', () => {
     expect(JSON.stringify(savedObjects.create.mock.calls)).not.toContain(token);
 
     await expect(service.publishLatest()).resolves.toBe(true);
-    expect(agentless.publish).toHaveBeenNthCalledWith(2, mintedPolicy);
+    expect(agentless.publish).toHaveBeenNthCalledWith(2, mintedPolicy, { signal: undefined });
     expect(agentless.mintToken).toHaveBeenCalledTimes(1);
     await expect(service.getSettings()).resolves.toEqual({
       enabled: false,
@@ -91,7 +91,7 @@ describe('RumPolicyService', () => {
 
     await expect(service.updateSettings(settings)).resolves.toBe(true);
     expect(savedObjects.update).not.toHaveBeenCalled();
-    expect(agentless.publish).toHaveBeenCalledWith(initialPolicy);
+    expect(agentless.publish).toHaveBeenCalledWith(initialPolicy, { signal: undefined });
   });
 
   it('rejects minting once the policy has ten tokens', async () => {
@@ -129,7 +129,7 @@ describe('RumPolicyService', () => {
     expect(savedObjects.update).toHaveBeenLastCalledWith(RUM_POLICY_TYPE, 'default', updated, {
       version: 'version-2',
     });
-    expect(agentless.publish).toHaveBeenCalledWith(updated);
+    expect(agentless.publish).toHaveBeenCalledWith(updated, { signal: undefined });
   });
 
   it.each([
@@ -158,7 +158,7 @@ describe('RumPolicyService', () => {
     expect(savedObjects.update).toHaveBeenCalledWith(RUM_POLICY_TYPE, 'default', policy, {
       version: 'version-1',
     });
-    expect(agentless.publish).toHaveBeenCalledWith(policy);
+    expect(agentless.publish).toHaveBeenCalledWith(policy, { signal: undefined });
   });
 
   it.each([
@@ -166,11 +166,156 @@ describe('RumPolicyService', () => {
     ['https://*.example.org'],
     ['https://example{test}.org'],
     ['https://example.org', 'https://example.org'],
+    ['ftp://example.org'],
+    ['https://example.org/'],
+    ['https://Example.org'],
+    ['https://example.org:443'],
   ])('rejects invalid origins before saving', async (...allowedOrigins) => {
     await expect(
       service.updateSettings({ enabled: true, allowed_origins: allowedOrigins })
     ).rejects.toThrow('Allowed origins must be unique HTTP(S) origins or a literal wildcard');
     expect(savedObjects.create).not.toHaveBeenCalled();
+    expect(savedObjects.update).not.toHaveBeenCalled();
+  });
+
+  it('republishes when a newer revision is saved during publishing', async () => {
+    const newer = { ...initialPolicy, revision: 2, client_tokens: [] };
+    savedObjects.get
+      .mockResolvedValueOnce(storedPolicy(initialPolicy, 'version-1'))
+      .mockResolvedValueOnce(storedPolicy(newer, 'version-2'))
+      .mockResolvedValue(storedPolicy(newer, 'version-2'));
+
+    await expect(service.publishLatest()).resolves.toBe(true);
+    expect(agentless.publish).toHaveBeenCalledTimes(2);
+    expect(agentless.publish).toHaveBeenLastCalledWith(newer, { signal: undefined });
+  });
+
+  it('stops after a bounded number of attempts while the policy keeps changing', async () => {
+    let revision = 0;
+    savedObjects.get.mockImplementation(async () =>
+      storedPolicy({ ...initialPolicy, revision: ++revision }, `version-${revision}`)
+    );
+
+    await expect(service.publishLatest()).resolves.toBe(false);
+    expect(agentless.publish).toHaveBeenCalledTimes(3);
+  });
+
+  it('publishes only known policy fields', async () => {
+    const newerPolicy = {
+      ...initialPolicy,
+      future: true,
+      client_tokens: [{ ...tokenRecord, label: 'x' }],
+    };
+    savedObjects.get.mockResolvedValue(storedPolicy(newerPolicy, 'version-1'));
+
+    await expect(service.publishLatest()).resolves.toBe(true);
+    expect(agentless.publish).toHaveBeenCalledWith(initialPolicy, { signal: undefined });
+  });
+
+  it('does not publish once the signal is aborted', async () => {
+    const controller = new AbortController();
+    savedObjects.get.mockImplementation(async () => {
+      controller.abort();
+      return storedPolicy(initialPolicy, 'version-1');
+    });
+
+    await expect(service.publishLatest(controller.signal)).resolves.toBe(false);
+    expect(agentless.publish).not.toHaveBeenCalled();
+  });
+
+  it('forwards the signal and logs the failure reason', async () => {
+    const controller = new AbortController();
+    savedObjects.get.mockResolvedValue(storedPolicy(initialPolicy, 'version-1'));
+    agentless.publish.mockRejectedValueOnce(new Error('Failed to publish'));
+
+    await expect(service.publishLatest(controller.signal)).resolves.toBe(false);
+    expect(agentless.publish).toHaveBeenCalledWith(initialPolicy, { signal: controller.signal });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Could not publish the saved RUM policy. Task Manager will retry: Failed to publish'
+    );
+  });
+
+  it('reads newer policies by ignoring unknown fields', () => {
+    const { modelVersions } = rumPolicySavedObject;
+    const versions = typeof modelVersions === 'function' ? modelVersions() : modelVersions;
+    const { forwardCompatibility } = versions?.[1]?.schemas ?? {};
+    expect(
+      typeof forwardCompatibility === 'object' &&
+        forwardCompatibility.validate({ ...initialPolicy, future: true })
+    ).toEqual(initialPolicy);
+  });
+
+  it.each([['*'], ['http://[::1]:8080'], ['https://example.org:8443']])(
+    'accepts the valid origin %s',
+    async (origin) => {
+      await expect(
+        service.updateSettings({ enabled: true, allowed_origins: [origin] })
+      ).resolves.toBe(true);
+      expect(savedObjects.create).toHaveBeenCalled();
+    }
+  );
+
+  it('does not bump the revision when revoking an unknown token', async () => {
+    savedObjects.get.mockResolvedValue(storedPolicy(initialPolicy, 'version-1'));
+
+    await expect(service.revokeToken('unknown')).resolves.toBe(true);
+    expect(savedObjects.update).not.toHaveBeenCalled();
+    expect(agentless.publish).toHaveBeenCalledWith(initialPolicy, { signal: undefined });
+  });
+
+  it('does not save a deletion when the policy is absent or already deleted', async () => {
+    savedObjects.get.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(RUM_POLICY_TYPE, 'default')
+    );
+    savedObjects.get.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(RUM_POLICY_TYPE, 'default')
+    );
+    await expect(service.deleteSettings()).resolves.toBe(true);
+
+    const deleted = { ...initialPolicy, deleted: true, enabled: false, client_tokens: [] };
+    savedObjects.get.mockResolvedValue(storedPolicy(deleted, 'version-1'));
+    await expect(service.deleteSettings()).resolves.toBe(true);
+    expect(savedObjects.create).not.toHaveBeenCalled();
+    expect(savedObjects.update).not.toHaveBeenCalled();
+  });
+
+  it('never returns token digests', async () => {
+    savedObjects.get.mockResolvedValue(storedPolicy(initialPolicy, 'version-1'));
+
+    const result = await service.getSettings();
+    expect(JSON.stringify(result)).not.toContain(tokenRecord.sha256);
+  });
+
+  it('returns 502 and saves nothing when minting fails', async () => {
+    savedObjects.get.mockResolvedValue(storedPolicy(initialPolicy, 'version-1'));
+    agentless.mintToken.mockRejectedValue(new Error('Failed to mint'));
+
+    await expect(service.createToken()).rejects.toMatchObject({ output: { statusCode: 502 } });
+    expect(savedObjects.update).not.toHaveBeenCalled();
+    expect(savedObjects.create).not.toHaveBeenCalled();
+  });
+
+  it('returns 409 after exhausting version conflict retries', async () => {
+    savedObjects.get.mockResolvedValue(storedPolicy(initialPolicy, 'version-1'));
+    savedObjects.update.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError(RUM_POLICY_TYPE, 'default')
+    );
+
+    await expect(service.revokeToken(tokenRecord.id)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(savedObjects.update).toHaveBeenCalledTimes(5);
+    expect(agentless.publish).not.toHaveBeenCalled();
+  });
+
+  it('returns 409 when the revision limit is reached', async () => {
+    savedObjects.get.mockResolvedValue(
+      storedPolicy({ ...initialPolicy, revision: Number.MAX_SAFE_INTEGER }, 'version-1')
+    );
+
+    await expect(service.revokeToken(tokenRecord.id)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
     expect(savedObjects.update).not.toHaveBeenCalled();
   });
 });

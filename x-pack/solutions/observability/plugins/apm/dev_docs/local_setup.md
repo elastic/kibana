@@ -113,9 +113,9 @@ xpack.fleet.agentless.api.tls.key: /path/to/kibana-client.key
 xpack.fleet.agentless.api.tls.ca: /path/to/agentless-ca.crt
 ```
 
-For ECH deployments pinned to a different Agentless host, set `xpack.fleet.agentless.api.rumUrl` to the direct HTTPS endpoint. The RUM client keeps mTLS requests on the configured origin.
+For ECH deployments pinned to a different Agentless host, set `xpack.fleet.agentless.api.rumUrl` to the direct HTTPS origin (any path is ignored). The RUM client keeps mTLS requests on the configured origin.
 
-Use the default space and a user with APM settings write access. Send requests through Kibana’s internal HTTP client, which sets the required headers.
+Use the default space and a user with APM settings write access in all spaces. Send requests through Kibana’s internal HTTP client, which sets the required headers.
 
 1. Send `PUT /internal/apm/rum` with `{"enabled":true,"allowed_origins":["https://example.org"]}`. Confirm the response contains `"published":true`.
 2. Send `POST /internal/apm/rum/client_tokens`. Copy the token from the response. Kibana stores only the digest and token metadata. A response with `"published":false` means the change was saved and Task Manager will retry publication.

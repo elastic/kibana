@@ -9,9 +9,10 @@ import Boom from '@hapi/boom';
 import { defer, retry } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { APMPluginStartDependencies } from '../../types';
+import { assertDeploymentWideRumWrite } from './rum_authz';
 import {
   RumPolicyService,
   RUM_POLICY_TYPE,
@@ -57,8 +58,8 @@ export const setupRum = (
             logger
           );
         })
-        .catch(() => {
-          logger.error('Failed to initialize the Managed RUM Agentless client');
+        .catch((error) => {
+          logger.error(`Failed to initialize the Managed RUM Agentless client: ${error.message}`);
           return undefined;
         })
     : Promise.resolve(undefined);
@@ -68,10 +69,13 @@ export const setupRum = (
       title: 'Republish the APM RUM policy',
       description: 'Restores the latest saved RUM policy in Agentless API',
       timeout: '30s',
-      createTaskRunner: () => ({
+      createTaskRunner: ({ signal }: RunContext) => ({
         async run() {
           const policy = await service;
-          if (policy && !(await policy.publishLatest())) {
+          if (!policy || signal.aborted) {
+            return;
+          }
+          if (!(await policy.publishLatest(signal)) && !signal.aborted) {
             throw new Error('Could not republish the RUM policy');
           }
         },
@@ -109,11 +113,18 @@ export const setupRum = (
     .pipe(retry({ delay: 60_000 }))
     .subscribe();
 
-  const getService = async (request: KibanaRequest): Promise<RumPolicyService> => {
+  const getService = async (
+    request: KibanaRequest,
+    { write }: { write: boolean }
+  ): Promise<RumPolicyService> => {
     const [, plugins] = await startServices;
+    // Keeps the settings in one place; authorization for writes is checked globally below.
     const space = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     if (space !== DEFAULT_SPACE_ID) {
       throw Boom.forbidden('Managed RUM settings are available in the default space only');
+    }
+    if (write) {
+      await assertDeploymentWideRumWrite(plugins.security?.authz, request);
     }
     const policy = await service;
     if (!policy) {
@@ -127,7 +138,7 @@ export const setupRum = (
   router.get(
     { path: RUM_PATH, validate: false, security: readSecurity, options: { access: 'internal' } },
     router.handleLegacyErrors(async (_context, request, response) =>
-      response.ok({ body: await (await getService(request)).getSettings() })
+      response.ok({ body: await (await getService(request, { write: false })).getSettings() })
     )
   );
 
@@ -140,7 +151,11 @@ export const setupRum = (
     },
     router.handleLegacyErrors(async (_context, request, response) =>
       response.ok({
-        body: { published: await (await getService(request)).updateSettings(request.body) },
+        body: {
+          published: await (
+            await getService(request, { write: true })
+          ).updateSettings(request.body),
+        },
       })
     )
   );
@@ -148,7 +163,9 @@ export const setupRum = (
   router.delete(
     { path: RUM_PATH, validate: false, security: writeSecurity, options: { access: 'internal' } },
     router.handleLegacyErrors(async (_context, request, response) =>
-      response.ok({ body: { published: await (await getService(request)).deleteSettings() } })
+      response.ok({
+        body: { published: await (await getService(request, { write: true })).deleteSettings() },
+      })
     )
   );
 
@@ -161,7 +178,7 @@ export const setupRum = (
     },
     router.handleLegacyErrors(async (_context, request, response) =>
       response.created({
-        body: await (await getService(request)).createToken(),
+        body: await (await getService(request, { write: true })).createToken(),
         headers: { 'cache-control': 'no-store' },
       })
     )
@@ -178,7 +195,11 @@ export const setupRum = (
     },
     router.handleLegacyErrors(async (_context, request, response) =>
       response.ok({
-        body: { published: await (await getService(request)).revokeToken(request.params.id) },
+        body: {
+          published: await (
+            await getService(request, { write: true })
+          ).revokeToken(request.params.id),
+        },
       })
     )
   );

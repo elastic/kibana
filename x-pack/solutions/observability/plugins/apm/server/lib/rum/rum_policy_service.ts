@@ -23,6 +23,20 @@ export const rumSettingsSchema = schema.object({
   }),
 });
 
+const rumPolicySchemaV1 = schema.object({
+  revision: schema.number({ min: 1, max: Number.MAX_SAFE_INTEGER }),
+  deleted: schema.boolean(),
+  ...rumSettingsSchema.getPropSchemas(),
+  client_tokens: schema.arrayOf(
+    schema.object({
+      id: schema.string({ maxLength: 128 }),
+      sha256: schema.string({ maxLength: 64 }),
+      created_at: schema.string({ maxLength: 64 }),
+    }),
+    { maxSize: MAX_TOKENS }
+  ),
+});
+
 export const rumPolicySavedObject: SavedObjectsType = {
   name: RUM_POLICY_TYPE,
   namespaceType: 'agnostic',
@@ -32,19 +46,8 @@ export const rumPolicySavedObject: SavedObjectsType = {
     1: {
       changes: [],
       schemas: {
-        create: schema.object({
-          revision: schema.number({ min: 1, max: Number.MAX_SAFE_INTEGER }),
-          deleted: schema.boolean(),
-          ...rumSettingsSchema.getPropSchemas(),
-          client_tokens: schema.arrayOf(
-            schema.object({
-              id: schema.string(),
-              sha256: schema.string(),
-              created_at: schema.string(),
-            }),
-            { maxSize: MAX_TOKENS }
-          ),
-        }),
+        forwardCompatibility: rumPolicySchemaV1.extends({}, { unknowns: 'ignore' }),
+        create: rumPolicySchemaV1,
       },
     },
   },
@@ -59,6 +62,27 @@ const emptyPolicy: AgentlessRumPolicy = {
   allowed_origins: [],
   client_tokens: [],
 };
+
+// Publish only known fields, even if a newer Kibana version stored more.
+const toPublishedPolicy = ({
+  revision,
+  enabled,
+  deleted,
+  allowed_origins: allowedOrigins,
+  client_tokens: tokens,
+}: AgentlessRumPolicy): AgentlessRumPolicy => ({
+  revision,
+  enabled,
+  deleted,
+  allowed_origins: allowedOrigins,
+  client_tokens: tokens.map(({ id, sha256, created_at: createdAt }) => ({
+    id,
+    sha256,
+    created_at: createdAt,
+  })),
+});
+
+const MAX_PUBLISH_ATTEMPTS = 3;
 
 export class RumPolicyService {
   constructor(
@@ -167,16 +191,38 @@ export class RumPolicyService {
     return this.publishLatest();
   }
 
-  public async publishLatest(): Promise<boolean> {
+  /**
+   * Publishes the latest saved revision. Kibana cannot make the save and the Agentless write
+   * atomic across instances, so it re-reads after publishing and republishes if a newer
+   * revision was saved meanwhile. The recovery task covers any remaining gap; rejecting
+   * revisions older than one already applied is the Agentless API's responsibility.
+   */
+  public async publishLatest(signal?: AbortSignal): Promise<boolean> {
     try {
-      // A newer revision may have won after a concurrent save.
-      const saved = await this.read();
-      if (saved) {
-        await this.agentless.publish(saved.attributes);
+      let saved = await this.read();
+      for (let attempt = 0; attempt < MAX_PUBLISH_ATTEMPTS && saved; attempt++) {
+        if (signal?.aborted) {
+          return false;
+        }
+        const { revision } = saved.attributes;
+        await this.agentless.publish(toPublishedPolicy(saved.attributes), { signal });
+        const latest = await this.read();
+        if (!latest || latest.attributes.revision <= revision) {
+          return true;
+        }
+        saved = latest;
       }
-      return true;
-    } catch {
-      this.logger.warn('Could not publish the saved RUM policy. Task Manager will retry.');
+      if (!saved) {
+        return true;
+      }
+      this.logger.warn('The RUM policy kept changing while it was being published.');
+      return false;
+    } catch (error) {
+      if (!signal?.aborted) {
+        this.logger.warn(
+          `Could not publish the saved RUM policy. Task Manager will retry: ${error.message}`
+        );
+      }
       return false;
     }
   }

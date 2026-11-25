@@ -409,7 +409,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
 
   const startContract: DeeplyMockedKeys<FleetStartContract> = {
     fleetSetupCompleted: jest.fn(async () => {}),
-    agentless: { enabled: false },
+    agentless: { enabled: false, createRumClient: jest.fn() },
     authz: { fromRequest: jest.fn(async (_) => fleetAuthzMock) },
     packageService: createMockPackageService(),
     agentService: createMockAgentService(),
