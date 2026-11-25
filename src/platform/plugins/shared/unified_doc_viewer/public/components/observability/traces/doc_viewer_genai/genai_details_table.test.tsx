@@ -212,6 +212,21 @@ describe('GenAiDetailsTable', () => {
     );
   });
 
+  it.each([
+    { field: 'attributes.gen_ai.usage.reasoning.output_tokens', count: 12 },
+    { field: 'gen_ai.usage.reasoning.output_tokens', count: 0 },
+    { field: 'labels.gen_ai_usage_reasoning_output_tokens', count: 5 },
+  ])('shows $field immediately after the output total', ({ field, count }) => {
+    const outputField = 'attributes.gen_ai.usage.output_tokens';
+    const hit = buildHit({ [field]: [count], [outputField]: [30] });
+
+    render(<GenAiDetailsTable hit={hit} dataView={dataView} />);
+
+    const { fieldNames, fieldConfigurations } = mockContentFrameworkTable.mock.calls[0][0];
+    expect(fieldNames).toEqual([outputField, field]);
+    expect(fieldConfigurations?.[field].title).toBe('Reasoning output tokens');
+  });
+
   it('works without the optional doc viewer callbacks (waterfall flyout context)', () => {
     const hit = buildHit({ 'gen_ai.response.id': ['resp-1'] });
 

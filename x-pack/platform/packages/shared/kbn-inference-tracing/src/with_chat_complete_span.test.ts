@@ -83,6 +83,12 @@ describe('withChatCompleteSpan token attributes', () => {
       expect(GenAISemanticConventions.GenAIUsageReasoningOutputTokens in attributes).toBe(false);
     });
 
+    it('does not record NaN output tokens when the completion count is missing', async () => {
+      await run({ prompt: 100, thinking: 12, total: 112 } as unknown as ChatCompletionTokenCount);
+      const attributes = getTokenAttributes();
+      expect(attributes[GenAISemanticConventions.GenAIUsageOutputTokens]).toBe(12);
+    });
+
     it('records the cache read and write tokens', async () => {
       await run({ prompt: 100, completion: 10, total: 110, cached: 40, cacheWrite: 20 });
       const attributes = getTokenAttributes();

@@ -25,6 +25,7 @@ import {
   ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_REASONING_OUTPUT_TOKENS,
 } from '@kbn/genai-common';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -73,6 +74,10 @@ const DETAIL_FIELD_TITLES: Record<string, string> = {
   [ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS]: i18n.translate(
     'unifiedDocViewer.observability.traces.genAi.details.outputTokens',
     { defaultMessage: 'Output tokens' }
+  ),
+  [ATTRIBUTE_GEN_AI_USAGE_REASONING_OUTPUT_TOKENS]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.reasoningOutputTokensLabel',
+    { defaultMessage: 'Reasoning output tokens' }
   ),
   // Shown with their share of the input tokens, see buildFieldConfigurations.
   [ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: i18n.translate(
