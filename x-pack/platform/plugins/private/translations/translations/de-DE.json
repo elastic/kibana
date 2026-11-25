@@ -30618,7 +30618,6 @@
     "xpack.exploratoryView.expView.kpi.errorStatesLabel": "Fehlerzustände",
     "xpack.exploratoryView.expView.kpi.failedTestsLabel": "Fehlgeschlagene Tests",
     "xpack.exploratoryView.expView.lastUpdated.label": "Letzte Aktualisierung: {updatedDate}",
-    "xpack.exploratoryView.expView.openInLens": "In Lens öffnen",
     "xpack.exploratoryView.expView.operationType.25thPercentile": "25. Perzentil",
     "xpack.exploratoryView.expView.operationType.75thPercentile": "75. Perzentil",
     "xpack.exploratoryView.expView.operationType.90thPercentile": "90. Perzentil",

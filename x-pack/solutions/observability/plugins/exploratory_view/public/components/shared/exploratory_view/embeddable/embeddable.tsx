@@ -139,8 +139,6 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     reportType,
     setIsSaveOpen,
     setAddToCaseOpen,
-    lensAttributes: attributesJSON,
-    timeRange,
   });
 
   if (!attributesJSON) {

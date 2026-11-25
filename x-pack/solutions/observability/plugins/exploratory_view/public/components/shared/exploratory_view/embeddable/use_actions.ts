@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
@@ -23,16 +23,12 @@ export function useActions({
   reportType,
   setIsSaveOpen,
   setAddToCaseOpen,
-  timeRange,
-  lensAttributes,
 }: {
   withActions?: boolean | ActionTypes[];
   reportType: ReportViewType;
   attributes: AllSeries;
   setIsSaveOpen: (val: boolean) => void;
   setAddToCaseOpen: (val: boolean) => void;
-  timeRange: { from: string; to: string };
-  lensAttributes: any;
 }) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
@@ -58,20 +54,10 @@ export function useActions({
 
   const routePath = createExploratoryViewRoutePath({ reportType, allSeries: attributes });
 
-  const openInLensCallback = useCallback(() => {
-    if (lensAttributes) {
-      lens.navigateToPrefilledEditor(
-        {
-          id: '',
-          time_range: timeRange,
-          attributes: lensAttributes,
-        },
-        {
-          openInNewTab: true,
-        }
-      );
-    }
-  }, [lens, lensAttributes, timeRange]);
+  const openInLensAction = useMemo(
+    () => lens.actions.createOpenInLensAction({ openInNewTab: true }),
+    [lens]
+  );
 
   const exploreCallback = useCallback(() => {
     application?.navigateToApp('exploratory-view', { path: routePath });
@@ -93,33 +79,11 @@ export function useActions({
       return getAddToCaseAction({ callback: addToCaseCallback });
     }
     if (action === 'openInLens') {
-      return getOpenInLensAction({ callback: openInLensCallback });
+      return openInLensAction;
     }
     return getExploreAction({ href, callback: exploreCallback });
   });
 }
-
-const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
-  return {
-    id: 'expViewOpenInLens',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return i18n.translate('xpack.exploratoryView.expView.openInLens', {
-        defaultMessage: 'Open in Lens',
-      });
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'chartArea';
-    },
-    type: 'link',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-      return;
-    },
-  };
-};
 
 const getExploreAction = ({ href, callback }: { href: string; callback: () => void }): Action => {
   return {

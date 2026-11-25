@@ -30681,7 +30681,6 @@
     "xpack.exploratoryView.expView.kpi.errorStatesLabel": "错误状态",
     "xpack.exploratoryView.expView.kpi.failedTestsLabel": "失败的测试",
     "xpack.exploratoryView.expView.lastUpdated.label": "上次更新时间：{updatedDate}",
-    "xpack.exploratoryView.expView.openInLens": "在 Lens 中打开",
     "xpack.exploratoryView.expView.operationType.25thPercentile": "第 25 个百分位",
     "xpack.exploratoryView.expView.operationType.75thPercentile": "第 75 个百分位",
     "xpack.exploratoryView.expView.operationType.90thPercentile": "第 90 个百分位",

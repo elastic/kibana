@@ -60,7 +60,26 @@ describe('open in Lens action', () => {
   it('opens the chart in the editor with the time range of the renderer', async () => {
     await createAction().execute(toContext(getEmbeddable()));
 
-    expect(navigateToPrefilledEditor).toHaveBeenCalledWith({ attributes, time_range: timeRange });
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
+      { attributes, time_range: timeRange },
+      { openInNewTab: undefined }
+    );
+  });
+
+  it('opens the editor in a new tab when asked to', async () => {
+    const action = createOpenInLensAction(
+      {
+        application: { capabilities: { visualize_v2: { show: true } } } as never,
+        navigateToPrefilledEditor,
+      },
+      { openInNewTab: true }
+    );
+
+    await action.execute(toContext(getEmbeddable()));
+
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(expect.anything(), {
+      openInNewTab: true,
+    });
   });
 
   it('prefers the panel time range over the one of the renderer', async () => {
@@ -68,10 +87,10 @@ describe('open in Lens action', () => {
 
     await createAction().execute(toContext(getEmbeddable(panelTimeRange)));
 
-    expect(navigateToPrefilledEditor).toHaveBeenCalledWith({
-      attributes,
-      time_range: panelTimeRange,
-    });
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
+      { attributes, time_range: panelTimeRange },
+      expect.anything()
+    );
   });
 
   it('calls onExecute when the action runs', async () => {

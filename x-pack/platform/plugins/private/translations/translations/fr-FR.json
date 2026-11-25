@@ -30582,7 +30582,6 @@
     "xpack.exploratoryView.expView.kpi.errorStatesLabel": "États d'erreur",
     "xpack.exploratoryView.expView.kpi.failedTestsLabel": "Tests ayant échoué",
     "xpack.exploratoryView.expView.lastUpdated.label": "Dernière mise à jour : {updatedDate}",
-    "xpack.exploratoryView.expView.openInLens": "Ouvrir dans Lens",
     "xpack.exploratoryView.expView.operationType.25thPercentile": "25e centile",
     "xpack.exploratoryView.expView.operationType.75thPercentile": "75e centile",
     "xpack.exploratoryView.expView.operationType.90thPercentile": "90e centile",

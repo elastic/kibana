@@ -15,17 +15,22 @@ import { getContextEmbeddable, getEffectiveTimeRange } from './helpers';
 
 export interface OpenInLensActionServices {
   application: Pick<ApplicationStart, 'capabilities'>;
-  navigateToPrefilledEditor: (input: LensSerializedState) => void;
+  navigateToPrefilledEditor: (
+    input: LensSerializedState,
+    options?: { openInNewTab?: boolean }
+  ) => void;
 }
 
 export interface OpenInLensActionOptions {
   /** Called when the user runs the action */
   onExecute?: () => void;
+  /** Opens the Lens editor in a new tab */
+  openInNewTab?: boolean;
 }
 
 export const createOpenInLensAction = (
   { application, navigateToPrefilledEditor }: OpenInLensActionServices,
-  { onExecute }: OpenInLensActionOptions = {}
+  { onExecute, openInNewTab }: OpenInLensActionOptions = {}
 ) =>
   createAction({
     id: ACTION_OPEN_IN_LENS,
@@ -42,9 +47,12 @@ export const createOpenInLensAction = (
       if (!isLensApi(embeddable)) throw new IncompatibleActionError();
 
       onExecute?.();
-      navigateToPrefilledEditor({
-        ...embeddable.getLegacySerializedState(),
-        time_range: getEffectiveTimeRange(embeddable),
-      });
+      navigateToPrefilledEditor(
+        {
+          ...embeddable.getLegacySerializedState(),
+          time_range: getEffectiveTimeRange(embeddable),
+        },
+        { openInNewTab }
+      );
     },
   });

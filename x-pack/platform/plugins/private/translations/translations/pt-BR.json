@@ -30707,7 +30707,6 @@
     "xpack.exploratoryView.expView.kpi.errorStatesLabel": "Estados de erro",
     "xpack.exploratoryView.expView.kpi.failedTestsLabel": "Testes reprovados",
     "xpack.exploratoryView.expView.lastUpdated.label": "Última atualização: {updatedDate}",
-    "xpack.exploratoryView.expView.openInLens": "Abrir no Lens",
     "xpack.exploratoryView.expView.operationType.25thPercentile": "25º percentil",
     "xpack.exploratoryView.expView.operationType.75thPercentile": "75º percentil",
     "xpack.exploratoryView.expView.operationType.90thPercentile": "90º percentil",

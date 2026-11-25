@@ -30684,7 +30684,6 @@
     "xpack.exploratoryView.expView.kpi.errorStatesLabel": "エラー状態",
     "xpack.exploratoryView.expView.kpi.failedTestsLabel": "失敗したテスト",
     "xpack.exploratoryView.expView.lastUpdated.label": "前回更新日時：{updatedDate}",
-    "xpack.exploratoryView.expView.openInLens": "Lensで開く",
     "xpack.exploratoryView.expView.operationType.25thPercentile": "25パーセンタイル",
     "xpack.exploratoryView.expView.operationType.75thPercentile": "75パーセンタイル",
     "xpack.exploratoryView.expView.operationType.90thPercentile": "90パーセンタイル",
