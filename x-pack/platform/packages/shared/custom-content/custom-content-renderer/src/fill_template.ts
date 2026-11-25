@@ -7,10 +7,11 @@
 
 import {
   CUSTOM_CONTENT_FORBIDDEN_FILTERS,
-  CUSTOM_CONTENT_FORBIDDEN_TAGS,
+  CUSTOM_CONTENT_UNESCAPED_TAGS,
   CUSTOM_CONTENT_LIQUID_OPTIONS,
 } from '@kbn/custom-content-common';
 import type { ESQLColumn } from '@kbn/es-types';
+import { registerEscapedTags } from './escaped_tags';
 
 /**
  * Loaded on demand so liquidjs ships in its own chunk instead of being embedded in every
@@ -18,23 +19,14 @@ import type { ESQLColumn } from '@kbn/es-types';
  * chunk once three chunks use it, which is far wider than this feature.
  */
 const getEngine = async () => {
-  const { Liquid } = await import('liquidjs');
+  const { Liquid, Tag } = await import('liquidjs');
   const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
   // A panel saved through the API never met the server's check, so the engine itself must keep
   // escaping: a forbidden filter becomes the identity, and the output is escaped as for any value.
   CUSTOM_CONTENT_FORBIDDEN_FILTERS.forEach((name) => liquid.registerFilter(name, (value) => value));
-  // Only `{{ }}` escapes. `echo` (also inside `liquid`) and `cycle` write a value as markup, so they
-  // fail with a message that says what to write instead, and not by leaving a gap in the panel.
-  CUSTOM_CONTENT_FORBIDDEN_TAGS.forEach((name) =>
-    liquid.registerTag(name, {
-      parse() {},
-      render() {
-        throw new Error(
-          `The "${name}" tag is not supported in a custom content template. Write values with {{ }}, and use CSS for alternating rows.`
-        );
-      },
-    })
-  );
+  // Only `{{ }}` escapes. `echo` (also inside `liquid`) and `cycle` would write a value as markup, so
+  // they are made to escape it too, and a panel that already uses one keeps rendering.
+  registerEscapedTags(liquid, Tag, CUSTOM_CONTENT_UNESCAPED_TAGS);
   return liquid;
 };
 

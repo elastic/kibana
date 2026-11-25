@@ -86,7 +86,7 @@ LIQUID SYNTAX:
 - Output value:  {{ row["column name"].value }}
 - Bar width:     <div style="width: {{ row["column name"].pct }}%; ..."></div>
 - Filters:       {{ row["column name"].value | round: 2 }}
-- Write values with {{ }}, which HTML-escapes them. The "raw" filter and the "echo" and "cycle" tags write them as they are, so they are rejected. For alternating rows use CSS (:nth-child).`;
+- Write values with {{ }}, which HTML-escapes them. The "raw" filter and the "echo" and "cycle" tags are rejected. For alternating rows use CSS (:nth-child).`;
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;

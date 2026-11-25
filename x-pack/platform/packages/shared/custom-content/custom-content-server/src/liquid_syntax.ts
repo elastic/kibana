@@ -9,7 +9,7 @@ import { Liquid, TokenKind } from 'liquidjs';
 import {
   CUSTOM_CONTENT_LIQUID_OPTIONS,
   CUSTOM_CONTENT_FORBIDDEN_FILTERS,
-  CUSTOM_CONTENT_FORBIDDEN_TAGS,
+  CUSTOM_CONTENT_UNESCAPED_TAGS,
 } from '@kbn/custom-content-common';
 
 const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
@@ -50,7 +50,7 @@ const findForbidden = (node: unknown, seen = new Set<unknown>()): Forbidden | un
   if (
     token?.kind === TokenKind.Tag &&
     typeof name === 'string' &&
-    CUSTOM_CONTENT_FORBIDDEN_TAGS.includes(name)
+    CUSTOM_CONTENT_UNESCAPED_TAGS.includes(name)
   ) {
     return { kind: 'tag', name };
   }
@@ -77,7 +77,7 @@ export const getLiquidSyntaxError = (template: string): string | undefined => {
     if (!forbidden) return undefined;
     return forbidden.kind === 'filter'
       ? `The "${forbidden.name}" filter is not allowed: values are always HTML-escaped. Remove it.`
-      : `The "${forbidden.name}" tag is not allowed: it writes a value without HTML escaping. Write values with {{ }}, and use CSS (:nth-child) for alternating rows.`;
+      : `The "${forbidden.name}" tag is not allowed in a generated template. Write values with {{ }}, and use CSS (:nth-child) for alternating rows.`;
   } catch (error) {
     return error instanceof Error ? error.message : String(error);
   }
