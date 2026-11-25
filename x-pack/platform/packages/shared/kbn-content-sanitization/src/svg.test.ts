@@ -349,7 +349,7 @@ describe('sanitizeSvg', () => {
       'https://evil.com/icon.svg#A',
       '//evil.com/icon.png',
       'icon.svg#A',
-      'javascript:alert(1)',
+      'javascript:alert(1)', // eslint-disable-line no-script-url
       ' javascript:alert(1)',
       '#A" onload="alert(1)',
       'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
