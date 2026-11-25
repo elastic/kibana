@@ -19088,7 +19088,6 @@
     "xpack.alertingV2EpisodesUi.details.flyout.badge.acknowledged": "Acquittée",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.flapping": "Bagotement",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.snoozed": "Répétée",
-    "xpack.alertingV2EpisodesUi.details.flyout.close": "Fermer",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertId": "ID de l'alerte",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertIdCopied": "ID de l’alerte copié",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.assignee": "Utilisateur affecté",

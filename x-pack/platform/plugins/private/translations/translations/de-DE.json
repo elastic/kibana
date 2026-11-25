@@ -19113,7 +19113,6 @@
     "xpack.alertingV2EpisodesUi.details.flyout.badge.acknowledged": "Bestätigt",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.flapping": "Flapping",
     "xpack.alertingV2EpisodesUi.details.flyout.badge.snoozed": "Zurückgestellt",
-    "xpack.alertingV2EpisodesUi.details.flyout.close": "Schließen",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertId": "Alert-ID",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertIdCopied": "Alert-ID kopiert",
     "xpack.alertingV2EpisodesUi.details.flyout.infoBlock.assignee": "Bearbeiter",
