@@ -63,7 +63,8 @@ describe(
       closeToastIfVisible();
     });
 
-    it('should be able to run live query and add to timeline', () => {
+    // skipped: https://github.com/elastic/kibana/issues/264533
+    it.skip('should be able to run live query and add to timeline', () => {
       const TIMELINE_NAME = 'Untitled Timeline';
       cy.getBySel('expand-event').first().click();
       cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();

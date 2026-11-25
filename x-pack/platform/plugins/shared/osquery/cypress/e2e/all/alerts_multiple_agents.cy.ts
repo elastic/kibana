@@ -72,7 +72,8 @@ describe(
       });
     });
 
-    it('should substitute params in osquery ran from timelines alerts', () => {
+    // skipped: https://github.com/elastic/kibana/issues/264525
+    it.skip('should substitute params in osquery ran from timelines alerts', () => {
       cy.getBySel('send-alert-to-timeline-button').first().click();
       cy.getBySel('docTableExpandToggleColumn').first().click();
       takeOsqueryActionWithParams();
