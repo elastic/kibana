@@ -245,12 +245,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       onTestConnector(connectorForTest);
     }
 
-    // A connector with outbound off cannot be tested, so show its settings.
-    setEditTab(
-      connectorForTest.isOutboundActionsEnabled === false
-        ? EditConnectorTabs.Configuration
-        : EditConnectorTabs.Test
-    );
+    setEditTab(EditConnectorTabs.Test);
     setConnectorToTest(connectorForTest);
   }, [
     validateAndCreateConnector,
