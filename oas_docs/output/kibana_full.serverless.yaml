@@ -169094,7 +169094,6 @@ components:
           discriminator:
             mapping:
               esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-pinned-options-list-dsl-control-schema-esql'
-              field: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-pinned-options-list-dsl-control-schema-field'
             propertyName: values_source
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-pinned-options-list-dsl-control-schema-esql'
@@ -169136,7 +169135,6 @@ components:
           discriminator:
             mapping:
               esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-pinned-range-slider-control-schema-esql'
-              field: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-pinned-range-slider-control-schema-field'
             propertyName: values_source
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-pinned-range-slider-control-schema-esql'
@@ -169437,11 +169435,12 @@ components:
           description: When `true`, the control's available options are narrowed by the page's active filters.
           type: boolean
         values_source:
+          anyOf:
+            - enum:
+                - field
+              type: string
           default: field
           description: The source of the field options for this control. Defaults to `field` for legacy controls.
-          type: string
-          enum:
-            - field
       required:
         - data_view_id
         - field_name
@@ -169816,11 +169815,12 @@ components:
           description: When `true`, the control's available options are narrowed by the page's active filters.
           type: boolean
         values_source:
+          anyOf:
+            - enum:
+                - field
+              type: string
           default: field
           description: The source of the field options for this control. Defaults to `field` for legacy controls.
-          type: string
-          enum:
-            - field
       required:
         - data_view_id
         - field_name
@@ -169910,11 +169910,12 @@ components:
           minItems: 2
           type: array
         values_source:
+          anyOf:
+            - enum:
+                - field
+              type: string
           default: field
           description: The source of the field options for this control. Defaults to `field` for legacy controls.
-          type: string
-          enum:
-            - field
       required:
         - data_view_id
         - field_name
@@ -169996,11 +169997,12 @@ components:
           minItems: 2
           type: array
         values_source:
+          anyOf:
+            - enum:
+                - field
+              type: string
           default: field
           description: The source of the field options for this control. Defaults to `field` for legacy controls.
-          type: string
-          enum:
-            - field
       required:
         - data_view_id
         - field_name
@@ -171588,7 +171590,6 @@ components:
           discriminator:
             mapping:
               esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
-              field: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'
             propertyName: values_source
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
@@ -171615,7 +171616,6 @@ components:
           discriminator:
             mapping:
               esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
-              field: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'
             propertyName: values_source
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
