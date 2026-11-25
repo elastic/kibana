@@ -34,6 +34,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';
+import { defaultRowRenderers } from '../body/renderers';
 import type { ColumnHeaderType } from '../../../../../common/types';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -662,6 +663,93 @@ describe('unified timeline', () => {
             ])
           );
         });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should should show callout when field search does not matches any field',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
+            '43'
+          );
+        });
+
+        fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
+          target: { value: 'fake_field' },
+        });
+
+        await waitFor(() => {
+          expect(
+            screen.getByTestId('fieldListGroupedAvailableFieldsNoFieldsCallout-noFieldsMatch')
+          ).toBeVisible();
+        });
+
+        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('0');
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should toggle side bar correctly',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+
+        expect(screen.getByTestId('fieldListGroupedFieldGroups')).toBeVisible();
+
+        fireEvent.click(screen.getByTitle('Hide sidebar'));
+
+        await waitFor(() => {
+          expect(screen.queryByTestId('fieldListGroupedFieldGroups')).not.toBeInTheDocument();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+  });
+
+  describe('row renderers', () => {
+    it(
+      'should show row-renderers correctly by default',
+      async () => {
+        renderTestComponents({ rowRenderers: defaultRowRenderers });
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+
+        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should hide row-renderers when disabled',
+      async () => {
+        const { container } = renderTestComponents({ rowRenderers: defaultRowRenderers });
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+
+        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+
+        fireEvent.click(screen.getByTestId('show-row-renderers-gear'));
+        expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
+
+        fireEvent.click(screen.getByTestId('disable-all'));
+        expect(
+          screen.getAllByTestId('renderer-checkbox')[0].querySelector('[type="checkbox"]')
+        ).not.toBeChecked();
+        fireEvent.click(
+          container.closest('body')!.querySelector('[aria-label="Closes this modal window"]')!
+        );
+
+        expect(screen.queryByTestId('row-renderers-modal')).not.toBeInTheDocument();
+
+        expect(screen.queryByTestId('timeline-row-renderer-0')).not.toBeInTheDocument();
       },
       SPECIAL_TEST_TIMEOUT
     );
