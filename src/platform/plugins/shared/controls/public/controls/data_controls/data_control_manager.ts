@@ -52,7 +52,6 @@ import {
   isSameValuesSourceSelection,
   resolveControlSource,
   toControlSourceDescriptor,
-  toValuesSourceSelection,
 } from '../utils/control_source';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
@@ -342,19 +341,33 @@ export const initializeDataControlManager = async <EditorState extends object = 
     )
     .subscribe((plan) => valuesSourceFetchPlan$.next(plan));
 
-  const valuesSourceSelection$ = combineLatest([
-    dataControlStateManager.api.valuesSource$,
+  // A data view control is selected by its data view and field. A query control by the dataset its
+  // query reads and the column it returns, so editing the text of the query does not change it.
+  const dataViewSelection$ = combineLatest([
     dataControlStateManager.api.dataViewId$,
     dataControlStateManager.api.fieldName$,
-    dataControlStateManager.api.esqlQuery$,
   ]).pipe(
-    map(([valuesSource, dataViewId, fieldName, esqlQuery]) =>
-      toValuesSourceSelection({
-        values_source: valuesSource,
-        data_view_id: dataViewId,
-        field_name: fieldName,
-        esql_query: esqlQuery,
+    map(
+      ([dataViewId, fieldName]): ValuesSourceSelection => ({
+        kind: 'dataView',
+        sourceId: dataViewId ?? '',
+        fieldName,
       })
+    )
+  );
+  const esqlSelection$ = combineLatest([
+    resolvedSource$.pipe(
+      map((resolved) => resolved?.filterableSource.id),
+      filter((sourceId): sourceId is string => sourceId !== undefined)
+    ),
+    // the column is not known while the next query runs
+    fieldName$.pipe(filter((fieldName): fieldName is string => fieldName !== undefined)),
+  ]).pipe(
+    map(([sourceId, fieldName]): ValuesSourceSelection => ({ kind: 'esql', sourceId, fieldName }))
+  );
+  const valuesSourceSelection$ = dataControlStateManager.api.valuesSource$.pipe(
+    switchMap((valuesSource) =>
+      valuesSource === ControlValuesSource.ESQL ? esqlSelection$ : dataViewSelection$
     ),
     distinctUntilChanged(isSameValuesSourceSelection)
   );

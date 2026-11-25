@@ -131,7 +131,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       /** Clear state when the field changes */
       const fieldChangedSubscription = dataControlManager.internalApi.valuesSourceSelection$
         .pipe(
-          filter(({ source }) => source.kind === 'dataView'),
+          filter(({ kind }) => kind === 'dataView'),
           distinctUntilChanged(isSameValuesSourceSelection),
           skip(1) // skip first, since this represents initialization
         )

@@ -424,6 +424,76 @@ describe('initializeDataControlManager', () => {
       expect(getInitialFilter).not.toHaveBeenCalled();
     });
 
+    describe('valuesSourceSelection$ of a query control', () => {
+      const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+      const column = (name: string) => ({
+        values: ['US'],
+        column: { name, type: 'keyword' },
+      });
+
+      const initializeQueryControl = async () => {
+        mockGetESQLSingleColumnValues.mockResolvedValue(column('myFieldName'));
+        const { data_view_id: _dataViewId, field_name: _fieldName, ...savedState } = esqlState;
+        const dataControlManager = await initializeDataControlManager({
+          controlId: 'esqlControl',
+          controlType: 'esql',
+          state: savedState,
+          editorStateManager: initializeStateManager({}, {}),
+          parentApi: {},
+          typeDisplayName: 'ES|QL Control',
+        });
+        await flush();
+        const selections: Array<{ kind: string; sourceId: string; fieldName?: string }> = [];
+        const subscription = dataControlManager.internalApi.valuesSourceSelection$.subscribe(
+          (selection) => selections.push(selection)
+        );
+        return { dataControlManager, selections, subscription };
+      };
+
+      it('does not change when only the text of the query changes', async () => {
+        const { dataControlManager, selections, subscription } = await initializeQueryControl();
+        expect(selections).toEqual([
+          { kind: 'esql', sourceId: 'esqlDatasetId', fieldName: 'myFieldName' },
+        ]);
+
+        dataControlManager.api.setEsqlQuery(
+          '// the same values\nFROM logs | WHERE country == ?geo_dest | KEEP myFieldName | SORT myFieldName'
+        );
+        await flush();
+        subscription.unsubscribe();
+
+        expect(selections).toHaveLength(1);
+      });
+
+      it('changes when the query returns another column', async () => {
+        const { dataControlManager, selections, subscription } = await initializeQueryControl();
+
+        mockGetESQLSingleColumnValues.mockResolvedValue(column('otherField'));
+        dataControlManager.api.setEsqlQuery('FROM logs | KEEP otherField');
+        await flush();
+        subscription.unsubscribe();
+
+        expect(selections.map(({ fieldName }) => fieldName)).toEqual(['myFieldName', 'otherField']);
+      });
+
+      it('changes when the query reads another dataset', async () => {
+        const { dataControlManager, selections, subscription } = await initializeQueryControl();
+
+        mockForDataset.mockResolvedValueOnce({
+          kind: 'esql',
+          toFilterableSource: async () => ({ ...esqlFilterableSource, id: 'otherDatasetId' }),
+        } as unknown as EsqlSource);
+        dataControlManager.api.setEsqlQuery('FROM other-* | KEEP myFieldName');
+        await flush();
+        subscription.unsubscribe();
+
+        expect(selections.map(({ sourceId }) => sourceId)).toEqual([
+          'esqlDatasetId',
+          'otherDatasetId',
+        ]);
+      });
+    });
+
     it('keeps the error of a query whose column cannot be derived, without looking up the previous column', async () => {
       mockGetESQLSingleColumnValues.mockResolvedValue({
         values: ['US'],

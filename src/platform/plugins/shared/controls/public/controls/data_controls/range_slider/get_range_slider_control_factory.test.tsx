@@ -202,6 +202,38 @@ describe('RangeSliderControlApi', () => {
       expect(api.serializeState().value).toEqual(['100', '200']);
     });
 
+    test('should keep the range of an ES|QL control when only the text of its query changes', async () => {
+      (dataService.search.esql as jest.Mock).mockResolvedValue({
+        rawResponse: {
+          columns: [{ name: 'myFieldName', type: 'long' }],
+          values: [[42], [256], [1024]],
+        },
+      });
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
+          values_source: ControlValuesSource.ESQL,
+          esql_query: 'FROM bytes-* | KEEP myFieldName',
+          value: ['100', '200'],
+        } as RangeSliderControlState,
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+      await waitFor(() => expect(api.appliedFilters$.value).toBeDefined());
+
+      api.setEsqlQuery('// same values\nFROM bytes-* | KEEP myFieldName | SORT myFieldName');
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(api.serializeState().value).toEqual(['100', '200']);
+      expect(api.appliedFilters$.value).toEqual([
+        expect.objectContaining({
+          query: { range: { myFieldName: { gte: 100, lte: 200 } } },
+        }),
+      ]);
+    });
+
     test('should set blocking error when data view is not found', async () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),

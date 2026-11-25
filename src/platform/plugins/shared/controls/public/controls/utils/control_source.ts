@@ -24,9 +24,13 @@ type ControlSourceState = Partial<
   Pick<DataControlState, 'values_source' | 'data_view_id' | 'field_name' | 'esql_query'>
 >;
 
-/** What the user chose a control's values from: the source, and the field of a field control. */
+/**
+ * What the values of a control come from: a data view or the dataset of a query, and the field.
+ * It changes when the source or the field really changes, not when the text of a query does.
+ */
 export interface ValuesSourceSelection {
-  readonly source: ControlSourceDescriptor;
+  readonly kind: ControlSourceDescriptor['kind'];
+  readonly sourceId: string;
   readonly fieldName?: string;
 }
 
@@ -48,15 +52,10 @@ export const isSameControlSource = (
     ? a.query === b.query
     : a.kind === 'dataView' && b.kind === 'dataView' && a.dataViewId === b.dataViewId;
 
-export const toValuesSourceSelection = (state: ControlSourceState): ValuesSourceSelection => ({
-  source: toControlSourceDescriptor(state),
-  fieldName: state.values_source === ControlValuesSource.ESQL ? undefined : state.field_name,
-});
-
 export const isSameValuesSourceSelection = (
   a: ValuesSourceSelection,
   b: ValuesSourceSelection
-): boolean => isSameControlSource(a.source, b.source) && a.fieldName === b.fieldName;
+): boolean => a.kind === b.kind && a.sourceId === b.sourceId && a.fieldName === b.fieldName;
 
 /** The data source a control reads its values from: a data view, or what an ES|QL query reads. */
 export const resolveControlSource = async (
