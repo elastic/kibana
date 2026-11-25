@@ -193,7 +193,7 @@ describe('ObservableService', () => {
       expect(log.error).not.toHaveBeenCalled();
     });
 
-    it('writes at most 1,000 objects per request', async () => {
+    it('writes at most 1,000 objects per request and waits for the refresh after the last', async () => {
       const observables = Array.from({ length: 1_001 }, (_, index) => toCreate(index));
 
       const result = await service.bulkCreate({
@@ -203,9 +203,12 @@ describe('ObservableService', () => {
         user,
       });
 
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1_000);
-      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[1][0]).toHaveLength(1);
+      const { calls } = unsecuredSavedObjectsClient.bulkCreate.mock;
+      expect(calls).toHaveLength(2);
+      expect(calls[0][0]).toHaveLength(1_000);
+      expect(calls[0][1]).toEqual({ refresh: false });
+      expect(calls[1][0]).toHaveLength(1);
+      expect(calls[1][1]).toEqual({ refresh: 'wait_for' });
       expect(result.map(({ id }) => id)).toEqual(observables.map(({ id }) => id));
     });
 

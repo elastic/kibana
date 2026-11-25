@@ -211,7 +211,9 @@ export class ObservableService {
         const references = [{ type: CASE_SAVED_OBJECT, name: CASE_REF_NAME, id: caseId }];
         const created: Observable[] = [];
 
-        for (const observablesChunk of chunk(observables, BULK_CREATE_CHUNK_SIZE)) {
+        const chunks = chunk(observables, BULK_CREATE_CHUNK_SIZE);
+
+        for (const [chunkIndex, observablesChunk] of chunks.entries()) {
           const { saved_objects: results } =
             await this.context.unsecuredSavedObjectsClient.bulkCreate<ObservablePersistedAttributes>(
               observablesChunk.map(({ id, typeKey, value, description, createdAt }) => ({
@@ -230,7 +232,8 @@ export class ObservableService {
                 },
                 references,
               })),
-              { refresh: 'wait_for' }
+              // Saved object indices have one shard, so the last chunk's refresh exposes every chunk.
+              { refresh: chunkIndex === chunks.length - 1 ? 'wait_for' : false }
             );
 
           const failures: string[] = [];
@@ -310,7 +313,9 @@ export class ObservableService {
     version,
   }: {
     id: string;
-    attributes: Partial<ObservablePersistedAttributes>;
+    attributes: Partial<
+      Pick<ObservablePersistedAttributes, 'value' | 'description' | 'updated_at' | 'updated_by'>
+    >;
     version?: string;
   }): Promise<void> {
     await this.logged(`update observable ${id}`, () =>
