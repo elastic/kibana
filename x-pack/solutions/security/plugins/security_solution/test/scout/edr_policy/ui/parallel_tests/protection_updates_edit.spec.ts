@@ -25,10 +25,13 @@ spaceTest.describe(
       await browserAuth.loginAsSecurityRole('endpoint_operations_analyst');
     });
 
-    spaceTest('renders tab content', async ({ pageObjects, endpointPolicy }) => {
+    spaceTest('renders tab content', async ({ page, pageObjects, endpointPolicy }) => {
       const { protectionUpdates } = pageObjects;
+      // Noon UTC keeps the page's "yesterday" and the expected date on the same side of midnight.
+      const clockStart = moment.utc().startOf('day').add(12, 'hours');
 
       await spaceTest.step('automatic updates are on by default', async () => {
+        await page.clock.install({ time: clockStart.toDate() });
         await protectionUpdates.goto(endpointPolicy.id);
         await expect(protectionUpdates.warningCallout).toBeVisible();
         await expect(protectionUpdates.automaticUpdatesEnabledCallout).toBeVisible();
@@ -38,8 +41,8 @@ spaceTest.describe(
       });
 
       await spaceTest.step('turning them off shows the manual version form', async () => {
-        // The page picks yesterday as the default version when it loads.
-        const defaultDate = daysAgo(1).format(DISPLAY_DATE_FORMAT);
+        // The page picks yesterday, by the browser clock, as the default version when it loads.
+        const defaultDate = clockStart.clone().subtract(1, 'days').format(DISPLAY_DATE_FORMAT);
         await protectionUpdates.toggleAutomaticUpdates();
         await expect(protectionUpdates.deployedVersionTitle).toBeVisible();
         await expect(protectionUpdates.deployedVersion).toHaveText('latest');
