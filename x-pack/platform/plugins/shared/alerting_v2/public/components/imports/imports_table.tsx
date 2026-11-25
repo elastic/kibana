@@ -5,33 +5,41 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import {
+  EuiBasicTable,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiInMemoryTable,
   EuiSpacer,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FindExternalSourcesSortField } from '@kbn/alerting-v2-schemas';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { ImportListItem } from '../../hooks/use_fetch_imports';
 import { ImportActionsMenu } from './import_actions_menu';
 
-const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
-  '.datadog': i18n.translate('xpack.alertingV2.imports.list.type.datadog', {
-    defaultMessage: 'Datadog',
-  }),
+export const IMPORTS_PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+
+interface ImportTypeDisplay {
+  label: string;
+  /** The type of the connector the import receives events through, which holds its icon. */
+  connectorTypeId: string;
+}
+
+const IMPORT_TYPE_DISPLAY: Readonly<Record<string, ImportTypeDisplay>> = {
+  datadog: {
+    label: i18n.translate('xpack.alertingV2.imports.list.type.datadog', {
+      defaultMessage: 'Datadog',
+    }),
+    connectorTypeId: '.datadog',
+  },
 };
 
-const getConnectorTypeLabel = (connectorTypeId: string): string =>
-  CONNECTOR_TYPE_LABELS[connectorTypeId] ?? connectorTypeId;
-
-/** The connector type's icon, looked up by type id; a generic plug when the type has none. */
-const ConnectorTypeIcon = ({ connectorTypeId }: { connectorTypeId: string }) => {
+/** The import type's connector icon; a generic plug when the connector type has none. */
+const ImportTypeIcon = ({ connectorTypeId }: { connectorTypeId: string }) => {
   const icon = ConnectorIconsMap.get(connectorTypeId);
   if (!icon) {
     return <EuiIcon type="plugs" size="m" aria-hidden="true" />;
@@ -43,9 +51,16 @@ const ConnectorTypeIcon = ({ connectorTypeId }: { connectorTypeId: string }) => 
   );
 };
 
-const getColumns = (
-  getConnectorUrl: (connectorId: string) => string
-): Array<EuiBasicTableColumn<ImportListItem>> => [
+const ACTIONS_COLUMN: EuiBasicTableColumn<ImportListItem> = {
+  name: i18n.translate('xpack.alertingV2.imports.list.column.actions', {
+    defaultMessage: 'Actions',
+  }),
+  align: 'right',
+  width: '8%',
+  render: ({ id, name }: ImportListItem) => <ImportActionsMenu importId={id} importName={name} />,
+};
+
+const getColumns = (canDelete: boolean): Array<EuiBasicTableColumn<ImportListItem>> => [
   {
     field: 'name',
     name: i18n.translate('xpack.alertingV2.imports.list.column.name', {
@@ -55,68 +70,87 @@ const getColumns = (
     truncateText: true,
   },
   {
-    field: 'connectorTypeId',
+    field: 'type',
     name: i18n.translate('xpack.alertingV2.imports.list.column.type', {
       defaultMessage: 'Type',
     }),
-    sortable: ({ connectorTypeId }: ImportListItem) => getConnectorTypeLabel(connectorTypeId),
-    render: (connectorTypeId: ImportListItem['connectorTypeId']) => (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <ConnectorTypeIcon connectorTypeId={connectorTypeId} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{getConnectorTypeLabel(connectorTypeId)}</EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+    sortable: true,
+    render: (type: ImportListItem['type']) => {
+      const { label, connectorTypeId } = IMPORT_TYPE_DISPLAY[type] ?? {
+        label: type,
+        connectorTypeId: '',
+      };
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <ImportTypeIcon connectorTypeId={connectorTypeId} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
   },
-  {
-    name: i18n.translate('xpack.alertingV2.imports.list.column.actions', {
-      defaultMessage: 'Actions',
-    }),
-    align: 'right',
-    width: '8%',
-    render: ({ connectorId }: ImportListItem) => (
-      <ImportActionsMenu connectorId={connectorId} connectorUrl={getConnectorUrl(connectorId)} />
-    ),
-  },
+  ...(canDelete ? [ACTIONS_COLUMN] : []),
 ];
 
 const SEARCH_LABEL = i18n.translate('xpack.alertingV2.imports.list.searchPlaceholder', {
-  defaultMessage: 'Search by name',
+  defaultMessage: 'Search by name or description',
 });
 
-/** Case-insensitive match on the import name. */
-export const filterImportsByName = (
-  items: readonly ImportListItem[],
-  searchText: string
-): ImportListItem[] => {
-  const needle = searchText.trim().toLowerCase();
-  return needle === ''
-    ? [...items]
-    : items.filter(({ name }) => name.toLowerCase().includes(needle));
-};
+/** The list API sort fields that are also table columns. */
+export type ImportsSortField = Extract<FindExternalSourcesSortField, keyof ImportListItem>;
+
+export interface ImportsTableChange {
+  pageIndex: number;
+  pageSize: number;
+  sortField: ImportsSortField;
+  sortOrder: 'asc' | 'desc';
+}
+
+const isSortField = (field: unknown): field is ImportsSortField =>
+  field === 'name' || field === 'type';
 
 interface ImportsTableProps {
   items: ImportListItem[];
+  totalItemCount: number;
   isLoading: boolean;
   error?: Error | null;
+  pageIndex: number;
+  pageSize: number;
+  sortField: ImportsSortField;
+  sortOrder: 'asc' | 'desc';
+  searchText: string;
+  /** Whether the user can delete imports, which also deletes their connectors. */
+  canDelete: boolean;
+  onSearchChange: (searchText: string) => void;
+  onTableChange: (change: ImportsTableChange) => void;
 }
 
-/** The imports of the current space, searched by name, sorted and paged in the browser. */
-export const ImportsTable = ({ items, isLoading, error }: ImportsTableProps) => {
-  const { getUrlForApp } = useService(CoreStart('application'));
-  const [searchText, setSearchText] = useState('');
-  const columns = useMemo(
-    () =>
-      getColumns((connectorId) =>
-        getUrlForApp('management', {
-          deepLinkId: 'triggersActionsConnectors',
-          path: `/connectors/${encodeURIComponent(connectorId)}`,
-        })
-      ),
-    [getUrlForApp]
-  );
-  const rows = useMemo(() => filterImportsByName(items, searchText), [items, searchText]);
+/** One page of the imports of the current space. Searching, sorting and paging happen on the server. */
+export const ImportsTable = ({
+  items,
+  totalItemCount,
+  isLoading,
+  error,
+  pageIndex,
+  pageSize,
+  sortField,
+  sortOrder,
+  searchText,
+  canDelete,
+  onSearchChange,
+  onTableChange,
+}: ImportsTableProps) => {
+  const columns = useMemo(() => getColumns(canDelete), [canDelete]);
+
+  const onChange = ({ page, sort }: CriteriaWithPagination<ImportListItem>) => {
+    onTableChange({
+      pageIndex: page.index,
+      pageSize: page.size,
+      sortField: isSortField(sort?.field) ? sort.field : sortField,
+      sortOrder: sort?.direction ?? sortOrder,
+    });
+  };
 
   return (
     <>
@@ -124,21 +158,27 @@ export const ImportsTable = ({ items, isLoading, error }: ImportsTableProps) => 
         fullWidth
         incremental
         value={searchText}
-        onChange={(event) => setSearchText(event.target.value)}
+        onChange={(event) => onSearchChange(event.target.value)}
         placeholder={SEARCH_LABEL}
         aria-label={SEARCH_LABEL}
         data-test-subj="importsListSearch"
       />
       <EuiSpacer size="m" />
-      <EuiInMemoryTable
+      <EuiBasicTable
         tableCaption={i18n.translate('xpack.alertingV2.imports.list.tableCaption', {
           defaultMessage: 'Alert imports',
         })}
-        items={rows}
-        itemId="connectorId"
+        items={items}
+        itemId="id"
         columns={columns}
-        sorting={{ sort: { field: 'name', direction: 'asc' } }}
-        pagination={{ pageSizeOptions: [10, 25, 50], initialPageSize: 25 }}
+        sorting={{ sort: { field: sortField, direction: sortOrder } }}
+        pagination={{
+          pageIndex,
+          pageSize,
+          totalItemCount,
+          pageSizeOptions: [...IMPORTS_PAGE_SIZE_OPTIONS],
+        }}
+        onChange={onChange}
         loading={isLoading}
         error={error?.message}
         noItemsMessage={

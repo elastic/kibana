@@ -16,6 +16,7 @@ export interface AlertingMountConfig {
     readonly episodeDetail: (episodeId: string) => string;
     readonly actionPoliciesCreate: string;
     readonly actionPoliciesEdit: (policyId: string) => string;
+    readonly imports: string;
   };
 }
 
@@ -34,5 +35,6 @@ export const OBSERVABILITY_MOUNT_CONFIG: AlertingMountConfig = {
     episodeDetail: (episodeId: string) => `/alerts/${encodeURIComponent(episodeId)}`,
     actionPoliciesCreate: '/action-policies/create',
     actionPoliciesEdit: (policyId: string) => `/action-policies/edit/${policyId}`,
+    imports: '/imports',
   },
 };

@@ -169,6 +169,25 @@ export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
   ],
 };
 
+/**
+ * {@link ALERTING_V2_ALERTS_READ_ROLE} plus `actions: ['read']`, which the Import alerts page
+ * requires.
+ */
+export const ALERTING_V2_ALERTS_AND_CONNECTORS_READ_ROLE: KibanaRole = {
+  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_alerts: ['read'],
+        actions: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const ALERTING_V2_ALERTS_AND_RULES_READ_ROLE: KibanaRole = {
   elasticsearch: READER_ES_PRIVILEGES,
   kibana: [

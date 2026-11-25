@@ -17,6 +17,7 @@ import { ComposeDiscoverPage } from './compose_discover_page';
 import { DiscoverAppMenu } from './discover_app_menu';
 import { EpisodeDetailsPage } from './episode_details_page';
 import { ExecutionHistoryPage } from './execution_history_page';
+import { ImportsListPage } from './imports_list_page';
 import { RuleBuilderPage } from './rule_builder_page';
 import { RuleDetailsPage } from './rule_details_page';
 import { RuleFormPage } from './rule_form_page';
@@ -33,6 +34,7 @@ export { ComposeDiscoverPage } from './compose_discover_page';
 export { DiscoverAppMenu } from './discover_app_menu';
 export { EpisodeDetailsPage } from './episode_details_page';
 export { ExecutionHistoryPage } from './execution_history_page';
+export { ImportsListPage } from './imports_list_page';
 export { RuleBuilderPage } from './rule_builder_page';
 export { RuleDetailsPage } from './rule_details_page';
 export { RuleFormPage } from './rule_form_page';
@@ -52,6 +54,7 @@ export type AlertingPageObjects = PageObjects & {
   discoverAppMenu: DiscoverAppMenu;
   episodeDetails: EpisodeDetailsPage;
   executionHistory: ExecutionHistoryPage;
+  importsList: ImportsListPage;
   ruleBuilder: RuleBuilderPage;
   ruleDetails: RuleDetailsPage;
   ruleForm: RuleFormPage;
@@ -79,6 +82,7 @@ export const extendPageObjects = (
     discoverAppMenu,
     episodeDetails: createLazyPageObject(EpisodeDetailsPage, page, kbnUrl, mountConfig),
     executionHistory: createLazyPageObject(ExecutionHistoryPage, page, kbnUrl, mountConfig),
+    importsList: createLazyPageObject(ImportsListPage, page, mountConfig),
     ruleBuilder: createLazyPageObject(RuleBuilderPage, page),
     ruleDetails: createLazyPageObject(RuleDetailsPage, page),
     ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu, mountConfig),

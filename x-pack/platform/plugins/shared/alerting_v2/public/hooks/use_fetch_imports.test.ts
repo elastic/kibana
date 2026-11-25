@@ -6,45 +6,76 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { fetchImports } from './use_fetch_imports';
+import { ALERTING_V2_INTERNAL_EXTERNAL_SOURCE_API_PATH } from '@kbn/alerting-v2-constants';
+import { fetchImports, toFindExternalSourcesRequest } from './use_fetch_imports';
+
+describe('toFindExternalSourcesRequest', () => {
+  it('maps the camelCase params to the snake_case list request', () => {
+    expect(
+      toFindExternalSourcesRequest({
+        page: 2,
+        perPage: 25,
+        search: 'prod',
+        sortField: 'type',
+        sortOrder: 'desc',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 25,
+      search: 'prod',
+      sort_field: 'type',
+      sort_order: 'desc',
+      connector_id: undefined,
+      type: undefined,
+    });
+  });
+});
 
 describe('fetchImports', () => {
-  const connector = (
-    id: string,
-    connectorTypeId: string,
-    isInboundEventsEnabled?: boolean
-  ): Record<string, unknown> => ({
-    id,
-    name: `Connector ${id}`,
-    connector_type_id: connectorTypeId,
-    ...(isInboundEventsEnabled === undefined
-      ? {}
-      : { is_inbound_events_enabled: isInboundEventsEnabled }),
-  });
-
-  const fetchWith = (connectors: Array<Record<string, unknown>>) => {
+  it('requests one page from the external source list API and maps each import to a row', async () => {
     const http = httpServiceMock.createStartContract();
-    http.get.mockResolvedValue(connectors);
-    return fetchImports(http);
-  };
+    http.get.mockResolvedValue({
+      items: [
+        {
+          id: 'import-1',
+          type: 'datadog',
+          kind: 'alert',
+          metadata: { name: 'Datadog production' },
+          connector_id: 'connector-1',
+          version: 1,
+          created_by: null,
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_by: null,
+          updated_at: '2025-01-01T00:00:00.000Z',
+        },
+      ],
+      total: 30,
+      page: 2,
+      per_page: 25,
+    });
 
-  it('keeps connectors that receive inbound events', async () => {
-    await expect(fetchWith([connector('1', '.datadog', true)])).resolves.toEqual([
-      { connectorId: '1', name: 'Connector 1', connectorTypeId: '.datadog' },
-    ]);
-  });
+    const result = await fetchImports(http, {
+      page: 2,
+      perPage: 25,
+      search: 'prod',
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
 
-  it('drops connectors with inbound events turned off', async () => {
-    await expect(fetchWith([connector('1', '.datadog', false)])).resolves.toEqual([]);
-  });
-
-  it('drops connectors without the flag, as when inbound events are disabled in the config', async () => {
-    await expect(fetchWith([connector('1', '.datadog')])).resolves.toEqual([]);
-  });
-
-  it('excludes custom webhooks', async () => {
-    await expect(
-      fetchWith([connector('1', '.inboundWebhook', true), connector('2', '.datadog', true)])
-    ).resolves.toEqual([{ connectorId: '2', name: 'Connector 2', connectorTypeId: '.datadog' }]);
+    expect(http.get).toHaveBeenCalledWith(ALERTING_V2_INTERNAL_EXTERNAL_SOURCE_API_PATH, {
+      query: expect.objectContaining({
+        page: 2,
+        per_page: 25,
+        search: 'prod',
+        sort_field: 'name',
+        sort_order: 'asc',
+      }),
+    });
+    expect(result).toEqual({
+      items: [
+        { id: 'import-1', name: 'Datadog production', type: 'datadog', connectorId: 'connector-1' },
+      ],
+      total: 30,
+    });
   });
 });
