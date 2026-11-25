@@ -92,7 +92,7 @@ const formatDashboardPanelAttachment = ({
         `[{ id: ${quotedPanelId}, content: ${getEditContent(panelType)} }]`
       )}.`
     : `It cannot be edited: read its config in the dashboard attachment to answer questions about it or its data. To recreate it as an editable ES|QL chart, once the user agrees, first ${generateCall(
-        '[{ id: <a new id>, content: { type: "vis", query: <the chart>, chartType: <its chart type> } }]'
+        '[{ id: <a new id>, section: <the original panel\'s section id, if it is in one>, content: { type: "vis", query: <the chart>, chartType: <its chart type> } }]'
       )}. Only once that call added the new panel, remove the original in another call: call \`${
         dashboardTools.generateDashboard
       }\` with \`dashboardId: ${quotedDashboardId}\` and \`remove: [${quotedPanelId}]\`.`;
