@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Edge } from '@xyflow/react';
 import type { EdgeBranchType } from '@kbn/workflows';
 
 /** Data carried by `workflowEdge` edges (written by `useWorkflowLayout` and the canvas). */
@@ -15,6 +16,8 @@ export interface WorkflowEdgeData extends Record<string, unknown> {
   readonly traversed?: boolean;
   /** Switch bus routing marker — present on all case/default edges of a switch node. */
   readonly branchType?: EdgeBranchType;
+  /** Position of this edge among its fork's branches (switch cases, parallel branches). */
+  readonly branchIndex?: number;
   /**
    * True when this edge participates in any fan-in (multiple predecessors
    * converging on the same target). Routes the edge on the merge bus
@@ -36,6 +39,9 @@ export interface WorkflowEdgeData extends Record<string, unknown> {
   /** Draw the stroke in when a step was just inserted (insert layout animation). */
   readonly drawIn?: boolean;
 }
+
+/** A React Flow edge carrying {@link WorkflowEdgeData}. */
+export type WorkflowEdge = Edge<WorkflowEdgeData>;
 
 /** Data carried by `bypassLane` nodes. */
 export interface WorkflowBypassLaneData extends Record<string, unknown> {

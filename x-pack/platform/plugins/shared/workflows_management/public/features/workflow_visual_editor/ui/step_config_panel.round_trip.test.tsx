@@ -12,7 +12,7 @@ import { parseDocument } from 'yaml';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { StepConfigPanel } from './step_config_panel';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 
 jest.mock('@kbn/code-editor', () =>
@@ -101,10 +101,6 @@ const renderPanel = (initialFragment = FRAGMENT) => {
 };
 
 describe('StepConfigPanel values round trip', () => {
-  beforeEach(() => {
-    resetStepConfigPanelSessionStateForTests();
-  });
-
   describe('what each kind shows for a stored value', () => {
     it('text', () => {
       renderPanel();

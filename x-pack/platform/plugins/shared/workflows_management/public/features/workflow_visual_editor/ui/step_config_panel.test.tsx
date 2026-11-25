@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
 import { z } from '@kbn/zod/v4';
-import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { StepConfigPanel } from './step_config_panel';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
 
@@ -54,17 +54,6 @@ jest.mock('../model/use_step_output_samples', () => ({
 }));
 jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
   StepIcon: () => <span data-test-subj="mocked-step-icon" />,
-}));
-
-jest.mock('../../actions_menu_popover', () => ({
-  ActionsMenu: ({ rootTitle, onClose }: { rootTitle?: string; onClose?: () => void }) => (
-    <div data-test-subj="actionsMenuCompact">
-      <span>{rootTitle}</span>
-      <button type="button" onClick={onClose}>
-        {'close'}
-      </button>
-    </div>
-  ),
 }));
 
 const connectors: ConnectorContractUnion[] = [
@@ -133,9 +122,6 @@ const expandSettingsAccordion = () => {
 };
 
 describe('StepConfigPanel', () => {
-  beforeEach(() => {
-    resetStepConfigPanelSessionStateForTests();
-  });
   it('renders the instance name as the title', () => {
     renderPanel();
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('notify');

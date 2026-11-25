@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Document, isMap, isPair, isScalar, isSeq, parseDocument } from 'yaml';
-import type { Node, Scalar, YAMLMap, YAMLSeq } from 'yaml';
+import { Document, isMap, isPair, isScalar, isSeq, parseDocument, YAMLMap, YAMLSeq } from 'yaml';
+import type { Node, Pair } from 'yaml';
 import type { BranchSlot } from '@kbn/workflows';
 import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
 import { detectIndent } from '@kbn/workflows-yaml';
@@ -18,13 +18,32 @@ import { detectIndent } from '@kbn/workflows-yaml';
  * Document is the only model: callers dispatch the result straight back into
  * the editor's `yamlString`.
  */
-export interface MutationResult {
-  readonly success: boolean;
-  readonly yaml: string;
-  readonly error?: string;
-}
 
-const fail = (yaml: string, error: string): MutationResult => ({ success: false, yaml, error });
+/**
+ * Why a mutation could not be applied. Carries a machine-readable `code` plus the data a UI needs
+ * to build a translated message; `detail` is the YAML library's own (untranslated) parse message.
+ */
+export type MutationError =
+  | { readonly code: 'yaml-parse-error'; readonly detail: string }
+  | { readonly code: 'yaml-root-not-mapping' }
+  | { readonly code: 'fragment-parse-error'; readonly detail: string }
+  | { readonly code: 'fragment-not-mapping' }
+  | { readonly code: 'step-not-found'; readonly stepName: string }
+  | { readonly code: 'trigger-not-found'; readonly triggerIndex: number }
+  | { readonly code: 'branch-not-found'; readonly index: number }
+  | { readonly code: 'branch-not-map'; readonly index: number }
+  | { readonly code: 'cases-missing' }
+  | { readonly code: 'case-not-found'; readonly index: number };
+
+export type MutationResult =
+  | { readonly success: true; readonly yaml: string }
+  | { readonly success: false; readonly yaml: string; readonly error: MutationError };
+
+const fail = (yaml: string, error: MutationError): MutationResult => ({
+  success: false,
+  yaml,
+  error,
+});
 
 /**
  * Forces block style on a step/trigger sequence. A fresh workflow starts with
@@ -42,27 +61,45 @@ const asBlockSeq = (seq: YAMLSeq): YAMLSeq => {
 
 const serialize = (doc: Document, indent: number): string => doc.toString({ indent, lineWidth: 0 });
 
-const parse = (yaml: string): { doc: Document; error?: string } => {
+type ParsedDocument =
+  | { readonly success: true; readonly doc: Document }
+  | { readonly success: false; readonly error: MutationError };
+
+const parse = (yaml: string): ParsedDocument => {
   const doc = parseDocument(yaml);
   if (doc.errors.length > 0) {
-    return { doc, error: `YAML parse errors: ${doc.errors[0].message}` };
+    return { success: false, error: { code: 'yaml-parse-error', detail: doc.errors[0].message } };
   }
   if (doc.contents !== null && !isMap(doc.contents)) {
-    return { doc, error: 'YAML root is not a mapping' };
+    return { success: false, error: { code: 'yaml-root-not-mapping' } };
   }
-  return { doc };
+  return { success: true, doc };
 };
 
+type ParsedFragment =
+  | { readonly success: true; readonly node: YAMLMap }
+  | { readonly success: false; readonly error: MutationError };
+
 /** Parses a single step fragment (`name: …\ntype: …`) into a map node. */
-const parseStepFragment = (fragment: string): { node?: YAMLMap; error?: string } => {
+const parseStepFragment = (fragment: string): ParsedFragment => {
   const doc = parseDocument(fragment);
   if (doc.errors.length > 0) {
-    return { error: `Step YAML has errors: ${doc.errors[0].message}` };
+    return {
+      success: false,
+      error: { code: 'fragment-parse-error', detail: doc.errors[0].message },
+    };
   }
   if (!isMap(doc.contents)) {
-    return { error: 'Step YAML must be a mapping' };
+    return { success: false, error: { code: 'fragment-not-mapping' } };
   }
-  return { node: doc.contents };
+  return { success: true, node: doc.contents };
+};
+
+/** The key of a map entry when it is a plain string scalar (numeric/boolean keys are not). */
+const stringKeyOf = (pair: Pair): string | undefined => {
+  if (!isScalar(pair.key)) return undefined;
+  const { value } = pair.key;
+  return typeof value === 'string' ? value : undefined;
 };
 
 const STEP_CHILD_CONTAINER_KEY_SET: ReadonlySet<string> = new Set(STEP_CHILD_CONTAINER_KEYS);
@@ -87,6 +124,7 @@ interface StepLocation {
   readonly onFailureOwner?: YAMLMap;
 }
 
+/** Read-only: never normalises the nodes it walks (see `locateStepForWrite`). */
 const findStepInNode = (
   node: unknown,
   stepName: string,
@@ -96,7 +134,7 @@ const findStepInNode = (
     for (let index = 0; index < node.items.length; index++) {
       const item = node.items[index];
       if (isMap(item) && item.get('name') === stepName) {
-        return { seq: asBlockSeq(node), index, node: item, onFailureOwner };
+        return { seq: node, index, node: item, onFailureOwner };
       }
       const found = findStepInNode(item, stepName, onFailureOwner);
       if (found) return found;
@@ -104,21 +142,17 @@ const findStepInNode = (
     return null;
   }
   if (isMap(node)) {
-    const nestedPairs = node.items.filter(
-      (pair) =>
-        isPair(pair) &&
-        isScalar(pair.key) &&
-        STEP_CHILD_CONTAINER_KEY_SET.has(pair.key.value as string)
-    );
-    for (const pair of nestedPairs) {
-      const key = (pair.key as Scalar).value as string;
-      const isFailureBlock = key === 'on-failure' || key === 'iteration-on-failure';
-      const owner = isFailureBlock && isMap(pair.value) ? pair.value : undefined;
-      const lists = isFailureBlock ? [owner?.get('fallback')] : stepListsUnder(key, pair.value);
-      const fallbackOwner = isFailureBlock ? owner : key === 'fallback' ? node : undefined;
-      for (const list of lists) {
-        const found = findStepInNode(list, stepName, fallbackOwner);
-        if (found) return found;
+    for (const pair of node.items) {
+      const key = stringKeyOf(pair);
+      if (key !== undefined && STEP_CHILD_CONTAINER_KEY_SET.has(key)) {
+        const isFailureBlock = key === 'on-failure' || key === 'iteration-on-failure';
+        const owner = isFailureBlock && isMap(pair.value) ? pair.value : undefined;
+        const lists = isFailureBlock ? [owner?.get('fallback')] : stepListsUnder(key, pair.value);
+        const fallbackOwner = isFailureBlock ? owner : key === 'fallback' ? node : undefined;
+        for (const list of lists) {
+          const found = findStepInNode(list, stepName, fallbackOwner);
+          if (found) return found;
+        }
       }
     }
   }
@@ -130,10 +164,23 @@ const locateStep = (doc: Document, stepName: string): StepLocation | null => {
   return findStepInNode(doc.contents.get('steps'), stepName);
 };
 
-/** Collects every step name in the document (any nesting), for unique-name generation. */
-export const collectStepNames = (yaml: string): Set<string> => {
+/**
+ * `locateStep` for write paths: forces block style on the sequence that holds the step (see
+ * `asBlockSeq`) so the splice/replace that follows renders readably. Read paths use `locateStep`.
+ */
+const locateStepForWrite = (doc: Document, stepName: string): StepLocation | null => {
+  const location = locateStep(doc, stepName);
+  if (location) asBlockSeq(location.seq);
+  return location;
+};
+
+/**
+ * Collects the trimmed, non-empty name of every step in the document (any nesting), for
+ * unique-name generation. Trims like `collect_step_names.ts` so both agree on a collision.
+ */
+export const collectStepNamesFromYaml = (yaml: string): ReadonlySet<string> => {
   const names = new Set<string>();
-  const { doc } = parse(yaml);
+  const doc = parseDocument(yaml);
   const walk = (node: unknown) => {
     if (isSeq(node)) {
       node.items.forEach(walk);
@@ -141,10 +188,10 @@ export const collectStepNames = (yaml: string): Set<string> => {
     }
     if (!isMap(node)) return;
     const name = node.get('name');
-    if (typeof name === 'string') names.add(name);
+    if (typeof name === 'string' && name.trim()) names.add(name.trim());
     for (const pair of node.items) {
-      const key = isPair(pair) && isScalar(pair.key) ? (pair.key.value as string) : undefined;
-      if (key && STEP_CHILD_CONTAINER_KEY_SET.has(key))
+      const key = stringKeyOf(pair);
+      if (key !== undefined && STEP_CHILD_CONTAINER_KEY_SET.has(key))
         stepListsUnder(key, pair.value).forEach(walk);
     }
   };
@@ -162,13 +209,11 @@ export const uniqueStepName = (base: string, taken: ReadonlySet<string>): string
 };
 
 const ensureTopLevelSeq = (doc: Document, key: 'steps' | 'triggers'): YAMLSeq => {
-  if (!isMap(doc.contents)) {
-    doc.contents = doc.createNode({}) as YAMLMap;
-  }
-  const root = doc.contents as YAMLMap;
+  const root = isMap(doc.contents) ? doc.contents : new YAMLMap();
+  doc.contents = root;
   const existing = root.get(key);
   if (isSeq(existing)) return asBlockSeq(existing);
-  const seq = doc.createNode([]) as YAMLSeq;
+  const seq = new YAMLSeq();
   root.set(key, seq);
   return seq;
 };
@@ -178,13 +223,13 @@ const ensureTopLevelSeq = (doc: Document, key: 'steps' | 'triggers'): YAMLSeq =>
  * Used when inserting the first step (clicking the flow port on a trigger — `mode: 'prepend-step'`).
  */
 export const prependStep = (yaml: string, stepFragment: string): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const { node, error: fragmentError } = parseStepFragment(stepFragment);
-  if (!node) return fail(yaml, fragmentError ?? 'Invalid step');
-  const seq = ensureTopLevelSeq(doc, 'steps');
-  seq.items.unshift(node);
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const fragment = parseStepFragment(stepFragment);
+  if (!fragment.success) return fail(yaml, fragment.error);
+  const seq = ensureTopLevelSeq(parsed.doc, 'steps');
+  seq.items.unshift(fragment.node);
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };
 
 /**
@@ -197,61 +242,57 @@ export const insertStepAfterName = (
   stepFragment: string,
   anchorStepName: string
 ): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const { node, error: fragmentError } = parseStepFragment(stepFragment);
-  if (!node) return fail(yaml, fragmentError ?? 'Invalid step');
-  const location = locateStep(doc, anchorStepName);
-  if (!location) return fail(yaml, `Step "${anchorStepName}" not found`);
-  location.seq.items.splice(location.index + 1, 0, node);
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const fragment = parseStepFragment(stepFragment);
+  if (!fragment.success) return fail(yaml, fragment.error);
+  const location = locateStepForWrite(parsed.doc, anchorStepName);
+  if (!location) return fail(yaml, { code: 'step-not-found', stepName: anchorStepName });
+  location.seq.items.splice(location.index + 1, 0, fragment.node);
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };
 
+type ResolvedBranch =
+  | { readonly success: true; readonly seq: YAMLSeq }
+  | { readonly success: false; readonly error: MutationError };
+
 /** Resolves the target YAMLSeq for a `BranchSlot` on the given step map. */
-const resolveBranchSeq = (
-  doc: Document,
-  ownerNode: YAMLMap,
-  slot: BranchSlot
-): { seq?: YAMLSeq; error?: string } => {
-  const ensureSeq = (key: string): YAMLSeq => {
-    const existing = ownerNode.get(key);
-    if (isSeq(existing)) return asBlockSeq(existing);
-    const created = doc.createNode([]) as YAMLSeq;
-    ownerNode.set(key, created);
-    return created;
+const resolveBranchSeq = (ownerNode: YAMLMap, slot: BranchSlot): ResolvedBranch => {
+  const ensureSeqIn = (container: YAMLMap, key: string): ResolvedBranch => {
+    const existing = container.get(key);
+    if (isSeq(existing)) return { success: true, seq: asBlockSeq(existing) };
+    const created = new YAMLSeq();
+    container.set(key, created);
+    return { success: true, seq: created };
   };
 
   switch (slot.kind) {
     case 'steps':
-      return { seq: ensureSeq('steps') };
+      return ensureSeqIn(ownerNode, 'steps');
     case 'else':
-      return { seq: ensureSeq('else') };
+      return ensureSeqIn(ownerNode, 'else');
     case 'default':
-      return { seq: ensureSeq('default') };
+      return ensureSeqIn(ownerNode, 'default');
     case 'branch': {
       const branches = ownerNode.get('branches');
-      if (!isSeq(branches) || slot.index >= branches.items.length) {
-        return { error: `Branch index ${slot.index} not found` };
+      if (!isSeq(branches) || slot.index < 0 || slot.index >= branches.items.length) {
+        return { success: false, error: { code: 'branch-not-found', index: slot.index } };
       }
       const branchWrapper = branches.items[slot.index];
-      if (!isMap(branchWrapper)) return { error: `Branch ${slot.index} is not a map` };
-      const existing = branchWrapper.get('steps');
-      if (isSeq(existing)) return { seq: asBlockSeq(existing) };
-      const created = doc.createNode([]) as YAMLSeq;
-      branchWrapper.set('steps', created);
-      return { seq: created };
+      if (!isMap(branchWrapper)) {
+        return { success: false, error: { code: 'branch-not-map', index: slot.index } };
+      }
+      return ensureSeqIn(branchWrapper, 'steps');
     }
     case 'case': {
       const cases = ownerNode.get('cases');
-      if (!isSeq(cases)) return { error: 'No cases array on step' };
+      if (!isSeq(cases)) return { success: false, error: { code: 'cases-missing' } };
       // Look up by index (robust against duplicate or empty match values).
       const caseItem = cases.items[slot.index];
-      if (!isMap(caseItem)) return { error: `Case index ${slot.index} not found` };
-      const existing = caseItem.get('steps');
-      if (isSeq(existing)) return { seq: asBlockSeq(existing) };
-      const created = doc.createNode([]) as YAMLSeq;
-      caseItem.set('steps', created);
-      return { seq: created };
+      if (!isMap(caseItem)) {
+        return { success: false, error: { code: 'case-not-found', index: slot.index } };
+      }
+      return ensureSeqIn(caseItem, 'steps');
     }
   }
 };
@@ -270,32 +311,32 @@ export const insertStepIntoBranch = (
   slot: BranchSlot,
   position: 'start' | 'end' = 'end'
 ): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const { node, error: fragmentError } = parseStepFragment(stepFragment);
-  if (!node) return fail(yaml, fragmentError ?? 'Invalid step');
-  const location = locateStep(doc, ownerStepName);
-  if (!location) return fail(yaml, `Step "${ownerStepName}" not found`);
-  const { seq, error: branchError } = resolveBranchSeq(doc, location.node, slot);
-  if (!seq) return fail(yaml, branchError ?? 'Branch not found');
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const fragment = parseStepFragment(stepFragment);
+  if (!fragment.success) return fail(yaml, fragment.error);
+  const location = locateStepForWrite(parsed.doc, ownerStepName);
+  if (!location) return fail(yaml, { code: 'step-not-found', stepName: ownerStepName });
+  const branch = resolveBranchSeq(location.node, slot);
+  if (!branch.success) return fail(yaml, branch.error);
   if (position === 'start') {
-    seq.items.unshift(node);
+    branch.seq.items.unshift(fragment.node);
   } else {
-    seq.items.push(node);
+    branch.seq.items.push(fragment.node);
   }
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };
 
 /** Appends a trigger (YAML fragment, `type: …`) to `triggers`. */
 export const appendTrigger = (yaml: string, triggerFragment: string): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const { node, error: fragmentError } = parseStepFragment(triggerFragment);
-  if (!node) return fail(yaml, fragmentError ?? 'Invalid trigger');
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const fragment = parseStepFragment(triggerFragment);
+  if (!fragment.success) return fail(yaml, fragment.error);
 
-  const triggers = ensureTopLevelSeq(doc, 'triggers');
-  triggers.items.push(node);
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  const triggers = ensureTopLevelSeq(parsed.doc, 'triggers');
+  triggers.items.push(fragment.node);
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };
 
 /** How many triggers the YAML declares. */
@@ -307,17 +348,18 @@ export const countTriggers = (yaml: string): number => {
 
 /** Removes the trigger at declaration index `triggerIndex`. */
 export const deleteTrigger = (yaml: string, triggerIndex: number): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const { doc } = parsed;
   const triggers = isMap(doc.contents) ? doc.contents.get('triggers') : undefined;
   if (!isSeq(triggers) || triggerIndex < 0 || triggerIndex >= triggers.items.length) {
-    return fail(yaml, `Trigger #${triggerIndex} not found`);
+    return fail(yaml, { code: 'trigger-not-found', triggerIndex });
   }
   triggers.items.splice(triggerIndex, 1);
   if (triggers.items.length === 0 && isMap(doc.contents)) {
     doc.contents.delete('triggers');
   }
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };
 
 /** Extracts a trigger's YAML fragment (a mapping, comments included). */
@@ -343,17 +385,18 @@ export const replaceTriggerFragment = (
   triggerIndex: number,
   triggerFragment: string
 ): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const { doc } = parsed;
   const triggers = isMap(doc.contents) ? doc.contents.get('triggers') : undefined;
   if (!isSeq(triggers) || triggerIndex < 0 || triggerIndex >= triggers.items.length) {
-    return fail(yaml, `Trigger #${triggerIndex} not found`);
+    return fail(yaml, { code: 'trigger-not-found', triggerIndex });
   }
-  const { node, error: fragmentError } = parseStepFragment(triggerFragment);
-  if (!node) return fail(yaml, fragmentError ?? 'Invalid trigger');
+  const fragment = parseStepFragment(triggerFragment);
+  if (!fragment.success) return fail(yaml, fragment.error);
 
-  triggers.items[triggerIndex] = node;
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  triggers.items[triggerIndex] = fragment.node;
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };
 
 /**
@@ -365,18 +408,19 @@ export const setStepFallback = (
   stepName: string,
   stepFragment: string
 ): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const location = locateStep(doc, stepName);
-  if (!location) return fail(yaml, `Step "${stepName}" not found`);
-  const { node: fallbackStep, error: fragmentError } = parseStepFragment(stepFragment);
-  if (!fallbackStep) return fail(yaml, fragmentError ?? 'Invalid step');
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const { doc } = parsed;
+  const location = locateStepForWrite(doc, stepName);
+  if (!location) return fail(yaml, { code: 'step-not-found', stepName });
+  const fragment = parseStepFragment(stepFragment);
+  if (!fragment.success) return fail(yaml, fragment.error);
 
   const existing = location.node.get('on-failure');
-  const onFailure = isMap(existing) ? existing : (doc.createNode({}) as YAMLMap);
-  onFailure.set('fallback', doc.createNode([fallbackStep]));
+  const onFailure = isMap(existing) ? existing : new YAMLMap();
+  onFailure.set('fallback', doc.createNode([fragment.node]));
   if (!isMap(existing)) location.node.set('on-failure', onFailure);
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };
 
 /**
@@ -384,10 +428,11 @@ export const setStepFallback = (
  * the step is a fallback step, its parent's error route is cleared instead.
  */
 export const deleteStepByName = (yaml: string, stepName: string): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const location = locateStep(doc, stepName);
-  if (!location) return fail(yaml, `Step "${stepName}" not found`);
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const { doc } = parsed;
+  const location = locateStepForWrite(doc, stepName);
+  if (!location) return fail(yaml, { code: 'step-not-found', stepName });
 
   location.seq.items.splice(location.index, 1);
 
@@ -398,7 +443,7 @@ export const deleteStepByName = (yaml: string, stepName: string): MutationResult
       removeChildMap(doc, onFailureOwner);
     }
   }
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };
 
 /** Removes the pair whose value is `target` from whichever map owns it. */
@@ -451,13 +496,13 @@ export const replaceStepFragment = (
   stepName: string,
   stepFragment: string
 ): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const location = locateStep(doc, stepName);
-  if (!location) return fail(yaml, `Step "${stepName}" not found`);
-  const { node, error: fragmentError } = parseStepFragment(stepFragment);
-  if (!node) return fail(yaml, fragmentError ?? 'Invalid step');
+  const parsed = parse(yaml);
+  if (!parsed.success) return fail(yaml, parsed.error);
+  const location = locateStepForWrite(parsed.doc, stepName);
+  if (!location) return fail(yaml, { code: 'step-not-found', stepName });
+  const fragment = parseStepFragment(stepFragment);
+  if (!fragment.success) return fail(yaml, fragment.error);
 
-  location.seq.items[location.index] = node;
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+  location.seq.items[location.index] = fragment.node;
+  return { success: true, yaml: serialize(parsed.doc, detectIndent(yaml)) };
 };

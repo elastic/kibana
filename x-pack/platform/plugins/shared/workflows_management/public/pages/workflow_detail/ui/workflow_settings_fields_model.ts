@@ -158,20 +158,21 @@ export const constantsToYamlRecord = (
   fields: readonly ConstantField[],
   existing: Record<string, unknown> = {}
 ): Record<string, unknown> | undefined => {
-  const record: Record<string, unknown> = {};
+  const entries: Array<[string, unknown]> = [];
   for (const field of fields) {
     const name = field.name.trim();
     if (name) {
       const inYaml = hasOwn(existing, name);
       const coerced = coerceConstantValue(field.type, field.value);
       if (inYaml && (isUnedited(field, existing[name]) || !coerced.ok)) {
-        record[name] = existing[name];
+        entries.push([name, existing[name]]);
       } else if (coerced.ok) {
-        record[name] = coerced.value;
+        entries.push([name, coerced.value]);
       }
     }
   }
-  return Object.keys(record).length > 0 ? record : undefined;
+  // `Object.fromEntries` defines own properties, so a name like `__proto__` cannot alter the prototype.
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
 };
 
 export const parseOutputsToFields = (outputs: unknown): OutputField[] => {

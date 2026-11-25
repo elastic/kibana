@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { filterOptionsForInsertionContext } from './filter_options_for_insertion_context';
+import {
+  filterOptionsForInsertionContext,
+  omitDisabledTriggers,
+} from './filter_options_for_insertion_context';
 import type { ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
@@ -41,12 +44,18 @@ describe('filterOptionsForInsertionContext', () => {
     expect(result[0].id).toBe('manual');
   });
 
-  it('hides disabled trigger ids in trigger mode', () => {
-    const result = filterOptionsForInsertionContext(options, {
-      mode: 'trigger',
-      disabledTriggerIds: ['manual'],
-    });
-    expect(result).toEqual([]);
+  it('hides disabled trigger ids once omitDisabledTriggers is applied, in every mode', () => {
+    const withoutManual = omitDisabledTriggers(options, ['manual']);
+    expect(filterOptionsForInsertionContext(withoutManual, { mode: 'trigger' })).toEqual([]);
+
+    const triggers = withoutManual.find((o) => o.id === 'triggers');
+    expect(triggers && isActionGroup(triggers) ? triggers.options : undefined).toEqual([]);
+    expect(withoutManual.map((o) => o.id)).toEqual(['triggers', 'elasticsearch', 'flowControl']);
+  });
+
+  it('returns the options unchanged when no trigger id is disabled', () => {
+    expect(omitDisabledTriggers(options, undefined)).toBe(options);
+    expect(omitDisabledTriggers(options, [])).toBe(options);
   });
 
   it('hides triggers for step mode but keeps flow control', () => {

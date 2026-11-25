@@ -99,13 +99,7 @@ export const GRAPH_REBUILD_FIXTURES = defineFixtures({
   data_transforms: {
     file: 'data_transforms.yaml',
     timeoutMs: FIVE_MINUTES,
-    knownGaps: [
-      {
-        key: 'members_by_team | with.fields | different',
-        reason:
-          'A `$map` directive has no form control (the key/value cell is YAML-only for it), so the object is stored as a JSON string.',
-      },
-    ],
+    knownGaps: [],
   },
 });
 

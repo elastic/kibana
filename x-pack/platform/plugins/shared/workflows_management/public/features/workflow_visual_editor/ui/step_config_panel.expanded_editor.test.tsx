@@ -12,7 +12,7 @@ import { parseDocument } from 'yaml';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { StepConfigPanel } from './step_config_panel';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 
 jest.mock('@kbn/code-editor', () =>
@@ -85,10 +85,6 @@ const expandField = (key: string) => {
 };
 
 describe('StepConfigPanel expanded editor', () => {
-  beforeEach(() => {
-    resetStepConfigPanelSessionStateForTests();
-  });
-
   describe('a JSON field', () => {
     it('keeps the text as typed while the value it stands for is written to the step', () => {
       const { written } = renderPanel();

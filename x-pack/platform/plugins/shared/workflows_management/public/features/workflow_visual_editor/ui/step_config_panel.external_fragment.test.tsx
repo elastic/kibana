@@ -12,7 +12,7 @@ import { parseDocument } from 'yaml';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { StepConfigPanel } from './step_config_panel';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 
 jest.mock('@kbn/code-editor', () =>
@@ -95,10 +95,6 @@ const renderPanel = () => {
 };
 
 describe('StepConfigPanel with the step changed from outside (undo, YAML tab)', () => {
-  beforeEach(() => {
-    resetStepConfigPanelSessionStateForTests();
-  });
-
   it('shows the values the step now has', () => {
     const { sync } = renderPanel();
     sync('name: sample\ntype: sample\nwith:\n  text: from undo\n  count: 9\n');

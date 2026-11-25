@@ -58,6 +58,7 @@ import {
   getStepFormSchema,
   isEmptyFieldValue,
   type StepFormField,
+  stepNameField,
 } from '../lib/step_form_schema';
 
 ensureWorkflowGraphEuiIcons();
@@ -127,6 +128,12 @@ export interface StepConfigPanelProps {
    */
   readonly onExpandedChange?: (expanded: boolean) => void;
   /**
+   * Open state of the Settings accordion, owned by the shell so it survives the panel remounting
+   * when another step is picked. The panel keeps its own state when this is omitted.
+   */
+  readonly settingsOpen?: boolean;
+  readonly onSettingsOpenChange?: (open: boolean) => void;
+  /**
    * Fires on every draft change with the current fragment string — the
    * stateful shell live-applies each valid edit straight to the YAML.
    */
@@ -150,20 +157,33 @@ export interface StepConfigPanelProps {
   readonly onOpenInYaml?: () => void;
 }
 
-/** The step's name, edited in the header and written as any other form key. */
-const STEP_NAME_FIELD: StepFormField = {
-  key: 'name',
-  path: ['name'],
-  label: 'Step name',
-  required: true,
-  kind: 'text',
-};
-
 /** Keeps a `<fieldset>` (used to disable its controls) from drawing a border or resizing. */
 const FIELDSET_RESET_CSS = { border: 0, margin: 0, padding: 0, minWidth: 0 } as const;
 
 /** Builder form vs full-step YAML — same axis as the canvas bottom-bar toggle. */
 type ParametersMode = 'form' | 'yaml';
+
+interface CatalogMetadata {
+  readonly summary?: string | null;
+  readonly displayName?: string;
+  readonly description?: string | null;
+}
+
+/** The descriptive fields of a connector contract; each is present on some members of the union only. */
+const readCatalogMetadata = (connector: ConnectorContractUnion | undefined): CatalogMetadata => {
+  if (!connector) return {};
+  return {
+    summary: 'summary' in connector ? connector.summary : undefined,
+    displayName:
+      'displayName' in connector && typeof connector.displayName === 'string'
+        ? connector.displayName
+        : undefined,
+    description:
+      'description' in connector && typeof connector.description === 'string'
+        ? connector.description
+        : undefined,
+  };
+};
 
 /** Catalog display name — same label the Actions menu shows. */
 const resolveCatalogLabel = (
@@ -172,36 +192,20 @@ const resolveCatalogLabel = (
   actionLabel?: string
 ): string => {
   const builtIn = getBuiltInStepDefinition(stepType);
-  const connector = connectors.find((c) => c.type === stepType) as
-    | (ConnectorContractUnion & {
-        summary?: string | null;
-        displayName?: string;
-        description?: string | null;
-      })
-    | undefined;
+  const connector = connectors.find((c) => c.type === stepType);
+  const { summary, displayName, description } = readCatalogMetadata(connector);
   return resolveCatalogDisplayName({
     type: stepType,
     actionLabel,
     builtInLabel: builtIn?.label,
-    summary: connector?.summary,
-    displayName: connector?.displayName,
-    description: connector?.description,
+    summary,
+    displayName,
+    description,
   });
 };
 
 /** For a row whose field has no sub-fields (only a `variants` field renders any). */
 const renderNoSubFields = (): React.ReactElement => <></>;
-
-/**
- * Settings accordion open state for the lifetime of this page. Survives panel
- * remounts when switching steps; resets when the document unloads.
- */
-let settingsAccordionOpenForPage = false;
-
-/** @internal clears page-session accordion state between Jest cases. */
-export function resetStepConfigPanelSessionStateForTests(): void {
-  settingsAccordionOpenForPage = false;
-}
 
 export function StepConfigPanel({
   mode,
@@ -217,6 +221,8 @@ export function StepConfigPanel({
   isFallbackStep = false,
   onExpandedChange,
   onFragmentChange,
+  settingsOpen: settingsOpenProp,
+  onSettingsOpenChange,
   onYamlEditorMount,
   runControls,
   syncedFragment,
@@ -248,19 +254,21 @@ export function StepConfigPanel({
     [workflowDefinition]
   );
 
+  const nameField = useMemo(() => stepNameField(), []);
   const committedStepName = typeof parsed.js?.name === 'string' ? parsed.js.name.trim() : '';
   const nameEditor = useStepNameEditor({
     committedName: committedStepName,
     siblingStepNames,
     onCommit: useCallback(
       (name: string) =>
-        setFragment((current) => writeFragmentValue(current, STEP_NAME_FIELD, name, indent)),
-      [indent]
+        setFragment((current) => writeFragmentValue(current, nameField, name, indent)),
+      [indent, nameField]
     ),
   });
-  const { reset: resetNameEditor, revert: revertNameEditor, error: nameError } = nameEditor;
+  const { revert: revertNameEditor, error: nameError } = nameEditor;
 
-  const [settingsOpen, setSettingsOpen] = useState(settingsAccordionOpenForPage);
+  const [localSettingsOpen, setLocalSettingsOpen] = useState(false);
+  const settingsOpen = settingsOpenProp ?? localSettingsOpen;
   /** Field currently open in the expanded editor (depth ≤ 2). */
   const [expandedField, setExpandedField] = useState<StepFormField | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -282,10 +290,13 @@ export function StepConfigPanel({
     onFragmentChange?.(fragment);
   }, [fragment, onFragmentChange, readOnly]);
 
-  const handleSettingsToggle = useCallback((isOpen: boolean) => {
-    settingsAccordionOpenForPage = isOpen;
-    setSettingsOpen(isOpen);
-  }, []);
+  const handleSettingsToggle = useCallback(
+    (isOpen: boolean) => {
+      setLocalSettingsOpen(isOpen);
+      onSettingsOpenChange?.(isOpen);
+    },
+    [onSettingsOpenChange]
+  );
 
   const [draftErrors, setDraftErrors] = useState<ReadonlyMap<string, string>>(() => new Map());
 
@@ -300,15 +311,6 @@ export function StepConfigPanel({
       return next;
     });
   }, []);
-
-  useEffect(() => {
-    setFragment(initialFragment);
-    setShowValidation(false);
-    setDraftErrors(new Map());
-    resetNameEditor();
-    setExpandedField(null);
-    setShowDiscardConfirm(false);
-  }, [initialFragment, resetNameEditor]);
 
   useEffect(() => {
     if (syncedFragment) setFragment(syncedFragment.fragment);
@@ -639,7 +641,6 @@ export function StepConfigPanel({
                       // the context covers the fields that are not (see `StepFormReadOnlyContext`).
                       <fieldset disabled={readOnly} css={FIELDSET_RESET_CSS}>
                         <StepForm
-                          key={initialFragment}
                           stepType={stepType}
                           fields={fields}
                           hasSchema={schema !== undefined}

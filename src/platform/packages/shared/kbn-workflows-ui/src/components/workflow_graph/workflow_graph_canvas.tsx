@@ -279,7 +279,11 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     pendingInsert,
   });
 
-  const { nodes: animatedNodes, edges: animatedEdges } = useInsertLayoutAnimation({
+  const {
+    nodes: animatedNodes,
+    edges: animatedEdges,
+    isSliding,
+  } = useInsertLayoutAnimation({
     nodes: nodesWithEditData,
     edges: layoutEdges,
     flashNodeId,
@@ -485,7 +489,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                   </div>
                 </Panel>
               )}
-              {!isEmptyWorkflow && edit && !suppressInsertionControls && (
+              {!isEmptyWorkflow && edit && !suppressInsertionControls && !isSliding && (
                 <WorkflowGraphEditOverlays
                   nodes={animatedNodes}
                   edges={animatedEdges}

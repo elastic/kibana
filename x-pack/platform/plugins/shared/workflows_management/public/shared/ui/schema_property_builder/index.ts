@@ -8,6 +8,7 @@
 export { SchemaPropertyList } from './schema_property_list';
 export type { SchemaPropertyListProps } from './schema_property_list';
 export { SchemaListDragClone } from './schema_list_drag_clone';
+export { schemaPropertyNameErrorMessage } from './schema_property_name_error_message';
 export {
   applyTypeChange,
   createEmptySchemaProperty,

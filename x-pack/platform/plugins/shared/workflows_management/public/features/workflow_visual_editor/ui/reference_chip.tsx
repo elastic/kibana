@@ -8,8 +8,8 @@
 import { EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
 import { LastRunHint } from './last_run_hint';
+import { ReferenceTypeIcon } from './reference_type_icon';
 import { toReferenceIconType } from '../lib/build_data_reference_catalog';
 import type { ReferenceChipTone } from '../lib/reference_chip_styles';
 import { getReferenceChipCss } from '../lib/reference_chip_styles';
@@ -54,7 +54,7 @@ export function ReferenceChip({
   const content = (
     <>
       <span aria-hidden css={{ display: 'inline-flex', flex: '0 0 auto' }}>
-        <FieldIcon type={toReferenceIconType(resolvedType)} color="gray" size="s" shape="square" />
+        <ReferenceTypeIcon type={toReferenceIconType(resolvedType)} color="gray" />
       </span>
       <span css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {expression}

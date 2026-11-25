@@ -26,6 +26,19 @@ describe('schema_property_model', () => {
       expect(validateSchemaPropertyName('alpha', [a, b], a.id)).toBeNull();
       expect(validateSchemaPropertyName('good_name', [a, b], 'x')).toBeNull();
     });
+
+    it('rejects __proto__ but allows other names that exist on Object.prototype', () => {
+      expect(validateSchemaPropertyName('__proto__', [], 'x')).toBe('reserved');
+      expect(validateSchemaPropertyName('  __proto__  ', [], 'x')).toBe('reserved');
+      expect(validateSchemaPropertyName('constructor', [], 'x')).toBeNull();
+      expect(validateSchemaPropertyName('toString', [], 'x')).toBeNull();
+    });
+
+    it('only needs the id and name of its siblings', () => {
+      expect(validateSchemaPropertyName('alpha', [{ id: 'a', name: 'alpha' }], 'x')).toBe(
+        'duplicate'
+      );
+    });
   });
 
   describe('type change', () => {
@@ -241,6 +254,45 @@ steps:
 `;
       expect(findStepsReferencingInput(yaml, 'hostname')).toEqual(['notify']);
       expect(findStepsReferencingInput(yaml, 'missing')).toEqual([]);
+    });
+  });
+
+  describe('schemaPropertiesToJsonSchema with names found on Object.prototype', () => {
+    it('keeps constructor, toString and __proto__ as own keys without touching the prototype', () => {
+      const names = ['constructor', 'toString', '__proto__'];
+      const schema = schemaPropertiesToJsonSchema(
+        names.map((name) => createEmptySchemaProperty({ name, required: true }))
+      );
+
+      const { properties, required } = schema;
+      expect(Object.getPrototypeOf(properties)).toBe(Object.prototype);
+      expect(Object.keys(properties ?? {})).toEqual(names);
+      names.forEach((name) => {
+        expect(Object.prototype.hasOwnProperty.call(properties, name)).toBe(true);
+      });
+      expect(required).toEqual(names);
+    });
+
+    it('round-trips such names through parse', () => {
+      const names = ['constructor', 'toString'];
+      const schema = schemaPropertiesToJsonSchema(
+        names.map((name) => createEmptySchemaProperty({ name }))
+      );
+      const parsed = parseInputsToSchemaProperties(schema);
+      expect(Array.isArray(parsed) ? parsed.map((field) => field.name) : parsed).toEqual(names);
+    });
+
+    it('keeps nested object properties with these names as own keys', () => {
+      const schema = schemaPropertiesToJsonSchema([
+        createEmptySchemaProperty({
+          name: 'parent',
+          type: 'object',
+          properties: [createEmptySchemaProperty({ name: '__proto__' })],
+        }),
+      ]);
+      const nested = schema.properties?.parent.properties;
+      expect(Object.keys(nested ?? {})).toEqual(['__proto__']);
+      expect(Object.getPrototypeOf(nested)).toBe(Object.prototype);
     });
   });
 });

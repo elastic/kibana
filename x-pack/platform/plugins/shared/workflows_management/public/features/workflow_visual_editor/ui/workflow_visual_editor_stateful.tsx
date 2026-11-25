@@ -6,7 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import type { ColorMode, Viewport } from '@xyflow/react';
+import type { ColorMode } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -25,6 +25,8 @@ import {
   type WorkflowYaml,
 } from '@kbn/workflows';
 import {
+  INSERT_FLASH_MS,
+  INSERT_LAYOUT_MS,
   type PendingInsertStepContext,
   type PendingInsertVisual,
   type RenderStepIcon,
@@ -37,10 +39,10 @@ import {
 import {
   CANVAS_CONFIG_PANEL_MARGIN,
   CanvasConfigPanelShell,
+  clampConfigPanelWidth,
   DEFAULT_CONFIG_PANEL_WIDTH,
   FIELD_EDITOR_EXPANDED_PANEL_WIDTH,
-  MIN_CONFIG_PANEL_WIDTH,
-  MIN_VISIBLE_CANVAS_PX,
+  getMaxConfigPanelWidth,
 } from './canvas_config_panel_shell';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { LastRunWorkflowIdProvider } from './last_run_hint';
@@ -86,10 +88,15 @@ import { getStepScope } from '../lib/get_step_scope';
 import { isStructuralFragmentChange } from '../lib/is_structural_fragment_change';
 import { resolveExternalStepFragment } from '../lib/resolve_external_step_fragment';
 import { rewriteStepReferences } from '../lib/rewrite_step_references';
-import { buildDefaultStep, getStepConfigWarningReason } from '../lib/step_form_schema';
+import {
+  buildDefaultStep,
+  getStepConfigWarningReason,
+  getStepFormSchema,
+} from '../lib/step_form_schema';
+import type { StepConfigWarningReason, StepFormSchema } from '../lib/step_form_schema';
 import {
   appendTrigger,
-  collectStepNames,
+  collectStepNamesFromYaml,
   countTriggers,
   deleteStepByName,
   deleteTrigger,
@@ -97,6 +104,7 @@ import {
   getTriggerFragment,
   insertStepAfterName,
   insertStepIntoBranch,
+  type MutationError,
   type MutationResult,
   prependStep,
   replaceStepFragment,
@@ -104,6 +112,60 @@ import {
   setStepFallback,
   uniqueStepName,
 } from '../lib/yaml_mutations';
+
+const getMutationErrorMessage = (error: MutationError): string => {
+  switch (error.code) {
+    case 'yaml-parse-error':
+      return i18n.translate('workflows.visualEditor.mutationError.yamlParseError', {
+        defaultMessage: 'The workflow YAML has errors: {detail}',
+        values: { detail: error.detail },
+      });
+    case 'yaml-root-not-mapping':
+      return i18n.translate('workflows.visualEditor.mutationError.yamlRootNotMapping', {
+        defaultMessage: 'The workflow YAML root must be a mapping.',
+      });
+    case 'fragment-parse-error':
+      return i18n.translate('workflows.visualEditor.mutationError.fragmentParseError', {
+        defaultMessage: 'The step YAML has errors: {detail}',
+        values: { detail: error.detail },
+      });
+    case 'fragment-not-mapping':
+      return i18n.translate('workflows.visualEditor.mutationError.fragmentNotMapping', {
+        defaultMessage: 'The step YAML must be a mapping.',
+      });
+    case 'step-not-found':
+      return i18n.translate('workflows.visualEditor.mutationError.stepNotFound', {
+        defaultMessage: 'Step "{stepName}" was not found.',
+        values: { stepName: error.stepName },
+      });
+    case 'trigger-not-found':
+      return i18n.translate('workflows.visualEditor.mutationError.triggerNotFound', {
+        defaultMessage: 'Trigger #{triggerIndex} was not found.',
+        values: { triggerIndex: error.triggerIndex },
+      });
+    case 'branch-not-found':
+      return i18n.translate('workflows.visualEditor.mutationError.branchNotFound', {
+        defaultMessage: 'Branch {index} was not found.',
+        values: { index: error.index },
+      });
+    case 'branch-not-map':
+      return i18n.translate('workflows.visualEditor.mutationError.branchNotMap', {
+        defaultMessage: 'Branch {index} is not a mapping.',
+        values: { index: error.index },
+      });
+    case 'cases-missing':
+      return i18n.translate('workflows.visualEditor.mutationError.casesMissing', {
+        defaultMessage: 'The step has no cases.',
+      });
+    case 'case-not-found':
+      return i18n.translate('workflows.visualEditor.mutationError.caseNotFound', {
+        defaultMessage: 'Case {index} was not found.',
+        values: { index: error.index },
+      });
+    default:
+      return assertNever(error);
+  }
+};
 
 function toColorMode(euiColorMode: string): ColorMode {
   switch (euiColorMode) {
@@ -124,26 +186,17 @@ interface WorkflowVisualEditorStatefulProps {
   /** Dagre rank direction for the graph layout. Defaults to `'TB'`. */
   direction?: LayoutDirection;
   /**
-   * Viewport to restore when the canvas mounts. The parent owns this value
-   * so it survives the unmount/remount that happens on YAML↔graph toggle.
-   */
-  defaultViewport?: Viewport;
-  /** Fired when the user pans or zooms; persist to restore on next mount. */
-  onViewportChange?: (viewport: Viewport) => void;
-  /**
    * Ref to the Monaco editor. When provided, ⌘Z / Ctrl+Z on the canvas
    * delegates to Monaco's undo stack (ADR-0005).
    */
   editorRef?: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
 }
 
-/** Floating read-only flyout inset from the canvas edges (top, right, bottom). */
+/** Gap between the floating config panel and the canvas edges (top, right, bottom). */
 const PANEL_MARGIN = CANVAS_CONFIG_PANEL_MARGIN;
-const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth.v3';
-const FLASH_MS = 900;
-const INSERT_LAYOUT_MS = 300;
+const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth';
 /** Slide subsequent nodes, then flash the inserted node border. */
-const FLASH_TOTAL_MS = INSERT_LAYOUT_MS + FLASH_MS;
+const FLASH_TOTAL_MS = INSERT_LAYOUT_MS + INSERT_FLASH_MS;
 
 interface InsertionState {
   readonly context: WorkflowGraphInsertionContext;
@@ -250,8 +303,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   onRunWorkflow,
   canRunStepDirectly,
   direction = 'TB',
-  defaultViewport,
-  onViewportChange,
   editorRef,
 }) => {
   const { colorMode } = useEuiTheme();
@@ -266,14 +317,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     typeof window !== 'undefined' ? window.innerWidth : DEFAULT_CONFIG_PANEL_WIDTH * 2
   );
   const [fieldEditorExpanded, setFieldEditorExpanded] = useState(false);
-  const maxPanelWidth = Math.max(
-    MIN_CONFIG_PANEL_WIDTH,
-    canvasWidth - MIN_VISIBLE_CANVAS_PX - PANEL_MARGIN * 2
-  );
-  const preferredPanelWidth = Math.min(
-    Math.max(storedPanelWidth, MIN_CONFIG_PANEL_WIDTH),
-    maxPanelWidth
-  );
+  // Kept here so the step panel's Settings accordion stays as the user left it across steps.
+  const [settingsAccordionOpen, setSettingsAccordionOpen] = useState(false);
+  const maxPanelWidth = getMaxConfigPanelWidth(canvasWidth);
+  const preferredPanelWidth = clampConfigPanelWidth(storedPanelWidth, canvasWidth);
   // Advanced editor needs room for the catalog + value pane; that width is
   // display-only so switching steps / closing the editor restores preferred.
   const panelWidth = fieldEditorExpanded
@@ -323,7 +370,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   );
   const [flashNodeId, setFlashNodeId] = useState<string | undefined>(undefined);
   const [pendingInsert, setPendingInsert] = useState<PendingInsertVisual | null>(null);
-  /** After a trigger insert's Done: clear the ghost on the next definition update (not eagerly). */
   // Refs so the live-apply callback (passed to StepConfigPanel, which calls
   // it on every draft keystroke) always reads fresh state without the
   // identity churn a useCallback dependency on yamlString/panel would cause.
@@ -417,18 +463,27 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const stepsByName = useMemo(() => collectStepsByName(workflow), [workflow]);
 
+  // Building a form schema walks the step's zod schemas and depends only on the step type and the
+  // connectors, so each type is built once per connector list instead of once per step per edit.
+  const schemaOfStepType = useMemo(() => {
+    const cache = new Map<string, StepFormSchema | undefined>();
+    return (stepType: string): StepFormSchema | undefined => {
+      if (!cache.has(stepType)) cache.set(stepType, getStepFormSchema(stepType, connectors));
+      return cache.get(stepType);
+    };
+  }, [connectors]);
   const nodeConfigWarnings = useMemo(() => {
     if (!canEdit) return undefined;
-    const warnings = new Map<string, NonNullable<ReturnType<typeof getStepConfigWarningReason>>>();
+    const warnings = new Map<string, StepConfigWarningReason>();
     Object.entries(transformed.nodeRefs).forEach(([nodeId, ref]) => {
       if (ref.kind !== 'step') return;
       const step = stepsByName.get(ref.stepName);
       if (!step) return;
-      const reason = getStepConfigWarningReason(step, connectors);
+      const reason = getStepConfigWarningReason(step, connectors, schemaOfStepType);
       if (reason) warnings.set(nodeId, reason);
     });
     return warnings;
-  }, [canEdit, transformed.nodeRefs, stepsByName, connectors]);
+  }, [canEdit, transformed.nodeRefs, stepsByName, connectors, schemaOfStepType]);
 
   const stepNameOf = useCallback(
     (nodeId: string): string | undefined => {
@@ -508,7 +563,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           title: i18n.translate('workflows.visualEditor.mutationFailed', {
             defaultMessage: 'Could not update the workflow',
           }),
-          text: result.error,
+          text: getMutationErrorMessage(result.error),
         });
         return false;
       }
@@ -575,7 +630,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (isTriggerType(stepType) || triggerSchemas.isRegisteredTriggerId(stepType)) {
         return { fragment: triggerFragmentFor(stepType) };
       }
-      const taken = collectStepNames(yamlString);
+      const taken = collectStepNamesFromYaml(yamlString);
       const name = uniqueStepName(`${stepType.replaceAll('.', '_')}_step`, taken);
       const step = buildDefaultStep(stepType, name, connectors);
       return { fragment: stringifyYaml(step, { lineWidth: 0 }), name };
@@ -586,8 +641,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   /**
    * Selecting an action for a step position writes the default step straight
    * into the YAML and opens the config panel in edit mode (origin 'insert') —
-   * every further edit live-applies the same way. Triggers keep the old
-   * draft-then-Done flow (unaffected by this change).
+   * every further edit live-applies the same way. Triggers are written the same way.
    */
   const handleInsertAction = useCallback(
     (action: ActionOptionData) => {
@@ -661,7 +715,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       const newName = typeof nameValue === 'string' ? nameValue.trim() : '';
       if (!newName) return;
       const isRename = newName !== current.stepName;
-      if (isRename && collectStepNames(yamlStringRef.current).has(newName)) return;
+      if (isRename && collectStepNamesFromYaml(yamlStringRef.current).has(newName)) return;
       // Edits to the step's own settings (`with`, `if`, `timeout`, ...) leave the graph as it is, so
       // they wait for the computation debounce instead of recomputing on every keystroke.
       const isStructural = isStructuralFragmentChange(lastAppliedStepFragmentRef.current, fragment);
@@ -1055,13 +1109,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setEditorView('yaml');
   }, [dispatch, panel, setEditorView]);
 
-  const handleStepSelect = useCallback(
-    (id: string | undefined) => {
-      requestStepSelect(id);
-    },
-    [requestStepSelect]
-  );
-
   const handleStepRun = useCallback(
     (stepName: string) => onStepRun?.({ stepId: stepName, actionType: 'run' }),
     [onStepRun]
@@ -1123,14 +1170,12 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         isYamlValid={isYamlValid}
         selectedStepId={selectedStepId}
         selectedNodePanelInset={floatingPanelOpen ? panelWidth + PANEL_MARGIN : undefined}
-        onStepSelect={handleStepSelect}
+        onStepSelect={requestStepSelect}
         colorMode={toColorMode(colorMode)}
         direction={direction}
         renderStepIcon={renderStepIcon}
         onStepRun={handleStepRun}
         canRunSteps={canRunSteps}
-        defaultViewport={defaultViewport}
-        onViewportChange={onViewportChange}
         showZoomControls
         edit={editActions}
         nodeConfigWarnings={nodeConfigWarnings}
@@ -1142,11 +1187,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         <ActionsMenuPopover
           isOpen
           closePopover={closeInsertion}
-          insertionContext={
-            insertion.context.mode === 'trigger'
-              ? { mode: 'trigger', disabledTriggerIds }
-              : toMenuInsertionContext(insertion.context)
-          }
+          insertionContext={toMenuInsertionContext(insertion.context)}
           disabledTriggerIds={disabledTriggerIds}
           onActionSelected={handleInsertAction}
         />
@@ -1156,6 +1197,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           width={panelWidth}
           onWidthChange={setStoredPanelWidth}
           canvasWidth={canvasWidth}
+          focusKey={panel.sessionId}
         >
           <KibanaSectionErrorBoundary
             key={panel.sessionId}
@@ -1181,6 +1223,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
                 onRevert={handleStepRevert}
                 isFallbackStep={panelIsFallbackStep}
                 onExpandedChange={setFieldEditorExpanded}
+                settingsOpen={settingsAccordionOpen}
+                onSettingsOpenChange={setSettingsAccordionOpen}
                 onFragmentChange={handleStepDraftChange}
                 onYamlEditorMount={stepYamlEditorMount}
                 runControls={referenceTreeRunControls}
@@ -1195,23 +1239,31 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       {panel && panel.mode === 'edit-trigger' && (
         <CanvasConfigPanelShell
           width={panelWidth}
-          onWidthChange={(w) => setStoredPanelWidth(w)}
+          onWidthChange={setStoredPanelWidth}
           canvasWidth={canvasWidth}
+          focusKey={panel.sessionId}
           data-test-subj="workflowTriggerConfigPanelContainer"
         >
-          <TriggerConfigPanel
+          <KibanaSectionErrorBoundary
             key={panel.sessionId}
-            mode={panel.origin}
-            triggerType={panel.triggerType}
-            triggerLabel={panel.triggerLabel}
-            initialFragment={panel.fragment}
-            workflowYaml={editorYaml}
-            onClose={handleStepClose}
-            onRevert={handleTriggerRevert}
-            onFragmentChange={handleTriggerDraftChange}
-            readOnly={!canEdit}
-            onOpenInYaml={handleOpenInYaml}
-          />
+            sectionName={i18n.translate(
+              'workflows.visualEditor.triggerConfigPanelErrorBoundarySectionName',
+              { defaultMessage: 'Trigger configuration panel' }
+            )}
+          >
+            <TriggerConfigPanel
+              mode={panel.origin}
+              triggerType={panel.triggerType}
+              triggerLabel={panel.triggerLabel}
+              initialFragment={panel.fragment}
+              workflowYaml={editorYaml}
+              onClose={handleStepClose}
+              onRevert={handleTriggerRevert}
+              onFragmentChange={handleTriggerDraftChange}
+              readOnly={!canEdit}
+              onOpenInYaml={handleOpenInYaml}
+            />
+          </KibanaSectionErrorBoundary>
         </CanvasConfigPanelShell>
       )}
     </div>

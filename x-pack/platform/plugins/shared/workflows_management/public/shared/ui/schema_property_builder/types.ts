@@ -39,7 +39,8 @@ export interface SchemaPropertyField {
   readonly itemProperties?: readonly SchemaPropertyField[];
 }
 
-export type SchemaPropertyNameError = 'empty' | 'invalid' | 'duplicate';
+/** `reserved`: a name that cannot be stored as an object key (`__proto__`). */
+export type SchemaPropertyNameError = 'empty' | 'invalid' | 'duplicate' | 'reserved';
 
 export const SCHEMA_PROPERTY_TYPE_OPTIONS: ReadonlyArray<{
   value: SchemaPropertyType;

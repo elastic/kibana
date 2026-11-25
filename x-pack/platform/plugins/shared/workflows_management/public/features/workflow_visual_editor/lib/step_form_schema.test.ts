@@ -31,8 +31,6 @@ import {
   getStepConfigWarningReason,
   getStepFormSchema,
   isFieldValueRepresentable,
-  isStepIncomplete,
-  prettifyFieldKey,
   type StepFormField,
   validateStepField,
 } from './step_form_schema';
@@ -54,15 +52,6 @@ const connectors: ConnectorContractUnion[] = [
 ];
 
 describe('step_form_schema', () => {
-  describe('prettifyFieldKey', () => {
-    it('sentence-cases camelCase, kebab, and snake keys', () => {
-      expect(prettifyFieldKey('failOnError')).toBe('Fail on error');
-      expect(prettifyFieldKey('connector-id')).toBe('Connector id');
-      expect(prettifyFieldKey('file_hash')).toBe('File hash');
-      expect(prettifyFieldKey('name')).toBe('Name');
-    });
-  });
-
   describe('fieldLabelDivergesFromKey', () => {
     it('ignores casing and separators; flags semantic renames', () => {
       expect(fieldLabelDivergesFromKey('failOnError', 'Fail on error')).toBe(false);
@@ -914,29 +903,40 @@ describe('step_form_schema', () => {
     });
   });
 
-  describe('isStepIncomplete', () => {
+  describe('getMissingRequiredFields with connectors', () => {
     it('flags missing required fields and clears when filled', () => {
-      expect(isStepIncomplete({ name: 'a', type: 'slack', with: {} }, connectors)).toBe(true);
       expect(
-        isStepIncomplete(
+        getMissingRequiredFields({ name: 'a', type: 'slack', with: {} }, connectors)
+      ).not.toHaveLength(0);
+      expect(
+        getMissingRequiredFields(
           { name: 'a', type: 'slack', 'connector-id': 'x', with: { message: 'hi' } },
           connectors
         )
-      ).toBe(false);
+      ).toHaveLength(0);
       expect(
-        isStepIncomplete(
+        getMissingRequiredFields(
           { name: 'a', type: 'slack', 'connector-id': 'x', with: { message: '   ' } },
           connectors
         )
-      ).toBe(true);
+      ).not.toHaveLength(0);
     });
 
     it('never flags unknown types', () => {
-      expect(isStepIncomplete({ name: 'a', type: 'mystery' }, connectors)).toBe(false);
+      expect(getMissingRequiredFields({ name: 'a', type: 'mystery' }, connectors)).toHaveLength(0);
     });
   });
 
   describe('getStepConfigWarningReason', () => {
+    it('reads the schema from the resolver it is given', () => {
+      const step = { name: 'a', type: 'slack', with: {} };
+      expect(getStepConfigWarningReason(step, connectors)).toBe('incomplete');
+
+      const schemaOf = jest.fn(() => undefined);
+      expect(getStepConfigWarningReason(step, connectors, schemaOf)).toBeUndefined();
+      expect(schemaOf).toHaveBeenCalledWith('slack');
+    });
+
     it('returns incomplete for missing required fields', () => {
       expect(getStepConfigWarningReason({ name: 'a', type: 'slack', with: {} }, connectors)).toBe(
         'incomplete'

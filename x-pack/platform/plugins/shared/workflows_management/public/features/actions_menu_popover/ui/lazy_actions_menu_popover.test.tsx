@@ -19,8 +19,8 @@ const mockMenuModuleLoaded = jest.fn();
 jest.mock('./actions_menu_popover', () => {
   mockMenuModuleLoaded();
   return {
-    ActionsMenuPopover: ({ rootTitle }: { rootTitle?: string }) => (
-      <div data-test-subj="loadedActionsMenu">{rootTitle}</div>
+    ActionsMenuPopover: ({ insertionContext }: { insertionContext?: { mode: string } }) => (
+      <div data-test-subj="loadedActionsMenu">{insertionContext?.mode}</div>
     ),
   };
 });
@@ -30,7 +30,7 @@ const popoverProps = (overrides: Partial<ActionsMenuPopoverProps> = {}) =>
     isOpen: true,
     closePopover: jest.fn(),
     onActionSelected: jest.fn(),
-    rootTitle: 'Add a step',
+    insertionContext: { mode: 'step' },
     ...overrides,
   } as ActionsMenuPopoverProps);
 
@@ -86,7 +86,7 @@ describe('lazy ActionsMenuPopover', () => {
     it('renders the menu with the same props once opened, without a second fetch', async () => {
       render(<ActionsMenuPopover {...popoverProps()} />);
 
-      expect(await screen.findByTestId('loadedActionsMenu')).toHaveTextContent('Add a step');
+      expect(await screen.findByTestId('loadedActionsMenu')).toHaveTextContent('step');
       expect(mockMenuModuleLoaded).toHaveBeenCalledTimes(1);
     });
 

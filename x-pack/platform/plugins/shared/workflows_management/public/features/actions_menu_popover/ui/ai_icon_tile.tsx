@@ -7,9 +7,6 @@
 
 import React from 'react';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
-import { aiIconTileCss } from '@kbn/workflows-ui';
-
-export { aiIconTileCss };
 
 /** Sparkles glyph with the standard Kibana AI Primary → Assistance SVG gradient. */
 export function ActionsMenuAiIcon(): JSX.Element {

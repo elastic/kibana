@@ -10,7 +10,7 @@ import React from 'react';
 import { Provider } from 'react-redux-v7';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { StepConfigPanel } from './step_config_panel';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 
 jest.mock('@kbn/code-editor', () =>
@@ -87,10 +87,6 @@ const renameTo = (name: string) => {
 };
 
 describe('StepConfigPanel step name uniqueness', () => {
-  beforeEach(() => {
-    resetStepConfigPanelSessionStateForTests();
-  });
-
   describe.each([
     ['the body of a step (steps)', { steps: [dupStep] }],
     ['an else branch', { else: [dupStep] }],

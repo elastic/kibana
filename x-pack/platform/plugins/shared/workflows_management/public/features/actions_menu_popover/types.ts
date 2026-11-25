@@ -112,12 +112,6 @@ export function isActionOption(option: ActionOptionData): option is ActionOption
  * `step` hides the Triggers group; `error` hides Triggers and Flow control.
  */
 export type ActionsMenuInsertionContext =
-  | { readonly mode: 'trigger'; readonly disabledTriggerIds?: readonly string[] }
+  | { readonly mode: 'trigger' }
   | { readonly mode: 'step' }
   | { readonly mode: 'error' };
-
-/**
- * `full` — centered dual-pane Actions menu.
- * `compact` — anchored single-column presentation of the same catalog (in-panel).
- */
-export type ActionsMenuPresentation = 'full' | 'compact';

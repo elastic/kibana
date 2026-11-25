@@ -26,9 +26,10 @@ export const omitDisabledTriggers = (
 
 /**
  * Filters the shared Actions catalog for an insertion context.
- * One function for the full menu and the compact popover — never fork lists.
+ * One function for every insertion mode — never fork lists. Disabled trigger ids are applied
+ * separately by `omitDisabledTriggers`.
  *
- * - `trigger`: only the Triggers group's leaves; hides `disabledTriggerIds`
+ * - `trigger`: only the Triggers group's leaves
  * - `step`: hide Triggers
  * - `error`: hide Triggers and Flow control (same as canvas error-port eligibility)
  */
@@ -39,8 +40,7 @@ export const filterOptionsForInsertionContext = (
   if (!context) return options;
 
   if (context.mode === 'trigger') {
-    const withDisabledOmitted = omitDisabledTriggers(options, context.disabledTriggerIds);
-    const triggers = withDisabledOmitted.find((o) => o.id === TRIGGERS_GROUP_ID);
+    const triggers = options.find((o) => o.id === TRIGGERS_GROUP_ID);
     return triggers && isActionGroup(triggers) ? triggers.options : [];
   }
 

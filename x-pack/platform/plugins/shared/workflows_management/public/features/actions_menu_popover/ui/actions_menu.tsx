@@ -8,14 +8,12 @@
 import type { EuiBreadcrumb, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBreadcrumbs,
-  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectable,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -40,7 +38,6 @@ import {
 import {
   type ActionOptionData,
   type ActionsMenuInsertionContext,
-  type ActionsMenuPresentation,
   type EditorCommand,
   getMenuItemData,
   isActionConnectorGroup,
@@ -48,12 +45,7 @@ import {
   type JumpToStepEntry,
 } from '../types';
 
-export type {
-  ActionsMenuInsertionContext,
-  ActionsMenuPresentation,
-  EditorCommand,
-  JumpToStepEntry,
-};
+export type { ActionsMenuInsertionContext, EditorCommand, JumpToStepEntry };
 
 const SEARCH_INPUT_NAME = 'actions-menu-search';
 const SELECTABLE_ID = 'actions-menu-selectable';
@@ -90,23 +82,12 @@ export interface ActionsMenuProps {
   jumpToStepEntries?: JumpToStepEntry[];
   onCommandSelected?: (commandId: string) => void;
   onJumpToStep?: (lineNumber: number) => void;
-  onClose?: () => void;
   insertionContext?: ActionsMenuInsertionContext;
   /**
    * Trigger option ids to hide (e.g. `manual` when a Manual trigger already exists).
-   * Applied in every presentation so a second Manual cannot be added from Actions.
+   * Applies in every insertion mode so a second Manual cannot be added from Actions.
    */
   disabledTriggerIds?: readonly string[];
-  /**
-   * `full` — dual-pane centered menu.
-   * `compact` — single-column anchored presentation of the same catalog.
-   */
-  presentation?: ActionsMenuPresentation;
-  /**
-   * Compact root header title (e.g. "Add fallback step"). Falls back to the
-   * insertion-context label, then "Actions menu".
-   */
-  rootTitle?: string;
 }
 
 const getContextLabel = (context: ActionsMenuInsertionContext): string => {
@@ -152,13 +133,9 @@ export function ActionsMenu({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
-  onClose,
   insertionContext,
   disabledTriggerIds,
-  presentation = 'full',
-  rootTitle,
 }: ActionsMenuProps) {
-  const isCompact = presentation === 'compact';
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { euiTheme } = useEuiTheme();
@@ -653,7 +630,7 @@ export function ActionsMenu({
     return crumbs;
   }, [isSearching, searchTerm, currentPath, pathLabels, navigateToPath]);
 
-  const showBreadcrumbs = !isCompact && breadcrumbs.length > 0;
+  const showBreadcrumbs = breadcrumbs.length > 0;
   const activeOption = keyboardIndex == null ? undefined : actionableDisplayOptions[keyboardIndex];
   const activeOptionIndex = activeOption ? displayOptions.indexOf(activeOption) : undefined;
   const activeOptionId =
@@ -666,47 +643,6 @@ export function ActionsMenu({
   }, [activeOptionId]);
   const isSearchVirtualized =
     searchTerm.length > 0 && displayOptions.length > SEARCH_VIRTUALIZATION_THRESHOLD;
-
-  const goBack = useCallback(() => {
-    if (currentPath.length === 0) return;
-    navigateToPath(currentPath.slice(0, -1), {
-      optionId: currentPath[currentPath.length - 1],
-    });
-  }, [currentPath, navigateToPath]);
-
-  const compactBackLabel = i18n.translate('workflows.actionsMenu.compact.back', {
-    defaultMessage: 'Back',
-  });
-  const compactCloseLabel = i18n.translate('workflows.actionsMenu.close', {
-    defaultMessage: 'Close actions menu',
-  });
-
-  const compactHeaderTitle = useMemo(() => {
-    if (isSearching) {
-      const count = actionableDisplayOptions.length;
-      return i18n.translate('workflows.actionsMenu.compact.resultsCount', {
-        defaultMessage: '{count, plural, one {# result} other {# results}}',
-        values: { count },
-      });
-    }
-    if (currentPath.length > 0) {
-      return pathLabels[pathLabels.length - 1]?.label ?? '';
-    }
-    if (rootTitle) return rootTitle;
-    if (insertionContext) return getContextLabel(insertionContext);
-    return i18n.translate('workflows.actionsMenu.title', {
-      defaultMessage: 'Actions menu',
-    });
-  }, [
-    isSearching,
-    actionableDisplayOptions.length,
-    currentPath.length,
-    pathLabels,
-    rootTitle,
-    insertionContext,
-  ]);
-
-  const showCompactBack = isCompact && currentPath.length > 0 && !isSearching;
 
   return (
     <EuiSelectable
@@ -721,13 +657,9 @@ export function ActionsMenu({
       searchProps={{
         id: 'actions-menu-search',
         name: SEARCH_INPUT_NAME,
-        placeholder: isCompact
-          ? i18n.translate('workflows.actionsMenu.compact.searchPlaceholder', {
-              defaultMessage: 'Search steps',
-            })
-          : i18n.translate('workflows.actionsMenu.searchPlaceholder', {
-              defaultMessage: 'Search step, command or # to go to a step',
-            }),
+        placeholder: i18n.translate('workflows.actionsMenu.searchPlaceholder', {
+          defaultMessage: 'Search step, command or # to go to a step',
+        }),
         value: searchTerm,
         onChange: handleSearchChange,
         compressed: true,
@@ -779,76 +711,31 @@ export function ActionsMenu({
       height="full"
     >
       {(list, search) => (
-        <div
-          ref={menuContainerRef}
-          css={styles.fill}
-          data-test-subj={isCompact ? 'actionsMenuCompact' : 'actionsMenuFull'}
-        >
+        <div ref={menuContainerRef} css={styles.fill} data-test-subj="actionsMenuFull">
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={styles.header}>
-            <EuiFlexItem grow={false} css={isCompact ? undefined : styles.headerTitle}>
-              {isCompact ? (
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  justifyContent="spaceBetween"
-                >
-                  {showCompactBack ? (
-                    <EuiToolTip content={compactBackLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        iconType="chevronSingleLeft"
-                        color="text"
-                        size="xs"
-                        onClick={goBack}
-                        aria-label={compactBackLabel}
-                        data-test-subj="actionsMenuCompactBack"
-                      />
-                    </EuiToolTip>
-                  ) : (
-                    <span aria-hidden style={{ width: 24 }} />
-                  )}
-                  <EuiTitle size="xxs">
-                    <h3>{compactHeaderTitle}</h3>
-                  </EuiTitle>
-                  {onClose ? (
-                    <EuiToolTip content={compactCloseLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        iconType="cross"
-                        color="text"
-                        size="xs"
-                        onClick={onClose}
-                        aria-label={compactCloseLabel}
-                        data-test-subj="actionsMenuCompactClose"
-                      />
-                    </EuiToolTip>
-                  ) : (
-                    <span aria-hidden style={{ width: 24 }} />
-                  )}
-                </EuiFlexGroup>
-              ) : (
-                <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-                  <EuiTitle size="xxs">
-                    <h3>
-                      <FormattedMessage
-                        id="workflows.actionsMenu.title"
-                        defaultMessage="Actions menu"
-                      />
-                    </h3>
-                  </EuiTitle>
-                  {insertionContext && (
-                    <EuiText size="xs" color="subdued" data-test-subj="actionsMenuContextLabel">
-                      {getContextLabel(insertionContext)}
-                    </EuiText>
-                  )}
-                </EuiFlexGroup>
-              )}
+            <EuiFlexItem grow={false} css={styles.headerTitle}>
+              <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+                <EuiTitle size="xxs">
+                  <h3>
+                    <FormattedMessage
+                      id="workflows.actionsMenu.title"
+                      defaultMessage="Actions menu"
+                    />
+                  </h3>
+                </EuiTitle>
+                {insertionContext && (
+                  <EuiText size="xs" color="subdued" data-test-subj="actionsMenuContextLabel">
+                    {getContextLabel(insertionContext)}
+                  </EuiText>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{search}</EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiFlexGroup gutterSize="none" css={styles.body} responsive={false}>
             <EuiFlexItem
-              css={isCompact ? styles.leftColumnCompact : styles.leftColumn}
+              css={styles.leftColumn}
               onMouseDown={keepSearchFocused}
               onMouseMove={handleListMouseMove}
             >
@@ -888,34 +775,32 @@ export function ActionsMenu({
               </EuiFlexGroup>
             </EuiFlexItem>
 
-            {!isCompact && (
-              <EuiFlexItem css={styles.rightColumn} data-test-subj="actionsMenuPreview">
-                <ActionsMenuPreviewPanel
-                  hoveredOption={previewOption}
-                  hoveredJumpEntry={hoveredJumpEntry}
-                  onStepSelected={handleStepOrGroupSelected}
-                  onAddStep={handleAddStep}
-                  onPinPreview={(action, parentSection) => {
-                    if (
-                      parentSection &&
-                      (isActionGroup(parentSection) || isActionConnectorGroup(parentSection))
-                    ) {
-                      const nextPath = parentSection.pathIds ?? [...currentPath, parentSection.id];
-                      const alreadyThere =
-                        nextPath.length === currentPath.length &&
-                        nextPath.every((id, i) => id === currentPath[i]);
-                      if (!alreadyThere) {
-                        setSearchTerm('');
-                        navigateToPath([...nextPath]);
-                      }
+            <EuiFlexItem css={styles.rightColumn} data-test-subj="actionsMenuPreview">
+              <ActionsMenuPreviewPanel
+                hoveredOption={previewOption}
+                hoveredJumpEntry={hoveredJumpEntry}
+                onStepSelected={handleStepOrGroupSelected}
+                onAddStep={handleAddStep}
+                onPinPreview={(action, parentSection) => {
+                  if (
+                    parentSection &&
+                    (isActionGroup(parentSection) || isActionConnectorGroup(parentSection))
+                  ) {
+                    const nextPath = parentSection.pathIds ?? [...currentPath, parentSection.id];
+                    const alreadyThere =
+                      nextPath.length === currentPath.length &&
+                      nextPath.every((id, i) => id === currentPath[i]);
+                    if (!alreadyThere) {
+                      setSearchTerm('');
+                      navigateToPath([...nextPath]);
                     }
-                    setPinnedOption(action);
-                    setHoveredOption(action);
-                    setHoveredJumpEntry(null);
-                  }}
-                />
-              </EuiFlexItem>
-            )}
+                  }
+                  setPinnedOption(action);
+                  setHoveredOption(action);
+                  setHoveredJumpEntry(null);
+                }}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </div>
       )}

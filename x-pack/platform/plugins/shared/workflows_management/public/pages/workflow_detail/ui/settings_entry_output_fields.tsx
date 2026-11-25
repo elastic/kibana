@@ -16,12 +16,11 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { settingsEntryNameErrorMessage } from './settings_entry_row_shared';
 import type { OutputField } from './workflow_settings_fields_model';
 import {
   SCHEMA_PROPERTY_TYPE_OPTIONS,
-  type SchemaPropertyField,
   SchemaPropertyList,
+  schemaPropertyNameErrorMessage,
   type SchemaPropertyType,
   validateSchemaPropertyName,
 } from '../../../shared/ui/schema_property_builder';
@@ -41,11 +40,7 @@ export const SettingsEntryOutputFields = ({
   readonly readOnly?: boolean;
   readonly onUpdate: (next: OutputField) => void;
 }) => {
-  const nameError = validateSchemaPropertyName(
-    field.name,
-    siblings as unknown as SchemaPropertyField[],
-    field.id
-  );
+  const nameError = validateSchemaPropertyName(field.name, siblings, field.id);
 
   return (
     <>
@@ -64,7 +59,7 @@ export const SettingsEntryOutputFields = ({
                 : undefined
             }
             isInvalid={nameError != null && field.name.length > 0}
-            error={settingsEntryNameErrorMessage(nameError)}
+            error={schemaPropertyNameErrorMessage(nameError)}
             fullWidth
           >
             <EuiFieldText

@@ -38,14 +38,21 @@ export const createEmptySchemaProperty = (
 
 const IDENTIFIER_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
+/** Assigning `__proto__` on a plain object changes its prototype instead of adding a key. */
+const RESERVED_NAMES: ReadonlySet<string> = new Set(['__proto__']);
+
+/** The only parts of a sibling the name check reads. */
+export type SchemaPropertySibling = Pick<SchemaPropertyField, 'id' | 'name'>;
+
 export const validateSchemaPropertyName = (
   name: string,
-  siblings: readonly SchemaPropertyField[],
+  siblings: ReadonlyArray<SchemaPropertySibling>,
   selfId: string
 ): SchemaPropertyNameError | null => {
   const trimmed = name.trim();
   if (!trimmed) return 'empty';
   if (!IDENTIFIER_RE.test(trimmed)) return 'invalid';
+  if (RESERVED_NAMES.has(trimmed)) return 'reserved';
   const duplicate = siblings.some((s) => s.id !== selfId && s.name.trim() === trimmed);
   if (duplicate) return 'duplicate';
   return null;
@@ -297,16 +304,14 @@ const propertyToJsonSchema = (field: SchemaPropertyField): JsonSchema => {
 export const schemaPropertiesToJsonSchema = (
   fields: readonly SchemaPropertyField[]
 ): JsonModelSchemaType => {
-  const properties: Record<string, JsonSchema> = {};
-  const required: string[] = [];
-
-  for (const field of fields) {
-    const name = field.name.trim();
-    if (name) {
-      properties[name] = propertyToJsonSchema(field);
-      if (field.required) required.push(name);
-    }
-  }
+  const named = fields
+    .map((field) => ({ field, name: field.name.trim() }))
+    .filter(({ name }) => name !== '');
+  // `Object.fromEntries` defines own properties, so a name like `__proto__` cannot alter the prototype.
+  const properties: Record<string, JsonSchema> = Object.fromEntries(
+    named.map(({ field, name }) => [name, propertyToJsonSchema(field)] as const)
+  );
+  const required = named.filter(({ field }) => field.required).map(({ name }) => name);
 
   return {
     type: 'object',

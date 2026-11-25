@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Edge, Node } from '@xyflow/react';
-import type { EdgeBranchType, LayoutDirection } from '@kbn/workflows';
+import type { Node } from '@xyflow/react';
+import type { LayoutDirection } from '@kbn/workflows';
 import type { InsertionPoints, NodePortTargets } from './compute_insertion_points';
 import { edgeLabelCrossSpan } from './edge_label_metrics';
 import { stepSupportsErrorHandling } from './step_supports_error_handling';
@@ -26,7 +26,7 @@ import {
   WIRE_CONTROL_SIZE,
 } from './workflow_graph_geometry';
 import type { GraphPoint } from './workflow_graph_geometry';
-import { nodeStepType } from './workflow_node_data';
+import { nodeStepType, type WorkflowEdge } from './workflow_node_data';
 
 // The wire control size is part of the overlay's public surface (the + button renders at it).
 export { WIRE_CONTROL_SIZE } from './workflow_graph_geometry';
@@ -139,18 +139,26 @@ const resolveInsertContext = (
   return { mode: 'after', stepName: ports.step.stepName };
 };
 
-const isFailureEdge = (edge: Edge): boolean => {
-  const data = edge.data as { isFailure?: boolean } | undefined;
-  return data?.isFailure === true;
+const isFailureEdge = (edge: WorkflowEdge): boolean => edge.data?.isFailure === true;
+
+const isMergeEdge = (edge: WorkflowEdge): boolean => edge.data?.isMerge === true;
+
+/**
+ * Logical branch key (as keyed by `computeInsertionPoints`) of the port an edge leaves from, or
+ * `undefined` when a switch edge carries neither `default` nor a case index to resolve it by.
+ */
+const resolveHandleKey = (edge: WorkflowEdge): string | undefined => {
+  const { branchType, branchIndex, label } = edge.data ?? {};
+  if (branchType === 'switch') {
+    if (label === 'default') return 'default';
+    return typeof branchIndex === 'number' ? `case:${branchIndex}` : undefined;
+  }
+  if (typeof branchIndex === 'number') return `branch:${branchIndex}`;
+  return edge.sourceHandle ?? 'step';
 };
 
-const isMergeEdge = (edge: Edge): boolean => {
-  const data = edge.data as { isMerge?: boolean } | undefined;
-  return data?.isMerge === true;
-};
-
-const isForkEdge = (edge: Edge): boolean => {
-  const data = edge.data as { branchType?: EdgeBranchType; branchIndex?: number } | undefined;
+const isForkEdge = (edge: WorkflowEdge): boolean => {
+  const data = edge.data;
   const branchType = data?.branchType;
   return (
     branchType === 'switch' ||
@@ -183,7 +191,7 @@ const fallbackStepNameFor = (
  */
 export function computeWireInsertionControls(args: {
   readonly nodes: readonly Node[];
-  readonly edges: readonly Edge[];
+  readonly edges: readonly WorkflowEdge[];
   readonly insertionPoints: InsertionPoints;
   readonly direction: LayoutDirection;
   /** Fork-node-id → join-node-id map from the transform. When provided, join-source
@@ -230,7 +238,7 @@ export function computeWireInsertionControls(args: {
     { busPos: number; entry: WireSegmentPoint; insertContext: WorkflowGraphInsertionContext }
   >();
 
-  const emitEdgeControls = (edge: Edge): void => {
+  const emitEdgeControls = (edge: WorkflowEdge): void => {
     if (isFailureEdge(edge)) return;
 
     // Join-node sources: the edge join → next-step uses the fork node's "after" context.
@@ -285,19 +293,10 @@ export function computeWireInsertionControls(args: {
       // to the case/branch key (nodes don't mount a named handle per case/branch).
       // Derive the logical branch key from edge data so insertionPoints can be
       // looked up correctly, independently of the rendered handle.
-      const edgeData = edge.data as
-        | { branchType?: EdgeBranchType; branchIndex?: number; label?: string }
-        | undefined;
-      const handleKey =
-        edgeData?.branchType === 'switch'
-          ? edgeData.label === 'default'
-            ? 'default'
-            : typeof edgeData?.branchIndex === 'number'
-            ? `case:${edgeData.branchIndex}`
-            : `case:${edgeData.label}`
-          : typeof edgeData?.branchIndex === 'number'
-          ? `branch:${edgeData.branchIndex}`
-          : edge.sourceHandle ?? 'step';
+      const edgeData = edge.data;
+      const handleKey = resolveHandleKey(edge);
+      // A switch edge with no case index and no `default` label cannot be matched to a port.
+      if (handleKey === undefined) return;
 
       const insertContext = resolveInsertContext(ports, handleKey);
       if (!insertContext) return;

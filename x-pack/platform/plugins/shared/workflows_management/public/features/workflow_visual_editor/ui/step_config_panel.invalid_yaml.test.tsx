@@ -11,7 +11,7 @@ import { Provider } from 'react-redux-v7';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { StepConfigPanel } from './step_config_panel';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 
 jest.mock('@kbn/code-editor', () =>
@@ -71,10 +71,6 @@ const renderPanel = (initialFragment: string) =>
   );
 
 describe('StepConfigPanel with a step YAML the form cannot edit', () => {
-  beforeEach(() => {
-    resetStepConfigPanelSessionStateForTests();
-  });
-
   it('asks to fix the YAML, and offers no Advanced controls that would write into it', () => {
     renderPanel('name: sample\ntype: sample\nwith:\n  text: hi\nfoo: [\n');
 

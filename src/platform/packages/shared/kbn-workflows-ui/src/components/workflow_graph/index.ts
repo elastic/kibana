@@ -39,6 +39,7 @@ export { aiIconTileCss } from './ai_icon_tile';
 
 export { stepSupportsErrorHandlingSettings } from './step_supports_error_handling';
 export { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
+export { INSERT_FLASH_MS, INSERT_LAYOUT_MS } from './use_insert_layout_animation';
 // Opt-in: sync-warm EUI icons (accordion arrows / node menus). Not run on import;
 // the canvas calls it on first render and workflows_management panels call it themselves.
 export { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';

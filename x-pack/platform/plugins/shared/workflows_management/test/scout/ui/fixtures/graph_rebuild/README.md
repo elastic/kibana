@@ -54,7 +54,7 @@ These are the causes found when the whole example library was rebuilt, one fixtu
 When the builder cannot author something, either fix the form or add an entry to the fixture's `knownGaps`:
 
 ```ts
-{ key: 'members_by_team | with.fields | different', reason: 'A `$map` directive has no form control ...' }
+{ key: 'my_step | with.field | different', reason: 'Why the form cannot author it.' }
 ```
 
 The key is `<where> | <what> | <kind>`. `where` is the step path (`a > else > b`, `a > case 0 > b`, `a > fallback > b`),

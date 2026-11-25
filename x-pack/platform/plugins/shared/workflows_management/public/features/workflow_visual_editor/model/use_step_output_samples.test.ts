@@ -179,6 +179,31 @@ describe('useStepOutputSamples', () => {
     );
   });
 
+  it('resolves steps named like inherited object members to their own sample', async () => {
+    const stepNames = ['toString', 'constructor', '__proto__'];
+    const { result } = renderSamples({ workflowId: 'wf-1', stepNames });
+
+    await waitFor(() => expect(result.current.byStep.toString).toEqual(expect.anything()));
+    await waitFor(() =>
+      stepNames.forEach((stepName) =>
+        expect(Object.getOwnPropertyDescriptor(result.current.byStep, stepName)?.value).toEqual({
+          status: 'done',
+          output: { value: 'from-history' },
+        })
+      )
+    );
+    expect(Object.keys(result.current.byStep)).toEqual(stepNames);
+    expect(Object.getPrototypeOf(result.current.byStep)).toBeNull();
+  });
+
+  it('does not resolve an inherited member for a step that was not requested', () => {
+    const { result } = renderSamples({ stepNames: ['a'] });
+
+    expect(result.current.byStep.toString).toBeUndefined();
+    expect(result.current.byStep.constructor).toBeUndefined();
+    expect(result.current.byStep.__proto__).toBeUndefined();
+  });
+
   it('uses the latest iteration of a step that ran several times', async () => {
     mockGetExecution.mockResolvedValue(
       execution([

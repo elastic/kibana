@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Edge, Node } from '@xyflow/react';
+import type { Node } from '@xyflow/react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { WorkflowEdge } from './workflow_node_data';
 
 /** How long existing nodes slide to make room for an inserted step. */
 export const INSERT_LAYOUT_MS = 300;
@@ -67,11 +68,11 @@ export function useInsertLayoutAnimation({
   flashNodeId,
 }: {
   readonly nodes: Node[];
-  readonly edges: Edge[];
+  readonly edges: WorkflowEdge[];
   readonly flashNodeId?: string;
 }): {
   readonly nodes: Node[];
-  readonly edges: Edge[];
+  readonly edges: WorkflowEdge[];
   readonly isSliding: boolean;
 } {
   const prevPositionsRef = useRef<Map<string, TrackedNode>>(new Map());
@@ -240,9 +241,7 @@ export function useInsertLayoutAnimation({
   const animatedEdges = useMemo(() => {
     if (!insertedIds) return edges;
     return edges.map((edge) => {
-      const edgeData = (edge.data ?? {}) as Record<string, unknown> & {
-        hideEndMarker?: boolean;
-      };
+      const edgeData = edge.data ?? {};
       // Bypass-lane target edges (hideEndMarker=true) target invisible 1×1
       // placeholder nodes. Skipping drawIn avoids the progressive-reveal
       // animation on structural placeholders.

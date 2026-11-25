@@ -9,6 +9,7 @@ import {
   coerceConstantValue,
   constantsToYamlRecord,
   createEmptyConstant,
+  createEmptyOutput,
   outputsToJsonSchema,
   parseConstsToFields,
   parseOutputsToFields,
@@ -29,6 +30,34 @@ describe('workflow_settings_fields_model', () => {
       retries: 3,
       dry_run: true,
     });
+  });
+
+  it('keeps names found on Object.prototype as own keys, including __proto__', () => {
+    const names = ['constructor', 'toString', '__proto__'];
+    const record = constantsToYamlRecord(
+      names.map((name) => createEmptyConstant({ name, type: 'string', value: 'v' }))
+    );
+
+    expect(record).toBeDefined();
+    expect(Object.getPrototypeOf(record)).toBe(Object.prototype);
+    expect(Object.keys(record ?? {})).toEqual(names);
+    names.forEach((name) => {
+      expect(Object.getOwnPropertyDescriptor(record, name)?.value).toBe('v');
+    });
+  });
+
+  it('round-trips consts named constructor and toString', () => {
+    const fields = parseConstsToFields({ constructor: 1, toString: 'x' });
+    expect(fields.map((f) => f.name)).toEqual(['constructor', 'toString']);
+    expect(constantsToYamlRecord(fields)).toEqual({ constructor: 1, toString: 'x' });
+  });
+
+  it('keeps outputs named constructor, toString and __proto__ as own properties', () => {
+    const names = ['constructor', 'toString', '__proto__'];
+    const schema = outputsToJsonSchema(names.map((name) => createEmptyOutput({ name })));
+
+    expect(Object.keys(schema?.properties ?? {})).toEqual(names);
+    expect(Object.getPrototypeOf(schema?.properties)).toBe(Object.prototype);
   });
 
   it('rejects template expressions in constant values', () => {

@@ -135,7 +135,8 @@ export const useStepOutputSamples = ({
     return latestFromHistory ? toSample(latestFromHistory) : NO_SAMPLE;
   };
 
-  const byStep: Record<string, StepSample> = {};
+  // No prototype: a step named `toString` or `constructor` must not resolve an inherited member.
+  const byStep: Record<string, StepSample> = Object.create(null);
   stepNames.forEach((stepName, historyIndex) => {
     byStep[stepName] = resolveStep(stepName, historyIndex);
   });

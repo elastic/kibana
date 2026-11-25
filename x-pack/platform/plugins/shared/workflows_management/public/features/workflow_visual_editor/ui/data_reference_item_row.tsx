@@ -8,8 +8,8 @@
 import { EuiBadge, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EuiToolTipRef } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
-import { FieldIcon } from '@kbn/react-field';
 import { ensureWorkflowGraphEuiIcons, resolveNodeChipStyle } from '@kbn/workflows-ui';
+import { ReferenceTypeIcon } from './reference_type_icon';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import type { DataReferenceItem } from '../lib/build_data_reference_catalog';
 import {
@@ -213,7 +213,7 @@ export function DataReferenceItemRowContent({
         }}
         aria-hidden
       >
-        <FieldIcon type={toReferenceIconType(item.typeLabel)} size="s" shape="square" />
+        <ReferenceTypeIcon type={toReferenceIconType(item.typeLabel)} />
       </span>
       <span
         css={{

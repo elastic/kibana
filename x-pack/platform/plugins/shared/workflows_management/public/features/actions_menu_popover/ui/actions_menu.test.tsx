@@ -408,18 +408,6 @@ describe('ActionsMenu — insertion context', () => {
     expect(screen.getByText('HTTP Request')).toBeInTheDocument();
   });
 
-  it('compact presentation shows a single-column menu with the root title', () => {
-    renderComponent({
-      presentation: 'compact',
-      insertionContext: { mode: 'error' },
-      rootTitle: 'Add fallback step',
-      onClose: jest.fn(),
-    });
-    expect(screen.getByTestId('actionsMenuCompact')).toBeInTheDocument();
-    expect(screen.getByText('Add fallback step')).toBeInTheDocument();
-    expect(screen.queryByTestId('actionsMenuContextLabel')).not.toBeInTheDocument();
-  });
-
   it('trigger mode lists trigger leaves at the root', () => {
     renderComponent({ insertionContext: { mode: 'trigger' } });
     expect(screen.getByTestId('actionsMenuContextLabel')).toHaveTextContent('Adding a trigger');
@@ -427,6 +415,19 @@ describe('ActionsMenu — insertion context', () => {
     expect(screen.getByText('Alert')).toBeInTheDocument();
     expect(screen.queryByText('HTTP Request')).not.toBeInTheDocument();
     expect(screen.queryByText('Triggers')).not.toBeInTheDocument();
+  });
+
+  it('trigger mode hides Manual when it is listed in disabledTriggerIds', () => {
+    renderComponent({ insertionContext: { mode: 'trigger' }, disabledTriggerIds: ['manual'] });
+    expect(screen.queryByText('Manual')).not.toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+  });
+
+  it('hides Manual from the Triggers group when disabledTriggerIds lists it', () => {
+    renderComponent({ disabledTriggerIds: ['manual'] });
+    clickOption('Triggers');
+    expect(screen.queryByText('Manual')).not.toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
   });
 
   it('selecting a step fires onActionSelected immediately', () => {

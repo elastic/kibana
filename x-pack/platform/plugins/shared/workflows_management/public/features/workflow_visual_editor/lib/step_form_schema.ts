@@ -125,9 +125,6 @@ export interface StepFormSchema {
   readonly timeout?: StepFormField;
 }
 
-/** Field-label alias for the shared catalog key prettifier. */
-export const prettifyFieldKey = prettifyCatalogKey;
-
 /** True when the display label is more than a casing/spacing variant of the key. */
 export function fieldLabelDivergesFromKey(key: string, label: string): boolean {
   const normalize = (s: string) => s.toLowerCase().replace(/[-_\s]+/g, '');
@@ -180,7 +177,7 @@ const readMetaLabel = (schema: z.ZodType): string | undefined => {
 
 /** Prefer schema meta title/label; otherwise prettify the key. */
 const resolveFieldLabel = (key: string, schema: z.ZodType): string =>
-  readMetaLabel(schema) ?? prettifyFieldKey(key);
+  readMetaLabel(schema) ?? prettifyCatalogKey(key);
 
 const readFieldMeta = (schema: z.ZodType): Record<string, unknown> | undefined => {
   for (const candidate of [schema, unwrapSchema(schema)]) {
@@ -575,7 +572,7 @@ const buildVariants = (
         : undefined;
       return {
         id: `variant-${index}`,
-        label: title ?? discriminatorValue ?? keys.map(prettifyFieldKey).join(' + '),
+        label: title ?? discriminatorValue ?? keys.map(prettifyCatalogKey).join(' + '),
         kind: 'object',
         schema: variantSchema,
         fields: Array.from(merged.values()),
@@ -858,12 +855,6 @@ const getStepTimeout = (stepType: string): StepFormField | undefined => {
 };
 
 /**
- * Builds the configuration form for a step type from the same schemas that
- * power the Actions menu: built-in step definitions (`inputSchema` → `with`,
- * `configSchema` → root keys) or a connector contract (`paramsSchema` → `with`,
- * plus `connector-id` when the contract requires one).
- */
-/**
  * A root-level `connector-id` is chosen among the connectors that fit the step (or typed, or
  * referenced), so it gets its own kind and knows its step type.
  */
@@ -874,6 +865,12 @@ const withConnectorIdKind = (stepType: string, fields: readonly StepFormField[])
       : field
   );
 
+/**
+ * Builds the configuration form for a step type from the same schemas that
+ * power the Actions menu: built-in step definitions (`inputSchema` → `with`,
+ * `configSchema` → root keys) or a connector contract (`paramsSchema` → `with`,
+ * plus `connector-id` when the contract requires one).
+ */
 export const getStepFormSchema = (
   stepType: string,
   connectors: readonly ConnectorContractUnion[]
@@ -906,7 +903,7 @@ export const getStepFormSchema = (
     fields.push({
       key: 'connector-id',
       path: ['connector-id'],
-      label: prettifyFieldKey('connector-id'),
+      label: prettifyCatalogKey('connector-id'),
       required: connector.hasConnectorId === 'required',
       kind: 'text',
     });
@@ -1072,10 +1069,10 @@ export const validateStepField = (field: StepFormField, value: unknown): string 
   return undefined;
 };
 
-const stepNameField = (): StepFormField => ({
+export const stepNameField = (): StepFormField => ({
   key: 'name',
   path: ['name'],
-  label: prettifyFieldKey('name'),
+  label: prettifyCatalogKey('name'),
   required: true,
   kind: 'text',
 });
@@ -1108,12 +1105,6 @@ export const getMissingRequiredFields = (
   return fields.filter((f) => f.required && isEmptyFieldValue(readPath(step, f.path)));
 };
 
-/** A step is incomplete when any schema-required field (or name) is empty. */
-export const isStepIncomplete = (
-  step: Record<string, unknown>,
-  connectors: readonly ConnectorContractUnion[]
-): boolean => getMissingRequiredFields(step, connectors).length > 0;
-
 /**
  * Applied-state config warning for the canvas badge.
  * - `incomplete`: a required field (or name) is empty
@@ -1124,11 +1115,14 @@ export type StepConfigWarningReason = 'incomplete' | 'misconfigured' | 'both';
 
 export const getStepConfigWarningReason = (
   step: Record<string, unknown>,
-  connectors: readonly ConnectorContractUnion[]
+  connectors: readonly ConnectorContractUnion[],
+  /** Lets a caller that checks many steps reuse the schema of a step type it has already built. */
+  schemaOf: (stepType: string) => StepFormSchema | undefined = (stepType) =>
+    getStepFormSchema(stepType, connectors)
 ): StepConfigWarningReason | undefined => {
   const type = step.type;
   if (typeof type !== 'string') return undefined;
-  const schema = getStepFormSchema(type, connectors);
+  const schema = schemaOf(type);
   const fields = getActiveFields([stepNameField(), ...(schema?.fields ?? [])], step);
 
   let incomplete = false;
@@ -1231,7 +1225,7 @@ export const buildDefaultStep = (
   return step;
 };
 
-export const setPath = (
+const setPath = (
   target: Record<string, unknown>,
   path: readonly string[],
   value: unknown

@@ -799,3 +799,113 @@ describe('computeWireInsertionControls', () => {
     expect(ctrl!.centre.x).toBeCloseTo((ctrl!.segmentStart.x + 301) / 2);
   });
 });
+
+describe('computeWireInsertionControls switch edges', () => {
+  const nodes: Node[] = [
+    {
+      id: 'sw',
+      type: 'step',
+      position: { x: 0, y: 0 },
+      width: 200,
+      height: 48,
+      data: { stepType: 'switch', label: 'sw' },
+    },
+    {
+      id: 'c0',
+      type: 'step',
+      position: { x: 0, y: 300 },
+      width: 200,
+      height: 48,
+      data: { stepType: 'slack', label: 'c0' },
+    },
+    {
+      id: 'dflt',
+      type: 'step',
+      position: { x: 300, y: 300 },
+      width: 200,
+      height: 48,
+      data: { stepType: 'slack', label: 'dflt' },
+    },
+  ];
+
+  const insertionPoints: InsertionPoints = {
+    byNodeId: new Map([
+      [
+        'sw',
+        {
+          branches: new Map([
+            [
+              'case:0',
+              {
+                slot: { kind: 'case' as const, index: 0, match: 'a' },
+                ownerStepName: 'sw',
+                isTerminal: false,
+              },
+            ],
+            [
+              'default',
+              { slot: { kind: 'default' as const }, ownerStepName: 'sw', isTerminal: false },
+            ],
+          ]),
+        },
+      ],
+    ]),
+    topLevelStepNodeIds: ['sw'],
+  };
+
+  const run = (edges: Edge[]) =>
+    computeWireInsertionControls({ nodes, edges, insertionPoints, direction: 'TB' });
+
+  it('resolves a case edge by its branch index, whatever its label', () => {
+    const controls = run([
+      {
+        id: 'sw-c0',
+        source: 'sw',
+        target: 'c0',
+        data: { branchType: 'switch', branchIndex: 0, label: 'a case label' },
+      },
+    ]);
+
+    expect(controls.find((c) => c.id === 'terminal:fork:sw-c0')?.insertContext).toEqual({
+      mode: 'branch',
+      stepName: 'sw',
+      branch: { kind: 'case', index: 0, match: 'a' },
+      position: 'start',
+    });
+  });
+
+  it('resolves the default edge by its label', () => {
+    const controls = run([
+      {
+        id: 'sw-default',
+        source: 'sw',
+        target: 'dflt',
+        data: { branchType: 'switch', label: 'default' },
+      },
+    ]);
+
+    expect(controls.find((c) => c.id === 'terminal:fork:sw-default')?.insertContext).toEqual({
+      mode: 'branch',
+      stepName: 'sw',
+      branch: { kind: 'default' },
+      position: 'start',
+    });
+  });
+
+  it('skips a switch edge that has neither a case index nor the default label', () => {
+    const controls = run([
+      { id: 'sw-c0', source: 'sw', target: 'c0', data: { branchType: 'switch' } },
+      {
+        id: 'sw-labelled',
+        source: 'sw',
+        target: 'dflt',
+        data: { branchType: 'switch', label: 'stale' },
+      },
+    ]);
+
+    expect(controls.filter((c) => c.id.includes('sw-c0') || c.id.includes('sw-labelled'))).toEqual(
+      []
+    );
+    expect(controls.some((c) => c.id.includes('undefined'))).toBe(false);
+  });
+});

@@ -42,6 +42,7 @@ import {
   createEmptySchemaProperty,
   validateSchemaPropertyName,
 } from './schema_property_model';
+import { schemaPropertyNameErrorMessage } from './schema_property_name_error_message';
 import {
   SCALAR_SCHEMA_PROPERTY_TYPES,
   SCHEMA_PROPERTY_MAX_DEPTH,
@@ -68,27 +69,6 @@ export interface SchemaPropertyListProps {
   /** Shows the properties without letting the user change them: no add, remove, reorder or edit. */
   readonly readOnly?: boolean;
 }
-
-const nameErrorMessage = (
-  error: ReturnType<typeof validateSchemaPropertyName>
-): string | undefined => {
-  if (error === 'empty') {
-    return i18n.translate('workflows.schemaPropertyBuilder.nameEmpty', {
-      defaultMessage: 'Name is required.',
-    });
-  }
-  if (error === 'invalid') {
-    return i18n.translate('workflows.schemaPropertyBuilder.nameInvalid', {
-      defaultMessage: 'Use letters, digits, or underscore; cannot start with a digit.',
-    });
-  }
-  if (error === 'duplicate') {
-    return i18n.translate('workflows.schemaPropertyBuilder.nameDuplicate', {
-      defaultMessage: 'Name must be unique among siblings.',
-    });
-  }
-  return undefined;
-};
 
 const PropertyEditor = ({
   field,
@@ -217,7 +197,7 @@ const PropertyEditor = ({
                     : undefined
                 }
                 isInvalid={nameError != null && field.name.length > 0}
-                error={nameErrorMessage(nameError)}
+                error={schemaPropertyNameErrorMessage(nameError)}
                 fullWidth
               >
                 <EuiFieldText
