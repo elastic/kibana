@@ -16,7 +16,7 @@ const SEMANTIC_INDICATOR_PREFIX = 'semantic_indicator:';
 const semanticIndicatorBasis = (basis: string): string =>
   `${SEMANTIC_INDICATOR_PREFIX}${basis}`.slice(0, MAX_IOC_TIER_BASIS_LENGTH);
 
-/** Candidates per model call; also bounds how many approved ids one call can contribute. */
+/** Candidates per model call; also bounds how many distinct approved ids one call can contribute. */
 export const MAX_SEMANTIC_CANDIDATES_PER_BATCH = 300;
 /**
  * Hard cap on adjudication *batches* (candidate groups of MAX_SEMANTIC_CANDIDATES_PER_BATCH),

@@ -11,6 +11,8 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  ENRICH_REPORT_CORE_MAX_ARTIFACTS,
+  ENRICH_REPORT_CORE_MAX_BEHAVIORS,
   THREAT_CATEGORIES,
   THREAT_REGIONS,
   type SeverityLevel,
@@ -44,10 +46,9 @@ const closedSet = <T extends string>(allowed: readonly T[], max: number) =>
     .transform((values) => [...new Set(values)].slice(0, max));
 
 // No `.max()` on model-output arrays: as `maxItems` it makes Gemini on Vertex AI answer 400 to
-// this schema (as in #297860). `enrichReportCore` caps behaviors/artifacts and keeps only
-// approved ids that belong to the reviewed batch.
-export const MAX_REPORT_BEHAVIORS = 100;
-export const MAX_REPORT_ARTIFACTS = 200;
+// this schema (as in #297860). `enrichReportCore` caps behaviors/artifacts at the response
+// schema's limits, and its `approvedIds` sets keep only ids from the batch that call reviewed,
+// so repeats and out-of-batch ids are dropped.
 
 const ATTACK_TECHNIQUE_ID_PATTERN = /^T\d{4}(?:\.\d{3})?$/;
 
@@ -482,14 +483,22 @@ export const enrichReportCore = async (
       score: severityScore(parsed.severity.level),
       ...(parsed.severity.rationale ? { rationale: parsed.severity.rationale } : {}),
     },
-    behaviors: capWithWarning(parsed.behaviors, MAX_REPORT_BEHAVIORS, 'behaviors', logger).map(
-      (behavior) => ({
-        ...behavior,
-        id: behaviorId(behavior),
-        llm_confidence: behavior.confidence,
-      })
+    behaviors: capWithWarning(
+      parsed.behaviors,
+      ENRICH_REPORT_CORE_MAX_BEHAVIORS,
+      'behaviors',
+      logger
+    ).map((behavior) => ({
+      ...behavior,
+      id: behaviorId(behavior),
+      llm_confidence: behavior.confidence,
+    })),
+    artifacts: capWithWarning(
+      parsed.artifacts,
+      ENRICH_REPORT_CORE_MAX_ARTIFACTS,
+      'artifacts',
+      logger
     ),
-    artifacts: capWithWarning(parsed.artifacts, MAX_REPORT_ARTIFACTS, 'artifacts', logger),
     ...adjudicated,
     context: contextMetadata,
     model_id: model.connector.connectorId,

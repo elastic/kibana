@@ -118,6 +118,10 @@ const reportArtifactSchema = schema.object({
   context: schema.string({ maxLength: 1_000 }),
 });
 
+/** Shared by the response schema and the enrich_report_core service cap, so the two cannot drift. */
+export const ENRICH_REPORT_CORE_MAX_BEHAVIORS = 100;
+export const ENRICH_REPORT_CORE_MAX_ARTIFACTS = 200;
+
 export const enrichReportCoreResponseSchema = schema.object({
   categories: schema.arrayOf(schema.string(), { maxSize: THREAT_CATEGORIES.length }),
   regions: schema.arrayOf(schema.string(), { maxSize: THREAT_REGIONS.length }),
@@ -142,8 +146,8 @@ export const enrichReportCoreResponseSchema = schema.object({
     deterministic_references: schema.number(),
     deferred_unreviewed: schema.number(),
   }),
-  behaviors: schema.arrayOf(reportBehaviorSchema, { maxSize: 100 }),
-  artifacts: schema.arrayOf(reportArtifactSchema, { maxSize: 200 }),
+  behaviors: schema.arrayOf(reportBehaviorSchema, { maxSize: ENRICH_REPORT_CORE_MAX_BEHAVIORS }),
+  artifacts: schema.arrayOf(reportArtifactSchema, { maxSize: ENRICH_REPORT_CORE_MAX_ARTIFACTS }),
   context: schema.object({
     mode: schema.oneOf([schema.literal('full'), schema.literal('degraded_context')]),
     original_chars: schema.number(),

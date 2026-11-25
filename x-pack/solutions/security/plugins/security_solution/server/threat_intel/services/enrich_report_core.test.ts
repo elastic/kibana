@@ -11,10 +11,13 @@ import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-comm
 import type { ExtractedIoc } from './extract_iocs';
 import { z } from '@kbn/zod/v4';
 import {
+  ENRICH_REPORT_CORE_MAX_ARTIFACTS as MAX_REPORT_ARTIFACTS,
+  ENRICH_REPORT_CORE_MAX_BEHAVIORS as MAX_REPORT_BEHAVIORS,
+  enrichReportCoreResponseSchema,
+} from '../../../common/threat_intel';
+import {
   enrichReportCore,
   iocAdjudicationOnlySchema,
-  MAX_REPORT_ARTIFACTS,
-  MAX_REPORT_BEHAVIORS,
   reportCoreModelOutputSchema,
   type ReportCoreModelOutput,
 } from './enrich_report_core';
@@ -189,6 +192,8 @@ describe('enrichReportCore', () => {
       iocs,
     });
 
+    // The capped result must still pass the route's response validation.
+    expect(() => enrichReportCoreResponseSchema.validate(result)).not.toThrow();
     expect(result.behaviors).toHaveLength(MAX_REPORT_BEHAVIORS);
     expect(result.behaviors[0].description).toBe('behavior 0');
     expect(result.artifacts).toHaveLength(MAX_REPORT_ARTIFACTS);
@@ -218,20 +223,38 @@ describe('enrichReportCore', () => {
     expect(quietLogger.warn).not.toHaveBeenCalled();
   });
 
-  it('keeps approved ids listed after many repeats and ignores ids outside the batch', async () => {
-    const invoke = jest.fn().mockResolvedValue({
-      raw: { response_metadata: {} },
-      parsed: {
-        ...OUTPUT,
-        approved_ioc_candidate_ids: [...Array.from({ length: 400 }, () => 0), 4_000, 1],
-      },
+  it('keeps approved ids listed after many repeats and ignores ids from a later batch', async () => {
+    const invoke = jest.fn().mockImplementation((prompt: string) => {
+      const isCore = String(prompt).includes('taxonomy');
+      return Promise.resolve({
+        raw: { response_metadata: {} },
+        parsed: isCore
+          ? // 305 is a real candidate, but it belongs to the second batch.
+            {
+              ...OUTPUT,
+              approved_ioc_candidate_ids: [...Array.from({ length: 400 }, () => 0), 305, 1],
+            }
+          : { approved_ioc_candidate_ids: [] },
+      });
     });
-    const result = await enrichReportCore(buildModel(invoke), logger, {
-      text: `The attacker downloaded ${URL}. Payload hash ${HASH}.`,
-      iocs,
-    });
+    const manyIocs = Array.from({ length: 320 }, (_, index) => ({
+      type: 'url' as const,
+      value: `https://evil.example/payload-${index}`,
+      defanged: `https://evil.example/payload-${index}`,
+      tier: 'discriminating' as const,
+      tier_heuristic: 'discriminating' as const,
+      tier_basis: 'url_path_entropy',
+      context: `C2 fetched https://evil.example/payload-${index}.`,
+    }));
+    const text = manyIocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
 
-    expect(result.anchor_iocs.map(({ value }) => value)).toEqual([URL, HASH]);
+    const result = await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(result.iocs[0].tier_basis).toContain('semantic_indicator:');
+    expect(result.iocs[1].tier_basis).toContain('semantic_indicator:');
+    // The second batch reviewed 305 and left it unapproved; the core call's verdict must not carry over.
+    expect(result.iocs[305].tier).toBe('reference');
   });
 
   it('downgrades an unapproved hash candidate to reference', async () => {
