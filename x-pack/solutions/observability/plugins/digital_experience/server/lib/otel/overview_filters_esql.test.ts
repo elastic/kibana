@@ -8,6 +8,7 @@
 import {
   esqlDocumentConditions,
   esqlFilterEvals,
+  esqlLogConditions,
   esqlPageLoadConditions,
 } from './overview_filters_esql';
 import { FILTER_SOURCE_FIELDS } from './overview_filters';
@@ -50,18 +51,34 @@ describe('overview filters as ES|QL', () => {
     ]);
   });
 
-  it('leaves the page filters to the page loads', () => {
+  it('leaves the page to the logs, and keeps it off the documents of every kind', () => {
     const filters = {
       browser: [{ value: 'Chrome', exclude: false }],
       pageUrl: [{ value: 'https://shop.example/cart', exclude: false }],
     };
 
     expect(esqlDocumentConditions(filters)).toEqual(['filter_browser IN ("Chrome")']);
-    expect(esqlPageLoadConditions(filters)).toEqual([
-      'attributes.url.full IN ("https://shop.example/cart")',
+    // The page narrows the logs; the HTTP request spans carry the URL they request.
+    expect(esqlLogConditions(filters)).toEqual([
+      'filter_page_url IN ("https://shop.example/cart")',
     ]);
-    // A single field needs no column of its own.
-    expect(esqlFilterEvals(filters)).toHaveLength(1);
+    expect(esqlPageLoadConditions(filters)).toEqual([]);
+  });
+
+  it('reads the route of the page first, and its URL when the app reports no route', () => {
+    const [pageEval] = esqlFilterEvals({
+      pageUrl: [{ value: '/products/{slug}', exclude: false }],
+    });
+
+    expect(pageEval.startsWith('filter_page_url = COALESCE(')).toBe(true);
+    expect(pageEval.indexOf('attributes.url.template')).toBeGreaterThan(-1);
+    expect(pageEval.indexOf('attributes.url.template')).toBeLessThan(
+      pageEval.indexOf('attributes.url.full')
+    );
+  });
+
+  it('matches the URL text on its single field, which needs no column of its own', () => {
+    expect(esqlFilterEvals({ pageContains: [{ value: 'cart', exclude: false }] })).toEqual([]);
   });
 
   it('matches the text of the URL whatever its case, with wildcards as literal text', () => {

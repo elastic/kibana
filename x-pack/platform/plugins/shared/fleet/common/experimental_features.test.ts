@@ -115,7 +115,6 @@ describe('allowedExperimentalValues', () => {
     'enableAutomaticAgentUpgrades',
     'enableSyncIntegrationsOnRemote',
     'enableSSLSecrets',
-    'installedIntegrationsTabularUI',
     'enabledUpgradeAgentlessDeploymentsTask',
     'enablePackageRollback',
     'enableAutoInstallContentPackages',
