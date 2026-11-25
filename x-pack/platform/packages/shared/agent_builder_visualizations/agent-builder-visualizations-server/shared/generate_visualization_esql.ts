@@ -12,8 +12,8 @@ import type { Logger } from '@kbn/logging';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { validateQueryTarget } from '@kbn/esql-utils';
 import { buildEsqlAdditionalInstructions } from './esql_instructions';
-import { validateQueryTarget } from './validate_query_target';
 import { findMissingTimeFilterError } from './validate_time_filter';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */

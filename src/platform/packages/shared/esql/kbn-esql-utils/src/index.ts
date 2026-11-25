@@ -119,6 +119,7 @@ export {
   getFieldParamDefinition,
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
+export { validateQueryTarget, type ValidateQueryTargetParams } from './utils/validate_query_target';
 export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';
 export {
   createEsqlViewsManagementClient,
