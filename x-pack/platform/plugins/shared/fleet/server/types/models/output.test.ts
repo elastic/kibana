@@ -219,7 +219,12 @@ describe('Output model', () => {
         expect(() =>
           schema.object(KafkaSchema).validate(
             kerberosOutput({
-              kerberos: { auth_type: 'token', config_path: '/etc/krb5.conf', realm: 'EXAMPLE.COM' },
+              kerberos: {
+                auth_type: 'token',
+                config_path: '/etc/krb5.conf',
+                username: 'kafka',
+                realm: 'EXAMPLE.COM',
+              },
             })
           )
         ).toThrow();
@@ -227,16 +232,18 @@ describe('Output model', () => {
 
       it('should require the path of the configuration and the realm', () => {
         expect(() =>
-          schema
-            .object(KafkaSchema)
-            .validate(kerberosOutput({ kerberos: { auth_type: 'keytab', realm: 'EXAMPLE.COM' } }))
+          schema.object(KafkaSchema).validate(
+            kerberosOutput({
+              kerberos: { auth_type: 'keytab', username: 'kafka', realm: 'EXAMPLE.COM' },
+            })
+          )
         ).toThrow();
         expect(() =>
-          schema
-            .object(KafkaSchema)
-            .validate(
-              kerberosOutput({ kerberos: { auth_type: 'keytab', config_path: '/etc/krb5.conf' } })
-            )
+          schema.object(KafkaSchema).validate(
+            kerberosOutput({
+              kerberos: { auth_type: 'keytab', username: 'kafka', config_path: '/etc/krb5.conf' },
+            })
+          )
         ).toThrow();
       });
 
@@ -247,6 +254,7 @@ describe('Output model', () => {
               kerberos: {
                 auth_type: 'password',
                 config_path: '/etc/krb5.conf',
+                username: 'kafka',
                 realm: 'EXAMPLE.COM',
                 password: 'plain',
               },
