@@ -20,6 +20,7 @@ export * from './definitions/utils/named_subqueries';
 export {
   analyzeResultRows,
   hasSchemaDerivedRows,
+  isSchemaTableResult,
   type EsqlResultRows,
 } from './definitions/utils/result_pipeline';
 export { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';

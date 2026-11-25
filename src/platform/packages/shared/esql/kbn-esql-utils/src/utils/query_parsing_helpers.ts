@@ -21,6 +21,7 @@ import {
   esqlCommandRegistry,
   analyzeResultRows,
   hasSchemaDerivedRows,
+  isSchemaTableResult,
   getNamedSubqueries,
   getPromqlBracketsToClose,
   TRANSFORMATIONAL_COMMANDS,
@@ -125,10 +126,6 @@ export function hasAggregatingCommand(esql?: string): boolean {
 /** Checks whether the query can emit schema-derived rows. */
 export function hasESQLSchemaDerivedRows(esql: string): boolean {
   return hasSchemaDerivedRows(getESQLResultRows(esql));
-}
-
-function isSchemaTableResult(rows: EsqlResultRows): boolean {
-  return hasSchemaDerivedRows(rows) && !rows.has('document') && !rows.has('unknown');
 }
 
 /** Checks whether schema-derived rows contribute to a table-only result. */

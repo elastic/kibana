@@ -25,7 +25,7 @@ import { isTimeseriesSourceCommand } from '../commands/definitions/utils/timeser
 import type { NamedSubquery } from '../commands/definitions/utils/named_subqueries';
 import {
   analyzeResultRows,
-  isSchemaDerivedRow,
+  isSchemaTableResult,
 } from '../commands/definitions/utils/result_pipeline';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
@@ -126,7 +126,7 @@ export function areNewUnmappedFieldsAllowed(
 ): boolean {
   return (
     !previousCommands.some((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name.toLowerCase())) &&
-    !Array.from(analyzeResultRows(previousCommands, namedSubqueries)).every(isSchemaDerivedRow)
+    !isSchemaTableResult(analyzeResultRows(previousCommands, namedSubqueries))
   );
 }
 

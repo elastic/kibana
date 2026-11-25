@@ -28,13 +28,16 @@ const DOCUMENT_ROWS: EsqlResultRows = new Set(['document']);
 const SCHEMA_ROWS: EsqlResultRows = new Set(['schema']);
 const AGGREGATE_ROWS: EsqlResultRows = new Set(['aggregate']);
 
-/** Identifies rows whose lineage starts at a schema-producing command. */
-export const isSchemaDerivedRow = (kind: EsqlResultRowKind): boolean =>
+const isSchemaDerivedRow = (kind: EsqlResultRowKind): boolean =>
   kind === 'schema' || kind === 'schema-aggregate';
 
 /** Checks whether any possible output row is schema-derived. */
 export const hasSchemaDerivedRows = (rows: EsqlResultRows): boolean =>
   [...rows].some(isSchemaDerivedRow);
+
+/** Checks whether schema-derived rows contribute to a table-only result. */
+export const isSchemaTableResult = (rows: EsqlResultRows): boolean =>
+  hasSchemaDerivedRows(rows) && !rows.has('document') && !rows.has('unknown');
 
 function unionRows(results: readonly EsqlResultRows[]): EsqlResultRows {
   return results.length ? new Set(results.flatMap((rows) => [...rows])) : UNKNOWN_ROWS;
