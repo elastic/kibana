@@ -3460,7 +3460,8 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.networkDrive.identityMappingsLabel', {
-          defaultMessage: 'Path of CSV file containing users and groups SID (For Linux Network Drive)',
+          defaultMessage:
+            'Path of CSV file containing users and groups SID (For Linux Network Drive)',
         }),
         options: [],
         order: 8,
@@ -3491,9 +3492,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: false,
         depends_on: [],
         display: TOGGLE,
-        label: translate('searchConnectors.nativeConnectors.networkDrive.skipExtensionFilterLabel', {
-          defaultMessage: 'Attempt extraction for all file types',
-        }),
+        label: translate(
+          'searchConnectors.nativeConnectors.networkDrive.skipExtensionFilterLabel',
+          {
+            defaultMessage: 'Attempt extraction for all file types',
+          }
+        ),
         options: [],
         order: 10,
         required: true,
