@@ -199,8 +199,9 @@ describe('MonitorEditPage', () => {
     expect(getByText('Unable to load monitor configuration')).toBeInTheDocument();
   });
 
-  it('renders monitor not found prompt on 404', async () => {
-    const { getByText } = render(<MonitorEditPage />, {
+  it('renders monitor not found prompt on 404 even when legacy packagePolicyId is in the URL', async () => {
+    const { getByText, queryByText, queryByRole } = render(<MonitorEditPage />, {
+      url: '/monitors/test-id/edit?packagePolicyId=leftover-policy-id',
       state: {
         serviceLocations: {
           locations: [{ id: 'us_central', label: 'Us Central' }],
@@ -217,5 +218,7 @@ describe('MonitorEditPage', () => {
     });
 
     expect(getByText('Monitor not found')).toBeInTheDocument();
+    expect(queryByText('Leftover integration found')).not.toBeInTheDocument();
+    expect(queryByRole('button', { name: /Delete integration/i })).not.toBeInTheDocument();
   });
 });
