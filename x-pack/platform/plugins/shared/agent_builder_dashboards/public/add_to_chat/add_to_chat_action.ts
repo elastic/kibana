@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { ActiveConversation, AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -191,6 +191,14 @@ export const createDashboardAddToChatAction = (
       )
     );
   };
+  // the binding as it is now, without waiting for a conversation to load
+  const getConversationBinding = () =>
+    firstValueFrom(agentBuilder.events.ui.activeConversation$.pipe(take(1)));
+  const getAttachmentVersionsKey = (active: ActiveConversation | null | undefined): string =>
+    JSON.stringify([
+      active?.id,
+      active?.conversation?.attachments?.map(({ id, current_version: version }) => [id, version]),
+    ]);
 
   return {
     id: ADD_TO_CHAT_ACTION_ID,
@@ -271,14 +279,21 @@ export const createDashboardAddToChatAction = (
         return { conversation, link, sent };
       };
 
-      // the comparison is async: resolve again if the user switched or closed the chat meanwhile, so
-      // the pointer never targets a dashboard id of another conversation
-      let resolved = await resolveConversation();
-      for (let attempt = 1; attempt < MAX_CONVERSATION_RESOLVE_ATTEMPTS; attempt++) {
-        if ((await getActiveConversation())?.id === resolved.conversation?.id) {
-          break;
+      // the comparison is async: resolve again if the user switched or closed the chat, or its
+      // attachments changed, meanwhile, so the pointer never targets a dashboard id of another
+      // conversation; gives up rather than staging against a binding that keeps changing
+      let resolved: Awaited<ReturnType<typeof resolveConversation>> | undefined;
+      for (let attempt = 0; attempt < MAX_CONVERSATION_RESOLVE_ATTEMPTS && !resolved; attempt++) {
+        const candidate = await resolveConversation();
+        const binding = await getConversationBinding();
+        if (
+          getAttachmentVersionsKey(binding) === getAttachmentVersionsKey(candidate.conversation)
+        ) {
+          resolved = candidate;
         }
-        resolved = await resolveConversation();
+      }
+      if (!resolved) {
+        return;
       }
       const {
         conversation: activeConversation,
