@@ -13,6 +13,9 @@ import { setManifestVersion, setProtectionUpdatesNote } from '../fixtures/protec
 const NOTE = 'test note';
 // 0 means the wait has no own timer; it is bounded by the test timeout.
 const NO_OWN_TIMEOUT_MS = 0;
+// Starts only once the tab is ready, so it never spends the cold navigation's budget; the lookup
+// is sent while the tab loads, so its answer is normally already there by then.
+const NOTE_LOOKUP_DEADLINE_MS = 30_000;
 
 spaceTest.describe(
   'Policy details - protection updates (read only)',
@@ -84,9 +87,23 @@ spaceTest.describe(
         await expect(protectionUpdates.versionToDeployViewMode).toBeVisible();
         await expect(protectionUpdates.versionToDeployPicker).toBeHidden();
         await expect(protectionUpdates.saveButton).toBeDisabled();
-        // Awaited only once the tab is ready: the lookup has no own timer (bounded by the test
-        // timeout), so a cold load cannot expire it before the tab's own readiness budget.
-        expect((await noteLookup).status()).toBe(404);
+        // Awaited only once the tab is ready: the lookup has no own timer, so a cold load cannot
+        // expire it; the deadline below starts now and gives a missing answer a clear failure.
+        let deadline: ReturnType<typeof setTimeout> | undefined;
+        try {
+          const noteResponse = await Promise.race([
+            noteLookup,
+            new Promise<never>((_, reject) => {
+              deadline = setTimeout(
+                () => reject(new Error('The note lookup for the policy never answered')),
+                NOTE_LOOKUP_DEADLINE_MS
+              );
+            }),
+          ]);
+          expect(noteResponse.status()).toBe(404);
+        } finally {
+          clearTimeout(deadline);
+        }
         // With no note to show, a read-only user gets no note section at all.
         await expect(protectionUpdates.noteTitle).toBeHidden();
         await expect(protectionUpdates.noteViewMode).toBeHidden();
