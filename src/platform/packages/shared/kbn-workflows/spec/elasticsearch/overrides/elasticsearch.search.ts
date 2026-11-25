@@ -14,7 +14,7 @@
  * This override is used to add the `index` parameter to the paramsSchema
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 import { getShapeAt } from '../../../common/utils/zod';
 
@@ -142,12 +142,15 @@ This situation can occur because the splitting criterion is based on Lucene docu
       'stats',
     ],
   },
-  paramsSchema: z.object({
-    ...search.shape,
-    ...getShapeAt(search_request, 'query'),
-    index: types_indices,
-    // The OpenAPI-generated schema for sort is too restrictive; ES accepts complex body-sort objects that the schema rejects.
-    sort: z.any().optional(),
-  }),
+  paramsSchema: lazySchema(() =>
+    z.object({
+      // The body shape goes last: the request builder sends keys that are in both (e.g. `_source`) in the body.
+      ...getShapeAt(search_request, 'query'),
+      ...search.shape,
+      index: types_indices,
+      // The OpenAPI-generated schema for sort is too restrictive; ES accepts complex body-sort objects that the schema rejects.
+      sort: z.any().optional(),
+    })
+  ),
   outputSchema: global_search_response_body,
 };

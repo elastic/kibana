@@ -46,7 +46,8 @@ const logs = (
     doc_count: 0,
     selectors: termsAggregate([]),
   },
-  frustration: Partial<Aggregations['frustration']> = {}
+  frustration: Partial<Aggregations['frustration']> = {},
+  pageSignals: Aggregations['pageSignals'] = { doc_count: 0, pages: termsAggregate([]) }
 ): UsageAggregations => {
   return {
     ...NO_ENVIRONMENTS,
@@ -62,9 +63,12 @@ const logs = (
       },
       clicks,
       frustration: { ...EMPTY_FRUSTRATION, ...frustration },
+      pageSignals,
     },
   };
 };
+
+const NO_SIGNALS = { lcpP75Ms: null, inpP75Ms: null, clsP75: null, jsErrors: null };
 
 const EMPTY = {
   topPages: [],
@@ -101,12 +105,50 @@ describe('toUsage', () => {
     );
 
     expect(usage.topPages).toEqual([
+      { url: 'https://shop/', pageLoads: 4, loadTimeP75Ms: 1200.5, ...NO_SIGNALS },
+      { url: 'https://shop/cart', pageLoads: 1, loadTimeP75Ms: null, ...NO_SIGNALS },
+    ]);
+  });
+
+  it('adds the web vitals and JS errors of each page, by its route, and none to a page without', () => {
+    const usage = toUsage(
+      logs(
+        {
+          topPages: termsAggregate([
+            { key: '/products/{slug}', doc_count: 4, loadTime: percentile(1200) },
+            // A page of an app without routes: its vitals and errors carry no URL to join on.
+            { key: 'https://shop/cart', doc_count: 2, loadTime: percentile(900) },
+          ]),
+        },
+        undefined,
+        {},
+        {
+          doc_count: 12,
+          pages: termsAggregate([
+            {
+              key: '/products/{slug}',
+              doc_count: 12,
+              lcp: { doc_count: 4, value: percentile(2100) },
+              inp: { doc_count: 2, value: percentile(180) },
+              cls: { doc_count: 4, value: percentile(null) },
+              jsErrors: { doc_count: 0 },
+            },
+          ]),
+        }
+      )
+    );
+
+    expect(usage.topPages).toEqual([
       {
-        url: 'https://shop/',
+        url: '/products/{slug}',
         pageLoads: 4,
-        loadTimeP75Ms: 1200.5,
+        loadTimeP75Ms: 1200,
+        lcpP75Ms: 2100,
+        inpP75Ms: 180,
+        clsP75: null,
+        jsErrors: 0,
       },
-      { url: 'https://shop/cart', pageLoads: 1, loadTimeP75Ms: null },
+      { url: 'https://shop/cart', pageLoads: 2, loadTimeP75Ms: 900, ...NO_SIGNALS },
     ]);
   });
 

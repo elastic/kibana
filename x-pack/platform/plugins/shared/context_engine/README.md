@@ -427,10 +427,11 @@ needs the Elasticsearch `write` privilege on each backing index, checked with `h
 or the route returns 403. If any AI index fails, the route rejects the request and saves
 nothing.
 
-Each request writes one `memory_save_event` audit event. It records the user the events belong
-to in `user.target.id`, the session in `kibana.saved_object`, and how many events were saved
-and failed. It records rejected requests, failed writes, and batches where every event fails as
-failures. Core adds the caller, the space and the request id.
+After route authorization, request validation, and feature-flag checks pass, each request writes
+one `memory_save_event` audit event. It records the user the events belong to in `user.target.id`,
+the session in `kibana.saved_object`, and how many events were saved and failed. Requests
+rejected by user-resolution or AI-index checks, failed writes, and batches where every event
+fails are recorded as failures. Core adds the caller, the space and the request id.
 
 ## Session memory
 

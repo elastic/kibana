@@ -370,8 +370,8 @@ export interface KafkaKerberosConfig {
   config_path: string;
   // path of the keytab file, on the host of the agent (keytab only)
   keytab?: string;
-  // password only
-  username?: string;
+  // the principal: the one to look up in the keytab, or the one to log in with (password)
+  username: string;
   service_name?: string;
   realm: string;
   enable_krb5_fast?: boolean;
