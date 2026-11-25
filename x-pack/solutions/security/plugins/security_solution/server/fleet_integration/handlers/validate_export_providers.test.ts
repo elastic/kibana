@@ -7,10 +7,13 @@
 
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import {
   removeDottedResponseActionsKeys,
+  removeResponseActionsConfigKeys,
   validateExportProviders,
   validateNoDottedResponseActionsKeys,
+  validateNoResponseActionsConfigKeys,
 } from './validate_export_providers';
 import { EndpointIntegrationFleetError } from './errors';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
@@ -104,6 +107,12 @@ describe('validateExportProviders()', () => {
       const policy = set(policyFactory(), 'mac.response_actions', 'azure-1');
 
       expect(getError(policy).message).toBe('mac.response_actions must be an object');
+    });
+
+    it('should reject a response_actions key other than export_providers', () => {
+      const policy = set(buildPolicy([buildProvider()]), 'mac.response_actions.foo', true);
+
+      expect(getError(policy).message).toBe('mac.response_actions: "foo" is not supported');
     });
 
     it('should reject an export_providers that is not an array', () => {
@@ -403,5 +412,77 @@ describe('removeDottedResponseActionsKeys()', () => {
     const policy = set(cloneDeep(expected), ['windows.response_actions'], {});
 
     expect(removeDottedResponseActionsKeys(policy)).toEqual(expected);
+  });
+});
+
+/** Config keys whose value Fleet merges into `policy.<os>.response_actions` of the agent policy */
+const responseActionsConfigKeyCases: Array<[string, unknown]> = [
+  ['policy.windows.response_actions', { export_providers: [buildProvider()] }],
+  ['policy.mac.response_actions.export_providers', [buildProvider()]],
+  ['policy.linux', { response_actions: { export_providers: [buildProvider()] } }],
+  ['policy.windows', { 'response_actions.export_providers': [buildProvider()] }],
+];
+
+describe('validateNoResponseActionsConfigKeys()', () => {
+  const buildConfig = (key: string, value: unknown): PackagePolicyConfigRecord => ({
+    policy: { value: policyFactory() },
+    [key]: { value },
+  });
+
+  const getConfigKeyError = (config: PackagePolicyConfigRecord): EndpointIntegrationFleetError => {
+    try {
+      validateNoResponseActionsConfigKeys(config);
+    } catch (error) {
+      return error;
+    }
+
+    throw new Error('Expected validateNoResponseActionsConfigKeys() to throw');
+  };
+
+  it.each(responseActionsConfigKeyCases)('should reject the key %s', (key, value) => {
+    const error = getConfigKeyError(buildConfig(key, value));
+
+    expect(error).toBeInstanceOf(EndpointIntegrationFleetError);
+    expect(error.statusCode).toBe(400);
+    expect(error.message).toBe(
+      `response_actions can't be set through the input config key "${key}"`
+    );
+  });
+
+  it.each<[string, unknown]>([
+    ['artifact_manifest', { manifest_version: '1.0.0', schema_version: 'v1', artifacts: {} }],
+    ['integration_config', { type: 'endpoint', endpointConfig: { preset: 'EDRComplete' } }],
+    ['policy.windows.malware', { mode: 'off' }],
+    ['policy.windows', { malware: { mode: 'off' } }],
+  ])('should accept the key %s', (key, value) => {
+    expect(() => validateNoResponseActionsConfigKeys(buildConfig(key, value))).not.toThrow();
+  });
+
+  it('should accept export providers in the policy key', () => {
+    expect(() =>
+      validateNoResponseActionsConfigKeys({ policy: { value: buildPolicy([buildProvider()]) } })
+    ).not.toThrow();
+  });
+});
+
+describe('removeResponseActionsConfigKeys()', () => {
+  const buildConfig = (): PackagePolicyConfigRecord => ({
+    policy: { value: buildPolicy([buildProvider()]) },
+    artifact_manifest: { value: { manifest_version: '1.0.0' } },
+  });
+
+  it('should remove every key that sets response_actions and keep the others', () => {
+    const config = buildConfig();
+    for (const [key, value] of responseActionsConfigKeyCases) {
+      config[key] = { value };
+    }
+
+    expect(removeResponseActionsConfigKeys(config)).toEqual(buildConfig());
+  });
+
+  it('should return the same config when no key sets response_actions', () => {
+    const config = buildConfig();
+
+    expect(removeResponseActionsConfigKeys(config)).toBe(config);
   });
 });
