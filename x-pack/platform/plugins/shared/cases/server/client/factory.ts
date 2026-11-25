@@ -49,6 +49,7 @@ import {
   AlertService,
   TemplatesService,
   FieldDefinitionsService,
+  ObservableService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -398,6 +399,12 @@ export class CasesClientFactory {
       attachmentService,
       licensingService,
       notificationService,
+      observableService: new ObservableService({
+        log: this.logger,
+        unsecuredSavedObjectsClient,
+        savedObjectsSerializer,
+        namespace,
+      }),
     };
   }
 

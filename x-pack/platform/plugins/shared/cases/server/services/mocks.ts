@@ -16,7 +16,9 @@ import type {
   AttachmentService,
   TemplatesService,
   FieldDefinitionsService,
+  ObservableService,
 } from '.';
+import type { ObservableToCreate } from './observables';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { DeleteAttachmentArgs } from './attachments/types';
 import type { LicensingService } from './licensing';
@@ -49,6 +51,7 @@ export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
+export type ObservableServiceMock = jest.Mocked<ObservableService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -270,4 +273,35 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
   });
 
   return service as unknown as FieldDefinitionsServiceMock;
+};
+
+/** Behaves like an empty `cases-observables` store: creates echo their input, reads find nothing. */
+export const createObservableServiceMock = (): ObservableServiceMock => {
+  const service: PublicMethodsOf<ObservableService> = lazyObject({
+    bulkCreate: jest
+      .fn()
+      .mockImplementation(async ({ observables }: { observables: ObservableToCreate[] }) =>
+        observables.map(({ id, typeKey, value, description, createdAt }) => ({
+          id,
+          typeKey,
+          value,
+          description,
+          createdAt,
+          updatedAt: null,
+        }))
+      ),
+    getForCase: jest.fn().mockImplementation(async (_caseId: string, ids: string[]) => ({
+      found: [],
+      missingIds: ids,
+    })),
+    update: jest.fn().mockResolvedValue(undefined),
+    bulkDelete: jest.fn().mockResolvedValue(undefined),
+    countForCase: jest.fn().mockResolvedValue(0),
+    findExisting: jest.fn().mockResolvedValue([]),
+    findPage: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    getPreviews: jest.fn().mockResolvedValue(new Map()),
+  });
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as ObservableServiceMock;
 };
