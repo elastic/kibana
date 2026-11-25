@@ -101,6 +101,26 @@ describe('RefreshInterval', () => {
     expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(60);
   });
 
+  it.each(['0', '-3', ''])(
+    'reverts the count "%s" to the current interval once focus leaves the form',
+    (typed) => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 10_000, intervalDisplayUnit: 's' }}
+          onChange={onChange}
+        />
+      );
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      fireEvent.change(count, { target: { value: typed } });
+      fireEvent.blur(count);
+
+      expect(count).toHaveValue(10);
+      expect(onChange).not.toHaveBeenCalled();
+    }
+  );
+
   it('disables every control when `readOnly`', () => {
     renderWithEuiTheme(
       <RefreshInterval

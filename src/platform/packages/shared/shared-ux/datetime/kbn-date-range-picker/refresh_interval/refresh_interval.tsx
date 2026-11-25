@@ -60,9 +60,15 @@ export interface RefreshIntervalProps {
 const getMinCount = (minIntervalMs: number, unit: AutoRefreshIntervalUnit): number =>
   Math.max(1, Math.ceil(minIntervalMs / autoRefreshIntervalToMs(1, unit)));
 
+/** Whether `count` can be applied as an interval count. */
+const isApplicableCount = (count: number | ''): count is number =>
+  typeof count === 'number' && count > 0;
+
 /**
  * "Refresh every" form: a switch to turn auto-refresh on and off, an interval count and a unit.
  * Turning auto-refresh on also starts the timer, so a second click on play is not needed.
+ * A count that can't be applied (empty, zero or negative) goes back to the current interval once
+ * focus leaves the form.
  */
 export function RefreshInterval({
   value,
@@ -99,7 +105,7 @@ export function RefreshInterval({
 
       setCountInput(parsed);
 
-      if (typeof parsed !== 'number' || isNaN(parsed) || parsed <= 0) return;
+      if (!isApplicableCount(parsed)) return;
 
       const intervalMs = autoRefreshIntervalToMs(parsed, derived.unit);
       if (intervalMs >= minIntervalMs) {
@@ -112,19 +118,22 @@ export function RefreshInterval({
   const handleBlur = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
       if (e.currentTarget.contains(e.relatedTarget)) return;
-      if (typeof countInput !== 'number' || countInput <= 0) return;
+      if (!isApplicableCount(countInput)) {
+        setCountInput(derived.count);
+        return;
+      }
       if (autoRefreshIntervalToMs(countInput, derived.unit) >= minIntervalMs) return;
 
       setCountInput(minCount);
       onChange({ ...value, intervalMs: autoRefreshIntervalToMs(minCount, derived.unit) });
     },
-    [countInput, derived.unit, minIntervalMs, minCount, onChange, value]
+    [countInput, derived.count, derived.unit, minIntervalMs, minCount, onChange, value]
   );
 
   const handleUnitChange = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
       const newUnit = e.target.value as AutoRefreshIntervalUnit;
-      const currentCount = typeof countInput === 'number' && countInput > 0 ? countInput : 1;
+      const currentCount = isApplicableCount(countInput) ? countInput : 1;
       const count = Math.max(currentCount, getMinCount(minIntervalMs, newUnit));
 
       onChange({
