@@ -61,6 +61,8 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
             type,
             expire_time: expireTime,
           } = request.body;
+          // only the items of the detection lists can have it, which the body of an Endpoint artifact does not
+          const appliesTo = 'applies_to' in request.body ? request.body.applies_to : undefined;
           const exceptionLists = await getExceptionListClient(context);
           const exceptionList = await exceptionLists.getExceptionList({
             id: undefined,
@@ -109,6 +111,7 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
           }
 
           const createdListItem = await exceptionLists.createExceptionListItem({
+            appliesTo,
             comments,
             description,
             entries: entriesArray,

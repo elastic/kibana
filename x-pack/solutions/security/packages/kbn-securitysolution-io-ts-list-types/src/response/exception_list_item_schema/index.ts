@@ -26,29 +26,34 @@ import { entriesArray } from '../../common/entries';
 import { item_id } from '../../common/item_id';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { expireTimeOrUndefined } from '../../common/expire_time';
+import { appliesTo } from '../../common/applies_to';
 
 export const exceptionListItemSchema = t.exact(
-  t.type({
-    _version: _versionOrUndefined,
-    comments: commentsArray,
-    created_at,
-    created_by,
-    description,
-    entries: entriesArray,
-    expire_time: expireTimeOrUndefined,
-    id,
-    item_id,
-    list_id,
-    meta: metaOrUndefined,
-    name,
-    namespace_type,
-    os_types: osTypeArray,
-    tags,
-    tie_breaker_id,
-    type: exceptionListItemType,
-    updated_at,
-    updated_by,
-  })
+  t.intersection([
+    t.type({
+      _version: _versionOrUndefined,
+      comments: commentsArray,
+      created_at,
+      created_by,
+      description,
+      entries: entriesArray,
+      expire_time: expireTimeOrUndefined,
+      id,
+      item_id,
+      list_id,
+      meta: metaOrUndefined,
+      name,
+      namespace_type,
+      os_types: osTypeArray,
+      tags,
+      tie_breaker_id,
+      type: exceptionListItemType,
+      updated_at,
+      updated_by,
+    }),
+    // optional, which keeps compiling the code that builds an item without it: an item without it applies to the source documents
+    t.partial({ applies_to: appliesTo }),
+  ])
 );
 
 export type ExceptionListItemSchema = t.TypeOf<typeof exceptionListItemSchema>;

@@ -8,6 +8,7 @@
 import React, { memo, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -18,7 +19,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL } from './translations';
+import { isEsqlOutputColumnsItem } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import {
+  EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL,
+  EXCEPTION_ITEM_COMPUTED_COLUMNS_BADGE,
+  EXCEPTION_ITEM_COMPUTED_COLUMNS_BADGE_TOOLTIP,
+} from './translations';
 
 export interface ExceptionItemCardHeaderProps {
   item: ExceptionListItemSchema;
@@ -53,9 +59,30 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
     return (
       <EuiFlexGroup data-test-subj={dataTestSubj} justifyContent="spaceBetween">
         <EuiFlexItem grow={9}>
-          <EuiTitle size="xs" textTransform="uppercase" data-test-subj={`${dataTestSubj}-title`}>
-            <h3>{item.name}</h3>
-          </EuiTitle>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s" wrap>
+            <EuiFlexItem grow={false}>
+              <EuiTitle
+                size="xs"
+                textTransform="uppercase"
+                data-test-subj={`${dataTestSubj}-title`}
+              >
+                <h3>{item.name}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {isEsqlOutputColumnsItem(item) && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={EXCEPTION_ITEM_COMPUTED_COLUMNS_BADGE_TOOLTIP}>
+                  <EuiBadge
+                    color="hollow"
+                    tabIndex={0}
+                    data-test-subj={`${dataTestSubj}-computedColumnsBadge`}
+                  >
+                    {EXCEPTION_ITEM_COMPUTED_COLUMNS_BADGE}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover

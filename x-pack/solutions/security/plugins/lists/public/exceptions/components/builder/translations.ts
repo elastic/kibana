@@ -122,3 +122,66 @@ export const WILDCARD_WITH_IS_OPERATOR_TOOLTIP = i18n.translate(
       'Using a wildcard with the "IS" operator can make an entry ineffective. Change the operator to "MATCHES" to ensure wildcards run properly.',
   }
 );
+
+export const ESQL_OUTPUT_COLUMN_FIELD_PLACEHOLDER = i18n.translate(
+  'xpack.lists.exceptions.builder.esqlOutputColumn.fieldPlaceholder',
+  {
+    defaultMessage: 'Column name',
+  }
+);
+
+export const ESQL_OUTPUT_COLUMN_FIELD_HELP_TEXT = i18n.translate(
+  'xpack.lists.exceptions.builder.esqlOutputColumn.fieldHelpText',
+  {
+    defaultMessage: 'Type the name of a column that the rule query returns.',
+  }
+);
+
+export const COLUMN_TYPE = i18n.translate('xpack.lists.exceptions.builder.columnTypeLabel', {
+  defaultMessage: 'Column type',
+});
+
+export const COLUMN_TYPE_PLACEHOLDER = i18n.translate(
+  'xpack.lists.exceptions.builder.esqlOutputColumn.columnTypePlaceholder',
+  {
+    defaultMessage: 'Select a type',
+  }
+);
+
+export const ESQL_OUTPUT_COLUMN_VALUE_PLACEHOLDER = i18n.translate(
+  'xpack.lists.exceptions.builder.esqlOutputColumn.valuePlaceholder',
+  {
+    defaultMessage: 'Enter a value',
+  }
+);
+
+export const ESQL_OUTPUT_COLUMN_VALUES_PLACEHOLDER = i18n.translate(
+  'xpack.lists.exceptions.builder.esqlOutputColumn.valuesPlaceholder',
+  {
+    defaultMessage: 'Enter values and press Enter',
+  }
+);
+
+export const ESQL_OUTPUT_COLUMN_VALUE_NOT_VALID = (value: string, columnType: string): string =>
+  i18n.translate('xpack.lists.exceptions.builder.esqlOutputColumn.valueNotValid', {
+    defaultMessage: '"{value}" is not a valid value for a column of type {columnType}',
+    values: { columnType, value },
+  });
+
+export const ESQL_OUTPUT_COLUMN_WILDCARD_ENDS_WITH_BACKSLASH = (value: string): string =>
+  i18n.translate('xpack.lists.exceptions.builder.esqlOutputColumn.wildcardEndsWithBackslash', {
+    defaultMessage: 'The pattern "{value}" cannot end with a single backslash',
+    values: { value },
+  });
+
+export const ESQL_OUTPUT_COLUMN_WILDCARD_TOO_LONG = (maxLength: number): string =>
+  i18n.translate('xpack.lists.exceptions.builder.esqlOutputColumn.wildcardTooLong', {
+    defaultMessage: 'A pattern cannot be longer than {maxLength} characters',
+    values: { maxLength },
+  });
+
+export const ESQL_OUTPUT_COLUMN_OPERATOR_NOT_SUPPORTED = (columnType: string): string =>
+  i18n.translate('xpack.lists.exceptions.builder.esqlOutputColumn.operatorNotSupported', {
+    defaultMessage: 'This operator is not supported for a column of type {columnType}',
+    values: { columnType },
+  });

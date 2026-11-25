@@ -8,9 +8,16 @@
 import type { ElementType } from 'react';
 import React from 'react';
 import { css } from '@emotion/css';
-import { EuiExpression, EuiBadge } from '@elastic/eui';
+import {
+  EuiExpression,
+  EuiBadge,
+  EuiScreenReaderOnly,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ValueWithSpaceWarning } from '../../../..';
+import * as i18n from '../../translations';
 import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
 import type { Entry } from '../types';
 
@@ -55,11 +62,31 @@ export const getValue = (entry: Entry) => {
   return 'value' in entry ? entry.value : '';
 };
 
+const ColumnTypeLabel = ({ columnType }: { columnType: string }) => {
+  const { euiTheme } = useEuiTheme();
+  const style = css`
+    margin-inline-start: ${euiTheme.size.xs};
+  `;
+  return (
+    <EuiTextColor color="subdued" className={style} data-test-subj="entryColumnType">
+      <EuiScreenReaderOnly>
+        <span>{`${i18n.COLUMN_TYPE}: `}</span>
+      </EuiScreenReaderOnly>
+      {`(${columnType})`}
+    </EuiTextColor>
+  );
+};
+
+/** The type of the column that an entry on the output columns of an ES|QL query declares, shown after the value. */
+export const getColumnType = (entry: Entry): string | undefined =>
+  'value_type' in entry ? entry.value_type : undefined;
+
 export const getValueExpression = (
   type: ListOperatorTypeEnum,
   operator: string,
   value: string | string[],
-  showValueListModal: ElementType
+  showValueListModal: ElementType,
+  columnType?: string
 ) => (
   <>
     <EuiExpression
@@ -67,6 +94,7 @@ export const getValueExpression = (
       value={getEntryValue(type, value, showValueListModal)}
       data-test-subj="entryValueExpression"
     />
+    {columnType ? <ColumnTypeLabel columnType={columnType} /> : null}
     <ValueWithSpaceWarning value={value} />
   </>
 );

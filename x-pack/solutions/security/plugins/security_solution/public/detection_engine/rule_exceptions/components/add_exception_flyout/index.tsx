@@ -26,6 +26,7 @@ import {
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionAppliesTo } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
@@ -154,6 +155,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, [isEndpointItem, sharedListToAddTo]);
   const [
     {
+      appliesTo,
       exceptionItemMeta: { name: exceptionItemName },
       listType,
       selectedOs,
@@ -186,6 +188,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     selectedRulesToAddTo: rules != null ? rules : [],
   });
 
+  // An item on the computed columns can be created from any place except for Endpoint exceptions. Only the ES|QL rules use it, the rules of other types leave it out when they run.
+  const canApplyToComputedColumns = !isEndpointItem;
+
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
@@ -216,6 +221,13 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         type: 'setInitialExceptionItems',
         items,
       });
+    },
+    [dispatch]
+  );
+
+  const setAppliesTo = useCallback(
+    (value: ExceptionAppliesTo): void => {
+      dispatch({ type: 'setAppliesTo', appliesTo: value });
     },
     [dispatch]
   );
@@ -624,6 +636,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         />
         <EuiHorizontalRule />
         <ExceptionsConditions
+          appliesTo={appliesTo}
+          onAppliesToChange={canApplyToComputedColumns ? setAppliesTo : undefined}
           exceptionItemName={exceptionItemName}
           allowLargeValueLists={allowLargeValueLists}
           exceptionListItems={initialItems}

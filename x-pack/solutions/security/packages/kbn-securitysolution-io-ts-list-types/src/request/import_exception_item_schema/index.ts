@@ -31,6 +31,7 @@ import { exceptionListItemType } from '../../common/exception_list_item_type';
 import type { EntriesArray } from '../../common/entries';
 import { DefaultImportCommentsArray } from '../../common/default_import_comments_array';
 import type { ExpireTimeOrUndefined, ImportCommentsArray } from '../../common';
+import { appliesTo } from '../../common/applies_to';
 import { expireTimeOrUndefined } from '../../common';
 
 /**
@@ -57,6 +58,7 @@ export const importExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       id, // defaults to undefined if not set during decode
+      applies_to: appliesTo, // an item without it applies to the source documents
       comments: DefaultImportCommentsArray, // defaults to empty array if not set during decode
       created_at, // defaults undefined if not set during decode
       updated_at, // defaults undefined if not set during decode

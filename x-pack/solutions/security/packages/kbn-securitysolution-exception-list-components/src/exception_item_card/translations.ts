@@ -184,3 +184,10 @@ export const AFFECTED_RULES_ARIA_LABEL = i18n.translate(
     defaultMessage: 'View affected rules',
   }
 );
+
+export const COLUMN_TYPE = i18n.translate(
+  'exceptionList-components.exceptions.exceptionItem.card.conditions.columnType',
+  {
+    defaultMessage: 'Column type',
+  }
+);
