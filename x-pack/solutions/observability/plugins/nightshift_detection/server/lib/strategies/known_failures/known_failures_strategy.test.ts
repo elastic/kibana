@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
 import type { QueryLink, QueryType } from '@kbn/significant-events-schema';
 import { computeRuleId } from '../../rules/rule_identity';
@@ -18,14 +19,24 @@ const createQuery = ({
   title = 'Checkout timeouts',
   esql = 'FROM logs-* | WHERE service.name == "checkout" AND message : "timeout"',
   type = 'match',
+  // The lowest score significant events backs with a rule, so the default fixture sits on the edge.
+  severityScore = 60,
 }: {
   id?: string;
   sourceId?: string;
   title?: string;
   esql?: string;
   type?: QueryType;
+  severityScore?: number;
 } = {}): QueryLink => ({
-  query: { id, title, description: 'Checkout calls time out', esql: { query: esql }, type },
+  query: {
+    id,
+    title,
+    description: 'Checkout calls time out',
+    esql: { query: esql },
+    type,
+    severity_score: severityScore,
+  },
   source_id: sourceId,
   rule_backed: false,
   rule_id: `rule-${id}`,
@@ -117,9 +128,15 @@ describe('KnownFailuresStrategy', () => {
     // Noted, not skipped: a skipped source keeps all its rules, so the old rule of an edited
     // indicator beside a STATS one would never be deleted. The note is the only place an author
     // learns why, so it names the actual reason.
-    it('notes STATS, non-filter, SET, subquery, self-timed, parameterized and overlong knowledge indicators without skipping their source', async () => {
+    it('notes STATS, non-filter, SET, subquery, self-timed, parameterized, overlong and low-severity knowledge indicators without skipping their source', async () => {
       const { resources, skipped, notes } = await new KnownFailuresStrategy().resources(
         createContext([
+          // Below the score significant events needs to back a query with a rule.
+          createQuery({ id: 'medium', severityScore: 59 }),
+          {
+            ...createQuery({ id: 'unscored' }),
+            query: omit(createQuery({ id: 'unscored' }).query, 'severity_score'),
+          },
           createQuery({ id: 'stats', type: 'stats' }),
           createQuery({ id: 'limited', esql: 'FROM logs-* | WHERE a == 1 | LIMIT 10' }),
           createQuery({ id: 'unfiltered', esql: 'FROM logs-* | SORT message' }),
@@ -144,6 +161,8 @@ describe('KnownFailuresStrategy', () => {
       expect(resources).toEqual([]);
       expect(skipped).toEqual([]);
       expect(notes).toEqual([
+        expect.stringMatching(/^source-1: .*\[medium\] has a severity score of 59, below 60/),
+        expect.stringMatching(/^source-1: .*\[unscored\] has no severity score/),
         expect.stringMatching(/^source-1: .*\[stats\] is a STATS query/),
         expect.stringMatching(/^source-1: .*\[limited\] uses LIMIT/),
         expect.stringMatching(/^source-1: .*\[unfiltered\] has no WHERE/),

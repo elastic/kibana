@@ -13,7 +13,14 @@ import { KnownFailuresGenerator } from './known_failures_generator';
 const WINDOW = { from: Date.UTC(2026, 10, 20, 10, 0), to: Date.UTC(2026, 10, 20, 10, 5) };
 
 const createQuery = (id: string, esql: string): QueryLink => ({
-  query: { id, title: id, description: id, esql: { query: esql }, type: 'match' },
+  query: {
+    id,
+    title: id,
+    description: id,
+    esql: { query: esql },
+    type: 'match',
+    severity_score: 70,
+  },
   source_id: 'source-1',
   rule_backed: false,
   rule_id: `rule-${id}`,
