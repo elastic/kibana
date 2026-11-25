@@ -1046,6 +1046,7 @@
       "groupName": "CLI tooling",
       "matchDepNames": [
         "chalk",
+        "chalk-template",
         "cli-progress",
         "cli-table3",
         "commander",
