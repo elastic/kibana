@@ -10,7 +10,16 @@
 import { BehaviorSubject } from 'rxjs';
 
 import type { FilterableSource } from '@kbn/data-source';
-import { getFirstPersistedDataViewId } from './create_data_control_panel_action';
+import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+import { dataViewsService } from '../services/kibana_services';
+import {
+  createDataControlPanelAction,
+  getFirstPersistedDataViewId,
+} from './create_data_control_panel_action';
+
+jest.mock('../controls/data_controls/open_data_control_editor', () => ({
+  openDataControlEditor: jest.fn(),
+}));
 
 const getSource = (id: string, isPersisted: boolean) =>
   ({ id, isPersisted: () => isPersisted } as unknown as FilterableSource);
@@ -60,5 +69,62 @@ describe('getFirstPersistedDataViewId', () => {
 
   test('returns undefined when the embeddable does not publish data sources', () => {
     expect(getFirstPersistedDataViewId({})).toBeUndefined();
+  });
+});
+
+describe('createDataControlPanelAction', () => {
+  const createEmbeddable = ({
+    published,
+    defaultDataViewId,
+  }: {
+    published?: FilterableSource[];
+    defaultDataViewId?: string;
+  }) => ({
+    addNewPanel: jest.fn(),
+    ...getEmbeddable(published),
+    ...(defaultDataViewId ? { getEditorConfig: () => ({ defaultDataViewId }) } : {}),
+  });
+
+  const execute = async (embeddable: ReturnType<typeof createEmbeddable>) => {
+    await createDataControlPanelAction().execute({ embeddable } as never);
+    return (openDataControlEditor as jest.Mock).mock.calls[0][0].initialState.data_view_id;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    dataViewsService.getDefaultDataView = jest.fn().mockResolvedValue({ id: 'default-data-view' });
+  });
+
+  it('starts from the first published data view', async () => {
+    await expect(
+      execute(createEmbeddable({ published: [getSource('published-data-view', true)] }))
+    ).resolves.toBe('published-data-view');
+  });
+
+  it('skips a published ES|QL source, whose id is not a data view, and uses the next data view', async () => {
+    await expect(
+      execute(createEmbeddable({ published: [esqlSource, getSource('published-data-view', true)] }))
+    ).resolves.toBe('published-data-view');
+  });
+
+  it('starts from the default data view when only ES|QL sources are published', async () => {
+    await expect(execute(createEmbeddable({ published: [esqlSource] }))).resolves.toBe(
+      'default-data-view'
+    );
+  });
+
+  it('starts from the default data view when nothing is published', async () => {
+    await expect(execute(createEmbeddable({ published: [] }))).resolves.toBe('default-data-view');
+  });
+
+  it('prefers the default data view of the editor config over a published one', async () => {
+    await expect(
+      execute(
+        createEmbeddable({
+          published: [getSource('published-data-view', true)],
+          defaultDataViewId: 'configured-data-view',
+        })
+      )
+    ).resolves.toBe('configured-data-view');
   });
 });
