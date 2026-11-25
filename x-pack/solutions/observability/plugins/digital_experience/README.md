@@ -101,8 +101,7 @@ on serverless and stateful.
   `ApplicationPage` stays the route's page and hands a mobile application to
   `MobileApplicationPage` (web ones keep the EDOT Browser and Classic RUM page). That page owns its
   header, as the Session page does: the title, a badge per platform the application reported on,
-  Share, the Overview tab, and two actions, **Compare to the previous period** (`compare=true` in
-  the URL, so a reload or Share keeps it) and **Open in Discover**, which opens the application's
+  Share, the Overview tab, and **Open in Discover**, which opens the application's
   mobile events with the URL's filters, newest first, built in the browser from the URL
   (`use_mobile_discover_href.ts`, `common/mobile/discover.ts`). It fetches the KPIs
   (`use_mobile_kpis.ts`) for the header's badges and the Overview, and remounts per application, so
@@ -114,11 +113,14 @@ on serverless and stateful.
   date picker pinned to the right. A picked value fits its capped button (`12em`), so picking one
   never moves the page. The filters are in the URL, so a reload or a shared link keeps them; the
   router drops a value longer than the KPI route accepts (`common/filter_lengths.ts`). Below, the
-  KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
+  **Health summary**: its title, a **Compare to the previous period** toggle (`compare=true` in the
+  URL, so a reload or Share keeps it) and the KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
   (health summary, release health, stability, users, performance, views) join the page as those
-  issues fill them, rather than showing placeholders. Every KPI uses `MobilePanel`: the current
+  issues fill them, rather than showing placeholders. Every KPI uses `ComparedKpiPanel`: the current
   value and a tooltip with the calculation and, with Compare on, its change against the previous
-  period of equal length and the previous value. A change's sign and color follow the rounded value
+  period of equal length and the previous value. The error rate shows with two decimals in the user's
+  number locale (`formatErrorRate`), as in the release table and its chart. A relative change shows one decimal at most
+  (`+3.9%`), whatever the percent pattern. A change's sign and color follow the rounded value
   shown, so one that rounds to 0 reads `0%` with a neutral badge. A warning shows when the user
   can't read every OTel index, as the counts may then miss data. Without mobile data it links to
   the EDOT Android and iOS setup docs, unless the user can't read every OTel index: then it says
@@ -131,6 +133,45 @@ on serverless and stateful.
   optional `osName` and `release`. It also lists, for the pickers, the OS names (whatever the OS
   and release filters) and releases (on the selected OS), each with its sessions, and the
   platforms and environments.
+- **Release health** (`mobile_overview/release_health/`), below the KPI row and only when it
+  shows: a table of sessions, users and error rate (exceptions per session, as the KPI row) per
+  release, the error rate over time by release, and the release adoption (sessions per release,
+  stacked), the charts with a marker where each release first appears. Releases are grouped as the
+  **top 5 by sessions** in the range, and **Other** for the rest (last in the table, left out when
+  nothing falls outside the top 5; with a release filter there is one group). A release needs
+  **100 sessions** (`MIN_RELEASE_SESSIONS`) in the range for an error rate: below it the table
+  shows "Not enough data" and the error rate chart leaves the release out. The chart also leaves a
+  gap for a time bucket with fewer than 10 sessions (`MIN_BUCKET_SESSIONS`), where one exception
+  would swing the rate from 0 to a spike; with no point left to draw, it says why. The charts'
+  buckets line up with the user's time zone, as the other time charts': the route takes
+  `timeZone` and sends it as the ES|QL request's `time_zone`, which `TBUCKET` follows (local
+  midnight for days, weeks and months, local alignment for fixed intervals); the series counts
+  sessions and exceptions only. Every release gets every bucket of the range: `TBUCKET` leaves out
+  the empty ones, so a `size: 0` date histogram (`min_doc_count: 0`, `extended_bounds`, same time
+  zone) lists them all, both of an hour repeated when clocks fall back included, and the route fills
+  them with no sessions and no error rate, so the charts never draw across them. A release **first appears** at its first document with
+  that `service.version` in the selected environment: its first one in the range, which comes
+  with its stats, unless it has one in the 30 days before the range, which a separate query checks
+  over those days only; one seen before the range start gets no marker, and releases first seen in the same bucket
+  share one (e.g. `2.3.0, 2.2.1`, or `2.3.0 +2` for more). The section loads apart from the KPIs
+  (`GET .../mobile_applications/{serviceName}/releases`, the KPI route's params and `timeZone`)
+  and has its own error state with a retry; the toolbar's refresh reloads both. The route ranks
+  the releases with their stats in one query (one more than the top 5, which tells whether any are
+  left for "Other", whose stats a second query counts only then), then reads the series, capped at
+  10,000 rows, and the releases seen before the range; with the release filter, all at once.
+  Releases with equal sessions keep their order (the highest first) and their colours, which follow
+  every release's rank, so a release keeps its colour when the page is filtered to it; the table's
+  sort survives a reload.
+  The table, in a bordered panel like the KPIs and charts, shows each release's share of the
+  sessions (none while filtered by a release, where it would read 100%), sorts by sessions, users
+  or error rate ("Other" stays last) and shows the error rate with two decimals; a release filters
+  the page by it (the `release` filter; not one longer than `MAX_RELEASE_LENGTH`, which the URL and
+  the routes reject, as the release picker leaves it out), and the selected one shows as a pill whose cross takes
+  the filter off. Each chart has a one-line header (an `h3` and an info tip with the
+  calculation), so both plots line up, and a legend below it (hover a release to spotlight it,
+  click to hide it); dragging over one narrows the time range. Session shares show one decimal at
+  most (`formatKpiPercent`). The crash rate (#64) and the cold start (#68) join the table's columns and
+  the charts later.
 
 ## Pages
 
@@ -243,10 +284,10 @@ The page loads chart and the Overview trends bucket by the time zone of Advanced
 weeks or months, so they start at local midnight. Below that they are fixed intervals (up to 12
 hours) that keep their local alignment across daylight saving changes; the bucket holding a change
 is an hour shorter or longer. The first and last buckets, which cover only part of the selected
-range, are shaded as partial data, as in Lens (`Endzones` from `@kbn/charts-plugin`), with its
-limits: area charts aren't shaded, and as every bucket is measured by the shortest one, a last
-bucket longer than that (a 31-day month after February, a day after a daylight saving change) may
-not be.
+range, are shaded as partial data, as in Lens (`Endzones` from `@kbn/charts-plugin`, without
+`isFullBin`): from the range's edges over the part of the edge buckets outside it, for bars and
+for lines and areas, whose domain reaches the end of the last bucket. As every bucket is measured by the shortest one, a last bucket longer than that (a
+31-day month after February, a day after a daylight saving change) may not be shaded.
 
 Both routes take an optional `timeZone` (at most 64 characters; `UTC` when left out): a name
 moment-timezone knows, or a `+HH:MM`/`-HH:MM` offset, which the browser sends when it can't name
@@ -916,7 +957,13 @@ readers also need `read` on `digital-experience-sessions-*` (and on the source i
 session detail timeline). Without it they answer 403 naming those privileges; other failures are
 logged and answer 500 without Elasticsearch details:
 
-- `GET /internal/digital_experience/sessions/status`: whether sessions are set up or turned off, the
+- `GET /internal/digital_experience/sessions/status` (fetched by `SessionsStatusProvider` only once
+  a web page asks for it, and checked back only while one is open, at once when one opens again
+  during a rebuild, so mobile pages and the list's
+  Mobile tab the URL picks request none; on that tab, with the status unknown, the list keeps its
+  Web tab, where sessions may still need setting up. The Mobile tab the list opens by itself, with
+  only mobile rows, requests it and checks back while sessions rebuild, so the list fetches again,
+  with their Web applications, once they're built; its refresh doesn't check the status): whether sessions are set up or turned off, the
   task's health, lag and last error, whether it is still building, how many days sessions are kept,
   whether the current user can set them up (`canEnable`) and whether the app should do it for them
   (`autoEnable`), what keeps anyone from

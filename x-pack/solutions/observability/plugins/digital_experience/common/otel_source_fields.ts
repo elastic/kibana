@@ -16,6 +16,7 @@ import {
 import {
   BROWSER_CSS_SELECTOR,
   NAVIGATION_TIMING_LOAD_EVENT_END,
+  URL_TEMPLATE,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
   attributeField,
@@ -31,6 +32,7 @@ export const SOURCE_EVENT_NAME_FIELD = OTEL_EVENT_NAME;
 export const SOURCE_SESSION_ID_FIELD = attributeField(SESSION_ID);
 export const SOURCE_SERVICE_NAME_FIELD = resourceAttributeField(SERVICE_NAME);
 export const SOURCE_URL_FIELD = attributeField(URL_FULL);
+export const SOURCE_URL_TEMPLATE_FIELD = attributeField(URL_TEMPLATE);
 export const SOURCE_CSS_SELECTOR_FIELD = attributeField(BROWSER_CSS_SELECTOR);
 export const SOURCE_WEB_VITAL_NAME_FIELD = attributeField(WEB_VITAL_NAME);
 export const SOURCE_WEB_VITAL_VALUE_FIELD = attributeField(WEB_VITAL_VALUE);

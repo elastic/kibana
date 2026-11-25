@@ -33,7 +33,9 @@ export const runEsql = async <TRow extends object>(
   esClient: TracedElasticsearchClient,
   operationName: string,
   query: ComposerQuery,
-  filter: estypes.QueryDslQueryContainer
+  filter: estypes.QueryDslQueryContainer,
+  /** The time zone of the query's date buckets; UTC unless set. */
+  timeZone?: string
 ): Promise<TRow[]> => {
   const { query: esqlQuery, params } = query.toRequest();
   try {
@@ -43,6 +45,7 @@ export const runEsql = async <TRow extends object>(
         query: esqlQuery,
         params: params as estypes.EsqlQueryRequest['params'],
         filter,
+        ...(timeZone ? { time_zone: timeZone } : {}),
         allow_partial_results: false,
       },
       { transform: 'plain' }
@@ -55,6 +58,10 @@ export const runEsql = async <TRow extends object>(
     throw error;
   }
 };
+
+/** A field's value as the session summaries keep it: trimmed, and empty or `null` as missing. */
+export const cleanedValue = (field: string): string =>
+  `CASE(TRIM(TO_STRING(${field})) IN ("", "null"), null, TRIM(TO_STRING(${field})))`;
 
 /**
  * The documents of `[start, end)`, in `environment` when set, as an ES|QL `filter`. Half-open, so

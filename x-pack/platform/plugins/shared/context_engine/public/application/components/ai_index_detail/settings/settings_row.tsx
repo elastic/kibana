@@ -27,7 +27,7 @@ export const SettingsRow = ({
         <h3>{title}</h3>
       </EuiTitle>
       <EuiText size="xs" color="subdued">
-        <p>{description}</p>
+        {typeof description === 'string' ? <p>{description}</p> : description}
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={2}>{children}</EuiFlexItem>

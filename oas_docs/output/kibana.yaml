@@ -24152,7 +24152,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -24621,7 +24621,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -X POST "${KIBANA_URL}/api/context_engine/ai_index" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -24875,7 +24875,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/_query" \
+              -X POST "${KIBANA_URL}/api/context_engine/ai_index/_query" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -25049,7 +25049,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
+              -X DELETE "${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
         - lang: Console
@@ -25329,7 +25329,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -25858,7 +25858,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -X PUT "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -26098,7 +26098,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
+              -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
@@ -26294,7 +26294,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_forget" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_forget" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -26519,7 +26519,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_remember" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_remember" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -26560,6 +26560,8 @@ paths:
         The route needs the `contextEngine:write` privilege. Without `user_id` the events belong to the caller's user profile, and a caller without one gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`. Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is saved.
 
         After authorization, validation, and feature-flag checks pass, each request writes one `memory_save_event` audit event.
+
+        Returns 429 when Elasticsearch rejects the request because it is overloaded. The whole request is rejected (unlike individual `failed` items in a 200 response); retry with backoff.
 
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.
 
@@ -26809,6 +26811,34 @@ paths:
                 required:
                   - message
           description: Context Engine or memory is turned off, or an AI index does not exist.
+        '429':
+          content:
+            application/json:
+              examples:
+                tooManyRequestsExample:
+                  description: Elasticsearch rejected the whole request with 429; retry with backoff
+                  summary: Too many requests
+                  value:
+                    error: Too Many Requests
+                    message: 'es_rejected_execution_exception: too many requests'
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch rejected the request because it is overloaded. The whole request was rejected (unlike individual `failed` items in a 200 response); retry with backoff.
       summary: Save session events
       tags:
         - context engine
@@ -26816,7 +26846,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_save_event" \
+              -X POST "${KIBANA_URL}/api/context_engine/memory/_save_event" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "Content-Type: application/json" \
               -H "kbn-xsrf: true" \
@@ -62661,7 +62691,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
+        Upgrade a package policy to a newer package version. When some package policies are upgraded and the others are only blocked because some active agents don't satisfy the package's agent version condition, the response is a 200 with a result per package policy: check each item's `success` field. When any other upgrade fails, the response is the first such failure. When none succeeds and every failure is an agent version block, the response is the first block.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
       operationId: post-fleet-package-policies-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62889,6 +62919,8 @@ paths:
                         type: array
                       maxItems: 1
                       type: array
+                    agent_version_block:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_agent_version_block'
                     body:
                       additionalProperties: false
                       type: object
@@ -92565,13 +92597,6 @@ paths:
                         name: logs-myapp-default
                         type: classic
                         updated_at: '2024-12-01T09:00:00.000Z'
-                      - description: All error-level logs across every stream
-                        name: logs.errors
-                        query:
-                          esql: FROM logs* | WHERE log.level == "error"
-                          view: logs.errors-view
-                        type: query
-                        updated_at: '2025-01-20T14:00:00.000Z'
           description: A list of all streams.
       summary: Get stream list
       tags:
@@ -92876,16 +92901,6 @@ paths:
         content:
           application/json:
             examples:
-              createQueryStream:
-                value:
-                  dashboards: []
-                  rules: []
-                  stream:
-                    description: All error-level logs across every stream
-                    query:
-                      esql: FROM logs* | WHERE log.level == "error"
-                      view: logs.errors-view
-                    type: query
               createWiredStream:
                 value:
                   dashboards: []
@@ -92991,8 +93006,6 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                draft:
-                  type: boolean
                 status:
                   enum:
                     - enabled
@@ -142715,8 +142728,6 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            draft:
-                              type: boolean
                             fields:
                               $ref: '#/components/schemas/Kibana_HTTP_APIs_FieldDefinition'
                             routing:
@@ -142727,8 +142738,6 @@ paths:
                                     description: A non-empty string.
                                     minLength: 1
                                     type: string
-                                  draft:
-                                    type: boolean
                                   status:
                                     enum:
                                       - enabled
@@ -142830,109 +142839,6 @@ paths:
       tags:
         - streams
       x-state: Experimental; added in 9.1.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/streams/{name}/_query:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_query</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Fetches the query settings of a query stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.
-      operationId: get-streams-name-query
-      parameters:
-        - description: The name of the query stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 200
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples: {}
-            schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - {}
-              nullable: true
-      responses:
-        '200':
-          description: Query settings for the stream.
-      summary: Get query stream settings
-      tags:
-        - streams
-      x-state: Experimental; added in 9.4.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-    put:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_query</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Upserts the query settings of a query stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.
-      operationId: put-streams-name-query
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The name of the query stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 200
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              upsertQueryStream:
-                value:
-                  query:
-                    esql: FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                field_descriptions:
-                  additionalProperties:
-                    maxLength: 1000
-                    type: string
-                  type: object
-                query:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    esql:
-                      maxLength: 65535
-                      type: string
-                  required:
-                    - esql
-              required:
-                - query
-      responses:
-        '200':
-          description: The query stream settings were updated successfully.
-      summary: Upsert query stream settings
-      tags:
-        - streams
-      x-state: Experimental; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -161890,6 +161796,21 @@ components:
     Kibana_HTTP_APIs_agent_policy_response:
       additionalProperties: false
       properties:
+        active_agents_per_version:
+          description: Number of active agents per version, excluding OpAMP agents. These are the agents package-level agent version conditions apply to.
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              count:
+                type: number
+              version:
+                type: string
+            required:
+              - version
+              - count
+          maxItems: 1000
+          type: array
         advanced_settings:
           additionalProperties: false
           type: object
@@ -166321,6 +166242,8 @@ components:
                 - failure_store
                 - classic
             query_streams:
+              deprecated: true
+              description: Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.
               items:
                 type: object
                 properties:
@@ -167196,6 +167119,10 @@ components:
     Kibana_HTTP_APIs_create_managed_integration_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -167418,6 +167345,10 @@ components:
     Kibana_HTTP_APIs_create_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -168266,6 +168197,11 @@ components:
           additionalProperties: false
           type: object
           properties:
+            attributes:
+              additionalProperties: true
+              description: Details of the error. `type` is `agent_version_incompatible` when the package policy was not upgraded because some active agents do not satisfy the package agent version condition.
+              type: object
+              properties: {}
             message:
               type: string
           required:
@@ -171421,6 +171357,22 @@ components:
                   - message
               name:
                 type: string
+              skipped_package_policies:
+                description: Package policies not upgraded because some of their active agents do not satisfy the agent version condition of the new package version.
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    version_condition:
+                      type: string
+                  required:
+                    - id
+                maxItems: 10000
+                type: array
               success:
                 type: boolean
             required:
@@ -182655,11 +182607,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -182991,6 +182946,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
         id:
           type: string
         is_default:
@@ -183018,6 +182984,27 @@ components:
           additionalProperties: false
           type: object
           properties:
+            auth:
+              additionalProperties: false
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
             otlp_exporter:
               additionalProperties: false
               type: object
@@ -183970,6 +183957,41 @@ components:
         - params
       title: Custom threshold
       type: object
+    Kibana_HTTP_APIs_otlp_auth_header:
+      additionalProperties: false
+      properties:
+        scheme:
+          description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+          enum:
+            - api_key
+            - bearer_token
+          type: string
+        type:
+          enum:
+            - auth_header
+          type: string
+      required:
+        - type
+        - scheme
+      title: otlp_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_custom_auth_header:
+      additionalProperties: false
+      properties:
+        name:
+          description: The name of the header that is sent with the credential as value.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom_header
+          type: string
+      required:
+        - type
+        - name
+      title: otlp_custom_auth_header
+      type: object
     Kibana_HTTP_APIs_otlp_grpc_exporter:
       additionalProperties: false
       properties:
@@ -184452,6 +184474,41 @@ components:
         - endpoint
         - protocol
       title: otlp_http_exporter
+      type: object
+    Kibana_HTTP_APIs_otlp_response_auth_header:
+      additionalProperties: true
+      properties:
+        scheme:
+          description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+          enum:
+            - api_key
+            - bearer_token
+          type: string
+        type:
+          enum:
+            - auth_header
+          type: string
+      required:
+        - type
+        - scheme
+      title: otlp_response_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_response_custom_auth_header:
+      additionalProperties: true
+      properties:
+        name:
+          description: The name of the header that is sent with the credential as value.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom_header
+          type: string
+      required:
+        - type
+        - name
+      title: otlp_response_custom_auth_header
       type: object
     Kibana_HTTP_APIs_otlp_response_grpc_exporter:
       additionalProperties: true
@@ -185145,11 +185202,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -185481,6 +185541,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
         id:
           type: string
         is_default:
@@ -185508,6 +185579,27 @@ components:
           additionalProperties: true
           type: object
           properties:
+            auth:
+              additionalProperties: true
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
             otlp_exporter:
               additionalProperties: true
               type: object
@@ -186330,6 +186422,34 @@ components:
         - has_policies
       title: package_metadata
       type: object
+    Kibana_HTTP_APIs_package_policy_agent_version_block:
+      additionalProperties: false
+      description: Set when some active agents don't satisfy the package-level agent version condition of the target package version.
+      properties:
+        blocked_count:
+          description: Number of active agents that don't satisfy the condition and would stop collecting the integration's data. Omitted when the user can't read agents.
+          type: number
+        min_version:
+          description: Lowest agent version satisfying the condition, when every blocked agent runs below it. Omitted when the user can't read agents.
+          type: string
+        observed_versions:
+          description: Versions reported by those agents. Omitted when the user can't read agents.
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        package_name:
+          type: string
+        package_version:
+          type: string
+        version_condition:
+          type: string
+      required:
+        - package_name
+        - package_version
+        - version_condition
+      title: package_policy_agent_version_block
+      type: object
     Kibana_HTTP_APIs_package_policy_input_deprecation_info:
       additionalProperties: false
       properties:
@@ -186881,6 +187001,11 @@ components:
           additionalProperties: false
           type: object
           properties:
+            attributes:
+              additionalProperties: true
+              description: Details of the error. `type` is `agent_version_incompatible` when the package policy was not upgraded because some active agents do not satisfy the package agent version condition.
+              type: object
+              properties: {}
             message:
               type: string
           required:
@@ -187076,60 +187201,6 @@ components:
         - has_required_role
       title: profiling_setup_status_response
       type: object
-    Kibana_HTTP_APIs_QueryStreamUpsertRequest:
-      additionalProperties: false
-      type: object
-      properties:
-        dashboards:
-          items:
-            type: string
-          type: array
-        rules:
-          items:
-            type: string
-          type: array
-        stream:
-          additionalProperties: false
-          type: object
-          properties:
-            description:
-              type: string
-            field_descriptions:
-              additionalProperties:
-                type: string
-              type: object
-            query:
-              additionalProperties: false
-              type: object
-              properties:
-                esql:
-                  type: string
-                view:
-                  type: string
-              required:
-                - view
-                - esql
-            query_streams:
-              items:
-                type: object
-                properties:
-                  name:
-                    type: string
-                required:
-                  - name
-              type: array
-            type:
-              enum:
-                - query
-              type: string
-          required:
-            - description
-            - type
-            - query
-      required:
-        - dashboards
-        - rules
-        - stream
     Kibana_HTTP_APIs_reauthorize_transform_request:
       additionalProperties: false
       properties:
@@ -188276,6 +188347,10 @@ components:
     Kibana_HTTP_APIs_simplified_create_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -191846,7 +191921,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_WiredStreamUpsertRequest'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicStreamUpsertRequest'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_QueryStreamUpsertRequest'
     Kibana_HTTP_APIs_syntheticsJsonValue:
       description: Any JSON value.
     Kibana_HTTP_APIs_tagcloudLibItemNoESQL:
@@ -192997,11 +193071,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -193327,6 +193404,17 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            propertyName: type
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
         id:
           type: string
         is_default:
@@ -193352,6 +193440,28 @@ components:
           additionalProperties: false
           type: object
           properties:
+            auth:
+              additionalProperties: false
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
+                  nullable: true
             otlp_exporter:
               additionalProperties: false
               type: object
@@ -193531,6 +193641,10 @@ components:
     Kibana_HTTP_APIs_update_package_policy_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -194107,6 +194221,10 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_agent_version_incompatibility:
+          description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         acknowledge_breaking_changes:
           default: false
           description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
@@ -202230,8 +202348,6 @@ components:
                   additionalProperties: false
                   type: object
                   properties:
-                    draft:
-                      type: boolean
                     fields:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_FieldDefinition'
                     routing:
@@ -202242,8 +202358,6 @@ components:
                             description: A non-empty string.
                             minLength: 1
                             type: string
-                          draft:
-                            type: boolean
                           status:
                             enum:
                               - enabled
@@ -202265,6 +202379,8 @@ components:
                 - failure_store
                 - wired
             query_streams:
+              deprecated: true
+              description: Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.
               items:
                 type: object
                 properties:

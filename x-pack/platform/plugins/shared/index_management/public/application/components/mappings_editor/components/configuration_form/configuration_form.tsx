@@ -154,7 +154,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
     options: { stripUnsetFields: true },
   });
   const dispatch = useDispatch();
-  const { subscribe, submit, reset, getFormData } = form;
+  const { subscribe, submit, reset, getFormData, getFields } = form;
 
   const isMapperSizeSectionVisible =
     value?._size !== undefined || esNodesPlugins.includes(MapperSizePluginId);
@@ -220,6 +220,14 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
       // If the source field is undefined (hasn't been set in the form)
       // and if the user has selected a `logsdb` or `time_series` index mode in the Logistics step,
       // update the form data with synthetic _source
+      const sourceOptionField = getFields()['sourceField.option'];
+      if (sourceOptionField?.isDirty) {
+        // The user interacted with the option while the synthetic source status request was
+        // pending: don't override their selection with the default. We use `isDirty` rather than
+        // `isModified` so that switching back to the initial option is still treated as a choice.
+        return;
+      }
+
       const nextValue = {
         ...(value ?? {}),
         _source: { mode: SYNTHETIC_SOURCE_OPTION },
@@ -228,7 +236,15 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
       reset({ resetValues: true, defaultValue: nextValue });
       dispatch({ type: 'configuration.save', value: nextValue as any });
     }
-  }, [canUseSyntheticSource, dispatch, enableMappingsSourceFieldSection, indexMode, reset, value]);
+  }, [
+    canUseSyntheticSource,
+    dispatch,
+    enableMappingsSourceFieldSection,
+    getFields,
+    indexMode,
+    reset,
+    value,
+  ]);
 
   useEffect(() => {
     isMounted.current = true;

@@ -69,6 +69,12 @@ export const attributeField = (name: string): string => `attributes.${name}`;
 /** A resource attribute as stored in the OTel indices, e.g. `resource.attributes.service.name`. */
 export const resourceAttributeField = (name: string): string => `resource.attributes.${name}`;
 
+/**
+ * The low-cardinality route of the page a browser record was written on, like `/products/{slug}`:
+ * EDOT Browser adds it to logs, except to resource timings. `@kbn/apm-types` doesn't name it.
+ */
+export const URL_TEMPLATE = 'url.template';
+
 /** One per install of a mobile app, which `@kbn/apm-types` doesn't name. */
 export const APP_INSTALLATION_ID = 'app.installation.id';
 

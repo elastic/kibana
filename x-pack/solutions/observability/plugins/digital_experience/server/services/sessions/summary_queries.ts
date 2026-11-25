@@ -56,6 +56,7 @@ import {
   SOURCE_WEB_VITAL_NAME_FIELD,
   SOURCE_WEB_VITAL_VALUE_FIELD,
 } from '../../../common/otel_source_fields';
+import { cleanedValue } from '../../lib/esql';
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 
@@ -186,10 +187,6 @@ ${events('changed_from', 'changed_to')}
   };
 };
 
-/** Strings as the summaries keep them: trimmed, and empty or `null` as missing. */
-const cleaned = (field: string): string =>
-  `CASE(TRIM(TO_STRING(${field})) IN ("", "null"), null, TRIM(TO_STRING(${field})))`;
-
 /** The column of an attribute in the summary query's rows, e.g. `attribute_browser_version`. */
 export const attributeColumn = (attribute: string): string => `attribute_${snakeCase(attribute)}`;
 const seenColumn = (group: string): string => `seen_${group}`;
@@ -235,7 +232,7 @@ export const attributeQueryParts = <TFields extends AttributeFields>(
     evals: Object.entries(fields).map(
       ([attribute, candidates]) =>
         `${attributeColumn(attribute)} = COALESCE(${candidates
-          .map((field) => cleaned(rawColumn(field)))
+          .map((field) => cleanedValue(rawColumn(field)))
           .join(', ')})`
     ),
   };

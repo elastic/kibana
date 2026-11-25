@@ -95,6 +95,7 @@ const parityTests = {
   scout_no_raw_eui_selectors: () => require('../scout_no_raw_eui_selectors.test.js'),
   scout_no_raw_locators: () => require('../scout_no_raw_locators.test.js'),
   scout_prefer_both_arch_tags: () => require('../scout_prefer_both_arch_tags.test.js'),
+  scout_require_tags: () => require('../scout_require_tags.test.js'),
   scout_require_api_client_in_api_test: () =>
     require('../scout_require_api_client_in_api_test.test.js'),
   scout_require_global_setup_hook_in_parallel_tests: () =>

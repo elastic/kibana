@@ -18,9 +18,7 @@ import type { DocumentMatchFilterOptions } from '.';
 import type { RoutingSamplesContext } from './routing_samples_state_machine';
 import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 
-export type PartitionableDefinition =
-  | Streams.ingest.all.GetResponse
-  | Streams.QueryStream.GetResponse;
+export type PartitionableDefinition = Streams.WiredStream.GetResponse;
 
 export interface StreamRoutingServiceDependencies {
   forkSuccessNotifier?: (streamName: string) => void;
@@ -55,7 +53,6 @@ export interface StreamRoutingContext {
   editingSuggestionIndex: number | null;
   editedSuggestion: PartitionSuggestion | null;
   isRefreshing: boolean;
-  editingQueryStreamName: string | null;
   isConditionEditorValid: boolean;
   bulkFork: {
     items: BulkForkItem[];
@@ -64,20 +61,11 @@ export interface StreamRoutingContext {
 }
 
 export type StreamRoutingEvent =
-  | { type: 'childStreams.mode.changeToIngestMode' }
-  | { type: 'childStreams.mode.changeToQueryMode' }
-  | { type: 'queryStream.create' }
-  | { type: 'queryStream.cancel' }
-  | { type: 'queryStream.save'; name: string; esqlQuery: string }
-  | { type: 'queryStream.edit'; name: string }
-  | { type: 'queryStream.cancelEdit' }
-  | { type: 'queryStream.delete' }
-  | { type: 'queryStream.update'; name: string; esqlQuery: string }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
   | { type: 'routingRule.edit'; id: string }
-  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition; draft?: boolean }
+  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition }
   | { type: 'routingRule.bulkFork'; items: BulkForkItem[] }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
