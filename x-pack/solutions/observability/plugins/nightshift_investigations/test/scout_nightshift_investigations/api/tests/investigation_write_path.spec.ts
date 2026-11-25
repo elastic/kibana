@@ -18,6 +18,7 @@ import {
   deleteWorkflow,
   findInvestigationBySubject,
   findOrCreateSlackThread,
+  getSharedInvestigation,
   listSharedInvestigations,
   makeAlertSnapshot,
   runAlertStartWorkflow,
@@ -297,6 +298,14 @@ apiTest.describe(
         // Until Agent Builder titles the investigation, the route headlines the question.
         expect(title).toBe('why is checkout slow?');
 
+        // Later calls backfill a missing link, so the create alone must record it.
+        const permalink = `https://app.slack.com/client/${thread.workspace}/${thread.channel}/thread/${thread.channel}-${thread.thread_ts}`;
+        const justCreated = await getSharedInvestigation(apiClient, cookieHeader, id);
+        expect(justCreated).toHaveStatusCode(200);
+        expect((justCreated.body as SharedInvestigation).subjects).toStrictEqual([
+          expect.objectContaining({ slack: expect.objectContaining({ permalink }) }),
+        ]);
+
         const recorded = await findOrCreateSlackThread(apiClient, cookieHeader, {
           ...thread,
           create: false,
@@ -355,6 +364,7 @@ apiTest.describe(
             slack: {
               channel: thread.channel,
               thread_ts: thread.thread_ts,
+              permalink,
               status_message_ts: '1712345679.000200',
               seen_events: [{ event_id: 'EvSCOUT1', execution_id: 'exec-scout-1' }],
             },

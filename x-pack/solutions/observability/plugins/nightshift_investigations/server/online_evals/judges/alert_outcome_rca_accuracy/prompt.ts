@@ -14,9 +14,11 @@ import systemPromptText from './system_prompt.text';
 
 export const ALERT_OUTCOME_RCA_ACCURACY_TOOL_NAME = 'score_alert_outcome_rca';
 
+export const GROUND_TRUTH_VERDICTS = ['verified_cause', 'contradicted', 'unresolved'] as const;
+
 export const alertOutcomeRcaAccuracyOutputSchema = lazySchema(() =>
   z.object({
-    ground_truth_has_verified_cause: z.boolean(),
+    ground_truth_verdict: z.enum(GROUND_TRUTH_VERDICTS),
     root_cause_match: z.boolean(),
     mechanism_match: z.boolean(),
     evidence_match: z.boolean(),
@@ -58,9 +60,11 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
         schema: {
           type: 'object',
           properties: {
-            ground_truth_has_verified_cause: {
-              type: 'boolean',
-              description: 'Does the confirmed root cause state a specific verified cause?',
+            ground_truth_verdict: {
+              type: 'string',
+              enum: GROUND_TRUTH_VERDICTS,
+              description:
+                "Whether the confirmed root cause states a verified cause, refutes the report's cause without naming one, or neither.",
             },
             root_cause_match: {
               type: 'boolean',
@@ -95,7 +99,7 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
             },
           },
           required: [
-            'ground_truth_has_verified_cause',
+            'ground_truth_verdict',
             'root_cause_match',
             'mechanism_match',
             'evidence_match',

@@ -9,12 +9,8 @@
 
 import { lastValueFrom, takeWhile } from 'rxjs';
 import { castArray } from 'lodash';
-import {
-  buildEsQuery,
-  getTimeZoneFromSettings,
-  isOfQueryType,
-  type EsQueryConfig,
-} from '@kbn/es-query';
+import { v4 as uuidv4 } from 'uuid';
+import { buildEsQuery, isOfQueryType, type EsQueryConfig } from '@kbn/es-query';
 import { fixESQLQueryWithVariables, getEsqlInspectorStats, getNamedParams } from '@kbn/esql-utils';
 import type {
   ISearchMethods,
@@ -22,6 +18,7 @@ import type {
   IDslSearchOptions,
   IDslSearchResult,
   IDslPaginatedSearchParams,
+  IDslUntrackedPaginatedSearchParams,
   IDslPaginatedSearchOptions,
   IDslPaginatedSearchResult,
   IDslPagination,
@@ -49,7 +46,11 @@ import type {
   SQL_SEARCH_STRATEGY,
 } from '..';
 import { getTime } from '../../query';
-import { mapEsqlResponseToDatatable, formatAndRethrowEsqlError } from './datatable_mapper';
+import {
+  mapEsqlResponseToDatatable,
+  formatAndRethrowEsqlError,
+  getInspectorErrorJson,
+} from './datatable_mapper';
 import {
   getDslRequestInspectorStats,
   getDslResponseInspectorStats,
@@ -61,6 +62,18 @@ export interface SearchMethodsServiceDependencies {
    * Resolves the query config from advanced settings, used to apply a search context
    */
   getEsQueryConfig: () => Promise<EsQueryConfig>;
+  /**
+   * Resolves the `preference` request param from the `courier:setRequestPreference` and
+   * `courier:customRequestPreference` advanced settings. Omit where those settings don't apply.
+   */
+  getRequestPreference?: () => string | undefined;
+  /**
+   * Resolves the project routing a request is actually sent with, given the caller's override.
+   * Used to log the effective routing to Inspector. Omit where cross-project search doesn't apply.
+   */
+  getProjectRouting?: (
+    override: IEsqlSearchParams['projectRouting']
+  ) => IEsqlSearchParams['projectRouting'];
 }
 
 /**
@@ -89,26 +102,64 @@ export class SearchMethodsService implements ISearchMethods {
       'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
     );
 
-    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
-      description: options.inspector.description,
-    });
+    // A request that was aborted while its context was being resolved (e.g. superseded by a newer one,
+    // which already reset the adapter) must not log a stale entry.
+    const requestId = uuidv4();
+    const requestResponder = options?.abortSignal?.aborted
+      ? undefined
+      : options?.inspector?.adapter.start(options.inspector.title, {
+          description: options.inspector.description,
+          id: requestId,
+        });
 
+    // A request that failed because it was aborted on purpose (e.g. superseded, or ended along with
+    // a sibling) is not worth showing in Inspector, so its entry is removed rather than left PENDING.
+    const dropEntryIfAborted = (): boolean => {
+      if (!options?.abortSignal?.aborted) return false;
+      if (requestResponder) options?.inspector?.adapter.resetRequest(requestId);
+      return true;
+    };
+
+    // The search interceptor falls back to the default routing when the caller gives none, so
+    // log the routing the request is sent with rather than only the caller's override. When a
+    // resolver is configured, an undefined result means no routing is sent (for example, the
+    // browser drops it when cross-project search is unavailable), so the caller's value is only
+    // used when there is no resolver, as on the server.
+    const projectRouting = this.deps.getProjectRouting
+      ? this.deps.getProjectRouting(params.projectRouting)
+      : params.projectRouting;
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
       ...(params.approximation !== undefined && { approximation: params.approximation }),
+      ...(projectRouting !== undefined && { project_routing: projectRouting }),
     });
 
     try {
       const response = await this.executeSearch(request, searchOptions);
 
-      requestResponder?.stats(getEsqlInspectorStats(response.rawResponse));
+      // `rawResponse.values` is always an array from here on. Elasticsearch can answer 200 with an
+      // `{ error }` body that has no `values`, but the search interceptor rejects any body with an
+      // `error` key (as an error carrying `attributes`) before it resolves, so such a body lands in
+      // the catch below and never reaches the stats or the normalization.
+
+      // An all-empty `values` (e.g. every column dropped) is reported as no rows
+      const rawResponse: IEsqlSearchResult['rawResponse'] = response.rawResponse.values?.every(
+        (row: unknown) => Array.isArray(row) && row.length === 0
+      )
+        ? { ...response.rawResponse, values: [] }
+        : response.rawResponse;
+
+      // A response that resolves after an abort is a partial result the user asked for (cancel),
+      // and callers read its warnings and cluster details from this entry, so it is always logged.
+      // Stats use the normalized rows so Inspector agrees with what the caller receives
+      requestResponder?.stats(getEsqlInspectorStats(rawResponse));
       requestResponder?.ok({
         json: { rawResponse: response.rawResponse },
         requestParams: response.requestParams,
       });
 
       const datatable = options?.includeDataTable
-        ? mapEsqlResponseToDatatable(response.rawResponse as any, {
+        ? mapEsqlResponseToDatatable(rawResponse, {
             query: params.query,
             timeRange: params.kibanaQueryContext?.timeRange,
             esqlVariables: params.kibanaQueryContext?.esqlVariables,
@@ -117,14 +168,16 @@ export class SearchMethodsService implements ISearchMethods {
         : undefined;
 
       return {
-        rawResponse: response.rawResponse,
+        rawResponse,
         warning: response.warning,
         datatable,
       };
     } catch (error) {
-      requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
-      });
+      if (!dropEntryIfAborted()) {
+        requestResponder?.error({
+          json: getInspectorErrorJson(error),
+        });
+      }
       return formatAndRethrowEsqlError(error);
     }
   }
@@ -139,54 +192,48 @@ export class SearchMethodsService implements ISearchMethods {
     const request = this.buildDslRequest(dslParams, options);
     const searchOptions = this.mapDslOptions(options, params);
 
-    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
-      description: options.inspector.description,
-    });
+    const response = await this.executeDslSearch(
+      request,
+      searchOptions,
+      params,
+      options?.inspector
+    );
 
-    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
-    if (options?.inspector?.getRequestStats) {
-      requestResponder?.stats(options.inspector.getRequestStats());
-    } else if (params.index && typeof params.index === 'object') {
-      requestResponder?.stats(getDslRequestInspectorStats(params.index));
-    }
-
-    try {
-      const response = await this.executeSearch(request, searchOptions);
-
-      requestResponder?.stats(getDslResponseInspectorStats(response.rawResponse));
-      requestResponder?.ok({
-        json: { rawResponse: response.rawResponse },
-        requestParams: response.requestParams,
-      });
-
-      return {
-        rawResponse: response.rawResponse,
-      };
-    } catch (error) {
-      requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
-      });
-      throw error;
-    }
+    return {
+      rawResponse: response.rawResponse,
+    };
   }
 
   /**
-   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
+   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers.
+   * Total hits are counted by default; pass `trackTotalHits: false` to skip counting, in which
+   * case `hasNextPage` must be given the total by the caller.
    */
-  async dslPaginated(
+  dslPaginated(
     params: IDslPaginatedSearchParams,
     options?: IDslPaginatedSearchOptions
-  ): Promise<IDslPaginatedSearchResult> {
+  ): Promise<IDslPaginatedSearchResult>;
+  dslPaginated(
+    params: IDslUntrackedPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
+  ): Promise<IDslPaginatedSearchResult<true>>;
+  async dslPaginated(
+    params: IDslPaginatedSearchParams | IDslUntrackedPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
+  ): Promise<IDslPaginatedSearchResult<boolean>> {
     // Apply the context once so every page reuses the merged query
     const contextParams = params.kibanaQueryContext
       ? await this.applyDslKibanaQueryContext(params)
       : params;
-    // trackTotalHits is required for pagination to determine if there are more pages
-    const paginatedParams = { ...contextParams, trackTotalHits: true as const };
+    const paginatedParams = { ...contextParams, trackTotalHits: params.trackTotalHits ?? true };
     const request = this.buildDslRequest(paginatedParams, options);
-    const response = await this.executeSearch(
+    const response = await this.executeDslSearch(
       request,
-      this.mapDslOptions(options, paginatedParams)
+      this.mapDslOptions(options, paginatedParams),
+      paginatedParams,
+      options?.inspector,
+      // The first page is the request users inspect, so it shows the session it belongs to
+      options?.sessionId
     );
 
     return {
@@ -224,7 +271,7 @@ export class SearchMethodsService implements ISearchMethods {
       };
     } catch (error) {
       requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
+        json: getInspectorErrorJson(error),
       });
       throw error;
     }
@@ -261,7 +308,7 @@ export class SearchMethodsService implements ISearchMethods {
       };
     } catch (error) {
       requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
+        json: getInspectorErrorJson(error),
       });
       throw error;
     }
@@ -285,6 +332,48 @@ export class SearchMethodsService implements ISearchMethods {
   // ============================================================================
   // DSL Search Helpers
   // ============================================================================
+
+  /**
+   * Execute a DSL request, logging it and its response to the inspector when one is provided
+   */
+  private async executeDslSearch(
+    request: IEsSearchRequest,
+    searchOptions: ISearchOptions,
+    params: IDslSearchParams,
+    inspector: IDslSearchOptions['inspector'],
+    searchSessionId?: string
+  ): Promise<any> {
+    const requestResponder = inspector?.adapter.start(inspector.title, {
+      description: inspector.description,
+      searchSessionId,
+    });
+
+    // Stats go first: the Inspector opens on the first tab to become available, which should be
+    // Statistics (as it is for search source requests), not Request.
+    if (inspector?.getRequestStats) {
+      requestResponder?.stats(inspector.getRequestStats());
+    } else if (params.index && typeof params.index === 'object') {
+      requestResponder?.stats(getDslRequestInspectorStats(params.index));
+    }
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.stats(getDslResponseInspectorStats(response.rawResponse));
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return response;
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
+  }
 
   private async applyDslKibanaQueryContext(params: IDslSearchParams): Promise<IDslSearchParams> {
     const {
@@ -340,12 +429,20 @@ export class SearchMethodsService implements ISearchMethods {
       // It could make sense to lock this down further if we get more confident or if expression functions
       // can no longer be used directly in Canvas
       ...rest,
-      track_total_hits: trackTotalHits,
     };
+
+    const { index: paramsIndex } = params;
+    const isDataView = typeof paramsIndex !== 'string';
+    const preference = this.deps.getRequestPreference?.();
 
     return {
       params: {
-        index: typeof params.index === 'string' ? params.index : params.index.getIndexPattern(),
+        index: isDataView ? paramsIndex.getIndexPattern() : paramsIndex,
+        // hidden indices for data views that
+        // allow them, and the shard preference (which keeps search_after pages on the same copies)
+        ...(isDataView && paramsIndex.getAllowHidden() && { expand_wildcards: 'all' }),
+        ...(preference && { preference }),
+        ...(trackTotalHits !== undefined && { track_total_hits: trackTotalHits }),
         body,
       },
     };
@@ -363,42 +460,77 @@ export class SearchMethodsService implements ISearchMethods {
   private buildDslPagination(
     rawResponse: any,
     originalParams: IDslSearchParams,
-    options?: IDslSearchOptions
-  ): IDslPagination {
+    options?: IDslSearchOptions,
+    previouslyLoadedCount = 0
+  ): IDslPagination<boolean> {
     const self = this;
     const lastHit = rawResponse.hits?.hits?.at?.(-1);
-    const currentCount = rawResponse.hits?.hits?.length ?? 0;
-    const totalValue =
+    // Total hits is for the whole query, so it is compared against everything loaded so far
+    const currentCount = previouslyLoadedCount + (rawResponse.hits?.hits?.length ?? 0);
+    const responseTotal: number | undefined =
       typeof rawResponse.hits?.total === 'number'
         ? rawResponse.hits.total
-        : rawResponse.hits?.total?.value ?? 0;
-    const hasNextPage = Boolean(lastHit?.sort) && totalValue > currentCount;
+        : rawResponse.hits?.total?.value;
+
+    // A page with fewer hits than requested means every shard that responded is exhausted. The total
+    // can still be higher, e.g. when a shard failed, but those hits can never be loaded.
+    const { size } = originalParams;
+    const isShortPage = size !== undefined && (rawResponse.hits?.hits?.length ?? 0) < size;
+
+    // Without a total from the caller or the response there is no way to know, so assume none
+    const hasNextPage = (totalHits: number | undefined = responseTotal): boolean =>
+      Boolean(lastHit?.sort) && !isShortPage && totalHits !== undefined && totalHits > currentCount;
 
     return {
       hasNextPage,
-      nextPage: async (): Promise<IDslPaginatedSearchResult | null> => {
-        if (!hasNextPage || !lastHit?.sort) {
+      nextPage: async (pageOptions): Promise<IDslPaginatedSearchResult<boolean> | null> => {
+        // When the response has no total the caller owns the decision to page, using `hasNextPage`
+        if (!lastHit?.sort || (responseTotal !== undefined && !hasNextPage())) {
           return null;
         }
+
+        const { abortSignal, executionContext, inspectorTitle, inspectorDescription } =
+          pageOptions ?? {};
+
+        // Later pages have their own lifecycle: they are not part of the first page's search
+        // session or abort signal, and are only logged when the caller asks for it
+        const paginationOptions: IDslSearchOptions = {
+          ...options,
+          abortSignal,
+          executionContext: executionContext ?? options?.executionContext,
+          sessionId: undefined,
+        };
+        const paginationInspector = options?.inspector && {
+          ...options.inspector,
+          title: inspectorTitle ?? options.inspector.title,
+          description: inspectorDescription ?? options.inspector.description,
+        };
 
         // Build next search with search_after
         const nextParams: IDslSearchParams = {
           ...originalParams,
         };
 
-        const request = self.buildDslRequest(nextParams, options);
+        const request = self.buildDslRequest(nextParams, paginationOptions);
         if (request.params && typeof request.params !== 'string') {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextResponse = await self.executeSearch(
+        const nextResponse = await self.executeDslSearch(
           request,
-          self.mapDslOptions(options, nextParams)
+          self.mapDslOptions(paginationOptions, nextParams),
+          nextParams,
+          paginationInspector
         );
 
         return {
           rawResponse: nextResponse.rawResponse,
-          pagination: self.buildDslPagination(nextResponse.rawResponse, nextParams, options),
+          pagination: self.buildDslPagination(
+            nextResponse.rawResponse,
+            nextParams,
+            paginationOptions,
+            currentCount
+          ),
         };
       },
     };
@@ -419,6 +551,7 @@ export class SearchMethodsService implements ISearchMethods {
         dropNullColumns: params.dropNullColumns,
         include_execution_metadata: params.includeExecutionMetadata,
         ...(params.columnMetadata ? { settings: { column_metadata: true } } : {}),
+        ...(params.profile ? { profile: true } : {}),
       },
     };
   }
@@ -436,6 +569,7 @@ export class SearchMethodsService implements ISearchMethods {
     // this is for backward compatibility, if the query is of fields or functions type
     // and the query is not set with ?? in the query, we should set it
     // https://github.com/elastic/elasticsearch/pull/122459
+    // TODO: remove with fixESQLQueryWithVariables in the next major release
     const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
 
     const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
@@ -458,9 +592,6 @@ export class SearchMethodsService implements ISearchMethods {
       query: esqlQuery,
       params: namedParams.length ? namedParams : undefined,
       filter: this.mergeEsqlFilters(contextFilter, params.filter),
-      timeZone:
-        params.timeZone ??
-        (esQueryConfig.dateFormatTZ ? getTimeZoneFromSettings(esQueryConfig.dateFormatTZ) : 'UTC'),
     };
   }
 

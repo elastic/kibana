@@ -17,12 +17,14 @@ import {
   getDefaultPresetForEsOutput,
   isBeatsOutput,
   isOtelExporterOutput,
+  isOtlpOutput,
 } from '../../../../../../../common/services/output_helpers';
 
 import type {
   KafkaOutput,
   NewElasticsearchOutput,
   NewLogstashOutput,
+  NewOtlpOutput,
   NewOutput,
   NewRemoteElasticsearchOutput,
   OtelExporterOutput,
@@ -104,10 +106,30 @@ import {
   useKafkaOAuth2Inputs,
   validateKafkaOAuth2Inputs,
 } from './use_kafka_oauth2_inputs';
+import type { OtlpInputs } from './use_otlp_inputs';
+import {
+  buildOtlpExporterConfig,
+  getOtlpInputEndpoints,
+  useOtlpInputs,
+  validateOtlpInputs,
+} from './use_otlp_inputs';
+import type { OtlpAuthInputs } from './use_otlp_auth_inputs';
+import {
+  buildOtlpAuth,
+  getSelectedOtlpAuthHeaderName,
+  isOtlpAuthAvailable,
+  isOtlpAuthSelected,
+  useOtlpAuthInputs,
+  validateOtlpAuthInputs,
+} from './use_otlp_auth_inputs';
 
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
-export interface OutputFormInputsType extends KafkaOAuth2Inputs, KafkaKerberosInputs {
+export interface OutputFormInputsType
+  extends KafkaOAuth2Inputs,
+    KafkaKerberosInputs,
+    OtlpInputs,
+    OtlpAuthInputs {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
@@ -289,6 +311,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       | keyof KafkaOutput
       | keyof NewRemoteElasticsearchOutput
       | keyof NewElasticsearchOutput
+      | keyof NewOtlpOutput
   ) {
     if (!authz.fleet.allSettings) {
       return true;
@@ -767,6 +790,28 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isLogstash = typeInput.value === outputType.Logstash;
   const isKafka = typeInput.value === outputType.Kafka;
   const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
+  const isOtlp = typeInput.value === outputType.Otlp;
+
+  const isOtlpAuthDisabled = isDisabled('auth');
+  const otlpAuthInputs = useOtlpAuthInputs(
+    output && isOtlpOutput(output) ? output : undefined,
+    isOtlp,
+    isOtlpAuthDisabled
+  );
+  const isOtlpExporterDisabled = isDisabled('otlp_exporter');
+  const otlpInputs = useOtlpInputs(
+    output && isOtlpOutput(output) ? output : undefined,
+    isOtlp,
+    isOtlpExporterDisabled,
+    {
+      headerName: getSelectedOtlpAuthHeaderName(otlpAuthInputs),
+      managedOtlpUrl: cloud?.managedOtlp?.url,
+    }
+  );
+  const isOtlpAuthEnabled = isOtlpAuthAvailable(
+    getOtlpInputEndpoints(otlpInputs),
+    cloud?.managedOtlp?.url
+  );
 
   const inputs: OutputFormInputsType = {
     nameInput,
@@ -813,6 +858,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaAuthPasswordSecretInput,
     ...kafkaOAuth2Inputs,
     ...kafkaKerberosInputs,
+    ...otlpInputs,
+    ...otlpAuthInputs,
     kafkaSaslMechanismInput,
     kafkaPartitionTypeInput,
     kafkaPartitionTypeRandomInput,
@@ -882,6 +929,16 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       ? kafkaPasswordPlainValid
       : kafkaPasswordSecretValid;
 
+    if (isOtlp) {
+      return [
+        nameInputValid,
+        validateOtlpInputs(otlpInputs),
+        // an authentication that is kept for the managed OTLP endpoint has to be removed explicitly
+        isOtlpAuthEnabled
+          ? validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value)
+          : !isOtlpAuthSelected(otlpAuthInputs),
+      ].every(Boolean);
+    }
     if (isLogstash) {
       // validate logstash
       return (
@@ -980,9 +1037,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaPartitionTypeRoundRobinInput,
     kafkaStaticTopicInput,
     kafkaDynamicTopicInput,
+    otlpInputs,
+    otlpAuthInputs,
+    isOtlpAuthEnabled,
     isLogstash,
     isKafka,
     isRemoteElasticsearch,
+    isOtlp,
   ]);
 
   const submit = useCallback(async () => {
@@ -1032,7 +1093,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
       const otelExporterParams: OtelExporterOutput = {
         otel_exporter_config_yaml: otelExporterConfigInput.value || null,
-        otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+        // Send the toggle value only when the user changed it; otherwise keep the stored value
+        // (or null when unset) so saving other fields does not turn "unset" into `false`
+        otel_disable_beatsauth: otelDisableBeatsauthInput.hasChanged
+          ? otelDisableBeatsauthInput.value
+          : otelOutput?.otel_disable_beatsauth ?? null,
       };
 
       // the client SSL key of the Elasticsearch, remote Elasticsearch and Logstash outputs
@@ -1054,6 +1119,24 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         };
 
         switch (typeInput.value) {
+          case outputType.Otlp:
+            // an OTLP output can be the default neither for data nor for monitoring
+            return {
+              name: nameInput.value,
+              type: outputType.Otlp,
+              is_default: false,
+              is_default_monitoring: false,
+              // an update without the exporter keeps it as it is: a preconfigured output that
+              // does not allow editing it must not send it, or the server rejects the update
+              ...(output && isOtlpExporterDisabled
+                ? {}
+                : { otlp_exporter: buildOtlpExporterConfig(otlpInputs) }),
+              ...(output && isOtlpAuthDisabled
+                ? {}
+                : buildOtlpAuth(otlpAuthInputs, {
+                    hasStoredAuth: !!(output && isOtlpOutput(output) && output.auth),
+                  })),
+            } as NewOtlpOutput;
           case outputType.Kafka:
             const definedCA = kafkaSslCertificateAuthoritiesInput.value.filter(
               (val) => val !== ''
@@ -1342,6 +1425,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaKerberosInputs,
     isKafkaKerberosConfigured,
     kafkaOutput,
+    otlpInputs,
+    isOtlpExporterDisabled,
+    otlpAuthInputs,
+    isOtlpAuthDisabled,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
@@ -1388,12 +1475,16 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     writeToStreams.value,
     otelExporterConfigInput.value,
     otelDisableBeatsauthInput.value,
+    otelDisableBeatsauthInput.hasChanged,
+    otelOutput?.otel_disable_beatsauth,
     caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,
   ]);
 
-  const isHostsMissing = isKafka
+  const isHostsMissing = isOtlp
+    ? !otlpInputs.otlpEndpointInput.value.trim()
+    : isKafka
     ? !kafkaHostsInput.value.some((v) => v.trim())
     : isLogstash
     ? !logstashHostsInput.value.some((v) => v.trim())
@@ -1412,6 +1503,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       (output && !hasChanged) ||
       !nameInput.value ||
       isHostsMissing ||
+      (isOtlp &&
+        Object.values(otlpInputs).some(
+          (input) => (input.formRowProps as { isInvalid?: boolean }).isInvalid
+        )) ||
       (isLogstash && !hasEncryptedSavedObjectConfigured) ||
       (!isKafka &&
         (sslCertificateAuthoritiesInput.props.isInvalid ||

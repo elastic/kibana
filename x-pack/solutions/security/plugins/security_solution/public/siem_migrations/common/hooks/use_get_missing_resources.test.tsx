@@ -73,6 +73,20 @@ describe('useGetMissingResources', () => {
     expect(onSuccess).toHaveBeenCalledWith(missingResources);
   });
 
+  it('should report no missing resources for workflows without calling the rules or dashboards services', async () => {
+    const onSuccess = jest.fn();
+
+    const { result } = renderHook(() => useGetMissingResources('workflow', onSuccess));
+
+    await act(async () => {
+      result.current.getMissingResources('migration-3');
+    });
+
+    expect(onSuccess).toHaveBeenCalledWith([]);
+    expect(mockGetMissingResourcesRule).not.toHaveBeenCalled();
+    expect(mockGetMissingResourcesDashboard).not.toHaveBeenCalled();
+  });
+
   it('handles errors when fetching missing resources', async () => {
     const onSuccess = jest.fn();
     const error = new Error('Failed to fetch');

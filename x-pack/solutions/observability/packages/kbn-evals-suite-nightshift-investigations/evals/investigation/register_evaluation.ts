@@ -8,7 +8,9 @@
 import { expect } from '@playwright/test';
 import pMap from 'p-map';
 import { tags } from '@kbn/evals';
-import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
+import type { EvalConnector, EvaluationDataset, EvalsClient, Evaluator } from '@kbn/evals';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { evaluate } from '../../src/evaluate';
 import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
@@ -19,7 +21,10 @@ import {
   saveConnectorSetOnInvestigator,
   saveConnectorsOnInvestigator,
 } from './connector_sets';
-import { createInvestigationJudges, createOrcaEvaluators } from './judges';
+import { createInvestigationJudges } from './judges';
+import { createOrcaEvaluators } from './orca/evaluators';
+import { addOrcaReport, assertOrcaReportsWritten } from './orca/report';
+import { assertOrcaRubricsCover, loadOrcaRubrics } from './orca/rubrics';
 import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation, waitForInvestigationToEnd } from './task';
@@ -48,6 +53,8 @@ const suiteTags = [...tags.serverless.observability.complete];
 // How long an ORCA investigation that outlived its poll may take to end before its cutoff's key is
 // taken off the connector.
 const ORCA_SETTLE_MS = 2 * 60_000;
+// Writing an ORCA task's report.md after its investigation, retries included.
+const ORCA_REPORT_BUDGET_MS = 5 * 60_000;
 
 /** Registers a dataset with the native investigation task, RCA judges and execution checks. */
 export const registerInvestigationEvaluation = ({
@@ -59,6 +66,9 @@ export const registerInvestigationEvaluation = ({
   bundledSynthetic: bundledSyntheticDataset = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
     !process.env.NIGHTSHIFT_DATASET_NAME,
   metadata: experimentMetadata = {},
+  prepareExample = (example) => example,
+  extraEvaluators = () => [],
+  excludeEvaluators = [],
   // Experiment ids come from the build, suite, model and this name, so datasets that can run in one
   // build need distinct names or their scores merge.
   experimentName = orca
@@ -73,6 +83,16 @@ export const registerInvestigationEvaluation = ({
   orca?: boolean;
   bundledSynthetic?: boolean;
   metadata?: Record<string, string | number>;
+  /** Turns a stored example into the one the investigation runs, e.g. to compose its prompt when the run starts. */
+  prepareExample?: (example: InvestigationExample) => InvestigationExample;
+  /** Evaluators scored in addition to the investigation judges, built with the run's judge connection. */
+  extraEvaluators?: (deps: {
+    inferenceClient: BoundInferenceClient;
+    evaluationConnector: EvalConnector;
+    log: ToolingLog;
+  }) => Array<Evaluator<InvestigationExample, InvestigationTaskOutput>>;
+  /** Evaluators to leave out, by name, when they do not apply to the dataset. */
+  excludeEvaluators?: string[];
   experimentName?: string;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
@@ -116,13 +136,23 @@ export const registerInvestigationEvaluation = ({
           evaluationConnector: judgeConnector,
           log,
         };
+        // ORCA's agent writes its own report.md, so the model under test writes ours from the
+        // finished investigation.
+        const reportDeps = {
+          inferenceClient: inferenceClient.bindTo({ connectorId: connector.id }),
+          log,
+        };
+        // Every task's events must have a rubric, or the task would silently go unscored.
+        const orcaRubrics = orca ? await loadOrcaRubrics(evalsClient) : undefined;
+        if (orcaRubrics) assertOrcaRubricsCover(dataset.examples, orcaRubrics);
         const judges = createInvestigationJudges(judgeDeps);
         const evaluators = [
           ...judges,
-          ...(orca ? createOrcaEvaluators(judgeDeps) : []),
+          ...(orcaRubrics ? createOrcaEvaluators(judgeDeps, { rubrics: orcaRubrics }) : []),
           executionSuccessEvaluator,
           ...efficiencyEvaluators,
-        ];
+          ...extraEvaluators(judgeDeps),
+        ].filter(({ name: evaluatorName }) => !excludeEvaluators.includes(evaluatorName));
         const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
         assertScoresWithinQueryLimit({
           examples: dataset.examples.length,
@@ -146,6 +176,8 @@ export const registerInvestigationEvaluation = ({
           : Math.ceil((dataset.examples.length * repetitions) / concurrency);
         const timeoutMs =
           rounds * (INVESTIGATION_TIMEOUT_MS + (orca ? ORCA_SETTLE_MS : 0) + 2 * 60_000) +
+          // A report.md is written after its cutoff's turn, so only the last one adds to the run.
+          (orca ? ORCA_REPORT_BUDGET_MS : 0) +
           5 * 60_000 +
           // Minting and checking each ORCA cutoff's key, and putting it on the connector.
           cutoffs.length * 60_000;
@@ -232,14 +264,16 @@ export const registerInvestigationEvaluation = ({
                     );
                   }
                   return output;
-                }),
+                  // The report reads only what the investigation recorded, so the next cutoff
+                  // need not wait for it.
+                }).then((output) => addOrcaReport(reportDeps, output)),
             });
           });
         } else {
           await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
           experimentResults = await runExperiment({
             runConcurrency: concurrency,
-            task: (example) => runInvestigation(fetch, example, connector),
+            task: (example) => runInvestigation(fetch, prepareExample(example), connector),
           });
         }
         const [experiment] = experimentResults;
@@ -272,6 +306,8 @@ export const registerInvestigationEvaluation = ({
           log.warning(`Investigation ${caseId} did not complete: ${reason}`);
         }
         assertExecutionSuccessRate(failures, runs.length);
+        if (orca)
+          assertOrcaReportsWritten(runs.map(({ output }) => output as InvestigationTaskOutput));
         const casesWithOrcaTelemetry: string[] = [];
 
         await pMap(

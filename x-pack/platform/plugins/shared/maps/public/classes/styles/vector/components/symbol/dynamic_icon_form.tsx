@@ -62,7 +62,9 @@ export function DynamicIconForm({
 
     return (
       <IconMapSelect
-        {...styleOptions}
+        customIconStops={styleOptions.custom_icon_stops}
+        iconPaletteId={styleOptions.icon_palette_id ?? null}
+        useCustomIconMap={styleOptions.use_custom_icon_map}
         styleProperty={styleProperty}
         customIcons={customIcons}
         onChange={onIconMapChange}

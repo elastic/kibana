@@ -29,13 +29,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -50,6 +50,7 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
@@ -62,7 +63,6 @@ describe('EVAL > columnsAfter', () => {
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -86,13 +86,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'foo + 1',
         type: 'integer',
         location: { min: 18, max: 24 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -116,6 +116,7 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
@@ -128,7 +129,6 @@ describe('EVAL > columnsAfter', () => {
         location: { min: 33, max: 41 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -171,6 +171,33 @@ describe('EVAL > columnsAfter', () => {
     ]);
   });
 
+  it('keeps only the rightmost assignment of a repeated name', () => {
+    const command = synth.cmd`EVAL baz = 1, qux = bar, baz = "a"`;
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.DEFAULT
+    );
+
+    expect(result).toEqual([
+      ...baseColumns,
+      {
+        name: 'qux',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      {
+        name: 'baz',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+    ]);
+  });
+
   it('propagates the concrete type of a CASE expression with a null result', () => {
     const command = synth.cmd`EVAL result = CASE(true, 1, NULL)`;
     const result = columnsAfter(
@@ -182,13 +209,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'result',
         type: 'integer',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -203,13 +230,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'newField',
         type: 'keyword',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -224,13 +251,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'newField',
         type: 'keyword',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -245,13 +272,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'newField',
         type: 'null',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 });

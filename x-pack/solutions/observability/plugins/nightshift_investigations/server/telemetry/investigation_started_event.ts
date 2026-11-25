@@ -6,10 +6,11 @@
  */
 
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import { alertIdentitySchema, type AlertIdentity } from './alert_identity';
 
 export const NIGHTSHIFT_INVESTIGATION_STARTED_EVENT = 'nightshift-investigation-started';
 
-export interface InvestigationStartedEvent {
+export interface InvestigationStartedEvent extends AlertIdentity {
   investigation_id: string;
   workflow_execution_id: string;
   trigger_type: string;
@@ -73,6 +74,7 @@ const investigationStartedSchema: RootSchema<InvestigationStartedEvent> = {
       optional: true,
     },
   },
+  ...alertIdentitySchema,
 };
 
 export const investigationStartedEvent: EventTypeOpts<InvestigationStartedEvent> = {

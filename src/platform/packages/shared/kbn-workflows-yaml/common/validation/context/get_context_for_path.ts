@@ -96,7 +96,7 @@ export function getContextSchemaForStep(
 }
 
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
-// src/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts
+// x-pack/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts
 export function getContextSchemaForPath(
   registry: WorkflowContextRegistry,
   definition: WorkflowDefinitionForContext,

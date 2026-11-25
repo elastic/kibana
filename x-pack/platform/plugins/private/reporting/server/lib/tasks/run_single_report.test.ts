@@ -12,6 +12,7 @@ import { Report, SavedReport } from '../store';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CancellationToken } from '@kbn/reporting-common';
 import {
+  ExportTypeUnavailableError,
   JOB_STATUS,
   KibanaShuttingDownError,
   QueueTimeoutError,
@@ -735,6 +736,8 @@ describe('Run Single Report Task', () => {
   });
 
   it('fails without running the export type when a serverless feature flag has disabled it', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
     const isExportTypeEnabled = jest
       .spyOn(mockReporting, 'isExportTypeEnabled')
       .mockResolvedValue(false);
@@ -755,12 +758,18 @@ describe('Run Single Report Task', () => {
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
     store.setReportError = jest.fn();
+    store.setReportFailed = jest.fn();
 
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     jest
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
-      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+      .mockResolvedValueOnce({
+        _id: 'test',
+        jobtype: 'test1',
+        status: 'pending',
+        payload: {},
+      } as never);
     await task.init(taskManagerMock.createStart());
     const taskRunner = task.getTaskDefinition().createTaskRunner({
       taskInstance: {
@@ -771,10 +780,59 @@ describe('Run Single Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrow('Export type test1 is disabled');
+    const error = await taskRunner.run().catch((err: Error) => err);
 
+    expect(error).toBeInstanceOf(ExportTypeUnavailableError);
+    expect((error as Error).message).toContain('Export type test1 is disabled');
+    expect(isUnrecoverableError(error as Error)).toBe(true);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
     expect(isExportTypeEnabled).toHaveBeenCalledWith('test1', ScheduleType.SINGLE);
     expect(runTaskFn).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalled();
+    expect(store.setReportError).not.toHaveBeenCalled();
+  });
+
+  it('fails without retrying when no export type is registered for the job type', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
+    const store = await mockReporting.getStore();
+    store.setReportError = jest.fn();
+    store.setReportFailed = jest.fn();
+
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
+      .mockResolvedValueOnce({
+        _id: 'test',
+        jobtype: 'unregistered',
+        status: 'pending',
+        payload: {},
+      } as never);
+    await task.init(taskManagerMock.createStart());
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        attempts: 1,
+        params: {
+          index: 'cool-reporting-index',
+          id: 'test1',
+          jobtype: 'unregistered',
+          payload: {},
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const error = await taskRunner.run().catch((err: Error) => err);
+
+    expect(error).toBeInstanceOf(ExportTypeUnavailableError);
+    expect((error as Error).message).toContain('No export type from unregistered found');
+    expect(isUnrecoverableError(error as Error)).toBe(true);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect(mockGetContentStream).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalled();
+    expect(store.setReportError).not.toHaveBeenCalled();
   });
 
   it('catches stream error during performJob and rejects the operation', async () => {
@@ -1538,6 +1596,7 @@ describe('Run Single Report Task', () => {
   });
   describe('page-render-service retries', () => {
     const CREATED_AT = '2026-10-14T12:00:00.000Z';
+    const CLAIMED_RUN_AT = new Date(CREATED_AT);
 
     async function runFailingWith(
       error: Error,
@@ -1598,6 +1657,7 @@ describe('Run Single Report Task', () => {
           id: 'random-task-id',
           attempts,
           state,
+          runAt: CLAIMED_RUN_AT,
           params: {
             index: 'cool-reporting-index',
             id: 'test1',
@@ -1640,7 +1700,8 @@ describe('Run Single Report Task', () => {
       });
 
       await expect(result).resolves.toEqual({
-        runAt: expect.any(Date),
+        // Keeps its place ahead of reports queued after it.
+        runAt: CLAIMED_RUN_AT,
         state: { unavailableRuns: 1, queued: true },
       });
       // Closes the execution the run started, without calling it an error.
@@ -1652,19 +1713,23 @@ describe('Run Single Report Task', () => {
     it('reschedules an unreachable service as queuing, not an attempt', async () => {
       const { result } = await runFailingWith(new RenderServiceUnavailableError('down'));
 
-      await expect(result).resolves.toEqual({
+      const resolved = await result;
+      expect(resolved).toEqual({
         runAt: expect.any(Date),
         state: { unavailableRuns: 1, queued: true },
       });
+      expect((resolved as { runAt: Date }).runAt.getTime()).toBeGreaterThan(Date.now());
     });
 
     it('reschedules a failed render as another attempt', async () => {
       const { result, store } = await runFailingWith(new RenderFailedError('boom'));
 
-      await expect(result).resolves.toEqual({
+      const resolved = await result;
+      expect(resolved).toEqual({
         runAt: expect.any(Date),
         state: { unavailableRuns: 0, queued: false, waitingSince: expect.any(Number) },
       });
+      expect((resolved as { runAt: Date }).runAt.getTime()).toBeGreaterThan(Date.now());
       expect(store.setReportError).toHaveBeenCalled();
       expect(store.setReportFailed).not.toHaveBeenCalled();
     });

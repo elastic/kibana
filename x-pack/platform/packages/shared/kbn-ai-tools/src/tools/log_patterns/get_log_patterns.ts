@@ -423,11 +423,13 @@ export async function getSigEventsLogPatternsEsql({
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
   const signal = timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
   try {
+    // A full-schema probe fails when no index maps `@timestamp`; the `fields` probe nullifies it.
     const columns = await getEsqlColumnSchema({
       esClient: esClient.client,
       index: samplingSource,
       start,
       end,
+      fields,
       signal,
     });
     // Both `text` and `match_only_text` mappings report as `text` in `column.type`.
@@ -440,32 +442,31 @@ export async function getSigEventsLogPatternsEsql({
       return [];
     }
 
-    const totalDocs = await runEsqlCountQuery({
-      esClient,
-      samplingSource,
-      start,
-      end,
-      kql,
-    });
-    if (totalDocs === 0) {
-      return [];
-    }
-
-    const samplingProbability =
-      MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
-
-    const filter = { bool: { filter: [...kqlQuery(kql), ...dateRangeQuery(start, end)] } };
-
     const perField = await Promise.all(
       eligibleFields.map(async (field) => {
+        const totalDocs = await runEsqlCountQuery({
+          esClient,
+          samplingSource,
+          start,
+          end,
+          kql,
+          populatedField: field,
+        });
+        if (totalDocs === 0) {
+          return [];
+        }
+
         // Metadata-free, so it works on ES|QL views as well as concrete indices.
         const rows = await categorizeWithNoiseExclusion({
           esClient,
           indices: samplingSource,
           field,
           total: totalDocs,
-          samplingProbability,
-          filter,
+          samplingProbability:
+            MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1,
+          start,
+          end,
+          kql,
         });
 
         return rows.map((row) => ({
@@ -493,15 +494,17 @@ async function runEsqlCountQuery({
   start,
   end,
   kql,
+  populatedField,
 }: {
   esClient: TracedElasticsearchClient;
   samplingSource: string;
   start: number;
   end: number;
   kql?: string;
+  populatedField: string;
 }): Promise<number> {
   const response = (await esClient.esql('count_docs_for_sigevents_log_patterns', {
-    query: buildCountQuery({ index: samplingSource, start, end, kql }),
+    query: buildCountQuery({ index: samplingSource, start, end, kql, populatedField }),
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];

@@ -57,6 +57,13 @@ describe('toStoredCustomContent', () => {
       'esql'
     );
     expect(toStoredCustomContent(customContentData({ esql: '  ' }))).not.toHaveProperty('esql');
+    expect(toStoredCustomContent(customContentData({ esql: [] }))).not.toHaveProperty('esql');
+  });
+
+  it('reads the main query of a panel stored as a list of queries, as the tools write it', () => {
+    expect(
+      toStoredCustomContent(customContentData({ esql: ['FROM logs | LIMIT 1', 'FROM other'] }))
+    ).toMatchObject({ esql: 'FROM logs | LIMIT 1' });
   });
 
   it('ignores panels of other renderers', () => {
@@ -338,29 +345,24 @@ describe('getCustomContentToolArgs', () => {
           {
             id: 'banner',
             content: {
-              source: 'request',
-              renderer: 'custom_content',
+              type: 'custom_content',
               query: 'show the live total number of requests',
             },
           },
           {
             id: 'kpi',
             content: {
-              source: 'request',
-              renderer: 'custom_content',
+              type: 'custom_content',
               query: 'show requests',
-              hasData: true,
-              esql: 'FROM logs | STATS c = COUNT(*)',
+              dataQueries: [{ esql: 'FROM logs | STATS c = COUNT(*)' }],
             },
           },
         ],
       }),
     ]);
 
-    expect(omitted).toContain('panel banner: hasData=unset');
-    expect(omitted).toContain('esql=no');
-    expect(passed).toContain('panel kpi: hasData=true');
-    expect(passed).toContain('esql=yes');
+    expect(omitted).toContain('panel banner: dataQueries=unset');
+    expect(passed).toContain('panel kpi: dataQueries=1');
     expect(passed).not.toContain('FROM logs');
   });
 
@@ -368,26 +370,27 @@ describe('getCustomContentToolArgs', () => {
     const lines = getCustomContentToolArgs([
       call('platform.core.create_visualization', {
         query: 'a status board',
-        target: { type: 'custom_content', has_data: false },
+        target: { type: 'custom_content', removeAllQueries: true },
       }),
       call('custom_content_update_panel', {
         embeddable_id: 'p1',
         prompt: 'x'.repeat(200),
-        regenerateEsql: true,
+        dataQueries: [{ description: 'x' }, {}],
       }),
     ]);
 
-    expect(lines[0]).toContain('create_visualization custom_content: has_data=false');
-    expect(lines[1]).toContain('regenerateEsql=true');
+    expect(lines[0]).toContain('create_visualization custom_content: dataQueries=unset');
+    expect(lines[0]).toContain('removeAllQueries=true');
+    expect(lines[1]).toContain('dataQueries=2');
     expect(lines[1].length).toBeLessThan(200);
   });
 
-  it('ignores other tools, other renderers and steps without params', () => {
+  it('ignores other tools, other panel types and steps without params', () => {
     expect(
       getCustomContentToolArgs([
         call('platform.core.get_index_mapping', { index: 'logs' }),
         call('platform.dashboard.generate_dashboard', {
-          panels: [{ id: 'a', content: { source: 'request', renderer: 'lens', query: 'x' } }],
+          panels: [{ id: 'a', content: { type: 'vis', query: 'x' } }],
         }),
         { type: 'tool_call', tool_id: 'platform.dashboard.generate_dashboard' },
         { type: 'reasoning' },

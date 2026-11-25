@@ -2,7 +2,7 @@
 
 This document explains how to develop Streams V2 — unit-scoped map, YAML unit model, and the Kibana unit APIs.
 
-Legacy wired / classic / query streams are documented in [`LEGACY_DEVELOPMENT.md`](./LEGACY_DEVELOPMENT.md).
+Legacy wired / classic streams are documented in [`LEGACY_DEVELOPMENT.md`](./LEGACY_DEVELOPMENT.md).
 
 Also consult the [streams-spec](https://github.com/elastic/streams-spec/tree/main/docs) repo for up to date ADRs, the official schema etc.
 
@@ -53,7 +53,7 @@ Settings marked UI-readonly can only be turned on through `uiSettings.overrides`
 
 ## Access via URL
 
-With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges"). A user who also has Streams access gets a Classic Streams tab with the V1 list only after a saved change: a classic stream with processing, field overrides, a lifecycle, settings, or a failure store, or a wired stream other than an untouched shipped root (`logs`, `logs.otel`, `logs.ecs`). Creating a wired child counts. Untouched integration data streams, query streams, draft streams, and `metrics-streams.otel-default` (where the V2 backend writes unit telemetry) do not. When nothing counts, the tab is hidden and `/app/streams/v2/unit/{unitId}/classic` redirects to the Map. A failed check keeps the tab and that URL.
+With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges"). A user who also has Streams access gets a Classic Streams tab with the V1 list, and lands on it by default. Without Streams access the tab is hidden, the user lands on the Map, and `/app/streams/v2/unit/{unitId}/classic` redirects to the Map.
 
 ## Privileges
 
@@ -85,10 +85,10 @@ With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/
 | Request | Kibana API privilege | Kibana calls | The user's Elasticsearch privileges |
 | --- | --- | --- | --- |
 | `GET /internal/streams/unit/{id}` | `read_streams_v2` | The unit saved object, through an internal client | None |
-| `PUT /internal/streams/unit/{id}` | `manage_streams_v2` | The unit saved object, the distributor (Kibana's mTLS client certificate), and `DELETE /_security/api_key` as Kibana for removed components | None |
+| `PUT /internal/streams/unit/{id}` | `manage_streams_v2` | The unit saved object, the distributor (Kibana's mTLS client certificate), `DELETE /_security/api_key` as Kibana for removed components, and an empty `POST <endpoint>/_prometheus/api/v1/write` with the user's key for new or changed remote Elasticsearch destinations | None |
 | `GET /internal/streams/components` | `read_streams_v2` | The distributor | None |
 | `POST /internal/streams/components/_validate` | `manage_streams_v2` | The distributor | None |
-| `GET /internal/streams/unit/{id}/_resolve_indices` | `read_streams_v2` | `GET /_resolve/index/<destination targets>`, `GET /_data_stream/<names>`, `POST /_security/user/_has_privileges` | `view_index_metadata` on the destination targets (see "Destination targets"). Indices the user can't see are left out. |
+| `GET /internal/streams/unit/{id}/_resolve_indices?start=&end=` | `read_streams_v2` | `POST /_query` (ES\|QL) on `metrics-streams.otel-default` for the indices each local Elasticsearch destination wrote to in the range, then `GET /_resolve/index/<those names>`, `GET /_data_stream/<names>`, `POST /_security/user/_has_privileges` | `read` on `metrics-streams.otel-default`, which fails the request as `forbidden` without it, and `view_index_metadata` on the destination targets (see "Destination targets"). Indices the user can't see are left out. |
 | `GET /internal/streams/indices/{name}` | `read_streams_v2` | `GET /_data_stream/<name>`, `GET /<name>`, `POST /_security/user/_has_privileges` | `view_index_metadata`. The response reports `monitor` and `read_failure_store`, which the UI uses to show or hide panels. |
 | `POST /internal/streams/unit/{id}/_stats` | `read_streams_v2` | `POST /_query` (ES\|QL) on `metrics-streams.otel-default` | `read` on `metrics-streams.otel-default`. Without it, the stats fail as `forbidden`. |
 | `/internal/streams/doc_counts/{total,degraded,failed,ingestion}`, `/internal/streams/storage_stats` | `read_stream` or `read_streams_v2` | `GET /_data_stream`, `_search`, ES\|QL on `<name>::failures`, and `_metering/stats` on Serverless | `view_index_metadata` and `read`, plus `read_failure_store` for failed-document counts |
@@ -168,9 +168,9 @@ POST /_security/api_key
 
 ### Destination targets
 
-Index privileges are on the targets of a local Elasticsearch destination, which depend on its configuration. The key, `_resolve_indices` and the indices table all use the same targets (`getSignalTargetsWritePatterns` in `@kbn/streams-schema`). For each signal the destination sends, the first of these that is set wins:
+Index privileges are on the targets of a local Elasticsearch destination, which depend on its configuration. The key and the privilege checks use the same targets (`getSignalTargetsWritePatterns` in `@kbn/streams-schema`). For each signal the destination sends, the first of these that is set wins:
 
-1. `index`: that index.
+1. `index`: that index. A metrics `index` also covers the data stream Prometheus remote write lands in (`getPrometheusDataStream`): `metrics-<dataset>.prometheus-<namespace>`, or `metrics-generic.prometheus-default` when the name doesn't split.
 2. `write_patterns`: those patterns.
 3. Neither: the Auto pattern `<signal>-*-*` (`logs-*`, `metrics-*` and `traces-*` for docs).
 
@@ -178,13 +178,16 @@ Index privileges are on the targets of a local Elasticsearch destination, which 
 | --- | --- | --- |
 | Auto, all signals | No `index` and no `write_patterns` | `logs-*-*`, `metrics-*-*`, `traces-*-*` |
 | Auto with custom write patterns | `write_patterns`, shaped `<signal>-<dataset>-<namespace>`, where either part may contain `*` | `logs-billing-*` for logs only |
-| Static index | `index`, shaped `<signal>-<dataset>-<namespace>` with no wildcards. "All" applies one `<dataset>-<namespace>` to every signal. | `logs-app-default`, `metrics-app-default` |
+| Static index | `index`, shaped `<signal>-<dataset>.otel-<namespace>` with no wildcards | `logs-app.otel-default`, `metrics-app.otel-default`, `metrics-app.prometheus-default` |
 
-The create form enforces those shapes. A unit written with the API can contain anything.
+The create form enforces those shapes. The unit `PUT` rejects (400) a new or changed logs, metrics or traces `index` on an `elasticsearch` or `remote_elasticsearch` destination with any other shape, because the exporter writes in OTel mapping mode and only `*.otel-*` data streams have its templates. The docs `index` is free-form. Anything else a unit written with the API contains is left to the config distributor.
 
 - A wildcard target needs a role covering every name it could match. `logs-*` covers `logs-*-*`; `logs-billing-*` doesn't, so that user can't create an Auto destination.
 - Grant write (`create_doc`, `auto_configure`) and read (`view_index_metadata`, `read`, `monitor`, `read_failure_store`) on the same names, covering the union of the targets the user manages. Otherwise they can create destinations whose indices they can't see.
 - The key covers the targets at the time the destination is created.
+- `_resolve_indices`, and the indices table and index count built on it, list only the indices the destination wrote to in the page time range, not every index its targets match. They come from `streams.destination.items` grouped by `db.collection.name`, and an index is listed when its `success` items less its `failure_store: used` items are above zero. `metrics-streams.otel-default` is never listed.
+- Each listed index carries that difference as `documents`, and `ingestion_rate` as `documents` per second over the range. The table's Docs written and Ingestion columns show them, so other writers to a shared data stream, such as another destination, aren't counted. Storage, quality, health and retention are of the whole index.
+- The flyout of a local Elasticsearch destination shows its delivery from the same metrics, as for S3 and remote Elasticsearch, with totals above it. Docs written is the sum of the listed indices' `documents`, so it adds up with the table. It can be lower than the delivery chart, because an index that was deleted since, or that the user can't see, isn't listed. Peak delivery rate is the busiest bucket of the delivery series. Storage size is of the listed indices.
 
 ### Non-admin V2 managers
 
@@ -267,7 +270,7 @@ Important consequences:
 - Only `unit_id` is mapped (`keyword`). The configuration saved object id is the unit id (`default` in v1). Do not add mappings unless you actually need to filter/sort on that field; mappings cannot be removed later.
 - `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest. `unit_id` and `sealed_credentials` are in AAD, so the cache stays readable but is authenticated: editing or swapping a cached blob makes `secrets` fail to decrypt, and the next save fails before anything is sent. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document, and do not `soClient.update` encrypted or AAD attributes. The one exception is `api_keys` (neither encrypted nor in AAD), which is updated on its own (see "API keys").
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
-- Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
+- Unit PUT order: remote Elasticsearch check → seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A rejected remote or a validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
 - `streams:republish-units` re-sends every stored unit every 30 minutes and re-seals after a key rotation. See "Republish and key rotation".
 - Without `xpack.streams.distributor.url`, unit PUT fails with a 503 ("streams-config-distributor URL is not configured"). There is no offline mode.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
@@ -376,6 +379,15 @@ That revokes every API key in the unit's registry, then deletes the configuratio
 | `application/yaml` (also `text/yaml`, `application/x-yaml`) | The authored unit document itself (`sources` / `destinations` / `pipelines`). Do **not** wrap it in `{ unit: … }` and do **not** jsonify it first. YAML cannot set `ui_metadata` or `secrets`; stored map layout and secrets are kept (stale node metadata is still pruned). |
 
 A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, the PUT fails with 503 and nothing is stored. If the unit published but the canvas layout write failed, the response includes `ui_metadata_not_persisted: true`.
+
+Each new remote Elasticsearch destination, and each one whose endpoint or key changed, gets an empty `POST <endpoint>/_prometheus/api/v1/write` with its key before anything is stored. The PUT fails with 400 and stores nothing when:
+
+- the endpoint is not `https://` on a host ending in `.elastic.cloud`, `.elastic-cloud.com` or `.cloud.es.io`, or has credentials, a query or a fragment
+- the key is missing or has whitespace, control or non-ASCII characters
+- the save has more than 10 such remotes
+- the remote answers with a 4xx other than 408 or 429
+
+When the remote answers with 3xx, 5xx, 408 or 429, times out or can't be reached, the unit is saved and the response includes `remote_destinations_unverified: [{ destination_id, host, reason, status? }]`, with `reason` one of `unexpected_status`, `timeout` or `unreachable`.
 
 ### JSON envelope (Map)
 
