@@ -364,11 +364,11 @@ export function SettingsEntryRow(props: SettingsEntryRowProps) {
         });
 
   return (
-    <EuiPanel hasBorder paddingSize="none" css={{ marginBottom: euiTheme.size.s }}>
+    <EuiPanel hasBorder paddingSize="s" css={{ marginBottom: euiTheme.size.s }}>
       <EuiAccordion
         id={accordionId}
         initialIsOpen={false}
-        paddingSize="m"
+        paddingSize="s"
         buttonContent={<SummaryLine displayName={displayName} typeLabel={typeLabel} />}
         extraAction={
           props.readOnly ? undefined : (
@@ -386,16 +386,6 @@ export function SettingsEntryRow(props: SettingsEntryRowProps) {
             </EuiToolTip>
           )
         }
-        css={{
-          '.euiAccordion__triggerWrapper': {
-            alignItems: 'center',
-            paddingInline: euiTheme.size.m,
-          },
-          '.euiAccordion__button': {
-            paddingInline: 0,
-            paddingBlock: euiTheme.size.s,
-          },
-        }}
         data-test-subj={`${testSubjPrefix}Row-${props.field.id}`}
       >
         {entryFields}

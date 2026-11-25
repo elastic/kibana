@@ -285,16 +285,7 @@ export const WorkflowSettingsFlyout = ({
       data-test-subj="workflowSettingsFlyout"
       aria-labelledby={titleId}
     >
-      <EuiFlyoutHeader
-        hasBorder
-        css={{
-          '&&': {
-            paddingTop: euiTheme.size.base,
-            paddingInline: euiTheme.size.base,
-            paddingBottom: 0,
-          },
-        }}
-      >
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={titleId}>
             <FormattedMessage
@@ -304,7 +295,12 @@ export const WorkflowSettingsFlyout = ({
           </h2>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiTabs size="m" bottomBorder={false} css={{ marginBottom: 0, paddingBottom: 0 }}>
+        {/* Pulls the tabs down over the header's bottom padding, as the EUI flyout tabs pattern does. */}
+        <EuiTabs
+          size="m"
+          bottomBorder={false}
+          css={{ marginBlockEnd: `calc(${euiTheme.size.l} * -1)` }}
+        >
           {SETTINGS_TABS.map((tab) => (
             <EuiTab
               key={tab.id}
@@ -318,13 +314,7 @@ export const WorkflowSettingsFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody
-        css={{
-          '.euiFlyoutBody__overflowContent': {
-            padding: euiTheme.size.base,
-          },
-        }}
-      >
+      <EuiFlyoutBody>
         {selectedTabId === 'general' ? (
           <>
             <EuiFormRow

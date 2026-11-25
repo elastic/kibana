@@ -171,11 +171,11 @@ const PropertyEditor = ({
   });
 
   return (
-    <EuiPanel hasBorder paddingSize="none" css={{ marginBottom: euiTheme.size.s }}>
+    <EuiPanel hasBorder paddingSize="s" css={{ marginBottom: euiTheme.size.s }}>
       <EuiAccordion
         id={accordionId}
         initialIsOpen
-        paddingSize="m"
+        paddingSize="s"
         buttonContent={buttonContent}
         extraAction={
           readOnly ? undefined : (
@@ -193,19 +193,6 @@ const PropertyEditor = ({
             </EuiToolTip>
           )
         }
-        css={{
-          '.euiAccordion__triggerWrapper': {
-            alignItems: 'center',
-            paddingInline: euiTheme.size.m, // 16px
-          },
-          '.euiAccordion__button': {
-            paddingInline: 0,
-            paddingBlock: euiTheme.size.s,
-          },
-          '.euiAccordion__optionalAction': {
-            paddingInlineEnd: 0,
-          },
-        }}
         data-test-subj={`${dataTestSubjPrefix}-row-${field.id}`}
       >
         {/* A disabled fieldset makes every control inside inert, so nothing added later can be
