@@ -21,6 +21,36 @@ const isHunted = (ioc: ReviewedIoc | undefined): boolean =>
 
 const share = (hits: number, total: number): number | null => (total === 0 ? null : hits / total);
 
+/** The enrich pipeline prefixes an approved basis and rewrites a rejected one; both start so. */
+const MODEL_VERDICT_BASIS_PREFIX = 'semantic_';
+
+const hasModelVerdict = (ioc: ReviewedIoc | undefined): boolean =>
+  ioc !== undefined &&
+  ioc.deferred_unreviewed !== true &&
+  ioc.tier_basis.startsWith(MODEL_VERDICT_BASIS_PREFIX);
+
+/**
+ * CODE evaluator: of the addresses labelled model-decided, the share the model actually judged.
+ * Without it, `email-not-hunted` would pass a row whose address the extractor dropped or the
+ * pipeline deferred, without the model ever seeing it. Null for a row with none.
+ */
+export const createEmailReviewedEvaluator = (): Evaluator<
+  ReviewIocsExample,
+  ReviewIocsResponse
+> => ({
+  name: 'email-reviewed',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output, expected }) => {
+    const labelled = (expected?.emails ?? []).filter((email) => email.decidedBy === 'model');
+    const missing = labelled.filter((email) => !hasModelVerdict(findEmail(output, email.value)));
+    return {
+      score: share(labelled.length - missing.length, labelled.length),
+      ...(missing.length > 0 ? { label: missing.map((email) => email.value).join(', ') } : {}),
+    };
+  },
+});
+
 /**
  * CODE evaluator: of the plain-prose addresses the source does not attribute to the attacker
  * (a publisher's contact line, a researcher credit, a victim), the share that is not hunted.

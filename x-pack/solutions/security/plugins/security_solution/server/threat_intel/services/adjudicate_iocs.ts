@@ -165,6 +165,13 @@ const tierPriority = (tier: IocTier): number => {
   return 2;
 };
 
+/**
+ * Within a tier, emails go after urls, domains and hashes. extract_iocs emits emails first, so
+ * ordering by index alone would let a long address list (a recipient list, a breach notice) fill
+ * the full-source first batch and the batch budget ahead of every url, domain and hash.
+ */
+const typePriority = (type: IocType): number => (type === 'email' ? 1 : 0);
+
 const downgrade = (ioc: ExtractedIoc, basis: string): ExtractedIoc => ({
   ...ioc,
   tier: 'reference',
@@ -209,6 +216,7 @@ export const prepareIocAdjudication = (
     .sort(
       (left, right) =>
         tierPriority(left.ioc.tier) - tierPriority(right.ioc.tier) ||
+        typePriority(left.ioc.type) - typePriority(right.ioc.type) ||
         left.originalIndex - right.originalIndex
     );
 

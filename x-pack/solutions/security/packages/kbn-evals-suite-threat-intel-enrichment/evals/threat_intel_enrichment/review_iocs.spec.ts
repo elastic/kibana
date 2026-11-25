@@ -11,6 +11,7 @@ import { reviewIocsDataset } from '../../src/datasets/review_iocs_dataset';
 import {
   createEmailHuntedEvaluator,
   createEmailNotHuntedEvaluator,
+  createEmailReviewedEvaluator,
   createEmailUnlabelledEvaluator,
 } from '../../src/evaluators/review_iocs_evaluators';
 
@@ -40,6 +41,7 @@ evaluate.describe(
             createEmailNotHuntedEvaluator(),
             createEmailHuntedEvaluator(),
             createEmailUnlabelledEvaluator(),
+            createEmailReviewedEvaluator(),
           ]
         );
       }

@@ -1870,23 +1870,43 @@ describe('extract_iocs — adjudication context window', () => {
     expect(ioc?.context).not.toContain('Questions about this report');
   });
 
-  it.each(['phishing', 'sender', 'sent from', 'spoofed', 'lure', 'ransom', 'extortion'])(
-    'treats %s as an email attribution cue',
-    (word) => {
-      const email = 'actor@evil-corp.com';
-      const result = extractIocs({
-        text:
-          `Header ${email} appears in an appendix. ` +
-          `${'unrelated prose. '.repeat(40)}` +
-          `The ${word} used ${email} here. ` +
-          `${'more unrelated prose. '.repeat(40)}` +
-          `Contact ${email} for questions.`,
-      });
-      const ioc = result.iocs.find((entry) => entry.type === 'email');
+  it('does not treat "registered" in a footer as an email attribution cue', () => {
+    const email = 'actor@evil-corp.com';
+    const result = extractIocs({
+      text:
+        `The phishing lure was sent from ${email} to finance staff. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `Example Corp is a registered trademark. Questions about this report can go to ${email}.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'email');
 
-      expect(ioc?.context).toContain(`The ${word} used`);
-    }
-  );
+    expect(ioc?.context).toContain('phishing lure');
+    expect(ioc?.context).not.toContain('registered trademark');
+  });
+
+  it.each([
+    'phishing',
+    'sender',
+    'sent from',
+    'spoofed',
+    'lure',
+    'ransom',
+    'extortion',
+    'registrant',
+  ])('treats %s as an email attribution cue', (word) => {
+    const email = 'actor@evil-corp.com';
+    const result = extractIocs({
+      text:
+        `Header ${email} appears in an appendix. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `The ${word} used ${email} here. ` +
+        `${'more unrelated prose. '.repeat(40)}` +
+        `Contact ${email} for questions.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'email');
+
+    expect(ioc?.context).toContain(`The ${word} used`);
+  });
 
   it('does not attach a context window to non-url/domain/hash candidates', () => {
     const result = extractIocs({ text: 'C2 IP: 203.0.113.5' });

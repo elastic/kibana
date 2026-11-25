@@ -60,10 +60,12 @@ const ATTRIBUTION_CONTEXT_CUE =
   /\b(attacker|adversary|c2|c&c|payload|malware|downloaded|beacon|exfiltrat|command.?and.?control|infrastructure|dropper|staged)\b/i;
 
 // An email is judged on who the source says used it, so its attribution check also accepts the
-// words that introduce a phishing sender, a spoofed sender, a ransom or extortion contact and an
-// attacker-registered account. URLs, domains and hashes keep the cue set above.
+// words that introduce a phishing sender, a spoofed sender, a ransom or extortion contact and a
+// registrant. URLs, domains and hashes keep the cue set above. Bare `registered` is left out: it
+// is common in footer boilerplate ("registered trademark"), and a cue there would let a later
+// contact footer win the occurrence tie-break.
 const EMAIL_ATTRIBUTION_CONTEXT_CUE =
-  /\b(?:phish\w*|sender|sent from|spoof\w*|lure|ransom\w*|extortion|registrant|registered)\b/i;
+  /\b(?:phish\w*|sender|sent from|spoof\w*|lure|ransom\w*|extortion|registrant)\b/i;
 
 const windowAround = (source: string, offset: number, length: number, radius: number): string =>
   source.slice(Math.max(0, offset - radius), Math.min(source.length, offset + length + radius));

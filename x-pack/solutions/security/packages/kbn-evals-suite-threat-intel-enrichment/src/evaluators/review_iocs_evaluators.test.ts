@@ -9,6 +9,7 @@ import type { ReviewIocsExample, ReviewIocsResponse, ReviewedIoc } from '../type
 import {
   createEmailHuntedEvaluator,
   createEmailNotHuntedEvaluator,
+  createEmailReviewedEvaluator,
   createEmailUnlabelledEvaluator,
 } from './review_iocs_evaluators';
 
@@ -100,6 +101,52 @@ describe('createEmailNotHuntedEvaluator', () => {
   });
 
   it('ignores rule-decided addresses and is null for a row with none', async () => {
+    const result = await run(
+      evaluator,
+      { iocs: [email('test@test.com', { tier: 'reference', tier_basis: 'placeholder_email' })] },
+      [{ value: 'test@test.com', hunted: false, decidedBy: 'rule' }]
+    );
+    expect(result.score).toBeNull();
+  });
+});
+
+describe('createEmailReviewedEvaluator', () => {
+  const evaluator = createEmailReviewedEvaluator();
+
+  it('is 1 when every model-decided address carries a model verdict', async () => {
+    const result = await run(evaluator, { iocs: [email('a@evil.com'), rejected('b@vendor.com')] }, [
+      { value: 'a@evil.com', hunted: true, decidedBy: 'model' },
+      { value: 'b@vendor.com', hunted: false, decidedBy: 'model' },
+    ]);
+    expect(result.score).toBe(1);
+  });
+
+  it('fails an address the pipeline did not store', async () => {
+    const result = await run(evaluator, { iocs: [] }, [
+      { value: 'a@vendor.com', hunted: false, decidedBy: 'model' },
+    ]);
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('a@vendor.com');
+  });
+
+  it('fails a deferred or never-reviewed address', async () => {
+    const result = await run(
+      evaluator,
+      {
+        iocs: [
+          email('a@evil.com', { deferred_unreviewed: true }),
+          email('b@vendor.com', { tier_basis: 'uncertain_default' }),
+        ],
+      },
+      [
+        { value: 'a@evil.com', hunted: true, decidedBy: 'model' },
+        { value: 'b@vendor.com', hunted: false, decidedBy: 'model' },
+      ]
+    );
+    expect(result.score).toBe(0);
+  });
+
+  it('is null for a row with only rule-decided addresses', async () => {
     const result = await run(
       evaluator,
       { iocs: [email('test@test.com', { tier: 'reference', tier_basis: 'placeholder_email' })] },

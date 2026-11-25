@@ -157,8 +157,9 @@ export interface PackTiScenario {
  * Seeded articles that go through the real enrich workflow write their email join keys defanged
  * only. A plain prose email is judged by the model, so a plain seed address would make a demo or
  * eval hunt depend on a verdict; a defanged one is attributed deterministically
- * (`discriminating` / `defanged_source`). The extractor treats an email as defanged only when the
- * plain address is absent from the original text, so the plain value must never appear in a body.
+ * (`discriminating` / `defanged_source`). The extractor treats an email as defanged when its `@`
+ * is written defanged at least once, or when the plain address is absent from the original text.
+ * Bodies still never carry the plain value, so a seeded address cannot reach model review.
  */
 export const defangSeededEmails = (scenario: PackTiScenario, text: string): string =>
   scenario.joinIocs.reduce(

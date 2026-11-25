@@ -608,6 +608,35 @@ describe('prose email candidates', () => {
     }
   });
 
+  it('reviews urls before emails of the same tier, whatever their extract order', () => {
+    const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
+    const emails = Array.from({ length: capacity }, (_, index) =>
+      email(`victim${index}@riverton-hospital.org`)
+    );
+    const url = candidate('https://evil-corp.com/payload.bin');
+    const prepared = prepareIocAdjudication({ iocs: [...emails, url] });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(prepared.reviewable[0].ioc.value).toBe(url.value);
+    expect(prepared.deferredUnreviewed).toBe(1);
+    expect(result.iocs[capacity].deferred_unreviewed).toBeUndefined();
+    expect(result.iocs[capacity - 1].deferred_unreviewed).toBe(true);
+  });
+
+  it('keeps tier ahead of type when ordering candidates', () => {
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate('https://evil-corp.com/a', { tier: 'contextual', tier_heuristic: 'contextual' }),
+        email('actor@evil-corp.com', {
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+        }),
+      ],
+    });
+
+    expect(prepared.reviewable.map((entry) => entry.ioc.type)).toEqual(['email', 'url']);
+  });
+
   it('defers an email past the batch budget and keeps it out of anchors', () => {
     const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
     const iocs = Array.from({ length: capacity + 1 }, (_, index) =>
