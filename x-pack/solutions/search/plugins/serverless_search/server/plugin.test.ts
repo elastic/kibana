@@ -11,7 +11,7 @@ import { ServerlessSearchPlugin } from './plugin';
 import type { StartDependencies } from './types';
 
 /** Minimal in-memory stand-in for the data views service default handling. */
-const createFakeDataViews = (initialDefault: string | null, onCreate?: () => void) => {
+const createFakeDataViews = (initialDefault: string | null, onCreate?: () => Promise<void>) => {
   const views = new Set<string>();
   let defaultIndex = initialDefault;
   const service = {
@@ -23,7 +23,7 @@ const createFakeDataViews = (initialDefault: string | null, onCreate?: () => voi
     ),
     defaultDataViewExists: jest.fn(async () => views.size > 0),
     createAndSave: jest.fn(async ({ id }: { id: string }) => {
-      onCreate?.();
+      await onCreate?.();
       views.add(id);
       return { id };
     }),
@@ -61,9 +61,9 @@ describe('ServerlessSearchPlugin default data view bootstrap', () => {
   });
 
   it('keeps a valid default configured while createAndSave is pending', async () => {
-    const fake = createFakeDataViews(null, () => {
+    const fake = createFakeDataViews(null, async () => {
       fake.addView('other-id');
-      fake.service.setDefault('other-id');
+      await fake.service.setDefault('other-id');
     });
     await fake.start();
     expect(fake.getDefaultIndex()).toBe('other-id');
