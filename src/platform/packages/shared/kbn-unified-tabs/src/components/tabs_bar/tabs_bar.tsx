@@ -293,13 +293,20 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} css={growingFlexItemCss}>
+              {/*
+                The tablist is intentionally empty and owns the tabs through aria-owns. Each tab
+                is rendered next to its Actions and Close buttons, which are not tabs and must not
+                be accessible children of the tablist. aria-owns re-parents only the role="tab"
+                elements, while the buttons stay outside of it. The element has no size, so the
+                layout is not affected.
+              */}
               <div
                 aria-orientation="horizontal"
                 aria-owns={ariaOwnsValue}
-                ref={setTabsContainerElement}
                 role="tablist"
-                css={tabsContainerCss}
-              >
+                data-test-subj="unifiedTabs_tabsBar_tablist"
+              />
+              <div ref={setTabsContainerElement} css={tabsContainerCss}>
                 {/*
                   OptionalDroppable provides the drag-drop context wrapper.
                   When disableDragAndDrop=false, it sets up EuiDragDropContext and EuiDroppable.
