@@ -30,7 +30,12 @@ const AVAILABILITY_STATEMENTS = {
   workflowsOnly: /\*\*Workflows\*\* only/i,
 };
 type Availability = keyof typeof AVAILABILITY_STATEMENTS;
-const NOT_YET_AVAILABLE_MARKER = '_(not yet available)_';
+// How a docs page marks an action that agents can't run. Pages use one of these.
+const UNAVAILABLE_MARKERS = ['_(not yet available)_', '_(API only)_'];
+const withoutMarkers = (line: string): string =>
+  UNAVAILABLE_MARKERS.reduce((text, marker) => text.split(marker).join(''), line);
+const findTrailingMarker = (line: string): string | undefined =>
+  UNAVAILABLE_MARKERS.find((marker) => line.endsWith(marker));
 const WORKFLOW_USE_CLAIM =
   /\b(workflow[- ]only|workflow steps?|reserved for workflows|available to workflows|(?:from|in|for|by) (?:a |your )?workflows?|workflows? or agents?|workflows and agents|workflow authors?)\b/gi;
 const INTERNAL_VOCABULARY =
@@ -252,8 +257,8 @@ describe('connector spec quality contracts', () => {
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
           .map((line) => ({
-            name: toHeadingKey(line.split(NOT_YET_AVAILABLE_MARKER).join('')),
-            marked: line.includes(NOT_YET_AVAILABLE_MARKER),
+            name: toHeadingKey(withoutMarkers(line)),
+            marked: UNAVAILABLE_MARKERS.some((marker) => line.includes(marker)),
           }));
         const unmarked = Object.entries(spec.actions)
           .filter(([, action]) => !action.isTool)
@@ -283,8 +288,8 @@ describe('connector spec quality contracts', () => {
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
           .map((line) => line.trim())
-          .filter((line) => line.endsWith(NOT_YET_AVAILABLE_MARKER))
-          .map((line) => line.slice(0, -NOT_YET_AVAILABLE_MARKER.length).trim())
+          .filter((line) => findTrailingMarker(line) !== undefined)
+          .map((line) => line.slice(0, -(findTrailingMarker(line)?.length ?? 0)).trim())
           .filter((heading) => !unavailableActionKeys.has(toHeadingKey(heading)));
 
         expect(wronglyMarked).toEqual([]);
