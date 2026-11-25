@@ -40,6 +40,7 @@ const getPublicAppHeaderViewProps = ({
   menu,
   favorite,
   share,
+  experimentalDashboardAiAction,
   description,
   metadata,
   sticky,
@@ -57,6 +58,7 @@ const getPublicAppHeaderViewProps = ({
     menu,
     favorite,
     share,
+    experimentalDashboardAiAction,
     ...secondaryContent,
     sticky,
     spacing,
@@ -102,7 +104,7 @@ AppHeaderView.displayName = 'AppHeaderView';
 export type AppHeaderProps = AppHeaderViewProps & { title: AppHeaderTitle };
 
 export const AppHeader = React.memo<AppHeaderProps>((props) => {
-  useInlineAppHeader();
+  useInlineAppHeader(props.title);
   const presentationProps = usePresentationProps(props);
   return <AppHeaderPresentation {...presentationProps} title={props.title} />;
 });
@@ -114,7 +116,7 @@ export type DiscoverAppHeaderProps = AppHeaderProps & {
 };
 
 export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, ...props }) => {
-  useInlineAppHeader();
+  useInlineAppHeader(props.title);
   const presentationProps = usePresentationProps(props, {
     titleAppend: tabsBar,
     borderless: tabsBar != null,

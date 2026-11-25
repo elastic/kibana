@@ -5,17 +5,28 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
-import { KBN_EVALS_VAULT_PATHS, KBN_EVALS_VAULT_CONFIG_FIELD, safeExec } from './utils';
-import { validateKbnEvalsConfig } from '../../scripts/vault/manage_secrets';
+import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  KBN_EVALS_VAULT_PATHS,
+  KBN_EVALS_VAULT_CONFIG_FIELD,
+  getKbnEvalsVaultPath,
+  safeExec,
+} from './utils';
+import {
+  validateKbnEvalsConfig,
+  validateSuiteVaultConfig,
+  type SuiteVaultConfig,
+} from '../../scripts/vault/manage_secrets';
 
 export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scripts/vault';
 
 /**
  * Virtual profile: load golden-cluster config from dev Vault at runtime (no config file).
- * Use with `--datasets-profile dev-vault` or `--profile dev-vault`.
+ * Use with `--evaluations-kbn-profile dev-vault` or `--profile dev-vault`.
  */
 export const DEV_VAULT_PROFILE = 'dev-vault';
 
@@ -26,25 +37,131 @@ export const stripTrailingSlash = (url: string): string => url.replace(/\/$/, ''
 
 export const probeHttp = async (url: string): Promise<boolean> => {
   try {
-    await fetch(url, { signal: AbortSignal.timeout(2000) });
-    return true;
+    const deadline = timeoutSignal(2000);
+    try {
+      const response = await fetch(url, { signal: deadline });
+      // Headers are enough. Cancel the unread body before dispose(), which does not abort the download.
+      await response.body?.cancel().catch(() => undefined);
+      return true;
+    } finally {
+      deadline.dispose();
+    }
   } catch {
     return false;
   }
 };
 
+interface ProfileFlagNames {
+  current: string;
+  deprecated: string;
+}
+
+const EVALUATIONS_KBN_PROFILE_FLAGS: ProfileFlagNames = {
+  current: 'evaluations-kbn-profile',
+  deprecated: 'datasets-profile',
+};
+
+const TRACING_PROFILE_FLAGS: ProfileFlagNames = {
+  current: 'tracing-profile',
+  deprecated: 'export-profile',
+};
+
+/**
+ * The per-side profile flags and their deprecated aliases. A command that reads them has to declare
+ * them, or the parser rejects them. `--profile` is not included: each command declares it itself.
+ */
+export const PROFILE_FLAG_NAMES: readonly string[] = [
+  EVALUATIONS_KBN_PROFILE_FLAGS.current,
+  EVALUATIONS_KBN_PROFILE_FLAGS.deprecated,
+  TRACING_PROFILE_FLAGS.current,
+  TRACING_PROFILE_FLAGS.deprecated,
+];
+
+const readProfileFlag = (
+  flagsReader: FlagsReader,
+  { current, deprecated }: ProfileFlagNames
+): string | undefined => flagsReader.string(current) ?? flagsReader.string(deprecated);
+
+/**
+ * The profile for the Kibana that stores datasets and scores and serves experiment results
+ * (`--evaluations-kbn-profile`, or the deprecated `--datasets-profile`).
+ */
+export const readEvaluationsKbnProfile = (flagsReader: FlagsReader): string | undefined =>
+  readProfileFlag(flagsReader, EVALUATIONS_KBN_PROFILE_FLAGS);
+
+/**
+ * The profile for tracing: where traces are exported and which Elasticsearch trace evaluators
+ * query (`--tracing-profile`, or the deprecated `--export-profile`).
+ */
+export const readTracingProfile = (flagsReader: FlagsReader): string | undefined =>
+  readProfileFlag(flagsReader, TRACING_PROFILE_FLAGS);
+
+/**
+ * The parser gives a declared string flag the value `""` whether it was left out or passed empty
+ * (for example `--export-profile "$UNSET_VAR"`), so only the raw arguments show that it was typed.
+ * Arguments after the `--` terminator are not flags of this CLI, so they are not scanned.
+ */
+const isFlagInArgv = (argv: readonly string[], flag: string): boolean => {
+  const terminatorIndex = argv.indexOf('--');
+  const flagArgs = terminatorIndex === -1 ? argv : argv.slice(0, terminatorIndex);
+  return flagArgs.some((arg) => arg === `--${flag}` || arg.startsWith(`--${flag}=`));
+};
+
+const warnOnDeprecatedFlag = (
+  flagsReader: FlagsReader,
+  log: ToolingLog,
+  argv: readonly string[],
+  { current, deprecated }: ProfileFlagNames
+): void => {
+  if (!isFlagInArgv(argv, deprecated)) return;
+
+  const deprecatedValue = flagsReader.string(deprecated);
+  const currentValue = flagsReader.string(current);
+  const isIgnored =
+    deprecatedValue !== undefined && currentValue !== undefined && currentValue !== deprecatedValue;
+  log.warning(
+    isIgnored
+      ? `--${deprecated} is deprecated and ignored because --${current} is also set. Use --${current}.`
+      : `--${deprecated} is deprecated. Use --${current} instead.`
+  );
+};
+
+/**
+ * Logs one warning for each deprecated profile flag typed in `argv`, whatever its value. Call it
+ * once per command.
+ */
+export const warnOnDeprecatedProfileFlags = (
+  flagsReader: FlagsReader,
+  log: ToolingLog,
+  argv: readonly string[]
+): void => {
+  warnOnDeprecatedFlag(flagsReader, log, argv, EVALUATIONS_KBN_PROFILE_FLAGS);
+  warnOnDeprecatedFlag(flagsReader, log, argv, TRACING_PROFILE_FLAGS);
+};
+
+/** The `Profiles:` line that `start`, `run` and `red-team` log, labelled with the flag names. */
+export const formatProfilesSummary = ({
+  evaluationsKbnProfile,
+  tracingProfile,
+}: {
+  evaluationsKbnProfile?: string;
+  tracingProfile?: string;
+}): string =>
+  `evaluations-kbn=${evaluationsKbnProfile ?? 'config'} tracing=${tracingProfile ?? 'none'}`;
+
 export const isExportProfileImplicitLocal = (
   flagsReader: FlagsReader,
-  exportProfile?: string
+  tracingProfile?: string
 ): boolean => {
-  if (exportProfile !== 'local') return false;
+  if (tracingProfile !== 'local') return false;
   const hasExplicitExport = Boolean(
-    flagsReader.string('export-profile') ?? flagsReader.string('profile')
+    readTracingProfile(flagsReader) ?? flagsReader.string('profile')
   );
   return !hasExplicitExport;
 };
 
 interface VaultConfig {
+  evaluationConnectorId?: string;
   evaluationsKbn?: { url?: string; apiKey?: string };
   tracingEs?: { url?: string; apiKey?: string };
   tracingExporters?: unknown;
@@ -91,21 +208,89 @@ export const readVaultConfigFromFile = (
   return JSON.parse(raw) as VaultConfig;
 };
 
-export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
-  const stdout = safeExec('vault', [
-    'read',
-    `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`,
-    KBN_EVALS_VAULT_PATHS.dev,
-  ]);
-  if (!stdout) return undefined;
+interface DevVaultSecret<T> {
+  vaultPath: string;
+  /** Names the config in log lines, e.g. `dev-vault config`. */
+  label: string;
+  /** What a failed read leaves the caller with, e.g. `the dev-vault profile is empty`. */
+  fallback: string;
+  schemaName: string;
+  validate: (config: unknown) => T;
+}
 
-  try {
-    const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
-    const parsed = JSON.parse(value);
-    return validateKbnEvalsConfig(parsed);
-  } catch {
+const readDevVaultSecretUncached = <T>({
+  vaultPath,
+  label,
+  fallback,
+  schemaName,
+  validate,
+}: DevVaultSecret<T>): T | undefined => {
+  const stdout = safeExec('vault', ['read', `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`, vaultPath]);
+  if (!stdout) {
+    process.stderr.write(
+      `[kbn-evals] Could not read ${vaultPath} from Vault; ${fallback}. ` +
+        'Check `vault login --method oidc`.\n'
+    );
     return undefined;
   }
+
+  // Fixed messages only: parser and validator errors can quote the config, which holds credentials.
+  const ignore = (reason: string): undefined => {
+    process.stderr.write(`[kbn-evals] Ignoring ${label} (${reason}); ${fallback}.\n`);
+    return undefined;
+  };
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(Buffer.from(stdout, 'base64').toString('utf-8').trim());
+  } catch {
+    return ignore('not valid base64-encoded JSON');
+  }
+
+  try {
+    return validate(parsed);
+  } catch {
+    return ignore(`does not match the ${schemaName}`);
+  }
+};
+
+// One successful read per process: profile env and the suite's scout hook must see the same config,
+// and a later read that failed transiently would otherwise silently drop part of it. Failures are
+// not cached, so a read after `vault login` can still succeed.
+let devVaultConfig: VaultConfig | undefined;
+const devVaultSuiteSecrets = new Map<string, SuiteVaultConfig>();
+
+export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
+  devVaultConfig ??= readDevVaultSecretUncached({
+    vaultPath: KBN_EVALS_VAULT_PATHS.dev,
+    label: 'dev-vault config',
+    fallback: 'the dev-vault profile is empty',
+    schemaName: 'evals config schema',
+    validate: validateKbnEvalsConfig,
+  });
+  return devVaultConfig;
+};
+
+/** Reads a suite's own secret (its `vaultSecret` in `evals.suites.json`) from dev Vault. */
+export const readSuiteSecretFromDevVault = (secret: string): SuiteVaultConfig | undefined => {
+  const cached = devVaultSuiteSecrets.get(secret);
+  if (cached) return cached;
+
+  const config = readDevVaultSecretUncached({
+    vaultPath: getKbnEvalsVaultPath('dev', secret),
+    label: `dev-vault "${secret}" suite config`,
+    fallback: "the suite's scoutHook gets an empty config",
+    schemaName: 'suite config shape (a JSON object)',
+    validate: validateSuiteVaultConfig,
+  });
+  if (config) devVaultSuiteSecrets.set(secret, config);
+  return config;
+};
+
+/** Clears the cached dev-vault reads; for tests. */
+export const resetDevVaultConfigCache = (): void => {
+  devVaultConfig = undefined;
+  devVaultSuiteSecrets.clear();
 };
 
 /**
@@ -120,6 +305,22 @@ export const loadVaultConfig = (repoRoot: string, profile?: string): VaultConfig
   return readVaultConfigFromFile(repoRoot, profile);
 };
 
+/**
+ * Default judge connector: the profile's `evaluationConnectorId` (dev Vault, or a
+ * `config.<profile>.json` synced from Vault). Undefined when the profile does not set one.
+ */
+export const resolveDefaultJudgeConnectorId = (
+  repoRoot: string,
+  profile?: string
+): string | undefined => {
+  const value = loadVaultConfig(repoRoot, profile)?.evaluationConnectorId;
+  return isNonEmptyString(value) && !isPlaceholder(value) ? value : undefined;
+};
+
+/**
+ * Env for the Kibana behind `--evaluations-kbn-profile`: `EVAL_KBN_URL` and `EVAL_KBN_API_KEY`
+ * (where datasets and scores are stored and read back), plus `GCS_CREDENTIALS` when the profile has them.
+ */
 export const envFromDatasetsProfile = (
   repoRoot: string,
   profile?: string
@@ -140,13 +341,17 @@ export const envFromDatasetsProfile = (
   return next;
 };
 
+/**
+ * Env for `--tracing-profile`: `TRACING_ES_URL` and `TRACING_ES_API_KEY` (where trace evaluators
+ * query), `TRACING_EXPORTERS` (where traces are exported), plus `GCS_CREDENTIALS` when present.
+ */
 export const envFromExportProfile = (
   repoRoot: string,
   profile?: string,
   options?: { defaultTracingExporters?: boolean }
 ): Record<string, string> => {
-  // Critical safety/ergonomics: don't implicitly use config.json as an export profile.
-  // Export profile must be explicitly selected (e.g. `local`, `ci`, `config`).
+  // Critical safety/ergonomics: don't implicitly use config.json as a tracing profile.
+  // Tracing profile must be explicitly selected (e.g. `local`, `ci`, `config`).
   if (!profile) return {};
 
   const cfg = loadVaultConfig(repoRoot, profile);

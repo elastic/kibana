@@ -46,8 +46,11 @@ describe('useRestoreHistory', () => {
 
       renderHook(() => useWorkpadHistory());
 
-      expect(history.replace).toBeCalledWith(history.location.pathname, encode(state.persistent));
-      expect(history.push).not.toBeCalled();
+      expect(history.replace).toHaveBeenCalledWith(
+        history.location.pathname,
+        encode(state.persistent)
+      );
+      expect(history.push).not.toHaveBeenCalled();
     });
 
     test('with location state not matching store state', () => {
@@ -69,8 +72,8 @@ describe('useRestoreHistory', () => {
 
       renderHook(() => useWorkpadHistory());
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).not.toHaveBeenCalled();
     });
 
     test('with location state matching store state', () => {
@@ -88,8 +91,8 @@ describe('useRestoreHistory', () => {
 
       renderHook(() => useWorkpadHistory());
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).not.toHaveBeenCalled();
     });
   });
 
@@ -127,7 +130,7 @@ describe('useRestoreHistory', () => {
       history.location.pathname = 'newpath';
       rerender();
 
-      expect(history.replace).toBeCalledWith('newpath', encode(newState.persistent));
+      expect(history.replace).toHaveBeenCalledWith('newpath', encode(newState.persistent));
     });
 
     test('does a push if location state does not match store state', () => {
@@ -156,7 +159,10 @@ describe('useRestoreHistory', () => {
       mockGetState.mockReturnValue(newState);
       rerender();
 
-      expect(history.push).toBeCalledWith(history.location.pathname, encode(newState.persistent));
+      expect(history.push).toHaveBeenCalledWith(
+        history.location.pathname,
+        encode(newState.persistent)
+      );
     });
 
     test('does nothing if new state matches location state', () => {
@@ -183,8 +189,8 @@ describe('useRestoreHistory', () => {
       mockGetState.mockReturnValue(newState);
       rerender();
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).not.toHaveBeenCalled();
     });
   });
 
@@ -217,8 +223,8 @@ describe('useRestoreHistory', () => {
 
       rerender();
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).not.toHaveBeenCalled();
     });
 
     test('changes to search does a replace', () => {
@@ -249,8 +255,8 @@ describe('useRestoreHistory', () => {
 
       rerender();
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).toBeCalledWith(
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).toHaveBeenCalledWith(
         `somepath?${history.location.search}`,
         encode(state.persistent)
       );

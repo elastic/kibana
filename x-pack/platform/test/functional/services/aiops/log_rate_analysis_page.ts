@@ -126,15 +126,24 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async clickDocumentCountChart(chartClickCoordinates: [number, number]) {
       await elasticChart.waitForRenderComplete();
-      const el = await elasticChart.getCanvas();
 
-      await browser
-        .getActions()
-        .move({ x: chartClickCoordinates[0], y: chartClickCoordinates[1], origin: el._webElement })
-        .click()
-        .perform();
+      // The chart re-renders once the change point annotation arrives, which can swallow a
+      // click that happens at the same time. Retry the click until the brushes show up.
+      await retry.tryForTime(30 * 1000, async () => {
+        const el = await elasticChart.getCanvas();
 
-      await this.assertHistogramBrushesExist();
+        await browser
+          .getActions()
+          .move({
+            x: chartClickCoordinates[0],
+            y: chartClickCoordinates[1],
+            origin: el._webElement,
+          })
+          .click()
+          .perform();
+
+        await this.assertHistogramBrushesExist();
+      });
     },
 
     async clickNoAutoRunButton() {
@@ -417,6 +426,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await common.waitForSaveModalToClose();
 
       // make sure the dashboard page actually loaded
+      await header.waitUntilLoadingHasFinished();
       const dashboardItemCount = await dashboardPage.getSharedItemsCount();
       expect(dashboardItemCount).to.not.eql(undefined);
 

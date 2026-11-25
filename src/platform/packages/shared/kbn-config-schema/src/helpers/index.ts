@@ -8,3 +8,29 @@
  */
 
 export { offeringBasedSchema } from './offering_based_schema';
+export {
+  savedObjectId,
+  savedObjectType,
+  savedObjectVersion,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
+  unboundedString,
+} from './string_helpers';
+export type {
+  SchemaHelper,
+  LabeledSchemaHelper,
+  LabeledStringWarnOptions,
+  StringWarnOptions,
+  UnboundedStringOptions,
+  BoundedStringHelper,
+  BoundedStringOptions,
+  BoundedStringWarnOptions,
+} from './string_helpers';

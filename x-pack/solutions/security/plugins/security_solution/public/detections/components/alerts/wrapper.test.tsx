@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import {
+  DATA_VIEW_DEGRADED_TEST_ID,
   DATA_VIEW_ERROR_TEST_ID,
   DATA_VIEW_LOADING_PROMPT_TEST_ID,
   SKELETON_TEST_ID,
@@ -66,26 +67,33 @@ describe('<Wrapper />', () => {
     expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
       'Unable to retrieve the data view'
     );
+    expect(screen.queryByTestId(DATA_VIEW_DEGRADED_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should render an error if the dataView status is ready but it has no indices', async () => {
-    const invalidDataView = {
+  it('should render the content with a warning when the dataView is ready but has no indices', async () => {
+    const degradedDataView = {
       ...dataView,
+      getIndexPattern: jest.fn().mockReturnValue('.alerts-security.alerts-default'),
       getRuntimeMappings: jest.fn(),
       hasMatchedIndices: jest.fn().mockReturnValue(false),
     } as unknown as DataView;
 
     render(
       <TestProviders>
-        <Wrapper dataView={invalidDataView} status="ready" />
+        <Wrapper dataView={degradedDataView} status="ready" />
       </TestProviders>
     );
 
     await waitFor(() => {
       expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(screen.getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view'
-      );
+      expect(screen.getByTestId(DATA_VIEW_DEGRADED_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByText('Some data view fields are unavailable')).toBeInTheDocument();
+      expect(screen.getByText('.alerts-security.alerts-default')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Alerts are still listed below, but field-dependent features/)
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('alerts-page-content')).toBeInTheDocument();
+      expect(screen.queryByTestId(DATA_VIEW_ERROR_TEST_ID)).not.toBeInTheDocument();
     });
   });
 
@@ -106,5 +114,6 @@ describe('<Wrapper />', () => {
 
     expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
     expect(await screen.findByTestId('alerts-page-content')).toBeInTheDocument();
+    expect(screen.queryByTestId(DATA_VIEW_DEGRADED_TEST_ID)).not.toBeInTheDocument();
   });
 });

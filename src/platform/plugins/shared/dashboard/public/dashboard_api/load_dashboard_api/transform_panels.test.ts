@@ -9,12 +9,12 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { transformPanels } from './transform_panels';
-import type { DashboardPanel, DashboardSection } from '../../../server';
+import type { DashboardPanel, DashboardSection } from '@kbn/as-code-dashboard-schema';
 
 describe('transformPanels', () => {
   const mockTransformOut = jest.fn();
   beforeAll(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../../services/kibana_services').embeddableService = {
       getLegacyURLTransform: async () => mockTransformOut,
     };

@@ -11,14 +11,13 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import {
   buildActorEntityIdEval,
   buildTargetEntityIdEvals,
   buildEntityFieldHints,
   buildSourceMetadataEvals,
-  checkIfEntitiesIndexExists,
+  resolveEntitiesIndexName,
 } from '../graph/utils';
 import type { EventRecord } from './types';
 
@@ -33,8 +32,10 @@ interface FetchEventsParams {
 }
 
 /**
- * Fetches enriched event/alert details.
- * Queries events by document ID (_id) and enriches with entity store data via LOOKUP JOIN.
+ * Fetches per-document event/alert details for `POST /graph/events`, one row per `_id`.
+ * Unlike `fetchEvents` in `graph/fetch_events_graph.ts` (aggregated graph rows), it resolves
+ * actor/target from the v1 pre-populated entity id fields only, without the v2 EUID resolution
+ * or the integration runtime evaluations, and no client consumes it yet.
  */
 export const fetchEvents = async ({
   esClient,
@@ -45,13 +46,12 @@ export const fetchEvents = async ({
   indexPatterns,
   spaceId,
 }: FetchEventsParams): Promise<EsqlToRecords<EventRecord>> => {
-  const entityStoreIndexExists = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
+  const entityStoreIndexName = await resolveEntitiesIndexName(esClient, logger, spaceId);
 
   const query = buildEventsEsqlQuery({
     indexPatterns,
     eventCount: eventIds.length,
-    entityStoreIndexExists,
-    spaceId,
+    entityStoreIndexName,
   });
 
   logger.trace(`Fetching events with query [${query}]`);
@@ -89,24 +89,24 @@ const buildDslFilter = (eventIds: string[], start: string | number, end: string 
 interface BuildEventsQueryParams {
   indexPatterns: string[];
   eventCount: number;
-  entityStoreIndexExists: boolean;
-  spaceId: string;
+  /** Resolved concrete entities index for LOOKUP JOIN, or null when none is live. */
+  entityStoreIndexName: string | null;
 }
 
 const buildEventsEsqlQuery = ({
   indexPatterns,
   eventCount,
-  entityStoreIndexExists,
-  spaceId,
+  entityStoreIndexName,
 }: BuildEventsQueryParams): string => {
   // Generate document ID params
   const documentIdParams = Array.from({ length: eventCount }, (_, idx) => `?doc_id${idx}`).join(
     ', '
   );
 
-  const indexName = getEntitiesLatestIndexName(spaceId);
-  const enrichmentEsql = entityStoreIndexExists
-    ? `| DROP entity.id
+  const indexName = entityStoreIndexName;
+  const enrichmentEsql =
+    indexName != null
+      ? `| DROP entity.id
 | DROP entity.target.id
 // rename entity.*fields before next pipeline to avoid name collisions
 | EVAL entity.id = actorEntityId
@@ -126,7 +126,7 @@ const buildEventsEsqlQuery = ({
 | INLINE STATS targetHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
 | RENAME targetLookupEntityId = entity.id
 | RENAME targetEntityEngineType = entity.EngineMetadata.Type`
-    : `// No enrichment available - use null values
+      : `// No enrichment available - use null values
 | EVAL actorEntityName = TO_STRING(null)
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
@@ -142,6 +142,7 @@ const buildEventsEsqlQuery = ({
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
 | WHERE _id IN (${documentIdParams})
+// v1 fields (user.entity.id, user.target.entity.id, ...): documents without them get no actor/target
 ${buildActorEntityIdEval(GRAPH_ACTOR_ENTITY_FIELDS)}
 ${buildTargetEntityIdEvals(GRAPH_TARGET_ENTITY_FIELDS)}
 | MV_EXPAND actorEntityId

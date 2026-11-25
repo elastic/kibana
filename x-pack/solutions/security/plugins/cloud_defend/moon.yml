@@ -43,8 +43,12 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
   - '@kbn/core-security-common'
+  - '@kbn/core-spaces-common'
   - '@kbn/react-query'
   - '@kbn/licensing-types'
+  - '@kbn/app-header'
+  - '@kbn/app-menu'
+  - '@kbn/security-solution-features'
 tags:
   - plugin
   - prod
@@ -59,6 +63,4 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

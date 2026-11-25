@@ -1,0 +1,64 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        addEventsRequestExample:
+          description: "Example request appending two custom events to a conversation"
+          value:
+            events:
+              - type: text_note
+                data:
+                  text: "First note on this conversation"
+              - type: text_note
+                data:
+                  text: "Second note on this conversation"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          addEventsResponseExample:
+            description: "Example response returning the materialized events with server-assigned fields"
+            value:
+              events:
+                - id: 7d3f1a2b-4c5e-6f7a-8b9c-0d1e2f3a4b5c
+                  type: text_note
+                  created_at: "2026-09-14T10:00:00.000Z"
+                  actor:
+                    type: user
+                    id: u_abc123_uid
+                    username: elastic
+                  data:
+                    text: "First note on this conversation"
+                - id: 8e4f2b3c-5d6f-7a8b-9c0d-1e2f3a4b5c6d
+                  type: text_note
+                  created_at: "2026-09-14T10:00:00.000Z"
+                  actor:
+                    type: user
+                    id: u_abc123_uid
+                    username: elastic
+                  data:
+                    text: "Second note on this conversation"
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/agent_builder/conversations/${CONVERSATION_ID}/_add_events" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "elastic-api-version: 2023-10-31" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "events": [
+          { "type": "text_note", "data": { "text": "A note on this conversation" } }
+        ]
+      }'
+- lang: Console
+  source: |
+    POST kbn://api/agent_builder/conversations/${CONVERSATION_ID}/_add_events
+    {
+      "events": [
+        { "type": "text_note", "data": { "text": "A note on this conversation" } }
+      ]
+    }

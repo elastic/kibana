@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { withSpan } from '@kbn/apm-utils';
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
@@ -72,6 +73,8 @@ import type { BulkEnableRulesParams } from '../application/rule/methods/bulk_ena
 import { bulkEnableRules } from '../application/rule/methods/bulk_enable';
 import type { BulkCreateRulesParams } from '../application/rule/methods/bulk_create';
 import { bulkCreateRules } from '../application/rule/methods/bulk_create';
+import type { BulkUpdateRulesParams } from '../application/rule/methods/bulk_update';
+import { bulkUpdateRules } from '../application/rule/methods/bulk_update';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
@@ -208,21 +211,44 @@ export class RulesClient {
   public getHistory = (params: GetRuleHistoryParams) => getRuleHistory(this.context, params);
 
   public bulkGetRules = <Params extends RuleTypeParams = never>(params: BulkGetRulesParams) =>
-    bulkGetRules<Params>(this.context, params);
+    withSpan({ name: 'RulesClient.bulkGetRules', type: 'rules' }, () =>
+      bulkGetRules<Params>(this.context, params)
+    );
   public bulkCreateRules = <Params extends RuleTypeParams = never>(
     params: BulkCreateRulesParams<Params>
-  ) => bulkCreateRules<Params>(this.context, params);
+  ) =>
+    withSpan({ name: 'RulesClient.bulkCreateRules', type: 'rules' }, () =>
+      bulkCreateRules<Params>(this.context, params)
+    );
+  public bulkUpdateRules = <Params extends RuleTypeParams = never>(
+    params: BulkUpdateRulesParams<Params>
+  ) =>
+    withSpan({ name: 'RulesClient.bulkUpdateRules', type: 'rules' }, () =>
+      bulkUpdateRules<Params>(this.context, params)
+    );
   public bulkDeleteRules = (options: BulkDeleteRulesParams) =>
-    bulkDeleteRules(this.context, options);
+    withSpan({ name: 'RulesClient.bulkDeleteRules', type: 'rules' }, () =>
+      bulkDeleteRules(this.context, options)
+    );
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
-    bulkEditRules<Params>(this.context, options);
+    withSpan({ name: 'RulesClient.bulkEditRules', type: 'rules' }, () =>
+      bulkEditRules<Params>(this.context, options)
+    );
 
   public bulkEditRuleParamsWithReadAuth = <Params extends RuleTypeParams>(
     options: BulkEditRuleParamsOptions<Params>
-  ) => bulkEditRuleParamsWithReadAuth<Params>(this.context, options);
-  public bulkEnableRules = (params: BulkEnableRulesParams) => bulkEnableRules(this.context, params);
+  ) =>
+    withSpan({ name: 'RulesClient.bulkEditRuleParamsWithReadAuth', type: 'rules' }, () =>
+      bulkEditRuleParamsWithReadAuth<Params>(this.context, options)
+    );
+  public bulkEnableRules = (params: BulkEnableRulesParams) =>
+    withSpan({ name: 'RulesClient.bulkEnableRules', type: 'rules' }, () =>
+      bulkEnableRules(this.context, params)
+    );
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
-    bulkDisableRules(this.context, options);
+    withSpan({ name: 'RulesClient.bulkDisableRules', type: 'rules' }, () =>
+      bulkDisableRules(this.context, options)
+    );
 
   public updateRuleApiKey = (params: { id: string }) => updateRuleApiKey(this.context, params);
   public disableRule = (params: DisableRuleParams) => disableRule(this.context, params);

@@ -42,7 +42,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslCertificateInput.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -64,7 +64,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslKeyInput.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -88,7 +88,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslCertificateAuthoritiesInput.props.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -111,7 +111,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await act(() => result.current.submit());
 
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 
   it('should block submission when username contains only spaces', async () => {
@@ -133,9 +133,73 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.usernameInput.errors).toEqual(['Username is required']);
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
+  });
+});
+
+describe('useDowloadSourceFlyoutForm reserve_diskspace', () => {
+  it('should default to enabled and send reserve_diskspace: true', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.post.mockResolvedValue({ item: {} });
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    expect(result.current.inputs.reserveDiskspaceInput.value).toBe(true);
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
+    expect(testRenderer.startServices.http.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ body: expect.stringContaining('"reserve_diskspace":true') })
+    );
+  });
+
+  it('should send reserve_diskspace: false when toggled off', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.post.mockResolvedValue({ item: {} });
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+      result.current.inputs.reserveDiskspaceInput.setValue(false);
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
+    expect(testRenderer.startServices.http.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ body: expect.stringContaining('"reserve_diskspace":false') })
+    );
+  });
+
+  it('should initialize from an existing download source', () => {
+    const testRenderer = createFleetTestRendererMock();
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(jest.fn(), {
+        id: 'ds-1',
+        name: 'My Source',
+        host: 'https://artifacts.example.com',
+        is_default: false,
+        reserve_diskspace: false,
+      })
+    );
+
+    expect(result.current.inputs.reserveDiskspaceInput.value).toBe(false);
   });
 });
 

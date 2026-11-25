@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/esql-language-inspector-plugin",
-  "owner": "@elastic/kibana-esql",
+  "owner": "@elastic/kibana-discover",
   "group": "platform",
   "visibility": "private",
   "plugin": {

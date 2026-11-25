@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { ScopedDiscoverEBTManager } from '../../../../../ebt_manager';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import type { ScopedProfilesManager } from '../../../../../context_awareness';
@@ -29,12 +29,14 @@ export function getTabRuntimeStateMock(
       undefined
     ),
     unifiedHistogramConfig$: new BehaviorSubject({ layoutPropsMap: {} }),
+    chartBreakdownFieldNames$: new BehaviorSubject<string[] | undefined>(undefined),
     scopedProfilesManager$: new BehaviorSubject({} as ScopedProfilesManager),
     scopedEbtManager$: new BehaviorSubject({} as ScopedDiscoverEBTManager),
     cascadedDocumentsFetcher$: new BehaviorSubject<CascadedDocumentsFetcher>(
       {} as CascadedDocumentsFetcher
     ),
-    currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    currentDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
+    cascadedLeafDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<(() => void) | undefined>(undefined),
     ...attrs,
   };

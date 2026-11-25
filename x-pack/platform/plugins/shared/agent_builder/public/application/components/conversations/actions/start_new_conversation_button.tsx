@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useLastAgentId } from '../../../hooks/use_last_agent_id';
 import { appPaths } from '../../../utils/app_paths';
@@ -26,12 +25,10 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
 export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId, resetAttachments } = useConversationContext();
-  const { removeError } = useConversationStream();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
 
   const handleClick = useCallback(() => {
     if (isEmbeddedContext) {
-      removeError();
       setConversationId?.(undefined);
       resetAttachments?.();
     } else {
@@ -39,18 +36,20 @@ export const StartNewConversationButton: React.FC = () => {
     }
   }, [
     isEmbeddedContext,
-    removeError,
     setConversationId,
     resetAttachments,
     navigateToAgentBuilderUrl,
     lastAgentId,
   ]);
 
+  const isDisabled = !isEmbeddedContext && !isLastAgentIdReady;
+
   return (
     <EuiButton
       color="primary"
       fill
       onClick={handleClick}
+      isDisabled={isDisabled}
       data-test-subj="startNewConversationButton"
       {...getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,

@@ -22,7 +22,7 @@ export const isInvestigationInvestigated = (status: InvestigationStatus): status
 
 export const isInvestigationTerminalFailure = (
   status: InvestigationStatus
-): status is 'failed' | 'unavailable' => status === 'failed' || status === 'unavailable';
+): status is 'unavailable' => status === 'unavailable';
 
 export const getInvestigationWorkflowStatusLabel = (status: InvestigationStatus): string => {
   if (isInvestigationInvestigated(status)) {
@@ -30,10 +30,6 @@ export const getInvestigationWorkflowStatusLabel = (status: InvestigationStatus)
   }
 
   switch (status) {
-    case 'failed':
-      return i18n.translate('xpack.nightshift.investigation.statusFailed', {
-        defaultMessage: 'Investigation failed',
-      });
     case 'unavailable':
       return i18n.translate('xpack.nightshift.investigation.statusUnavailable', {
         defaultMessage: 'Investigation unavailable',

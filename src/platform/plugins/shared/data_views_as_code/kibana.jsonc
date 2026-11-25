@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/data-views-as-code-plugin",
-  "owner": ["@elastic/kibana-data-discovery"],
+  "owner": ["@elastic/kibana-discover"],
   "group": "platform",
   "visibility": "shared",
   "description": "The data views as code plugin offers different endpoints following the as code standards",

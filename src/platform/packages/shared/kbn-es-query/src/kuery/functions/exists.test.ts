@@ -75,7 +75,7 @@ describe('kuery functions', () => {
           'exists',
           'script string'
         ) as KqlExistsFunctionNode;
-        expect(() => exists.toElasticsearchQuery(existsNode, indexPattern)).toThrowError(
+        expect(() => exists.toElasticsearchQuery(existsNode, indexPattern)).toThrow(
           /Exists query does not support scripted fields/
         );
       });

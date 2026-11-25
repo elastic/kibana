@@ -9,7 +9,7 @@
 
 // TODO: move this to core as part of deep link registration
 export const AppDeepLinkIdToIcon: Record<string, string> = {
-  workflows: 'workflowsApp',
+  workflows: 'workflow',
   // analytics
   discover: 'discoverApp',
   dashboards: 'dashboardApp',

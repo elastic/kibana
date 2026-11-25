@@ -45,6 +45,8 @@
     "@kbn/core-di-internal",
     "@kbn/core-di-server",
     "@kbn/core-http-request-handler-context-server-internal",
+    "@kbn/core-security-server-mocks",
+    "@kbn/tracing-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -18,9 +18,13 @@ import {
 describe('alert analysis workflow install', () => {
   const createManagedClient = () => ({
     install: jest.fn().mockResolvedValue(undefined),
+    installMany: jest.fn().mockResolvedValue({ failed: [] }),
     uninstall: jest.fn().mockResolvedValue(undefined),
+    disable: jest.fn().mockResolvedValue(true),
     ready: jest.fn().mockResolvedValue(undefined),
     getWorkflowStatus: jest.fn().mockResolvedValue(undefined),
+    getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+    listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
     execute: jest.fn().mockResolvedValue('execution-id'),
   });
 
@@ -46,6 +50,7 @@ describe('alert analysis workflow install', () => {
           .mockResolvedValueOnce('connector-abc')
           .mockResolvedValueOnce('elastic-ai-agent')
           .mockResolvedValueOnce(false)
+          .mockResolvedValueOnce(true)
           .mockResolvedValueOnce('alert-analysis'),
       };
 
@@ -59,6 +64,7 @@ describe('alert analysis workflow install', () => {
         connectorId: 'connector-abc',
         agentId: 'elastic-ai-agent',
         createConversation: false,
+        usePrompt: true,
         tagPrefix: 'alert-analysis',
       });
     });

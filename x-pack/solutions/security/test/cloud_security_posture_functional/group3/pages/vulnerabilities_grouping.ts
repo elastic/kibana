@@ -193,7 +193,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           operation: 'is',
           value: resourceName1,
         });
-        expect(await filterBar.hasFilter('resource.name', resourceName1)).to.be(true);
+        await filterBar.expectFilter('resource.name', resourceName1);
 
         const grouping = await findings.findingsGrouping();
 
@@ -212,7 +212,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('remove filter', async () => {
         await filterBar.removeFilter('resource.name');
 
-        expect(await filterBar.hasFilter('resource.name', resourceName1)).to.be(false);
+        await filterBar.expectNoFilter('resource.name', resourceName1);
 
         const grouping = await findings.findingsGrouping();
         const groupCount = await grouping.getGroupCount();

@@ -92,7 +92,7 @@ describe('getGapAutoFillSchedulerSO', () => {
         operation: ReadOperations.GetGapAutoFillScheduler,
         authAuditAction: GapAutoFillSchedulerAuditAction.GET,
       })
-    ).rejects.toThrowError('Unable to get');
+    ).rejects.toThrow('Unable to get');
 
     expect(context.authorization.bulkEnsureAuthorized).not.toHaveBeenCalled();
   });

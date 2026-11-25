@@ -8,6 +8,7 @@
  */
 
 import { z } from 'zod/v4';
+import { isoDateTime } from '../iso_datetime';
 import type { JsonSchema } from './types';
 
 export function parseString(schema: JsonSchema): z.ZodType {
@@ -38,9 +39,19 @@ export function parseString(schema: JsonSchema): z.ZodType {
       case 'uuid':
         zs = zs.uuid();
         break;
-      case 'date-time':
-        zs = zs.datetime();
-        break;
+      case 'date-time': {
+        let dateTimeSchema = isoDateTime();
+        if (schema.minLength !== undefined) {
+          dateTimeSchema = dateTimeSchema.min(schema.minLength);
+        }
+        if (schema.maxLength !== undefined) {
+          dateTimeSchema = dateTimeSchema.max(schema.maxLength);
+        }
+        if (schema.pattern) {
+          dateTimeSchema = dateTimeSchema.regex(new RegExp(schema.pattern));
+        }
+        return dateTimeSchema;
+      }
       case 'date':
         zs = zs.date();
         break;

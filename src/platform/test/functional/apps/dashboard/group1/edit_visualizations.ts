@@ -20,21 +20,30 @@ marks: [{
 }]}`;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, header, visualize, visEditor, vegaChart, visChart, timePicker } =
-    getPageObjects([
-      'dashboard',
-      'header',
-      'visualize',
-      'visEditor',
-      'vegaChart',
-      'visChart',
-      'timePicker',
-    ]);
+  const {
+    dashboard,
+    header,
+    visualize,
+    visEditor,
+    vegaChart,
+    visChart,
+    timePicker,
+    timeToVisualize,
+  } = getPageObjects([
+    'dashboard',
+    'header',
+    'visualize',
+    'visEditor',
+    'vegaChart',
+    'visChart',
+    'timePicker',
+    'timeToVisualize',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const retry = getService('retry');
 
   const fillSpecAndGo = async (newSpec: string) => {
     await vegaChart.fillSpec(newSpec);
@@ -42,24 +51,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const expectVegaText = async (text: string) => {
-    const vegaText = await (await vegaChart.getViewContainer()).findByTagName('text');
-    expect(await vegaText.getVisibleText()).to.eql(text);
+    await retry.try(async () => {
+      const vegaText = await (await vegaChart.getViewContainer()).findByTagName('text');
+      expect(await vegaText.getVisibleText()).to.eql(text);
+    });
   };
 
+  // Dashboard's "Add panel" creates the standalone Vega panel, so legacy Vega visualizations are
+  // created in Visualize and added to a new dashboard: by reference with a title, else by value.
   const createVegaVis = async (title?: string) => {
-    await dashboardAddPanel.clickAddVega();
+    await visualize.navigateToNewVisualization();
+    await visualize.clickVega();
     await fillSpecAndGo(getTestSpec());
 
     await visChart.waitForVisualizationRenderingStabilized();
-    if (title) {
-      await visualize.saveVisualizationExpectSuccess(title, {
-        saveAsNew: true,
-        redirectToOrigin: true,
-      });
-      await dashboard.waitForRenderComplete();
-    } else {
-      await visualize.saveVisualizationAndReturn();
-    }
+    await testSubjects.click('visualizeSaveButton');
+    await timeToVisualize.saveFromModal(title ?? 'Vega by value', {
+      addToDashboard: 'new',
+      saveToLibrary: title !== undefined,
+    });
+    await dashboard.waitForRenderComplete();
   };
 
   const editVegaVis = async () => {
@@ -94,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await expectVegaText('Test');
       await editVegaVis();
       await visualize.saveVisualizationAndReturn();
-      expect(await (await vegaChart.getViewContainer()).getVisibleText()).to.eql('Modified');
+      await expectVegaText('Modified');
     });
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
@@ -125,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize library');
-      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+      await testSubjects.existOrFail('visualizationLandingPage', { timeout: 5000 });
     });
 
     it('visualize app menu navigates to the visualize listing page if the last opened visualization was linked to dashboard', async () => {
@@ -138,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize library');
-      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+      await testSubjects.existOrFail('visualizationLandingPage', { timeout: 5000 });
     });
 
     describe('by value', () => {

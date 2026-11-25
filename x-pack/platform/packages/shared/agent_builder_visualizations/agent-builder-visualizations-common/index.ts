@@ -5,16 +5,30 @@
  * 2.0.
  */
 
-export { VISUALIZATION_ATTACHMENT_TYPE, MAX_VEGA_SPEC_LENGTH } from './constants';
+export {
+  VISUALIZATION_ATTACHMENT_TYPE,
+  MAX_VEGA_SPEC_LENGTH,
+  DEFAULT_TIME_RANGE,
+} from './constants';
 
-export type { VisualizationAttachmentData, VisualizationRenderer } from './visualization_types';
+export type {
+  VisualizationAttachmentData,
+  ChartVisualizationAttachmentData,
+  VisualizationRenderer,
+} from './visualization_types';
+export {
+  getEffectiveRenderer,
+  isCustomContentVisualization,
+  readAttachmentQueries,
+  toQueryList,
+} from './visualization_types';
+
+export { getLensConfigLabel, getVisualizationLabel } from './visualization_label';
 
 export {
   buildVegaSavedVis,
   extractVegaSpecFromSavedVis,
   normalizeVegaConfig,
-  prettyPrintVegaSpec,
   VEGA_VIS_TYPE,
   type VegaConfig,
-  type VegaSavedVis,
 } from './vega_saved_vis';

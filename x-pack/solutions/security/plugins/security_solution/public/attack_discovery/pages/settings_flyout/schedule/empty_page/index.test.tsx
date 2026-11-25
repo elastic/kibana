@@ -37,7 +37,7 @@ describe('EmptyPage', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(false),
+          useBooleanValue: jest.fn().mockReturnValue(false),
         },
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);

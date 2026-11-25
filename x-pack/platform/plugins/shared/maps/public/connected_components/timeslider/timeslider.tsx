@@ -9,6 +9,8 @@ import React, { useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { switchMap, tap } from 'rxjs';
 
+import { euiShadow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   ControlGroupRenderer,
   type ControlGroupStateBuilder,
@@ -27,6 +29,7 @@ export interface Props {
 }
 
 export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }: Props) {
+  const euiThemeContext = useEuiTheme();
   const [dataLoading, setDataLoading] = useState(false);
   const [api, setApi] = useState<ControlGroupRendererApi | undefined>();
 
@@ -64,7 +67,14 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
   }, [api, setTimeslice, waitForTimesliceToLoad$]);
 
   return (
-    <div className="mapTimeslider mapTimeslider--animation">
+    <div
+      className="mapTimeslider mapTimeslider--animation"
+      css={css`
+        .controlFrame__formControlLayout {
+          ${euiShadow(euiThemeContext, 'm')}
+        }
+      `}
+    >
       <KibanaContextProvider services={{ uiActions: getUiActions() }}>
         <ControlGroupRenderer
           onApiAvailable={(nextApi: ControlGroupRendererApi) => {

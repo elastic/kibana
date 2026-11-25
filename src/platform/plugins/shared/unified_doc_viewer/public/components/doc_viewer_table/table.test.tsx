@@ -12,6 +12,7 @@ import { screen } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { EsqlSource } from '@kbn/data-source';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
@@ -436,6 +437,73 @@ describe('DocViewerTable', () => {
     });
   });
 
+  describe('ES|QL all-null columns', () => {
+    const makeColumn = (name: string, isNull: boolean): EsqlSource['resultColumns'][number] => ({
+      id: name,
+      name,
+      meta: { type: 'string' },
+      isNull,
+    });
+
+    const setupEsqlComponent = async (nullColumnNames: string[]) => {
+      const user = userEvent.setup();
+      const dataSource = await EsqlSource.create({
+        query: `FROM sparse-${nullColumnNames.join('-')}`,
+        resultColumns: [
+          makeColumn('message', false),
+          ...nullColumnNames.map((name) => makeColumn(name, true)),
+        ],
+        timeFieldName: '@timestamp',
+      });
+      const esqlHit = buildDataTableRecord(
+        { _id: '1', _index: 'sparse', message: 'hello' } as never,
+        dataView
+      );
+      esqlHit.flattened = { message: 'hello' };
+
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable
+            dataView={dataView}
+            dataSource={dataSource}
+            hit={esqlHit}
+            textBasedHits={[esqlHit]}
+            columns={[]}
+          />
+        </IntlProvider>
+      );
+
+      return { user };
+    };
+
+    beforeEach(() => {
+      storage.clear();
+    });
+
+    it('should list an all-null column that is missing from the row, and hide it when hiding null values', async () => {
+      const { user } = await setupEsqlComponent(['empty.field']);
+
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.getByText('empty.field')).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('unifiedDocViewerHideNullValuesSwitch'));
+
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.queryByText('empty.field')).toBeNull();
+    });
+
+    it('should list an all-null column named like an Object.prototype property', async () => {
+      const { user } = await setupEsqlComponent(['constructor']);
+
+      expect(screen.getByText('constructor')).toBeInTheDocument();
+      expect(screen.queryByText(/native code/)).toBeNull();
+
+      await user.click(screen.getByTestId('unifiedDocViewerHideNullValuesSwitch'));
+
+      expect(screen.queryByText('constructor')).toBeNull();
+    });
+  });
+
   describe('filter by field type', () => {
     it('should keep pinned fields visible even when their type is filtered out', () => {
       // Pre-seed: only "number" type selected, and "extension.keyword" (keyword) is pinned.
@@ -452,6 +520,88 @@ describe('DocViewerTable', () => {
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
       // @timestamp (date) fails the type filter and is not pinned → hidden
       expect(screen.queryByText('@timestamp')).toBeNull();
+    });
+  });
+
+  describe('pinning', () => {
+    it('should render pinning controls', () => {
+      setupComponent({ columns: ['bytes'] });
+
+      expect(screen.getByTestId('unifiedDocViewer_pinControl_bytes')).toBeInTheDocument();
+      expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toBeInTheDocument();
+    });
+
+    describe.each([
+      {
+        from: 'Pin field',
+        to: 'Unpin field',
+        fieldInitialStatus: 'unpinned',
+        before: () => storage.clear(),
+      },
+      {
+        from: 'Unpin field',
+        to: 'Pin field',
+        fieldInitialStatus: 'pinned',
+        before: () => storage.set('discover:pinnedFields', { [dataView.id!]: ['bytes'] }),
+      },
+    ])('when the field is $fieldInitialStatus', ({ from, to, before }) => {
+      beforeEach(() => {
+        before();
+      });
+
+      afterEach(() => {
+        storage.clear();
+      });
+
+      describe('when the pinning control is clicked', () => {
+        it('should toggle the field', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            from
+          );
+
+          await user.click(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes'));
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            to
+          );
+        });
+
+        it('should not focus the toggled field', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+
+          await user.click(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes'));
+
+          expect(document.activeElement).not.toBe(
+            screen
+              .getByTestId('unifiedDocViewer_pinControlButton_bytes')
+              .closest('[role="gridcell"]')
+          );
+        });
+      });
+
+      describe('when the pinning control is focused and Enter is pressed', () => {
+        it('should toggle the field and focus its new grid position', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+          const button = screen.getByTestId('unifiedDocViewer_pinControlButton_bytes');
+
+          button.focus();
+          await user.keyboard('{Enter}');
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            to
+          );
+          expect(document.activeElement).toBe(
+            screen
+              .getByTestId('unifiedDocViewer_pinControlButton_bytes')
+              .closest('[role="gridcell"]')
+          );
+        });
+      });
     });
   });
 });

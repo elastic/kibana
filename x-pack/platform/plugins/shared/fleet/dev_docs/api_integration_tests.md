@@ -13,21 +13,21 @@ Usually, having the test server and the test runner in two different shells is m
 
 ```
 $ export FLEET_PACKAGE_REGISTRY_PORT=12345
-$ yarn test:ftr:server --config x-pack/platform/test/fleet_api_integration/config.ts
+$ pnpm test:ftr:server --config x-pack/platform/test/fleet_api_integration/config.ts
 ```
 
 In another shell in the same directory, run
 
 ```
 $ export FLEET_PACKAGE_REGISTRY_PORT=12345
-$ yarn test:ftr:runner --config x-pack/platform/test/fleet_api_integration/config.ts
+$ pnpm test:ftr:runner --config x-pack/platform/test/fleet_api_integration/config.ts
 ```
 
 However, it is also possible to **alternatively** run everything in one go, again from the main `kibana` directory:
 
 ```
 $ export FLEET_PACKAGE_REGISTRY_PORT=12345
-$ yarn test:ftr --config x-pack/platform/test/fleet_api_integration/config.ts
+$ pnpm test:ftr --config x-pack/platform/test/fleet_api_integration/config.ts
 ```
 
 Port `12345` is used as an example here, it can be anything, but the environment variable has to be present for the tests to run at all.

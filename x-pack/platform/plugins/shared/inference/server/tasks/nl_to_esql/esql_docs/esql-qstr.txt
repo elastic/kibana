@@ -4,7 +4,7 @@ The QSTR function performs a query string query and returns true if the provided
 
 ## Syntax
 
-`QSTR(query, options, max_determinized_states, fuzziness, auto_generate_synonyms_phrase_query, phrase_slop, default_field, allow_leading_wildcard, minimum_should_match, fuzzy_transpositions, fuzzy_prefix_length, time_zone, lenient, rewrite, default_operator, analyzer, fuzzy_max_expansions, quote_analyzer, allow_wildcard, boost, quote_field_suffix, enable_position_increments, fields)`
+`QSTR(query, options, max_determinized_states, fuzziness, auto_generate_synonyms_phrase_query, phrase_slop, default_field, allow_leading_wildcard, minimum_should_match, fuzzy_transpositions, fuzzy_prefix_length, time_zone, lenient, rewrite, default_operator, analyzer, fuzzy_max_expansions, quote_analyzer, analyze_wildcard, boost, quote_field_suffix, enable_position_increments, fields)`
 
 ### Parameters
 
@@ -80,7 +80,7 @@ Optional. Additional options for Query String as function named parameters. See 
 
 (keyword) Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.
 
-#### allow_wildcard
+#### analyze_wildcard
 
 (boolean) If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.
 

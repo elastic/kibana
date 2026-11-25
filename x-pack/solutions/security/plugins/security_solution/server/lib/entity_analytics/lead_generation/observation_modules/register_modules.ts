@@ -12,13 +12,16 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { RelationshipsClient } from '@kbn/entity-store/server';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
+import type { LeadEntity } from '../types';
 import type { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from './risk_score_module';
 import { createTemporalStateModule } from './temporal_state_module';
 import { createBehavioralAnalysisModule } from './behavioral_analysis_module';
-import { createEntityProfileModule } from './entity_profile_module';
+import { createRelationshipModule } from './relationship_module';
+import { createEntityAttributesModule } from './entity_attributes_module';
 import { createAnomalyDetectionModule } from './anomaly_detection_module';
 
 type LeadGenerationEngine = ReturnType<typeof createLeadGenerationEngine>;
@@ -38,6 +41,8 @@ export interface ObservationModuleDeps {
   readonly ml?: MlPluginSetup;
   readonly request?: KibanaRequest;
   readonly soClient?: SavedObjectsClientContract;
+  readonly relationshipsClient: RelationshipsClient;
+  readonly entitiesMap: ReadonlyMap<string, LeadEntity>;
 }
 
 /**
@@ -48,7 +53,17 @@ export interface ObservationModuleDeps {
  */
 export const registerObservationModules = (
   engine: LeadGenerationEngine,
-  { logger, esClient, spaceId, riskScoreDataClient, ml, request, soClient }: ObservationModuleDeps
+  {
+    logger,
+    esClient,
+    spaceId,
+    riskScoreDataClient,
+    ml,
+    request,
+    soClient,
+    relationshipsClient,
+    entitiesMap,
+  }: ObservationModuleDeps
 ): void => {
   engine.registerModule(createRiskScoreModule({ riskScoreDataClient, logger }));
   engine.registerModule(createTemporalStateModule({ esClient, logger, spaceId }));
@@ -59,6 +74,7 @@ export const registerObservationModules = (
       alertsIndexPattern: getAlertsIndex(spaceId),
     })
   );
-  engine.registerModule(createEntityProfileModule({ logger }));
+  engine.registerModule(createRelationshipModule({ logger, relationshipsClient, entitiesMap }));
+  engine.registerModule(createEntityAttributesModule({ logger }));
   engine.registerModule(createAnomalyDetectionModule({ logger, ml, request, soClient }));
 };

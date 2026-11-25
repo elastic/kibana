@@ -35,6 +35,7 @@ export enum AgentBuilderAuditAction {
   SKILL_CREATE = 'agent_builder_skill_create',
   SKILL_UPDATE = 'agent_builder_skill_update',
   SKILL_DELETE = 'agent_builder_skill_delete',
+  CONVERSATION_CREATE = 'agent_builder_conversation_create',
 }
 
 type VerbsTuple = [string, string, string];
@@ -49,6 +50,7 @@ const eventVerbs: Record<AgentBuilderAuditAction, VerbsTuple> = {
   [AgentBuilderAuditAction.SKILL_CREATE]: ['create', 'creating', 'created'],
   [AgentBuilderAuditAction.SKILL_UPDATE]: ['update', 'updating', 'updated'],
   [AgentBuilderAuditAction.SKILL_DELETE]: ['delete', 'deleting', 'deleted'],
+  [AgentBuilderAuditAction.CONVERSATION_CREATE]: ['create', 'creating', 'created'],
 };
 
 const eventTypes: Record<AgentBuilderAuditAction, ArrayElement<EcsEvent['type']> | undefined> = {
@@ -61,6 +63,7 @@ const eventTypes: Record<AgentBuilderAuditAction, ArrayElement<EcsEvent['type']>
   [AgentBuilderAuditAction.SKILL_CREATE]: AUDIT_TYPE.CREATION,
   [AgentBuilderAuditAction.SKILL_UPDATE]: AUDIT_TYPE.CHANGE,
   [AgentBuilderAuditAction.SKILL_DELETE]: AUDIT_TYPE.DELETION,
+  [AgentBuilderAuditAction.CONVERSATION_CREATE]: AUDIT_TYPE.CREATION,
 };
 
 interface CommonAuditEventParams {
@@ -170,6 +173,44 @@ export function toolAuditEvent({
   } else if (toolType) {
     doc = `tool [type=${toolType}]`;
   }
+
+  const [present, progressive, past] = eventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+
+  const type = eventTypes[action];
+
+  return {
+    message,
+    event: {
+      action,
+      category: [AUDIT_CATEGORY.DATABASE],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.SUCCESS),
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}
+
+export interface ConversationAuditEventParams extends CommonAuditEventParams {
+  conversationId: string;
+  agentId: string;
+}
+
+export function conversationAuditEvent({
+  action,
+  conversationId,
+  agentId,
+  outcome,
+  error,
+}: ConversationAuditEventParams): AuditEvent {
+  const doc = `conversation [id=${conversationId}, agent=${agentId}]`;
 
   const [present, progressive, past] = eventVerbs[action];
   const message = error

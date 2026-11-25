@@ -11,6 +11,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
 import { buildInboundEventsClient } from './client';
 import { createInboundEventsClient } from './factory';
+import { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 
 jest.mock('./create_unsecured_inbound_saved_objects_client', () => ({
   createUnsecuredInboundSavedObjectsClient: jest.fn(),
@@ -33,15 +34,23 @@ describe('createInboundEventsClient (factory)', () => {
     const getStartServices = coreMock.createSetup().getStartServices;
     const emitConnectorEvents = jest.fn();
     const logger = loggingSystemMock.createLogger();
+    const rateLimiter = new InboundEventRateLimiter({
+      enabled: true,
+      maxKeys: 10_000,
+      remoteAddress: { limit: 10, windowMs: 60_000 },
+      connector: { limit: 300, windowMs: 60_000 },
+    });
 
     createInboundEventsClient({
       logger,
       inboundEventsEnabled: true,
       isActionTypeEnabled: jest.fn().mockReturnValue(true),
       maxEmitted: 25,
+      maxBodyBytes: 1024 * 1024,
       emitConnectorEvents,
       getStartServices,
       inMemoryConnectors: [],
+      rateLimiter,
     });
 
     expect(buildInboundEventsClientMock).toHaveBeenCalledWith(
@@ -50,9 +59,12 @@ describe('createInboundEventsClient (factory)', () => {
         inboundEventsEnabled: true,
         isActionTypeEnabled: expect.any(Function),
         maxEmitted: 25,
+        maxBodyBytes: 1024 * 1024,
         emitConnectorEvents,
         inMemoryConnectors: [],
+        rateLimiter,
         getUnsecuredSavedObjectsClient: expect.any(Function),
+        getDecryptedConnectorAttributes: expect.any(Function),
       })
     );
 

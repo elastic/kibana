@@ -71,7 +71,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
     } else {
       return (
         <Fragment>
-          <EuiIcon type="flag" aria-hidden={true} />
+          <EuiIcon type="pencil" aria-hidden={true} />
           &nbsp;
           <EuiTextColor color="warning">
             {i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {
@@ -94,7 +94,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
       badgeProps.onClickAriaLabel = customText || clickToMonitorWithMetricbeat;
     }
     statusText = (
-      <EuiBadge color="danger" iconType="flag" {...badgeProps}>
+      <EuiBadge color="danger" iconType="pencil" {...badgeProps}>
         {customText || clickToMonitorWithMetricbeat}
       </EuiBadge>
     );
@@ -103,7 +103,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
       badgeProps.onClickAriaLabel = customText || clickToDisableInternalCollection;
     }
     statusText = (
-      <EuiBadge color="warning" iconType="flag" {...badgeProps}>
+      <EuiBadge color="warning" iconType="pencil" {...badgeProps}>
         {customText || clickToDisableInternalCollection}
       </EuiBadge>
     );
@@ -112,7 +112,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
       badgeProps.onClickAriaLabel = customText || monitoredWithMetricbeat;
     }
     statusText = (
-      <EuiBadge color="primary" iconType="flag" {...badgeProps}>
+      <EuiBadge color="primary" iconType="pencil" {...badgeProps}>
         {customText || monitoredWithMetricbeat}
       </EuiBadge>
     );
@@ -121,7 +121,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
       badgeProps.onClickAriaLabel = customText || clickToMonitorWithMetricbeat;
     }
     statusText = (
-      <EuiBadge color="danger" iconType="flag" {...badgeProps}>
+      <EuiBadge color="danger" iconType="pencil" {...badgeProps}>
         {customText || clickToMonitorWithMetricbeat}
       </EuiBadge>
     );
@@ -130,7 +130,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
       badgeProps.onClickAriaLabel = customText || unknown;
     }
     statusText = (
-      <EuiBadge color="danger" iconType="flag" {...badgeProps}>
+      <EuiBadge color="danger" iconType="pencil" {...badgeProps}>
         {customText || unknown}
       </EuiBadge>
     );

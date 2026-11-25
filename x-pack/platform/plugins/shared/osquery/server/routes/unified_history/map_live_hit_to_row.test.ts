@@ -138,6 +138,42 @@ describe('mapLiveHitToRow', () => {
     expect(mapLiveHitToRow(hit).source).toBe('Rule');
   });
 
+  test.each([undefined, ['alert-1']])('detects Workflow source with alert_ids %p', (alertIds) => {
+    expect(
+      mapLiveHitToRow({
+        _source: { origin: { type: 'workflow' }, alert_ids: alertIds },
+      }).source
+    ).toBe('Workflow');
+  });
+
+  test('detects Workflow source from fields ahead of alerts', () => {
+    expect(
+      mapLiveHitToRow({
+        fields: { 'origin.type': ['workflow'] },
+        _source: { alert_ids: ['alert-1'] },
+      }).source
+    ).toBe('Workflow');
+  });
+
+  test.each([
+    [false, false],
+    [undefined, false],
+    [true, true],
+  ])('sets originVerified to %p → %p on Workflow rows', (verified, expected) => {
+    const row = mapLiveHitToRow({
+      _source: { origin: { type: 'workflow', run_id: 'run-1', verified } },
+    });
+
+    expect(row.originVerified).toBe(expected);
+  });
+
+  test('leaves originVerified unset on Live and Rule rows', () => {
+    expect(mapLiveHitToRow({ _source: {} })).not.toHaveProperty('originVerified');
+    expect(mapLiveHitToRow({ _source: { alert_ids: ['alert-1'] } })).not.toHaveProperty(
+      'originVerified'
+    );
+  });
+
   test('sets empty queryText for pack queries (multiple queries)', () => {
     const hit = {
       _source: {

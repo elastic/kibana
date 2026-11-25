@@ -83,6 +83,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
         {
           name: 'ContainsKibana',
           kind: 'CODE' as const,
+          direction: 'maximize',
           evaluate: async ({ output }) => ({
             score: String((output as TaskOutput)?.response ?? '')
               .toLowerCase()
@@ -159,7 +160,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
   evaluate(
     'smoke tests: trace-retrieval',
     async ({ executorClient, inferenceClient, evaluators }) => {
-      const { inputTokens, outputTokens } = evaluators.traceBasedEvaluators;
+      const { inputTokens, outputTokens, estimatedCost } = evaluators.traceBasedEvaluators;
 
       const result = await executorClient.runExperiment(
         {
@@ -179,12 +180,20 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
             return { response: response.content };
           },
         },
-        [inputTokens, outputTokens]
+        [inputTokens, outputTokens, estimatedCost]
       );
 
-      const scores = result[0].evaluationRuns.map((r) => r.result?.score);
-      expect(scores.every((s) => s !== null && s !== undefined)).toBe(true);
-      expect(scores.some((s) => typeof s === 'number' && s > 0)).toBe(true);
+      const { evaluationRuns } = result[0];
+      const tokenScores = evaluationRuns
+        .filter((r) => r.name !== estimatedCost.name)
+        .map((r) => r.result?.score);
+      expect(tokenScores.every((s) => s !== null && s !== undefined)).toBe(true);
+      expect(tokenScores.some((s) => typeof s === 'number' && s > 0)).toBe(true);
+
+      // Only EIS models have prices, so other connectors legitimately score `unavailable`.
+      const costResult = evaluationRuns.find((r) => r.name === estimatedCost.name)?.result;
+      const isPriced = typeof costResult?.score === 'number' && costResult.score > 0;
+      expect(isPriced || costResult?.label === 'unavailable').toBe(true);
     }
   );
 
@@ -228,10 +237,11 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
           },
         },
         evaluatorClient.toEvaluators([
-          { name: 'groundedness', kind: 'LLM', connectorId: connectorId! },
+          { name: 'groundedness', kind: 'LLM', direction: 'maximize', connectorId: connectorId! },
           {
             name: 'correctness',
             kind: 'LLM',
+            direction: 'maximize',
             connectorId: connectorId!,
             subScores: [
               { key: 'factuality', evaluatorName: 'Factuality' },
@@ -288,6 +298,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
           {
             name: 'SnapshotRestored',
             kind: 'CODE' as const,
+            direction: 'maximize',
             evaluate: async ({ output }) => {
               const { success, reindexedIndices } = output as {
                 success: boolean;

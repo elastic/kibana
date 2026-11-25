@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 import { combineLatest, from, Subject } from 'rxjs';
@@ -65,13 +66,13 @@ export function useFieldStatsSearchStrategy(
   searchStrategyParams: OverallStatsSearchStrategyParams | undefined,
   fieldStatsParams: FieldStatsParams | undefined,
   dataVisualizerListState: DataVisualizerIndexBasedAppState,
-  samplingProbability: number | null
+  samplingProbability: number | null,
+  requestCancellationManager?: RequestCancellationManager
 ): FieldStatsSearchStrategyReturnBase {
   const {
     services: {
       data,
       notifications: { toasts },
-      cps,
     },
   } = useDataVisualizerKibana();
 
@@ -91,6 +92,13 @@ export function useFieldStatsSearchStrategy(
     retries$.current?.unsubscribe();
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
+
+    // The panel was cancelled and no new load has started yet, don't start requests.
+    if (requestCancellationManager?.signal.aborted) {
+      setFetchState({ isRunning: false, cancelled: true });
+      return;
+    }
+
     setFetchState({
       ...getInitialProgress(),
       error: undefined,
@@ -171,14 +179,16 @@ export function useFieldStatsSearchStrategy(
       samplingProbability,
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
       samplingOption: searchStrategyParams.samplingOption,
-      ...(cps?.cpsManager?.getProjectRouting()
-        ? { projectRouting: cps.cpsManager.getProjectRouting() }
+      ...(searchStrategyParams.projectRouting
+        ? { projectRouting: searchStrategyParams.projectRouting }
         : {}),
     };
 
     const { sessionId, embeddableExecutionContext } = searchStrategyParams;
     const searchOptions: ISearchOptions = {
-      abortSignal: abortCtrl.current.signal,
+      abortSignal: requestCancellationManager
+        ? AbortSignal.any([abortCtrl.current.signal, requestCancellationManager.signal])
+        : abortCtrl.current.signal,
       sessionId,
       ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
     };
@@ -198,7 +208,21 @@ export function useFieldStatsSearchStrategy(
       .map((batch) => getFieldsStats(data.search, params, batch, searchOptions))
       .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>;
 
+    // Batch fetchers catch search failures, including aborts, and emit them as
+    // FieldStatsError values. An abort before an async-search id therefore never
+    // reaches onError, and the table keeps loading unless we read the signal.
+    const requestWasCancelled = () => searchOptions.abortSignal?.aborted === true;
+
+    const markCancelled = () => {
+      setFetchState({ isRunning: false, cancelled: true });
+    };
+
     const onError = (error: any) => {
+      if (requestWasCancelled() || error?.name === 'AbortError') {
+        markCancelled();
+        return;
+      }
+
       // eslint-disable-next-line no-console
       console.error(
         i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
@@ -213,6 +237,11 @@ export function useFieldStatsSearchStrategy(
     };
 
     const onComplete = () => {
+      if (requestWasCancelled()) {
+        markCancelled();
+        return;
+      }
+
       setFetchState({
         isRunning: false,
       });
@@ -225,6 +254,11 @@ export function useFieldStatsSearchStrategy(
       .pipe(mergeMap((observable) => observable, MAX_CONCURRENT_REQUESTS))
       .subscribe({
         next: (batchResponse) => {
+          if (requestWasCancelled()) {
+            markCancelled();
+            return;
+          }
+
           setFetchState({
             ...getInitialProgress(),
             error: undefined,
@@ -276,6 +310,11 @@ export function useFieldStatsSearchStrategy(
       ),
     ]).subscribe({
       next: (resp) => {
+        if (requestWasCancelled()) {
+          markCancelled();
+          return;
+        }
+
         const statsMap = cloneDeep(resp[0]) as Map<string, FieldStats>;
         const fieldBatches = resp[1];
 
@@ -313,6 +352,7 @@ export function useFieldStatsSearchStrategy(
     dataVisualizerListState.sortDirection,
     dataVisualizerListState.sortField,
     samplingProbability,
+    requestCancellationManager,
   ]);
 
   const cancelFetch = useCallback(() => {

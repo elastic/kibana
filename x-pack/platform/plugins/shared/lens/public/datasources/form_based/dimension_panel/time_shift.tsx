@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import type { GenericIndexPatternColumn, FormBasedLayer, IndexPattern } from '@kbn/lens-common';
-import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
+import { adjustTimeScaleLabelSuffix } from '@kbn/lens-common';
+import { operationDefinitionMap } from '../operations';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import {
   getDateHistogramInterval,

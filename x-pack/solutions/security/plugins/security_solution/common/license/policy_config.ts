@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { ILicense } from '@kbn/licensing-types';
 import { isAtLeast } from './license';
 import type { PolicyConfig } from '../endpoint/types';
@@ -16,6 +17,7 @@ import {
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
+import { hasCustomYaraSignaturesAdvancedSettings } from '../endpoint/models/policy_config_helpers';
 
 function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {
@@ -47,13 +49,30 @@ function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: I
 }
 
 function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  const macRansomware = policy.mac?.ransomware;
+  const macRansomwarePopup = policy.mac?.popup?.ransomware;
+  const linuxRansomware = policy.linux?.ransomware;
+  const linuxRansomwarePopup = policy.linux?.popup?.ransomware;
+
+  if (
+    (macRansomware !== undefined && !isPlainObject(macRansomware)) ||
+    (macRansomwarePopup !== undefined && !isPlainObject(macRansomwarePopup)) ||
+    (linuxRansomware !== undefined && !isPlainObject(linuxRansomware)) ||
+    (linuxRansomwarePopup !== undefined && !isPlainObject(linuxRansomwarePopup))
+  ) {
+    return false;
+  }
+
   if (isAtLeast(license, 'platinum')) {
     const defaults = policyFactoryWithSupportedFeatures();
 
     // only platinum or higher may enable ransomware protection
     if (
       policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-      policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+      (macRansomware !== undefined &&
+        macRansomware.supported !== defaults.mac.ransomware.supported) ||
+      (linuxRansomware !== undefined &&
+        linuxRansomware.supported !== defaults.linux.ransomware?.supported)
     ) {
       return false;
     }
@@ -67,21 +86,28 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
 
   if (
     policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-    policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+    (macRansomware !== undefined &&
+      macRansomware.supported !== defaults.mac.ransomware.supported) ||
+    (linuxRansomware !== undefined &&
+      linuxRansomware.supported !== defaults.linux.ransomware?.supported)
   ) {
     return false;
   }
 
   if (
     policy.windows.ransomware.mode !== defaults.windows.ransomware.mode ||
-    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode
+    (macRansomware !== undefined && macRansomware.mode !== defaults.mac.ransomware.mode) ||
+    (linuxRansomware !== undefined && linuxRansomware.mode !== defaults.linux.ransomware?.mode)
   ) {
     return false;
   }
 
   if (
     policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled ||
-    policy.mac.popup.ransomware.enabled !== defaults.mac.popup.ransomware.enabled
+    (macRansomwarePopup !== undefined &&
+      macRansomwarePopup.enabled !== defaults.mac.popup.ransomware.enabled) ||
+    (linuxRansomwarePopup !== undefined &&
+      linuxRansomwarePopup.enabled !== defaults.linux.popup.ransomware?.enabled)
   ) {
     return false;
   }
@@ -89,8 +115,12 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
   if (
     (policy.windows.popup.ransomware.message !== '' &&
       policy.windows.popup.ransomware.message !== DefaultPolicyNotificationMessage) ||
-    (policy.mac.popup.ransomware.message !== '' &&
-      policy.mac.popup.ransomware.message !== DefaultPolicyNotificationMessage)
+    (macRansomwarePopup !== undefined &&
+      macRansomwarePopup.message !== '' &&
+      macRansomwarePopup.message !== DefaultPolicyNotificationMessage) ||
+    (linuxRansomwarePopup !== undefined &&
+      linuxRansomwarePopup.message !== '' &&
+      linuxRansomwarePopup.message !== DefaultPolicyNotificationMessage)
   ) {
     return false;
   }
@@ -302,6 +332,46 @@ function isEndpointDeviceControlPolicyValidForLicense(
   return true;
 }
 
+function isEndpointCustomYaraSignaturesPolicyValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'enterprise')) {
+    return true;
+  }
+
+  // An absent field means the feature is not enabled (pre-backfill policies omit it).
+  if (
+    policy.windows.memory_protection.custom_yara_signatures === true ||
+    policy.mac.memory_protection.custom_yara_signatures === true ||
+    policy.linux.memory_protection.custom_yara_signatures === true
+  ) {
+    return false;
+  }
+
+  if (hasCustomYaraSignaturesAdvancedSettings(policy)) {
+    return false;
+  }
+
+  return true;
+}
+
+function isEndpointRegistryCredentialHardeningPolicyValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'enterprise')) {
+    return true;
+  }
+
+  // Absent means never configured and is treated as disabled.
+  if (policy.windows.attack_surface_reduction.registry_credential_hardening?.enabled === true) {
+    return false;
+  }
+
+  return true;
+}
+
 function isEndpointProtectionUpdatesValidForLicense(
   policy: PolicyConfig,
   license: ILicense | null
@@ -331,6 +401,8 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointAdvancedPolicyValidForLicense(policy, license) &&
     isEndpointCredentialDumpingPolicyValidForLicense(policy, license) &&
     isEndpointDeviceControlPolicyValidForLicense(policy, license) &&
+    isEndpointCustomYaraSignaturesPolicyValidForLicense(policy, license) &&
+    isEndpointRegistryCredentialHardeningPolicyValidForLicense(policy, license) &&
     isEndpointProtectionUpdatesValidForLicense(policy, license)
   );
 };

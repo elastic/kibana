@@ -38,6 +38,12 @@ export const initiateState = (
     commandHistory: [],
     sidePanel: { show: null },
     footerContent: '',
+    // This interface will be set with real implementation in`console_state.tsx`
+    // once the store has been initialized
+    consoleApi: {
+      setInput: () => {},
+      setFocusOnInput: () => {},
+    },
     input: {
       leftOfCursorText: '',
       rightOfCursorText: '',
@@ -47,6 +53,7 @@ export const initiateState = (
       showPopover: undefined,
       history: [],
       visibleState: undefined,
+      suggestion: { value: '' },
     },
   };
 
@@ -105,6 +112,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'updateInputPlaceholderState':
     case 'setInputState':
     case 'updateInputCommandArgState':
+    case 'updateInputSuggestionState':
       newState = handleInputAreaState(state, action);
       break;
 

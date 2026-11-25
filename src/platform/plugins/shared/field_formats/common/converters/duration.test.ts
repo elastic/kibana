@@ -10,6 +10,51 @@
 import { DurationFormat } from './duration';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 import { asPrettyString } from '../utils';
+import {
+  getDurationUnitFromOutputFormat,
+  getDurationUnitInSeconds,
+} from '../constants/duration_formats';
+
+describe('getDurationUnitInSeconds', () => {
+  it.each([
+    ['picoseconds', 0.000000000001],
+    ['nanoseconds', 0.000000001],
+    ['microseconds', 0.000001],
+    ['milliseconds', 0.001],
+    ['seconds', 1],
+    ['minutes', 60],
+    ['hours', 3600],
+    ['days', 86400],
+    ['weeks', 604800],
+    ['months', 2592000],
+    ['years', 31536000],
+  ])('returns the number of seconds in %s', (unit, seconds) => {
+    expect(getDurationUnitInSeconds(unit)).toBe(seconds);
+  });
+
+  it('returns undefined for unsupported units', () => {
+    expect(getDurationUnitInSeconds('fortnights')).toBeUndefined();
+  });
+
+  it.each([
+    ['humanize', 'seconds'],
+    ['humanizePrecise', 'seconds'],
+    ['asMilliseconds', 'milliseconds'],
+    ['asSeconds', 'seconds'],
+    ['asMinutes', 'minutes'],
+    ['asHours', 'hours'],
+    ['asDays', 'days'],
+    ['asWeeks', 'weeks'],
+    ['asMonths', 'months'],
+    ['asYears', 'years'],
+  ])('maps output format %s to coordinate unit %s', (outputFormat, unit) => {
+    expect(getDurationUnitFromOutputFormat(outputFormat)).toBe(unit);
+  });
+
+  it('returns undefined for an unsupported output format', () => {
+    expect(getDurationUnitFromOutputFormat('asFortnights')).toBeUndefined();
+  });
+});
 
 describe('Duration Format', () => {
   test('handles missing values', () => {
@@ -217,15 +262,49 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 1988,
-        output: '0.00 milliseconds',
+        output: '1.99 microseconds',
       },
       {
         input: 658,
-        output: '0.00 milliseconds',
+        output: '658.00 nanoseconds',
       },
       {
         input: 3857,
-        output: '0.00 milliseconds',
+        output: '3.86 microseconds',
+      },
+      {
+        input: 1000,
+        output: '1.00 microseconds',
+      },
+      {
+        input: 1000000,
+        output: '1.00 milliseconds',
+      },
+      {
+        input: -1988,
+        output: '-1.99 microseconds',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'picoseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    useShortSuffix: true,
+    fixtures: [
+      {
+        input: 500,
+        output: '0.50 ns',
+      },
+      {
+        input: 1500,
+        output: '1.50 ns',
+      },
+      {
+        input: 2500000,
+        output: '2.50 µs',
       },
     ],
   });
@@ -242,7 +321,7 @@ describe('Duration Format', () => {
       },
       {
         input: 658,
-        output: '0.66 milliseconds',
+        output: '658.00 microseconds',
       },
       {
         input: 3857,
@@ -263,11 +342,11 @@ describe('Duration Format', () => {
       },
       {
         input: 0,
-        output: '0.0 milliseconds',
+        output: '0',
       },
       {
         input: 658,
-        output: '0.7 milliseconds',
+        output: '658.0 microseconds',
       },
       {
         input: 3857,
@@ -414,7 +493,15 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 0.5,
-        output: '0.50 ms',
+        output: '500.00 µs',
+      },
+      {
+        input: -0.5,
+        output: '-500.00 µs',
+      },
+      {
+        input: 0,
+        output: '0',
       },
       {
         input: -123.5,
@@ -585,7 +672,7 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 0.5,
-        output: '1ms',
+        output: '500µs',
       },
       {
         input: -123,

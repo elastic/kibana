@@ -23,7 +23,6 @@ export interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
   tabId: keyof typeof ENDPOINT_ARTIFACT_LISTS;
-  nextTabId: string;
   artifactName: string;
 
   /** The siem version from which the artifact privilege is available.
@@ -49,6 +48,11 @@ export interface ArtifactsFixtureType {
   };
 }
 
+/**
+ * Live Cypress fork of the Scout cases in
+ * `test/scout/edr_artifacts/ui/fixtures/artifact_tabs_test_data.ts`.
+ * If you change a criteriaConditions string here, update the other.
+ */
 export const getArtifactsListTestDataForArtifact = (
   artifact: keyof typeof ENDPOINT_ARTIFACT_LISTS
 ) => getArtifactsListTestsData().find(({ tabId }) => tabId === artifact) as ArtifactsFixtureType;
@@ -58,7 +62,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Trusted applications',
     pagePrefix: 'trustedAppsListPage',
     tabId: 'trustedApps',
-    nextTabId: 'eventFilters',
     artifactName: 'Trusted application name',
     privilegePrefix: 'trusted_applications_',
     create: {
@@ -184,7 +187,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Event Filters',
     pagePrefix: 'EventFiltersListPage',
     tabId: 'eventFilters',
-    nextTabId: 'blocklists',
     artifactName: 'Event filter name',
     privilegePrefix: 'event_filters_',
     create: {
@@ -299,7 +301,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Blocklist',
     pagePrefix: 'blocklistPage',
     tabId: 'blocklists',
-    nextTabId: 'hostIsolationExceptions',
     artifactName: 'Blocklist name',
     privilegePrefix: 'blocklist_',
     create: {
@@ -422,7 +423,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Host isolation exceptions',
     pagePrefix: 'hostIsolationExceptionsListPage',
     tabId: 'hostIsolationExceptions',
-    nextTabId: 'trustedApps',
     artifactName: 'Host Isolation exception name',
     privilegePrefix: 'host_isolation_exceptions_',
     create: {
@@ -518,7 +518,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Trusted devices',
     pagePrefix: 'trustedDevicesList',
     tabId: 'trustedDevices',
-    nextTabId: 'trustedApps',
     artifactName: 'Trusted device name',
     firstSiemVersion: 'siemV3',
     privilegePrefix: 'trusted_devices_',
@@ -625,122 +624,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
       ],
       os_types: ['windows', 'macos'],
-    },
-  },
-  {
-    title: 'Endpoint exceptions',
-    pagePrefix: 'endpointExceptionsListPage',
-    tabId: 'endpointExceptions',
-    nextTabId: 'protectionUpdates',
-    artifactName: 'Endpoint exception name',
-    firstSiemVersion: 'siemV4',
-    privilegePrefix: 'endpoint_exceptions_',
-    create: {
-      formActions: [
-        {
-          type: 'input',
-          selector: 'endpointExceptions-form-name-input',
-          value: 'Endpoint exception name',
-        },
-        {
-          type: 'input',
-          selector: 'endpointExceptions-form-description-input',
-          value: 'This is the endpoint exception description',
-        },
-
-        {
-          type: 'input',
-          selector: 'fieldAutocompleteComboBox',
-          value: 'agent.version',
-        },
-        {
-          type: 'click',
-          selector: 'valuesAutocompleteMatch',
-        },
-        {
-          type: 'input',
-          selector: 'valuesAutocompleteMatch',
-          value: '1234',
-        },
-        {
-          type: 'click',
-          selector: 'endpointExceptions-form-description-input',
-        },
-      ],
-      checkResults: [
-        {
-          selector: 'endpointExceptionsListPage-card-criteriaConditions-condition',
-          value: 'AND agent.versionIS 1234',
-        },
-      ],
-    },
-    update: {
-      formActions: [
-        {
-          type: 'clear',
-          selector: 'endpointExceptions-form-name-input',
-        },
-        {
-          type: 'input',
-          selector: 'endpointExceptions-form-name-input',
-          value: 'Endpoint exception name edited',
-        },
-        {
-          type: 'clear',
-          selector: 'endpointExceptions-form-description-input',
-        },
-        {
-          type: 'input',
-          selector: 'endpointExceptions-form-description-input',
-          value: 'This is the endpoint exception description edited',
-        },
-        {
-          type: 'input',
-          selector: 'fieldAutocompleteComboBox',
-          value: '{selectAll}agent.name',
-        },
-        {
-          type: 'input',
-          selector: 'valuesAutocompleteMatch',
-          value: 'test',
-        },
-        {
-          type: 'click',
-          selector: 'endpointExceptions-form-description-input',
-        },
-      ],
-      checkResults: [
-        {
-          selector: 'endpointExceptionsListPage-card-criteriaConditions-condition',
-          value: 'AND agent.nameIS test',
-        },
-        {
-          selector: 'endpointExceptionsListPage-card-header-title',
-          value: 'Endpoint exception name edited',
-        },
-        {
-          selector: 'endpointExceptionsListPage-card-description',
-          value: 'This is the endpoint exception description edited',
-        },
-      ],
-    },
-    delete: {
-      confirmSelector: 'endpointExceptionsListPage-deleteModal-submitButton',
-      card: 'endpointExceptionsListPage-card',
-    },
-    urlPath: 'endpoint_exceptions',
-    emptyState: 'endpointExceptionsListPage-emptyState',
-    createRequestBody: {
-      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
-      entries: [
-        {
-          field: 'process.name',
-          operator: 'included',
-          type: 'match',
-          value: 'notepad.exe',
-        },
-      ],
-      os_types: ['windows'],
     },
   },
 ];

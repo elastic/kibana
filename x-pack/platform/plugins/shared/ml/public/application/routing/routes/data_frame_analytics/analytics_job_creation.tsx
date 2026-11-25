@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
@@ -49,7 +49,7 @@ export const analyticsJobsCreationRouteFactory = (navigateToApp: NavigateToApp):
 });
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
-  const { index, jobId, savedSearchId }: Record<string, any> = parse(location.search, {
+  const { index, jobId, savedSearchId }: Record<string, any> = queryString.parse(location.search, {
     sort: false,
   });
   const {

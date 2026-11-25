@@ -65,6 +65,42 @@ describe('ProjectPickerListItem', () => {
     expect(item.querySelector('[data-euiicon-type="logoElasticsearch"]')).toBeInTheDocument();
   });
 
+  describe('cloud provider and region', () => {
+    it('should render a friendly provider and region', () => {
+      renderComponent({ project: { ...defaultProject, _csp: 'aws', _region: 'eu-west-1' } });
+
+      expect(screen.getByTestId('projectPickerListItem')).toHaveTextContent(
+        'AWS, Ireland (eu-west-1)'
+      );
+    });
+
+    it('should ignore a provider prefix on the region', () => {
+      renderComponent({ project: { ...defaultProject, _csp: 'gcp', _region: 'gcp-us-central1' } });
+
+      expect(screen.getByTestId('projectPickerListItem')).toHaveTextContent(
+        'GCP, Iowa (us-central1)'
+      );
+    });
+
+    it('should render the bare region when its location is unknown', () => {
+      renderComponent({ project: { ...defaultProject, _csp: 'azure', _region: 'newregion' } });
+
+      expect(screen.getByTestId('projectPickerListItem')).toHaveTextContent('Azure, newregion');
+    });
+
+    it('should not render the provider and region when the region is missing', () => {
+      renderComponent({ project: { ...defaultProject, _csp: 'aws' } });
+
+      expect(screen.getByTestId('projectPickerListItem')).not.toHaveTextContent('AWS');
+    });
+
+    it('should not render the provider and region when the provider is missing', () => {
+      renderComponent({ project: { ...defaultProject, _region: 'eu-west-1' } });
+
+      expect(screen.getByTestId('projectPickerListItem')).not.toHaveTextContent('eu-west-1');
+    });
+  });
+
   it('should not render a tags badge when the project has no custom tags', () => {
     renderComponent();
 
@@ -81,6 +117,18 @@ describe('ProjectPickerListItem', () => {
     });
 
     expect(screen.getByTestId('projectPickerListItemTags')).toHaveTextContent('2');
+  });
+
+  it('should hide the tags badge when project tags are disabled', () => {
+    renderComponent({
+      project: {
+        ...defaultProject,
+        env: 'prod',
+      },
+      showProjectTags: false,
+    });
+
+    expect(screen.queryByTestId('projectPickerListItemTags')).not.toBeInTheDocument();
   });
 
   describe('enabled controls state', () => {

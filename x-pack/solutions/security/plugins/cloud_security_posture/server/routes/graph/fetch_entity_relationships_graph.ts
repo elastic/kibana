@@ -8,7 +8,6 @@
 import { chunk } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
 import {
   type EuidSourceFields,
@@ -24,6 +23,7 @@ import {
   JSON_OBJECT_SEPARATOR,
   JSON_OBJECT_START,
   concatJsonObjectPropertyEsqlExprAsString,
+  concatJsonObjectPropertyEsqlExprAsStringArray,
   buildPinnedEsql,
 } from './utils';
 import type { EntityId, EntityRecord, RelationshipEsqlRow } from './types';
@@ -119,6 +119,7 @@ ${forkBranches}
           ${JSON_OBJECT_END}),
         ""
       ),
+      ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')},
       ${JSON_OBJECT_SEPARATOR}, _source_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
@@ -232,22 +233,20 @@ export const fetchEntityRelationships = async ({
   esClient,
   logger,
   entityIds,
-  spaceId,
-  entityStoreIndexExists,
+  entityStoreIndexName,
   pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
-  spaceId: string;
-  entityStoreIndexExists: boolean;
+  entityStoreIndexName: string | null;
   pinnedIds?: string[];
 }): Promise<EsqlToRecords<RelationshipEsqlRow>> => {
-  if (!entityStoreIndexExists) {
+  if (entityStoreIndexName == null) {
     return { columns: [], records: [] };
   }
 
-  const indexName = getEntitiesLatestIndexName(spaceId);
+  const indexName = entityStoreIndexName;
   logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
 
   const filter = buildRelationshipDslFilter(entityIds);
@@ -291,30 +290,31 @@ export const fetchEntities = async ({
   esClient,
   logger,
   entityIds,
-  spaceId,
-  entityStoreIndexExists,
+  entityStoreIndexName,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
-  spaceId: string;
-  entityStoreIndexExists: boolean;
+  entityStoreIndexName: string | null;
 }): Promise<EsqlToRecords<EntityRecord>> => {
-  if (entityIds.length === 0 || !entityStoreIndexExists) {
+  if (entityIds.length === 0 || entityStoreIndexName == null) {
     return { columns: [], records: [] };
   }
 
-  const indexName = getEntitiesLatestIndexName(spaceId);
+  const indexName = entityStoreIndexName;
 
   logger.trace(`Fetching entities from index [${indexName}] for ${entityIds.length} entities`);
   const esqlQuery = `SET unmapped_fields="nullify";
     FROM ${indexName}
     | WHERE entity.id IN (${entityIds.map((_, idx) => `?entityId${idx}`).join(',')})
-    | INLINE STATS __host_ip = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
     | EVAL id = entity.id
     | EVAL name = entity.name
     | EVAL type = entity.type
     | EVAL sub_type = entity.sub_type
+    // Kept as columns (not only inside docData) because the node-level riskScore range and
+    // assetCriticality distribution are computed in TypeScript from EntityRecord.
+    | EVAL riskScore = \`entity.risk.calculated_score_norm\`
+    | EVAL assetCriticality = asset.criticality
     | EVAL docData = CONCAT(${JSON_OBJECT_START},
       ${concatJsonObjectPropertyEsqlExprAsString('id', 'entity.id')},
       ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
@@ -334,14 +334,15 @@ export const fetchEntities = async ({
         CASE(
           host.ip IS NOT NULL,
           CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-            "\\"ip\\":[\\"", MV_CONCAT(__host_ip, "\\",\\""), "\\"]",
+            "\\"ip\\":[\\"", MV_CONCAT(TO_STRING(host.ip), "\\",\\""), "\\"]",
             ${JSON_OBJECT_END}),
           ""
         ),
+        ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')},
         ${JSON_OBJECT_SEPARATOR}, ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)},
       ${JSON_OBJECT_END},
     ${JSON_OBJECT_END})
-    | KEEP id, name, type, sub_type, docData`;
+    | KEEP id, name, type, sub_type, docData, riskScore, assetCriticality`;
   logger.trace(`Entities ES|QL query: ${esqlQuery}`);
 
   const response = await esClient.asCurrentUser.helpers

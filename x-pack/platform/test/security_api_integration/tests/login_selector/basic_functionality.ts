@@ -87,7 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.authentication_type).to.be(authenticationType);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/218378
   describe('Login Selector', () => {
     afterEach(async () => {
       // Wait for the index to be available
@@ -188,7 +187,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('SAML', () => {
       function createSAMLResponse(options = {}) {
         return getSAMLResponse({
-          destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+          destination: url.format({
+            protocol: 'http',
+            hostname: kibanaServerConfig.hostname,
+            port: kibanaServerConfig.port,
+            pathname: '/api/security/saml/callback',
+          }),
           sessionIndex: String(randomness.naturalNumber()),
           ...options,
         });

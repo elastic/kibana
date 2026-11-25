@@ -18,7 +18,7 @@ import { defaultHeaders } from '../../mock/header';
 import { mockGlobalState } from '../../mock/global_state';
 import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { TestProviders } from '../../mock/test_providers';
-import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
+import type { DeprecatedCellValueElementProps } from '@kbn/securitysolution-timeline-common';
 import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 
@@ -274,7 +274,7 @@ describe('DataTable', () => {
     // click the `Remove column` action in the popover
     fireEvent.click(await screen.getByText(REMOVE_COLUMN));
 
-    expect(mockDispatch).toBeCalledWith({
+    expect(mockDispatch).toHaveBeenCalledWith({
       payload: { columnId: '@timestamp', id: 'table-test' },
       type: 'x-pack/security_solution/data-table/REMOVE_COLUMN',
     });
@@ -292,7 +292,7 @@ describe('DataTable', () => {
     fireEvent.mouseMove(screen.getAllByTestId('dataGridColumnResizer')[0]);
     fireEvent.mouseUp(screen.getAllByTestId('dataGridColumnResizer')[0]);
 
-    expect(mockDispatch).toBeCalledWith({
+    expect(mockDispatch).toHaveBeenCalledWith({
       payload: { columnId: '@timestamp', id: 'table-test', width: NaN },
       type: 'x-pack/security_solution/data-table/UPDATE_COLUMN_WIDTH',
     });

@@ -27,6 +27,7 @@ export {
 export {
   NOTIFICATION_CENTER_API_BASE,
   GET_NOTIFICATIONS_PATH,
+  GET_UNREAD_STATUS_PATH,
   MARK_READ_PATH,
   MARK_ALL_READ_PATH,
   NOTIFICATION_CENTER_API_VERSION,
@@ -52,12 +53,14 @@ export type {
 
 export type {
   Notification,
+  NotificationListItem,
   NotificationInput,
   NotificationDocument,
   NotificationContent,
   NotificationSubmitInput,
   NotificationQueryParams,
   NotificationQueryResult,
+  NotificationUnreadStatus,
   StateSubmitIdParts,
   TimeseriesSubmitIdParts,
   Severity,

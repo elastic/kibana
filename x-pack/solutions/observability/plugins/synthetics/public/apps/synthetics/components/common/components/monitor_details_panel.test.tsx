@@ -65,6 +65,7 @@ const localMonitor = {
   enabled: true,
   schedule: { number: '5', unit: 'm' },
   locations: [{ id: 'us-east', label: 'US East' }],
+  created_at: '2025-12-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
   origin: 'ui',
   project_id: '',
@@ -99,10 +100,11 @@ const pingWithTimespan = {
 } as unknown as Ping;
 
 describe('MonitorDetailsPanel', () => {
-  it('renders SO-only sections (Enabled, Last modified, Frequency) for a local monitor', () => {
+  it('renders SO-only sections (Enabled, Created, Last modified, Frequency) for a local monitor', () => {
     render(<MonitorDetailsPanel monitor={localMonitor} loading={false} configId="config-1" />);
 
     expect(screen.getByTestId('monitorEnabledStub')).toBeInTheDocument();
+    expect(screen.getByText(/^Created$/i)).toBeInTheDocument();
     expect(screen.getByText(/Last modified/i)).toBeInTheDocument();
     expect(screen.getByText(/Frequency/i)).toBeInTheDocument();
   });
@@ -111,6 +113,7 @@ describe('MonitorDetailsPanel', () => {
     render(<MonitorDetailsPanel monitor={remoteMonitor} loading={false} configId="config-1" />);
 
     expect(screen.queryByTestId('monitorEnabledStub')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Created$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Last modified/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Frequency/i)).not.toBeInTheDocument();
   });
@@ -127,6 +130,7 @@ describe('MonitorDetailsPanel', () => {
     render(<MonitorDetailsPanel monitor={heartbeatMonitor} loading={false} configId="config-1" />);
 
     expect(screen.queryByTestId('monitorEnabledStub')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Created$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Last modified/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('tagsListStub')).toHaveTextContent('env:prod');
   });
@@ -195,5 +199,23 @@ describe('getScheduleFromTimespan', () => {
     expect(
       getScheduleFromTimespan({ gte: '2026-01-01T00:00:00Z', lt: '2026-01-02T00:00:00Z' })
     ).toEqual({ number: '1', unit: 'd' });
+  });
+
+  it('derives the same schedule when synthetic _source returns lte instead of lt', () => {
+    expect(
+      getScheduleFromTimespan({ gte: '2026-01-01T00:00:00.000Z', lte: '2026-01-01T00:00:29.999Z' })
+    ).toEqual({ number: '30', unit: 's' });
+    expect(
+      getScheduleFromTimespan({ gte: '2026-01-01T00:00:00.000Z', lte: '2026-01-01T00:03:59.999Z' })
+    ).toEqual({ number: '4', unit: 'm' });
+    expect(
+      getScheduleFromTimespan({ gte: '2026-01-01T00:00:00.000Z', lte: '2026-01-01T00:59:59.999Z' })
+    ).toEqual({ number: '1', unit: 'h' });
+  });
+
+  it('returns undefined for an empty span when lte is 1ms before gte', () => {
+    expect(
+      getScheduleFromTimespan({ gte: '2026-01-01T00:00:00.000Z', lte: '2025-12-31T23:59:59.999Z' })
+    ).toBeUndefined();
   });
 });

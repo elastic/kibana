@@ -15,6 +15,92 @@ import { GLOBAL_RESOURCE } from './constants';
  * Elasticsearch specific portion of the role definition.
  * See more details at https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api.html#security-role-apis.
  */
+const dataSourcePrivilegesEntrySchema = schema.object(
+  {
+    names: schema.arrayOf(
+      schema.string({
+        meta: {
+          description:
+            'A list of data source names or wildcard patterns to which the permissions in this entry apply.',
+        },
+        maxLength: 1000,
+      }),
+      { minSize: 1, maxSize: 1000 }
+    ),
+    privileges: schema.arrayOf(
+      schema.oneOf([
+        schema.literal('create'),
+        schema.literal('read_metadata'),
+        schema.literal('delete'),
+        schema.literal('read'),
+        schema.literal('manage'),
+      ]),
+      {
+        minSize: 1,
+        maxSize: 5,
+        meta: {
+          description:
+            'The data source privileges that role members have for the specified data sources.',
+        },
+      }
+    ),
+  },
+  {
+    meta: {
+      id: 'security_role_data_source_privileges',
+      description: 'The data source privileges entry.',
+    },
+  }
+);
+
+const applicationsSchema = (description: string) =>
+  schema.arrayOf(
+    schema.string({
+      meta: { description },
+      maxLength: 100,
+    }),
+    { maxSize: 1000 }
+  );
+
+const globalPrivilegeEntrySchema = schema.object(
+  {
+    application: schema.maybe(
+      schema.object({
+        manage: schema.maybe(
+          schema.object({
+            applications: applicationsSchema(
+              'A list of application names that the role can manage at the global privilege scope.'
+            ),
+          })
+        ),
+      })
+    ),
+    profile: schema.maybe(
+      schema.object({
+        write: schema.maybe(
+          schema.object({
+            applications: applicationsSchema(
+              'A list of application names whose user profile data the role can write at the global privilege scope.'
+            ),
+          })
+        ),
+      })
+    ),
+    // Elasticsearch manage-roles global privilege (`role.manage.indices[]`).
+    role: schema.maybe(
+      // allowing unknowns in order that the content is preserved without needing to know the full schema
+      schema.object({}, { meta: { description: 'Global role privileges.' }, unknowns: 'allow' })
+    ),
+    data_source: schema.maybe(schema.arrayOf(dataSourcePrivilegesEntrySchema, { maxSize: 1000 })),
+  },
+  {
+    meta: {
+      id: 'security_role_global_privileges',
+      description: 'Global privileges for the role.',
+    },
+  }
+);
+
 export const elasticsearchRoleSchema = schema.object(
   {
     /**
@@ -29,7 +115,7 @@ export const elasticsearchRoleSchema = schema.object(
               'Cluster privileges that define the cluster level actions that users can perform.',
           },
         }),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
     /**
@@ -47,7 +133,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
             clusters: schema.arrayOf(
               schema.string({
@@ -56,7 +142,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
           },
           {
@@ -66,7 +152,7 @@ export const elasticsearchRoleSchema = schema.object(
             },
           }
         ),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
 
@@ -88,7 +174,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -119,7 +205,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The index level privileges that the role members have for the data streams and indices.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -177,7 +263,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -191,7 +277,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -222,7 +308,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The index level privileges that role members have for the specified indices.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -273,9 +359,15 @@ export const elasticsearchRoleSchema = schema.object(
             description: 'A username that members of this role can impersonate.',
           },
         }),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
+
+    /**
+     * An optional object defining global privileges. A global privilege is a form of cluster privilege
+     * that is request-aware.
+     */
+    global: schema.maybe(globalPrivilegeEntrySchema),
   },
   {
     meta: {
@@ -322,8 +414,11 @@ const FEATURE_NAME_VALUE_REGEX = /^[a-zA-Z0-9_-]+$/;
  */
 export const getKibanaRoleSchema = (
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
-) =>
-  schema.arrayOf(
+) => {
+  // Resolving base privilege names rebuilds the full privilege map; do it once per schema.
+  const getMemoizedBasePrivilegeNames = _.once(getBasePrivilegeNames);
+
+  return schema.arrayOf(
     schema.object(
       {
         /**
@@ -348,7 +443,7 @@ export const getKibanaRoleSchema = (
                   description: 'A base privilege that grants applies to all spaces.',
                 },
                 validate(value) {
-                  const globalPrivileges = getBasePrivilegeNames().global;
+                  const globalPrivileges = getMemoizedBasePrivilegeNames().global;
                   if (!globalPrivileges.some((privilege) => privilege === value)) {
                     return `unknown global privilege "${value}", must be one of [${globalPrivileges}]`;
                   }
@@ -362,7 +457,7 @@ export const getKibanaRoleSchema = (
                   description: 'A base privilege that applies to specific spaces.',
                 },
                 validate(value) {
-                  const spacePrivileges = getBasePrivilegeNames().space;
+                  const spacePrivileges = getMemoizedBasePrivilegeNames().space;
                   if (!spacePrivileges.some((privilege) => privilege === value)) {
                     return `unknown space privilege "${value}", must be one of [${spacePrivileges}]`;
                   }
@@ -400,7 +495,7 @@ export const getKibanaRoleSchema = (
                   }
                 },
               }),
-              { maxSize: 100 }
+              { maxSize: 1000 }
             )
           )
         ),
@@ -430,18 +525,21 @@ export const getKibanaRoleSchema = (
       }
     ),
     {
+      maxSize: 1000,
       validate(value) {
-        for (const [indexA, valueA] of value.entries()) {
-          for (const valueB of value.slice(indexA + 1)) {
-            const spaceIntersection = _.intersection(valueA.spaces, valueB.spaces);
-            if (spaceIntersection.length !== 0) {
-              return `more than one privilege is applied to the following spaces: [${spaceIntersection}]`;
+        const claimed = new Set<string>();
+        for (const { spaces } of value) {
+          for (const space of spaces) {
+            if (claimed.has(space)) {
+              return `more than one privilege is applied to the following spaces: [${space}]`;
             }
+            claimed.add(space);
           }
         }
       },
     }
   );
+};
 
 export type ElasticsearchPrivilegesType = TypeOf<typeof elasticsearchRoleSchema>;
 export type KibanaPrivilegesType = TypeOf<ReturnType<typeof getKibanaRoleSchema>>;

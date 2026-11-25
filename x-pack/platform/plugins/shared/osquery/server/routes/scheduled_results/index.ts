@@ -16,8 +16,6 @@ export const initScheduledResultsRoutes = (
   router: IRouter<DataRequestHandlerContext>,
   context: OsqueryAppContext
 ) => {
-  if (!context.experimentalFeatures.queryHistoryRework) return;
-
   getScheduledActionResultsRoute(router, context);
   getScheduledQueryResultsRoute(router, context);
   if (context.experimentalFeatures.exportResults) {

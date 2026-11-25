@@ -8,6 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
 import { formatKibanaNamespace } from '../../../../../common/formatters';
+import { DEFAULT_HTTP_ADVANCED_FIELDS } from '../../../../../common/constants/monitor_defaults';
+import { ConfigKey } from '../../../../../common/runtime_types';
 import {
   apiTest,
   mergeSyntheticsApiHeaders,
@@ -62,11 +64,73 @@ apiTest.describe(
     });
 
     apiTest(
-      'sets namespace to Kibana space when not set to a custom namespace',
+      'hydrates default kerberos/ntlm when omitted from the request',
+      async ({ apiClient }) => {
+        const {
+          [ConfigKey.KERBEROS]: _k,
+          [ConfigKey.NTLM]: _n,
+          ...withoutAuth
+        } = httpMonitorFixture;
+        const newMonitor = {
+          ...withoutAuth,
+          locations: [privateLocation],
+          name: `omit-auth-${uuidv4()}`,
+        };
+
+        const res = await addMonitor(apiClient, editorHeaders, newMonitor);
+        const body = parseMonitorResponse(res.body as Record<string, unknown>);
+
+        expect(body).toMatchObject({
+          [ConfigKey.KERBEROS]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS],
+          [ConfigKey.NTLM]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM],
+        });
+        expect(body).toStrictEqual(
+          omitMonitorKeys({
+            ...newMonitor,
+            [ConfigKey.KERBEROS]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS],
+            [ConfigKey.NTLM]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM],
+          })
+        );
+      }
+    );
+
+    apiTest(
+      'falls back to the Kibana space namespace when namespace is omitted',
       async ({ apiClient, apiServices, kbnClient }) => {
         const SPACE_ID = `test-space-${uuidv4()}`;
         const SPACE_NAME = `test-space-name ${uuidv4()}`;
         const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
+
+        await kbnClient.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+        try {
+          const spacePrivateLocation =
+            await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(SPACE_ID);
+
+          const { namespace, ...monitorWithoutNamespace } = httpMonitorFixture;
+          const monitor = {
+            ...monitorWithoutNamespace,
+            locations: [spacePrivateLocation],
+            spaces: [],
+          };
+
+          const res = await apiClient.post(`s/${SPACE_ID}/api/synthetics/monitors`, {
+            headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+            body: monitor,
+            responseType: 'json',
+          });
+          expect(res).toHaveStatusCode(200);
+          expect((res.body as Record<string, unknown>).namespace).toStrictEqual(EXPECTED_NAMESPACE);
+        } finally {
+          await kbnClient.spaces.delete(SPACE_ID);
+        }
+      }
+    );
+
+    apiTest(
+      'honors an explicitly provided namespace, even "default"',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const SPACE_ID = `test-space-${uuidv4()}`;
+        const SPACE_NAME = `test-space-name ${uuidv4()}`;
 
         await kbnClient.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
         try {
@@ -86,7 +150,39 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(res).toHaveStatusCode(200);
-          expect((res.body as Record<string, unknown>).namespace).toStrictEqual(EXPECTED_NAMESPACE);
+          expect((res.body as Record<string, unknown>).namespace).toBe('default');
+        } finally {
+          await kbnClient.spaces.delete(SPACE_ID);
+        }
+      }
+    );
+
+    apiTest(
+      'rejects an invalid namespace with a 400, also when preserve_namespace is set',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const SPACE_ID = `test-space-${uuidv4()}`;
+
+        await kbnClient.spaces.create({ id: SPACE_ID, name: `test-space-name ${uuidv4()}` });
+        try {
+          const spacePrivateLocation =
+            await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(SPACE_ID);
+
+          // An empty namespace passes the request schema, so the handler's validation rejects it.
+          const res = await apiClient.post(
+            `s/${SPACE_ID}/api/synthetics/monitors?preserve_namespace=true`,
+            {
+              headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+              body: {
+                ...httpMonitorFixture,
+                namespace: '',
+                locations: [spacePrivateLocation],
+                spaces: [],
+              },
+              responseType: 'json',
+            }
+          );
+          expect(res).toHaveStatusCode(400);
+          expect((res.body as { message: string }).message).toContain('namespace is invalid');
         } finally {
           await kbnClient.spaces.delete(SPACE_ID);
         }

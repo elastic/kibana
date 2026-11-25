@@ -19,6 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
+import { githubEvents } from './events';
+import { githubSkillFile } from './skills/github_skill';
+import { toTimelinePage } from './timeline';
 import type {
   AddAssigneeInput,
   AddIssueCommentInput,
@@ -32,6 +35,7 @@ import type {
   GetFileContentsInput,
   GetIssueCommentsInput,
   GetIssueInput,
+  GetIssueTimelineInput,
   GetLatestReleaseInput,
   ListBranchesInput,
   ListCommitsInput,
@@ -64,6 +68,7 @@ import {
   GetFileContentsInputSchema,
   GetIssueCommentsInputSchema,
   GetIssueInputSchema,
+  GetIssueTimelineInputSchema,
   GetLatestReleaseInputSchema,
   GetMeInputSchema,
   ListBranchesInputSchema,
@@ -94,7 +99,7 @@ export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
     displayName: 'GitHub',
-    description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
+    description: i18n.translate('connectorSpecs.github.metadata.description', {
       defaultMessage:
         'Search, browse, and manage GitHub repositories: create and update issues and pull requests, add comments, labels, and assignees, create branches, trigger workflows, and merge pull requests.',
     }),
@@ -107,6 +112,7 @@ export const GithubConnector: ConnectorSpec = {
     types: [
       {
         type: 'oauth_authorization_code',
+        supportsSandbox: true,
         defaults: {
           authorizationUrl: 'https://github.com/login/oauth/authorize',
           tokenUrl: 'https://github.com/login/oauth/access_token',
@@ -122,9 +128,10 @@ export const GithubConnector: ConnectorSpec = {
       },
       {
         type: 'bearer',
+        supportsSandbox: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.github.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.github.auth.bearer.label', {
             defaultMessage: 'Personal Access Token (PAT)',
           }),
         },
@@ -158,9 +165,18 @@ export const GithubConnector: ConnectorSpec = {
     fields: ['serverUrl'],
   },
 
+  sandbox: {
+    // github.com serves git over HTTPS, so `git clone` in the sandbox can authenticate with the token.
+    hosts: ['api.github.com', 'api.githubcopilot.com', 'github.com'],
+    hostsFromConfig: ['serverUrl'],
+  },
+
+  events: githubEvents,
+
   actions: {
     getMe: {
       isTool: true,
+      scope: 'read',
       description: 'Get the authenticated GitHub user profile.',
       input: GetMeInputSchema,
       handler: async (ctx) => {
@@ -170,6 +186,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchCode: {
       isTool: true,
+      scope: 'read',
       description: 'Search for code across GitHub repositories.',
       input: SearchCodeInputSchema,
       handler: async (ctx, input: SearchCodeInput) => {
@@ -183,6 +200,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchRepositories: {
       isTool: true,
+      scope: 'read',
       description: 'Search for GitHub repositories.',
       input: SearchRepositoriesInputSchema,
       handler: async (ctx, input: SearchRepositoriesInput) => {
@@ -196,6 +214,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchIssues: {
       isTool: true,
+      scope: 'read',
       description: 'Search for issues across GitHub repositories.',
       input: SearchIssuesInputSchema,
       handler: async (ctx, input: SearchIssuesInput) => {
@@ -211,6 +230,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchPullRequests: {
       isTool: true,
+      scope: 'read',
       description: 'Search for pull requests across GitHub repositories.',
       input: SearchPullRequestsInputSchema,
       handler: async (ctx, input: SearchPullRequestsInput) => {
@@ -226,6 +246,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchUsers: {
       isTool: true,
+      scope: 'read',
       description: 'Search for GitHub users.',
       input: SearchUsersInputSchema,
       handler: async (ctx, input: SearchUsersInput) => {
@@ -239,6 +260,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listIssues: {
       isTool: true,
+      scope: 'read',
       description: 'List issues in a GitHub repository. Uses cursor-based pagination.',
       input: ListIssuesInputSchema,
       handler: async (ctx, input: ListIssuesInput) => {
@@ -254,6 +276,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listPullRequests: {
       isTool: true,
+      scope: 'read',
       description: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
       input: ListPullRequestsInputSchema,
       handler: async (ctx, input: ListPullRequestsInput) => {
@@ -269,6 +292,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listCommits: {
       isTool: true,
+      scope: 'read',
       description: 'List commits in a GitHub repository. Uses cursor-based pagination.',
       input: ListCommitsInputSchema,
       handler: async (ctx, input: ListCommitsInput) => {
@@ -284,6 +308,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listBranches: {
       isTool: true,
+      scope: 'read',
       description: 'List branches in a GitHub repository. Uses cursor-based pagination.',
       input: ListBranchesInputSchema,
       handler: async (ctx, input: ListBranchesInput) => {
@@ -298,6 +323,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listReleases: {
       isTool: true,
+      scope: 'read',
       description: 'List releases in a GitHub repository. Uses cursor-based pagination.',
       input: ListReleasesInputSchema,
       handler: async (ctx, input: ListReleasesInput) => {
@@ -312,6 +338,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listTags: {
       isTool: true,
+      scope: 'read',
       description: 'List tags in a GitHub repository. Uses cursor-based pagination.',
       input: ListTagsInputSchema,
       handler: async (ctx, input: ListTagsInput) => {
@@ -326,6 +353,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getCommit: {
       isTool: true,
+      scope: 'read',
       description: 'Get details of a specific commit.',
       input: GetCommitInputSchema,
       handler: async (ctx, input: GetCommitInput) => {
@@ -339,6 +367,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getLatestRelease: {
       isTool: true,
+      scope: 'read',
       description: 'Get the latest release of a GitHub repository.',
       input: GetLatestReleaseInputSchema,
       handler: async (ctx, input: GetLatestReleaseInput) => {
@@ -348,6 +377,7 @@ export const GithubConnector: ConnectorSpec = {
 
     pullRequestRead: {
       isTool: true,
+      scope: 'read',
       description: 'Read the full details of a specific pull request.',
       input: PullRequestReadInputSchema,
       handler: async (ctx, input: PullRequestReadInput) => {
@@ -362,6 +392,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getFileContents: {
       isTool: true,
+      scope: 'read',
       description: 'Get the contents of a file or directory from a GitHub repository.',
       input: GetFileContentsInputSchema,
       handler: async (ctx, input: GetFileContentsInput) => {
@@ -376,6 +407,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssue: {
       isTool: true,
+      scope: 'read',
       description: 'Get details of a specific issue in a GitHub repository.',
       input: GetIssueInputSchema,
       handler: async (ctx, input: GetIssueInput) => {
@@ -390,6 +422,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssueComments: {
       isTool: true,
+      scope: 'read',
       description: 'Get comments for a specific issue in a GitHub repository.',
       input: GetIssueCommentsInputSchema,
       handler: async (ctx, input: GetIssueCommentsInput) => {
@@ -402,8 +435,34 @@ export const GithubConnector: ConnectorSpec = {
       },
     },
 
+    getIssueTimeline: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Get the timeline of an issue or pull request with exact timestamps: label added or removed, comments, cross-references from other issues or repositories, close and reopen with the reason, review requests and reviews. Use it to answer "when" and "who" questions about the history of an issue. Pass excludeEventTypes such as ["subscribed","mentioned"] to drop the noise before paging, and eventTypes to keep only some types. Returns one page of up to 100 events, oldest first, so the most recent events are on the last page: the result has lastPage, which you can pass as page to jump straight to them. Use page to read more while hasMore is true. When eventTypes is set, an empty page does not mean you are done: keep paging while hasMore is true. The connected and disconnected events show when and who, not which pull request or issue was linked. The line-commented and commit-commented events group several comments: createdAt, actor, id and url are those of the first comment, and commentCount says how many there are.',
+      input: GetIssueTimelineInputSchema,
+      handler: async (ctx, input: GetIssueTimelineInput) => {
+        const { owner, repo, issueNumber, eventTypes, excludeEventTypes, page, perPage } = input;
+        const response = await ctx.client.get<object[]>(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/timeline`,
+          {
+            params: {
+              page,
+              per_page: perPage,
+              ...(excludeEventTypes?.length ? { exclude: excludeEventTypes.join(',') } : {}),
+            },
+            headers: GITHUB_API_VERSION_HEADER,
+          }
+        );
+        return toTimelinePage(response, { page, eventTypes });
+      },
+    },
+
     createIssue: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new issue in a GitHub repository. Returns the created issue including its number, URL, and state.',
       input: CreateIssueInputSchema,
@@ -427,6 +486,7 @@ export const GithubConnector: ConnectorSpec = {
 
     addIssueComment: {
       isTool: true,
+      scope: 'write',
       description:
         'Add a comment to an existing issue or pull request. Returns the created comment including its ID and URL.',
       input: AddIssueCommentInputSchema,
@@ -445,6 +505,7 @@ export const GithubConnector: ConnectorSpec = {
 
     updateIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing issue (title, body, state, assignees, labels, or milestone). At least one field must be provided. To close an issue set state to "closed".',
       input: UpdateIssueInputSchema,
@@ -471,6 +532,7 @@ export const GithubConnector: ConnectorSpec = {
 
     createPullRequest: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new pull request. The head branch must already exist and have commits not in the base branch. Returns the PR including its number and URL.',
       input: CreatePullRequestInputSchema,
@@ -492,6 +554,7 @@ export const GithubConnector: ConnectorSpec = {
 
     mergePullRequest: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Merge an open pull request. Returns the merge commit SHA and a confirmation message. Fails if the PR is not mergeable.',
       input: MergePullRequestInputSchema,
@@ -513,6 +576,7 @@ export const GithubConnector: ConnectorSpec = {
 
     addLabels: {
       isTool: true,
+      scope: 'write',
       description:
         'Add one or more labels to an issue or pull request. Labels are added without removing existing ones. Returns the full updated label list.',
       input: AddLabelsInputSchema,
@@ -531,6 +595,7 @@ export const GithubConnector: ConnectorSpec = {
 
     addAssignee: {
       isTool: true,
+      scope: 'write',
       description:
         'Add one or more assignees to an issue or pull request. Assignees are added without removing existing ones.',
       input: AddAssigneeInputSchema,
@@ -549,6 +614,7 @@ export const GithubConnector: ConnectorSpec = {
 
     createBranch: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new branch (git ref) in a repository. The ref must start with "refs/heads/". Use getCommit or listCommits to find a valid SHA.',
       input: CreateBranchInputSchema,
@@ -567,6 +633,7 @@ export const GithubConnector: ConnectorSpec = {
 
     createOrUpdateFile: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Create or update a single file in a repository. The content must be Base64-encoded. To update an existing file, provide the current file blob SHA (get it via getFileContents). Returns the commit and file metadata.',
       input: CreateOrUpdateFileInputSchema,
@@ -588,6 +655,7 @@ export const GithubConnector: ConnectorSpec = {
 
     updatePullRequest: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an open pull request (title, body, state, base branch, or maintainer permissions). At least one field must be provided. To close a PR set state to "closed".',
       input: UpdatePullRequestInputSchema,
@@ -613,6 +681,7 @@ export const GithubConnector: ConnectorSpec = {
 
     requestReviewers: {
       isTool: true,
+      scope: 'write',
       description:
         'Request one or more reviewers (individuals or teams) on a pull request. Reviewers are added without removing existing requests. Returns the updated PR. Note: GitHub rejects requests where a reviewer is the same user as the PR author with a 422 error — do not request the authenticated user as a reviewer on their own PR.',
       input: RequestReviewersInputSchema,
@@ -634,6 +703,7 @@ export const GithubConnector: ConnectorSpec = {
 
     triggerWorkflow: {
       isTool: true,
+      scope: 'write',
       description:
         'Trigger a workflow_dispatch event for a GitHub Actions workflow. The workflow must have a workflow_dispatch trigger defined in its YAML. Returns nothing on success (HTTP 204).',
       input: TriggerWorkflowInputSchema,
@@ -654,6 +724,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
       input: ListToolsInputSchema,
@@ -691,13 +762,17 @@ export const GithubConnector: ConnectorSpec = {
     },
   },
 
+  skillFiles: [githubSkillFile],
+
   skill: [
     'Action strategy guide:',
     '- Parameter names are camelCase. Use the exact names shown (e.g. issueNumber, pullNumber, workflowId) — never snake_case equivalents like issue_number or pull_number.',
     '- Start with getMe to identify the authenticated user.',
     '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
+    '- If the `/connector-github` skill is available, prefer it for searching and listing issues and pull requests: it returns compact results instead of the full (very large) API payload.',
     '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
     '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
+    '- For history (who or when a label was added, links from other repos, review requests): getIssueTimeline. Pass excludeEventTypes ["subscribed","mentioned"] by default: they are most of a timeline and rarely answer a history question. Events are oldest first: for the latest change, call once and then read the page given in lastPage. Keep paging while hasMore is true, even after an empty page.',
     '- Write actions (require write permission on the repo):',
     '  - Issues: createIssue, updateIssue, addIssueComment, addLabels, addAssignee.',
     '  - Pull requests: createPullRequest, updatePullRequest, mergePullRequest, requestReviewers.',

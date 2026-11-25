@@ -8,7 +8,7 @@
  */
 
 import { execSync } from 'child_process';
-import { CiStatsClient } from './client';
+import { CiStatsClient } from './client.ts';
 
 const ciStats = new CiStatsClient();
 

@@ -82,6 +82,7 @@ export enum SecurityPageName {
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
   siemMigrationsDashboards = 'siem_migrations-dashboards',
+  siemMigrationsWorkflows = 'siem_migrations-workflows',
   siemMigrationsManage = 'siem_migrations-manage',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -92,6 +93,7 @@ export enum SecurityPageName {
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   trustedDevices = 'trusted_devices',
+  customYaraSignatures = 'custom_yara_signatures',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',
@@ -124,6 +126,7 @@ export enum SecurityPageName {
    * external links
    */
   externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkAlertZero = 'external_link-alertzero',
   externalLinkDiscover = 'external_link-discover',
   externalLinkWorkflows = 'external_link-workflows',
 
@@ -133,22 +136,20 @@ export enum SecurityPageName {
   onboarding = 'onboarding',
 
   /**
-   * PND pages.
+   * AlertZero pages.
    *
-   * These live on the `pnd` plugin rather than `securitySolutionUI`, so their link ids are built with
-   * `pndLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
-   * name is the same concept, and the app prefix is what distinguishes the two links.
+   * These live on the `alertzero` plugin rather than `securitySolutionUI`, so their link ids are built with
+   * `alertZeroLink()` instead of `securityLink()`.
    */
-  pndChats = 'chats',
-  pndRecords = 'records',
-  pndThreatHunt = 'threat_hunt',
-  pndStreams = 'streams',
-  pndWatches = 'watches',
-  pndWatchesWorkers = 'watches_workers',
-  pndWatchesSkills = 'watches_skills',
-  pndWatchFloor = 'watch_floor',
-  pndWatchOfficer = 'watch_officer',
-  pndWatchDark = 'watch_dark',
-  pndWatchDeep = 'watch_deep',
-  pndWatchDetection = 'watch_detection',
+  alertZeroHome = 'home',
+  alertZeroEscalations = 'escalations',
+  alertZeroWatches = 'watches',
+  alertZeroWatchesWorkers = 'watches_workers',
+  alertZeroWatchesSkills = 'watches_skills',
+  alertZeroWatchFloor = 'watch_floor',
+  alertZeroWatchOfficer = 'watch_officer',
+  alertZeroWatchHunt = 'watch_hunt',
+  alertZeroWatchDeep = 'watch_deep',
+  alertZeroWatchDetection = 'watch_detection',
+  alertZeroWatchForensics = 'watch_forensics',
 }

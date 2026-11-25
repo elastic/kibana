@@ -121,7 +121,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ params }, {}, mockDeps).toPromise();
 
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.query).toEqual(params.query);
@@ -140,7 +140,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
@@ -148,13 +148,12 @@ describe('ES search strategy', () => {
         expect(request).toHaveProperty('return_intermediate_results', false);
       });
 
-      it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
+      it('allows overriding keep_alive, and wait_for_completion_timeout via pollLength', async () => {
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = {
           index: 'logstash-*',
           query: {},
-          wait_for_completion_timeout: '10s',
           keep_alive: '5m',
         };
         const esSearch = await enhancedEsSearchStrategyProvider(
@@ -163,9 +162,9 @@ describe('ES search strategy', () => {
           mockLogger
         );
 
-        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+        await esSearch.search({ id: 'foo', params }, { pollLength: '10s' }, mockDeps).toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout', '10s');
@@ -187,7 +186,7 @@ describe('ES search strategy', () => {
           .search({ id: 'foo', params }, { returnIntermediateResults: true }, mockDeps)
           .toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('return_intermediate_results', true);
@@ -237,7 +236,7 @@ describe('ES search strategy', () => {
           esSearch.search({ id: 'foo', params }, { transport: { maxRetries: 1 } }, mockDeps)
         );
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         const transportOptions = mockGetCaller.mock.calls[0][1];
 
@@ -271,7 +270,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ params }, {}, mockDeps).toPromise();
 
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive');
@@ -298,7 +297,7 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockRollupSearchCaller).toBeCalled();
+        expect(mockRollupSearchCaller).toHaveBeenCalled();
         expect(mockRollupSearchCaller).toHaveBeenCalledWith(
           {
             index: 'foo-程',
@@ -335,7 +334,7 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockApiCaller).toBeCalledTimes(0);
+        expect(mockApiCaller).toHaveBeenCalledTimes(0);
       });
 
       it('should delete when aborted', async () => {
@@ -369,9 +368,9 @@ describe('ES search strategy', () => {
         } catch (e) {
           err = e;
         }
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockDeleteCaller).toBeCalled();
+        expect(mockDeleteCaller).toHaveBeenCalled();
       });
 
       it('should not throw when encountering an error deleting', async () => {
@@ -414,9 +413,9 @@ describe('ES search strategy', () => {
         } catch (e) {
           err = e;
         }
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockDeleteCaller).toBeCalled();
+        expect(mockDeleteCaller).toHaveBeenCalled();
       });
     });
 
@@ -433,7 +432,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
 
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.query).toEqual(params.query);
@@ -453,7 +452,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ params }, { sessionId: '1', isStored: true }, mockDeps).toPromise();
 
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.query).toEqual(params.query);
@@ -473,7 +472,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
@@ -495,7 +494,7 @@ describe('ES search strategy', () => {
           .search({ id: 'foo', params }, { sessionId: '1', isStored: true }, mockDeps)
           .toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
@@ -521,7 +520,7 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
@@ -566,9 +565,9 @@ describe('ES search strategy', () => {
         } catch (e) {
           err = e;
         }
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockDeleteCaller).not.toBeCalled();
+        expect(mockDeleteCaller).not.toHaveBeenCalled();
       });
     });
 
@@ -596,7 +595,7 @@ describe('ES search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockSubmitCaller).toBeCalled();
+      expect(mockSubmitCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
@@ -621,7 +620,7 @@ describe('ES search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockSubmitCaller).toBeCalled();
+      expect(mockSubmitCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
@@ -642,7 +641,7 @@ describe('ES search strategy', () => {
 
       await esSearch.cancel!(id, {}, mockDeps);
 
-      expect(mockDeleteCaller).toBeCalled();
+      expect(mockDeleteCaller).toHaveBeenCalled();
       const request = mockDeleteCaller.mock.calls[0][0];
       expect(request).toEqual({ id });
     });
@@ -671,7 +670,7 @@ describe('ES search strategy', () => {
         err = e;
       }
 
-      expect(mockDeleteCaller).toBeCalled();
+      expect(mockDeleteCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(400);
       expect(err?.message).toBe(errResponse.message);
@@ -693,7 +692,7 @@ describe('ES search strategy', () => {
 
       await esSearch.extend!(id, keepAlive, {}, mockDeps);
 
-      expect(mockGetCaller).toBeCalled();
+      expect(mockGetCaller).toHaveBeenCalled();
       const request = mockGetCaller.mock.calls[0][0];
       expect(request).toEqual({ id, keep_alive: keepAlive });
     });
@@ -717,7 +716,7 @@ describe('ES search strategy', () => {
         err = e;
       }
 
-      expect(mockGetCaller).toBeCalled();
+      expect(mockGetCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);

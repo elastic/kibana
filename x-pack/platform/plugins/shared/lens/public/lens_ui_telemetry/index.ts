@@ -10,5 +10,7 @@ export {
   getUsageCollectionStart,
   trackUiCounterEvents,
   trackSaveUiCounterEvents,
+  trackCreateUiCounterEvents,
   getExecutionContextEvents,
 } from './track_counter_events';
+export type { LensTelemetrySource } from './track_counter_events';

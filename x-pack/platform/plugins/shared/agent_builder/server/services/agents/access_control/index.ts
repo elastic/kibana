@@ -8,4 +8,3 @@
 export * from './authorization';
 export * from './document_access';
 export * from './query';
-export * from './update_validation';

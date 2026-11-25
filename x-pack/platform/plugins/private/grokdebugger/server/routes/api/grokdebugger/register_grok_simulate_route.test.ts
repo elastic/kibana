@@ -30,7 +30,7 @@ describe('grok simulate route', () => {
       ['nested object', { FOO: { nested: true } }],
       ['array', { FOO: ['a'] }],
     ])('SHOULD reject customPatterns with a %s value', (_label, customPatterns) => {
-      expect(() => requestBodySchema.validate({ ...validBody, customPatterns })).toThrowError(
+      expect(() => requestBodySchema.validate({ ...validBody, customPatterns })).toThrow(
         /expected value of type \[string\]/
       );
     });

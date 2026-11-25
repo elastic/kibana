@@ -12,7 +12,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
 ) => {
   expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
     caseId: 'mock-id-1',
     attachments: [
       {
@@ -30,7 +30,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
     caseId: 'mock-id-2',
     attachments: [
       {
@@ -48,7 +48,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
     caseId: 'mock-id-3',
     attachments: [
       {
@@ -72,7 +72,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
 ) => {
   expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
     caseId: 'mock-id-1',
     attachments: [
       {
@@ -90,7 +90,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
     caseId: 'mock-id-2',
     attachments: [
       {
@@ -108,7 +108,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
     caseId: 'mock-id-4',
     attachments: [
       {
@@ -132,7 +132,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
 ) => {
   expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
     caseId: 'mock-id-1',
     attachments: [
       { data: { content: 'comment-1' }, owner: 'securitySolution', type: 'comment' },
@@ -148,7 +148,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
     caseId: 'mock-id-2',
     attachments: [
       { data: { content: 'comment-2' }, owner: 'securitySolution', type: 'comment' },
@@ -165,7 +165,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
     caseId: 'mock-id-3',
     attachments: [
       {

@@ -11,6 +11,12 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 import { examplesServerArgs } from '../shared';
 
+/**
+ * Scout server config for example-plugin tests on local stateful classic.
+ *
+ * Usage:
+ *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet examples
+ */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {

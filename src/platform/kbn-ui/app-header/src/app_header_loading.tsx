@@ -21,9 +21,9 @@ import { AppHeaderSkeletonTitle } from './app_header_skeleton';
  */
 export interface AppHeaderLoadingMenu {
   /**
-   * App menu button placeholders on the left (overflow / secondary actions).
-   * Defaults to 1. Clamped to `APP_MENU_ITEM_LIMIT` (3) from `@kbn/ui-app-menu` —
-   * the max visible left-side slots. The primary action does not count toward this.
+   * App menu button placeholders (secondary actions before the primary, overflow after it).
+   * Defaults to 1. Clamped to `APP_MENU_ITEM_LIMIT` (3) from `@kbn/ui-app-menu`.
+   * The primary action does not count toward this.
    */
   buttonCount?: number;
   /** Primary-action app menu button. Defaults to `true`. */
@@ -44,7 +44,14 @@ export const AppHeaderLoadingView = React.memo<AppHeaderLoadingViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea back={back} size={titleSize} placeholder={<AppHeaderSkeletonTitle />} />}
+        title={
+          <TitleArea
+            back={back}
+            size={titleSize}
+            compact={spacing === 'compact'}
+            placeholder={<AppHeaderSkeletonTitle />}
+          />
+        }
         trailing={<AppMenuLoading buttonCount={menu?.buttonCount} hasPrimary={menu?.hasPrimary} />}
         sticky={sticky}
         spacing={spacing}

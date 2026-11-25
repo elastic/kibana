@@ -1,0 +1,104 @@
+{
+  "sha1": "801eca6965304e26e7b60c0b1dcf4d20a32d873a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "2ba3835daa4e961-be714b671949562",
+      "title": "Data Usage privileges - admin renders for the admin role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/ui/tests/privileges_admin.spec.ts",
+        "line": 22,
+        "column": 60
+      }
+    },
+    {
+      "id": "14326b6d5880903-990a3abfc47160b",
+      "title": "Data Usage privileges - custom role with monitor renders with the monitor cluster privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/ui/tests/privileges_custom_monitor.spec.ts",
+        "line": 11,
+        "column": 14
+      }
+    },
+    {
+      "id": "b89c1a950c8e649-7b2b7d4b4a563bd",
+      "title": "Data Usage privileges - custom role without monitor does not render without the monitor cluster privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/ui/tests/privileges_custom_no_monitor.spec.ts",
+        "line": 11,
+        "column": 14
+      }
+    },
+    {
+      "id": "3f27aa8b87fdf26-4eb7d202bafa5e7",
+      "title": "Data Usage privileges - developer renders for the developer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/ui/tests/privileges_developer.spec.ts",
+        "line": 13,
+        "column": 14
+      }
+    },
+    {
+      "id": "0ad4ce0d8eb5e7c-52356ba73dc960f",
+      "title": "Data Usage privileges - editor does not render for the editor role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/ui/tests/privileges_editor.spec.ts",
+        "line": 17,
+        "column": 10
+      }
+    },
+    {
+      "id": "11c86343593182d-fc3de1ed7d9a101",
+      "title": "Data Usage privileges - viewer does not render for the viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout/ui/tests/privileges_viewer.spec.ts",
+        "line": 22,
+        "column": 69
+      }
+    }
+  ]
+}

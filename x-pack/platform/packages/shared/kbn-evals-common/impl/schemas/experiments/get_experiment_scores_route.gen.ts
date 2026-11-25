@@ -23,15 +23,19 @@ export const GetEvaluationExperimentScoresRequestQuery = lazySchema(() =>
     /**
      * Filter by suite ID
      */
-    suite_id: z.string().max(256).optional(),
+    suite_id: z.string().max(256).optional().describe('Filter by suite ID'),
     /**
      * Filter by task model ID
      */
-    model_id: z.string().max(256).optional(),
+    model_id: z.string().max(256).optional().describe('Filter by task model ID'),
     /**
      * When provided, fetches scores for all experiments in this execution
      */
-    execution_id: z.string().max(1024).optional(),
+    execution_id: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe('When provided, fetches scores for all experiments in this execution'),
   })
 );
 export type GetEvaluationExperimentScoresRequestQuery = z.infer<

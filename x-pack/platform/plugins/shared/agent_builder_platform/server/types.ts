@@ -17,11 +17,15 @@ import type {
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
   actions: ActionsPluginSetup;
+  files: FilesSetup;
+  share: SharePluginSetup;
   cloud?: CloudSetup;
 }
 
@@ -32,6 +36,7 @@ export interface PluginStartDependencies {
   cloud?: CloudStart;
   llmTasks?: LlmTasksPluginStart;
   spaces?: SpacesPluginStart;
+  files: FilesStart;
 }
 
 export interface AgentBuilderPlatformTracingFeaturesStart {

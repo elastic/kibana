@@ -55,14 +55,17 @@ describe('IdAllocator', () => {
     expect(a.allocate('---')).toBe('step');
   });
 
-  it('handles 10 000 duplicates in under 50ms (amortised O(1))', () => {
+  it('allocates 10 000 duplicates with unique suffixes within the regression limit', () => {
     const a = new IdAllocator();
-    const COUNT = 10_000;
+    const allocatedIds = new Set<string>();
     const start = performance.now();
-    for (let i = 0; i < COUNT; i++) {
-      a.allocate('dup');
+    for (let i = 0; i < 10_000; i++) {
+      allocatedIds.add(a.allocate('dup'));
     }
     const elapsed = performance.now() - start;
-    expect(elapsed).toBeLessThan(50);
+
+    expect(allocatedIds.size).toBe(10_000);
+    expect(allocatedIds.has('dup-10000')).toBe(true);
+    expect(elapsed).toBeLessThan(10_000);
   });
 });

@@ -190,7 +190,7 @@ describe('SubActionConnector', () => {
       const res = await service.testUrl({ url: 'https://example.com' }, connectorUsageCollector);
 
       expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toBeCalledWith({
+      expect(requestMock).toHaveBeenCalledWith({
         axios: axiosInstanceMock,
         configurationUtilities: mockedActionsConfig,
         logger,
@@ -204,7 +204,7 @@ describe('SubActionConnector', () => {
         connectorUsageCollector,
       });
 
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         'Request to external service. Connector Id: test-id. Connector type: .test Method: get. URL: https://example.com'
       );
 
@@ -320,11 +320,31 @@ describe('SubActionConnector', () => {
       );
     });
 
+    it('keeps the network error message set by the request layer', async () => {
+      const cause = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+      const networkError = new Error(
+        'The connection was interrupted before a response was received (read ECONNRESET)'
+      ) as AxiosError;
+      networkError.isAxiosError = true;
+      networkError.code = 'ECONNRESET';
+      networkError.cause = cause;
+
+      requestMock.mockImplementation(() => {
+        throw networkError;
+      });
+
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow(
+        'The connection was interrupted before a response was received (read ECONNRESET)'
+      );
+    });
+
     it('converts auth axios property to a basic auth header if provided', async () => {
       await service.testAuth(undefined, connectorUsageCollector);
 
       expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toBeCalledWith({
+      expect(requestMock).toHaveBeenCalledWith({
         axios: axiosInstanceMock,
         configurationUtilities: mockedActionsConfig,
         logger,
@@ -347,7 +367,7 @@ describe('SubActionConnector', () => {
       );
 
       expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toBeCalledWith({
+      expect(requestMock).toHaveBeenCalledWith({
         axios: axiosInstanceMock,
         configurationUtilities: mockedActionsConfig,
         logger,

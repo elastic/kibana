@@ -6,9 +6,20 @@
  */
 
 import { monitorOverviewReducer } from '.';
-import { setOverviewPageStateAction } from './actions';
+import { setOverviewPageStateAction, setOverviewViewAction, trendStatsBatch } from './actions';
 
 describe('monitorOverviewReducer', () => {
+  describe('trendStatsBatch.fail', () => {
+    it('returns canceled trends to a retryable state', () => {
+      const requests = [{ configId: 'monitor-1', locationIds: ['us-east'], schedule: '3' }];
+      const loading = monitorOverviewReducer(undefined, trendStatsBatch.get(requests));
+      const canceled = monitorOverviewReducer(loading, trendStatsBatch.fail(requests));
+
+      expect(canceled.trendStats['monitor-1']).toBeNull();
+      expect(canceled.trendStats['monitor-1us-east']).toBeNull();
+    });
+  });
+
   describe('setOverviewPageStateAction (no-op suppression)', () => {
     // Why this exists:
     //
@@ -152,6 +163,38 @@ describe('monitorOverviewReducer', () => {
 
       expect(next.pageState).not.toBe(initial.pageState);
       expect(next.pageState.useLogicalAndFor).toEqual(['tags']);
+    });
+  });
+
+  describe('setOverviewViewAction', () => {
+    it("produces a new pageState reference on a real view switch and applies that view's own default perPage", () => {
+      const initial = monitorOverviewReducer(undefined, { type: '@@INIT' });
+      expect(initial.view).toBe('cardView');
+      expect(initial.pageState.page).toBe(1);
+      expect(initial.pageState.perPage).toBe(20);
+
+      const next = monitorOverviewReducer(initial, setOverviewViewAction('compactView'));
+
+      expect(next.view).toBe('compactView');
+      expect(next.pageState).not.toBe(initial.pageState);
+      expect(next.pageState.page).toBe(1);
+      // Compact view's own default (10), not carried over from card view (20).
+      expect(next.pageState.perPage).toBe(10);
+    });
+
+    it('switching back to card view restores its own default perPage', () => {
+      const initial = monitorOverviewReducer(undefined, { type: '@@INIT' });
+      const compact = monitorOverviewReducer(initial, setOverviewViewAction('compactView'));
+      const back = monitorOverviewReducer(compact, setOverviewViewAction('cardView'));
+
+      expect(back.pageState.perPage).toBe(20);
+    });
+
+    it('preserves pageState identity when the view is unchanged', () => {
+      const initial = monitorOverviewReducer(undefined, { type: '@@INIT' });
+      const next = monitorOverviewReducer(initial, setOverviewViewAction(initial.view));
+
+      expect(next.pageState).toBe(initial.pageState);
     });
   });
 });

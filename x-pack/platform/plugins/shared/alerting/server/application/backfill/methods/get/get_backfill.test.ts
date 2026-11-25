@@ -29,8 +29,6 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
-
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -113,6 +111,7 @@ describe('getBackfill()', () => {
       spaceId: 'default',
       namespace: 'default',
       getUserName: jest.fn(),
+      getProfileUid: jest.fn(),
       createAPIKey: jest.fn(),
       cloneAPIKey: jest.fn(),
       logger,
@@ -132,7 +131,6 @@ describe('getBackfill()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
-      featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAdHocRunSO);

@@ -11,6 +11,7 @@ import type { DetailedPeerCertificate } from 'tls';
 import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
+import type { AuthenticationOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
@@ -109,22 +110,30 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
 
   /**
    * Performs PKI request authentication.
+   * During session renewal, ignore the expired token that Core put in the Authorization header.
+   * Use the supplied session and contact Elasticsearch, even on minimal-authentication routes.
+   * The request headers stay unchanged.
    * @param request Request instance.
    * @param [session] Optional session object associated with the provider.
+   * @param [options] Explicit session reauthentication controls.
    */
-  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    session?: SessionValue<ProviderState> | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
 
-    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+    if (!options?.reauthenticate && HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
     if (session?.state) {
-      authenticationResult = await this.authenticateViaState(request, session);
+      authenticationResult = await this.authenticateViaState(request, session, options);
 
       // If access token expired or doesn't match to the certificate fingerprint we should try to get
       // a new one in exchange to peer certificate chain. Since we know that we had a valid session
@@ -195,15 +204,28 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
    * @param session Session value previously stored by the provider.
+   * @param [options] Reauthentication options forwarded to full backend credential validation.
    */
-  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
+  private async authenticateViaState(
+    request: KibanaRequest,
+    session: SessionValue<ProviderState>,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug('Trying to authenticate via state.');
 
     // If peer is authorized, but its certificate isn't available, that likely means the connection
     // with the peer is closed already. We shouldn't invalidate peer's access token in this case
     // since we cannot guarantee that there is a mismatch in access token and peer certificate.
+    //
+    // Under HTTP/2, when a stream is destroyed mid-request (e.g. RST_STREAM from an AbortController
+    // cancellation), Node's Http2ServerRequest.socket returns a Proxy over the destroyed stream.
+    // After stream destruction, stream.session is cleared and the Proxy's getPrototypeOf trap
+    // falls back to the Http2Stream prototype, causing `instanceof TLSSocket` to return false in
+    // KibanaSocket. This makes `socket.authorized` return `undefined` (not `true` or `false`).
+    // We must treat `undefined` the same as `true` here — both indicate the socket state is
+    // indeterminate or was previously authorized. Only `false` means "definitively unauthorized."
     const peerCertificate = request.socket.getPeerCertificate(true);
-    if (peerCertificate === null && request.socket.authorized) {
+    if (peerCertificate === null && request.socket.authorized !== false) {
       this.logger.debug(
         'Cannot validate state access token with the peer certificate since it is not available.'
       );
@@ -235,7 +257,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
       authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
     };
     try {
-      const user = await this.getUser(request, authHeaders, session);
+      const user = await this.getUser(request, authHeaders, session, options);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
@@ -264,8 +286,14 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
     );
 
     if (!request.socket.authorized) {
+      // `authorized === false` means the peer cert was presented but rejected (e.g. untrusted CA).
+      // `authorized === undefined` means socket state is unknowable, typically because the HTTP/2
+      // stream was destroyed (RST_STREAM) before or during the auth lifecycle — see pki.ts comment
+      // in authenticateViaState for details.
       this.logger.debug(
-        `Authentication is not possible since peer certificate was not authorized: ${request.socket.authorizationError}.`
+        request.socket.authorized === false
+          ? `Authentication is not possible since peer certificate was not authorized: ${request.socket.authorizationError}.`
+          : 'Authentication is not possible since socket authorization state is unknown (the HTTP/2 stream may have been cancelled before authentication completed).'
       );
       return AuthenticationResult.notHandled();
     }

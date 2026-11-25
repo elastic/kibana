@@ -18,6 +18,7 @@ export default createTestConfig({
   },
   kbnServerArgs: findTestPluginPaths([
     resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins'),
+    resolve(REPO_ROOT, 'src/platform/test_plugins/plugin_functional'),
   ]),
 
   // include settings from project controller

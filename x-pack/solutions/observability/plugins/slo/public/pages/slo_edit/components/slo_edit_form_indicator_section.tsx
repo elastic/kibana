@@ -9,7 +9,7 @@ import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { SLI_OPTIONS } from '../constants';
 import { useUnregisterFields } from '../hooks/use_unregister_fields';
 import type { CreateSLOForm, FormSettings } from '../types';
@@ -19,6 +19,7 @@ import { ApmLatencyIndicatorTypeForm } from './indicator_section/apm_latency/apm
 import { CustomKqlIndicatorTypeForm } from './indicator_section/custom_kql/custom_kql_indicator_type_form';
 import { CustomMetricIndicatorTypeForm } from './indicator_section/custom_metric/custom_metric_type_form';
 import { HistogramIndicatorTypeForm } from './indicator_section/histogram/histogram_indicator_type_form';
+import { ProjectRoutingsSelector } from './indicator_section/project_routings_selector';
 import { SyntheticsAvailabilityIndicatorTypeForm } from './indicator_section/synthetics_availability/synthetics_availability_indicator_type_form';
 import { TimesliceMetricIndicatorTypeForm } from './indicator_section/timeslice_metric/timeslice_metric_indicator';
 
@@ -28,10 +29,10 @@ interface SloEditFormIndicatorSectionProps {
 
 export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicatorSectionProps) {
   const { isEditMode = false, allowedIndicatorTypes = [] } = formSettings;
-  const { control, watch } = useFormContext<CreateSLOForm>();
+  const { control } = useFormContext<CreateSLOForm>();
   useUnregisterFields({ isEditMode });
 
-  const indicatorType = watch('indicator.type');
+  const indicatorType = useWatch({ control, name: 'indicator.type' });
 
   const filteredSliOptions = useMemo(() => {
     if (allowedIndicatorTypes.length === 0) {
@@ -90,6 +91,7 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
           <EuiSpacer size="xl" />
         </>
       )}
+      <ProjectRoutingsSelector />
       {indicatorTypeForm}
     </EuiPanel>
   );

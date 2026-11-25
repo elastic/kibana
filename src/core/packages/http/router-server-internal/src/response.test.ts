@@ -136,13 +136,21 @@ describe('kibanaResponseFactory', () => {
     });
 
     describe('content-type', () => {
-      it('default mime type octet-stream', () => {
-        const result = kibanaResponseFactory.file({ body: 'content', filename: 'myfile.unknown' });
-        expect(result.options.headers).toHaveProperty('content-type', 'application/octet-stream');
-      });
-      it('gets mime type from filename', () => {
-        const result = kibanaResponseFactory.file({ body: 'content', filename: 'myfile.mp4' });
-        expect(result.options.headers).toHaveProperty('content-type', 'video/mp4');
+      it.each(['myfile.unknown', 'myfile', '.hidden'])(
+        '%s defaults to octet-stream',
+        (filename) => {
+          const result = kibanaResponseFactory.file({ body: 'content', filename });
+          expect(result.options.headers).toHaveProperty('content-type', 'application/octet-stream');
+        }
+      );
+      it.each([
+        ['myfile.mp4', 'video/mp4'],
+        ['myfile.txt', 'text/plain'],
+        ['myfile.JPG', 'image/jpeg'],
+        ['myfile.pdf', 'application/pdf'],
+      ])('gets mime type from filename %s', (filename, contentType) => {
+        const result = kibanaResponseFactory.file({ body: 'content', filename });
+        expect(result.options.headers).toHaveProperty('content-type', contentType);
       });
       it('gets accepts contentType override', () => {
         const result = kibanaResponseFactory.file({

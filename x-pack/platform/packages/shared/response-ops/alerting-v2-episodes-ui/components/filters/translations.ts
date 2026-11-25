@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CONNECTOR_SOURCE_OPTIONS_LIMIT } from '../../queries/episode_connector_source_options_query';
 
 /** --- Inline filter popover --- */
 export const INLINE_FILTER_POPOVER_ARIA_LABEL = i18n.translate(
@@ -19,23 +20,23 @@ export const INLINE_FILTER_POPOVER_ARIA_LABEL = i18n.translate(
 export const TAG_FILTER_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.tagFilter.ariaLabel',
   {
-    defaultMessage: 'Tag filter',
+    defaultMessage: 'Alert tags filter',
   }
 );
 
 export const TAG_FILTER_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.label', {
-  defaultMessage: 'Tags',
+  defaultMessage: 'Alert tags',
 });
 
 export const TAG_FILTER_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alertingV2EpisodesUi.tagFilter.searchPlaceholder',
   {
-    defaultMessage: 'Search tags…',
+    defaultMessage: 'Search alert tags…',
   }
 );
 
 export const TAG_FILTER_NO_MATCH = i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.noMatch', {
-  defaultMessage: 'No tags in this time range',
+  defaultMessage: 'No alert tags in this time range',
 });
 
 /** --- Rule filter --- */
@@ -173,5 +174,46 @@ export const SEVERITY_FILTER_NO_MATCH = i18n.translate(
   'xpack.alertingV2EpisodesUi.severityFilter.noMatch',
   {
     defaultMessage: 'No matching severities',
+  }
+);
+
+/** --- Source filter --- */
+export const SOURCE_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.ariaLabel',
+  {
+    defaultMessage: 'Source filter',
+  }
+);
+
+export const SOURCE_FILTER_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.sourceFilter.label', {
+  defaultMessage: 'Source',
+});
+
+export const SOURCE_FILTER_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.searchPlaceholder',
+  {
+    defaultMessage: 'Search sources…',
+  }
+);
+
+export const SOURCE_FILTER_NO_MATCH = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.noMatch',
+  {
+    defaultMessage: 'No matching sources',
+  }
+);
+
+export const SOURCE_FILTER_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.loadErrorMessage',
+  {
+    defaultMessage: "Couldn't load connector sources",
+  }
+);
+
+export const SOURCE_FILTER_TRUNCATED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.truncatedLabel',
+  {
+    defaultMessage: 'Showing the first {limit} sources',
+    values: { limit: CONNECTOR_SOURCE_OPTIONS_LIMIT },
   }
 );

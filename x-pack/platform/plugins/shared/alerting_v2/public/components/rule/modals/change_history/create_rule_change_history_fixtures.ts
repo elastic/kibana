@@ -9,8 +9,8 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { ChangeHistoryDetail } from '@kbn/change-history-ui';
 import { RULE_CHANGE_HISTORY_STORY_OBJECT_ID } from './constants';
 
-/** Domain rule snapshot persisted as `object.snapshot` (API response minus SO OCC token). */
-type RuleSnapshot = Omit<RuleResponse, 'version'>;
+/** Domain rule snapshot persisted as `object.snapshot` (the API response shape). */
+type RuleSnapshot = RuleResponse;
 type RuleApiResponse = RuleResponse;
 
 export interface CreateRuleChangeHistoryFixturesOptions {
@@ -35,31 +35,29 @@ const buildBaseSnapshot = ({
   id: objectId,
   kind: 'alert',
   enabled: true,
+  version: 1,
   metadata: {
     name,
-    version: 1,
     description: 'Alert when destination weather is thunder and lightning.',
     tags: ['flights', 'weather'],
-    owner: 'observability',
   },
   time_field: 'timestamp',
   schedule: { every: '1m', lookback: '5h' },
   query: {
-    format: 'standalone',
-    breach: {
-      query:
-        'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 1',
-    },
+    base: 'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 1',
   },
-  created_by: 'admin',
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
+  created_by: { profile_uid: 'user-admin' },
   created_at: '2026-07-22T14:00:00.000Z',
-  updated_by: 'admin',
+  updated_by: { profile_uid: 'user-admin' },
   updated_at: '2026-07-22T14:00:00.000Z',
 });
 
 /**
  * Newest-first mock history for Storybook / local UI exploration.
- * Snapshots mirror domain `RuleResponse` minus the SO OCC `version` token.
+ * Snapshots mirror the domain `RuleResponse`; the entry sequence lives on the
+ * row's `metadata.version`, which is what the change-history UI package reads.
  */
 export const createRuleChangeHistoryFixtures = (
   options: CreateRuleChangeHistoryFixturesOptions = {}
@@ -78,40 +76,27 @@ export const createRuleChangeHistoryFixtures = (
     ...baseSnapshot,
     metadata: {
       ...baseSnapshot.metadata,
-      version: 2,
       description: 'Alert when flights see thunder and lightning at destination.',
     },
     schedule: { every: '1m', lookback: '1h' },
     updated_at: '2026-07-25T09:15:00.000Z',
-    updated_by: 'bailey',
+    updated_by: { profile_uid: 'user-bailey' },
   };
 
   const v3: RuleSnapshot = {
     ...v2,
-    metadata: {
-      ...v2.metadata,
-      version: 3,
-    },
     query: {
-      format: 'standalone',
-      breach: {
-        query:
-          'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 2',
-      },
+      base: 'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 2',
     },
     updated_at: '2026-07-30T16:42:00.000Z',
-    updated_by: 'admin',
+    updated_by: { profile_uid: 'user-admin' },
   };
 
   const v4: RuleSnapshot = {
     ...v3,
-    metadata: {
-      ...v3.metadata,
-      version: 4,
-    },
     enabled: false,
     updated_at: '2026-08-01T11:05:00.000Z',
-    updated_by: 'bailey',
+    updated_by: { profile_uid: 'user-bailey' },
   };
 
   const allVersions: ChangeHistoryDetail[] = [
@@ -184,10 +169,5 @@ export const createRuleApiResponseFromHistoryFixtures = (
     empty: false,
     versionCount: options.versionCount ?? 1,
   });
-  const latest = history[0]?.snapshot as RuleSnapshot;
-
-  return {
-    ...latest,
-    version: 'WzEsMV0=',
-  };
+  return history[0]?.snapshot as RuleSnapshot;
 };

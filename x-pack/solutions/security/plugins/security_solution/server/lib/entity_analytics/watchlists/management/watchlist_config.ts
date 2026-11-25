@@ -123,15 +123,26 @@ export class WatchlistConfigClient {
       throw new Error('internalEsClient is required to create a watchlist index');
     }
 
-    await createOrUpdateIndex({
-      esClient: this.deps.internalEsClient,
-      logger: this.deps.logger,
-      options: {
-        index: getIndexForWatchlist(this.deps.namespace),
-        mappings: generateWatchlistEntityIndexMappings(),
-        settings: { hidden: true, auto_expand_replicas: '0-1' },
-      },
-    });
+    try {
+      await createOrUpdateIndex({
+        esClient: this.deps.internalEsClient,
+        logger: this.deps.logger,
+        options: {
+          index: getIndexForWatchlist(this.deps.namespace),
+          mappings: generateWatchlistEntityIndexMappings(),
+          settings: { hidden: true, auto_expand_replicas: '0-1' },
+        },
+      });
+    } catch (err) {
+      await this.deps.soClient
+        .delete(watchlistConfigTypeName, so.id, { refresh: 'wait_for' })
+        .catch((deleteErr) =>
+          this.deps.logger.error(
+            `Failed to roll back watchlist saved object '${so.id}' after index creation failed: ${deleteErr.message}`
+          )
+        );
+      throw err;
+    }
 
     return toWatchlistObject(so);
   }
@@ -163,7 +174,6 @@ export class WatchlistConfigClient {
   async list(limit: number = MAX_PER_PAGE): Promise<WatchlistObjectWithId[]> {
     const response = await this.deps.soClient.find<WatchlistObject>({
       type: watchlistConfigTypeName,
-      namespaces: [this.deps.namespace],
       perPage: limit,
     });
     const watchlists = response.saved_objects.map(
@@ -208,7 +218,6 @@ export class WatchlistConfigClient {
     // 2. Look it up by exact name
     const response = await this.deps.soClient.find<WatchlistSavedObjectAttributes>({
       type: watchlistConfigTypeName,
-      namespaces: [this.deps.namespace],
       filter: nodeBuilder.is(`${watchlistConfigTypeName}.attributes.name`, trimmed),
       perPage: 100,
       fields: ['name'],

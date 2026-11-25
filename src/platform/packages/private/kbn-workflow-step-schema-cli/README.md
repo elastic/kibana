@@ -115,15 +115,126 @@ determinable `type` literal, or two branches would map to the same tag, the
 
 Each `schema.json` is written minified with sorted keys — exactly the bytes a CDN
 serves. `index.json` is the pretty, sorted entry point: `kibanaVersion`,
-`buildHash`, `profile: "superset"`, `channel`, `connectorTypes[]`, `stepTypes[]`,
+`buildHash`, `profile: "superset"`, `connectorTypes[]`, `stepTypes[]`,
 `triggerTypes[]`, and per variant `{ path, sha256 }`, where `sha256` is over the
 **exact served bytes** of that variant's `schema.json`. There is no timestamp, so
-an identical schema yields a byte-identical `index.json` across runs.
+an identical schema yields a byte-identical `index.json` across runs. The
+`channel` field is absent from the committed copy and stamped at CDN publish time.
 
 ## Loading
 
 Consumers read `index.json`, then fetch each variant's `schema.json` and verify
 its bytes against the manifest `sha256`.
+
+## CI generation and CDN publishing
+
+The artifact is generated in CI and committed to the repo, then published to the
+CDN from the release/serverless build pipelines. **Only a bot "sync" PR writes the
+committed artifact**: feature PRs never commit it, so concurrent PRs cannot conflict
+on it (see [Who commits the artifact](#who-commits-the-artifact)).
+
+### Generation (committed to the repo)
+
+The generation is a Jest integration test
+(`integration_tests/generate_schema.test.ts`), following the same convention as
+the encrypted-saved-objects `ci_checks` integration test. It boots a real,
+all-solutions Kibana (`createRootWithCorePlugins({}, { oss: false })` over a
+trial-license ES), generates the artifact in-process using this package's own
+modules (the same steps the CLI runs), and writes the committed artifact directly
+to a single channel-agnostic bundle:
+
+```
+generated/{index.json,strict/schema.json,template/schema.json}
+```
+
+The `kibanaVersion`, `buildHash`, and `channel` fields are omitted from the
+committed `index.json` and stamped at CDN publish time by `publish_schema.sh`.
+The output is otherwise deterministic and timestamp-free, so re-generation is a
+no-op unless the schema actually changed. Determinism is achieved through two
+layers:
+
+1. **Pre-composition ordering.** Connector and trigger arrays are sorted by their
+   `type` discriminator before `z.toJSONSchema()` runs, pinning the
+   `__schemaN` reference-definition numbering that Zod v4 assigns in traversal
+   order. This ensures re-ordering of async step-loader resolution never
+   produces a whole-file diff.
+2. **Post-serialization canonicalization.** The writer sorts members of
+   `anyOf`, `oneOf`, and `required` arrays by stable-stringified content before
+   hashing, as a belt-and-braces guard. `enum` and `allOf` are intentionally
+   excluded: `enum` order is curated (e.g. severity levels), and `allOf` has no
+   ordering benefit here.
+
+The config runs exclusively via
+`.buildkite/scripts/steps/code_generation/workflow_step_schema_codegen.sh`,
+wired into the `Checks` pipeline step (`checks.sh`). It is excluded from the
+regular Jest integration lane via `.buildkite/disabled_jest_configs.json` to
+avoid a redundant double boot. Set `WORKFLOW_SCHEMA_OUTPUT_DIR` to write
+elsewhere (e.g. under the gitignored `target/`) when experimenting locally.
+
+The same boot also checks the per-step `definitionHash` approvals (see
+`workflows_extensions/dev_docs/STEPS.md`). Unapproved steps are written to
+`WORKFLOW_STEP_APPROVAL_REPORT` (when set) rather than failing the test, and the
+codegen script fails PR and merge queue builds on a non-empty report.
+
+### Who commits the artifact
+
+The codegen script behaves differently per build type:
+
+| Build | Behavior |
+| --- | --- |
+| Feature PR | Generates (guards and approvals still run), annotates the PR when the schema changed, and resets `generated/` to the PR's merge-base (one auto-commit if the PR carried an old copy). The schema is never committed by feature PRs. |
+| Merge queue | Generates for the guards and approvals, then discards the output. |
+| On-merge | Generates; on drift it triggers the sync pipeline (async) and discards the output. |
+| Sync PR (`workflow_step_schema_sync_*` branch) | Generates and auto-commits as before. |
+
+The `kibana-workflow-step-schema-sync` pipeline
+(`.buildkite/scripts/steps/workflow_step_schema/sync_pr.sh`) runs on on-merge drift
+and on a daily schedule. It regenerates the schema and opens, or force-updates, a
+single `[One Workflow] Update workflow step schema` PR, which is auto-approved
+(`auto-approve-machine-prs.yml`), has no code owner, and is auto-merged through the
+merge queue. The committed copy therefore lags `main` by roughly the time of one
+sync (around 1–3 hours after a schema-changing merge).
+
+Because the committed copy can lag, publishing warns when a sync is pending (see
+below). To publish the schema of a specific commit (for example the sync PR's merge
+commit), run the `kibana-workflow-step-schema-republish` pipeline on that commit:
+
+```
+node .buildkite/scripts/steps/trigger_pipeline.ts kibana-workflow-step-schema-republish <branch> <commit> "" \
+  "CHANNEL=release BASE_VERSION=9.5.0 FULL_VERSION=9.5.0-rc1"
+```
+
+`CHANNEL` is `release` or `serverless`; `BASE_VERSION` is required for `release`.
+Add `DRY_RUN=true` to verify and stage without uploading.
+
+### CDN layout
+
+Published to the workflows CDN bucket (`elastic-workflows-library-prod`, served
+at `https://workflows.elastic.co`) under a `/schema/v1` prefix, a sibling of the
+Workflow Template Library's `/library` prefix:
+
+```
+schema/v1/<version>/release/{index.json,strict/schema.json,template/schema.json}
+schema/v1/serverless/{index.json,strict/schema.json,template/schema.json}
+```
+
+- **Release** (`.buildkite/scripts/steps/artifacts/upload_dra_pipeline.sh`, gated on
+  `RELEASE_BUILD=true`, `depends_on: dra-prep`): version cut, every RC, and GA
+  overwrite `schema/v1/<version>/release`. Nightly snapshots are not published.
+- **Serverless** (`.buildkite/scripts/steps/artifacts/docker_image.sh`, on the
+  main-branch image promotion): rolling overwrite of `schema/v1/serverless`.
+
+Both call the shared `.buildkite/scripts/steps/workflow_step_schema/publish_schema.sh`,
+which reads the GCS service-account key from Vault
+(`kv/ci-shared/workflows-library/gcs-publish`), stamps the real `kibanaVersion`, `buildHash`, and `channel` onto the
+published `index.json` (the committed copy omits all three), and `gcloud storage rsync`s
+the bytes with `cache-control: public, max-age=300`.
+
+The CDN publish is `soft_fail` on both paths; a Buildkite warning annotation is emitted
+on failure so the CDN staleness is visible without trawling job logs. When an open sync
+PR or a running sync/on-merge build exists for the branch, `publish_schema.sh` annotates
+that the published schema may be stale (and still publishes); the republish pipeline
+above fixes it once the sync PR has merged.
 
 ## Limitations (accepted)
 

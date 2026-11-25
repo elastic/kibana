@@ -18,7 +18,9 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/ui-ai-components",
     "@kbn/ui-app-menu",
+    "@kbn/ui-chrome-layout",
     "@kbn/ui-favorite-button"
   ]
 }

@@ -5,8 +5,21 @@
  * 2.0.
  */
 
-import type { EvaluatorDefinition, EvaluatorResult } from '../types';
+import type { EvaluatorDefinition, EvaluatorResult, TraceAccessor } from '../types';
 import { createTraceAccessor } from '../trace_accessor';
+
+/**
+ * Throws, rather than reporting the metric unavailable, because a missing trace is a caller
+ * error that no amount of waiting fixes.
+ */
+const requireTrace = (trace: TraceAccessor | undefined, evaluatorName: string): TraceAccessor => {
+  if (!trace) {
+    throw new Error(
+      `Evaluator "${evaluatorName}" reads its metric from the trace, so it cannot grade in-memory evidence`
+    );
+  }
+  return trace;
+};
 
 const getTraceMetricResult = async ({
   evaluatorName,
@@ -55,9 +68,11 @@ export const latencyEvaluatorDef: EvaluatorDefinition = {
   name: 'latency',
   version: '1.0.0',
   kind: 'code',
+  origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns total trace latency in seconds.',
   async evaluate({ trace, log }) {
-    const accessor = createTraceAccessor(trace);
+    const accessor = createTraceAccessor(requireTrace(trace, 'latency'));
 
     return getTraceMetricResult({
       evaluatorName: 'latency',
@@ -88,9 +103,11 @@ export const inputTokensEvaluatorDef: EvaluatorDefinition = {
   name: 'input_tokens',
   version: '1.0.0',
   kind: 'code',
+  origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns summed prompt/input token usage across the trace.',
   async evaluate({ trace, log }) {
-    const accessor = createTraceAccessor(trace);
+    const accessor = createTraceAccessor(requireTrace(trace, 'input_tokens'));
 
     return getTraceMetricResult({
       evaluatorName: 'input_tokens',
@@ -120,9 +137,11 @@ export const outputTokensEvaluatorDef: EvaluatorDefinition = {
   name: 'output_tokens',
   version: '1.0.0',
   kind: 'code',
+  origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns summed completion/output token usage across the trace.',
   async evaluate({ trace, log }) {
-    const accessor = createTraceAccessor(trace);
+    const accessor = createTraceAccessor(requireTrace(trace, 'output_tokens'));
 
     return getTraceMetricResult({
       evaluatorName: 'output_tokens',
@@ -152,9 +171,11 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
   name: 'tool_calls',
   version: '1.0.0',
   kind: 'code',
+  origin: 'built_in',
+  direction: 'neutral',
   description: 'Returns count of TOOL spans associated with the trace.',
   async evaluate({ trace, log }) {
-    const accessor = createTraceAccessor(trace);
+    const accessor = createTraceAccessor(requireTrace(trace, 'tool_calls'));
 
     return getTraceMetricResult({
       evaluatorName: 'tool_calls',

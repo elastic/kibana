@@ -11,21 +11,24 @@ import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
   apiHasExecutionContext,
+  getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
 import { initializeStateApi } from '@kbn/presentation-publishing';
-import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
@@ -61,6 +64,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
         titleManager.api
       );
 
+      const requestCancellationManager = new RequestCancellationManager();
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
@@ -129,6 +133,12 @@ export const getSingleMetricViewerEmbeddableFactory = (
         ...stateApi,
         dataLoading$,
         blockingError$,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          dataLoading$.next(false);
+        },
       });
 
       const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(
@@ -136,7 +146,15 @@ export const getSingleMetricViewerEmbeddableFactory = (
         services[1].data.query.timefilter.timefilter
       );
 
+      // Starting a new load lifts a previous cancellation. The data fetcher emits whenever the
+      // fetch context or one of the panel's data inputs changes, before the chart (a later
+      // subscriber) starts loading.
+      subscriptions.add(
+        singleMetricViewerData$.subscribe(() => requestCancellationManager.startLoad())
+      );
+
       const SingleMetricViewerComponent = getSingleMetricViewerComponent(...services, api);
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
 
       return {
         api,
@@ -147,34 +165,10 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
           const { singleMetricViewerData, bounds, lastRefresh } =
             useStateFromPublishingSubject(singleMetricViewerData$);
-          const [isLoading, error] = useBatchedPublishingSubjects(dataLoading$, blockingError$);
-
-          const [hasRendered, setHasRendered] = useState(false);
-          const wrapperRef = useRef<HTMLDivElement>(null);
-
-          useEffect(() => {
-            if (isLoading) {
-              setHasRendered(false);
-            }
-          }, [isLoading]);
-
-          useEffect(
-            function dispatchRenderMessages() {
-              const el = wrapperRef.current;
-              if (!el) return;
-              if (error) {
-                dispatchRenderComplete(el);
-                return;
-              }
-              if (isLoading) {
-                dispatchRenderStart(el);
-                return;
-              }
-              if (hasRendered) {
-                dispatchRenderComplete(el);
-              }
-            },
-            [isLoading, hasRendered, error]
+          const [isLoading, error, viewMode] = useBatchedPublishingSubjects(
+            dataLoading$,
+            blockingError$,
+            viewMode$
           );
 
           useReactEmbeddableExecutionContext(
@@ -200,6 +194,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           return (
             <SingleMetricViewerComponent
               shouldShowForecastButton={true}
+              isInteractive={viewMode !== 'non-interactive'}
               bounds={bounds}
               functionDescription={functionDescription}
               lastRefresh={lastRefresh}
@@ -215,15 +210,14 @@ export const getSingleMetricViewerEmbeddableFactory = (
               forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
               onForecastIdChange={api.updateForecastId}
-              wrapperRef={wrapperRef}
-              isRenderComplete={error ? true : hasRendered}
+              isRenderComplete={error ? true : !isLoading}
               onLoading={(loading) => {
                 dataLoading$.next(loading);
               }}
               onRenderComplete={() => {
                 dataLoading$.next(false);
-                setHasRendered(true);
               }}
+              requestCancellationManager={requestCancellationManager}
             />
           );
         },

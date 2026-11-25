@@ -32,10 +32,13 @@ export const durationUnitNames = {
 };
 
 export function getLensMetricFormat(
-  unit: MetricUnit
+  unit: MetricUnit | undefined
 ): Pick<LensBaseLayer, 'format' | 'decimals' | 'fromUnit' | 'toUnit'> | undefined {
   if (!unit || unit === 'count' || isSpecialUnitOfCount(unit)) {
-    return;
+    return {
+      format: 'number',
+      decimals: 0,
+    };
   }
 
   const format = formatTypeByUnit[unit];

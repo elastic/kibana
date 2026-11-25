@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getPolicyQuery, parseQueryFilterToKQL } from './utils';
+import {
+  getEnabledStatusQuery,
+  getPolicyQuery,
+  isArtifactEnabledStatus,
+  parsePoliciesAndFilterToKql,
+  parseQueryFilterToKQL,
+} from './utils';
 
 describe('utils', () => {
   const searchableFields = [`name`, `description`, `entries.value`, `entries.entries.value`];
@@ -53,6 +59,62 @@ describe('utils', () => {
       expect(getPolicyQuery('unassigned')).toBe(
         '(not exception-list-agnostic.attributes.tags:policy\\:*)'
       );
+    });
+  });
+
+  describe('getEnabledStatusQuery', () => {
+    it('should exclude disabled artifacts for the enabled status', () => {
+      expect(getEnabledStatusQuery('enabled')).toBe(
+        'not exception-list-agnostic.attributes.tags:"disabled"'
+      );
+    });
+
+    it('should include only disabled artifacts for the disabled status', () => {
+      expect(getEnabledStatusQuery('disabled')).toBe(
+        'exception-list-agnostic.attributes.tags:"disabled"'
+      );
+    });
+  });
+
+  describe('parsePoliciesAndFilterToKql', () => {
+    const kuery = '(exception-list-agnostic.attributes.name:(*foo*))';
+
+    it('should return undefined without any filters', () => {
+      expect(parsePoliciesAndFilterToKql({})).toBeUndefined();
+    });
+
+    it('should return the kuery as is when there are no policies and no enabled status', () => {
+      expect(parsePoliciesAndFilterToKql({ kuery })).toBe(kuery);
+    });
+
+    it('should combine policies with the kuery', () => {
+      expect(parsePoliciesAndFilterToKql({ policies: ['aaa'], kuery })).toBe(
+        `((exception-list-agnostic.attributes.tags:"policy:aaa")) AND (${kuery})`
+      );
+    });
+
+    it('should filter by enabled status only', () => {
+      expect(parsePoliciesAndFilterToKql({ enabledStatus: 'disabled' })).toBe(
+        '(exception-list-agnostic.attributes.tags:"disabled")'
+      );
+    });
+
+    it('should combine policies, enabled status and the kuery', () => {
+      expect(
+        parsePoliciesAndFilterToKql({ policies: ['global'], enabledStatus: 'enabled', kuery })
+      ).toBe(
+        `((exception-list-agnostic.attributes.tags:"policy:all")) AND (not exception-list-agnostic.attributes.tags:"disabled") AND (${kuery})`
+      );
+    });
+  });
+
+  describe('isArtifactEnabledStatus', () => {
+    it.each(['enabled', 'disabled'])('should accept %s', (value) => {
+      expect(isArtifactEnabledStatus(value)).toBe(true);
+    });
+
+    it.each(['', 'all', undefined, ['enabled']])('should reject %p', (value) => {
+      expect(isArtifactEnabledStatus(value)).toBe(false);
     });
   });
 });

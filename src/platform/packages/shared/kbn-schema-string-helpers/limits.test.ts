@@ -1,0 +1,110 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  assertStringHelperLabel,
+  assertUnboundedStringReason,
+  assertValidMinLength,
+  BOUNDED_STRING_MAX_LENGTH,
+  getBoundedStringLimits,
+  getStringHelperLimits,
+  LABEL_REQUIRED_HELPERS,
+  STRING_HELPER_DEFAULTS,
+} from './limits';
+
+test.each([NaN, Infinity, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
+  'rejects invalid maximum length %s',
+  (maxLength) => {
+    expect(() => getStringHelperLimits('description', { maxLength })).toThrow();
+  }
+);
+
+test.each([NaN, Infinity, -1, 1.5])('rejects invalid minimum length %s', (minLength) => {
+  expect(() => getStringHelperLimits('description', { minLength })).toThrow();
+});
+
+test('rejects contradictory limits', () => {
+  expect(() => getStringHelperLimits('savedObjectId', { minLength: 3, maxLength: 2 })).toThrow();
+});
+
+test('allows empty-only strings and finite overrides', () => {
+  expect(getStringHelperLimits('description', { maxLength: 0 })).toEqual({
+    minLength: 0,
+    maxLength: 0,
+  });
+  expect(getStringHelperLimits('savedObjectId', { maxLength: 1024 })).toEqual({
+    minLength: 1,
+    maxLength: 1024,
+  });
+});
+
+test('requires a nonempty explanation', () => {
+  expect(() => assertUnboundedStringReason('  ')).toThrow();
+  expect(() => assertUnboundedStringReason('Enforced upstream')).not.toThrow();
+});
+
+test.each([-1, -0.5, 1.5, Infinity, NaN])('rejects invalid unbounded minLength %s', (minLength) => {
+  expect(() => assertValidMinLength(minLength)).toThrow(
+    'requires a non-negative integer minLength'
+  );
+});
+
+test('accepts valid unbounded minLength values', () => {
+  expect(() => assertValidMinLength(undefined)).not.toThrow();
+  expect(() => assertValidMinLength(0)).not.toThrow();
+  expect(() => assertValidMinLength(1)).not.toThrow();
+});
+
+describe('getBoundedStringLimits', () => {
+  test('requires the maximum and defaults the minimum to zero', () => {
+    expect(getBoundedStringLimits({ maxLength: 4096 })).toEqual({ minLength: 0, maxLength: 4096 });
+    expect(getBoundedStringLimits({ minLength: 1, maxLength: 4096 })).toEqual({
+      minLength: 1,
+      maxLength: 4096,
+    });
+  });
+
+  test.each([undefined, NaN, Infinity, -1, 1.5])(
+    'rejects invalid maximum length %s',
+    (maxLength) => {
+      expect(() => getBoundedStringLimits({ maxLength: maxLength as number })).toThrow(
+        'boundedString() requires non-negative integer limits'
+      );
+    }
+  );
+
+  test('rejects contradictory limits', () => {
+    expect(() => getBoundedStringLimits({ minLength: 3, maxLength: 2 })).toThrow();
+  });
+
+  test('caps the maximum length', () => {
+    expect(getBoundedStringLimits({ maxLength: BOUNDED_STRING_MAX_LENGTH }).maxLength).toBe(
+      BOUNDED_STRING_MAX_LENGTH
+    );
+    expect(() => getBoundedStringLimits({ maxLength: BOUNDED_STRING_MAX_LENGTH + 1 })).toThrow(
+      `maxLength <= ${BOUNDED_STRING_MAX_LENGTH}`
+    );
+  });
+});
+
+test('requires a non-empty reporting label and names the helper', () => {
+  expect(() => assertStringHelperLabel('boundedString', '  ')).toThrow(
+    'boundedString.warn() requires a non-empty label'
+  );
+  expect(() => assertStringHelperLabel('urlString', undefined)).toThrow(
+    'urlString.warn() requires a non-empty label'
+  );
+  expect(() => assertStringHelperLabel('boundedString', 'fleet.output.ca_file')).not.toThrow();
+});
+
+test('every label-requiring helper is a real semantic helper', () => {
+  for (const helper of LABEL_REQUIRED_HELPERS) {
+    expect(STRING_HELPER_DEFAULTS).toHaveProperty(helper);
+  }
+});

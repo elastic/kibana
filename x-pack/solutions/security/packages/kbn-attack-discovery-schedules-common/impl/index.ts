@@ -44,6 +44,7 @@ export {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID,
@@ -68,6 +69,7 @@ export {
   convertScheduleActionsToAlertingActions,
   createScheduleExecutionSummary,
   generateAttackDiscoveryAlertHash,
+  getGenerationSourceHashSuffix,
   transformToBaseAlertDocument,
   type AttackDiscoveryAlertDocumentBase,
 } from './transforms';

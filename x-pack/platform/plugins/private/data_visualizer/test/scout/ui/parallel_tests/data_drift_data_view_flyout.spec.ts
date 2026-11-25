@@ -27,6 +27,8 @@ spaceTest.describe('data drift data view flows', { tag: tags.stateful.classic },
   spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
     await mlTestResources.deleteDataViewByTitle('ft_fare*,ft_fareq*', scoutSpace.id);
     await mlTestResources.deleteDataViewByTitle('ft_fare*_picker_test', scoutSpace.id);
+    // ft_ihp_outlier is created first and becomes the space default; leaving it hijacks source selection in the next suite sharing the worker space.
+    await mlTestResources.deleteDataViewByTitle('ft_ihp_outlier', scoutSpace.id);
     await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
   });
 

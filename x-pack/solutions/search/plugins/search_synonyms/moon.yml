@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/share-plugin'
   - '@kbn/react-query'
+  - '@kbn/app-header'
   - '@kbn/ui-callout'
 tags:
   - plugin
@@ -53,6 +54,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

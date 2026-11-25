@@ -13,24 +13,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     timeToVisualize,
     timePicker,
     dashboard,
-    visEditor,
     visualize,
+    visualBuilder,
     security,
     header,
     lens,
-    vegaChart,
-    visChart,
   } = getPageObjects([
     'timeToVisualize',
     'timePicker',
     'dashboard',
-    'visEditor',
     'visualize',
+    'visualBuilder',
     'security',
     'header',
     'lens',
-    'vegaChart',
-    'visChart',
   ]);
 
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -131,6 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('disables save to library button without visualize save permissions', async () => {
         await dashboard.waitForRenderComplete();
         await dashboardPanelActions.navigateToEditorFromFlyout();
+        await lens.openSaveOptionsIfNeeded();
         const saveButton = await testSubjects.find('lnsApp_saveButton');
         expect(await saveButton.getAttribute('disabled')).to.equal('true');
         await lens.saveAndReturn();
@@ -182,14 +179,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
       });
 
-      it('can add a markdown panel by value', async () => {
-        await dashboard.navigateToApp();
-        await dashboard.clickNewDashboard();
-        await dashboard.waitForRenderComplete();
-
-        await dashboardAddPanel.clickAddVega();
+      it('can add a TSVB panel by value', async () => {
+        await dashboardAddPanel.clickAddTsvb();
+        await visualBuilder.checkVisualBuilderIsPresent();
 
         await visualize.saveVisualizationAndReturn();
+        await dashboard.waitForRenderComplete();
         const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
       });
@@ -198,20 +193,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboardPanelActions.clickEdit();
         await header.waitUntilLoadingHasFinished();
 
-        const { spec, isValid } = await vegaChart.getSpecAsJSON();
-        expect(isValid).to.be(true);
-        // add SVG renderer to read the Y axis labels
-        const updatedSpec = { ...spec, config: { kibana: { renderer: 'svg' } } };
-        await vegaChart.fillSpec(JSON.stringify(updatedSpec, null, 2));
-        await visEditor.clickGo();
-        await visChart.waitForVisualizationRenderingStabilized();
+        await visualBuilder.clickMetric();
+        await visualBuilder.checkMetricTabIsPresent();
 
         await visualize.saveVisualizationAndReturn();
         await dashboard.waitForRenderComplete();
-        const fullDataLabels = await vegaChart.getYAxisLabels();
-        expect(fullDataLabels[0]).to.eql('0');
+        await testSubjects.existOrFail('tsvbMetricValue');
 
-        const newPanelCount = dashboard.getPanelCount();
+        const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
       });
 

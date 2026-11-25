@@ -30,7 +30,6 @@ import {
 import {
   generateAPIKeyName,
   apiKeyAsRuleDomainProperties,
-  addMissingUiamKeyTagIfNeeded,
   resolveRuleAPIKey,
 } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -54,7 +53,17 @@ import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 export interface CreateRuleOptions {
   id?: string;
   initialRevision?: number;
+  /**
+   * Declares that the API key the request authenticated with is borrowed (e.g. granted by Task
+   * Manager for a background task) and must not become the rule's key: a framework-owned key with
+   * the same privileges is minted for the rule instead. A no-op when the request is not
+   * authenticated with an API key, so callers may set it unconditionally.
+   */
+  cloneApiKey?: boolean;
 }
+
+/** Matches HTTP create `template_id` maxLength. */
+export const RULE_CREATE_TEMPLATE_ID_MAX_LENGTH = 1024;
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
@@ -81,6 +90,12 @@ export async function createRule<Params extends RuleParams = never>(
     allowMissingConnectorSecrets,
     templateId,
   } = createParams;
+
+  if (templateId !== undefined && templateId.length > RULE_CREATE_TEMPLATE_ID_MAX_LENGTH) {
+    throw Boom.badRequest(
+      `Error validating create data - templateId must be at most ${RULE_CREATE_TEMPLATE_ID_MAX_LENGTH} characters`
+    );
+  }
 
   const actionsClient = await context.getActionsClient();
 
@@ -159,12 +174,15 @@ export async function createRule<Params extends RuleParams = never>(
     request: context.request,
   });
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
 
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
     const apiKeyName = generateAPIKeyName(ruleType.id, data.name);
-    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled);
+    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled, {
+      cloneApiKey: options?.cloneApiKey,
+    });
     createdAPIKey = resolved.createdAPIKey;
     isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
@@ -216,13 +234,11 @@ export async function createRule<Params extends RuleParams = never>(
 
   const { systemActions, actions: actionToNotUse, ...restData } = data;
 
-  const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
-  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
-    data.tags,
-    apiKeyProps.uiamApiKey,
-    apiKeyProps.apiKeyCreatedByUser,
-    context.isServerless,
-    context.featureFlags
+  const apiKeyProps = apiKeyAsRuleDomainProperties(
+    createdAPIKey,
+    username,
+    isAuthTypeApiKey,
+    profileUid
   );
 
   // Convert domain rule object to ES rule attributes
@@ -231,13 +247,14 @@ export async function createRule<Params extends RuleParams = never>(
     artifactsWithRefs,
     rule: {
       ...restData,
-      tags: tagsWithUiamCheck,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
       ...apiKeyProps,
       id,
       createdBy: username,
       updatedBy: username,
+      createdByProfileUid: profileUid,
+      updatedByProfileUid: profileUid,
       createdAt: new Date(createTime),
       updatedAt: new Date(createTime),
       snoozeSchedule: [],

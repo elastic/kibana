@@ -26,6 +26,7 @@ import {
 
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
+import { packagePolicyService } from '../package_policy';
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
 
@@ -208,6 +209,166 @@ describe('Agentless Agent service', () => {
     );
   });
 
+  describe('policy_details.package', () => {
+    const setup = () => {
+      jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: { url: 'http://api.agentless.com', tls: { certificate: 'c', key: 'k', ca: 'ca' } },
+        },
+      } as any);
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+      } as any);
+      mockedListEnrollmentApiKeys.mockResolvedValue({
+        items: [{ id: 't', policy_id: 'p', api_key: 'k' }],
+      } as any);
+    };
+    const create = () =>
+      agentlessAgentService.createAgentlessAgent(
+        elasticsearchServiceMock.createClusterClient().asInternalUser,
+        getAgentPolicyCreateMock(),
+        {
+          id: 'otel-policy',
+          name: 'otel',
+          namespace: 'default',
+          fleet_server_host_id: 'h',
+          data_output_id: 'o',
+          supports_agentless: true,
+        } as AgentPolicy
+      );
+
+    const otelPackagePolicies = (version: string) =>
+      [
+        { package: { name: 'system', version: '2.0.0' }, inputs: [] },
+        {
+          package: { name: 'aws_cloudwatch_input_otel', version },
+          inputs: [
+            { type: 'otelcol', enabled: false, policy_template: 'disabled_template' },
+            { type: 'otelcol', enabled: true, policy_template: 'cloudwatch' },
+          ],
+        },
+      ] as any;
+
+    it('sends the non-system integration package so OTel policies can be labelled', async () => {
+      setup();
+      jest
+        .mocked(packagePolicyService.findAllForAgentPolicy)
+        .mockResolvedValue(otelPackagePolicies('0.8.0'));
+
+      await create();
+
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            policy_details: {
+              output_name: 'default',
+              package: {
+                name: 'aws_cloudwatch_input_otel',
+                version: '0.8.0',
+                policy_template: 'cloudwatch',
+                release: 'beta',
+              },
+            },
+          }),
+        })
+      );
+    });
+
+    it.each([
+      ['1.2.0', 'ga'],
+      ['1.0.0-beta.1', 'beta'],
+    ])('derives the release of version %s as %s', async (version, release) => {
+      setup();
+      jest
+        .mocked(packagePolicyService.findAllForAgentPolicy)
+        .mockResolvedValue(otelPackagePolicies(version));
+
+      await create();
+
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            policy_details: {
+              output_name: 'default',
+              package: {
+                name: 'aws_cloudwatch_input_otel',
+                version,
+                policy_template: 'cloudwatch',
+                release,
+              },
+            },
+          }),
+        })
+      );
+    });
+
+    it('still sends name and version when the version is not valid semver', async () => {
+      setup();
+      jest
+        .mocked(packagePolicyService.findAllForAgentPolicy)
+        .mockResolvedValue(otelPackagePolicies('not-a-version'));
+
+      await create();
+
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            policy_details: {
+              output_name: 'default',
+              package: {
+                name: 'aws_cloudwatch_input_otel',
+                version: 'not-a-version',
+                policy_template: 'cloudwatch',
+              },
+            },
+          }),
+        })
+      );
+    });
+
+    it('omits policy_template when the policy has no enabled input', async () => {
+      setup();
+      jest
+        .mocked(packagePolicyService.findAllForAgentPolicy)
+        .mockResolvedValue([
+          { package: { name: 'aws_cloudwatch_input_otel', version: '0.8.0' }, inputs: [] },
+        ] as any);
+
+      await create();
+
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            policy_details: {
+              output_name: 'default',
+              package: { name: 'aws_cloudwatch_input_otel', version: '0.8.0', release: 'beta' },
+            },
+          }),
+        })
+      );
+    });
+
+    it('does not fail the deployment when the package cannot be resolved', async () => {
+      setup();
+      jest.mocked(packagePolicyService.findAllForAgentPolicy).mockRejectedValue(new Error('boom'));
+
+      await create();
+
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ policy_details: { output_name: 'default' } }),
+        })
+      );
+    });
+  });
+
   it('should include is_elastic_staff_owned when cloud reports elastic staff owned deployment', async () => {
     jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
@@ -271,6 +432,145 @@ describe('Agentless Agent service', () => {
         }),
         method: 'POST',
         url: 'http://api.agentless.com/api/v1/ess/deployments',
+      })
+    );
+  });
+
+  it('should include deployment_id and elasticsearch_cluster_id for ECH', async () => {
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      deploymentId: 'mocked-deployment-id',
+      elasticsearchClusterId: 'mocked-es-cluster-id',
+    } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+      id: 'mocked-agentless-agent-policy-id',
+      name: 'agentless agent policy',
+      namespace: 'default',
+      fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+      data_output_id: 'mock-fleet-default-output',
+      supports_agentless: true,
+    } as AgentPolicy);
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          policy_id: 'mocked-agentless-agent-policy-id',
+          stack_version: 'mocked-kibana-version-infinite',
+          deployment_id: 'mocked-deployment-id',
+          elasticsearch_cluster_id: 'mocked-es-cluster-id',
+        }),
+        method: 'POST',
+        url: 'http://api.agentless.com/api/v1/ess/deployments',
+      })
+    );
+  });
+
+  it('should not include deployment_id and elasticsearch_cluster_id for serverless', async () => {
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+      deploymentId: 'mocked-deployment-id',
+      elasticsearchClusterId: 'mocked-es-cluster-id',
+    } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+      id: 'mocked-agentless-agent-policy-id',
+      name: 'agentless agent policy',
+      namespace: 'default',
+      fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+      data_output_id: 'mock-fleet-default-output',
+      supports_agentless: true,
+    } as AgentPolicy);
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ deployment_id: expect.anything() }),
+      })
+    );
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ elasticsearch_cluster_id: expect.anything() }),
       })
     );
   });
@@ -883,6 +1183,51 @@ describe('Agentless Agent service', () => {
     );
   });
 
+  it('should include deployment_id and elasticsearch_cluster_id when upgrading agentless agent for ESS', async () => {
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('8.18.0');
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      deploymentId: 'mocked-deployment-id',
+      elasticsearchClusterId: 'mocked-es-cluster-id',
+    } as any);
+
+    await agentlessAgentService.upgradeAgentlessDeployment('mocked-agentless-agent-policy-id');
+
+    expect(axios).toHaveBeenCalledTimes(1);
+
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'PUT',
+        data: {
+          stack_version: '8.18.0',
+          deployment_id: 'mocked-deployment-id',
+          elasticsearch_cluster_id: 'mocked-es-cluster-id',
+        },
+        url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
+      })
+    );
+  });
+
   it('should delete agentless agent for serverless', async () => {
     const returnValue = {
       id: 'mocked',
@@ -1034,7 +1379,7 @@ describe('Agentless Agent service', () => {
         data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     // Assert that tls configuration is missing
     expect(mockedLogger.debug).toHaveBeenCalledWith(expect.stringContaining('cert: undefined'));
@@ -1095,7 +1440,7 @@ describe('Agentless Agent service', () => {
         data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     // Assert that sensitive information is redacted
     expect(mockedLogger.error).toHaveBeenCalledWith(
@@ -1198,7 +1543,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: false,
         } as AgentPolicy)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentlessAgentConfigError(
           'Agentless agent policy does not have supports_agentless enabled'
         )
@@ -1237,7 +1582,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentlessAgentConfigError(
           'Agentless agents are only supported in cloud deployment and serverless projects'
         )
@@ -1260,7 +1605,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentlessAgentConfigError('missing Agentless API configuration in Kibana')
       );
     });
@@ -1306,7 +1651,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(new AgentlessAgentConfigError('missing default Fleet server host'));
+      ).rejects.toThrow(new AgentlessAgentConfigError('missing default Fleet server host'));
     });
 
     it('should throw AgentlessAgentConfigError if enrollment tokens are not found', async () => {
@@ -1349,7 +1694,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(new AgentlessAgentConfigError('missing Fleet enrollment token'));
+      ).rejects.toThrow(new AgentlessAgentConfigError('missing Fleet enrollment token'));
     });
 
     it('should throw AgentlessAgentConfigError if agent policy is missing fleet_server_host_id', async () => {
@@ -1391,7 +1736,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(new AgentlessAgentConfigError('missing fleet_server_host_id'));
+      ).rejects.toThrow(new AgentlessAgentConfigError('missing fleet_server_host_id'));
     });
 
     it('should throw an error and log and error when the Agentless API returns a status not handled and not in the 2xx series', async () => {
@@ -1450,7 +1795,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
       expect(mockedLogger.error).toHaveBeenCalledTimes(1);
@@ -1517,7 +1862,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
       expect(mockedLogger.error).toHaveBeenCalledTimes(1);
@@ -1596,7 +1941,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
       expect(mockedLogger.error).toHaveBeenCalledTimes(1);
@@ -1659,10 +2004,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 404', async () => {
@@ -1721,10 +2066,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 403', async () => {
@@ -1784,10 +2129,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 401', async () => {
@@ -1847,10 +2192,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 400', async () => {
@@ -1910,10 +2255,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 400 with code FLEET_UNREACHABLE', async () => {
@@ -1975,10 +2320,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(AgentlessAgentCreateFleetUnreachableError);
+      ).rejects.toThrow(AgentlessAgentCreateFleetUnreachableError);
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 429 with code OVER_PROVISIONED', async () => {
@@ -2040,10 +2385,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(AgentlessAgentCreateOverProvisionnedError);
+      ).rejects.toThrow(AgentlessAgentCreateOverProvisionnedError);
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('Agentless list API should handle 404', async () => {
@@ -2091,12 +2436,12 @@ describe('Agentless Agent service', () => {
       // Force axios to throw an AxiosError to simulate an error response
       jest.mocked(axios).mockRejectedValueOnce(mockedError);
 
-      await expect(agentlessAgentService.listAgentlessDeployments()).rejects.toThrowError(
+      await expect(agentlessAgentService.listAgentlessDeployments()).rejects.toThrow(
         AgentlessAgentListNotFoundError
       );
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
   });
 });

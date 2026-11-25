@@ -8,15 +8,23 @@
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { CancellationToken } from '@kbn/reporting-common';
-import { JOB_STATUS, KibanaShuttingDownError, QueueTimeoutError } from '@kbn/reporting-common';
+import {
+  ExportTypeUnavailableError,
+  JOB_STATUS,
+  KibanaShuttingDownError,
+  QueueTimeoutError,
+  RenderServiceSaturatedError,
+} from '@kbn/reporting-common';
 import type { ReportDocument, TaskRunResult } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
+import { ScheduleType, type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getErrorSource, isUnrecoverableError } from '@kbn/task-manager-plugin/server/task_running';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { EventTracker } from '../../usage';
@@ -428,6 +436,86 @@ describe('Run Scheduled Report Task', () => {
     });
   });
 
+  it('re-marks the rebuilt request when the task manager fake request carries an external UIAM credential', async () => {
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    // The real thing Task Manager hands to the runner: a fake KibanaRequest whose
+    // external-credential verdict is bound to the request object, not its headers.
+    const markedRequestFromTask = kibanaRequestFactory(fakeRawRequest);
+    markExternalUiamCredential(markedRequestFromTask);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test1',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: markedRequestFromTask,
+    } as unknown as RunContext);
+
+    await taskRunner.run();
+
+    const rebuiltRequest = runTaskFn.mock.calls[0][0].request;
+    expect(rebuiltRequest).not.toBe(markedRequestFromTask);
+    expect(rebuiltRequest.headers).toEqual({
+      authorization: 'ApiKey skdjtq4u543yt3rhewrh',
+    });
+    expect(isExternalUiamCredential(rebuiltRequest)).toBe(true);
+  });
+
+  it('does not mark the rebuilt request when the task manager fake request is not marked', async () => {
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    const unmarkedRequestFromTask = kibanaRequestFactory(fakeRawRequest);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test1',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: unmarkedRequestFromTask,
+    } as unknown as RunContext);
+
+    await taskRunner.run();
+
+    expect(isExternalUiamCredential(runTaskFn.mock.calls[0][0].request)).toBe(false);
+  });
+
   it('sends telemetry event when job is claimed', async () => {
     const store = await mockReporting.getStore();
     store.addReport = jest.fn().mockImplementation(
@@ -750,7 +838,7 @@ describe('Run Scheduled Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    await expect(() => taskRunner.run()).rejects.toThrow('failure generating report');
 
     expect(logger.error).toHaveBeenCalledWith(
       new Error(
@@ -770,6 +858,160 @@ describe('Run Scheduled Report Task', () => {
       completed_at: expect.any(String),
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
+  });
+
+  it('fails a run that found page-render-service busy instead of rescheduling it', async () => {
+    const busyRunTask = jest.fn().mockRejectedValue(new RenderServiceSaturatedError('busy'));
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test2',
+      name: 'Test2',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: busyRunTask,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test2',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportFailed = jest.fn().mockResolvedValue({});
+    store.setReportError = jest.fn();
+
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    await task.init(taskManagerMock.createStart(), emailNotificationService);
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test2',
+          schedule: { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } },
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await expect(taskRunner.run()).rejects.toBeInstanceOf(RenderServiceSaturatedError);
+    // So the render waits out the whole run rather than a minute of it.
+    expect(busyRunTask.mock.calls[0][0].taskInstanceFields.canHandBack).toBe(false);
+    expect(store.setReportFailed).toHaveBeenCalledWith(
+      thisSavedReport,
+      expect.objectContaining({
+        output: expect.objectContaining({
+          content: `Can't generate this report because the rendering service is busy. Try again later.`,
+          error_code: 'render_service_saturated_error',
+        }),
+      })
+    );
+  });
+
+  it('fails without running the export type when a serverless feature flag has disabled it', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
+    const isExportTypeEnabled = jest
+      .spyOn(mockReporting, 'isExportTypeEnabled')
+      .mockResolvedValue(false);
+    const runThisTaskFn = jest.fn();
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test2',
+      name: 'Test2',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runThisTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test2',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportFailed = jest.fn();
+
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    await task.init(taskManagerMock.createStart(), emailNotificationService);
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test2',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const error = await taskRunner.run().catch((err: Error) => err);
+
+    expect(error).toBeInstanceOf(ExportTypeUnavailableError);
+    expect((error as Error).message).toContain('Export type test2 is disabled');
+    // Unrecoverable would delete the recurring task and end the schedule.
+    expect(isUnrecoverableError(error as Error)).toBe(false);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect(isExportTypeEnabled).toHaveBeenCalledTimes(1);
+    expect(isExportTypeEnabled).toHaveBeenCalledWith('test2', ScheduleType.SCHEDULED);
+    expect(runThisTaskFn).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalled();
+  });
+
+  it('fails without retrying when no export type is registered for the job type', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
+    const store = await mockReporting.getStore();
+    const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'unregistered' });
+    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportFailed = jest.fn();
+
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    await task.init(taskManagerMock.createStart(), emailNotificationService);
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'unregistered',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const error = await taskRunner.run().catch((err: Error) => err);
+
+    expect(error).toBeInstanceOf(ExportTypeUnavailableError);
+    expect((error as Error).message).toContain('No export type from unregistered found');
+    expect(isUnrecoverableError(error as Error)).toBe(false);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect(mockGetContentStream).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalled();
   });
 
   it('should retry up to maxRetries', async () => {
@@ -830,7 +1072,7 @@ describe('Run Scheduled Report Task', () => {
     } as unknown as RunContext);
 
     const runPromise = taskRunner.run();
-    const expectPromise = expect(runPromise).rejects.toThrowError('failure generating report');
+    const expectPromise = expect(runPromise).rejects.toThrow('failure generating report');
     // Advance past all retry delays
     for (let i = 0; i < 10; i++) {
       await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);

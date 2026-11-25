@@ -30,6 +30,9 @@ spaceTest.describe(
 
     spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
       await mlTestResources.deleteSavedSearches(scoutSpace.id);
+      // ft_ihp_outlier is created first and becomes the space default; leaving it hijacks source selection in the next suite sharing the worker space.
+      await mlTestResources.deleteDataViewByTitle('ft_ihp_outlier', scoutSpace.id);
+      await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
       await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
     });
 

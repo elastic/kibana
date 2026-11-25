@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
+import { OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { CollectionChooser } from './collection_chooser';
 import { FleetCardsProvider } from './fleet_cards_provider';
 
 const mockUseAvailablePackages = jest.fn();
 
-// Stubbed rather than required from the real module, which executes Fleet's whole
-// public bundle. The chooser renders members and never searches.
+// Stub the Fleet public bundle; this suite only renders members.
 jest.mock('@kbn/fleet-plugin/public', () => {
   const ReactActual = jest.requireActual('react');
   return {
@@ -29,7 +30,11 @@ jest.mock('@kbn/fleet-plugin/public', () => {
   };
 });
 
-const member = (name: string, title: string) => ({
+const member = (
+  name: string,
+  title: string,
+  overrides: { type?: string; categories?: string[] } = {}
+) => ({
   id: `epr:${name}`,
   name,
   title,
@@ -40,6 +45,7 @@ const member = (name: string, title: string) => ({
   version: '1.0.0',
   integration: '',
   type: 'integration',
+  ...overrides,
 });
 
 const nginxCollection = {
@@ -56,18 +62,58 @@ const nginxCollection = {
   groupMembers: [member('nginx', 'Nginx'), member('nginx_otel', 'Nginx (OpenTelemetry)')],
 };
 
+// Registry order: ECS, OTel assets, OTel input. Only the input should be recommended.
+const mysqlCollection = {
+  id: 'collection:mysql',
+  name: 'mysql',
+  title: 'MySQL',
+  description: 'Choose from MySQL, MySQL Enterprise, or OTel-based collection.',
+  categories: ['observability', 'opentelemetry'],
+  icons: [],
+  url: '/app/integrations/browse',
+  version: '',
+  integration: '',
+  isCollectionCard: true,
+  groupMembers: [
+    member('mysql', 'MySQL'),
+    member('mysql_otel', 'MySQL OpenTelemetry Assets', {
+      type: 'content',
+      categories: ['observability', 'opentelemetry'],
+    }),
+    member('mysql_input_otel', 'MySQL (OpenTelemetry)', {
+      type: 'input',
+      categories: ['observability', 'opentelemetry'],
+    }),
+  ],
+};
+
+const redisCollection = {
+  id: 'collection:redis',
+  name: 'redis',
+  title: 'Redis',
+  description: 'Choose from Redis (OSS) or Redis Enterprise collection.',
+  categories: ['observability'],
+  icons: [],
+  url: '/app/integrations/browse',
+  version: '',
+  integration: '',
+  isCollectionCard: true,
+  groupMembers: [member('redis', 'Redis'), member('redisenterprise', 'Redis Enterprise')],
+};
+
 const renderChooser = ({
   collection,
   searchTerm = '',
 }: {
   collection?: string;
   searchTerm?: string;
-}) =>
+}) => {
+  const core = coreMock.createStart();
   render(
     <I18nProvider>
-      <KibanaContextProvider services={coreMock.createStart()}>
+      <KibanaContextProvider services={core}>
         <MemoryRouter initialEntries={['/']}>
-          <FleetCardsProvider enabled>
+          <FleetCardsProvider>
             <CollectionChooser
               collection={collection}
               searchTerm={searchTerm}
@@ -79,18 +125,25 @@ const renderChooser = ({
       </KibanaContextProvider>
     </I18nProvider>
   );
+  return core;
+};
 
 const memberHrefs = () =>
   screen
     .getAllByTestId(/^collectionVariantRow-/)
     .map((row) => row.querySelector('a')?.getAttribute('href') ?? '');
 
+const memberIds = () =>
+  screen
+    .getAllByTestId(/^collectionVariantRow-/)
+    .map((row) => row.getAttribute('data-test-subj')?.replace('collectionVariantRow-', ''));
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseAvailablePackages.mockReturnValue({
     isLoading: false,
     eprPackageLoadingError: undefined,
-    allCards: [nginxCollection],
+    allCards: [nginxCollection, mysqlCollection, redisCollection],
   });
 });
 
@@ -103,8 +156,7 @@ describe('CollectionChooser', () => {
     expect(screen.queryByTestId('collectionFlyout')).not.toBeInTheDocument();
   });
 
-  // A refresh and a return from a member's detail page both land before Fleet's
-  // packages exist, so the chooser waits rather than deciding once on mount.
+  // Refresh and return-from-detail both render before Fleet's packages load.
   it('opens the chooser named in the url once the cards arrive', async () => {
     renderChooser({ collection: 'nginx' });
 
@@ -122,7 +174,6 @@ describe('CollectionChooser', () => {
     }
   });
 
-  // How a chooser opened from a curated grid tile arrives: no search term.
   it('leaves the search out of member return paths when there is none', async () => {
     renderChooser({ collection: 'nginx' });
 
@@ -133,12 +184,53 @@ describe('CollectionChooser', () => {
     }
   });
 
-  // Flag off, group retired, or a hand-edited url: the page stays usable.
   it('shows no chooser when no card matches the url', async () => {
     renderChooser({ collection: 'docker' });
 
     await screen.findByTestId('probeMounted');
     await waitFor(() => expect(mockUseAvailablePackages).toHaveBeenCalled());
     expect(screen.queryByTestId('collectionFlyout')).not.toBeInTheDocument();
+  });
+
+  it('fronts the installable OpenTelemetry variant and marks it recommended', async () => {
+    renderChooser({ collection: 'mysql' });
+
+    await screen.findByTestId('collectionFlyout');
+    expect(memberIds()).toEqual(['epr:mysql_input_otel', 'epr:mysql', 'epr:mysql_otel']);
+
+    const badges = screen.getAllByTestId('collectionVariantRecommendedBadge');
+    expect(badges).toHaveLength(1);
+    expect(screen.getByTestId('collectionVariantRow-epr:mysql_input_otel')).toContainElement(
+      badges[0]
+    );
+  });
+
+  it('reports the picked variant with its collection and the recommendation', async () => {
+    const user = userEvent.setup();
+    const core = renderChooser({ collection: 'mysql' });
+
+    await screen.findByTestId('collectionFlyout');
+    await user.click(
+      within(screen.getByTestId('collectionVariantRow-epr:mysql_input_otel')).getByRole('link')
+    );
+
+    expect(core.analytics.reportEvent).toHaveBeenCalledWith(
+      OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT.eventType,
+      {
+        tile_id: 'epr:mysql_input_otel',
+        surface: 'collection_variant',
+        collection_id: 'mysql',
+        is_recommended: true,
+        has_search_term: false,
+      }
+    );
+  });
+
+  it('keeps Fleet order and shows no recommendation when no member is an OpenTelemetry package', async () => {
+    renderChooser({ collection: 'redis' });
+
+    await screen.findByTestId('collectionFlyout');
+    expect(memberIds()).toEqual(['epr:redis', 'epr:redisenterprise']);
+    expect(screen.queryByTestId('collectionVariantRecommendedBadge')).not.toBeInTheDocument();
   });
 });

@@ -19,6 +19,7 @@ import {
   ACTION_EXPORT_JSON,
   ACTION_UNLINK_FROM_LIBRARY,
   ACTION_FILTERS_NOTIFICATION,
+  ACTION_ESQL_NOTIFICATION,
 } from './constants';
 
 export const registerActions = async (plugins: DashboardStartDependencies) => {
@@ -41,6 +42,12 @@ export const registerActions = async (plugins: DashboardStartDependencies) => {
     return new FiltersNotificationAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_FILTERS_NOTIFICATION);
+
+  uiActions.registerActionAsync(ACTION_ESQL_NOTIFICATION, async () => {
+    const { esqlNotificationAction } = await import('../dashboard_renderer/dashboard_module');
+    return esqlNotificationAction;
+  });
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_ESQL_NOTIFICATION);
 
   uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
     const { AddSectionAction } = await import('../dashboard_renderer/dashboard_module');

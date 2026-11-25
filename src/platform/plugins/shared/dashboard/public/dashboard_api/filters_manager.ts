@@ -42,7 +42,7 @@ export const initializeFiltersManager = (
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
-  const childFiltersLoading$ = layoutManager.internalApi.childrenLoading$
+  const childFiltersLoading$ = layoutManager.internalApi.childApisPending$
     .pipe(
       combineLatestWith(
         combineCompatibleChildrenApis<AppliesFilters, boolean>(
@@ -57,7 +57,10 @@ export const initializeFiltersManager = (
       )
     )
     .pipe(
-      map(([childrenLoading, filtersLoading]) => childrenLoading || filtersLoading),
+      map(
+        ([hasPendingChildApis, hasChildFiltersLoading]) =>
+          hasPendingChildApis || hasChildFiltersLoading
+      ),
       distinctUntilChanged()
     );
 
@@ -115,7 +118,7 @@ export const initializeFiltersManager = (
     .pipe(
       switchMap(async () => {
         await new Promise((resolve) => {
-          unpublishedChildFilters$.pipe(skip(1), first()).subscribe(resolve);
+          unpublishedChildFilters$.pipe(first()).subscribe(resolve);
         });
       })
     )

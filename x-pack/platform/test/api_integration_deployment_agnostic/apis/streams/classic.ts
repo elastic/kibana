@@ -107,7 +107,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               stream: {
                 type: 'classic',
                 description: '',
-                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   settings: {},
@@ -158,7 +157,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: TEST_STREAM_NAME,
           description: '',
           updated_at: stream.updated_at,
-          query_streams: [],
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
@@ -239,7 +237,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               stream: {
                 type: 'classic',
                 description: '',
-                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
@@ -272,7 +269,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             type: 'classic',
             description: '',
-            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -315,7 +311,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               stream: {
                 type: 'classic',
                 description: '',
-                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
@@ -360,7 +355,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             type: 'classic',
             description: 'Should cause a failure due to invalid ingest pipeline',
-            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},
@@ -408,7 +402,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             type: 'classic',
             description: '',
-            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},
@@ -537,6 +530,84 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(fieldCapsResponse.fields['foo.bar']).to.have.property('keyword');
         expect(fieldCapsResponse.fields).to.have.property('foo.baz');
         expect(fieldCapsResponse.fields['foo.baz']).to.have.property('keyword');
+      });
+
+      it('Clears the data stream mappings override when all field overrides are removed', async () => {
+        const setResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              ...emptyAssets,
+              stream: {
+                type: 'classic',
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  classic: {
+                    field_overrides: {
+                      'foo.bar': {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  failure_store: { inherit: {} },
+                },
+              },
+            },
+          },
+        });
+        expect(setResponse.status).to.eql(200);
+
+        const mappingsBefore = await esClient.indices.getDataStreamMappings({
+          name: TEST_STREAM_NAME,
+        });
+        expect(mappingsBefore.data_streams[0].mappings).to.have.property('properties');
+        expect(mappingsBefore.data_streams[0].mappings._meta).to.eql({ managed_by: 'streams' });
+
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              ...emptyAssets,
+              stream: {
+                type: 'classic',
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  classic: {
+                    field_overrides: {},
+                  },
+                  failure_store: { inherit: {} },
+                },
+              },
+            },
+          },
+        });
+        expect(putResponse.status).to.eql(200);
+
+        // The data stream level override must be gone entirely, including _meta
+        const mappingsAfter = await esClient.indices.getDataStreamMappings({
+          name: TEST_STREAM_NAME,
+        });
+        expect(mappingsAfter.data_streams[0].mappings).to.eql({});
+
+        // A lazy rollover was requested: indexing a document creates a new backing index
+        const indicesBefore = (await esClient.indices.getDataStream({ name: TEST_STREAM_NAME }))
+          .data_streams[0].indices.length;
+
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: 'after reset',
+        });
+        expect(response.result).to.eql('created');
+
+        const indicesAfter = (await esClient.indices.getDataStream({ name: TEST_STREAM_NAME }))
+          .data_streams[0].indices.length;
+        expect(indicesAfter).to.eql(indicesBefore + 1);
       });
     });
 

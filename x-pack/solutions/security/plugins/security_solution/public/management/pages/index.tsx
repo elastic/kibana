@@ -26,6 +26,7 @@ import {
   MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
@@ -39,6 +40,13 @@ import { PrivilegedRoute } from '../components/privileged_route';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { ArtifactsPage } from './artifacts';
 import { ScriptLibraryContainer } from './script_library';
+import {
+  ARTIFACTS,
+  ENDPOINTS,
+  POLICIES,
+  RESPONSE_ACTIONS_HISTORY,
+  SCRIPT_LIBRARY,
+} from '../../app/translations';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -76,6 +84,9 @@ const Notes = () => (
 
 export const ManagementContainer = memo(() => {
   const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const customYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
+    'customYaraSignaturesEnabled'
+  );
   const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
@@ -87,6 +98,7 @@ export const ManagementContainer = memo(() => {
     loading,
     canReadPolicyManagement,
     canReadBlocklist,
+    canReadCustomYaraSignatures,
     canReadTrustedApplications,
     canReadTrustedDevices,
     canReadEventFilters,
@@ -124,17 +136,20 @@ export const ManagementContainer = memo(() => {
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
         component={EndpointTelemetry}
         hasPrivilege={canReadEndpointList}
+        title={ENDPOINTS}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_POLICIES_PATH}
         component={PolicyTelemetry}
         hasPrivilege={canReadPolicyManagement}
+        title={POLICIES}
       />
       {endpointExceptionsMovedUnderManagement && (
         <PrivilegedRoute
           path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
           component={ArtifactsPage}
           hasPrivilege={canReadEndpointExceptions}
+          title={ARTIFACTS}
           exact
         />
       )}
@@ -142,6 +157,7 @@ export const ManagementContainer = memo(() => {
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
         component={ArtifactsPage}
         hasPrivilege={canReadTrustedApplications}
+        title={ARTIFACTS}
         exact
       />
       {trustedDevicesEnabled && (
@@ -149,6 +165,7 @@ export const ManagementContainer = memo(() => {
           path={MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH}
           component={ArtifactsPage}
           hasPrivilege={canReadTrustedDevices}
+          title={ARTIFACTS}
           exact
         />
       )}
@@ -156,24 +173,37 @@ export const ManagementContainer = memo(() => {
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
         component={ArtifactsPage}
         hasPrivilege={canReadEventFilters}
+        title={ARTIFACTS}
         exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={ArtifactsPage}
         hasPrivilege={canReadHostIsolationExceptions}
+        title={ARTIFACTS}
         exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
         component={ArtifactsPage}
         hasPrivilege={canReadBlocklist}
+        title={ARTIFACTS}
         exact
       />
+      {customYaraSignaturesEnabled && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH}
+          component={ArtifactsPage}
+          hasPrivilege={canReadCustomYaraSignatures}
+          title={ARTIFACTS}
+          exact
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
         component={ResponseActionsTelemetry}
         hasPrivilege={canReadActionsLogManagement}
+        title={RESPONSE_ACTIONS_HISTORY}
       />
 
       {showScriptsLibrary && (
@@ -181,6 +211,7 @@ export const ManagementContainer = memo(() => {
           path={MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH}
           component={ScriptLibraryTelemetry}
           hasPrivilege={canReadScriptsLibrary}
+          title={SCRIPT_LIBRARY}
         />
       )}
 

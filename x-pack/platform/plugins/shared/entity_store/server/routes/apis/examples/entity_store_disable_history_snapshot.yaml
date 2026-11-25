@@ -1,0 +1,59 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        disableOnly:
+          summary: Disable without clearing
+          value: {}
+        disableAndClear:
+          summary: Disable and clear snapshot indices
+          value:
+            clearHistorySnapshots: true
+responses:
+  200:
+    description: Indicates a successful response.
+    content:
+      application/json:
+        examples:
+          disableSuccessExample:
+            summary: History snapshot task disabled
+            description: The Entity Store history snapshot task was disabled.
+            value:
+              ok: true
+  404:
+    description: Entity store is not installed.
+    content:
+      application/json:
+        examples:
+          notInstalledExample:
+            summary: Entity store not installed
+            description: The Entity Store history snapshot task cannot be disabled because the entity store is not installed.
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Entity store is not installed
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -d '{}' \
+        "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
+  - lang: curl
+    label: Disable and clear indices
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -d '{"clearHistorySnapshots":true}' \
+        "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
+  - lang: Console
+    source: |
+      PUT kbn://api/security/entity_store/history_snapshot/disable
+      {}
+  - lang: Console
+    label: Disable and clear indices
+    source: |
+      PUT kbn://api/security/entity_store/history_snapshot/disable
+      {
+        "clearHistorySnapshots": true
+      }

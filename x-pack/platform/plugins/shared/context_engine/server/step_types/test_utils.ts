@@ -6,18 +6,23 @@
  */
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type { Logger } from '@kbn/logging';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from '../ai_indices/service';
+import type { ContextEngineAnalyticsService } from '../telemetry';
 
 /** Builds a minimal step handler context with a mocked scoped ES client. */
 export const createMockStepContext = ({
   input,
   esClient,
+  abortController = new AbortController(),
+  spaceId = 'default',
 }: {
   input: unknown;
   esClient: unknown;
+  abortController?: AbortController;
+  spaceId?: string;
 }): StepHandlerContext => {
-  const abortController = new AbortController();
   return {
     input,
     rawInput: {},
@@ -25,7 +30,11 @@ export const createMockStepContext = ({
     contextManager: {
       getScopedEsClient: jest.fn().mockReturnValue(esClient),
       getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
-      getContext: jest.fn(),
+      getContext: jest.fn().mockReturnValue({
+        workflow: { id: 'wf-1', name: 'wf', enabled: true, spaceId, version: 3 },
+        execution: { id: 'exec-1', isTestRun: false, startedAt: new Date(), url: '' },
+        kibanaUrl: '',
+      }),
       renderInputTemplate: jest.fn(),
     },
     logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
@@ -36,7 +45,26 @@ export const createMockStepContext = ({
 };
 
 /** An AiIndexService stub whose `get` resolves to an AI index with the given dest. */
-export const mockAiIndexService = (dest: AiIndexDest): AiIndexService =>
+export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexService =>
   ({
-    get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest }),
+    get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest, managed }),
   } as unknown as AiIndexService);
+
+export const mockKiWriter = {
+  uri: 'workflow://wf-1',
+  metadata: { version: 3, run_id: 'exec-1', space_id: 'default' },
+};
+
+/** Fresh telemetry deps (analytics service + logger mocks) for a KI step definition. */
+export const mockKiStepTelemetry = () => ({
+  analyticsService: {
+    reportKiWrite: jest.fn(),
+    reportKiVerification: jest.fn(),
+  } as unknown as jest.Mocked<ContextEngineAnalyticsService>,
+  logger: {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger,
+});

@@ -65,12 +65,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
           />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
-          <RiskDetailsTabBody
-            {...tabProps}
-            riskEntity={EntityType.user}
-            entityName={detailName}
-            entityId={entityId}
-          />
+          <RiskDetailsTabBody {...tabProps} riskEntity={EntityType.user} entityId={entityId} />
         </Route>
       </Routes>
     );

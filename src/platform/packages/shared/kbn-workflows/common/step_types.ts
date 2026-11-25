@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isWorkflowStepTriggered } from './well_known_trigger_sources';
+
 export const WORKFLOW_EXECUTE_STEP_TYPE = 'workflow.execute' as const;
 export const WORKFLOW_EXECUTE_ASYNC_STEP_TYPE = 'workflow.executeAsync' as const;
+export const WORKFLOW_AWAIT_EXECUTIONS_STEP_TYPE = 'workflow.awaitExecutions' as const;
 
 export const isExecuteSyncStepType = (stepType: string | undefined): boolean =>
   stepType === WORKFLOW_EXECUTE_STEP_TYPE;
@@ -29,3 +32,11 @@ export const isSyncParentInvocation = (
 } =>
   context?.parentWorkflowInvocation === 'sync' &&
   typeof context?.parentWorkflowExecutionId === 'string';
+
+/**
+ * True when a parent workflow step did not start the execution, so it is the root of its own
+ * lineage chain. Execution scheduling uses `isWorkflowStepTriggered` directly, so widening what
+ * counts as a chain here can't change how runs are scheduled.
+ */
+export const isTopLevelWorkflowExecution = ({ triggeredBy }: { triggeredBy?: string }): boolean =>
+  !isWorkflowStepTriggered(triggeredBy);

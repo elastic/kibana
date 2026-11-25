@@ -7,25 +7,78 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateEmptyStrings } from '../../../../../validate_empty_strings';
+import {
+  CONNECTOR_CONFIG_KEY_MAX_LENGTH,
+  CONNECTOR_ID_MAX_LENGTH,
+  CONNECTOR_NAME_MAX_LENGTH,
+  CONNECTOR_SPEC_VERSION_MAX_LENGTH,
+} from '../../../../..';
 
 export const updateConnectorParamsSchema = schema.object({
   id: schema.string({
+    maxLength: CONNECTOR_ID_MAX_LENGTH,
     meta: { description: 'An identifier for the connector.' },
   }),
 });
 
-export const updateConnectorBodySchema = schema.object(
-  {
-    name: schema.string({
-      validate: validateEmptyStrings,
-      meta: { description: 'The display name for the connector.' },
-    }),
-    config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+const updateConnectorBodyFields = {
+  name: schema.string({
+    maxLength: CONNECTOR_NAME_MAX_LENGTH,
+    validate: validateEmptyStrings,
+    meta: { description: 'The display name for the connector.' },
+  }),
+  config: schema.recordOf(
+    schema.string({ maxLength: CONNECTOR_CONFIG_KEY_MAX_LENGTH }),
+    schema.any({ validate: validateEmptyStrings }),
+    {
       defaultValue: {},
-    }),
-    secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    }
+  ),
+  secrets: schema.recordOf(
+    schema.string({ maxLength: CONNECTOR_CONFIG_KEY_MAX_LENGTH }),
+    schema.any({ validate: validateEmptyStrings }),
+    {
       defaultValue: {},
-    }),
-  },
-  { meta: { id: 'update_connector' } }
-);
+    }
+  ),
+};
+
+const specVersionUpdateField = {
+  spec_version: schema.maybe(
+    schema.string({
+      maxLength: CONNECTOR_SPEC_VERSION_MAX_LENGTH,
+      meta: {
+        description:
+          'The connector schema version to move to, as a major (for example, "1") or exact major.minor (for example, "1.3"). When omitted, versioned connectors keep their major and move to its latest accepted minor.',
+      },
+    })
+  ),
+};
+
+const isInboundEventsEnabledUpdateField = {
+  is_inbound_events_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Turn receiving inbound events on or off. Omit to keep the current setting. Only valid for connectors that both send and receive.',
+      },
+    })
+  ),
+};
+
+/** Update-connector body schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
+export const getUpdateConnectorBodySchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
+  schema.object(
+    {
+      ...updateConnectorBodyFields,
+      ...(includeSpecVersionField ? specVersionUpdateField : {}),
+      ...(includeInboundEventsField ? isInboundEventsEnabledUpdateField : {}),
+    },
+    { meta: { id: 'update_connector' } }
+  );
+
+/** Flag-on schema so TypeOf includes the optional field. */
+export const updateConnectorBodySchema = getUpdateConnectorBodySchema(true, true);

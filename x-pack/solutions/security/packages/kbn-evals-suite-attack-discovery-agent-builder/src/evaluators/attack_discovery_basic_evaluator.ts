@@ -21,6 +21,7 @@ export const createAttackDiscoveryBasicEvaluator = (): Evaluator<
   return {
     name: ATTACK_DISCOVERY_BASIC_EVALUATOR_NAME,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       if (!expectsAttackDiscovery(expected?.expectedToolPath)) {
         return {
@@ -31,7 +32,12 @@ export const createAttackDiscoveryBasicEvaluator = (): Evaluator<
       }
 
       const insights = output?.insights;
-      if (!insights || !Array.isArray(insights)) {
+      // An EMPTY array is also "missing": a slow-path run whose every
+      // discovery was filtered produces `insights: []`, and the shape check
+      // below (`[].find(...) === undefined`) would otherwise score that empty
+      // report as a well-formed one. The zero count is still preserved in
+      // workflow evidence (`validatedDiscoveryCount`).
+      if (!insights || !Array.isArray(insights) || insights.length === 0) {
         return { score: 0, label: 'missing_insights' };
       }
 

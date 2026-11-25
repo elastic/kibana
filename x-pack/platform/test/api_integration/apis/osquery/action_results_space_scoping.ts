@@ -23,19 +23,27 @@ interface ActionResultsRows {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const spaces = getService('spaces');
   const osqueryPublicApiVersion = '2023-10-31';
 
+  const actionIndex = '.logs-osquery_manager.actions-default';
   // Live-query action responses are written by osquerybeat to the
   // osquery_manager action.responses data stream. The search strategy only
   // queries this data stream when it actually exists (newDataStreamIndexExists),
   // so the test must create it as a real data stream rather than a plain index.
   const responsesIndex = 'logs-osquery_manager.action.responses-default';
   const indexTemplateName = 'osquery-action-results-space-scoping-it';
-  const actionId = `action-space-scoping-it-${Date.now()}`;
+  const parentActionId = `action-space-scoping-it-${Date.now()}`;
+  const actionId = `query-space-scoping-it-${Date.now()}`;
+  // Responses exist for this id, but no action document does.
+  const orphanActionId = `orphan-space-scoping-it-${Date.now()}`;
 
-  const spaceAAgent = 'action-space-scoping-it-agent-a';
-  const spaceBAgent = 'action-space-scoping-it-agent-b';
   const otherSpaceId = 'action-space-scoping-it-b';
+  const topLevelStampedAgent = 'action-space-scoping-it-agent-a';
+  const actionDataStampedAgent = 'action-space-scoping-it-agent-b';
+  // Indexed before Kibana stamped `action_data.space_id`: no space field at all.
+  const unstampedAgent = 'action-space-scoping-it-agent-c';
+  const orphanAgent = 'action-space-scoping-it-agent-d';
 
   // Install a higher-priority data stream template with the field types the
   // action_results query/aggregation rely on, then (re)create the data stream.
@@ -54,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
             'event.ingested': { type: 'date' },
             action_id: { type: 'keyword' },
             space_id: { type: 'keyword' },
+            action_data: { properties: { space_id: { type: 'keyword' } } },
             agent_id: { type: 'keyword' },
             agent: { properties: { id: { type: 'keyword' } } },
             elastic_agent: { properties: { id: { type: 'keyword' } } },
@@ -70,6 +79,32 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.createDataStream({ name: responsesIndex });
   };
 
+  const seedActionDocument = async () => {
+    await es.index({
+      index: actionIndex,
+      id: parentActionId,
+      refresh: 'wait_for',
+      document: {
+        action_id: parentActionId,
+        type: 'INPUT_ACTION',
+        input_type: 'osquery',
+        '@timestamp': new Date().toISOString(),
+        expiration: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        agents: [topLevelStampedAgent, actionDataStampedAgent, unstampedAgent],
+        user_id: 'elastic',
+        space_id: otherSpaceId,
+        queries: [
+          {
+            action_id: actionId,
+            id: 'query-1',
+            query: 'select 1;',
+            agents: [topLevelStampedAgent, actionDataStampedAgent, unstampedAgent],
+          },
+        ],
+      },
+    });
+  };
+
   const seedResponses = async () => {
     const timestamp = new Date().toISOString();
     const base = {
@@ -77,25 +112,29 @@ export default function ({ getService }: FtrProviderContext) {
       'event.ingested': timestamp,
       started_at: timestamp,
       completed_at: timestamp,
-      action_id: actionId,
       action_response: { osquery: { count: 1 } },
     };
+    const agentFields = (agentId: string) => ({
+      agent_id: agentId,
+      agent: { id: agentId },
+      elastic_agent: { id: agentId },
+    });
 
     const documents = [
       {
         ...base,
-        space_id: 'default',
-        agent_id: spaceAAgent,
-        agent: { id: spaceAAgent },
-        elastic_agent: { id: spaceAAgent },
+        action_id: actionId,
+        space_id: otherSpaceId,
+        ...agentFields(topLevelStampedAgent),
       },
       {
         ...base,
-        space_id: otherSpaceId,
-        agent_id: spaceBAgent,
-        agent: { id: spaceBAgent },
-        elastic_agent: { id: spaceBAgent },
+        action_id: actionId,
+        action_data: { space_id: otherSpaceId },
+        ...agentFields(actionDataStampedAgent),
       },
+      { ...base, action_id: actionId, ...agentFields(unstampedAgent) },
+      { ...base, action_id: orphanActionId, ...agentFields(orphanAgent) },
     ];
 
     for (const document of documents) {
@@ -104,39 +143,65 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
 
-  const deleteResponses = async () => {
+  const cleanup = async () => {
+    await es.deleteByQuery({
+      index: actionIndex,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      refresh: true,
+      query: { term: { action_id: parentActionId } },
+    });
     await es.indices.deleteDataStream({ name: responsesIndex }, { ignore: [404] });
     await es.indices.deleteIndexTemplate({ name: indexTemplateName }, { ignore: [404] });
   };
 
+  // `spaceId` omitted reads from the default space.
+  const fetchActionResults = (id: string, spaceId?: string) => {
+    const basePath = spaceId ? `/s/${spaceId}` : '';
+
+    return supertest
+      .get(`${basePath}/api/osquery/action_results/${id}?page=0&pageSize=100&kuery=`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', osqueryPublicApiVersion);
+  };
+
   describe('Action results space scoping', () => {
     before(async () => {
+      await spaces.create({ id: otherSpaceId, name: otherSpaceId, disabledFeatures: [] });
       await recreateResponsesIndex();
+      await seedActionDocument();
       await seedResponses();
     });
-    after(deleteResponses);
+    after(async () => {
+      await cleanup();
+      await spaces.delete(otherSpaceId);
+    });
 
-    it('returns only active-space responses (hits + aggregation)', async () => {
-      const { body } = await supertest
-        .get(`/api/osquery/action_results/${actionId}?page=0&pageSize=100&kuery=`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', osqueryPublicApiVersion)
-        .expect(200);
-
+    // The action document is in the active space, so its responses are read by
+    // `action_id` whatever space field they carry, including none.
+    it('returns every response of an action from the action space (hits + aggregation)', async () => {
+      const { body } = await fetchActionResults(actionId, otherSpaceId).expect(200);
       const { edges, aggregations } = body as ActionResultsRows;
-      const spaceIds = (edges ?? []).map(
-        (edge) => edge._source?.space_id ?? (edge.fields?.space_id as string[] | undefined)?.[0]
-      );
+      const serialized = JSON.stringify(edges);
 
-      // The default-space response is returned; the other-space one is filtered out.
-      expect(spaceIds).not.to.contain(otherSpaceId);
-      expect(JSON.stringify(body)).not.to.contain(spaceBAgent);
-      expect(JSON.stringify(body)).not.to.contain(otherSpaceId);
-      expect(JSON.stringify(body)).to.contain(spaceAAgent);
+      expect(serialized).to.contain(topLevelStampedAgent);
+      expect(serialized).to.contain(actionDataStampedAgent);
+      expect(serialized).to.contain(unstampedAgent);
+      expect(serialized).not.to.contain(orphanAgent);
+      expect(aggregations?.totalResponded).to.eql(3);
+    });
 
-      // The aggregation is space-scoped too, so its counts match the
-      // space-scoped hits (only the single default-space response is counted).
-      expect(aggregations?.totalResponded).to.eql(1);
+    // Field-less responses used to match the default space's missing-field
+    // allowance, which exposed another space's results there.
+    it('returns 404 for the action from another space', async () => {
+      const { body } = await fetchActionResults(actionId).expect(404);
+
+      expect(JSON.stringify(body)).not.to.contain(unstampedAgent);
+    });
+
+    it('returns 404 for responses without an action document', async () => {
+      await fetchActionResults(orphanActionId).expect(404);
+      await fetchActionResults(orphanActionId, otherSpaceId).expect(404);
     });
   });
 }

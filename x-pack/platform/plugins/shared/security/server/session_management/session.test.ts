@@ -254,9 +254,11 @@ describe('Session', () => {
       );
     });
 
-    it('returns session value with decrypted content', async () => {
+    it('returns a legacy session with a base64 ID', async () => {
+      const legacySid = 'legacy/+/id=';
       mockSessionCookie.get.mockResolvedValue(
         sessionCookieMock.createValue({
+          sid: legacySid,
           aad: mockAAD,
           idleTimeoutExpiration: now + 1,
           lifespanExpiration: now + 1,
@@ -264,6 +266,7 @@ describe('Session', () => {
       );
 
       const mockSessionIndexValue = sessionIndexMock.createValue({
+        sid: legacySid,
         idleTimeoutExpiration: now - 1,
         lifespanExpiration: now + 1,
         content: await encryptContent(
@@ -281,7 +284,7 @@ describe('Session', () => {
           createdAt: 1234567890,
           metadata: { index: mockSessionIndexValue },
           provider: { name: 'basic1', type: 'basic' },
-          sid: 'some-long-sid',
+          sid: legacySid,
           state: 'some-state',
           username: 'some-user',
           userProfileId: 'uid',
@@ -289,6 +292,7 @@ describe('Session', () => {
       });
       expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
+      expect(mockSessionIndex.get).toHaveBeenCalledWith(legacySid);
     });
 
     it('returns session value with decrypted content if optional fields are missing', async () => {
@@ -364,7 +368,7 @@ describe('Session', () => {
 
   describe('#create', () => {
     it('creates session value', async () => {
-      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
+      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64url');
       const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
 
       const mockSessionIndexValue = sessionIndexMock.createValue({
@@ -395,6 +399,10 @@ describe('Session', () => {
         metadata: { index: mockSessionIndexValue },
       });
 
+      const createdSID = mockSessionIndex.create.mock.calls[0][0].sid;
+      expect(createdSID).toMatch(/^[A-Za-z0-9_-]{43}$/);
+      expect(Buffer.from(createdSID, 'base64url')).toHaveLength(32);
+
       // Properly creates session index value.
       expect(mockSessionIndex.create).toHaveBeenCalledTimes(1);
       expect(mockSessionIndex.create).toHaveBeenCalledWith({
@@ -422,8 +430,29 @@ describe('Session', () => {
       );
     });
 
+    it('encodes session IDs containing slash as URL-safe base64', async () => {
+      jest.mocked(crypto.randomBytes).mockImplementationOnce((num, callback) => {
+        const buffer = Buffer.alloc(num, 255);
+        if (typeof callback !== 'function') {
+          return buffer;
+        }
+        callback(null, buffer);
+      });
+      mockSessionIndex.create.mockResolvedValue(sessionIndexMock.createValue());
+
+      await session.create(httpServerMock.createKibanaRequest(), {
+        provider: { type: 'basic', name: 'basic1' },
+        state: 'some-state',
+      });
+
+      const sid = mockSessionIndex.create.mock.calls[0][0].sid;
+      expect(Buffer.alloc(32, 255).toString('base64')).toContain('/');
+      expect(sid).toBe(Buffer.alloc(32, 255).toString('base64url'));
+      expect(sid).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    });
+
     it('creates session value if optional fields are missing', async () => {
-      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
+      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64url');
       const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
 
       const mockSessionIndexValue = sessionIndexMock.createValue({
@@ -477,7 +506,7 @@ describe('Session', () => {
     });
 
     it('creates intermediate session with custom cookie options when stateCookieOptions is provided', async () => {
-      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
+      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64url');
       const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
 
       const mockSessionIndexValue = sessionIndexMock.createValue({
@@ -541,7 +570,7 @@ describe('Session', () => {
     });
 
     it('creates regular session with default cookie options when stateCookieOptions is not provided', async () => {
-      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
+      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64url');
       const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
 
       const mockSessionIndexValue = sessionIndexMock.createValue({
@@ -756,6 +785,60 @@ describe('Session', () => {
         lifespanExpiration: now + 1,
       });
     });
+
+    it.each([now + 50, null])(
+      'persists refreshed state without extending the cookie idle deadline (%s)',
+      async (idleTimeoutExpiration) => {
+        const cookie = sessionCookieMock.createValue({
+          aad: mockAAD,
+          idleTimeoutExpiration,
+          lifespanExpiration: now + 100,
+        });
+        mockSessionCookie.get.mockResolvedValue(cookie);
+        mockSessionIndex.update.mockImplementation(async (value) => value);
+        const state = {
+          accessToken: 'refreshed-access-token',
+          refreshToken: 'refreshed-refresh-token',
+        };
+        const previousValue = sessionMock.createValue({
+          idleTimeoutExpiration: now + 1,
+          lifespanExpiration: now + 2,
+        });
+        const request = httpServerMock.createKibanaRequest();
+
+        const updated = await session.update(
+          request,
+          { ...previousValue, state },
+          { extend: false }
+        );
+
+        expect(updated).toEqual(
+          expect.objectContaining({
+            sid: previousValue.sid,
+            state,
+            idleTimeoutExpiration,
+            lifespanExpiration: cookie.lifespanExpiration,
+          })
+        );
+        expect(mockSessionIndex.update).toHaveBeenCalledTimes(1);
+        const stored = mockSessionIndex.update.mock.calls[0][0];
+        expect(stored).toEqual(
+          expect.objectContaining({
+            idleTimeoutExpiration,
+            lifespanExpiration: cookie.lifespanExpiration,
+          })
+        );
+        const decrypted = await nodeCrypto({ encryptionKey: mockEncryptionKey }).decrypt(
+          stored.content,
+          mockAAD
+        );
+        expect(JSON.parse(decrypted as string).state).toEqual(state);
+        expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
+        expect(mockSessionCookie.set).toHaveBeenCalledWith(request, cookie);
+        expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
+      }
+    );
 
     it('properly extends session expiration if idle timeout is defined.', async () => {
       mockSessionCookie.get.mockResolvedValue(

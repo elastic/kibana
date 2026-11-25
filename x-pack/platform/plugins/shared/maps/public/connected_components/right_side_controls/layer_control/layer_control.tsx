@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -15,8 +15,10 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiToolTip,
+  euiShadow,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LayerTOC } from './layer_toc';
@@ -29,12 +31,12 @@ export interface Props {
   isLayerTOCOpen: boolean;
   layerList: ILayer[];
   isFlyoutOpen: boolean;
+  isLoading: boolean;
   showAddLayerWizard: () => Promise<void>;
   closeLayerTOC: () => void;
   openLayerTOC: () => void;
   hideAllLayers: () => void;
   showAllLayers: () => void;
-  zoom: number;
 }
 
 export function LayerControl({
@@ -45,20 +47,42 @@ export function LayerControl({
   openLayerTOC,
   layerList,
   isFlyoutOpen,
+  isLoading,
   hideAllLayers,
   showAllLayers,
-  zoom,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+
+  // Expanding/collapsing swaps one button for another, which drops focus to <body> and
+  // leaves screen readers silent. Move focus to the counterpart button after a user toggle
+  // so the new state is announced.
+  const expandButtonRef = useRef<HTMLButtonElement | null>(null);
+  const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const shouldRestoreFocusRef = useRef(false);
+
+  useEffect(() => {
+    if (!shouldRestoreFocusRef.current) return;
+    shouldRestoreFocusRef.current = false;
+    (isLayerTOCOpen ? collapseButtonRef : expandButtonRef).current?.focus();
+  }, [isLayerTOCOpen]);
+
+  const onOpenLayerTOC = useCallback(() => {
+    shouldRestoreFocusRef.current = true;
+    openLayerTOC();
+  }, [openLayerTOC]);
+
+  const onCloseLayerTOC = useCallback(() => {
+    shouldRestoreFocusRef.current = true;
+    closeLayerTOC();
+  }, [closeLayerTOC]);
+
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
       return null;
     }
     const hasErrorsOrWarnings = layerList.some((layer) => {
       return layer.hasErrors() || layer.hasWarnings();
-    });
-    const isLoading = layerList.some((layer) => {
-      return layer.isLayerLoading(zoom);
     });
 
     return (
@@ -67,11 +91,13 @@ export function LayerControl({
           defaultMessage: 'Expand layers panel',
         })}
         position="left"
+        disableScreenReaderOutput
       >
         <ExpandButton
           hasErrorsOrWarnings={hasErrorsOrWarnings}
           isLoading={isLoading}
-          onClick={openLayerTOC}
+          onClick={onOpenLayerTOC}
+          buttonRef={expandButtonRef}
         />
       </EuiToolTip>
     );
@@ -85,6 +111,11 @@ export function LayerControl({
         <EuiButton
           isDisabled={isFlyoutOpen}
           className="mapLayerControl__addLayerButton"
+          css={css`
+            &:enabled {
+              ${euiShadow(euiThemeContext, 'm')}
+            }
+          `}
           fill
           fullWidth
           onClick={showAddLayerWizard}
@@ -101,11 +132,7 @@ export function LayerControl({
 
   return (
     <Fragment>
-      <EuiPanel
-        className="mapWidgetControl mapWidgetControl-hasShadow"
-        paddingSize="none"
-        grow={false}
-      >
+      <EuiPanel className="mapWidgetControl" paddingSize="none" grow={false}>
         <EuiFlexItem className="mapWidgetControl__headerFlexItem" grow={false}>
           <EuiFlexGroup
             justifyContent="spaceBetween"
@@ -162,11 +189,13 @@ export function LayerControl({
                 content={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
                   defaultMessage: 'Collapse layers panel',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   className="mapLayerControl__closeLayerTOCButton"
-                  css={{ backgroundColor: `${euiTheme.colors.emptyShade} !important` }}
-                  onClick={closeLayerTOC}
+                  css={{ backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important` }}
+                  onClick={onCloseLayerTOC}
+                  buttonRef={collapseButtonRef}
                   iconType="menuRight"
                   color="text"
                   aria-label={i18n.translate(

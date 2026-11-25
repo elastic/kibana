@@ -80,9 +80,9 @@ export function sendGetEnrollmentAPIKeys(
 
 export function useGetEnrollmentAPIKeysQuery(
   query: GetEnrollmentAPIKeysRequest['query'],
-  options: RequestOptions & { refetchInterval?: number | false } = {}
+  options: RequestOptions & { refetchInterval?: number | false; enabled?: boolean } = {}
 ) {
-  const { refetchInterval, ...requestOptions } = options;
+  const { refetchInterval, enabled, ...requestOptions } = options;
 
   return useQuery(
     ['get-enrollment-api-keys', query],
@@ -95,7 +95,7 @@ export function useGetEnrollmentAPIKeysQuery(
         ...requestOptions,
       });
     },
-    { refetchInterval, refetchIntervalInBackground: false }
+    { refetchInterval, refetchIntervalInBackground: false, enabled }
   );
 }
 

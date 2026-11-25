@@ -6,7 +6,7 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { ToolRegistry } from '@kbn/agent-builder-server';
+import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
 import {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
@@ -77,12 +77,14 @@ export const createSkillRegistry = ({
   toolRegistry,
   experimentalFeaturesEnabled,
   uiSettingValues = new Map(),
+  availabilityContext,
 }: {
   builtinProvider: ReadonlySkillProvider;
   persistedProvider: WritableSkillProvider;
   toolRegistry: ToolRegistry;
   experimentalFeaturesEnabled: boolean;
   uiSettingValues?: ReadonlyMap<string, unknown>;
+  availabilityContext?: AvailabilityContext;
 }): SkillRegistry => {
   const isVisible = (skill: InternalSkillDefinition): boolean => {
     if (skill.experimental && !experimentalFeaturesEnabled) {
@@ -97,15 +99,62 @@ export const createSkillRegistry = ({
     return true;
   };
 
+  // `get` throws when the tool is not registered or unavailable to the caller. The registry
+  // serves one request, so each tool is looked up once and shared by every skill that needs it.
+  const toolAvailability = new Map<string, Promise<boolean>>();
+  const isToolAvailable = (toolId: string): Promise<boolean> => {
+    let check = toolAvailability.get(toolId);
+    if (!check) {
+      check = toolRegistry.get(toolId).then(
+        () => true,
+        () => false
+      );
+      toolAvailability.set(toolId, check);
+    }
+    return check;
+  };
+
+  // A skill whose tools cannot be resolved is hidden on its own rather than failing the listing.
+  const areRegistryToolsAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
+    try {
+      const toolIds = await skill.getRegistryTools();
+      const available = await Promise.all(toolIds.map(isToolAvailable));
+      return available.every(Boolean);
+    } catch {
+      return false;
+    }
+  };
+
+  const isAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
+    if (!isVisible(skill)) {
+      return false;
+    }
+    if (skill.requiresAllRegistryTools && !(await areRegistryToolsAvailable(skill))) {
+      return false;
+    }
+    if (skill.isAvailable && availabilityContext) {
+      const result = await skill.isAvailable(availabilityContext);
+      return result.status === 'available';
+    }
+    return true;
+  };
+
+  const filterAvailable = async (
+    skills: InternalSkillDefinition[]
+  ): Promise<InternalSkillDefinition[]> => {
+    const checks = await Promise.all(skills.map(isAvailable));
+    return skills.filter((_, i) => checks[i]);
+  };
+
   return {
     async has(skillId) {
       const builtinSkill = await builtinProvider.get(skillId);
       if (builtinSkill) {
-        return isVisible(builtinSkill);
+        return isAvailable(builtinSkill);
       }
       const persistedSkill = await persistedProvider.get(skillId);
       if (persistedSkill) {
-        return isVisible(persistedSkill);
+        return isAvailable(persistedSkill);
       }
       return false;
     },
@@ -113,20 +162,19 @@ export const createSkillRegistry = ({
     async get(skillId) {
       const builtin = await builtinProvider.get(skillId);
       if (builtin) {
-        return isVisible(builtin) ? builtin : undefined;
+        return (await isAvailable(builtin)) ? builtin : undefined;
       }
       const persisted = await persistedProvider.get(skillId);
       if (persisted) {
-        return isVisible(persisted) ? persisted : undefined;
+        return (await isAvailable(persisted)) ? persisted : undefined;
       }
       return undefined;
     },
 
     async bulkGet(ids) {
       const builtinResult = await builtinProvider.bulkGet(ids);
-      // Filter out experimental skills from builtin results
       for (const [id, skill] of builtinResult) {
-        if (!isVisible(skill)) {
+        if (!(await isAvailable(skill))) {
           builtinResult.delete(id);
         }
       }
@@ -136,7 +184,7 @@ export const createSkillRegistry = ({
       }
       const persistedResult = await persistedProvider.bulkGet(remainingIds);
       for (const [id, skill] of persistedResult) {
-        if (isVisible(skill)) {
+        if (await isAvailable(skill)) {
           builtinResult.set(id, skill);
         }
       }
@@ -144,7 +192,7 @@ export const createSkillRegistry = ({
     },
 
     async list(options) {
-      const { type, includePlugins, ...listOptions } = options ?? {};
+      const { type, includePlugins, includeHidden, ...listOptions } = options ?? {};
       let results: InternalSkillDefinition[];
       if (type === 'built-in') {
         results = await builtinProvider.list(listOptions);
@@ -160,7 +208,10 @@ export const createSkillRegistry = ({
       if (!includePlugins) {
         results = results.filter((skill) => !skill.plugin_id);
       }
-      return results.filter(isVisible);
+      if (!includeHidden) {
+        results = results.filter((skill) => !skill.hidden);
+      }
+      return filterAvailable(results);
     },
 
     async create(params) {

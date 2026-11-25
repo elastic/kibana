@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import { EuiButton, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import type { Rule } from '@kbn/alerts-ui-shared';
@@ -33,13 +33,9 @@ export function AddToCaseButton({
   } = useKibana();
 
   const selectCaseModal = services.cases?.hooks.useCasesAddToExistingCaseModal({
-    onSuccess: ({ updatedAt }) => {
-      // If the case is newly created the updatedAt will be null
-      // onSuccess doesn't provide a way to know if the case was created or updated
-      // onCreateCaseClicked callback is NOT triggered
-      const isNewCaseCreated = !updatedAt;
+    onSuccess: (_theCase, isNewCase) => {
       telemetryClient.reportAlertAddedToCase(
-        isNewCaseCreated,
+        isNewCase,
         'alertDetails.addToCaseBtn',
         rule?.ruleTypeId || 'unknown'
       );
@@ -69,9 +65,10 @@ export function AddToCaseButton({
   };
 
   return (
-    <EuiButton
-      fill
-      iconType="plus"
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconType="casesApp"
       onClick={handleAddToCase}
       data-test-subj={`add-to-cases-button-${rule?.ruleTypeId}`}
     >
@@ -80,6 +77,6 @@ export function AddToCaseButton({
           defaultMessage: 'Add to case',
         })}
       </EuiText>
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 }

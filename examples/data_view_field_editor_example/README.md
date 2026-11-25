@@ -4,4 +4,4 @@ This example data view field editor app shows how to:
  - Edit data view fields via flyout
  - Delete data view runtime fields with modal confirm prompt
 
-To run this example, use the command `yarn start --run-examples`.
+To run this example, use the command `pnpm start --run-examples`.

@@ -14,23 +14,23 @@ describe('Range parsing utility', () => {
   test('throws an error for inputs that are not formatted properly', () => {
     expect(() => {
       parseRange('');
-    }).toThrowError(TypeError);
+    }).toThrow(TypeError);
 
     expect(function () {
       parseRange('p10202');
-    }).toThrowError(TypeError);
+    }).toThrow(TypeError);
 
     expect(function () {
       parseRange('{0,100}');
-    }).toThrowError(TypeError);
+    }).toThrow(TypeError);
 
     expect(function () {
       parseRange('[0,100');
-    }).toThrowError(TypeError);
+    }).toThrow(TypeError);
 
     expect(function () {
       parseRange(')0,100(');
-    }).toThrowError(TypeError);
+    }).toThrow(TypeError);
   });
 
   const tests = {

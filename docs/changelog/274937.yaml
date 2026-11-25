@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/274937
-type: feature
-products:
-- product: cloud-serverless
-  target: 2026-08-12
-- product: kibana
-title: Add Super Timeline to aggregate multiple analyst timelines
-description: "Adds Super Timeline: select 2–10 analyst timelines from the Timelines list or from a Case's Attachments tab and view them aggregated into a single read-only modal."

@@ -9,13 +9,17 @@ import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import produce from 'immer-v9';
 import { i18n } from '@kbn/i18n';
-import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useNavigation } from './use_navigation';
 import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
+import {
+  movePinnedConversationBetweenLists,
+  patchConversationList,
+} from '../utils/conversation_sidebar_list_cache';
 
 const pinnedUpdateErrorTitle = i18n.translate(
   'xpack.agentBuilder.conversations.pinnedUpdateError',
@@ -46,7 +50,7 @@ export const useConversationListMutations = ({
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
 
       if (isCurrentConversation) {
-        navigateToAgentBuilderUrl(appPaths.root, undefined, { shouldStickToBottom: true });
+        navigateToAgentBuilderUrl(appPaths.root);
       }
     },
     [conversationsService, queryClient, navigateToAgentBuilderUrl, routeConversationId]
@@ -72,14 +76,12 @@ export const useConversationListMutations = ({
     [conversationsService, queryClient]
   );
 
-  const listQueryKey = useMemo(() => queryKeys.conversations.byAgent(agentId), [agentId]);
-
   const rollbackConversationCaches = useCallback(
     (conversationId: string) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
-      queryClient.invalidateQueries({ queryKey: listQueryKey });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list });
     },
-    [queryClient, listQueryKey]
+    [queryClient]
   );
 
   const updateReadStatus = useCallback(
@@ -94,21 +96,14 @@ export const useConversationListMutations = ({
         }
       );
 
-      queryClient.setQueryData<ConversationWithoutRounds[]>(listQueryKey, (current) => {
-        if (!current) return current;
-        return produce(current, (draft) => {
-          const conv = draft.find((c) => c.id === conversationId);
-          if (conv) {
-            conv.read = read;
-          }
-        });
-      });
+      // Apply across all paged list variants via the shared helper.
+      patchConversationList({ queryClient, agentId, conversationId, values: { read } });
 
       conversationsService.updateReadStatus({ conversationId, read }).catch(() => {
         rollbackConversationCaches(conversationId);
       });
     },
-    [conversationsService, queryClient, listQueryKey, rollbackConversationCaches]
+    [conversationsService, queryClient, agentId, rollbackConversationCaches]
   );
 
   const markAsRead = useCallback(
@@ -123,36 +118,25 @@ export const useConversationListMutations = ({
 
   const updatePinnedStatus = useCallback(
     (conversationId: string, pinned: boolean) => {
-      const now = new Date().toISOString();
-
       queryClient.setQueryData<Conversation>(
         queryKeys.conversations.byId(conversationId),
         (current) => {
           if (!current) return current;
           return produce(current, (draft) => {
             draft.pinned = pinned;
-            draft.updated_at = now;
           });
         }
       );
 
-      queryClient.setQueryData<ConversationWithoutRounds[]>(listQueryKey, (current) => {
-        if (!current) return current;
-        return produce(current, (draft) => {
-          const conv = draft.find((c) => c.id === conversationId);
-          if (conv) {
-            conv.pinned = pinned;
-            conv.updated_at = now;
-          }
-        });
-      });
+      // Pinning is per-user state, so `updated_at` is left untouched.
+      movePinnedConversationBetweenLists({ queryClient, agentId, conversationId, pinned });
 
       conversationsService.updatePinnedStatus({ conversationId, pinned }).catch(() => {
         rollbackConversationCaches(conversationId);
         addErrorToast({ title: pinnedUpdateErrorTitle });
       });
     },
-    [conversationsService, queryClient, listQueryKey, rollbackConversationCaches, addErrorToast]
+    [conversationsService, queryClient, agentId, rollbackConversationCaches, addErrorToast]
   );
 
   const markAsPinned = useCallback(

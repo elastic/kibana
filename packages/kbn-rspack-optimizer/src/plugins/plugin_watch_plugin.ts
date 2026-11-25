@@ -8,7 +8,8 @@
  */
 
 import Path from 'path';
-import { rspack, type Compiler } from '@rspack/core';
+import type { Compiler } from '@rspack/core';
+import { rspack } from '../rspack_runtime';
 import type { SingleCompileConfigOptions } from '../config/create_single_compile_config';
 import { discoverPlugins, getPackageMapPath } from '../utils/plugin_discovery';
 import { collectPluginEntries, createUnifiedEntry } from '../utils/entry_generation';
@@ -80,7 +81,7 @@ export class PluginWatchPlugin {
       }
 
       // Watch package-map.json to detect new/removed plugins
-      // (updated by `yarn kbn bootstrap` when plugins are added/removed)
+      // (updated by `pnpm kbn bootstrap` when plugins are added/removed)
       compilation.fileDependencies.add(getPackageMapPath());
     });
 
@@ -95,8 +96,10 @@ export class PluginWatchPlugin {
           repoRoot: this.options.repoRoot,
           examples: this.options.examples || false,
           testPlugins: this.options.testPlugins || false,
+          devOnly: this.options.devOnly,
           paths: this.options.pluginPaths,
           parentDirs: this.options.pluginScanDirs,
+          allowlistPluginGroups: this.options.allowlistPluginGroups,
         });
 
         // Collect plugin entries

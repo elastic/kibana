@@ -30,14 +30,9 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
     const h = createHelpers(() => cookieHeader);
 
-    apiTest.beforeAll(async ({ samlAuth, esClient, apiClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, systemEsClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
-      // The plugin creates the backing data stream lazily, on the first read. Touch the route
-      // before seeding: a direct bulk write to a name with no data stream behind it makes ES
-      // auto-create a plain index, and the plugin's later data-stream creation then fails with
-      // a name conflict.
-      await h.getNotifications(apiClient);
-      await seedNotifications(esClient, [
+      await seedNotifications(systemEsClient, [
         makeDoc('get-info', { namespace: NAMESPACE, severity: 'info' }),
         makeDoc('get-warning', { namespace: NAMESPACE, severity: 'warning' }),
         makeDoc('get-error', { namespace: NAMESPACE, severity: 'error' }),
@@ -47,8 +42,8 @@ apiTest.describe(
       ]);
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
-      await clearNotifications(esClient, NAMESPACE);
+    apiTest.afterAll(async ({ systemEsClient }) => {
+      await clearNotifications(systemEsClient, NAMESPACE);
     });
 
     apiTest('returns the { items, truncated } contract', async ({ apiClient }) => {
@@ -77,27 +72,14 @@ apiTest.describe(
       }
     );
 
-    apiTest('accepts severity as a single query value', async ({ apiClient }) => {
-      const response = await h.getNotifications(apiClient, {
-        namespace: NAMESPACE,
-        severity: 'warning',
-      });
+    apiTest('returns severity on each item for consumers to facet on', async ({ apiClient }) => {
+      const response = await h.getNotifications(apiClient, { namespace: NAMESPACE });
       expect(response).toHaveStatusCode(200);
-      expect(ids(response.body)).toStrictEqual(['get-warning']);
-    });
 
-    apiTest('accepts severity as repeated query values', async ({ apiClient }) => {
-      const response = await h.getNotifications(apiClient, {
-        namespace: NAMESPACE,
-        severity: ['warning', 'error'],
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(ids(response.body).sort()).toStrictEqual(['get-error', 'get-warning']);
-    });
-
-    apiTest('rejects an unknown severity value', async ({ apiClient }) => {
-      const response = await h.getNotifications(apiClient, { severity: 'bogus' });
-      expect(response).toHaveStatusCode(400);
+      const bySeverity = response.body.items
+        .filter((item: { severity: string }) => item.severity === 'warning')
+        .map((item: { notification_id: string }) => item.notification_id);
+      expect(bySeverity).toStrictEqual(['get-warning']);
     });
 
     apiTest('rejects an unknown query parameter', async ({ apiClient }) => {

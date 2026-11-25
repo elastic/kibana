@@ -12,11 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { chunk, isNumber } from 'lodash';
-import type {
-  MlServerDefaults,
-  MlServerLimits,
-  MlNodeCount,
-} from '@kbn/ml-common-types/ml_server_info';
+import type { MlNodeCount, MlInfoResponse } from '@kbn/ml-common-types/ml_server_info';
 import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 import type { RecognizeModuleResult } from '@kbn/ml-common-types/modules';
 import type { MlCalendar, MlCalendarId, UpdateCalendar } from '@kbn/ml-common-types/calendars';
@@ -55,22 +51,6 @@ import { inferenceModelsApiProvider } from './inference_models';
 export interface MlHasPrivilegesResponse {
   hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
   upgradeInProgress: boolean;
-}
-
-export interface MlInfoResponse {
-  defaults: MlServerDefaults;
-  limits: MlServerLimits;
-  native_code: {
-    build_hash: string;
-    version: string;
-  };
-  upgrade_mode: boolean;
-  cloudId?: string;
-  isCloudTrial?: boolean;
-  cloudUrl?: string;
-  isMlAutoscalingEnabled: boolean;
-  showNodeInfo: boolean;
-  showLicenseInfo: boolean;
 }
 
 export interface BucketSpanEstimatorResponse {
@@ -387,13 +367,15 @@ export function mlApiProvider(httpService: HttpService) {
       start,
       end,
       overallScore,
+      signal,
     }: {
       jobId: string[];
-      topN: string;
+      topN: number;
       bucketSpan: string;
       start: number;
       end: number;
       overallScore?: number;
+      signal?: AbortSignal;
     }): Promise<estypes.MlGetOverallBucketsResponse> {
       const body = JSON.stringify({
         topN,
@@ -415,6 +397,7 @@ export function mlApiProvider(httpService: HttpService) {
             method: 'POST',
             body,
             version: '1',
+            signal,
           });
         })
       ).then((responses) => {
@@ -698,6 +681,7 @@ export function mlApiProvider(httpService: HttpService) {
       earliestMs,
       latestMs,
       datafeed,
+      signal,
     }: {
       index: string;
       fieldNames: string[];
@@ -706,6 +690,7 @@ export function mlApiProvider(httpService: HttpService) {
       earliestMs: number;
       latestMs: number;
       datafeed?: Datafeed;
+      signal?: AbortSignal;
     }) {
       const body = JSON.stringify({
         index,
@@ -722,6 +707,7 @@ export function mlApiProvider(httpService: HttpService) {
         method: 'POST',
         body,
         version: '1',
+        signal,
       });
     },
 

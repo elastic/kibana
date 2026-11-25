@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
@@ -134,23 +134,31 @@ describe('BulkAlertAssigneesPanel', () => {
     const wrapper = renderAssigneesMenu(mockAlertsWithAssignees);
 
     const deselectUser = (userName: string, index: number) => {
-      expect(wrapper.getAllByRole('option')[index]).toHaveAttribute('title', userName);
-      expect(wrapper.getAllByRole('option')[index]).toBeChecked();
+      const option = wrapper.getByText(userName).closest('li');
+
+      expect(option).toBeInTheDocument();
+      expect(option).toBeChecked();
+
       act(() => {
         fireEvent.click(wrapper.getByText(userName));
       });
-      expect(wrapper.getAllByRole('option')[index]).toHaveAttribute('title', userName);
-      expect(wrapper.getAllByRole('option')[index]).not.toBeChecked();
+
+      expect(option).toBeInTheDocument();
+      expect(option).not.toBeChecked();
     };
 
     const selectUser = (userName: string, index = 0) => {
-      expect(wrapper.getAllByRole('option')[index]).toHaveAttribute('title', userName);
-      expect(wrapper.getAllByRole('option')[index]).not.toBeChecked();
+      const option = wrapper.getByText(userName).closest('li');
+
+      expect(option).toBeInTheDocument();
+      expect(option).not.toBeChecked();
+
       act(() => {
         fireEvent.click(wrapper.getByText(userName));
       });
-      expect(wrapper.getAllByRole('option')[index]).toHaveAttribute('title', userName);
-      expect(wrapper.getAllByRole('option')[index]).toBeChecked();
+
+      expect(option).toBeInTheDocument();
+      expect(option).toBeChecked();
     };
 
     deselectUser('user1', 0);

@@ -18,17 +18,20 @@ import {
   createMockLiveRow,
   createMockPackLiveRow,
   createMockRuleRow,
+  createMockWorkflowRow,
   createMockScheduledRow,
   defaultPermissions,
   noRunPermissions,
   resetMockCounter,
 } from './__test_helpers__/mock_data';
+import { allowedExperimentalValues } from '../../common/experimental_features';
 
 const renderWithProviders = (element: React.ReactElement) =>
   render(element, { wrapper: TestProviders });
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+let mockSearch = '';
 const mockUseKibana = jest.fn();
 
 jest.mock('../common/lib/kibana', () => ({
@@ -44,7 +47,7 @@ jest.mock('react-router-dom', () => ({
     replace: mockReplace,
     location: { search: '', pathname: '/history' },
   }),
-  useLocation: () => ({ search: '', pathname: '/history' }),
+  useLocation: () => ({ search: mockSearch, pathname: '/history' }),
 }));
 
 jest.mock('@elastic/eui', () => ({
@@ -111,6 +114,7 @@ const mockHistory = ({
 describe('UnifiedHistoryTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSearch = '';
     resetMockCounter();
     mockKibana();
     mockPacks();
@@ -158,6 +162,41 @@ describe('UnifiedHistoryTable', () => {
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByTestId('history-toolbar-search')).toBeInTheDocument();
+  });
+
+  describe('workflow source filter', () => {
+    const renderWithWorkflowSteps = (workflowsExtensionsEnabled: boolean) =>
+      render(<UnifiedHistoryTable />, {
+        wrapper: ({ children }) => (
+          <TestProviders
+            experimentalFeatures={{ ...allowedExperimentalValues, workflowsExtensionsEnabled }}
+          >
+            {children}
+          </TestProviders>
+        ),
+      });
+
+    it.each([true, false])(
+      'requests workflow rows from the URL whether workflow steps are enabled (%p)',
+      (workflowsExtensionsEnabled) => {
+        mockSearch = '?sources=workflow,live';
+        mockHistory({ data: [] });
+
+        renderWithWorkflowSteps(workflowsExtensionsEnabled);
+
+        expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
+          expect.objectContaining({ sourceFilters: ['workflow', 'live'] })
+        );
+      }
+    );
+
+    it('still labels existing workflow rows as Workflow when workflow steps are disabled', () => {
+      mockHistory({ data: [createMockWorkflowRow()] });
+
+      renderWithWorkflowSteps(false);
+
+      expect(screen.getByText('Workflow')).toBeInTheDocument();
+    });
   });
 
   it('calls useUnifiedHistory with expected parameters', () => {
@@ -254,6 +293,15 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.getByText('Rule')).toBeInTheDocument();
   });
 
+  it('source column shows Workflow for workflow row', () => {
+    const row = createMockWorkflowRow();
+    mockHistory({ data: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText('Workflow')).toBeInTheDocument();
+  });
+
   it('run by column shows Elastic for rule row', () => {
     const row = createMockRuleRow();
     mockHistory({ data: [row] });
@@ -326,6 +374,28 @@ describe('UnifiedHistoryTable', () => {
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
+  });
+
+  it('query column truncates SQL longer than 90 characters', () => {
+    const longQuery =
+      'SELECT very_long_column_name, another_column, yet_another FROM some_table WHERE condition = 1 AND more_stuff';
+    expect(longQuery.length).toBeGreaterThan(90);
+    mockHistory({ data: [createMockLiveRow({ queryText: longQuery })] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText(`${longQuery.substring(0, 90)}...`)).toBeInTheDocument();
+    expect(screen.queryByText(longQuery)).not.toBeInTheDocument();
+  });
+
+  it('query column shows SQL of exactly 90 characters untruncated', () => {
+    const exactQuery = `SELECT * FROM processes WHERE name = '${'a'.repeat(51)}'`;
+    expect(exactQuery).toHaveLength(90);
+    mockHistory({ data: [createMockLiveRow({ queryText: exactQuery })] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText(exactQuery)).toBeInTheDocument();
   });
 
   it('query column shows pack name for pack query', () => {

@@ -9,7 +9,7 @@ import { graphlib, layout } from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { getStackNodeStyle } from '../node/styles';
-import { isEntityNode, isConnectorNode, isStackNode, isStackedLabel } from '../utils';
+import { isEntityNode, isConnectorNode, isStackNode, isOutsideConnectorGroup } from '../utils';
 import {
   GRID_SIZE,
   STACK_NODE_VERTICAL_PADDING,
@@ -82,6 +82,8 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
+      // Reserve the full expanded height so nodes never overlap neighbours
+      // once the metadata panel (always visible) is taken into account.
       size.height = ENTITY_NODE_TOTAL_HEIGHT;
     }
 
@@ -105,7 +107,7 @@ export const layoutGraph = (
     g,
     (nodeId: string) => {
       const node = nodesById[nodeId].data;
-      return node && isStackedLabel(node);
+      return node && isOutsideConnectorGroup(node);
     },
     nodesById
   );
@@ -138,6 +140,11 @@ export const layoutGraph = (
 
     if (isEntityNode(node.data)) {
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
+      // Place the entity card so its visual centre aligns with the Dagre Y.
+      // NODE_HEIGHT ≈ actual rendered card height (card is flex-centred inside
+      // NodeShapeContainer which has height NODE_HEIGHT), so NODE_HEIGHT / 2
+      // puts the card's midpoint at dagreNode.y — exactly where relationship/
+      // event nodes (also centred at Y) are positioned by the layout algorithm.
       const y = Math.round(dagreNode.y - NODE_HEIGHT / 2);
 
       return {

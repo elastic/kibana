@@ -190,7 +190,6 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          color="success"
           iconType="refresh"
           onClick={reload}
           data-test-subj="reloadButton"
@@ -279,7 +278,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   } else if (!hasTemplates) {
     content = (
       <EuiEmptyPrompt
-        iconType="managementApp"
+        iconType="gear"
         title={
           <h1 data-test-subj="title">
             <FormattedMessage

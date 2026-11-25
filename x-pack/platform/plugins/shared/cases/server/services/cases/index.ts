@@ -41,14 +41,19 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
   SavedObjectsBulkResponseWithErrors,
   SOWithErrors,
 } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { STATUS_ESMODEL_TO_EXTERNAL } from '../../common/constants';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
@@ -78,15 +83,17 @@ import {
   EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 import type {
+  CaseCreateAttributes,
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import {
-  CaseTransformedAttributesRt,
+  CaseCreateAttributesSchema,
+  CaseTransformedAttributesSchema,
   CasePersistedStatus,
-  getPartialCaseTransformedAttributesRt,
-  OwnerRt,
+  getPartialCaseTransformedAttributesSchema,
+  OwnerSchema,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
@@ -107,14 +114,15 @@ import type {
   BulkCreateCasesArgs,
 } from './types';
 import { bulkDecodeSOAttributes } from '../utils';
+import type { AttachmentSearchField } from './utils';
 import {
-  DEFAULT_ATTACHMENT_SEARCH_FIELDS,
   constructSearchQuery,
   convertFindQueryParams,
+  isAttachmentSearchField,
   mergeSearchQuery,
 } from './utils';
 
-const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+const PartialCaseTransformedAttributesSchema = getPartialCaseTransformedAttributesSchema();
 
 /**
  * Merges the legacy (`cases-comments`) and unified (`cases-attachments`) responses for
@@ -166,23 +174,45 @@ const mergeCaseIdsByAlertIdResponses = (
   };
 };
 
+const UNIFIED_ATTACHMENT_TYPES_BY_SEARCH_FIELD: Record<AttachmentSearchField, string[]> = {
+  'cases-comments.comment': [COMMENT_ATTACHMENT_TYPE],
+  'cases-comments.alertId': UNIFIED_ALERT_TYPES_ARRAY,
+  'cases-comments.eventId': [SECURITY_EVENT_ATTACHMENT_TYPE],
+};
+
 /**
- * `cases-comments.comment` is a text-analyzed field: we use `match_phrase` so the user's
- * input has to appear as a contiguous sequence
+ * Returns the legacy `cases-comments` clause and its unified `cases-attachments` counterpart,
+ * which stores a comment in `data.content` and an alert or event id in `attachmentId`.
  *
- * `cases-comments.alertId` and `cases-comments.eventId` are keyword fields used
- * to look up an exact ID, so a regular `match` is the correct semantic
+ * Comments are text-analyzed, so `match_phrase` requires the input as a contiguous sequence;
+ * ids are keyword fields, so a regular `match` looks up the exact id.
  */
-const buildAttachmentSearchClause = (
-  field: string,
+const buildAttachmentSearchClauses = (
+  field: AttachmentSearchField,
   search: string
-): estypes.QueryDslQueryContainer => {
-  // TODO: add support for CASE_ATTACHMENT_SAVED_OBJECT
-  // https://github.com/elastic/security-team/issues/15066
-  if (field === `${CASE_COMMENT_SAVED_OBJECT}.comment`) {
-    return { match_phrase: { [field]: search } };
-  }
-  return { match: { [field]: search } };
+): estypes.QueryDslQueryContainer[] => {
+  const isComment = field === `${CASE_COMMENT_SAVED_OBJECT}.comment`;
+
+  return [
+    isComment ? { match_phrase: { [field]: search } } : { match: { [field]: search } },
+    {
+      bool: {
+        filter: [
+          {
+            terms: {
+              [`${CASE_ATTACHMENT_SAVED_OBJECT}.type`]:
+                UNIFIED_ATTACHMENT_TYPES_BY_SEARCH_FIELD[field],
+            },
+          },
+        ],
+        must: [
+          isComment
+            ? { match_phrase: { [`${CASE_ATTACHMENT_SAVED_OBJECT}.data.content`]: search } }
+            : { match: { [`${CASE_ATTACHMENT_SAVED_OBJECT}.attachmentId`]: search } },
+        ],
+      },
+    },
+  ];
 };
 
 export class CasesService {
@@ -334,7 +364,7 @@ export class CasesService {
 
     const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
     for (const so of response.saved_objects) {
-      const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+      const validatedAttributes = decodeOrThrowZod(OwnerSchema)(so.attributes);
 
       owners.push(Object.assign(so, { attributes: validatedAttributes }));
     }
@@ -356,30 +386,42 @@ export class CasesService {
     search?: string,
     searchFields?: string[]
   ): Promise<string[]> {
-    const attachmentSearchFields = searchFields?.filter((field) =>
-      DEFAULT_ATTACHMENT_SEARCH_FIELDS.includes(field)
-    );
+    const attachmentSearchFields = searchFields?.filter(isAttachmentSearchField);
     if (!search || !attachmentSearchFields?.length) {
       return [];
     }
 
+    // Both types are searched regardless of `attachments.enabled`: existing cases can hold either.
     const response = await this.searchCases({
-      type: [CASE_COMMENT_SAVED_OBJECT],
+      type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
       namespaces,
       query: {
         bool: {
-          should: attachmentSearchFields.map((field) => buildAttachmentSearchClause(field, search)),
+          should: attachmentSearchFields.flatMap((field) =>
+            buildAttachmentSearchClauses(field, search)
+          ),
+        },
+      },
+      // Aggregate the case ids: reading hits would only see the first page of matching attachments.
+      size: 0,
+      aggs: {
+        references: {
+          nested: { path: 'references' },
+          aggs: {
+            cases: {
+              filter: { term: { 'references.type': CASE_SAVED_OBJECT } },
+              aggs: { caseIds: { terms: { field: 'references.id', size: MAX_DOCS_PER_PAGE } } },
+            },
+          },
         },
       },
     });
 
-    const references = response?.hits?.hits?.map((hit) => hit?._source?.references).flat();
-    if (!references) {
-      return [];
-    }
-    return references
-      .filter((ref) => ref?.type === 'cases' && ref?.id !== undefined)
-      .map((ref) => ref?.id ?? '');
+    const aggregations = response.aggregations as
+      | { references?: { cases?: { caseIds?: { buckets: Array<{ key: string }> } } } }
+      | undefined;
+
+    return aggregations?.references?.cases?.caseIds?.buckets.map(({ key }) => key) ?? [];
   }
 
   /**
@@ -750,7 +792,9 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(caseSavedObject);
-      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        res.attributes
+      ) as CaseTransformedAttributes;
 
       return {
         ...res,
@@ -778,7 +822,9 @@ export class CasesService {
       }
 
       const resolvedSO = transformSavedObjectToExternalModel(resolveCaseResult.saved_object);
-      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(resolvedSO.attributes);
+      const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        resolvedSO.attributes
+      ) as CaseTransformedAttributes;
 
       return {
         ...resolveCaseResult,
@@ -805,7 +851,9 @@ export class CasesService {
         }
 
         const so = Object.assign(theCase, transformSavedObjectToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(so.attributes);
+        const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          so.attributes
+        ) as CaseTransformedAttributes;
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         return soWithDecodedRes;
@@ -816,6 +864,29 @@ export class CasesService {
       });
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * The status of each case found, reading only the status field; cases not found are left out.
+   */
+  public async getCaseStatuses({ caseIds }: GetCasesArgs): Promise<Map<string, CaseStatuses>> {
+    try {
+      this.log.debug(`Attempting to GET the status of cases ${caseIds.join(', ')}`);
+      const { saved_objects: cases } = await this.unsecuredSavedObjectsClient.bulkGet<
+        Pick<CasePersistedAttributes, 'status'>
+      >(caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id, fields: ['status'] })));
+
+      return new Map(
+        cases.flatMap((theCase): Array<[string, CaseStatuses]> => {
+          if (isSavedObjectErrorResult(theCase)) return [];
+          const status = STATUS_ESMODEL_TO_EXTERNAL[theCase.attributes.status];
+          return status ? [[theCase.id, status]] : [];
+        })
+      );
+    } catch (error) {
+      this.log.error(`Error on GET the status of cases ${caseIds.join(', ')}: ${error}`);
       throw error;
     }
   }
@@ -832,7 +903,7 @@ export class CasesService {
       });
 
       const res = transformFindResponseToExternalModel(cases);
-      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
+      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesSchema);
 
       return {
         ...res,
@@ -885,7 +956,6 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
@@ -895,7 +965,6 @@ export class CasesService {
             sortField: defaultSortField,
             ...options,
           },
-          mode,
         });
       }
 
@@ -906,7 +975,6 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -923,7 +991,6 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
@@ -945,7 +1012,6 @@ export class CasesService {
           filter: options?.filter,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);
@@ -1083,7 +1149,9 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to create a new case`);
 
-      const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrowZod(CaseCreateAttributesSchema)(
+        attributes
+      ) as CaseCreateAttributes;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       transformedAttributes.attributes.total_alerts = 0;
@@ -1100,7 +1168,9 @@ export class CasesService {
       this.analyticsV2Writer.upsertCase(createdCase);
 
       const res = transformSavedObjectToExternalModel(createdCase);
-      const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodedRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        res.attributes
+      ) as CaseTransformedAttributes;
 
       return { ...res, attributes: decodedRes };
     } catch (error) {
@@ -1117,7 +1187,9 @@ export class CasesService {
       this.log.debug(`Attempting to bulk create cases`);
 
       const bulkCreateRequest = cases.map(({ id, ...attributes }) => {
-        const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+        const decodedAttributes = decodeOrThrowZod(CaseCreateAttributesSchema)(
+          attributes
+        ) as CaseCreateAttributes;
 
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
@@ -1156,7 +1228,9 @@ export class CasesService {
         successfulAnalyticsV2Mirrors.push(theCase);
 
         const transformedCase = transformSavedObjectToExternalModel(theCase);
-        const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
+        const decodedRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          transformedCase.attributes
+        ) as CaseTransformedAttributes;
 
         return { ...transformedCase, attributes: decodedRes };
       });
@@ -1181,9 +1255,9 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
 
-      const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+      const decodedAttributes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
         updatedAttributes
-      );
+      ) as Partial<CaseTransformedAttributes>;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
       // Compute the merged reference list once and share it between the SO
       // update and the analytics-writer synthesis. Mirrors the
@@ -1220,7 +1294,9 @@ export class CasesService {
       });
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
-      const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
+        res.attributes
+      ) as Partial<CaseTransformedAttributes>;
 
       return {
         ...res,
@@ -1244,9 +1320,9 @@ export class CasesService {
       // after `bulkUpdate` succeeds. We can't read `bulkUpdate`'s response for
       // this because it returns partial attributes, not the full merged state.
       const perCaseUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
-        const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+        const decodedAttributes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
           updatedAttributes
-        );
+        ) as Partial<CaseTransformedAttributes>;
         const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
         const builtReferences = referenceHandler.build(originalCase.references);
         return {
@@ -1302,7 +1378,9 @@ export class CasesService {
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
+        const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
+          so.attributes
+        ) as Partial<CaseTransformedAttributes>;
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         acc.push(soWithDecodedRes);
