@@ -111,9 +111,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     analytics,
   } = props;
   const LensComponent = lens?.EmbeddableComponent;
-  const LensSaveModalComponent = lens?.SaveModalComponent;
 
-  const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
 
   const series = Object.entries(attributes)[0]?.[1];
@@ -137,8 +135,8 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     withActions,
     attributes,
     reportType,
-    setIsSaveOpen,
     setAddToCaseOpen,
+    title: attributesJSON?.title,
   });
 
   if (!attributesJSON) {
@@ -234,15 +232,6 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
           onLoad?.(loading);
         }}
       />
-      {isSaveOpen && attributesJSON && (
-        <LensSaveModalComponent
-          initialInput={{ attributes: attributesJSON }}
-          onClose={() => setIsSaveOpen(false)}
-          // if we want to do anything after the viz is saved
-          // right now there is no action, so an empty function
-          onSave={() => {}}
-        />
-      )}
       <AddToCaseAction
         lensAttributes={attributesJSON}
         timeRange={customTimeRange ?? series?.time}

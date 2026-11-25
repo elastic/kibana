@@ -100,4 +100,24 @@ describe('open in Lens action', () => {
 
     expect(onExecute).toHaveBeenCalledTimes(1);
   });
+
+  it('uses the title option over the one of the chart', async () => {
+    const action = createOpenInLensAction(
+      {
+        application: { capabilities: { visualize_v2: { show: true } } } as never,
+        navigateToPrefilledEditor,
+      },
+      { title: 'Prefilled title' }
+    );
+
+    await action.execute(toContext(getEmbeddable()));
+
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
+      {
+        attributes: { ...attributes, title: 'Prefilled title' },
+        time_range: timeRange,
+      },
+      expect.anything()
+    );
+  });
 });

@@ -15,19 +15,31 @@ import type { LensPluginStartDependencies } from '../../plugin';
 import type { LensTelemetrySource } from '../../lens_ui_telemetry';
 import { getSaveModalComponent } from '../../app_plugin/shared/saved_modal_lazy';
 import { ACTION_SAVE_TO_DASHBOARD } from './constants';
-import { getContextEmbeddable, getEffectiveTimeRange } from './helpers';
+import { getChartInput, getContextEmbeddable } from './helpers';
 
 export interface SaveToDashboardActionOptions {
   /** Where the chart comes from, reported when saving it creates a chart */
   telemetrySource?: LensTelemetrySource;
   /** Called when the user runs the action */
   onExecute?: () => void;
+  /** Also lets the user save the chart to the Lens library */
+  isSaveable?: boolean;
+  /** Label of the action, instead of "Save to dashboard" */
+  displayName?: string;
+  /** Title of the chart in the modal, when the embedded chart hides its own */
+  title?: string;
 }
 
 export const createSaveToDashboardAction = (
   core: CoreStart,
   startDependencies: LensPluginStartDependencies,
-  { telemetrySource, onExecute }: SaveToDashboardActionOptions = {}
+  {
+    telemetrySource,
+    onExecute,
+    isSaveable = false,
+    displayName,
+    title,
+  }: SaveToDashboardActionOptions = {}
 ) => {
   const SaveModal = getSaveModalComponent(core, startDependencies);
 
@@ -37,6 +49,7 @@ export const createSaveToDashboardAction = (
     order: 16,
     getIconType: () => 'save',
     getDisplayName: () =>
+      displayName ??
       i18n.translate('xpack.lens.action.saveToDashboard', {
         defaultMessage: 'Save to dashboard',
       }),
@@ -54,11 +67,8 @@ export const createSaveToDashboardAction = (
       document.body.appendChild(container);
       const unmount = toMountPoint(
         <SaveModal
-          initialInput={{
-            ...embeddable.getLegacySerializedState(),
-            time_range: getEffectiveTimeRange(embeddable),
-          }}
-          isSaveable={false}
+          initialInput={getChartInput(embeddable, title)}
+          isSaveable={isSaveable}
           telemetrySource={telemetrySource}
           onClose={() => {
             unmount();

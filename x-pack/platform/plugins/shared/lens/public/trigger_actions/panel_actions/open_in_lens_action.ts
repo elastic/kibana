@@ -11,7 +11,7 @@ import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/pu
 import type { LensSerializedState } from '@kbn/lens-common';
 import { isLensApi } from '../../react_embeddable/type_guards';
 import { ACTION_OPEN_IN_LENS } from './constants';
-import { getContextEmbeddable, getEffectiveTimeRange } from './helpers';
+import { getChartInput, getContextEmbeddable } from './helpers';
 
 export interface OpenInLensActionServices {
   application: Pick<ApplicationStart, 'capabilities'>;
@@ -26,11 +26,13 @@ export interface OpenInLensActionOptions {
   onExecute?: () => void;
   /** Opens the Lens editor in a new tab */
   openInNewTab?: boolean;
+  /** Title of the chart in the editor, when the embedded chart hides its own */
+  title?: string;
 }
 
 export const createOpenInLensAction = (
   { application, navigateToPrefilledEditor }: OpenInLensActionServices,
-  { onExecute, openInNewTab }: OpenInLensActionOptions = {}
+  { onExecute, openInNewTab, title }: OpenInLensActionOptions = {}
 ) =>
   createAction({
     id: ACTION_OPEN_IN_LENS,
@@ -47,12 +49,6 @@ export const createOpenInLensAction = (
       if (!isLensApi(embeddable)) throw new IncompatibleActionError();
 
       onExecute?.();
-      navigateToPrefilledEditor(
-        {
-          ...embeddable.getLegacySerializedState(),
-          time_range: getEffectiveTimeRange(embeddable),
-        },
-        { openInNewTab }
-      );
+      navigateToPrefilledEditor(getChartInput(embeddable, title), { openInNewTab });
     },
   });

@@ -15,20 +15,25 @@ import type { ReportViewType } from '../types';
 import type { AllSeries } from '../hooks/use_series_storage';
 import type { ObservabilityAppServices } from '../../../../application/types';
 
+const saveLabel = i18n.translate('xpack.exploratoryView.expView.save', {
+  defaultMessage: 'Save visualization',
+});
+
 export type ActionTypes = 'explore' | 'save' | 'addToCase' | 'openInLens';
 
 export function useActions({
   withActions,
   attributes,
   reportType,
-  setIsSaveOpen,
   setAddToCaseOpen,
+  title,
 }: {
   withActions?: boolean | ActionTypes[];
   reportType: ReportViewType;
   attributes: AllSeries;
-  setIsSaveOpen: (val: boolean) => void;
   setAddToCaseOpen: (val: boolean) => void;
+  /** Title of the chart, which the embedded chart hides */
+  title?: string;
 }) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
@@ -55,17 +60,27 @@ export function useActions({
   const routePath = createExploratoryViewRoutePath({ reportType, allSeries: attributes });
 
   const openInLensAction = useMemo(
-    () => lens.actions.createOpenInLensAction({ openInNewTab: true }),
-    [lens]
+    () => lens.actions.createOpenInLensAction({ openInNewTab: true, title }),
+    [lens, title]
+  );
+
+  const saveAction = useMemo(
+    () => ({
+      ...lens.actions.createSaveToDashboardAction({
+        isSaveable: true,
+        displayName: saveLabel,
+        title,
+      }),
+      // the id and the order are relied on by the menu and the tests
+      id: 'expViewSave',
+      order: 49,
+    }),
+    [lens, title]
   );
 
   const exploreCallback = useCallback(() => {
     application?.navigateToApp('exploratory-view', { path: routePath });
   }, [application, routePath]);
-
-  const saveCallback = useCallback(() => {
-    setIsSaveOpen(true);
-  }, [setIsSaveOpen]);
 
   const addToCaseCallback = useCallback(() => {
     setAddToCaseOpen(true);
@@ -73,7 +88,7 @@ export function useActions({
 
   return defaultActions.map<Action>((action) => {
     if (action === 'save') {
-      return getSaveAction({ callback: saveCallback });
+      return saveAction;
     }
     if (action === 'addToCase') {
       return getAddToCaseAction({ callback: addToCaseCallback });
@@ -108,29 +123,6 @@ const getExploreAction = ({ href, callback }: { href: string; callback: () => vo
       return;
     },
     order: 50,
-  };
-};
-
-const getSaveAction = ({ callback }: { callback: () => void }): Action => {
-  return {
-    id: 'expViewSave',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return i18n.translate('xpack.exploratoryView.expView.save', {
-        defaultMessage: 'Save visualization',
-      });
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'save';
-    },
-    type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-      return;
-    },
-    order: 49,
   };
 };
 

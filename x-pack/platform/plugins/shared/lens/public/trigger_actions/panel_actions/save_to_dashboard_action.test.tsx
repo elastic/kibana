@@ -92,4 +92,27 @@ describe('save to dashboard action', () => {
     (mockSaveModal.mock.calls[0][0] as { onClose: () => void }).onClose();
     expect(screen.queryByTestId('saveModal')).not.toBeInTheDocument();
   });
+
+  it('supports saving to the library, a label and a title', async () => {
+    const action = createAction(true, {
+      isSaveable: true,
+      displayName: 'Save visualization',
+      title: 'Prefilled title',
+    });
+
+    expect(action.getDisplayName({} as never)).toBe('Save visualization');
+
+    await action.execute(toContext(getEmbeddable()));
+    await screen.findByTestId('saveModal');
+
+    expect(mockSaveModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialInput: {
+          attributes: { ...attributes, title: 'Prefilled title' },
+          time_range: timeRange,
+        },
+        isSaveable: true,
+      })
+    );
+  });
 });
