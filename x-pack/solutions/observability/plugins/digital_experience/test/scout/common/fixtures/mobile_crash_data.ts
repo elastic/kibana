@@ -1,0 +1,302 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EsClient } from '@kbn/scout-oblt';
+import { CRASH_FINGERPRINT_CASES } from '../../../../common/mobile/crash_fingerprint.test_helpers';
+
+const LOGS_INDEX = 'logs-generic.otel-default';
+const TRACES_INDEX = 'traces-generic.otel-default';
+
+/** Applications of their own, so the other mobile fixtures' counts stay as they are. */
+export const CRASH_APPS = {
+  android: 'scout-crashes-android',
+  ios: 'scout-crashes-ios',
+  fingerprints: 'scout-crash-fingerprints',
+} as const;
+
+const at = (time: string) => `2021-01-18T${time}.000Z`;
+
+const jvmTrace = (type: string, frame: string, line: number) =>
+  [
+    `${type}: crashed`,
+    `\tat ${frame}(MainActivity.kt:${line})`,
+    '\tat android.os.Looper.loop(Looper.java:294)',
+  ].join('\n');
+
+interface Crash {
+  serviceName: string;
+  osName: 'Android' | 'iOS';
+  version: string;
+  installationId: string;
+  sessionId?: string;
+  /** When the SDK sent it: EDOT iOS sends a crash on the next launch. */
+  timestamp: string;
+  /** When it happened, which EDOT iOS only sets here. */
+  observedTimestamp?: string;
+  /** EDOT iOS with legacy names sends `crash`. */
+  eventName?: 'app.crash' | 'crash';
+  type?: string;
+  message?: string;
+  stacktrace?: string;
+  storedFingerprint?: string;
+  deviceModel: string;
+  osVersion: string;
+}
+
+const android = {
+  serviceName: CRASH_APPS.android,
+  osName: 'Android',
+} as const;
+
+const ios = {
+  serviceName: CRASH_APPS.ios,
+  osName: 'iOS',
+  version: '8.5.0',
+  deviceModel: 'iPhone13,2',
+  osVersion: '17.6.1',
+  type: 'SIGSEGV',
+  message: 'SEGV_MAPERR',
+} as const;
+
+const CRASHES: Crash[] = [
+  // A device stuck in a crash loop on the older release: 4 events, 1 user.
+  ...['05:00', '06:00', '07:00', '08:00'].map((time) => ({
+    ...android,
+    version: '4.1.0',
+    installationId: 'crash-loop-device',
+    sessionId: 'crash-loop-session',
+    timestamp: at(`12:${time}`),
+    type: 'java.lang.IllegalStateException',
+    message: 'Fragment not attached to an activity.',
+    stacktrace: jvmTrace('java.lang.IllegalStateException', 'com.example.Settings.onAttach', 42),
+    deviceModel: 'SM-A145R',
+    osVersion: '13',
+  })),
+  // A crash only the newest release has, on 3 devices, at different lines of the same frames.
+  ...[
+    { time: '20:00', line: 88, deviceModel: 'Pixel 8', osVersion: '15' },
+    { time: '30:00', line: 91, deviceModel: 'Pixel 8', osVersion: '15' },
+    { time: '40:00', line: 88, deviceModel: 'SM-S911B', osVersion: '14' },
+  ].map(({ time, line, deviceModel, osVersion }, index) => ({
+    ...android,
+    version: '4.2.0',
+    installationId: `crash-npe-device-${index + 1}`,
+    sessionId: `crash-npe-session-${index + 1}`,
+    timestamp: at(`12:${time}`),
+    type: 'java.lang.NullPointerException',
+    message: 'TrackRecorder is null',
+    stacktrace: jvmTrace(
+      'java.lang.NullPointerException',
+      'com.example.MainActivity.onResume',
+      line
+    ),
+    deviceModel,
+    osVersion,
+  })),
+  // The same iOS crash with different load addresses: sent on the next launch with the legacy
+  // name, sent after the range ended, and without a session.
+  {
+    ...ios,
+    installationId: 'crash-ios-device-1',
+    sessionId: 'CRASH-IOS-SESSION-1',
+    eventName: 'crash',
+    timestamp: at('12:50:00'),
+    observedTimestamp: at('12:15:00'),
+    stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace,
+  },
+  {
+    ...ios,
+    installationId: 'crash-ios-device-2',
+    sessionId: 'CRASH-IOS-SESSION-2',
+    timestamp: at('13:20:00'),
+    observedTimestamp: at('12:55:00'),
+    stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace,
+  },
+  {
+    ...ios,
+    installationId: 'crash-ios-device-2',
+    timestamp: at('12:35:00'),
+    observedTimestamp: at('12:35:00'),
+    stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace,
+  },
+  // Sent in the range, but it happened before: not one of the range's crashes.
+  {
+    ...ios,
+    installationId: 'crash-ios-device-3',
+    sessionId: 'CRASH-IOS-SESSION-3',
+    timestamp: at('12:10:00'),
+    observedTimestamp: at('11:30:00'),
+    stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace,
+  },
+  // The fingerprint's golden cases, one device each.
+  ...Object.entries(CRASH_FINGERPRINT_CASES).map(([name, crash], index) => ({
+    serviceName: CRASH_APPS.fingerprints,
+    osName: 'Android' as const,
+    version: '1.0.0',
+    installationId: `crash-case-${name}`,
+    timestamp: at(`12:${String(10 + index).padStart(2, '0')}:00`),
+    deviceModel: 'Pixel 8',
+    osVersion: '15',
+    ...crash,
+  })),
+];
+
+/** The NPE's latest crash, whose session the detail lists before it. */
+export const NPE_LATEST_SESSION = 'crash-npe-session-3';
+
+const npeSession = {
+  'service.name': CRASH_APPS.android,
+  'service.version': '4.2.0',
+  'os.name': 'Android',
+};
+
+/** Events of the NPE's latest session, and one of the iOS session, which writes its id in uppercase. */
+const SESSION_EVENTS = [
+  {
+    index: TRACES_INDEX,
+    resource: npeSession,
+    document: {
+      '@timestamp': at('12:39:50'),
+      name: 'elastic.app.screen.load',
+      kind: 'Internal',
+      trace_id: 'c'.repeat(32),
+      span_id: 'c'.repeat(15) + '1',
+      duration: 50_000_000,
+      attributes: { 'session.id': NPE_LATEST_SESSION, 'app.screen.name': 'Map' },
+    },
+  },
+  {
+    index: TRACES_INDEX,
+    resource: npeSession,
+    document: {
+      '@timestamp': at('12:39:55'),
+      name: 'POST',
+      kind: 'Client',
+      trace_id: 'c'.repeat(32),
+      span_id: 'c'.repeat(15) + '2',
+      duration: 420_000_000,
+      attributes: {
+        'session.id': NPE_LATEST_SESSION,
+        'app.screen.name': 'Map',
+        'http.request.method': 'POST',
+        'url.full': 'https://api.example.com/tracks?id=7',
+        'http.response.status_code': 503,
+      },
+    },
+  },
+  {
+    index: LOGS_INDEX,
+    resource: npeSession,
+    document: {
+      '@timestamp': at('12:39:58'),
+      event_name: 'app.widget.click',
+      attributes: {
+        'session.id': NPE_LATEST_SESSION,
+        'app.screen.name': 'Map',
+        'app.widget.name': 'Start recording',
+      },
+    },
+  },
+  // After the crash: never listed before it.
+  {
+    index: LOGS_INDEX,
+    resource: npeSession,
+    document: {
+      '@timestamp': at('12:41:00'),
+      event_name: 'app.widget.click',
+      attributes: { 'session.id': NPE_LATEST_SESSION, 'app.widget.name': 'Retry' },
+    },
+  },
+  {
+    index: TRACES_INDEX,
+    resource: { 'service.name': CRASH_APPS.ios, 'service.version': '8.5.0', 'os.name': 'iOS' },
+    document: {
+      '@timestamp': at('12:54:50'),
+      name: 'Transfer - view appearing',
+      kind: 'Client',
+      scope: { name: 'UIViewController' },
+      trace_id: 'd'.repeat(32),
+      span_id: 'd'.repeat(16),
+      duration: 57_000_000,
+      attributes: { 'session.id': 'CRASH-IOS-SESSION-2' },
+    },
+  },
+];
+
+const mobileResource = (attributes: Record<string, string>, osName: string) => ({
+  'telemetry.distro.name': 'elastic',
+  'telemetry.sdk.name': 'opentelemetry',
+  'telemetry.sdk.language': osName === 'iOS' ? 'swift' : 'java',
+  ...attributes,
+});
+
+const documents = [
+  ...CRASHES.map((crash, index) => ({
+    id: `dx-mobile-crash-${index}`,
+    index: LOGS_INDEX,
+    document: {
+      '@timestamp': crash.timestamp,
+      ...(crash.observedTimestamp ? { observed_timestamp: crash.observedTimestamp } : {}),
+      event_name: crash.eventName ?? 'app.crash',
+      resource: {
+        attributes: mobileResource(
+          {
+            'service.name': crash.serviceName,
+            'service.version': crash.version,
+            'os.name': crash.osName,
+            'os.version': crash.osVersion,
+            'device.model.identifier': crash.deviceModel,
+            'app.installation.id': crash.installationId,
+          },
+          crash.osName
+        ),
+      },
+      attributes: {
+        ...(crash.sessionId ? { 'session.id': crash.sessionId } : {}),
+        ...(crash.type ? { 'exception.type': crash.type } : {}),
+        ...(crash.message ? { 'exception.message': crash.message } : {}),
+        ...(crash.stacktrace ? { 'exception.stacktrace': crash.stacktrace } : {}),
+        ...(crash.storedFingerprint ? { 'exception.fingerprint': crash.storedFingerprint } : {}),
+      },
+    },
+  })),
+  ...SESSION_EVENTS.map(({ index, resource, document }, position) => ({
+    id: `dx-mobile-crash-session-${position}`,
+    index,
+    document: {
+      ...document,
+      resource: { attributes: mobileResource(resource, resource['os.name']) },
+    },
+  })),
+];
+
+/** Deletes the crash documents by their ids, leaving the rest of the data streams. */
+export const deleteMobileCrashData = async (esClient: EsClient): Promise<void> => {
+  await esClient.deleteByQuery({
+    index: [LOGS_INDEX, TRACES_INDEX],
+    query: { ids: { values: documents.map(({ id }) => id) } },
+    refresh: true,
+    ignore_unavailable: true,
+  });
+};
+
+/** Indexes the crash documents, replacing what an interrupted run left behind. */
+export const ingestMobileCrashData = async (esClient: EsClient): Promise<void> => {
+  // Data streams only accept `create`, which would keep a leftover document's old body.
+  await deleteMobileCrashData(esClient);
+  const { errors, items } = await esClient.bulk({
+    refresh: 'wait_for',
+    operations: documents.flatMap(({ id, index, document }) => [
+      { create: { _index: index, _id: id } },
+      document,
+    ]),
+  });
+  const failure = items.find((item) => item.create?.error);
+  if (errors && failure) {
+    throw new Error(`Could not ingest the mobile crash data: ${JSON.stringify(failure)}`);
+  }
+};
