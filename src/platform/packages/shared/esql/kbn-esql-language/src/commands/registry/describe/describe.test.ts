@@ -12,6 +12,12 @@ import { suggest, validateQuery } from '../../../..';
 import { QueryColumns } from '../../../query_columns_service';
 
 describe('DESCRIBE editor support', () => {
+  it('validates DESCRIBE as a processing command with no arguments', async () => {
+    expect((await validateQuery('ROW input = 1 | DESCRIBE')).errors).toEqual([]);
+    expect((await validateQuery('ROW input = 1 | DESCRIBE input')).errors).not.toHaveLength(0);
+    expect((await validateQuery('DESCRIBE')).errors).not.toHaveLength(0);
+  });
+
   it('suggests DESCRIBE after a pipe', async () => {
     const query = 'ROW input = 1 | ';
     const suggestions = await suggest(query, query.length);
