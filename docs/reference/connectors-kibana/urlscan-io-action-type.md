@@ -90,4 +90,4 @@ An API key enables scanning, result retrieval, and DOM retrieval. The search, sc
 3. Copy the key, which is a UUID-shaped value.
 4. When you create the connector in {{kib}}, choose **API key** as the authentication type and paste the key. {{kib}} sends it in the `api-key` header, which is the only header name the API accepts.
 
-To confirm the key is working, run the connector's **Test** action or the `getQuota` action: an accepted key reports a quota scope of `user`, while `ip-address` means no key is being applied.
+To confirm the key is working, run the connector's **Test** action or the `getQuota` action: `ip-address` means no key is being applied, while an accepted key reports the account's scope, such as `user` or `team`.

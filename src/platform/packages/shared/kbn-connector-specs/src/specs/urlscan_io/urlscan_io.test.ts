@@ -1280,6 +1280,16 @@ describe('URLScan.io connector', () => {
       expect((result as Record<string, unknown>).ok).toBeUndefined();
     });
 
+    // urlscan's spec shows a team scope for quotas, so only the anonymous scope means no key.
+    it('passes on a team-scoped quota response when a key is configured', async () => {
+      const { ctx, client } = createContext({ authType: 'api_key_header' });
+      client.get.mockResolvedValue({ data: { scope: 'team', limits: {} }, headers: {} });
+      await expect(UrlscanIo.test.handler(ctx)).resolves.toMatchObject({
+        scope: 'team',
+        authenticated: true,
+      });
+    });
+
     it('fails when a key is configured but the quota scope shows it was not applied', async () => {
       // A 200 alone does not prove the key worked: urlscan answers anonymous callers too.
       const { ctx, client } = createContext({ authType: 'api_key_header' });
