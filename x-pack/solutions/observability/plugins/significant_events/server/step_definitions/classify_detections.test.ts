@@ -91,14 +91,15 @@ describe('classifyDetectionsStepDefinition', () => {
   const runHandler = async (
     definition: ReturnType<typeof createDefinition>['definition'],
     input: unknown,
-    esClient: unknown
+    esClient: unknown,
+    spaceId = 'default'
   ) => {
     const { output } = await definition.handler({
       input,
       rawInput: input,
       contextManager: {
         getScopedEsClient: jest.fn(() => esClient),
-        getContext: jest.fn(() => ({ workflow: { spaceId: 'default' } })),
+        getContext: jest.fn(() => ({ workflow: { spaceId } })),
       },
       abortSignal: new AbortController().signal,
     } as never);
@@ -148,6 +149,25 @@ describe('classifyDetectionsStepDefinition', () => {
         budget_ms: 20_000,
       }).success
     ).toBe(true);
+  });
+
+  it('reads the live series and the breaches in the execution space, not the input one', async () => {
+    const { definition } = createDefinition();
+    const { query, esClient } = esClientWith();
+
+    await runHandler(
+      definition,
+      { ...settings, space_id: 'input-space', rows: [detectionRow('rule-A')] },
+      esClient,
+      'execution-space'
+    );
+
+    const queries = query.mock.calls.map(([request]) => request.query);
+    expect(queries).toHaveLength(2);
+    for (const text of queries) {
+      expect(text).toContain('space_id == "execution-space"');
+      expect(text).not.toContain('input-space');
+    }
   });
 
   it('classifies through the scoped ES client, reads the rule breach and logs once', async () => {
