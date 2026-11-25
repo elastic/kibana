@@ -47,7 +47,7 @@ AndQuery
   / NotQuery
 
 NotQuery
-  = Not query:SubQuery {
+  = Not query:NotQuery {
     if (query.type === 'cursor') return query;
     return buildFunctionNode('not', [query]);
   }
@@ -170,7 +170,7 @@ AndListOfValues
   / NotListOfValues
 
 NotListOfValues
-  = Not partial:ListOfValues {
+  = Not partial:NotListOfValues {
     if (partial.type === 'cursor') {
       return {
         ...partial,
@@ -195,6 +195,14 @@ Value "value"
 
     return (field) => buildFunctionNode('is', [field, value]);
   }
+  / value:TrailingNot {
+    return (field) => buildFunctionNode('is', [field, value]);
+  }
+
+// A "not" followed by whitespace that no clause follows is plain text, the same as a "not" at the very end.
+// It is only reached after NotQuery / NotListOfValues found nothing to negate.
+TrailingNot
+  = keyword:'not'i &Space { return buildLiteralNode(keyword); }
 
 Or "OR"
   = Space+ 'or'i Space+
@@ -230,7 +238,8 @@ QuotedCharacter
   / '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 
-// A leading NOT is consumed by NotQuery / NotListOfValues first, so a dangling "not" stays a syntax error.
+// A leading NOT is consumed by NotQuery / NotListOfValues first, so a literal never starts with the NOT
+// operator. A "not" that no clause follows is plain text, see TrailingNot.
 UnquotedLiteral
   = &{ return parseCursor; } !Not prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
     const { start, end } = location();

@@ -8,6 +8,7 @@
  */
 
 import type { KueryNode } from '..';
+import { escapeNot } from '../utils/escape_kuery';
 
 export const KQL_WILDCARD_SYMBOL = '@kuery-wildcard@';
 export const KQL_NODE_TYPE_WILDCARD = 'wildcard';
@@ -74,5 +75,6 @@ export function hasLeadingWildcard(node: KqlWildcardNode) {
 }
 
 export function toKqlExpression(node: KqlWildcardNode): string {
-  return toQueryStringQuery(node);
+  // A leading "not " would otherwise re-parse as the NOT operator.
+  return escapeNot(toQueryStringQuery(node));
 }

@@ -38,26 +38,6 @@ describe('kql syntax errors', () => {
     );
   });
 
-  it('should throw an error for a NOT query missing a sub-query', () => {
-    expect(() => {
-      fromKueryExpression('response:200 and not ');
-    }).toThrow(
-      'Expected "(", field name, value but end of input found.\n' +
-        'response:200 and not \n' +
-        '---------------------^'
-    );
-  });
-
-  it('should throw an error for a "missing a sub-query', () => {
-    expect(() => {
-      fromKueryExpression('response:(200 and not )');
-    }).toThrow(
-      'Expected "(", value but ")" found.\n' +
-        'response:(200 and not )\n' +
-        '----------------------^'
-    );
-  });
-
   it('should throw an error for unbalanced quotes', () => {
     expect(() => {
       fromKueryExpression('foo:"ba ');
