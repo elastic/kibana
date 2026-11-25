@@ -41,12 +41,18 @@ export const searchRelevantRuleIds = async ({
   esClient,
   spaceId,
   term,
+  candidateIds,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   term: string;
+  /** Rank only these rules (saved object ids): the rules that the filters of the page keep. */
+  candidateIds?: string[];
 }): Promise<RankedRule[]> => {
-  const inSpace = [{ term: { space_id: spaceId } }];
+  const inSpace = [
+    { term: { space_id: spaceId } },
+    ...(candidateIds ? [{ terms: { so_id: candidateIds } }] : []),
+  ];
   const byWords: RetrieverContainer = {
     standard: {
       query: {

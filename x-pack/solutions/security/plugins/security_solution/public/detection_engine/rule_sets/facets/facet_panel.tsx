@@ -150,16 +150,20 @@ const FacetValueRow = ({
   selection,
   onChange,
   styles,
+  countsByMeaning = false,
 }: {
   field: FacetField;
   value: FacetValue;
   selection: FacetSelection;
   onChange: (next: FacetSelection) => void;
   styles: PanelStyles;
+  countsByMeaning?: boolean;
 }) => {
   const id = useGeneratedHtmlId({ prefix: `ruleFacet-${field.id}` });
   const isIncluded = selection.include.includes(value.value);
   const isExcluded = selection.exclude.includes(value.value);
+  const noCount =
+    countsByMeaning && !isIncluded && selection.include.length + selection.exclude.length > 0;
   const without = (values: string[]) => values.filter((v) => v !== value.value);
 
   const toggleInclude = () =>
@@ -212,7 +216,9 @@ const FacetValueRow = ({
           onChange={toggleInclude}
           title={value.label}
           label={
-            <span css={value.count === 0 && !isIncluded ? styles.empty : undefined}>{text}</span>
+            <span css={value.count === 0 && !isIncluded && !noCount ? styles.empty : undefined}>
+              {text}
+            </span>
           }
         />
       )}
@@ -233,7 +239,15 @@ const FacetValueRow = ({
         className="ruleFacetCount"
         css={[styles.count, isIncluded && styles.countSelected, isExcluded && styles.countExcluded]}
       >
-        {value.count}
+        {noCount ? (
+          <EuiToolTip content={i18n.NO_COUNT_BY_MEANING} disableScreenReaderOutput>
+            <span tabIndex={0} aria-label={i18n.NO_COUNT_BY_MEANING}>
+              —
+            </span>
+          </EuiToolTip>
+        ) : (
+          value.count
+        )}
       </span>
     </div>
   );
@@ -294,6 +308,7 @@ interface FacetGroupProps {
   onFieldChange: (field: FacetField, next: FacetSelection) => void;
   initialIsOpen: boolean;
   resetKey: string;
+  countsByMeaning?: boolean;
 }
 
 const FacetGroupComponent = ({
@@ -303,6 +318,7 @@ const FacetGroupComponent = ({
   onFieldChange,
   initialIsOpen,
   resetKey,
+  countsByMeaning,
 }: FacetGroupProps) => {
   const onChange = (next: FacetSelection) => onFieldChange(field, next);
   const styles = usePanelStyles();
@@ -384,6 +400,7 @@ const FacetGroupComponent = ({
                 selection={selection}
                 onChange={onChange}
                 styles={styles}
+                countsByMeaning={countsByMeaning}
               />
             ))
           )}
@@ -500,6 +517,7 @@ export const FacetPanel = ({
         onFieldChange={onFieldChange}
         initialIsOpen={field.section !== 'tags' || hasSelection(selection)}
         resetKey={scopeKey}
+        countsByMeaning={counts?.byMeaning}
       />
     );
   };

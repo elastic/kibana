@@ -215,6 +215,9 @@ export function buildToolFilter(params: FilterInput): string | undefined {
 
 // ---- Tool handler ----
 
+/** One page of rule ids; a larger filtered set is ranked in the whole space and filtered after. */
+const MAX_CANDIDATE_RULES = 10_000;
+
 interface FindRulesToolDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
   logger: Logger;
@@ -275,8 +278,21 @@ export const createFindRulesInlineTool = ({
       const kqlFilter = buildToolFilter(input);
       const { perPage, sortField, sortOrder } = input;
 
-      // By meaning: the relevant rules come from the rule search index; RulesClient then loads
-      // them as the user with the structured filters, and they keep the relevance order.
+      // By meaning: the relevant rules come from the rule search index, ranked only among the
+      // rules that the structured filters keep; RulesClient then loads them as the user, and they
+      // keep the relevance order.
+      const subset =
+        input.query && kqlFilter
+          ? await findRules({
+              rulesClient,
+              filter: kqlFilter,
+              fields: ['updatedAt'],
+              sortField: undefined,
+              sortOrder: undefined,
+              page: 1,
+              perPage: MAX_CANDIDATE_RULES,
+            })
+          : undefined;
       const semantic = input.query
         ? await resolveSemanticSearch({
             esClient: coreStart.elasticsearch.client.asInternalUser,
@@ -287,6 +303,10 @@ export const createFindRulesInlineTool = ({
             isWorkflowEnabled: (spaceId) =>
               isRuleSearchWorkflowEnabled(startPlugins.workflowsExtensions, spaceId),
             term: input.query,
+            candidateIds:
+              subset && subset.total <= MAX_CANDIDATE_RULES
+                ? subset.data.map((rule) => rule.id)
+                : undefined,
             logger,
           })
         : undefined;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -118,29 +119,44 @@ const checkRuleSearch = async ({
 export const getRuleSearchStatus = async (context: RuleSearchContext) =>
   (await checkRuleSearch(context)).status;
 
-type SemanticSearchParams = RuleSearchContext & { term: string; logger: Logger };
+type SemanticSearchParams = RuleSearchContext & {
+  term: string;
+  /** Rank only these rules; unset: every rule of the space. */
+  candidateIds?: string[];
+  logger: Logger;
+};
+
+/** The same text over the same rules: one key, whatever the order of the ids. */
+const searchKey = ({ spaceId, term, candidateIds }: SemanticSearchParams) => {
+  const ids = candidateIds
+    ? createHash('sha256')
+        .update([...candidateIds].sort().join(','))
+        .digest('hex')
+    : '*';
+  return `${spaceId}\u0000${term}\u0000${ids}`;
+};
 
 /**
  * The relevant rules for a text, best first, as saved object ids; or why the search falls back
  * to `legacy`. Search only reads the index, with the internal user; only ids leave this function.
  */
-const runSemanticSearch = async ({
-  term,
-  logger,
-  ...context
-}: SemanticSearchParams): Promise<SemanticSearchResult> => {
+const runSemanticSearch = async (params: SemanticSearchParams): Promise<SemanticSearchResult> => {
+  const { term, candidateIds, logger, ...context } = params;
   const { esClient, spaceId } = context;
   try {
     const check = await checkRuleSearch(context);
     if (check.status !== 'ready') {
       return { mode: 'legacy', reason: check.reason };
     }
-    const key = `${spaceId}\u0000${term}`;
+    if (candidateIds?.length === 0) {
+      return { mode: 'semantic', ruleIds: [] };
+    }
+    const key = searchKey(params);
     const cached = cache.get(key);
     if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
       return { mode: 'semantic', ruleIds: cached.ruleIds };
     }
-    const ranked = await searchRelevantRuleIds({ esClient, spaceId, term });
+    const ranked = await searchRelevantRuleIds({ esClient, spaceId, term, candidateIds });
     const ruleIds = ranked.map(({ soId }) => soId);
     const oldest = cache.keys().next().value;
     if (cache.size >= CACHE_SIZE && oldest !== undefined) cache.delete(oldest);
@@ -155,7 +171,7 @@ const runSemanticSearch = async ({
 export const resolveSemanticSearch = (
   params: SemanticSearchParams
 ): Promise<SemanticSearchResult> => {
-  const key = `${params.spaceId}\u0000${params.term}`;
+  const key = searchKey(params);
   const running = inFlight.get(key);
   if (running) return running;
   const search = runSemanticSearch(params).finally(() => inFlight.delete(key));

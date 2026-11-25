@@ -56,6 +56,7 @@ export const useFacetCounts = ({
         total: response.total,
         counts: response.counts ?? {},
         tagCategoryCounts: response.tag_category_counts ?? {},
+        byMeaning: response.search_mode === 'semantic',
       };
     },
     {

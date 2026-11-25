@@ -67,6 +67,11 @@ export interface FacetField {
 export interface FacetCountsResult {
   counts: FacetCounts;
   tagCategoryCounts: FacetCounts;
+  /**
+   * Counted over a search by meaning, ranked only inside the selected facets: the other values
+   * of a facet with a selection have no count (it would take one more search per facet).
+   */
+  byMeaning?: boolean;
 }
 
 export interface FacetLabels {

@@ -138,10 +138,31 @@ export const searchRulesRoute = (
                   buildRuleSetFilter({ ...membership, conditions }),
               };
 
-          // Semantic search: the relevant rules (best first) come from the rule search index;
-          // facets, the rule scope and RBAC then apply to them through RulesClient below.
+          // Semantic search: the relevant rules (best first) come from the rule search index.
+          // With facets, a rule set or a KQL filter, only the rules they keep are ranked: ranking
+          // the whole space first would push most rules of a small subset out of the top.
+          const wantsSemantic = search?.mode === 'semantic' && Boolean(search.term.trim());
+          const baseKql = buildGranularRulesKql({ filter, search: undefined });
+          const subset =
+            wantsSemantic && (baseKql || ruleSetFilter)
+              ? await findRules({
+                  rulesClient,
+                  filter: baseKql,
+                  kueryFilter: ruleSetFilter,
+                  fields: ['updatedAt'],
+                  sortField: undefined,
+                  sortOrder: undefined,
+                  page: 1,
+                  perPage: MAX_RESULTS_WINDOW,
+                })
+              : undefined;
+          // Larger subsets than one page are ranked in the whole space and filtered after.
+          const candidateIds =
+            subset && subset.total <= MAX_RESULTS_WINDOW
+              ? subset.data.map((rule) => rule.id)
+              : undefined;
           const semantic =
-            search?.mode === 'semantic' && search.term.trim()
+            wantsSemantic && search
               ? await resolveSemanticSearch({
                   esClient: ctx.core.elasticsearch.client.asInternalUser,
                   uiSettings: ctx.core.uiSettings.client,
@@ -154,6 +175,7 @@ export const searchRulesRoute = (
                       spaceId
                     ),
                   term: search.term.trim(),
+                  candidateIds,
                   logger,
                 })
               : undefined;

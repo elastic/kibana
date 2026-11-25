@@ -185,3 +185,11 @@ export const REMOVE_FILTER = (filter: string) =>
 export const NO_VALUES = i18n.translate('xpack.securitySolution.ruleSets.facets.noValues', {
   defaultMessage: 'No values',
 });
+
+export const NO_COUNT_BY_MEANING = i18n.translate(
+  'xpack.securitySolution.ruleSets.facets.noCountByMeaning',
+  {
+    defaultMessage:
+      'AI search looks only inside the selected values. Select this value to count it.',
+  }
+);
