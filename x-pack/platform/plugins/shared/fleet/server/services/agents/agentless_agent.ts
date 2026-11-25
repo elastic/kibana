@@ -8,6 +8,7 @@
 import https from 'https';
 
 import { escapeQuotes } from '@kbn/es-query';
+import { schema } from '@kbn/config-schema';
 
 import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -77,6 +78,53 @@ import {
 } from '../../../common/constants/agentless';
 import { agentPolicyService } from '../agent_policy';
 
+export interface AgentlessRumToken {
+  id: string;
+  sha256: string;
+  created_at: string;
+}
+
+export interface AgentlessRumPolicy {
+  revision: number;
+  enabled: boolean;
+  deleted: boolean;
+  allowed_origins: string[];
+  client_tokens: AgentlessRumToken[];
+}
+
+export interface AgentlessRumClient {
+  mintToken(): Promise<AgentlessRumToken & { token: string }>;
+  publish(policy: AgentlessRumPolicy): Promise<void>;
+}
+
+const mintedRumTokenSchema = schema.object({
+  id: schema.string({
+    minLength: 1,
+    maxLength: 128,
+    validate: (id) => (/^[A-Za-z0-9_-]+$/.test(id) ? undefined : 'Invalid token ID'),
+  }),
+  sha256: schema.string({
+    minLength: 64,
+    maxLength: 64,
+    validate: (digest) => (/^[0-9a-f]{64}$/.test(digest) ? undefined : 'Invalid token digest'),
+  }),
+  created_at: schema.string({
+    validate: (date) => {
+      const parsed = new Date(date);
+      // Agentless emits UTC timestamps at whole-second precision.
+      if (
+        date === '0001-01-01T00:00:00Z' ||
+        !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(date) ||
+        Number.isNaN(parsed.getTime()) ||
+        parsed.toISOString() !== `${date.slice(0, -1)}.000Z`
+      ) {
+        return 'Invalid token creation time';
+      }
+    },
+  }),
+  token: schema.string({ minLength: 1 }),
+});
+
 interface AgentlessAgentErrorHandlingMessages {
   [key: string]: {
     [key: string]: {
@@ -120,6 +168,52 @@ export interface AgentlessAgentService {
 }
 
 class AgentlessAgentServiceImpl implements AgentlessAgentService {
+  public createRumClient(): AgentlessRumClient | undefined {
+    const agentlessConfig = appContextService.getConfig()?.agentless;
+    const api = agentlessConfig?.api;
+    const endpoint = api?.rumUrl ?? api?.url;
+    if (!endpoint || !api?.tls?.certificate || !api.tls.key) {
+      return;
+    }
+    const url = new URL('/api/v2/rum', endpoint);
+    if (url.protocol !== 'https:') {
+      return;
+    }
+
+    const tlsConfig = this.createTlsConfig(agentlessConfig);
+    tlsConfig.rejectUnauthorized = true;
+    const client = axios.create({
+      ...this.getHeaders(tlsConfig, undefined),
+      maxRedirects: 0,
+      timeout: 10_000,
+    });
+
+    return {
+      async mintToken() {
+        try {
+          const { data, status } = await client.post(`${url}/client_tokens`);
+          if (status === 201) {
+            return mintedRumTokenSchema.validate(data);
+          }
+        } catch {
+          // Axios and validation errors can contain the plaintext token or mTLS configuration.
+        }
+        throw new Error('Failed to mint a RUM token in Agentless API');
+      },
+      async publish(policy) {
+        try {
+          const { status } = await client.put(url.href, policy);
+          if (status === 200 || status === 201 || status === 204) {
+            return;
+          }
+        } catch {
+          // The request contains token digests and mTLS configuration.
+        }
+        throw new Error('Failed to publish the RUM policy to Agentless API');
+      },
+    };
+  }
+
   /** Fleet server host is chosen purely by cloud environment, independent of the policy. */
   public getDefaultFleetServerId() {
     const cloudSetup = appContextService.getCloud();
