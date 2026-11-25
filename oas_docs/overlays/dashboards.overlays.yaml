@@ -259,3 +259,24 @@ actions:
         description: Dashboards documentation
         url: https://www.elastic.co/docs/explore-analyze/dashboards
       x-displayName: Dashboards
+  # ──────────────────────────────────────────────
+  # Temporary: hide the `lens-dashboard-app` panel type
+  # It is registered only while the `lens.apiFormat` flag is on (dev mode defaults to on, which is how
+  # the OAS snapshot is captured), and is not part of the public Dashboards API.
+  # Route validation still accepts it. Remove these actions once the `lens.apiFormat` flag is removed.
+  # ──────────────────────────────────────────────
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app']"
+    description: Remove the lens-dashboard-app panel schema
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].properties.panels.items.anyOf[0].discriminator.mapping['lens-dashboard-app']"
+    description: Remove lens-dashboard-app from the dashboard panel discriminator mapping
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].properties.panels.items.anyOf[0].oneOf[?(@['$ref']=='#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app')]"
+    description: Remove lens-dashboard-app from the dashboard panel oneOf
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-section'].properties.panels.items.discriminator.mapping['lens-dashboard-app']"
+    description: Remove lens-dashboard-app from the section panel discriminator mapping
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-section'].properties.panels.items.oneOf[?(@['$ref']=='#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app')]"
+    description: Remove lens-dashboard-app from the section panel oneOf
+    remove: true
