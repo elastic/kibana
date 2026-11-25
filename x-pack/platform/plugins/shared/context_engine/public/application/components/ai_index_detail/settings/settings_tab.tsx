@@ -39,7 +39,7 @@ export const SettingsTab = ({
       {isMemoryEnabled && aiIndex && (
         <>
           <EuiSpacer size="xl" />
-          <DreamingPanel aiIndex={aiIndex} />
+          <DreamingPanel key={aiIndex.id} aiIndex={aiIndex} />
         </>
       )}
       <EuiSpacer size="xl" />

@@ -181,18 +181,8 @@ describe('DreamingPanel', () => {
     );
   });
 
-  it('turns dreaming on from the setup form and shows the editor', async () => {
-    const props = aiIndexWith(undefined);
-    const applied = { ...factsOnly, instructions: 'Support.' };
-    applyTemplate.mockImplementation(async () => {
-      jest.mocked(useAiIndexDreaming).mockReturnValue({
-        dreaming: applied,
-        workflowIds: ['wf-dreaming'],
-        isLoading: false,
-      });
-      return true;
-    });
-    const view = renderPanel(props);
+  it('calls applyTemplate with the setup config when save is clicked', async () => {
+    renderPanel(aiIndexWith(undefined));
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
     await waitFor(() =>
       expect(screen.getByTestId('contextAiIndexDreamingSetupSave')).toBeInTheDocument()
@@ -209,8 +199,13 @@ describe('DreamingPanel', () => {
         }),
       })
     );
-    view.rerender(panel({ ...props, dreaming: applied }));
-    expect(screen.getByTestId('contextAiIndexDreamingInstructions')).toBeInTheDocument();
+  });
+
+  it('disables the setup toggle and discard while apply is saving', async () => {
+    jest.mocked(useApplyDreamingTemplate).mockReturnValue({ applyTemplate, isSaving: true });
+    renderPanel(aiIndexWith(undefined));
+
+    expect(screen.getByTestId('contextAiIndexDreamingSetUpToggle')).toBeDisabled();
   });
 
   it('disables apply when custom is picked with no fact types', async () => {

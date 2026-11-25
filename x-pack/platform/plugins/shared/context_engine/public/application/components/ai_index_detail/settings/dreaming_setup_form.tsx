@@ -28,7 +28,7 @@ import {
   summaryLabel,
 } from '../../dreaming_setup/translations';
 import { useDreamingSetupDraft } from '../../dreaming_setup/use_dreaming_setup_draft';
-import { useApplyDreamingTemplate } from '../../../hooks/use_apply_dreaming_template';
+import type { DreamingTemplateConfig } from '../../../../../common/dreaming_templates';
 import { DreamingLearnsRows } from './dreaming_learns_rows';
 import { SettingsRow } from './settings_row';
 
@@ -40,11 +40,12 @@ const startFromLabel = i18n.translate(
 );
 
 interface DreamingSetupFormProps {
-  aiIndexId: string;
+  isSaving: boolean;
+  onApply: (config: DreamingTemplateConfig) => Promise<boolean>;
   onDiscard: () => void;
 }
 
-export const DreamingSetupForm = ({ aiIndexId, onDiscard }: DreamingSetupFormProps) => {
+export const DreamingSetupForm = ({ isSaving, onApply, onDiscard }: DreamingSetupFormProps) => {
   const {
     templates,
     isLoading,
@@ -60,12 +61,11 @@ export const DreamingSetupForm = ({ aiIndexId, onDiscard }: DreamingSetupFormPro
     canApply,
     buildConfig,
   } = useDreamingSetupDraft();
-  const { applyTemplate, isSaving } = useApplyDreamingTemplate();
 
   const apply = async () => {
     const config = buildConfig();
     if (config) {
-      await applyTemplate({ aiIndexId, config });
+      await onApply(config);
     }
   };
 
@@ -107,7 +107,11 @@ export const DreamingSetupForm = ({ aiIndexId, onDiscard }: DreamingSetupFormPro
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onDiscard} data-test-subj="contextAiIndexDreamingSetupDiscard">
+          <EuiButtonEmpty
+            onClick={onDiscard}
+            isDisabled={isSaving}
+            data-test-subj="contextAiIndexDreamingSetupDiscard"
+          >
             {discardChangesLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>

@@ -48,6 +48,7 @@ import {
   useLatestWorkflowExecution,
   type LatestWorkflowExecution,
 } from '../../../hooks/use_latest_workflow_execution';
+import { useApplyDreamingTemplate } from '../../../hooks/use_apply_dreaming_template';
 import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
 import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import {
@@ -391,6 +392,7 @@ interface DreamingPanelProps {
 export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
   const [isJsonOpen, setIsJsonOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const { applyTemplate, isSaving: isApplying } = useApplyDreamingTemplate();
   const {
     dreaming: savedDreaming,
     workflowIds,
@@ -433,6 +435,7 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
             showLabel={false}
             label={turnOnDreamingLabel}
             checked={isCreating}
+            disabled={isApplying}
             onChange={(event) => setIsCreating(event.target.checked)}
             data-test-subj="contextAiIndexDreamingSetUpToggle"
           />
@@ -440,7 +443,11 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
         {isCreating ? (
           <>
             <EuiHorizontalRule margin="m" />
-            <DreamingSetupForm aiIndexId={aiIndex.id} onDiscard={() => setIsCreating(false)} />
+            <DreamingSetupForm
+              isSaving={isApplying}
+              onApply={(config) => applyTemplate({ aiIndexId: aiIndex.id, config })}
+              onDiscard={() => setIsCreating(false)}
+            />
           </>
         ) : null}
       </>
