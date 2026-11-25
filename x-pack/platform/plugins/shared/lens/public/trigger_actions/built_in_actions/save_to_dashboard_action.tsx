@@ -16,6 +16,7 @@ import type { LensPluginStartDependencies } from '../../plugin';
 import { getSaveModalComponent } from '../../app_plugin/shared/saved_modal_lazy';
 import { ACTION_SAVE_TO_DASHBOARD } from './constants';
 import {
+  getEffectiveTimeRange,
   getTelemetrySource,
   isBuiltInActionRequested,
   notifyBuiltInActionExecuted,
@@ -52,7 +53,7 @@ export const createSaveToDashboardAction = (
         <SaveModal
           initialInput={{
             ...embeddable.getLegacySerializedState(),
-            time_range: embeddable.timeRange$.getValue(),
+            time_range: getEffectiveTimeRange(embeddable),
           }}
           isSaveable={false}
           telemetrySource={getTelemetrySource(embeddable)}

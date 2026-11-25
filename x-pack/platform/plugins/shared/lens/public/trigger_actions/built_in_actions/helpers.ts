@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { apiHasParentApi } from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { TimeRange } from '@kbn/es-query';
 import type { LensBuiltInActionId, LensTelemetrySource } from '@kbn/lens-common';
 
 interface PublishesBuiltInActionIds {
@@ -42,3 +43,14 @@ export const getTelemetrySource = (embeddable: unknown): LensTelemetrySource | u
   apiHasParentApi(embeddable)
     ? (embeddable.parentApi as { telemetrySource?: LensTelemetrySource }).telemetrySource
     : undefined;
+
+/** The panel time range, falling back to the one of the renderer hosting the embeddable. */
+export const getEffectiveTimeRange = (embeddable: unknown): TimeRange | undefined => {
+  if (apiPublishesTimeRange(embeddable)) {
+    const panelTimeRange = embeddable.timeRange$.getValue();
+    if (panelTimeRange) return panelTimeRange;
+  }
+  return apiHasParentApi(embeddable) && apiPublishesTimeRange(embeddable.parentApi)
+    ? embeddable.parentApi.timeRange$.getValue()
+    : undefined;
+};

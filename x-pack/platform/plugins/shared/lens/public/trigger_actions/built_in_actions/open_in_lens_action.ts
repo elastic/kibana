@@ -12,7 +12,11 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { LensSerializedState } from '@kbn/lens-common';
 import { isLensApi } from '../../react_embeddable/type_guards';
 import { ACTION_OPEN_IN_LENS } from './constants';
-import { isBuiltInActionRequested, notifyBuiltInActionExecuted } from './helpers';
+import {
+  getEffectiveTimeRange,
+  isBuiltInActionRequested,
+  notifyBuiltInActionExecuted,
+} from './helpers';
 
 export interface OpenInLensActionServices {
   application: Pick<ApplicationStart, 'capabilities'>;
@@ -40,7 +44,7 @@ export const createOpenInLensAction = ({
       notifyBuiltInActionExecuted(embeddable, 'openInLens');
       navigateToPrefilledEditor({
         ...embeddable.getLegacySerializedState(),
-        time_range: embeddable.timeRange$.getValue(),
+        time_range: getEffectiveTimeRange(embeddable),
       });
     },
   });

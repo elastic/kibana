@@ -33,10 +33,11 @@ const getEmbeddable = (builtInActions?: LensBuiltInActionId[], onBuiltInAction =
   ({
     ...getLensApiMock(),
     canViewUnderlyingData$: new BehaviorSubject(true),
-    timeRange$: new BehaviorSubject(timeRange),
+    timeRange$: new BehaviorSubject(undefined),
     getLegacySerializedState: () => ({ attributes }),
     parentApi: {
       builtInActionIds$: new BehaviorSubject(builtInActions),
+      timeRange$: new BehaviorSubject(timeRange),
       onBuiltInAction,
       telemetrySource: 'chat',
     },

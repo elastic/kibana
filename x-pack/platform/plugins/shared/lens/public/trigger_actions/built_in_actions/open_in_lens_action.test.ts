@@ -20,10 +20,11 @@ const getEmbeddable = (builtInActions?: LensBuiltInActionId[], onBuiltInAction =
   ({
     ...getLensApiMock(),
     canViewUnderlyingData$: new BehaviorSubject(true),
-    timeRange$: new BehaviorSubject(timeRange),
+    timeRange$: new BehaviorSubject(undefined),
     getLegacySerializedState: () => ({ attributes }),
     parentApi: {
       builtInActionIds$: new BehaviorSubject(builtInActions),
+      timeRange$: new BehaviorSubject(timeRange),
       onBuiltInAction,
     },
   } as unknown as EmbeddableApiContext['embeddable']);
@@ -77,5 +78,20 @@ describe('open in Lens action', () => {
     await createAction().execute(toContext(getEmbeddable(['openInLens'], onBuiltInAction)));
 
     expect(onBuiltInAction).toHaveBeenCalledWith('openInLens');
+  });
+
+  it('prefers the panel time range over the one of the renderer', async () => {
+    const embeddable = getEmbeddable(['openInLens']) as unknown as {
+      timeRange$: BehaviorSubject<unknown>;
+    };
+    const panelTimeRange = { from: 'now-1h', to: 'now' };
+    embeddable.timeRange$.next(panelTimeRange);
+
+    await createAction().execute(toContext(embeddable as never));
+
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith({
+      attributes,
+      time_range: panelTimeRange,
+    });
   });
 });
