@@ -67,7 +67,7 @@ Response:
 
 | key | |
 | --- | --- |
-| `columns` | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, `last_seen`. The same names and kinds the `types` route returns for the type, without its labels. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
+| `columns` | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, the metrics in the order the definition declares them, `last_seen`. A metric column carries its `agg` and, when declared, its `unit`. Metric order never follows plan order: a source's filtered metrics run in their own plans, after its unfiltered ones. The same names and kinds the `types` route returns for the type, without its labels. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
 | `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |
@@ -75,7 +75,7 @@ Response:
 | `probes` | One entry per distinct source pattern: `indexPattern`, `esql`, `params`, `outcome` (`time_series`, `no_time_series` or `failed`), `isPartial` and the same execution metadata as `queries`; a probe that threw has null metadata. |
 | `timings` | Server phases in fractional milliseconds: `definitionMs`, `planningMs` (probes and query generation), `probesMs` (part of `planningMs`), `queriesMs`, `processingMs` and `totalMs`, their sum. |
 | `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
-| `unavailableColumns` | `{ column, indexPattern, field }` for an attribute no index behind that source's pattern maps; its value is null. |
+| `unavailableColumns` | `{ column, indexPattern, field }`, one per attribute or metric column whose field no index behind that source's pattern maps; its value is null. A metric the plan's engine cannot compute is in `unsupportedMetrics` only, even when another column reads the same unmapped field. |
 | `unsupportedMetrics` | `{ indexPattern, engine, column, field, agg }` for a metric the plan engine cannot compute (e.g. a rate under `FROM`); omitted from that plan's STATS. The app lists these in the section-header warning tip with `errors`. |
 
 Anything about one source degrades the result and is reported in `errors`; it never fails the request:
@@ -190,7 +190,7 @@ registers them.
 | `parse_guard.ts` | Parses generated text before it is returned; a failure is a generator bug. |
 | `identity.ts` | The `BY` keys, the identity-presence predicate, the `entity.id` evaluation, the identity compositions as field lists, and a raw column for each `BY` key the evaluation overwrites. The predicate and the evaluation come from the entity store's id compiler verbatim. |
 | `source_plans.ts` | Query plans from the sources and their probe results: a `FROM` plan per source, and a `TS` plan before it when the probe found a time-series index, validated once. A later phase also splits a source by metric filter. |
-| `columns.ts` | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), `last_seen`. |
+| `columns.ts` | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), metrics in the order the definition declares them (one column per name across sources), `last_seen`. `types`, `_list` and `_plan` all derive their columns here. |
 | `list_query.ts` | One list query per plan. |
 | `probe_query.ts` | The probe deciding whether a source gets a `TS` plan. |
 | `attribute_filters.ts` | The other dropdowns' selections as one ES\|QL predicate per plan: each column read from the field the plan's source declares, each label matched against every raw value that reads as it, values as named parameters. A plan that cannot match the selections gets none. |
@@ -249,14 +249,14 @@ The executor reads the type of the `@timestamp` column to decide whether the sou
 | `errors/source_error.ts` | Flattens a failed query to `{ indexPattern, status, reason }`; never a stack or the raw body. |
 | `value_labels.ts` | Maps an attribute's raw values to its `valueLabels` per plan, before the merge; an unmapped value passes through stringified. |
 | `merge.ts` | One row per `entity.id` across plans: attributes from the row with the newest `last_seen`, identity fields and `entity.id` first non-null, `last_seen` newest, a null never replacing a value; `provenance` names the source pattern behind each attribute value. |
-| `plan_result.ts` | Reads from a plan's column types whether it is usable and which of its attribute fields no index maps. |
+| `plan_result.ts` | Reads from a plan's column types whether it is usable and which of its attribute and metric columns no index maps, one entry per column. |
 | `output.ts` | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, sets each plan's `LIMIT` one above the request, derives `truncated` from plan cuts and the limit (there is no count query), and fills every row with every column. |
 
 No metadata API is called and no concrete index is named: the executor learns everything from ES\|QL results.
 
 **Probe.** One probe per distinct pattern, concurrently: `TS <pattern> | KEEP @timestamp | LIMIT 0`. `@timestamp` of any type other than `null` means a time-series index exists and the source gets a `TS` plan. `null`, no column, or a verification error (a concrete index that is not time series, a name that does not exist) means none. Any other failure is a source error and no plan of the source runs: the `FROM` plan excludes time-series indices, so reading the failure as "none" would silently leave them out. The decision reads the error type, never the message. Elasticsearch drops indices the user cannot read like indices that do not exist.
 
-**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from `raw:entity.id`, its value as the documents supplied it, which the response does not carry. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut, and `truncated` is true only when the row limit left rows out. A failed probe or query and a partial result (`is_partial`) do not set `truncated`; each is reported in `errors[]`, and a partial plan's rows are kept.
+**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from `raw:entity.id`, its value as the documents supplied it, which the response does not carry. An attribute or metric column of type `null` is reported in `unavailableColumns`, one entry per column, and is not fatal. A metric the engine cannot compute is not in the query, so it is never reported there, only in `unsupportedMetrics`. A plan that returns its full limit is cut, and `truncated` is true only when the row limit left rows out. A failed probe or query and a partial result (`is_partial`) do not set `truncated`; each is reported in `errors[]`, and a partial plan's rows are kept.
 
 Nothing is cached yet.
 

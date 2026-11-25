@@ -83,7 +83,10 @@ export interface GetTypesResponse {
   types: InventoryType[];
 }
 
-/** An attribute or metric column one source cannot fill because no index behind its pattern maps the field. */
+/**
+ * An attribute or metric column one source cannot fill because no index behind its pattern maps the
+ * field. One entry per column; a metric the engine cannot compute is an `UnsupportedMetric` instead.
+ */
 export interface UnavailableColumn {
   column: string;
   indexPattern: string;
