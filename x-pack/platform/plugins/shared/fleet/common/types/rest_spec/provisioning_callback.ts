@@ -25,6 +25,11 @@ export interface GetProvisioningCallbackAvailabilityResponse {
 export interface CreateProvisioningCallbackRequest {
   body: CloudConnectorCallbackIdentity & {
     provider: 'aws';
+    /**
+     * For a stack update: the cloud connector whose stack is being updated. The report then
+     * records the template details on that connector instead of creating one.
+     */
+    cloud_connector_id?: string;
   };
 }
 

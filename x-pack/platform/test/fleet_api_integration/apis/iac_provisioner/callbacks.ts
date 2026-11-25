@@ -13,7 +13,7 @@ import {
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { INTERNAL_ROUTE_HEADERS } from './helpers/fixtures';
+import { INTERNAL_ROUTE_HEADERS, createAwsCloudConnector } from './helpers/fixtures';
 
 const CALLBACKS_PATH = '/internal/fleet/iac_provisioner/callbacks';
 const receivePath = (id: string) => `/api/fleet/iac_provisioner/callbacks/${id}`;
@@ -200,6 +200,71 @@ export default function (providerContext: FtrProviderContext) {
       expect(created.iac_blueprint_id).to.be('federated-identity');
       expect(created.iac_blueprint_version).to.be('1.0.0');
       expect(created.iac_deployment_id).to.be(stackArn);
+    });
+
+    describe('for a stack update', () => {
+      // The role the fixture's connector stores, which the updated stack reports.
+      const UPDATE_PAYLOAD = {
+        role_arn: `arn:aws:iam::${ACCOUNT}:role/iac-test-role`,
+        stack_arn: `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/elastic-wif/77777777-8888-9999-0000-111111111111`,
+      };
+      const TEMPLATE = {
+        iac_key: 'sha256:updated',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.1.0',
+      };
+
+      it('records the template on the identity the update was launched for instead of creating one', async () => {
+        const connectorId = await createAwsCloudConnector(supertest, {
+          iac_key: 'sha256:before',
+          iac_deployment_id: UPDATE_PAYLOAD.stack_arn,
+        });
+        const { item, token } = await createCallback({
+          cloud_connector_id: connectorId,
+          ...TEMPLATE,
+        });
+        expect((item as { cloud_connector_id?: string }).cloud_connector_id).to.be(connectorId);
+
+        // Only the identity's own stack can report to the record.
+        await receive(item.id, token, { ...UPDATE_PAYLOAD, role_arn: PAYLOAD.role_arn }).expect(
+          400
+        );
+
+        const reported = await receive(item.id, token, UPDATE_PAYLOAD).expect(200);
+        expect(reported.body).to.eql({ status: 'received' });
+
+        const { body } = await supertest
+          .get(`${CALLBACKS_PATH}/${item.id}`)
+          .set(INTERNAL_ROUTE_HEADERS)
+          .expect(200);
+        expect(body.item.status).to.be('received');
+        expect(body.item.cloud_connector_id).to.be(connectorId);
+
+        const { body: connector } = await supertest
+          .get(`/api/fleet/cloud_connectors/${connectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(connector.item.iac_key).to.be('sha256:updated');
+        expect(connector.item.iac_blueprint_id).to.be('federated-identity');
+        expect(connector.item.iac_blueprint_version).to.be('1.1.0');
+        expect(connector.item.iac_deployment_id).to.be(UPDATE_PAYLOAD.stack_arn);
+
+        const connectors = await supertest
+          .get('/api/fleet/cloud_connectors')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(
+          connectors.body.items.filter((c: { id: string }) => c.id === item.id)
+        ).to.have.length(0);
+      });
+
+      it('refuses a record for an identity that does not exist', async () => {
+        await supertest
+          .post(CALLBACKS_PATH)
+          .set(INTERNAL_ROUTE_HEADERS)
+          .send({ provider: 'aws', cloud_connector_id: 'no-such-connector', ...TEMPLATE })
+          .expect(404);
+      });
     });
 
     it('cancels a pending record, so a late report is turned away', async () => {

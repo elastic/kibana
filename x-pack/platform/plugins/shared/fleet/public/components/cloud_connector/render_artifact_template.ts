@@ -51,8 +51,12 @@ export interface RenderArtifactTemplateParams {
    * launch URL a stack-update deep link.
    */
   deploymentId?: string;
+  /** Stack parameters for a new stack. An update keeps the stack's own, so these are not sent. */
   stackParams?: Readonly<Record<string, string>>;
-  /** Extra stack parameters for the rendered template, merged over `stackParams`. */
+  /**
+   * Extra stack parameters for the rendered template: merged over `stackParams` for a new stack,
+   * the only parameters set for an update.
+   */
   getExtraStackParams?: (rendered: {
     templateSha: string;
     blueprint: RenderedIacBlueprint;
@@ -113,7 +117,11 @@ export const renderArtifactTemplate = async ({
     provider,
     artifactUrl: data.artifactUrl,
     deploymentId,
-    stackParams: extraStackParams ? { ...stackParams, ...extraStackParams } : stackParams,
+    stackParams: deploymentId
+      ? extraStackParams
+      : extraStackParams
+      ? { ...stackParams, ...extraStackParams }
+      : stackParams,
     staticUrl,
   });
   return launchUrl

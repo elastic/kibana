@@ -209,6 +209,26 @@ describe('provisioningCallbackService', () => {
       );
       expect(item).toMatchObject({ connector_name: 'my-identity', iac_key: 'sha256:abc' });
     });
+
+    it('stores the identity a stack update belongs to, so the report updates it instead of creating one', async () => {
+      const { item } = await provisioningCallbackService.create(soClient, {
+        provider: 'aws',
+        cloudConnectorId: 'cc-1',
+        identity: { iac_key: 'sha256:new', iac_blueprint_id: 'federated-identity' },
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'fleet-provisioning-callback',
+        expect.objectContaining({
+          status: 'pending',
+          cloud_connector_id: 'cc-1',
+          iac_key: 'sha256:new',
+          iac_blueprint_id: 'federated-identity',
+        }),
+        { id: 'cb-1' }
+      );
+      expect(item).toMatchObject({ cloud_connector_id: 'cc-1', iac_key: 'sha256:new' });
+    });
   });
 
   describe('expired record sweep on create', () => {
@@ -449,10 +469,10 @@ describe('provisioningCallbackService', () => {
   });
 
   describe('receive', () => {
-    /** The record, with no cloud connector of its id yet. */
+    /** The record, and the stored cloud connector its id (or `cloud_connector_id`) names, if any. */
     const mockRecord = (
       attributes: ProvisioningCallbackSOAttributes,
-      connector?: { name: string }
+      connector?: { name: string; vars?: unknown; iac_deployment_id?: string }
     ) => {
       soClient.get.mockImplementation(async (type, id) => {
         if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
@@ -1067,6 +1087,179 @@ describe('provisioningCallbackService', () => {
         },
         kibana: { saved_object: { type: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE, id: 'cb-1' } },
         labels: { role_arn: 'arn:aws:iam::123456789012:role/another', stack_arn: STACK_ARN },
+      });
+    });
+
+    describe('for a stack update', () => {
+      /** A record created for the update of the stack behind connector `cc-1`. */
+      const UPDATE_ATTRS = pendingAttrs({
+        cloud_connector_id: 'cc-1',
+        iac_key: 'sha256:new',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.1.0',
+      });
+      /** The connector as stored, with the role and stack the record's report must come from. */
+      const CONNECTOR = {
+        name: 'my-identity',
+        vars: { role_arn: { type: 'text', value: ROLE_ARN } },
+        iac_deployment_id: STACK_ARN,
+      };
+      const UPDATED = {
+        id: 'cc-1',
+        name: 'my-identity',
+        cloudProvider: 'aws' as const,
+        vars: { role_arn: { type: 'text' as const, value: ROLE_ARN } },
+        created_at: NOW.toISOString(),
+        updated_at: NOW.toISOString(),
+        packagePolicyCount: 1,
+      };
+
+      beforeEach(() => {
+        jest.spyOn(cloudConnectorService, 'update').mockResolvedValue(UPDATED);
+      });
+
+      it('records the template the stack now runs on the identity instead of creating one, and audit-logs the update', async () => {
+        mockRecord(UPDATE_ATTRS, CONNECTOR);
+
+        const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        });
+
+        expect(cloudConnectorService.create).not.toHaveBeenCalled();
+        expect(cloudConnectorService.update).toHaveBeenCalledWith(soClient, 'cc-1', {
+          iac_key: 'sha256:new',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.1.0',
+        });
+        expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith('default');
+        expect(soClient.update).toHaveBeenLastCalledWith(
+          PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+          'cb-1',
+          {
+            status: 'received',
+            received_at: NOW.toISOString(),
+            connector_name: 'my-identity',
+            cloud_connector_id: 'cc-1',
+          },
+          { version: 'v2' }
+        );
+        expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
+          message: 'Provisioning callback received, cloud connector updated',
+          event: {
+            action: 'provisioning_callback_received',
+            category: ['database'],
+            type: ['change'],
+            outcome: 'success',
+          },
+          kibana: { saved_object: { type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, id: 'cc-1' } },
+          labels: { provisioning_callback_id: 'cb-1', role_arn: ROLE_ARN, stack_arn: STACK_ARN },
+        });
+        expect(result).toEqual({
+          outcome: 'received',
+          item: expect.objectContaining({
+            id: 'cb-1',
+            status: 'received',
+            ...PAYLOAD,
+            cloud_connector_id: 'cc-1',
+            connector_name: 'my-identity',
+          }),
+        });
+      });
+
+      it('records the stack on an identity that had none', async () => {
+        mockRecord(UPDATE_ATTRS, { ...CONNECTOR, iac_deployment_id: undefined });
+
+        await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        });
+
+        expect(cloudConnectorService.update).toHaveBeenCalledWith(
+          soClient,
+          'cc-1',
+          expect.objectContaining({ iac_deployment_id: STACK_ARN })
+        );
+      });
+
+      it('is gone, without claiming the record, when the identity no longer exists', async () => {
+        mockRecord(UPDATE_ATTRS);
+
+        const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        });
+
+        expect(result).toEqual({ outcome: 'gone' });
+        expect(soClient.update).not.toHaveBeenCalled();
+        expect(cloudConnectorService.update).not.toHaveBeenCalled();
+      });
+
+      it('is invalid when the report comes from a role other than the identity’s', async () => {
+        mockRecord(UPDATE_ATTRS, {
+          ...CONNECTOR,
+          vars: { role_arn: { type: 'text', value: `${ROLE_ARN}-other` } },
+        });
+
+        const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        });
+
+        expect(result).toEqual({
+          outcome: 'invalid',
+          message:
+            'role_arn and stack_arn must be those of the identity the stack update belongs to',
+        });
+        expect(soClient.update).not.toHaveBeenCalled();
+        expect(cloudConnectorService.update).not.toHaveBeenCalled();
+      });
+
+      it('is invalid when the report comes from a stack other than the identity’s', async () => {
+        mockRecord(UPDATE_ATTRS, { ...CONNECTOR, iac_deployment_id: `${STACK_ARN}-other` });
+
+        const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        });
+
+        expect(result).toMatchObject({ outcome: 'invalid' });
+        expect(soClient.update).not.toHaveBeenCalled();
+      });
+
+      it('releases the claim and rethrows when the identity could not be updated', async () => {
+        mockRecord(UPDATE_ATTRS, CONNECTOR);
+        jest.mocked(cloudConnectorService.update).mockRejectedValue(new Error('boom'));
+
+        await expect(
+          provisioningCallbackService.receive(soClient, 'cb-1', {
+            token: TOKEN,
+            payload: PAYLOAD,
+          })
+        ).rejects.toThrow('boom');
+
+        expect(soClient.update).toHaveBeenLastCalledWith(
+          PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+          'cb-1',
+          { status: 'pending' },
+          { version: 'v2' }
+        );
+      });
+
+      it('answers a retry of the same report after received without touching the identity again', async () => {
+        mockRecord(
+          { ...UPDATE_ATTRS, status: 'received', received_at: NOW.toISOString(), ...PAYLOAD },
+          CONNECTOR
+        );
+
+        const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        });
+
+        expect(result).toMatchObject({ outcome: 'received' });
+        expect(cloudConnectorService.update).not.toHaveBeenCalled();
+        expect(soClient.update).not.toHaveBeenCalled();
       });
     });
   });

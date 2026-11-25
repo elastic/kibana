@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
 
 import {
@@ -485,11 +486,11 @@ const ITEM: CloudConnectorCallback = {
 const realmUser = () =>
   ({ username: 'elastic', authentication_type: 'realm' } as unknown as AuthenticatedUser);
 
-const buildCallbackContext = (spaceId = 'default') =>
+const buildCallbackContext = (spaceId = 'default', internalSoClient: unknown = {}) =>
   ({
     fleet: Promise.resolve({
       spaceId,
-      internalSoClient: {},
+      internalSoClient,
     }),
   } as any);
 
@@ -671,6 +672,56 @@ describe('Provisioning callback handlers', () => {
           },
         })
       );
+    });
+
+    it('passes the identity a stack update belongs to, once found in the request space', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
+      const spaceSoClient = { get: jest.fn().mockResolvedValue({ id: 'cc-1', attributes: {} }) };
+      const request = httpServerMock.createKibanaRequest({
+        body: { provider: 'aws', cloud_connector_id: 'cc-1', iac_key: 'sha256:new' },
+      });
+
+      await createProvisioningCallbackHandler(
+        buildCallbackContext('default', spaceSoClient),
+        request,
+        response
+      );
+
+      expect(spaceSoClient.get).toHaveBeenCalledWith('fleet-cloud-connector', 'cc-1');
+      expect(mockedService.create).toHaveBeenCalledWith(soClient, {
+        provider: 'aws',
+        createdBy: 'elastic',
+        spaceId: 'default',
+        cloudConnectorId: 'cc-1',
+        identity: { iac_key: 'sha256:new' },
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, token: 'tok-1' } });
+    });
+
+    it('returns 404 and mints nothing when the identity a stack update belongs to is not in the request space', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      const spaceSoClient = {
+        get: jest
+          .fn()
+          .mockRejectedValue(
+            SavedObjectsErrorHelpers.createGenericNotFoundError('fleet-cloud-connector', 'cc-1')
+          ),
+      };
+      const request = httpServerMock.createKibanaRequest({
+        body: { provider: 'aws', cloud_connector_id: 'cc-1' },
+      });
+
+      await createProvisioningCallbackHandler(
+        buildCallbackContext('default', spaceSoClient),
+        request,
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: 'Cloud connector not found' },
+      });
+      expect(mockedService.create).not.toHaveBeenCalled();
     });
   });
 

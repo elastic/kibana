@@ -90,6 +90,16 @@ export const CreateProvisioningCallbackRequestSchema = {
     iac_blueprint_version: schema.maybe(
       schema.nullable(schema.string({ minLength: 1, maxLength: 64 }))
     ),
+    cloud_connector_id: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 256,
+        meta: {
+          description:
+            'For a stack update: the cloud connector whose stack is being updated. The report records the template details on it instead of creating a cloud connector.',
+        },
+      })
+    ),
   }),
 };
 

@@ -56,6 +56,10 @@ export interface CloudConnectorCallback
   extends ProvisioningCallback,
     CloudConnectorCallbackIdentity,
     Partial<CloudConnectorCallbackReceivedValues> {
-  /** Set when the stack's report has created the cloud connector. */
+  /**
+   * The cloud connector the record is about. Set when the stack's report has created it, or,
+   * for a stack update, at launch: the connector whose stack is being updated, on which the
+   * report records the template details stored here instead of creating a connector.
+   */
   cloud_connector_id?: string;
 }

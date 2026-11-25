@@ -126,12 +126,12 @@ export interface UseCloudConnectorTemplateParams {
    */
   onTemplateRendered?: (rendered: TemplateRendered) => void;
   /**
-   * Extra stack parameters for a new stack, resolved after the click and before the console
-   * opens. Receives the template details of the launch: the rendered key and blueprint, nulls for
-   * the static template with the IaC Provisioner on, or undefined with it off. Not used for a stack
-   * update, which keeps the stack's own parameters, or for a static URL that is not a quick-create
-   * link. An undefined result launches without them. A rejection aborts the launch: the console
-   * is closed and an error asks the user to try again.
+   * Extra stack parameters, resolved after the click and before the console opens. Receives the
+   * template details of the launch: the rendered key and blueprint, nulls for the static template
+   * with the IaC Provisioner on, or undefined with it off. For a stack update they are the only
+   * parameters the link sets; the stack keeps its own values for the rest. Not used for a static
+   * URL that is not a quick-create link. An undefined result launches without them. A rejection
+   * aborts the launch: the console is closed and an error asks the user to try again.
    */
   getLaunchStackParams?: (
     iac: CloudConnectorIacState | undefined
@@ -361,15 +361,12 @@ export const useCloudConnectorTemplate = ({
         templateSha,
         deploymentId,
         stackParams,
-        // Only a new stack gets extra parameters; an update keeps the stack's own.
-        getExtraStackParams: deploymentId
-          ? undefined
-          : (rendered) =>
-              resolveLaunchStackParams({
-                iac_key: rendered.templateSha,
-                iac_blueprint_id: rendered.blueprint.id,
-                iac_blueprint_version: rendered.blueprint.version,
-              }),
+        getExtraStackParams: (rendered) =>
+          resolveLaunchStackParams({
+            iac_key: rendered.templateSha,
+            iac_blueprint_id: rendered.blueprint.id,
+            iac_blueprint_version: rendered.blueprint.version,
+          }),
         staticUrl: staticTemplate.url,
       });
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -26,6 +26,8 @@ export interface IacKeyCheckCalloutProps {
    * console and continue; Update stays available to relaunch.
    */
   updateLaunched?: boolean;
+  /** The launched stack can report its update back, and has not yet. */
+  isWaitingForReport?: boolean;
 }
 
 /** Renders null when the IAC key matches or there is no actionable reason. */
@@ -35,6 +37,7 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
   onUpdateStack,
   isUpdating,
   updateLaunched = false,
+  isWaitingForReport = false,
 }) => {
   if (result.matches || !result.reason) {
     return null;
@@ -88,6 +91,24 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
   const text = (
     <>
       <p>{bodyText}</p>
+      {isWaitingForReport && (
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          data-test-subj={CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.WAITING_FOR_REPORT}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.fleet.cloudConnector.iacCheck.waitingForReport"
+              defaultMessage="Waiting for CloudFormation to report the updated stack"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {!canUpdate && (
         <p>
           <EuiTextColor color="subdued">
