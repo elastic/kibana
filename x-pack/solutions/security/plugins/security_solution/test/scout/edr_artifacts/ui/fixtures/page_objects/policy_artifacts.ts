@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
+import { euiSelectors } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { TRUSTED_APP_HASH } from '../artifact_tabs_test_data';
 
@@ -120,8 +121,8 @@ export class PolicyArtifactsPage {
       .locator('valuesAutocompleteMatch')
       .getByRole('combobox');
     // EUI renders the options list in a portal, outside the combo box.
-    this.eventFiltersValueOptionsList = this.page.testSubj.locator(
-      '~valuesAutocompleteMatch-optionsList'
+    this.eventFiltersValueOptionsList = this.page.locator(
+      euiSelectors.comboBox.optionsListFor('valuesAutocompleteMatch')
     );
   }
 
