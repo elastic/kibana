@@ -23,7 +23,11 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { BootstrapRenderer } from './bootstrap_renderer';
-import { bootstrapRendererFactory, getChunkFilenamesForPlugins } from './bootstrap_renderer';
+import {
+  bootstrapRendererFactory,
+  getChunkFilenamesForPlugins,
+  normalizeChunkPreloadManifest,
+} from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
@@ -86,6 +90,15 @@ describe('getChunkFilenamesForPlugins', () => {
       )
     ).toEqual(['all.js']);
   });
+});
+
+describe('normalizeChunkPreloadManifest', () => {
+  it.each([null, { allChunks: null }])(
+    'normalizes malformed but valid JSON manifests',
+    (manifest) => {
+      expect(normalizeChunkPreloadManifest(manifest)).toEqual({ allChunks: [] });
+    }
+  );
 });
 
 describe('bootstrapRenderer', () => {
@@ -511,6 +524,7 @@ describe('bootstrapRenderer', () => {
       const externalPluginsDir = fromRoot('plugins');
       for (const pluginId of ['extFirst', 'extSecond']) {
         uiPlugins.internal.set(pluginId, {
+          requiredPlugins: [],
           requiredBundles: [],
           version: '1.0.0',
           publicTargetDir: Path.join(externalPluginsDir, pluginId, 'target', 'public'),

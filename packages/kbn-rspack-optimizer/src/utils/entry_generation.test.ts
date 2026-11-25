@@ -7,18 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
+import { runInNewContext } from 'vm';
 import { createUnifiedEntry } from './entry_generation';
 
 describe('createUnifiedEntry', () => {
@@ -35,7 +27,7 @@ describe('createUnifiedEntry', () => {
     Fs.rmSync(repoRoot, { recursive: true, force: true });
   });
 
-  it('generates statically analyzable loaders gated by the server selection', () => {
+  it('runs only core and the server-selected plugin loaders', async () => {
     const entryPaths = ['core', 'security', 'security_oauth', 'discover'].map((name) => {
       const entryPath = Path.join(repoRoot, `${name}.js`);
       Fs.writeFileSync(entryPath, `export const name = ${JSON.stringify(name)};\n`);
@@ -70,14 +62,52 @@ describe('createUnifiedEntry', () => {
     ]);
 
     const content = Fs.readFileSync(unifiedEntryPath, 'utf-8');
+    const importExpression =
+      /import\(\/\* webpackChunkName: "[^"]+" \*\/ "[^"]+"\)\.then\(m => registerPlugin\(("[^"]+"), m\)\)/g;
+    const importExpressions = [...content.matchAll(importExpression)];
+    const executableContent = content.replace(
+      importExpression,
+      'Promise.resolve({}).then(m => registerPlugin($1, m))'
+    );
 
-    expect(content).toContain('window.__kbnPluginIdsToLoad__');
-    expect(content).toContain("pluginId === 'core' || selectedPluginIds.has(pluginId)");
-    expect(content).toContain(': pluginLoaders;');
-    expect(content.match(/pluginId: "security"/g)).toHaveLength(2);
-    expect(content).toContain('plugin/security/public');
-    expect(content).toContain('plugin/security/common/oauth');
-    expect(content).toContain('plugin/discover/public');
+    expect(importExpressions).toHaveLength(4);
     expect(content).toContain('webpackChunkName: "plugin-security"');
+
+    const runGeneratedEntry = async (selectedPluginIds?: string[]) => {
+      const registeredBundleIds: string[] = [];
+      const browserWindow: {
+        __kbnPluginIdsToLoad__?: string[];
+        __kbnPluginsLoaded?: Promise<void>;
+      } = {};
+      if (selectedPluginIds !== undefined) {
+        browserWindow.__kbnPluginIdsToLoad__ = selectedPluginIds;
+      }
+
+      runInNewContext(executableContent, {
+        window: browserWindow,
+        document: { querySelector: () => null },
+        __kbnBundles__: {
+          define: (bundleId: string) => registeredBundleIds.push(bundleId),
+        },
+        console: { log: jest.fn(), error: jest.fn() },
+        setTimeout,
+      });
+
+      await browserWindow.__kbnPluginsLoaded;
+      return registeredBundleIds;
+    };
+
+    await expect(runGeneratedEntry(['security'])).resolves.toEqual([
+      'entry/core/public',
+      'plugin/security/public',
+      'plugin/security/common/oauth',
+    ]);
+    await expect(runGeneratedEntry([])).resolves.toEqual(['entry/core/public']);
+    await expect(runGeneratedEntry()).resolves.toEqual([
+      'entry/core/public',
+      'plugin/security/public',
+      'plugin/security/common/oauth',
+      'plugin/discover/public',
+    ]);
   });
 });

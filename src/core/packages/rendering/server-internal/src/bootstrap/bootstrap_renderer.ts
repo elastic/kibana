@@ -56,6 +56,25 @@ interface ChunkPreloadManifest {
   entrypointChunks?: Record<string, string[]>;
 }
 
+/** Converts parsed JSON into a chunk manifest that is safe to consume. */
+export const normalizeChunkPreloadManifest = (value: unknown): ChunkPreloadManifest => {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return { allChunks: [] };
+  }
+
+  const { allChunks, entrypointChunks } = value as Record<string, unknown>;
+  return {
+    allChunks: Array.isArray(allChunks)
+      ? allChunks.filter((chunk): chunk is string => typeof chunk === 'string')
+      : [],
+    ...(entrypointChunks !== null &&
+    typeof entrypointChunks === 'object' &&
+    !Array.isArray(entrypointChunks)
+      ? { entrypointChunks: entrypointChunks as Record<string, string[]> }
+      : {}),
+  };
+};
+
 /** Returns the preload chunks required by the selected internal plugin entries. */
 export const getChunkFilenamesForPlugins = (
   manifest: ChunkPreloadManifest,
@@ -100,7 +119,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     try {
       const manifestPath = fromRoot('target/public/bundles/chunk-manifest.json');
       const raw = Fs.readFileSync(manifestPath, 'utf-8');
-      const manifest = JSON.parse(raw) as ChunkPreloadManifest;
+      const manifest = normalizeChunkPreloadManifest(JSON.parse(raw));
       if (isDist) {
         cachedChunkManifest = manifest;
       }

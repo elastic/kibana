@@ -185,22 +185,35 @@ describe('ChunkPreloadManifestPlugin', () => {
 
   it('merges and deduplicates multiple targets for the same plugin', () => {
     const sharedChunk = createMockChunk(['shared.js'], [], 'shared');
-    const pluginChunk = createMockChunk(['plugin-security.js'], [], 'plugin-security');
+    const publicPrerequisite = createMockChunk(['shared-public.js'], [], 'shared-public');
+    const oauthPrerequisite = createMockChunk(['shared-oauth.js'], [], 'shared-oauth');
+    const publicChunk = createMockChunk(
+      ['plugin-security-public.js'],
+      [],
+      'plugin-security-public'
+    );
+    const oauthChunk = createMockChunk(['plugin-security-oauth.js'], [], 'plugin-security-oauth');
 
     const entrypoints = new Map([
       [
         'kibana',
         {
           childrenIterable: [
-            { name: 'plugin-security', chunks: [sharedChunk, pluginChunk] },
-            { name: 'plugin-security', chunks: [sharedChunk, pluginChunk] },
+            {
+              name: 'plugin-security',
+              chunks: [sharedChunk, publicPrerequisite, publicChunk],
+            },
+            {
+              name: 'plugin-security',
+              chunks: [sharedChunk, oauthPrerequisite, oauthChunk],
+            },
           ],
         },
       ],
     ]);
 
     const { compiler, runProcessAssets, getEmittedAssets } = createMockCompiler({
-      chunks: [sharedChunk, pluginChunk],
+      chunks: [sharedChunk, publicPrerequisite, oauthPrerequisite, publicChunk, oauthChunk],
       entrypoints,
     });
 
@@ -209,7 +222,13 @@ describe('ChunkPreloadManifestPlugin', () => {
     runProcessAssets();
 
     const manifest = JSON.parse(getEmittedAssets()[0].source);
-    expect(manifest.entrypointChunks.security).toEqual(['plugin-security.js', 'shared.js']);
+    expect(manifest.entrypointChunks.security).toEqual([
+      'plugin-security-oauth.js',
+      'plugin-security-public.js',
+      'shared-oauth.js',
+      'shared-public.js',
+      'shared.js',
+    ]);
   });
 
   it('deduplicates shared chunks in allChunks', () => {

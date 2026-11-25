@@ -39,6 +39,14 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
     const cdp = await context.newCDPSession(page);
     await cdp.send('Network.enable');
     perfTracker.captureBundleResponses(cdp);
+    const requestedPluginEntryIds = new Set<string>();
+    cdp.on('Network.requestWillBeSent', ({ request }) => {
+      const filename = new URL(request.url).pathname.split('/').pop() ?? '';
+      const pluginEntryMatch = filename.match(/^plugin-(.+)\.[a-f0-9]{8,}\.js$/i);
+      if (pluginEntryMatch) {
+        requestedPluginEntryIds.add(pluginEntryMatch[1]);
+      }
+    });
 
     await pageObjects.login.goto();
     await page.testSubj.locator('loginSubmit').waitFor({ state: 'visible' });
@@ -53,26 +61,22 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
           }
         ).__kbnPluginIdsToLoad__ ?? []
     );
-    const loadedPluginEntryIds = stats.plugins.flatMap(({ name, bundles }) =>
-      bundles.some((bundle) => /^plugin-.+\.[a-f0-9]{8,}\.js$/i.test(bundle.name)) ? [name] : []
-    );
+    const requestedPluginIds = [...requestedPluginEntryIds].sort();
     log.info(
-      `Login loaded ${loadedPluginEntryIds.length} plugin entries across ${
+      `Login requested ${requestedPluginIds.length} plugin entries across ${
         stats.bundleCount
-      } JavaScript bundles (${stats.totalSize} transferred bytes): ${loadedPluginEntryIds
-        .sort()
-        .join(', ')}`
+      } JavaScript bundles (${stats.totalSize} transferred bytes): ${requestedPluginIds.join(', ')}`
     );
 
     expect(selectedPluginIds).toContain('core');
     expect(selectedPluginIds).toContain('security');
-    expect(loadedPluginEntryIds).toContain('core');
-    expect(loadedPluginEntryIds).toContain('security');
+    expect(requestedPluginIds).toContain('core');
+    expect(requestedPluginIds).toContain('security');
     expect(
-      loadedPluginEntryIds.filter((pluginId) => !selectedPluginIds.includes(pluginId))
+      requestedPluginIds.filter((pluginId) => !selectedPluginIds.includes(pluginId))
     ).toStrictEqual([]);
-    expect(loadedPluginEntryIds).not.toContain('dashboard');
-    expect(loadedPluginEntryIds).not.toContain('discover');
+    expect(requestedPluginIds).not.toContain('dashboard');
+    expect(requestedPluginIds).not.toContain('discover');
   });
 
   test('displays message acknowledging logout', async ({ page, pageObjects }) => {
