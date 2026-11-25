@@ -7,8 +7,10 @@
 
 import { AddExceptionButtonType, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-
-const SOURCE_INDEX_PREFIX = 'auditbeat-scout-exceptions-flyout';
+import {
+  FLYOUT_VALIDATION_INDEX_PREFIX,
+  FLYOUT_VALIDATION_ROLE,
+} from '../fixtures/flyout_validation_role';
 
 spaceTest.describe(
   'Exceptions flyout builder',
@@ -19,7 +21,7 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ esClient, apiServices, scoutSpace }) => {
       const idSegment = scoutSpace.id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      sourceIndex = `${SOURCE_INDEX_PREFIX}-${idSegment}`;
+      sourceIndex = `${FLYOUT_VALIDATION_INDEX_PREFIX}-${idSegment}`;
 
       await esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true });
       await esClient.indices.create({
@@ -76,7 +78,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, kbnUrl, scoutSpace }) => {
       const { ruleDetailsPage, addExceptionFlyoutPage } = pageObjects;
 
-      await browserAuth.loginAsPlatformEngineer();
+      await browserAuth.loginWithCustomRole(FLYOUT_VALIDATION_ROLE);
       await ruleDetailsPage.goto({
         kbnUrl,
         spaceId: scoutSpace.id,
