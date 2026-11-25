@@ -51,13 +51,15 @@ export const GroupSimilarMessagesButton = () => {
   }
 
   const label = i18n.translate('discover.esql.groupSimilarMessages.buttonLabel', {
-    defaultMessage: 'Find patterns',
+    defaultMessage: 'Find patterns in {field}',
+    values: { field: groupByField },
   });
 
   return (
     <EuiToolTip
       content={i18n.translate('discover.esql.groupSimilarMessages.tooltip', {
-        defaultMessage: 'Group log messages by pattern to spot trends and anomalies.',
+        defaultMessage: 'Group the messages in {field} by pattern to spot trends and anomalies.',
+        values: { field: groupByField },
       })}
     >
       <EuiBadge

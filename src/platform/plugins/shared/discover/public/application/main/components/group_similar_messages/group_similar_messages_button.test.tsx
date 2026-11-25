@@ -93,6 +93,9 @@ describe('GroupSimilarMessagesButton', () => {
   it('rewrites the query to group messages by pattern and tracks the click', async () => {
     const { getQuery, trackEsqlCategorizeEvent } = await setup();
 
+    expect(screen.getByTestId('dscGroupSimilarMessagesButton')).toHaveTextContent(
+      'Find patterns in message'
+    );
     await userEvent.click(screen.getByTestId('dscGroupSimilarMessagesButton'));
 
     expect(getQuery()).toEqual({
@@ -113,6 +116,9 @@ describe('GroupSimilarMessagesButton', () => {
       ],
     });
 
+    expect(screen.getByTestId('dscGroupSimilarMessagesButton')).toHaveTextContent(
+      'Find patterns in error.message'
+    );
     await userEvent.click(screen.getByTestId('dscGroupSimilarMessagesButton'));
 
     expect(getQuery()).toEqual({
