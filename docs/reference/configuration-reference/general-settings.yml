@@ -948,6 +948,8 @@ groups:
     id: async-search-settings
     description: |
       Configure how {{kib}} submits and polls asynchronous searches, including those in Discover and Dashboards. Set these options in `kibana.yml`.
+
+      For `waitForCompletion`, `keepAlive`, and `pollLength`, you can use a number followed by a time unit such as `ms` (milliseconds), `s` (seconds), or `m` (minutes).
     settings:
 
       - setting: data.search.asyncSearch.waitForCompletion
@@ -1007,7 +1009,7 @@ groups:
 
       - setting: data.search.asyncSearch.pollLength
         description: |
-          Maximum time that each poll request waits for results. Specify a duration such as `30s` or `100ms`.
+          Maximum time that each poll request waits for results.
           If you omit this setting, {{kib}} uses `30s` for searches that use long polling over HTTP/2 or HTTP/3. Over HTTP/1, polls return the available results immediately by default.
         datatype: string
         applies_to:
