@@ -16,7 +16,11 @@ export const getNavCategories = (
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards],
+      linkIds: [
+        SecurityPageName.externalLinkAlertZero,
+        SecurityPageName.externalLinkDiscover,
+        SecurityPageName.dashboards,
+      ],
     },
     {
       type: LinkCategoryType.separator,

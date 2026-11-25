@@ -1,5 +1,5 @@
 {
-  "sha1": "05c7b9b25386e30abadaa3d186023fb219dc6e45",
+  "sha1": "e2b0a65009b77cf36c17b0c4bf7f1f9b89073d30",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -886,6 +886,19 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_created_workloads.spec.ts",
         "line": 257,
         "column": 17
+      }
+    },
+    {
+      "id": "1aab569281345d5-df5e2d832ffd4ef",
+      "title": "Service account bound-workload telemetry counts bindings and their binder types in the security usage collector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_telemetry.spec.ts",
+        "line": 87,
+        "column": 52
       }
     },
     {

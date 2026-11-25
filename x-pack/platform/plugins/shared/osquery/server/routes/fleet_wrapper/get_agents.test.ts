@@ -121,9 +121,48 @@ describe('getAgentsRoute', () => {
 
     // Top level must be the AND that binds the search clause to the policy scope.
     expect(receivedKueryNode().function).toBe('and');
+    expect(receivedEsQuery()).toContain('policy-1');
+    // Fleet rejects `policy_name`, which is not an agent field.
+    expect(receivedKueryString()).not.toContain('policy_name');
+  });
+
+  it('replaces the policy_name clause of a generated search with the resolved policy ids', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildAgentSearchKuery('Production Policy')) as never,
+      mockResponse
+    );
+
+    expect(mockResponse.badRequest).not.toHaveBeenCalled();
+    expect(receivedKueryString()).not.toContain('policy_name');
+
+    const node = receivedKueryNode();
+    expect(node.function).toBe('and');
+    // The policy-id match for the name is an alternative to the host search terms.
+    const [searchNode] = node.arguments as KueryNode[];
+    expect(searchNode.function).toBe('or');
+    const searchEsQuery = JSON.stringify(toElasticsearchQuery(searchNode));
+    expect(searchEsQuery).toContain('Production Policy');
+    expect(searchEsQuery).toContain('policy-1');
+  });
+
+  it('replaces only the trailing policy_name clause when the search text contains one', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildAgentSearchKuery('web or policy_name:Production')) as never,
+      mockResponse
+    );
+
+    expect(mockResponse.badRequest).not.toHaveBeenCalled();
+    expect(receivedKueryNode().function).toBe('and');
+
     const esQuery = receivedEsQuery();
-    expect(esQuery).toContain('policy-1');
-    expect(esQuery).toContain('prod');
+    // No clause filters on the `policy_name` field...
+    expect(esQuery).not.toContain('"policy_name"');
+    // ...and the quoted hostname clause keeps the raw search text intact.
+    expect(esQuery).toContain('"local_metadata.host.hostname":"web or policy_name:Production"');
   });
 
   it('returns empty result when no osquery policies exist', async () => {
@@ -186,10 +225,13 @@ describe('getAgentsRoute', () => {
       mockResponse
     );
 
-    const esQuery = receivedEsQuery();
-    expect(esQuery).toContain('policy-1');
-    expect(esQuery).toContain('nonexistent');
-    expect(receivedKueryNode().function).toBe('and');
+    expect(receivedKueryString()).not.toContain('policy_name');
+    const node = receivedKueryNode();
+    expect(node.function).toBe('and');
+    // A name that matches no policy still matches no agent, rather than dropping the filter.
+    const [searchNode] = node.arguments as KueryNode[];
+    expect(JSON.stringify(toElasticsearchQuery(searchNode))).toContain('"policy_id":""');
+    expect(receivedEsQuery()).toContain('policy-1');
   });
   it('keeps the policy scope inescapable for an escaped hostile search term', async () => {
     // What the client sends for searchValue `a) or (b` after escapeKuery.
@@ -204,6 +246,7 @@ describe('getAgentsRoute', () => {
 
     // Fleet's `includeUnenrolled` calls `.toLowerCase()`, so this must be a string.
     expect(typeof receivedKueryString()).toBe('string');
+    expect(receivedKueryString()).not.toContain('policy_name');
 
     const node = receivedKueryNode();
     expect(node.function).toBe('and');

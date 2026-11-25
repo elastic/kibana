@@ -189,6 +189,31 @@ describe('addComment', () => {
     );
   });
 
+  it('reports triggerAttachmentType on the attachmentAdded event instead of the payload type', async () => {
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.create.mockResolvedValue({
+      ...mockCaseUnifiedAttachments[0],
+      id: 'mock-saved-object-id',
+    });
+
+    await addComment(
+      { comment: unifiedComment, caseId, triggerAttachmentType: 'alert' },
+      clientArgs
+    );
+
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
+      clientArgs.request,
+      expect.objectContaining({ caseId, attachmentType: 'alert' })
+    );
+  });
+
   describe('addCommentAndGetCase', () => {
     const theCase = { ...mockCases[0], id: caseId };
     const emptyCommentsPage = { saved_objects: [], total: 0, per_page: 0, page: 1 };
