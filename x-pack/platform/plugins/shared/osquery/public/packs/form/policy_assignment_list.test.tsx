@@ -169,6 +169,28 @@ describe('PolicyAssignmentList', () => {
       return screen.findByTestId('policyAssignmentSharedPoliciesPopover');
     };
 
+    it('clicking a partial header checkbox selects all visible policies including group members', () => {
+      const onFormChange = jest.fn();
+      render(
+        <FormWrapper defaultValues={{ policy_ids: ['policy-3'] }} onFormChange={onFormChange} />
+      );
+
+      const checkbox = screen.getByTestId('policyAssignmentSelectAll') as HTMLInputElement;
+      expect(checkbox).not.toBeChecked();
+      expect(checkbox.indeterminate).toBe(true);
+
+      fireEvent.click(checkbox);
+
+      expect(onFormChange).toHaveBeenLastCalledWith({
+        policy_ids: expect.arrayContaining(['policy-1', 'policy-2', 'policy-3']),
+        shards: {},
+      });
+      expect(onFormChange.mock.calls.at(-1)[0].policy_ids).toHaveLength(3);
+      expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
+      expect(checkbox).toBeChecked();
+      expect(checkbox.indeterminate).toBe(false);
+    });
+
     it.each([false, true])(
       'explains a partial saved selection (read-only: %s)',
       async (isReadOnly) => {
@@ -637,6 +659,106 @@ describe('PolicyAssignmentList', () => {
 
       expect(screen.getByText('No policies match your search')).toBeInTheDocument();
       expect(screen.queryByText('Alpha Policy')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('header checkbox', () => {
+    it('is unchecked and indeterminate for partial selection with no separate unselect-all control', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1'] }} />);
+
+      const checkbox = screen.getByTestId('policyAssignmentSelectAll') as HTMLInputElement;
+      expect(checkbox).not.toBeChecked();
+      expect(checkbox.indeterminate).toBe(true);
+      expect(screen.queryByTestId('policyAssignmentUnselectAll')).not.toBeInTheDocument();
+    });
+
+    it('clears a full visible selection while keeping policies hidden by search selected', () => {
+      const onFormChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: ['policy-1', 'policy-2', 'policy-3'] }}
+          onFormChange={onFormChange}
+        />
+      );
+      fireEvent.change(screen.getByPlaceholderText('Search agent policies.'), {
+        target: { value: 'Alpha' },
+      });
+
+      const checkbox = screen.getByTestId('policyAssignmentSelectAll') as HTMLInputElement;
+      expect(checkbox).toBeChecked();
+      expect(checkbox.indeterminate).toBe(false);
+
+      fireEvent.click(checkbox);
+
+      expect(onFormChange).toHaveBeenLastCalledWith({
+        policy_ids: ['policy-2', 'policy-3'],
+        shards: {},
+      });
+      expect(checkbox).not.toBeChecked();
+      expect(checkbox.indeterminate).toBe(false);
+    });
+
+    it('ignores a visible unselected shard-assigned row when checking and toggling all', () => {
+      const onFormChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: ['policy-1', 'policy-3'], shards: { 'policy-2': 50 } }}
+          onFormChange={onFormChange}
+        />
+      );
+
+      const shardCheckbox = screen.getByRole('checkbox', { name: 'Select policy Beta Policy' });
+      expect(shardCheckbox).toBeDisabled();
+      expect(shardCheckbox).not.toBeChecked();
+      const checkbox = screen.getByTestId('policyAssignmentSelectAll') as HTMLInputElement;
+      expect(checkbox).toBeChecked();
+      expect(checkbox.indeterminate).toBe(false);
+
+      fireEvent.click(checkbox);
+
+      expect(onFormChange).toHaveBeenLastCalledWith({
+        policy_ids: [],
+        shards: { 'policy-2': 50 },
+      });
+      expect(checkbox).not.toBeChecked();
+      expect(checkbox.indeterminate).toBe(false);
+
+      fireEvent.click(checkbox);
+
+      expect(onFormChange).toHaveBeenLastCalledWith({
+        policy_ids: ['policy-1', 'policy-3'],
+        shards: { 'policy-2': 50 },
+      });
+      expect(checkbox).toBeChecked();
+      expect(checkbox.indeterminate).toBe(false);
+      expect(shardCheckbox).not.toBeChecked();
+    });
+
+    it('is disabled when search matches only shard-assigned rows', () => {
+      const onFormChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: ['policy-1'], shards: { 'policy-2': 50 } }}
+          onFormChange={onFormChange}
+        />
+      );
+      fireEvent.change(screen.getByPlaceholderText('Search agent policies.'), {
+        target: { value: 'Beta' },
+      });
+
+      const checkbox = screen.getByTestId('policyAssignmentSelectAll') as HTMLInputElement;
+      expect(screen.getByText('Beta Policy')).toBeInTheDocument();
+      expect(screen.queryByText('Alpha Policy')).not.toBeInTheDocument();
+      expect(checkbox).toBeDisabled();
+      expect(checkbox).not.toBeChecked();
+      expect(checkbox.indeterminate).toBe(false);
+
+      fireEvent.click(checkbox);
+
+      expect(onFormChange).toHaveBeenLastCalledWith({
+        policy_ids: ['policy-1'],
+        shards: { 'policy-2': 50 },
+      });
     });
   });
 
