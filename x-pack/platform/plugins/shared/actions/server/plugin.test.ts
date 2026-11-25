@@ -49,7 +49,7 @@ import {
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
 import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
-import { setConnectorEventPublisher } from './inbound/publish_connector_event';
+import * as publishConnectorEvent from './inbound/publish_connector_event';
 import { CONNECTOR_TYPE_CATALOG_INDEX } from './lib/connector_catalog';
 import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
 
@@ -124,7 +124,7 @@ const casesConnectorType = getConnectorType({
 
 describe('Actions Plugin', () => {
   afterEach(() => {
-    setConnectorEventPublisher(undefined);
+    publishConnectorEvent.setConnectorEventPublisher(undefined);
   });
 
   describe('setup()', () => {
@@ -685,6 +685,55 @@ describe('Actions Plugin', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
       );
+    });
+
+    describe('connector event publisher', () => {
+      let setPublisher: jest.SpiedFunction<typeof publishConnectorEvent.setConnectorEventPublisher>;
+
+      beforeEach(() => {
+        setPublisher = jest.spyOn(publishConnectorEvent, 'setConnectorEventPublisher');
+      });
+
+      afterEach(() => {
+        setPublisher.mockRestore();
+      });
+
+      it('does not install a publisher while inbound events are disabled', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+
+        expect(setPublisher).not.toHaveBeenCalled();
+      });
+
+      it('installs the publisher with the topics registered in setup', async () => {
+        const enabledPlugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>(
+            getConfig({
+              inboundEvents: {
+                enabled: true,
+                maxBodyBytes: new ByteSizeValue(1024 * 1024),
+                maxEmitted: 25,
+                ...defaultInboundEventsLimitConfigs,
+              },
+            })
+          )
+        );
+        const topics = registerConnectorEventTopics(jest.fn());
+
+        await enabledPlugin.setup(coreSetup, pluginsSetup);
+        enabledPlugin.start(coreStart, pluginsStart);
+
+        expect(setPublisher).toHaveBeenCalledTimes(1);
+        const [publisher] = setPublisher.mock.calls[0];
+        expect(publisher).toEqual(
+          expect.objectContaining({
+            pubsub: coreStart.pubsub,
+          })
+        );
+        if (publisher) {
+          expect([...publisher.topics.keys()]).toEqual([...topics.keys()]);
+        }
+      });
     });
 
     describe('connector catalog feature flag', () => {

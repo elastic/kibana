@@ -338,7 +338,7 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private connectorEventEmitter?: ConnectorEventEmitter;
-  /** Topics registered in setup. `start` publishes with this map. */
+  /** Topics registered in setup when inbound events are enabled. `start` installs the publisher only when this is set. */
   private connectorEventTopicsByEventId?: ReturnType<typeof registerConnectorEventTopics>;
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
   // Process-wide: a warm client must outlive a single action, and the per-action context is
@@ -655,11 +655,12 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    if (this.actionsConfig.inboundEvents.enabled) {
+    const connectorEventTopicsByEventId = this.connectorEventTopicsByEventId;
+    if (connectorEventTopicsByEventId) {
       setConnectorEventPublisher({
         pubsub: core.pubsub,
         logger: this.logger,
-        topics: this.connectorEventTopicsByEventId ?? new Map(),
+        topics: connectorEventTopicsByEventId,
       });
     }
     this.securityStart = plugins.security;
