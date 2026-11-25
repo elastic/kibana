@@ -275,7 +275,12 @@ export const getSearchEmbeddableFactory = ({
             discoverServices.capabilities.discover_v2.save && !Boolean(savedObjectId$.getValue())
           );
         },
-        canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
+        // A deleted tab or one without a Data View has no tab to turn into a by-value panel
+        canUnlinkFromLibrary: async () =>
+          Boolean(
+            savedObjectId$.getValue() &&
+              latestRuntimeState.tabs?.find(({ id }) => id === selectedTabId$.getValue())?.tab
+          ),
         saveToLibrary: async (title: string) => {
           const description = titleManager.api.description$.getValue();
           const savedObjectId = await save({
