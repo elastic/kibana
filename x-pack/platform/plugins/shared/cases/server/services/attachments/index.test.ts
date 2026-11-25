@@ -2098,6 +2098,19 @@ describe('AttachmentService', () => {
       const filterAsString = JSON.stringify(unifiedCallArgs.filter);
       expect(filterAsString).not.toMatch(/"value":\s*"file"/);
     });
+
+    it('counts every unified external reference type in the unified type filter', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+      await service.countPersistableStateAndExternalReferenceAttachments({ caseId: 'test-id' });
+
+      const filterAsString = JSON.stringify(
+        unsecuredSavedObjectsClient.find.mock.calls[1][0].filter
+      );
+      expect(filterAsString).toMatch(/"value":\s*"security\.endpoint"/);
+      expect(filterAsString).toMatch(/"value":\s*"security\.indicator"/);
+      expect(filterAsString).toMatch(/"value":\s*"osquery"/);
+    });
   });
 
   describe('countAlertsAttachedToCase', () => {
