@@ -330,6 +330,8 @@ describe('HistorySnapshotClient', () => {
 
       expect(mockCancelTask).toHaveBeenCalledWith(expect.objectContaining({ taskId: 'node:2' }));
       expect(mockPollTaskUntil).not.toHaveBeenCalled();
+      // The copy finished before the reset phase, so the history index stays.
+      expect(mockDeleteIndex).not.toHaveBeenCalled();
       expect(result).toEqual(expect.objectContaining({ ok: true, docCount: 9 }));
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: { lastExecutionTimestamp: expect.any(String), lastError: null },
@@ -369,14 +371,16 @@ describe('HistorySnapshotClient', () => {
       expect(result).toEqual(expect.objectContaining({ ok: true, docCount: 0 }));
     });
 
-    it('fails when the Elasticsearch task was cancelled', async () => {
+    it('fails and deletes the partial copy when the Elasticsearch task was cancelled', async () => {
       mockPollTaskUntil.mockResolvedValueOnce(
         completed({ total: 10, created: 3, canceled: 'by user request' })
       );
+      const run = savedRun();
 
-      const result = await client.runHistorySnapshot({ run: savedRun() });
+      const result = await client.runHistorySnapshot({ run });
 
       expect(result.ok).toBe(false);
+      expect(mockDeleteIndex).toHaveBeenCalledWith(mockEsClient, run.historySnapshotIndex);
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: expect.objectContaining({
           lastError: {
@@ -387,7 +391,7 @@ describe('HistorySnapshotClient', () => {
       });
     });
 
-    it('cancels the Elasticsearch task when the run is aborted', async () => {
+    it('cancels the Elasticsearch task and deletes the partial copy when the run is aborted', async () => {
       const abortController = new AbortController();
       mockPollTaskUntil.mockImplementationOnce(async () => {
         abortController.abort();
@@ -398,8 +402,33 @@ describe('HistorySnapshotClient', () => {
 
       expect(result.ok).toBe(false);
       expect(mockCancelTask).toHaveBeenCalledWith(
-        expect.objectContaining({ esClient: mockInternalEsClient, taskId: 'node:reindex' })
+        expect.objectContaining({
+          esClient: mockInternalEsClient,
+          taskId: 'node:reindex',
+          waitForCompletion: true,
+        })
       );
+      const [, deletedIndex] = mockDeleteIndex.mock.calls[0];
+      expect(deletedIndex).toMatch(/\.entities\.v2\.history\.default\./);
+      // A reindex batch still in flight would create the index again after the delete.
+      expect(mockCancelTask.mock.invocationCallOrder[0]).toBeLessThan(
+        mockDeleteIndex.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('keeps the original error when deleting the partial copy fails', async () => {
+      mockPollTaskUntil.mockRejectedValueOnce(new Error('reindex failed'));
+      mockDeleteIndex.mockRejectedValueOnce(new Error('delete failed'));
+
+      const result = await client.runHistorySnapshot();
+
+      expect(result.ok).toBe(false);
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('delete failed'));
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        historySnapshot: expect.objectContaining({
+          lastError: { message: 'reindex failed', timestamp: expect.any(String) },
+        }),
+      });
     });
 
     it('returns skipped when history snapshot status is not started', async () => {
@@ -420,16 +449,18 @@ describe('HistorySnapshotClient', () => {
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(0);
     });
 
-    it('cancels a saved run when history snapshot status is not started', async () => {
+    it('cancels a saved run and deletes its partial copy when history snapshot status is not started', async () => {
       mockGlobalStateClient.findOrThrow.mockResolvedValue({
         ...mockGlobalStateStarted,
         historySnapshot: { ...mockGlobalStateStarted.historySnapshot, status: 'stopped' },
       });
+      const run = savedRun();
 
-      const result = await client.runHistorySnapshot({ run: savedRun() });
+      const result = await client.runHistorySnapshot({ run });
 
       expect(result).toHaveProperty('skipped', true);
       expect(mockCancelTask).toHaveBeenCalledWith(expect.objectContaining({ taskId: 'node:1' }));
+      expect(mockDeleteIndex).toHaveBeenCalledWith(mockEsClient, run.historySnapshotIndex);
       expect(mockPollTaskUntil).not.toHaveBeenCalled();
     });
 
@@ -446,7 +477,7 @@ describe('HistorySnapshotClient', () => {
           .mockResolvedValue(stoppedState);
       };
 
-      it('cancels the task and returns no run instead of an unfinished one', async () => {
+      it('cancels the task, deletes the partial copy and returns no run instead of an unfinished one', async () => {
         stopAfterStart();
         mockPollTaskUntil.mockResolvedValueOnce({ status: 'pending' });
 
@@ -454,19 +485,24 @@ describe('HistorySnapshotClient', () => {
 
         expect(result).toEqual({ ok: true, skipped: true });
         expect(mockCancelTask).toHaveBeenCalledWith(
-          expect.objectContaining({ taskId: 'node:reindex' })
+          expect.objectContaining({ taskId: 'node:reindex', waitForCompletion: true })
         );
+        const [, deletedIndex] = mockDeleteIndex.mock.calls[0];
+        expect(deletedIndex).toMatch(/\.entities\.v2\.history\.default\./);
       });
 
-      it('does not start a missing task again', async () => {
+      it('does not start a missing task again and deletes its partial copy', async () => {
         stopAfterStart();
         mockPollTaskUntil.mockResolvedValueOnce({ status: 'missing' });
+        const run = savedRun();
 
-        const result = await client.runHistorySnapshot({ run: savedRun() });
+        const result = await client.runHistorySnapshot({ run });
 
         expect(result).toEqual({ ok: true, skipped: true });
         expect(mockStartReindex).not.toHaveBeenCalled();
-        expect(mockDeleteIndex).not.toHaveBeenCalled();
+        expect(mockCreateIndex).not.toHaveBeenCalled();
+        expect(mockDeleteIndex).toHaveBeenCalledTimes(1);
+        expect(mockDeleteIndex).toHaveBeenCalledWith(mockEsClient, run.historySnapshotIndex);
       });
 
       it('keeps going while the snapshot stays started', async () => {
@@ -497,7 +533,7 @@ describe('HistorySnapshotClient', () => {
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
-    it('returns error when the reindex task fails', async () => {
+    it('returns error and deletes the partial copy when the reindex task fails', async () => {
       mockPollTaskUntil.mockRejectedValueOnce(new Error('reindex failed'));
 
       const result = await client.runHistorySnapshot();
@@ -506,7 +542,8 @@ describe('HistorySnapshotClient', () => {
       if (!result.ok) {
         expect(result.error.message).toBe('History snapshot failed');
       }
-      expect(mockCancelTask).not.toHaveBeenCalled();
+      const [, deletedIndex] = mockDeleteIndex.mock.calls[0];
+      expect(deletedIndex).toMatch(/\.entities\.v2\.history\.default\./);
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: expect.objectContaining({
           lastError: { message: 'reindex failed', timestamp: expect.any(String) },
@@ -698,8 +735,12 @@ describe('HistorySnapshotClient', () => {
       );
     });
 
-    it('clears the unfinished run from task state and cancels its Elasticsearch task', async () => {
-      const run = { phase: 'reindex', esTaskId: 'node:1' };
+    it('clears the unfinished run from task state, cancels its Elasticsearch task and deletes the partial copy', async () => {
+      const run = {
+        phase: 'reindex',
+        esTaskId: 'node:1',
+        historySnapshotIndex: '.entities.v2.history.default.2026-11-03-08',
+      };
       mockTaskManager.bulkUpdateState.mockImplementation(async (_ids, mapFn) => {
         expect(mapFn({ namespace, run }, taskId)).toEqual({ namespace });
         return { tasks: [], errors: [] };
@@ -713,6 +754,7 @@ describe('HistorySnapshotClient', () => {
       expect(mockCancelTask).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: mockInternalEsClient, taskId: 'node:1' })
       );
+      expect(mockDeleteIndex).toHaveBeenCalledWith(mockEsClient, run.historySnapshotIndex);
     });
 
     it('does not cancel anything when no run is in progress', async () => {

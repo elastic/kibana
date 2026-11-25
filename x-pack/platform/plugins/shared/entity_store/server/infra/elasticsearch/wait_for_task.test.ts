@@ -196,6 +196,14 @@ describe('cancelTask', () => {
     expect(cancel).toHaveBeenCalledWith({ task_id: TASK_ID });
   });
 
+  it('waits for the task to stop when asked', async () => {
+    const cancel = jest.fn().mockResolvedValue({});
+
+    await cancelTask({ esClient: buildClient(cancel), taskId: TASK_ID, waitForCompletion: true });
+
+    expect(cancel).toHaveBeenCalledWith({ task_id: TASK_ID, wait_for_completion: true });
+  });
+
   it('ignores a task that no longer exists', async () => {
     const logger = loggerMock.create();
     const cancel = jest

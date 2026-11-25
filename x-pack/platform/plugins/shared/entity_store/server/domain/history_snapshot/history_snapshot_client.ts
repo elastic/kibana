@@ -293,7 +293,7 @@ export class HistorySnapshotClient {
       return;
     }
     if (savedRun) {
-      await this.cancelRun(savedRun);
+      await this.discardRun(savedRun);
     }
   }
 
@@ -322,7 +322,7 @@ export class HistorySnapshotClient {
 
     if (globalState.historySnapshot?.status !== 'started') {
       if (options.run) {
-        await this.cancelRun(options.run);
+        await this.discardRun(options.run);
       }
       this.logger.debug('History snapshot status is not started, skipping run');
       return { ok: true, skipped: true };
@@ -341,9 +341,17 @@ export class HistorySnapshotClient {
       result = await this.advance(run, (current) => (run = current), deadline, abortSignal);
     } catch (err) {
       const caughtError = err instanceof Error ? err : new Error(String(err));
-      if (abortSignal?.aborted && run) {
-        // Task Manager does not keep the state of an aborted run, so nothing would resume this task.
-        await this.cancelRun(run);
+      const unfinishedRun = run;
+      if (unfinishedRun) {
+        // Nothing resumes a failed cycle, and Task Manager does not keep the state of an aborted run.
+        // Stop the copy and drop its partial index so history readers never see an incomplete snapshot.
+        await this.discardRun(unfinishedRun).catch((discardErr) => {
+          this.logger.warn(
+            `history snapshot: failed to discard the unfinished copy into ${
+              unfinishedRun.historySnapshotIndex
+            }: ${getErrorMessage(discardErr)}`
+          );
+        });
       }
       this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
       await this.updateGlobalStateOnError(caughtError);
@@ -375,13 +383,30 @@ export class HistorySnapshotClient {
   /**
    * Cancels the Elasticsearch task of an unfinished snapshot cycle.
    */
-  public async cancelRun(run: HistorySnapshotRun): Promise<void> {
+  public async cancelRun(
+    run: HistorySnapshotRun,
+    { waitForCompletion }: { waitForCompletion?: boolean } = {}
+  ): Promise<void> {
     this.logger.info(`Cancelling history snapshot ${run.phase} task ${run.esTaskId}`);
     await cancelTask({
       esClient: this.internalEsClient,
       taskId: run.esTaskId,
       logger: this.logger,
+      waitForCompletion,
     });
+  }
+
+  /**
+   * Cancels an unfinished copy and deletes its partial history index.
+   */
+  private async discardRun(run: HistorySnapshotRun): Promise<void> {
+    // Wait for the cancel, or a last reindex batch could create the index again after the delete.
+    await this.cancelRun(run, { waitForCompletion: true });
+    // A run saved in the `reset` phase already finished its copy.
+    if (run.phase === 'reindex') {
+      this.logger.info(`Deleting partial history snapshot index ${run.historySnapshotIndex}`);
+      await deleteIndex(this.esClient, run.historySnapshotIndex);
+    }
   }
 
   private async startCycle(abortSignal?: AbortSignal): Promise<HistorySnapshotRun> {
@@ -460,7 +485,7 @@ export class HistorySnapshotClient {
         return undefined;
       }
       this.logger.info('History snapshot was disabled during the run, cancelling it');
-      await this.cancelRun(run);
+      await this.discardRun(run);
       return { ok: true, skipped: true };
     };
 

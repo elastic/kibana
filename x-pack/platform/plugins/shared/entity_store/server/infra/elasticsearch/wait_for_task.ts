@@ -164,18 +164,24 @@ export const pollTaskUntil = async <T>({
 
 /**
  * Asks Elasticsearch to stop a task. A task that already finished or no longer exists is not an error.
+ * With `waitForCompletion`, returns only once the task has stopped.
  */
 export const cancelTask = async ({
   esClient,
   taskId,
   logger,
+  waitForCompletion,
 }: {
   esClient: ElasticsearchClient;
   taskId: TaskId;
   logger?: Logger;
+  waitForCompletion?: boolean;
 }): Promise<void> => {
   try {
-    await esClient.tasks.cancel({ task_id: String(taskId) });
+    await esClient.tasks.cancel({
+      task_id: String(taskId),
+      ...(waitForCompletion ? { wait_for_completion: true } : {}),
+    });
   } catch (err) {
     if (err?.meta?.statusCode === 404) {
       return;
