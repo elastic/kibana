@@ -8,7 +8,6 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import type { EsqlQueryResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import {
   getIndexPatternFromESQLQuery,
@@ -17,7 +16,6 @@ import {
 } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
@@ -41,54 +39,70 @@ export const getMaxNestingDepth = (query: string): number => {
   return max;
 };
 
-const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
-  Boolean(result.fields && result.fields['@timestamp']);
-
-const getEsqlColumnsForSource = async ({
-  client,
-  sourceName,
-  projectRouting,
-}: {
-  client: ElasticsearchClient;
-  sourceName: string;
-  projectRouting: string | undefined;
-}): Promise<EsqlQueryResponse | undefined> => {
-  // Limit 0 is used to get the schema, more performant
-  const query = `FROM ${sourceName} | LIMIT 0`;
-
-  try {
-    return await client.esql.query({
-      query,
-      ...(projectRouting ? { project_routing: projectRouting } : {}),
-    });
-  } catch {
-    // ignore
+const isUnknownTimestampColumn = (error: unknown): boolean => {
+  if (getErrorStatusCode(error) !== 400) {
+    return false;
   }
+  const reason = (error as { meta?: { body?: { error?: { reason?: string } } } })?.meta?.body?.error
+    ?.reason;
+  const message = error instanceof Error ? error.message : String(error);
+  return `${reason ?? ''} ${message}`.includes(`Unknown column [${ES_TIMESTAMP_FIELD_NAME}]`);
 };
 
-const checkViewLikeSourceForTimestamp = async ({
-  client,
-  sourceName,
-  projectRouting,
-}: {
-  client: ElasticsearchClient;
-  sourceName: string;
-  projectRouting: string | undefined;
-}): Promise<boolean> => {
-  // ES|QL views are resolved by ES|QL itself, and their schema is the output schema.
-  const esqlResp = await getEsqlColumnsForSource({ client, sourceName, projectRouting });
-  return Boolean(esqlResp?.columns?.some((col) => col.name === ES_TIMESTAMP_FIELD_NAME));
+const isUnknownSource = (error: unknown): boolean => {
+  const message = error instanceof Error ? error.message : String(error);
+  return getErrorStatusCode(error) === 404 || /Unknown (index|view|dataset)/i.test(message);
 };
 
 /**
- * Registers the ESQL get timefield route.
- * This route returns the timefield to use for the ES|QL ad-hoc dataview.
+ * Whether the sources have a `@timestamp` time column, asked as
+ * `FROM <sources> | KEEP @timestamp | DESCRIBE`. ES|QL resolves indices, views and datasets itself and,
+ * as only that one column is kept, asks for that one field only.
+ */
+const describeHasTimeField = async ({
+  client,
+  sourceName,
+  projectRouting,
+  logger,
+}: {
+  client: ElasticsearchClient;
+  sourceName: string;
+  projectRouting: string | undefined;
+  logger: Logger;
+}): Promise<boolean> => {
+  try {
+    const { columns = [], values = [] } = await client.esql.query({
+      query: `FROM ${sourceName} | KEEP ${ES_TIMESTAMP_FIELD_NAME} | DESCRIBE`,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
+    });
+    const names = columns.map(({ name }) => name);
+    const row = values.find((value) => value[names.indexOf('name')] === ES_TIMESTAMP_FIELD_NAME);
+    const role = row?.[names.indexOf('role')];
+    // `mixed`: the indices of a pattern disagree on the role of @timestamp, e.g. a date in most of them.
+    // A pattern with one such index keeps its time field.
+    return role === 'time' || role === 'mixed';
+  } catch (error) {
+    // A source without the column is an answer, not a failure
+    if (isUnknownTimestampColumn(error)) {
+      return false;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    logger[isUnknownSource(error) ? 'debug' : 'error'](
+      `DESCRIBE of "${sourceName}" failed while resolving ES|QL timefield: ${message}`,
+      {
+        tags: ['esql', 'timefield', 'describe'],
+        error: { stack_trace: error instanceof Error ? error.stack : undefined },
+      }
+    );
+    return false;
+  }
+};
+
+/**
+ * Resolves the time field of a query.
  *
- * The timefield is extracted from the ES|QL query if specified.
- * If not specified, it checks if the index pattern contains the default time field '@timestamp'.
- * In case of subqueries, it verifies that all involved indices contain the '@timestamp' field.
- * @param router The IRouter instance to register the route with.
- * @param logger The logger instance from the PluginInitializerContext.
+ * It is extracted from the ES|QL query if specified. If not, it asks ES|QL whether the sources have the
+ * default time field '@timestamp'. In case of subqueries, it verifies that all involved sources have it.
  *
  * @returns timeField or undefined
  */
@@ -113,117 +127,30 @@ const resolveTimeField = async (
     return { timeField: undefined };
   }
   const sources = getIndexPatternFromESQLQuery(query);
-  const subqueryArgs = sourceCommand.args.filter(isSubQuery);
-  const hasSubqueries = subqueryArgs.length > 0;
+  const hasSubqueries = sourceCommand.args.filter(isSubQuery).length > 0;
   const splitSources = sources
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
 
-  try {
-    // In case of subqueries we need to check all indices separately.
-    // Otherwise, pass the full sources string to fieldCaps so Elasticsearch
-    // evaluates the multi-index pattern holistically.
-    const indices = hasSubqueries ? splitSources : [sources];
-
-    if (!indices.length) {
-      return { timeField: undefined };
-    }
-
-    // The cheapest check comes first: most sources are indices, aliases or data streams.
-    const fieldCapsResults = await Promise.all(
-      indices.map(async (index) => {
-        try {
-          const fieldCapsResp = await client.fieldCaps({
-            index,
-            fields: '@timestamp',
-            include_unmapped: false,
-            ...(effectiveProjectRouting ? { project_routing: effectiveProjectRouting } : {}),
-          });
-          return hasTimestampInFieldCapsResponse(fieldCapsResp);
-        } catch (fieldCapsError) {
-          const message =
-            fieldCapsError instanceof Error ? fieldCapsError.message : String(fieldCapsError);
-          // An unknown index is expected for views and datasets, which are checked below
-          const logLevel = getErrorStatusCode(fieldCapsError) === 404 ? 'debug' : 'error';
-          logger[logLevel](
-            `fieldCaps check failed for index "${index}" while resolving ES|QL timefield: ${message}`,
-            {
-              tags: ['esql', 'timefield', 'fieldCaps'],
-              error: {
-                stack_trace: fieldCapsError instanceof Error ? fieldCapsError.stack : undefined,
-              },
-            }
-          );
-          return false;
-        }
-      })
-    );
-
-    if (fieldCapsResults.every(Boolean)) {
-      return { timeField: ES_TIMESTAMP_FIELD_NAME };
-    }
-
-    // fieldCaps didn't find @timestamp: the sources may be views or datasets, which fieldCaps
-    // doesn't know. ES|QL resolves them itself, so their schema is their output schema.
-    const service = new EsqlService({ client });
-    const [{ views }, { datasets }] = await Promise.all([
-      service.getViews().catch((viewsError) => {
-        const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
-        logger.error(`Failed to fetch ES|QL views while resolving timefield: ${message}`, {
-          tags: ['esql', 'timefield', 'views'],
-          error: {
-            stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
-          },
-        });
-        return { views: [] };
-      }),
-      service.getDatasets().catch(() => ({ datasets: [] })),
-    ]);
-    const datasetNames = new Set(datasets.map(({ name }) => name));
-    const viewNames = new Set(views.map(({ name }) => name));
-
-    const datasetSources = splitSources.filter((name) => datasetNames.has(name));
-    if (datasetSources.length > 0) {
-      const datasetChecks = await Promise.all(
-        datasetSources.map((sourceName) =>
-          checkViewLikeSourceForTimestamp({
-            client,
-            sourceName,
-            projectRouting: effectiveProjectRouting,
-          })
-        )
-      );
-      if (datasetChecks.every(Boolean)) {
-        return { timeField: ES_TIMESTAMP_FIELD_NAME };
-      }
-    }
-
-    const viewSources = splitSources.filter((name) => viewNames.has(name));
-    if (viewSources.length) {
-      const viewChecks = await Promise.all(
-        viewSources.map((viewName) =>
-          checkViewLikeSourceForTimestamp({
-            client,
-            sourceName: viewName,
-            projectRouting: effectiveProjectRouting,
-          })
-        )
-      );
-      if (viewChecks.every(Boolean)) {
-        return { timeField: ES_TIMESTAMP_FIELD_NAME };
-      }
-    }
-
+  // In case of subqueries we need to check all sources separately. Otherwise the whole list is one
+  // query, so ES|QL evaluates the sources together.
+  const sourceNames = hasSubqueries ? splitSources : [sources].filter(Boolean);
+  if (!sourceNames.length) {
     return { timeField: undefined };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    logger.error(`Failed to resolve ES|QL timefield: ${message}`, {
-      tags: ['esql', 'timefield'],
-      error: { stack_trace: error instanceof Error ? error.stack : undefined },
-    });
-    throw error;
   }
+
+  const results = await Promise.all(
+    sourceNames.map((sourceName) =>
+      describeHasTimeField({
+        client,
+        sourceName,
+        projectRouting: effectiveProjectRouting,
+        logger,
+      })
+    )
+  );
+  return { timeField: results.every(Boolean) ? ES_TIMESTAMP_FIELD_NAME : undefined };
 };
 
 export const registerGetTimeFieldRoute = (
