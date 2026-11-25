@@ -849,11 +849,11 @@ export function parseOtlpDurationNs(value: string): number | undefined {
   }
   return [...duration.matchAll(GO_DURATION_COMPONENT_REGEX)].reduce(
     // like the collector, the whole part of each component is exact, and its fraction is
-    // truncated to whole nanoseconds
+    // truncated to whole nanoseconds, with integer arithmetic so that its digits are exact too
     (total, [, whole, fraction = '', unit]) => {
       const unitNs = GO_DURATION_UNIT_NS[unit];
       const fractionNs = fraction
-        ? Math.trunc(Number(fraction) * (unitNs / 10 ** fraction.length))
+        ? Number((BigInt(fraction) * BigInt(unitNs)) / BigInt(10) ** BigInt(fraction.length))
         : 0;
       return total + Number(whole || 0) * unitNs + fractionNs;
     },

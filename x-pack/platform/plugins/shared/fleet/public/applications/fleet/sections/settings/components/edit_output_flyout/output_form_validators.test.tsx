@@ -800,6 +800,8 @@ describe('OTLP validators', () => {
       ['1.5ns2.5ns', 3],
       ['1m1.001s', 61001e6],
       ['61001ms', 61001e6],
+      ['30.50000000000000000000s', 30500e6],
+      ['30500ms', 30500e6],
       ['0', 0],
     ])('should parse %p', (value, expected) => {
       expect(parseOtlpDurationNs(value)).toBe(expected);
