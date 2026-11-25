@@ -464,4 +464,14 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.google_workspace_admin',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleWorkspaceAdmin" */ './specs/google_workspace_admin/icon'
+        )
+    ),
+  ],
 ]);

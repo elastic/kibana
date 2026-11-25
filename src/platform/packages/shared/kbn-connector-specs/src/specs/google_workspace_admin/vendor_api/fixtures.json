@@ -1,0 +1,35 @@
+{
+  "removeGroupMember": {
+    "responses": [
+      {
+        "source": "directory",
+        "method": "DELETE",
+        "path": "/admin/directory/v1/groups/{groupKey}/members/{memberKey}",
+        "status": 404,
+        "body": { "error": { "code": 404, "message": "Resource Not Found: memberKey", "errors": [{ "reason": "notFound" }] } }
+      }
+    ]
+  },
+  "revokeAppPasswords": {
+    "responses": [
+      {
+        "source": "directory",
+        "method": "DELETE",
+        "path": "/admin/directory/v1/users/{userKey}/asps/{codeId}",
+        "status": 404,
+        "body": { "error": { "code": 404, "message": "Resource Not Found: codeId", "errors": [{ "reason": "notFound" }] } }
+      }
+    ]
+  },
+  "revokeUserToken": {
+    "responses": [
+      {
+        "source": "directory",
+        "method": "DELETE",
+        "path": "/admin/directory/v1/users/{userKey}/tokens/{clientId}",
+        "status": 404,
+        "body": { "error": { "code": 404, "message": "Resource Not Found: clientId", "errors": [{ "reason": "notFound" }] } }
+      }
+    ]
+  }
+}

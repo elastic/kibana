@@ -1,0 +1,945 @@
+{
+  "components": {
+    "schemas": {
+      "Activities": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Activity"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "default": "admin#reports#activities",
+            "type": "string"
+          },
+          "nextPageToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Activity": {
+        "properties": {
+          "actor": {
+            "properties": {
+              "agentAttributionInfo": {
+                "$ref": "#/components/schemas/AgentAttributionInfo"
+              },
+              "applicationInfo": {
+                "properties": {
+                  "applicationName": {
+                    "type": "string"
+                  },
+                  "impersonation": {
+                    "type": "boolean"
+                  },
+                  "oauthClientId": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "callerType": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "profileId": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "events": {
+            "items": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "parameters": {
+                  "items": {
+                    "properties": {
+                      "boolValue": {
+                        "type": "boolean"
+                      },
+                      "intValue": {
+                        "format": "int64",
+                        "type": "string"
+                      },
+                      "messageValue": {
+                        "properties": {
+                          "parameter": {
+                            "items": {
+                              "$ref": "#/components/schemas/NestedParameter"
+                            },
+                            "type": "array"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "multiIntValue": {
+                        "items": {
+                          "format": "int64",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "multiMessageValue": {
+                        "items": {
+                          "properties": {
+                            "parameter": {
+                              "items": {
+                                "$ref": "#/components/schemas/NestedParameter"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "multiValue": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "resourceIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "sensitiveParameters": {
+                  "items": {
+                    "properties": {
+                      "boolValue": {
+                        "type": "boolean"
+                      },
+                      "intValue": {
+                        "format": "int64",
+                        "type": "string"
+                      },
+                      "messageValue": {
+                        "properties": {
+                          "parameter": {
+                            "items": {
+                              "$ref": "#/components/schemas/NestedParameter"
+                            },
+                            "type": "array"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "multiIntValue": {
+                        "items": {
+                          "format": "int64",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "multiMessageValue": {
+                        "items": {
+                          "properties": {
+                            "parameter": {
+                              "items": {
+                                "$ref": "#/components/schemas/NestedParameter"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "multiValue": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "status": {
+                  "$ref": "#/components/schemas/ActivityEventsStatus"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "id": {
+            "properties": {
+              "applicationName": {
+                "type": "string"
+              },
+              "customerId": {
+                "type": "string"
+              },
+              "time": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "uniqueQualifier": {
+                "format": "int64",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "isAgenticAction": {
+            "type": "boolean"
+          },
+          "kind": {
+            "default": "admin#reports#activity",
+            "type": "string"
+          },
+          "networkInfo": {
+            "$ref": "#/components/schemas/ActivityNetworkInfo"
+          },
+          "ownerDomain": {
+            "type": "string"
+          },
+          "resourceDetails": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceDetails"
+            },
+            "type": "array"
+          },
+          "userDeviceInfo": {
+            "$ref": "#/components/schemas/ActivityUserDeviceInfo"
+          }
+        },
+        "type": "object"
+      },
+      "ActivityEventsStatus": {
+        "properties": {
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "eventStatus": {
+            "type": "string"
+          },
+          "httpStatusCode": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ActivityNetworkInfo": {
+        "properties": {
+          "ipAsn": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "regionCode": {
+            "type": "string"
+          },
+          "subdivisionCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ActivityUserDeviceInfo": {
+        "properties": {
+          "deviceId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "deviceOsVersion": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "deviceType": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentAttributionInfo": {
+        "properties": {
+          "agentId": {
+            "type": "string"
+          },
+          "agentName": {
+            "type": "string"
+          },
+          "agentOwner": {
+            "$ref": "#/components/schemas/AgentAttributionInfoAgentOwner"
+          },
+          "agentType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentAttributionInfoAgentOwner": {
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AppliedLabel": {
+        "properties": {
+          "fieldValues": {
+            "items": {
+              "$ref": "#/components/schemas/FieldValue"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomerIdentity": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Date": {
+        "properties": {
+          "day": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "month": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "year": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FieldValue": {
+        "properties": {
+          "dateValue": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "integerValue": {
+            "format": "int64",
+            "type": "string"
+          },
+          "longTextValue": {
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "selectionListValue": {
+            "$ref": "#/components/schemas/FieldValueSelectionListValue"
+          },
+          "selectionValue": {
+            "$ref": "#/components/schemas/FieldValueSelectionValue"
+          },
+          "textListValue": {
+            "$ref": "#/components/schemas/FieldValueTextListValue"
+          },
+          "textValue": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "unsetValue": {
+            "type": "boolean"
+          },
+          "userListValue": {
+            "$ref": "#/components/schemas/FieldValueUserListValue"
+          },
+          "userValue": {
+            "$ref": "#/components/schemas/FieldValueUserValue"
+          }
+        },
+        "type": "object"
+      },
+      "FieldValueSelectionListValue": {
+        "properties": {
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/FieldValueSelectionValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FieldValueSelectionValue": {
+        "properties": {
+          "badged": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FieldValueTextListValue": {
+        "properties": {
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FieldValueUserListValue": {
+        "properties": {
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/FieldValueUserValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FieldValueUserValue": {
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GroupIdentity": {
+        "properties": {
+          "groupEmail": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NestedParameter": {
+        "properties": {
+          "boolValue": {
+            "type": "boolean"
+          },
+          "intValue": {
+            "format": "int64",
+            "type": "string"
+          },
+          "multiBoolValue": {
+            "items": {
+              "type": "boolean"
+            },
+            "type": "array"
+          },
+          "multiIntValue": {
+            "items": {
+              "format": "int64",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "multiValue": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OwnerDetails": {
+        "properties": {
+          "ownerIdentity": {
+            "items": {
+              "$ref": "#/components/schemas/OwnerIdentity"
+            },
+            "type": "array"
+          },
+          "ownerType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OwnerIdentity": {
+        "properties": {
+          "customerIdentity": {
+            "$ref": "#/components/schemas/CustomerIdentity"
+          },
+          "groupIdentity": {
+            "$ref": "#/components/schemas/GroupIdentity"
+          },
+          "sharedDriveIdentity": {
+            "$ref": "#/components/schemas/SharedDriveIdentity"
+          },
+          "userIdentity": {
+            "$ref": "#/components/schemas/UserIdentity"
+          }
+        },
+        "type": "object"
+      },
+      "Reason": {
+        "properties": {
+          "reasonType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceDetails": {
+        "properties": {
+          "appliedLabels": {
+            "items": {
+              "$ref": "#/components/schemas/AppliedLabel"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ownerDetails": {
+            "$ref": "#/components/schemas/OwnerDetails"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SharedDriveIdentity": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sharedDriveName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserIdentity": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userEmail": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/admin.reports.audit.readonly": "View audit reports for your Google Workspace domain",
+              "https://www.googleapis.com/auth/admin.reports.usage.readonly": "View usage reports for your Google Workspace domain"
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Admin SDK API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/admin/reports/v1/activity/users/{userKey}/applications/{applicationName}": {
+      "get": {
+        "operationId": "reports.activities.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "applicationName",
+            "required": true,
+            "schema": {
+              "enum": [
+                "access_transparency",
+                "admin",
+                "calendar",
+                "chat",
+                "drive",
+                "gcp",
+                "gmail",
+                "gplus",
+                "groups",
+                "groups_enterprise",
+                "jamboard",
+                "login",
+                "meet",
+                "mobile",
+                "rules",
+                "saml",
+                "token",
+                "user_accounts",
+                "context_aware_access",
+                "chrome",
+                "data_studio",
+                "keep",
+                "vault",
+                "gemini_in_workspace_apps",
+                "classroom",
+                "assignments",
+                "cloud_search",
+                "tasks",
+                "data_migration",
+                "meet_hardware",
+                "directory_sync",
+                "ldap",
+                "profile",
+                "access_evaluation",
+                "admin_data_action",
+                "contacts",
+                "takeout",
+                "graduation",
+                "voice",
+                "chrome_sync",
+                "workspace_studio",
+                "gemini_notebook"
+              ],
+              "pattern": "(access_evaluation)|(access_transparency)|(admin)|(admin_data_action)|(assignments)|(calendar)|(chat)|(chrome)|(classroom)|(cloud_search)|(contacts)|(context_aware_access)|(data_studio)|(data_migration)|(directory_sync)|(drive)|(gcp)|(gmail)|(gplus)|(graduation)|(groups)|(groups_enterprise)|(jamboard)|(keep)|(ldap)|(login)|(meet)|(meet_hardware)|(mobile)|(profile)|(rules)|(saml)|(token)|(user_accounts)|(vault)|(gemini_in_workspace_apps)|(tasks)|(takeout)|(voice)|(chrome_sync)|(workspace_studio)|(gemini_notebook)",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "1000",
+              "format": "int32",
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "eventName",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orgUnitID",
+            "schema": {
+              "default": "",
+              "pattern": "(id:[a-z0-9]+)",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actorIpAddress",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "agentInfoFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "statusFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "applicationInfoFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startTime",
+            "schema": {
+              "pattern": "(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)T(\\d\\d):(\\d\\d):(\\d\\d)(?:\\.(\\d+))?(?:(Z)|([-+])(\\d\\d):(\\d\\d))",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filters",
+            "schema": {
+              "pattern": "(.+[<,<=,==,>=,>,<>].+,)*(.+[<,<=,==,>=,>,<>].+)",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customerId",
+            "schema": {
+              "pattern": "C.+|my_customer",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "groupIdFilter",
+            "schema": {
+              "pattern": "(id:[a-z0-9]+(,id:[a-z0-9]+)*)",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "networkInfoFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeSensitiveData",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endTime",
+            "schema": {
+              "pattern": "(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)T(\\d\\d):(\\d\\d):(\\d\\d)(?:\\.(\\d+))?(?:(Z)|([-+])(\\d\\d):(\\d\\d))",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resourceDetailsFilter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deviceFilter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Activities"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://admin.googleapis.com"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+overlay: 1.0.0
+info:
+  title: Google Admin SDK Directory API corrections
+  version: 1.0.0
+actions:
+  - target: >-
+      $.paths['/admin/directory/v1/users/{userKey}/tokens/{clientId}','/admin/directory/v1/users/{userKey}/asps/{codeId}','/admin/directory/v1/groups/{groupKey}/members/{memberKey}'].delete.responses
+    description: >-
+      Discovery documents declare only the success response. Google APIs answer a request for a
+      resource that does not exist with HTTP 404 and the standard error envelope
+      {"error": {"code": 404, "message": ..., "errors": [{"reason": "notFound"}]}}, as
+      https://cloud.google.com/apis/design/errors#http_mapping describes (NOT_FOUND maps to 404);
+      the Directory API answered an unknown userKey this way in a live check.
+      The connector reads a 404 on these deletes as "already gone" when the user or group exists.
+    update:
+      '404':
+        description: The user, group, grant, app password or member does not exist.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                    message:
+                      type: string
+                    errors:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          reason:
+                            type: string
+                          message:
+                            type: string
+                          domain:
+                            type: string

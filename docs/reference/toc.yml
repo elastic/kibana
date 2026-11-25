@@ -120,6 +120,7 @@ toc:
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/google-gke-action-type.md
           - file: connectors-kibana/google-threat-intelligence-action-type.md
+          - file: connectors-kibana/google-workspace-admin-action-type.md
           - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/graphql-action-type.md
           - file: connectors-kibana/greynoise-action-type.md

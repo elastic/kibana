@@ -1,0 +1,3260 @@
+{
+  "components": {
+    "schemas": {
+      "Asp": {
+        "properties": {
+          "codeId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "creationTime": {
+            "format": "int64",
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#asp",
+            "type": "string"
+          },
+          "lastTimeUsed": {
+            "format": "int64",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "userKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Asps": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Asp"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "default": "admin#directory#aspList",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExpirationDetails": {
+        "properties": {
+          "expireTime": {
+            "format": "google-datetime",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalId": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Group": {
+        "properties": {
+          "adminCreated": {
+            "type": "boolean"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "directMembersCount": {
+            "format": "int64",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "externalIds": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalId"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#group",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nonEditableAliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Groups": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/Group"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "default": "admin#directory#groups",
+            "type": "string"
+          },
+          "nextPageToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GuestAccountInfo": {
+        "properties": {
+          "primaryGuestEmail": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Member": {
+        "properties": {
+          "delivery_settings": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#member",
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Members": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#members",
+            "type": "string"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/Member"
+            },
+            "type": "array"
+          },
+          "nextPageToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MobileDevice": {
+        "properties": {
+          "adbStatus": {
+            "type": "boolean"
+          },
+          "applications": {
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string"
+                },
+                "packageName": {
+                  "type": "string"
+                },
+                "permission": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "versionCode": {
+                  "format": "int32",
+                  "type": "integer"
+                },
+                "versionName": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "basebandVersion": {
+            "type": "string"
+          },
+          "bootloaderVersion": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "buildNumber": {
+            "type": "string"
+          },
+          "defaultLanguage": {
+            "type": "string"
+          },
+          "developerOptionsStatus": {
+            "type": "boolean"
+          },
+          "deviceCompromisedStatus": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "devicePasswordStatus": {
+            "type": "string"
+          },
+          "email": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "encryptionStatus": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "firstSync": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hardware": {
+            "type": "string"
+          },
+          "hardwareId": {
+            "type": "string"
+          },
+          "imei": {
+            "type": "string"
+          },
+          "kernelVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#mobiledevice",
+            "type": "string"
+          },
+          "lastSync": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "managedAccountIsOnOwnerProfile": {
+            "type": "boolean"
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "meid": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "networkOperator": {
+            "type": "string"
+          },
+          "os": {
+            "type": "string"
+          },
+          "otherAccountsInfo": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "privilege": {
+            "type": "string"
+          },
+          "releaseVersion": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "securityPatchLevel": {
+            "format": "int64",
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "supportsWorkProfile": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          },
+          "unknownSourcesStatus": {
+            "type": "boolean"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "wifiMacAddress": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MobileDeviceAction": {
+        "properties": {
+          "action": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MobileDevices": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#mobiledevices",
+            "type": "string"
+          },
+          "mobiledevices": {
+            "items": {
+              "$ref": "#/components/schemas/MobileDevice"
+            },
+            "type": "array"
+          },
+          "nextPageToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RoleAssignment": {
+        "properties": {
+          "assignedTo": {
+            "type": "string"
+          },
+          "assigneeType": {
+            "enum": [
+              "user",
+              "group"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "expirationDetails": {
+            "$ref": "#/components/schemas/ExpirationDetails"
+          },
+          "kind": {
+            "default": "admin#directory#roleAssignment",
+            "type": "string"
+          },
+          "orgUnitId": {
+            "type": "string"
+          },
+          "roleAssignmentId": {
+            "format": "int64",
+            "type": "string"
+          },
+          "roleId": {
+            "format": "int64",
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RoleAssignments": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignment"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "default": "admin#directory#roleAssignments",
+            "type": "string"
+          },
+          "nextPageToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Token": {
+        "properties": {
+          "anonymous": {
+            "type": "boolean"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "displayText": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#token",
+            "type": "string"
+          },
+          "nativeApp": {
+            "type": "boolean"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "userKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Tokens": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Token"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "default": "admin#directory#tokenList",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "User": {
+        "properties": {
+          "addresses": {},
+          "agreedToTerms": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "archivalTime": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "changePasswordAtNextLogin": {
+            "type": "boolean"
+          },
+          "creationTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "customSchemas": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/UserCustomProperties"
+            },
+            "type": "object"
+          },
+          "customerId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "deletionTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "emails": {},
+          "etag": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "externalIds": {},
+          "gender": {},
+          "guestAccountInfo": {
+            "$ref": "#/components/schemas/GuestAccountInfo"
+          },
+          "hashFunction": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ims": {},
+          "includeInGlobalAddressList": {
+            "type": "boolean"
+          },
+          "ipWhitelisted": {
+            "type": "boolean"
+          },
+          "isAdmin": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isDelegatedAdmin": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isEnforcedIn2Sv": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isEnrolledIn2Sv": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isGuestUser": {
+            "type": "boolean"
+          },
+          "isMailboxSetup": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "keywords": {},
+          "kind": {
+            "default": "admin#directory#user",
+            "readOnly": true,
+            "type": "string"
+          },
+          "languages": {},
+          "lastLoginTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "locations": {},
+          "name": {
+            "$ref": "#/components/schemas/UserName"
+          },
+          "nonEditableAliases": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "notes": {},
+          "orgUnitPath": {
+            "type": "string"
+          },
+          "organizations": {},
+          "password": {
+            "type": "string"
+          },
+          "phones": {},
+          "posixAccounts": {},
+          "primaryEmail": {
+            "type": "string"
+          },
+          "recoveryEmail": {
+            "type": "string"
+          },
+          "recoveryPhone": {
+            "type": "string"
+          },
+          "relations": {},
+          "sshPublicKeys": {},
+          "suspended": {
+            "type": "boolean"
+          },
+          "suspensionReason": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "suspensionTime": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "thumbnailPhotoEtag": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "thumbnailPhotoUrl": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "websites": {}
+        },
+        "type": "object"
+      },
+      "UserCustomProperties": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "UserName": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "familyName": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "givenName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Users": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#users",
+            "type": "string"
+          },
+          "nextPageToken": {
+            "type": "string"
+          },
+          "trigger_event": {
+            "type": "string"
+          },
+          "users": {
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "VerificationCode": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "admin#directory#verificationCode",
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "verificationCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VerificationCodes": {
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VerificationCode"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "default": "admin#directory#verificationCodesList",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/admin.chrome.printers": "See, add, edit, and permanently delete the printers that your organization can use with Chrome",
+              "https://www.googleapis.com/auth/admin.chrome.printers.readonly": "See the printers that your organization can use with Chrome",
+              "https://www.googleapis.com/auth/admin.directory.customer": "View and manage customer related information",
+              "https://www.googleapis.com/auth/admin.directory.customer.readonly": "View customer related information",
+              "https://www.googleapis.com/auth/admin.directory.device.chromeos": "View and manage your ChromeOS devices' metadata",
+              "https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly": "View your ChromeOS devices' metadata",
+              "https://www.googleapis.com/auth/admin.directory.device.mobile": "View and manage your mobile devices' metadata",
+              "https://www.googleapis.com/auth/admin.directory.device.mobile.action": "Manage your mobile devices by performing administrative tasks",
+              "https://www.googleapis.com/auth/admin.directory.device.mobile.readonly": "View your mobile devices' metadata",
+              "https://www.googleapis.com/auth/admin.directory.domain": "View and manage the provisioning of domains for your customers",
+              "https://www.googleapis.com/auth/admin.directory.domain.readonly": "View domains related to your customers",
+              "https://www.googleapis.com/auth/admin.directory.group": "View and manage the provisioning of groups on your domain",
+              "https://www.googleapis.com/auth/admin.directory.group.member": "View and manage group subscriptions on your domain",
+              "https://www.googleapis.com/auth/admin.directory.group.member.readonly": "View group subscriptions on your domain",
+              "https://www.googleapis.com/auth/admin.directory.group.readonly": "View groups on your domain",
+              "https://www.googleapis.com/auth/admin.directory.orgunit": "View and manage organization units on your domain",
+              "https://www.googleapis.com/auth/admin.directory.orgunit.readonly": "View organization units on your domain",
+              "https://www.googleapis.com/auth/admin.directory.resource.calendar": "View and manage the provisioning of calendar resources on your domain",
+              "https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly": "View calendar resources on your domain",
+              "https://www.googleapis.com/auth/admin.directory.rolemanagement": "Manage delegated admin roles for your domain",
+              "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly": "View delegated admin roles for your domain",
+              "https://www.googleapis.com/auth/admin.directory.user": "View and manage the provisioning of users on your domain",
+              "https://www.googleapis.com/auth/admin.directory.user.alias": "View and manage user aliases on your domain",
+              "https://www.googleapis.com/auth/admin.directory.user.alias.readonly": "View user aliases on your domain",
+              "https://www.googleapis.com/auth/admin.directory.user.readonly": "See info about users on your domain",
+              "https://www.googleapis.com/auth/admin.directory.user.security": "Manage data access permissions for users on your domain",
+              "https://www.googleapis.com/auth/admin.directory.userschema": "View and manage the provisioning of user schemas on your domain",
+              "https://www.googleapis.com/auth/admin.directory.userschema.readonly": "View user schemas on your domain",
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Admin SDK API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/admin/directory/v1/customer/{customerId}/devices/mobile": {
+      "get": {
+        "operationId": "directory.mobiledevices.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customerId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "100",
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "enum": [
+                "deviceId",
+                "email",
+                "lastSync",
+                "model",
+                "name",
+                "os",
+                "status",
+                "type"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projection",
+            "schema": {
+              "enum": [
+                "BASIC",
+                "FULL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "enum": [
+                "ASCENDING",
+                "DESCENDING"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MobileDevices"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.device.mobile"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.device.mobile.action"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.device.mobile.readonly"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/customer/{customerId}/devices/mobile/{resourceId}/action": {
+      "post": {
+        "operationId": "directory.mobiledevices.action",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customerId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MobileDeviceAction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "2XX": {}
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.device.mobile"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.device.mobile.action"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/customer/{customer}/roleassignments": {
+      "get": {
+        "operationId": "directory.roleAssignments.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "format": "int32",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userKey",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roleId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeIndirectRoleAssignments",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleAssignments"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.rolemanagement"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/groups": {
+      "get": {
+        "operationId": "directory.groups.list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "200",
+              "format": "int32",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "enum": [
+                "ASCENDING",
+                "DESCENDING"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "enum": [
+                "email"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userKey",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Groups"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group.readonly"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/groups/{groupKey}/members": {
+      "get": {
+        "operationId": "directory.members.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeDerivedMembership",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "200",
+              "format": "int32",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "roles",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Members"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group.member"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group.member.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group.readonly"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "operationId": "directory.members.insert",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Member"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Member"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group.member"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/groups/{groupKey}/members/{memberKey}": {
+      "delete": {
+        "operationId": "directory.members.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "memberKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "2XX": {}
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.group.member"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users": {
+      "get": {
+        "operationId": "directory.users.list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "viewType",
+            "schema": {
+              "default": "admin_view",
+              "enum": [
+                "admin_view",
+                "domain_public"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "showDeleted",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projection",
+            "schema": {
+              "default": "basic",
+              "enum": [
+                "basic",
+                "custom",
+                "full"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "event",
+            "schema": {
+              "enum": [
+                "add",
+                "delete",
+                "makeAdmin",
+                "undelete",
+                "update"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "enum": [
+                "email",
+                "familyName",
+                "givenName"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customFieldMask",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "100",
+              "format": "int32",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "enum": [
+                "ASCENDING",
+                "DESCENDING"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users/{userKey}": {
+      "get": {
+        "operationId": "directory.users.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customFieldMask",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "viewType",
+            "schema": {
+              "default": "admin_view",
+              "enum": [
+                "admin_view",
+                "domain_public"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projection",
+            "schema": {
+              "default": "basic",
+              "enum": [
+                "basic",
+                "custom",
+                "full"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.readonly"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "operationId": "directory.users.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users/{userKey}/asps": {
+      "get": {
+        "operationId": "directory.asps.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Asps"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.security"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users/{userKey}/asps/{codeId}": {
+      "delete": {
+        "operationId": "directory.asps.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "codeId",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "2XX": {}
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.security"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users/{userKey}/signOut": {
+      "post": {
+        "operationId": "directory.users.signOut",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "2XX": {}
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.security"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users/{userKey}/tokens": {
+      "get": {
+        "operationId": "directory.tokens.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tokens"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.security"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users/{userKey}/tokens/{clientId}": {
+      "delete": {
+        "operationId": "directory.tokens.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clientId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "2XX": {}
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.security"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users/{userKey}/verificationCodes": {
+      "get": {
+        "operationId": "directory.verificationCodes.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationCodes"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.security"
+            ]
+          }
+        ]
+      }
+    },
+    "/admin/directory/v1/users/{userKey}/verificationCodes/invalidate": {
+      "post": {
+        "operationId": "directory.verificationCodes.invalidate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "2XX": {}
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/admin.directory.user.security"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://admin.googleapis.com"
+    }
+  ]
+}

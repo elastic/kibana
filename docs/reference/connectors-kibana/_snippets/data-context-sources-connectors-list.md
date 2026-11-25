@@ -81,6 +81,7 @@
 - [Okta](/reference/connectors-kibana/okta-action-type.md): Contain compromised identities — suspend users, revoke sessions, reset MFA, manage group membership, and query System Log events.
 - [Google Cloud IAM](/reference/connectors-kibana/gcp-iam-action-type.md): Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings.
 - [Google Cloud Secret Manager](/reference/connectors-kibana/gcp-secret-manager-action-type.md): Inspect secrets, add and disable secret versions, and read access policy.
+- [Google Workspace Admin](/reference/connectors-kibana/google-workspace-admin-action-type.md): Investigate Google Workspace accounts — audit events, users, OAuth grants, app passwords, groups, admin roles, and mobile devices.
 
 **Email security**
 

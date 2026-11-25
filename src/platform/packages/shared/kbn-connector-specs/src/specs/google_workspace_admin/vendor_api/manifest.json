@@ -1,0 +1,250 @@
+{
+  "operations": {
+    "actionMobileDevice": [
+      {
+        "method": "post",
+        "path": "/admin/directory/v1/customer/{customerId}/devices/mobile/{resourceId}/action",
+        "source": "directory"
+      }
+    ],
+    "addGroupMember": [
+      {
+        "method": "post",
+        "path": "/admin/directory/v1/groups/{groupKey}/members",
+        "source": "directory"
+      }
+    ],
+    "getUser": [
+      {
+        "method": "get",
+        "path": "/admin/directory/v1/users/{userKey}",
+        "source": "directory"
+      }
+    ],
+    "invalidateVerificationCodes": [
+      {
+        "method": "post",
+        "path": "/admin/directory/v1/users/{userKey}/verificationCodes/invalidate",
+        "source": "directory"
+      }
+    ],
+    "listActivities": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/admin/reports/v1/activity/users/{userKey}/applications/{applicationName}",
+        "source": "reports"
+      }
+    ],
+    "listAppPasswords": [
+      {
+        "method": "get",
+        "path": "/admin/directory/v1/users/{userKey}/asps",
+        "source": "directory"
+      }
+    ],
+    "listGroupMembers": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "members",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/admin/directory/v1/groups/{groupKey}/members",
+        "source": "directory"
+      }
+    ],
+    "listGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "groups",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/admin/directory/v1/groups",
+        "source": "directory"
+      }
+    ],
+    "listMobileDevices": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "mobiledevices",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/admin/directory/v1/customer/{customerId}/devices/mobile",
+        "source": "directory"
+      }
+    ],
+    "listRoleAssignments": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/admin/directory/v1/customer/{customer}/roleassignments",
+        "source": "directory"
+      }
+    ],
+    "listUserTokens": [
+      {
+        "method": "get",
+        "path": "/admin/directory/v1/users/{userKey}/tokens",
+        "source": "directory"
+      }
+    ],
+    "listUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "users",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/admin/directory/v1/users",
+        "source": "directory"
+      }
+    ],
+    "listVerificationCodes": [
+      {
+        "method": "get",
+        "path": "/admin/directory/v1/users/{userKey}/verificationCodes",
+        "source": "directory"
+      }
+    ],
+    "removeGroupMember": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "members",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/admin/directory/v1/groups/{groupKey}/members",
+        "source": "directory"
+      },
+      {
+        "method": "delete",
+        "path": "/admin/directory/v1/groups/{groupKey}/members/{memberKey}",
+        "source": "directory"
+      }
+    ],
+    "revokeAppPasswords": [
+      {
+        "method": "get",
+        "path": "/admin/directory/v1/users/{userKey}",
+        "source": "directory"
+      },
+      {
+        "method": "delete",
+        "path": "/admin/directory/v1/users/{userKey}/asps/{codeId}",
+        "source": "directory"
+      }
+    ],
+    "revokeUserToken": [
+      {
+        "method": "get",
+        "path": "/admin/directory/v1/users/{userKey}",
+        "source": "directory"
+      },
+      {
+        "method": "delete",
+        "path": "/admin/directory/v1/users/{userKey}/tokens/{clientId}",
+        "source": "directory"
+      }
+    ],
+    "signOutUser": [
+      {
+        "method": "post",
+        "path": "/admin/directory/v1/users/{userKey}/signOut",
+        "source": "directory"
+      }
+    ],
+    "suspendUser": [
+      {
+        "method": "put",
+        "path": "/admin/directory/v1/users/{userKey}",
+        "source": "directory"
+      }
+    ],
+    "unsuspendUser": [
+      {
+        "method": "put",
+        "path": "/admin/directory/v1/users/{userKey}",
+        "source": "directory"
+      }
+    ],
+    "updateUser": [
+      {
+        "method": "put",
+        "path": "/admin/directory/v1/users/{userKey}",
+        "source": "directory"
+      }
+    ]
+  },
+  "sources": {
+    "directory": {
+      "apiVersion": "directory_v1",
+      "fetchedAt": "2026-11-23T17:43:17.122Z",
+      "format": "discovery",
+      "url": "https://admin.googleapis.com/$discovery/rest?version=directory_v1"
+    },
+    "reports": {
+      "apiVersion": "reports_v1",
+      "fetchedAt": "2026-11-23T17:43:17.671Z",
+      "format": "discovery",
+      "url": "https://admin.googleapis.com/$discovery/rest?version=reports_v1"
+    }
+  }
+}
