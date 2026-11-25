@@ -32,14 +32,17 @@ const MockSearchBar = jest.fn(({ dateRangeFrom, onQuerySubmit }: StatefulSearchB
   useEffect(() => setPickerFrom(dateRangeFrom), [dateRangeFrom]);
 
   return (
-    <button
-      data-test-subj="mockSearchBarPick7d"
-      data-picker-from={pickerFrom}
-      onClick={() => {
-        setPickerFrom('now-7d');
-        onQuerySubmit?.({ dateRange: { from: 'now-7d', to: 'now' } });
-      }}
-    />
+    <>
+      <button
+        data-test-subj="mockSearchBarPick7d"
+        data-picker-from={pickerFrom}
+        onClick={() => {
+          setPickerFrom('now-7d');
+          onQuerySubmit?.({ dateRange: { from: 'now-7d', to: 'now' } });
+        }}
+      />
+      <button data-test-subj="mockSearchBarDraft2h" onClick={() => setPickerFrom('now-2h')} />
+    </>
   );
 });
 
@@ -55,16 +58,18 @@ const renderSearchBar = (
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   unifiedSearch.ui.SearchBar = MockSearchBar;
   const config = createPublicConfigMock({ timeRangeLimitDisabled });
-
-  return render(
-    <MockEntityInventoryProvider
-      entityCategory={entityCategory}
-      services={{ ...coreMock.createStart(), unifiedSearch, config }}
-      history={createMemoryHistory()}
-    >
+  const services = { ...coreMock.createStart(), unifiedSearch, config };
+  const history = createMemoryHistory();
+  const searchBar = (category: EntityInventoryEntityCategory) => (
+    <MockEntityInventoryProvider entityCategory={category} services={services} history={history}>
       <EntityInventorySearchBar />
     </MockEntityInventoryProvider>
   );
+  const { rerender } = render(searchBar(entityCategory));
+
+  return {
+    changeCategory: (category: EntityInventoryEntityCategory) => rerender(searchBar(category)),
+  };
 };
 
 describe('EntityInventorySearchBar', () => {
@@ -173,6 +178,29 @@ describe('EntityInventorySearchBar', () => {
       'data-picker-from',
       previousFrom
     );
+  });
+
+  it('shows the committed range again when the entity category changes', () => {
+    const { changeCategory } = renderSearchBar('hosts');
+    const committedFrom = lastSearchBarProps().dateRangeFrom;
+    fireEvent.click(screen.getByTestId('mockSearchBarDraft2h'));
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-2h');
+
+    changeCategory('all');
+
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute(
+      'data-picker-from',
+      committedFrom
+    );
+  });
+
+  it('keeps the draft of the picker while the entity category stays the same', () => {
+    const { changeCategory } = renderSearchBar('hosts');
+    fireEvent.click(screen.getByTestId('mockSearchBarDraft2h'));
+
+    changeCategory('hosts');
+
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-2h');
   });
 
   it('updates the filters passed to the search bar', () => {
