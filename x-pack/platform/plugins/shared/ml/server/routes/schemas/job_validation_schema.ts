@@ -42,7 +42,8 @@ export const modelMemoryLimitSchema = schema.object({
   datafeedConfig: datafeedConfigSchema,
   analysisConfig: analysisConfigSchema,
   indexPattern: schema.string({ maxLength: 10000 }),
-  query: schema.any(),
+  // ES|QL datafeeds have no DSL query
+  query: schema.maybe(schema.any()),
   timeFieldName: schema.string({ maxLength: 10000 }),
   earliestMs: schema.number(),
   latestMs: schema.number(),

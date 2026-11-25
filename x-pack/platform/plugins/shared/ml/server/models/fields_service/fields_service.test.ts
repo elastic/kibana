@@ -35,3 +35,35 @@ describe('fieldsServiceProvider getCardinalityOfFields', () => {
     );
   });
 });
+
+describe('fieldsServiceProvider getMaxBucketCardinalities', () => {
+  it('runs an ES|QL query on the output columns of an ES|QL datafeed', async () => {
+    const client = elasticsearchServiceMock.createScopedClusterClient();
+    client.asCurrentUser.esql.query.mockResolvedValue({
+      columns: [{ name: '__ml_cardinality_0', type: 'long' }],
+      values: [[7]],
+    });
+    const fieldsService = fieldsServiceProvider(client);
+    const hour = 60 * 60 * 1000;
+
+    const resp = await fieldsService.getMaxBucketCardinalities(
+      'logs',
+      ['host'],
+      undefined,
+      'timestamp',
+      0,
+      2 * hour,
+      '1h',
+      {
+        esql_query:
+          'FROM logs | STATS c = COUNT(*) BY timestamp = BUCKET(@timestamp, 1 hour), host',
+      } as Datafeed
+    );
+
+    expect(resp).toEqual({ host: 7 });
+    expect(client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
+    expect(client.asCurrentUser.search).not.toHaveBeenCalled();
+    const [[request]] = client.asCurrentUser.esql.query.mock.calls;
+    expect(request.query).toContain(`BUCKET(\`timestamp\`, ${hour} milliseconds)`);
+  });
+});

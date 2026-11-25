@@ -19,7 +19,6 @@ const datafeed: Datafeed = {
   delayed_data_check_config: { enabled: false },
   esql_query:
     'FROM logs | STATS avg_bytes = AVG(bytes) BY bucket_time = BUCKET(@timestamp, 1 hour)',
-  source_time_field: '@timestamp',
   grouping_interval: '1h',
 };
 
@@ -57,6 +56,10 @@ describe('esqlMetricDataProvider', () => {
       });
       const [[request]] = client.asCurrentUser.esql.query.mock.calls;
       expect(request.query).toContain(`BUCKET(\`bucket_time\`, ${HOUR} milliseconds)`);
+      expect(request.query).toContain(
+        `| WHERE \`bucket_time\` >= TO_DATETIME(0) AND \`bucket_time\` <= TO_DATETIME(${3 * HOUR})`
+      );
+      expect(request).not.toHaveProperty('filter');
     });
 
     test('does not set project_routing when the datafeed has none', async () => {
@@ -112,6 +115,7 @@ describe('esqlMetricDataProvider', () => {
 
       const resp = await esqlMetricDataProvider(client).fetchEsqlCardinalityOfFields(
         { ...datafeed, project_routing: '_alias:linked' },
+        'bucket_time',
         ['host'],
         0,
         HOUR
@@ -120,6 +124,53 @@ describe('esqlMetricDataProvider', () => {
       expect(resp).toEqual({ host: 12 });
       const [[request]] = client.asCurrentUser.esql.query.mock.calls;
       expect(request).toHaveProperty('project_routing', '_alias:linked');
+      expect(request.query).toContain(
+        `| WHERE \`bucket_time\` >= TO_DATETIME(0) AND \`bucket_time\` <= TO_DATETIME(${HOUR})`
+      );
+    });
+  });
+
+  describe('fetchEsqlMaxBucketCardinalities', () => {
+    test('returns the highest per-bucket count of each field', async () => {
+      const client = elasticsearchServiceMock.createScopedClusterClient();
+      client.asCurrentUser.esql.query.mockResolvedValue({
+        columns: [
+          { name: '__ml_cardinality_0', type: 'long' },
+          { name: '__ml_cardinality_1', type: 'long' },
+        ],
+        values: [[4, null]],
+      });
+
+      const resp = await esqlMetricDataProvider(client).fetchEsqlMaxBucketCardinalities(
+        datafeed,
+        'bucket_time',
+        ['host', 'geo'],
+        0,
+        3 * HOUR,
+        HOUR
+      );
+
+      expect(resp).toEqual({ host: 4 });
+      const [[request]] = client.asCurrentUser.esql.query.mock.calls;
+      expect(request.query).toContain(
+        `BY \`__ml_bucket\` = BUCKET(\`bucket_time\`, ${HOUR} milliseconds)`
+      );
+    });
+
+    test('does not query without fields', async () => {
+      const client = elasticsearchServiceMock.createScopedClusterClient();
+
+      const resp = await esqlMetricDataProvider(client).fetchEsqlMaxBucketCardinalities(
+        datafeed,
+        'bucket_time',
+        [],
+        0,
+        HOUR,
+        HOUR
+      );
+
+      expect(resp).toEqual({});
+      expect(client.asCurrentUser.esql.query).not.toHaveBeenCalled();
     });
   });
 });

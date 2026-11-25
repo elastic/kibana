@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 
@@ -18,6 +17,8 @@ export const ESQL_CHART_METRIC_COLUMN = '__ml_metric';
 export const ESQL_MAX_CHART_BUCKETS = 10000;
 
 const ESQL_CARDINALITY_COLUMN_PREFIX = '__ml_cardinality_';
+const ESQL_BUCKET_CARDINALITY_COLUMN_PREFIX = '__ml_bucket_cardinality_';
+const ESQL_CARDINALITY_BUCKET_COLUMN = '__ml_bucket';
 
 /** Column name holding the document count of each value in the generated top values query. */
 export const ESQL_TOP_VALUES_COUNT_COLUMN = '__ml_value_count';
@@ -30,12 +31,11 @@ export interface EsqlEntityField {
 export interface EsqlRequest {
   readonly query: string;
   readonly params: Array<Record<string, string>>;
-  readonly filter: estypes.QueryDslQueryContainer;
 }
 
 export interface EsqlMetricQueryOptions {
   readonly esqlQuery: string;
-  readonly sourceTimeField: string;
+  /** The query's output time column, which is the job's time field. */
   readonly timeField: string;
   readonly entityFields: readonly EsqlEntityField[];
   readonly metricFunction: string | null;
@@ -47,20 +47,23 @@ export interface EsqlMetricQueryOptions {
 
 export interface EsqlCardinalityQueryOptions {
   readonly esqlQuery: string;
-  readonly sourceTimeField: string;
+  /** The query's output time column, which is the job's time field. */
+  readonly timeField: string;
   readonly fieldNames: readonly string[];
   readonly earliestMs: number;
   readonly latestMs: number;
 }
 
+export interface EsqlMaxBucketCardinalityQueryOptions extends EsqlCardinalityQueryOptions {
+  /** The job's bucket span in milliseconds. */
+  readonly intervalMs: number;
+}
+
 /** Returns true when the datafeed runs an ES|QL query rather than a Query DSL search. */
 export const isEsqlDatafeed = (
   datafeed: Partial<Datafeed> | undefined | null
-): datafeed is Datafeed & { esql_query: string; source_time_field: string } =>
-  typeof datafeed?.esql_query === 'string' &&
-  datafeed.esql_query.length > 0 &&
-  typeof datafeed.source_time_field === 'string' &&
-  datafeed.source_time_field.length > 0;
+): datafeed is Datafeed & { esql_query: string } =>
+  typeof datafeed?.esql_query === 'string' && datafeed.esql_query.length > 0;
 
 const getChartInterval = (intervalMs: number): number => Math.max(1, Math.trunc(intervalMs));
 
@@ -122,19 +125,13 @@ export const getEsqlMetricExpression = (
   }
 };
 
-const buildSourceTimeFilter = (
-  sourceTimeField: string,
-  earliestMs: number,
-  latestMs: number
-): estypes.QueryDslQueryContainer => ({
-  range: {
-    [sourceTimeField]: {
-      gte: earliestMs,
-      lte: latestMs,
-      format: 'epoch_millis',
-    },
-  },
-});
+// Filters on the query's output time column, as the source indices might not have that field
+const buildTimeWhereClause = (timeField: string, earliestMs: number, latestMs: number): string => {
+  const field = escapeEsqlIdentifier(timeField);
+  return `| WHERE ${field} >= TO_DATETIME(${Math.trunc(
+    earliestMs
+  )}) AND ${field} <= TO_DATETIME(${Math.trunc(latestMs)})`;
+};
 
 const buildEntityWhereClauses = (
   entityFields: readonly EsqlEntityField[]
@@ -165,7 +162,6 @@ const buildEntityWhereClauses = (
  */
 export const buildEsqlMetricRequest = ({
   esqlQuery,
-  sourceTimeField,
   timeField,
   entityFields,
   metricFunction,
@@ -188,6 +184,7 @@ export const buildEsqlMetricRequest = ({
 
   const query = [
     esqlQuery.trim(),
+    buildTimeWhereClause(timeField, earliestMs, latestMs),
     ...clauses,
     `| STATS ${escapeEsqlIdentifier(
       ESQL_CHART_METRIC_COLUMN
@@ -198,11 +195,7 @@ export const buildEsqlMetricRequest = ({
     `| LIMIT ${Math.max(1, rowLimit)}`,
   ].join('\n');
 
-  return {
-    query,
-    params,
-    filter: buildSourceTimeFilter(sourceTimeField, earliestMs, latestMs),
-  };
+  return { query, params };
 };
 
 /** Name of the output column holding the cardinality of the field at the given index. */
@@ -215,7 +208,7 @@ export const getEsqlCardinalityColumn = (index: number): string =>
  */
 export const buildEsqlCardinalityRequest = ({
   esqlQuery,
-  sourceTimeField,
+  timeField,
   fieldNames,
   earliestMs,
   latestMs,
@@ -230,9 +223,57 @@ export const buildEsqlCardinalityRequest = ({
     .join(', ');
 
   return {
-    query: [esqlQuery.trim(), `| STATS ${aggregates}`, '| LIMIT 1'].join('\n'),
+    query: [
+      esqlQuery.trim(),
+      buildTimeWhereClause(timeField, earliestMs, latestMs),
+      `| STATS ${aggregates}`,
+      '| LIMIT 1',
+    ].join('\n'),
     params: [],
-    filter: buildSourceTimeFilter(sourceTimeField, earliestMs, latestMs),
+  };
+};
+
+/**
+ * Builds an ES|QL request that finds, for each output column of an ES|QL datafeed query, the
+ * highest number of distinct values in any one bucket of the time window.
+ */
+export const buildEsqlMaxBucketCardinalityRequest = ({
+  esqlQuery,
+  timeField,
+  fieldNames,
+  earliestMs,
+  latestMs,
+  intervalMs,
+}: EsqlMaxBucketCardinalityQueryOptions): EsqlRequest => {
+  const getBucketColumn = (index: number) =>
+    escapeEsqlIdentifier(`${ESQL_BUCKET_CARDINALITY_COLUMN_PREFIX}${index}`);
+  const bucketAggregates = fieldNames
+    .map(
+      (fieldName, index) =>
+        `${getBucketColumn(index)} = COUNT_DISTINCT(${escapeEsqlIdentifier(fieldName)})`
+    )
+    .join(', ');
+  const maxAggregates = fieldNames
+    .map(
+      (_fieldName, index) =>
+        `${escapeEsqlIdentifier(getEsqlCardinalityColumn(index))} = MAX(${getBucketColumn(index)})`
+    )
+    .join(', ');
+  const bucket = `BUCKET(${escapeEsqlIdentifier(timeField)}, ${getChartInterval(
+    intervalMs
+  )} milliseconds)`;
+
+  return {
+    query: [
+      esqlQuery.trim(),
+      buildTimeWhereClause(timeField, earliestMs, latestMs),
+      `| STATS ${bucketAggregates} BY ${escapeEsqlIdentifier(
+        ESQL_CARDINALITY_BUCKET_COLUMN
+      )} = ${bucket}`,
+      `| STATS ${maxAggregates}`,
+      '| LIMIT 1',
+    ].join('\n'),
+    params: [],
   };
 };
 

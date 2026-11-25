@@ -8,7 +8,6 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ES_AGGREGATION, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import {
-  escapeEsqlIdentifier,
   buildEsqlMetricRequest,
   buildEsqlTopValuesRequest,
   parseEsqlMetricResponse,
@@ -70,7 +69,6 @@ export const loadEsqlLineCharts = async (
       ? [{ fieldName: splitFieldName, fieldValue: splitFieldValue }]
       : [];
 
-  const timeField = escapeEsqlIdentifier(source.timeField);
   const timeRange = { from: new Date(start).toISOString(), to: new Date(end).toISOString() };
 
   const series = await Promise.all(
@@ -82,9 +80,7 @@ export const loadEsqlLineCharts = async (
         metricFieldName === undefined &&
         typeof source.summaryCountField === 'string';
       const options = {
-        // filter on the query's output time column, which might not exist in the source indices
-        esqlQuery: `${source.esqlQuery.trim()}\n| WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`,
-        sourceTimeField: source.timeField,
+        esqlQuery: source.esqlQuery,
         timeField: source.timeField,
         entityFields,
         metricFunction: sumDocCounts ? ES_AGGREGATION.SUM : agg,

@@ -11,11 +11,13 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import type { MetricData } from '@kbn/ml-common-types/results';
 import {
   buildEsqlCardinalityRequest,
+  buildEsqlMaxBucketCardinalityRequest,
   buildEsqlMetricRequest,
   getEsqlCardinalityColumn,
   isEsqlDatafeed,
   parseEsqlMetricResponse,
   type EsqlEntityField,
+  type EsqlRequest,
 } from '../../../common/util/esql_metric_query';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
@@ -54,7 +56,6 @@ export const esqlMetricDataProvider = (client: IScopedClusterClient) => {
     const options = {
       ...params,
       esqlQuery: datafeed.esql_query,
-      sourceTimeField: datafeed.source_time_field,
       timeField,
     };
     const request = buildEsqlMetricRequest(options);
@@ -76,24 +77,12 @@ export const esqlMetricDataProvider = (client: IScopedClusterClient) => {
     };
   };
 
-  /** Counts the distinct values of ES|QL output columns over the time window. */
-  const fetchEsqlCardinalityOfFields = async (
+  // Runs a cardinality request and reads the value of each field from its single row
+  const fetchCardinalities = async (
     datafeed: Datafeed,
-    fieldNames: readonly string[],
-    earliestMs: number,
-    latestMs: number
+    request: EsqlRequest,
+    fieldNames: readonly string[]
   ): Promise<Record<string, number>> => {
-    if (isEsqlDatafeed(datafeed) === false || fieldNames.length === 0) {
-      return {};
-    }
-
-    const request = buildEsqlCardinalityRequest({
-      esqlQuery: datafeed.esql_query,
-      sourceTimeField: datafeed.source_time_field,
-      fieldNames,
-      earliestMs,
-      latestMs,
-    });
     const { columns, values } = await asCurrentUser.esql.query(
       { ...request, ...getProjectRouting(datafeed) },
       { maxRetries: 0 }
@@ -110,7 +99,53 @@ export const esqlMetricDataProvider = (client: IScopedClusterClient) => {
     }, {});
   };
 
-  return { fetchEsqlMetricData, fetchEsqlCardinalityOfFields };
+  /** Counts the distinct values of ES|QL output columns over the time window. */
+  const fetchEsqlCardinalityOfFields = async (
+    datafeed: Datafeed,
+    timeField: string,
+    fieldNames: readonly string[],
+    earliestMs: number,
+    latestMs: number
+  ): Promise<Record<string, number>> => {
+    if (isEsqlDatafeed(datafeed) === false || fieldNames.length === 0) {
+      return {};
+    }
+
+    const request = buildEsqlCardinalityRequest({
+      esqlQuery: datafeed.esql_query,
+      timeField,
+      fieldNames,
+      earliestMs,
+      latestMs,
+    });
+    return fetchCardinalities(datafeed, request, fieldNames);
+  };
+
+  /** Finds the most distinct values of ES|QL output columns in any one bucket of the time window. */
+  const fetchEsqlMaxBucketCardinalities = async (
+    datafeed: Datafeed,
+    timeField: string,
+    fieldNames: readonly string[],
+    earliestMs: number,
+    latestMs: number,
+    intervalMs: number
+  ): Promise<Record<string, number>> => {
+    if (isEsqlDatafeed(datafeed) === false || fieldNames.length === 0) {
+      return {};
+    }
+
+    const request = buildEsqlMaxBucketCardinalityRequest({
+      esqlQuery: datafeed.esql_query,
+      timeField,
+      fieldNames,
+      earliestMs,
+      latestMs,
+      intervalMs,
+    });
+    return fetchCardinalities(datafeed, request, fieldNames);
+  };
+
+  return { fetchEsqlMetricData, fetchEsqlCardinalityOfFields, fetchEsqlMaxBucketCardinalities };
 };
 
 /**

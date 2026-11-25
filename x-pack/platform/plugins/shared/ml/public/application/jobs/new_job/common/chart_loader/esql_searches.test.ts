@@ -62,7 +62,7 @@ describe('esql_searches', () => {
       expect(avgRequest.query).toContain('AVG(`bytes_kb`)');
       expect(avgRequest.params).toEqual([{ ml_entity_0: 'a' }]);
       expect(avgRequest.query).toContain(
-        '| WHERE `@timestamp` >= ?_tstart AND `@timestamp` <= ?_tend'
+        `| WHERE \`@timestamp\` >= TO_DATETIME(0) AND \`@timestamp\` <= TO_DATETIME(${HOUR})`
       );
       expect(avgRequest.kibanaQueryContext.timeRange).toEqual({
         from: new Date(0).toISOString(),

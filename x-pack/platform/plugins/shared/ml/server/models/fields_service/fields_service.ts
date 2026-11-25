@@ -118,6 +118,7 @@ export function fieldsServiceProvider(client: IScopedClusterClient) {
       const { start, end } = getSafeTimeRange(earliestMs, latestMs);
       return esqlMetricDataProvider(client).fetchEsqlCardinalityOfFields(
         datafeedConfig,
+        timeFieldName,
         fieldNames,
         start,
         end
@@ -351,6 +352,26 @@ export function fieldsServiceProvider(client: IScopedClusterClient) {
   ): Promise<{ [key: string]: number }> {
     if (!interval) {
       throw Boom.badRequest('Interval is required to retrieve max bucket cardinalities.');
+    }
+
+    if (isEsqlDatafeed(datafeedConfig)) {
+      // ES|QL datafeed fields are output columns of the query, not fields of the source index.
+      const intervalDuration = parseInterval(interval);
+      if (intervalDuration === null) {
+        throw Boom.badRequest('Interval is invalid');
+      }
+      const { start, end } = getSafeTimeRangeForInterval(
+        interval,
+        ...Object.values(getSafeTimeRange(earliestMs, latestMs))
+      );
+      return esqlMetricDataProvider(client).fetchEsqlMaxBucketCardinalities(
+        datafeedConfig,
+        timeFieldName,
+        fieldNames,
+        start,
+        end,
+        intervalDuration.asMilliseconds()
+      );
     }
 
     const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);

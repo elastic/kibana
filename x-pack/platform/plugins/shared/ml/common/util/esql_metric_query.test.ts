@@ -8,6 +8,7 @@
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import {
   buildEsqlCardinalityRequest,
+  buildEsqlMaxBucketCardinalityRequest,
   buildEsqlMetricRequest,
   buildEsqlTopValuesRequest,
   ESQL_MAX_CHART_BUCKETS,
@@ -25,7 +26,6 @@ const HOUR = 60 * 60 * 1000;
 const baseOptions: EsqlMetricQueryOptions = {
   esqlQuery:
     'FROM logs | STATS event_count = COUNT(*) BY bucket_time = BUCKET(@timestamp, 1 hour), host = host.keyword',
-  sourceTimeField: '@timestamp',
   timeField: 'bucket_time',
   entityFields: [],
   metricFunction: 'sum',
@@ -37,11 +37,9 @@ const baseOptions: EsqlMetricQueryOptions = {
 
 describe('esql_metric_query', () => {
   describe('isEsqlDatafeed', () => {
-    test('returns true only when esql_query and source_time_field are set', () => {
-      expect(
-        isEsqlDatafeed({ esql_query: 'FROM logs', source_time_field: '@timestamp' } as Datafeed)
-      ).toBe(true);
-      expect(isEsqlDatafeed({ esql_query: 'FROM logs' } as Datafeed)).toBe(false);
+    test('returns true only when esql_query is set', () => {
+      expect(isEsqlDatafeed({ esql_query: 'FROM logs' } as Datafeed)).toBe(true);
+      expect(isEsqlDatafeed({ esql_query: '' } as Datafeed)).toBe(false);
       expect(isEsqlDatafeed({ indices: ['logs'] } as Datafeed)).toBe(false);
       expect(isEsqlDatafeed(undefined)).toBe(false);
     });
@@ -75,22 +73,20 @@ describe('esql_metric_query', () => {
   });
 
   describe('buildEsqlMetricRequest', () => {
-    test('appends re-bucketing to the datafeed query and filters on the source time field', () => {
+    test('filters the datafeed query on its output time column and re-buckets it', () => {
       const request = buildEsqlMetricRequest(baseOptions);
 
       expect(request).toEqual({
         query: [
           baseOptions.esqlQuery,
+          `| WHERE \`bucket_time\` >= TO_DATETIME(0) AND \`bucket_time\` <= TO_DATETIME(${
+            3 * HOUR
+          })`,
           '| STATS `__ml_metric` = SUM(`event_count`) BY `__ml_chart_time` = BUCKET(`bucket_time`, 3600000 milliseconds)',
           '| SORT `__ml_chart_time`',
           '| LIMIT 4',
         ].join('\n'),
         params: [],
-        filter: {
-          range: {
-            '@timestamp': { gte: 0, lte: 3 * HOUR, format: 'epoch_millis' },
-          },
-        },
       });
     });
 
@@ -129,7 +125,7 @@ describe('esql_metric_query', () => {
       expect(
         buildEsqlCardinalityRequest({
           esqlQuery: 'FROM logs',
-          sourceTimeField: '@timestamp',
+          timeField: '@timestamp',
           fieldNames: ['host', 'geo.src'],
           earliestMs: 0,
           latestMs: HOUR,
@@ -137,11 +133,35 @@ describe('esql_metric_query', () => {
       ).toEqual({
         query: [
           'FROM logs',
+          `| WHERE \`@timestamp\` >= TO_DATETIME(0) AND \`@timestamp\` <= TO_DATETIME(${HOUR})`,
           '| STATS `__ml_cardinality_0` = COUNT_DISTINCT(`host`), `__ml_cardinality_1` = COUNT_DISTINCT(`geo.src`)',
           '| LIMIT 1',
         ].join('\n'),
         params: [],
-        filter: { range: { '@timestamp': { gte: 0, lte: HOUR, format: 'epoch_millis' } } },
+      });
+    });
+  });
+
+  describe('buildEsqlMaxBucketCardinalityRequest', () => {
+    test('counts distinct values in each bucket and keeps the highest count of each field', () => {
+      expect(
+        buildEsqlMaxBucketCardinalityRequest({
+          esqlQuery: 'FROM logs',
+          timeField: '@timestamp',
+          fieldNames: ['host', 'geo.src'],
+          earliestMs: 0,
+          latestMs: 3 * HOUR,
+          intervalMs: HOUR,
+        })
+      ).toEqual({
+        query: [
+          'FROM logs',
+          `| WHERE \`@timestamp\` >= TO_DATETIME(0) AND \`@timestamp\` <= TO_DATETIME(${3 * HOUR})`,
+          `| STATS \`__ml_bucket_cardinality_0\` = COUNT_DISTINCT(\`host\`), \`__ml_bucket_cardinality_1\` = COUNT_DISTINCT(\`geo.src\`) BY \`__ml_bucket\` = BUCKET(\`@timestamp\`, ${HOUR} milliseconds)`,
+          '| STATS `__ml_cardinality_0` = MAX(`__ml_bucket_cardinality_0`), `__ml_cardinality_1` = MAX(`__ml_bucket_cardinality_1`)',
+          '| LIMIT 1',
+        ].join('\n'),
+        params: [],
       });
     });
   });
