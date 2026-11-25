@@ -359,12 +359,16 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         reason: 'terms_other_bucket_not_supported',
       },
     },
+    // Two Top values with Other on the outer dimension: the outer typed key drives the remap and
+    // the inner `LIMIT n BY key` runs per outer group, including Other. The dataset has 5
+    // operating systems, so size 2 groups three of them into Other; its last row is the third
+    // host kept inside Other, aggregated over every remaining document of those three systems.
     {
       group: 'top_n',
       dataset: logs,
       description: 'nested terms with other bucket on the outer dimension ranked by metric DESC',
       columns: {
-        col1: terms('geo.src', {
+        col1: terms('machine.os.keyword', {
           size: 2,
           orderBy: { type: 'column', columnId: 'col3' },
           orderDirection: 'desc',
@@ -380,12 +384,19 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | EVAL key_geo_src = CASE(geo.src IN (${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | STATS rank_geo_src = AVG(bytes) BY geo.src | SORT rank_geo_src DESC, geo.src ASC | LIMIT 2 | KEEP geo.src), geo.src, NULL) | INLINE STATS rank_geo_src = AVG(bytes) BY key_geo_src | STATS AVG(bytes) BY rank_geo_src, key_geo_src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_geo_src | EVAL named_geo_src = CASE(key_geo_src IS NULL, 0::LONG, 1::LONG) | SORT named_geo_src DESC, rank_geo_src DESC, key_geo_src ASC, \`AVG(bytes)\` DESC | EVAL geo.src = COALESCE(TO_STRING(key_geo_src), "Other"::KEYWORD) | DROP named_geo_src, key_geo_src, rank_geo_src`,
-        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS rank_machine_os_keyword = AVG(bytes) BY machine.os.keyword | SORT rank_machine_os_keyword DESC, machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | INLINE STATS rank_machine_os_keyword = AVG(bytes) BY key_machine_os_keyword | STATS AVG(bytes) BY rank_machine_os_keyword, key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, rank_machine_os_keyword DESC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword, rank_machine_os_keyword`,
+        columnNames: ['AVG(bytes)', 'machine.os.keyword', 'host.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
-          'geo.src': ['col1'],
+          'machine.os.keyword': ['col1'],
           'host.keyword': ['col2'],
+        },
+        // Other is win 7, win 8 and osx; its third host is www.elastic.co: 2938 documents,
+        // 14803157 bytes.
+        expectedLastRow: {
+          'machine.os.keyword': 'Other',
+          'host.keyword': 'www.elastic.co',
+          'AVG(bytes)': 14803157 / 2938,
         },
       },
     },
@@ -394,7 +405,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       dataset: logs,
       description: 'nested terms with other bucket on the outer dimension ranked by metric ASC',
       columns: {
-        col1: terms('geo.src', {
+        col1: terms('machine.os.keyword', {
           size: 2,
           orderBy: { type: 'column', columnId: 'col3' },
           orderDirection: 'asc',
@@ -410,12 +421,19 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | EVAL key_geo_src = CASE(geo.src IN (${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | STATS rank_geo_src = AVG(bytes) BY geo.src | SORT rank_geo_src ASC, geo.src ASC | LIMIT 2 | KEEP geo.src), geo.src, NULL) | INLINE STATS rank_geo_src = AVG(bytes) BY key_geo_src | STATS AVG(bytes) BY rank_geo_src, key_geo_src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_geo_src | EVAL named_geo_src = CASE(key_geo_src IS NULL, 0::LONG, 1::LONG) | SORT named_geo_src DESC, rank_geo_src ASC, key_geo_src ASC, \`AVG(bytes)\` DESC | EVAL geo.src = COALESCE(TO_STRING(key_geo_src), "Other"::KEYWORD) | DROP named_geo_src, key_geo_src, rank_geo_src`,
-        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS rank_machine_os_keyword = AVG(bytes) BY machine.os.keyword | SORT rank_machine_os_keyword ASC, machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | INLINE STATS rank_machine_os_keyword = AVG(bytes) BY key_machine_os_keyword | STATS AVG(bytes) BY rank_machine_os_keyword, key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, rank_machine_os_keyword ASC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword, rank_machine_os_keyword`,
+        columnNames: ['AVG(bytes)', 'machine.os.keyword', 'host.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
-          'geo.src': ['col1'],
+          'machine.os.keyword': ['col1'],
           'host.keyword': ['col2'],
+        },
+        // Other is win xp, ios and win 8; its third host is www.elastic.co: 2831 documents,
+        // 14692951 bytes.
+        expectedLastRow: {
+          'machine.os.keyword': 'Other',
+          'host.keyword': 'www.elastic.co',
+          'AVG(bytes)': 14692951 / 2831,
         },
       },
     },
@@ -424,7 +442,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       dataset: logs,
       description: 'nested terms with other bucket on the outer dimension ranked alphabetically',
       columns: {
-        col1: terms('geo.src', {
+        col1: terms('machine.os.keyword', {
           size: 2,
           orderBy: { type: 'alphabetical' },
           orderDirection: 'asc',
@@ -440,12 +458,19 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | EVAL key_geo_src = CASE(geo.src IN (${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | STATS COUNT(*) BY geo.src | SORT geo.src ASC | LIMIT 2 | KEEP geo.src), geo.src, NULL) | STATS AVG(bytes) BY key_geo_src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_geo_src | EVAL named_geo_src = CASE(key_geo_src IS NULL, 0::LONG, 1::LONG) | SORT named_geo_src DESC, key_geo_src ASC, \`AVG(bytes)\` DESC | EVAL geo.src = COALESCE(TO_STRING(key_geo_src), "Other"::KEYWORD) | DROP named_geo_src, key_geo_src`,
-        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        esql: `${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | EVAL key_machine_os_keyword = CASE(machine.os.keyword IN (${logsFrom} | ${logsWhere} | WHERE machine.os.keyword IS NOT NULL | STATS COUNT(*) BY machine.os.keyword | SORT machine.os.keyword ASC | LIMIT 2 | KEEP machine.os.keyword), machine.os.keyword, NULL) | STATS AVG(bytes) BY key_machine_os_keyword, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_machine_os_keyword | EVAL named_machine_os_keyword = CASE(key_machine_os_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_machine_os_keyword DESC, key_machine_os_keyword ASC, \`AVG(bytes)\` DESC | EVAL machine.os.keyword = COALESCE(TO_STRING(key_machine_os_keyword), "Other"::KEYWORD) | DROP named_machine_os_keyword, key_machine_os_keyword`,
+        columnNames: ['AVG(bytes)', 'machine.os.keyword', 'host.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
-          'geo.src': ['col1'],
+          'machine.os.keyword': ['col1'],
           'host.keyword': ['col2'],
+        },
+        // Other is win 7, win 8 and win xp; its third host is www.elastic.co: 2894 documents,
+        // 14884033 bytes.
+        expectedLastRow: {
+          'machine.os.keyword': 'Other',
+          'host.keyword': 'www.elastic.co',
+          'AVG(bytes)': 14884033 / 2894,
         },
       },
     },
@@ -454,7 +479,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       dataset: logs,
       description: 'nested terms with other bucket on the inner dimension is not convertible',
       columns: {
-        col1: terms('geo.src', {
+        col1: terms('machine.os.keyword', {
           size: 2,
           orderBy: { type: 'column', columnId: 'col3' },
           orderDirection: 'desc',
