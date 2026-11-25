@@ -261,12 +261,16 @@
     "console",
     "context-engine.applyDreamChanges",
     "context-engine.applyDreamRelationships",
+    "context-engine.applyMaintenanceChanges",
     "context-engine.createKi",
     "context-engine.deleteKi",
+    "context-engine.gatherMaintenance",
     "context-engine.getDreamingStatus",
     "context-engine.getFeedbackContext",
-    "context-engine.readTraceTranscripts",
+    "context-engine.readSessionMemories",
+    "context-engine.readSessionTranscripts",
     "context-engine.recordImprovements",
+    "context-engine.recordMaintenanceRun",
     "context-engine.updateKi",
     "context-engine.verifyKi",
     "d3security.run",
@@ -875,6 +879,7 @@
     "shodan.searchHosts",
     "significantEvents.classifyDetections",
     "significantEvents.resolveModel",
+    "significantEvents.resolveWrittenDetections",
     "slack",
     "slack2.addReaction",
     "slack2.askQuestion",
@@ -1001,6 +1006,7 @@
     "waitForApproval",
     "waitForInput",
     "while",
+    "workflow.awaitExecutions",
     "workflow.execute",
     "workflow.executeAsync",
     "workflow.fail",
@@ -1110,11 +1116,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "ee6589e0ed4fdb9d9b956996472514642a898ed5edf30e000f5f9dbc38756400"
+      "sha256": "bf871ef99cda9b183a9cb7284276aa63bcaafd48c633cd4dec2352b2f33580c4"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "6b075a35e8479cd3114245ee64ec477b466c75f69ca9c8339dd42ba97ed407c3"
+      "sha256": "e4a275b2d37d73d16c29e4fec97d4c360d5c71f89a7b6a723bff9bc1bfc5abfe"
     }
   }
 }

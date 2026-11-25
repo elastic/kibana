@@ -50,6 +50,10 @@ describe('getKiDisplayTitle', () => {
     expect(getKiDisplayTitle()).toBe('Untitled');
     expect(getKiDisplayTitle('')).toBe('Untitled');
   });
+
+  it('returns Untitled when the title has only spaces', () => {
+    expect(getKiDisplayTitle('   ')).toBe('Untitled');
+  });
 });
 
 describe('getStatusesForFilter', () => {

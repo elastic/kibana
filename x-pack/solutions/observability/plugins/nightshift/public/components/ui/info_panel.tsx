@@ -35,7 +35,7 @@ export function InfoPanel({ title, headerRightContent, children }: InfoPanelProp
           font-weight: ${euiTheme.font.weight.semiBold};
         `}
       >
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={1}>{title}</EuiFlexItem>
           {headerRightContent && <EuiFlexItem grow={false}>{headerRightContent}</EuiFlexItem>}
         </EuiFlexGroup>

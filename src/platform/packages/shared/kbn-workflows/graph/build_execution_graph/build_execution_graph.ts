@@ -33,6 +33,7 @@ import type {
   WaitForInputStep,
   WaitStep,
   WhileStep,
+  WorkflowAwaitExecutionsStep,
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
   WorkflowFailStep,
@@ -249,6 +250,10 @@ function visitTypedAbstractStep(
     return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
   }
 
+  if (currentStep.type === 'workflow.awaitExecutions') {
+    return visitWorkflowAwaitExecutionsStep(currentStep as WorkflowAwaitExecutionsStep, context);
+  }
+
   if (currentStep.type === 'workflow.output') {
     return visitWorkflowOutputStep(currentStep, context);
   }
@@ -272,6 +277,7 @@ type LeafNodeType =
   | 'data.set'
   | 'workflow.execute'
   | 'workflow.executeAsync'
+  | 'workflow.awaitExecutions'
   | `elasticsearch.${string}`
   | `kibana.${string}`;
 
@@ -389,6 +395,13 @@ export function visitWorkflowExecuteAsyncStep(
   context: GraphBuildContext
 ): WorkflowGraphType {
   return createLeafStepGraph(currentStep, context, 'workflow.executeAsync');
+}
+
+export function visitWorkflowAwaitExecutionsStep(
+  currentStep: WorkflowAwaitExecutionsStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  return createLeafStepGraph(currentStep, context, 'workflow.awaitExecutions');
 }
 
 export function visitWorkflowOutputStep(
