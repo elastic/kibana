@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { errors } from '@elastic/elasticsearch';
 import { esql } from '@elastic/esql';
 import { getEsqlColumnSchema, type EsqlColumnSchema } from '@kbn/ai-tools';
 import { SOURCE_TIMESTAMP_FIELD, getTimestampColumnProblem } from '@kbn/nightshift-shared';
@@ -73,20 +74,31 @@ const probeColumns = async ({
   // Only the columns the caller reads: the full schema of a wide source can time out. No time
   // range here: a request-level range narrows the lookup to indices with data in the window,
   // while the sampling query's WHERE does not, so the two could disagree on a column's type.
-  const columns = await getEsqlColumnSchema({
-    esClient,
-    index,
-    fields: [SOURCE_TIMESTAMP_FIELD, ...new Set(fields)],
-    signal,
-  }).catch((error) => {
+  let columns: EsqlColumnSchema[] | undefined;
+  try {
+    columns = await getEsqlColumnSchema({
+      esClient,
+      index,
+      fields: [SOURCE_TIMESTAMP_FIELD, ...new Set(fields)],
+      signal,
+    });
+  } catch (error) {
     if (isIndexNotFoundError(error)) {
       throw error;
+    }
+    const reason = getVerificationReason(error);
+    // With the caller's fields in the probe the refusal can be about one of them, not the source:
+    // NULLIFY does not cover a metadata name such as `_id`.
+    if (reason !== undefined && fields.length === 0) {
+      return {
+        kind: 'unsupported',
+        problem: `Elasticsearch rejects the query behind [${index}]: ${reason}`,
+      };
     }
     // A probe that cannot answer must not take sampling down with it: the arms run as they did
     // before the probe existed, the entity arm without its filters.
     logger.warn(`Column probe failed, sampling without it: ${parseError(error).message}`);
-    return undefined;
-  });
+  }
 
   // Every arm filters on @timestamp. A narrowed probe drops unmapped columns, so a missing one
   // looks the same for a source with data but no @timestamp (saved before the source API
@@ -120,6 +132,17 @@ const probeColumns = async ({
   return problem
     ? { kind: 'unsupported', problem: `Cannot sample [${index}]: ${problem}` }
     : { kind: 'supported', columns: fullColumns };
+};
+
+const getVerificationReason = (error: unknown): string | undefined => {
+  if (
+    !(error instanceof errors.ResponseError) ||
+    error.body?.error?.type !== 'verification_exception'
+  ) {
+    return undefined;
+  }
+  const reason: unknown = error.body.error.reason;
+  return typeof reason === 'string' ? reason : error.message;
 };
 
 /** One cheap `LIMIT 1` count: tells a view with no data yet apart from one that has documents. */

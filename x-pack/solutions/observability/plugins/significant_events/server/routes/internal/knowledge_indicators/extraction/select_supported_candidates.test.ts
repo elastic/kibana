@@ -107,6 +107,25 @@ describe('selectSupportedCandidates', () => {
     ]);
   });
 
+  it('rejects a source whose query Elasticsearch refuses to plan', async () => {
+    mockColumnsByView({
+      'view-broken': makeResponseError(
+        400,
+        'verification_exception',
+        'Unknown column [gone_field]'
+      ),
+    });
+
+    const { toSchedule, unsupported } = await select(['broken'], 5);
+
+    expect(toSchedule).toEqual([]);
+    expect(unsupported).toEqual([
+      expect.objectContaining({
+        reason: 'Elasticsearch rejects the query behind [view-broken]: Unknown column [gone_field]',
+      }),
+    ]);
+  });
+
   it('keeps a source with no index yet', async () => {
     mockColumnsByView({ 'view-pending': [] });
 
