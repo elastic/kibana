@@ -13,6 +13,7 @@ import { AGENT_QUERYABLE_MAPPINGS } from '../../../common/constants';
 interface MappingProperty {
   type?: string;
   properties?: Record<string, MappingProperty>;
+  fields?: Record<string, MappingProperty>;
 }
 
 const SEARCHABLE_FIELD_TYPES: readonly string[] = ['keyword', 'text'];
@@ -25,11 +26,12 @@ const collectSearchableFields = (
   properties: Record<string, MappingProperty>,
   prefix = ''
 ): string[] =>
-  Object.entries(properties).flatMap(([name, { type, properties: children }]) => {
+  Object.entries(properties).flatMap(([name, { type, properties: children, fields }]) => {
     const path = `${prefix}${name}`;
     const self = type && SEARCHABLE_FIELD_TYPES.includes(type) ? [path] : [];
     const nested = children ? collectSearchableFields(children, `${path}.`) : [];
-    return [...self, ...nested];
+    const multiFields = fields ? collectSearchableFields(fields, `${path}.`) : [];
+    return [...self, ...nested, ...multiFields];
   });
 
 /** The fields a field-less (free text) agent kuery term is searched on. */

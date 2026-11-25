@@ -29,6 +29,18 @@ describe('AGENT_FREE_TEXT_SEARCH_FIELDS', () => {
     );
   });
 
+  it('includes the keyword multi-fields declared under `fields`', () => {
+    expect(AGENT_FREE_TEXT_SEARCH_FIELDS).toEqual(
+      expect.arrayContaining([
+        'upgrade_details.target_version',
+        'upgrade_details.target_version.keyword',
+        'upgrade_details.metadata.error_msg',
+        'upgrade_details.metadata.error_msg.keyword',
+        'upgrade_details.metadata.retry_error_msg.keyword',
+      ])
+    );
+  });
+
   it('does not include non-string fields', () => {
     expect(AGENT_FREE_TEXT_SEARCH_FIELDS).not.toEqual(
       expect.arrayContaining(['enrolled_at', 'active', 'policy_revision_idx'])
