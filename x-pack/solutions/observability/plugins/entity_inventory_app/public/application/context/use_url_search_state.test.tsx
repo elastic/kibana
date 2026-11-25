@@ -437,5 +437,29 @@ describe('useUrlSearchState', () => {
 
       expect(result.current[0].dateRange).toBe(before.dateRange);
     });
+
+    describe('that ages past the limit', () => {
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('is not used by a page opened after it aged', () => {
+        jest.useFakeTimers({ now: new Date('2026-11-25T10:00:00.000Z') });
+        // Within the last 3 days when it is set, and older than 3 days two and a half hours later.
+        const aging = { from: '2026-11-22T11:00:00.000Z', to: '2026-11-22T12:00:00.000Z' };
+        const { result, history } = renderUrlState(
+          '/kubernetes?_a=(dateRange:(from:now-2h,to:now))',
+          { defaultDateRange: aging }
+        );
+
+        jest.setSystemTime(new Date('2026-11-25T12:30:00.000Z'));
+        act(() => {
+          history.push('/hosts');
+        });
+
+        expect(result.current[0].dateRange).toEqual(DEFAULT_TIME_RANGE);
+        expect(readWrittenState(history)).toEqual(DEFAULT_STATE);
+      });
+    });
   });
 });

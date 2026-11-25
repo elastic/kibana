@@ -141,8 +141,16 @@ const getStateParam = (search: string) => {
 
 const hasStateParam = (search: string) => URL_SEARCH_STATE_KEY in qs.parse(search);
 
-const getStartState = (search: string, fallbackState: UrlSearchState): UrlSearchState =>
-  hasStateParam(search) ? DEFAULT_URL_SEARCH_STATE : fallbackState;
+const getStartState = (
+  search: string,
+  defaultDateRange: TimeRange | undefined,
+  maxDays: number
+): UrlSearchState =>
+  !hasStateParam(search) &&
+  defaultDateRange &&
+  checkTimeRange(defaultDateRange, maxDays) === 'valid'
+    ? { ...DEFAULT_URL_SEARCH_STATE, dateRange: defaultDateRange }
+    : DEFAULT_URL_SEARCH_STATE;
 
 const readUrlSearchState = (
   value: string | null | undefined,
@@ -181,14 +189,6 @@ export const useUrlSearchState = ({
     services: { uiSettings, notifications },
   } = useKibana();
 
-  const fallbackState = useMemo(
-    () =>
-      defaultDateRange && checkTimeRange(defaultDateRange, maxDays) === 'valid'
-        ? { ...DEFAULT_URL_SEARCH_STATE, dateRange: defaultDateRange }
-        : DEFAULT_URL_SEARCH_STATE,
-    [defaultDateRange, maxDays]
-  );
-
   const stateParam = getStateParam(search);
   const urlRead = useMemo(
     () => readUrlSearchState(stateParam, uiSettings, maxDays),
@@ -218,13 +218,14 @@ export const useUrlSearchState = ({
 
   const updateUrlSearchState = useStableCallback((patch: Partial<UrlSearchState>) =>
     writeSearchStateToUrl({
-      ...(readCurrent()?.state ?? getStartState(history.location.search, fallbackState)),
+      ...(readCurrent()?.state ??
+        getStartState(history.location.search, defaultDateRange, maxDays)),
       ...patch,
     })
   );
 
   const writeStartState = useStableCallback(() =>
-    writeSearchStateToUrl(getStartState(history.location.search, fallbackState))
+    writeSearchStateToUrl(getStartState(history.location.search, defaultDateRange, maxDays))
   );
 
   const repairUrl = useCallback(() => {
@@ -242,7 +243,9 @@ export const useUrlSearchState = ({
     repairUrl();
   }, [repairUrl]);
 
-  const state = useStableDateRange(urlRead?.state ?? getStartState(search, fallbackState));
+  const state = useStableDateRange(
+    urlRead?.state ?? getStartState(search, defaultDateRange, maxDays)
+  );
 
   return [state, updateUrlSearchState];
 };
