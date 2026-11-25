@@ -129,5 +129,25 @@ describe('createDashboardAppStateValidator', () => {
         } as DashboardAttachmentData)
       ).toEqual([{ path: ['title'], message: expect.any(String) }]);
     });
+
+    it('accepts the dashboard options the tool writes', () => {
+      expect(
+        createValidator().validateDashboardFields({
+          title: 'Dashboard',
+          panels: [],
+          options: { hide_panel_borders: true, sync_cursor: true },
+        })
+      ).toEqual([]);
+    });
+
+    it('reports an unknown options key, such as a typo, at its path', () => {
+      expect(
+        createValidator().validateDashboardFields({
+          title: 'Dashboard',
+          panels: [],
+          options: { hide_borders: true },
+        } as DashboardAttachmentData)
+      ).toEqual([{ path: ['options', 'hide_borders'], message: 'Unrecognized key' }]);
+    });
   });
 });
