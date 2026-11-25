@@ -65,5 +65,6 @@ const untitledLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.u
   defaultMessage: 'Untitled',
 });
 
+// A title of only spaces shows nothing, so it counts as no title.
 export const getKiDisplayTitle = (title?: string): string =>
-  title !== undefined && title.length > 0 ? title : untitledLabel;
+  title !== undefined && title.trim().length > 0 ? title : untitledLabel;

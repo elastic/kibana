@@ -6,7 +6,16 @@
  */
 
 import type { EuiEmptyPromptProps, IconType } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSkeletonCircle,
+  EuiSkeletonText,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { type ReactNode } from 'react';
 
 interface AiIndexDetailPanelEmptyStateProps {
@@ -48,3 +57,27 @@ export const AiIndexDetailPanelEmptyState = ({
     />
   );
 };
+
+// The centered prompt shrinks its content to fit, and the skeleton line has no content of its
+// own, so a box with a width keeps the line visible.
+const skeletonMessageStyle = css({ width: 240 });
+const skeletonIconStyle = css({ margin: '0 auto' });
+
+/** Loading version of the empty state: same layout and sizes, so the panel keeps its height. */
+export const AiIndexDetailPanelEmptyStateSkeleton = ({
+  dataTestSubj,
+}: {
+  dataTestSubj: string;
+}) => (
+  <EuiEmptyPrompt
+    paddingSize="none"
+    data-test-subj={dataTestSubj}
+    // `s` is 24px, the size of the `l` icon in the empty state.
+    icon={<EuiSkeletonCircle size="s" css={skeletonIconStyle} />}
+    body={
+      <div css={skeletonMessageStyle}>
+        <EuiSkeletonText lines={1} size="xs" />
+      </div>
+    }
+  />
+);

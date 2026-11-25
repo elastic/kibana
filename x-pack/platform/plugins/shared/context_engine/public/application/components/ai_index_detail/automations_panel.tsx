@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiPanel,
   EuiPopover,
-  EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
@@ -39,7 +38,10 @@ import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getVisibleAutomations, getVisibleWorkflowIds } from '../../utils/visible_automations';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
-import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
+import {
+  AiIndexDetailPanelEmptyState,
+  AiIndexDetailPanelEmptyStateSkeleton,
+} from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
 import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
@@ -266,7 +268,11 @@ export const AutomationsPanel = ({
         </>
       )}
       {isLoading || isLoadingSummaries ? (
-        <EuiSkeletonText lines={2} data-test-subj="contextAiIndexAutomationsLoading" />
+        <>
+          <EuiSpacer size="m" />
+          {/* Shaped like the empty state, so a new AI index keeps the panel height after loading. */}
+          <AiIndexDetailPanelEmptyStateSkeleton dataTestSubj="contextAiIndexAutomationsLoading" />
+        </>
       ) : (
         <>
           {!hasAutomations ? (

@@ -13,8 +13,6 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
-import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
-import { KI_NOT_DELETED_STATUSES } from '../../../common/ki_lifecycle_status';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
@@ -25,6 +23,7 @@ import {
   LearnMorePanel,
   ManageAutomationsLink,
   OverviewStatCards,
+  RECENT_KNOWLEDGE_DOCUMENTS_QUERY,
   RecentKnowledgeDocumentsPanel,
   SourcesPanel,
   SpendPanel,
@@ -136,11 +135,12 @@ export const AiIndexDetailPage = () => {
     isPreviousData: isKiSummaryPreviousData,
     error: kiSummaryError,
   } = useListKi({
-    aiIndexId: aiIndex?.id,
-    size: KI_SUMMARY_PAGE_SIZE,
-    status: KI_NOT_DELETED_STATUSES,
-    enabled: aiIndex !== undefined,
-    notifyOnError: true,
+    // The URL id, so the summary loads in parallel with the AI index instead of after it.
+    aiIndexId: id,
+    // Same request as the Recent documents panel, so the Overview sends it only once.
+    ...RECENT_KNOWLEDGE_DOCUMENTS_QUERY,
+    // No toast for an AI index that does not exist: the page shows that error.
+    notifyOnError: aiIndex !== undefined,
   });
 
   // `useListKi` keeps the previous AI index's response while this one loads.
@@ -223,6 +223,8 @@ export const AiIndexDetailPage = () => {
     return { primaryActionItem };
   }, [aiIndex, discoverHref, isKnowledgeIndicatorsTab]);
 
+  // No count before the AI index loads: 0 would claim the AI index has no sources.
+  const sourcesTabBadge = aiIndex ? sources.length : undefined;
   const headerTabs = useMemo<AppHeaderTab[] | undefined>(() => {
     if (error) {
       return undefined;
@@ -243,7 +245,7 @@ export const AiIndexDetailPage = () => {
         label: sourcesTabLabel,
         isSelected: isSourcesTab,
         onClick: () => navigateToContextEngine(getAiIndexSourcesPath(resolvedAiIndexId)),
-        badge: sources.length,
+        badge: sourcesTabBadge,
         'data-test-subj': 'contextAiIndexDetailTab-sources',
       },
     ];
@@ -277,7 +279,7 @@ export const AiIndexDetailPage = () => {
     navigateToContextEngine,
     resolvedAiIndexId,
     showKnowledgeIndicatorsTabInHeader,
-    sources.length,
+    sourcesTabBadge,
     summary.total,
   ]);
 
@@ -297,13 +299,6 @@ export const AiIndexDetailPage = () => {
           onDismiss={() => setShowCreatedCallout(false)}
           showMemory={isMemoryEnabled}
         />
-      )}
-      {aiIndex && !isManaged && <FailedAutomationRunsCallout workflowIds={visibleWorkflowIds} />}
-      {showOnboardingPanel && (
-        <>
-          <ConnectAgentPanel prompt={onboardingPrompt} />
-          <EuiSpacer size="l" />
-        </>
       )}
       {/* Sections render with skeletons right away, so nothing is pushed down while they load. */}
       <OverviewStatCards
@@ -326,14 +321,20 @@ export const AiIndexDetailPage = () => {
             isMemoryEnabled={isMemoryEnabled}
           />
         </EuiFlexItem>
-        {/* Most AI indices have documents, so the chart stays until the summary says there are none. */}
-        {(!hasLoadedKiSummary || hasKnowledgeIndicators) && (
-          <EuiFlexItem css={shrinkableFlexItemStyle}>
-            <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem css={shrinkableFlexItemStyle}>
+          <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
+      {/* Below the sections that are always there, so it does not push them down when it shows. */}
+      {showOnboardingPanel && (
+        <>
+          <ConnectAgentPanel prompt={onboardingPrompt} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {/* Next to the automations it is about, and below the sections that are always there. */}
+      {aiIndex && !isManaged && <FailedAutomationRunsCallout workflowIds={visibleWorkflowIds} />}
       <AutomationsSection
         isLoading={isLoading}
         aiIndex={aiIndex}

@@ -6,6 +6,7 @@
  */
 
 import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +18,15 @@ import { useKibana } from '../../hooks/use_kibana';
 import { hasReadableWorkflow, useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_path';
 import { goToAutomations } from './automations_panel_id';
+
+// The small callout shows its text inline after the title, so CSS cannot clamp it to lines.
+// About 2 lines at the callout's maximum width.
+const MAX_MESSAGE_LENGTH = 200;
+// A long word without spaces (a URL, a stack frame) must wrap instead of leaving the callout.
+const messageStyle = css({ overflowWrap: 'anywhere' });
+
+const shortenMessage = (message: string): string =>
+  message.length > MAX_MESSAGE_LENGTH ? `${message.slice(0, MAX_MESSAGE_LENGTH - 1)}…` : message;
 
 interface FailedAutomationRunsCalloutProps {
   workflowIds: string[];
@@ -44,6 +54,48 @@ export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRun
   const runHref = application.getUrlForApp(WORKFLOWS_APP_ID, {
     path: getWorkflowExecutionPath(workflowId, execution.id),
   });
+  const message = errorMessage
+    ? i18n.translate('xpack.contextEngine.aiIndexDetail.overview.failedRuns.messageWithError', {
+        defaultMessage: '{name}: {error}',
+        values: { name, error: errorMessage },
+      })
+    : name;
+
+  // Several failed runs: one error would not describe them all, so the link to the list is enough.
+  const text =
+    failedRuns.length > 1 ? (
+      <p>
+        <EuiLink
+          onClick={goToAutomations}
+          data-test-subj="contextOverviewFailedRunsViewAutomationsLink"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
+            action: CONTEXT_ENGINE_UI_EBT.action.overview.VIEW_FAILED_AUTOMATIONS,
+          })}
+        >
+          {i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.overview.failedRuns.viewAutomationsLink',
+            { defaultMessage: 'View automations' }
+          )}
+        </EuiLink>
+      </p>
+    ) : (
+      <p data-test-subj="contextOverviewFailedRunsMessage" title={message} css={messageStyle}>
+        {shortenMessage(message)}{' '}
+        <EuiLink
+          href={runHref}
+          data-test-subj="contextOverviewFailedRunsViewRunLink"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
+            action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_FAILED_RUN,
+          })}
+        >
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.overview.failedRuns.viewRunLink', {
+            defaultMessage: 'View run',
+          })}
+        </EuiLink>
+      </p>
+    );
 
   return (
     <>
@@ -56,48 +108,7 @@ export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRun
             '{count, plural, one {# automation run failed.} other {# automation runs failed.}}',
           values: { count: failedRuns.length },
         })}
-        text={
-          <p data-test-subj="contextOverviewFailedRunsMessage">
-            {errorMessage
-              ? i18n.translate(
-                  'xpack.contextEngine.aiIndexDetail.overview.failedRuns.messageWithError',
-                  {
-                    defaultMessage: '{name}: {error}',
-                    values: { name, error: errorMessage },
-                  }
-                )
-              : name}{' '}
-            {failedRuns.length > 1 ? (
-              <EuiLink
-                onClick={goToAutomations}
-                data-test-subj="contextOverviewFailedRunsViewAutomationsLink"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
-                  action: CONTEXT_ENGINE_UI_EBT.action.overview.VIEW_FAILED_AUTOMATIONS,
-                })}
-              >
-                {i18n.translate(
-                  'xpack.contextEngine.aiIndexDetail.overview.failedRuns.viewAutomationsLink',
-                  { defaultMessage: 'View automations' }
-                )}
-              </EuiLink>
-            ) : (
-              <EuiLink
-                href={runHref}
-                data-test-subj="contextOverviewFailedRunsViewRunLink"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,
-                  action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_FAILED_RUN,
-                })}
-              >
-                {i18n.translate(
-                  'xpack.contextEngine.aiIndexDetail.overview.failedRuns.viewRunLink',
-                  { defaultMessage: 'View run' }
-                )}
-              </EuiLink>
-            )}
-          </p>
-        }
+        text={text}
       />
       <EuiSpacer size="l" />
     </>

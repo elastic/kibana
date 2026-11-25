@@ -32,9 +32,24 @@ import { getAiIndexKnowledgeDocumentsPath, getKnowledgeDocumentLocation } from '
 import { getKiDisplayTitle } from '../ki/list/list_ki_helpers';
 import { KiFormattedDate } from '../ki/shared/ki_formatted_date';
 import { KiTypeDisplay } from '../ki/shared/ki_type_display';
-import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import { OverviewPanelEmptyState } from './overview_panel_empty_state';
+
+// A column, so the empty state can sit at the bottom of the panel, level with the chart's.
+const panelStyle = css({ display: 'flex', flexDirection: 'column' });
+// Flex groups grow by default, which would push the title down in the column panel.
+const headerStyle = css({ flexGrow: 0 });
 
 export const RECENT_KNOWLEDGE_DOCUMENTS_SIZE = 5;
+
+/**
+ * Request for the newest documents. The Overview page asks with the same values for its counts,
+ * so both share one request: the response has the counts whatever the size.
+ */
+export const RECENT_KNOWLEDGE_DOCUMENTS_QUERY = {
+  size: RECENT_KNOWLEDGE_DOCUMENTS_SIZE,
+  status: KI_NOT_DELETED_STATUSES,
+  sort: 'updated',
+} as const;
 
 const badgeItemCss = css({ minWidth: 0, maxWidth: '40%' });
 
@@ -134,12 +149,7 @@ export const RecentKnowledgeDocumentsPanel = ({
   isMemoryEnabled,
 }: RecentKnowledgeDocumentsPanelProps) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
-  const { kis, isLoading, error } = useListKi({
-    aiIndexId,
-    size: RECENT_KNOWLEDGE_DOCUMENTS_SIZE,
-    status: KI_NOT_DELETED_STATUSES,
-    sort: 'updated',
-  });
+  const { kis, isLoading, error } = useListKi({ aiIndexId, ...RECENT_KNOWLEDGE_DOCUMENTS_QUERY });
   const knowledgeDocumentsPath = getAiIndexKnowledgeDocumentsPath(aiIndexId);
   const viewAllLinkProps = getRouterLinkProps({
     href: createContextEngineUrl(knowledgeDocumentsPath),
@@ -158,18 +168,23 @@ export const RecentKnowledgeDocumentsPanel = ({
     }
     if (error && !hasDocuments) {
       return (
-        <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsError">
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.overview.recentDocuments.loadError', {
-            defaultMessage: 'Unable to load recent knowledge documents.',
-          })}
-        </AiIndexDetailPanelDescription>
+        <OverviewPanelEmptyState
+          iconType="warning"
+          dataTestSubj="contextOverviewRecentDocumentsError"
+          message={i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.loadError',
+            { defaultMessage: 'Unable to load recent knowledge documents.' }
+          )}
+        />
       );
     }
     if (!hasDocuments) {
       return (
-        <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsEmpty">
-          {getEmptyText({ isManaged, isMemoryEnabled })}
-        </AiIndexDetailPanelDescription>
+        <OverviewPanelEmptyState
+          iconType="document"
+          dataTestSubj="contextOverviewRecentDocumentsEmpty"
+          message={getEmptyText({ isManaged, isMemoryEnabled })}
+        />
       );
     }
     return (
@@ -198,8 +213,13 @@ export const RecentKnowledgeDocumentsPanel = ({
   };
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextOverviewRecentDocuments">
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+    <EuiPanel
+      hasBorder
+      paddingSize="l"
+      css={panelStyle}
+      data-test-subj="contextOverviewRecentDocuments"
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} css={headerStyle}>
         <EuiFlexItem>
           <EuiTitle size="s">
             <h2>

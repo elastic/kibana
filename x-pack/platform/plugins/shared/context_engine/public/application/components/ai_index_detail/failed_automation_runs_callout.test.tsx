@@ -109,7 +109,7 @@ describe('FailedAutomationRunsCallout', () => {
     );
   });
 
-  it('counts every failed run and describes the first one', () => {
+  it('counts every failed run and shows no single error when several runs failed', () => {
     mockUseFailedAutomationRuns.mockReturnValue([
       failedRun('wf-2', 'Timed out'),
       failedRun('wf-1', 'connect ECONNREFUSED'),
@@ -118,11 +118,21 @@ describe('FailedAutomationRunsCallout', () => {
     renderCallout();
 
     expect(screen.getByTestId('contextOverviewFailedRunsCallout')).toHaveTextContent(
-      '2 automation runs failed.'
+      /^2 automation runs failed\.View automations$/
     );
-    expect(screen.getByTestId('contextOverviewFailedRunsMessage')).toHaveTextContent(
-      'wf-2: Timed out'
-    );
+    expect(screen.queryByTestId('contextOverviewFailedRunsMessage')).not.toBeInTheDocument();
+  });
+
+  it('cuts a long error and keeps the full text on hover', () => {
+    const longError = 'x'.repeat(500);
+    mockUseFailedAutomationRuns.mockReturnValue([failedRun('wf-1', longError)]);
+
+    renderCallout();
+
+    const message = screen.getByTestId('contextOverviewFailedRunsMessage');
+    expect(message).toHaveAttribute('title', `Sync runbooks: ${longError}`);
+    expect(message.textContent).toMatch(/^Sync runbooks: x+… View run$/);
+    expect(message.textContent?.length).toBeLessThan(250);
   });
 
   it('links to the automations list instead of one run when several runs failed', () => {

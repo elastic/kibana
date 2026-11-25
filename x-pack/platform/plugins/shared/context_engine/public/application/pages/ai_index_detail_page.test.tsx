@@ -37,6 +37,7 @@ import {
 } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
+import { RECENT_KNOWLEDGE_DOCUMENTS_QUERY } from '../components/ai_index_detail';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 
@@ -743,7 +744,24 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextOverviewStatCardValue-automations')).toHaveTextContent('1');
   });
 
-  it('gives the empty recent documents panel the full row when there are no documents', async () => {
+  it('asks for the counts with the same request as Recent documents, so it is sent once', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    // `notifyOnError` only picks who shows the error toast, it is not part of the request.
+    const requests = mockUseListKi.mock.calls.map(([args]) => ({
+      ...args,
+      notifyOnError: undefined,
+    }));
+    expect(requests).toContainEqual({ aiIndexId: aiIndex.id, ...RECENT_KNOWLEDGE_DOCUMENTS_QUERY });
+    expect(new Set(requests.map((request) => JSON.stringify(request))).size).toBe(1);
+  });
+
+  it('keeps the chart next to the empty recent documents panel when there are no documents', async () => {
     mockUseListKi.mockImplementation(() => ({
       ...defaultListKiMock,
       total: 0,
@@ -757,7 +775,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextOverviewRecentDocumentsEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextOverviewDocumentsChart')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
   });
 
   it('shows no knowledge documents count when the summary request fails', async () => {
@@ -814,7 +832,6 @@ describe('AiIndexDetailPage', () => {
     expect(
       screen.queryByTestId('contextOverviewStatCardValue-knowledgeDocuments')
     ).not.toBeInTheDocument();
-    // The chart stays until the summary for this AI index says there are no documents.
     expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
     expect(screen.queryByTestId('contextOnboardingConnectAgentPanel')).not.toBeInTheDocument();
     expect(
@@ -841,12 +858,18 @@ describe('AiIndexDetailPage', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('contextOverviewRecentDocuments')).toBeInTheDocument();
     expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-sources')).toHaveTextContent(/^Sources$/);
+    // The summary does not wait for the AI index, and stays quiet about errors until it exists.
+    expect(mockUseListKi).toHaveBeenCalledWith(
+      expect.objectContaining({ aiIndexId: aiIndex.id, notifyOnError: false })
+    );
 
     resolveAiIndexGet(aiIndex);
 
     expect(await screen.findByTestId('contextOverviewStatCardValue-sources')).toHaveTextContent(
       '1'
     );
+    expect(screen.getByTestId('contextAiIndexDetailTab-sources')).toHaveTextContent('Sources1');
   });
 
   it('shows the Manage in Settings link only once the AI index is known to be editable', async () => {
