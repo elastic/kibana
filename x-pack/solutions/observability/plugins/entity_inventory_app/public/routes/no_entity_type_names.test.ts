@@ -10,9 +10,10 @@ import { join, relative } from 'path';
 
 const PUBLIC_DIR = join(__dirname, '..');
 
-// `routes/config.tsx` holds the page-to-type map until entity definitions carry a category.
-// `mock_inventory_api/` is the filters' stand-in for the routes until the filters read the routes.
-const ALLOWED_FILES: readonly string[] = ['routes/config.tsx'];
+// The page-to-type map lives here until entity definitions carry a category.
+const CATEGORIES_FILE = 'application/utils/entity_categories.ts';
+const ALLOWED_FILES: readonly string[] = [CATEGORIES_FILE];
+// `mock_inventory_api/` is the filters' stand-in for the values route until the filters read it.
 const ALLOWED_DIRECTORIES: readonly string[] = ['mock_inventory_api', '__fixtures__'];
 const TEST_ONLY_FILE = /(\.test\.tsx?$)|(^mocks\.tsx$)/;
 const TYPE_NAME_LITERAL = /(['"`])(host|k8s\.deployment)\1/;
@@ -41,10 +42,10 @@ describe('entity type names in the app', () => {
   });
 
   it('finds the page-to-type map, so the scan reads the sources', () => {
-    expect(listProductionFiles(PUBLIC_DIR)).toContain('routes/config.tsx');
-    expect(
-      TYPE_NAME_LITERAL.test(readFileSync(join(PUBLIC_DIR, 'routes/config.tsx'), 'utf8'))
-    ).toBe(true);
+    expect(listProductionFiles(PUBLIC_DIR)).toContain(CATEGORIES_FILE);
+    expect(TYPE_NAME_LITERAL.test(readFileSync(join(PUBLIC_DIR, CATEGORIES_FILE), 'utf8'))).toBe(
+      true
+    );
   });
 });
 
@@ -72,6 +73,6 @@ describe('test-only modules in the app', () => {
     expect(TEST_ONLY_IMPORT.test(`from '../../mocks';`)).toBe(true);
     expect(TEST_ONLY_IMPORT.test(`from './mocks';`)).toBe(true);
     expect(TEST_ONLY_IMPORT.test(`from '@kbn/core/public/mocks';`)).toBe(false);
-    expect(listNonTestFiles(PUBLIC_DIR)).toContain('mock_inventory_api/get_types.ts');
+    expect(listNonTestFiles(PUBLIC_DIR)).toContain(CATEGORIES_FILE);
   });
 });
