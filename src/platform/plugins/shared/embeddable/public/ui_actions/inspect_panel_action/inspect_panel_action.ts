@@ -52,14 +52,15 @@ export class InspectPanelAction
     return inspector.isAvailable(embeddable.getInspectorAdapters());
   }
 
-  /** Re-checks compatibility the first time the panel has rendered. */
+  /** Re-checks compatibility the first time the panel has rendered or errored. */
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     return isApiCompatible(embeddable) && apiPublishesPhaseEvents(embeddable)
       ? embeddable.phase$.pipe(
           // TODO: the render phase is only a proxy for "the adapters may have changed". Replace it
           // by making `getInspectorAdapters` an observable (e.g. `inspectorAdapters$` on
           // `HasInspectorAdapters`) and re-check when that emits.
-          filter((phase) => phase?.status === 'rendered'),
+          // An errored panel never renders, but its request may still be inspected.
+          filter((phase) => phase?.status === 'rendered' || phase?.status === 'error'),
           take(1),
           map(() => undefined)
         )
