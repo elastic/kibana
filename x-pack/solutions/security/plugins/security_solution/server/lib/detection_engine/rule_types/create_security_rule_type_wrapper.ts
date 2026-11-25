@@ -19,11 +19,13 @@ import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { gapReasonType } from '@kbn/alerting-plugin/common';
 import {
   getExceptions,
   getRuleRangeTuples,
-  getUncoveredGapRange,
+  getUncoveredGap,
+  didSearchComplete,
+  hasOnlyUserErrors,
+  parseInterval,
   isMachineLearningParams,
   isEsqlParams,
   getDisabledActionsWarningText,
@@ -374,8 +376,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ruleExecutionLogger.warn(gapWarningMessage);
           }
 
-          // Tuples whose search completed. Any other tuple was not actually covered by this run,
-          // either because its search failed or because the run threw before reaching it.
+          // Tuples that need no gap: their search completed, or it failed for a user error (an
+          // invalid query, a missing index or field) that would fail identically on every gap
+          // fill attempt. Any other tuple was not actually covered by this run, either because
+          // its search failed or because the run threw before reaching it.
           const coveredTuples = new Set<RuleRangeTuple>();
 
           try {
@@ -474,7 +478,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 );
                 runResult.warningMessages.forEach((message) => ruleExecutionLogger.warn(message));
 
-                if (runResult.success) {
+                if (didSearchComplete(runResult) || hasOnlyUserErrors(runResult)) {
                   coveredTuples.add(tuple);
                 }
 
@@ -561,25 +565,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           } finally {
             try {
-              // The anchor still advances for this run, so record the windows it did not cover as
-              // a gap (merged with the drift gap detected above) to keep them visible and fillable.
+              // The anchor still advances for this run, so record the execution slices it did not
+              // cover as a gap (merged with the drift gap detected above, unless that gap is
+              // attributed to the rule having been disabled) to keep them visible and fillable.
               const uncoveredTuples = skipExecution
                 ? []
                 : tuples.filter((tuple) => !coveredTuples.has(tuple));
               if (uncoveredTuples.length > 0) {
-                const uncoveredGap = getUncoveredGapRange({ driftGap: gap, uncoveredTuples });
+                const uncoveredGap = getUncoveredGap({
+                  driftGap: gap,
+                  driftGapReason: detectedGapReason,
+                  uncoveredTuples,
+                  intervalDuration: parseInterval(interval),
+                });
                 if (uncoveredGap) {
+                  const { range, reason } = uncoveredGap;
                   ruleExecutionLogger.logMetrics({
                     gap_duration_s: Math.round(
-                      (Date.parse(uncoveredGap.lte) - Date.parse(uncoveredGap.gte)) / 1000
+                      (Date.parse(range.lte) - Date.parse(range.gte)) / 1000
                     ),
-                    gap_range: uncoveredGap,
-                    // Keep the reason detected for the drift gap (it can be `rule_disabled`, which
-                    // auto fill excludes by default) and only fall back to `rule_did_not_run` when
-                    // the uncovered window comes solely from this run's failed tuples.
-                    gap_reason: experimentalFeatures.gapReasonDetectionEnabled
-                      ? gapReason ?? { type: gapReasonType.RULE_DID_NOT_RUN }
-                      : undefined,
+                    gap_range: range,
+                    gap_reason: experimentalFeatures.gapReasonDetectionEnabled ? reason : undefined,
                   });
                 }
               }

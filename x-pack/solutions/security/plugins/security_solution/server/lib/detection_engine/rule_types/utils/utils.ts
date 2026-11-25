@@ -39,6 +39,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { SanitizedRuleAction, GapReason } from '@kbn/alerting-plugin/common';
 import { gapReasonType } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import { checkErrorDetails } from './check_error_details';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import type {
@@ -481,41 +482,65 @@ export interface GapRange {
   lte: string;
 }
 
+export interface UncoveredGap {
+  range: GapRange;
+  reason: GapReason | undefined;
+}
+
 /**
- * Builds the gap range to record for this execution.
+ * Builds the gap to record for this execution.
  *
  * The catch-up anchor (`previousStartedAt`) advances whenever a run completes, even when the
- * search for one of its range tuples failed (shard, cluster block, verification or cache errors),
- * so the window of such a tuple would otherwise be silently skipped. This merges the drift gap
- * detected between runs with the windows of the tuples that were not actually covered into a
- * single range, so that the missed time is visible as a gap and recoverable through gap fill.
+ * search for one of its range tuples failed (shard, cluster block or cache errors), so the
+ * window of such a tuple would otherwise be silently skipped. Each uncovered tuple contributes
+ * the execution slice it was scheduled for, `[tuple.to - interval, tuple.to]`, rather than its
+ * full query window: gap fill schedules one run per interval from the start of the gap, so a
+ * gap aligned to the execution boundary is replayed with the original query window (`to` minus
+ * the look-back), which keeps threshold and sequence matches that straddle the look-back intact.
  *
- * The range tuples are consecutive intervals adjacent to the drift gap, so a single bounding
- * range is used. When only non-adjacent tuples fail, the range also spans the tuples between
- * them, which over-reports rather than under-reports the missed time.
+ * The framework records a single gap per run, so the uncovered slices are merged with the drift
+ * gap detected between runs into one bounding range. Range tuples are consecutive intervals
+ * adjacent to the drift gap, so the bounding range only over-reports when non-adjacent catch-up
+ * tuples fail. A `rule_disabled` drift gap is the exception: auto fill excludes that reason by
+ * default because the operator chose to stop the rule, while a failed search is data loss that
+ * should be recoverable, so the failed slices are recorded on their own as `rule_did_not_run`
+ * and the disabled period is left out of this run's gap.
  */
-export const getUncoveredGapRange = ({
+export const getUncoveredGap = ({
   driftGap,
+  driftGapReason,
   uncoveredTuples,
+  intervalDuration,
 }: {
   driftGap: GapRange | undefined;
+  driftGapReason: GapReason | undefined;
   uncoveredTuples: RuleRangeTuple[];
-}): GapRange | undefined => {
+  intervalDuration: moment.Duration | null;
+}): UncoveredGap | undefined => {
   if (uncoveredTuples.length === 0) {
-    return driftGap;
+    return driftGap ? { range: driftGap, reason: driftGapReason } : undefined;
   }
 
   const ranges: GapRange[] = uncoveredTuples.map((tuple) => ({
-    gte: tuple.from.toISOString(),
+    gte: (intervalDuration != null && intervalDuration.asMilliseconds() > 0
+      ? moment.max(tuple.from, tuple.to.clone().subtract(intervalDuration))
+      : tuple.from
+    ).toISOString(),
     lte: tuple.to.toISOString(),
   }));
-  if (driftGap != null) {
+  const excludeDriftGap = driftGapReason?.type === gapReasonType.RULE_DISABLED;
+  if (driftGap != null && !excludeDriftGap) {
     ranges.push(driftGap);
   }
 
   return {
-    gte: new Date(Math.min(...ranges.map((range) => Date.parse(range.gte)))).toISOString(),
-    lte: new Date(Math.max(...ranges.map((range) => Date.parse(range.lte)))).toISOString(),
+    range: {
+      gte: new Date(Math.min(...ranges.map((range) => Date.parse(range.gte)))).toISOString(),
+      lte: new Date(Math.max(...ranges.map((range) => Date.parse(range.lte)))).toISOString(),
+    },
+    reason: excludeDriftGap
+      ? { type: gapReasonType.RULE_DID_NOT_RUN }
+      : driftGapReason ?? { type: gapReasonType.RULE_DID_NOT_RUN },
   };
 };
 
@@ -768,6 +793,9 @@ export const addToSearchAfterReturn = ({
   current.bulkCreateTimes.push(next.bulkCreateDuration);
   current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
+  if (next.errors.length > 0) {
+    current.alertWriteErrors = [...new Set([...(current.alertWriteErrors ?? []), ...next.errors])];
+  }
   if (next.suppressedItemsCount != null) {
     current.suppressedAlertsCount =
       (current.suppressedAlertsCount ?? 0) + next.suppressedItemsCount;
@@ -788,6 +816,7 @@ export const mergeReturns = (
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
+      alertWriteErrors: existingAlertWriteErrors,
       warningMessages: existingWarningMessages,
       suppressedAlertsCount: existingSuppressedAlertsCount,
       totalEventsFound: existingTotalEventsFound,
@@ -803,6 +832,7 @@ export const mergeReturns = (
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
+      alertWriteErrors: newAlertWriteErrors,
       warningMessages: newWarningMessages,
       suppressedAlertsCount: newSuppressedAlertsCount,
       totalEventsFound: newTotalEventsFound,
@@ -818,11 +848,53 @@ export const mergeReturns = (
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
+      ...(existingAlertWriteErrors != null || newAlertWriteErrors != null
+        ? {
+            alertWriteErrors: [
+              ...new Set([...(existingAlertWriteErrors ?? []), ...(newAlertWriteErrors ?? [])]),
+            ],
+          }
+        : {}),
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
       suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
       totalEventsFound: (existingTotalEventsFound ?? 0) + (newTotalEventsFound ?? 0),
     };
   });
+};
+
+/**
+ * Whether every failure of a range tuple is a user (configuration) error: an invalid query, a
+ * missing index or field, insufficient privileges. Such a search fails identically on every run
+ * and on every gap fill attempt, so recording a gap for it only adds noise and backfill churn.
+ */
+export const hasOnlyUserErrors = (result: SearchAfterAndBulkCreateReturnType): boolean => {
+  if (result.userError) {
+    return true;
+  }
+  const alertWriteErrors = new Set(result.alertWriteErrors ?? []);
+  const searchErrors = result.errors.filter((error) => !alertWriteErrors.has(error));
+  return (
+    searchErrors.length > 0 && searchErrors.every((error) => checkErrorDetails(error).isUserError)
+  );
+};
+
+/**
+ * Whether the search for a range tuple completed, i.e. every search request for the window
+ * returned without an error or a failed shard. A tuple whose search completed but whose alerts
+ * could not all be written was still covered: the events were found, and replaying the window
+ * (for suppression rules in particular, which regroup events without the original run's
+ * suppression state) could create duplicate alerts.
+ */
+export const didSearchComplete = (result: SearchAfterAndBulkCreateReturnType): boolean => {
+  const alertWriteErrors = new Set(result.alertWriteErrors ?? []);
+  const searchErrors = result.errors.filter((error) => !alertWriteErrors.has(error));
+  if (searchErrors.length > 0) {
+    return false;
+  }
+  // `success` is also false when only alert writes failed; any other failure (an exception thrown
+  // while searching, or a rule type that reported failure without an error message) means the
+  // window was not fully searched.
+  return result.success || alertWriteErrors.size > 0;
 };
 
 export const getTotalHitsValue = (totalHits: number | { value: number } | undefined): number =>

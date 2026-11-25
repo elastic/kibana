@@ -29,7 +29,9 @@ import {
   getGapReason,
   getNumCatchupIntervals,
   getRuleRangeTuples,
-  getUncoveredGapRange,
+  getUncoveredGap,
+  didSearchComplete,
+  hasOnlyUserErrors,
   getExceptions,
   hasTimestampFields,
   createErrorsFromShard,
@@ -331,39 +333,196 @@ describe('utils', () => {
     });
   });
 
-  describe('getUncoveredGapRange', () => {
+  describe('getUncoveredGap', () => {
     const tuple = (from: string, to: string) => ({
       from: moment(from),
       to: moment(to),
       maxSignals: 100,
     });
+    const fiveMinutes = moment.duration(5, 'minutes');
+    const didNotRun = { type: gapReasonType.RULE_DID_NOT_RUN };
 
-    test('returns the drift gap unchanged when every tuple was covered', () => {
+    test('returns the drift gap and its reason unchanged when every tuple was covered', () => {
       const driftGap = { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:10:00.000Z' };
 
-      expect(getUncoveredGapRange({ driftGap, uncoveredTuples: [] })).toEqual(driftGap);
-      expect(getUncoveredGapRange({ driftGap: undefined, uncoveredTuples: [] })).toEqual(undefined);
+      expect(
+        getUncoveredGap({
+          driftGap,
+          driftGapReason: didNotRun,
+          uncoveredTuples: [],
+          intervalDuration: fiveMinutes,
+        })
+      ).toEqual({ range: driftGap, reason: didNotRun });
+      expect(
+        getUncoveredGap({
+          driftGap: undefined,
+          driftGapReason: undefined,
+          uncoveredTuples: [],
+          intervalDuration: fiveMinutes,
+        })
+      ).toEqual(undefined);
     });
 
-    test('returns the window of a tuple whose search failed when there is no drift gap', () => {
+    test('records the execution slice of a failed tuple, not its full query window', () => {
+      // A 5-minute rule querying a 6-minute window: the slice this run was scheduled for ends at
+      // the tuple's `to` and is one interval long, so gap fill replays it with the original window.
       expect(
-        getUncoveredGapRange({
+        getUncoveredGap({
           driftGap: undefined,
+          driftGapReason: undefined,
           uncoveredTuples: [tuple('2024-01-01T00:10:00.000Z', '2024-01-01T00:16:00.000Z')],
+          intervalDuration: fiveMinutes,
         })
+      ).toEqual({
+        range: { gte: '2024-01-01T00:11:00.000Z', lte: '2024-01-01T00:16:00.000Z' },
+        reason: didNotRun,
+      });
+    });
+
+    test('never records more than the query window when the interval exceeds the look-back', () => {
+      expect(
+        getUncoveredGap({
+          driftGap: undefined,
+          driftGapReason: undefined,
+          uncoveredTuples: [tuple('2024-01-01T00:10:00.000Z', '2024-01-01T00:16:00.000Z')],
+          intervalDuration: moment.duration(30, 'minutes'),
+        })?.range
+      ).toEqual({ gte: '2024-01-01T00:10:00.000Z', lte: '2024-01-01T00:16:00.000Z' });
+      expect(
+        getUncoveredGap({
+          driftGap: undefined,
+          driftGapReason: undefined,
+          uncoveredTuples: [tuple('2024-01-01T00:10:00.000Z', '2024-01-01T00:16:00.000Z')],
+          intervalDuration: null,
+        })?.range
       ).toEqual({ gte: '2024-01-01T00:10:00.000Z', lte: '2024-01-01T00:16:00.000Z' });
     });
 
-    test('merges the drift gap with the windows of the tuples that were not covered', () => {
+    test('merges the drift gap with the slices of the tuples that were not covered', () => {
       expect(
-        getUncoveredGapRange({
+        getUncoveredGap({
           driftGap: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:10:00.000Z' },
+          driftGapReason: didNotRun,
           uncoveredTuples: [
             tuple('2024-01-01T00:10:00.000Z', '2024-01-01T00:16:00.000Z'),
             tuple('2024-01-01T00:15:00.000Z', '2024-01-01T00:21:00.000Z'),
           ],
+          intervalDuration: fiveMinutes,
         })
-      ).toEqual({ gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:21:00.000Z' });
+      ).toEqual({
+        range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:21:00.000Z' },
+        reason: didNotRun,
+      });
+    });
+
+    test('records failed slices on their own as `rule_did_not_run` when the drift gap is `rule_disabled`', () => {
+      expect(
+        getUncoveredGap({
+          driftGap: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:10:00.000Z' },
+          driftGapReason: { type: gapReasonType.RULE_DISABLED },
+          uncoveredTuples: [tuple('2024-01-01T00:10:00.000Z', '2024-01-01T00:16:00.000Z')],
+          intervalDuration: fiveMinutes,
+        })
+      ).toEqual({
+        range: { gte: '2024-01-01T00:11:00.000Z', lte: '2024-01-01T00:16:00.000Z' },
+        reason: didNotRun,
+      });
+    });
+  });
+
+  describe('didSearchComplete', () => {
+    test('is true for a successful result', () => {
+      expect(didSearchComplete(createSearchAfterReturnType())).toEqual(true);
+    });
+
+    test('is false when the search threw', () => {
+      expect(
+        didSearchComplete(
+          createSearchAfterReturnType({ success: false, errors: ['cluster_block_exception'] })
+        )
+      ).toEqual(false);
+    });
+
+    test('is false when a shard failed even though the result reports success', () => {
+      // Suppression rules can take the aggregations of the healthy shards and still report
+      // success, with the shard failure only listed among the errors.
+      expect(
+        didSearchComplete(
+          createSearchAfterReturnType({ success: true, errors: ['reason: "shard failure"'] })
+        )
+      ).toEqual(false);
+    });
+
+    test('is true when the search completed and only the alert writes failed', () => {
+      expect(
+        didSearchComplete({
+          ...createSearchAfterReturnType({ success: false, errors: ['queue full'] }),
+          alertWriteErrors: ['queue full'],
+        })
+      ).toEqual(true);
+    });
+
+    test('is false when both a shard failed and the alert writes failed', () => {
+      expect(
+        didSearchComplete({
+          ...createSearchAfterReturnType({
+            success: false,
+            errors: ['reason: "shard failure"', 'queue full'],
+          }),
+          alertWriteErrors: ['queue full'],
+        })
+      ).toEqual(false);
+    });
+  });
+
+  describe('hasOnlyUserErrors', () => {
+    test('is true when the rule type flagged the result as a user error', () => {
+      expect(
+        hasOnlyUserErrors({
+          ...createSearchAfterReturnType({ success: false, errors: ['bad'] }),
+          userError: true,
+        })
+      ).toEqual(true);
+    });
+
+    test('is true when every search error is a user error', () => {
+      expect(
+        hasOnlyUserErrors(
+          createSearchAfterReturnType({
+            success: false,
+            errors: ['verification_exception: Unknown column [foo]'],
+          })
+        )
+      ).toEqual(true);
+    });
+
+    test('is false for a data error, a mix of errors, or no errors at all', () => {
+      expect(
+        hasOnlyUserErrors(
+          createSearchAfterReturnType({ success: false, errors: ['cluster_block_exception'] })
+        )
+      ).toEqual(false);
+      expect(
+        hasOnlyUserErrors(
+          createSearchAfterReturnType({
+            success: false,
+            errors: ['verification_exception', 'cluster_block_exception'],
+          })
+        )
+      ).toEqual(false);
+      expect(hasOnlyUserErrors(createSearchAfterReturnType())).toEqual(false);
+    });
+
+    test('ignores alert write errors', () => {
+      expect(
+        hasOnlyUserErrors({
+          ...createSearchAfterReturnType({
+            success: false,
+            errors: ['verification_exception', 'queue full'],
+          }),
+          alertWriteErrors: ['queue full'],
+        })
+      ).toEqual(true);
     });
   });
 

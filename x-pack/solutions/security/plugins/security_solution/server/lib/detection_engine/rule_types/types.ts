@@ -370,6 +370,12 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  /**
+   * The subset of `errors` raised while indexing or enriching alerts, after the search for the
+   * window completed. Lets the rule type wrapper tell a window that was not searched (recorded as
+   * a gap) from one that was searched but whose alerts could not all be written.
+   */
+  alertWriteErrors?: string[];
   userError?: boolean;
   warningMessages: string[];
   totalEventsFound?: number;
