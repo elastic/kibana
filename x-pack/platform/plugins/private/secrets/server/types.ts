@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SecretsClient } from './client/types';
+
+export interface GetSecretsClientParams {
+  /** Gives the space of the secrets and the user recorded as their author. */
+  readonly request: KibanaRequest;
+}
 
 /**
  * Setup contract of the secrets plugin. It has no members: dependants use its presence to know,
@@ -13,9 +23,19 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
  */
 export type SecretsPluginSetup = Record<string, never>;
 
-/** Start contract of the secrets plugin. */
-export type SecretsPluginStart = Record<string, never>;
+export interface SecretsPluginStart {
+  /**
+   * Returns the secrets client for the space of the request. It makes no permission check: the
+   * consumer owns the permissions and checks them first. When Kibana has no encryption key, every
+   * operation of the client throws `SecretsUnavailableError`.
+   */
+  getClient(params: GetSecretsClientParams): SecretsClient;
+}
 
 export interface SecretsPluginSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+}
+
+export interface SecretsPluginStartDependencies {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }

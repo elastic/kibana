@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-export const plugin = async () => {
+import type { PluginInitializerContext } from '@kbn/core/server';
+
+export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { SecretsPlugin } = await import('./plugin');
-  return new SecretsPlugin();
+  return new SecretsPlugin(initializerContext);
 };
 
 export { config } from './config';
 export type { SecretsConfig } from './config';
 export type { SecretsClient } from './client/types';
-export type { SecretsPluginSetup, SecretsPluginStart } from './types';
+export type { GetSecretsClientParams, SecretsPluginSetup, SecretsPluginStart } from './types';

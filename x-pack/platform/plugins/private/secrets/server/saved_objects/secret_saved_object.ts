@@ -23,9 +23,9 @@ const ENCRYPTED_VALUE_MAX_LENGTH = 131072;
 const secretSchemaV1 = schema.object({
   name: schema.string({ minLength: 1, maxLength: SECRET_NAME_MAX_LENGTH }),
   description: schema.maybe(schema.string({ maxLength: SECRET_DESCRIPTION_MAX_LENGTH })),
-  createdBy: schema.string({ maxLength: USERNAME_MAX_LENGTH }),
+  createdBy: schema.nullable(schema.string({ maxLength: USERNAME_MAX_LENGTH })),
   createdAt: schema.string({ maxLength: TIMESTAMP_MAX_LENGTH }),
-  updatedBy: schema.string({ maxLength: USERNAME_MAX_LENGTH }),
+  updatedBy: schema.nullable(schema.string({ maxLength: USERNAME_MAX_LENGTH })),
   updatedAt: schema.string({ maxLength: TIMESTAMP_MAX_LENGTH }),
   value: schema.string({ minLength: 1, maxLength: ENCRYPTED_VALUE_MAX_LENGTH }),
 });

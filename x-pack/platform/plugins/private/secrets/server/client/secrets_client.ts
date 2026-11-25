@@ -14,8 +14,8 @@ import { validateSecret } from './validate_secret';
 export interface CreateSecretsClientParams {
   /** The secrets of one space. */
   readonly storage: SecretsStorage;
-  /** Recorded as the author of created and updated secrets. */
-  readonly username: string;
+  /** Recorded as the author of created and updated secrets. `null` when there is no user. */
+  readonly username: string | null;
 }
 
 const withoutValue = ({ value, ...metadata }: SecretEntry): SecretMetadata => metadata;
