@@ -437,6 +437,32 @@ describe('test fetchAll', () => {
       expect(deps.services.data.search.showError).toHaveBeenCalledWith(error);
     });
 
+    test('should keep loaded rows without an error toast when loading more is aborted', async () => {
+      const mockPagination = {
+        hasNextPage: () => true,
+        nextPage: jest.fn().mockRejectedValue(new Error('The query was canceled')),
+        getAllPages: jest.fn(),
+      };
+
+      subjects.documents$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: initialRecords,
+        pagination: mockPagination,
+      });
+
+      const fetching = fetchMoreDocuments(deps);
+      deps.abortController.abort(AbortReason.CANCELED);
+      await fetching;
+
+      expect(subjects.documents$.getValue()).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: initialRecords,
+        interceptedWarnings: undefined,
+        pagination: mockPagination,
+      });
+      expect(deps.services.data.search.showError).not.toHaveBeenCalled();
+    });
+
     test('should swallow abort errors', async () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
