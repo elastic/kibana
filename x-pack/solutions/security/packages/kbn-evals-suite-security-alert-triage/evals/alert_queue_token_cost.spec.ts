@@ -269,6 +269,8 @@ evaluate.describe(
     evaluate.beforeAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
       log.info(`Indexing 4 queue token-cost alerts into ${ALERTS_INDEX}`);
 
+      await deleteEvidenceAlerts(esClient);
+
       const response = await esClient.bulk({
         refresh: 'wait_for',
         operations: Array.from({ length: 4 }, (_, index) => [
@@ -370,12 +372,27 @@ const EVIDENCE_RUN_ID = randomUUID().slice(0, 8);
 const EVIDENCE_ALERT_ID_PREFIX = `${EVIDENCE_ALERT_ID_BASE}${EVIDENCE_RUN_ID}-`;
 const EVIDENCE_EVENTS_INDEX = `logs-queue_evidence_eval_${EVIDENCE_RUN_ID}`;
 const EVIDENCE_RULE_ID = 'queue-evidence-failed-logon';
+// The alerts point at logs-*, so the user names carry the run suffix. Another run's events or a
+// leftover index then cannot add to this run's logon counts.
+const EVIDENCE_USER_COMPROMISED = `svc_eval_backup_${EVIDENCE_RUN_ID}`;
+const EVIDENCE_USER_BENIGN = `evalusr_jdoe_${EVIDENCE_RUN_ID}`;
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Evidence alerts that a crashed run left behind would count as open alerts in the queue tests. This
+// removes the alerts of every run, so do not start two runs against one cluster at the same time.
+const deleteEvidenceAlerts = (esClient: EsClient) =>
+  esClient.deleteByQuery({
+    index: ALERTS_INDEX,
+    query: { prefix: { 'kibana.alert.uuid': EVIDENCE_ALERT_ID_BASE } },
+    conflicts: 'proceed',
+    ignore_unavailable: true,
+    refresh: true,
+  });
 
 /**
  * Events are 10 days older than the alerts (a rule can match old data, and an alert's timestamp is when
  * the rule ran). The threshold alerts carry only the user, with no host or IP. Only the events show
- * that svc_eval_backup was compromised.
+ * that the compromised user was compromised.
  */
 const buildEvidenceEvents = () => {
   const eventBase = Date.now() - 10 * DAY_MS;
@@ -396,11 +413,11 @@ const buildEvidenceEvents = () => {
 
   return [
     ...Array.from({ length: 20 }, (_, i) =>
-      event(i * 20, 'svc_eval_backup', 'srv-eval-db-01', '198.18.0.7', 'failure')
+      event(i * 20, EVIDENCE_USER_COMPROMISED, 'srv-eval-db-01', '198.18.0.7', 'failure')
     ),
-    event(20 * 20 + 5, 'svc_eval_backup', 'srv-eval-db-01', '198.18.0.7', 'success'),
+    event(20 * 20 + 5, EVIDENCE_USER_COMPROMISED, 'srv-eval-db-01', '198.18.0.7', 'success'),
     ...Array.from({ length: 6 }, (_, i) =>
-      event(i * 30, 'evalusr_jdoe', 'wks-eval-02', '10.250.0.5', 'failure')
+      event(i * 30, EVIDENCE_USER_BENIGN, 'wks-eval-02', '10.250.0.5', 'failure')
     ),
   ];
 };
@@ -431,20 +448,7 @@ evaluate.describe(
     evaluate.beforeAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
       log.info(`Indexing evidence events into ${EVIDENCE_EVENTS_INDEX} and 2 alerts`);
 
-      // Alerts that a crashed run left behind would count as open alerts in the queue tests.
-      await esClient.deleteByQuery({
-        index: ALERTS_INDEX,
-        query: {
-          bool: {
-            filter: [
-              { prefix: { 'kibana.alert.uuid': EVIDENCE_ALERT_ID_BASE } },
-              { range: { '@timestamp': { lt: 'now-1h' } } },
-            ],
-          },
-        },
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-      });
+      await deleteEvidenceAlerts(esClient);
       await esClient.indices.create({
         index: EVIDENCE_EVENTS_INDEX,
         mappings: {
@@ -466,7 +470,7 @@ evaluate.describe(
             { index: { _index: EVIDENCE_EVENTS_INDEX } },
             doc,
           ]),
-          ...['svc_eval_backup', 'evalusr_jdoe'].flatMap((user, index) => [
+          ...[EVIDENCE_USER_COMPROMISED, EVIDENCE_USER_BENIGN].flatMap((user, index) => [
             { index: { _index: ALERTS_INDEX, _id: `${EVIDENCE_ALERT_ID_PREFIX}${index}` } },
             buildEvidenceAlertDoc(index, user),
           ]),
@@ -508,8 +512,7 @@ evaluate.describe(
                   'I have five minutes. Is anything in this alert queue actually on fire? Give me the shortest honest answer.',
               },
               output: {
-                expected:
-                  'Yes, svc_eval_backup: 20 failed logons from external IP 198.18.0.7 on srv-eval-db-01 followed by a successful logon from the same IP, so this is a suspected compromise that needs urgent investigation. evalusr_jdoe only has 6 failed logons from internal 10.250.0.5 and no success, so it can wait.',
+                expected: `Yes, ${EVIDENCE_USER_COMPROMISED}: 20 failed logons from external IP 198.18.0.7 on srv-eval-db-01 followed by a successful logon from the same IP, so this is a suspected compromise that needs urgent investigation. ${EVIDENCE_USER_BENIGN} only has 6 failed logons from internal 10.250.0.5 and no success, so it can wait.`,
               },
               // Built-in tools are off when skill_ids is set, so grant the ES|QL tool the evidence step uses.
               metadata: { skillIds: ['alert-analysis'], toolIds: ['platform.core.execute_esql'] },
@@ -517,9 +520,9 @@ evaluate.describe(
           ],
         },
         criteria: [
-          'The response says svc_eval_backup is a suspected compromise that needs urgent investigation, based on a successful logon after the failures',
+          `The response says ${EVIDENCE_USER_COMPROMISED} is a suspected compromise that needs urgent investigation, based on a successful logon after the failures`,
           'The response does not say that nothing is wrong or on fire',
-          'The response says evalusr_jdoe has no successful logon and can wait',
+          `The response says ${EVIDENCE_USER_BENIGN} has no successful logon and can wait`,
         ],
       });
     });
