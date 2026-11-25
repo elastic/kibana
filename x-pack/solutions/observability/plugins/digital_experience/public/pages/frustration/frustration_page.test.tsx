@@ -257,6 +257,12 @@ describe('FrustrationPage', () => {
     const panel = await screen.findByTestId('nativePanel');
     expect(panel).toHaveAttribute('data-total', '6');
     expect(panel).toHaveAttribute('data-sessions-href', '/sessions-href');
+    expect(sessionsHref).toHaveBeenCalledWith({
+      browser: undefined,
+      os: undefined,
+      country: undefined,
+      withFrustration: true,
+    });
     expect(panel).not.toHaveAttribute('data-dashboard-href');
     expect(useApplicationLinks).toHaveBeenCalledWith('my-app', 'otel');
   });

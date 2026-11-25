@@ -23,6 +23,7 @@ import { useEnvironment } from '../../hooks/use_environment';
 import { useFrustrationDashboardAvailable } from '../../hooks/use_frustration_dashboard_available';
 import { useLastEnvironments } from '../../hooks/use_last_environments';
 import { useTimeRange } from '../../hooks/use_time_range';
+import type { SessionsListUrlQuery } from '../../utils/sessions_list_query';
 import { FrustrationPanel } from '../application_details/otel_overview/components/frustration_panel';
 import {
   EMPTY_USAGE,
@@ -115,6 +116,10 @@ function FrustrationBody({
   const { environment } = useEnvironment();
   const isDashboardAvailable = useFrustrationDashboardAvailable();
   const { sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
+  // The panel counts every browser, OS and country; the Overview's filters in the URL are only
+  // for the back link, so its rows must not narrow the sessions to them.
+  const unfilteredSessionsHref = (sessionsQuery: SessionsListUrlQuery = {}) =>
+    sessionsHref({ browser: undefined, os: undefined, country: undefined, ...sessionsQuery });
   const [refreshCount, setRefreshCount] = useState(0);
   const sessionSource = useFrustrationSessionSource(
     Date.parse(getDateISORange({ from: timeRange.rangeFrom, to: timeRange.rangeTo }).startDate),
@@ -152,7 +157,7 @@ function FrustrationBody({
             frustratedElements={frustratedElements}
             frustratedPages={frustratedPages}
             isLoading={usage.isLoading}
-            sessionsHref={sessionsHref}
+            sessionsHref={unfilteredSessionsHref}
           />
         )}
         <EuiSpacer size="m" />
