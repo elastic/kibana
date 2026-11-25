@@ -61,6 +61,10 @@ describe('MainPanel', () => {
         'Every 120 sec',
         { isEnabled: true, isPaused: false, intervalMs: 120_000, intervalDisplayUnit: 's' },
       ],
+      [
+        'Every 10 sec',
+        { isEnabled: true, isPaused: false, intervalMs: 10_000, intervalDisplayUnit: 'm' },
+      ],
     ])('shows "%s" in the auto-refresh badge', (label, value) => {
       renderMainPanel({ onRefresh: () => {}, autoRefresh: value });
 

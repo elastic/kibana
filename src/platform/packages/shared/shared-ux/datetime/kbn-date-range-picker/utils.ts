@@ -42,10 +42,10 @@ const pad = (n: number, width: number): string =>
  * Converts an interval in milliseconds to a count and unit for display.
  *
  * @param intervalMs - The interval in milliseconds.
- * @param unit - The unit to use for the display.
- * If `unit` is provided, that unit is used (count is rounded to the nearest whole step).
- * If omitted, picks the largest unit (hours, then minutes, then seconds) that divides
- * `intervalMs` evenly so common values round-trip without drifting (e.g. 90s stays 90s, not 2m).
+ * @param unit - The preferred unit for the display.
+ * `unit` is used when `intervalMs` is a whole number of it. Otherwise, or when `unit` is omitted,
+ * picks the largest unit (hours, then minutes, then seconds) that divides `intervalMs` evenly so
+ * the count never rounds the interval away (e.g. 90s stays 90s, not 2m; 10s never shows as 0m).
  *
  * @returns The count and unit for the display.
  */
@@ -57,14 +57,8 @@ export function msToAutoRefreshInterval(
     return { count: 0, unit: 's' };
   }
 
-  if (unit === 'h') {
-    return { count: Math.round(intervalMs / MS_PER.hour), unit: 'h' };
-  }
-  if (unit === 'm') {
-    return { count: Math.round(intervalMs / MS_PER.minute), unit: 'm' };
-  }
-  if (unit === 's') {
-    return { count: Math.round(intervalMs / MS_PER.second), unit: 's' };
+  if (unit && intervalMs % autoRefreshIntervalToMs(1, unit) === 0) {
+    return { count: intervalMs / autoRefreshIntervalToMs(1, unit), unit };
   }
 
   if (intervalMs % MS_PER.hour === 0) {

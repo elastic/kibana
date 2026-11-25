@@ -437,9 +437,16 @@ describe('msToAutoRefreshInterval (auto unit)', () => {
   });
 });
 
-describe('msToAutoRefreshInterval (explicit unit)', () => {
-  it('rounds count to the chosen unit', () => {
-    expect(msToAutoRefreshInterval(90_000, 'm')).toEqual({ count: 2, unit: 'm' });
+describe('msToAutoRefreshInterval (preferred unit)', () => {
+  it('uses the preferred unit when the interval is a whole number of it', () => {
+    expect(msToAutoRefreshInterval(120_000, 's')).toEqual({ count: 120, unit: 's' });
+    expect(msToAutoRefreshInterval(3_600_000, 'm')).toEqual({ count: 60, unit: 'm' });
+  });
+
+  it('falls back to the largest whole unit when the preferred unit would round the interval', () => {
+    expect(msToAutoRefreshInterval(90_000, 'm')).toEqual({ count: 90, unit: 's' });
+    expect(msToAutoRefreshInterval(10_000, 'm')).toEqual({ count: 10, unit: 's' });
+    expect(msToAutoRefreshInterval(1_800_000, 'h')).toEqual({ count: 30, unit: 'm' });
   });
 });
 
