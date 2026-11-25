@@ -1012,6 +1012,7 @@ export default function (providerContext: FtrProviderContext) {
             secrets: { auth: { credential: 'test-credential-value' } },
           });
           const policyId = await createOtelPolicy(outputId);
+          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
 
           const { body: updateBody } = await supertest
             .put(`/api/fleet/outputs/${outputId}`)
@@ -1022,7 +1023,10 @@ export default function (providerContext: FtrProviderContext) {
           expect(newCredentialId).not.to.be(credentialId);
 
           // the update publishes a new revision, so agents stop using the replaced secret
-          const { data: publishedPolicy } = await getPublishedPolicy(policyId);
+          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
+            policyId
+          );
+          expect(revision).to.be.greaterThan(previousRevision);
           expect(publishedPolicy.exporters[`otlp/${outputId}`].headers).to.eql({
             Authorization: `ApiKey $co.elastic.secret{${newCredentialId}}`,
           });
@@ -1036,6 +1040,7 @@ export default function (providerContext: FtrProviderContext) {
             secrets: { auth: { credential: 'test-credential-value' } },
           });
           const policyId = await createOtelPolicy(outputId);
+          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
 
           await supertest
             .put(`/api/fleet/outputs/${outputId}`)
@@ -1043,7 +1048,10 @@ export default function (providerContext: FtrProviderContext) {
             .send({ auth: null })
             .expect(200);
 
-          const { data: publishedPolicy } = await getPublishedPolicy(policyId);
+          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
+            policyId
+          );
+          expect(revision).to.be.greaterThan(previousRevision);
           expect(publishedPolicy.exporters[`otlp/${outputId}`]).to.eql({
             endpoint: 'otlp.example.com:4317',
           });
