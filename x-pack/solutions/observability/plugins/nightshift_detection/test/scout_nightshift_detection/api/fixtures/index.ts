@@ -31,6 +31,7 @@ export const COMMON_HEADERS = {
 } as const;
 
 export const TICK_PATH = 'internal/nightshift/detection/_tick';
+export const RECONCILE_PATH = 'internal/nightshift/detection/_reconcile';
 const ENABLE_PATH = '/internal/nightshift/detection/service_account/_enable';
 
 /** Setup needs the workflows plugin ready, which a cold start can still be working on. */

@@ -1,0 +1,158 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { esql } from '@elastic/esql';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { Logger as CoreLogger } from '@kbn/core-di';
+import { inject, injectable } from 'inversify';
+import { DetectionEngineSystemClient } from '../engine/tokens';
+import { getStrategyTag, MANAGED_RULE_TAG } from './rule_identity';
+import { DetectionRulesClient } from './tokens';
+
+/** Rules read per page; Alerting v2 caps a find at 500 per page. */
+const FIND_PAGE_SIZE = 500;
+/**
+ * Saved objects count matches only up to 10,000 and cannot page past them, so a list that reaches
+ * this many may be incomplete. Reconciling an incomplete list would leave the rest unmanaged.
+ */
+const MAX_LISTED_RULES = 10_000;
+/** Rows one read returns at most; a window holds about one row per rule run. */
+const MAX_ROWS = 10_000;
+
+/** A rule the engine manages, as far as reconciling and reading it needs. */
+export interface ManagedRule {
+  id: string;
+  enabled: boolean;
+  /** ISO timestamp of the rule's creation. */
+  created_at: string;
+  tags: string[];
+}
+
+/** A row a managed rule wrote to `.rule-events`: one row of its query's result. */
+export interface RuleRow {
+  rule_id: string;
+  /** When the rule run was scheduled, in epoch milliseconds. */
+  scheduled_timestamp: number;
+  /** The columns of the row, as the rule's query returned them. */
+  data: Record<string, unknown>;
+}
+
+/** The part of a `.rule-events` document a row is read from. */
+interface RuleEventSource {
+  rule: { id: string };
+  scheduled_timestamp: string;
+  data?: Record<string, unknown>;
+}
+
+/** Lists the rules the engine manages in the scope's space, and reads the rows they wrote. */
+@injectable()
+export class ManagedRuleReader {
+  constructor(
+    @inject(DetectionRulesClient) private readonly rulesClient: Pick<RulesClientApi, 'findRules'>,
+    @inject(DetectionEngineSystemClient) private readonly esClient: ElasticsearchClient,
+    @inject(CoreLogger) private readonly logger: Logger
+  ) {}
+
+  /** Every managed rule of the space, or only those of one strategy. */
+  public async listManaged({ strategy }: { strategy?: string } = {}): Promise<ManagedRule[]> {
+    const tag = strategy === undefined ? MANAGED_RULE_TAG : getStrategyTag(strategy);
+    const rules: ManagedRule[] = [];
+
+    // Page by page: the next page is asked for only once the previous one came back short of the total.
+    for (let page = 1; ; page++) {
+      const { items, total } = await this.rulesClient.findRules({
+        filter: `metadata.tags: "${tag}"`,
+        perPage: FIND_PAGE_SIZE,
+        page,
+      });
+      if (total >= MAX_LISTED_RULES) {
+        throw new Error(
+          `The space has ${MAX_LISTED_RULES} or more rules tagged [${tag}], more than the engine reads.`
+        );
+      }
+      rules.push(
+        ...items.map(({ id, enabled, created_at: createdAt, metadata }) => ({
+          id,
+          enabled,
+          created_at: createdAt,
+          tags: metadata.tags ?? [],
+        }))
+      );
+
+      if (items.length === 0 || rules.length >= total) {
+        return rules;
+      }
+    }
+  }
+
+  /**
+   * The rows the given rules wrote in `space_id` during `[from, to)` (epoch milliseconds), newest
+   * run first. The range is on `@timestamp`, the time `.rule-events` indexed the row, not on when
+   * the run was scheduled: a run that writes late is read by the next window instead of being lost.
+   * Read with the engine's system client: `.rule-events` is not the account's to read, and the
+   * filter keeps the read to the space and its own rules.
+   */
+  public async readRows({
+    spaceId,
+    ruleIds,
+    from,
+    to,
+    abortSignal,
+  }: {
+    spaceId: string;
+    ruleIds: string[];
+    from: number;
+    to: number;
+    abortSignal?: AbortSignal;
+  }): Promise<RuleRow[]> {
+    if (ruleIds.length === 0) {
+      return [];
+    }
+
+    const timestamp = esql.col('@timestamp');
+    const isSignal = esql.exp`type == ${esql.str('signal')}`;
+    const inSpace = esql.exp`space_id == ${esql.str(spaceId)}`;
+    const ofRules = esql.exp`${esql.col(['rule', 'id'])} IN (${ruleIds.map((id) => esql.str(id))})`;
+    const inWindow = esql.exp`${timestamp} >= TO_DATETIME(${esql.int(
+      from
+    )}) AND ${timestamp} < TO_DATETIME(${esql.int(to)})`;
+    const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+      .where`${isSignal} AND ${inSpace} AND ${ofRules} AND ${inWindow}`
+      .sort(['scheduled_timestamp', 'DESC'])
+      .keep('_source')
+      .limit(MAX_ROWS);
+
+    // `_source` rather than columns: `.rule-events` maps `data` as `flattened`, which ES|QL cannot
+    // return as an object. Partial results are refused so a shard failure never reads as no rows.
+    const response = await this.esClient.esql.query(
+      { query: query.print('basic'), allow_partial_results: false },
+      { signal: abortSignal }
+    );
+    const sourceIndex = response.columns.findIndex(({ name }) => name === '_source');
+    if (response.values.length >= MAX_ROWS) {
+      // Newest first, so the oldest runs of the window are the ones left out.
+      this.logger.warn(
+        `Read only the newest ${MAX_ROWS} rows the ${
+          ruleIds.length
+        } rule(s) wrote in space [${spaceId}] between ${new Date(
+          from
+        ).toISOString()} and ${new Date(to).toISOString()}; older rows of that window are not read.`
+      );
+    }
+
+    return response.values.map((row) => {
+      const source = row[sourceIndex] as unknown as RuleEventSource;
+      return {
+        rule_id: source.rule.id,
+        scheduled_timestamp: Date.parse(source.scheduled_timestamp),
+        data: source.data ?? {},
+      };
+    });
+  }
+}

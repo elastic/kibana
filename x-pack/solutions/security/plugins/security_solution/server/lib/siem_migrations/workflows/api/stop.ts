@@ -13,9 +13,10 @@ import {
   type StopWorkflowMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { authz } from './util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
-import { authz } from './util/authz';
 
 export const registerSiemWorkflowMigrationsStopRoute = (
   router: SecuritySolutionPluginRouter,
@@ -31,16 +32,35 @@ export const registerSiemWorkflowMigrationsStopRoute = (
       {
         version: '1',
         validate: {
-          request: {
-            params: buildRouteValidationWithZod(StopWorkflowMigrationRequestParams),
-          },
+          request: { params: buildRouteValidationWithZod(StopWorkflowMigrationRequestParams) },
         },
       },
       withLicense(
         withExistingMigration(
-          async (_context, req, res): Promise<IKibanaResponse<StopWorkflowMigrationResponse>> => {
-            logger.debug(`Workflow migration stop is not implemented (${req.params.migration_id})`);
-            return res.ok({ body: { stopped: false } });
+          async (context, req, res): Promise<IKibanaResponse<StopWorkflowMigrationResponse>> => {
+            const migrationId = req.params.migration_id;
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'workflows'
+            );
+            try {
+              const ctx = await context.resolve(['securitySolution']);
+              const workflowMigrationsClient =
+                ctx.securitySolution.siemMigrations.getWorkflowsClient();
+
+              const { exists, stopped } = await workflowMigrationsClient.task.stop(migrationId);
+
+              if (!exists) {
+                return res.notFound();
+              }
+              await siemMigrationAuditLogger.logStop({ migrationId });
+
+              return res.ok({ body: { stopped } });
+            } catch (error) {
+              logger.error(error);
+              await siemMigrationAuditLogger.logStop({ migrationId, error });
+              return res.badRequest({ body: error.message });
+            }
           }
         )
       )

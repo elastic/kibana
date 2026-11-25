@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getSlotProcessorIds, type ProcessingNodeRef } from '../../../../../services/unit_graph';
 import { isSlotSaved } from '../../../../../services/unit_processing';
 import {
@@ -28,7 +29,8 @@ interface ProcessingNodeStatsProps {
  * this part. It reads the saved unit, because the stats describe what is deployed. A route that
  * unsaved edits moved to another position shows nothing until the unit is saved, because the
  * saved unit has another route there. Until the first result arrives it keeps its space and shows
- * nothing, so a load or a failure never looks like a measured zero.
+ * nothing, so a load or a failure never looks like a measured zero. A result with neither a rate
+ * nor a time shows `No data` instead of two dashes; one missing value still shows a dash.
  */
 export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
   const { euiTheme } = useEuiTheme();
@@ -39,6 +41,13 @@ export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
     [savedUnit, stagedUnit, slot]
   );
   const stats = useSlotStats({ ref: slot, processorIds });
+  const hasResult = stats.status === 'ready' || stats.status === 'stale';
+  const hasNoData = hasResult && stats.eventsRate === null && stats.durationAverage === null;
+  const staleIcon = stats.status === 'stale' && (
+    <EuiFlexItem grow={false}>
+      <StatsProblemIcon problem="stale" dataTestSubj="streamsCanvasProcessingNodeStale" />
+    </EuiFlexItem>
+  );
 
   return (
     <div
@@ -57,7 +66,19 @@ export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
           dataTestSubj="streamsCanvasProcessingNodeError"
         />
       )}
-      {(stats.status === 'ready' || stats.status === 'stale') && (
+      {hasNoData && (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" data-test-subj="streamsCanvasProcessingNodeNoData">
+              {i18n.translate('xpack.streams.canvas.processingNode.noDataStatus', {
+                defaultMessage: 'No data',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          {staleIcon}
+        </EuiFlexGroup>
+      )}
+      {hasResult && !hasNoData && (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -65,11 +86,7 @@ export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
                 {formatEventsRate(stats.eventsRate)}
               </EuiText>
             </EuiFlexItem>
-            {stats.status === 'stale' && (
-              <EuiFlexItem grow={false}>
-                <StatsProblemIcon problem="stale" dataTestSubj="streamsCanvasProcessingNodeStale" />
-              </EuiFlexItem>
-            )}
+            {staleIcon}
           </EuiFlexGroup>
           <EuiText size="xs" color="subdued" data-test-subj="streamsCanvasProcessingNodeDuration">
             {formatDuration(stats.durationAverage)}

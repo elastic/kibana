@@ -438,6 +438,10 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
+    '.aws_rds',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsRds" */ './specs/aws_rds/icon')),
+  ],
+  [
     '.azure_sql',
     lazy(() => import(/* webpackChunkName: "connectorIconazuresql" */ './specs/azure_sql/icon')),
   ],
@@ -448,6 +452,23 @@ export const ConnectorIconsMap: Map<
         import(
           /* webpackChunkName: "connectorIconSolarWindsPlatform" */ './specs/solarwinds_platform/icon'
         )
+    ),
+  ],
+
+  [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
+        )
+    ),
+  ],
+
+  [
+    '.sentinelone2',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
     ),
   ],
 ]);

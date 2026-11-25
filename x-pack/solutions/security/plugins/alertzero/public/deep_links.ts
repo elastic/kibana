@@ -12,7 +12,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import * as i18n from './components/app_chrome/translations';
 
 /**
- * Deep links for Security solution nav + global search (Discover + Dashboards are owned elsewhere).
+ * Deep links for Security solution nav, Classic nav + global search (Discover + Dashboards are owned elsewhere).
  *
  * Ids are `SecurityPageName` values so the solution navigation can reference the same registry the
  * rest of Security uses, via `alertZeroLink()`.
@@ -27,13 +27,29 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
     capabilities === undefined || capabilities.agenticInvestigations?.showEscalations !== false;
 
   return [
+    {
+      // The Classic nav highlights a link only when its id is the current app id, so the app link
+      // would stay highlighted on every AlertZero page. Like Security's own entries, the Classic nav
+      // lists AlertZero's pages as deep links instead. The app link covers the other surfaces.
+      id: SecurityPageName.alertZeroHome,
+      title: i18n.BRAND_TITLE,
+      path: '/',
+      // Above every Security entry in the Classic nav (1–13), followed by Escalations and Watches.
+      order: -3,
+      visibleIn: ['classicSideNav'],
+    },
     ...(showEscalations
       ? [
           {
             id: SecurityPageName.alertZeroEscalations,
             title: i18n.NAV_ESCALATIONS,
             path: '/escalations',
-            visibleIn: ['globalSearch', 'projectSideNav'] as AppDeepLink['visibleIn'],
+            order: -2,
+            visibleIn: [
+              'globalSearch',
+              'classicSideNav',
+              'projectSideNav',
+            ] as AppDeepLink['visibleIn'],
           },
         ]
       : []),
@@ -41,7 +57,8 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
       id: SecurityPageName.alertZeroWatches,
       title: i18n.NAV_WATCHES,
       path: '/watches',
-      visibleIn: ['globalSearch', 'projectSideNav'],
+      order: -1,
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     },
   ];
 };

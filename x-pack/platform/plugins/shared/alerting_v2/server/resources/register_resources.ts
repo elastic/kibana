@@ -40,8 +40,7 @@ export function initializeResources({
 
   resourceManager.registerResource(
     RULE_CHANGES_HISTORY_RESOURCE_KEY,
-    new RuleChangesHistoryInitializer(changeHistoryClient, esClient, userProfileService),
-    { optional: true }
+    new RuleChangesHistoryInitializer(changeHistoryClient, esClient, userProfileService)
   );
 
   resourceManager.startInitialization();
