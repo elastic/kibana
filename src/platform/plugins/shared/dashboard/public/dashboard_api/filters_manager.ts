@@ -129,7 +129,6 @@ export const initializeFiltersManager = (
 
   /** when auto-apply is `false`, the first set of complete filters is published automatically, exactly once */
   let initialPublishPending = !settingsManager.api.settings.autoApplyFilters$.getValue();
-
   /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
   const unpublishedFiltersSubscription = childFilters$
     .pipe(
@@ -137,7 +136,10 @@ export const initializeFiltersManager = (
       combineLatestWith(
         anyChildFiltersLoading$,
         childrenAwaitingRequiredFilters$,
-        layoutManager.internalApi.childApisPending$
+        layoutManager.internalApi.childApisPending$,
+        // the grid mounting (published awaiting state going to `false`) also pushes, so grid controls' saved
+        // selections can be published as soon as they have reported
+        awaitingRequiredFilters$
       ),
       skip(1),
       debounceTime(0),
@@ -161,17 +163,33 @@ export const initializeFiltersManager = (
     }
     const awaiting = childrenAwaitingRequiredFilters$.getValue();
     if (awaiting !== awaitingRequiredFilters$.getValue()) {
+      // The grid was not rendered while awaiting, so the initial publish only saw the pinned controls. Re-arm it
+      // so the saved selections of grid controls are published once the grid opens.
+      if (!awaiting && !settingsManager.api.settings.autoApplyFilters$.getValue()) {
+        initialPublishPending = true;
+      }
       awaitingRequiredFilters$.next(awaiting);
     }
   };
 
-  /** `true` while the unpublished child filters differ from the published ones */
+  /**
+   * `true` while the unpublished child filters, or whether the children are awaiting required filters,
+   * differ from what is published. The awaiting state can change without the filters changing (e.g. a
+   * required control is made optional, unpinned or deleted), and still needs to be applied.
+   */
   const hasUnpublishedFilters$ = new BehaviorSubject<boolean>(false);
   const hasUnpublishedFiltersSubscription = combineLatest([
     publishedChildFilters$,
     unpublishedChildFilters$,
+    childrenAwaitingRequiredFilters$,
+    awaitingRequiredFilters$,
   ])
-    .pipe(map(([published, unpublished]) => !deepEqual(published ?? [], unpublished ?? [])))
+    .pipe(
+      map(
+        ([published, unpublished, childrenAwaiting, awaiting]) =>
+          !deepEqual(published ?? [], unpublished ?? []) || childrenAwaiting !== awaiting
+      )
+    )
     .subscribe((hasUnpublished) => {
       if (hasUnpublished !== hasUnpublishedFilters$.getValue()) {
         hasUnpublishedFilters$.next(hasUnpublished);

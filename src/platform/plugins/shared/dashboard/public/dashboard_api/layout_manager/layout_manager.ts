@@ -127,7 +127,7 @@ export function initializeLayoutManager(
         : Object.keys(panels).filter((uuid) => !isSectionCollapsed(panels[uuid].grid.sectionId));
       return [...pinnedPanelIds, ...gridPanelIds];
     }),
-    distinctUntilChanged(deepEqual)
+    distinctUntilChanged<string[]>(deepEqual)
   );
 
   /** Publishes `true` while some rendered children's APIs haven't registered yet */

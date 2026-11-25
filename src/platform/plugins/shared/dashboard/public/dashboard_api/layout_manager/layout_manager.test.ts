@@ -916,7 +916,7 @@ describe('layout manager', () => {
           trackPanelMock,
           awaitingRequiredFilters$
         );
-        layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+        layoutManager.internalApi.childApisPending$.subscribe((loading) => {
           loadingStates.push(loading);
         });
         expect(loadingStates.at(-1)).toBe(true);
@@ -937,7 +937,7 @@ describe('layout manager', () => {
           trackPanelMock,
           awaitingRequiredFilters$
         );
-        layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+        layoutManager.internalApi.childApisPending$.subscribe((loading) => {
           loadingStates.push(loading);
         });
         layoutManager.api.registerChildApi({ uuid: pinnedControls[0].id } as DefaultEmbeddableApi);
@@ -961,7 +961,7 @@ describe('layout manager', () => {
           trackPanelMock,
           new BehaviorSubject<boolean>(true)
         );
-        layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+        layoutManager.internalApi.childApisPending$.subscribe((loading) => {
           loadingStates.push(loading);
         });
         layoutManager.api.registerChildApi({ uuid: pinnedControls[0].id } as DefaultEmbeddableApi);

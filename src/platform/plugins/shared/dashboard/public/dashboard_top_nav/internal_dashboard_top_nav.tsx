@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
@@ -43,7 +42,7 @@ import { useFavorite } from '@kbn/content-management-favorites-public';
 import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
-import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
+import { useApplyUnpublishedChanges } from '../dashboard_api/use_apply_unpublished_changes';
 import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
@@ -164,7 +163,6 @@ export function InternalDashboardTopNav({
   const { onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
-  const dashboardInternalApi = useDashboardInternalApi();
 
   const [
     allDataViews,
@@ -175,12 +173,6 @@ export function InternalDashboardTopNav({
     query,
     title,
     viewMode,
-    publishedChildFilters,
-    unpublishedChildFilters,
-    publishedTimeslice,
-    unpublishedTimeslice,
-    publishedEsqlVariables,
-    unpublishedEsqlVariables,
     dataLoading,
     canCancel,
   ] = useBatchedPublishingSubjects(
@@ -192,25 +184,11 @@ export function InternalDashboardTopNav({
     dashboardApi.query$,
     dashboardApi.title$,
     dashboardApi.viewMode$,
-    dashboardApi.publishedChildFilters$,
-    dashboardApi.unpublishedChildFilters$,
-    dashboardApi.publishedTimeslice$,
-    dashboardApi.unpublishedTimeslice$,
-    dashboardInternalApi.publishedEsqlVariables$,
-    dashboardInternalApi.unpublishedEsqlVariables$,
     dashboardApi.dataLoading$,
     dashboardApi.canCancel$
   );
 
-  const hasUnpublishedFilters = useMemo(() => {
-    return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
-  }, [publishedChildFilters, unpublishedChildFilters]);
-  const hasUnpublishedTimeslice = useMemo(() => {
-    return !deepEqual(publishedTimeslice, unpublishedTimeslice);
-  }, [publishedTimeslice, unpublishedTimeslice]);
-  const hasUnpublishedVariables = useMemo(() => {
-    return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
-  }, [publishedEsqlVariables, unpublishedEsqlVariables]);
+  const { hasUnpublishedChanges, applyUnpublishedChanges } = useApplyUnpublishedChanges();
 
   const hasEsqlPanel = useHasEsqlPanel(dashboardApi);
 
@@ -535,14 +513,10 @@ export function InternalDashboardTopNav({
             if (isUpdate === false) {
               dashboardApi.forceRefresh();
             }
-            if (hasUnpublishedFilters) dashboardApi.publishFilters();
-            if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
-            if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
+            applyUnpublishedChanges();
           }}
           onSavedQueryIdChange={setSavedQueryId}
-          hasDirtyState={
-            hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
-          }
+          hasDirtyState={hasUnpublishedChanges}
           isLoading={dataLoading ?? false}
           onCancel={canCancel ? dashboardApi.cancelAllRequests : undefined}
           useBackgroundSearchButton={

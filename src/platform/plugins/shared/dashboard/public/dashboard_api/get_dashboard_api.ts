@@ -273,10 +273,10 @@ export function getDashboardApi({
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
 
-  // required controls must fetch their options while the dashboard awaits their filters, so only pause on filters that are loading
-  const pauseFetchManager = initializePauseFetchManager(
-    filtersManager.internalApi.anyChildFiltersLoading$
-  );
+  // Unpause once the visible children have registered and finished computing their filters. `childApisPending$` is
+  // scoped to the visible children (only pinned controls while required filters are awaited), so required controls
+  // are not blocked on grid panels that aren't rendered yet.
+  const pauseFetchManager = initializePauseFetchManager(filtersManager.api.childFiltersLoading$);
 
   const canCancel$ = new BehaviorSubject<boolean>(false);
   const canCancelSubscription = combineLatest([

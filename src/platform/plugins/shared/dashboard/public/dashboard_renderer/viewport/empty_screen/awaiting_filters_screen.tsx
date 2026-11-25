@@ -22,6 +22,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
+import { useApplyUnpublishedChanges } from '../../../dashboard_api/use_apply_unpublished_changes';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
 
@@ -66,10 +67,9 @@ const useAwaitingControlLabels = (): string[] | undefined => {
 
 export function AwaitingFiltersScreen() {
   const dashboardApi = useDashboardApi();
-  const [hasUnpublished, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.hasUnpublishedFilters$,
-    dashboardApi.viewMode$
-  );
+  const [viewMode] = useBatchedPublishingSubjects(dashboardApi.viewMode$);
+  const { hasUnpublishedChanges: hasUnpublished, applyUnpublishedChanges } =
+    useApplyUnpublishedChanges();
 
   const labels = useAwaitingControlLabels();
   const isDarkTheme = useKibanaIsDarkMode();
@@ -154,7 +154,7 @@ export function AwaitingFiltersScreen() {
               fill
               size="s"
               iconType="check"
-              onClick={() => dashboardApi.publishFilters()}
+              onClick={() => applyUnpublishedChanges()}
               data-test-subj="dashboardAwaitingRequiredFiltersApply"
             >
               {i18n.translate('dashboard.emptyScreen.awaitingPublishApplyButton', {

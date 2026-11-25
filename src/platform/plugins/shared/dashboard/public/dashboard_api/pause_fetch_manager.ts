@@ -17,7 +17,7 @@ export function initializePauseFetchManager(childrenLoading$: Observable<boolean
   };
 
   /**
-   * Fetching stays paused until every child API is available
+   * Fetching stays paused until every visible child API has registered and finished computing its filters
    */
   const childrenAvailableSubscription = childrenLoading$
     .pipe(

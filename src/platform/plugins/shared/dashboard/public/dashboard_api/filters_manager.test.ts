@@ -219,6 +219,41 @@ describe('filters manager: awaiting required filters', () => {
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
   });
 
+  test('flags an unpublished change when the awaiting state changes but the filters do not', async () => {
+    const { filtersManager, awaitingRequiredFilters$, layout$, setChildren } = buildSetup(
+      ['control1'],
+      false
+    );
+    const awaiting$ = new BehaviorSubject<boolean>(true);
+    setChildren([{ uuid: 'control1', awaitingRequiredFilters$: awaiting$ }]);
+    await flush();
+    filtersManager.api.publishFilters();
+    await flush();
+    expect(awaitingRequiredFilters$.value).toBe(true);
+    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+
+    // the control is no longer required (setRequired(false)); no filters changed
+    awaiting$.next(false);
+    await flush();
+    expect(awaitingRequiredFilters$.value).toBe(true);
+    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+
+    filtersManager.api.publishFilters();
+    await flush();
+    expect(awaitingRequiredFilters$.value).toBe(false);
+    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+
+    // unpinning or deleting an awaiting control behaves the same way
+    awaiting$.next(true);
+    await flush();
+    filtersManager.api.publishFilters();
+    await flush();
+    expect(awaitingRequiredFilters$.value).toBe(true);
+    layout$.next({ ...layout$.value, pinnedPanels: {} });
+    await flush();
+    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+  });
+
   test('keeps waiting for publish when a control derives awaiting from its own appliedFilters$', async () => {
     const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(
       ['control1'],
@@ -551,5 +586,51 @@ describe('filters manager: awaiting required filters', () => {
 
     expect(loadingStates.length).toBe(loadingCount);
     expect(unpublished.length).toBe(unpublishedCount);
+  });
+
+  test('auto-apply off: saved grid control selections are published when the grid first opens after the awaiting screen', async () => {
+    const { filtersManager, awaitingRequiredFilters$, setChildren, setVisibleChildren } =
+      buildSetup(['required'], false, true);
+    const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
+    const saved = { meta: { key: 'saved' }, query: { match_phrase: { saved: 'x' } } } as Filter;
+    const requiredAwaiting$ = new BehaviorSubject<boolean>(true);
+    const requiredFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+    const gridFilters$ = new BehaviorSubject<Filter[] | undefined>([saved]);
+    const requiredChild: MockChild = {
+      uuid: 'required',
+      awaitingRequiredFilters$: requiredAwaiting$,
+      filtersLoading$: new BehaviorSubject<boolean>(false),
+      appliedFilters$: requiredFilters$,
+    };
+    const gridChild: MockChild = {
+      uuid: 'grid',
+      filtersLoading$: new BehaviorSubject<boolean>(false),
+      appliedFilters$: gridFilters$,
+    };
+    // the grid is replaced by the awaiting screen, so its panels have not mounted
+    setVisibleChildren(['required']);
+    setChildren([requiredChild]);
+    // like the real layout manager, the grid becomes visible as soon as the published awaiting state clears
+    awaitingRequiredFilters$.subscribe((awaiting) =>
+      setVisibleChildren(awaiting ? ['required'] : ['required', 'grid'])
+    );
+    await flush();
+    expect(awaitingRequiredFilters$.value).toBe(true);
+
+    // viewer selects a required value and applies
+    requiredAwaiting$.next(false);
+    requiredFilters$.next([region]);
+    await flush();
+    filtersManager.api.publishFilters();
+    await flush();
+    expect(awaitingRequiredFilters$.value).toBe(false);
+
+    // the grid's panels are rendered now, but only register their APIs afterwards
+    await flush();
+    setChildren([requiredChild, gridChild]);
+    await flush();
+
+    expect(filtersManager.api.unpublishedChildFilters$.value).toEqual([region, saved]);
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([region, saved]);
   });
 });
