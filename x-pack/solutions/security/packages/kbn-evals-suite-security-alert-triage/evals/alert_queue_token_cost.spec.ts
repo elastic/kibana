@@ -466,7 +466,7 @@ evaluate.describe(
               },
               output: {
                 expected:
-                  'Yes, svc_eval_backup: 20 failed logons from external IP 198.18.0.7 on srv-eval-db-01 followed by a successful logon from the same IP, so the account is compromised. evalusr_jdoe only has 6 failed logons from internal 10.250.0.5 and no success, so it can wait.',
+                  'Yes, svc_eval_backup: 20 failed logons from external IP 198.18.0.7 on srv-eval-db-01 followed by a successful logon from the same IP, so this is a suspected compromise that needs urgent investigation. evalusr_jdoe only has 6 failed logons from internal 10.250.0.5 and no success, so it can wait.',
               },
               // Built-in tools are off when skill_ids is set, so grant the ES|QL tool the evidence step uses.
               metadata: { skillIds: ['alert-analysis'], toolIds: ['platform.core.execute_esql'] },
@@ -474,7 +474,7 @@ evaluate.describe(
           ],
         },
         criteria: [
-          'The response says svc_eval_backup is compromised, based on a successful logon after the failures',
+          'The response says svc_eval_backup is a suspected compromise that needs urgent investigation, based on a successful logon after the failures',
           'The response does not say that nothing is wrong or on fire',
           'The response says evalusr_jdoe has no successful logon and can wait',
         ],
