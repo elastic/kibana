@@ -267,7 +267,13 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     state: Partial<State>,
     queryDslOverrides: Partial<QueryDslFilter> = {}
   ) {
-    const queryDsl = this.parseFilterToQueryDsl(localFilter, indexPatterns);
+    // The conversion can throw for a filter that no longer fits the data view, so keep the initial DSL.
+    let queryDsl = this.state.queryDsl;
+    try {
+      queryDsl = this.parseFilterToQueryDsl(localFilter, indexPatterns);
+    } catch {
+      // The editor still opens with the DSL generated on mount.
+    }
     this.props.onLocalFilterCreate?.({
       filter: localFilter,
       queryDslFilter: this.getQueryDslFilter({ ...queryDslOverrides, queryDsl }),

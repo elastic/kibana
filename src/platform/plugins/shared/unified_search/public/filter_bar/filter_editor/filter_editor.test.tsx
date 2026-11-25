@@ -231,8 +231,10 @@ describe('<FilterEditor />', () => {
       });
 
       it('shows the loaded filter in the builder and reports it as unchanged', () => {
-        const { exists } = nestedTestBed;
+        const { exists, component } = nestedTestBed;
         expect(exists('filterParams')).toBe(true);
+        expect(component.text()).toContain('user.name');
+        expect(component.html()).toContain('alice');
 
         // Baseline and latest update match, so closing the editor doesn't report unsaved changes.
         expect(onLocalFilterCreate).toHaveBeenLastCalledWith(expect.objectContaining({ filter }));
