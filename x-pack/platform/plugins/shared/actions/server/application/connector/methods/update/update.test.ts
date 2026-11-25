@@ -1830,6 +1830,99 @@ describe('update()', () => {
         ).rejects.toThrow(/error validating connector type config/);
         expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       });
+
+      describe('connector created with outbound off (no auth mode chosen)', () => {
+        const buildNotChosen = ({
+          outboundEnabled,
+          configAuthType,
+        }: {
+          outboundEnabled: boolean;
+          configAuthType?: string;
+        }) => {
+          const { authMode: _authMode, ...attributes } = existingRawAction.attributes;
+          return {
+            ...existingRawAction,
+            attributes: {
+              ...attributes,
+              actionTypeId: '.dual',
+              config: {
+                instanceUrl: 'https://saved.example.com',
+                ...(configAuthType ? { authType: configAuthType } : {}),
+                ...(outboundEnabled ? {} : { outboundEnabled: false }),
+              },
+              secrets: {},
+              hasInboundEventIdentity: true,
+            },
+          };
+        };
+
+        test('turning on with a per-user auth type is accepted and saves authMode per-user', async () => {
+          arrangeExisting(buildNotChosen({ outboundEnabled: false }) as never);
+
+          const result = await update({
+            context: dualContext,
+            id: 'connector-id',
+            action: {
+              name: 'renamed',
+              config: { instanceUrl: 'https://saved.example.com', authType: PER_USER },
+              secrets: { authType: PER_USER },
+              isOutboundActionsEnabled: true,
+            },
+          });
+
+          expect(result.authMode).toBe('per-user');
+          expect(savedAction()).toEqual(expect.objectContaining({ authMode: 'per-user' }));
+        });
+
+        test('turning on with a shared auth type saves authMode shared', async () => {
+          arrangeExisting(buildNotChosen({ outboundEnabled: false }) as never);
+
+          const result = await update({
+            context: dualContext,
+            id: 'connector-id',
+            action: {
+              name: 'renamed',
+              config: { instanceUrl: 'https://saved.example.com' },
+              secrets: { authType: 'bearer' },
+              isOutboundActionsEnabled: true,
+            },
+          });
+
+          expect(result.authMode).toBe('shared');
+          expect(savedAction()).toEqual(expect.objectContaining({ authMode: 'shared' }));
+        });
+
+        test('staying off with no secrets saves no authMode', async () => {
+          arrangeExisting(buildNotChosen({ outboundEnabled: false }) as never);
+
+          await update({
+            context: dualContext,
+            id: 'connector-id',
+            action: { name: 'renamed', config: {}, secrets: {} },
+          });
+
+          expect(savedAction()).not.toHaveProperty('authMode');
+        });
+
+        test('an old shared connector with no config.authType and outbound on cannot become per-user', async () => {
+          arrangeExisting(buildNotChosen({ outboundEnabled: true }) as never);
+
+          await expect(
+            update({
+              context: dualContext,
+              id: 'connector-id',
+              action: {
+                name: 'renamed',
+                config: { instanceUrl: 'https://saved.example.com', authType: PER_USER },
+                secrets: { authType: PER_USER },
+              },
+            })
+          ).rejects.toThrow(
+            'Authentication type cannot be changed to a per-user type for shared connectors.'
+          );
+          expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+        });
+      });
     });
 
     test('rejects the field on a non-dual type', async () => {

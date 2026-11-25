@@ -45,6 +45,7 @@ import {
   areSecretsOmitted,
   assertOutboundActionsToggleAllowed,
   getOutboundDisabledValidationType,
+  isOutboundActionsDisabledInConfig,
   readOutboundActionsEnabled,
   resolveUpdateOutboundActionsEnabled,
 } from '../../../../lib/outbound_actions_enabled';
@@ -159,13 +160,25 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   // Outbound off with no secrets sent: the saved auth type is kept, so it is not checked.
   const isOutboundOffWithoutSecrets = !isOutboundActionsEnabled && areSecretsOmitted(secrets);
 
-  if (!isOutboundOffWithoutSecrets) {
-    const requestedAuthMode = inferAuthMode({
-      authTypeRegistry: context.authTypeRegistry,
-      secrets,
-      config,
-    });
+  // A connector created with outbound off has not chosen an auth mode yet. Old shared
+  // connectors with no `config.authType` have outbound on, so they stay locked.
+  const isAuthModeNotChosen =
+    authMode === undefined &&
+    isOutboundActionsDisabledInConfig({
+      actionTypeId,
+      config: attributes.config as Record<string, unknown> | undefined,
+    }) &&
+    currentAuthTypeId === undefined;
 
+  const requestedAuthMode = isOutboundOffWithoutSecrets
+    ? undefined
+    : inferAuthMode({
+        authTypeRegistry: context.authTypeRegistry,
+        secrets,
+        config,
+      });
+
+  if (!isOutboundOffWithoutSecrets && !isAuthModeNotChosen) {
     if (currentAuthMode === 'per-user') {
       if (requestedAuthTypeId !== currentAuthTypeId) {
         throw Boom.badRequest(
@@ -309,6 +322,9 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           isMissingSecrets: false,
           config: configForSave,
           secrets: validatedActionTypeSecrets,
+          ...(isAuthModeNotChosen && requestedAuthMode !== undefined
+            ? { authMode: requestedAuthMode }
+            : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
           hasInboundEventIdentity: Boolean(identityAttributes),
         },
