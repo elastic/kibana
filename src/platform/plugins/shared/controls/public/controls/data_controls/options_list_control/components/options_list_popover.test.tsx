@@ -205,6 +205,25 @@ describe('Options list popover', () => {
     expect(option).not.toBeChecked();
   });
 
+  describe('document count', () => {
+    test('describes the option with a document count tooltip without making the badge focusable', async () => {
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.setAvailableOptions([{ value: 'woof', docCount: 1234 }]);
+      const popover = mountComponent(contextMock);
+
+      const option = popover.getByTestId('optionsList-control-selection-woof');
+      const badge = within(option).getByTestId('optionsList-document-count-badge');
+      expect(badge).toHaveTextContent('1,234');
+      expect(badge).toHaveAttribute('aria-hidden', 'true');
+      expect(badge).not.toHaveAttribute('tabindex');
+
+      await userEvent.hover(badge);
+      const tooltip = await popover.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent('This value appears in 1,234 documents');
+      expect(option).toHaveAttribute('aria-describedby', expect.stringContaining(tooltip.id));
+    });
+  });
+
   describe('show only selected', () => {
     test('show only selected options', async () => {
       const contextMock = getOptionsListContextMock();

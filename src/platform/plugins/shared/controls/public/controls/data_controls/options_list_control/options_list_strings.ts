@@ -259,12 +259,6 @@ export const OptionsListStrings = {
           'This value appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
         values: { documentCount },
       }),
-    getDocumentCountScreenReaderText: (documentCount: number) =>
-      i18n.translate('controls.optionsList.popover.documentCountScreenReaderText', {
-        defaultMessage:
-          'Appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
-        values: { documentCount },
-      }),
     getSelectAllButtonLabel: () =>
       i18n.translate('controls.optionsList.popover.selectAllButtonLabel', {
         defaultMessage: 'Select all',

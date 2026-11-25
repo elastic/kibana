@@ -11,30 +11,19 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiScreenReaderOnly, EuiText } from '@elastic/eui';
-
-import { OptionsListStrings } from '../options_list_strings';
+import { EuiText } from '@elastic/eui';
 
 export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentCount: number }) => {
   return (
-    <>
-      <EuiText
-        size="xs"
-        aria-hidden={true}
-        title={OptionsListStrings.popover.getDocumentCountTooltip(documentCount)}
-        className="eui-textNumber"
-        data-test-subj="optionsList-document-count-badge"
-        css={styles.documentCountBadge}
-      >
-        {`${documentCount.toLocaleString()}`}
-      </EuiText>
-      <EuiScreenReaderOnly>
-        <div>
-          {'" "'} {/* Adds a pause for the screen reader */}
-          {OptionsListStrings.popover.getDocumentCountScreenReaderText(documentCount)}
-        </div>
-      </EuiScreenReaderOnly>
-    </>
+    <EuiText
+      size="xs"
+      aria-hidden={true}
+      className="eui-textNumber"
+      data-test-subj="optionsList-document-count-badge"
+      css={styles.documentCountBadge}
+    >
+      {`${documentCount.toLocaleString()}`}
+    </EuiText>
   );
 };
 

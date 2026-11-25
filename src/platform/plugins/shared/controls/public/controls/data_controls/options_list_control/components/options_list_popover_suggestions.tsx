@@ -124,6 +124,8 @@ export const OptionsListPopoverSuggestions = ({
         suggestion = { value: suggestion };
       }
 
+      const documentCount = showOnlySelected ? undefined : suggestion.docCount;
+
       return {
         disabled: !(displaySettings.isInteractive ?? true),
         key: String(suggestion.value),
@@ -134,10 +136,13 @@ export const OptionsListPopoverSuggestions = ({
           showOnlySelected && invalidSelections?.has(suggestion.value as string)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
-        append:
-          !showOnlySelected && suggestion?.docCount ? (
-            <OptionsListPopoverSuggestionBadge documentCount={suggestion.docCount} />
-          ) : undefined,
+        ...(documentCount
+          ? {
+              append: <OptionsListPopoverSuggestionBadge documentCount={documentCount} />,
+              toolTipContent: OptionsListStrings.popover.getDocumentCountTooltip(documentCount),
+              toolTipProps: { position: 'right' },
+            }
+          : {}),
       } as EuiSelectableOption;
     });
 
