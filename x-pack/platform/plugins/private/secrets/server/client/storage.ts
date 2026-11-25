@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SecretEntry, SecretMetadata } from './types';
+import type { SecretMetadata } from '@kbn/secrets';
+import type { SecretEntry } from './types';
 
 /** A secret as read from storage, with the version to pass back when replacing it. */
 export interface StoredSecret {

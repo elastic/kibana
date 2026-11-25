@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecretsUnavailableError } from './errors';
+import { SecretsUnavailableError } from '@kbn/secrets';
 import type { SecretsClient } from './types';
 
 export interface CreateUnavailableSecretsClientParams {

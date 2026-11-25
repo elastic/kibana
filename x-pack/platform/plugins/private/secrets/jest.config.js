@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/jest/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-secrets'],
+  roots: ['<rootDir>/x-pack/platform/plugins/private/secrets/server'],
 };

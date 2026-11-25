@@ -20,22 +20,14 @@ export {
   SecretValidationError,
 } from './src/errors';
 export { isValidSecretName } from './src/secret_name';
-export { createSecretsClient } from './src/secrets_client';
-export type { CreateSecretsClientParams } from './src/secrets_client';
-export type { SecretsStorage, StoredSecret } from './src/storage';
-export { createUnavailableSecretsClient } from './src/unavailable_secrets_client';
-export type { CreateUnavailableSecretsClientParams } from './src/unavailable_secrets_client';
 export type {
   CreateSecretParams,
   DeleteSecretParams,
-  KibanaSecretEntry,
   KibanaSecretMetadata,
   KibanaSecretSource,
   SecretDetails,
-  SecretEntry,
   SecretMetadata,
   SecretProviderType,
-  SecretsClient,
   SecretSource,
   UpdateSecretParams,
 } from './src/types';

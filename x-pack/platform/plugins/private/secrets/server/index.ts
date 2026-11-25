@@ -12,4 +12,5 @@ export const plugin = async () => {
 
 export { config } from './config';
 export type { SecretsConfig } from './config';
+export type { SecretsClient } from './client/types';
 export type { SecretsPluginSetup, SecretsPluginStart } from './types';

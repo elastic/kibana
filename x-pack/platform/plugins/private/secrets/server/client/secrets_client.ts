@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SecretConflictError, SecretNotFoundError, SecretValidationError } from './errors';
+import { SecretConflictError, SecretNotFoundError, SecretValidationError } from '@kbn/secrets';
+import type { SecretMetadata } from '@kbn/secrets';
 import type { SecretsStorage, StoredSecret } from './storage';
-import type { SecretEntry, SecretMetadata, SecretsClient } from './types';
+import type { SecretEntry, SecretsClient } from './types';
 import { validateSecret } from './validate_secret';
 
 export interface CreateSecretsClientParams {

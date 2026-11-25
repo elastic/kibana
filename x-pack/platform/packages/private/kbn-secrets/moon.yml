@@ -15,14 +15,14 @@ project:
   description: Moon project for @kbn/secrets
   channel: ''
   owner: '@elastic/workflows-eng'
-  sourceRoot: x-pack/platform/packages/shared/kbn-secrets
+  sourceRoot: x-pack/platform/packages/private/kbn-secrets
 dependsOn: []
 tags:
   - shared-common
   - package
   - prod
   - group-platform
-  - shared
+  - private
   - jest-unit-tests
 fileGroups:
   src:

@@ -6,14 +6,14 @@
  */
 
 import {
+  isValidSecretName,
   SECRET_DESCRIPTION_MAX_LENGTH,
   SECRET_NAME_MAX_LENGTH,
   SECRET_VALUE_MAX_LENGTH,
   SECRET_VALUE_MIN_LENGTH,
-} from './constants';
-import { SecretValidationError } from './errors';
-import { isValidSecretName } from './secret_name';
-import type { SecretSource, UpdateSecretParams } from './types';
+  SecretValidationError,
+} from '@kbn/secrets';
+import type { SecretSource, UpdateSecretParams } from '@kbn/secrets';
 
 const validateSourceValue = ({ value: { length } }: SecretSource): void => {
   if (length < SECRET_VALUE_MIN_LENGTH || length > SECRET_VALUE_MAX_LENGTH) {

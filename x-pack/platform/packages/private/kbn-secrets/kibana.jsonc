@@ -3,5 +3,5 @@
   "id": "@kbn/secrets",
   "owner": "@elastic/workflows-eng",
   "group": "platform",
-  "visibility": "shared"
+  "visibility": "private"
 }
