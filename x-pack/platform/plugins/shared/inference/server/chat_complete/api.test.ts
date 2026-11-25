@@ -26,6 +26,7 @@ import {
   isChatCompletionTokenCountEvent,
   createInferenceProviderError,
   InferenceTaskErrorCode,
+  isToolValidationError,
 } from '@kbn/inference-common';
 import {
   createInferenceConnectorAdapterMock,
@@ -344,6 +345,7 @@ describe('createChatCompleteApi', () => {
         },
         maxRetries: 1,
         retryConfiguration: {
+          retryOn: isToolValidationError,
           initialDelay: 1,
           backoffMultiplier: 1,
         },
@@ -355,6 +357,39 @@ describe('createChatCompleteApi', () => {
       expect(response.toolCalls).toEqual([
         { toolCallId: 'call-2', function: { name: 'myTool', arguments: {} } },
       ]);
+    });
+
+    it('does not resend the same request on a tool validation error by default', async () => {
+      inferenceAdapter.chatComplete.mockImplementation(() =>
+        of(
+          chunkEvent('', [
+            {
+              index: 0,
+              toolCallId: 'call-1',
+              function: { name: 'myTool', arguments: 'not-valid-json{' },
+            },
+          ])
+        )
+      );
+
+      const error = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        tools: {
+          myTool: {
+            description: 'my tool',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+        maxRetries: 2,
+        retryConfiguration: {
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      }).catch((e: Error) => e);
+
+      expect(isToolValidationError(error as Error)).toBe(true);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
     });
 
     describe('request cancellation', () => {
@@ -481,6 +516,7 @@ describe('createChatCompleteApi', () => {
         },
         maxRetries: 1,
         retryConfiguration: {
+          retryOn: isToolValidationError,
           initialDelay: 1,
           backoffMultiplier: 1,
         },

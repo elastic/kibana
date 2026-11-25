@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import { stampRetryable } from '@langchain/core/errors';
+import { isToolValidationError } from '@kbn/inference-common';
+
 export const wrapInferenceError = (error: any) => {
+  // Resending the identical request rarely fixes malformed tool calls, so keep langchain's
+  // caller from retrying them; callers recover by sending the error back to the model.
+  if (isToolValidationError(error)) {
+    return stampRetryable(error, false);
+  }
   // TODO maybe at some point we may want to add the errors likes as done in the following models
   //      however, only a very small subset of chat models are doing this, so I don't think it's strictly necessary.
   //      https://github.com/langchain-ai/langchainjs/blob/ff0dc580a71268b098e5ac2ee68b7d98317727ed/libs/langchain-openai/src/utils/openai.ts

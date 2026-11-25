@@ -27,8 +27,10 @@ import type {
   InferenceConnector,
 } from '@kbn/inference-common';
 import {
+  ChatCompletionErrorCode,
   ChatCompletionEventType,
   InferenceConnectorType,
+  InferenceTaskError,
   MessageRole,
   createInferenceRequestError,
 } from '@kbn/inference-common';
@@ -1089,6 +1091,23 @@ describe('InferenceChatModel', () => {
       await expect(() =>
         chatModel.invoke('Some question')
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"bad parameter"`);
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+    });
+    it('does not resend the same request on a tool validation error', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        maxRetries: 2,
+      });
+
+      chatComplete.mockImplementation(async () => {
+        throw new InferenceTaskError(ChatCompletionErrorCode.ToolValidationError, 'invalid args', {
+          toolCalls: [],
+        });
+      });
+
+      await expect(() => chatModel.invoke('Some question')).rejects.toThrow(OutputParserException);
 
       expect(chatComplete).toHaveBeenCalledTimes(1);
     });
