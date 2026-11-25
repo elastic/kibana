@@ -321,7 +321,8 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             projectRouting={projectRouting}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        {/* wide enough to show the prepend label and a typical field name before one is picked */}
+        <EuiFlexItem grow={false} css={{ minWidth: 180 }}>
           <EuiSelect
             options={timeFieldOptions}
             value={currentTimeFieldIsOption ? timeField : ''}
