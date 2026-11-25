@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { parseSlackChannelInput } from './parse_slack_channel_input';
+import { isSlackChannelId, parseSlackChannelInput } from './slack_channel';
+
+describe('isSlackChannelId', () => {
+  it('accepts any channel-id-shaped value, including short ones', () => {
+    expect(isSlackChannelId('C123')).toBe(true);
+    expect(isSlackChannelId('#oncall')).toBe(false);
+  });
+});
 
 describe('parseSlackChannelInput', () => {
+  it('requires the full id length for typed input', () => {
+    expect(parseSlackChannelInput('C123')).toBeUndefined();
+  });
+
   it.each([
     ['C0123456789', 'C0123456789'],
     ['  G0123456789 ', 'G0123456789'],

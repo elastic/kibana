@@ -360,7 +360,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    * @param MetadataGenerator
    */
   constructor(
-    seed: string | seedrandom.prng = Math.random().toString(),
+    seed: string | seedrandom.PRNG = Math.random().toString(),
     MetadataGenerator: typeof EndpointMetadataGenerator = EndpointMetadataGenerator
   ) {
     super(seed);
