@@ -3,7 +3,7 @@ navigation_title: "Microsoft Defender XDR"
 type: reference
 description: "Use the Microsoft Defender XDR connector to manage incidents and alerts, run advanced hunting KQL queries, enrich threat intelligence, and triage threats in Microsoft Defender XDR."
 applies_to:
-  stack: preview 9.6
+  stack: preview 9.7
   serverless: preview
 ---
 
@@ -15,15 +15,15 @@ This connector is currently available in **Agent Builder** only.
 
 ## Create connectors in {{kib}} [define-microsoft-defender-xdr-ui]
 
-Create a Microsoft Defender XDR connector from the **{{connectors-ui}}** page. To open the page, find **{{connectors-ui}}** in the navigation or under **Alerts and Insights / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
 
 ### Connector configuration [microsoft-defender-xdr-connector-configuration]
 
 Cloud environment
 :   Select the Microsoft cloud where your Defender XDR tenant is hosted:
-    - **Commercial (global)** — public Microsoft 365 cloud (default)
-    - **US Government GCC High** — Microsoft 365 Government GCC High cloud
-    - **US Government DoD** — Microsoft 365 Government DoD cloud
+    - **Commercial (global)**: Public Microsoft 365 cloud (default)
+    - **US Government GCC High**: Microsoft 365 Government GCC High cloud
+    - **US Government DoD**: Microsoft 365 Government DoD cloud
 
 ### Authentication: Client secret (OAuth 2.0 Client Credentials) [microsoft-defender-xdr-client-secret-auth]
 
@@ -42,7 +42,7 @@ Client Secret
 
 As an alternative to a client secret, authenticate with an X.509 certificate. Upload the PEM-encoded public certificate and private key. The certificate must first be uploaded to your app registration under **Certificates & secrets > Certificates**.
 
-## Available actions [microsoft-defender-xdr-available-actions]
+## Connector actions [microsoft-defender-xdr-connector-actions]
 
 The following actions are available for the Microsoft Defender XDR connector. Actions marked _(API only)_ are not available as agent tools and can only be invoked through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 
@@ -85,7 +85,7 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 `addIncidentComment`
 :   Appends a comment to an incident's activity log. Use to record analyst notes, investigation findings, or escalation decisions for audit trail purposes.
 
-`mergeIncidents`
+`mergeIncidents` _(API only)_
 :   Merges two or more incidents into a single incident. The first incident ID in the `incidentIds` list becomes the primary (surviving) incident; all others are merged into it. Use to consolidate duplicate detections or combine related incidents from the same attack campaign. This action is irreversible — verify incident IDs with `listIncidents` or `getIncident` first.
 
 ### Alert management
@@ -115,13 +115,13 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 `getDetectionRule`
 :   Retrieves full details for a single custom detection rule by its numeric ID, including its KQL query, schedule, alert template, and trigger settings.
 
-`createDetectionRule`
+`createDetectionRule` _(API only)_
 :   Creates a new custom detection rule that runs a KQL query on a schedule and generates alerts when the result count satisfies the trigger condition. The query must project at least one of: `DeviceId`, `AccountObjectId`, `AccountSid`, `AccountUpn`, `AccountName`, `MailboxAddress`, `FileName`, `SHA256`, `IPAddress`, `URL`. The `alertTemplate` object requires a `title` and `severity` and optionally accepts `description`, `recommendedActions`, and `tactics`. `tactics` is an array of tactic objects, each with a `tactic` string (e.g. `"Execution"`) and an optional `techniques` array; each technique has a `technique` string (e.g. `"T1059"`) and an optional `subTechniques` array of strings. The `period` must be one of `PT1H`, `PT3H`, `PT12H`, `P1D`, or `P7D`.
 
-`updateDetectionRule`
+`updateDetectionRule` _(API only)_
 :   Updates an existing custom detection rule — modify `displayName`, enable/disable via `status` (`enabled` or `disabled`), change the KQL `queryText`, adjust the `period`, or update the `alertTemplate`. Provide only the fields you want to change.
 
-`deleteDetectionRule`
+`deleteDetectionRule` _(API only)_
 :   Permanently deletes a custom detection rule by its numeric ID. Confirm the rule ID with `listDetectionRules` or `getDetectionRule` before deleting. This action is irreversible.
 
 ### Threat intelligence
