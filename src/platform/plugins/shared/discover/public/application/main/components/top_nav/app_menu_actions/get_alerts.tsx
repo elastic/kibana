@@ -298,10 +298,6 @@ export const getAlertsAppMenuItem = ({
   };
 };
 
-/**
- * Classic rules tab registered by the hosting solution where Alerting v2 applies;
- * otherwise the Stack Management rules page.
- */
 const getManageRulesHref = (
   { application, core, share }: DiscoverServices,
   solutionNavId: string | null | undefined

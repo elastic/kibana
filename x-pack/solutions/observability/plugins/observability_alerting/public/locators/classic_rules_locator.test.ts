@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { ALERTING_V2_CLASSIC_RULES_LOCATOR } from '@kbn/alerting-v2-constants';
-import {
-  OBSERVABILITY_ALERTING_APP_ID,
-  OBSERVABILITY_ALERTING_RULES_V1_PATH,
-} from '@kbn/deeplinks-observability';
 import { classicRulesLocatorDefinition } from './classic_rules_locator';
 
 describe('classicRulesLocatorDefinition', () => {
-  it('uses the shared classic rules locator id', () => {
-    expect(classicRulesLocatorDefinition.id).toBe(ALERTING_V2_CLASSIC_RULES_LOCATOR);
+  it('registers under the id Discover looks up', () => {
+    expect(classicRulesLocatorDefinition.id).toBe('ALERTING_V2_CLASSIC_RULES_LOCATOR');
   });
 
-  it('resolves to the Observability Alerting classic rules tab', async () => {
+  it('resolves to the Classic tab of the Observability Alerting rules page', async () => {
     expect(await classicRulesLocatorDefinition.getLocation({})).toEqual({
-      app: OBSERVABILITY_ALERTING_APP_ID,
-      path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+      app: 'observabilityAlerting',
+      path: '/rules/classic',
       state: {},
     });
   });
