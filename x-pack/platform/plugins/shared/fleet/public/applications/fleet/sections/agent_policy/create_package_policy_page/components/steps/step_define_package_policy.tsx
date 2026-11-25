@@ -61,7 +61,7 @@ import {
   VarGroupSelector,
 } from './components';
 import { useOutputs, usePackagePolicyVarGroups } from './components/hooks';
-import { ClassicAwsIdentityFederationSetup } from './components/classic_aws_identity_federation_setup';
+import { PackagePolicyAwsIdentityFederationSetup } from './components/package_policy_aws_identity_federation_setup';
 import { PackagePolicyOutputSelect } from './components/package_policy_output_select';
 import { useNamespaceCustomization } from './use_namespace_customization';
 
@@ -91,7 +91,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   deploymentSelector?: React.ReactNode;
   hideInVarGroupOptions?: Record<string, string[]>;
   packageVarGroups?: ReturnType<typeof usePackagePolicyVarGroups>;
-  classicIdentityFederation?: {
+  identityFederation?: {
     provider: CloudProvider;
     onReadyChange: (isReady: boolean) => void;
   };
@@ -113,7 +113,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     deploymentSelector,
     hideInVarGroupOptions,
     packageVarGroups,
-    classicIdentityFederation,
+    identityFederation,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const varGroups = packageInfo.var_groups;
@@ -886,15 +886,15 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       {isLastGroup && isCloudConnectorSelected && cloudProvider && (
                         <EuiFlexItem>
                           {cloudProvider === 'aws' &&
-                          classicIdentityFederation?.provider === cloudProvider ? (
-                            <ClassicAwsIdentityFederationSetup
+                          identityFederation?.provider === cloudProvider ? (
+                            <PackagePolicyAwsIdentityFederationSetup
                               packageName={packageInfo.name}
                               packageVersion={packageInfo.version}
                               inputs={packagePolicy.inputs}
                               accountType={accountType}
                               cloud={cloud}
                               iacTemplateUrl={iacTemplateUrl}
-                              onReadyChange={classicIdentityFederation.onReadyChange}
+                              onReadyChange={identityFederation.onReadyChange}
                             />
                           ) : (
                             <CloudConnectorSetup

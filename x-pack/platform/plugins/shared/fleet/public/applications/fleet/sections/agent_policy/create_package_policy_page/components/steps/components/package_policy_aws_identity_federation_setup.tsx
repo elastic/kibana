@@ -21,7 +21,7 @@ type Props = Pick<
   inputs: NewPackagePolicy['inputs'];
 };
 
-export function ClassicAwsIdentityFederationSetup({
+export function PackagePolicyAwsIdentityFederationSetup({
   packageName,
   packageVersion,
   inputs,

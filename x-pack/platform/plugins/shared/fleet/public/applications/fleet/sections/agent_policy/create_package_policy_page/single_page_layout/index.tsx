@@ -672,7 +672,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
             }
             packageVarGroups={packageVarGroups}
-            classicIdentityFederation={
+            identityFederation={
               identityFederationProvider && {
                 provider: identityFederationProvider,
                 onReadyChange: onIdentityFederationReadyChange,

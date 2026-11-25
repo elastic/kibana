@@ -58,7 +58,7 @@ async function ensureAgentlessSelected(page: ScoutPage) {
 // ---------------------------------------------------------------------------
 
 test.describe(
-  'AWS Federated Identity — classic create and saved-policy edit',
+  'AWS Federated Identity — create and saved-policy edit',
   { tag: tags.stateful.classic },
   () => {
     test.setTimeout(3 * 60 * 1000);

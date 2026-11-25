@@ -55,7 +55,7 @@ const AGENTLESS_RADIO_ID = 'SetupTechnologySelector_agentless';
 /** Radio button ID for the agent-based setup technology option. */
 const AGENT_BASED_RADIO_ID = 'SetupTechnologySelector_agent-based';
 
-/** Launch action of the shared AWS setup on classic create. */
+/** Launch action of the shared AWS setup on the create package policy page. */
 const FI_LAUNCH = 'awsIdentityFederationSetup-launchCloudFormation';
 
 /**

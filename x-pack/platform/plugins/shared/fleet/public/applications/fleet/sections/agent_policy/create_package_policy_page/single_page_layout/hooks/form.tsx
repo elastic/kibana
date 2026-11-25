@@ -559,7 +559,7 @@ export function useOnSubmit({
       ? 'pendingAttachment'
       : 'notReady'
     : 'inactive';
-  // The classic editor will attach the selected identity to the policy in ingest-dev#10669.
+  // The create package policy page will attach the selected identity to the policy in ingest-dev#10669.
   const isIdentityFederationSaveBlocked = identityFederationSubmitState !== 'inactive';
 
   const newInputs = useMemo(() => {

@@ -36,7 +36,7 @@ async function selectIdentityFederation(page: ScoutPage) {
 }
 
 test.describe(
-  'Classic AWS Identity Federation',
+  'AWS Identity Federation on the create package policy page',
   { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
   () => {
     test.beforeAll(async ({ apiServices }) => {

@@ -533,7 +533,7 @@ describe('StepDefinePackagePolicy', () => {
     });
   });
 
-  it('hosts the AWS setup with the current enabled inputs on classic create', () => {
+  it('hosts the AWS setup with the current enabled inputs on the create package policy page', () => {
     const awsPackage: PackageInfo = {
       ...packageInfo,
       name: 'aws',
@@ -572,7 +572,7 @@ describe('StepDefinePackagePolicy', () => {
         validationResults={validationResults}
         submitAttempted={false}
         isAgentlessSelected
-        classicIdentityFederation={{ provider: 'aws', onReadyChange }}
+        identityFederation={{ provider: 'aws', onReadyChange }}
       />
     );
 
