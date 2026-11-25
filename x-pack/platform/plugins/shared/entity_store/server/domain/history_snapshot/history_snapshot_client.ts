@@ -293,7 +293,15 @@ export class HistorySnapshotClient {
       return;
     }
     if (savedRun) {
-      await this.discardRun(savedRun);
+      const { historySnapshotIndex } = savedRun;
+      // The task is already disabled, so a failed cleanup must not fail the disable.
+      await this.discardRun(savedRun).catch((discardErr) => {
+        this.logger.warn(
+          `History snapshot: failed to discard the unfinished copy into ${historySnapshotIndex}: ${getErrorMessage(
+            discardErr
+          )}`
+        );
+      });
     }
   }
 
@@ -405,7 +413,7 @@ export class HistorySnapshotClient {
     // A run saved in the `reset` phase already finished its copy.
     if (run.phase === 'reindex') {
       this.logger.info(`Deleting partial history snapshot index ${run.historySnapshotIndex}`);
-      await deleteIndex(this.esClient, run.historySnapshotIndex);
+      await deleteIndex(this.internalEsClient, run.historySnapshotIndex);
     }
   }
 
