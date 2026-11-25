@@ -365,6 +365,7 @@ const KafkaKerberosSchema = schema.object({
   ),
   username: schema.string({
     minLength: 1,
+    maxLength: 256,
     meta: {
       description:
         'Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.',

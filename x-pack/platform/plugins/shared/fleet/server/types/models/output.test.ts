@@ -201,6 +201,25 @@ describe('Output model', () => {
         ).toThrow();
       });
 
+      it('should limit the length of the username', () => {
+        const withUsername = (username: string) =>
+          kerberosOutput({
+            kerberos: {
+              auth_type: 'keytab',
+              config_path: '/etc/krb5.conf',
+              keytab: '/etc/kafka.keytab',
+              username,
+              realm: 'EXAMPLE.COM',
+            },
+            secrets: undefined,
+          });
+
+        expect(() =>
+          schema.object(KafkaSchema).validate(withUsername('a'.repeat(256)))
+        ).not.toThrow();
+        expect(() => schema.object(KafkaSchema).validate(withUsername('a'.repeat(257)))).toThrow();
+      });
+
       it('should accept a secret reference as the password', () => {
         expect(() =>
           schema

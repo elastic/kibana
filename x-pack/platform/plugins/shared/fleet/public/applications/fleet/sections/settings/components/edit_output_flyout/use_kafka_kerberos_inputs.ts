@@ -131,9 +131,9 @@ export function buildKafkaKerberosConfig(
     auth_type: inputs.kafkaKerberosAuthTypeInput.value as KafkaKerberosConfig['auth_type'],
     config_path: inputs.kafkaKerberosConfigPathInput.value.trim(),
     realm: inputs.kafkaKerberosRealmInput.value.trim(),
+    username: inputs.kafkaKerberosUsernameInput.value.trim(),
     ...defined({
       service_name: text(inputs.kafkaKerberosServiceNameInput),
-      username: text(inputs.kafkaKerberosUsernameInput),
       ...(isPassword ? {} : { keytab: text(inputs.kafkaKerberosKeytabInput) }),
     }),
     // the default is only sent when it was set before

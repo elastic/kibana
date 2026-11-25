@@ -152,7 +152,7 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
             ? undefined
             : i18n.translate(
                 'xpack.fleet.settings.editOutputFlyout.kafkaKerberosUsernameKeytabHelpText',
-                { defaultMessage: 'Username associated to the keytab file.' }
+                { defaultMessage: 'Username associated with the keytab file.' }
               )
         }
         input={inputs.kafkaKerberosUsernameInput}
