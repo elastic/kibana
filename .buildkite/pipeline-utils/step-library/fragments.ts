@@ -37,6 +37,7 @@ import {
   pageLoadBenchSteps,
   warmStartMemoryBenchSteps,
 } from './steps/benchmarks.ts';
+import { evalsSuggestions } from './steps/evals_suggestions.ts';
 import { fleetCypressSteps } from './steps/fleet_cypress.ts';
 import { localCheck } from './steps/local_check.ts';
 import { postBuildSteps } from './steps/post_build.ts';
@@ -99,6 +100,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/cps_testing'), steps: cpsTests },
   { ...yamlFragment('pull_request/deploy_cloud'), steps: deployCloudSteps },
   { ...yamlFragment('pull_request/deploy_project'), steps: deployProjectSteps },
+  { ...yamlFragment('pull_request/evals_suggestions'), steps: evalsSuggestions },
   { ...yamlFragment('pull_request/fips'), steps: buildFipsImage },
   { ...yamlFragment('pull_request/fleet_cypress'), steps: fleetCypressSteps },
   { ...yamlFragment('pull_request/ftr_bench'), steps: ftrBenchSteps },

@@ -32,6 +32,7 @@ export {
   pageLoadBenchSteps,
   warmStartMemoryBenchSteps,
 } from './steps/benchmarks.ts';
+export { EVALS_SUGGESTIONS_LABEL, evalsSuggestions } from './steps/evals_suggestions.ts';
 export { fleetCypressSteps } from './steps/fleet_cypress.ts';
 export { kbnHandlebars } from './steps/kbn_handlebars.ts';
 export { localCheck } from './steps/local_check.ts';
