@@ -7,12 +7,14 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import {
   FIT_VIEW_DEFER_MS,
   MOCK_EUI_THEME_FOR_USE_THEME,
   OPENED_GROUP_MAX_ZOOM,
 } from './constants';
+import { DEFAULT_SERVICE_MAP_VIEW_FILTERS } from './apply_service_map_visibility';
 import { ServiceMapGraph } from './graph';
 
 const mockFitView = jest.fn();
@@ -275,6 +277,21 @@ describe('ServiceMapGraph service groups', () => {
 
   const groupProps = { ...defaultProps, nodes: [closedGroup], edges: [] };
 
+  // What an open group is on the map: the box and its members. A box alone is hidden by the filters.
+  const memberA: ServiceMapNode = {
+    ...serviceNode,
+    id: 'frontend',
+    parentId: box.id,
+    data: { ...serviceNode.data, id: 'frontend', label: 'frontend' },
+  } as ServiceMapNode;
+  const memberB: ServiceMapNode = {
+    ...serviceNode,
+    id: 'cart',
+    parentId: box.id,
+    data: { ...serviceNode.data, id: 'cart', label: 'cart' },
+  } as ServiceMapNode;
+  const openGroupNodes = [box, memberA, memberB];
+
   beforeEach(() => {
     mockUseKeyboardNavigation.mockClear();
   });
@@ -413,18 +430,6 @@ describe('ServiceMapGraph service groups', () => {
   });
 
   describe('a call inside a group that closes', () => {
-    const memberA: ServiceMapNode = {
-      ...serviceNode,
-      id: 'frontend',
-      parentId: box.id,
-      data: { ...serviceNode.data, id: 'frontend', label: 'frontend' },
-    } as ServiceMapNode;
-    const memberB: ServiceMapNode = {
-      ...serviceNode,
-      id: 'cart',
-      parentId: box.id,
-      data: { ...serviceNode.data, id: 'cart', label: 'cart' },
-    } as ServiceMapNode;
     const intraGroupEdge = {
       ...serviceToDependencyEdge,
       id: 'frontend~cart',
@@ -485,7 +490,7 @@ describe('ServiceMapGraph service groups', () => {
       settle();
       mockFitView.mockClear();
 
-      rerender(<ServiceMapGraph {...groupProps} nodes={[box]} />);
+      rerender(<ServiceMapGraph {...groupProps} nodes={openGroupNodes} />);
       settle();
 
       expect(mockFitView).toHaveBeenCalledTimes(1);
@@ -498,7 +503,7 @@ describe('ServiceMapGraph service groups', () => {
     });
 
     it('keeps the zoom and centres on the group that was closed', () => {
-      const { rerender } = render(<ServiceMapGraph {...groupProps} nodes={[box]} />);
+      const { rerender } = render(<ServiceMapGraph {...groupProps} nodes={openGroupNodes} />);
       settle();
       mockFitView.mockClear();
 
@@ -520,9 +525,9 @@ describe('ServiceMapGraph service groups', () => {
       settle();
       mockFitView.mockClear();
 
-      rerender(<ServiceMapGraph {...groupProps} nodes={[box]} />);
+      rerender(<ServiceMapGraph {...groupProps} nodes={openGroupNodes} />);
       // Before the view moved: this run cancels the first one, and must frame the group too.
-      rerender(<ServiceMapGraph {...groupProps} nodes={[box, serviceNode]} />);
+      rerender(<ServiceMapGraph {...groupProps} nodes={[...openGroupNodes, serviceNode]} />);
       settle();
 
       expect(mockFitView).toHaveBeenCalledTimes(1);
@@ -531,6 +536,31 @@ describe('ServiceMapGraph service groups', () => {
           nodes: [{ id: 'service.namespace:shop' }],
           maxZoom: OPENED_GROUP_MAX_ZOOM,
         })
+      );
+    });
+
+    it('fits the whole map when a filter hides the group before the view moves', () => {
+      const { rerender } = render(<ServiceMapGraph {...groupProps} />);
+      settle();
+      mockFitView.mockClear();
+
+      rerender(<ServiceMapGraph {...groupProps} nodes={openGroupNodes} />);
+      // Before the view moved: nothing in the box matches the filter, so the box is hidden.
+      rerender(
+        <ServiceMapGraph
+          {...groupProps}
+          nodes={openGroupNodes}
+          viewFilters={{
+            ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+            alertStatusFilter: [ALERT_STATUS_ACTIVE],
+          }}
+        />
+      );
+      settle();
+
+      expect(mockFitView).toHaveBeenCalledTimes(1);
+      expect(mockFitView).not.toHaveBeenCalledWith(
+        expect.objectContaining({ nodes: expect.anything() })
       );
     });
 

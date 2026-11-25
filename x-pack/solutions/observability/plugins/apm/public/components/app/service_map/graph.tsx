@@ -484,9 +484,11 @@ function GraphInner({
       const timer = setTimeout(() => {
         const switchedGroup = pendingGroupFitRef.current;
         pendingGroupFitRef.current = undefined;
+        // Only a group that is shown: React Flow leaves hidden nodes out of the fit, and a filter can
+        // hide the group before this runs, which would leave the view where it was.
         if (
           !switchedGroup ||
-          !nodesWithContextHighlight.some(({ id }) => id === switchedGroup.id)
+          !nodesWithContextHighlight.some(({ id, hidden }) => id === switchedGroup.id && !hidden)
         ) {
           handleFitView(!isInitialFit);
           return;
