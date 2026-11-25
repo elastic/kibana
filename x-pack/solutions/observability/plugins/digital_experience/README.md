@@ -398,7 +398,73 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   its per-type counts, its sessions (**Pages** shows a lower bound: the largest session count of the
   URLs that fold into the path) and **Open sessions**, which opens the Sessions list filtered to
   that element or page (`withFrustration`, `frustrationTarget` / `frustrationPage`). The page filter
-  narrows it, as the signals carry a page URL. See [Frustration signals](#frustration-signals).
+  narrows it, as the signals carry a page URL. A **View dashboard** link in its header opens the
+  Frustration page below. See [Frustration signals](#frustration-signals).
+
+### Frustration (`/{serviceName}/frustration?source=otel`)
+
+A page of EDOT Browser applications only (Classic RUM shows an empty prompt), opened from the
+Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcrumb is Applications >
+{application} > Frustration. The time range and environment are the app's and are kept in the URL.
+
+- **Dashboard:** the portable dashboard (`DashboardRenderer`, view mode) with Lens panels built as
+  code from ES|QL (`LensConfigBuilder`, `public/pages/frustration/utils/frustration_panels.ts`), so
+  each has the panel menu's inspect, maximize and **Explore in Discover / Lens**. Collapsible
+  sections, laid out after Datadog's RUM frustration signals dashboard, each open with a by-value
+  markdown panel defining the signal (the Overview panel's definitions). Each metric's panel
+  `description` says what it measures, which the dashboard shows as an info icon tooltip by the
+  title:
+  - **Overview:** signals per session and rage, dead and error clicks per session (2 decimals, with
+    the count), frustrated sessions (share of all sessions, with their count); signals over time,
+    stacked by type, and the frustrated sessions by their number of signals (`10+` caps it); the
+    top actions, by type, element (CSS selector) and page, with signals, sessions and signals per
+    page view (2 decimals; above 1 when a view has several).
+  - **Rage clicks**, **Dead clicks**, **Error clicks:** the average per page view, with the count,
+    the share of sessions with the type (with their count), and the type's top actions by page and
+    element; error clicks add the clicks by exception.
+  - **Breakdowns** (collapsed): signals per session by app version, browser and device, stacked by
+    type, so a release or browser with less traffic but more signals per session stands out; the
+    busiest values without signals stay as a baseline.
+
+  Once sessions are set up and built (`/sessions/status`: installed, not rebuilding, healthy, so
+  not lagging, degraded or turned off),
+  the per-session panels (signals and frustrated share per session, per page view, the
+  distribution and the breakdowns) read the session summaries, one document per session instead
+  of every event, with the sessions that overlap the time range (`start_time <= ?_tend AND
+  end_time >= ?_tstart`), as the Sessions list does. Signals over time, top actions and exceptions
+  read the events, which the summaries don't keep. Before that, every panel reads the events:
+  sessions are the distinct non-empty `session.id` of the page views and signals of the
+  application, as every session has a page view, so a session whose page views fall before the
+  time range can be in the list and not on the dashboard. Sessions are counted exactly up to
+  40,000 (`COUNT_DISTINCT` precision), as the summaries count them. The source is picked once per
+  time range, environment and **Refresh**, so a status change doesn't remount the dashboard.
+  Shares have one decimal. Page views are
+  `PAGE_VIEW_EVENTS` (`common/otel_data.ts`) in the logs. A page is labeled in ES|QL as
+  `toPagePath` labels it for the Overview's frustrated pages (hash route, else path, without
+  query), and its views are counted with `INLINE STATS ... BY page` before the signals are grouped.
+- **Save as dashboard:** a header action, with the privilege to save dashboards
+  (`dashboard_v2.showWriteControls`), opens Kibana's save modal (`DashboardApi.runInteractiveSave`)
+  titled after the application (and environment), then opens the saved dashboard. It keeps the
+  panels and sections with the application and environment in their ES|QL; the native panel
+  isn't part of it. Saved while the per-session panels read the summaries, it keeps reading them
+  for any time range, which its description says: ranges older than the summaries keep have no
+  sessions there, and once sessions are turned off they stop updating.
+- **Queries:** every panel filters on the application and, unless all environments are picked, the
+  environment, in the ES|QL `WHERE` (escaped). The time range goes through `?_tstart`/`?_tend`:
+  Lens takes the column compared with the first of them as the panel's time field and filters it
+  on the range too (the Lens API can't set it for ES|QL), so the events compare `@timestamp` first,
+  and the summaries wrap `start_time` in `TO_DATETIME` so that there's no time field to filter
+  out sessions that started before the range. The field
+  names are shared with the summary query (`common/otel_source_fields.ts`) and the event names come
+  from `common/otel_data.ts`.
+- **Native panel:** above the dashboard, the Overview's **Elements** / **Pages** panel from
+  `/usage`, with **Open sessions**, as Lens tables can't link into the Sessions list with those
+  filters.
+- **Plugins:** `dashboard` and `lens` are optional. Without them the Overview hides the
+  link and the page shows an empty prompt in place of the dashboard.
+- **Limits:** the Overview's filters (browser, OS, device, country, version, page) and KQL query
+  aren't carried over yet: the dashboard and the panel above it cover the application and
+  environment only.
 
 ### Sessions (`/{serviceName}/sessions?source=otel`)
 
@@ -542,7 +608,7 @@ country, city and pages, which the list's search matches anywhere in.
 ### Frustration signals
 
 EDOT Browser reports a rage, dead or error click as a log event of its own
-(`browser.frustration.rage_click`, `.dead_click` and `.error_click`, in `common/otel_data.ts`),
+(`elastic.frustration.rage_click`, `.dead_click` and `.error_click`, in `common/otel_data.ts`),
 timestamped at the first click, with the element's `browser.css_selector` and the page's `url.full`.
 Kibana adds no detection of its own; it counts what the SDK reports:
 
@@ -921,7 +987,7 @@ logged and answer 500 without Elasticsearch details:
 - `server/services/sessions/`: the session summaries: the task, its ES|QL queries, the index, status,
   and enabling, with their routes and readers in `server/routes/sessions/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
-  `session_detail/`) with its own components, hooks and utils; what several pages share is in
-  `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
-  The applications list keeps each tab's components in `web/` and `mobile/`, and what both use in
-  `components/`.
+  `session_detail/`, `frustration/`) with its own components, hooks and utils; what several pages
+  share is in `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the
+  app shell. The applications list keeps each tab's components in `web/` and `mobile/`, and what both
+  use in `components/`.
