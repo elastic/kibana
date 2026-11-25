@@ -20,7 +20,8 @@ export function getDataViewsServiceFactory(
   getDataViews: () => DataViewsPluginStart | null,
   savedObjectClient: SavedObjectsClientContract,
   scopedClient: IScopedClusterClient,
-  request: KibanaRequest
+  request: KibanaRequest,
+  byPassCapabilities = false
 ): GetDataViewsService {
   const dataViews = getDataViews();
   if (dataViews === null) {
@@ -28,5 +29,10 @@ export function getDataViewsServiceFactory(
   }
 
   return () =>
-    dataViews.dataViewsServiceFactory(savedObjectClient, scopedClient.asCurrentUser, request);
+    dataViews.dataViewsServiceFactory(
+      savedObjectClient,
+      scopedClient.asCurrentUser,
+      request,
+      byPassCapabilities
+    );
 }

@@ -189,7 +189,8 @@ async function deleteDestinationDataView(
       deps.getDataViews,
       context.savedObjectsClient,
       context.esClient,
-      context.request
+      context.request,
+      true
     )();
     const deleted = await deleteDataViewFn({ dataViewsService, dataViewName });
     if (!deleted.success) {

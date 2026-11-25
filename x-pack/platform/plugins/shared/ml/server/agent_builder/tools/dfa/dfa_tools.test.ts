@@ -197,34 +197,45 @@ describe('data frame analytics tools', () => {
   });
 
   const dataViewsCreateFor = (
-    createAndSave = jest.fn().mockResolvedValue({ id: 'dv-1' }),
+    create = jest.fn().mockResolvedValue({ id: 'dv-1' }),
+    createSavedObject = jest.fn().mockResolvedValue(undefined),
     find = jest.fn().mockResolvedValue([])
-  ) => ({
-    getDataViews: () => ({
-      dataViewsServiceFactory: async () => ({
-        find,
-        createAndSave,
-      }),
-    }),
-  });
+  ) => {
+    const dataViewsServiceFactory = jest.fn(async () => ({
+      find,
+      create,
+      createSavedObject,
+    }));
+    return { getDataViews: () => ({ dataViewsServiceFactory }), dataViewsServiceFactory };
+  };
 
   it('create saves a data view titled with the destination index', async () => {
     const mlClient = createMlClient();
-    const createAndSave = jest.fn().mockResolvedValue({ id: 'dv-1' });
+    const created = { id: 'dv-1' };
+    const create = jest.fn().mockResolvedValue(created);
+    const createSavedObject = jest.fn().mockResolvedValue(undefined);
+    const context = createContext();
+    const views = dataViewsCreateFor(create, createSavedObject);
     const tool = createDfaCreateJobTool({
       resolveMlCapabilities: resolveWith(adminCapabilities()),
       buildMlClient: () => mlClient as any,
-      ...dataViewsCreateFor(createAndSave),
+      getDataViews: views.getDataViews,
     } as any);
-    const result = await tool.handler(flightConfig, createContext());
-    expect(createAndSave).toHaveBeenCalledWith(
+    const result = await tool.handler(flightConfig, context);
+    expect(views.dataViewsServiceFactory).toHaveBeenCalledWith(
+      context.savedObjectsClient,
+      context.esClient.asCurrentUser,
+      context.request,
+      true
+    );
+    expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'flight-delay-results',
         allowNoIndex: true,
       }),
-      false,
       true
     );
+    expect(createSavedObject).toHaveBeenCalledWith(created, false);
     expect(resultData(result)).toEqual(
       expect.objectContaining({
         created: true,
@@ -236,17 +247,19 @@ describe('data frame analytics tools', () => {
 
   it('create keeps an existing data view with the destination title', async () => {
     const mlClient = createMlClient();
-    const createAndSave = jest.fn();
+    const create = jest.fn();
+    const createSavedObject = jest.fn();
     const find = jest
       .fn()
       .mockResolvedValue([{ id: 'dv-existing', title: 'flight-delay-results' }]);
     const tool = createDfaCreateJobTool({
       resolveMlCapabilities: resolveWith(adminCapabilities()),
       buildMlClient: () => mlClient as any,
-      ...dataViewsCreateFor(createAndSave, find),
+      getDataViews: dataViewsCreateFor(create, createSavedObject, find).getDataViews,
     } as any);
     const result = await tool.handler(flightConfig, createContext());
-    expect(createAndSave).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    expect(createSavedObject).not.toHaveBeenCalled();
     expect(mlClient.putDataFrameAnalytics).toHaveBeenCalled();
     expect(resultData(result)).toEqual(
       expect.objectContaining({
@@ -260,11 +273,12 @@ describe('data frame analytics tools', () => {
 
   it('a data view failure does not undo the created job', async () => {
     const mlClient = createMlClient();
-    const createAndSave = jest.fn().mockRejectedValue(new Error('saved object denied'));
+    const create = jest.fn().mockResolvedValue({ id: 'dv-1' });
+    const createSavedObject = jest.fn().mockRejectedValue(new Error('saved object denied'));
     const tool = createDfaCreateJobTool({
       resolveMlCapabilities: resolveWith(adminCapabilities()),
       buildMlClient: () => mlClient as any,
-      ...dataViewsCreateFor(createAndSave),
+      getDataViews: dataViewsCreateFor(create, createSavedObject).getDataViews,
     } as any);
     const result = await tool.handler(flightConfig, createContext());
     expect(mlClient.putDataFrameAnalytics).toHaveBeenCalled();

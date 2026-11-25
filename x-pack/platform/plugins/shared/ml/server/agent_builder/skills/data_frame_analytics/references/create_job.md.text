@@ -4,7 +4,7 @@ When the user asks for help creating analytics, clarify the business question fi
 
 Order after that: `ml.dfa_explain`, then `ml.dfa_create_job`, then `ml.dfa_manage_job` with `operation=start`. Do not start inside the create call. Do not create until explain succeeds.
 
-`ml.dfa_create_job` also saves a Kibana data view whose title is `dest_index`. That view is how Discover and Lens open the results. It is created before the job starts, so the destination index can still be empty. If a data view with that title already exists, it is kept. Tell the user the data view title when you report that the job was created. If `data_view_error` is set, the job still exists; say that the data view was not created and why.
+`ml.dfa_create_job` also saves a Kibana data view whose title is `dest_index`. That view is how Discover and Lens open the results. It is created before the job starts, so the destination index can still be empty. The save uses the current user's saved objects client in this space and does not require Data View Management. It does not replace the space's default data view. If a data view with that title already exists, it is kept. Tell the user the data view title when you report that the job was created. If `data_view_error` is set, the job still exists; say that the data view was not created and why.
 
 ## Business clarification
 
