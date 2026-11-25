@@ -401,54 +401,40 @@ NIGHTSHIFT_DATASETS=recovery-production \
 
 ## PR evals gate
 
-The suite opts into the [evals decision on PRs](../../../../platform/packages/shared/kbn-evals/README.md#requiring-an-evals-decision-on-prs).
-A PR that changes the investigation harness gets a failing `evals gate` check until it has one of:
+PRs that change the investigation harness get a failing `evals gate` check until they have one of
+these labels ([how the gate works](../../../../platform/packages/shared/kbn-evals/README.md#requiring-an-evals-decision-on-prs)):
 
-- `evals:nightshift-investigations`: runs the suite on Sonnet 5.5 (its `defaultModelGroups`, the
-  model the daily run baselines on `main`).
-- `evals:skip`: a conscious skip.
+- `evals:nightshift-investigations` runs the suite on Sonnet 5.5. The verdict arrives about 1.5 hours
+  after the Kibana build.
+- `evals:skip` skips it.
 
-The paths are under `requireDecisionOnPaths` in
-[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json). They include
-all of `nightshift_investigations/server` and `common`, plus the decision trees package's code,
-the managed workflow definitions and model resolution. They exclude tests, docs, online evals, and
-the folders that don't change how the agent investigates: routes, telemetry, saved objects, purge,
-tracing, automations, investigation quotas, notifications, locators and the service account
-helpers.
+A run blocks the PR only if `goal_pass` on the golden cut drops by 0.10 or more with p < 0.05
+against `main`. Fix it, or add `evals:accept-regression`. Infra problems and stale baselines never
+block.
 
-`agentic_investigations` is a shared plugin, co-owned with AlertZero (Security), so only the parts
-that shape what the agent records are gated: hypotheses, impact (without its routes and pills),
-investigation attachments and the findings writer, plus their `common` schemas. Escalations,
-proposals, subjects and the rest are AlertZero's and need no decision.
+The gated paths are `requireDecisionOnPaths` in
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json): all of the
+Nightshift plugin's `server` and `common` folders, minus plumbing such as routes, telemetry and
+saved objects, plus the agent-facing parts of `agentic_investigations`. New folders are gated by
+default. Only exclude a folder that holds no prompts or agent logic; a config test fails if an
+exclude hides a prompt file.
 
-A new folder in the Nightshift plugin is gated by default, so nobody has to remember to add it. Only add an exclude for a
-folder that holds no prompts or agent logic; a config test fails if a folder exclude covers a
-prompt file (`*.text`, `*prompt*`, or anything under `instructions/`).
+<details>
+<summary>Calibrating the gate</summary>
 
-A run also has to pass the regression gate: `goal_pass` on the pinned golden cut
-(`ns-investigation-golden-2710`) mustn't drop by 0.10 or more with p < 0.05 against the latest
-`main` baseline. A regression blocks the PR until it's fixed or the PR gets
-`evals:accept-regression`. Other evaluators stay advisory in the comparison comment, and a missing
-or stale baseline never blocks.
-
-The verdict arrives about 1.5 hours after the PR's Kibana build, once all four shards finish, even
-though the gate only reads the golden one.
-
-The golden cut has 15 examples, and the daily baseline on `main` moves by up to about 0.2 between
-runs, so the thresholds aren't calibrated yet. Before `evals gate` becomes a required check, the
-gate is backtested on pairs of consecutive daily runs. If it flags noise, the golden shard gets
-repetitions or the thresholds are raised. Compare each pair newer run first, with a large maximum
-baseline age, since the age is measured against today rather than against the newer run:
+The golden cut has 15 examples, so the thresholds are unverified until the gate is backtested on
+consecutive daily runs. Compare newer run first, with a large baseline age, since age is measured
+against today:
 
 ```bash
-# EVAL_KBN_URL and EVAL_KBN_API_KEY point at the evaluations cluster the daily runs export to.
+# EVAL_KBN_URL and EVAL_KBN_API_KEY point at the evaluations cluster.
 node scripts/evals compare <newer-daily-run-id> <older-daily-run-id> \
   --suite nightshift-investigations \
   --gate-dataset ns-investigation-golden-2710 --gate-evaluator goal_pass \
   --gate-min-drop 0.1 --gate-alpha 0.05 --gate-max-baseline-age-days 365
 ```
 
-The verdict is the "Regression gate:" line in the output.
+</details>
 
 ## Connector sets
 
