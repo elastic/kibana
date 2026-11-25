@@ -15,6 +15,7 @@ import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
 import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
 import type { LatestWorkflowExecution } from '../../../hooks/use_latest_workflow_execution';
+import { useApplyDreamingTemplate } from '../../../hooks/use_apply_dreaming_template';
 import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import { DreamingPanel } from './dreaming_panel';
 
@@ -55,6 +56,9 @@ jest.mock('../../../hooks/use_workflow_summaries', () => ({
 }));
 jest.mock('../../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
 jest.mock('../../../hooks/use_dreaming_templates', () => ({ useDreamingTemplates: jest.fn() }));
+jest.mock('../../../hooks/use_apply_dreaming_template', () => ({
+  useApplyDreamingTemplate: jest.fn(),
+}));
 jest.mock('../../../hooks/use_run_dreaming', () => ({
   useRunDreaming: () => ({ runDreaming: jest.fn(), isLoading: false }),
 }));
@@ -64,12 +68,8 @@ jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
 }));
-const navigateToContextEngine = jest.fn();
-jest.mock('../../../hooks/use_navigation', () => ({
-  useNavigation: () => ({ navigateToContextEngine }),
-}));
-
 const saveConfig = jest.fn();
+const applyTemplate = jest.fn();
 
 const SUPPORT_ENTITIES = {
   nodes: [{ type: 'issue' }, { type: 'product_area' }],
@@ -100,22 +100,21 @@ const aiIndexWith = (
   dreaming,
 });
 
-const renderPanel = (
-  { aiIndex, dreaming }: ReturnType<typeof aiIndexWith>,
-  isLoading: boolean = false
-) => {
+const panel = ({ aiIndex, dreaming }: ReturnType<typeof aiIndexWith>) => (
+  <I18nProvider>
+    <EuiProvider>
+      <DreamingPanel aiIndex={aiIndex} />
+    </EuiProvider>
+  </I18nProvider>
+);
+
+const renderPanel = (props: ReturnType<typeof aiIndexWith>, isLoading: boolean = false) => {
   jest.mocked(useAiIndexDreaming).mockReturnValue({
-    dreaming,
-    workflowIds: dreaming?.enabled ? ['wf-dreaming'] : [],
+    dreaming: props.dreaming,
+    workflowIds: props.dreaming?.enabled ? ['wf-dreaming'] : [],
     isLoading,
   });
-  return render(
-    <I18nProvider>
-      <EuiProvider>
-        <DreamingPanel aiIndex={aiIndex} />
-      </EuiProvider>
-    </I18nProvider>
-  );
+  return render(panel(props));
 };
 
 describe('DreamingPanel', () => {
@@ -138,6 +137,8 @@ describe('DreamingPanel', () => {
       isLoading: false,
       error: undefined,
     });
+    applyTemplate.mockResolvedValue(true);
+    jest.mocked(useApplyDreamingTemplate).mockReturnValue({ applyTemplate, isSaving: false });
   });
 
   it('shows a skeleton while the config loads', () => {
@@ -145,15 +146,85 @@ describe('DreamingPanel', () => {
 
     expect(screen.getByText('Dreaming')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexDreamingLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexDreamingSetUp')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexDreamingSetUpToggle')).not.toBeInTheDocument();
   });
 
-  it('links to the setup when dreaming was never set up', () => {
+  it('shows the setup form when Enable dreaming is on and hides it when off', async () => {
     renderPanel(aiIndexWith(undefined));
 
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUp'));
+    expect(screen.queryByTestId('contextAiIndexDreamingSetupApply')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
 
-    expect(navigateToContextEngine).toHaveBeenCalledWith('/ai_index/tickets/dreaming_template');
+    await waitFor(() =>
+      expect(screen.getByTestId('contextAiIndexDreamingSetupApply')).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
+
+    expect(screen.queryByTestId('contextAiIndexDreamingSetupApply')).not.toBeInTheDocument();
+  });
+
+  it('discards setup edits when Cancel is clicked and toggling on again starts pristine', async () => {
+    renderPanel(aiIndexWith(undefined));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
+    await waitFor(() =>
+      expect(screen.getByTestId('contextAiIndexDreamingSetupSummary')).toBeInTheDocument()
+    );
+
+    fireEvent.change(screen.getByTestId('contextAiIndexDreamingSetupSummary'), {
+      target: { value: 'Edited.' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupCancel'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('contextAiIndexDreamingSetupSummary')).toHaveValue('Support.')
+    );
+  });
+
+  it('turns dreaming on from the setup form and shows the editor', async () => {
+    const props = aiIndexWith(undefined);
+    const applied = { ...factsOnly, instructions: 'Support.' };
+    applyTemplate.mockImplementation(async () => {
+      jest.mocked(useAiIndexDreaming).mockReturnValue({
+        dreaming: applied,
+        workflowIds: ['wf-dreaming'],
+        isLoading: false,
+      });
+      return true;
+    });
+    const view = renderPanel(props);
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
+    await waitFor(() =>
+      expect(screen.getByTestId('contextAiIndexDreamingSetupApply')).toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetupApply'));
+
+    await waitFor(() =>
+      expect(applyTemplate).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          facts: [{ type: 'solution' }],
+          instructions: 'Support.',
+        }),
+      })
+    );
+    view.rerender(panel({ ...props, dreaming: applied }));
+    expect(screen.getByTestId('contextAiIndexDreamingInstructions')).toBeInTheDocument();
+  });
+
+  it('disables apply when custom is picked with no fact types', async () => {
+    renderPanel(aiIndexWith(undefined));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUpToggle'));
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('contextDreamingTemplateOption-customer_support')
+      ).toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByTestId('contextDreamingTemplateOption-custom'));
+
+    expect(screen.getByTestId('contextAiIndexDreamingSetupApply')).toBeDisabled();
   });
 
   it('shows the config as JSON in a modal', () => {
