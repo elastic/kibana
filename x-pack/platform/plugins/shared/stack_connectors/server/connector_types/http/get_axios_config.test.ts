@@ -136,11 +136,12 @@ describe('getAxiosConfig', () => {
   it('passes the configured tokenType to the token request', async () => {
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce('Bearer fakeToken');
 
-    await getAxiosConfig({
+    const [, error] = await getAxiosConfig({
       ...params,
       config: { ...params.config, tokenType: 'Bearer' },
     });
 
+    expect(error).toBeNull();
     expect(getOAuthClientCredentialsAccessToken).toHaveBeenCalledWith(
       expect.objectContaining({ tokenType: 'Bearer' })
     );
@@ -216,8 +217,12 @@ describe('getAxiosConfig with OAuth2 password grant', () => {
   it('passes the configured tokenType to the password token request', async () => {
     (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValueOnce('Bearer fakeToken');
 
-    await getAxiosConfig({ ...params, config: { ...params.config, tokenType: 'Bearer' } });
+    const [, error] = await getAxiosConfig({
+      ...params,
+      config: { ...params.config, tokenType: 'Bearer' },
+    });
 
+    expect(error).toBeNull();
     expect(getOAuthPasswordAccessToken).toHaveBeenCalledWith(
       expect.objectContaining({ tokenType: 'Bearer' })
     );
