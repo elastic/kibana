@@ -46,6 +46,7 @@ toc:
       - file: connectors-kibana/elastic-connectors.md
         children:
           - file: connectors-kibana/cases-action-type.md
+          - file: connectors-kibana/inbound-webhook-action-type.md
           - file: connectors-kibana/index-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
@@ -128,6 +129,7 @@ toc:
           - file: connectors-kibana/jira-cloud-action-type.md
           - file: connectors-kibana/kubernetes-action-type.md
           - file: connectors-kibana/microsoft-defender-xdr-action-type.md
+          - file: connectors-kibana/microsoft-sql-server-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/monday-com-action-type.md
           - file: connectors-kibana/misp-action-type.md

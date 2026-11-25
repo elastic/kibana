@@ -94,7 +94,7 @@ const hitTier1 = (overrides: Partial<HuntForThreatResult> = {}): HuntCoordinator
     resolved_iocs: [
       { type: 'ip', value: '192.0.2.30' },
       { type: 'ip', value: '192.0.2.31' },
-      { type: 'email', value: 'dev-user@corp.example' },
+      { type: 'email', value: 'dev-user@corp.example.cloud' },
     ],
     resolved_techniques: ['T1078.004', 'T1562.008'],
     counts: { total_hits: 121, returned_hits: 25, affected_hosts: 2, affected_users: 1 },
@@ -197,7 +197,7 @@ describe('buildHuntNarrative', () => {
           '- **Window:** 2026-08-26T00:00:00.000Z to 2026-09-25T00:00:00.000Z',
           '- **Indices:** `logs-*` and `-logs-elastic_agent*`',
           "- **Behavior Hunt targets:** `logs-aws.cloudtrail-*` and `logs-endpoint.events.process-*` (from the report's vendor or product, IOC Hunt hits and process telemetry)",
-          '- **Indicators (3):** ip `192.0.2.30` and `192.0.2.31`; email `dev-user@corp.example`',
+          '- **Indicators (3):** ip `192.0.2.30` and `192.0.2.31`; email `dev-user@corp.example.cloud`',
           '- **ATT&CK techniques (2):** `T1078.004` and `T1562.008`',
         ].join('\n'),
         [

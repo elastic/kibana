@@ -25,18 +25,18 @@ interface CapabilitiesResponse {
 
 const CAPABILITY_CASES = [
   {
-    title: 'resolves show, save and short URLs, but not managing sessions, for the all privilege',
+    title: 'resolves show, save, managing sessions and short URLs for the all privilege',
     role: createRole({ digital_experience: ['all'] }),
     expected: {
       navLink: true,
       show: true,
       save: true,
-      manageSessions: false,
+      manageSessions: true,
       createShortUrl: true,
     },
   },
   {
-    title: 'resolves show and save, but no short URLs, for all without the Short URLs sub-feature',
+    title: 'resolves show and save, but no sub-feature privileges, for all without them',
     role: createRole({ digital_experience: ['minimal_all'] }),
     expected: {
       navLink: true,
@@ -69,7 +69,7 @@ const CAPABILITY_CASES = [
     },
   },
   {
-    title: 'resolves managing sessions only with the manage_sessions sub-feature privilege',
+    title: 'resolves managing sessions with the manage_sessions sub-feature privilege',
     role: createRole({ digital_experience: ['read', 'manage_sessions'] }),
     expected: {
       navLink: true,
@@ -140,7 +140,8 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
               privileges: [
                 {
                   id: 'manage_sessions',
-                  includeIn: 'none',
+                  name: 'Manage session summaries',
+                  includeIn: 'all',
                   api: ['manage_digital_experience_sessions'],
                   ui: ['manageSessions'],
                 },

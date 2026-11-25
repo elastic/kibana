@@ -460,6 +460,13 @@ export const ConnectorIconsMap: Map<
       () =>
         import(
           /* webpackChunkName: "connectorIconMicrosoftDefenderXdr" */ './specs/microsoft_defender_xdr/icon'
+
+  [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
         )
     ),
   ],

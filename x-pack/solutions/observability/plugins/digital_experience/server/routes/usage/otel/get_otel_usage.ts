@@ -6,16 +6,25 @@
  */
 
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
+import { sortEnvironments } from '../../../lib/helpers/environment';
+import { pickerEnvironments } from '../../../lib/otel/environments';
 import type { ApplicationSearch } from '../../application_tab_route';
 import { USAGE_SEARCH_SPAN_NAME } from '../constants';
 import { usageSearch } from './search_request';
 import { toUsage } from './to_usage';
 
-/** What users load and do in one EDOT Browser application, for the Overview's panels. */
+/**
+ * What users load and do in one EDOT Browser application, for the Overview's panels and the
+ * frustration page, with its environments for the picker.
+ */
 export const getOtelUsage = async ({
   esClient,
   ...searchParams
 }: ApplicationSearch): Promise<ApplicationUsageResponse> => {
   const { aggregations } = await esClient.search(USAGE_SEARCH_SPAN_NAME, usageSearch(searchParams));
-  return toUsage(aggregations);
+  return {
+    serviceName: searchParams.serviceName,
+    ...toUsage(aggregations),
+    environments: sortEnvironments(pickerEnvironments(aggregations)),
+  };
 };

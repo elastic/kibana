@@ -101,7 +101,7 @@ export async function fetchApmErrorContext({
 
   if (traceId) {
     const traceContextPromise = (async () => {
-      const apmIndices = await getApmIndices({ core, plugins, logger });
+      const apmIndices = await getApmIndices({ core, plugins, request, logger });
       return getTraceDocuments({
         esClient,
         traceIds: [traceId],

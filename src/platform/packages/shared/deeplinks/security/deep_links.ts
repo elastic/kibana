@@ -82,6 +82,7 @@ export enum SecurityPageName {
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
   siemMigrationsDashboards = 'siem_migrations-dashboards',
+  siemMigrationsWorkflows = 'siem_migrations-workflows',
   siemMigrationsManage = 'siem_migrations-manage',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -140,6 +141,7 @@ export enum SecurityPageName {
    * These live on the `alertzero` plugin rather than `securitySolutionUI`, so their link ids are built with
    * `alertZeroLink()` instead of `securityLink()`.
    */
+  alertZeroHome = 'home',
   alertZeroEscalations = 'escalations',
   alertZeroWatches = 'watches',
   alertZeroWatchesWorkers = 'watches_workers',

@@ -12,7 +12,7 @@ import {
   k8sDeploymentOtelAndAgentFixture,
   k8sNodeFixture,
 } from '../inventory/__fixtures__/definitions';
-import { buildColumns } from '../inventory/generator';
+import { buildColumns, getDynamicBlock } from '../inventory/generator';
 import { InventoryService } from './inventory_service';
 
 jest.mock('../inventory/generator', () => {
@@ -53,7 +53,7 @@ describe('InventoryService.listTypes', () => {
           'kubernetes.deployment.name',
         ],
         columns: [
-          { name: 'entity.id', kind: 'id' },
+          { name: 'entity.id', kind: 'id', label: 'ID' },
           { name: 'k8s.cluster.name', kind: 'identity' },
           { name: 'k8s.namespace.name', kind: 'identity' },
           { name: 'k8s.deployment.name', kind: 'identity' },
@@ -65,8 +65,9 @@ describe('InventoryService.listTypes', () => {
           { name: 'paused', kind: 'attribute' },
           { name: 'app', kind: 'attribute' },
           { name: 'resource_id', kind: 'attribute' },
-          { name: 'last_seen', kind: 'last_seen' },
+          { name: 'last_seen', kind: 'last_seen', label: 'Last seen' },
         ],
+        suggestedFilters: [],
         sources: [
           {
             indexPattern: 'metrics-kubernetes.state_deployment-*',
@@ -76,6 +77,69 @@ describe('InventoryService.listTypes', () => {
         ],
       },
     ]);
+  });
+
+  it('labels the columns of an identity field and an attribute from the display labels', async () => {
+    const labelled = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: {
+        ...getDynamicBlock(k8sDeploymentOtelAndAgentFixture),
+        displayLabels: [
+          { name: 'kubernetes.namespace', label: 'Namespace' },
+          { name: 'available_replicas', label: 'Available replicas' },
+        ],
+      },
+    };
+    const { service } = createService([labelled]);
+
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    expect(type.columns.filter(({ label }) => label !== undefined)).toEqual([
+      { name: 'entity.id', kind: 'id', label: 'ID' },
+      { name: 'kubernetes.namespace', kind: 'identity', label: 'Namespace' },
+      { name: 'available_replicas', kind: 'attribute', label: 'Available replicas' },
+      { name: 'last_seen', kind: 'last_seen', label: 'Last seen' },
+    ]);
+  });
+
+  it('returns the suggested filters of a definition, in the order it declares them', async () => {
+    const suggesting = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: {
+        ...getDynamicBlock(k8sDeploymentOtelAndAgentFixture),
+        suggestedFilters: ['paused', 'k8s.cluster.name'],
+      },
+    };
+    const { service } = createService([suggesting]);
+
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    expect(type.suggestedFilters).toStrictEqual(['paused', 'k8s.cluster.name']);
+  });
+
+  it('returns the labelled columns and the suggested filters of a definition that declares both', async () => {
+    const both = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: {
+        ...getDynamicBlock(k8sDeploymentOtelAndAgentFixture),
+        displayLabels: [{ name: 'kubernetes.namespace', label: 'Namespace' }],
+        suggestedFilters: ['kubernetes.namespace', 'paused'],
+      },
+    };
+    const { service } = createService([both]);
+
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    expect(type.columns.find(({ name }) => name === 'kubernetes.namespace')?.label).toBe(
+      'Namespace'
+    );
+    expect(type.suggestedFilters).toStrictEqual(['kubernetes.namespace', 'paused']);
   });
 
   it('omits definitions without a dynamic block', async () => {
@@ -390,11 +454,9 @@ describe('InventoryService.list', () => {
       errors: [],
       unavailableColumns: [],
     });
-    expect(response).not.toHaveProperty('unsupportedMetrics');
-    expect(response).not.toHaveProperty('documentFilterWarnings');
   });
 
-  it('returns the same columns as listTypes for the type', async () => {
+  it('returns the same columns as listTypes for the type, without the labels', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
@@ -410,7 +472,7 @@ describe('InventoryService.list', () => {
       types: [type],
     } = await service.listTypes();
 
-    expect(columns).toEqual(type.columns);
+    expect(columns).toEqual(type.columns.map(({ name, kind }) => ({ name, kind })));
   });
 
   it.each([
@@ -615,6 +677,7 @@ describe('InventoryService.list', () => {
         },
       ],
     });
+    expect(response.queries[0]).toMatchObject({ indexPattern: STATE_PATTERN, isPartial: true });
   });
 
   it.each([
@@ -750,6 +813,13 @@ describe('InventoryService.list diagnostics', () => {
       params: [{ from: WINDOW.from }, { to: WINDOW.to }],
       took: 4,
       documentsFound: 2,
+      valuesLoaded: null,
+      rowsEmitted: null,
+      cpuNanos: null,
+      driverNanos: null,
+      bytesRead: null,
+      shards: null,
+      isPartial: false,
       rowCount: 1,
     });
   });
@@ -768,9 +838,16 @@ describe('InventoryService.list diagnostics', () => {
       indexPattern: STATE_PATTERN,
       took: null,
       documentsFound: null,
+      valuesLoaded: null,
+      cpuNanos: null,
+      shards: null,
+      isPartial: null,
       rowCount: 0,
     });
-    expect(response.queries[1]).toMatchObject({ indexPattern: OTEL_PATTERN, rowCount: 1 });
+    expect(response.queries[1]).toMatchObject({
+      indexPattern: OTEL_PATTERN,
+      rowCount: 1,
+    });
   });
 
   it('leaves out the plan queries of a source whose probe failed', async () => {
@@ -789,7 +866,7 @@ describe('InventoryService.list diagnostics', () => {
     expect(response.queries.map(({ indexPattern }) => indexPattern)).toEqual([OTEL_PATTERN]);
   });
 
-  it('reports took as the wall time of the whole call, probes included', async () => {
+  it('reports the wall time of the whole call, probes included, as timings.totalMs', async () => {
     jest.useFakeTimers({ now: new Date('2026-11-01T12:00:00.000Z') });
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     // Each probe and plan query takes 100ms of wall time: two probes, then two FROM queries.
@@ -805,7 +882,147 @@ describe('InventoryService.list diagnostics', () => {
 
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
-    expect(response.took).toBe(400);
+    expect(response.timings.totalMs).toBe(400);
+  });
+
+  it('splits the call into phases', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-01T12:00:00.000Z') });
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    // Each request advances the clock as it is sent; requests of one phase are sent together.
+    esClient.esql.query.mockImplementation(async ({ query }) => {
+      if (isProbe(query)) {
+        jest.advanceTimersByTime(query.includes(STATE_PATTERN) ? 10 : 20);
+        return probeResponse(false);
+      }
+      jest.advanceTimersByTime(query.includes(STATE_PATTERN) ? 100 : 200);
+      return query.includes(STATE_PATTERN)
+        ? esqlResponse(STATE_COLUMNS, [])
+        : esqlResponse(OTEL_COLUMNS, []);
+    });
+
+    const { timings } = await service.list({
+      type: 'k8s.deployment',
+      window: WINDOW,
+      limit: 10,
+    });
+
+    expect(timings).toEqual({
+      definitionMs: 0,
+      planningMs: 30,
+      probesMs: 30,
+      queriesMs: 300,
+      processingMs: 0,
+      totalMs: 330,
+    });
+  });
+
+  it('lists every probe with its outcome, text and stats', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { probeFails: { [STATE_PATTERN]: esError(503, 'timeout_exception', 'timed out') } }
+    );
+
+    const { probes } = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    const sentProbes = esClient.esql.query.mock.calls
+      .map(([body]) => body.query)
+      .filter((query) => isProbe(query));
+    expect(probes.map(({ esql }) => esql)).toEqual(sentProbes);
+    expect(probes[0]).toMatchObject({
+      indexPattern: STATE_PATTERN,
+      outcome: 'failed',
+      took: null,
+      isPartial: null,
+    });
+    expect(probes[1]).toEqual({
+      indexPattern: OTEL_PATTERN,
+      esql: sentProbes[1],
+      params: expect.any(Array),
+      outcome: 'no_time_series',
+      took: 1,
+      documentsFound: 0,
+      valuesLoaded: null,
+      rowsEmitted: null,
+      cpuNanos: null,
+      driverNanos: null,
+      bytesRead: null,
+      shards: null,
+      isPartial: false,
+    });
+  });
+
+  it('reports a probe that found a time-series index', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { timeSeries: [OTEL_PATTERN] }
+    );
+
+    const { probes } = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(probes.map(({ outcome }) => outcome)).toEqual(['no_time_series', 'time_series']);
+  });
+});
+
+describe('InventoryService.listAttributeValues', () => {
+  const withSuggestedFilters = (suggestedFilters: string[]) => ({
+    ...k8sDeploymentOtelAndAgentFixture,
+    dynamic: {
+      sources: k8sDeploymentOtelAndAgentFixture.dynamic?.sources ?? [],
+      suggestedFilters,
+    },
+  });
+
+  const request = {
+    attribute: 'paused',
+    types: ['k8s.deployment'],
+    selections: {},
+    selected: [],
+    window: WINDOW,
+    limit: 10,
+  };
+
+  it('lists the values of a suggested filter through the service clients', async () => {
+    const { service, esClient } = createService([withSuggestedFilters(['paused'])]);
+    esClient.esql.query.mockImplementation(async ({ query }) => {
+      if (isProbe(query)) {
+        return probeResponse(false);
+      }
+      return {
+        columns: [
+          { name: 'value', type: 'keyword' },
+          { name: 'last_seen', type: 'date' },
+        ],
+        values: [
+          ['false', '2026-11-01T10:00:00.000Z'],
+          ['true', '2026-11-01T10:00:00.000Z'],
+        ],
+        is_partial: false,
+        took: 3,
+        documents_found: 2,
+      };
+    });
+
+    const response = await service.listAttributeValues(request);
+
+    expect(response.values).toEqual(['false', 'true']);
+    expect(response.errors).toEqual([]);
+  });
+
+  it('rejects an attribute that the type does not suggest', async () => {
+    const { service, esClient } = createService([withSuggestedFilters([])]);
+
+    await expect(service.listAttributeValues(request)).rejects.toThrow('not a suggested filter');
+    expect(esClient.esql.query).not.toHaveBeenCalled();
   });
 });
 
