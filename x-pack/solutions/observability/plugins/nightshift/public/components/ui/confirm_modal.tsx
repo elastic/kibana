@@ -43,6 +43,7 @@ export function ConfirmModal({
   'data-test-subj': dataTestSubj,
 }: ConfirmModalProps) {
   const titleId = useGeneratedHtmlId();
+  const bodyId = useGeneratedHtmlId();
 
   return (
     <EuiModal
@@ -50,12 +51,13 @@ export function ConfirmModal({
       role="alertdialog"
       maxWidth={448}
       aria-labelledby={titleId}
+      aria-describedby={bodyId}
       data-test-subj={dataTestSubj}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={titleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>{children}</EuiModalBody>
+      <EuiModalBody id={bodyId}>{children}</EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="confirmModalCancelButton">
           {cancelButtonText}

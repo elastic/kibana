@@ -218,6 +218,7 @@ export class SignificantEventsPlugin
             request,
             signal
           ).catch((error: Error) => {
+            slackCountsByRun.delete(signal);
             if (signal.aborted) throw error;
             this.logger.warn(`Failed to read the Slack snapshot counts: ${error.message}`);
             return {};
