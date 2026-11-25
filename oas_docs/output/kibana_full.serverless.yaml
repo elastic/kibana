@@ -49779,6 +49779,7 @@ paths:
                   description: Fleet is not ready — a Fleet Server and API keys are required
                   value:
                     is_action_secrets_storage_enabled: false
+                    is_output_secrets_storage_enabled: false
                     is_secrets_storage_enabled: false
                     is_space_awareness_enabled: false
                     is_ssl_secrets_storage_enabled: false
@@ -49792,6 +49793,7 @@ paths:
                   description: Fleet is ready to enroll agents — all requirements are met
                   value:
                     is_action_secrets_storage_enabled: true
+                    is_output_secrets_storage_enabled: true
                     is_secrets_storage_enabled: true
                     is_space_awareness_enabled: false
                     is_ssl_secrets_storage_enabled: false
@@ -49807,6 +49809,8 @@ paths:
                   is_action_secrets_storage_enabled:
                     type: boolean
                   is_fips_enabled:
+                    type: boolean
+                  is_output_secrets_storage_enabled:
                     type: boolean
                   is_secrets_storage_enabled:
                     type: boolean
