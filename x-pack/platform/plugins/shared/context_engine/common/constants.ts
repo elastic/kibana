@@ -6,6 +6,7 @@
  */
 
 import type { AiIndexType } from './http_api/ai_indices';
+import { RECALL_SESSION_STORES, type RecallFormat } from './http_api/recall';
 
 export const PUBLIC_API_PATH = '/api/context_engine';
 export const INTERNAL_API_PATH = '/internal/context_engine';
@@ -41,6 +42,7 @@ export const KI_HISTOGRAM_DAYS = 30;
 export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
 export const SESSION_MEMORY_FORGET_PATH = `${PUBLIC_API_PATH}/memory/_forget`;
 export const SESSION_MEMORY_REMEMBER_PATH = `${PUBLIC_API_PATH}/memory/_remember`;
+export const RECALL_PATH = `${PUBLIC_API_PATH}/_recall`;
 
 /** Shared bounds for session memory and session events HTTP routes. */
 export const MAX_MEMORY_ID_LENGTH = 256;
@@ -131,6 +133,18 @@ export const DEFAULT_AI_INDEX_TYPE: AiIndexType = 'index';
 export const MAX_AI_INDICES = 100;
 
 export const MAX_AI_INDEX_ID_LENGTH = 256;
+
+export const RECALL_AI_INDEX_PREFIX = 'ai_index:';
+export const MAX_RECALL_QUERY_LENGTH = 4096;
+export const MAX_RECALL_SESSION_IDS = 100;
+export const MAX_RECALL_INCLUDE_ITEMS = MAX_MEMORY_AI_INDEX_IDS + RECALL_SESSION_STORES.length;
+export const MAX_RECALL_INCLUDE_ENTRY_LENGTH =
+  RECALL_AI_INDEX_PREFIX.length + MAX_AI_INDEX_ID_LENGTH;
+export const MIN_RECALL_TOKEN_BUDGET = 1000;
+export const MAX_RECALL_TOKEN_BUDGET = 25000;
+export const DEFAULT_RECALL_TOKEN_BUDGET = 6000;
+export const DEFAULT_RECALL_FORMAT: RecallFormat = 'yaml';
+
 export const MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
