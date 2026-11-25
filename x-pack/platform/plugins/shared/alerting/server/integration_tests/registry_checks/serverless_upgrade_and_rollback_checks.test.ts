@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  type TestElasticsearchUtils,
-  type TestKibanaUtils,
-} from '@kbn/core-test-helpers-kbn-server';
 import { uniq } from 'lodash';
 import { z, setLazySchemaDisabled } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { setupTestServers } from '../lib';
+import { setupKibanaSetupOnly } from '../lib';
 import type { RuleTypeRegistry } from '../../rule_type_registry';
 
 jest.mock('../../rule_type_registry', () => {
@@ -100,8 +96,7 @@ const skippedRuleTypes = [
 ];
 
 describe('Serverless upgrade and rollback checks', () => {
-  let esServer: TestElasticsearchUtils;
-  let kibanaServer: TestKibanaUtils;
+  let kibanaServer: Awaited<ReturnType<typeof setupKibanaSetupOnly>>['kibanaServer'];
   let ruleTypeRegistry: RuleTypeRegistry;
   const ruleTypesToCheck: string[] = uniq(
     ruleTypesInEsProjects.concat(ruleTypesInObltProjects).concat(ruleTypesInSecurityProjects)
@@ -110,8 +105,7 @@ describe('Serverless upgrade and rollback checks', () => {
 
   beforeAll(async () => {
     setLazySchemaDisabled(true);
-    const setupResult = await setupTestServers();
-    esServer = setupResult.esServer;
+    const setupResult = await setupKibanaSetupOnly();
     kibanaServer = setupResult.kibanaServer;
 
     const mockedRuleTypeRegistry = jest.requireMock('../../rule_type_registry');
@@ -123,9 +117,6 @@ describe('Serverless upgrade and rollback checks', () => {
     setLazySchemaDisabled(false);
     if (kibanaServer) {
       await kibanaServer.stop();
-    }
-    if (esServer) {
-      await esServer.stop();
     }
   });
 

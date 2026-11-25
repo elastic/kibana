@@ -16,7 +16,10 @@ import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_inges
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
 import { installPrebuiltWatchlists } from '../watchlists/migrations/install_prebuilt_watchlists';
-import { scheduleAlertEntityIdBackfill } from './backfill_alert_entity_id';
+import {
+  registerAlertEntityIdBackfillTask,
+  scheduleAlertEntityIdBackfill,
+} from './backfill_alert_entity_id';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EntityAnalyticsConfig } from '../types';
 
@@ -61,6 +64,8 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
     ...params,
     logger: params.logger.get('entityAnalytics.migration'),
   };
+  // Register synchronously before the first await so Task Manager knows the type during setup().
+  registerAlertEntityIdBackfillTask(paramsWithScopedLogger);
   await createEventIngestedPipelineInAllNamespaces(paramsWithScopedLogger);
   await updateAssetCriticalityMappings(paramsWithScopedLogger);
   await scheduleAssetCriticalityEcsCompliancyMigration(paramsWithScopedLogger);

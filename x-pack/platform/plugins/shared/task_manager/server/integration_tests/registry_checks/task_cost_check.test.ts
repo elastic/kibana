@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import {
-  type TestElasticsearchUtils,
-  type TestKibanaUtils,
-} from '@kbn/core-test-helpers-kbn-server';
 import type { TaskDefinition } from '../../task';
 import { TaskCost } from '../../task';
-import { setupTestServers } from '../lib';
+import { setupKibanaSetupOnly } from '../lib';
 import type { TaskTypeDictionary } from '../../task_type_dictionary';
 import { sortBy } from 'lodash';
 import { connectorsSpecs } from '@kbn/connector-specs';
@@ -32,13 +28,11 @@ const taskTypeIdsFromSpecs = new Set(
 
 // Notify response-ops if a task sets a cost to something other than `Normal`
 describe('Task cost checks', () => {
-  let esServer: TestElasticsearchUtils;
-  let kibanaServer: TestKibanaUtils;
+  let kibanaServer: Awaited<ReturnType<typeof setupKibanaSetupOnly>>['kibanaServer'];
   let taskTypeDictionary: TaskTypeDictionary;
 
   beforeAll(async () => {
-    const setupResult = await setupTestServers();
-    esServer = setupResult.esServer;
+    const setupResult = await setupKibanaSetupOnly();
     kibanaServer = setupResult.kibanaServer;
 
     const mockedTaskTypeDictionary = jest.requireMock('../../task_type_dictionary');
@@ -49,9 +43,6 @@ describe('Task cost checks', () => {
   afterAll(async () => {
     if (kibanaServer) {
       await kibanaServer.stop();
-    }
-    if (esServer) {
-      await esServer.stop();
     }
   });
 

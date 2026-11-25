@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { setupTestServers } from '../lib';
+import { setupKibanaSetupOnly } from '../lib';
 import type { RuleTypeRegistry } from '../../rule_type_registry';
 
 jest.mock('../../rule_type_registry', () => {
@@ -69,13 +68,11 @@ const ruleTypes: string[] = [
 ];
 
 describe('Alert as data fields checks', () => {
-  let esServer: TestElasticsearchUtils;
-  let kibanaServer: TestKibanaUtils;
+  let kibanaServer: Awaited<ReturnType<typeof setupKibanaSetupOnly>>['kibanaServer'];
   let ruleTypeRegistry: RuleTypeRegistry;
 
   beforeAll(async () => {
-    const setupResult = await setupTestServers();
-    esServer = setupResult.esServer;
+    const setupResult = await setupKibanaSetupOnly();
     kibanaServer = setupResult.kibanaServer;
 
     const mockedRuleTypeRegistry = jest.requireMock('../../rule_type_registry');
@@ -86,9 +83,6 @@ describe('Alert as data fields checks', () => {
   afterAll(async () => {
     if (kibanaServer) {
       await kibanaServer.stop();
-    }
-    if (esServer) {
-      await esServer.stop();
     }
   });
 

@@ -654,9 +654,10 @@ const createBackfillTaskRunner =
   });
 
 /**
- * Registers and schedules the one-off backfill that stamps `kibana.alert.entity.id` onto alerts
+ * Registers the one-off backfill task definition synchronously during plugin setup so Task Manager
+ * knows about it before start().
  */
-export const scheduleAlertEntityIdBackfill = async ({
+export const registerAlertEntityIdBackfillTask = ({
   taskManager,
   logger: parentLogger,
   getStartServices,
@@ -685,6 +686,24 @@ export const scheduleAlertEntityIdBackfill = async ({
       createTaskRunner: createBackfillTaskRunner({ getStartServices, logger, enabled }),
     },
   });
+};
+
+/**
+ * Schedules the one-off backfill that stamps `kibana.alert.entity.id` onto alerts.
+ * Expects {@link registerAlertEntityIdBackfillTask} to have registered the task definition in setup().
+ */
+export const scheduleAlertEntityIdBackfill = async ({
+  taskManager,
+  logger: parentLogger,
+  getStartServices,
+  entityAnalyticsConfig,
+}: EntityAnalyticsMigrationsParams) => {
+  if (!taskManager) {
+    return;
+  }
+
+  const enabled = entityAnalyticsConfig?.alertEntityIdBackfill.enabled ?? true;
+  const logger = parentLogger.get(LOGGER_NAME);
 
   const [, depsStart] = await getStartServices();
   const taskManagerStart = depsStart.taskManager;

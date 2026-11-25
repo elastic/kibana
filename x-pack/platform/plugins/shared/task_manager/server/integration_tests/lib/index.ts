@@ -6,5 +6,5 @@
  */
 
 export { injectTask, injectTaskBulk } from './inject_task';
-export { setupTestServers } from './setup_test_servers';
+export { setupKibanaSetupOnly, setupTestServers } from './setup_test_servers';
 export { retry } from './retry';

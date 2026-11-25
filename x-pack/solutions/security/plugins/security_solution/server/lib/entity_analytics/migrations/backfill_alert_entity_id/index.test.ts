@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { runBackfillTask, scheduleAlertEntityIdBackfill } from '.';
+import { registerAlertEntityIdBackfillTask, runBackfillTask } from '.';
 import {
   BackfillRequestFailedError,
   buildBackfillQuery,
@@ -114,7 +114,7 @@ describe('the registered task runner', () => {
       { createTaskRunner: (ctx: unknown) => { run: () => unknown } }
     > = {};
 
-    await scheduleAlertEntityIdBackfill({
+    registerAlertEntityIdBackfillTask({
       taskManager: {
         registerTaskDefinitions: (registry: typeof definitions) =>
           Object.assign(definitions, registry),

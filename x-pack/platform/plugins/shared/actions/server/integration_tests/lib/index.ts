@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { setupTestServers } from './setup_test_servers';
+export { setupKibanaSetupOnly, setupTestServers } from './setup_test_servers';
 export { retry } from './retry';

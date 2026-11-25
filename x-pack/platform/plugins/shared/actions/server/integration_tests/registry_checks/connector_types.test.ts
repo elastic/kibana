@@ -6,9 +6,8 @@
  */
 
 import { z, setLazySchemaDisabled } from '@kbn/zod';
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../../action_type_registry';
-import { setupTestServers } from '../lib';
+import { setupKibanaSetupOnly } from '../lib';
 import { connectorTypes } from '../mocks/connector_types';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -44,14 +43,12 @@ jest.mock('openai', () => ({
 }));
 
 describe('Connector type config checks', () => {
-  let esServer: TestElasticsearchUtils;
-  let kibanaServer: TestKibanaUtils;
+  let kibanaServer: Awaited<ReturnType<typeof setupKibanaSetupOnly>>['kibanaServer'];
   let actionTypeRegistry: ActionTypeRegistry;
 
   beforeAll(async () => {
     setLazySchemaDisabled(true);
-    const setupResult = await setupTestServers();
-    esServer = setupResult.esServer;
+    const setupResult = await setupKibanaSetupOnly();
     kibanaServer = setupResult.kibanaServer;
 
     const mockedActionTypeRegistry = jest.requireMock('../../action_type_registry');
@@ -63,9 +60,6 @@ describe('Connector type config checks', () => {
     setLazySchemaDisabled(false);
     if (kibanaServer) {
       await kibanaServer.stop();
-    }
-    if (esServer) {
-      await esServer.stop();
     }
   });
 

@@ -35,3 +35,24 @@ export async function setupTestServers(settings = {}) {
     },
   };
 }
+
+/** Boots Kibana through setup() without Elasticsearch or start() for registry snapshot checks. */
+export async function setupKibanaSetupOnly(settings = {}) {
+  const root = createRootWithCorePlugins(settings, { oss: false });
+
+  try {
+    await root.preboot();
+    const coreSetup = await root.setup();
+
+    return {
+      kibanaServer: {
+        root,
+        coreSetup,
+        stop: async () => await root.shutdown(),
+      },
+    };
+  } catch (error) {
+    await root.shutdown().catch(() => {});
+    throw error;
+  }
+}
