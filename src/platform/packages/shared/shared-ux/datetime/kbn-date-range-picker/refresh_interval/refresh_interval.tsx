@@ -41,6 +41,11 @@ export interface RefreshIntervalProps {
    * @default 0
    */
   minIntervalMs?: number;
+  /**
+   * Show the current state without letting the user change it.
+   * @default false
+   */
+  readOnly?: boolean;
 }
 
 /** Lowest whole count of `unit` that is at least `minIntervalMs`, and never below 1. */
@@ -51,7 +56,12 @@ const getMinCount = (minIntervalMs: number, unit: AutoRefreshIntervalUnit): numb
  * "Refresh every" form: a switch to turn auto-refresh on and off, an interval count and a unit.
  * Turning auto-refresh on also starts the timer, so a second click on play is not needed.
  */
-export function RefreshInterval({ value, onChange, minIntervalMs = 0 }: RefreshIntervalProps) {
+export function RefreshInterval({
+  value,
+  onChange,
+  minIntervalMs = 0,
+  readOnly = false,
+}: RefreshIntervalProps) {
   const derived = msToAutoRefreshInterval(value.intervalMs, value.intervalDisplayUnit);
   const minCount = getMinCount(minIntervalMs, derived.unit);
 
@@ -121,6 +131,7 @@ export function RefreshInterval({ value, onChange, minIntervalMs = 0 }: RefreshI
           label={refreshIntervalTexts.label}
           checked={value.isEnabled}
           onChange={handleToggle}
+          disabled={readOnly}
           compressed
           data-test-subj="dateRangePickerAutoRefreshToggle"
         />
@@ -133,7 +144,7 @@ export function RefreshInterval({ value, onChange, minIntervalMs = 0 }: RefreshI
           min={minCount}
           onChange={handleCountChange}
           onBlur={handleCountBlur}
-          disabled={!value.isEnabled}
+          disabled={readOnly || !value.isEnabled}
           aria-label={refreshIntervalTexts.intervalCountAriaLabel}
           data-test-subj="dateRangePickerAutoRefreshIntervalCount"
         />
@@ -143,7 +154,7 @@ export function RefreshInterval({ value, onChange, minIntervalMs = 0 }: RefreshI
           compressed
           fullWidth
           value={derived.unit}
-          disabled={!value.isEnabled}
+          disabled={readOnly || !value.isEnabled}
           options={AUTO_REFRESH_UNIT_OPTIONS}
           onChange={handleUnitChange}
           aria-label={refreshIntervalTexts.intervalUnitAriaLabel}

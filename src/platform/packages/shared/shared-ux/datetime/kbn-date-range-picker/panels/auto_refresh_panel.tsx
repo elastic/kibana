@@ -24,8 +24,13 @@ import { autoRefreshPanelTexts, mainPanelTexts } from '../translations';
 
 /** Auto-refresh panel, reached from the main panel nav. */
 export function AutoRefreshPanel() {
-  const { autoRefresh, onAutoRefreshChange, autoRefreshMinIntervalMs, setIsEditing } =
-    useDateRangePickerContext();
+  const {
+    autoRefresh,
+    onAutoRefreshChange,
+    isAutoRefreshReadOnly,
+    autoRefreshMinIntervalMs,
+    setIsEditing,
+  } = useDateRangePickerContext();
 
   const doneButton = (
     <EuiButton
@@ -50,6 +55,7 @@ export function AutoRefreshPanel() {
               value={autoRefresh}
               onChange={onAutoRefreshChange}
               minIntervalMs={autoRefreshMinIntervalMs}
+              readOnly={isAutoRefreshReadOnly}
             />
           ) : null}
         </PanelBodySection>

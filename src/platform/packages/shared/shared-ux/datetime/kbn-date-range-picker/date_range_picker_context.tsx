@@ -141,6 +141,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   autoRefresh?: AutoRefreshSettings;
   /** Called when the user changes the auto-refresh state. No-op when the prop is not set. */
   onAutoRefreshChange: (autoRefresh: AutoRefreshSettings) => void;
+  /** Whether the auto-refresh controls show the state without letting the user change it, because `onAutoRefreshChange` was not provided. */
+  isAutoRefreshReadOnly: boolean;
   /** Lowest refresh interval the user can set, in milliseconds. */
   autoRefreshMinIntervalMs?: number;
   /**
@@ -324,6 +326,8 @@ export function DateRangePickerProvider({
     [onAutoRefreshChangeProp]
   );
 
+  const isAutoRefreshReadOnly = !onAutoRefreshChangeProp;
+
   const toggleAutoRefresh = useCallback(() => {
     if (!autoRefresh) return;
 
@@ -400,6 +404,7 @@ export function DateRangePickerProvider({
       onSettingsChange,
       autoRefresh,
       onAutoRefreshChange,
+      isAutoRefreshReadOnly,
       autoRefreshMinIntervalMs,
       timeZone,
       autoRefreshSecondsRemaining,
@@ -439,6 +444,7 @@ export function DateRangePickerProvider({
       onSettingsChange,
       autoRefresh,
       onAutoRefreshChange,
+      isAutoRefreshReadOnly,
       autoRefreshMinIntervalMs,
       timeZone,
       autoRefreshSecondsRemaining,

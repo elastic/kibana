@@ -182,7 +182,10 @@ export interface DateRangePickerProps {
   onRefresh?: () => void;
   /** Current auto-refresh state. The auto-refresh UI is shown only when both this and `onRefresh` are set. */
   autoRefresh?: AutoRefreshSettings;
-  /** Called when the user changes the auto-refresh state, e.g. enables it or pauses the timer. */
+  /**
+   * Called when the user changes the auto-refresh state, e.g. enables it or pauses the timer.
+   * Without it, the auto-refresh controls show the state but can't be changed.
+   */
   onAutoRefreshChange?: (autoRefresh: AutoRefreshSettings) => void;
   /**
    * Lowest refresh interval the user can set, in milliseconds. Lower values typed into the

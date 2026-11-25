@@ -101,6 +101,20 @@ describe('RefreshInterval', () => {
     expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(60);
   });
 
+  it('disables every control when `readOnly`', () => {
+    renderWithEuiTheme(
+      <RefreshInterval
+        value={{ isEnabled: true, isPaused: false, intervalMs: 10_000 }}
+        onChange={jest.fn()}
+        readOnly
+      />
+    );
+
+    expect(screen.getByTestId('dateRangePickerAutoRefreshToggle')).toBeDisabled();
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toBeDisabled();
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit')).toBeDisabled();
+  });
+
   describe('with `minIntervalMs`', () => {
     it('does not apply a count below the minimum while typing and raises it on blur', () => {
       const onChange = jest.fn();

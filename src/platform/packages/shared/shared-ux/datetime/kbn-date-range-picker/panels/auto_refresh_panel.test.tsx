@@ -40,4 +40,27 @@ describe('AutoRefreshPanel', () => {
     });
     expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
   });
+
+  it('disables the auto-refresh controls without `onAutoRefreshChange`', async () => {
+    renderWithEuiTheme(
+      <DateRangePicker
+        defaultValue="-15m"
+        onChange={() => {}}
+        settings={{ roundRelativeTime: false }}
+        onSettingsChange={() => {}}
+        onRefresh={() => {}}
+        autoRefresh={{ isEnabled: true, isPaused: false, intervalMs: 10_000 }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('dateRangePickerControlButton'));
+    fireEvent.click(
+      within(screen.getByTestId('dateRangePickerAutoRefreshNavItem')).getByRole('button')
+    );
+    await screen.findByTestId('dateRangePickerAutoRefreshPanel');
+
+    expect(screen.getByTestId('dateRangePickerAutoRefreshToggle')).toBeDisabled();
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toBeDisabled();
+    expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit')).toBeDisabled();
+  });
 });

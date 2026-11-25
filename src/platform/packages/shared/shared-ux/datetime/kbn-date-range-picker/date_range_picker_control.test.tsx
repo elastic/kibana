@@ -1003,6 +1003,14 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
+    it('disables the auto-refresh append control without `onAutoRefreshChange`', () => {
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} onRefresh={onRefresh} autoRefresh={autoRefresh} />
+      );
+
+      expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeDisabled();
+    });
+
     it('remains interactive when readOnly is true, unlike the control button', () => {
       const onAutoRefreshChange = jest.fn();
 

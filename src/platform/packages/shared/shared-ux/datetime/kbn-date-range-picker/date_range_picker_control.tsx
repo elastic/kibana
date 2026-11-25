@@ -78,6 +78,7 @@ export function DateRangePickerControl() {
     hasAutoRefresh,
     autoRefreshSecondsRemaining,
     toggleAutoRefresh,
+    isAutoRefreshReadOnly,
     timeRange,
     transformOptions,
   } = useDateRangePickerContext();
@@ -272,7 +273,7 @@ export function DateRangePickerControl() {
               intervalMs={autoRefresh.intervalMs}
               secondsRemaining={autoRefreshSecondsRemaining}
               onClick={toggleAutoRefresh}
-              disabled={disabled}
+              disabled={disabled || isAutoRefreshReadOnly}
             />
           ) : undefined
         }
