@@ -60,7 +60,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // Why: security-team#21037 — queue/list questions with the skill cost ~2.8x tokens vs no-skill when
   // the model still runs related-alerts, Security Labs, and get_entity. The queue path must stop after
   // security.alerts.
-  it('tells the model to stop after security.alerts on list/count/prioritize questions', () => {
+  it('tells the model to stop after security.alerts on list/count questions', () => {
     const { content } = alertAnalysisSkill;
     const queuePath = content.slice(
       content.indexOf('### Queue path'),
@@ -72,6 +72,20 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(queuePath).toMatch(/do NOT call 'security\.alert-analysis\.get-related-alerts'/i);
     expect(queuePath).toMatch(/'security\.security_labs_search'/i);
     expect(queuePath).toMatch(/'security\.get_entity'/i);
+  });
+
+  // Why: "prioritize" sat under the stop-after-security.alerts path and under the evidence step at the
+  // same time, so the model had two opposite instructions for "which alert do I handle first".
+  it('sends judgment questions out of the queue path instead of stopping', () => {
+    const { content } = alertAnalysisSkill;
+    const queuePath = content.slice(
+      content.indexOf('### Queue path'),
+      content.indexOf('### Judgment questions')
+    );
+
+    expect(content).toMatch(/### Queue path \(plain list, count, or summary/i);
+    expect(queuePath).not.toMatch(/prioritize/i);
+    expect(queuePath).toMatch(/which alert to handle first[^\n]*use the next two sections/i);
   });
 
   // Why: each security.alerts call runs an NL -> ES|QL generator on a second model. In the 21037 lab it
@@ -100,6 +114,30 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(evidence).toMatch(/share hosts or IPs/i);
     expect(evidence).toMatch(/ES\|QL tool if it is available/i);
     expect(evidence).toMatch(/in one query/i);
+  });
+
+  // Why: in the 21037 lab the model ran 8-9 ES|QL calls on some questions, and sometimes queried the
+  // alerts index, which is not scoped to the current space. It also searched events only inside the
+  // alerts' 24h window, found nothing (the events were older than the alerts), and answered "nothing is
+  // on fire" (question 14).
+  it('bounds the ES|QL evidence step and keeps it off the alerts index', () => {
+    const { content } = alertAnalysisSkill;
+    const evidence = content.slice(
+      content.indexOf('### Check the evidence before you answer'),
+      content.indexOf('### Triage path')
+    );
+
+    expect(evidence).toMatch(/never the alerts index/i);
+    expect(evidence).toMatch(/at most three ES\|QL calls/i);
+    expect(evidence).toMatch(/not when the events happened/i);
+    expect(evidence).toMatch(/at least the last 30 days/i);
+    expect(evidence).toMatch(/never answer that nothing is wrong from an empty result/i);
+    expect(evidence).toMatch(
+      /if the ES\|QL tool is not available, say that the events were not checked/i
+    );
+    expect(content).toMatch(
+      /never query the alerts index \('\.alerts-security\.alerts-\*'\) with ES\|QL/i
+    );
   });
 
   it('limits entity and related-alert lookups on judgment questions', () => {
