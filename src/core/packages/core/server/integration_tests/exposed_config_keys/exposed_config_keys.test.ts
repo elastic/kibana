@@ -135,6 +135,7 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'workflowsManagement.pages.enabled (boolean?)',
   'xpack.actions.auth.ears.enableExperimental (boolean?)',
   'xpack.actions.auth.ears.enabled (boolean?)',
+  'xpack.actions.catalog.enabled (boolean?|false?)',
   'xpack.actions.email.domain_allowlist (array?)',
   'xpack.actions.email.services.enabled (array?)',
   'xpack.actions.inboundEvents.enabled (boolean?)',
