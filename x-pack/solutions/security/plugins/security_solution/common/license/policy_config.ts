@@ -373,7 +373,11 @@ function isEndpointRegistryCredentialHardeningPolicyValidForLicense(
   return true;
 }
 
-function isEndpointExportProvidersValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+/** Export providers need an Enterprise license; a policy without any is valid for every license. */
+export function isEndpointExportProvidersValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+): boolean {
   if (isAtLeast(license, 'enterprise')) {
     return true;
   }

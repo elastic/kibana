@@ -6,7 +6,12 @@
  */
 
 import { isEqual, isPlainObject, omitBy } from 'lodash';
+import type {
+  PackagePolicyConfigRecord,
+  PackagePolicyConfigRecordEntry,
+} from '@kbn/fleet-plugin/common';
 import type { ExportProvider, PolicyConfig } from '../../../common/endpoint/types';
+import { removeExportProviders } from '../../../common/endpoint/models/export_providers';
 import type {
   ExportProviderFieldError,
   ExportProviderFieldName,
@@ -285,4 +290,77 @@ export const validateExportProviders = (policy: PolicyConfig): void => {
   if (errors.length > 0) {
     throw new EndpointIntegrationFleetError(errors.join('; '));
   }
+};
+
+const RESPONSE_ACTIONS_CONFIG_PATH_PATTERN =
+  /^policy\.(?:windows|mac|linux)\.response_actions(?:\.|$)/;
+
+/**
+ * Whether `path`, or a path made of `path` and the keys of `value`, reaches `response_actions`.
+ * Keys may contain dots, so the depth is counted on the joined path.
+ */
+const reachesResponseActions = (path: string, value: unknown): boolean =>
+  path.split('.').length >= 3
+    ? RESPONSE_ACTIONS_CONFIG_PATH_PATTERN.test(path)
+    : isPlainObject(value) &&
+      Object.entries(value as Record<string, unknown>).some(([key, child]) =>
+        reachesResponseActions(`${path}.${key}`, child)
+      );
+
+const isResponseActionsConfigEntry = (
+  entry: PackagePolicyConfigRecordEntry | undefined,
+  key: string
+): boolean => key !== 'policy' && reachesResponseActions(key, entry?.value);
+
+const findResponseActionsConfigKey = (config: PackagePolicyConfigRecord): string | undefined =>
+  Object.keys(config).find((key) => isResponseActionsConfigEntry(config[key], key));
+
+/**
+ * Rejects (400) an input config key other than `policy` that sets `response_actions`. Fleet merges
+ * the value of every input config key into the agent policy, which would bypass the checks of
+ * `policy` (ex. `policy.windows.response_actions`, or `policy.linux` with a `response_actions` value).
+ */
+export const validateNoResponseActionsConfigKeys = (config: PackagePolicyConfigRecord): void => {
+  const key = findResponseActionsConfigKey(config);
+
+  if (key !== undefined) {
+    throw new EndpointIntegrationFleetError(
+      `response_actions can't be set through the input config key ${quoteForMessage(key)}`
+    );
+  }
+};
+
+/**
+ * Returns a copy of `config` without the keys that `validateNoResponseActionsConfigKeys()` rejects,
+ * for deployments where export providers are stripped (feature flag / product feature).
+ */
+export const removeResponseActionsConfigKeys = <Config extends PackagePolicyConfigRecord>(
+  config: Config
+): Config =>
+  findResponseActionsConfigKey(config) === undefined
+    ? config
+    : (omitBy(config, isResponseActionsConfigEntry) as Config);
+
+type EndpointInputConfig = PackagePolicyConfigRecord & { policy: { value: PolicyConfig } };
+
+/** Every export provider check of the Endpoint input `config`, when export providers are enabled. */
+export const validateExportProviderSettings = (config: EndpointInputConfig): void => {
+  validateNoDottedResponseActionsKeys(config.policy.value);
+  validateNoResponseActionsConfigKeys(config);
+  validateExportProviders(config.policy.value);
+};
+
+/** Returns a copy of the Endpoint input `config` without any export provider setting. */
+export const removeExportProviderSettings = <Config extends EndpointInputConfig>(
+  config: Config
+): Config => {
+  const configWithoutKeys = removeResponseActionsConfigKeys(config);
+
+  return {
+    ...configWithoutKeys,
+    policy: {
+      ...configWithoutKeys.policy,
+      value: removeExportProviders(removeDottedResponseActionsKeys(configWithoutKeys.policy.value)),
+    },
+  };
 };
