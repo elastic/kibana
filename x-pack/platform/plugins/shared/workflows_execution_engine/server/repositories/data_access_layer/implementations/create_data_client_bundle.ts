@@ -6,8 +6,8 @@
  */
 
 import { DeferredDataClientBundle } from './deferred_data_client_bundle';
-import type { CreateDataClientDeps, DataClientBundle } from '../types';
+import type { CreateDataClientDeps } from '../types';
 
-export function createDataClientBundle(deps: CreateDataClientDeps): DataClientBundle {
+export function createDataClientBundle(deps: CreateDataClientDeps): DeferredDataClientBundle {
   return new DeferredDataClientBundle(deps);
 }
