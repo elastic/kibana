@@ -57,13 +57,13 @@ The Firecrawl connector has the following actions:
     - `allowExternalLinks` (optional): Follow external links. Defaults to false.
 
 `crawlAndWait`
-:   Crawl a website and wait for the crawl to finish. Prefer it for small or well-known sites; use `crawl` and `getCrawlStatus` for large sites or when the duration is unpredictable. The action fails if the crawl is still running after `maxWaitMs`.
+:   Crawl a website and wait for the crawl to finish. Prefer it for small or well-known sites; use `crawl` and `getCrawlStatus` for large sites or when the duration is unpredictable. The action returns the URL, title and a short Markdown snippet (500 characters) for at most 30 pages, even when `limit` is higher. It fails if the crawl is still running after `maxWaitMs`.
     - `url` (required): Base URL to start crawling from.
     - `limit` (optional): Maximum pages to crawl, from 1 to 100. Defaults to 20.
     - `maxDiscoveryDepth` (optional): Maximum discovery depth.
     - `allowExternalLinks` (optional): Follow external links. Defaults to false.
     - `pollIntervalMs` (optional): How often to poll the crawl job, in milliseconds, from 1000 to 60000. Defaults to 3000.
-    - `maxWaitMs` (optional): Maximum time to wait for the crawl, in milliseconds, from 5000 to 3600000. Defaults to 1800000 (30 minutes).
+    - `maxWaitMs` (optional): How long to wait for the crawl, in milliseconds, from 5000 to 3600000. Defaults to 1800000 (30 minutes). The deadline is checked between polls, so the action can run up to `pollIntervalMs` longer than this value.
 
 `getCrawlStatus`
 :   Get the status and results of a crawl job.
