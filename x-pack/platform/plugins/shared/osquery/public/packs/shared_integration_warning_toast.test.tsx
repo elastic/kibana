@@ -114,6 +114,19 @@ describe('addSharedIntegrationWarningToasts', () => {
     expect(container.textContent).not.toContain('id-4');
   });
 
+  it('lists the first three ids with "and 2 more" and no link when names are uncached and the pack id is unknown', () => {
+    queryClient.setQueryData(['agentPolicies'], []);
+    run([warning(['id-1', 'id-2', 'id-3', 'id-4', 'id-5'])]);
+
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    const { container } = renderToast();
+    expect(container.textContent).toContain('id-1, id-2, id-3 and 2 more');
+    expect(container.textContent).not.toContain('id-4');
+    expect(container.textContent).not.toContain('id-5');
+    expect(screen.queryByTestId('sharedIntegrationWarningToastPackLink')).not.toBeInTheDocument();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
   it('shows one capped toast per warning, each naming its own integration', () => {
     run(
       [
