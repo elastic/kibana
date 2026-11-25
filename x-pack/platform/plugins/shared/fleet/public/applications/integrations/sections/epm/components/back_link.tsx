@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
+import { SuppressChromeBackButton } from '@kbn/app-header';
+
 import { useStartServices } from '../../../../../hooks';
 
 import { INTEGRATION_GROUPS } from '../screens/home/integration_groups';
@@ -61,8 +63,11 @@ export function BackLink({ queryParams, integrationsPath, collectionTitle }: Pro
     ? BACK_TO_INTEGRATIONS
     : BACK_TO_SELECTION;
 
+  const hasReturnParams = Boolean(returnAppId && returnPath);
+
   return (
     <>
+      {hasReturnParams ? <SuppressChromeBackButton /> : null}
       <EuiButtonEmpty
         iconType="chevronSingleLeft"
         size="xs"

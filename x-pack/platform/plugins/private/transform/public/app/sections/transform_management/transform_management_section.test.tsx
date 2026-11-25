@@ -8,6 +8,11 @@
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
+import { screen, within } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 import { TransformManagementSection } from './transform_management_section';
 
@@ -15,20 +20,21 @@ jest.mock('../../services/navigation');
 
 const queryClient = new QueryClient();
 
+const mockUseTransformCapabilities = jest.fn();
+const mockUseGetTransformNodes = jest.fn();
+const mockUseGetTransforms = jest.fn();
+const mockUseEnabledFeatures = jest.fn();
+const mockRefreshTransformList = jest.fn();
+
 jest.mock('../../hooks', () => ({
-  useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
-  useTransformCapabilities: () => ({ canStartStopTransform: true }),
-  useGetTransformNodes: () => ({
-    isInitialLoading: false,
-    error: null,
-    data: 0,
+  useDocumentationLinks: () => ({
+    esNodeRoles: 'https://example.test/node-roles',
+    esTransform: 'https://example.test',
   }),
-  useGetTransforms: () => ({
-    isInitialLoading: false,
-    isLoading: false,
-    error: null,
-    data: { transforms: [], transformIdsWithoutConfig: [] },
-  }),
+  useRefreshTransformList: () => mockRefreshTransformList,
+  useTransformCapabilities: () => mockUseTransformCapabilities(),
+  useGetTransformNodes: () => mockUseGetTransformNodes(),
+  useGetTransforms: () => mockUseGetTransforms(),
 }));
 
 jest.mock('../../hooks/use_get_transform_stats', () => ({
@@ -40,7 +46,7 @@ jest.mock('../../hooks/use_get_transform_stats', () => ({
 }));
 
 jest.mock('../../serverless_context', () => ({
-  useEnabledFeatures: () => ({ showNodeInfo: false }),
+  useEnabledFeatures: () => mockUseEnabledFeatures(),
 }));
 
 jest.mock('../../../alerting/transform_alerting_flyout', () => {
@@ -53,22 +59,161 @@ jest.mock('../../../alerting/transform_alerting_flyout', () => {
   };
 });
 
-jest.mock('./components/transform_list/transforms_stats_bar', () => ({
-  TransformStatsBar: () => null,
-}));
-
 jest.mock('./components/dangling_task_warning/dangling_task_warning', () => ({
   DanglingTasksWarning: () => null,
 }));
 
+jest.mock('./components/transform_list', () => ({
+  TransformList: ({ transforms }: { transforms: Array<{ id: string }> }) =>
+    transforms.length === 0 ? (
+      <div data-test-subj="transformNoTransformsFound">
+        <button type="button" data-test-subj="transformButtonCreate">
+          Create your first transform
+        </button>
+      </div>
+    ) : (
+      <div data-test-subj="mockedTransformList" />
+    ),
+}));
+
+const renderSection = () => {
+  const history = createMemoryHistory();
+  return renderWithI18n(
+    <MockAppHeaderProvider>
+      <Router history={history}>
+        <QueryClientProvider client={queryClient}>
+          <TransformManagementSection />
+        </QueryClientProvider>
+      </Router>
+    </MockAppHeaderProvider>
+  );
+};
+
 describe('Transform: <TransformManagementSection />', () => {
+  beforeEach(() => {
+    mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: false });
+    mockUseGetTransformNodes.mockReturnValue({
+      isInitialLoading: false,
+      error: null,
+      data: 0,
+    });
+    mockUseGetTransforms.mockReturnValue({
+      isInitialLoading: false,
+      isLoading: false,
+      error: null,
+      data: { transforms: [], transformIdsWithoutConfig: [] },
+    });
+  });
+
   test('Minimal initialization', () => {
-    const { container } = renderWithI18n(
-      <QueryClientProvider client={queryClient}>
-        <TransformManagementSection />
-      </QueryClientProvider>
-    );
+    mockUseTransformCapabilities.mockReturnValue({ canStartStopTransform: true });
+    const { container } = renderSection();
 
     expect(container.textContent).toContain('Missing permission');
+  });
+
+  test('keeps AppHeader mounted while loading and hides Create', () => {
+    mockUseTransformCapabilities.mockReturnValue({
+      canGetTransform: true,
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
+    });
+    mockUseGetTransformNodes.mockReturnValue({
+      isInitialLoading: true,
+      error: null,
+      data: 0,
+    });
+    mockUseGetTransforms.mockReturnValue({
+      isInitialLoading: true,
+      isLoading: true,
+      error: null,
+      data: { transforms: [], transformIdsWithoutConfig: [] },
+    });
+
+    renderSection();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
+    expect(screen.queryByTestId('transformButtonCreate')).not.toBeInTheDocument();
+  });
+
+  test('shows the no-transform-nodes warning when the list is unavailable', () => {
+    mockUseTransformCapabilities.mockReturnValue({
+      canGetTransform: true,
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
+    });
+    mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: true });
+
+    renderSection();
+
+    expect(screen.getByText('There are no transform nodes available.')).toBeInTheDocument();
+    expect(
+      screen.getByText(/You will not be able to create or run transforms/)
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
+      'href',
+      'https://example.test/node-roles'
+    );
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
+    expect(screen.queryByTestId('mockedTransformList')).not.toBeInTheDocument();
+  });
+
+  test('keeps AppHeader mounted on an empty list and hides Create', () => {
+    mockUseTransformCapabilities.mockReturnValue({
+      canGetTransform: true,
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
+    });
+    mockUseGetTransformNodes.mockReturnValue({
+      isInitialLoading: false,
+      error: null,
+      data: 1,
+    });
+
+    renderSection();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
+    expect(
+      within(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).queryByTestId(
+        'transformButtonCreate'
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('transformNoTransformsFound')).getByTestId('transformButtonCreate')
+    ).toBeInTheDocument();
+  });
+
+  test('shows Create as the AppHeader primary action when transforms exist', () => {
+    mockUseTransformCapabilities.mockReturnValue({
+      canGetTransform: true,
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
+    });
+    mockUseGetTransformNodes.mockReturnValue({
+      isInitialLoading: false,
+      error: null,
+      data: 1,
+    });
+    mockUseGetTransforms.mockReturnValue({
+      isInitialLoading: false,
+      isLoading: false,
+      error: null,
+      data: { transforms: [{ id: 'transform-1' }], transformIdsWithoutConfig: [] },
+    });
+
+    renderSection();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
+    expect(
+      screen.queryByText(
+        'Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access.'
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('transformButtonCreate')).toBeInTheDocument();
+    expect(screen.getByTestId('mockedTransformList')).toBeInTheDocument();
   });
 });

@@ -78,7 +78,7 @@ export const JiraConnector: ConnectorSpec = {
   metadata: {
     id: '.jira-cloud',
     displayName: 'Jira Cloud',
-    description: i18n.translate('core.kibanaConnectorSpecs.jira.metadata.description', {
+    description: i18n.translate('connectorSpecs.jira.metadata.description', {
       defaultMessage: 'Search, create, and manage issues, projects, and users in Jira Cloud',
     }),
     minimumLicense: 'enterprise',
@@ -106,15 +106,15 @@ export const JiraConnector: ConnectorSpec = {
         type: 'basic',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.jira.auth.basic.label', {
             defaultMessage: 'Shared API key',
           }),
           meta: {
             password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.label', {
+              label: i18n.translate('connectorSpecs.jira.auth.password.label', {
                 defaultMessage: 'API key',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.helpText', {
+              helpText: i18n.translate('connectorSpecs.jira.auth.password.helpText', {
                 defaultMessage: 'Your Jira API token',
               }),
             },
@@ -129,17 +129,17 @@ export const JiraConnector: ConnectorSpec = {
         .string()
         .min(1)
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.description', {
+          i18n.translate('connectorSpecs.jira.config.subdomain.description', {
             defaultMessage: 'Your Atlassian subdomain',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.label', {
+          label: i18n.translate('connectorSpecs.jira.config.subdomain.label', {
             defaultMessage: 'Subdomain',
           }),
           placeholder: 'your-domain',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.helpText', {
+          helpText: i18n.translate('connectorSpecs.jira.config.subdomain.helpText', {
             defaultMessage:
               'The subdomain for your Jira Cloud site (e.g. your-domain for https://your-domain.atlassian.net)',
           }),
@@ -148,16 +148,16 @@ export const JiraConnector: ConnectorSpec = {
         .string()
         .optional()
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.description', {
+          i18n.translate('connectorSpecs.jira.config.cloudId.description', {
             defaultMessage: 'Atlassian cloud ID (OAuth)',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.label', {
+          label: i18n.translate('connectorSpecs.jira.config.cloudId.label', {
             defaultMessage: 'Cloud ID',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.helpText', {
+          helpText: i18n.translate('connectorSpecs.jira.config.cloudId.helpText', {
             defaultMessage:
               'Required for OAuth. To find your Cloud ID, visit https://your-subdomain.atlassian.net/_edge/tenant_info (replace your-subdomain with your Atlassian subdomain) and use the cloudId value from the response. Your Atlassian OAuth app must have the write:jira-work scope enabled to use write actions.',
           }),
@@ -167,6 +167,7 @@ export const JiraConnector: ConnectorSpec = {
   actions: {
     searchIssuesWithJql: {
       isTool: true,
+      scope: 'read',
       description:
         'Search or filter Jira issues using JQL (Jira Query Language). Use when you need to find issues by status, assignee, project, label, or any other criteria. Supports pagination via nextPageToken.',
       input: SearchIssuesWithJqlInputSchema,
@@ -183,6 +184,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     getIssue: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch full details of a single Jira issue by its ID or key. Use when you already have the issue key (e.g. PROJ-123) or issue ID and need the complete record including fields, comments, and metadata.',
       input: GetIssueInputSchema,
@@ -199,6 +201,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     getProjects: {
       isTool: true,
+      scope: 'read',
       description:
         'List or search Jira projects. Use when you need to discover available projects or find a project by name or key. Supports pagination and optional text filtering.',
       input: GetProjectsInputSchema,
@@ -217,6 +220,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     getProject: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch full details of a single Jira project by its ID or key. Use when you already have the project key (e.g. PROJ) or numeric project ID and need the complete project record.',
       input: GetProjectInputSchema,
@@ -233,6 +237,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     searchUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'Find Jira users by name, username, or email. Use when you need a user accountId (e.g. for JQL assignee filters) or to look up user contact details. At least one search parameter should be provided.',
       input: SearchUsersInputSchema,
@@ -373,6 +378,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getTransitions: {
       isTool: true,
+      scope: 'read',
       description:
         'List the workflow transitions available for a Jira issue. ' +
         'Use before transitionIssue — Jira requires a transition ID, not a status name. ' +
@@ -389,6 +395,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getIssueTypes: {
       isTool: true,
+      scope: 'read',
       description:
         'List the issue types available in a Jira project (e.g. Bug, Task, Story, Epic). ' +
         'Use before createIssue to discover valid issue type names and IDs for the project.',
@@ -406,6 +413,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getCreateMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the required and optional fields for creating a Jira issue of a specific type. ' +
         'Use after getIssueTypes to build a valid createIssue payload, especially when the ' +
@@ -467,6 +475,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getAttachment: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the content of a Jira attachment by its ID. ' +
         'Returns the file as a base64-encoded string along with its MIME type. ' +
@@ -515,7 +524,7 @@ export const JiraConnector: ConnectorSpec = {
     },
 
     deleteIssue: {
-      isTool: false,
+      isTool: true,
       scope: 'destroy',
       description:
         'Permanently delete a Jira issue. This is irreversible. ' +
@@ -571,7 +580,7 @@ export const JiraConnector: ConnectorSpec = {
     },
   },
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.jira.test.description', {
+    description: i18n.translate('connectorSpecs.jira.test.description', {
       defaultMessage: 'Verifies Jira Cloud connection by fetching the current user',
     }),
     handler: async (ctx) => {

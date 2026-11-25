@@ -32,23 +32,6 @@ export async function getDataStreams(options: {
         })
       );
 
-  const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
-    esClient,
-    datasetNames,
-    isSecurityEnabled
-  );
-
-  const canMonitor = Object.values(datasetUserPrivileges.datasetsPrivilages).some(
-    (privileges) => privileges.canMonitor
-  );
-
-  if (!canMonitor) {
-    return {
-      dataStreams: [],
-      datasetUserPrivileges,
-    };
-  }
-
   const allDataStreams = await dataStreamService.getMatchingDataStreams(
     esClient,
     datasetNames.join(',')
@@ -64,12 +47,17 @@ export async function getDataStreams(options: {
     ? await datasetQualityPrivileges.getHasIndexPrivileges(
         esClient,
         filteredDataStreams.map(({ name }) => name),
-        ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
+        ['read', 'monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
         isSecurityEnabled
       )
     : {};
 
-  const mappedDataStreams = filteredDataStreams.map((dataStream) => {
+  const accessibleDataStreams = filteredDataStreams.filter(({ name }) => {
+    const privileges = dataStreamsPrivileges[name];
+    return privileges?.read || privileges?.monitor;
+  });
+
+  const mappedDataStreams = accessibleDataStreams.map((dataStream) => {
     // @ts-expect-error
     const failureStoreLifecycle = dataStream.failure_store?.lifecycle;
     return {
@@ -94,31 +82,5 @@ export async function getDataStreams(options: {
 
   return {
     dataStreams: mappedDataStreams,
-    datasetUserPrivileges,
-  };
-}
-
-export async function getDatasetTypesPrivileges(options: {
-  esClient: ElasticsearchClient;
-  types: DataStreamType[];
-  isSecurityEnabled: boolean;
-}) {
-  const { esClient, types, isSecurityEnabled } = options;
-
-  const datasetNames = types.map((type) =>
-    streamPartsToIndexPattern({
-      typePattern: type,
-      datasetPattern: '*-*',
-    })
-  );
-
-  const { datasetsPrivilages } = await datasetQualityPrivileges.getDatasetPrivileges(
-    esClient,
-    datasetNames,
-    isSecurityEnabled
-  );
-
-  return {
-    datasetsPrivilages,
   };
 }

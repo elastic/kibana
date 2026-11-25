@@ -16,6 +16,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { XYLegendValue } from '@kbn/chart-expressions-common';
+import type { AutoColorType, ColorByValueType } from './schema/color';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -83,6 +84,11 @@ export interface LensBaseLayer {
   seriesColor?: string;
   value: LensLayerQuery;
 }
+
+export type LensFormatConfig = Pick<
+  LensBaseLayer,
+  'format' | 'decimals' | 'suffix' | 'compactValues' | 'fromUnit' | 'toUnit'
+>;
 
 export interface LensBaseXYLayer {
   dataset?: LensDataset;
@@ -246,8 +252,18 @@ export interface LensHeatmapConfigBase {
   chartType: 'heatmap';
   /** field name to apply breakdown based on field type or full breakdown configuration */
   breakdown?: LensBreakdownConfig;
+  /** Y-axis field format. Layer `format` still applies to the cell value. */
+  breakdownFormat?: LensFormatConfig;
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
+  axisLabel?: { xAxis?: boolean; yAxis?: boolean };
+  /**
+   * Cell color scale, in the same shape as the heatmap API `metric.color`.
+   * Omit or use `auto` to keep the default heatmap palette.
+   */
+  color?: ColorByValueType | AutoColorType;
+  /** Vertical-axis order. Becomes the heatmap `ySortPredicate`. Omitted keeps datasource order. */
+  ySort?: 'asc' | 'desc';
 }
 
 export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHeatmapConfigBase>;
@@ -311,6 +327,7 @@ export interface LensXYConfigBase {
   fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
   yBounds?: LensYBoundsConfig;
   valueLabels?: 'hide' | 'show';
+  areaFill?: 'solid' | 'gradient';
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;

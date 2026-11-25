@@ -22,6 +22,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { APP_TITLE } from './translations';
 import { ExperimentsListPage } from './pages/experiments_list';
 import { DatasetsListPage } from './pages/datasets_list';
+import { OnlineEvalsListPage } from './pages/online_evals_list';
+import { OnlineEvalDetailPage } from './pages/online_eval_detail';
 
 const ExperimentDetailPage = React.lazy(async () => {
   const mod = await import('./pages/experiment_detail');
@@ -58,12 +60,21 @@ const RunOverviewPage = React.lazy(async () => {
   return { default: mod.RunOverviewPage };
 });
 
+const EvaluatorsPage = React.lazy(async () => {
+  const mod = await import('./pages/evaluators');
+  return { default: mod.EvaluatorsPage };
+});
+
 const experimentsTabLabel = i18n.translate('xpack.evals.navigation.experiments', {
   defaultMessage: 'Experiments',
 });
 
 const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
   defaultMessage: 'Datasets',
+});
+
+const evaluatorsTabLabel = i18n.translate('xpack.evals.navigation.evaluators', {
+  defaultMessage: 'Evaluators',
 });
 
 const remotesTabLabel = i18n.translate('xpack.evals.navigation.remotes', {
@@ -74,12 +85,22 @@ const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
   defaultMessage: 'Tracing',
 });
 
+const onlineTabLabel = i18n.translate('xpack.evals.navigation.online', {
+  defaultMessage: 'Online Evaluations',
+});
+
 const ROOT_PATH = '/' as const;
 const COMPARE_PATH = '/compare' as const;
 const RUNS_PATH = '/runs' as const;
 const DATASETS_PATH = '/datasets' as const;
+const EVALUATORS_PATH = '/evaluators' as const;
 const TRACING_PATH = '/tracing' as const;
 const REMOTES_PATH = '/remotes' as const;
+const ONLINE_PATH = '/online' as const;
+
+// TODO: Show online evaluations tab when the feature is ready
+const SHOW_ONLINE_EVALS_TAB = false;
+
 const experimentDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.experimentDetail', {
   defaultMessage: 'Experiment details',
 });
@@ -129,6 +150,7 @@ const getBreadcrumbs = ({
   const experimentsHref = getHref(ROOT_PATH);
   const datasetsHref = getHref(DATASETS_PATH);
   const tracingHref = getHref(TRACING_PATH);
+  const onlineHref = getHref(ONLINE_PATH);
 
   if (pathname.startsWith(`${TRACING_PATH}/`)) {
     const parts = pathname.split('/').filter(Boolean);
@@ -142,12 +164,27 @@ const getBreadcrumbs = ({
     return [{ text: tracingTabLabel }];
   }
 
+  if (pathname.startsWith(`${ONLINE_PATH}/`)) {
+    return [
+      { text: onlineTabLabel, href: onlineHref },
+      { text: decodeURIComponent(pathname.split('/')[2]) },
+    ];
+  }
+
+  if (pathname === ONLINE_PATH) {
+    return [{ text: onlineTabLabel }];
+  }
+
   if (pathname.startsWith(`${DATASETS_PATH}/`)) {
     return [{ text: datasetsTabLabel, href: datasetsHref }, { text: datasetDetailBreadcrumbLabel }];
   }
 
   if (pathname === DATASETS_PATH) {
     return [{ text: datasetsTabLabel }];
+  }
+
+  if (pathname === EVALUATORS_PATH) {
+    return [{ text: evaluatorsTabLabel }];
   }
 
   if (pathname === REMOTES_PATH) {
@@ -183,8 +220,15 @@ const EvalsNavigation: React.FC = () => {
   const { pathname } = useLocation();
   const isTracingSelected = pathname.startsWith(TRACING_PATH);
   const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
+  const isEvaluatorsSelected = pathname.startsWith(EVALUATORS_PATH);
   const isRemotesSelected = pathname.startsWith(REMOTES_PATH);
-  const isExperimentsSelected = !isTracingSelected && !isDatasetsSelected && !isRemotesSelected;
+  const isOnlineSelected = pathname.startsWith(ONLINE_PATH);
+  const isExperimentsSelected =
+    !isTracingSelected &&
+    !isDatasetsSelected &&
+    !isEvaluatorsSelected &&
+    !isRemotesSelected &&
+    !isOnlineSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
@@ -195,12 +239,20 @@ const EvalsNavigation: React.FC = () => {
         <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push(DATASETS_PATH)}>
           {datasetsTabLabel}
         </EuiTab>
+        <EuiTab isSelected={isEvaluatorsSelected} onClick={() => history.push(EVALUATORS_PATH)}>
+          {evaluatorsTabLabel}
+        </EuiTab>
         <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
           {tracingTabLabel}
         </EuiTab>
         <EuiTab isSelected={isRemotesSelected} onClick={() => history.push(REMOTES_PATH)}>
           {remotesTabLabel}
         </EuiTab>
+        {SHOW_ONLINE_EVALS_TAB ? (
+          <EuiTab isSelected={isOnlineSelected} onClick={() => history.push(ONLINE_PATH)}>
+            {onlineTabLabel}
+          </EuiTab>
+        ) : null}
       </EuiTabs>
     </div>
   );
@@ -236,19 +288,25 @@ export const EvalsApp: React.FC<{
           getHref={getHref}
           breadcrumbPrefix={breadcrumbPrefix}
         />
-        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-          <Routes>
-            <Route exact path={ROOT_PATH} component={ExperimentsListPage} />
-            <Route exact path={COMPARE_PATH} component={CompareExperimentsPage} />
-            <Route exact path={RUNS_PATH} component={RunOverviewPage} />
-            <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
-            <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
-            <Route exact path={REMOTES_PATH} component={RemotesListPage} />
-            <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />
-            <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
-            <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
-          </Routes>
-        </Suspense>
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <EuiSpacer size="m" />
+          <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+            <Routes>
+              <Route exact path={ROOT_PATH} component={ExperimentsListPage} />
+              <Route exact path={COMPARE_PATH} component={CompareExperimentsPage} />
+              <Route exact path={RUNS_PATH} component={RunOverviewPage} />
+              <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
+              <Route exact path={EVALUATORS_PATH} component={EvaluatorsPage} />
+              <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
+              <Route exact path={REMOTES_PATH} component={RemotesListPage} />
+              <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />
+              <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
+              <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
+              <Route exact path={ONLINE_PATH} component={OnlineEvalsListPage} />
+              <Route exact path="/online/:workflowId" component={OnlineEvalDetailPage} />
+            </Routes>
+          </Suspense>
+        </div>
       </div>
     </Router>
   );

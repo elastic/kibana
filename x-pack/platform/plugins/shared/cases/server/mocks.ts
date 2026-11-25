@@ -590,7 +590,13 @@ export const mockCaseUnifiedAttachments: Array<SavedObject<UnifiedAttachmentAttr
       updated_at: null,
       updated_by: null,
     },
-    references: [],
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-1',
+      },
+    ],
   },
 ];
 
@@ -811,11 +817,6 @@ export const mockCasesContract = (): CasesServerStart => ({
     },
     chat: {
       enabled: true,
-    },
-    casesRedesign: {
-      list: false,
-      details: false,
-      settings: false,
     },
     attachments: {
       enabled: true,

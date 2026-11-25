@@ -28,9 +28,13 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   recommended,
   title,
   href,
+  onClick,
   button,
   layout,
   category,
+  isDisabled,
+  target,
+  rel,
   ...cardRest
 }) => {
   const {
@@ -83,21 +87,31 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     defaultMessage: 'Add Elastic Agent',
   });
 
+  const resolvedHref = href ?? addBasePath(`/app/integrations/browse${hasCategory}`);
+
+  // The href/onClick live on the button only: a card-level href/onClick would make
+  // the whole card an interactive wrapper around this button, which is invalid,
+  // doubly-focusable nesting (@elastic/eui/no-nested-interactive-element).
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      // The href and/or onClick are attached to the whole Card, so the button is just for show.
-      // Do not add the behavior here too or else it will propogate through
-      <EuiButton fill>{button || title || defaultCTAtitle}</EuiButton>
+      <EuiButton
+        fill
+        href={resolvedHref}
+        onClick={onClick}
+        isDisabled={isDisabled}
+        target={target}
+        rel={rel}
+      >
+        {button || title || defaultCTAtitle}
+      </EuiButton>
     );
 
   return (
     <EuiCard
       paddingSize="l"
       image={image}
-      href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
-      // Bad hack to fix the need for an a11y title even though the button exists
       title={
         <EuiScreenReaderOnly>
           <span>{defaultCTAtitle}</span>
@@ -109,6 +123,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
       footer={footer}
       layout={layout as 'vertical' | undefined}
+      isDisabled={isDisabled}
       {...cardRest}
     />
   );

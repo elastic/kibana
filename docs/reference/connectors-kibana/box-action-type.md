@@ -11,6 +11,8 @@ applies_to:
 
 The Box connector integrates with Box through the official remote MCP server at `https://mcp.box.com`. It searches files and folders, retrieves file content and metadata, and uses Box AI to answer questions about enterprise content. It uses OAuth 2.0 Authorization Code flow to authenticate.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-box-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

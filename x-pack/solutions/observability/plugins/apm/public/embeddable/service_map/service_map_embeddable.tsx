@@ -14,11 +14,12 @@ import { SERVICE_NAME } from '@kbn/apm-types';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
 import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
+import { useTimeRange } from '../../hooks/use_time_range';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getDateRange } from '../../context/url_params_context/helpers';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { FETCH_STATUS, isPending } from '../../hooks/use_fetcher';
@@ -29,6 +30,7 @@ import { DisabledPrompt } from '../../components/app/service_map/disabled_prompt
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
+import { useServiceMapClosedGroups } from '../../components/app/service_map/use_service_map_closed_groups';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
 import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
 import {
@@ -54,6 +56,7 @@ export interface ServiceMapEmbeddableProps {
   environment?: Environment;
   kuery?: string;
   serviceName?: string;
+  viewMode?: ViewMode;
   /**
    * Multi-service context highlight from panel state (`highlighted_service_names`).
    * When unset, falls back to highlighting `serviceName` alone.
@@ -153,6 +156,7 @@ function EmbeddableContainer({
 }
 
 export function ServiceMapEmbeddable({
+  viewMode = 'view',
   rangeFrom,
   rangeTo,
   environment = ENVIRONMENT_ALL.value,
@@ -213,21 +217,24 @@ export function ServiceMapEmbeddable({
     }
   }, [license, hasValidLicense, isServiceMapEnabled, onBlockingError]);
 
-  const { start, end } = useMemo(() => {
-    const { start: parsedStart, end: parsedEnd } = getDateRange({ rangeFrom, rangeTo });
-    return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
-  }, [rangeFrom, rangeTo]);
+  // `optional` keeps the raw range when date math cannot parse, and `timeRangeId`
+  // (inside useTimeRange) re-resolves relative ranges on Refresh.
+  const { start: resolvedStart, end: resolvedEnd } = useTimeRange({
+    rangeFrom,
+    rangeTo,
+    optional: true,
+  });
+  const start = resolvedStart ?? rangeFrom;
+  const end = resolvedEnd ?? rangeTo;
 
-  const { start: badgesStart, end: badgesEnd } = useMemo(() => {
-    if (badgesRangeFrom == null || badgesRangeTo == null) {
-      return { start, end };
-    }
-    const { start: parsedStart, end: parsedEnd } = getDateRange({
-      rangeFrom: badgesRangeFrom,
-      rangeTo: badgesRangeTo,
-    });
-    return { start: parsedStart ?? badgesRangeFrom, end: parsedEnd ?? badgesRangeTo };
-  }, [badgesRangeFrom, badgesRangeTo, start, end]);
+  const { start: resolvedBadgesStart, end: resolvedBadgesEnd } = useTimeRange({
+    rangeFrom: badgesRangeFrom,
+    rangeTo: badgesRangeTo,
+    optional: true,
+  });
+  const hasBadgesRange = badgesRangeFrom != null && badgesRangeTo != null;
+  const badgesStart = hasBadgesRange ? resolvedBadgesStart ?? badgesRangeFrom : start;
+  const badgesEnd = hasBadgesRange ? resolvedBadgesEnd ?? badgesRangeTo : end;
 
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
@@ -314,13 +321,23 @@ export function ServiceMapEmbeddable({
     onEmptyStateChange(data.nodes.length === 0);
   }, [onEmptyStateChange, status, data.nodes.length]);
 
-  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+  const { nodes: nodesWithBadges, status: badgesStatus } = useServiceMapBadges({
     environment,
     start: badgesStart,
     end: badgesEnd,
     kuery: badgesKuery ?? kuery,
     nodes: data.nodes,
     nodesStatus: status,
+  });
+
+  const {
+    nodes: nodesForGraph,
+    edges: edgesForGraph,
+    countLine: groupingCountLine,
+  } = useServiceMapClosedGroups({
+    nodes: nodesWithBadges,
+    edges: data.edges,
+    serviceGrouping: useContextualMap ? undefined : data.serviceGrouping,
   });
 
   // Strip badge-dependent filters (alert/SLO/anomaly) until badge data resolves. On failure,
@@ -501,9 +518,11 @@ export function ServiceMapEmbeddable({
           />
         )}
         {useContextualMap ? (
+          // Focused hop map stays one node per service. Closed groups would hide the focal
+          // service and break expand/collapse, which keys off service ids.
           <ContextualServiceMapGraph
             height="100%"
-            nodes={isLoading ? [] : nodesForGraph}
+            nodes={isLoading ? [] : nodesWithBadges}
             edges={isLoading ? [] : data.edges}
             focalServiceId={serviceName!}
             baseMaxHops={baseMaxHops}
@@ -529,7 +548,7 @@ export function ServiceMapEmbeddable({
           <ServiceMapGraph
             height="100%"
             nodes={isLoading ? [] : nodesForGraph}
-            edges={isLoading ? [] : data.edges}
+            edges={isLoading ? [] : edgesForGraph}
             serviceName={serviceName}
             highlightedServiceNames={highlightedServiceNames}
             environment={environment}
@@ -539,6 +558,7 @@ export function ServiceMapEmbeddable({
             isFullscreen={false}
             fullMapHref={fullMapHref}
             isEmbedded
+            isInteractive={viewMode !== 'non-interactive'}
             showEmbeddedControls={showEmbeddedControls}
             showFocusMap={showFocusMapInPopover}
             alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
@@ -548,6 +568,7 @@ export function ServiceMapEmbeddable({
             viewFilters={viewFiltersForGraph}
             onViewFiltersChange={onViewFiltersChange}
             flyoutOptions={flyoutOptions}
+            groupingCountLine={isLoading ? undefined : groupingCountLine}
           />
         )}
       </div>

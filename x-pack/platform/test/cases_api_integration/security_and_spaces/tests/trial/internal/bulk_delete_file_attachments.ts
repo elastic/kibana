@@ -7,7 +7,7 @@
 
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import type { Owner } from '@kbn/cases-plugin/common/constants/types';
-import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
+import { getUnifiedFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   bulkCreateAttachments,
@@ -116,8 +116,8 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             params: [
-              getFilesAttachmentReq({
-                externalReferenceId: create.file.id,
+              getUnifiedFilesAttachmentReq({
+                attachmentId: create.file.id,
                 owner: scenario.owner,
               }),
             ],

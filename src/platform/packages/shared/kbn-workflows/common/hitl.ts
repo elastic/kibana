@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CONNECTOR_ID_MAX_LENGTH } from './constants';
+
 export const DEFAULT_WAIT_FOR_INPUT_TIMEOUT = '72h' as const;
 
 /** Max length for external resume tokens in HITL URLs. */
 export const MAX_HITL_EXTERNAL_RESUME_TOKEN_LENGTH = 128 as const;
 
 /** Max length for connector saved-object id / name in HITL channel config. */
-export const MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH = 512 as const;
+export const MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH = CONNECTOR_ID_MAX_LENGTH;
 
-/** Max length for Slack channel id in `slack_api` config. */
-export const MAX_HITL_SLACK_CHANNEL_ID_LENGTH = 256 as const;
+/** Max length for a Slack channel id or name in `slack_api` config. */
+export const MAX_HITL_SLACK_CHANNEL_LENGTH = 256 as const;
 
 /** Max length for HITL step messages and channel notification templates. */
 export const MAX_HITL_MESSAGE_LENGTH = 10_240 as const;
@@ -27,6 +29,12 @@ export const MAX_HITL_ACTION_LABEL_LENGTH = 256 as const;
 /** Max length for `respondedBy` on HITL step output. */
 export const MAX_HITL_RESPONDED_BY_LENGTH = 1024 as const;
 
+/** Max length for `channel` on HITL step output (e.g. inbox, kibana_execution_view, timeout). */
+export const MAX_HITL_CHANNEL_LENGTH = 256 as const;
+
+/** Max length for `respondedAt` ISO-8601 timestamp on HITL step output. */
+export const MAX_HITL_RESPONDED_AT_LENGTH = 64 as const;
+
 /** Max length for external resume / form URLs in template context. */
 export const MAX_HITL_EXTERNAL_LINK_LENGTH = 8192 as const;
 
@@ -36,11 +44,52 @@ export const MAX_HITL_GRAPH_NODE_ID_LENGTH = 255 as const;
 /** Max length for keys in dynamic waitForInput response records. */
 export const MAX_HITL_RESPONSE_FIELD_KEY_LENGTH = 512 as const;
 
-/** Internal `stepExecution.input` field storing the external HITL resume token hash. */
+/**
+ * External HITL resume token hash. A new wait stores this on step `state` and on step `input`.
+ * `state` is what this version reads. `input` is what a 9.6 node reads.
+ */
 export const HITL_TOKEN_HASH_INPUT_FIELD = '_hitlTokenHash' as const;
 
-/** Internal `stepExecution.input` field storing the external HITL resume token expiry. */
+/**
+ * External HITL resume token expiry. A new wait stores this on step `state` and on step `input`.
+ * `state` is what this version reads. `input` is what a 9.6 node reads.
+ */
 export const HITL_TOKEN_EXPIRES_AT_INPUT_FIELD = '_hitlTokenExpiresAt' as const;
+
+export interface HitlExternalResumeTokenRecord {
+  hash: string;
+  expiresAt: string;
+}
+
+const readHitlTokenRecord = (value: unknown): HitlExternalResumeTokenRecord | undefined => {
+  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  const hash = record[HITL_TOKEN_HASH_INPUT_FIELD];
+  const expiresAt = record[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
+  if (typeof hash !== 'string' || hash.length === 0) {
+    return undefined;
+  }
+  if (typeof expiresAt !== 'string' || expiresAt.length === 0) {
+    return undefined;
+  }
+  return { hash, expiresAt };
+};
+
+/** True when `value` itself holds a live external-resume token. */
+export const hasHitlExternalResumeToken = (value: unknown): boolean =>
+  readHitlTokenRecord(value) !== undefined;
+
+/**
+ * Reads the external resume token. Step `state` wins when both copies are live.
+ * `input` is the copy a 9.6 node reads, and the location older waits used.
+ */
+export const readHitlExternalResumeToken = (step: {
+  state?: Record<string, unknown> | null;
+  input?: unknown;
+}): HitlExternalResumeTokenRecord | undefined =>
+  readHitlTokenRecord(step.state) ?? readHitlTokenRecord(step.input);
 
 /** Workflow context path: `context.hitl.externalFormLink`. */
 export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;
@@ -48,10 +97,22 @@ export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;
 /** Workflow context path: `context.hitl.externalQueryLink`. */
 export const HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY = 'externalQueryLink' as const;
 
+/** Workflow context path: `context.hitl.externalApproveLink`. */
+export const HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY = 'externalApproveLink' as const;
+
+/** Workflow context path: `context.hitl.externalRejectLink`. */
+export const HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY = 'externalRejectLink' as const;
+
 export const DEFAULT_HITL_INPUT_OPEN_FORM_LABEL = 'Open form' as const;
 
 export const DEFAULT_HITL_INPUT_CHANNEL_MESSAGE =
   'Respond here: {{context.hitl.externalFormLink}}' as const;
+
+export const MAX_HITL_EMAIL_RECIPIENTS = 100 as const;
+
+export const MAX_HITL_EMAIL_ADDRESS_LENGTH = 512 as const;
+
+export const MAX_HITL_EMAIL_SUBJECT_LENGTH = 998 as const;
 
 /**
  * YAML schema description for `with.channels` on HITL wait steps with scope boundary definition.
@@ -62,3 +123,57 @@ export const HITL_EXTERNAL_CHANNELS_DESCRIPTION =
 /** Returns false only when config explicitly sets `enabled: false`. */
 export const isHitlExternalResumeEnabled = (enabled: boolean | undefined): boolean =>
   enabled !== false;
+
+export type HitlWaitStepType = 'waitForInput' | 'waitForApproval';
+
+export const isHitlWaitStepType = (stepType: string | undefined): stepType is HitlWaitStepType =>
+  stepType === 'waitForInput' || stepType === 'waitForApproval';
+
+/**
+ * Maps `with.channels` keys to connector step types for connector-id autocomplete/validation.
+ * Include the required sub-action when the connector uses `selectedActions` (e.g. `slack2.sendMessage`)
+ * so suggestions exclude instances that cannot execute the HITL notification.
+ */
+export const HITL_CHANNEL_CONNECTOR_TYPES = {
+  slack: 'slack',
+  slack_api: 'slack_api',
+  email: 'email',
+  slack2: 'slack2.sendMessage',
+  teams: 'microsoft-teams.sendChannelMessage',
+  servicenow: 'servicenow_search.addComment',
+  http: 'http',
+} as const satisfies Record<string, string>;
+
+/**
+ * When `channels.slack2.interactive` is true, HITL posts Slack Block Kit controls and resumes via
+ * Slack Interactivity on the same connector ingest URL used for Receive events.
+ */
+export const HITL_SLACK2_INTERACTIVE_DESCRIPTION =
+  'When true, render interactive Slack controls in-channel (Approve/Decline for waitForApproval, or schema fields for waitForInput) instead of Kibana resume links. Requires the Slack (v2) connector to have Receive events enabled and the Slack app Interactivity Request URL set to that connector ingest URL.' as const;
+
+export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;
+
+/**
+ * Resolves the connector type for a nested HITL `with.channels.<key>.connector-id`
+ * path. Shared by YAML validation and editor autocomplete so waitForInput and
+ * waitForApproval stay in lockstep.
+ */
+export function getHitlChannelConnectorTypeFromPath(
+  path: readonly unknown[] | undefined
+): string | null {
+  if (!path || path.length === 0) {
+    return null;
+  }
+
+  const connectorIdIndex = path.lastIndexOf('connector-id');
+  if (connectorIdIndex < 2 || path[connectorIdIndex - 2] !== 'channels') {
+    return null;
+  }
+
+  const channelKey = path[connectorIdIndex - 1];
+  if (typeof channelKey !== 'string') {
+    return null;
+  }
+
+  return HITL_CHANNEL_CONNECTOR_TYPES[channelKey as HitlChannelKey] ?? null;
+}

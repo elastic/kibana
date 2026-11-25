@@ -61,7 +61,7 @@ KIBANA_BUILD_ID_ARG="${KIBANA_BUILD_ID:-${BUILDKITE_BUILD_ID:-}}"
 # includeBuildkitePrVars=true forwards BUILDKITE_PULL_REQUEST* so the child build checks out
 # refs/pull/<N>/head — required for fork PRs, whose branch isn't a ref in elastic/kibana.
 # ${GITHUB_ENV_VARS[*]:-} guards against an empty array under `set -u`.
-ts-node .buildkite/scripts/steps/trigger_pipeline.ts \
+node .buildkite/scripts/steps/trigger_pipeline.ts \
   kibana-evals-pr-llm-evals \
   "$BUILDKITE_BRANCH" \
   "$BUILDKITE_COMMIT" \

@@ -6,6 +6,7 @@
  */
 
 import { transformAttackDiscoveryAlertFromApi } from '.';
+import { transformAttackDiscoveryAlertToApi } from '../transform_attack_discovery_alert_to_api';
 import type { AttackDiscoveryAlert } from '../../schemas/attack_discovery/attack_discovery_alert.gen';
 import type { AttackDiscoveryApiAlert } from '../../schemas/attack_discovery/attack_discovery_api_alert.gen';
 
@@ -113,5 +114,33 @@ describe('transformAttackDiscoveryAlertFromApi', () => {
       users: undefined,
     };
     expect(result).toEqual(expected);
+  });
+
+  describe('alertWorkflowReason', () => {
+    it('maps alert_workflow_reason to alertWorkflowReason', () => {
+      const result = transformAttackDiscoveryAlertFromApi({
+        ...fullApiMock,
+        alert_workflow_reason: 'false_positive',
+      });
+
+      expect(result.alertWorkflowReason).toEqual('false_positive');
+    });
+
+    it('returns undefined when alert_workflow_reason is not set', () => {
+      expect(transformAttackDiscoveryAlertFromApi(fullApiMock).alertWorkflowReason).toBeUndefined();
+    });
+
+    it('survives a full API -> internal -> API round trip', () => {
+      const api: AttackDiscoveryApiAlert = {
+        ...fullApiMock,
+        alert_workflow_reason: 'false_positive',
+      };
+
+      const roundTripped = transformAttackDiscoveryAlertToApi(
+        transformAttackDiscoveryAlertFromApi(api)
+      );
+
+      expect(roundTripped.alert_workflow_reason).toEqual('false_positive');
+    });
   });
 });

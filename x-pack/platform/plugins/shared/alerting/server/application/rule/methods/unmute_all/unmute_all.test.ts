@@ -18,7 +18,7 @@ jest.mock('../../../../lib/retry_if_conflicts', () => ({
 }));
 
 jest.mock('../../../../rules_client/lib', () => ({
-  updateMetaAttributes: () => {},
+  updateMetaAttributes: (_context: unknown, attributes: unknown) => attributes,
 }));
 
 jest.mock('../../../../saved_objects', () => ({
@@ -38,6 +38,10 @@ savedObjectsMock.get = jest.fn().mockReturnValue({
   version: '9.0.0',
 });
 
+const { partiallyUpdateRule: partiallyUpdateRuleMock } = jest.requireMock(
+  '../../../../saved_objects'
+);
+
 const context = {
   logger: { error: loggerErrorMock },
   getActionsClient: () => {
@@ -51,6 +55,7 @@ const context = {
     ensureRuleTypeEnabled: () => {},
   },
   getUserName: async () => {},
+  getProfileUid: async () => null,
   alertsService: {
     unmuteAllAlerts: unmuteAllAlertsMock,
   },
@@ -76,6 +81,34 @@ describe('unmuteAll', () => {
       indices: ['.alerts-default'],
       logger: context.logger,
     });
+    expect(partiallyUpdateRuleMock).toHaveBeenCalledWith(
+      savedObjectsMock,
+      'rule-123',
+      expect.objectContaining({
+        muteAll: false,
+        mutedInstanceIds: [],
+        updatedByProfileUid: null,
+      }),
+      { version: '9.0.0' }
+    );
+  });
+
+  it('stamps updatedByProfileUid from the current user', async () => {
+    const contextWithProfile = {
+      ...context,
+      getProfileUid: async () => 'u_profile_1',
+    } as unknown as RulesClientContext;
+
+    await unmuteAll(contextWithProfile, { id: 'rule-123' });
+
+    expect(partiallyUpdateRuleMock).toHaveBeenCalledWith(
+      savedObjectsMock,
+      'rule-123',
+      expect.objectContaining({
+        updatedByProfileUid: 'u_profile_1',
+      }),
+      { version: '9.0.0' }
+    );
   });
 
   it('should throw Boom.badRequest for invalid params', async () => {
@@ -105,9 +138,6 @@ describe('unmuteAll', () => {
     const unmuteAllAlertsErrorMock = jest
       .fn()
       .mockRejectedValueOnce(new Error('ES connection failed'));
-    const { partiallyUpdateRule: partiallyUpdateRuleMock } = jest.requireMock(
-      '../../../../saved_objects'
-    );
     const contextWithLogger = {
       ...context,
       logger: loggerMock,

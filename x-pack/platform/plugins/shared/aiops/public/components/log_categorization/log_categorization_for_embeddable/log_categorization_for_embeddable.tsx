@@ -54,9 +54,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   randomSamplerMode,
   randomSamplerProbability,
   onChange,
+  onLoading,
   onRenderComplete,
   timeRange,
   lastReloadRequestTime,
+  requestCancellationManager,
+  parentApi,
 }) => {
   const {
     notifications: { toasts },
@@ -71,20 +74,25 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   const { filters, query } = useFilterQueryUpdates();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
-    useValidateFieldRequest();
-  const { getMinimumTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useMinimumTimeRange();
+    useValidateFieldRequest(requestCancellationManager);
+  const { getMinimumTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useMinimumTimeRange(
+    requestCancellationManager
+  );
 
   const isMounted = useMountedState();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest({
-    randomSamplerMode,
-    setRandomSamplerMode: () => {},
-    randomSamplerProbability,
-    setRandomSamplerProbability: () => {},
-  });
+  } = useCategorizeRequest(
+    {
+      randomSamplerMode,
+      setRandomSamplerMode: () => {},
+      randomSamplerProbability,
+      setRandomSamplerProbability: () => {},
+    },
+    requestCancellationManager
+  );
 
   const appState = getDefaultLogCategorizationAppState({
     searchQuery: buildEsQuery(
@@ -100,6 +108,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
 
   const [loading, setLoading] = useState<boolean | null>(null);
+  const [isDocumentCountLoading, setIsDocumentCountLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [data, setData] = useState<{
     categories: Category[];
@@ -152,7 +161,17 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     undefined,
     BAR_TARGET,
     false,
-    timeRangeParsed
+    timeRangeParsed,
+    requestCancellationManager,
+    undefined,
+    setIsDocumentCountLoading
+  );
+
+  useEffect(
+    function reportLoadingState() {
+      onLoading?.(isDocumentCountLoading || loading === true);
+    },
+    [isDocumentCountLoading, loading, onLoading]
   );
 
   const onAddFilter = useCallback(
@@ -191,6 +210,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       minimumTimeRangeOption === undefined ||
       isMounted() !== true
     ) {
+      return;
+    }
+
+    // The panel was cancelled and no new load has started yet, don't start requests.
+    if (requestCancellationManager?.signal.aborted) {
+      setLoading(false);
       return;
     }
 
@@ -276,7 +301,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         });
       }
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      // A cancellation aborts with a custom reason, which core fetch reports as a non-AbortError.
+      if (!requestCancellationManager?.signal.aborted && error.name !== 'AbortError') {
         toasts.addError(error, {
           title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
             defaultMessage: 'Error loading categories',
@@ -301,6 +327,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     latest,
     loading,
     minimumTimeRangeOption,
+    requestCancellationManager,
     runCategorizeRequest,
     runValidateFieldRequest,
     searchQuery,
@@ -388,6 +415,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           selectable={false}
           actions={actions}
           onRenderComplete={onRenderComplete}
+          parentApi={parentApi}
         />
       ) : null}
     </>

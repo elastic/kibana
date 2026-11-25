@@ -8,14 +8,20 @@
 import type { ActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { createActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { createDispatcherPipelineState, createStepLogger } from '../fixtures/test_utils';
+import {
+  createAlert,
+  createDispatcherPipelineState,
+  createStepLogger,
+} from '../fixtures/test_utils';
 import { FetchPoliciesStep } from './fetch_policies_step';
 
 const logger = createStepLogger();
 
 describe('FetchPoliciesStep', () => {
   let npSoService: ActionPolicySavedObjectService;
-  let mockFindAllDecrypted: jest.SpyInstance;
+  let mockFindAllDecrypted: ReturnType<
+    typeof createActionPolicySavedObjectService
+  >['mockFindAllDecrypted'];
 
   beforeEach(() => {
     ({ actionPolicySavedObjectService: npSoService, mockFindAllDecrypted } =
@@ -23,6 +29,7 @@ describe('FetchPoliciesStep', () => {
   });
 
   const buildStep = () => new FetchPoliciesStep(npSoService);
+  const buildState = () => createDispatcherPipelineState({ dispatchable: [createAlert()] });
 
   it('fetches all decrypted policies via findAllDecrypted', async () => {
     mockFindAllDecrypted.mockResolvedValue([
@@ -31,9 +38,9 @@ describe('FetchPoliciesStep', () => {
         attributes: {
           name: 'Policy 1',
           description: 'Test',
+          enabled: true,
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           matcher: null,
-          groupBy: null,
           throttle: null,
           apiKey: 'decrypted-key',
           apiKeyOwner: 'elastic',
@@ -46,7 +53,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+    const result = await buildStep().execute(buildState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -56,18 +63,46 @@ describe('FetchPoliciesStep', () => {
     expect(policy?.name).toBe('Policy 1');
     expect(policy?.apiKey).toBe('decrypted-key');
     expect(policy?.matcher).toBeUndefined();
-    expect(policy?.groupBy).toEqual([]);
-    expect(policy?.tags).toEqual([]);
+    expect(policy?.grouping).toEqual({ mode: 'per_alert' });
     expect(policy?.throttle).toBeUndefined();
     expect(policy?.snoozedUntil).toBeNull();
 
-    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default'],
+    });
+  });
+
+  it('skips the lookup and returns an empty catalog when no alert is dispatchable', async () => {
+    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.policies?.size).toBe(0);
+    expect(mockFindAllDecrypted).not.toHaveBeenCalled();
+  });
+
+  it('fetches policies only in the spaces of the dispatchable alerts', async () => {
+    const state = createDispatcherPipelineState({
+      dispatchable: [
+        createAlert(),
+        createAlert({ space_id: 'space-a', alert_id: 'alert-2' }),
+        createAlert({ space_id: 'space-a', alert_id: 'alert-3' }),
+      ],
+    });
+
+    await buildStep().execute(state, logger);
+
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default', 'space-a'],
+    });
   });
 
   it('returns empty map when no policies exist', async () => {
     mockFindAllDecrypted.mockResolvedValue([]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+    const result = await buildStep().execute(buildState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -80,7 +115,7 @@ describe('FetchPoliciesStep', () => {
       { id: 'p1', error: { statusCode: 500, message: 'Decryption failed', error: 'Error' } },
     ]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), loggerService);
+    const result = await buildStep().execute(buildState(), loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -93,13 +128,15 @@ describe('FetchPoliciesStep', () => {
     );
   });
 
-  it('surfaces the matcher used to scope a policy to a rule', async () => {
+  it('surfaces both clauses of a structured matcher', async () => {
     mockFindAllDecrypted.mockResolvedValue([
       {
         id: 'p-scoped',
         attributes: {
           name: 'Scoped',
-          matcher: 'rule.id: "rule-7"',
+          description: 'Test',
+          enabled: true,
+          matcher: { tags: ['prod'], expression: 'data.severity: "critical"' },
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           apiKey: 'k',
           apiKeyOwner: 'elastic',
@@ -112,11 +149,11 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+    const result = await buildStep().execute(buildState(), logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
     const policy = result.data?.policies?.get('p-scoped');
-    expect(policy?.matcher).toBe('rule.id: "rule-7"');
+    expect(policy?.matcher).toEqual({ tags: ['prod'], expression: 'data.severity: "critical"' });
   });
 
   it('fetches multiple policies', async () => {
@@ -125,6 +162,8 @@ describe('FetchPoliciesStep', () => {
         id: 'p1',
         attributes: {
           name: 'Policy 1',
+          description: 'Test',
+          enabled: true,
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           apiKey: 'key-1',
           apiKeyOwner: 'elastic',
@@ -139,6 +178,8 @@ describe('FetchPoliciesStep', () => {
         id: 'p2',
         attributes: {
           name: 'Policy 2',
+          description: 'Test',
+          enabled: true,
           destinations: [],
           apiKey: 'key-2',
           apiKeyOwner: 'elastic',
@@ -151,13 +192,16 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+    const result = await buildStep().execute(buildState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(2);
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
-    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default'],
+    });
   });
 });

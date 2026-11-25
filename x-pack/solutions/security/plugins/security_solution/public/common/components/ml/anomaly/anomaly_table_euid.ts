@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { Anomaly, CriteriaFields } from '../types';
@@ -57,10 +57,10 @@ export const buildEuidSampleDocumentForAnomaliesTable = (
  * and would exclude `.ml-anomalies-*` records.
  */
 export const buildBroadMlIdentityFieldsExistFilter = (
-  euid: EntityStoreEuid,
+  { euid, getBuiltInEntityDefinition }: EntityStoreEuidApi,
   entityType: AnomaliesTableEntityType
 ): estypes.QueryDslQueryContainer => {
-  const { identitySourceFields } = euid.getEuidSourceFields(entityType);
+  const { identitySourceFields } = euid.getEuidSourceFields(getBuiltInEntityDefinition(entityType));
   return {
     bool: {
       should: identitySourceFields.map((field) => ({ exists: { field } })),
@@ -70,31 +70,35 @@ export const buildBroadMlIdentityFieldsExistFilter = (
 };
 
 export const buildAnomaliesTableInfluencersFilterQuery = ({
-  euid,
+  euidApi,
   entityType,
   entityRecord,
   isScopedToEntity,
   identityFields,
   fallbackDisplayName,
 }: {
-  euid: EntityStoreEuid | undefined;
+  euidApi: EntityStoreEuidApi | undefined;
   entityType: AnomaliesTableEntityType;
   entityRecord?: EntityStoreRecord | null;
   isScopedToEntity: boolean;
   identityFields?: Record<string, string>;
   fallbackDisplayName?: string;
 }): estypes.QueryDslQueryContainer => {
-  if (euid) {
+  if (euidApi) {
+    const { euid, getBuiltInEntityDefinition } = euidApi;
     if (isScopedToEntity) {
       const inputDoc = entityRecord
         ? entityRecord
         : buildEuidSampleDocumentForAnomaliesTable(entityType, identityFields, fallbackDisplayName);
-      const scoped = euid.dsl.getEuidFilterBasedOnDocument(entityType, inputDoc);
+      const scoped = euid.dsl.getEuidFilterBasedOnDocument(
+        getBuiltInEntityDefinition(entityType),
+        inputDoc
+      );
       if (scoped != null) {
         return scoped as estypes.QueryDslQueryContainer;
       }
     }
-    return buildBroadMlIdentityFieldsExistFilter(euid, entityType);
+    return buildBroadMlIdentityFieldsExistFilter(euidApi, entityType);
   }
   return entityType === 'user'
     ? { exists: { field: 'user.name' } }
@@ -102,14 +106,14 @@ export const buildAnomaliesTableInfluencersFilterQuery = ({
 };
 
 export const getCriteriaFieldsForAnomaliesTable = ({
-  euid,
+  euidApi,
   entityType,
   entityRecord,
   isScopedToEntity,
   identityFields,
   fallbackDisplayName,
 }: {
-  euid: EntityStoreEuid | undefined;
+  euidApi: EntityStoreEuidApi | undefined;
   entityType: AnomaliesTableEntityType;
   entityRecord?: EntityStoreRecord | null;
   isScopedToEntity: boolean;
@@ -119,15 +123,22 @@ export const getCriteriaFieldsForAnomaliesTable = ({
   if (!isScopedToEntity || fallbackDisplayName == null) {
     return [];
   }
-  if (euid) {
+  if (euidApi) {
+    const { euid, getBuiltInEntityDefinition } = euidApi;
     const inputDoc = entityRecord
       ? entityRecord
       : buildEuidSampleDocumentForAnomaliesTable(entityType, identityFields, fallbackDisplayName);
-    const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument(entityType, inputDoc);
+    const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument(
+      getBuiltInEntityDefinition(entityType),
+      inputDoc
+    );
     if (scopedDsl != null) {
       return [];
     }
-    const identifiers = euid.getEntityIdentifiersFromDocument(entityType, inputDoc);
+    const identifiers = euid.getEntityIdentifiersFromDocument(
+      getBuiltInEntityDefinition(entityType),
+      inputDoc
+    );
     if (identifiers != null && Object.keys(identifiers).length > 0) {
       return Object.entries(identifiers).map(([fieldName, fieldValue]) => ({
         fieldName,
@@ -176,13 +187,13 @@ export const anomalyRowMatchesIdentityIdentifiers = (
 
 export const anomalyEntityNameInEuidIdentitySourceFields = (
   anomaly: Anomaly,
-  euid: EntityStoreEuid,
+  { euid, getBuiltInEntityDefinition }: EntityStoreEuidApi,
   entityType: AnomaliesTableEntityType
 ): boolean => {
   if (anomaly.entityName == null) {
     return false;
   }
-  const { identitySourceFields } = euid.getEuidSourceFields(entityType);
+  const { identitySourceFields } = euid.getEuidSourceFields(getBuiltInEntityDefinition(entityType));
   return identitySourceFields.includes(anomaly.entityName);
 };
 

@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import Boom from '@hapi/boom';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -17,10 +18,12 @@ import {
   MAX_EXTENDED_FIELD_VALUE_BYTES,
 } from '../../../common/constants';
 import type { CasePostRequest } from '../../../common';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import type { BulkCreateCasesRequest } from '../../../common/types/api';
+import { GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { bulkCreate } from './bulk_create';
+import { bulkCreate as bulkCreateCases } from './bulk_create';
+import type { BulkCreateCasesClientOptions } from './bulk_create';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
@@ -55,6 +58,26 @@ describe('bulkCreate', () => {
       ...overrides,
     },
   ];
+
+  // The cases connector always passes a source per case id. Tests that do not check the source
+  // pass an empty map, so the cases are stored without a source.
+  const bulkCreate = (
+    data: Parameters<typeof bulkCreateCases>[0],
+    clientArgs: Parameters<typeof bulkCreateCases>[1],
+    casesClient: Parameters<typeof bulkCreateCases>[2],
+    options: Partial<BulkCreateCasesClientOptions> = {}
+  ) =>
+    bulkCreateCases(data, clientArgs, casesClient, {
+      extractObservablesSourceByCaseId: new Map(),
+      ...options,
+    });
+
+  // Stack cannot store extractObservables true, so its fixture case sets it to false.
+  const getStackCases = () =>
+    getCases({
+      owner: GENERAL_CASES_OWNER,
+      settings: { syncAlerts: true, extractObservables: false },
+    });
 
   const caseSO = mockCases[0];
   const casesClientMock = createCasesClientMock();
@@ -509,11 +532,7 @@ describe('bulkCreate', () => {
     });
 
     it('validates the cases correctly', async () => {
-      await bulkCreate(
-        { cases: [getCases()[0], getCases({ owner: 'cases' })[0]] },
-        clientArgs,
-        casesClientMock
-      );
+      await bulkCreate({ cases: [getCases()[0], getStackCases()[0]] }, clientArgs, casesClientMock);
 
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
         entities: [
@@ -542,11 +561,7 @@ describe('bulkCreate', () => {
     });
 
     it('validates with assign+create operations when cases have assignees', async () => {
-      await bulkCreate(
-        { cases: [getCases()[0], getCases({ owner: 'cases' })[0]] },
-        clientArgs,
-        casesClientMock
-      );
+      await bulkCreate({ cases: [getCases()[0], getStackCases()[0]] }, clientArgs, casesClientMock);
 
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
         entities: [
@@ -687,7 +702,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ assignees }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
+        `Failed to bulk create cases: Error: cases.0.assignees: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
       );
     });
 
@@ -708,7 +723,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ foo: 'bar' }) }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: invalid keys \\"foo\\""`
+        `"Failed to bulk create cases: Error: Excess keys are not allowed"`
       );
     });
 
@@ -734,7 +749,8 @@ describe('bulkCreate', () => {
           {
             cases: getCases({
               extended_fields: {
-                large_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1),
+                // 2-byte characters: within the request char cap, over the byte cap
+                large_as_keyword: 'é'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES / 2 + 1),
               },
             }),
           },
@@ -1014,7 +1030,7 @@ describe('bulkCreate', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+        `Failed to bulk create cases: Error: cases.0.title: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
       );
     });
 
@@ -1022,7 +1038,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ title: '' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The title field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -1030,7 +1046,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ title: '   ' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The title field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -1069,7 +1085,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ description }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+        `Failed to bulk create cases: Error: cases.0.description: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
       );
     });
 
@@ -1077,7 +1093,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ description: '' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The description field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1085,7 +1101,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ description: '   ' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The description field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1125,7 +1141,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ tags }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
+        `Failed to bulk create cases: Error: cases.0.tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
@@ -1133,7 +1149,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ tags: [''] }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The tag field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1141,7 +1157,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ tags: ['  '] }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The tag field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1153,7 +1169,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ tags: [tag] }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
+        `Failed to bulk create cases: Error: cases.0.tags.0: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
 
@@ -1190,7 +1206,7 @@ describe('bulkCreate', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The length of the category is too long.'
+        'Failed to bulk create cases: Error: cases.0.category: The length of the category is too long.'
       );
     });
 
@@ -1198,7 +1214,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ category: '' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The category field cannot be an empty string.,Invalid value "" supplied to "cases,category"'
+        'Failed to bulk create cases: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -1206,7 +1222,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ category: '   ' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "cases,category"'
+        'Failed to bulk create cases: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -1391,7 +1407,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `"Failed to bulk create cases: Error: cases.0.customFields: The length of the field customFields is too long. Array must be of length <= 10."`
       );
     });
 
@@ -1480,7 +1496,7 @@ describe('bulkCreate', () => {
     });
 
     it('validate required custom fields from different owners', async () => {
-      const casesWithDifferentOwners = [getCases()[0], getCases({ owner: 'cases' })[0]];
+      const casesWithDifferentOwners = [getCases()[0], getStackCases()[0]];
 
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
@@ -1515,7 +1531,7 @@ describe('bulkCreate', () => {
     });
 
     it('should fill out missing custom fields from different owners correctly', async () => {
-      const casesWithDifferentOwners = [getCases()[0], getCases({ owner: 'cases' })[0]];
+      const casesWithDifferentOwners = [getCases()[0], getStackCases()[0]];
 
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
@@ -1699,11 +1715,12 @@ describe('bulkCreate', () => {
       await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
 
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-1'
+        'tmpl-1',
+        1
       );
     });
 
-    it('increments stats once per unique template ID', async () => {
+    it('adds one use per case, in a single call per template', async () => {
       const caseSOWithTemplate1 = {
         ...caseSO,
         id: 'case-1',
@@ -1730,12 +1747,16 @@ describe('bulkCreate', () => {
         casesClient
       );
 
+      // Two cases share tmpl-1, so it gains two uses from one call — the tally counts cases, while
+      // the call is still deduped per template to keep the writes down.
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(2);
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-1'
+        'tmpl-1',
+        2
       );
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-2'
+        'tmpl-2',
+        1
       );
     });
 
@@ -1845,6 +1866,119 @@ describe('bulkCreate', () => {
         false
       );
       expect(flagOffClientArgs.services.templatesService.getTemplate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Template usage counters', () => {
+    const usageCounter = usageCollectionPluginMock
+      .createSetupContract()
+      .createUsageCounter('cases');
+    const clientArgs = { ...createCasesClientMockArgs(), usageCounter };
+    const casesClient = createCasesClientMock();
+    casesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+    const caseSOWithTemplate = (id: string, templateId: string) => ({
+      ...caseSO,
+      id,
+      attributes: { ...caseSO.attributes, template: { id: templateId, version: 1 } },
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('counts created cases, not distinct templates', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [
+          caseSOWithTemplate('case-1', 'tmpl-1'),
+          caseSOWithTemplate('case-2', 'tmpl-1'),
+          { ...caseSO, id: 'case-3' },
+        ],
+      });
+
+      await bulkCreate(
+        { cases: [getCases()[0], getCases()[0], getCases()[0]] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_with_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 2,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_without_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    it('does not emit a counter for an empty bucket', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'create_case_with_template' })
+      );
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_without_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    it('attributes counters to the calling source', async () => {
+      const connectorArgs = {
+        ...createCasesClientMockArgs(),
+        usageCounter,
+        clientSource: 'connector' as const,
+      };
+      connectorArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate('case-1', 'tmpl-1')],
+      });
+
+      await bulkCreate({ cases: getCases() }, connectorArgs, casesClient);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_with_template',
+        counterType: 'cases_client.connector',
+        incrementBy: 1,
+      });
+    });
+
+    it('does not count a bulk create that failed', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockRejectedValueOnce(
+        new Error('bulk create failed')
+      );
+
+      await expect(bulkCreate({ cases: getCases() }, clientArgs, casesClient)).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    });
+
+    // The realistic partial failure is a resolved response carrying an error entry, which is a
+    // different branch from a rejected write — nothing may be counted, not even the cases that
+    // did persist.
+    it('does not count a bulk create whose saved object write partially failed', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [
+          caseSOWithTemplate('case-1', 'tmpl-1'),
+          {
+            type: 'cases',
+            id: 'case-2',
+            error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      await expect(bulkCreate({ cases: getCases() }, clientArgs, casesClient)).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -2137,6 +2271,269 @@ describe('bulkCreate', () => {
       expect(extendedFieldsAction?.payload).toEqual({
         extended_fields: { count_as_integer: '9' },
       });
+    });
+  });
+
+  describe('extractObservables defaulting from space configuration', () => {
+    const caseSoForDefaults = mockCases[0];
+    const extractObservablesCasesClient = createCasesClientMock();
+
+    const createClientArgsWithConfig = (extractObservables: boolean) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSoForDefaults],
+      });
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: SECURITY_SOLUTION_OWNER,
+          customFields: [],
+          extractObservables,
+        },
+      ]);
+      return clientArgs;
+    };
+
+    it('inherits extractObservables from the space configuration when omitted', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+      const cases = getCases({ settings: { syncAlerts: true } });
+
+      await bulkCreate({ cases }, clientArgs, extractObservablesCasesClient);
+
+      const bulkCreateCall =
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(bulkCreateCall.settings.extractObservables).toBe(true);
+    });
+
+    it('uses explicit extractObservables over space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+      const cases = getCases({ settings: { syncAlerts: true, extractObservables: false } });
+
+      await bulkCreate({ cases }, clientArgs, extractObservablesCasesClient);
+
+      const bulkCreateCall =
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(bulkCreateCall.settings.extractObservables).toBe(false);
+    });
+
+    it('falls back to the owner autoExtractDefault when no space configuration exists', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSoForDefaults],
+      });
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+      const cases = getCases({ settings: { syncAlerts: true } });
+
+      await bulkCreate({ cases }, clientArgs, extractObservablesCasesClient);
+
+      const bulkCreateCall =
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(bulkCreateCall.settings.extractObservables).toBe(true);
+    });
+
+    describe('extract_observables_source', () => {
+      const getSavedCases = (ids: string[]) => ids.map((id) => ({ ...caseSoForDefaults, id }));
+
+      const getStoredRequests = (clientArgs: ReturnType<typeof createCasesClientMockArgs>) =>
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases;
+
+      describe('with a source map', () => {
+        it('uses the map entry of each case id', async () => {
+          const clientArgs = createClientArgsWithConfig(true);
+          clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+            saved_objects: getSavedCases(['case-a', 'case-b', 'case-c']),
+          });
+          const [baseCase] = getCases({ settings: { syncAlerts: true } });
+
+          await bulkCreate(
+            {
+              cases: [
+                { ...baseCase, id: 'case-a' },
+                { ...baseCase, id: 'case-b' },
+                { ...baseCase, id: 'case-c' },
+              ],
+            },
+            clientArgs,
+            extractObservablesCasesClient,
+            {
+              extractObservablesSourceByCaseId: new Map([
+                ['case-a', 'rule'],
+                ['case-b', 'template'],
+                ['case-c', 'space_default'],
+              ]),
+            }
+          );
+
+          expect(
+            getStoredRequests(clientArgs).map(({ id, extract_observables_source: source }) => [
+              id,
+              source,
+            ])
+          ).toEqual([
+            ['case-a', 'rule'],
+            ['case-b', 'template'],
+            ['case-c', 'space_default'],
+          ]);
+        });
+
+        it('does not guess "explicit" for a case without an entry when the caller set extractObservables', async () => {
+          const clientArgs = createClientArgsWithConfig(true);
+          clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+            saved_objects: getSavedCases(['case-a']),
+          });
+
+          await bulkCreate(
+            { cases: getCases({ id: 'case-a' }) },
+            clientArgs,
+            extractObservablesCasesClient,
+            { extractObservablesSourceByCaseId: new Map() }
+          );
+
+          const [request] = getStoredRequests(clientArgs);
+          expect(request).not.toHaveProperty('extract_observables_source');
+        });
+
+        it('ignores entries for case ids that are not in the request', async () => {
+          const clientArgs = createClientArgsWithConfig(true);
+          clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+            saved_objects: getSavedCases(['case-a']),
+          });
+
+          await bulkCreate(
+            { cases: getCases({ id: 'case-a' }) },
+            clientArgs,
+            extractObservablesCasesClient,
+            {
+              extractObservablesSourceByCaseId: new Map([
+                ['case-a', 'template'],
+                ['unknown-case', 'rule'],
+              ]),
+            }
+          );
+
+          expect(getStoredRequests(clientArgs)).toHaveLength(1);
+          expect(getStoredRequests(clientArgs)[0].extract_observables_source).toBe('template');
+        });
+      });
+
+      it('rejects a request that carries settings.extractObservablesSource', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await expect(
+          bulkCreate(
+            {
+              cases: getCases({
+                settings: { syncAlerts: true, extractObservablesSource: 'rule' },
+              }),
+            } as unknown as BulkCreateCasesRequest,
+            clientArgs,
+            extractObservablesCasesClient
+          )
+        ).rejects.toThrow('Excess keys are not allowed');
+        expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+      });
+
+      it('rejects a request that carries a top-level extract_observables_source', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await expect(
+          bulkCreate(
+            {
+              cases: getCases({ extract_observables_source: 'rule' }),
+            } as unknown as BulkCreateCasesRequest,
+            clientArgs,
+            extractObservablesCasesClient
+          )
+        ).rejects.toThrow('Excess keys are not allowed');
+        expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('extractObservables owner rule', () => {
+    const ownerRuleCasesClient = createCasesClientMock();
+    const blockedOwners = [GENERAL_CASES_OWNER, OBSERVABILITY_OWNER];
+
+    const createClientArgs = (
+      configuration: { owner: string; extractObservables?: boolean } = {
+        owner: SECURITY_SOLUTION_OWNER,
+      }
+    ) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [mockCases[0]],
+      });
+      ownerRuleCasesClient.configure.get = jest
+        .fn()
+        .mockResolvedValue([{ customFields: [], ...configuration }]);
+      return clientArgs;
+    };
+
+    it.each(blockedOwners)(
+      'coerces an inherited true to false for the %s owner instead of rejecting it',
+      async (owner) => {
+        const clientArgs = createClientArgs({ owner });
+        const cases = getCases({ owner, settings: { syncAlerts: true, extractObservables: true } });
+
+        await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+        const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+        expect(request.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it.each(blockedOwners)(
+      'coerces a true from the space configuration to false for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs({ owner, extractObservables: true });
+        const cases = getCases({ owner, settings: { syncAlerts: true } });
+
+        await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+        const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+        expect(request.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it.each(blockedOwners)('accepts an explicit false for the %s owner', async (owner) => {
+      const clientArgs = createClientArgs({ owner });
+      const cases = getCases({ owner, settings: { syncAlerts: true, extractObservables: false } });
+
+      await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+      const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(request.settings.extractObservables).toBe(false);
+    });
+
+    it.each(blockedOwners)(
+      'stores false when the value is omitted for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs({ owner });
+        const cases = getCases({ owner, settings: { syncAlerts: true } });
+
+        await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+        const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+        expect(request.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it('accepts an explicit true for the Security owner', async () => {
+      const clientArgs = createClientArgs();
+
+      await bulkCreate({ cases: getCases() }, clientArgs, ownerRuleCasesClient);
+
+      const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(request.settings.extractObservables).toBe(true);
+    });
+
+    it('accepts an explicit true for an unknown owner', async () => {
+      const clientArgs = createClientArgs({ owner: 'securitySolutionFixture' });
+      const cases = getCases({ owner: 'securitySolutionFixture' });
+
+      await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+      const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(request.settings.extractObservables).toBe(true);
     });
   });
 });

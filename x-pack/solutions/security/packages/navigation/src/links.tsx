@@ -11,11 +11,11 @@ import React, {
   type HTMLAttributeAnchorTarget,
   useCallback,
 } from 'react';
-import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiLink, type EuiCardProps, type EuiLinkProps } from '@elastic/eui';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { useGetAppUrl, useNavigateTo } from './navigation';
-import { PND_APP_ID, SECURITY_UI_APP_ID } from './constants';
+import { ALERTZERO_APP_ID, SECURITY_UI_APP_ID } from './constants';
 
 export interface BaseLinkProps {
   /** The Kibana application of the link. Defaults to Security Solution */
@@ -135,6 +135,13 @@ export const LinkButton = withLink(EuiButton);
  */
 export const LinkAnchor = withLink<EuiLinkProps>(EuiLink);
 
+/**
+ * Security Solutions internal link card, the whole card is the navigation target.
+ *
+ * `<LinkCard deepLinkId={SecurityPageName.hosts} title="Hosts" />;`
+ */
+export const LinkCard = withLink<EuiCardProps>(EuiCard);
+
 // Utils
 
 export const formatPath = (path: string, urlState: string) => {
@@ -159,8 +166,8 @@ export const securityLink = (pageName: SecurityPageName): AppDeepLinkId => {
 };
 
 /**
- * Link id for a page on the PND app. Same registry of page names as `securityLink`, different app
- * prefix — which is what distinguishes e.g. PND's alerts page from the Security UI's.
+ * Link id for a page on the AlertZero app. Same registry of page names as `securityLink`, different app
+ * prefix — which is what distinguishes AlertZero's page from a Security UI page of the same name.
  */
-export const pndLink = (pageName?: SecurityPageName): AppDeepLinkId =>
-  (pageName ? `${PND_APP_ID}:${pageName}` : PND_APP_ID) as AppDeepLinkId;
+export const alertZeroLink = (pageName?: SecurityPageName): AppDeepLinkId =>
+  (pageName ? `${ALERTZERO_APP_ID}:${pageName}` : ALERTZERO_APP_ID) as AppDeepLinkId;

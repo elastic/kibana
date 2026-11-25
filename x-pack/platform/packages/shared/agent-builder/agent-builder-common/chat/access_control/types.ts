@@ -44,6 +44,27 @@ export const normalizeConversationAccessControl = (
   };
 };
 
+/** True when this conversation is readable by any user with access to its agent. */
+export const isPublicConversation = (
+  accessControl: Partial<ConversationAccessControl> | undefined
+): boolean =>
+  normalizeConversationAccessControl(accessControl).access_mode ===
+  ConversationAccessControlMode.Public;
+
+/** True when this conversation is shared with specific users rather than with everyone. */
+export const isPrivatelySharedConversation = (
+  accessControl: Partial<ConversationAccessControl> | undefined
+): boolean => {
+  const { access_mode: accessMode, entries } = normalizeConversationAccessControl(accessControl);
+
+  return accessMode === ConversationAccessControlMode.Private && entries.length > 0;
+};
+
+/** True when someone other than the owner can read and converse in this conversation. */
+export const isSharedConversation = (
+  accessControl: Partial<ConversationAccessControl> | undefined
+): boolean => isPublicConversation(accessControl) || isPrivatelySharedConversation(accessControl);
+
 /** An access-control entry without the server-assigned `added_at` timestamp, for write operations. */
 export type ConversationAccessControlEntryInput = Omit<ConversationAccessControlEntry, 'added_at'>;
 

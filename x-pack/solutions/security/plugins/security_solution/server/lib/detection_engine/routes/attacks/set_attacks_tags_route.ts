@@ -8,7 +8,7 @@
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/elastic-assistant-common';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
@@ -25,11 +25,10 @@ import {
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
-import { searchAlerts } from '../common/operations/search_alerts';
-import { verifyAlertIdsInIndex } from '../common/operations/prefetch_previous_statuses';
+import { prefetchChangedListFieldIds } from '../common/operations/prefetch_previous_statuses';
 import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
-import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
+import { executeCascadeListField } from './cascade_list_field_helpers';
 import { buildSiemResponse } from '../utils';
 import {
   ATTACKS_DUPLICATE_TAGS_VALIDATION_ERROR,
@@ -87,6 +86,8 @@ export const setAttacksTagsRoute = (
         const validTagsToAdd = allValidTagsToAdd.slice(0, MAX_TAGS_PER_OPERATION);
         const validTagsToRemove = allValidTagsToRemove.slice(0, MAX_TAGS_PER_OPERATION);
         const operationTruncated =
+          allValidTagsToAdd.length !== tags.tags_to_add.length ||
+          allValidTagsToRemove.length !== tags.tags_to_remove.length ||
           allValidTagsToAdd.length > MAX_TAGS_PER_OPERATION ||
           allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
 
@@ -100,32 +101,27 @@ export const setAttacksTagsRoute = (
             telemetrySender,
             telemetryFields,
             async () => {
-              // Verify which IDs actually exist in the attack index before emitting,
-              // so the event payload never includes unknown/non-attack IDs.
-              // Failures here must never block the mutation.
+              // prefetch failure suppresses the trigger; must not block the mutation
               let verifiedAttackIds: string[] = [];
+              let attackTagsActuallyAdded = validTagsToAdd;
+              let attackTagsActuallyRemoved = validTagsToRemove;
               if (eventBus) {
                 try {
-                  const attackDocs = await searchAlerts({
-                    context,
-                    index: attackIndex,
-                    params: {
-                      query: { bool: { filter: { terms: { _id: ids } } } },
-                      _source: false,
-                      // `attackIndex` spans the scheduled and adhoc families and an _id can
-                      // exist in both, so reserve a slot per family rather than one per id.
-                      size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
-                    },
-                  });
-                  // Deduplicate: an attack present in both families returns two hits, and
-                  // emitting the id twice makes a workflow process it repeatedly.
-                  verifiedAttackIds = Array.from(
-                    new Set(
-                      attackDocs.hits.hits
-                        .map((hit) => hit._id)
-                        .filter((id): id is string => id != null)
-                    )
-                  );
+                  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+                  ({
+                    changedIds: verifiedAttackIds,
+                    actualAdded: attackTagsActuallyAdded,
+                    actualRemoved: attackTagsActuallyRemoved,
+                  } = await prefetchChangedListFieldIds(
+                    esClient,
+                    attackIndex,
+                    ids,
+                    ALERT_WORKFLOW_TAGS,
+                    tags.tags_to_add,
+                    tags.tags_to_remove,
+                    validTagsToAdd,
+                    validTagsToRemove
+                  ));
                 } catch (err) {
                   logger?.warn(`Failed to verify attack IDs for workflow trigger: ${err}`);
                 }
@@ -133,10 +129,11 @@ export const setAttacksTagsRoute = (
               const result = await updateAlertsTags({ context, index: attackIndex, ids, tags });
               if (eventBus && verifiedAttackIds.length > 0) {
                 void eventBus.emitAttackTagsChanged(request, {
-                  attackIds: verifiedAttackIds,
-                  tagsToAdd: validTagsToAdd,
-                  tagsToRemove: validTagsToRemove,
-                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
+                  attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                  tagsAdded: attackTagsActuallyAdded,
+                  tagsRemoved: attackTagsActuallyRemoved,
+                  truncated:
+                    verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
                 });
               }
               return result;
@@ -148,83 +145,39 @@ export const setAttacksTagsRoute = (
           response,
           telemetrySender,
           telemetryFields,
-          async () => {
-            // Pre-fetch the verified attack docs to read their related detection
-            // alert ids; the attack index scope filters out unknown attack ids.
-            const attackDocs = await searchAlerts({
+          () =>
+            executeCascadeListField({
               context,
-              index: attackIndex,
-              params: {
-                query: { bool: { filter: { terms: { _id: ids } } } },
-                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
-                // `attackIndex` spans the scheduled and adhoc families and an _id can exist
-                // in both, so reserve a slot per family rather than one per requested id.
-                size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
+              ruleDataClient,
+              attackIndex,
+              ids,
+              field: ALERT_WORKFLOW_TAGS,
+              rawToAdd: tags.tags_to_add,
+              rawToRemove: tags.tags_to_remove,
+              validToAdd: validTagsToAdd,
+              validToRemove: validTagsToRemove,
+              operationTruncated,
+              mutate: (index, combinedIds) =>
+                updateAlertsTags({ context, index, ids: combinedIds, tags }),
+              eventBus,
+              emitAttack: (attackIds, actualAdded, actualRemoved, truncated) => {
+                void eventBus?.emitAttackTagsChanged(request, {
+                  attackIds,
+                  tagsAdded: actualAdded,
+                  tagsRemoved: actualRemoved,
+                  truncated,
+                });
               },
-            });
-
-            // Deduplicate: an attack present in both families returns two hits, and emitting
-            // the id twice makes a workflow process it repeatedly.
-            const verifiedAttackIds = Array.from(
-              new Set(
-                attackDocs.hits.hits.map((hit) => hit._id).filter((id): id is string => id != null)
-              )
-            );
-
-            const relatedAlertIds = Array.from(
-              new Set(
-                attackDocs.hits.hits.flatMap((hit) => {
-                  const source = hit._source as Record<string, unknown> | undefined;
-                  const alertIds = source?.[ALERT_ATTACK_DISCOVERY_ALERT_IDS];
-                  return Array.isArray(alertIds) ? (alertIds as string[]) : [];
-                })
-              )
-            );
-
-            const combinedIds = Array.from(new Set([...verifiedAttackIds, ...relatedAlertIds]));
-
-            // Related detection alerts live outside the attack indices, so expand
-            // the target to the unified index pattern for the cascade update.
-            const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
-
-            // Verify that the related alert IDs still exist in the unified index;
-            // stale/deleted references must not appear in the emitted event payload.
-            let verifiedRelatedAlertIds: string[] = [];
-            if (eventBus && relatedAlertIds.length > 0) {
-              try {
-                const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-                verifiedRelatedAlertIds = await verifyAlertIdsInIndex(
-                  esClient,
-                  index,
-                  relatedAlertIds
-                );
-              } catch (err) {
-                logger?.warn(
-                  `Failed to verify related alert IDs for workflow trigger (tags): ${err}`
-                );
-              }
-            }
-
-            const result = await updateAlertsTags({ context, index, ids: combinedIds, tags });
-            if (verifiedAttackIds.length > 0) {
-              void eventBus?.emitAttackTagsChanged(request, {
-                attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: validTagsToAdd,
-                tagsToRemove: validTagsToRemove,
-                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
-              });
-            }
-            if (verifiedRelatedAlertIds.length > 0) {
-              void eventBus?.emitAlertTagsChanged(request, {
-                alertIds: verifiedRelatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: validTagsToAdd,
-                tagsToRemove: validTagsToRemove,
-                truncated:
-                  verifiedRelatedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
-              });
-            }
-            return result;
-          }
+              emitAlert: (alertIds, actualAdded, actualRemoved, truncated) => {
+                void eventBus?.emitAlertTagsChanged(request, {
+                  alertIds,
+                  tagsAdded: actualAdded,
+                  tagsRemoved: actualRemoved,
+                  truncated,
+                });
+              },
+              logger,
+            })
         );
       }
     );

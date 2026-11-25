@@ -1,5 +1,5 @@
 {
-  "sha1": "49c9f07ab55176b9ce6e26723739d8c42a155de0",
+  "sha1": "bd3eef94cdd9d2ba5acb359e9146741b91602193",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
-        "line": 25,
+        "line": 17,
         "column": 21
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
-        "line": 30,
+        "line": 22,
         "column": 21
       }
     },
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
-        "line": 34,
-        "column": 11
+        "line": 29,
+        "column": 9
       }
     },
     {

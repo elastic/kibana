@@ -50,11 +50,17 @@ export class PersistedLog<T = any> {
       ...[...this.items$.value].filter((item) => !this.isEqual(item, val)),
     ].slice(0, this.maxLength); // truncate
 
-    // Persist the stack to storage
-    this.storage.setItem(this.name, JSON.stringify(nextItems));
-    // Notify subscribers
-    this.items$.next(nextItems);
+    this.persist(nextItems);
+    return nextItems;
+  }
 
+  public removeIf(predicate: (item: T) => boolean) {
+    const nextItems = this.items$.value.filter((item) => !predicate(item));
+    if (nextItems.length === this.items$.value.length) {
+      return this.items$.value;
+    }
+
+    this.persist(nextItems);
     return nextItems;
   }
 
@@ -64,6 +70,11 @@ export class PersistedLog<T = any> {
 
   public get$() {
     return this.items$.pipe(map((items) => cloneDeep(items)));
+  }
+
+  private persist(nextItems: T[]) {
+    this.storage.setItem(this.name, JSON.stringify(nextItems));
+    this.items$.next(nextItems);
   }
 
   private loadItems() {

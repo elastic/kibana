@@ -31,6 +31,10 @@ jest.mock('./alert_condition_step', () => ({
   AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
 }));
 
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: () => ({ mgetWorkflows: jest.fn().mockResolvedValue([]) }),
+}));
+
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
   ...overrides,
@@ -41,7 +45,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', breach: { segment: '' } },
+  query: { base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -215,7 +219,7 @@ describe('step validation', () => {
           {
             id: 'dashboard-id',
             type: DASHBOARD_ARTIFACT_TYPE,
-            data: { dashboardId: DASHBOARD_ID },
+            data: { dashboard_id: DASHBOARD_ID },
           },
         ],
       });
@@ -235,6 +239,11 @@ describe('step validation', () => {
     it('outcome has no validate function', () => {
       const outcomeStep = getSteps(true).steps.find((s) => s.id === 'outcome')!;
       expect(outcomeStep.validate).toBeUndefined();
+    });
+
+    it('outcome triggers both lifecycle fields, so the no-data rule blocks "Next"', () => {
+      const outcomeStep = getSteps(true).steps.find((s) => s.id === 'outcome')!;
+      expect(outcomeStep.fields).toEqual(['recovery', 'noData']);
     });
 
     it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
@@ -273,30 +282,25 @@ describe('step validation', () => {
   describe('notifications step validation', () => {
     const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
 
-    it('declares notifications fields and no custom validate', () => {
-      expect(notificationsStep.fields).toEqual(['notifications']);
+    it('validates the routing tags field and has no custom validate', () => {
+      expect(notificationsStep.fields).toEqual(['metadata.routingTags']);
       expect(notificationsStep.validate).toBeUndefined();
     });
 
-    it('delegates to methods.trigger with notifications', async () => {
-      const state = createState();
-      const methods = {
-        trigger: jest.fn().mockResolvedValue(true),
-      } as unknown as UseFormReturn<FormValues>;
-
-      const result = await validateStep(notificationsStep, methods, state);
-
-      expect(methods.trigger).toHaveBeenCalledWith(['notifications']);
-      expect(result).toBe(true);
-    });
-
-    it('returns false when trigger rejects notifications validation', async () => {
+    it('triggers validation of the routing tags field', async () => {
       const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
 
-      expect(await validateStep(notificationsStep, methods, state)).toBe(false);
+      const result = await validateStep(notificationsStep, methods, state);
+
+      expect(methods.trigger).toHaveBeenCalledWith(['metadata.routingTags']);
+      expect(result).toBe(false);
+    });
+
+    it('is not a step for signal rules', () => {
+      expect(getSteps(false).steps.map(({ id }) => id)).not.toContain('notifications');
     });
   });
 
@@ -310,22 +314,21 @@ describe('step validation', () => {
           onRecoveryTypeChange={jest.fn()}
           onKindChange={jest.fn()}
           isEditing={ruleId !== undefined}
-          ruleId={ruleId}
         />,
         { wrapper: createComposeFormWrapper() }
       );
 
-    it('renders the simple action policy section in create mode', async () => {
+    it('renders the action policies section in create mode', async () => {
       renderNotificationsStep();
       await waitFor(() => {
-        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+        expect(screen.getByText('Action policies')).toBeInTheDocument();
       });
     });
 
-    it('renders the simple action policy section in edit mode', async () => {
+    it('renders the action policies section in edit mode', async () => {
       renderNotificationsStep('rule-1');
       await waitFor(() => {
-        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+        expect(screen.getByText('Action policies')).toBeInTheDocument();
       });
     });
   });
@@ -389,7 +392,7 @@ describe('shell shared fields', () => {
   it('renders Outcome kind cards without alert-only fields for signal kind', () => {
     renderShell(
       { step: 1 },
-      { kind: 'signal', query: { format: 'standalone', breach: { query: 'FROM logs-*' } } }
+      { kind: 'signal', query: { base: 'FROM logs-*', breach: { segment: '' } } }
     );
 
     expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();

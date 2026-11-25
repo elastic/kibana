@@ -13,4 +13,5 @@ export const PROJECT_DEFAULT_ROLES = new Map<string, Role>([
   ['es', 'developer'],
   ['security', 'editor'],
   ['oblt', 'editor'],
+  ['vectordb', 'developer'],
 ]);

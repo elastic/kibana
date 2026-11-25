@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { spaceTest, testData } from '../fixtures';
 
 const FIRST_TAB_LABEL = 'Persisted data view';
@@ -117,7 +117,6 @@ spaceTest.describe(
                   },
                   column_order: ['referer'],
                   chart_interval: FIRST_TAB_CHART_INTERVAL_VALUE,
-                  time_restore: true,
                   time_range: {
                     from: FIRST_TAB_TIME.start,
                     to: FIRST_TAB_TIME.end,
@@ -136,7 +135,6 @@ spaceTest.describe(
                     expression: SECOND_TAB_QUERY,
                   },
                   column_order: ['geo.src'],
-                  time_restore: true,
                   time_range: {
                     from: SECOND_TAB_TIME.start,
                     to: SECOND_TAB_TIME.end,
@@ -149,7 +147,6 @@ spaceTest.describe(
                     type: 'esql',
                     query: THIRD_TAB_QUERY,
                   },
-                  time_restore: true,
                   time_range: {
                     from: THIRD_TAB_TIME.start,
                     to: THIRD_TAB_TIME.end,

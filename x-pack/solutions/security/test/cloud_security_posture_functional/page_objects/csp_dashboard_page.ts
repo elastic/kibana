@@ -39,7 +39,13 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     });
 
   const index = {
-    remove: () => es.indices.delete({ index: LATEST_FINDINGS_INDEX, ignore_unavailable: true }),
+    remove: () =>
+      es.deleteByQuery({
+        index: LATEST_FINDINGS_INDEX,
+        query: { match_all: {} },
+        ignore_unavailable: true,
+        refresh: true,
+      }),
     add: async <T>(findingsMock: T[]) => {
       await Promise.all(
         findingsMock.map((finding) =>
@@ -59,12 +65,10 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
   } as const;
 
   const dashboard = {
-    getDashboardPageHeader: () => testSubjects.find('cloud-posture-dashboard-page-header'),
-
     getDashboardTabs: async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const dashboardPageHeader = await dashboard.getDashboardPageHeader();
-      return await dashboardPageHeader.findByClassName('euiTabs');
+      const dashboardTabs = await testSubjects.find('cloud-posture-dashboard-tabs');
+      return await dashboardTabs.findByClassName('euiTabs');
     },
 
     getCloudTab: async () => {

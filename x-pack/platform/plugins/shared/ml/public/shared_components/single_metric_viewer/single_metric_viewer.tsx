@@ -23,6 +23,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { tz } from 'moment';
 import { pick, throttle } from 'lodash';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { MlDependencies } from '../../application/app';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
@@ -70,6 +71,8 @@ export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
 
 export interface SingleMetricViewerProps {
   shouldShowForecastButton?: boolean;
+  isInteractive?: boolean;
+
   bounds?: TimeRangeBounds;
   forecastId?: string;
   selectedEntities?: MlEntity;
@@ -90,6 +93,10 @@ export interface SingleMetricViewerProps {
    */
   isRenderComplete?: boolean;
   wrapperRef?: Ref<HTMLDivElement>;
+  /**
+   * Provided by hosts that can cancel in-flight requests, e.g. the embeddable.
+   */
+  requestCancellationManager?: RequestCancellationManager;
 }
 
 type Zoom = AppStateZoom | undefined;
@@ -114,9 +121,11 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   selectedEntities,
   selectedJobId,
   shouldShowForecastButton,
+  isInteractive = true,
   uuid,
   isRenderComplete,
   wrapperRef,
+  requestCancellationManager,
 }) => {
   const timeseriesExplorerStyles = useTimeseriesExplorerStyles();
   const annotationStyles = useAnnotationStyles();
@@ -312,8 +321,10 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       selectedJobStats={selectedJobWrapper.stats}
                       onLoading={onLoading}
                       onRenderComplete={onRenderComplete}
+                      requestCancellationManager={requestCancellationManager}
                       onForecastComplete={onForecastComplete}
                       shouldShowForecastButton={shouldShowForecastButton}
+                      isInteractive={isInteractive}
                     />
                   )}
               </DatePickerContextProvider>

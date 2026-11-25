@@ -10,9 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { LOG_PREFIX, probeDatasetTimeRanges } from './dataset_probe';
 import { selectTimeRange, type SelectedTimeRange } from './select_time_range';
 
-export type { SelectedTimeRange };
-
-export interface SelectDefaultTimeRangeParams {
+interface SelectDefaultTimeRangeParams {
   esqlQueries: string[];
   esClient: IScopedClusterClient;
   logger: Logger;

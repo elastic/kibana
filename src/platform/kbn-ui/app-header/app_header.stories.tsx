@@ -13,9 +13,11 @@ import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
 import { EuiPageTemplate } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout';
 import type {
   AppHeaderBack,
   AppHeaderBadge,
+  AppHeaderFavoriteStatus,
   AppHeaderMetadataItems,
   AppHeaderSpacing,
   AppHeaderTab,
@@ -33,6 +35,8 @@ interface ComposedHeaderStoryProps {
   showBadges: boolean;
   secondaryContent: 'description' | 'metadata' | 'none';
   showFavorite: boolean;
+  showShare: boolean;
+  showEnhance: boolean;
   showMenu: boolean;
 }
 
@@ -114,6 +118,8 @@ const ComposedHeader = ({
   showBadges,
   secondaryContent,
   showFavorite,
+  showShare,
+  showEnhance,
   showMenu,
 }: ComposedHeaderStoryProps) => {
   const [title, setTitle] = useState(initialTitle);
@@ -150,6 +156,21 @@ const ComposedHeader = ({
             ? {
                 status: 'unfavorited',
                 onToggle: action('favorite'),
+              }
+            : undefined
+        }
+        share={
+          showShare
+            ? {
+                onClick: action('share'),
+              }
+            : undefined
+        }
+        experimentalDashboardAiAction={
+          showEnhance
+            ? {
+                onClick: action('enhance'),
+                tooltip: 'Improve the content and style of your dashboard using AI',
               }
             : undefined
         }
@@ -202,6 +223,8 @@ const meta: Meta<ComposedHeaderStoryProps> = {
     showBadges: true,
     secondaryContent: 'metadata',
     showFavorite: true,
+    showShare: false,
+    showEnhance: false,
     showMenu: true,
   },
 };
@@ -225,7 +248,64 @@ export const TitleOnly: Story = {
     showBadges: false,
     secondaryContent: 'none',
     showFavorite: false,
+    showShare: false,
+    showEnhance: false,
     showMenu: false,
+  },
+};
+
+export const TitleActionsShareFavoriteEnhance: Story = {
+  args: {
+    showBack: false,
+    showTabs: false,
+    showBadges: false,
+    secondaryContent: 'none',
+    showFavorite: true,
+    showShare: true,
+    showEnhance: true,
+    showMenu: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Title actions after the title: Share, Favorite, then Enhance, then the app menu. ' +
+          'At m / l / xl the Enhance control is labeled; at s / xs it is icon-only.',
+      },
+    },
+  },
+};
+
+export const NarrowEnhanceIconOnly: Story = {
+  render: (args) => (
+    <div
+      id={APP_MAIN_SCROLL_CONTAINER_ID}
+      css={css`
+        width: 480px;
+      `}
+    >
+      <ComposedHeader {...args} />
+    </div>
+  ),
+  args: {
+    width: 480,
+    showBack: false,
+    showTabs: false,
+    showBadges: false,
+    secondaryContent: 'none',
+    showFavorite: true,
+    showShare: true,
+    showEnhance: true,
+    showMenu: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Same title actions at a narrow application width (`s` / `xs`). Enhance is icon-only ' +
+          'with a tooltip; aria-label stays "Enhance".',
+      },
+    },
   },
 };
 
@@ -454,6 +534,51 @@ export const LoadingToLoaded: Story = {
           'Side-by-side loading vs loaded for typical single-row combinations. Height and the ' +
           'trailing menu width should match closely; title width is a fixed skeleton. Multi-row ' +
           'headers (tabs, description, metadata) are not fully supported and will shift height.',
+      },
+    },
+  },
+};
+
+const favoriteVariantCases = [
+  { title: 'Star, not starred', variant: 'star', status: 'unfavorited' },
+  { title: 'Star, starred', variant: 'star', status: 'favorited' },
+  { title: 'Pin, not pinned', variant: 'pin', status: 'unfavorited' },
+  { title: 'Pin, pinned', variant: 'pin', status: 'favorited' },
+] as const;
+
+// Toggling passes through `adding` / `removing` like a real save, so the add animation plays.
+const FavoriteVariantRow = ({
+  title,
+  variant,
+  status: initialStatus,
+}: (typeof favoriteVariantCases)[number]) => {
+  const [status, setStatus] = useState<AppHeaderFavoriteStatus>(initialStatus);
+
+  const onToggle = () => {
+    action('favorite')();
+    const isFavorite = status === 'favorited' || status === 'adding';
+    setStatus(isFavorite ? 'removing' : 'adding');
+    setTimeout(() => setStatus(isFavorite ? 'unfavorited' : 'favorited'), 500);
+  };
+
+  return <AppHeaderView title={title} favorite={{ variant, status, onToggle }} sticky={false} />;
+};
+
+export const FavoriteVariants: Story = {
+  render: () => (
+    <div css={comparisonGrid}>
+      {favoriteVariantCases.map((favoriteCase) => (
+        <FavoriteVariantRow key={favoriteCase.title} {...favoriteCase} />
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The favorite title action as `star` (default) and `pin`. Pick the variant whose ' +
+          'wording matches the app; an item shows one or the other, never both. Click a button ' +
+          'to toggle it and see the add animation.',
       },
     },
   },

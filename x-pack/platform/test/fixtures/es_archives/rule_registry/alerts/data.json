@@ -228,7 +228,7 @@
         "gte": "2020-12-16T15:16:18.570Z"
       },
       "kibana.alert.status": "active",
-      "kibana.space_ids": ["default"],
+      "kibana.space_ids": ["space1", "space2"],
       "kibana.alert.workflow_tags": ["apm-tag-1"]
     }
   }

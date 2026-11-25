@@ -37,7 +37,8 @@ export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common
 export type ServiceNowExecutorResultData =
   | PushToServiceResponse
   | GetCommonFieldsResponse
-  | GetChoicesResponse;
+  | GetChoicesResponse
+  | ServiceNowIncident;
 
 export type ServiceNowEndpoint = 'table' | 'import_set' | 'oauth' | 'jwt' | 'event' | 'other';
 
@@ -215,6 +216,15 @@ export interface ServiceNowError {
 }
 
 export type ResponseError = AxiosError<ServiceNowError>;
+
+/**
+ * The errors `addServiceMessageToError` accepts: an axios error, a `ServiceNowApiError`,
+ * or a plain `Error`.
+ */
+export interface ServiceError extends Error {
+  code?: string;
+  response?: AxiosResponse<ServiceNowError>;
+}
 
 export interface ErrorMessageFormat {
   error: string;

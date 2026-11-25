@@ -26,7 +26,11 @@ function getSpacesManager(spaces: Space[] = []) {
 }
 
 const renderScreen = (props: SpaceSelectorProps) => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
 
   return renderWithI18n(
     <QueryClientProvider client={queryClient}>
@@ -135,5 +139,117 @@ test('it displays only spaces matching the search term', async () => {
   await waitFor(() => {
     expect(screen.getByText('Space 1')).toBeInTheDocument();
     expect(screen.getByText('Space 10')).toBeInTheDocument();
+  });
+});
+
+describe('initial solution setup', () => {
+  const customBranding$ = customBrandingServiceMock.createStartContract().customBranding$;
+  const spaces = [
+    {
+      id: asSpaceId('space-1'),
+      name: 'Space 1',
+      description: 'This is the first space',
+      disabledFeatures: [],
+    },
+  ];
+
+  it('skips getInitialSolutionSetup and loads spaces when disabled', async () => {
+    const spacesManager = getSpacesManager(spaces);
+
+    renderScreen({
+      spacesManager,
+      serverBasePath: '/server-base-path',
+      customBranding$,
+      initialSolutionSetupEnabled: false,
+    });
+
+    await waitFor(() => {
+      expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
+    });
+    expect(spacesManager.getInitialSolutionSetup).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: 'Select your space' })).toBeInTheDocument();
+  });
+
+  it('renders setup and does not load spaces when enabled and required', async () => {
+    const spacesManager = getSpacesManager(spaces);
+    spacesManager.getInitialSolutionSetup = jest.fn().mockResolvedValue({ required: true });
+
+    renderScreen({
+      spacesManager,
+      serverBasePath: '/server-base-path',
+      customBranding$,
+      initialSolutionSetupEnabled: true,
+    });
+
+    await waitFor(() => {
+      expect(spacesManager.getInitialSolutionSetup).toHaveBeenCalledTimes(1);
+    });
+    expect(spacesManager.getSpaces).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('heading', { name: 'Select a solution view for your space' })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('initialSolutionSetup-solutionViewEsOption')).toBeInTheDocument();
+  });
+
+  it('loads spaces when enabled and setup is not required', async () => {
+    const spacesManager = getSpacesManager(spaces);
+    spacesManager.getInitialSolutionSetup = jest.fn().mockResolvedValue({ required: false });
+
+    renderScreen({
+      spacesManager,
+      serverBasePath: '/server-base-path',
+      customBranding$,
+      initialSolutionSetupEnabled: true,
+    });
+
+    await waitFor(() => {
+      expect(spacesManager.getInitialSolutionSetup).toHaveBeenCalledTimes(1);
+      expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByRole('heading', { name: 'Select your space' })).toBeInTheDocument();
+    expect(screen.getByText('Space 1')).toBeInTheDocument();
+  });
+
+  it('loads spaces when setup-state check is unauthorized', async () => {
+    const spacesManager = getSpacesManager(spaces);
+    spacesManager.getInitialSolutionSetup = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error('Forbidden'), { response: { status: 403 } }));
+
+    renderScreen({
+      spacesManager,
+      serverBasePath: '/server-base-path',
+      customBranding$,
+      initialSolutionSetupEnabled: true,
+    });
+
+    await waitFor(() => {
+      expect(spacesManager.getInitialSolutionSetup).toHaveBeenCalledTimes(1);
+      expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByRole('heading', { name: 'Select your space' })).toBeInTheDocument();
+    expect(screen.getByText('Space 1')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('initialSolutionSetup-solutionViewEsOption')
+    ).not.toBeInTheDocument();
+  });
+
+  it('loads spaces when setup-state check fails transiently', async () => {
+    const spacesManager = getSpacesManager(spaces);
+    spacesManager.getInitialSolutionSetup = jest.fn().mockRejectedValue(new Error('boom'));
+
+    renderScreen({
+      spacesManager,
+      serverBasePath: '/server-base-path',
+      customBranding$,
+      initialSolutionSetupEnabled: true,
+    });
+
+    await waitFor(() => {
+      expect(spacesManager.getInitialSolutionSetup).toHaveBeenCalledTimes(1);
+      expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByRole('heading', { name: 'Select your space' })).toBeInTheDocument();
+    expect(screen.getByText('Space 1')).toBeInTheDocument();
   });
 });

@@ -149,6 +149,24 @@ describe('endpoint list middleware', () => {
         );
       });
 
+      it('forwards the endpoint list admin query as kuery', async () => {
+        dispatchUserChangedUrlToEndpointList({
+          search:
+            "?admin_query=(language:kuery,query:'united.endpoint.Endpoint.state.isolation: true')",
+        });
+
+        await waitForAction('serverReturnedEndpointList');
+
+        expect(fakeHttpServices.get).toHaveBeenCalledWith(HOST_METADATA_LIST_ROUTE, {
+          query: {
+            page: '0',
+            pageSize: '10',
+            kuery: 'united.endpoint.Endpoint.state.isolation: true',
+          },
+          version: '2023-10-31',
+        });
+      });
+
       describe('fetching non-existing policies', () => {
         it('should not fetch package policies without required privileges', async () => {
           canFetchAgentPoliciesMock.mockReturnValue(false);

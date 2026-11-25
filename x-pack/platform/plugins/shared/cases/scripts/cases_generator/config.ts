@@ -115,8 +115,8 @@ function validateConfig(config: GeneratorConfig): GeneratorConfig {
     }
   }
 
-  if (config.events > 0 && config.owners.every((owner) => owner === 'observability')) {
-    throw new Error('Event attachments are unsupported for observability-only generation');
+  if (config.events > 0 && !config.owners.includes('securitySolution')) {
+    throw new Error('Event attachments require the securitySolution owner');
   }
 
   if (config.seed !== null && config.seed.trim().length === 0) {

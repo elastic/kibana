@@ -99,8 +99,37 @@ export const createSkillRegistry = ({
     return true;
   };
 
+  // `get` throws when the tool is not registered or unavailable to the caller. The registry
+  // serves one request, so each tool is looked up once and shared by every skill that needs it.
+  const toolAvailability = new Map<string, Promise<boolean>>();
+  const isToolAvailable = (toolId: string): Promise<boolean> => {
+    let check = toolAvailability.get(toolId);
+    if (!check) {
+      check = toolRegistry.get(toolId).then(
+        () => true,
+        () => false
+      );
+      toolAvailability.set(toolId, check);
+    }
+    return check;
+  };
+
+  // A skill whose tools cannot be resolved is hidden on its own rather than failing the listing.
+  const areRegistryToolsAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
+    try {
+      const toolIds = await skill.getRegistryTools();
+      const available = await Promise.all(toolIds.map(isToolAvailable));
+      return available.every(Boolean);
+    } catch {
+      return false;
+    }
+  };
+
   const isAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
     if (!isVisible(skill)) {
+      return false;
+    }
+    if (skill.requiresAllRegistryTools && !(await areRegistryToolsAvailable(skill))) {
       return false;
     }
     if (skill.isAvailable && availabilityContext) {
@@ -163,7 +192,7 @@ export const createSkillRegistry = ({
     },
 
     async list(options) {
-      const { type, includePlugins, ...listOptions } = options ?? {};
+      const { type, includePlugins, includeHidden, ...listOptions } = options ?? {};
       let results: InternalSkillDefinition[];
       if (type === 'built-in') {
         results = await builtinProvider.list(listOptions);
@@ -178,6 +207,9 @@ export const createSkillRegistry = ({
       }
       if (!includePlugins) {
         results = results.filter((skill) => !skill.plugin_id);
+      }
+      if (!includeHidden) {
+        results = results.filter((skill) => !skill.hidden);
       }
       return filterAvailable(results);
     },

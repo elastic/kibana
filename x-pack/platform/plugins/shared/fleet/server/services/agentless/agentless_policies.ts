@@ -52,7 +52,12 @@ import {
 import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
-import { getInstallation, getPackageInfo } from '../epm/packages';
+import {
+  getInstallation,
+  getPackageInfo,
+  getPackagePoliciesUpgradeBreakingChanges,
+  packagePolicyBreakingChangesToError,
+} from '../epm/packages';
 import { runWithCache } from '../epm/packages/cache';
 import { appContextService, cloudConnectorService } from '..';
 import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
@@ -65,6 +70,7 @@ import {
 } from '../../../common/services/agentless_policy_helper';
 import { agentlessAgentService } from '../agents/agentless_agent';
 import { createAndIntegrateCloudConnector } from '../cloud_connectors';
+import { assertSecretIdsReusable, deleteSecretsIfNotReferenced } from '../secrets';
 
 import { prefixKueryFieldsWithSavedObjectType } from './kuery_utils';
 
@@ -108,7 +114,8 @@ export interface AgentlessPoliciesService {
 
   bulkUpgradeAgentlessPolicies: (
     policyIds: string[],
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    options?: { acknowledgeBreakingChanges?: boolean }
   ) => Promise<BulkUpgradeAgentlessPoliciesResponse>;
 
   getAgentlessPolicyUpgradeDryRunDiff: (
@@ -171,6 +178,9 @@ export const packagePolicyToAgentlessPolicy = (packagePolicy: PackagePolicy): Ag
     created_by: packagePolicy.created_by,
     updated_at: packagePolicy.updated_at,
     updated_by: packagePolicy.updated_by,
+    ...(packagePolicy.onboarding_deployment_id
+      ? { onboarding_deployment_id: packagePolicy.onboarding_deployment_id }
+      : {}),
   };
 };
 
@@ -205,6 +215,22 @@ const toUpdatePackagePolicy = (packagePolicy: PackagePolicy): NewPackagePolicy =
   };
 };
 
+/** The ids of every secret ref (`{ isSecretRef: true, id | ids }`) found in a request body. */
+const collectSecretRefIds = (node: unknown, found = new Set<string>()): Set<string> => {
+  if (Array.isArray(node)) {
+    node.forEach((child) => collectSecretRefIds(child, found));
+  } else if (node && typeof node === 'object') {
+    const object = node as Record<string, unknown>;
+    if (object.isSecretRef === true) {
+      const ids = Array.isArray(object.ids) ? object.ids : [object.id];
+      ids.forEach((id) => typeof id === 'string' && found.add(id));
+    } else {
+      Object.values(object).forEach((child) => collectSecretRefIds(child, found));
+    }
+  }
+  return found;
+};
+
 export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   constructor(
     private readonly packagePolicyService: PackagePolicyClient,
@@ -225,6 +251,10 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const agentPolicyId = packagePolicyId; // Use the same ID for agent policy and package policy
     const force = data.force;
     this.logger.debug('Creating agentless policy');
+
+    // A request may reuse the secrets of a sibling policy by sending their refs back; it cannot
+    // point a new policy at a secret no policy it can see uses.
+    await assertSecretIdsReusable(this.soClient, [...collectSecretRefIds(data)]);
 
     const user = request
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
@@ -360,6 +390,18 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         request
       );
 
+      // The package policy above is created with `bumpRevision: false`, which skips the agent policy
+      // update that computes `has_agent_version_conditions` and the minimum agent version. Without it
+      // the agent policy would not get version specific policies until its first update. This only
+      // refreshes those fields: no revision bump, no deploy event.
+      await agentPolicyService.update(
+        this.soClient,
+        this.esClient,
+        agentPolicyId,
+        {},
+        { user, bumpRevision: false, skipValidation: true }
+      );
+
       this.logger.debug(`Deploy agentless policy ${agentPolicyId}`);
       await agentPolicyService.deployPolicy(this.soClient, agentPolicyId, undefined, {
         throwOnAgentlessError: true,
@@ -466,6 +508,16 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     // but the version may change: a PUT can bump (or downgrade) the package version,
     // mirroring the regular package-policy PUT.
     this.assertPackageNameUnchanged(existingPackagePolicy, pkg);
+
+    // Refs the policy already holds are fine; any other secret must be in use by a policy the
+    // caller can see (see createAgentlessPolicy).
+    const ownSecretIds = new Set(
+      (existingPackagePolicy.secret_references ?? []).map(({ id }) => id)
+    );
+    await assertSecretIdsReusable(
+      this.soClient,
+      [...collectSecretRefIds(data)].filter((id) => !ownSecretIds.has(id))
+    );
 
     // Load package info for the *requested* version (not the stored one) so a version
     // change re-derives the agentless config, resources, global data tags and inputs
@@ -600,6 +652,12 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         throwOnAgentlessError: true,
       });
 
+      await this.deleteReplacedSecrets({
+        previous: existingPackagePolicy,
+        updated: updatedPackagePolicy,
+        agentPolicyId,
+      });
+
       return packagePolicyToAgentlessPolicy(updatedPackagePolicy);
     } catch (err) {
       // Log the triggering failure at error level before attempting rollback. The error is also
@@ -625,6 +683,53 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       });
 
       throw err;
+    }
+  }
+
+  /**
+   * Deletes the secrets an update replaced. The package-policy update runs with
+   * `bumpRevision: false`, so while it runs the compiled policy still references the old secrets
+   * and Fleet keeps them (it never deletes a secret a compiled policy references). Once the agent
+   * policy update has written the new revision they are unreferenced, so they are removed here.
+   * Secrets another package policy still uses (in any Space) are kept by
+   * `deleteSecretsIfNotReferenced`.
+   * Best-effort: a failed cleanup leaves a secret behind but must not fail the update.
+   */
+  private async deleteReplacedSecrets({
+    previous,
+    updated,
+    agentPolicyId,
+  }: {
+    previous: PackagePolicy;
+    updated: PackagePolicy;
+    agentPolicyId: string;
+  }) {
+    // Cloud connector secrets are shared across package policies and not tracked in their
+    // `secret_references`, so they are never removed from here.
+    if (previous.cloud_connector_id) return;
+
+    const stillUsed = new Set((updated.secret_references ?? []).map(({ id }) => id));
+    const replaced = (previous.secret_references ?? [])
+      .map(({ id }) => id)
+      .filter((id) => !stillUsed.has(id));
+    if (replaced.length === 0) return;
+
+    try {
+      await deleteSecretsIfNotReferenced({
+        esClient: this.esClient,
+        // Secrets are global: a package policy in another Space can reference one of them, and
+        // the request-scoped client only sees its own Space. Check every Space before deleting.
+        soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+        checkAllSpaces: true,
+        ids: replaced,
+        agentPolicyIds: [agentPolicyId],
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Could not delete replaced secrets [${replaced.join(', ')}] of agentless policy: ${
+          error.message
+        }`
+      );
     }
   }
 
@@ -741,7 +846,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
   async bulkUpgradeAgentlessPolicies(
     policyIds: string[],
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    options?: { acknowledgeBreakingChanges?: boolean }
   ): Promise<BulkUpgradeAgentlessPoliciesResponse> {
     this.logger.debug(`Bulk upgrading ${policyIds.length} agentless policies`);
 
@@ -762,10 +868,32 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     }
 
     // Skip already-latest policies: report `success: true` without the engine's needless SO re-persist + redeploy churn.
-    const { upgradeIds, noopResults } = await this.partitionAlreadyLatestPolicies(
-      agentlessPackagePolicies
-    );
+    const { upgradeIds: candidateUpgradeIds, noopResults } =
+      await this.partitionAlreadyLatestPolicies(agentlessPackagePolicies);
     results.push(...noopResults);
+
+    // Policies whose upgrade includes unacknowledged breaking changes become per-policy 400
+    // failures and are left unchanged.
+    let upgradeIds = candidateUpgradeIds;
+    if (!options?.acknowledgeBreakingChanges && candidateUpgradeIds.length > 0) {
+      const candidateIdSet = new Set(candidateUpgradeIds);
+      const breakingChangesResults = await getPackagePoliciesUpgradeBreakingChanges(
+        agentlessPackagePolicies.filter(({ id }) => candidateIdSet.has(id))
+      );
+      const rejectedIds = new Set<string>();
+      for (const breakingChangesResult of breakingChangesResults) {
+        const { packagePolicy } = breakingChangesResult;
+        rejectedIds.add(packagePolicy.id);
+        results.push({
+          id: packagePolicy.id,
+          name: packagePolicy.name,
+          success: false,
+          statusCode: 400,
+          body: { message: packagePolicyBreakingChangesToError(breakingChangesResult).message },
+        });
+      }
+      upgradeIds = candidateUpgradeIds.filter((id) => !rejectedIds.has(id));
+    }
 
     if (upgradeIds.length > 0) {
       // Reuse the package-policy bulk upgrade engine: it migrates the config and persists the

@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { noop } from 'lodash';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import type { VisualizationMap, DatasourceMap } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { InlineEditLensEmbeddableContext } from './types';
@@ -70,7 +71,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
           });
         }
       },
-      options: { container },
+      options: { container, isEsql: isTextBasedAttributes(attributes) },
     });
   }
 }

@@ -11,9 +11,28 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { updateConnectorBodySchema } from '../../../../common/routes/connector/apis/update';
+import {
+  getUpdateConnectorBodySchema,
+  updateConnectorBodySchema,
+  updateConnectorParamsSchema,
+} from '../../../../common/routes/connector/apis/update';
 import { createMockConnector } from '../../../application/connector/mocks';
+import { actionsConfigMock } from '../../../actions_config.mock';
 import Boom from '@hapi/boom';
+import type { Type } from '@kbn/config-schema';
+
+const actionsConfigUtils = ({
+  inboundEventsFeatureEnabled = false,
+  catalogEnabled = false,
+}: {
+  inboundEventsFeatureEnabled?: boolean;
+  catalogEnabled?: boolean;
+} = {}) => {
+  const utils = actionsConfigMock.create();
+  utils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
+  utils.isCatalogEnabled.mockReturnValue(catalogEnabled);
+  return utils;
+};
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -29,7 +48,7 @@ describe('updateConnectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateConnectorRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.put.mock.calls[0];
 
@@ -85,6 +104,7 @@ describe('updateConnectorRoute', () => {
             "secrets": Object {
               "key": "i8oh34yf9783y39",
             },
+            "specVersion": undefined,
           },
           "id": "1",
         },
@@ -94,11 +114,207 @@ describe('updateConnectorRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it.each(['1', '1.3'])(
+    'forwards spec_version %s and returns the exact version from the application',
+    async (specVersion) => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      updateConnectorRoute(router, licenseState, actionsConfigUtils({ catalogEnabled: true }));
+      const [, handler] = router.put.mock.calls[0];
+      const actionsClient = actionsClientMock.create();
+      actionsClient.update.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
+
+      const body = updateConnectorBodySchema.validate({
+        name: 'Versioned connector',
+        config: {},
+        secrets: {},
+        spec_version: specVersion,
+      });
+      const [context, req, res] = mockHandlerArguments(
+        { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(true) },
+        { body, params: { id: '1' } },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(actionsClient.update).toHaveBeenCalledWith({
+        id: '1',
+        action: {
+          name: 'Versioned connector',
+          config: {},
+          secrets: {},
+          specVersion,
+        },
+      });
+      expect(res.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ spec_version: '1.3' }),
+      });
+    }
+  );
+
+  it('forwards omitted config and secrets as empty objects alongside spec_version', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState, actionsConfigUtils({ catalogEnabled: true }));
+    const [, handler] = router.put.mock.calls[0];
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(createMockConnector({ specVersion: '2.0' }));
+
+    const body = updateConnectorBodySchema.validate({
+      name: 'Versioned connector',
+      spec_version: '2',
+    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(true) },
+      { body, params: { id: '1' } },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.update).toHaveBeenCalledWith({
+      id: '1',
+      action: { name: 'Versioned connector', config: {}, secrets: {}, specVersion: '2' },
+    });
+  });
+
+  it('rejects spec_version when the connector catalog is disabled', () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState, actionsConfigUtils({ catalogEnabled: false }));
+
+    const [config] = router.put.mock.calls[0];
+    const validateConfig = config.validate as { request?: { body?: Type<unknown> } };
+
+    expect(config.validate).toBeDefined();
+    expect(validateConfig.request?.body).toBeDefined();
+    expect(() =>
+      validateConfig.request?.body!.validate({
+        name: 'Versioned connector',
+        config: {},
+        secrets: {},
+        spec_version: '1.0',
+      })
+    ).toThrow(
+      "[spec_version]: Additional properties are not allowed ('spec_version' was unexpected)"
+    );
+  });
+
+  it('rejects a spec_version past the max length', () => {
+    expect(() =>
+      updateConnectorBodySchema.validate({
+        name: 'Versioned connector',
+        config: {},
+        secrets: {},
+        spec_version: '1'.repeat(33),
+      })
+    ).toThrow(/maximum length/);
+  });
+
+  it('forwards is_inbound_events_enabled when the inbound events flag is on', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(
+      router,
+      licenseState,
+      actionsConfigUtils({ inboundEventsFeatureEnabled: true })
+    );
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.dual',
+        name: 'Datadog prod',
+        isInboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+        body: {
+          name: 'Datadog prod',
+          config: {},
+          secrets: {},
+          is_inbound_events_enabled: true,
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.update).toHaveBeenCalledWith({
+      id: '1',
+      action: expect.objectContaining({ isInboundEventsEnabled: true }),
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ is_inbound_events_enabled: true }),
+    });
+  });
+
+  it('rejects is_inbound_events_enabled as unknown when the inbound events flag is off', () => {
+    expect(() =>
+      getUpdateConnectorBodySchema(false, false).validate({
+        name: 'Datadog prod',
+        config: {},
+        secrets: {},
+        is_inbound_events_enabled: true,
+      })
+    ).toThrow(
+      /\[is_inbound_events_enabled\]: Additional properties are not allowed \('is_inbound_events_enabled' was unexpected\)/
+    );
+  });
+
+  it('omits is_inbound_events_enabled from the response when the inbound events flag is off', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(
+      router,
+      licenseState,
+      actionsConfigUtils({ inboundEventsFeatureEnabled: false })
+    );
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.dual',
+        name: 'Datadog prod',
+        isInboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+        body: {
+          name: 'Datadog prod',
+          config: {},
+          secrets: {},
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.not.objectContaining({ is_inbound_events_enabled: expect.anything() }),
+    });
+  });
+
   it('ensures the license allows deleting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateConnectorRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [, handler] = router.put.mock.calls[0];
 
@@ -140,7 +356,7 @@ describe('updateConnectorRoute', () => {
       throw new Error('OMG');
     });
 
-    updateConnectorRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [, handler] = router.put.mock.calls[0];
 
@@ -185,10 +401,30 @@ describe('updateConnectorRoute', () => {
     );
   });
 
+  test('rejects names, ids, and config keys past the max length', () => {
+    expect(() =>
+      updateConnectorBodySchema.validate({
+        name: 'a'.repeat(1025),
+        config: {},
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+    expect(() =>
+      updateConnectorBodySchema.validate({
+        name: 'ok',
+        config: { ['a'.repeat(1025)]: true },
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+    expect(() => updateConnectorParamsSchema.validate({ id: 'a'.repeat(37) })).toThrow(
+      /maximum length/
+    );
+  });
+
   it('rejects update when OAuth URLs fail allowedHosts validation (validation error)', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    updateConnectorRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
     const [, handler] = router.put.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();

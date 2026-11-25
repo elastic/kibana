@@ -17,13 +17,18 @@ import type { ScoutServerConfig } from '../../../../../types';
 // we can call in our tests.
 const pluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
-  'x-pack/platform/test/security_functional/plugins/test_endpoints'
+  'x-pack/platform/test_plugins/security_functional/plugins/test_endpoints'
 )}`;
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, pluginPath],
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      pluginPath,
+      '--xpack.task_manager.grant_uiam_api_keys=true',
+      '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',
+    ],
   },
 };

@@ -7,7 +7,7 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
@@ -76,7 +76,7 @@ jest.mock('./components/slo_list_search_bar');
 jest.mock('./components/slo_sparkline', () => ({
   SloSparkline: () => <div data-test-subj="mockedSparkline" />,
 }));
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
@@ -186,6 +186,7 @@ const mockKibana = () => {
           hasQuerySuggestions: () => {},
         },
       },
+      inspector: { open: jest.fn() },
       executionContext: {
         get: () => ({
           name: 'slo',
@@ -315,7 +316,7 @@ describe('SLOs Page', () => {
         render(<SlosPage />);
       });
 
-      expect(screen.getByText('Create SLO')).toBeTruthy();
+      expect(await screen.findByText('Create SLO')).toBeTruthy();
     });
 
     describe('when API has returned results', () => {

@@ -175,7 +175,7 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
     (event: React.MouseEvent) => {
       event.preventDefault();
       if (path) {
-        push(path, { fromHistory: true });
+        push(path);
       }
     },
     [push, path]
@@ -380,7 +380,12 @@ const UnifiedHistoryTableComponent = () => {
   }, []);
 
   const renderSourceColumn = useCallback(
-    (_: unknown, row: UnifiedHistoryRow) => <SourceBadge source={row.source} />,
+    (_: unknown, row: UnifiedHistoryRow) => (
+      <SourceBadge
+        source={row.source}
+        originVerified={row.sourceType === 'live' ? row.originVerified : undefined}
+      />
+    ),
     []
   );
 
@@ -477,7 +482,6 @@ const UnifiedHistoryTableComponent = () => {
 
       if (row.packId) {
         return push(newQueryPath, {
-          fromHistory: true,
           form: pickBy(
             {
               packId: row.packId,
@@ -494,7 +498,6 @@ const UnifiedHistoryTableComponent = () => {
       }
 
       push(newQueryPath, {
-        fromHistory: true,
         form: pickBy(
           {
             query: row.queryText,

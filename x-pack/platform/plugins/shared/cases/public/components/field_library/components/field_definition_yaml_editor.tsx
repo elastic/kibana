@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel } from '@elastic/eui';
 import { parse as parseYaml } from 'yaml';
+import { InlineFieldSchema } from '../../../../common/types/domain/template/fields';
 import { StrictInlineFieldSchema } from '../../../../common/types/domain/template/strict_fields';
 import { TemplateYamlEditorBase } from '../../templates_v2/components/template_yaml_editor';
 import { TemplateActionsMenu } from '../../templates_v2/components/template_actions_menu';
@@ -26,6 +27,12 @@ import * as i18n from '../translations';
 interface FieldDefinitionYamlEditorProps {
   value: string;
   onChange: (value: string) => void;
+  /**
+   * When editing an existing definition the name is immutable and the server validates with
+   * the lenient schema, so a stored name that predates the authoring-charset rule (e.g. one
+   * with hyphens) must not surface a charset error here. Mirrors the flyout's Save gate.
+   */
+  isEditing?: boolean;
   height?: number;
   'data-test-subj'?: string;
 }
@@ -53,9 +60,12 @@ const validationFooterCss = css({
   overflow: 'hidden',
 });
 
-const getDefinitionValidationErrors = (value: string): ValidationError[] => {
+const getDefinitionValidationErrors = (value: string, isEditing: boolean): ValidationError[] => {
   try {
-    const result = StrictInlineFieldSchema.safeParse(parseYaml(value));
+    // Strict (authoring charset) on create; lenient on edit, where the name is immutable and
+    // may legitimately predate the charset rule — matching what the server will accept.
+    const schema = isEditing ? InlineFieldSchema : StrictInlineFieldSchema;
+    const result = schema.safeParse(parseYaml(value));
     if (result.success) return [];
 
     // Surface the first issue's message so the author sees which character is invalid,
@@ -88,6 +98,7 @@ const getDefinitionValidationErrors = (value: string): ValidationError[] => {
 export const FieldDefinitionYamlEditor: React.FC<FieldDefinitionYamlEditorProps> = ({
   value,
   onChange,
+  isEditing = false,
   height = 300,
   'data-test-subj': dataTestSubj,
 }) => {
@@ -100,7 +111,10 @@ export const FieldDefinitionYamlEditor: React.FC<FieldDefinitionYamlEditorProps>
     handleErrorClick,
   } = useValidationAccordionPositioning();
 
-  const definitionValidationErrors = useMemo(() => getDefinitionValidationErrors(value), [value]);
+  const definitionValidationErrors = useMemo(
+    () => getDefinitionValidationErrors(value, isEditing),
+    [value, isEditing]
+  );
   const allValidationErrors = useMemo(
     () =>
       validationErrors.some(({ severity }) => severity === 'error')

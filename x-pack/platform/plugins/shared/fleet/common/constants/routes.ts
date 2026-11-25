@@ -71,6 +71,7 @@ export const EPM_API_ROUTES = {
 // Data stream API routes
 export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  HAS_DATA_PATTERN: `${DATA_STREAM_API_ROOT}/data`,
   DEPRECATED_ILM_CHECK_PATTERN: `${INTERNAL_ROOT}/data_streams/deprecated_ilm_check`,
 };
 
@@ -103,6 +104,7 @@ export const AGENT_POLICY_API_ROUTES = {
   AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
   CREATE_WITH_PACKAGE_POLICIES: `${INTERNAL_ROOT}/agent_and_package_policies`,
   CLEANUP_REVISIONS_PATTERN: `${INTERNAL_ROOT}/agent_policies/_cleanup_revisions`,
+  PACKAGE_POLICIES_SUMMARY_PATTERN: `${INTERNAL_ROOT}/agent_policies/_package_policies_summary`,
 };
 
 // Cloud Connector API routes
@@ -113,22 +115,40 @@ export const CLOUD_CONNECTOR_API_ROUTES = {
   UPDATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   DELETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   USAGE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}/usage`,
+  // Internal: UI-driven check, not part of the public cloud connector API (see render_template).
+  VERIFY_IAC_KEY_PATTERN: `${INTERNAL_ROOT}/cloud_connectors/{cloudConnectorId}/verify_iac_key`,
 };
 
 export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT = `${API_ROOT}/cloud_onboarding_deployments`;
 
 export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
   CREATE_PATTERN: CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
+  LIST_PATTERN: CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
   INFO_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
   BY_CONNECTOR_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/connector/{connectorId}`,
   UPDATE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
   DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+  COUNTS_PATTERN: `${INTERNAL_ROOT}/cloud_onboarding_deployments/counts`,
 };
 
 // IaC Provisioner API routes
 export const IAC_PROVISIONER_API_ROUTES = {
   RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
+  // One-time callback records that let a launched CloudFormation stack report its role back.
+  CALLBACK_CREATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks`,
+  // Whether a launched stack could report back to this Kibana, and why not.
+  CALLBACK_AVAILABILITY_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callback_availability`,
+  CALLBACK_INFO_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
+  CALLBACK_DELETE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
+  // Public: called by the stack's Lambda with the record's token, not by the browser.
+  CALLBACK_RECEIVE_PATTERN: `${API_ROOT}/iac_provisioner/callbacks/{callbackId}`,
 };
+
+/**
+ * Header the stack's Lambda sends the callback token in. A header rather than a query parameter,
+ * so the token never lands in a URL, and not `Authorization`, since the token is no credential.
+ */
+export const PROVISIONING_CALLBACK_TOKEN_HEADER = 'x-elastic-callback-token';
 
 // Kubernetes Manifest API routes
 export const K8S_API_ROUTES = {
@@ -144,6 +164,7 @@ export const OUTPUT_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
   GET_OUTPUT_HEALTH_PATTERN: `${API_ROOT}/outputs/{outputId}/health`,
+  GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN: `${INTERNAL_ROOT}/outputs/{outputId}/agent_policy_count`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 
@@ -219,6 +240,8 @@ export const AGENT_API_ROUTES = {
   BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
   ROLLBACK_PATTERN: `${API_ROOT}/agents/{agentId}/rollback`,
   BULK_ROLLBACK_PATTERN: `${API_ROOT}/agents/bulk_rollback`,
+  RESTART_PATTERN: `${API_ROOT}/agents/{agentId}/restart`,
+  BULK_RESTART_PATTERN: `${API_ROOT}/agents/bulk_restart`,
   GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 

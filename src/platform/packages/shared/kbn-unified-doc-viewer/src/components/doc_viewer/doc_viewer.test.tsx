@@ -18,6 +18,7 @@ import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mock
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import userEvent from '@testing-library/user-event';
+import { z } from '@kbn/zod';
 
 const analytics = analyticsServiceMock.createAnalyticsServiceStart();
 const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
@@ -331,6 +332,113 @@ describe('<DocViewer />', () => {
       docViewerTabsState: {
         test1: initialState,
       },
+    });
+  });
+
+  test('should emit the projected shareable state when a tab with a schema writes its slice', () => {
+    const onShareableStateChange = jest.fn();
+    const tabState = { selectedSubTab: 'details', scrollTop: 42 };
+    const renderFn = jest.fn(({ onInitialStateChange }) => (
+      <InitialStateReportingTab
+        content="Tab 1 Content"
+        onInitialStateChange={onInitialStateChange}
+        state={tabState}
+      />
+    ));
+
+    const registry = new DocViewsRegistry();
+    registry.add({
+      id: 'test1',
+      order: 10,
+      title: 'Tab 1',
+      shareableStateSchema: z.object({ selectedSubTab: z.string().max(50) }),
+      render: renderFn,
+    });
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onShareableStateChange={onShareableStateChange}
+      />
+    );
+
+    // Only the schema-allowed field is shared; `scrollTop` is stripped.
+    expect(onShareableStateChange).toHaveBeenLastCalledWith({
+      selectedTabId: 'test1',
+      tabsState: { test1: { selectedSubTab: 'details' } },
+    });
+  });
+
+  describe('when restoring the shareable state', () => {
+    const createRegistryWithSchemaTab = () => {
+      const registry = new DocViewsRegistry();
+      registry.add({
+        id: 'test1',
+        order: 10,
+        title: 'Tab 1',
+        shareableStateSchema: z.object({ selectedSubTab: z.string().max(50) }),
+        render: ({ initialState }) => <div>{JSON.stringify(initialState)}</div>,
+      });
+      registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: () => <div>Tab 2</div> });
+      return registry;
+    };
+
+    test('should seed the tab with only the schema-allowed fields of its shared slice', () => {
+      render(
+        <WrappedDocViewer
+          docViews={createRegistryWithSchemaTab().getAll()}
+          hit={records[0]}
+          dataView={dataViewMock}
+          initialShareableState={{
+            tabsState: { test1: { selectedSubTab: 'details', injected: 'value' } },
+          }}
+        />
+      );
+
+      expect(screen.getByText('{"selectedSubTab":"details"}')).toBeVisible();
+    });
+
+    test('should keep the local tab state when the shared slice fails validation', () => {
+      render(
+        <WrappedDocViewer
+          docViews={createRegistryWithSchemaTab().getAll()}
+          hit={records[0]}
+          dataView={dataViewMock}
+          initialState={{ docViewerTabsState: { test1: { selectedSubTab: 'local' } } }}
+          initialShareableState={{ tabsState: { test1: { selectedSubTab: 42 } } }}
+        />
+      );
+
+      expect(screen.getByText('{"selectedSubTab":"local"}')).toBeVisible();
+    });
+
+    test('should select the shared tab when no initialTabId is provided', () => {
+      render(
+        <WrappedDocViewer
+          docViews={createRegistryWithSchemaTab().getAll()}
+          hit={records[0]}
+          dataView={dataViewMock}
+          initialShareableState={{ selectedTabId: 'test2' }}
+        />
+      );
+
+      expect(screen.getByTestId('docViewerTab-test2')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    test('should prioritize the initialTabId prop over the shared tab', () => {
+      render(
+        <WrappedDocViewer
+          docViews={createRegistryWithSchemaTab().getAll()}
+          hit={records[0]}
+          dataView={dataViewMock}
+          initialTabId="test1"
+          initialShareableState={{ selectedTabId: 'test2' }}
+        />
+      );
+
+      expect(screen.getByTestId('docViewerTab-test1')).toHaveAttribute('aria-selected', 'true');
     });
   });
 

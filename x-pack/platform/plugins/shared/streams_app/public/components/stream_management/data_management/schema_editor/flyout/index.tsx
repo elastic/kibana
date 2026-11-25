@@ -263,6 +263,8 @@ export const SchemaEditorFlyout = ({
                 !isValidAdvancedFieldMappings ||
                 // For inherited fields in description-only mode, require description change
                 (isInheritedDescriptionOnlyEditing && !hasDescriptionChanged) ||
+                // For mapped fields in description-only mode (built-in root mappings), require description change
+                (isDescriptionOnlyEditing && field.status === 'mapped' && !hasDescriptionChanged) ||
                 // For doc-only fields in description-only mode, require description change
                 (isDescriptionOnlyEditing && isDocOnlyField && !hasDescriptionChanged) ||
                 (!isValidSimulation && !isExpensiveQueriesError)
@@ -272,11 +274,9 @@ export const SchemaEditorFlyout = ({
 
                 const stagedField = (() => {
                   if (isDescriptionOnlyEditing) {
-                    if (field.status === 'inherited') {
-                      // Keep the inherited status and original parent so the table
-                      // continues to show the correct parent stream.
-                      // buildSchemaSavePayload handles persisting the description
-                      // override for inherited fields.
+                    if (field.status === 'inherited' || field.status === 'mapped') {
+                      // Keep the existing status and mapping so description-only edits
+                      // cannot unmap inherited or built-in root fields.
                       return {
                         ...field,
                         description: nextField.description,

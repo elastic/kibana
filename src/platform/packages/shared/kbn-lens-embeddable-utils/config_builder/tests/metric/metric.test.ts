@@ -12,8 +12,9 @@ import type { MetricVisualizationState, TermsIndexPatternColumn } from '@kbn/len
 
 import { validator } from '../utils/validator';
 import { DEFAULT_LAYER_ID } from '../../constants';
-import type { MetricConfig } from '../../schema/charts/metric';
+import { metricConfigSchema, type MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { getPalettes } from '@kbn/palettes';
 import { LensConfigBuilder } from '../../config_builder';
 import {
   simpleMetricAttributes,
@@ -164,6 +165,43 @@ describe('Metric', () => {
           ?.fieldName
       ).toBe('custom_time_bucket');
     });
+
+    it('derives the trendline from the FORK branch producing the metric column', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const query =
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | FORK (STATS `Total Flights` = COUNT(*)) (STATS `Flight Count` = COUNT(*) BY `Time Bucket` = BUCKET(timestamp, 75, ?_tstart, ?_tend))';
+      const lensState = builder.fromAPIFormat({
+        type: 'metric',
+        title: 'FORK metric with trendline',
+        data_source: { type: 'esql', query },
+        ignore_global_filters: false,
+        sampling: 1,
+        metrics: [
+          {
+            type: 'primary',
+            column: 'Total Flights',
+            background_chart: { type: 'trend' },
+          },
+        ],
+      } satisfies MetricConfig);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+      const trendlineLayerId = visualization.trendlineLayerId;
+      const trendlineTimeAccessor = visualization.trendlineTimeAccessor;
+
+      if (!trendlineLayerId || !trendlineTimeAccessor) {
+        throw new Error('Expected trendline accessors in metric visualization state');
+      }
+
+      const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
+      expect(trendlineLayer?.query?.esql).toBe(
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      );
+      expect(trendlineLayer?.query?.esql).not.toContain('FORK');
+      expect(
+        trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
+          ?.fieldName
+      ).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+    });
   });
 
   describe('form-based trendline breakdown ordering', () => {
@@ -307,6 +345,178 @@ describe('Metric', () => {
     });
   });
 
+  describe('secondary metric name visibility', () => {
+    const getConfigWithSecondaryLabel = (
+      label?: NonNullable<NonNullable<MetricConfig['styling']>['secondary']>['label']
+    ) =>
+      ({
+        ...baseMetric,
+        metrics: [
+          ...baseMetric.metrics,
+          {
+            type: 'secondary',
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        ...(label ? { styling: { secondary: { label } } } : {}),
+      } satisfies MetricConfig);
+
+    const convert = (config: MetricConfig) => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      return {
+        visualization: lensState.state.visualization as MetricVisualizationState,
+        apiOutput: builder.toAPIFormat(lensState) as MetricConfig,
+      };
+    };
+
+    it('should hide the name when no label visibility is specified', () => {
+      const { visualization, apiOutput } = convert(getConfigWithSecondaryLabel());
+
+      expect(visualization.secondaryNameVisibility).toBe('hidden');
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+    });
+
+    it('should hide the name when the label is explicitly not visible', () => {
+      const { visualization, apiOutput } = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+
+      expect(visualization.secondaryNameVisibility).toBe('hidden');
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+    });
+
+    it.each(['before', 'after', 'tooltip'] as const)(
+      'should round-trip a visible name with %s placement',
+      (placement) => {
+        const { visualization, apiOutput } = convert(
+          getConfigWithSecondaryLabel({ visible: true, placement })
+        );
+
+        expect(visualization.secondaryNameVisibility).toBe(placement);
+        expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement });
+      }
+    );
+
+    it('should default a visible name to before the value', () => {
+      const { visualization } = convert(getConfigWithSecondaryLabel({ visible: true }));
+
+      expect(visualization.secondaryNameVisibility).toBe('before');
+    });
+
+    it('should keep the default placement of a visible name after schema parse', () => {
+      const { apiOutput } = convert(getConfigWithSecondaryLabel({ visible: true }));
+      const parsed = metricConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+      expect(parsed.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+    });
+
+    it('should not add a placement after schema parse when the name is hidden', () => {
+      const { apiOutput } = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+      const parsed = metricConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+      expect(parsed.styling?.secondary?.label).toEqual({ visible: false });
+    });
+  });
+
+  describe('legacy secondaryLabel on API round-trip', () => {
+    const LEGACY_LABEL = 'Custom Name (label)';
+
+    const getLegacyAttributes = () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      const visualization = attributes.state.visualization as MetricVisualizationState;
+      visualization.secondaryLabel = LEGACY_LABEL;
+      const layer = attributes.state.datasourceStates.formBased!.layers[visualization.layerId];
+      const column = layer.columns[visualization.secondaryMetricAccessor!];
+      column.label = 'Custom Name';
+      column.customLabel = true;
+      return attributes;
+    };
+
+    it('emits leftover vis secondaryLabel as the secondary metric label', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const api = builder.toAPIFormat(getLegacyAttributes()) as MetricConfig;
+      const secondary = api.metrics.find((metric) => metric.type === 'secondary');
+
+      expect(secondary?.label).toBe(LEGACY_LABEL);
+    });
+
+    it('writes leftover vis secondaryLabel onto the column and drops it from visualization', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const so = builder.fromAPIFormat(builder.toAPIFormat(getLegacyAttributes()));
+      const visualization = so.state.visualization as MetricVisualizationState;
+      const column =
+        so.state.datasourceStates.formBased!.layers[DEFAULT_LAYER_ID].columns
+          .metric_accessor_secondary;
+
+      expect(visualization).not.toHaveProperty('secondaryLabel');
+      expect(column.label).toBe(LEGACY_LABEL);
+      expect(column.customLabel).toBe(true);
+    });
+
+    it('does not overlay an empty leftover secondaryLabel', () => {
+      const attributes = getLegacyAttributes();
+      (attributes.state.visualization as MetricVisualizationState).secondaryLabel = '';
+      const builder = new LensConfigBuilder(undefined, true);
+      const api = builder.toAPIFormat(attributes) as MetricConfig;
+      const secondary = api.metrics.find((metric) => metric.type === 'secondary');
+
+      expect(secondary?.label).toBe('Custom Name');
+    });
+  });
+
+  describe('hidden bar', () => {
+    const getBackgroundChart = (config: MetricConfig) => {
+      const [primaryMetric] = config.metrics;
+      return 'background_chart' in primaryMetric ? primaryMetric.background_chart : undefined;
+    };
+
+    it('(SO -> API) keeps the bar and its max when showBar is set', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = true;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toMatchObject({ type: 'bar' });
+    });
+
+    it('(SO -> API) drops the bar when the max is set but showBar is false', () => {
+      // The editor's supporting visualization None/Trend keeps the max and sets showBar to false
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = false;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toBeUndefined();
+    });
+
+    it('(SO -> API) drops the bar when showBar is missing, like the runtime', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      delete (attributes.state.visualization as MetricVisualizationState).showBar;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toBeUndefined();
+    });
+
+    it('(SO -> API -> SO) does not show a bar for a hidden one', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = false;
+
+      const builder = new LensConfigBuilder();
+      const so = builder.fromAPIFormat(builder.toAPIFormat(attributes));
+      const viz = so.state.visualization as MetricVisualizationState;
+
+      expect(viz.showBar).toBe(false);
+      expect(viz.maxAccessor).toBeUndefined();
+    });
+  });
+
   describe('color by value named palette', () => {
     it('(API -> SO -> API) round-trips a named palette on a single-value metric as a numeric range', () => {
       const config = {
@@ -357,6 +567,51 @@ describe('Metric', () => {
 
       expect(viz.palette?.params?.rangeType).toBe('percent');
       expect(apiOutput.metrics[0].color).toEqual(config.metrics[0].color);
+    });
+
+    it('(SO -> API) turns a single-value custom percent palette into the static color at 50%', () => {
+      const attributes = structuredClone(defaultColorByValueAttributes);
+      const viz = attributes.state.visualization as MetricVisualizationState;
+      viz.palette = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          continuity: 'above',
+          stops: [
+            { color: '#f6726a', stop: 50 },
+            { color: '#24c292', stop: 100 },
+          ],
+          colorStops: [
+            { color: '#f6726a', stop: 0 },
+            { color: '#24c292', stop: 50 },
+          ],
+        },
+      };
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual({ type: 'static', color: '#24c292' });
+    });
+
+    it('(SO -> API) turns a single-value named percent palette into the static color at 50%', () => {
+      const attributes = structuredClone(defaultColorByValueAttributes);
+      const viz = attributes.state.visualization as MetricVisualizationState;
+      viz.palette = {
+        type: 'palette',
+        name: 'status',
+        params: { name: 'status', rangeType: 'percent', steps: 3, continuity: 'all' },
+      };
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual({
+        type: 'static',
+        color: getPalettes(false).get('status').colors(3)[1],
+      });
     });
 
     it('(SO -> API -> SO) keeps the numeric range of a single-value named palette ', () => {
@@ -422,6 +677,57 @@ describe('Metric', () => {
       expect(outViz.palette?.params?.continuity).toBe('all');
       expect(outViz.palette?.params?.stops).toBeUndefined();
       expect(outViz.palette?.params?.colorStops).toBeUndefined();
+    });
+  });
+
+  describe('ES|QL Control Variable', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const esqlControlMetric = {
+      type: 'metric',
+      title: 'Identifier Control variable',
+      data_source: {
+        type: 'esql',
+        query: 'FROM logs | STATS count = COUNT(*) BY ??field',
+      },
+      metrics: [{ type: 'primary', column: 'count' }],
+      breakdown_by: { column: '??field', columns: 3 },
+      sampling: 1,
+      ignore_global_filters: true,
+    } satisfies MetricConfig;
+
+    const getColumnByFieldName = (
+      attributes: ReturnType<LensConfigBuilder['fromAPIFormat']>,
+      fieldName: string
+    ) =>
+      Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})
+        .flatMap((layer) => layer.columns)
+        .find((column) => column.fieldName === fieldName);
+
+    it('(SO -> API -> SO) preserves `variable`', () => {
+      const original = builder.fromAPIFormat(esqlControlMetric);
+      expect(getColumnByFieldName(original, '??field')?.variable).toBe('field');
+
+      const api = builder.toAPIFormat(original) as MetricConfig;
+      const so = builder.fromAPIFormat(api);
+      expect(getColumnByFieldName(so, '??field')?.variable).toBe('field');
+    });
+
+    it('(SO -> API -> SO) does not stamp `variable` for a Value (`?`) control', () => {
+      const original = builder.fromAPIFormat({
+        ...esqlControlMetric,
+        title: 'Value Control variable',
+        data_source: {
+          ...esqlControlMetric.data_source,
+          query: 'FROM logs | STATS count = COUNT(*) BY ??field, ?os',
+        },
+        breakdown_by: { ...esqlControlMetric.breakdown_by, column: '?os' },
+      } satisfies MetricConfig);
+      expect(getColumnByFieldName(original, '?os')?.variable).toBeUndefined();
+
+      const api = builder.toAPIFormat(original) as MetricConfig;
+      const so = builder.fromAPIFormat(api);
+
+      expect(getColumnByFieldName(so, '?os')?.variable).toBeUndefined();
     });
   });
 });

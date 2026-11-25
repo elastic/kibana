@@ -23,6 +23,7 @@ jest.mock('@kbn/agent-builder-server/skills', () => {
 });
 
 jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
+  ...jest.requireActual('@kbn/agent-builder-server/allow_lists'),
   isAllowedSkillRegistration: jest.fn().mockReturnValue(true),
 }));
 

@@ -52,6 +52,7 @@ const getPublicAppHeaderViewProps = ({
   menu,
   favorite,
   share,
+  experimentalDashboardAiAction,
   description,
   metadata,
   sticky,
@@ -71,6 +72,7 @@ const getPublicAppHeaderViewProps = ({
     menu,
     favorite,
     share,
+    experimentalDashboardAiAction,
     ...secondaryContent,
     sticky,
     spacing,
@@ -90,6 +92,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
     menu,
     favorite,
     share,
+    experimentalDashboardAiAction,
     titleAppend,
     description,
     metadata,
@@ -112,7 +115,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
       !metadata?.length &&
       !titleAppend &&
       !favorite &&
-      !share;
+      !share &&
+      !experimentalDashboardAiAction;
     const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
 
     // Match the title size to the spacing: the shorter `compact` header uses an `xs` title, while the
@@ -128,6 +132,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
       !!titleAppend ||
       !!share ||
       !!favorite ||
+      !!experimentalDashboardAiAction ||
       !!description ||
       !!metadata?.length ||
       hasStaticItems ||
@@ -139,9 +144,22 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea title={title} back={back} size={titleSize} />}
+        title={
+          <TitleArea
+            title={title}
+            back={back}
+            size={titleSize}
+            compact={resolvedSpacing === 'compact'}
+          />
+        }
         badges={<AppBadges badges={badges} />}
-        titleActions={<TitleActions shareAction={share} favorite={favorite} />}
+        titleActions={
+          <TitleActions
+            shareAction={share}
+            favorite={favorite}
+            experimentalDashboardAiAction={experimentalDashboardAiAction}
+          />
+        }
         titleAppend={titleAppend}
         trailing={<AppMenu menu={menu} staticItems={staticItems} fallbackMenu={fallbackMenu} />}
         secondaryContent={

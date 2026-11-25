@@ -141,6 +141,7 @@ describe('SearchInterceptor', () => {
     };
 
     mockCoreSetup.http.post = jest.fn();
+    mockCoreSetup.http.delete = jest.fn().mockResolvedValue({});
     mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
       switch (name) {
         case UI_SETTINGS.SEARCH_TIMEOUT:
@@ -1181,8 +1182,6 @@ describe('SearchInterceptor', () => {
 
       describe('when background search is disabled', () => {
         test('should show warning once if a search is not available during restore', async () => {
-          mockCoreStart.featureFlags.getBooleanValue.mockReturnValue(false);
-
           setup({
             isRestore: true,
             isStored: true,
@@ -1461,6 +1460,94 @@ describe('SearchInterceptor', () => {
           (_sessionId) => _sessionId === sessionId
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
+      });
+
+      test('evicting one session preserves another session in the shared cache', async () => {
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        searchInterceptor
+          .search(basicReq, { sessionId: 'other' })
+          .subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(searchInterceptor.hasResponseCacheForSession('other')).toBe(true);
+
+        searchInterceptor.evictResponseCacheForSession('other');
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(true);
+        expect(searchInterceptor.hasResponseCacheForSession('other')).toBe(false);
+
+        searchInterceptor
+          .search(basicReq, { sessionId: 'other' })
+          .subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(3);
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('session eviction preserves active consumers and the next search misses', async () => {
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel();
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+        searchInterceptor.evictResponseCacheForSession(sessionId);
+        await timeTravel(10);
+        expect(complete).toHaveBeenCalledTimes(2);
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(false);
+
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(true);
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('reuses completed partial responses within the same session', async () => {
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            id: 'partial-result',
+            isPartial: true,
+            isRunning: false,
+            rawResponse: {},
+          })
+        );
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(true);
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+        expect(complete).toHaveBeenCalledTimes(2);
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('should bypass cached responses when restoring a session', async () => {
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
+        sessionService.getSearchOptions.mockReturnValue({
+          sessionId,
+          isRestore: false,
+          isStored: false,
+        });
+
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(searchInterceptor.hasResponseCacheForSession(sessionId)).toBe(true);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+
+        sessionService.getSearchOptions.mockReturnValue({
+          sessionId,
+          isRestore: true,
+          isStored: true,
+        });
+
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(complete).toHaveBeenCalledTimes(2);
+        expect(error).not.toHaveBeenCalled();
       });
 
       test('should be disabled if there is no session', async () => {
@@ -2313,6 +2400,40 @@ describe('SearchInterceptor', () => {
         expect(error).not.toHaveBeenCalled();
       });
 
+      test('should not attempt to fetch partial results when aborted before getting an async search ID', async () => {
+        const responses = [
+          {
+            time: 500,
+            value: getMockSearchResponse({
+              isPartial: false,
+              isRunning: false,
+              rawResponse: {},
+              id: '1',
+            }),
+          },
+        ];
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+        const abortController = new AbortController();
+        // Abort immediately, before the initial submit completes
+        setTimeout(() => abortController.abort(AbortReason.CANCELED), 10);
+
+        const response = searchInterceptor.search(
+          {},
+          { abortSignal: abortController.signal, pollInterval: 0 }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(10);
+
+        expect(error).toHaveBeenCalled();
+        expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+
+        // Should only make the initial POST request, no attempt to fetch partial results
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+      });
+
       test('should not request partial results and throw error if canceled for a reason other than CANCELED/TIMEOUT', async () => {
         const abortController = new AbortController();
         setTimeout(() => {
@@ -2334,6 +2455,146 @@ describe('SearchInterceptor', () => {
 
         expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
         expect(error).toHaveBeenCalled();
+      });
+    });
+
+    describe('cancel on browser navigation (pagehide)', () => {
+      test('should send DELETE via http.delete with keepalive when pagehide fires during active async search', async () => {
+        const responses = [
+          {
+            time: 10,
+            value: getMockSearchResponse({
+              isPartial: true,
+              isRunning: true,
+              rawResponse: {},
+              id: 'async-id-1',
+            }),
+          },
+          {
+            time: 1000,
+            value: getMockSearchResponse({
+              isPartial: false,
+              isRunning: false,
+              rawResponse: {},
+              id: 'async-id-1',
+            }),
+          },
+        ];
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10); // First response arrives (still running)
+
+        expect(next).toHaveBeenCalled();
+
+        window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
+
+        expect(mockCoreSetup.http.delete).toHaveBeenCalledWith(
+          '/internal/search/ese/async-id-1',
+          expect.objectContaining({ keepalive: true })
+        );
+      });
+
+      test('should not send DELETE via http.delete if search completes before pagehide', async () => {
+        const responses = [
+          {
+            time: 10,
+            value: getMockSearchResponse({
+              isPartial: false,
+              isRunning: false,
+              rawResponse: {},
+              id: 'async-id-2',
+            }),
+          },
+        ];
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10); // Search completes
+
+        expect(complete).toHaveBeenCalled();
+
+        window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
+
+        const calls = (mockCoreSetup.http.delete as jest.Mock).mock.calls as Array<[string]>;
+        const callsForOurSearch = calls.filter(([path]) => path.includes('async-id-2'));
+        expect(callsForOurSearch).toHaveLength(0);
+      });
+
+      test('should not send DELETE via http.delete for searches saved to background', async () => {
+        const sessionId = 'session-bg-1';
+        sessionService.isCurrentSession.mockImplementation(
+          (_sessionId) => _sessionId === sessionId
+        );
+        sessionService.isSaving.mockReturnValue(false);
+
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: 'async-id-3',
+          })
+        );
+
+        const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(next).toHaveBeenCalled();
+
+        sessionState$.next(SearchSessionState.BackgroundLoading);
+
+        await timeTravel(10);
+
+        window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
+
+        const calls = (mockCoreSetup.http.delete as jest.Mock).mock.calls as Array<[string]>;
+        const callsForOurSearch = calls.filter(([path]) => path.includes('async-id-3'));
+        expect(callsForOurSearch).toHaveLength(0);
+      });
+
+      test('should send DELETE via http.delete with keepalive for active searches when stop() is called', async () => {
+        const responses = [
+          {
+            time: 10,
+            value: getMockSearchResponse({
+              isPartial: true,
+              isRunning: true,
+              rawResponse: {},
+              id: 'async-id-4',
+            }),
+          },
+          {
+            time: 1000,
+            value: getMockSearchResponse({
+              isPartial: false,
+              isRunning: false,
+              rawResponse: {},
+              id: 'async-id-4',
+            }),
+          },
+        ];
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10); // First response arrives (still running)
+
+        expect(next).toHaveBeenCalled();
+
+        searchInterceptor.stop();
+
+        expect(mockCoreSetup.http.delete).toHaveBeenCalledWith(
+          '/internal/search/ese/async-id-4',
+          expect.objectContaining({ keepalive: true })
+        );
       });
     });
   });
@@ -2716,8 +2977,9 @@ describe('SearchInterceptor', () => {
       )[1];
       const pollBody = JSON.parse(pollRequest?.body as string);
 
-      // Should use DEFAULT_MULTIPLEXING_POLL_LENGTH (30s)
-      expect(pollBody.params.wait_for_completion_timeout).toBe('30s');
+      // Should use DEFAULT_MULTIPLEXING_POLL_LENGTH (30s), sent as an option
+      expect(pollBody.pollLength).toBe('30s');
+      expect(pollBody.params.wait_for_completion_timeout).toBeUndefined();
     });
 
     test('should not set wait_for_completion_timeout when pollLength is not set and protocol does not support multiplexing', async () => {
@@ -2787,6 +3049,7 @@ describe('SearchInterceptor', () => {
 
       // Should not have wait_for_completion_timeout
       expect(pollBody.params.wait_for_completion_timeout).toBeUndefined();
+      expect(pollBody.pollLength).toBeUndefined();
     });
 
     test('should not set wait_for_completion_timeout when pollLength is set even if protocol supports multiplexing', async () => {
@@ -2856,6 +3119,7 @@ describe('SearchInterceptor', () => {
 
       // Should not have wait_for_completion_timeout
       expect(pollBody.params.wait_for_completion_timeout).toBeUndefined();
+      expect(pollBody.pollLength).toBeUndefined();
     });
   });
 });

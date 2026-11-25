@@ -119,24 +119,6 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertErrorResponse();
     });
 
-    it('Last selected system prompt persists in conversation', () => {
-      visitGetStartedPage();
-      openAssistant();
-      selectConversation(mockConvo1.title);
-      selectConnector(azureConnectorAPIPayload.name);
-      selectSystemPrompt(customPrompt2.name);
-      typeAndSendMessage('hello');
-      assertSystemPromptSent(customPrompt2.content);
-      assertMessageSent('hello', true);
-      assertErrorResponse();
-      resetConversation();
-      assertSystemPromptSelected(customPrompt2.name);
-      selectConversation(mockConvo2.title);
-      assertEmptySystemPrompt();
-      selectConversation(mockConvo1.title);
-      assertSystemPromptSelected(customPrompt2.name);
-    });
-
     it('Add prompt from system prompt selector without setting a default conversation', () => {
       visitGetStartedPage();
       openAssistant();

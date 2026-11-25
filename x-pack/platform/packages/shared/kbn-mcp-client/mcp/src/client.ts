@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { isEmbeddedResourcePart, isResourceLinkPart, isTextPart } from './types';
 import { ZodJsonSchemaValidator } from './json_schema_validator';
+import { McpNotConnectedError } from './mcp_not_connected_error';
 
 /**
  * Produces a human-readable error message from a connection error,
@@ -92,6 +93,14 @@ export class McpClient {
         jsonSchemaValidator: new ZodJsonSchemaValidator(this.logger),
       }
     );
+    // The SDK drops its transport when the connection closes. Track that so a pooled, long-lived
+    // instance does not keep reporting itself as connected.
+    this.client.onclose = () => {
+      if (this.connected) {
+        this.connected = false;
+        this.logger.debug(`MCP server ${this.name}, ${this.version} closed the connection`);
+      }
+    };
   }
 
   /**
@@ -117,12 +126,14 @@ export class McpClient {
         this.logger.error(
           `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
+        // Keep the original error as `cause` so callers can classify connect-phase failures
+        // (for example an SDK RequestTimeout during the initialize handshake).
         if (error instanceof StreamableHTTPError) {
-          throw new Error(errorMessage);
+          throw new Error(errorMessage, { cause: error });
         } else if (error instanceof UnauthorizedError) {
-          throw new Error(`Unauthorized error: ${errorMessage}`);
+          throw new Error(`Unauthorized error: ${errorMessage}`, { cause: error });
         } else {
-          throw new Error(`Error connecting to MCP server: ${errorMessage}`);
+          throw new Error(`Error connecting to MCP server: ${errorMessage}`, { cause: error });
         }
       }
     }
@@ -133,6 +144,14 @@ export class McpClient {
       connected: this.connected,
       capabilities,
     };
+  }
+
+  /** Server capabilities from the initialize handshake; undefined until connected. */
+  getServerCapabilities(): ServerCapabilities | undefined {
+    if (!this.connected) {
+      return undefined;
+    }
+    return this.client.getServerCapabilities();
   }
 
   /**
@@ -152,7 +171,7 @@ export class McpClient {
    */
   async listTools(): Promise<ListToolsResponse> {
     if (!this.connected) {
-      throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
+      throw new McpNotConnectedError(this.name, this.version);
     }
 
     this.logger.debug(`Listing tools from MCP server ${this.name}, ${this.version}`);
@@ -195,7 +214,7 @@ export class McpClient {
    */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
     if (!this.connected) {
-      throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
+      throw new McpNotConnectedError(this.name, this.version);
     }
 
     this.logger.debug(`Calling tool ${params.name} on MCP server ${this.name}, ${this.version}`);

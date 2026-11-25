@@ -13,32 +13,39 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { isSequenceValid } from '@kbn/alerting-v2-rule-form';
 import type { FormValues, SequenceFormValues } from '@kbn/alerting-v2-rule-form';
 import { experimentalBadge } from '../../components/experimental_badge';
+import type { SequenceBuilderStep } from './use_sequence_builder_form';
 import { DEFAULT_SEQUENCE_RULE_NAME } from './use_sequence_builder_form';
+import { useCanSaveSequenceRule } from './use_can_save_sequence_rule';
 
 export interface SequenceBuilderHeaderProps {
+  step: SequenceBuilderStep;
+  sidebarOpen: boolean;
   seqValues: SequenceFormValues;
   isSaving: boolean;
+  ruleFetchError?: boolean;
   rulesListHref: string;
+  onStepChange: (step: SequenceBuilderStep) => void;
+  onToggleDetails: () => void;
   onSave: () => void;
   onCancel: () => void;
 }
 
 export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
+  step,
+  sidebarOpen,
   seqValues,
   isSaving,
+  ruleFetchError,
   rulesListHref,
+  onStepChange,
+  onToggleDetails,
   onSave,
   onCancel,
 }) => {
   const { setValue } = useFormContext<FormValues>();
   const ruleName = useWatch<FormValues, 'metadata.name'>({ name: 'metadata.name' });
   const sequenceValid = isSequenceValid(seqValues);
-  const trimmedName = (ruleName ?? '').trim();
-  const canSave =
-    !isSaving &&
-    sequenceValid &&
-    trimmedName.length > 0 &&
-    trimmedName !== DEFAULT_SEQUENCE_RULE_NAME;
+  const canSave = useCanSaveSequenceRule(seqValues, isSaving);
 
   const onTitleSave = useCallback(
     async (newName: string) => {
@@ -57,6 +64,12 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
 
   const saveDisabledReason = useMemo(() => {
     if (isSaving) return undefined;
+    if (ruleFetchError) {
+      return i18n.translate('xpack.alertingV2.sequenceBuilderPage.saveDisabledRuleFetchTooltip', {
+        defaultMessage:
+          'One or more rules could not be found. Remove missing rules to enable saving.',
+      });
+    }
     if (!sequenceValid) {
       return i18n.translate('xpack.alertingV2.sequenceBuilderPage.saveDisabledSequenceTooltip', {
         defaultMessage: 'Add at least two steps with rules to save',
@@ -68,11 +81,55 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
       });
     }
     return undefined;
-  }, [isSaving, sequenceValid, canSave]);
+  }, [isSaving, ruleFetchError, sequenceValid, canSave]);
 
   const menu = useMemo((): AppHeaderMenu => {
+    const items: AppHeaderMenu['items'] = [
+      {
+        id: 'alertStep',
+        label: i18n.translate('xpack.alertingV2.sequenceBuilderPage.alertConditionButton', {
+          defaultMessage: 'Alert condition',
+        }),
+        iconType: 'bell',
+        order: 1,
+        run: () => onStepChange('alert'),
+        disableButton: isSaving,
+        isSelected: step === 'alert' && !sidebarOpen,
+        testId: 'sequenceBuilderGoToAlert',
+      },
+      {
+        id: 'recoveryStep',
+        label: i18n.translate('xpack.alertingV2.sequenceBuilderPage.recoveryConditionButton', {
+          defaultMessage: 'Recovery condition',
+        }),
+        iconType: 'checkCircle',
+        order: 2,
+        run: () => onStepChange('recovery'),
+        disableButton: isSaving || !sequenceValid,
+        tooltipContent: sequenceValid
+          ? undefined
+          : i18n.translate('xpack.alertingV2.sequenceBuilderPage.recoveryDisabledTooltip', {
+              defaultMessage: 'Add at least two steps with rules to proceed',
+            }),
+        isSelected: step === 'recovery' && !sidebarOpen,
+        testId: 'sequenceBuilderGoToRecovery',
+      },
+      {
+        id: 'details',
+        label: i18n.translate('xpack.alertingV2.sequenceBuilderPage.detailsButton', {
+          defaultMessage: 'Details',
+        }),
+        iconType: 'gear',
+        order: 3,
+        run: onToggleDetails,
+        disableButton: isSaving,
+        isSelected: sidebarOpen,
+        testId: 'sequenceBuilderOpenDetails',
+      },
+    ];
+
     return {
-      items: [],
+      items,
       primaryActionItem: {
         id: 'save',
         label: i18n.translate('xpack.alertingV2.sequenceBuilderPage.saveButton', {
@@ -81,12 +138,23 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
         iconType: 'check',
         run: onSave,
         isLoading: isSaving,
-        disableButton: !canSave,
+        disableButton: !canSave || ruleFetchError,
         tooltipContent: saveDisabledReason,
         testId: 'sequenceBuilderSave',
       },
     };
-  }, [isSaving, canSave, saveDisabledReason, onSave]);
+  }, [
+    step,
+    sidebarOpen,
+    isSaving,
+    ruleFetchError,
+    sequenceValid,
+    canSave,
+    saveDisabledReason,
+    onStepChange,
+    onToggleDetails,
+    onSave,
+  ]);
 
   return (
     <AppHeader

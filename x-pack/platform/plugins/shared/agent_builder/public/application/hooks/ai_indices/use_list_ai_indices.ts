@@ -7,7 +7,6 @@
 
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useQuery } from '@kbn/react-query';
-import { AI_INDEX_API_VERSION, aiIndexPath } from '@kbn/context-engine-plugin/common/constants';
 import type {
   AiIndexHttpItem,
   ListAiIndexResponse,
@@ -16,6 +15,10 @@ import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useKibana } from '../use_kibana';
 import { useToasts } from '../use_toasts';
+
+/** Kept in-plugin so Agent Builder does not take a bundle dependency on contextEngine. */
+const AI_INDEX_API_VERSION = '2023-10-31';
+const AI_INDEX_PATH = '/api/context_engine/ai_index';
 
 interface UseListAiIndicesResult {
   aiIndices: AiIndexHttpItem[];
@@ -27,7 +30,7 @@ interface UseListAiIndicesResult {
  * Lists the AI indices registered in the Context Engine for the current space.
  *
  * Agent Builder does not depend on the `contextEngine` plugin: this calls the public HTTP API
- * directly and only borrows types and constants from its `common/` directory.
+ * directly and only borrows types from its `common/` directory.
  */
 export const useListAiIndices = (): UseListAiIndicesResult => {
   const {
@@ -38,7 +41,7 @@ export const useListAiIndices = (): UseListAiIndicesResult => {
   const { data, isLoading, error } = useQuery<ListAiIndexResponse, Error>({
     queryKey: queryKeys.aiIndices.list,
     queryFn: ({ signal }) =>
-      http.get<ListAiIndexResponse>(aiIndexPath, { version: AI_INDEX_API_VERSION, signal }),
+      http.get<ListAiIndexResponse>(AI_INDEX_PATH, { version: AI_INDEX_API_VERSION, signal }),
     onError: (err) => {
       addErrorToast({
         title: labels.aiIndices.loadErrorMessage,

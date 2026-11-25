@@ -372,6 +372,63 @@ describe('attachRelatedEntities', () => {
     ]);
   });
 
+  it('withInteractionCounts: false issues no query and leaves interactedWithAtLeast undefined', async () => {
+    const target = buildEntity({ id: 'host:shared' });
+    const candidateEntity = buildEntity({
+      id: 'user:alice',
+      relationships: { accesses_frequently: { ids: ['host:shared'] } },
+    });
+
+    const [result] = await attachRelatedEntities({
+      candidates: [buildCandidate(candidateEntity)],
+      entitiesMap: new Map([[target.id, target]]),
+      esClient,
+      spaceId,
+      logger,
+      withInteractionCounts: false,
+    });
+
+    expect(esClient.search).not.toHaveBeenCalled();
+    expect(result.topRelatedEntities).toEqual([
+      expect.objectContaining({ id: 'host:shared', interactedWithAtLeast: undefined }),
+    ]);
+  });
+
+  it('produces identical topRelatedEntities regardless of withInteractionCounts when selection does not depend on the accessor count', async () => {
+    const owned = buildEntity({ id: 'host:owned', criticality: 'high_impact' });
+    const administered = buildEntity({ id: 'host:administered', riskScoreNorm: 40 });
+    const candidateEntity = buildEntity({
+      id: 'user:alice',
+      relationships: {
+        owns: { ids: [owned.id] },
+        administers: { ids: [administered.id] },
+      },
+    });
+    const entitiesMap = new Map([
+      [owned.id, owned],
+      [administered.id, administered],
+    ]);
+
+    const [withCounts] = await attachRelatedEntities({
+      candidates: [buildCandidate(candidateEntity)],
+      entitiesMap,
+      esClient,
+      spaceId,
+      logger,
+      withInteractionCounts: true,
+    });
+    const [withoutCounts] = await attachRelatedEntities({
+      candidates: [buildCandidate(candidateEntity)],
+      entitiesMap,
+      esClient,
+      spaceId,
+      logger,
+      withInteractionCounts: false,
+    });
+
+    expect(withoutCounts.topRelatedEntities).toEqual(withCounts.topRelatedEntities);
+  });
+
   it('caps each kind independently and reports the pre-cap count per kind', async () => {
     const owned = buildEntity({ id: 'host:owned', criticality: 'high_impact' });
     const highValueAccess = buildEntity({ id: 'host:high-value', riskScoreNorm: 90 });

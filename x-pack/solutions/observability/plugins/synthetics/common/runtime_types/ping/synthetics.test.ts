@@ -11,12 +11,13 @@ import type {
   ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from './synthetics';
+
 import {
   isRefResult,
   isFullScreenshot,
   isScreenshotRef,
   isScreenshotImageBlob,
-} from './synthetics';
+} from '../schemas/ping_guards';
 
 describe('synthetics runtime types', () => {
   let refResult: RefResult;

@@ -7,7 +7,6 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { IUiSettingsClient } from '@kbn/core/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -24,12 +23,7 @@ import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/t
  */
 type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
-  | 'streamsClient'
-  | 'scopedClusterClient'
-  | 'getKnowledgeIndicatorClient'
-  | 'uiSettingsClient'
-  | 'attachmentClient'
-  | 'uiSettingsClient'
+  'streamsClient' | 'scopedClusterClient' | 'attachmentClient'
 >;
 
 /**
@@ -61,8 +55,6 @@ export const createMockGetScopedClients = () => {
       | 'upsertStream'
       | 'forkStream'
       | 'deleteStream'
-      | 'createQueryStream'
-      | 'ensureStream'
     >
   > = {
     getStream: jest.fn(),
@@ -73,13 +65,6 @@ export const createMockGetScopedClients = () => {
     upsertStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'updated' }),
     forkStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'created' }),
     deleteStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
-    createQueryStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'created' }),
-    ensureStream: jest.fn().mockResolvedValue(undefined),
-  };
-
-  const uiSettingsClient: jest.Mocked<Pick<IUiSettingsClient, 'get'>> = {
-    // Query streams enabled by default; individual tests can override.
-    get: jest.fn().mockResolvedValue(true),
   };
 
   const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
@@ -93,9 +78,7 @@ export const createMockGetScopedClients = () => {
   } = {
     streamsClient,
     scopedClusterClient,
-    uiSettingsClient,
     attachmentClient,
-    getKnowledgeIndicatorClient: jest.fn().mockRejectedValue(new Error('Not implemented')),
   };
 
   const getScopedClients = jest
@@ -108,7 +91,6 @@ export const createMockGetScopedClients = () => {
     esClient,
     scopedClusterClient,
     attachmentClient,
-    uiSettingsClient,
   };
 };
 

@@ -46,7 +46,7 @@ spaceTest.describe(
           await managementPage.toggleEntityAnalytics();
           await managementPage.waitForStatusLoaded();
           await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 60000);
-          await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
+          await expect(managementPage.entityAnalyticsSwitch).toHaveAccessibleName('Enabled', {
             timeout: 60000,
           });
         });

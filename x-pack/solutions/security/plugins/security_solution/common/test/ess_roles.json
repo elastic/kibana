@@ -828,5 +828,22 @@
         "base": []
       }
     ]
+  },
+  "exceptions_all_no_rules_read": {
+    "name": "exceptions_all_no_rules_read",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "securitySolutionRulesV4": ["security_solution_exceptions_all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
   }
 }

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, map } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
 import type { NewsfeedApi } from '../lib/api';
@@ -39,6 +38,8 @@ export function createNewsfeedSidebarController({
   sidebar: SidebarStart;
   newsfeedApi: NewsfeedApi;
 }): NewsfeedSidebarController {
+  const app = sidebar.getApp(NEWSFEED_APP_ID);
+
   // Opening marks whatever is currently in the feed as read, so the latest result is tracked here.
   // The stream completes when the plugin stops, which tears this subscription down with it.
   let lastFetchResult: FetchResult | null | void = null;
@@ -50,18 +51,15 @@ export function createNewsfeedSidebarController({
     if (lastFetchResult) {
       newsfeedApi.markAsRead(lastFetchResult.feedItems.map((item) => item.hash));
     }
-    sidebar.getApp(NEWSFEED_APP_ID).open();
+    app.open();
   };
 
   return {
-    isOpen$: sidebar.getCurrentAppId$().pipe(
-      map((appId) => appId === NEWSFEED_APP_ID),
-      distinctUntilChanged()
-    ),
+    isOpen$: app.isOpen$(),
     open,
     toggle: () => {
-      if (sidebar.getCurrentAppId() === NEWSFEED_APP_ID) {
-        sidebar.getApp(NEWSFEED_APP_ID).close();
+      if (app.isOpen()) {
+        app.close();
       } else {
         open();
       }

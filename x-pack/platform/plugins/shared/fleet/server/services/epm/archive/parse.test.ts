@@ -690,6 +690,38 @@ describe('parseAndVerifyDataStreams', () => {
     ]);
   });
 
+  it('should preserve use_otel_suffix', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0
+          use_otel_suffix: true`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        elasticsearch: {},
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+        use_otel_suffix: true,
+      },
+    ]);
+  });
+
   it('should parse dotted elasticsearch keys', async () => {
     expect(
       parseAndVerifyDataStreams({

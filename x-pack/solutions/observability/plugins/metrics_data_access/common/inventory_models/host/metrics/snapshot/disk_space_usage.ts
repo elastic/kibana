@@ -53,7 +53,7 @@ export const diskSpaceUsage: SchemaBasedAggregations = {
           freeTotal: 'disk_usage_state_free_total',
           usageTotal: 'disk_usage_state_all_total',
         },
-        script: 'params.usageTotal > 0 ? 1 - params.freeTotal / params.usageTotal : 0',
+        script: 'params.usageTotal > 0 ? 1 - params.freeTotal / params.usageTotal : null',
         gap_policy: 'skip',
       },
     },

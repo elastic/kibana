@@ -10,7 +10,12 @@ import type { BaseSSLSecrets, ValueOf } from '..';
 import type {
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaKerberosAuthType,
+  kafkaOAuth2GrantType,
+  kafkaOAuth2SignatureAlgorithm,
   kafkaSaslMechanism,
+  otlpAuthScheme,
+  otlpAuthType,
   otlpProtocol,
   otlpCompressionType,
 } from '../../constants';
@@ -26,6 +31,9 @@ export type KafkaCompressionType = typeof kafkaCompressionType;
 export type KafkaAuthType = typeof kafkaAuthType;
 export type KafkaConnectionTypeType = typeof kafkaConnectionType;
 export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
+export type KafkaKerberosAuthType = typeof kafkaKerberosAuthType;
+export type KafkaOAuth2GrantType = typeof kafkaOAuth2GrantType;
+export type KafkaOAuth2SignatureAlgorithm = typeof kafkaOAuth2SignatureAlgorithm;
 export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
@@ -189,13 +197,37 @@ export interface OtlpHttpExporterConfig extends OtlpExporterBaseConfig {
 
 export type OtlpExporterConfig = OtlpGrpcExporterConfig | OtlpHttpExporterConfig;
 
+export type OtlpAuthScheme = ValueOf<typeof otlpAuthScheme>;
+
+/** `Authorization: <scheme> <credential>` */
+export interface OtlpAuthHeader {
+  type: typeof otlpAuthType.AuthHeader;
+  scheme: OtlpAuthScheme;
+}
+
+/** `<name>: <credential>` */
+export interface OtlpCustomAuthHeader {
+  type: typeof otlpAuthType.CustomHeader;
+  name: string;
+}
+
+/**
+ * How an OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. The
+ * credential is stored as a secret in `secrets.auth.credential`.
+ */
+export type OtlpOutputAuth = OtlpAuthHeader | OtlpCustomAuthHeader;
+
 export interface NewOtlpOutput extends NewBaseOutput {
   type: OutputType['Otlp'];
   otlp_exporter: OtlpExporterConfig;
+  auth?: OtlpOutputAuth | null;
   secrets?: OtlpOutputSecrets;
 }
 
 interface OtlpOutputSecrets {
+  auth?: {
+    credential?: SOSecret;
+  };
   otlp_exporter?: {
     tls?: {
       key_pem?: SOSecret;
@@ -271,6 +303,8 @@ export interface KafkaOutput extends BeatsBaseOutput {
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   } | null;
+  oauth2?: KafkaOAuth2Config | null;
+  kerberos?: KafkaKerberosConfig | null;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;
@@ -293,8 +327,65 @@ export interface KafkaOutput extends BeatsBaseOutput {
   secrets?: KafkaOutputSecrets;
 }
 
+/**
+ * Settings of the OAuth2 authentication method, they follow the `oauth2clientauthextension` of the
+ * OpenTelemetry collector. The client secret and the client certificate key are in `secrets`.
+ */
+export interface KafkaOAuth2Config {
+  grant_type?: ValueOf<KafkaOAuth2GrantType>;
+  client_id?: string;
+  client_id_file?: string;
+  client_secret_file?: string;
+  token_url: string;
+  scopes?: string[];
+  endpoint_params?: Record<string, string[]>;
+  tls?: {
+    ca_file?: string;
+    cert_file?: string;
+    key_file?: string;
+    insecure_skip_verify?: boolean;
+    server_name_override?: string;
+    min_version?: string;
+    max_version?: string;
+  };
+  // in seconds
+  timeout?: number;
+  expiry_buffer?: number;
+  // jwt-bearer grant only
+  client_certificate_key_id?: string;
+  client_certificate_key_file?: string;
+  signature_algorithm?: ValueOf<KafkaOAuth2SignatureAlgorithm>;
+  iss?: string;
+  audience?: string;
+  claims?: Record<string, unknown>;
+}
+
+/**
+ * Settings of the Kerberos authentication method, they follow the `kerberos` settings of the Kafka
+ * output of Beats. The password is in `secrets`.
+ */
+export interface KafkaKerberosConfig {
+  auth_type: ValueOf<KafkaKerberosAuthType>;
+  // path of the `krb5.conf` file, on the host of the agent
+  config_path: string;
+  // path of the keytab file, on the host of the agent (keytab only)
+  keytab?: string;
+  // password only
+  username?: string;
+  service_name?: string;
+  realm: string;
+  enable_krb5_fast?: boolean;
+}
+
 interface KafkaOutputSecrets extends BaseSSLSecrets {
   password?: SOSecret;
+  oauth2?: {
+    client_secret?: SOSecret;
+    client_certificate_key?: SOSecret;
+  };
+  kerberos?: {
+    password?: SOSecret;
+  };
 }
 interface RemoteESOutputSecrets extends BaseSSLSecrets {
   service_token?: SOSecret;

@@ -24,19 +24,30 @@ export const DeleteListItemRequestQuery = lazySchema(() =>
     /**
      * Value list item's identifier. Required if `list_id` and `value` are not specified.
      */
-    id: ListItemId.optional(),
+    id: ListItemId.optional().describe(
+      "Value list item's identifier. Required if `list_id` and `value` are not specified."
+    ),
     /**
      * Value list's identifier. Required if `id` is not specified.
      */
-    list_id: ListId.optional(),
+    list_id: ListId.optional().describe(
+      "Value list's identifier. Required if `id` is not specified."
+    ),
     /**
      * The value used to evaluate exceptions. Required if `id` is not specified.
      */
-    value: z.string().optional(),
+    value: z
+      .string()
+      .optional()
+      .describe('The value used to evaluate exceptions. Required if `id` is not specified.'),
     /**
      * Determines when changes made by the request are made visible to search.
      */
-    refresh: z.enum(['true', 'false', 'wait_for']).optional().default('false'),
+    refresh: z
+      .enum(['true', 'false', 'wait_for'])
+      .optional()
+      .default('false')
+      .describe('Determines when changes made by the request are made visible to search.'),
   })
 );
 export type DeleteListItemRequestQuery = z.infer<typeof DeleteListItemRequestQuery>;

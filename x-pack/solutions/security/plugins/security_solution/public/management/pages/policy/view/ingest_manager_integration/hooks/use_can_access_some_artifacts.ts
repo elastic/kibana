@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 /**
  * Checks to see if the current user can access at least one artifact page.
@@ -17,20 +18,39 @@ export const useCanAccessSomeArtifacts = (): boolean => {
     canReadBlocklist,
     canReadEventFilters,
     canReadTrustedApplications,
+    canReadEndpointExceptions,
     canReadHostIsolationExceptions,
+    canReadTrustedDevices,
+    canReadCustomYaraSignatures,
   } = useUserPrivileges().endpointPrivileges;
+  const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+  const customYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
+    'customYaraSignaturesEnabled'
+  );
 
   return useMemo(() => {
     return (
       canReadBlocklist ||
       canReadEventFilters ||
       canReadTrustedApplications ||
-      canReadHostIsolationExceptions
+      (endpointExceptionsMovedUnderManagement && canReadEndpointExceptions) ||
+      canReadHostIsolationExceptions ||
+      (trustedDevicesEnabled && canReadTrustedDevices) ||
+      (customYaraSignaturesEnabled && canReadCustomYaraSignatures)
     );
   }, [
     canReadBlocklist,
     canReadEventFilters,
     canReadTrustedApplications,
+    canReadEndpointExceptions,
     canReadHostIsolationExceptions,
+    trustedDevicesEnabled,
+    endpointExceptionsMovedUnderManagement,
+    canReadTrustedDevices,
+    customYaraSignaturesEnabled,
+    canReadCustomYaraSignatures,
   ]);
 };

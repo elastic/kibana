@@ -52,7 +52,6 @@ export const KpiViewSelect: React.FC<KpiViewSelectProps> = React.memo(
         idSelected={kpiViewSelection}
         onChange={onKpiViewChange}
         buttonSize="compressed"
-        color="primary"
         data-test-subj="kpi-view-select-tabs"
       />
     );

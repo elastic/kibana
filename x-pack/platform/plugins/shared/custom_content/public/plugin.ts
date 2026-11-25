@@ -12,14 +12,13 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import {
-  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  CUSTOM_CONTENT_ENABLED_FLAG_KEY,
-} from '@kbn/custom-content-common';
-import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
 import { setServices } from './services';
-import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../common/constants';
+import {
+  ADD_CUSTOM_CONTENT_ACTION_ID,
+  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+} from '../common/constants';
 import { setAnalyticsSetup } from './telemetry/analytics_setup';
 
 interface SetupDeps {
@@ -42,17 +41,13 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
   }
 
   start(core: CoreStart, { data, uiActions, agentBuilder }: StartDeps) {
-    setServices(core, data.search.search, data.dataViews, agentBuilder);
-    if (core.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false)) {
-      uiActions.registerActionAsync<EmbeddableApiContext>(
-        ADD_CUSTOM_CONTENT_ACTION_ID,
-        async () => {
-          const { getAddCustomContentAction } = await import('./actions/add_custom_content_action');
-          return getAddCustomContentAction();
-        }
-      );
-      uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_CUSTOM_CONTENT_ACTION_ID);
-    }
+    setServices(core, data.search, data.dataViews, agentBuilder);
+
+    uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_CONTENT_ACTION_ID, async () => {
+      const { getAddCustomContentAction } = await import('./actions/add_custom_content_action');
+      return getAddCustomContentAction();
+    });
+    uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_CUSTOM_CONTENT_ACTION_ID);
 
     if (agentBuilder) {
       agentBuilder.attachments.addAttachmentType(

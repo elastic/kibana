@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { inject, injectable, multiInject } from 'inversify';
 import type {
   RuleExecutionInput,
@@ -25,6 +26,7 @@ import type {
 } from './metrics/types';
 import { MetricCollectorFactoryToken } from './metrics/tokens';
 import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
+import { tagRunReport } from './execution_outcome/run_report';
 import {
   RuleExecutorEventPublisher,
   type RuleExecutorEventPublisherContract,
@@ -36,7 +38,7 @@ import {
  */
 export interface RuleExecutionPipelineInput {
   readonly ruleId: string;
-  readonly spaceId: string;
+  readonly spaceId: SpaceId;
   readonly scheduledAt: string;
   readonly executionUuid: string;
   readonly abortSignal: AbortSignal;
@@ -75,6 +77,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     const input: RuleExecutionInput = {
       ruleId: rawInput.ruleId,
       spaceId: rawInput.spaceId,
+      executionId: rawInput.executionUuid,
       scheduledAt: rawInput.scheduledAt,
       executionContext,
     };
@@ -117,7 +120,10 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       };
     } catch (error) {
       this.publishExecutionFailed(rawInput, pipelineState.logger, error);
-      throw error;
+      throw tagRunReport(error, {
+        ruleVersion: pipelineState.rule?.version,
+        counters: collector.finalize().counters,
+      });
     } finally {
       collector.finalize();
     }

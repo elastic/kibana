@@ -32,7 +32,13 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/compone
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import type { DataStream } from '../../../../../../common/types';
-import { isNextGenIlm } from '../../../../lib/data_streams';
+import {
+  isIlmLifecyclePreferred,
+  isLookupDslNotApplicable,
+  isLookupIndexMode,
+  isLookupLifecycleNotApplicable,
+  isManaged,
+} from '../../../../lib/data_streams';
 import type { UseRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
@@ -51,11 +57,13 @@ import { DataRetentionValue } from '../data_retention_value';
 import { formatByteSizeString } from '../../../../lib/format_bytes';
 
 interface TableDataStream extends DataStream {
-  isNextGenIlm: boolean;
+  isIlmLifecyclePreferred: boolean;
 }
 
 interface Props {
   dataStreams?: DataStream[];
+  /** Loaded data streams that are excluded from `dataStreams` by the view filters. */
+  excludedDataStreams?: DataStream[];
   isLoading?: boolean;
   reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
@@ -81,6 +89,7 @@ const useStyles = () => {
 
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
+  excludedDataStreams = [],
   isLoading,
   reload,
   history,
@@ -102,15 +111,58 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   const data = useMemo(() => {
     return (dataStreams || []).map((dataStream) => ({
       ...dataStream,
-      isNextGenIlm: isNextGenIlm(dataStream),
+      isIlmLifecyclePreferred: isIlmLifecyclePreferred(dataStream),
     }));
   }, [dataStreams]);
 
+  const searchQuery = searchValue.trim().toLowerCase();
+
   const filteredData = useMemo(() => {
-    const q = searchValue.trim().toLowerCase();
-    if (!q) return data;
-    return data.filter((ds) => ds.name.toLowerCase().includes(q));
-  }, [data, searchValue]);
+    if (!searchQuery) return data;
+    return data.filter((ds) => ds.name.toLowerCase().includes(searchQuery));
+  }, [data, searchQuery]);
+
+  // Data streams that would match the search but are excluded by the view filters.
+  const excludedMatchingData = useMemo(() => {
+    if (!searchQuery) return excludedDataStreams;
+    return excludedDataStreams.filter((ds) => ds.name.toLowerCase().includes(searchQuery));
+  }, [excludedDataStreams, searchQuery]);
+
+  // Turn on only the view filters that are currently excluding matching data streams.
+  const showExcludedDataStreams = () => {
+    const hasManaged = excludedMatchingData.some(isManaged);
+    const hasHidden = excludedMatchingData.some(({ hidden }) => hidden);
+
+    onViewFilterChange({
+      managed: hasManaged ? { ...viewFilters.managed, checked: 'on' } : viewFilters.managed,
+      hidden: hasHidden ? { ...viewFilters.hidden, checked: 'on' } : viewFilters.hidden,
+    });
+  };
+
+  const isEmptyBecauseOfViewFilters = filteredData.length === 0 && excludedMatchingData.length > 0;
+
+  const noItemsMessage = isEmptyBecauseOfViewFilters ? (
+    <FormattedMessage
+      id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMatchingViewFiltersMessage"
+      defaultMessage="{count, plural, one {# managed or hidden data stream is} other {# managed or hidden data streams are}} not shown. {showAllLink}"
+      values={{
+        count: excludedMatchingData.length,
+        showAllLink: (
+          <EuiLink onClick={showExcludedDataStreams} data-test-subj="showAllDataStreamsLink">
+            <FormattedMessage
+              id="xpack.idxMgmt.dataStreamList.table.showAllDataStreamsLinkText"
+              defaultMessage="Show all data streams"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"
+      defaultMessage="No data streams found"
+    />
+  );
 
   const columns: Array<EuiBasicTableColumn<TableDataStream>> = [];
 
@@ -266,13 +318,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     sortable: true,
     render: (lifecycle: DataStream['lifecycle'], dataStream) => (
       <ConditionalWrap
-        condition={dataStream.isNextGenIlm}
+        condition={dataStream.isIlmLifecyclePreferred}
         wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
       >
         <>
           <DataRetentionValue dataStream={dataStream} infiniteAsIcon={INFINITE_AS_ICON} />
 
-          {!dataStream.isNextGenIlm &&
+          {!dataStream.isIlmLifecyclePreferred &&
+            !isLookupLifecycleNotApplicable(dataStream) &&
             dataStream.lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
               <>
                 {' '}
@@ -339,7 +392,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   if (
     selection.every(
       (dataStream: DataStream) =>
-        dataStream.privileges.manage_data_stream_lifecycle && !isNextGenIlm(dataStream)
+        dataStream.privileges.manage_data_stream_lifecycle &&
+        (!isIlmLifecyclePreferred(dataStream) || isLookupIndexMode(dataStream)) &&
+        !isLookupDslNotApplicable(dataStream)
     )
   ) {
     dataStreamActions.push({
@@ -477,12 +532,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         tableCaption={i18n.translate('xpack.idxMgmt.dataStreamList.table.caption', {
           defaultMessage: 'Data streams',
         })}
-        noItemsMessage={
-          <FormattedMessage
-            id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"
-            defaultMessage="No data streams found"
-          />
-        }
+        noItemsMessage={noItemsMessage}
         tableLayout="auto"
         scrollableInline
         responsiveBreakpoint={false}

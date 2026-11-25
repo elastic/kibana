@@ -9,7 +9,12 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_EXPERIMENTS_COMPARE_URL, API_VERSIONS, type Direction } from '@kbn/evals-common';
+import {
+  EVALS_EXPERIMENTS_COMPARE_URL,
+  API_VERSIONS,
+  type Direction,
+  type RepetitionPolicy,
+} from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
@@ -101,11 +106,20 @@ describe('GET /internal/evals/experiments/compare', () => {
     return { handler, context, evaluationScoreService, logger };
   };
 
-  const makeRequest = (baselineId = 'experiment-a', targetId = 'experiment-b') =>
+  const makeRequest = (
+    baselineId = 'experiment-a',
+    targetId = 'experiment-b',
+    repetitionPolicy: RepetitionPolicy = 'mean'
+  ) =>
     httpServerMock.createKibanaRequest({
       method: 'get',
       path: EVALS_EXPERIMENTS_COMPARE_URL,
-      query: { type: 'experiment', baseline_id: baselineId, target_id: targetId },
+      query: {
+        type: 'experiment',
+        baseline_id: baselineId,
+        target_id: targetId,
+        repetition_policy: repetitionPolicy,
+      },
     });
 
   it('queries both experiments through evaluationScoreService.search', async () => {
@@ -197,8 +211,8 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toEqual([]);
     expect(response.payload.pairing.totalPairs).toBe(0);
-    expect(response.payload.pairing.truncatedA).toBe(false);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(false);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
   });
 
   it('returns comparison results with pairing stats for overlapping datasets', async () => {
@@ -232,13 +246,16 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.results[0].evaluatorName).toBe('Correctness');
     expect(response.payload.results[0].sampleSize).toBe(2);
     expect(response.payload.results[0].direction).toBe('maximize');
-    expect(response.payload.results[0].meanA).toBeCloseTo(0.4);
-    expect(response.payload.results[0].meanB).toBeCloseTo(0.8);
+    expect(response.payload.results[0].target.mean).toBeCloseTo(0.4);
+    expect(response.payload.results[0].baseline.mean).toBeCloseTo(0.8);
+    expect(response.payload.results[0].metricType).toBe('continuous_bounded');
+    expect(response.payload.results[0].hypothesisTest.id).toBe('wilcoxon_signed_rank');
     expect(response.payload.pairing.totalPairs).toBe(2);
     expect(response.payload.pairing.skippedMissingPairs).toBe(0);
     expect(response.payload.pairing.skippedNullScores).toBe(0);
-    expect(response.payload.pairing.truncatedA).toBe(false);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(false);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
+    expect(response.payload.pairing).not.toHaveProperty('rejectedSlices');
   });
 
   it('returns direction: minimize for lower-is-better evaluator metadata', async () => {
@@ -354,8 +371,48 @@ describe('GET /internal/evals/experiments/compare', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(200);
-    expect(response.payload.pairing.truncatedA).toBe(true);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(true);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
+  });
+
+  it('returns 400 when median rejects every slice and names the rejected slices otherwise', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const scores = (latency: number, correctness?: number) => ({
+      hits: {
+        hits: [
+          { _source: makeScoreDoc({ evaluatorName: 'Latency', score: latency }) },
+          ...(correctness === undefined ? [] : [{ _source: makeScoreDoc({ score: correctness }) }]),
+        ],
+        total: { value: 2, relation: 'eq' },
+      },
+    });
+
+    evaluationScoreService.search
+      .mockResolvedValueOnce(scores(120) as any)
+      .mockResolvedValueOnce(scores(150) as any);
+    const rejected = await handler(
+      context,
+      makeRequest('experiment-a', 'experiment-b', 'median'),
+      kibanaResponseFactory
+    );
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.payload.message).toContain('Dataset 1 / Latency');
+
+    evaluationScoreService.search
+      .mockResolvedValueOnce(scores(120, 0.5) as any)
+      .mockResolvedValueOnce(scores(150, 0.7) as any);
+    const partial = await handler(
+      context,
+      makeRequest('experiment-a', 'experiment-b', 'median'),
+      kibanaResponseFactory
+    );
+
+    expect(partial.status).toBe(200);
+    expect(partial.payload.pairing).toMatchObject({
+      repetitionPolicy: 'median',
+      rejectedSlices: [{ datasetName: 'Dataset 1', evaluatorName: 'Latency' }],
+    });
   });
 
   it('returns 500 when ES throws', async () => {

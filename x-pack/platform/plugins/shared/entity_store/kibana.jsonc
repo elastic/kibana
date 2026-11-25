@@ -12,13 +12,15 @@
     "requiredPlugins": [
       "spaces",
       "taskManager",
+      "taskManagerDependencies",
       "dataViews",
       "security",
       "licensing",
       "workflowsExtensions"
     ],
     "optionalPlugins": [
-      "encryptedSavedObjects"
+      "encryptedSavedObjects",
+      "usageCollection"
     ],
     "extraPublicDirs": [
       "common",

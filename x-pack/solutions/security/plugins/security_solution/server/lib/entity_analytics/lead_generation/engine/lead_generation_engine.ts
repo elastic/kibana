@@ -38,11 +38,14 @@ export const createLeadGenerationEngine = ({
   };
   const modules: ObservationModule[] = [];
 
-  const prepareLeadCandidates = async (entities: LeadEntity[]): Promise<LeadCandidate[]> => {
+  const prepareLeadCandidates = async (
+    entities: LeadEntity[]
+  ): Promise<{ confident: LeadCandidate[]; exploratory: LeadCandidate[] }> => {
     const pipelineStart = Date.now();
+    const empty = { confident: [], exploratory: [] };
 
     if (entities.length === 0) {
-      return [];
+      return empty;
     }
 
     // 1. Collect observations from all enabled modules
@@ -55,7 +58,7 @@ export const createLeadGenerationEngine = ({
 
     if (observations.length === 0) {
       logger.debug('[LeadGenerationEngine] No observations collected - no leads to generate');
-      return [];
+      return empty;
     }
 
     // 2. Score entities based on their observations
@@ -72,37 +75,42 @@ export const createLeadGenerationEngine = ({
       `[LeadGenerationEngine] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
     );
 
-    // 3. Filter entities below threshold and cap to maxLeads before synthesis
-    const qualifyingEntities = scoredEntities
-      .filter((e) => e.observations.length >= config.minObservations)
-      .slice(0, config.maxLeads);
+    // 3. Filter entities below threshold
+    const qualifyingEntities = scoredEntities.filter(
+      (e) => e.observations.length >= config.minObservations
+    );
 
     if (qualifyingEntities.length === 0) {
       logger.debug('[LeadGenerationEngine] No entities met the threshold - no leads to generate');
-      return [];
+      return empty;
     }
 
     // 4. Format lead candidates. Relationships aren't resolved here — the
     // pipeline fills topRelatedEntities/relatedEntityCounts in afterwards via
     // `attachRelatedEntities`.
-    const candidates = qualifyingEntities.map((scored) => {
-      return {
-        entity: scored.entity,
-        priority: scored.priority,
-        observations: scored.observations,
-        leadId: hashEuid(scored.entity.id),
-        topRelatedEntities: [],
-        relatedEntityCounts: {},
-      };
+    const toCandidate = (scored: (typeof qualifyingEntities)[number]): LeadCandidate => ({
+      entity: scored.entity,
+      priority: scored.priority,
+      observations: scored.observations,
+      leadId: hashEuid(scored.entity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
     });
 
+    // 'confident' is the pool of best scored entities (up to maxLeads) that will be used to generate leads
+    const confident = qualifyingEntities.slice(0, config.maxLeads).map(toCandidate);
+    // 'exploratory' is the pool of entities that did not make the cut (still have minObservations) but will be considered for exploratory leads
+    const exploratory = qualifyingEntities.slice(config.maxLeads).map(toCandidate);
+
     logger.debug(
-      `[LeadGenerationEngine] Prepared ${candidates.length} candidates in ${
+      `[LeadGenerationEngine] Prepared ${confident.length} confident + ${
+        exploratory.length
+      } exploratory candidates in ${
         Date.now() - pipelineStart
       }ms (collection=${collectMs}ms, scoring=${scoreMs}ms)`
     );
 
-    return candidates;
+    return { confident, exploratory };
   };
 
   const synthesizeLeads = async (
@@ -291,6 +299,7 @@ const groupIntoLeads = async (
       observations,
       topRelatedEntities,
       relatedEntityCounts,
+      origin: candidate.origin ?? 'observations',
     };
   });
 };

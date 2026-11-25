@@ -327,6 +327,30 @@ describe('getSettings', () => {
     await getSettings(soClient);
   });
 
+  it('should map otlp_output_requirements_met from the SO attributes', async () => {
+    const soClient = savedObjectsClientMock.create();
+
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: {
+            otlp_output_requirements_met: true,
+          },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+      page: 1,
+      per_page: 10,
+      total: 1,
+    });
+
+    const settings = await getSettings(soClient);
+    expect(settings.otlp_output_requirements_met).toBe(true);
+  });
+
   it('should handle null values for space awareness migration fields', async () => {
     const soClient = savedObjectsClientMock.create();
 

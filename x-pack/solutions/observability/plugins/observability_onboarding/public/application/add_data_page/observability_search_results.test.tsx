@@ -20,9 +20,12 @@ const mockAvailablePackagesHook = jest.fn();
 
 jest.mock('@kbn/fleet-plugin/public', () => {
   const ReactActual = jest.requireActual('react');
-  const { LocalSearchHook } = jest.requireActual('@kbn/fleet-plugin/public');
+  const { LocalSearchHook, withSearchMemberMatch, SearchMemberMatchDescription } =
+    jest.requireActual('@kbn/fleet-plugin/public');
   return {
     LocalSearchHook,
+    withSearchMemberMatch,
+    SearchMemberMatchDescription,
     AvailablePackagesHook: () => mockAvailablePackagesHook(),
     useGetSettingsQuery: () => ({ data: undefined }),
     CardIcon: () => ReactActual.createElement('span', { 'data-test-subj': 'resultCardIconStub' }),
@@ -34,7 +37,7 @@ const renderResults = (searchTerm = 'redis', onOpenCollection = jest.fn()) => {
     <I18nProvider>
       <KibanaContextProvider services={coreMock.createStart()}>
         <MemoryRouter initialEntries={['/']}>
-          <FleetCardsProvider enabled>
+          <FleetCardsProvider>
             <ObservabilitySearchResults
               searchTerm={searchTerm}
               onOpenCollection={onOpenCollection}

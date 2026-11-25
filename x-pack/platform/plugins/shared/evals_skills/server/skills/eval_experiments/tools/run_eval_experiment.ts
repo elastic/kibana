@@ -16,12 +16,12 @@ import {
   buildResultsLink,
   errorResult,
   evalExperimentConfigSchema,
-  evalsTools,
+  evalsExperimentTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
-} from './common';
-import { hasManageEvalsPrivilege } from './check_privileges';
+} from './tool_utils';
+import { hasManageEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const cancelLaunchedExecutions = async (
@@ -65,7 +65,7 @@ const runSchema = evalExperimentConfigSchema.extend({
 export const runEvalExperimentTool = (
   deps: EvalExperimentsToolDeps
 ): BuiltinSkillBoundedTool<typeof runSchema> => ({
-  id: evalsTools.runExperiment,
+  id: evalsExperimentTools.runExperiment,
   type: ToolType.builtin,
   description:
     'Run an evaluation experiment now. Launches one or more workflow executions (without waiting for completion) and returns the execution ids plus a link to the live results. Prefer preview_eval_experiment first so the user can review the configuration.',

@@ -9,8 +9,28 @@
 export { test, spaceTest } from './src/playwright';
 
 // Security-specific test constants
-export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
+export { getEndpointArtifactsApiService } from './src/playwright/fixtures/worker/apis/endpoint_artifacts';
+export type {
+  CreateEndpointArtifactItemInput,
+  CreateEndpointArtifactListInput,
+  CreatedEndpointArtifactItem,
+  EndpointArtifactsApiService,
+  FindEndpointArtifactItemIdsInput,
+} from './src/playwright/fixtures/worker/apis/endpoint_artifacts';
+export {
+  CUSTOM_QUERY_RULE,
+  DEFAULT_SECURITY_SOLUTION_INDEXES,
+  EQL_RULE,
+  ESQL_RULE,
+} from './src/playwright/constants/detection_rules';
+export type {
+  CustomQueryRuleResponseAction,
+  EsqlRule,
+  ThreatMatchRule,
+} from './src/playwright/constants/detection_rules';
+export { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from './src/playwright/constants/timeouts';
 export { PREVALENCE_HOST_NAME } from './src/playwright/fixtures/worker/apis/prevalence';
+export { THREAT_INDICATOR_IP } from './src/playwright/fixtures/worker/apis/threat_intelligence';
 export { ANALYZER_ORIGIN_PROCESS_NAME } from './src/playwright/fixtures/worker/apis/analyzer';
 export { NETWORK_SOURCE_IP } from './src/playwright/fixtures/worker/apis/network';
 export { HOST_NAME } from './src/playwright/fixtures/worker/apis/host';
@@ -35,7 +55,14 @@ export {
 export { AddExceptionButtonType } from './src/playwright/fixtures/test/page_objects';
 
 // re-exported test framework from @kbn/scout
-export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
+export {
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
+  globalTeardownHook,
+  getPlaywrightTagsFor,
+  tags,
+} from '@kbn/scout';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
@@ -57,6 +84,9 @@ export * from '@kbn/scout/src/playwright/eui_components';
 // re-exported CLI tools from @kbn/scout
 export { cli } from '@kbn/scout';
 
+// re-exported config-set constants from @kbn/scout
+export { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from '@kbn/scout';
+
 // TYPE EXPORTS
 
 // Observability-specific types
@@ -68,6 +98,7 @@ export type {
   SecurityParallelTestFixtures,
   SecurityParallelApiServicesFixture,
   SecurityParallelWorkerFixtures,
+  RuleCreateWizardPage,
   ThreatMatchRuleCreatePage,
 } from './src/playwright';
 
@@ -86,7 +117,12 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
+export type {
+  ApiClientFixture,
+  ApiServicesFixture,
+  BrowserAuthFixture,
+  SamlAuth,
+} from '@kbn/scout';
 
 // Re-exported service & configuration types
 export type {

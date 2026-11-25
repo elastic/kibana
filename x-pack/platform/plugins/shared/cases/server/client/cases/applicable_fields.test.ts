@@ -10,7 +10,13 @@ import type { InlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils';
 import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
-import { resolveApplicableFields, toApplicableField } from './applicable_fields';
+import { mockCases } from '../../mocks';
+import { createCasesClientMockArgs } from '../mocks';
+import {
+  getApplicableFields,
+  resolveApplicableFields,
+  toApplicableField,
+} from './applicable_fields';
 
 describe('applicable_fields', () => {
   describe('toApplicableField', () => {
@@ -282,6 +288,55 @@ describe('applicable_fields', () => {
           fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         })
       ).rejects.toThrow('Template tpl-1 has an invalid definition');
+    });
+  });
+
+  describe('getApplicableFields — case-scoped template version', () => {
+    const owner = mockCases[0].attributes.owner;
+
+    const makeVersionedTemplateSO = (version: number, fieldNames: string[]) => ({
+      attributes: {
+        templateId: 'tpl-1',
+        name: 'Test Template',
+        owner,
+        definition: yamlStringify({
+          name: 'Test Template',
+          fields: fieldNames.map((name) => ({
+            name,
+            label: name,
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+          })),
+        }),
+        templateVersion: version,
+        deletedAt: null,
+        isLatest: version === 2,
+      },
+    });
+
+    it('lists the fields of the template version the case is pinned to, not the latest', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.getCase.mockResolvedValue({
+        ...mockCases[0],
+        attributes: { ...mockCases[0].attributes, template: { id: 'tpl-1', version: 1 } },
+      });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+      // v1 has only `base`; the latest (v2) adds `foo`.
+      clientArgs.services.templatesService.getTemplate.mockImplementation((async (
+        _id: string,
+        version?: string
+      ) =>
+        version === '1'
+          ? makeVersionedTemplateSO(1, ['base'])
+          : makeVersionedTemplateSO(2, ['base', 'foo'])) as never);
+
+      const { fields } = await getApplicableFields({ caseId: mockCases[0].id }, clientArgs);
+
+      // PATCH validates against the pinned version, so discovery must not offer v2-only keys.
+      expect(fields.map(({ key }) => key)).toEqual(['base_as_keyword']);
     });
   });
 });

@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout';
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/alerts';
+
+// The alerts page persists its table state in local storage under the `id` it passes to the shared
+// alerts table: `detection-engine-alert-table-<tableId>-<viewMode>`.
+const ALERTS_TABLE_STATE_STORAGE_KEY = 'detection-engine-alert-table-alerts-page-gridView';
 
 export class AlertsTablePage {
   public detectionsAlertsWrapper: Locator;
@@ -29,7 +34,9 @@ export class AlertsTablePage {
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
-    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
+    this.alertRow = this.page.testSubj
+      .locator('alertsTableIsLoaded')
+      .locator(euiSelectors.dataGrid.ROW_SELECTOR);
     this.contextMenuButton = this.page.testSubj.locator('timeline-context-menu-button');
     this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
     this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');
@@ -45,7 +52,20 @@ export class AlertsTablePage {
     this.bulkActionsHeaderCheckbox = this.page.testSubj.locator('bulk-actions-header');
   }
 
-  async navigate() {
+  /**
+   * Opens the alerts page, optionally restricting the alerts table to `visibleColumns` (field names)
+   * so that columns the ~16 defaults would push outside the horizontally virtualized viewport are
+   * rendered on first paint.
+   */
+  async navigate({ visibleColumns }: { visibleColumns?: string[] } = {}) {
+    if (visibleColumns) {
+      await this.page.addInitScript(
+        ({ key, columns }) => {
+          window.localStorage.setItem(key, JSON.stringify({ visibleColumns: columns }));
+        },
+        { key: ALERTS_TABLE_STATE_STORAGE_KEY, columns: visibleColumns }
+      );
+    }
     await this.page.gotoApp(PAGE_URL);
   }
 
@@ -79,6 +99,21 @@ export class AlertsTablePage {
     await row.getByTestId('expand-event').click();
   }
 
+  /**
+   * Opens the document flyout for the first alert whose rule-name cell matches.
+   * Use when one rule can emit multiple alerts (`expandAlertDetailsFlyout` requires exactly one).
+   */
+  async expandFirstAlertDetailsFlyout(ruleName: string, timeout = 60_000) {
+    await this.alertsTable.waitFor({ state: 'visible', timeout });
+    const matchingCells = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    // One rule can emit several alerts; open the first matching row.
+    // eslint-disable-next-line playwright/no-nth-methods
+    const firstCell = matchingCells.first();
+    await firstCell.waitFor({ state: 'visible', timeout });
+    const row = firstCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    await row.getByTestId('expand-event').click();
+  }
+
   async clickRuleName(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
     // The rule column renders the rule name as a link (data-test-subj="ruleName"); filtered by the
@@ -88,19 +123,11 @@ export class AlertsTablePage {
     await ruleNameLink.click();
   }
 
+  /** Requires `source.ip` / `destination.ip` to be visible, see `navigate`'s `visibleColumns`. */
   async clickNetworkIpCell(ip: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
-    // The source.ip / destination.ip columns sit at the far right of the grid and are
-    // column-virtualized, so their cells are not in the DOM until scrolled into view. Scroll the
-    // virtualized body fully right to mount them before clicking. EUI's react-window scroll
-    // container exposes no stable data-test-subj, so the `.euiDataGrid__virtualized` class is a
-    // deliberate, documented exception (a stable test-subj on this container would be a good
-    // follow-up in EUI/Kibana).
-    await this.alertsTable
-      .locator('.euiDataGrid__virtualized')
-      .evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
-
     const ipCell = this.alertsTable.getByTestId('network-details').filter({ hasText: ip });
+    await expect(ipCell, `IP '${ip}' is not displayed in the alerts table`).toBeVisible();
     await ipCell.click();
   }
 

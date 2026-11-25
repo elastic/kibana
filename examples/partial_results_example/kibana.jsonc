@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/paertial-results-example-plugin",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": "@elastic/kibana-discover",
   "description": "A plugin demonstrating partial results in the expressions plugin",
   "group": "platform",
   "visibility": "private",

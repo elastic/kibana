@@ -37,8 +37,11 @@ describe('METRICS_STATE_DEF', () => {
       counterAggregation: { type: ProfileStateType.Url },
       gaugeAggregation: { type: ProfileStateType.Url },
       histogramPercentile: { type: ProfileStateType.Url },
+      histogramVisualization: { type: ProfileStateType.Url },
       sortField: { type: ProfileStateType.Url },
       sortDirection: { type: ProfileStateType.Url },
+      dimensions: { type: ProfileStateType.Url },
+      searchTerm: { type: ProfileStateType.Url },
     });
   });
 
@@ -56,8 +59,11 @@ describe('METRICS_STATE_DEF', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',
+      histogramVisualization: 'lnsXY',
       sortField: 'alphabetically',
       sortDirection: 'asc',
+      dimensions: [],
+      searchTerm: '',
     });
   });
 

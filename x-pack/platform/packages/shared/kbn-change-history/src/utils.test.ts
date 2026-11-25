@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { sha256, sanitizeFields, REDACTED } from './utils';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { UserProfile } from '@kbn/core/server';
+import { userProfileServiceMock } from '@kbn/core/server/mocks';
+import { sha256, sanitizeFields, REDACTED, enrichWithProfiles } from './utils';
+import type { ChangeHistoryDocument } from './types';
 
 describe('#sanitizeFields', () => {
   describe('when fieldsToHash is not provided', () => {
@@ -235,6 +239,125 @@ describe('#sanitizeFields', () => {
     });
   });
 
+  describe('keys containing dots', () => {
+    it('should preserve dotted keys that are not masked', () => {
+      const snapshot = {
+        user: { 'first.name': 'bob' },
+        http: { 'request.id': 'abc' },
+        apiKey: 'sk-9f8a7b6c5d4e3f2a1b0c',
+      };
+      const fieldsToHash = { apiKey: true };
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+
+      expect(result.snapshot.user).toEqual({ 'first.name': 'bob' });
+      expect(result.snapshot.http).toEqual({ 'request.id': 'abc' });
+      expect(result.fields.hashed).toEqual(['apiKey']);
+    });
+
+    it('should match a dotted mask key literally and mask the dotted snapshot key', () => {
+      const snapshot = { user: { 'first.name': 'bob' } };
+      const fieldsToRedact = { user: { 'first.name': true } };
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
+
+      expect(result.snapshot).toEqual({ user: { 'first.name': REDACTED } });
+      expect(result.fields.redacted).toEqual(['user.first.name']);
+    });
+
+    it('should not treat a dotted mask key as a nested path', () => {
+      const snapshot = { user: { first: { name: 'bob' } } };
+      const fieldsToRedact = { user: { 'first.name': true } };
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
+
+      expect(result.snapshot).toEqual(snapshot);
+      expect(result.fields.redacted).toEqual([]);
+    });
+
+    it('should keep both keys when a dotted key collides with an equivalent nested path', () => {
+      const snapshot = {
+        user: { 'first.name': 'bob', first: { name: 'alice' } },
+      };
+      const fieldsToRedact = { user: { 'first.name': true } };
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
+
+      expect(result.snapshot).toEqual({
+        user: { 'first.name': REDACTED, first: { name: 'alice' } },
+      });
+      expect(result.fields.redacted).toEqual(['user.first.name']);
+    });
+
+    it('should mask dotted keys inside a subtree mask', () => {
+      const snapshot = { user: { 'first.name': 'bob', email: 'bob@example.com', age: 42 } };
+      const fieldsToRedact = { user: true };
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
+
+      expect(result.snapshot).toEqual({
+        user: { 'first.name': REDACTED, email: REDACTED, age: 42 },
+      });
+      expect(result.fields.redacted.sort()).toEqual(['user.email', 'user.first.name']);
+    });
+
+    it('should hash a dotted snapshot key matched by a dotted mask key', () => {
+      const snapshot = { api: { 'secret.key': 'sk-9f8a7b6c5d4e3f2a1b0c' } };
+      const fieldsToHash = { api: { 'secret.key': true } };
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "fields": Object {
+            "hashed": Array [
+              "api.secret.key",
+            ],
+            "redacted": Array [],
+          },
+          "snapshot": Object {
+            "api": Object {
+              "secret.key": "a41351a16cdc",
+            },
+          },
+        }
+      `);
+    });
+
+    it('should hash dotted keys inside a subtree mask and preserve unmatched dotted keys', () => {
+      const snapshot = {
+        api: { 'secret.key': 'sk-9f8a7b6c5d4e3f2a1b0c' },
+        http: { 'request.id': 'abc' },
+      };
+      const fieldsToHash = { api: true };
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "fields": Object {
+            "hashed": Array [
+              "api.secret.key",
+            ],
+            "redacted": Array [],
+          },
+          "snapshot": Object {
+            "api": Object {
+              "secret.key": "a41351a16cdc",
+            },
+            "http": Object {
+              "request.id": "abc",
+            },
+          },
+        }
+      `);
+    });
+
+    it('should redact rather than hash a dotted key matched by both masks', () => {
+      const snapshot = { user: { 'first.name': 'bob' } };
+      const fieldsToHash = { user: { 'first.name': true } };
+      const fieldsToRedact = { user: { 'first.name': true } };
+      const result = sanitizeFields(snapshot, { fieldsToHash, fieldsToRedact, salt: 'obj-id' });
+
+      expect(result.snapshot).toEqual({ user: { 'first.name': REDACTED } });
+      expect(result.fields.redacted).toEqual(['user.first.name']);
+      expect(result.fields.hashed).toEqual([]);
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle empty snapshot', () => {
       const result = sanitizeFields({}, { fieldsToHash: { api: true }, salt: 'obj-id' });
@@ -260,5 +383,92 @@ describe('#sanitizeFields', () => {
 
       expect(snapshot.api).toBe(api);
     });
+  });
+});
+
+describe('#enrichWithProfiles', () => {
+  const logger = loggingSystemMock.createLogger();
+
+  const doc = (id: string | undefined, name: string): ChangeHistoryDocument => ({
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    ecs: { version: '9.3.0' },
+    user: { id, name },
+    event: {
+      id: 'e1',
+      module: 'workflows',
+      dataset: 'definitions',
+      action: 'update',
+      type: 'change',
+    },
+    object: {
+      id: 'obj-1',
+      type: 'workflow',
+      hash: 'hash',
+      fields: { hashed: [], redacted: [] },
+      snapshot: {},
+    },
+    service: { type: 'kibana', version: '9.4.0' },
+  });
+
+  const profile = (uid: string, full_name?: string, email?: string): UserProfile => ({
+    uid,
+    enabled: true,
+    data: {},
+    user: { username: uid, full_name, email },
+  });
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('populates full_name and email from resolved profiles', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockResolvedValue([
+      profile('u1', 'Alice A.', 'alice@example.com'),
+      profile('u2', undefined, 'bob@example.com'),
+    ]);
+    const items = [doc('u1', 'alice'), doc('u2', 'bob')];
+
+    await enrichWithProfiles(items, service, logger);
+
+    expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['u1', 'u2']) });
+    expect(items[0].user.full_name).toBe('Alice A.');
+    expect(items[0].user.email).toBe('alice@example.com');
+    expect(items[1].user.full_name).toBeUndefined();
+    expect(items[1].user.email).toBe('bob@example.com');
+  });
+
+  it('only looks up and enriches items that have a user.id', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockResolvedValue([profile('u1', 'Alice A.', 'alice@example.com')]);
+    const items = [doc('u1', 'alice'), doc(undefined, 'bob')];
+
+    await enrichWithProfiles(items, service, logger);
+
+    expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['u1']) });
+    expect(items[0].user.full_name).toBe('Alice A.');
+    expect(items[0].user.email).toBe('alice@example.com');
+    expect(items[1].user).toEqual({ id: undefined, name: 'bob' });
+  });
+
+  it('leaves the user untouched when no matching profile is returned', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockResolvedValue([profile('u2', 'Bob B.', 'bob@example.com')]);
+    const items = [doc('u1', 'alice')];
+
+    await enrichWithProfiles(items, service, logger);
+
+    expect(items[0].user).toEqual({ id: 'u1', name: 'alice' });
+  });
+
+  it('swallows bulkGet failures and warns', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockRejectedValue(new Error('es down'));
+    const items = [doc('u1', 'alice')];
+
+    await expect(enrichWithProfiles(items, service, logger)).resolves.toBeUndefined();
+
+    expect(items[0].user.full_name).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringMatching(/Failed to resolve user profiles for change history: Error: es down/)
+    );
   });
 });

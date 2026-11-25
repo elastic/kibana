@@ -15,14 +15,25 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
+import { shouldDefaultCollectS3Logs } from './field_config';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
+import { isServiceConfigIncomplete } from './use_service_settings';
+import type { DatasetTemplatesPolicy } from './dataset_templates';
 import { ServiceFieldsForm } from './service_fields_form';
+import {
+  InstanceNamespaceField,
+  getNamespaceError,
+  supportsNamespace,
+} from './instance_namespace_field';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 
 function getDefaultDsInputs(
@@ -39,13 +50,43 @@ function getDefaultDsInputs(
   return dsInfo?.defaultEnabledInputs ?? [];
 }
 
+/** Persist `collect_s3_logs: true` for S3 inputs given a bucket ARN, so the switch shows the real behaviour. */
+function withCollectS3Defaults(
+  service: AwsServiceMatrixEntry,
+  draftByDs: Record<string, ServiceDataStreamVars>
+): Record<string, ServiceDataStreamVars> {
+  const result: Record<string, ServiceDataStreamVars> = {};
+  for (const [dsId, dsVars] of Object.entries(draftByDs)) {
+    const dsView = makeDsView(service, dsId);
+    const varsByInput = { ...dsVars.varsByInput };
+    for (const input of Object.keys(varsByInput)) {
+      if (shouldDefaultCollectS3Logs(dsView, input, varsByInput[input])) {
+        varsByInput[input] = { ...varsByInput[input], collect_s3_logs: 'true' };
+      }
+    }
+    result[dsId] = { ...dsVars, varsByInput };
+  }
+  return result;
+}
+
 interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
   globalRegion: string;
+  /** Only a duplicate has a namespace of its own; an original takes the global one. */
+  isDuplicate?: boolean;
+  globalNamespace?: string;
+  /** Whether the instance is already deployed, which changes what a new namespace means. */
+  isDeployed?: boolean;
+  /** The template choice of the policy the service deploys in, shared with its other services. */
+  datasetTemplatesPolicy?: DatasetTemplatesPolicy;
   onApply: (
     varsByDataStream: Record<string, ServiceDataStreamVars>,
-    enabledDataStreams: string[]
+    enabledDataStreams: string[],
+    /** The duplicate's namespace; absent for an original. */
+    namespace?: string,
+    /** The template choice, only when the user changed it. */
+    createDatasetTemplates?: boolean
   ) => void;
   onClose: () => void;
 }
@@ -54,6 +95,10 @@ export function ServiceSettingsFlyout({
   service,
   config,
   globalRegion,
+  isDuplicate = false,
+  globalNamespace = '',
+  isDeployed = false,
+  datasetTemplatesPolicy,
   onApply,
   onClose,
 }: ServiceSettingsFlyoutProps) {
@@ -61,23 +106,50 @@ export function ServiceSettingsFlyout({
 
   const isSingleDs = service.dataStreams.length === 1;
 
-  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
-    ...config.varsByDataStream,
-  }));
+  // Seed the S3 toggle on open too, so a stored bucket ARN shows the switch on before any save.
+  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() =>
+    withCollectS3Defaults(service, { ...config.varsByDataStream })
+  );
+  // An empty namespace follows the global one, so it stays empty and the global value is only the
+  // placeholder: saving other settings must not pin the duplicate to today's global namespace.
+  const [namespace, setNamespace] = useState(config.namespace ?? '');
+  // The policy takes one template value, so the switch shows it whichever service opens the flyout.
+  const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean | undefined>(
+    undefined
+  );
+  const showNamespace = isDuplicate && supportsNamespace(service);
+  const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
+
+  const enabledDataStreams = service.dataStreams.filter((dsId) => {
+    const dsVars = draftByDs[dsId];
+    if (dsVars) return dsVars.enabledInputs.length > 0;
+    return (
+      getDefaultDsInputs(
+        service.varDefsByDataStream?.[dsId],
+        isSingleDs,
+        service.defaultEnabledInputs
+      ).length > 0
+    );
+  });
+  // Same rule as the Step 2 / Step 3 gates, so Save cannot persist a config those would reject.
+  const isDraftIncomplete = isServiceConfigIncomplete(service, {
+    enabledDataStreams,
+    varsByDataStream: draftByDs,
+    namespace: showNamespace ? namespace : undefined,
+  });
 
   const handleApply = () => {
-    const enabledDataStreams = service.dataStreams.filter((dsId) => {
-      const dsVars = draftByDs[dsId];
-      if (dsVars) return dsVars.enabledInputs.length > 0;
-      return (
-        getDefaultDsInputs(
-          service.varDefsByDataStream?.[dsId],
-          isSingleDs,
-          service.defaultEnabledInputs
-        ).length > 0
-      );
-    });
-    onApply(draftByDs, enabledDataStreams);
+    const applied = [
+      withCollectS3Defaults(service, draftByDs),
+      enabledDataStreams,
+      showNamespace ? namespace : undefined,
+    ] as const;
+    // The template choice only goes along when the user changed it.
+    if (createDatasetTemplates === undefined) {
+      onApply(...applied);
+    } else {
+      onApply(...applied, createDatasetTemplates);
+    }
   };
 
   return (
@@ -101,6 +173,25 @@ export function ServiceSettingsFlyout({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {showNamespace && (
+          <>
+            <InstanceNamespaceField
+              emptyUsesGlobal
+              placeholder={globalNamespace || undefined}
+              namespace={namespace}
+              onChange={setNamespace}
+              note={
+                isDeployed
+                  ? i18n.translate('xpack.ingestHub.serviceSettingsStep.namespace.deployedNote', {
+                      defaultMessage:
+                        'On the next deploy, this service switches to the namespace entered here. Data already collected stays in the previous namespace.',
+                    })
+                  : undefined
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <ServiceFieldsForm
           service={service}
           varsByDataStream={draftByDs}
@@ -112,7 +203,7 @@ export function ServiceSettingsFlyout({
                 enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
                 varsByInput: {},
               };
-              return {
+              return withCollectS3Defaults(service, {
                 ...prev,
                 [dsId]: {
                   ...existing,
@@ -121,9 +212,40 @@ export function ServiceSettingsFlyout({
                     [input]: { ...(existing.varsByInput[input] ?? {}), [fieldName]: value },
                   },
                 },
+              });
+            })
+          }
+          onVarGroupSelectionChange={(dsId, input, groupName, optionName) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const existing = prev[dsId] ?? {
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
+                varsByInput: {},
+              };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  varGroupSelectionsByInput: {
+                    ...(existing.varGroupSelectionsByInput ?? {}),
+                    [input]: {
+                      ...(existing.varGroupSelectionsByInput?.[input] ?? {}),
+                      [groupName]: optionName,
+                    },
+                  },
+                },
               };
             })
           }
+          isDeployed={isDeployed}
+          datasetTemplatesSharedWith={datasetTemplatesPolicy?.sharedWith}
+          createDatasetTemplates={
+            createDatasetTemplates ??
+            datasetTemplatesPolicy?.enabled ??
+            config.createDatasetTemplates ??
+            true
+          }
+          onCreateDatasetTemplatesChange={setCreateDatasetTemplates}
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
@@ -155,7 +277,12 @@ export function ServiceSettingsFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleApply} data-test-subj="serviceSettingsFlyout-saveButton">
+            <EuiButton
+              fill
+              onClick={handleApply}
+              isDisabled={isNamespaceInvalid || isDraftIncomplete}
+              data-test-subj="serviceSettingsFlyout-saveButton"
+            >
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.flyout.saveButton"
                 defaultMessage="Save"

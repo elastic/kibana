@@ -14,7 +14,7 @@ A task type is registered in the **setup** lifecycle of a plugin via `taskManage
 Tasks are **scheduled** separately, usually on plugin **start**, via `taskManager.ensureScheduled` (recurring/idempotent) or `taskManager.schedule` / `bulkSchedule` (one-shot).
 
 **Source of truth:**
-- Definition shape: `x-pack/platform/plugins/shared/task_manager/server/task.ts` (`TaskDefinition`, `RunContext`, `TaskCost`, `TaskPriority`, `InstanceTaskCost`, `DEFAULT_TIMEOUT = '5m'`)
+- Definition shape: `x-pack/platform/plugins/shared/task_manager/server/task.ts` (`TaskDefinition`, `RunContext`, `TaskCost`, `TaskPriority`, `DEFAULT_TIMEOUT = '5m'`)
 - Error helpers: `x-pack/platform/plugins/shared/task_manager/server/task_running/errors.ts`
 - Plugin entry point exports: `@kbn/task-manager-plugin/server`
 
@@ -28,7 +28,7 @@ taskManager.registerTaskDefinitions({
     timeout: '2m',
     maxAttempts: 1,
     cost: TaskCost.Normal,
-    priority: TaskPriority.Normal,
+    priority: TaskPriority.Standard,
     paramsSchema: schema.object({ /* ... */ }),
     stateSchemaByVersion: { 1: { schema: stateSchemaV1, up: (s) => s } },
     createTaskRunner: (context) => {
@@ -257,7 +257,7 @@ If the task is fully stateless (every run starts from scratch), return `{ state:
 
 ## 8. `cost` and `priority` — capacity discipline
 
-**Rule:** Pick `cost` based on the task's actual resource footprint, not its perceived importance. Pick `priority` only when the task should preempt or yield to others; the default (`Normal`) is correct for most tasks.
+**Rule:** Pick `cost` based on the task's actual resource footprint, not its perceived importance. Pick `priority` only when the task should preempt or yield to others; the default (`Standard`) is correct for most tasks.
 
 `TaskCost` values are integers used by the capacity pool: `Tiny = 1`, `Normal = 2`, `Large = 4`, `ExtraLarge = 10`. Capacity is finite; an over-costed task starves its neighbours, an under-costed task gets starved by them.
 
@@ -270,37 +270,31 @@ If the task is fully stateless (every run starts from scratch), return `{ state:
 
 The memory budgets are the assumption capacity planning is built on; if the task's real footprint exceeds the budget for its tier, bump the cost rather than relying on the smaller tier's slot.
 
-| Priority | When to pick |
-|---|---|
-| `TaskPriority.Normal` | Default — almost always correct |
-| `TaskPriority.NormalLongRunning` | Long-running tasks that should not block the regular pool |
-| `TaskPriority.Low` | Background bookkeeping that may be deferred under load |
+`TaskPriority` members are named after what the task is *for*, and the integer is the claim-ordering tier — capacity is filled highest first, oldest first within a tier.
 
-### `TaskCost` vs `InstanceTaskCost`
+| Priority | Value | When to pick |
+|---|---|---|
+| `TaskPriority.UserInteractive` | 100 | Work a user is directly waiting on, or with a tight latency budget. Displaces `Standard` work, so reserve it for user-visible delay |
+| `TaskPriority.Standard` | 50 | Default — almost always correct, and what you get when `priority` is omitted |
+| `TaskPriority.Deferrable` | 40 | Long-running tasks that should yield to `Standard` rather than hold the regular pool |
+| `TaskPriority.Maintenance` | 1 | Background bookkeeping that may be deferred under load — cleanup, rollups, backfills |
 
-These are distinct enums for distinct contexts — confusing them is a recurring review finding (see [PR #260373](https://github.com/elastic/kibana/pull/260373)):
+`priority` is not importance and not `cost`: raise it only when the task must preempt or yield, not because the task matters to your plugin.
 
-- **`TaskCost`** — integer enum (`Tiny = 1`, `Normal = 2`, `Large = 4`, `ExtraLarge = 10`). Use for the **task type definition's** `cost` field and for the **per-instance `cost` override** in `TaskInstance.cost` *when the value is set in code* against the `TaskInstance` type. This is the value the capacity pool reads.
-- **`InstanceTaskCost`** — string enum (`'tiny'`, `'normal'`, `'large'`, `'extralarge'`). Use whenever cost travels through a **schema or saved-object attribute**: task params, persisted state, anything serialized. Convert to the numeric `TaskCost` with `getTaskCostFromInstance(...)` (exported from `@kbn/task-manager-plugin/server`) before comparing or feeding it back to capacity logic.
+The old positional names are deprecated aliases with unchanged numeric values — use the intent-based names in new code: `Low` → `Maintenance`, `NormalLongRunning` → `Deferrable`, `Normal` → `Standard`.
+
+### Per-instance cost
+
+`TaskCost` is the only cost type: use it for the task type definition's `cost` and for the per-instance override in `TaskInstance.cost`, which takes precedence over the definition. Task Manager converts the cost to and from its stored form on the task saved object, so task code never handles that form. If task params need to carry a cost, store the `TaskCost` value; params are serialized as JSON.
 
 ```ts
-import { TaskCost, InstanceTaskCost, getTaskCostFromInstance } from '@kbn/task-manager-plugin/server';
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 
-// Task type registration — integer enum
+// Task type registration
 { cost: TaskCost.ExtraLarge }
 
-// Task params schema — string enum, because it's serialized
-const paramsSchema = schema.object({
-  cost: schema.oneOf([
-    schema.literal(InstanceTaskCost.Tiny),
-    schema.literal(InstanceTaskCost.Normal),
-    schema.literal(InstanceTaskCost.Large),
-    schema.literal(InstanceTaskCost.ExtraLarge),
-  ]),
-});
-
-// Reading params back at run time
-const numericCost = getTaskCostFromInstance(taskInstance.params.cost);
+// Per-instance override
+await taskManager.schedule({ taskType, params, state: {}, cost: TaskCost.Tiny });
 ```
 
 ## 9. Scheduling — `ensureScheduled` vs `schedule` vs `bulkSchedule`
@@ -387,7 +381,7 @@ The assertion is a hard-coded sorted list of every registered task type, not a s
 | `stateSchemaByVersion` | Define when state is non-empty between runs | none | Silent state-shape drift after upgrade |
 | `maxAttempts` | `1` for one-shot; default for retryable recurring | global default | Duplicate side-effects on transient failures |
 | `cost` | Match real resource use; `Normal` default | `TaskCost.Normal` | Pool starvation either way |
-| `priority` | `Normal` unless preemption needed | `TaskPriority.Normal` | Long-running task blocks the regular pool |
+| `priority` | `Standard` unless preemption needed | `TaskPriority.Standard` | Long-running task blocks the regular pool |
 | `ensureScheduled` | Recurring + startup | n/a | Use of `schedule` here duplicates on every restart |
 
 ## Author checklist
@@ -416,9 +410,7 @@ When registering a new task type:
    - [ ] No raw `throw new Error(...)` for classifiable failures
 
 4. **Cost type discipline**
-   - [ ] `TaskCost` is used for `definition.cost` and in-code `TaskInstance.cost`
-   - [ ] `InstanceTaskCost` is used in any persisted/serialised cost field
-   - [ ] The string cost is converted with `getTaskCostFromInstance(...)` before comparing to `TaskCost`
+   - [ ] `TaskCost` is used for `definition.cost`, `TaskInstance.cost`, and any cost carried in params
 
 5. **Scheduling**
    - [ ] Recurring tasks scheduled on plugin start use `ensureScheduled` with a stable `id`
@@ -436,7 +428,7 @@ When reviewing a PR that adds or modifies a task:
 - [ ] Each definition field listed above is set deliberately, not by default
 - [ ] `signal` is propagated through the entire `run()` call chain — search the diff for new ES/HTTP calls without `signal:` and reject
 - [ ] Errors are classified — search the diff for `throw new Error` inside `run()` and challenge each one
-- [ ] If `cost` or `priority` differs from `Normal`, the PR description justifies the choice
+- [ ] If `cost` differs from `Normal`, or `priority` from `Standard`, the PR description justifies the choice
 - [ ] If `stateSchemaByVersion` is added or modified, `up` migrations are pure and idempotent and cover every shape change
 - [ ] `schedule` is not used in plugin startup code — `ensureScheduled` instead
 - [ ] If the task is one-shot, `maxAttempts: 1` is set
@@ -448,14 +440,13 @@ When reviewing a PR that adds or modifies a task:
 |---|---|---|
 | Fleet | `x-pack/platform/plugins/shared/fleet/server/tasks/automatic_agent_upgrade_task.ts` | `signal` threaded through call chain with a `throwIfAborted` helper in loops |
 | Entity Store | `x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/index.ts` | Destructures `signal` from `RunContext`; threads it through downstream services |
-| Alerting | `x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts` | `stateSchemaByVersion`; telemetry on success/failure |
+| Alerting | `x-pack/platform/plugins/shared/alerting/server/invalidate_pending_api_keys/task.ts` | `stateSchemaByVersion`; scheduled invalidation of ES and UIAM API keys |
 | SLO | `x-pack/solutions/observability/plugins/slo/server/services/tasks/health_scan_task/health_scan_task.ts` | `maxAttempts: 1`; config-gated execution; typed `RunContext` |
 | Synthetics | `x-pack/solutions/observability/plugins/synthetics/server/tasks/sync_private_locations_monitors_task.ts` | Preserves existing schedule in `ensureScheduled`; dynamic schedule from task result |
 
 ## Source references
 
-- Task definition schema, `TaskCost`, `TaskPriority`, `InstanceTaskCost`, `RunContext`, `DEFAULT_TIMEOUT`: `x-pack/platform/plugins/shared/task_manager/server/task.ts`
+- Task definition schema, `TaskCost`, `TaskPriority`, `RunContext`, `DEFAULT_TIMEOUT`: `x-pack/platform/plugins/shared/task_manager/server/task.ts`
 - Error helpers (`throwUnrecoverableError`, `throwRetryableError`, `createRetryableError`): `x-pack/platform/plugins/shared/task_manager/server/task_running/errors.ts`
 - Plugin public exports: `x-pack/platform/plugins/shared/task_manager/server/index.ts`
 - Monitoring guide: `x-pack/platform/plugins/shared/task_manager/server/MONITORING.md`
-- `InstanceTaskCost` introduction context: [PR #260373](https://github.com/elastic/kibana/pull/260373)

@@ -22,7 +22,7 @@ export interface DeleteIndexApiLogicValues {
 export const deleteIndex = async ({
   indexName,
 }: DeleteIndexApiLogicArgs): Promise<DeleteIndexApiLogicValues> => {
-  const route = `/internal/enterprise_search/indices/${indexName}`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}`;
   await HttpLogic.values.http.delete(route);
   return { indexName };
 };

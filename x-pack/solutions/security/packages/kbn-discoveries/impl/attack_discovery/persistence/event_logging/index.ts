@@ -22,7 +22,10 @@ export {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
   ATTACK_DISCOVERY_EVENT_PROVIDER,
+  ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG,
 } from './constants';
+export { getAttackDiscoveryEventOwnerFilter } from './get_attack_discovery_event_owner_filter';
+export { isServiceAccountUser } from './is_service_account_user';
 export { writeAttackDiscoveryEvent } from './write_attack_discovery_event';
 export type {
   AttackDiscoverySource,

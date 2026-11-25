@@ -7,6 +7,8 @@
 import React from 'react';
 import { TestProvider } from '../../../common/test_utils';
 import { render, type RenderResult } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { DataUsagePage, type DataUsagePageProps } from './page';
 
 describe('Page Component', () => {
@@ -26,25 +28,26 @@ describe('Page Component', () => {
     renderComponent = (props: DataUsagePageProps) =>
       render(
         <TestProvider>
-          <DataUsagePage data-test-subj={testId} {...props} />
+          <MockAppHeaderProvider>
+            <DataUsagePage data-test-subj={testId} {...props} />
+          </MockAppHeaderProvider>
         </TestProvider>
       );
   });
 
   it('renders', () => {
     const { getByTestId } = renderComponent({ title: 'test' });
-    expect(getByTestId(`${testId}-header`)).toBeTruthy();
+    expect(getByTestId(testId)).toBeTruthy();
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeTruthy();
   });
 
   it('should show page title', () => {
     const { getByTestId } = renderComponent({ title: 'test header' });
-    expect(getByTestId(`${testId}-title`)).toBeTruthy();
-    expect(getByTestId(`${testId}-title`)).toHaveTextContent('test header');
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('test header');
   });
 
   it('should show page description', () => {
     const { getByTestId } = renderComponent({ title: 'test', subtitle: 'test description' });
-    expect(getByTestId(`${testId}-description`)).toBeTruthy();
-    expect(getByTestId(`${testId}-description`)).toHaveTextContent('test description');
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent('test description');
   });
 });

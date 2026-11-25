@@ -46,7 +46,10 @@ export const EndpointActionListRequestSchema = {
     ),
     agentTypes: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(agentTypesSchema.schema, agentTypesSchema.options),
+        schema.arrayOf(agentTypesSchema.schema, {
+          ...agentTypesSchema.options,
+          maxSize: agentTypesSchema.options.maxSize,
+        }),
         agentTypesSchema.schema,
       ])
     ),
@@ -61,7 +64,10 @@ export const EndpointActionListRequestSchema = {
     endDate: schema.maybe(schema.string({ maxLength: 64 })), // date ISO strings or moment date
     statuses: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(statusesSchema.schema, statusesSchema.options),
+        schema.arrayOf(statusesSchema.schema, {
+          ...statusesSchema.options,
+          maxSize: statusesSchema.options.maxSize,
+        }),
         statusesSchema.schema,
       ])
     ),
@@ -99,7 +105,10 @@ export const EndpointActionListRequestSchema = {
     // action types
     types: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(actionTypesSchema.schema, actionTypesSchema.options),
+        schema.arrayOf(actionTypesSchema.schema, {
+          ...actionTypesSchema.options,
+          maxSize: actionTypesSchema.options.maxSize,
+        }),
         actionTypesSchema.schema,
       ])
     ),

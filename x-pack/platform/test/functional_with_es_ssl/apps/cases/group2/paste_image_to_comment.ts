@@ -98,8 +98,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByButtonText('Preview');
 
       // assert the image is present
-      const image = await find.existsByCssSelector('img[alt="screenshot.png"]');
-      expect(!!image).to.be(true);
+      await retry.waitForWithTimeout('uploaded image to be visible in preview', 10000, () =>
+        find.existsByDisplayedByCssSelector('img[alt="screenshot.png"]', 0)
+      );
 
       // assert that the image is a real image
       await retry.waitFor(

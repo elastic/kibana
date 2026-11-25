@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { type ICPSManager, type CPSAppAccessResolver } from '@kbn/cps-utils';
 import { CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
@@ -54,29 +53,14 @@ export class CpsPlugin
         cloud,
       });
 
-      // Register project picker only after the default project routing is known
-      manager.whenReady().then(() =>
-        import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
-          // register into solution-view chrome next header
-          core.chrome.next.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
-
-          // register into legacy chrome header
-          core.chrome.navControls.registerLeft({
-            mount: (element) => {
-              ReactDOM.render(
-                core.rendering.addContext(<ProjectPickerContainer cpsManager={manager} />),
-                element,
-                () => {}
-              );
-
-              return () => {
-                ReactDOM.unmountComponentAtNode(element);
-              };
-            },
-            order: 1000,
-          });
-        })
-      );
+      // Register project picker only after the default project routing is known. It renders
+      // nothing without linked projects, so skip it to keep the header from reserving its slot.
+      manager.whenReady().then(() => {
+        if (!manager.hasLinkedProjects()) return;
+        return import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
+          core.chrome.controls.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
+        });
+      });
       cpsManager = manager;
     }
 

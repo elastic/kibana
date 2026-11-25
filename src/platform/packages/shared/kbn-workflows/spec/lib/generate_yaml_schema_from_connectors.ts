@@ -8,7 +8,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { type ConnectorContractUnion } from '../..';
+import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
+import type { ConnectorContractUnion } from '../../types/v1';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
@@ -16,7 +17,6 @@ import {
   DataSetStepSchema,
   getForEachStepSchema,
   getIfStepSchema,
-  getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
   getSwitchStepSchema,
@@ -27,6 +27,7 @@ import {
   WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
+  WorkflowAwaitExecutionsStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
   WorkflowFailStepSchema,
@@ -35,7 +36,12 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import { getTriggerSchema } from '../schema/triggers';
+import {
+  type CustomTriggerSchemaInput,
+  getTriggerSchema,
+  type TriggerSchemaOptions,
+  validatePageTriggers,
+} from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -45,14 +51,29 @@ export function getStepId(stepName: string): string {
 
 export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContractUnion[],
-  /** Registered custom trigger type ids for YAML schema validation (e.g. example.custom_trigger) */
-  triggers: string[] = [],
+  /** Registered custom triggers for YAML schema validation (id, optional requiresConnectorId) */
+  triggers: CustomTriggerSchemaInput[] = [],
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
-  loose: boolean = false
+  loose: boolean = false,
+  triggerSchemaOptions: TriggerSchemaOptions = {}
 ): z.ZodType {
-  const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
+  // Zod v4's `z.toJSONSchema({ reused: 'ref' })` names shared definitions
+  // `__schema0…__schemaN` in traversal (encounter) order. Any reordering of
+  // the connector or trigger arrays therefore renumbers every downstream
+  // definition and the 8 000+ `$ref`s that point to them, producing a ~2 MB
+  // whole-file diff on a schema that has not semantically changed.
+  // Sort both arrays by their type discriminator to make traversal order stable
+  // and independent of async loader resolution order or Map insertion order.
+  const sortedConnectors = [...connectors].sort((a, b) => a.type.localeCompare(b.type));
+  const sortedTriggers = triggers.toSorted((left, right) => {
+    const leftId = typeof left === 'string' ? left : left.id;
+    const rightId = typeof right === 'string' ? right : right.id;
+    return leftId.localeCompare(rightId);
+  });
+
+  const recursiveStepSchema = createRecursiveStepSchema(sortedConnectors, loose);
 
   if (loose) {
     // For loose mode, use WorkflowSchemaForAutocompleteBase which already handles partial fields
@@ -66,9 +87,9 @@ export function generateYamlSchemaFromConnectors(
     }));
   }
 
-  const triggerSchema = getTriggerSchema(triggers);
+  const triggerSchema = getTriggerSchema(sortedTriggers, triggerSchemaOptions);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z.array(triggerSchema).min(1),
+    triggers: z.array(triggerSchema).min(1).superRefine(validatePageTriggers),
   });
 
   return workflowBaseWithTriggers.extend({
@@ -81,12 +102,15 @@ export function generateYamlSchemaFromConnectors(
  * Generates a schema for trusted workflow definitions that need the shared workflow envelope
  * validation without materializing the connector-expanded step union.
  */
-export function generateLightweightYamlSchema(triggers: string[] = []): z.ZodType {
+export function generateLightweightYamlSchema(
+  triggers: CustomTriggerSchemaInput[] = [],
+  triggerSchemaOptions: TriggerSchemaOptions = {}
+): z.ZodType {
   // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
   // not materialize connector or step-definition schemas.
-  const triggerSchema = getTriggerSchema(triggers);
+  const triggerSchema = getTriggerSchema(triggers, triggerSchemaOptions);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z.array(triggerSchema).min(1),
+    triggers: z.array(triggerSchema).min(1).superRefine(validatePageTriggers),
   });
 
   return workflowBaseWithTriggers.extend({
@@ -116,7 +140,6 @@ function createRecursiveStepSchema(
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const switchSchema = getSwitchStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
-    const mergeSchema = getMergeStepSchema(stepSchema, loose);
 
     const connectorSchemas = connectors.map((c) =>
       generateStepSchemaForConnector(c, stepSchema, loose)
@@ -126,19 +149,24 @@ function createRecursiveStepSchema(
     // autocomplete.
     const aliasSchemas = generateAliasSchemas(connectors, stepSchema, loose);
 
+    // Static schemas use BaseStepSchema fallbacks; override so nested steps keep `with`.
+    const stepLevelOnFailure = {
+      'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    };
+
     cachedUnion = z.discriminatedUnion('type', [
       forEachSchema,
       whileSchema,
       ifSchema,
       switchSchema,
       parallelSchema,
-      mergeSchema,
       WaitStepSchema,
-      WaitForInputStepSchema,
-      WaitForApprovalStepSchema,
+      WaitForInputStepSchema.extend(stepLevelOnFailure),
+      WaitForApprovalStepSchema.extend(stepLevelOnFailure),
       DataSetStepSchema,
-      WorkflowExecuteStepSchema,
-      WorkflowExecuteAsyncStepSchema,
+      WorkflowExecuteStepSchema.extend(stepLevelOnFailure),
+      WorkflowExecuteAsyncStepSchema.extend(stepLevelOnFailure),
+      WorkflowAwaitExecutionsStepSchema.extend(stepLevelOnFailure),
       WorkflowOutputStepSchema,
       WorkflowFailStepSchema,
       LoopBreakStepSchema,
@@ -171,8 +199,9 @@ function generateStepSchemaForConnector(
   const connectorIdSchema: Record<string, z.ZodType> = {};
   // Add connector-id schema if hasConnectorId has a value
   if (connector.hasConnectorId) {
+    const connectorId = z.string().max(CONNECTOR_ID_MAX_LENGTH);
     connectorIdSchema['connector-id'] =
-      connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
+      connector.hasConnectorId === 'required' ? connectorId : connectorId.optional();
   }
 
   // If all params are optional (or there are none), `with` itself should be optional so users

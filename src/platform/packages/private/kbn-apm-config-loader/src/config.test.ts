@@ -8,6 +8,7 @@
  */
 
 import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
+import { hostname } from 'os';
 import {
   packageMock,
   mockedRootDir,
@@ -81,6 +82,18 @@ describe('ApmConfiguration', () => {
     const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
     const labels = config.getConfig('serviceName').globalLabels as Labels;
     expect(labels.kibana_uuid).toBe('uuid-from-config');
+  });
+
+  describe('getKibanaName', () => {
+    it('uses `server.name` from the kibana config if present', () => {
+      const config = new ApmConfiguration(mockedRootDir, { server: { name: 'my-kibana' } }, false);
+      expect(config.getKibanaName()).toBe('my-kibana');
+    });
+
+    it('defaults to the host name', () => {
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getKibanaName()).toBe(hostname().replace(/[^\x00-\x7F]/g, ''));
+    });
   });
 
   it('overrides metricsInterval, breakdownMetrics, captureHeaders, and captureBody when `isDistributable` is true', () => {
@@ -512,6 +525,38 @@ describe('ApmConfiguration', () => {
       expect(frontendConfig.active).toBe(false);
       expect(frontendConfig).not.toHaveProperty('servicesOverrides');
       expect(shouldInstrumentClient(frontendConfig)).toBe(false);
+    });
+
+    it('does not throw when elastic.apm.active is false and contextPropagationOnly is omitted', () => {
+      const configWithActiveFalse = new ApmConfiguration(
+        mockedRootDir,
+        {
+          ...kibanaConfig,
+          elastic: {
+            apm: {
+              active: false,
+            },
+          },
+        },
+        false
+      );
+
+      const serverConfig = configWithActiveFalse.getConfig('serviceName');
+      expect(serverConfig).toEqual(
+        expect.objectContaining({
+          active: false,
+          contextPropagationOnly: false,
+        })
+      );
+
+      const frontendConfig = configWithActiveFalse.getConfig('kibana-frontend');
+      expect(frontendConfig).toEqual(
+        expect.objectContaining({
+          active: true,
+          contextPropagationOnly: false,
+        })
+      );
+      expect(shouldInstrumentClient(frontendConfig)).toBe(true);
     });
 
     it('disables kibana-frontend when overridden in elastic.apm.servicesOverrides', () => {

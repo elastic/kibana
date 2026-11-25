@@ -42,6 +42,7 @@ export interface HuntingLead {
   sourceType: 'adhoc' | 'scheduled';
   topRelatedEntities: RelatedEntity[];
   relatedEntityCounts: Record<string, number>;
+  origin: 'observations' | 'exploratory';
 }
 
 export interface ApiLead extends HuntingLead {
@@ -64,4 +65,5 @@ export const fromApiLead = (lead: ApiLead): HuntingLead => ({
   sourceType: lead.sourceType,
   topRelatedEntities: lead.topRelatedEntities,
   relatedEntityCounts: lead.relatedEntityCounts,
+  origin: lead.origin,
 });

@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
-import DETECTION_YAML from './significant_events/detection.yaml';
-import DISCOVERY_YAML from './significant_events/discovery.yaml';
-import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
@@ -22,8 +19,7 @@ export {
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID = 'system-significant-events-orchestrator';
-export const SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID =
-  'system-significant-events-investigation-completed';
+export const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID = 'system-significant-events-cleanup';
 
 // lifecycle: 'static' — instances are declared at startup; orphans are cleaned up on restart.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.
@@ -34,21 +30,31 @@ const SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
   enablement: 'enforced',
 } as const;
 
+const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_MANAGEMENT = {
+  lifecycle: 'dynamic',
+  versionStrategy: 'auto',
+  enablement: 'restorable',
+} as const;
+
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 7,
+  version: 9,
   billable: false,
-  yaml: DETECTION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'significant_events/detection.yaml');
+  },
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 18,
+  version: 31,
   billable: false,
-  yaml: DISCOVERY_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'significant_events/discovery.yaml');
+  },
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -57,15 +63,19 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   pluginId: 'significantEvents',
   version: 4,
   billable: false,
-  yaml: ORCHESTRATOR_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'significant_events/orchestrator.yaml');
+  },
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
-export const SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
+export const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   pluginId: 'significantEvents',
   version: 1,
   billable: false,
-  yaml: INVESTIGATION_COMPLETED_YAML,
-  management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'cleanup.yaml');
+  },
+  management: SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

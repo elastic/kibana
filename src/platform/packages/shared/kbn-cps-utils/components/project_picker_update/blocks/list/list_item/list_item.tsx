@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import capitalize from 'lodash/capitalize';
 import type { CPSProject } from '../../../../../types';
-import { getProjectTags, getSolutionIcon } from '../../../../utils';
+import { getCSPLabel, getProjectTags, getRegionLabel, getSolutionIcon } from '../../../../utils';
 import type { ProjectPickerStateProviderProps } from '../../../state';
 
 export interface ProjectPickerListItemProps {
@@ -32,6 +32,7 @@ export interface ProjectPickerListItemProps {
   /** True while a filter/selection edit is awaiting server confirmation; disables all row interactions. */
   isInteractionsDisabled?: boolean;
   isOriginProject: boolean;
+  showProjectTags?: boolean;
   toggleDisabledMessage: string;
   project: CPSProject;
   onContextMenu: (project: CPSProject, evt: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -49,6 +50,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
   isToggleDisabled = false,
   isInteractionsDisabled = false,
   isOriginProject,
+  showProjectTags = true,
   toggleDisabledMessage,
   project,
   onContextMenu,
@@ -59,6 +61,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
   const toggleTooltipId = useGeneratedHtmlId();
 
   const projectTags = getProjectTags(project);
+  const { _csp: csp, _region: region } = project;
 
   const switchControl = (
     <EuiSwitch
@@ -103,7 +106,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
                   </EuiBadge>
                 </EuiFlexItem>
               )}
-              {Boolean(projectTags.length) && (
+              {showProjectTags && Boolean(projectTags.length) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge
                     tabIndex={0}
@@ -125,12 +128,12 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" color="subdued">
-              {project._region && project._csp
+              {region && csp
                 ? i18n.translate('cpsUtils.projectPicker.listItem.region', {
                     defaultMessage: '{provider}, {region}',
                     values: {
-                      provider: project._csp,
-                      region: project._region,
+                      provider: getCSPLabel(csp),
+                      region: getRegionLabel(csp, region),
                     },
                   })
                 : null}

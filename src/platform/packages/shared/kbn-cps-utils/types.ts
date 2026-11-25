@@ -45,6 +45,13 @@ export interface ProjectTagsResponse {
   linked_projects: Record<string, CPSProject>;
 }
 
+export interface CpsLinkedProject {
+  id: string;
+  alias: string;
+  type: string;
+  organization: string;
+}
+
 export interface ProjectsData {
   origin: CPSProject | null;
   linkedProjects: CPSProject[];

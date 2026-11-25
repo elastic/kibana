@@ -28,6 +28,11 @@ interface UseAgentBuilderAttachmentBaseParams {
    * Description shown for the attachment in the conversation
    */
   attachmentDescription?: string;
+  /**
+   * When true, the initial message is sent automatically without user confirmation.
+   * Defaults to false.
+   */
+  autoSendInitialMessage?: boolean;
 }
 
 /**
@@ -60,6 +65,7 @@ export const useAgentBuilderAttachment = ({
   origin,
   attachmentPrompt,
   attachmentDescription,
+  autoSendInitialMessage,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
   const hasWarned = useRef(false);
@@ -85,7 +91,7 @@ export const useAgentBuilderAttachment = ({
     };
 
     agentBuilder.openChat({
-      autoSendInitialMessage: false,
+      autoSendInitialMessage: autoSendInitialMessage ?? false,
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
@@ -98,6 +104,7 @@ export const useAgentBuilderAttachment = ({
     origin,
     attachmentPrompt,
     attachmentDescription,
+    autoSendInitialMessage,
     agentBuilder,
   ]);
 

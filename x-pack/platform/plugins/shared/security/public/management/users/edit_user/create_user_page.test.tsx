@@ -9,6 +9,7 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { CreateUserPage } from './create_user_page';
@@ -46,14 +47,18 @@ describe('CreateUserPage', () => {
 
     const { findByRole, findByLabelText } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <CreateUserPage />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <CreateUserPage />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     fireEvent.change(await findByLabelText('Username'), { target: { value: 'jdoe' } });
-    fireEvent.change(await findByLabelText('Password'), { target: { value: 'changeme' } });
+    fireEvent.change(await findByLabelText('Password', { selector: 'input' }), {
+      target: { value: 'changeme' },
+    });
     fireEvent.change(await findByLabelText('Confirm password'), {
       target: { value: 'changeme' },
     });
@@ -83,9 +88,11 @@ describe('CreateUserPage', () => {
 
     render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <CreateUserPage />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <CreateUserPage />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
@@ -108,9 +115,11 @@ describe('CreateUserPage', () => {
 
     const { findAllByText, findByRole, findByLabelText } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <CreateUserPage />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <CreateUserPage />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
@@ -152,11 +161,15 @@ describe('CreateUserPage', () => {
       /Username must contain only letters, numbers, spaces, punctuation, and symbols/i
     );
 
-    fireEvent.change(await findByLabelText('Password'), { target: { value: '111' } });
+    fireEvent.change(await findByLabelText('Password', { selector: 'input' }), {
+      target: { value: '111' },
+    });
 
     await findAllByText(/Password must be at least 6 characters/i);
 
-    fireEvent.change(await findByLabelText('Password'), { target: { value: '123456' } });
+    fireEvent.change(await findByLabelText('Password', { selector: 'input' }), {
+      target: { value: '123456' },
+    });
     fireEvent.change(await findByLabelText('Confirm password'), { target: { value: '111' } });
 
     await findAllByText(/Passwords do not match/i);

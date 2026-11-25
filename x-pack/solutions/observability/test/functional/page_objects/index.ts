@@ -9,11 +9,9 @@ import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platf
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraLogsPageProvider } from './infra_logs_page';
 import { InfraSavedViewsProvider } from './infra_saved_views';
-import { UptimePageObject } from './uptime_page';
 import { ObservabilityPageProvider } from './observability_page';
 import { AlertControlsProvider } from './alert_controls';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
-import { DatasetQualityPageObject } from './dataset_quality';
 
 export const pageObjects = {
   ...platformPageObjects,
@@ -22,7 +20,5 @@ export const pageObjects = {
   infraLogs: InfraLogsPageProvider,
   infraSavedViews: InfraSavedViewsProvider,
   observability: ObservabilityPageProvider,
-  uptime: UptimePageObject,
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
-  datasetQuality: DatasetQualityPageObject,
 };

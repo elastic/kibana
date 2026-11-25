@@ -8,12 +8,20 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
-const mockUpsertRule = jest.fn().mockResolvedValue({});
-const mockNavigateToUrl = jest.fn();
+const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
+const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
+const mockRulesNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
-const mockPrepend = (path: string) => `/base${path}`;
+
+jest.mock('../../application/bind_locators_to_host', () => ({
+  bindLocatorsToHost: (locators: unknown, _host: unknown) => locators,
+  getAlertingV2Locators: () => ({
+    rulesLocators: { navigateSync: (...args: unknown[]) => mockRulesNavigateSync(...args) },
+  }),
+}));
 
 jest.mock('@kbn/core-di-browser', () => ({
   Context: {
@@ -21,16 +29,10 @@ jest.mock('@kbn/core-di-browser', () => ({
   },
   CoreStart: (key: string) => key,
   useService: (token: unknown) => {
-    if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: mockPrepend } };
-    }
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
-    return { upsertRule: mockUpsertRule };
+    return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
 }));
 
@@ -38,17 +40,17 @@ jest.mock('../../services/rules_api', () => ({
   RulesApi: Symbol('RulesApi'),
 }));
 
-jest.mock('../../components/rule_details/rule_context', () => ({
-  RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('../../components/rule/rule_summary', () => ({
+  RuleSummaryBody: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="mockRuleSummaryBody">{children}</div>
+  ),
+  RuleSummaryAboutSection: () => <div data-test-subj="mockAboutSection" />,
+  RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
+  RuleSummaryArtifactsSection: () => <div data-test-subj="mockArtifactsSection" />,
 }));
 
-jest.mock('../../components/rule_details/rule_summary_header', () => ({
-  RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
-  RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
-}));
-
-jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
-  RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
+jest.mock('../../components/rule/rule_summary/rule_summary_query_preview_section', () => ({
+  RuleSummaryQueryPreviewSection: () => <div data-test-subj="mockQueryPreviewSection" />,
 }));
 
 const createMockServices = () => ({
@@ -66,8 +68,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     metadata: { name: 'My Rule', tags: ['tag1'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-    state_transition: null,
+    query: { base: 'FROM logs-*' },
     enabled: overrides.enabled,
   } as any,
 });
@@ -84,11 +85,55 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns watchesApp', () => {
+    it('returns if', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
 
-      expect(definition.getIcon!()).toBe('watchesApp');
+      expect(definition.getIcon!()).toBe('if');
+    });
+  });
+
+  describe('getHeader', () => {
+    it.each([
+      ['alert', 'bell'],
+      ['signal', 'chartBarVertical'],
+    ])('returns the %s kind icon', (kind, icon) => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+
+      expect(definition.getHeader!({ attachment: { data: { kind } } as any })).toEqual({ icon });
+    });
+
+    it('adds an unsaved changes badge when the latest version is newer than the last sync', () => {
+      const definition = createRuleAttachmentDefinition(createMockServices());
+      const attachment = {
+        ...createAttachment({ origin: 'rule-123' }),
+        versionData: {
+          version: 2,
+          versionCount: 2,
+          createdAt: '2026-04-02T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      };
+
+      expect(definition.getHeader!({ attachment }).badges).toEqual([
+        { label: 'Unsaved', color: 'primary', iconType: 'save' },
+      ]);
+    });
+
+    it('has no badge when the latest version matches the last sync', () => {
+      const definition = createRuleAttachmentDefinition(createMockServices());
+      const attachment = {
+        ...createAttachment({ origin: 'rule-123' }),
+        versionData: {
+          version: 1,
+          versionCount: 1,
+          createdAt: '2026-04-01T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      };
+
+      expect(definition.getHeader!({ attachment }).badges).toBeUndefined();
     });
   });
 
@@ -135,7 +180,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('draft')).toBeDefined();
+      expect(getByText('Draft')).toBeDefined();
     });
 
     it('shows enabled status when origin set and enabled is undefined (server default)', () => {
@@ -147,7 +192,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('enabled')).toBeDefined();
+      expect(getByText('Enabled')).toBeDefined();
     });
 
     it('shows disabled status when origin set and enabled is false', () => {
@@ -159,7 +204,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('disabled')).toBeDefined();
+      expect(getByText('Disabled')).toBeDefined();
     });
 
     it('shows schedule interval', () => {
@@ -171,12 +216,12 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('Every 5m')).toBeDefined();
+      expect(getByText('Every 5 min')).toBeDefined();
     });
   });
 
   describe('renderCanvasContent', () => {
-    it('renders sidebar and header description', () => {
+    it('renders the Agent Builder summary composition', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
       const attachment = createAttachment();
@@ -194,8 +239,11 @@ describe('createRuleAttachmentDefinition', () => {
         </>
       );
 
-      expect(getByTestId('mockRuleSidebar')).toBeDefined();
-      expect(getByTestId('mockRuleHeaderDescription')).toBeDefined();
+      expect(getByTestId('mockRuleSummaryBody')).toBeDefined();
+      expect(getByTestId('mockAboutSection')).toBeDefined();
+      expect(getByTestId('mockInvestigationSection')).toBeDefined();
+      expect(getByTestId('mockQueryPreviewSection')).toBeDefined();
+      expect(getByTestId('mockArtifactsSection')).toBeDefined();
     });
 
     it('registers Create rule button for unsaved attachment', () => {
@@ -285,11 +333,12 @@ describe('createRuleAttachmentDefinition', () => {
     });
 
     describe('Update Rule handler', () => {
-      it('calls upsertRule with the origin id', async () => {
+      it('calls upsertRule with the origin id and refreshes the origin', async () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment({ origin: 'rule-123' });
         const registerActionButtons = jest.fn();
+        const updateOrigin = jest.fn().mockResolvedValue(undefined);
 
         render(
           <>
@@ -297,7 +346,7 @@ describe('createRuleAttachmentDefinition', () => {
               { attachment, isSidebar: false },
               {
                 registerActionButtons,
-                updateOrigin: jest.fn(),
+                updateOrigin,
                 closeCanvas: jest.fn(),
               }
             )}
@@ -313,6 +362,7 @@ describe('createRuleAttachmentDefinition', () => {
           'rule-123',
           expect.objectContaining({ metadata: attachment.data.metadata })
         );
+        expect(updateOrigin).toHaveBeenCalledWith('rule-123');
       });
     });
 
@@ -341,7 +391,10 @@ describe('createRuleAttachmentDefinition', () => {
         const viewButton = buttons.find((b: { label: string }) => b.label === 'View in Rules');
         viewButton.handler();
 
-        expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('rule-123'));
+        expect(mockRulesNavigateSync).toHaveBeenCalledWith({
+          ruleId: 'rule-123',
+          host: OBSERVABILITY_ALERTING_HOST.rules,
+        });
       });
     });
   });

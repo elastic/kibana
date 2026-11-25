@@ -167,6 +167,7 @@ export interface DatatableColumn {
   id: string;
   name: string;
   meta: DatatableColumnMeta;
+  /** An ES|QL column without values. Rows have no key for it, and the row values follow the other columns' order. */
   isNull?: boolean;
   // Whether the column is computed by the query (not from the index)
   isComputedColumn?: boolean;
@@ -201,6 +202,11 @@ export interface DatatableMeta {
    * The `Datatable` data source.
    */
   source?: string;
+
+  /**
+   * Whether approximate results were applied for the query that generated the `Datatable`.
+   */
+  approximationApplied?: boolean;
 
   [key: string]: unknown;
 }

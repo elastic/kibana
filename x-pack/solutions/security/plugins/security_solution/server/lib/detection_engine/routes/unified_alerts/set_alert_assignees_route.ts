@@ -31,7 +31,9 @@ import {
 import {
   fetchAllAlertIdIndexWithSource,
   collectChangedIdsByFamily,
+  computeActualDelta,
 } from '../common/operations/prefetch_previous_statuses';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -89,8 +91,15 @@ export const setUnifiedAlertsAssigneesRoute = (
           MAX_ASSIGNEES_PER_OPERATION
         );
         const operationTruncated =
+          allValidAssigneesToAdd.length !== assignees.add.length ||
+          allValidAssigneesToRemove.length !== assignees.remove.length ||
           allValidAssigneesToAdd.length > MAX_ASSIGNEES_PER_OPERATION ||
           allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
+
+        let alertAssigneesActuallyAdded = validAssigneesToAdd;
+        let alertAssigneesActuallyRemoved = validAssigneesToRemove;
+        let attackAssigneesActuallyAdded = validAssigneesToAdd;
+        let attackAssigneesActuallyRemoved = validAssigneesToRemove;
 
         if (eventBus) {
           try {
@@ -107,13 +116,33 @@ export const setUnifiedAlertsAssigneesRoute = (
                   ? (source[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[])
                   : []
               );
-              // Use allValid* (not the capped arrays) so a UID beyond position 100 that would
-              // actually change the document still triggers the event.
+              // Use the raw request arrays so over-length UIDs that would change a document
+              // still trigger the event; allValid* is only used for the schema-bounded payload.
               return (
-                allValidAssigneesToAdd.some((uid) => !currentAssignees.has(uid)) ||
-                allValidAssigneesToRemove.some((uid) => currentAssignees.has(uid))
+                assignees.add.some((uid) => !currentAssignees.has(uid)) ||
+                assignees.remove.some((uid) => currentAssignees.has(uid))
               );
             }));
+            // Compute independent per-family deltas: an assignee already on every attack doc
+            // must not appear in the alert emit's assigneesAdded, and vice versa.
+            const alertHits = hits.filter((h) => !isAttackDiscoveryIndex(h.index));
+            const attackHits = hits.filter((h) => isAttackDiscoveryIndex(h.index));
+            const alertDelta = computeActualDelta(
+              alertHits.map((h) => h.source),
+              validAssigneesToAdd,
+              validAssigneesToRemove,
+              ALERT_WORKFLOW_ASSIGNEE_IDS
+            );
+            const attackDelta = computeActualDelta(
+              attackHits.map((h) => h.source),
+              validAssigneesToAdd,
+              validAssigneesToRemove,
+              ALERT_WORKFLOW_ASSIGNEE_IDS
+            );
+            alertAssigneesActuallyAdded = alertDelta.actualAdded;
+            alertAssigneesActuallyRemoved = alertDelta.actualRemoved;
+            attackAssigneesActuallyAdded = attackDelta.actualAdded;
+            attackAssigneesActuallyRemoved = attackDelta.actualRemoved;
           } catch {
             logger.warn('Failed to pre-fetch alert indices for workflow trigger (assignees)');
           }
@@ -125,16 +154,16 @@ export const setUnifiedAlertsAssigneesRoute = (
             if (attackIds.length > 0) {
               void eventBus.emitAttackAssigneesChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: validAssigneesToAdd,
-                assigneesToRemove: validAssigneesToRemove,
+                assigneesAdded: attackAssigneesActuallyAdded,
+                assigneesRemoved: attackAssigneesActuallyRemoved,
                 truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertAssigneesChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: validAssigneesToAdd,
-                assigneesToRemove: validAssigneesToRemove,
+                assigneesAdded: alertAssigneesActuallyAdded,
+                assigneesRemoved: alertAssigneesActuallyRemoved,
                 truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }

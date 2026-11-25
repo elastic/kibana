@@ -48,17 +48,17 @@ export interface CommandArgDefinition {
   about: ReactNode;
 
   /**
-   * If argument (when used) should have a value defined by the user.
-   * Default is `false` which mean that argument can be entered without any value - internally the
-   * value for the argument will be a boolean `true`.
-   * When set to `true` the argument is expected to have a value that is non-boolean
-   * In addition, the following options can be used with this parameter to further validate the user's input:
+   * If argument (when used) should have a value defined by the user. Default is `false`
+   * This parameter supports the following values:
    *
-   * - `non-empty-string`: user's value must be a string whose length is greater than zero. Note that
-   *   the value entered will first be `trim()`'d.
-   * - `number`: user's value will be converted to a Number and ensured to be a `safe integer`
-   * - `number-greater-than-zero`: user's value must be a number greater than zero
-   * - `truthy`: The argument must have a value and the values must be "truthy" (evaluate to `Boolean` true)
+   * - `false`: argument does not accept a value from the user. Internally, the value for the
+   *            argument will be a boolean `true`.
+   * - `true`: the argument is expected to have a value that is non-boolean
+   * - `'non-empty-string'`: user's value must be a string whose length is greater than zero. Note that
+   *    the value entered will first be `trim()`'d.
+   * - `'number'`: user's value will be converted to a Number and ensured to be a `safe integer`
+   * - `'number-greater-than-zero'`: user's value must be a number greater than zero
+   * - `'truthy'`: The argument must have a value and the values must be "truthy" (evaluate to `Boolean` true)
    */
   mustHaveValue?: boolean | 'non-empty-string' | 'number' | 'number-greater-than-zero' | 'truthy';
 
@@ -418,6 +418,13 @@ export interface ConsoleProps extends CommonProps {
    * allows for interacting with the console from outside the component.
    */
   apiRef?: MutableRefObject<ConsoleApi | undefined>;
+
+  /**
+   * If provided, it will be called with the console's API as soon as that API becomes usable
+   * (once the console has mounted). Prefer this over `apiRef` when the API needs to be used right
+   * after showing the console, because `apiRef` is only populated after the console has rendered.
+   */
+  onApiAvailable?: (api: ConsoleApi) => void;
 
   /**
    * If defined, certain console data (ex. command input history) will be persisted to localstorage

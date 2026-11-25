@@ -8,12 +8,18 @@
  */
 
 import { ExistenceFetchStatus } from '@kbn/unified-field-list';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { TABS_LOCAL_STORAGE_KEY } from '../tabs_storage_manager';
 import {
   createTabItem,
   DEFAULT_EXPANDED_DOC_OWNER,
   DEFAULT_HISTOGRAM_KEY_PREFIX,
   internalStateActions,
+  getTabDataView,
   selectTabRuntimeState,
   selectTab,
 } from '.';
@@ -38,19 +44,19 @@ describe('InternalStateStore', () => {
       store: toolkit.internalState,
       runtimeStateManager: toolkit.runtimeStateManager,
       initializeSingleTab: toolkit.initializeSingleTab,
+      services: toolkit.services,
     };
   };
+
+  const registerEsqlSource = (source: EsqlSource) =>
+    registerEsqlSourceInDataViewsCache(createMockDataViewsService(), source);
 
   it('should set data view', async () => {
     const { store, runtimeStateManager } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    expect(
-      selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
-    ).toBeUndefined();
+    expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBeUndefined();
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
-    expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
-      dataViewMock
-    );
+    expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(dataViewMock);
   });
 
   it('should clear expandedDoc when setDataView is called with a different data view id', async () => {
@@ -83,6 +89,58 @@ describe('InternalStateStore', () => {
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+  });
+
+  it('should not clear expandedDoc when ES|QL DataView id changes but the dataset is the same', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const descSource = await EsqlSource.create({
+      query: 'FROM logstash-* | SORT @timestamp DESC',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const ascSource = await EsqlSource.create({
+      query: 'FROM logstash-* | SORT @timestamp ASC',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const esqlDataView = await registerEsqlSource(descSource);
+    await registerEsqlSource(ascSource);
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, esqlDataView);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: descSource }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: ascSource }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+  });
+
+  it('should clear expandedDoc when ES|QL DataView index pattern changes', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const logsSource = await EsqlSource.create({
+      query: 'FROM logstash-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const metricsSource = await EsqlSource.create({
+      query: 'FROM metrics-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const esqlDataView = await registerEsqlSource(logsSource);
+    await registerEsqlSource(metricsSource);
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, esqlDataView);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: logsSource }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: metricsSource }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
   });
 
   it('should append a new tab to the tabs list', async () => {
@@ -502,6 +560,38 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBe('Table');
   });
 
+  it('should set expandedDocCascadePath for cascade owned flyouts', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const expandedDocCascadePath = {
+      nodePath: ['extension'],
+      nodePathMap: { extension: 'png' },
+    };
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: mockDoc,
+        expandedDocOwner: 'nested-grid',
+        expandedDocCascadePath,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toEqual(
+      expandedDocCascadePath
+    );
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: undefined,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toBeUndefined();
+  });
+
   it('should default expandedDocOwner to the main grid when not provided', async () => {
     const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
@@ -646,6 +736,7 @@ describe('InternalStateStore', () => {
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toBeUndefined();
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBeUndefined();
   });
@@ -683,6 +774,46 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
+  });
+
+  describe('local tabs persistence', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      localStorage.removeItem(TABS_LOCAL_STORAGE_KEY);
+    });
+
+    it('should persist the unsaved tab ids only when they change', async () => {
+      const services = createDiscoverServicesMock();
+      services.storage = new Storage(localStorage);
+      const toolkit = getDiscoverInternalStateMock({
+        services,
+        tabsStorageEnabled: true,
+        persistedDataViews: [dataViewMock],
+      });
+      await toolkit.initializeTabs();
+      await jest.runAllTimersAsync();
+
+      const { internalState } = toolkit;
+      const unsavedTabIds = [internalState.getState().tabs.unsafeCurrentId];
+      const setStorageSpy = jest.spyOn(services.storage, 'set');
+
+      internalState.dispatch(
+        internalStateActions.setUnsavedChanges({ hasUnsavedChanges: true, unsavedTabIds })
+      );
+      await jest.runAllTimersAsync();
+      internalState.dispatch(
+        internalStateActions.setUnsavedChanges({ hasUnsavedChanges: true, unsavedTabIds })
+      );
+      await jest.runAllTimersAsync();
+
+      expect(setStorageSpy.mock.calls).toEqual([
+        [TABS_LOCAL_STORAGE_KEY, expect.objectContaining({ unsavedTabIds })],
+      ]);
+    });
   });
 
   describe('discardFlyoutsOnTabChange', () => {

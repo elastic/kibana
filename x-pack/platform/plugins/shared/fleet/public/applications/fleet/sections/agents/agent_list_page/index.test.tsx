@@ -51,6 +51,11 @@ jest.mock('../../../hooks', () => ({
     items: [
       { id: 'policy1', is_managed: false },
       { id: 'managed_policy', is_managed: true },
+      {
+        id: 'fleet_server_policy',
+        is_managed: false,
+        package_policies: [{ package: { name: 'fleet_server' } }],
+      },
     ],
   }),
   sendGetAgentPolicies: jest.fn().mockResolvedValue({ data: { items: [] } }),
@@ -76,7 +81,9 @@ jest.mock('../../../hooks', () => ({
   }),
   useBreadcrumbs: jest.fn(),
   useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
-  useUrlParams: jest.fn().mockReturnValue({ urlParams: { kuery: '' } }),
+  useUrlParams: jest
+    .fn()
+    .mockReturnValue({ urlParams: { kuery: '' }, toUrlParams: jest.fn(() => '') }),
   useKibanaVersion: jest.fn().mockReturnValue('8.3.0'),
   useFleetServerUnhealthy: jest.fn().mockReturnValue({
     isUnhealthy: false,
@@ -95,6 +102,8 @@ const mockSessionState = {
   page: { index: 0, size: 20 },
 };
 
+const mockUpdateTableState = jest.fn();
+
 const mockOnTableChange = jest.fn((changes: any) => {
   if (changes.sort) {
     mockSessionState.sort = changes.sort;
@@ -107,7 +116,7 @@ const mockOnTableChange = jest.fn((changes: any) => {
 jest.mock('./hooks/use_session_agent_list_state', () => ({
   useSessionAgentListState: jest.fn(() => ({
     ...mockSessionState,
-    updateTableState: jest.fn(),
+    updateTableState: mockUpdateTableState,
     onTableChange: mockOnTableChange,
     clearFilters: jest.fn(),
     resetToDefaults: jest.fn(),
@@ -134,9 +143,40 @@ jest.mock('./hooks/use_session_agent_list_state', () => ({
 
 jest.mock('./components/search_and_filter_bar', () => {
   return {
-    SearchAndFilterBar: () => <>SearchAndFilterBar</>,
+    SearchAndFilterBar: ({
+      onClickAddCollector,
+      selectionHasFleetServer,
+    }: {
+      onClickAddCollector: () => void;
+      selectionHasFleetServer: boolean;
+    }) => (
+      <>
+        SearchAndFilterBar
+        <span data-test-subj="mockSelectionHasFleetServer">{String(selectionHasFleetServer)}</span>
+        <button data-test-subj="mockAddCollectorButton" onClick={onClickAddCollector}>
+          Add collector
+        </button>
+      </>
+    ),
   };
 });
+
+jest.mock('./components/add_collector_flyout', () => ({
+  AddCollectorFlyout: ({
+    onClose,
+    onClickViewAgents,
+  }: {
+    onClose: () => void;
+    onClickViewAgents: () => void;
+  }) => (
+    <div data-test-subj="addCollectorFlyout">
+      <button data-test-subj="mockViewCollectorsButton" onClick={onClickViewAgents}>
+        View connected collectors
+      </button>
+      <button onClick={onClose}>Close</button>
+    </div>
+  ),
+}));
 
 const mockedSendGetAgentsForRq = sendGetAgentsForRq as jest.Mock;
 const mockedSendGetAgentStatus = sendGetAgentStatus as jest.Mock;
@@ -325,6 +365,65 @@ describe('agent_list_page', () => {
     });
   });
 
+  describe('Fleet Server in a bulk selection', () => {
+    let renderResult: RenderResult;
+
+    const selectRow = async (hostname: string) => {
+      const checkbox = renderResult
+        .getByText(hostname)
+        .closest('tr')!
+        .querySelector('input[type="checkbox"]')!;
+      await act(async () => {
+        fireEvent.click(checkbox);
+      });
+    };
+
+    beforeEach(async () => {
+      mockedSendGetAgentsForRq.mockResolvedValue({
+        items: [
+          {
+            id: 'agent1',
+            active: true,
+            policy_id: 'policy1',
+            local_metadata: { host: { hostname: 'agent1' } },
+          },
+          {
+            id: 'agent2',
+            active: true,
+            policy_id: 'fleet_server_policy',
+            local_metadata: { host: { hostname: 'agent2' } },
+          },
+        ],
+        total: 2,
+        statusSummary: { online: 2 },
+      });
+      mockedSendGetAgentStatus.mockResolvedValue({
+        data: { results: { inactive: 0 }, totalInactive: 0 },
+      });
+
+      const renderer = createFleetTestRendererMock();
+      await act(async () => {
+        renderResult = renderer.render(<AgentListPage />);
+      });
+      await waitFor(() => {
+        expect(renderResult.queryByText('Showing 2 agents')).toBeInTheDocument();
+      });
+    });
+
+    it('should flag a manual selection that includes a Fleet Server agent', async () => {
+      await selectRow('agent1');
+      await selectRow('agent2');
+
+      expect(renderResult.getByTestId('mockSelectionHasFleetServer')).toHaveTextContent('true');
+    });
+
+    it('should not flag a manual selection without a Fleet Server agent', async () => {
+      await selectRow('agent1');
+
+      expect(renderResult.getByTestId('mockSelectionHasFleetServer')).toHaveTextContent('false');
+    });
+  });
+
   describe('Uninstall agent', () => {
     let renderResult: RenderResult;
 
@@ -428,6 +527,49 @@ describe('agent_list_page', () => {
       });
 
       expect(renderResult.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
+    });
+  });
+
+  describe('Add collector flyout', () => {
+    beforeEach(async () => {
+      mockUpdateTableState.mockClear();
+      mockedSendGetAgentsForRq.mockResolvedValue({
+        items: [],
+        total: 0,
+        statusSummary: {},
+      });
+      mockedSendGetAgentStatus.mockResolvedValue({
+        data: { results: { inactive: 0 }, totalInactive: 0 },
+      });
+    });
+
+    it('filters the agent list to OPAMP collectors when "View connected collectors" is clicked', async () => {
+      const renderer = createFleetTestRendererMock();
+      let renderResult: RenderResult;
+
+      await act(async () => {
+        renderResult = renderer.render(<AgentListPage />);
+      });
+
+      // Open the Add Collector flyout
+      await act(async () => {
+        fireEvent.click(renderResult!.getByTestId('mockAddCollectorButton'));
+      });
+
+      await waitFor(() => {
+        expect(renderResult!.getByTestId('addCollectorFlyout')).toBeInTheDocument();
+      });
+
+      // Click "View connected collectors"
+      await act(async () => {
+        fireEvent.click(renderResult!.getByTestId('mockViewCollectorsButton'));
+      });
+
+      // The flyout should close and the search state should be updated with the OPAMP filter
+      expect(renderResult!.queryByTestId('addCollectorFlyout')).not.toBeInTheDocument();
+      expect(mockUpdateTableState).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'fleet-agents.type:OPAMP' })
+      );
     });
   });
 });

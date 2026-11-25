@@ -244,6 +244,27 @@ export const DashboardEditModeConfig: Story = {
   },
 };
 
+export const WithHistory: Story = {
+  args: {
+    config: {
+      historyConfig: {
+        undo: { onClick: action('undo') },
+        redo: { onClick: action('redo'), disabled: true },
+      },
+      items: [
+        { id: 'share', label: 'Share', iconType: 'share', run: action('share') },
+        { id: 'export', label: 'Export', iconType: 'upload', run: action('export') },
+      ],
+      primaryActionItem: {
+        id: 'edit',
+        label: 'Edit',
+        iconType: 'pencil',
+        run: action('edit'),
+      },
+    },
+  },
+};
+
 const standaloneForcedOverflowConfig: AppMenuConfig = {
   items: [
     {

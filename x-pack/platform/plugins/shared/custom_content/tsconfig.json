@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
@@ -13,11 +13,10 @@
     "@kbn/data-plugin",
     "@kbn/esql-utils",
     "@kbn/es-query",
-    "@kbn/es-types",
-    "@kbn/datemath",
     "@kbn/search-types",
     "@kbn/custom-content-common",
-    "@kbn/custom-content-server",
+    "@kbn/custom-content-renderer",
+    "@kbn/agent-builder-visualizations-server",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
@@ -31,7 +30,13 @@
     "@kbn/data-views-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util",
-    "@kbn/esql-types"
+    "@kbn/scout",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/kbn-client",
+    "@kbn/esql-types",
+    "@kbn/i18n-react",
+    "@kbn/inspector-plugin",
+    "@kbn/unified-tabs"
   ],
   "exclude": ["target/**/*"]
 }

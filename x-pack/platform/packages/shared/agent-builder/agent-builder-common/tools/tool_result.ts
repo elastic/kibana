@@ -126,14 +126,8 @@ export enum SupportedChartType {
   Mosaic = 'mosaic',
 }
 
-export interface VisualizationResultData {
-  esql: string;
+interface VisualizationResultDataBase {
   time_range?: TimeRange;
-  renderer?: 'lens' | 'vega';
-  /** Shared visualization payload. Vega stores spec at visualization.spec. */
-  visualization: Record<string, unknown> & { spec?: string };
-  /** Optional chart type identifier (primarily Lens). */
-  chart_type?: SupportedChartType;
   /**
    * ID of the persisted visualization attachment. Present when persistence
    * succeeded; the agent renders the visualization inline via
@@ -143,6 +137,31 @@ export interface VisualizationResultData {
   /** Version of the persisted attachment backing this result. */
   version?: number;
 }
+
+/** A Lens or Vega result. `renderer` is omitted on results predating the discriminator. */
+export interface ChartVisualizationResultData extends VisualizationResultDataBase {
+  esql: string;
+  renderer?: 'lens' | 'vega';
+  /** Shared visualization payload. Vega stores spec at visualization.spec. */
+  visualization: Record<string, unknown> & { spec?: string };
+  /** Optional chart type identifier (primarily Lens). */
+  chart_type?: SupportedChartType;
+}
+
+/**
+ * A custom content result. The HTML template is deliberately absent — it lives in the
+ * attachment, and round-tripping KBs of markup through the model invites corruption.
+ */
+export interface CustomContentVisualizationResultData extends VisualizationResultDataBase {
+  renderer: 'custom_content';
+  esql?: string;
+  /** The prompt the template was generated from. */
+  visualization: { prompt: string };
+}
+
+export type VisualizationResultData =
+  | ChartVisualizationResultData
+  | CustomContentVisualizationResultData;
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;
 
@@ -200,6 +219,21 @@ export const isOtherResult = <T extends Object = Record<string, unknown>>(
 
 export const isErrorResult = (result: ToolResult): result is ErrorResult => {
   return result.type === ToolResultType.error;
+};
+
+/**
+ * `metadata.declined_reason` of the error result a non-interactive run returns in place of a HITL
+ * prompt (tool confirmation, on-demand prompt, destructive API approval): with no user to answer,
+ * the call is declined and the agent is told why.
+ */
+export const NON_INTERACTIVE_DECLINED_REASON = 'non_interactive';
+
+/** True for the error result that stands in for a HITL prompt auto-declined in a non-interactive run. */
+export const isNonInteractiveDeclinedResult = (result: ToolResult): result is ErrorResult => {
+  return (
+    isErrorResult(result) &&
+    result.data.metadata?.declined_reason === NON_INTERACTIVE_DECLINED_REASON
+  );
 };
 
 export const isFileReferenceResult = (result: ToolResult): result is FileReferenceResult => {

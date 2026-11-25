@@ -37,8 +37,10 @@ import type {
   LogsEndpointActionResponse,
   ProcessesEntry,
   ResponseActionExecuteOutputContent,
+  ResponseActionExportedOutput,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionMemoryDumpParameters,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
@@ -53,6 +55,23 @@ import {
 } from '../service/response_actions/constants';
 import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 import { ActivityLogItemTypes } from '../types';
+
+const KILL_PROCESS_RESPONSE_CODES = Object.freeze([
+  'ra_kill-process_success_done',
+  'ra_kill-process_success_partial-descendants',
+  'ra_kill-process_error_not-found',
+  'ra_kill-process_success_no-action',
+  'ra_kill-process_error_not-permitted',
+  'ra_kill-process_error_not-supported',
+  'ra_kill-process_error_invalid-input',
+  'ra_kill-process_error_failure',
+  'ra_kill-process_descendant_error_not-found',
+  'ra_kill-process_descendant_error_failure',
+  'ra_kill-process_descendant_success_done',
+  'ra_kill-process_descendant_error_not-permitted',
+  'ra_kill-process_descendant_error_not-supported',
+  'ra_kill-process_descendant_error_invalid-input',
+]);
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -358,6 +377,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
 
       if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        const exportProviderId = (overrides.parameters as ResponseActionGetFileParameters)?.export;
+
         (
           details as unknown as ActionDetails<
             ResponseActionGetFileOutputContent,
@@ -374,10 +395,19 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             content: {
               code: 'ra_get-file_success',
               zip_size: 123,
-              downloadUri: ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
-                `{action_id}`,
-                details.id
-              ).replace(`{file_id}`, agentId),
+              ...(typeof exportProviderId === 'string'
+                ? {
+                    exported: this.generateExportedOutput({
+                      export: exportProviderId,
+                      path: `${overrides.id ?? details.id}/upload.zip`,
+                    }),
+                  }
+                : {
+                    downloadUri: ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
+                      `{action_id}`,
+                      details.id
+                    ).replace(`{file_id}`, agentId),
+                  }),
               contents: [
                 {
                   path: '/some/file/txt',
@@ -512,14 +542,27 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         details.outputs = {};
       }
 
+      const exportProviderId = (overrides.parameters as ResponseActionMemoryDumpParameters)?.export;
+
       for (const agentId of details.agents) {
+        const dumpFileName = 'memory-dump.2025-11-03T16:22:05.365Z.zip';
+
         details.outputs[agentId] = {
           type: 'json',
           content: {
             code: 'ra_memory-dump-success',
-            path: `/home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip`,
+            path: `/home/user/${agentId}/tmp/${dumpFileName}`,
             file_size: 23895729,
             disk_free_space: 1234567000,
+            ...(typeof exportProviderId === 'string'
+              ? {
+                  file_name: dumpFileName,
+                  exported: this.generateExportedOutput({
+                    export: exportProviderId,
+                    path: `${overrides.id ?? details.id}/upload.zip`,
+                  }),
+                }
+              : {}),
             ...(details.parameters?.type === 'raw'
               ? {
                   total_memory_size: 53_000_000,
@@ -569,6 +612,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     >;
   }
 
+  /** Generates the output Endpoint reports when a file was uploaded to an export provider instead of Fleet */
+  generateExportedOutput(
+    overrides: Partial<ResponseActionExportedOutput> = {}
+  ): ResponseActionExportedOutput {
+    return {
+      export: 'azure-1',
+      service: 'azure_blob',
+      account: 'acct',
+      container: 'response-actions',
+      path: `${this.seededUUIDv4()}/upload.zip`,
+      ...overrides,
+    };
+  }
+
   randomGetFileFailureCode(): string {
     return this.randomChoice([
       'ra_get-file_error_canceled',
@@ -583,6 +640,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_get-file_error_upload-timeout',
       'ra_get-file_error_queue-timeout',
       'ra_get-file_error_not-enough-free-space',
+      'ra_get-file_error_file-locked',
     ]);
   }
 
@@ -596,6 +654,48 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_scan_error_processing',
       'ra_scan_error_processing-interrupted',
     ]);
+  }
+
+  /**
+   * Returns a random kill-process code for the "main" process
+   */
+  randomKillProcessResponseCode(type?: 'error' | 'success'): string {
+    const codeList = KILL_PROCESS_RESPONSE_CODES.filter((code) => {
+      if (/_descendant_/.test(code)) {
+        return false;
+      }
+
+      if (!type) {
+        return true;
+      }
+
+      if (type === 'error') {
+        return /_error_/.test(code);
+      }
+
+      return /_success_/.test(code);
+    });
+
+    return this.randomChoice(codeList);
+  }
+
+  /**
+   * Returns a random kill-process code for a descendant process
+   */
+  randomKillProcessDescendantResponseCode(type: 'error' | 'success'): string {
+    const codeList = KILL_PROCESS_RESPONSE_CODES.filter((code) => {
+      if (!/_descendant_/.test(code)) {
+        return false;
+      }
+
+      if (type === 'error') {
+        return /_error_/.test(code);
+      }
+
+      return /_success_/.test(code);
+    });
+
+    return this.randomChoice(codeList);
   }
 
   generateActivityLogAction(
@@ -703,14 +803,17 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       {
         type: 'json',
         content: {
-          code: atError ? 'ra_kill-process_error_not-found' : 'ra_kill-process_success_done',
+          code: atError
+            ? this.randomKillProcessResponseCode('error')
+            : this.randomKillProcessResponseCode('success'),
           ...(!atError
             ? {
                 command: this.randomFileSystemPath(),
                 pid: parameters.pid || 234,
                 ...(parameters?.entity_id ? { entity_id: parameters.entity_id } : {}),
                 ...(parameters?.process_name ? { process_name: parameters.process_name } : {}),
-                ...((parameters as ResponseActionParametersWithPid).kill_descendants
+                ...((parameters as ResponseActionParametersWithPid).kill_descendants &&
+                !overrides.content?.descendants
                   ? {
                       descendants: [
                         {
@@ -719,7 +822,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.456',
                           parent_entity_id: 'ksuqwn8364fnbks.234',
                           command: '456_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 567,
@@ -727,7 +830,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.567',
                           parent_entity_id: 'ksuqwn8364fnbks.456',
                           command: '567_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 5671,
@@ -735,7 +838,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.5671',
                           parent_entity_id: 'ksuqwn8364fnbks.567',
                           command: '5671_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 56711,
@@ -743,7 +846,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.56711',
                           parent_entity_id: 'ksuqwn8364fnbks.5671',
                           command: '56711_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 56712,
@@ -751,7 +854,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.56712',
                           parent_entity_id: 'ksuqwn8364fnbks.5671',
                           command: '56712_command.exe',
-                          was_killed: true,
+                          code: 'ra_kill-process_descendant_success_done',
                         },
                         {
                           pid: 654,
@@ -759,8 +862,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                           entity_id: 'ksuqwn8364fnbks.654',
                           parent_entity_id: 'ksuqwn8364fnbks.234',
                           command: '654_command.exe',
-                          was_killed: false,
-                          error: 'process is protected',
+                          code: 'ra_kill-process_descendant_error_failure',
                         },
                       ],
                     }
@@ -806,8 +908,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         parent_entity_id: parentEntityId,
         process_name: command.split('/').pop(),
         command,
-        was_killed: wasKilled,
         error: wasKilled ? undefined : this.randomChoice(possibleErrors),
+        code: wasKilled
+          ? this.randomKillProcessDescendantResponseCode('success')
+          : this.randomKillProcessDescendantResponseCode('error'),
       };
     };
 

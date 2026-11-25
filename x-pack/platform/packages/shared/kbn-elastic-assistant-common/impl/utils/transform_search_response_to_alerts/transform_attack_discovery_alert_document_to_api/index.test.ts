@@ -14,6 +14,7 @@ import {
   ALERT_UPDATED_AT,
   ALERT_UPDATED_BY_USER_ID,
   ALERT_UPDATED_BY_USER_NAME,
+  ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
@@ -96,6 +97,7 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
     [ALERT_UPDATED_AT]: timestamp,
     [ALERT_UPDATED_BY_USER_ID]: 'updater-user-id',
     [ALERT_UPDATED_BY_USER_NAME]: 'Updater User',
+    [ALERT_WORKFLOW_REASON]: 'false_positive',
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS_UPDATED_AT]: timestamp,
     // Required by type
@@ -224,6 +226,7 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
         alert_updated_at: '2024-01-01T00:00:00.000Z',
         alert_updated_by_user_id: 'updater-user-id',
         alert_updated_by_user_name: 'Updater User',
+        alert_workflow_reason: 'false_positive',
         alert_workflow_status: 'open',
         alert_workflow_status_updated_at: '2024-01-01T00:00:00.000Z',
         connector_id: 'connector-id',
@@ -361,6 +364,7 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
         alert_updated_at: '2024-01-01T00:00:00.000Z',
         alert_updated_by_user_id: 'updater-user-id',
         alert_updated_by_user_name: 'Updater User',
+        alert_workflow_reason: 'false_positive',
         alert_workflow_status: 'open',
         alert_workflow_status_updated_at: '2024-01-01T00:00:00.000Z',
         connector_id: 'connector-id',
@@ -416,6 +420,33 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
       });
 
       expect(result.details_markdown).toEqual(`{{ user.name james }}`);
+    });
+  });
+
+  describe('alert_workflow_reason', () => {
+    it('maps kibana.alert.workflow_reason from the document', () => {
+      const result: AttackDiscoveryApiAlert = transformAttackDiscoveryAlertDocumentToApi({
+        attackDiscoveryAlertDocument: mockDocument,
+        enableFieldRendering: true,
+        id,
+        withReplacements: false,
+      });
+
+      expect(result.alert_workflow_reason).toEqual('false_positive');
+    });
+
+    it('returns undefined when the document has no kibana.alert.workflow_reason', () => {
+      const result: AttackDiscoveryApiAlert = transformAttackDiscoveryAlertDocumentToApi({
+        attackDiscoveryAlertDocument: omit(
+          ALERT_WORKFLOW_REASON,
+          mockDocument
+        ) as AttackDiscoveryAlertDocument,
+        enableFieldRendering: true,
+        id,
+        withReplacements: false,
+      });
+
+      expect(result.alert_workflow_reason).toBeUndefined();
     });
   });
 });

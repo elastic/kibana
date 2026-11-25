@@ -8,7 +8,16 @@
  */
 
 import type { monaco, ParsedRequest } from '@kbn/monaco';
+import { createInsideConsoleStringChecker } from '@kbn/monaco/src/languages/definitions/console/utils';
 import { getRequestEndLineNumber, getRequestFromEditor } from './editor_request';
+
+jest.mock('@kbn/monaco/src/languages/definitions/console/utils', () => {
+  const actual = jest.requireActual('@kbn/monaco/src/languages/definitions/console/utils');
+  return {
+    ...actual,
+    createInsideConsoleStringChecker: jest.fn(actual.createInsideConsoleStringChecker),
+  };
+});
 
 describe('editor_request', () => {
   const inlineData = '{"query":"test"}';
@@ -77,6 +86,144 @@ describe('editor_request', () => {
         startLineNumber: 1,
       });
       expect(result).toEqual(3);
+    });
+
+    it('keeps request-like lines inside an unfinished triple-quoted value in the request', () => {
+      const content = ['POST _query', '{', '  "script": """', '  GET _all', '  {', '', '  }'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(7);
+
+      expect(
+        getRequestEndLineNumber({
+          parsedRequest,
+          model,
+          startLineNumber: 4,
+        })
+      ).toEqual(7);
+    });
+
+    it('still detects the next request after a completed triple-quoted value', () => {
+      const content = ['POST _query', '{', '  "script": """done"""', '}', 'GET _search'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(4);
+    });
+
+    it('skips request-like lines inside a closed multi-line triple-quoted value and stops at the next request', () => {
+      const content = [
+        'POST _query',
+        '{',
+        '  "script": """',
+        '  GET _all',
+        '  """',
+        '}',
+        'GET _search',
+      ];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(6);
+    });
+
+    it('detects the next request when empty lines precede a closed string value', () => {
+      // Pins the per-line offset accumulation: empty lines contribute only their newline,
+      // so a drifted offset for POST /b would fall back inside the closed "abc" string.
+      const content = ['GET /a', '{', '', '', '  "s": "abc"', 'POST /b'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(5);
+    });
+
+    it('ignores a stray quote on the request line when the request starts after a block comment', () => {
+      const content = ['/* c', ' */ GET x"', '{"a": ', 'GET y'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 2 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 2,
+      });
+
+      expect(result).toEqual(3);
+    });
+
+    it('does not treat a quote in the request line url as an unfinished string', () => {
+      const content = ['GET /a"b', 'POST /c'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(1);
+    });
+
+    it('scans a large unfinished triple-quoted body with many request-like lines once', () => {
+      const content = [
+        'POST _query',
+        '{',
+        '  "script": """',
+        ...Array.from({ length: 5000 }, () => 'GET _all?padding-to-make-the-line-longer'),
+      ];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+      jest.mocked(createInsideConsoleStringChecker).mockClear();
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(content.length);
+      // One scan of the whole body: rescanning the prefix per request-like line is quadratic here.
+      expect(createInsideConsoleStringChecker).toHaveBeenCalledTimes(1);
     });
   });
 

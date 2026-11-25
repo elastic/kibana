@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/image-embeddable-plugin",
   "owner": [
-    "@elastic/appex-sharedux"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "private",

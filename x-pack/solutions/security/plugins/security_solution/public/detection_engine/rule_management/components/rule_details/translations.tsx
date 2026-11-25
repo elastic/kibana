@@ -201,7 +201,7 @@ export const RULE_NAME_OVERRIDE_FIELD_LABEL = i18n.translate(
 export const THREAT_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFieldLabel',
   {
-    defaultMessage: 'MITRE ATT&CK\u2122',
+    defaultMessage: 'Threat mappings',
   }
 );
 
@@ -477,24 +477,10 @@ export const HAS_RULE_UPDATE_CALLOUT_BUTTON = i18n.translate(
   }
 );
 
-export const MODIFIED_PREBUILT_DIFF_TOOLTIP_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleDiffTooltipTitle',
-  {
-    defaultMessage: 'Modified',
-  }
-);
-
 export const MODIFIED_PREBUILT_DIFF_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleDiffTooltipContent',
   {
     defaultMessage: 'This rule has been modified from the original Elastic version. Click to open.',
-  }
-);
-
-export const NO_BASE_VERSION_MODIFIED_PREBUILT_DIFF_TOOLTIP_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.noBaseVersionRuleDiffTooltipTitle',
-  {
-    defaultMessage: 'Unable to view rule diff',
   }
 );
 

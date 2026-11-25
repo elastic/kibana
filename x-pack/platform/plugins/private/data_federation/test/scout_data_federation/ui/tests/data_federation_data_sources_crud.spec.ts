@@ -14,7 +14,7 @@ import { test, CUSTOM_ROLES } from '../fixtures';
 const S3_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 const S3_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
 
-test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.stateful.classic }, () => {
+test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.deploymentAgnostic }, () => {
   let dataSourceName: string | undefined;
 
   test.afterAll(async ({ kbnClient }) => {
@@ -43,11 +43,7 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
     await test.step('navigate to the Data Federation management app', async () => {
       await pageObjects.dataFederation.goto();
 
-      await page.getByRole('tab', { name: 'Data sources' }).click();
-      await expect(page.getByRole('tab', { name: 'Data sources' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
+      await pageObjects.dataFederation.selectTab('Data sources');
       await expect(pageObjects.dataFederation.dataSourcesTable).toBeVisible();
     });
 
@@ -60,7 +56,6 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
       await pageObjects.dataFederation.createS3DataSource({
         name: createdDataSourceName,
         description: initialDescription,
-        region: 'us-east-1',
         accessKey: S3_ACCESS_KEY,
         secretKey: S3_SECRET_KEY,
       });

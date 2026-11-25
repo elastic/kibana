@@ -44,37 +44,15 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
       await cases.common.waitForCaseViewToLoad();
 
-      if (await cases.common.isRedesignEnabled()) {
-        // Redesign moves the title to the app header and the attributes into the sidebar.
-        const redesignTitle = await testSubjects.find('appHeaderTitle');
-        expect(await redesignTitle.getVisibleText()).to.contain(caseTitle);
+      const title = await testSubjects.find('appHeaderTitle');
+      expect(await title.getVisibleText()).to.contain(caseTitle);
 
-        const redesignDescription = await testSubjects.find('description');
-        expect(await redesignDescription.getVisibleText()).to.contain('test description');
+      const description = await testSubjects.find('description');
+      expect(await description.getVisibleText()).to.contain('test description');
 
-        await testSubjects.existOrFail('case-tags');
-        await testSubjects.existOrFail('cases-categories');
-        await testSubjects.existOrFail('case-view-sidebar-connectors');
-        return;
-      }
-
-      // validate title
-      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-      expect(await title.getVisibleText()).equal(caseTitle);
-
-      // validate description
-      const description = await testSubjects.find('scrollable-markdown');
-      expect(await description.getVisibleText()).equal('test description');
-
-      // validate tag exists
-      await testSubjects.existOrFail('tag-tagme');
-
-      // validate category exists
-      await testSubjects.existOrFail('category-viewer-new');
-
-      // validate no connector added
-      const button = await find.byCssSelector('[data-test-subj*="case-callout"] button');
-      expect(await button.getVisibleText()).equal('Add connector');
+      await testSubjects.existOrFail('case-tags');
+      await testSubjects.existOrFail('cases-categories');
+      await testSubjects.existOrFail('case-view-sidebar-attributes');
     });
 
     it('displays errors correctly while creating a case', async () => {
@@ -134,31 +112,17 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
         await cases.common.waitForCaseViewToLoad();
 
-        if (await cases.common.isRedesignEnabled()) {
-          // Redesign moves the title to the app header and assignees into the sidebar panel.
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).to.contain(caseTitle);
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).to.contain(caseTitle);
 
-          await testSubjects.existOrFail('case-view-assignees-field-panel');
-          await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user');
-          await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user2');
-          return;
-        }
-
-        await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
+        await testSubjects.existOrFail('case-view-assignees-field-panel');
+        await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user');
+        await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user2');
       });
     });
 
     describe('customFields', () => {
       it('creates a case with custom fields', async function () {
-        // The redesigned case view only renders custom-field viewers inside the templates-v2
-        // sidebar section, which is off by default, so there is nothing to assert there.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
         // Templates v2 hides the legacy inline custom fields on Create behind a switch;
         // reveal it so this legacy flow is exercised whether or not templates is on.
         await cases.common.showLegacyCustomFields('cases');
@@ -200,30 +164,24 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         );
         await toggleCustomField.click();
 
+        // Pre-open the accordion so it is ready when the case view loads after submission.
+        await cases.common.openLegacyCustomFieldsAccordion('cases');
         await cases.create.submitCase();
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('case-view-title');
+        await testSubjects.existOrFail('appHeaderTitle');
 
-        // validate custom fields
-        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        // validate custom fields (accordion is in view mode; use the view-mode selectors)
+        const summary = await testSubjects.find(`text-custom-field-view-${customFields[0].key}`);
 
         expect(await summary.getVisibleText()).equal('This is a sample text!');
 
-        const sync = await testSubjects.find(
-          `case-toggle-custom-field-form-field-${customFields[1].key}`
-        );
-        expect(await sync.getAttribute('aria-checked')).equal('true');
+        const sync = await testSubjects.find(`toggle-custom-field-view-${customFields[1].key}`);
+        expect(await sync.getAttribute('aria-label')).equal('On');
       });
 
       it('creates a case with custom fields that have default values', async function () {
-        // The redesigned case view only renders custom-field viewers inside the templates-v2
-        // sidebar section, which is off by default, so there is nothing to assert there.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
         // Templates v2 hides the legacy inline custom fields on Create behind a switch;
         // reveal it so this legacy flow is exercised whether or not templates is on.
         await cases.common.showLegacyCustomFields('cases');
@@ -256,24 +214,26 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await cases.create.setTitle(caseTitle);
         await cases.create.setDescription('this is a test description');
 
+        // Pre-open the accordion so it is ready when the case view loads after submission.
+        await cases.common.openLegacyCustomFieldsAccordion('cases');
         // submit without touching the custom fields
         await cases.create.submitCase();
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('case-view-title');
+        await testSubjects.existOrFail('appHeaderTitle');
 
-        // validate custom fields
+        // validate custom fields (accordion is in view mode; use the view-mode selectors)
         const textCustomField = await testSubjects.find(
-          `case-text-custom-field-${customFields[0].key}`
+          `text-custom-field-view-${customFields[0].key}`
         );
 
         expect(await textCustomField.getVisibleText()).equal(customFields[0].defaultValue);
 
         const toggleCustomField = await testSubjects.find(
-          `case-toggle-custom-field-form-field-${customFields[1].key}`
+          `toggle-custom-field-view-${customFields[1].key}`
         );
-        expect(await toggleCustomField.getAttribute('aria-checked')).equal('true');
+        expect(await toggleCustomField.getAttribute('aria-label')).equal('On');
       });
     });
   });

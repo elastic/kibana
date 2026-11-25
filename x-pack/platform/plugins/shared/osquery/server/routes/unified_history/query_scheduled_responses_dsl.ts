@@ -18,7 +18,7 @@ interface ScheduledResponsesQueryOptions {
   startDate?: string;
   endDate?: string;
   sortDirection?: 'asc' | 'desc';
-  cpsEnabled?: boolean;
+  cpsActive?: boolean;
 }
 
 export const buildScheduledResponsesQuery = ({
@@ -31,7 +31,7 @@ export const buildScheduledResponsesQuery = ({
   startDate,
   endDate,
   sortDirection = 'desc',
-  cpsEnabled = false,
+  cpsActive = false,
 }: ScheduledResponsesQueryOptions): {
   body: Record<string, unknown>;
 } => {
@@ -41,7 +41,7 @@ export const buildScheduledResponsesQuery = ({
   const filters: estypes.QueryDslQueryContainer[] = [
     { exists: { field: 'schedule_id' } },
     buildSpaceIdFilter(spaceId, {
-      matchMissingSpaceId: !cpsEnabled,
+      matchMissingSpaceId: !cpsActive,
     }),
   ];
 

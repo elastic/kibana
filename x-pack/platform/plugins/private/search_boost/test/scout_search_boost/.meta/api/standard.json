@@ -1,0 +1,151 @@
+{
+  "sha1": "e77713758889e41a47b3140ba200b3c780e37c0c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "f9ac18ac047ec3d-8215c5aee6bf15e",
+      "title": "Search boost list API lists the profiles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
+        "line": 41,
+        "column": 13
+      }
+    },
+    {
+      "id": "f9ac18ac047ec3d-a5be5d1975fad1a",
+      "title": "Search boost list API lists the rules with the indices and data streams each applies to",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "f9ac18ac047ec3d-af3396f594dc169",
+      "title": "Search boost list API adds the storage size and retention of each match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
+        "line": 109,
+        "column": 27
+      }
+    },
+    {
+      "id": "f9ac18ac047ec3d-a3d9859caea69a0",
+      "title": "Search boost list API ranks the rules the same way as Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
+        "line": 125,
+        "column": 28
+      }
+    },
+    {
+      "id": "f9ac18ac047ec3d-d917115362b5df7",
+      "title": "Search boost list API lists the rules without matches to a user without index privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
+        "line": 159,
+        "column": 21
+      }
+    },
+    {
+      "id": "f9ac18ac047ec3d-bbc008db5d1df89",
+      "title": "Search boost list API responds 403 to internal/search_boost/profiles without read_boost_profiles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
+        "line": 185,
+        "column": 53
+      }
+    },
+    {
+      "id": "f9ac18ac047ec3d-e2be07de772983a",
+      "title": "Search boost list API responds 403 to internal/search_boost/rules without read_boost_rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/boost_lists.spec.ts",
+        "line": 185,
+        "column": 53
+      }
+    },
+    {
+      "id": "c85dc68a18c50e3-caa637c2b1da64e",
+      "title": "Search boost capabilities a user with both read privileges gets show: true, save: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/search_boost_capabilities.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "c85dc68a18c50e3-7539e8f5ee49055",
+      "title": "Search boost capabilities a user with both manage privileges gets show: true, save: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/search_boost_capabilities.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "c85dc68a18c50e3-4739e9572dffa95",
+      "title": "Search boost capabilities a user with only manage_boost_profiles gets show: true, save: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/search_boost_capabilities.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "c85dc68a18c50e3-037384c465eee90",
+      "title": "Search boost capabilities a user with only manage_boost_rules gets show: true, save: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/search_boost_capabilities.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    }
+  ]
+}

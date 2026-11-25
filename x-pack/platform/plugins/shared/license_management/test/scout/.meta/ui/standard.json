@@ -1,5 +1,5 @@
 {
-  "sha1": "426d7e7c31465a87e07791adbc57cc67852fa918",
+  "sha1": "30baed135268e130d6d42f3d77760aa6c4dded55",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/license_management/test/scout/ui/tests/license_management_a11y.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 8
       }
     }

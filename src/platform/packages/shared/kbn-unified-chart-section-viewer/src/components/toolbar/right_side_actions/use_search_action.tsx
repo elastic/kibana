@@ -55,6 +55,10 @@ export const useSearchAction = ({
 
   useDebounce(() => onSearchTermChange(searchTerm), DEBOUNCE_TIME, [searchTerm]);
 
+  useEffect(() => {
+    setSearchTerm(value);
+  }, [value]);
+
   const onShowSearch = useCallback(() => {
     setShowSearchInput(true);
   }, []);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Task } from '../../lib';
+import type { Task, Platform } from '../../lib';
 import { runFpm } from './run_fpm';
 import { runDockerGenerator } from './docker_generator';
 import { createOSPackageKibanaYML } from './create_os_package_kibana_yml';
@@ -28,7 +28,7 @@ export const CreateDebPackageX64: Task = {
   description: `${debDesc} ${X64}`,
 
   async run(config, log, build) {
-    await runFpm(config, log, build, 'deb', 'x64', [
+    await runFpm(config, log, build, 'deb', config.getPlatform('linux', 'x64'), [
       '--architecture',
       'amd64',
       '--deb-priority',
@@ -43,7 +43,7 @@ export const CreateDebPackageARM64: Task = {
   description: `${debDesc} ${ARM64}`,
 
   async run(config, log, build) {
-    await runFpm(config, log, build, 'deb', 'arm64', [
+    await runFpm(config, log, build, 'deb', config.getPlatform('linux', 'arm64'), [
       '--architecture',
       'arm64',
       '--deb-priority',
@@ -54,32 +54,18 @@ export const CreateDebPackageARM64: Task = {
   },
 };
 
-const rpmDesc = 'Creating rpm package';
-export const CreateRpmPackageX64: Task = {
-  description: `${rpmDesc} ${X64}`,
-
+/** Creates an RPM task for the selected Linux distribution. */
+export const CreateRpmPackage = (platform: Platform): Task => ({
+  description: `Creating rpm package ${platform.getArchitecture() === 'x64' ? X64 : ARM64}`,
   async run(config, log, build) {
-    await runFpm(config, log, build, 'rpm', 'x64', [
+    await runFpm(config, log, build, 'rpm', platform, [
       '--architecture',
-      'x86_64',
+      platform.getArchitecture() === 'x64' ? 'x86_64' : 'aarch64',
       '--rpm-os',
       'linux',
     ]);
   },
-};
-
-export const CreateRpmPackageARM64: Task = {
-  description: `${rpmDesc} ${ARM64}`,
-
-  async run(config, log, build) {
-    await runFpm(config, log, build, 'rpm', 'arm64', [
-      '--architecture',
-      'aarch64',
-      '--rpm-os',
-      'linux',
-    ]);
-  },
-};
+});
 
 const dockerBuildDate = new Date().toISOString();
 

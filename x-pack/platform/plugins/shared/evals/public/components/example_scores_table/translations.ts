@@ -100,8 +100,55 @@ export const getJudgedByLabel = (modelId: string) =>
     values: { modelId },
   });
 
+export const getEvaluatorVersionLabel = (version: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.evaluatorVersionLabel', {
+    defaultMessage: 'v{version}',
+    values: { version },
+  });
+
+export const getEvaluatorVersionTooltip = (version: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.evaluatorVersionTooltip', {
+    defaultMessage:
+      'Scored by version {version} of this evaluator. A definition can change after a run, so scores only compare across versions that share a major.',
+    values: { version },
+  });
+
 export const getEvaluatorAccordionAriaLabel = (evaluatorName: string) =>
   i18n.translate('xpack.evals.exampleScoresTable.evaluatorAccordionAriaLabel', {
     defaultMessage: 'Toggle details for evaluator {evaluatorName}',
     values: { evaluatorName },
+  });
+
+export const VIEW_FULL_INPUT_BUTTON_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.viewFullInputButtonLabel',
+  {
+    defaultMessage: 'View full input',
+  }
+);
+
+export const VIEW_FULL_OUTPUT_BUTTON_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.viewFullOutputButtonLabel',
+  {
+    defaultMessage: 'View full output',
+  }
+);
+
+export const HIDE_FULL_INPUT_ARIA_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.hideFullInputAriaLabel',
+  {
+    defaultMessage: 'Hide full input',
+  }
+);
+
+export const HIDE_FULL_OUTPUT_ARIA_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.hideFullOutputAriaLabel',
+  {
+    defaultMessage: 'Hide full output',
+  }
+);
+
+export const getDetailsLoadErrorMessage = (errorMessage: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.detailsLoadErrorMessage', {
+    defaultMessage: 'Failed to load details: {errorMessage}',
+    values: { errorMessage },
   });

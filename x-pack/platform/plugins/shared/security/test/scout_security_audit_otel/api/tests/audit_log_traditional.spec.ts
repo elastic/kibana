@@ -34,7 +34,7 @@ const expectTraditionalEnvelope = (e: FlatAttributes) => {
   expect(resource['service.name']).not.toBe('serverless-kibana');
   // project.id stays in the resource on traditional — promoteResourceAttributes is not applied off
   // Serverless, so it is NOT copied to per-record attributes (contrast with the Serverless spec,
-  // where it appears in both).
+  // where it appears only in per-record attributes).
   expect(resource['project.id']).toBe(OTEL_TEST_PROJECT_ID);
   expect(getLogAttributes(e)['project.id']).toBeUndefined();
 

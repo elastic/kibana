@@ -8,6 +8,7 @@
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
 import { registerInternalToolsRoutes } from './internal/tools';
+import { registerInternalConnectorRoutes } from './internal/connectors';
 import { registerInternalSkillsRoutes } from './internal/skills';
 import { registerInternalAgentRoutes } from './internal/agents';
 import { registerInternalConversationRoutes } from './internal/conversations';
@@ -27,10 +28,12 @@ import { registerInternalExecutionRoutes } from './internal/executions';
 import { registerAccessPrincipalsRoutes } from './internal/access_principals';
 import { registerWorkspaceFileRoutes } from './internal/workspace_files';
 import { registerSpaceSettingsRoutes } from './internal/space_settings';
+import { registerEvalBaselineRoutes } from './internal/eval_baselines';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
   registerInternalToolsRoutes(dependencies);
+  registerInternalConnectorRoutes(dependencies);
   registerInternalSkillsRoutes(dependencies);
   registerInternalAgentRoutes(dependencies);
   registerInternalConversationRoutes(dependencies);
@@ -50,4 +53,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerAccessPrincipalsRoutes(dependencies);
   registerWorkspaceFileRoutes(dependencies);
   registerSpaceSettingsRoutes(dependencies);
+  registerEvalBaselineRoutes(dependencies);
 };

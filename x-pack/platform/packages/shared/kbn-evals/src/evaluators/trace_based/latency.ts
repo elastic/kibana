@@ -36,13 +36,16 @@ export function createLatencyEvaluator({
 }
 
 type SpanLatencyFilter =
-  | { spanName: string; operationName?: undefined }
-  | { operationName: string; spanName?: undefined };
+  | { spanName: string; spanNamePattern?: undefined; operationName?: undefined }
+  /** Matched with ES|QL `LIKE`, so wildcards are `*` and `?` rather than SQL's `%` and `_`. */
+  | { spanNamePattern: string; spanName?: undefined; operationName?: undefined }
+  | { operationName: string; spanName?: undefined; spanNamePattern?: undefined };
 
 export function createSpanLatencyEvaluator({
   traceEsClient,
   log,
   spanName,
+  spanNamePattern,
   operationName,
 }: {
   traceEsClient: EsClient;
@@ -50,6 +53,8 @@ export function createSpanLatencyEvaluator({
 } & SpanLatencyFilter): Evaluator {
   const spanFilter = spanName
     ? `name == "${spanName}"`
+    : spanNamePattern
+    ? `name LIKE "${spanNamePattern}"`
     : `attributes.gen_ai.operation.name == "${operationName}"`;
 
   return createTraceBasedEvaluator({

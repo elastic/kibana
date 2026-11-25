@@ -7,73 +7,78 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VegaSpecEditor } from '../components/vega_vis_editor';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { isOfQueryType, type Filter, type Query } from '@kbn/es-query';
+import { ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { VegaByValueState } from '../../server';
+import type { VegaPluginStartDependencies } from '../plugin';
+import {
+  VegaEditorBody,
+  hasTooManyFilters,
+  vegaEditorFlyoutBodyCss,
+} from '../components/vega_editor_body';
+import { specFromEditor, specToEditorValue } from '../lib/editor_spec';
+import { isSameSearch } from '../lib/editable_state';
+import { vegaTitleInWizard } from '../vega_icon';
+import type { VegaEmbeddableApi } from './vega_embeddable';
 
-const bodyCss = css({
-  '.euiFlyoutBody__overflowContent': {
-    display: 'flex',
-    height: '100%',
-    '.vgaEditor': { minHeight: 0 },
-  },
-});
-
-const specFromEditor = (
-  text: string,
-  format: VegaByValueState['spec']['format']
-): VegaByValueState['spec'] => {
-  if (format === 'json') {
-    try {
-      return { format: 'json', value: JSON.parse(text) };
-    } catch {
-      return { format: 'hjson', value: text };
-    }
-  }
-  return { format: 'hjson', value: text };
-};
+interface PanelSearch {
+  query?: Query;
+  filters?: Filter[];
+}
 
 export const VegaEditorFlyout = ({
+  api,
   ariaLabelledBy,
   closeFlyout,
+  defaultDataView,
   initialSpec,
+  SearchBar,
   isNewPanel = false,
   onPreview,
   onRevert,
   onSave,
 }: {
+  api: VegaEmbeddableApi;
+  SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   ariaLabelledBy: string;
   closeFlyout: () => void;
+  defaultDataView?: DataView;
   initialSpec: VegaByValueState['spec'];
-
   isNewPanel?: boolean;
   onPreview: (spec: VegaByValueState['spec']) => void;
   onRevert: () => void;
   onSave: (spec: VegaByValueState['spec']) => void;
 }) => {
-  const initialEditorValue =
-    initialSpec.format === 'json' ? JSON.stringify(initialSpec.value, null, 2) : initialSpec.value;
+  const initialEditorValue = specToEditorValue(initialSpec);
   const [spec, setSpec] = useState(initialEditorValue);
   const [previewedSpec, setPreviewedSpec] = useState(initialEditorValue);
   const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);
+  const [publishedQuery, publishedFilters, publishedDataViews] = useBatchedPublishingSubjects(
+    api.query$,
+    api.filters$,
+    api.dataSources$
+  );
+  const search = useMemo<PanelSearch>(
+    () => ({
+      query: isOfQueryType(publishedQuery) ? publishedQuery : undefined,
+      filters: publishedFilters,
+    }),
+    [publishedFilters, publishedQuery]
+  );
+  const initialSearch = useMemo<PanelSearch>(() => {
+    const initialQuery = api.query$.getValue();
+    return {
+      query: isOfQueryType(initialQuery) ? initialQuery : undefined,
+      filters: api.filters$.getValue(),
+    };
+  }, [api]);
   const canPreview = spec !== previewedSpec;
-  const canSave = isNewPanel || spec !== initialEditorValue;
-  const previewChanges = () => {
-    onPreview(specFromEditor(spec, format));
-    setPreviewedSpec(spec);
-  };
+  const canSave = isNewPanel || spec !== initialEditorValue || !isSameSearch(search, initialSearch);
 
   // Revert on unmount unless the user saved. A ref holds the latest callback without re-arming the
   // unmount effect; `saved` suppresses the revert after a successful Save.
@@ -82,12 +87,16 @@ export const VegaEditorFlyout = ({
   onRevertRef.current = onRevert;
   useEffect(
     () => () => {
-      if (!saved.current) {
-        onRevertRef.current();
-      }
+      if (saved.current) return;
+      onRevertRef.current();
     },
     []
   );
+
+  const previewChanges = () => {
+    onPreview(specFromEditor(spec, format));
+    setPreviewedSpec(spec);
+  };
 
   const handleSave = () => {
     saved.current = true;
@@ -98,61 +107,39 @@ export const VegaEditorFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={ariaLabelledBy}>Vega</h2>
+          <h2 id={ariaLabelledBy}>{vegaTitleInWizard}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={bodyCss}>
-        <VegaSpecEditor
-          editorValue={spec}
+      <EuiFlyoutBody data-test-subj="editorFlyoutBody" css={vegaEditorFlyoutBodyCss}>
+        <VegaEditorBody
+          SearchBar={SearchBar}
+          specDataViews={publishedDataViews}
+          defaultDataView={defaultDataView}
+          query={search.query}
+          filters={search.filters}
+          onQueryChange={api.setQuery}
+          onFiltersChange={api.setFilters}
+          spec={spec}
           initialFormat={initialSpec.format}
-          onChange={setSpec}
+          onSpecChange={setSpec}
           onFormatChange={setFormat}
         />
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="vegaEditorFlyoutCancelButton"
-              flush="left"
-              onClick={closeFlyout}
-            >
-              {i18n.translate('visTypeVega.dashboard.cancelButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="success"
-                  data-test-subj="vegaEditorFlyoutPreviewButton"
-                  disabled={!canPreview}
-                  iconType="play"
-                  onClick={previewChanges}
-                >
-                  {i18n.translate('visTypeVega.dashboard.previewButtonLabel', {
-                    defaultMessage: 'Run Preview',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="vegaEditorFlyoutSaveButton"
-                  fill
-                  disabled={!canSave}
-                  onClick={handleSave}
-                >
-                  {i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
-                    defaultMessage: 'Apply and close',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <ManagedEditorFooter
+        onCancel={closeFlyout}
+        cancelButtonDataTestSubj="vegaEditorFlyoutCancelButton"
+        previewAction={{
+          onPreview: previewChanges,
+          isEnabled: canPreview,
+          'data-test-subj': 'vegaEditorFlyoutPreviewButton',
+        }}
+        onSave={handleSave}
+        saveButtonLabel={i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
+          defaultMessage: 'Apply and close',
+        })}
+        isSaveDisabled={!canSave || hasTooManyFilters(search.filters)}
+        saveButtonDataTestSubj="vegaEditorFlyoutSaveButton"
+      />
     </>
   );
 };

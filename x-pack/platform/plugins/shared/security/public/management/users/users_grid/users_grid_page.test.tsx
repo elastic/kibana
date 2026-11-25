@@ -9,7 +9,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { LocationDescriptorObject } from 'history';
 import React from 'react';
 
-import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -17,11 +18,16 @@ import { UsersGridPage } from './users_grid_page';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
 
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(
+    <I18nProvider>
+      <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+    </I18nProvider>
+  );
 
 describe('UsersGridPage', () => {
   let history: ScopedHistory;
-  let coreStart: CoreStart;
+  let coreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -465,5 +471,41 @@ describe('UsersGridPage', () => {
       expect(screen.getByText('foo')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('createUserButton')).not.toBeInTheDocument();
+  });
+
+  it('hides the create action until the first load settles', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    let resolveUsers: (value: Awaited<ReturnType<typeof apiClientMock.getUsers>>) => void;
+    apiClientMock.getUsers.mockReturnValue(
+      new Promise((resolve) => {
+        resolveUsers = resolve;
+      })
+    );
+
+    renderWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(screen.queryByTestId('createUserButton')).not.toBeInTheDocument();
+
+    resolveUsers!([
+      {
+        username: 'foo',
+        email: 'foo@bar.net',
+        full_name: 'foo bar',
+        roles: ['kibana_user'],
+        enabled: true,
+      },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createUserButton')).toBeInTheDocument();
+    });
   });
 });

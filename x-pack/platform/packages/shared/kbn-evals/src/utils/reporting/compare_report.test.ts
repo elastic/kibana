@@ -5,26 +5,31 @@
  * 2.0.
  */
 
-import type { PairedTTestResult } from '@kbn/evals-common';
-import { formatPairedTTestReport } from './compare_report';
+import type { ComparisonResult } from '@kbn/evals-common';
+import { formatCompareReport } from './compare_report';
 
-const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResult => ({
+const side = (mean: number) => ({ mean, used: 10, missing: 0, stability: null });
+
+const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Correctness',
   sampleSize: 10,
-  meanA: 0.8,
-  meanB: 0.7,
+  target: side(0.8),
+  baseline: side(0.7),
   pValue: 0.03,
   direction: 'maximize',
+  metricType: 'continuous_bounded',
+  hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
+  repetitionWarning: false,
   ...overrides,
 });
 
-describe('formatPairedTTestReport', () => {
+describe('formatCompareReport', () => {
   it('returns correct header and summary for a single result', () => {
-    const { header, summary, significantCount } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { header, summary, significantCount } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results: [makeResult()],
     });
 
@@ -32,6 +37,7 @@ describe('formatPairedTTestReport', () => {
       'Target: experiment-1',
       'Baseline: experiment-2',
       'Significance threshold: p < 0.05',
+      'Repetition policy: mean',
     ]);
     expect(summary).toBe('Significant differences: 1/1');
     expect(significantCount).toBe(1);
@@ -44,9 +50,9 @@ describe('formatPairedTTestReport', () => {
       makeResult({ evaluatorName: 'C', pValue: null }),
     ];
 
-    const { significantCount, summary } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { significantCount, summary } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -60,9 +66,9 @@ describe('formatPairedTTestReport', () => {
       makeResult({ evaluatorName: 'B', pValue: 0.15 }),
     ];
 
-    const { significantCount, header } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { significantCount, header } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
       significanceThreshold: 0.1,
     });
@@ -78,9 +84,9 @@ describe('formatPairedTTestReport', () => {
       makeResult({ datasetName: 'Zebra', evaluatorName: 'Eval1' }),
     ];
 
-    const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -99,9 +105,9 @@ describe('formatPairedTTestReport', () => {
       makeResult({ datasetName: 'DS-B', datasetId: 'b', evaluatorName: 'E1' }),
     ];
 
-    const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -111,11 +117,11 @@ describe('formatPairedTTestReport', () => {
   });
 
   it('formats positive differences with a "+" prefix', () => {
-    const results = [makeResult({ meanA: 0.9, meanB: 0.5 })];
+    const results = [makeResult({ target: side(0.9), baseline: side(0.5) })];
 
-    const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -123,25 +129,36 @@ describe('formatPairedTTestReport', () => {
   });
 
   it('formats negative differences without a "+" prefix', () => {
-    const results = [makeResult({ meanA: 0.3, meanB: 0.8 })];
+    const results = [makeResult({ target: side(0.3), baseline: side(0.8) })];
 
-    const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
     expect(tableOutput).toContain('-0.50');
   });
 
+  it('warns about rows with uneven repetitions and marks their N', () => {
+    const { header, tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [makeResult({ repetitionWarning: true })],
+    });
+
+    expect(header[4]).toContain('Warning: in rows marked N*');
+    expect(tableOutput).toContain(' 10* ');
+  });
+
   it('handles empty results gracefully', () => {
-    const { header, summary, tableOutput, significantCount } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { header, summary, tableOutput, significantCount } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results: [],
     });
 
-    expect(header).toHaveLength(3);
+    expect(header).toHaveLength(4);
     expect(summary).toBe('Significant differences: 0/0');
     expect(tableOutput).toBe('');
     expect(significantCount).toBe(0);
@@ -150,9 +167,9 @@ describe('formatPairedTTestReport', () => {
   it('handles null pValue as not significant', () => {
     const results = [makeResult({ pValue: null })];
 
-    const { significantCount } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { significantCount } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -160,16 +177,61 @@ describe('formatPairedTTestReport', () => {
   });
 
   it('includes sample size and formatted means in the table', () => {
-    const results = [makeResult({ sampleSize: 42, meanA: 0.1234, meanB: 0.5678 })];
+    const results = [makeResult({ sampleSize: 42, target: side(0.1234), baseline: side(0.5678) })];
 
-    const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
     expect(tableOutput).toContain('42');
     expect(tableOutput).toContain('0.12');
     expect(tableOutput).toContain('0.57');
+  });
+
+  it('shows the test that produced each p-value', () => {
+    const results = [
+      makeResult({ evaluatorName: 'Wilcoxon row' }),
+      makeResult({
+        evaluatorName: 'T row',
+        hypothesisTest: { id: 'paired_t', statistic: 2.1 },
+      }),
+    ];
+
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results,
+    });
+
+    expect(tableOutput).toContain('Test');
+    expect(tableOutput).toContain('Wilcoxon');
+    expect(tableOutput).toContain('t-test');
+  });
+
+  it('appends discordant pairs to the diff of binary rows', () => {
+    const results = [
+      makeResult({
+        metricType: 'binary',
+        target: side(0.75),
+        baseline: side(0.5),
+        hypothesisTest: {
+          id: 'mcnemar',
+          method: 'mid-p',
+          statistic: 1,
+          discordantPairs: { targetOnly: 4, baselineOnly: 1 },
+        },
+      }),
+    ];
+
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results,
+    });
+
+    expect(tableOutput).toContain('(4 target only, 1 baseline only)');
+    expect(tableOutput).toContain('McNemar');
   });
 });

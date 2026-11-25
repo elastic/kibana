@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import dagre, { graphlib } from '@dagrejs/dagre';
 import { MarkerType, Position } from '@xyflow/react';
 import { getNodeHeight, type SequenceNodeType } from './sequence_node';
@@ -52,19 +53,31 @@ const buildEdges = (
   return edges;
 };
 
+export interface LayoutSequenceOptions {
+  onRemoveRule?: (stepId: string, ruleId: string) => void;
+  onOperatorChange?: (stepId: string, op: 'and' | 'or') => void;
+  onDropRule?: (
+    stepId: string,
+    payload: { id: string; name: string; groupingFields: string[]; kind: RuleKind }
+  ) => void;
+  onHopWindowChange?: (hopIndex: number, value: string) => void;
+  closeAllTick?: number;
+  interactive?: boolean;
+}
+
 export const layoutSequence = (
   stages: StageItem[],
   hopWindows: string[],
-  onRemoveRule?: (stepId: string, ruleId: string) => void,
-  onOperatorChange?: (stepId: string, op: 'and' | 'or') => void,
-  onDropRule?: (
-    stepId: string,
-    payload: { id: string; name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
-  ) => void,
-  onHopWindowChange?: (hopIndex: number, value: string) => void,
-  closeAllTick: number = 0,
-  interactive: boolean = true
+  options: LayoutSequenceOptions = {}
 ): { nodes: SequenceNodeType[]; edges: SequenceEdgeType[] } => {
+  const {
+    onRemoveRule,
+    onOperatorChange,
+    onDropRule,
+    onHopWindowChange,
+    closeAllTick = 0,
+    interactive = true,
+  } = options;
   const edges = buildEdges(stages, hopWindows, onHopWindowChange, closeAllTick, interactive);
 
   const noop = () => {};

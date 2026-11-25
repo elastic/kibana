@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { DashboardPluginStart, DashboardState } from '@kbn/dashboard-plugin/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -94,6 +95,8 @@ const createDashboardClient = ({
         version: 'v1',
       },
     }),
+    create: jest.fn(),
+    update: jest.fn(),
   } as jest.Mocked<DashboardPluginStart['client']>);
 
 const createLogger = (): Logger =>
@@ -200,20 +203,24 @@ describe('dashboardSmlType', () => {
 
     const result = await dashboardSmlType.toAttachment(
       {
-        id: 'chunk-1',
         type: 'dashboard',
         title: 'System Overview',
-        origin_id: 'dashboard-1',
-        origin: { uri: 'dashboard://dashboard-1' },
         content: '...',
-        created_at: '2025-01-01T00:00:00.000Z',
+        id: 'chunk-1',
+        '@timestamp': '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
+        references: [{ uri: 'dashboard://dashboard-1', relation: 'derived_from' }],
+        governance: {
+          provenance: {
+            created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+            updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+          },
+        },
         permissions: {
           kibana: {
             privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
           },
         },
-        ingestion_method: 'crawled',
       },
       {
         request: {} as never,
@@ -262,20 +269,24 @@ describe('dashboardSmlType', () => {
 
     const result = await dashboardSmlType.toAttachment(
       {
-        id: 'chunk-2',
         type: 'dashboard',
         title: 'API Lens Dashboard',
-        origin_id: 'dashboard-2',
-        origin: { uri: 'dashboard://dashboard-2' },
         content: '...',
-        created_at: '2025-01-01T00:00:00.000Z',
+        id: 'chunk-2',
+        '@timestamp': '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
+        references: [{ uri: 'dashboard://dashboard-2', relation: 'derived_from' }],
+        governance: {
+          provenance: {
+            created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+            updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+          },
+        },
         permissions: {
           kibana: {
             privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
           },
         },
-        ingestion_method: 'crawled',
       },
       {
         request: {} as never,
@@ -338,5 +349,41 @@ describe('dashboardSmlType', () => {
     expect(result).toEqual(
       expect.objectContaining({ type: 'dashboard', title: 'System Overview' })
     );
+  });
+
+  describe('searchByTitle', () => {
+    const search = async (title: string) => {
+      const find = jest.fn().mockResolvedValue({
+        saved_objects: [
+          { id: 'dash-1', attributes: { title: 'Sales overview' } },
+          { id: 'dash-2', attributes: {} },
+        ],
+      });
+      const dashboardSmlType = createDashboardSmlType({
+        getDashboardClient: async () => createDashboardClient(),
+      });
+      const results = await dashboardSmlType.searchByTitle!({ title, size: 5 }, {
+        savedObjectsClient: { find },
+      } as never);
+      return { find, results };
+    };
+
+    it('searches the title by prefix and maps the results', async () => {
+      const { find, results } = await search('sal');
+
+      expect(find).toHaveBeenCalledWith({
+        type: 'dashboard',
+        fields: ['title'],
+        perPage: 5,
+        sort: [{ field: 'updated_at', order: 'desc' }],
+        search: 'sal*',
+        searchFields: ['title'],
+        defaultSearchOperator: 'AND',
+      });
+      expect(results).toEqual([
+        { originId: 'dash-1', title: 'Sales overview' },
+        { originId: 'dash-2', title: 'dash-2' },
+      ]);
+    });
   });
 });

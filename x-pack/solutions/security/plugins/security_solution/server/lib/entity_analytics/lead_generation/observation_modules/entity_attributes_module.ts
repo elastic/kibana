@@ -7,12 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { LeadEntity, Observation, ObservationModule } from '../types';
+import type { EntityAttributes } from './utils';
 import {
   makeObservation,
-  getEntityField,
   entityTypeLabel,
   extractIsPrivileged,
   getAssetCriticality,
+  getEntityAttributes,
+  getEntityLifecycle,
   isHighCriticality,
 } from './utils';
 import { OBSERVATION_MODULE_WEIGHTS } from './weights';
@@ -24,16 +26,6 @@ const MODULE_WEIGHT = OBSERVATION_MODULE_WEIGHTS.entity_attributes;
 
 /** An entity first seen within this window is treated as newly observed. */
 const NEWLY_OBSERVED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
-
-interface EntityStoreAttributes {
-  readonly managed?: boolean;
-  readonly mfa_enabled?: boolean;
-}
-
-interface EntityLifecycle {
-  readonly first_seen?: string;
-  readonly last_seen?: string;
-}
 
 /**
  * Derives governance and lifecycle signals from fields already present on the
@@ -72,11 +64,8 @@ export const createEntityAttributesModule = ({
 });
 
 const buildAttributeObservations = (entity: LeadEntity): Observation[] => {
-  const entityField = getEntityField(entity);
-  if (!entityField) return [];
-
-  const attributes = (entityField.attributes as EntityStoreAttributes | undefined) ?? {};
-  const lifecycle = (entityField.lifecycle as EntityLifecycle | undefined) ?? {};
+  const attributes = getEntityAttributes(entity) ?? {};
+  const lifecycle = getEntityLifecycle(entity) ?? {};
 
   const label = entityTypeLabel(entity);
   const isPrivileged = extractIsPrivileged(entity);
@@ -130,7 +119,7 @@ const isNewlyObserved = (firstSeen: string | undefined): NewlyObserved | undefin
 
 const buildGovernanceGap = (
   entity: LeadEntity,
-  attributes: EntityStoreAttributes,
+  attributes: EntityAttributes,
   isPrivileged: boolean,
   contextMeta: Record<string, unknown>
 ): Observation | undefined => {

@@ -54,11 +54,11 @@ describe.skip('Response console', { tags: ['@ess', '@serverless', '@brokenInServ
         suspendProcessRequestResponse = responseBody;
       }, 'suspend-process');
       submitCommand();
-      cy.contains('Action pending.').should('exist');
+      cy.contains('suspend-process is pending').should('exist');
       cy.wait('@suspend-process').then(() => {
         sendActionResponse(suspendProcessRequestResponse);
       });
-      cy.contains('Action completed.', { timeout: 120000 }).should('exist');
+      cy.contains('suspend-process completed successfully', { timeout: 120000 }).should('exist');
     });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import { isString } from 'lodash';
+import { decodeStoredApiKey, getUiamApiKeyId } from '@kbn/task-manager-plugin/server';
 import type { DenormalizedAction } from '../../../rules_client';
 import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { calculateSchedule } from '../../../backfill_client/lib';
@@ -27,6 +28,7 @@ export const transformBackfillParamToAdHocRun = (
 ): TransformBackfillResult => {
   const { schedule, truncated } = calculateSchedule(rule.schedule.interval, param.ranges);
   const shouldRunActions = param.runActions !== undefined ? param.runActions : true;
+  const uiamApiKeyId = getUiamApiKeyId(rule.uiamApiKey);
   const start = param.ranges[0].start;
   // Derive end from the actual schedule so it stays consistent when calculateSchedule truncates
   const end =
@@ -41,13 +43,16 @@ export const transformBackfillParamToAdHocRun = (
       // Task Manager uses — so scheduling the backfill does not throw before the snapshotted
       // UIAM key below takes over. The ad hoc task runner treats an empty `apiKeyToUse` as
       // absent and falls back to `uiamApiKey` when building the fake request.
-      apiKeyId: rule.apiKey ? Buffer.from(rule.apiKey, 'base64').toString().split(':')[0] : '',
+      apiKeyId: rule.apiKey ? decodeStoredApiKey(rule.apiKey).id : '',
       apiKeyToUse: rule.apiKey ?? '',
       // Snapshot the rule's UIAM API key (when present) so the ad hoc task runner
       // can authenticate the same way a regular rule run does in UIAM deployments.
       // `uiamApiKeyExternal` has to ride along: without it the backfill run would present a
       // user-created (external) Cloud key with the UIAM shared secret, which UIAM rejects.
+      // The id rides along unencrypted so the invalidation task's in-use guard can see this
+      // snapshot; without it a rule update would revoke the key this backfill still runs under.
       ...(rule.uiamApiKey ? { uiamApiKey: rule.uiamApiKey } : {}),
+      ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
       ...(rule.uiamApiKey && rule.uiamApiKeyExternal === true ? { uiamApiKeyExternal: true } : {}),
       createdAt: new Date().toISOString(),
       duration: rule.schedule.interval,

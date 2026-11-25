@@ -1,5 +1,5 @@
 {
-  "sha1": "3d12d1c19ccfbc61072ccdb9c91ae0efde7fb920",
+  "sha1": "f32fbaaa1a2ccb1f7d0f920d74580630c25a9e13",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 79,
-        "column": 23
+        "line": 72,
+        "column": 47
       }
     },
     {
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 144,
+        "line": 137,
         "column": 18
       }
     },
@@ -70,7 +70,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 188,
+        "line": 181,
+        "column": 9
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-50463082c36fec5",
+      "title": "Audit log — OTel field shape (Serverless) http_request: logged for a route with minimal authentication, without user.domain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 234,
         "column": 18
       }
     },
@@ -84,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 236,
-        "column": 24
+        "line": 262,
+        "column": 18
       }
     },
     {
@@ -98,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 285,
-        "column": 20
+        "line": 301,
+        "column": 49
       }
     }
   ]

@@ -59,7 +59,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
   test('allows to select tags for a new map', async ({ page, pageObjects, kbnUrl }) => {
     await pageObjects.maps.gotoNewMap();
 
-    await pageObjects.maps.saveButton.click();
+    await pageObjects.maps.clickSaveButton();
     await pageObjects.saveModal.fillTitle('my-new-map');
     await pageObjects.saveModal.selectNoDashboard();
     await pageObjects.tagManagement.selectSavedObjectTags('tag-1', 'tag-3');
@@ -75,7 +75,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
   test('allows to create a tag from the tag selector', async ({ page, pageObjects, kbnUrl }) => {
     await pageObjects.maps.gotoNewMap();
 
-    await pageObjects.maps.saveButton.click();
+    await pageObjects.maps.clickSaveButton();
     await pageObjects.saveModal.fillTitle('map-with-new-tag');
     await pageObjects.saveModal.selectNoDashboard();
     await pageObjects.tagManagement.openCreateTagFromSelector();
@@ -98,9 +98,9 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
 
   test('allows to select tags for an existing map', async ({ page, pageObjects, kbnUrl }) => {
     await pageObjects.savedObjectsListing.clickItemLink('map', 'map 4 (tag-1)');
-    await pageObjects.maps.waitForRenderComplete();
+    await pageObjects.maps.waitForLayersToLoad();
 
-    await pageObjects.maps.saveButton.click();
+    await pageObjects.maps.clickSaveButton();
     await pageObjects.tagManagement.selectSavedObjectTags('tag-3');
     await pageObjects.saveModal.confirm();
 

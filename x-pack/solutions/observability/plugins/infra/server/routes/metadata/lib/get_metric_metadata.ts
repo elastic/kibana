@@ -5,8 +5,12 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  DATASTREAM_DATASET,
+  EVENT_DATASET,
+  findInventoryFields,
+} from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetricsClient } from '../../../lib/helpers/get_infra_metrics_client';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import type {
@@ -32,9 +36,11 @@ export const getMetricMetadata = async (
   nodeId: string,
   nodeType: InventoryItemType,
   timeRange: { from: number; to: number },
-  infraMetricsClient: InfraMetricsClient
+  infraMetricsClient: InfraMetricsClient,
+  schema?: DataSchemaFormat
 ): Promise<InfraMetricsAdapterResponse> => {
-  const fields = findInventoryFields(nodeType);
+  const fields = findInventoryFields(nodeType, schema);
+  const datasetField = schema === 'semconv' ? DATASTREAM_DATASET : EVENT_DATASET;
   const metricQuery = {
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -69,7 +75,7 @@ export const getMetricMetadata = async (
         },
         metrics: {
           terms: {
-            field: 'event.dataset',
+            field: datasetField,
             size: 1000,
           },
         },

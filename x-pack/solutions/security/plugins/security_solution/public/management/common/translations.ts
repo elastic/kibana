@@ -50,6 +50,11 @@ export const BLOCKLIST_TAB = i18n.translate('xpack.securitySolution.artifacts.ta
   defaultMessage: 'Blocklist',
 });
 
+export const CUSTOM_YARA_SIGNATURES_TAB = i18n.translate(
+  'xpack.securitySolution.artifacts.tabs.customYaraSignatures',
+  { defaultMessage: 'Custom YARA signatures' }
+);
+
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',
@@ -262,6 +267,35 @@ export const CONSOLE_COMMANDS = {
           'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgAbout',
           {
             defaultMessage: 'The full file path to be retrieved',
+          }
+        ),
+        /** Used when the argument can be used more than once (Elastic Defend Endpoint) */
+        aboutMultiple: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgAboutMultiple',
+          {
+            defaultMessage:
+              'The full file path to be retrieved. Use this argument multiple times to retrieve more than one file',
+          }
+        ),
+        multipleNotSupported: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgMultipleNotSupported',
+          {
+            defaultMessage:
+              'This version of the Endpoint does not support retrieving multiple paths. Upgrade your Agent in Fleet to use this parameter.',
+          }
+        ),
+        tooManyPaths: (maxPaths: number) =>
+          i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.pathArgTooMany', {
+            defaultMessage: 'Argument can be used at most {maxPaths} times',
+            values: { maxPaths },
+          }),
+      },
+      force: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.force.about',
+          {
+            defaultMessage:
+              'Read a file that is locked by the operating system from a snapshot of its volume (Windows only)',
           }
         ),
       },
@@ -558,4 +592,16 @@ export const RESPONSE_ACTION_STATUS = Object.freeze({
   successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
     defaultMessage: 'Action successful',
   }),
+});
+
+export const ENDPOINT_VERSION_NOT_SUPPORTED = (unsupportedFeature: string): string => {
+  return i18n.translate('xpack.securitySolution.translations.endpointVersionNotSupported', {
+    defaultMessage:
+      'The version of Endpoint running on this host does not support {unsupportedFeature}.',
+    values: { unsupportedFeature },
+  });
+};
+
+export const HOST_ISOLATION = i18n.translate('xpack.securitySolution.translations.hostIsolation', {
+  defaultMessage: 'host isolation',
 });

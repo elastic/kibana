@@ -15,6 +15,7 @@ import {
   MANAGEMENT_DEFAULT_SORT_FIELD,
   MANAGEMENT_DEFAULT_SORT_ORDER,
 } from '../../common/constants';
+import type { ArtifactEnabledStatus } from '../../common/utils';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
@@ -30,6 +31,9 @@ export function useListArtifact(
     perPage: number;
     policies: string[];
     excludedPolicies: string[];
+    enabledStatus: ArtifactEnabledStatus;
+    sortField: string;
+    sortOrder: 'asc' | 'desc';
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
   customQueryOptions?: Partial<UseQueryOptions<FoundExceptionListItemSchema, IHttpFetchError>>,
@@ -41,24 +45,37 @@ export function useListArtifact(
     perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies = [],
     excludedPolicies = [],
+    enabledStatus,
+    sortField = MANAGEMENT_DEFAULT_SORT_FIELD,
+    sortOrder = MANAGEMENT_DEFAULT_SORT_ORDER,
   } = options;
   const filterKuery = useMemo<string | undefined>(() => {
     return parsePoliciesAndFilterToKql({
       kuery: parseQueryFilterToKQL(filter, searchableFields),
       policies,
       excludedPolicies,
+      enabledStatus,
     });
-  }, [filter, searchableFields, policies, excludedPolicies]);
+  }, [filter, searchableFields, policies, excludedPolicies, enabledStatus]);
 
   return useQuery<FoundExceptionListItemSchema, IHttpFetchError>(
-    [...customQueryIds, 'list', exceptionListApiClient, filterKuery, page, perPage],
+    [
+      ...customQueryIds,
+      'list',
+      exceptionListApiClient,
+      filterKuery,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+    ],
     async () => {
       const result = await exceptionListApiClient.find({
         filter: filterKuery,
         perPage,
         page,
-        sortField: MANAGEMENT_DEFAULT_SORT_FIELD,
-        sortOrder: MANAGEMENT_DEFAULT_SORT_ORDER,
+        sortField,
+        sortOrder,
       });
 
       return result;

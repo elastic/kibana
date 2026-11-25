@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 
 // use require to bypass unnecessary TypeScript checks for JSON imports
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const navigationTree = require('./mocks/mock_security_tree.json') as NavigationTreeDefinitionUI;
 
 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -45,8 +45,8 @@ describe('toNavigationItems', () => {
   it('keeps the home node as a regular primary item', () => {
     const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
     expect(homeItem).toBeDefined();
-    expect(homeItem?.label).toBe('Security');
-    expect(homeItem?.iconType).toBe('logoSecurity');
+    expect(homeItem?.label).toBe('Home');
+    expect(homeItem?.iconType).toBe('home');
   });
 
   it('should return primary items from navigation tree', () => {

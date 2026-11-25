@@ -106,5 +106,29 @@ describe('form_settings', () => {
         },
       });
     });
+
+    it('do not render comment-only yaml values for agent policy (full agent policy)', () => {
+      const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
+        advanced_settings: {
+          agent_internal: '# test',
+        },
+      } as any);
+      expect(res).toEqual({});
+    });
+
+    it('render yaml values with leading comment for agent policy (full agent policy)', () => {
+      const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
+        advanced_settings: {
+          agent_internal: '# comment\nagent:\n  internal:\n    runtime:\n      default: otel',
+        },
+      } as any);
+      expect(res).toEqual({
+        'agent.internal': {
+          runtime: {
+            default: 'otel',
+          },
+        },
+      });
+    });
   });
 });

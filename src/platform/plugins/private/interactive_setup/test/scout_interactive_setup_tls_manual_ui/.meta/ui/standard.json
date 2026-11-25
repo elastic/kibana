@@ -1,0 +1,22 @@
+{
+  "sha1": "e2018f3c20b37ef980315dee4b362e6648c58c3e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "0c7ab0aded92029-a6ce1d28d59487c",
+      "title": "Interactive setup - manual configuration configures Kibana against a TLS-enabled cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@limit/except-fips"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_ui/ui/tests/manual_configuration.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    }
+  ]
+}

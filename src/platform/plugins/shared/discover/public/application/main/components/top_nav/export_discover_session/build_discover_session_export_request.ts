@@ -14,7 +14,9 @@ import {
   fromTabStateToSavedObjectTab,
   selectAllTabs,
   selectTab,
+  getTabDataView,
   selectTabRuntimeState,
+  selectTabTypeForPersistence,
   TabInitializationStatus,
   type DiscoverInternalState,
   type RuntimeStateManager,
@@ -59,16 +61,14 @@ export const buildDiscoverSessionExportRequest = ({
   const tabs = tabId ? [selectTab(state, tabId)] : allTabs;
   const selectedTab = allTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId);
   const storedTabs = tabs.map((tab) => {
-    const currentDataView = selectTabRuntimeState(
-      runtimeStateManager,
-      tab.id
-    )?.currentDataView$.getValue();
+    const currentDataView = getTabDataView(selectTabRuntimeState(runtimeStateManager, tab.id));
 
     const storedTab = fromTabStateToSavedObjectTab({
       tab,
       currentDataView,
       overridenTimeRestore: includeCurrentTimeSettings,
       services,
+      tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState: tab }),
     });
 
     if (

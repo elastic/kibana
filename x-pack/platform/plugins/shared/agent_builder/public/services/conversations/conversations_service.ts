@@ -8,18 +8,25 @@
 import { type HttpSetup, buildPath } from '@kbn/core-http-browser';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
+  CreateConversationResponse,
+  AddConversationEventsRequestBody,
+  AddConversationEventsResponse,
   GetConversationResponse,
   ListConversationsResponse,
+  SearchConversationsResponse,
   DeleteConversationResponse,
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SteerConversationRequestBody,
+  SteerConversationResponse,
   UpdateConversationAccessControlRequestBody,
   UpdateConversationAccessControlResponse,
 } from '../../../common/http_api/conversations';
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
   ConversationListOptions,
+  ConversationSearchRequestOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';
@@ -53,6 +60,32 @@ export class ConversationsService {
     );
   }
 
+  async search({
+    query,
+    agentId,
+    page,
+    perPage,
+  }: ConversationSearchRequestOptions): Promise<SearchConversationsResponse> {
+    return await this.http.get<SearchConversationsResponse>(
+      buildPath(`${internalApiPath}/conversations/_search`),
+      {
+        query: {
+          query,
+          agent_id: agentId,
+          page,
+          per_page: perPage,
+        },
+      }
+    );
+  }
+
+  /** Creates an empty conversation so it exists before the first message is sent. */
+  async create({ agentId }: { agentId: string }) {
+    return await this.http.post<CreateConversationResponse>(`${publicApiPath}/conversations`, {
+      body: JSON.stringify({ agent_id: agentId }),
+    });
+  }
+
   async get({ conversationId }: ConversationGetOptions) {
     return await this.http.get<GetConversationResponse>(
       buildPath(`${publicApiPath}/conversations/{conversationId}`, { conversationId })
@@ -74,6 +107,22 @@ export class ConversationsService {
     );
   }
 
+  async steer({
+    conversationId,
+    message,
+    eventId,
+  }: {
+    conversationId: string;
+    message: string;
+    eventId: string;
+  }) {
+    const body: SteerConversationRequestBody = { message, event_id: eventId };
+    return await this.http.post<SteerConversationResponse>(
+      buildPath(`${internalApiPath}/conversations/{conversationId}/_steer`, { conversationId }),
+      { body: JSON.stringify(body) }
+    );
+  }
+
   async updateReadStatus({
     conversationId,
     read,
@@ -89,22 +138,22 @@ export class ConversationsService {
 
   async submitRoundFeedback({
     conversationId,
-    roundId,
+    executionId,
     vote,
     chips,
     comment,
   }: {
     conversationId: string;
-    roundId: string;
+    executionId: string;
     vote: 'up' | 'down' | null;
     chips?: FeedbackChipId[];
     comment?: string;
   }): Promise<void> {
     await this.http.post(
-      buildPath(`${internalApiPath}/conversations/{conversationId}/rounds/{roundId}/_feedback`, {
-        conversationId,
-        roundId,
-      }),
+      buildPath(
+        `${internalApiPath}/conversations/{conversationId}/executions/{executionId}/_feedback`,
+        { conversationId, executionId }
+      ),
       { body: JSON.stringify({ vote, chips, comment }) }
     );
   }
@@ -136,6 +185,18 @@ export class ConversationsService {
       {
         body: JSON.stringify(accessControl),
       }
+    );
+  }
+
+  async addEvents({
+    conversationId,
+    events,
+  }: AddConversationEventsRequestBody & {
+    conversationId: string;
+  }): Promise<AddConversationEventsResponse> {
+    return await this.http.post<AddConversationEventsResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/_add_events`, { conversationId }),
+      { body: JSON.stringify({ events }) }
     );
   }
 

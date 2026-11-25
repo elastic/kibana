@@ -9,10 +9,11 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSuperSelect,
   EuiText,
+  EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
@@ -68,11 +69,16 @@ export const ConversationAccessModeSelect: React.FC<ConversationAccessModeSelect
   onAccessModeChange,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const titleId = useGeneratedHtmlId({ prefix: 'conversationShareGeneralAccess' });
 
   return (
-    <EuiFormRow label={generalAccessLabel} fullWidth>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiTitle size="xxxs">
+        <h4 id={titleId}>{generalAccessLabel}</h4>
+      </EuiTitle>
       <EuiSuperSelect<ConversationAccessControlMode>
         fullWidth
+        aria-labelledby={titleId}
         valueOfSelected={accessMode}
         options={accessModeOptions}
         onChange={onAccessModeChange}
@@ -89,6 +95,6 @@ export const ConversationAccessModeSelect: React.FC<ConversationAccessModeSelect
         }}
         data-test-subj="agentBuilderConversationSharingAccessModeSelect"
       />
-    </EuiFormRow>
+    </EuiFlexGroup>
   );
 };

@@ -78,6 +78,7 @@ function getDefaultLensApiMock() {
     hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     anyStateChange$: of(),
+    latestState$: of({}),
     serializeState: jest.fn(),
     getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
@@ -92,7 +93,7 @@ function getDefaultLensApiMock() {
       status: 'rendered',
       timeToEvent: 1000,
     }),
-    dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
+    dataSources$: new BehaviorSubject<DataView[] | undefined>(undefined),
     savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),
     updateAttributes: jest.fn(),
@@ -112,7 +113,8 @@ function getDefaultLensApiMock() {
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
     applySerializedState: jest.fn(),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
-    usesEsql$: new BehaviorSubject<boolean>(false),
+    esql$: new BehaviorSubject<AggregateQuery[]>([]),
+    approximationApplied$: new BehaviorSubject<boolean | undefined>(false),
     supportsJsonExport: true,
     cancelRequests: jest.fn(),
   };

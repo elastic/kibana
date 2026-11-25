@@ -263,6 +263,7 @@
             "__one_of": [
               "disabled",
               "stored",
+              "columnar_stored",
               "synthetic"
             ]
           }
@@ -494,6 +495,9 @@
               "_tier_preference": "",
               "_id": ""
             },
+            "require": {
+              "*": ""
+            },
             "initial_recovery": {
               "_id": ""
             },
@@ -597,6 +601,11 @@
                 false
               ]
             }
+          }
+        },
+        "requests": {
+          "cache": {
+            "enable": ""
           }
         },
         "similarity": {

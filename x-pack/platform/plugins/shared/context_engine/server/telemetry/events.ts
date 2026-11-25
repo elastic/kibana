@@ -13,6 +13,7 @@ export const CONTEXT_ENGINE_EVENT_TYPES = {
   KiCreate: `${TELEMETRY_PREFIX}_ki_create`,
   KiUpdate: `${TELEMETRY_PREFIX}_ki_update`,
   KiDelete: `${TELEMETRY_PREFIX}_ki_delete`,
+  KiRestore: `${TELEMETRY_PREFIX}_ki_restore`,
   KiVerification: `${TELEMETRY_PREFIX}_ki_verification`,
 } as const;
 
@@ -74,11 +75,19 @@ const KI_DELETE_EVENT: EventTypeOpts<ReportKiWriteEventParams> = {
   schema: kiWriteEventSchema,
 };
 
+const KI_RESTORE_EVENT: EventTypeOpts<ReportKiWriteEventParams> = {
+  eventType: CONTEXT_ENGINE_EVENT_TYPES.KiRestore,
+  schema: kiWriteEventSchema,
+};
+
 export interface ReportKiVerificationEventParams {
   outcome: ContextEngineOutcome;
   passed?: boolean;
   verifiers_run?: number;
   failed_verifier_ids?: string[];
+  failed_workflow_verifier_count?: number;
+  workflow_id?: string;
+  ai_index_id?: string;
   error_type?: string;
 }
 
@@ -119,11 +128,34 @@ const kiVerificationEventSchema: RootSchema<ReportKiVerificationEventParams> = {
     items: {
       type: 'keyword',
       _meta: {
-        description: 'Verifier id, verbatim.',
+        description: 'Verifier id: built-in ids verbatim; custom verifiers as "workflow:<id>".',
       },
     },
     _meta: {
-      description: 'Failing verifier ids. Present only when a completed run failed verification.',
+      description:
+        'Distinct failing verifier ids. Present only when a completed run failed verification.',
+      optional: true,
+    },
+  },
+  failed_workflow_verifier_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of custom verifier workflows that failed. Present when at least one failed.',
+      optional: true,
+    },
+  },
+  workflow_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the workflow that ran this verification.',
+      optional: true,
+    },
+  },
+  ai_index_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The AI index the KI belongs to, when provided by the caller.',
       optional: true,
     },
   },
@@ -138,5 +170,6 @@ export const contextEngineServerEbtEvents: Array<EventTypeOpts<Record<string, un
   KI_CREATE_EVENT,
   KI_UPDATE_EVENT,
   KI_DELETE_EVENT,
+  KI_RESTORE_EVENT,
   KI_VERIFICATION_EVENT,
 ];

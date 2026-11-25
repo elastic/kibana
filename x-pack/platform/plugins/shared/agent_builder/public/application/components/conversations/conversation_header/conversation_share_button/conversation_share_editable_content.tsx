@@ -7,14 +7,14 @@
 
 import React from 'react';
 import {
+  EuiButton,
   EuiCallOut,
   EuiComboBox,
-  EuiFormRow,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
@@ -24,8 +24,11 @@ import {
   type UserProfileWithAvatar,
 } from '@kbn/user-profile-components';
 import { ConversationAccessModeSelect } from './conversation_access_mode_select';
-import { ConversationParticipantsList } from './conversation_participants_list';
-import { currentMembersLabel, searchUsersLabel } from './conversation_share_i18n';
+import {
+  ConversationShareUsersSection,
+  type ConversationShareUsers,
+} from './conversation_share_users_section';
+import { addUsersLabel, inviteUsersLabel, searchUsersLabel } from './conversation_share_i18n';
 
 const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
 
@@ -62,31 +65,29 @@ interface ConversationShareAccessProps {
   onChange: (nextAccessMode: ConversationAccessControlMode) => void;
 }
 
-interface ConversationShareMembersProps {
-  ownerProfile?: UserProfileWithAvatar;
-  profiles: UserProfileWithAvatar[];
-  onRemove: (id: string) => void;
-}
-
 interface ConversationShareUserSearchProps {
   memberIds: string[];
   ownerId?: string;
   suggestedProfiles: UserProfileWithAvatar[];
+  selectedOptions: Array<EuiComboBoxOptionOption<string>>;
   isSearching: boolean;
-  onAdd: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
+  onSelect: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
   onSearch: (value: string) => void;
+  onAdd: () => void;
 }
 
 interface ConversationShareEditableContentProps {
   access: ConversationShareAccessProps;
-  members: ConversationShareMembersProps;
+  users: ConversationShareUsers;
   userSearch: ConversationShareUserSearchProps;
+  agentName?: string;
 }
 
 export const ConversationShareEditableContent: React.FC<ConversationShareEditableContentProps> = ({
   access,
-  members,
+  users,
   userSearch,
+  agentName,
 }) => {
   const isPublic = access.mode === ConversationAccessControlMode.Public;
   const excludedIds = new Set([userSearch.ownerId, ...userSearch.memberIds].filter(Boolean));
@@ -127,50 +128,59 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
       {editableHeader}
 
       <EuiSpacer size="l" />
-      <EuiFormRow label={currentMembersLabel} fullWidth>
-        <EuiComboBox<string>
-          compressed
-          fullWidth
-          async
-          placeholder={searchUsersLabel}
-          aria-label={searchUsersLabel}
-          options={userOptions}
-          selectedOptions={[]}
-          onChange={userSearch.onAdd}
-          onSearchChange={userSearch.onSearch}
-          isLoading={userSearch.isSearching}
-          isDisabled={access.isSaving}
-          isClearable={false}
-          prepend={
-            <EuiIcon
-              type="magnify"
-              color="subdued"
-              data-test-subj="agentBuilderConversationSharingUserSearchIcon"
-              aria-hidden={true}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        data-test-subj="agentBuilderConversationSharingInviteSection"
+      >
+        <EuiTitle size="xxxs">
+          <h4>{inviteUsersLabel}</h4>
+        </EuiTitle>
+        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem>
+            <EuiComboBox<string>
+              fullWidth
+              async
+              placeholder={searchUsersLabel}
+              aria-label={searchUsersLabel}
+              options={userOptions}
+              selectedOptions={userSearch.selectedOptions}
+              onChange={userSearch.onSelect}
+              onSearchChange={userSearch.onSearch}
+              isLoading={userSearch.isSearching}
+              isDisabled={access.isSaving}
+              renderOption={(option) => {
+                const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
+
+                if (!profile) {
+                  return null;
+                }
+
+                return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
+              }}
+              rowHeight={USER_SEARCH_OPTION_ROW_HEIGHT}
+              data-test-subj="agentBuilderConversationSharingUserSearch"
             />
-          }
-          singleSelection={{ asPlainText: true }}
-          renderOption={(option) => {
-            const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="plus"
+              onClick={userSearch.onAdd}
+              isDisabled={userSearch.selectedOptions.length === 0}
+              isLoading={access.isSaving}
+              data-test-subj="agentBuilderConversationSharingAddUsersButton"
+            >
+              {addUsersLabel}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
 
-            if (!profile) {
-              return null;
-            }
-
-            return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
-          }}
-          rowHeight={USER_SEARCH_OPTION_ROW_HEIGHT}
-          data-test-subj="agentBuilderConversationSharingUserSearch"
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="s" />
-
-      <ConversationParticipantsList
-        ownerProfile={members.ownerProfile}
-        memberProfiles={members.profiles}
+      <EuiSpacer size="l" />
+      <ConversationShareUsersSection
+        users={users}
         isSaving={access.isSaving}
-        onRemoveUser={members.onRemove}
+        agentName={agentName}
       />
     </>
   );

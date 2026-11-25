@@ -38,10 +38,12 @@ const GroupGridCardContent = ({
   isLoading,
   setFlyoutConfigCallback,
   groupMonitors,
+  isInteractive = true,
 }: {
   isLoading: boolean;
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   groupMonitors: OverviewStatusMetaData[];
+  isInteractive?: boolean;
 }) => {
   const [activePage, setActivePage] = useState(0);
   const [rowSize, setRowSize] = useState(DEFAULT_ROW_SIZE);
@@ -72,7 +74,11 @@ const GroupGridCardContent = ({
               key={`${monitor.configId}-${monitor.locations[0]?.id ?? 'default'}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
-              <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+              <MetricItem
+                monitor={monitor}
+                onClick={setFlyoutConfigCallback}
+                isInteractive={isInteractive}
+              />
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
@@ -91,6 +97,7 @@ const GroupGridCardContent = ({
         itemsPerPage={rowSize}
         onChangeItemsPerPage={changeItemsPerPage}
         itemsPerPageOptions={[2, 3, 4, 5, 10]}
+        showPerPageOptions={isInteractive}
       />
     </>
   );
@@ -105,6 +112,7 @@ export const GroupGridItem = ({
   groupMonitors: allGroupMonitors,
   setFlyoutConfigCallback,
   view,
+  isInteractive = true,
 }: {
   loaded: boolean;
   groupMonitors: OverviewStatusMetaData[];
@@ -114,6 +122,7 @@ export const GroupGridItem = ({
   setFullScreenGroup: (group: string) => void;
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   view: OverviewView;
+  isInteractive?: boolean;
 }) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
@@ -226,10 +235,16 @@ export const GroupGridItem = ({
           isLoading={isLoading}
           setFlyoutConfigCallback={setFlyoutConfigCallback}
           groupMonitors={groupMonitors}
+          isInteractive={isInteractive}
         />
       ) : null}
       {view === 'compactView' ? (
-        <MonitorsTable items={groupMonitors} setFlyoutConfigCallback={setFlyoutConfigCallback} />
+        <MonitorsTable
+          items={groupMonitors}
+          setFlyoutConfigCallback={setFlyoutConfigCallback}
+          enableServerPagination={false}
+          isInteractive={isInteractive}
+        />
       ) : null}
     </EuiAccordion>
   );

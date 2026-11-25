@@ -26,6 +26,7 @@ import {
   CoreKibanaRequest,
   lifecycleResponseFactory,
 } from '@kbn/core-http-router-server-internal';
+import { SELF_CALL_AUTH_CHALLENGE_HEADER, SELF_CALL_HEADER } from '../self_client_observer';
 
 const authResult = {
   authenticated(data: AuthResultParams = {}): AuthResult {
@@ -64,6 +65,15 @@ const toolkit: AuthToolkit = {
   redirected: authResult.redirected,
 };
 
+/**
+ * Marks a 401 as an authentication-stage rejection, but only for a self call: the header is a
+ * signal to Kibana's own HTTP self client and has no meaning to an external client.
+ */
+const authChallengeHeaders = (request: Request): ResponseHeaders | undefined =>
+  request.headers[SELF_CALL_HEADER] === undefined
+    ? undefined
+    : { [SELF_CALL_AUTH_CHALLENGE_HEADER]: 'true' };
+
 /** @internal */
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
@@ -81,6 +91,10 @@ export function adoptToHapiAuthFormat(
       const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
 
       if (isKibanaResponse(result)) {
+        const challengeHeaders = result.status === 401 ? authChallengeHeaders(request) : undefined;
+        if (challengeHeaders) {
+          result.options.headers = { ...result.options.headers, ...challengeHeaders };
+        }
         return hapiResponseAdapter.handle(result);
       }
 
@@ -111,7 +125,9 @@ export function adoptToHapiAuthFormat(
         if (kibanaRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
-        return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
+        return hapiResponseAdapter.handle(
+          lifecycleResponseFactory.unauthorized({ headers: authChallengeHeaders(request) })
+        );
       }
       throw new Error(
         `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`

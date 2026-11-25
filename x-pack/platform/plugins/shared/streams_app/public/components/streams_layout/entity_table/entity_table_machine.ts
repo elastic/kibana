@@ -27,8 +27,8 @@ import type {
 
 /**
  * Creates the generic machine backing the Streams entity tables (Destinations,
- * and later Sources and Pipelines). It owns the row list (via the `fetchItems`
- * actor provided per entity) and the URL-synced search/sort/pagination state.
+ * and later Sources). It owns the row list (via the `fetchItems` actor provided
+ * per entity) and the URL-synced search/sort/pagination state.
  */
 export const createEntityTableMachine = <TItem>() =>
   setup({

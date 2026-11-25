@@ -41,8 +41,7 @@ export const YamlEditorWrapper = () => {
   const dsl = useStreamEnrichmentSelector((state) => state.context.nextStreamlangDSL);
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const streamType = getStreamTypeFromDefinition(definition.stream);
-  const editorStreamType =
-    streamType === 'unknown' || streamType === 'query' ? undefined : streamType;
+  const editorStreamType = streamType === 'unknown' ? undefined : streamType;
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
   const canSimulate = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.simulate
@@ -95,7 +94,7 @@ export const YamlEditorWrapper = () => {
       <EuiFlexItem grow={true} css={editorContainer}>
         {/* NOTE: Incredibly insidious but this must be hasShadow={false} or the transforms
         applied for shadows will break Monaco's fixed positioning for menus */}
-        <EuiPanel css={fullHeightPanel} paddingSize="none" hasShadow={false}>
+        <EuiPanel css={fullHeightPanel} paddingSize="none" hasShadow={false} hasBorder={false}>
           <StreamlangYamlEditor
             dsl={dsl}
             onDslChange={handleDslChange}

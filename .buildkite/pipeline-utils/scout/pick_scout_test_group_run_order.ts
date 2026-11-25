@@ -9,9 +9,10 @@
 
 import Fs from 'fs';
 import path from 'path';
-import { expandAgentQueue } from '../agent_images';
-import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
-import { collectEnvFromLabels } from '../pr_labels';
+import { expandAgentQueue } from '../agent_images.ts';
+import { BuildkiteClient, type BuildkiteStep } from '../buildkite/index.ts';
+import { collectEnvFromLabels } from '../pr_labels.ts';
+import { SCOUT_STEP_KEYS } from './step_keys.ts';
 import { getKibanaDir, getRequiredEnv } from '#pipeline-utils';
 
 export interface ModuleDiscoveryInfo {
@@ -118,6 +119,33 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     Fs.readFileSync(scoutConfigsPath, 'utf-8')
   ) as ModuleDiscoveryInfo[];
 
+  const moonShadowPath = path.join(getKibanaDir(), '.scout/code_changes.moon_shadow.json');
+  if (Fs.existsSync(moonShadowPath)) {
+    const shadow = JSON.parse(Fs.readFileSync(moonShadowPath, 'utf-8')) as {
+      scoutTasks?: { modeledConfigs: string[]; affectedConfigs: string[] };
+    };
+    if (shadow.scoutTasks) {
+      const selected = new Set(
+        modulesWithTests.flatMap((module) => module.configs.map((config) => config.path))
+      );
+      const modeled = new Set(shadow.scoutTasks.modeledConfigs);
+      const affected = new Set(shadow.scoutTasks.affectedConfigs);
+      const currentOnly = [...selected].filter(
+        (config) => modeled.has(config) && !affected.has(config)
+      );
+      const moonOnly = [...affected].filter((config) => !selected.has(config));
+      console.log(
+        `Moon Scout task shadow selection: ${selected.size} current, ${affected.size} Moon, ${currentOnly.length} current-only, ${moonOnly.length} Moon-only`
+      );
+      if (currentOnly.length || moonOnly.length) {
+        console.log('Moon Scout task shadow differences:', {
+          currentOnly: currentOnly.slice(0, 20),
+          moonOnly: moonOnly.slice(0, 20),
+        });
+      }
+    }
+  }
+
   if (modulesWithTests.length === 0) {
     // no scout configs found, nothing to need to upload steps
     return;
@@ -128,7 +156,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       ? process.env.SCOUT_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build_scout_tests', 'build'];
+      : [SCOUT_STEP_KEYS.BUILDER, 'build'];
 
   // Apply the heavy-suite split here, at scheduling time, so each (arch, domain) mode
   // for module gets its own Buildkite step. The scheduled (post-split)

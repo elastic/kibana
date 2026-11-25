@@ -54,6 +54,7 @@ describe('buildIndexAttachment', () => {
     expect(callArgs.spaces).toEqual(['space-1']);
     expect(callArgs.esClient).toBe(deps.esInternalClient);
     expect(callArgs.savedObjectsClient).toBe(deps.soClient);
+    expect(callArgs.clientHasSpacesExtension).toBe(true);
   });
 
   it('falls back to the default space when no spaces service and no spaceId are provided', async () => {
@@ -97,10 +98,10 @@ describe('buildDeleteAttachment', () => {
     const deps = buildDeps({ spaceFromRequest: 'space-1' });
     const deleteAttachment = buildDeleteAttachment(deps);
 
-    await deleteAttachment({ ...baseParams, ingestionMethod: 'all' });
+    await deleteAttachment({ ...baseParams, ingestionMethod: 'all', strict: true });
 
     expect(deps.smlService.deleteAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({ ingestionMethod: 'all', spaces: ['space-1'] })
+      expect.objectContaining({ ingestionMethod: 'all', spaces: ['space-1'], strict: true })
     );
   });
 
