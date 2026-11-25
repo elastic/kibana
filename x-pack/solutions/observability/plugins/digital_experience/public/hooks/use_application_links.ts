@@ -84,13 +84,15 @@ export const useApplicationLinks = (
       ...listQuery,
       ...pick(urlQuery, OVERVIEW_QUERY_KEYS),
       ...(filters ? { filters } : {}),
-      // The mobile page's filters and Compare; the list's `applicationType` gives it the mobile page.
+      // Compare, so it is still on back on the Overview after another tab.
+      compare,
+      // The mobile page's filters; the list's `applicationType` gives it the mobile page.
       ...(listQuery.applicationType === APPLICATION_TYPE.mobile
-        ? { osName: osName || undefined, release: release || undefined, compare }
+        ? { osName: osName || undefined, release: release || undefined }
         : {}),
       source,
     };
-    const query = { ...listQuery, ...sharedFilters, source };
+    const query = { ...listQuery, ...sharedFilters, compare, source };
     const overviewPath = router.link('/{serviceName}', {
       path: { serviceName },
       query: tabQuery,

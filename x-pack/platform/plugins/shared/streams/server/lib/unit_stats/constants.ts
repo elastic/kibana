@@ -88,6 +88,7 @@ export const STATS_COLUMN = {
   authenticationRate: 'authentication_rate',
   authorizationRate: 'authorization_rate',
   collection: 'collection',
+  documents: 'documents',
   reason: 'reason',
   acceptedRate: 'accepted_rate',
   avgLatency: 'avg_latency',
