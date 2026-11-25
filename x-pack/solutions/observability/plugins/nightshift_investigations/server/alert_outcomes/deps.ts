@@ -11,7 +11,9 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { NIGHTSHIFT_ALERT_OUTCOMES_USAGE_ID } from '@kbn/nightshift-shared';
+import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import { findInvestigationConversations } from '../client/investigation_conversation';
+import { isAlertRecoveryRound } from '../client/build_investigation_message';
 import type { RawRoundStep } from '../investigation_round';
 import {
   createInvestigationBackgroundTelemetry,
@@ -31,6 +33,10 @@ export interface AlertOutcomeServicesDeps {
   getInference: () => InferenceServerStart | undefined;
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
+  getInvestigationsClient: (
+    request: KibanaRequest,
+    spaceId: string
+  ) => NightshiftInvestigationsClient;
   telemetry?: NightshiftTelemetryClient;
   logger: Logger;
 }
@@ -42,7 +48,7 @@ export interface AlertOutcomeServices {
     options: { investigationId: string; roundConnectorId?: string }
   ) => Promise<TrackInvestigationDeps>;
   /** Deps of the poller, scoped to the failure sweep's request. */
-  getPollDeps: (request: KibanaRequest) => Promise<PollAlertOutcomesDeps>;
+  getPollDeps: (request: KibanaRequest, spaceId: string) => Promise<PollAlertOutcomesDeps>;
 }
 
 /** Builds alert outcome dependencies lazily, since they read plugin start contracts. */
@@ -113,7 +119,7 @@ export const createAlertOutcomeServices = (
       };
     },
 
-    async getPollDeps(request) {
+    async getPollDeps(request, spaceId) {
       const { actions, agentBuilder } = requireStart();
       const [actionsClient, conversations] = await Promise.all([
         actions.getActionsClientWithRequest(request),
@@ -130,6 +136,14 @@ export const createAlertOutcomeServices = (
               status,
             ])
           ),
+        getLatestRecoveryRoundAt: async (id) =>
+          (await conversations.get(id)).rounds
+            .filter((round) => isAlertRecoveryRound(round.input?.message))
+            .at(-1)?.started_at,
+        followUpExternalAlertRecovery: (record, checkWindow) =>
+          deps
+            .getInvestigationsClient(request, spaceId)
+            .followUpExternalAlertRecovery(record, checkWindow),
         telemetry: deps.telemetry,
         logger: deps.logger,
       };

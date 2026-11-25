@@ -1036,6 +1036,7 @@ export class NightshiftInvestigationsPlugin
       getInference: () => this.inference,
       getSavedObjects: () => this.savedObjects,
       getUiSettings: () => this.uiSettings,
+      getInvestigationsClient: (request, spaceId) => this.getInvestigationsClient(request, spaceId),
       telemetry: this.telemetry,
       logger: this.logger.get('alert_outcomes'),
     });

@@ -3656,6 +3656,80 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
   });
 });
 
+describe('NightshiftInvestigationsClient.followUpExternalAlertRecovery()', () => {
+  const RECORD = {
+    investigation_id: 'inv-1',
+    subject_type: 'slack_thread',
+    ref: {
+      source: 'elastic' as const,
+      connector_id: 'remote-es',
+      alert_uuid: 'alert-1',
+      rule_id: 'rule-1',
+      rule_name: 'High error rate',
+      rule_type_id: '.es-query',
+    },
+  };
+  const WINDOW = {
+    firingAt: '2026-11-24T10:20:00.000Z',
+    recoveredBy: '2026-11-24T10:25:00.000Z',
+  };
+
+  beforeEach(() => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: BOUND_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [], settings: { run_as: 'kibana/nightshift_agent' } },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-ext-1');
+  });
+
+  it('queues a recovery round like the one for alerts on this cluster', async () => {
+    withConversations(makeConversation({ id: 'inv-1', status: 'open' }));
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await expect(
+      makeClient({ telemetry: telemetry as never }).followUpExternalAlertRecovery(RECORD, WINDOW)
+    ).resolves.toEqual({ investigation_id: 'inv-1', execution_id: 'exec-ext-1' });
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: BOUND_WORKFLOW_ID }),
+      SPACE_ID,
+      {
+        investigation_id: 'inv-1',
+        message: expect.stringContaining(
+          'was firing at 2026-11-24T10:20:00.000Z and recovered by 2026-11-24T10:25:00.000Z'
+        ),
+        context: {
+          source: 'alert',
+          follow_up: 'alert_recovered',
+          entry_point: 'alert_recovery',
+          alert_rule_type: '.es-query',
+        },
+      },
+      mockRequest,
+      'nightshift-investigations'
+    );
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflow_execution_id: 'exec-ext-1',
+        entry_point: 'alert_recovery',
+        subject_type: 'slack_thread',
+        is_follow_up: true,
+      })
+    );
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
+  });
+
+  it('queues nothing when the investigation is closed', async () => {
+    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+    await expect(
+      makeClient().followUpExternalAlertRecovery(RECORD, WINDOW)
+    ).resolves.toBeUndefined();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+});
+
 describe('NightshiftInvestigationsClient.claimSlackThread()', () => {
   const THREAD = {
     investigationId: 'inv-1',

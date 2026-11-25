@@ -79,8 +79,10 @@ import {
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
 } from '../../common';
+import type { AlertRef, TrackingRecord } from '../alert_outcomes/types';
 import {
   buildAlertRecoveredFollowUpMessage,
+  buildExternalAlertRecoveredFollowUpMessage,
   buildInvestigationMessage,
   buildInvestigationRoundMessage,
   type AlertRecoveredMessageInput,
@@ -1638,11 +1640,88 @@ export class NightshiftInvestigationsClient {
         ? snapshotRuleType
         : '');
 
+    const executionId = await this.queueAlertRecoveryRound({
+      investigationId: existing.id,
+      message,
+      alertRuleType,
+      subjectType: 'alert',
+      alertSnapshot: alertSubject?.snapshot,
+      alertLabel: `alert/${alertUuid}`,
+    });
+    return { investigation_id: existing.id, execution_id: executionId };
+  }
+
+  /**
+   * Runs a recovery round for an alert Nightshift did not start, which polling found recovered.
+   * Like {@link followUpRecoveredAlert} it never starts an investigation and is not charged to the
+   * quota; it resolves to undefined, running nothing, when the investigation is closed or gone.
+   */
+  async followUpExternalAlertRecovery(
+    record: Pick<TrackingRecord, 'investigation_id' | 'subject_type'> & { ref: AlertRef },
+    checkWindow: { firingAt: string; recoveredBy: string; reportedRecoveredAt?: string }
+  ): Promise<{ investigation_id: string; execution_id: string } | undefined> {
+    if (!(await this.checkInfrastructureAvailability())) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
+    const { agentBuilder } = this.requireWriteDeps();
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const investigation = await findInvestigationConversation(
+      conversations,
+      record.investigation_id
+    );
+    if (investigation?.status !== 'open') {
+      this.logger.debug(
+        `Investigation "${record.investigation_id}" is not open; no recovery round to run`
+      );
+      return undefined;
+    }
+    const { ref } = record;
+    const executionId = await this.queueAlertRecoveryRound({
+      investigationId: investigation.id,
+      message: buildExternalAlertRecoveredFollowUpMessage({
+        alertUuid: ref.alert_uuid,
+        instanceId: ref.instance_id,
+        ruleId: ref.rule_id,
+        ruleName: ref.rule_name,
+        ruleTypeId: ref.rule_type_id,
+        alertStart: ref.alert_start,
+        connectorId: ref.connector_id,
+        ...checkWindow,
+      }),
+      alertRuleType: ref.rule_type_id ?? '',
+      subjectType: record.subject_type ?? 'manual',
+      alertLabel: `${ref.source} alert ${ref.alert_uuid}`,
+    });
+    return { investigation_id: investigation.id, execution_id: executionId };
+  }
+
+  /**
+   * Queues a recovery round like any other follow-up: the investigation's queue, its notification
+   * routing, no quota charge. `inputs.context` marks it as an alert recovery, so online evals run
+   * the alert-outcome judges on it.
+   */
+  private async queueAlertRecoveryRound({
+    investigationId,
+    message,
+    alertRuleType,
+    subjectType,
+    alertSnapshot,
+    alertLabel,
+  }: {
+    investigationId: string;
+    message: string;
+    alertRuleType: string;
+    subjectType: string;
+    alertSnapshot?: Record<string, unknown>;
+    alertLabel: string;
+  }): Promise<string> {
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
     const workflow = await this.getInvestigationWorkflow(spaceId);
     const executionId = await this.runInvestigationWorkflow(workflow, spaceId, {
-      investigation_id: existing.id,
+      investigation_id: investigationId,
       message,
       context: {
         source: 'alert',
@@ -1652,18 +1731,18 @@ export class NightshiftInvestigationsClient {
       },
     });
     this.telemetry?.reportInvestigationStarted({
-      investigation_id: existing.id,
+      investigation_id: investigationId,
       workflow_execution_id: executionId,
       trigger_type: 'automatic',
       entry_point: 'alert_recovery',
-      subject_type: 'alert',
+      subject_type: subjectType,
       is_follow_up: true,
-      ...alertIdentityOf(spaceId, alertSubject?.snapshot),
+      ...alertIdentityOf(spaceId, alertSnapshot),
     });
     this.logger.info(
-      `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`
+      `Requested a recovery round on investigation "${investigationId}" for ${alertLabel}, execution_id=${executionId}`
     );
-    return { investigation_id: existing.id, execution_id: executionId };
+    return executionId;
   }
 
   /**

@@ -13,6 +13,7 @@ import {
 import {
   ALERT_OUTCOME_POLICY,
   buildAlertRecoveredFollowUpMessage,
+  buildExternalAlertRecoveredFollowUpMessage,
   buildInvestigationMessage,
   isAlertRecoveryRound,
 } from './build_investigation_message';
@@ -406,6 +407,53 @@ describe('buildInvestigationMessage with a significant event alert', () => {
 
     expect(message).toContain('not a classic one');
     expect(message).not.toContain('significant event');
+  });
+});
+
+describe('buildExternalAlertRecoveredFollowUpMessage', () => {
+  const external = {
+    alertUuid: 'alert-1',
+    instanceId: 'host-a',
+    ruleId: 'rule-1',
+    ruleName: 'High error rate',
+    ruleTypeId: '.es-query',
+    alertStart: '2026-11-24T09:58:00.000Z',
+    connectorId: 'remote-es',
+    firingAt: '2026-11-24T10:20:00.000Z',
+    recoveredBy: '2026-11-24T10:25:00.000Z',
+  };
+
+  it('gives the check window and asks for the actual recovery time', () => {
+    const message = buildExternalAlertRecoveredFollowUpMessage({
+      ...external,
+      reportedRecoveredAt: '2026-11-24T10:22:10.000Z',
+    });
+    expect(message).toContain(
+      [
+        '<alert_data>',
+        'Alert "High error rate" (UUID alert-1, instance "host-a", rule rule-1, type .es-query) was firing at 2026-11-24T10:20:00.000Z and recovered by 2026-11-24T10:25:00.000Z, first active at 2026-11-24T09:58:00.000Z.',
+        'The alerting system recorded the recovery at 2026-11-24T10:22:10.000Z.',
+        'Determine the actual recovery time from telemetry.',
+      ].join('\n')
+    );
+    expect(message).toContain('through the connector remote-es');
+  });
+
+  it('is a recovery round under the same alert-outcome policy', () => {
+    const message = buildExternalAlertRecoveredFollowUpMessage(external);
+    expect(isAlertRecoveryRound(message)).toBe(true);
+    expect(message).toContain(ALERT_OUTCOME_POLICY);
+    expect(message).not.toContain('The alerting system recorded');
+  });
+
+  it('names an alert without a rule name by its uuid', () => {
+    const message = buildExternalAlertRecoveredFollowUpMessage({
+      alertUuid: 'alert-1',
+      connectorId: 'remote-es',
+      firingAt: '2026-11-24T10:20:00.000Z',
+      recoveredBy: '2026-11-24T10:25:00.000Z',
+    });
+    expect(message).toContain('Alert "alert-1" (UUID alert-1) was firing at');
   });
 });
 

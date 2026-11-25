@@ -127,4 +127,21 @@ describe('AlertOutcomeTrackingStore', () => {
       sort: [{ next_check_at: { order: 'asc' } }],
     });
   });
+
+  it('finds claims without a recovery round', async () => {
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+    await createStore().findStuckRecovering({
+      spaceId: 'default',
+      before: '2026-11-24T10:00:00.000Z',
+      size: 20,
+    });
+    expect(client.search.mock.calls[0][0].query.bool).toEqual({
+      filter: [
+        { term: { space_id: 'default' } },
+        { term: { state: 'recovering' } },
+        { range: { recovering_since: { lte: '2026-11-24T10:00:00.000Z' } } },
+      ],
+      must_not: [{ exists: { field: 'recovery_execution_id' } }],
+    });
+  });
 });

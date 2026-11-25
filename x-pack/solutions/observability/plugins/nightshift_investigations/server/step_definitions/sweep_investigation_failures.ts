@@ -26,7 +26,10 @@ export const ALERT_OUTCOME_POLL_BUDGET_MS = 60_000;
 const SWEEP_STEP_BUDGET_MS = 3.5 * 60_000;
 
 export type SweepStepDeps = InvestigationFailureSweepDeps & {
-  getAlertOutcomePollDeps?: (request: KibanaRequest) => Promise<PollAlertOutcomesDeps>;
+  getAlertOutcomePollDeps?: (
+    request: KibanaRequest,
+    spaceId: string
+  ) => Promise<PollAlertOutcomesDeps>;
 };
 
 /** Adapts the authenticated workflow step context to the failure sweep. */
@@ -84,7 +87,7 @@ const pollWithinBudget = async (
 ): Promise<PollAlertOutcomesResult | undefined> => {
   if (!deps.getAlertOutcomePollDeps) return undefined;
   try {
-    const pollDeps = await deps.getAlertOutcomePollDeps(request);
+    const pollDeps = await deps.getAlertOutcomePollDeps(request, spaceId);
     return await pollAlertOutcomes(pollDeps, { spaceId, deadline, abortSignal });
   } catch (error) {
     // Polling never fails failure reconciliation, whose checkpoint the sweep must save.

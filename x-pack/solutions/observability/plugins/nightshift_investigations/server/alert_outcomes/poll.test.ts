@@ -11,6 +11,7 @@ import {
   HARD_CAP_MS,
   MAX_CONSECUTIVE_FAILURES,
   POLL_INTERVAL_MS,
+  RECOVERING_RETRY_AFTER_MS,
   pollAlertOutcomes,
   type PollAlertOutcomesDeps,
 } from './poll';
@@ -46,6 +47,16 @@ class FakeTrackingStore {
           record.space_id === spaceId && record.state === 'tracking' && record.next_check_at! <= now
       )
       .sort((a, b) => a.record.next_check_at!.localeCompare(b.record.next_check_at!));
+  }
+
+  async findStuckRecovering({ spaceId, before }: { spaceId: string; before: string }) {
+    return [...this.docs.values()].filter(
+      ({ record }) =>
+        record.space_id === spaceId &&
+        record.state === 'recovering' &&
+        record.recovering_since! <= before &&
+        !record.recovery_execution_id
+    );
   }
 
   async update(stored: StoredTrackingRecord, patch: Partial<TrackingRecord>) {
@@ -92,10 +103,16 @@ const setup = ({
     isEnabled: () => enabled,
     adapterContext: { actionsClient: {} },
     getInvestigationStatuses: jest.fn(async () => new Map(Object.entries(statuses))),
+    getLatestRecoveryRoundAt: jest.fn().mockResolvedValue(undefined),
+    followUpExternalAlertRecovery: jest.fn().mockResolvedValue({ execution_id: 'exec-9' }),
     telemetry,
     logger: loggingSystemMock.createLogger(),
     now: () => NOW,
-  } as unknown as PollAlertOutcomesDeps & { telemetry: typeof telemetry };
+  } as unknown as PollAlertOutcomesDeps & {
+    getLatestRecoveryRoundAt: jest.Mock;
+    followUpExternalAlertRecovery: jest.Mock;
+    telemetry: typeof telemetry;
+  };
   const poll = (deadline = NOW + 60_000) =>
     pollAlertOutcomes(deps, { spaceId: 'default', deadline });
   return { store, deps, telemetry, poll };
@@ -138,15 +155,23 @@ describe('pollAlertOutcomes', () => {
     expect(check).not.toHaveBeenCalled();
   });
 
-  it('records a recovery once, with how long it took to see it', async () => {
-    const { store, poll, telemetry } = setup({
+  it('queues one recovery round for a recovery, with the check window', async () => {
+    const { store, poll, deps, telemetry } = setup({
       results: { 'alert-1': { status: 'recovered', recovered_at: iso(NOW - 3 * 60_000) } },
     });
     store.put(tracking());
     await expect(poll()).resolves.toMatchObject({ checked: 1, recovered: 1 });
+    expect(deps.followUpExternalAlertRecovery).toHaveBeenCalledWith(
+      expect.objectContaining({ investigation_id: 'inv-1', ref: tracking().ref }),
+      {
+        firingAt: iso(NOW - 5 * 60_000),
+        recoveredBy: iso(NOW),
+        reportedRecoveredAt: iso(NOW - 3 * 60_000),
+      }
+    );
     expect(store.record('inv-1')).toMatchObject({
       state: 'recovered',
-      last_status: 'recovered',
+      recovery_execution_id: 'exec-9',
       recovered_seen_at: iso(NOW),
     });
     expect(telemetry.reportAlertOutcome).toHaveBeenCalledWith({
@@ -156,25 +181,109 @@ describe('pollAlertOutcomes', () => {
       detection_lag_seconds: 180,
       tracked_seconds: 3600,
     });
+    expect(telemetry.reportAlertOutcome).toHaveBeenCalledWith({
+      transition: 'round_queued',
+      source: 'elastic',
+      automation_id: 'auto-1',
+    });
 
     // A later run finds nothing to do.
     await expect(poll()).resolves.toMatchObject({ checked: 0, recovered: 0 });
+    expect(deps.followUpExternalAlertRecovery).toHaveBeenCalledTimes(1);
   });
 
-  it('records nothing when another run wrote the record first', async () => {
-    const { store, poll, telemetry } = setup({
-      results: { 'alert-1': { status: 'recovered' } },
+  it('uses the post time as the firing time before the first check', async () => {
+    const { store, poll, deps } = setup({ results: { 'alert-1': { status: 'recovered' } } });
+    store.put(tracking({ last_firing_at: undefined }));
+    await poll();
+    expect(deps.followUpExternalAlertRecovery.mock.calls[0][1]).toEqual({
+      firingAt: tracking().post_received_at,
+      recoveredBy: iso(NOW),
     });
+  });
+
+  it('queues no round when another run claimed the recovery first', async () => {
+    const { store, poll, deps } = setup({ results: { 'alert-1': { status: 'recovered' } } });
     store.put(tracking());
     check.mockImplementation(async () => {
-      // Another sweep writes the record between this run's read and its update.
+      // Another sweep writes the record between this run's read and its claim.
       const current = store.docs.get('inv-1')!;
-      await store.update(current, { state: 'recovered', recovered_seen_at: iso(NOW - 1000) });
+      await store.update(current, { state: 'recovering', recovering_since: iso(NOW) });
       return new Map([['alert-1', { status: 'recovered' }]]);
     });
     await expect(poll()).resolves.toMatchObject({ recovered: 0 });
-    expect(store.record('inv-1').recovered_seen_at).toBe(iso(NOW - 1000));
-    expect(telemetry.reportAlertOutcome).not.toHaveBeenCalled();
+    expect(deps.followUpExternalAlertRecovery).not.toHaveBeenCalled();
+  });
+
+  it('stops when the investigation closed before the round could be queued', async () => {
+    const { store, poll, deps } = setup({ results: { 'alert-1': { status: 'recovered' } } });
+    deps.followUpExternalAlertRecovery.mockResolvedValue(undefined);
+    store.put(tracking());
+    await expect(poll()).resolves.toMatchObject({ recovered: 0, stopped: 1 });
+    expect(store.record('inv-1')).toMatchObject({
+      state: 'stopped',
+      stop_reason: 'investigation_closed',
+    });
+  });
+
+  it('leaves the claim for the retry when queueing throws', async () => {
+    const { store, poll, deps } = setup({ results: { 'alert-1': { status: 'recovered' } } });
+    deps.followUpExternalAlertRecovery.mockRejectedValue(new Error('engine down'));
+    store.put(tracking());
+    await expect(poll()).resolves.toMatchObject({ recovered: 0, errors: 1 });
+    expect(store.record('inv-1')).toMatchObject({
+      state: 'recovering',
+      recovering_since: iso(NOW),
+    });
+    expect(store.record('inv-1').recovery_execution_id).toBeUndefined();
+  });
+
+  describe('stuck recoveries', () => {
+    const stuck = () =>
+      tracking({
+        state: 'recovering',
+        recovering_since: iso(NOW - RECOVERING_RETRY_AFTER_MS - 1000),
+        recovered_seen_at: iso(NOW - RECOVERING_RETRY_AFTER_MS - 1000),
+      });
+
+    it('retries the round of a claim a crash left behind', async () => {
+      const { store, poll, deps } = setup();
+      store.put(stuck());
+      await expect(poll()).resolves.toMatchObject({ recovered: 1 });
+      expect(deps.followUpExternalAlertRecovery.mock.calls[0][1]).toEqual({
+        firingAt: stuck().last_firing_at,
+        recoveredBy: stuck().recovered_seen_at,
+      });
+      expect(store.record('inv-1')).toMatchObject({
+        state: 'recovered',
+        recovery_execution_id: 'exec-9',
+      });
+    });
+
+    it('does not queue a second round when the first one exists', async () => {
+      const { store, poll, deps } = setup();
+      deps.getLatestRecoveryRoundAt.mockResolvedValue(iso(NOW - RECOVERING_RETRY_AFTER_MS));
+      store.put(stuck());
+      await poll();
+      expect(deps.followUpExternalAlertRecovery).not.toHaveBeenCalled();
+      expect(store.record('inv-1').state).toBe('recovered');
+    });
+
+    it('ignores a recovery round from before the claim', async () => {
+      const { store, poll, deps } = setup();
+      deps.getLatestRecoveryRoundAt.mockResolvedValue(iso(NOW - 2 * 60 * 60_000));
+      store.put(stuck());
+      await poll();
+      expect(deps.followUpExternalAlertRecovery).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits before retrying a recent claim', async () => {
+      const { store, poll, deps } = setup();
+      store.put(stuck());
+      store.put({ ...stuck(), recovering_since: iso(NOW - 60_000) });
+      await poll();
+      expect(deps.followUpExternalAlertRecovery).not.toHaveBeenCalled();
+    });
   });
 
   it.each([
