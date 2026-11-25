@@ -2555,7 +2555,20 @@ describe('EditOutputFlyout', () => {
         });
       });
 
-      it('should fetch the Fleet status again once when it does not report output secret storage', () => {
+      it('should fetch a cached Fleet status again when it does not report output secret storage', () => {
+        // the status was loaded before the OTLP output was enabled
+        mockedUseFleetStatus.mockReturnValue({
+          isLoading: false,
+          refetch: mockRefetchFleetStatus,
+        } as any);
+
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+
+        expect(mockRefetchFleetStatus).toHaveBeenCalledTimes(1);
+      });
+
+      it('should fetch the Fleet status again only once, after it is loaded', () => {
         let fleetStatus = { isLoading: true, refetch: mockRefetchFleetStatus };
         mockedUseFleetStatus.mockImplementation(() => fleetStatus as any);
         // any edit renders the flyout again, which reads the current status
