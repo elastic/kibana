@@ -262,6 +262,37 @@ export const IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT: EventTypeOpts<IacKeyCheckAc
 };
 
 /**
+ * How a provisioning callback report proved where it came from: 'verified' by the provider's
+ * proof; 'rejected' when the proof did not verify (the report was refused); 'missing' when the
+ * report carried none and was accepted as a report of a deployment launched before proofs were
+ * sent. The proof becomes required once 'missing' stops being reported.
+ */
+export type IacCallbackOriginProof = 'verified' | 'rejected' | 'missing';
+
+export interface IacCallbackReceivedFields {
+  provider: string;
+  originProof: IacCallbackOriginProof;
+}
+
+/** Server-side: one event per provisioning callback report judged, however it was judged. */
+export const IAC_PROVISIONER_CALLBACK_RECEIVED_EVENT: EventTypeOpts<IacCallbackReceivedFields> = {
+  eventType: 'iac_provisioner_callback_received',
+  schema: {
+    provider: {
+      type: 'keyword',
+      _meta: { description: 'Cloud provider of the record the report was received for.' },
+    },
+    originProof: {
+      type: 'keyword',
+      _meta: {
+        description:
+          "Whether the report proved the account it came from: 'verified'; 'rejected' (the proof did not verify and the report was refused); 'missing' (no proof, accepted as a report of a deployment launched before proofs were sent; the proof becomes required once this is no longer reported).",
+      },
+    },
+  },
+};
+
+/**
  * Minimal registrar interface so this file works with both
  * AnalyticsServiceSetup (server) and the browser analytics client without
  * importing @kbn/core.
@@ -279,4 +310,5 @@ export const registerIacProvisionerTelemetryEvents = (
   analytics.registerEventType(IAC_PROVISIONER_KEY_VERIFICATION_COMPLETED_EVENT);
   analytics.registerEventType(IAC_PROVISIONER_UPGRADE_CHECK_COMPLETED_EVENT);
   analytics.registerEventType(IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT);
+  analytics.registerEventType(IAC_PROVISIONER_CALLBACK_RECEIVED_EVENT);
 };

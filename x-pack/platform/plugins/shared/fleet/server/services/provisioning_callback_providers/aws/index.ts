@@ -61,7 +61,11 @@ const CallerIdentityProofSchema = schema.object({
   }),
 });
 
-/** What the stack's Lambda reports: the role and the stack it created, and the proof of its account. */
+/**
+ * What the stack's Lambda reports: the role and the stack it created, and the proof of its
+ * account. The proof is optional while stacks launched from templates that predate it can still
+ * report; it becomes required once none do.
+ */
 const AwsReportSchema = schema.object({
   role_arn: schema.string({
     minLength: 1,
@@ -77,7 +81,7 @@ const AwsReportSchema = schema.object({
       isCloudFormationStackArn(value) ? undefined : 'must be a CloudFormation stack ARN',
     meta: { description: 'ARN (StackId) of the CloudFormation stack.' },
   }),
-  origin_proof: CallerIdentityProofSchema,
+  origin_proof: schema.maybe(CallerIdentityProofSchema),
 });
 
 const accountIdOfArn = (arn: string): string | undefined => arn.split(':')[4];

@@ -34,6 +34,7 @@ import {
   mintProvisioningCallbackToken,
 } from './provisioning_callback_token';
 import { getProvisioningCallbackProvider } from './provisioning_callback_providers/registry';
+import { reportIacProvisionerCallbackReceived } from './telemetry/iac_provisioner_telemetry';
 import type { RegisteredProvisioningCallbackProvider } from './provisioning_callback_providers/registry';
 
 /** How long the stack has to call back. Also the lifetime of the token bound to the record. */
@@ -469,31 +470,48 @@ class ProvisioningCallbackService {
     // The token proves the caller was given the launch; the proof says which account the report
     // was sent from. Checked before anything is written, so a report from elsewhere leaves the
     // record waiting for the real one.
-    const verification = await receiver.verifyOrigin(
-      proof,
-      { callbackId: so.id, report },
-      {
-        verifierUrl:
-          appContextService.getConfig()?.developer?.provisioningCallbackVerifierUrls?.[
-            so.attributes.provider
-          ],
-      }
-    );
-    if (!verification.verified) {
+    if (proof === undefined) {
+      // A deployment launched from a template that predates the proof. Accepted as every report
+      // was before proofs existed, and counted, so the proof can be required once no such
+      // deployment reports any more.
       this.logger.warn(
-        `Provisioning callback report [id=${so.id}] caller identity not verified [reason=${
-          verification.reason
-        }]${verification.detail ? ` [detail=${verification.detail}]` : ''}`
+        `Provisioning callback report [id=${so.id}] carries no origin proof; accepted as a report of a deployment launched before proofs were sent`
       );
-      return {
-        outcome: 'unverified',
-        reason: verification.reason,
-        ...(verification.detail ? { detail: verification.detail } : {}),
-      };
+      reportIacProvisionerCallbackReceived({
+        provider: so.attributes.provider,
+        originProof: 'missing',
+      });
+    } else {
+      const verification = await receiver.verifyOrigin(
+        proof,
+        { callbackId: so.id, report },
+        {
+          verifierUrl:
+            appContextService.getConfig()?.developer?.provisioningCallbackVerifierUrls?.[
+              so.attributes.provider
+            ],
+        }
+      );
+      reportIacProvisionerCallbackReceived({
+        provider: so.attributes.provider,
+        originProof: verification.verified ? 'verified' : 'rejected',
+      });
+      if (!verification.verified) {
+        this.logger.warn(
+          `Provisioning callback report [id=${so.id}] caller identity not verified [reason=${
+            verification.reason
+          }]${verification.detail ? ` [detail=${verification.detail}]` : ''}`
+        );
+        return {
+          outcome: 'unverified',
+          reason: verification.reason,
+          ...(verification.detail ? { detail: verification.detail } : {}),
+        };
+      }
+      this.logger.info(
+        `Provisioning callback report [id=${so.id}] caller identity verified [account=${verification.account}] [principal=${verification.principal}]`
+      );
     }
-    this.logger.info(
-      `Provisioning callback report [id=${so.id}] caller identity verified [account=${verification.account}] [principal=${verification.principal}]`
-    );
 
     let { attributes, version } = so;
     let updatedAt = so.updated_at;

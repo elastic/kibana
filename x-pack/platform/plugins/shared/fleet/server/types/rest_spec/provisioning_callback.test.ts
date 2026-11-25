@@ -36,14 +36,14 @@ describe('ReceiveProvisioningCallbackRequestSchema', () => {
     expect(validate(BODY)).toEqual(BODY);
   });
 
-  it('requires the proof', () => {
+  it('accepts a body without the proof, from a deployment launched before proofs were sent', () => {
     const { origin_proof: _, ...withoutProof } = BODY;
-    expect(() => validate(withoutProof)).toThrow(/origin_proof/);
+    expect(validate(withoutProof)).toEqual(withoutProof);
   });
 
-  it('wants the proof under its generic name, not the AWS-only one it had', () => {
+  it('knows the proof only under its generic name, not the AWS-only one it had', () => {
     const { origin_proof: proof, ...values } = BODY;
-    expect(() => validate({ ...values, caller_identity: proof })).toThrow(/origin_proof/);
+    expect(() => validate({ ...values, caller_identity: proof })).toThrow(/caller_identity/);
   });
 
   it('rejects a body that is a report for no registered provider', () => {

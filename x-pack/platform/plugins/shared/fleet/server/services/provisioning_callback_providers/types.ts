@@ -40,7 +40,10 @@ export interface OriginVerifierOptions {
  */
 export interface ProvisioningCallbackProvider<Report, Proof> {
   readonly provider: CloudProvider;
-  /** The body a deployment of this provider reports: its values plus `origin_proof`. */
+  /**
+   * The body a deployment of this provider reports: its values plus `origin_proof`, optional
+   * while deployments launched before proofs were sent can still report.
+   */
   readonly reportSchema: ObjectType;
   /** Offline consistency checks on the received values. A message means the report is a 400. */
   validateReport(report: Report): string | undefined;

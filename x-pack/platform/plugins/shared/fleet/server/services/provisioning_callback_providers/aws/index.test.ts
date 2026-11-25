@@ -33,6 +33,10 @@ describe('AWS provisioning callback provider', () => {
       expect(aws.reportSchema.validate(body)).toEqual(body);
     });
 
+    it('accepts the two ARNs alone, from a stack launched before its Lambda sent a proof', () => {
+      expect(aws.reportSchema.validate(REPORT)).toEqual(REPORT);
+    });
+
     it.each([
       ['a role that is not an IAM role ARN', { role_arn: 'arn:aws:iam::123456789012:user/x' }],
       ['a stack that is not a CloudFormation stack ARN', { stack_arn: 'arn:aws:s3:::bucket' }],

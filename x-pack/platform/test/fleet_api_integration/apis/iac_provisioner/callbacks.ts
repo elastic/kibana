@@ -239,10 +239,20 @@ export default function (providerContext: FtrProviderContext) {
       await receive(item.id, token, { ...PAYLOAD, role_arn: 'not-an-arn' }).expect(400);
     });
 
-    it('rejects a report without the proof of its account', async () => {
+    it('accepts a report without a proof, from a stack launched before its Lambda sent one, without contacting STS', async () => {
       const { item, token } = await createCallback();
 
-      await receiveRaw(item.id, token, PAYLOAD).expect(400);
+      // Until every launched stack sends a proof, its absence is accepted as every report was
+      // before proofs existed. Once no such stack reports any more, this becomes a 400.
+      const { body } = await receiveRaw(item.id, token, PAYLOAD).expect(200);
+      expect(body).to.eql({ status: 'received' });
+      expect(sts.getRequests()).to.have.length(0);
+      expect((await getRecord(item.id)).status).to.be('received');
+    });
+
+    it('rejects a malformed proof without contacting STS', async () => {
+      const { item, token } = await createCallback();
+
       await receiveRaw(item.id, token, {
         ...PAYLOAD,
         origin_proof: { ...proofFor(item.id, PAYLOAD), region: 'sts.evil.example' },

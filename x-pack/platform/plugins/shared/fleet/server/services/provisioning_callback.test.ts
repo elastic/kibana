@@ -27,6 +27,7 @@ import {
 } from './provisioning_callback_token';
 import { verifyCallerIdentity } from './provisioning_callback_providers/aws/caller_identity';
 import { awsProvisioningCallbackProvider } from './provisioning_callback_providers/aws';
+import { reportIacProvisionerCallbackReceived } from './telemetry/iac_provisioner_telemetry';
 
 jest.mock('./app_context');
 jest.mock('./audit_logging');
@@ -35,10 +36,12 @@ jest.mock('./provisioning_callback_providers/aws/caller_identity', () => ({
   ...jest.requireActual('./provisioning_callback_providers/aws/caller_identity'),
   verifyCallerIdentity: jest.fn(),
 }));
+jest.mock('./telemetry/iac_provisioner_telemetry');
 jest.mock('uuid', () => ({ v4: () => 'cb-1' }));
 
 const mockedAudit = jest.mocked(auditLoggingService);
 const mockedVerify = jest.mocked(verifyCallerIdentity);
+const mockedReportReceived = jest.mocked(reportIacProvisionerCallbackReceived);
 
 const ROLE_ARN = 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc';
 const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1';
@@ -679,6 +682,32 @@ describe('provisioningCallbackService', () => {
       expect(logger.info).toHaveBeenCalledWith(
         `Provisioning callback report [id=cb-1] caller identity verified [account=123456789012] [principal=${CALLER_ARN}]`
       );
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'verified',
+      });
+    });
+
+    it('accepts a report without a proof, as a stack launched before its Lambda sent one, and counts it', async () => {
+      mockRecord(pendingAttrs());
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+
+      expect(result).toMatchObject({ outcome: 'received' });
+      expect(mockedVerify).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).toHaveBeenCalled();
+      // Until every launched stack sends a proof, its absence is accepted as every report was
+      // before proofs existed, and counted so the proof can be required once the count is zero.
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Provisioning callback report [id=cb-1] carries no origin proof; accepted as a report of a deployment launched before proofs were sent'
+      );
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'missing',
+      });
     });
 
     it('is unverified, writes nothing and audit-logs when the proof does not verify', async () => {
@@ -691,6 +720,10 @@ describe('provisioningCallbackService', () => {
       });
 
       expect(result).toEqual({ outcome: 'unverified', reason: 'account_mismatch' });
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'rejected',
+      });
       // The record stays pending for a report that does verify.
       expect(soClient.update).not.toHaveBeenCalled();
       expect(cloudConnectorService.create).not.toHaveBeenCalled();

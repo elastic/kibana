@@ -69,7 +69,8 @@ export interface CloudConnectorCallerIdentityProof {
  * `GetCallerIdentity` request.
  */
 export interface CloudConnectorCallbackReport extends CloudConnectorCallbackReceivedValues {
-  origin_proof: CloudConnectorCallerIdentityProof;
+  /** Optional while deployments launched before proofs were sent can still report. */
+  origin_proof?: CloudConnectorCallerIdentityProof;
 }
 
 /**
