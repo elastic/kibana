@@ -931,26 +931,32 @@ describe('saved search embeddable', () => {
       });
     });
 
-    it('should not offer unlinking when the selected tab no longer exists', async () => {
-      runtimeState = getInitialRuntimeState({
-        partialState: {
-          savedObjectId: 'id',
-          selectedTabId: 'removed-tab',
-          tabs: [{ id: 'tab-1' }] as SearchEmbeddableRuntimeState['tabs'],
-        },
-      });
+    it.each(['removed-tab', 'tab-without-data-view'])(
+      'should not offer unlinking when the selected tab cannot be shown (%s)',
+      async (selectedTabId) => {
+        runtimeState = getInitialRuntimeState({
+          partialState: {
+            savedObjectId: 'id',
+            selectedTabId,
+            tabs: [
+              { id: 'tab-with-data-view', tab: {} },
+              { id: 'tab-without-data-view' },
+            ] as SearchEmbeddableRuntimeState['tabs'],
+          },
+        });
 
-      const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { ref_id: 'id', overrides: {} },
-        finalizeApi: finalizeApiMock,
-        uuid,
-        parentApi: mockedDashboardApi,
-      });
-      await waitOneTick();
+        const { api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager: mockInitializeDrilldownsManager,
+          initialState: { ref_id: 'id', overrides: {} },
+          finalizeApi: finalizeApiMock,
+          uuid,
+          parentApi: mockedDashboardApi,
+        });
+        await waitOneTick();
 
-      expect(await api.canUnlinkFromLibrary()).toBe(false);
-    });
+        expect(await api.canUnlinkFromLibrary()).toBe(false);
+      }
+    );
   });
 
   describe('context awareness', () => {
