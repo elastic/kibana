@@ -125,8 +125,11 @@
     "alertzero.triage.headroom",
     "alertzero.triage.joinProposal",
     "alertzero.triage.loadAlerts",
+    "alertzero.triage.matchFpDecisions",
     "alertzero.triage.planSweep",
     "alertzero.triage.retagProposalAlerts",
+    "alertzero.triage.revokeFpDecision",
+    "alertzero.triage.storeFpDecisions",
     "alertzero.triage.tagPatternKeys",
     "alienvault-otx.getIndicator",
     "alienvault-otx.getPulse",
@@ -258,12 +261,15 @@
     "console",
     "context-engine.applyDreamChanges",
     "context-engine.applyDreamRelationships",
+    "context-engine.applyMaintenanceChanges",
     "context-engine.createKi",
     "context-engine.deleteKi",
+    "context-engine.gatherMaintenance",
     "context-engine.getDreamingStatus",
     "context-engine.getFeedbackContext",
     "context-engine.readTraceTranscripts",
     "context-engine.recordImprovements",
+    "context-engine.recordMaintenanceRun",
     "context-engine.updateKi",
     "context-engine.verifyKi",
     "d3security.run",
@@ -872,6 +878,7 @@
     "shodan.searchHosts",
     "significantEvents.classifyDetections",
     "significantEvents.resolveModel",
+    "significantEvents.resolveWrittenDetections",
     "slack",
     "slack2.addReaction",
     "slack2.askQuestion",
@@ -998,6 +1005,7 @@
     "waitForApproval",
     "waitForInput",
     "while",
+    "workflow.awaitExecutions",
     "workflow.execute",
     "workflow.executeAsync",
     "workflow.fail",
@@ -1092,6 +1100,7 @@
     "servicenow_search.work_note_added",
     "significant-events.eventCreated",
     "significant-events.eventStatusChanged",
+    "significant-events.knowledgeIndicatorsChanged",
     "slack2.app_mention",
     "slack2.channel_created",
     "slack2.file_public",
@@ -1106,11 +1115,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "d43936f0a8c54cc632c533eaf84168650069e9dd69001b7d6ff451ed91f7624b"
+      "sha256": "11b3d087f7db6310f37ca31e6cf5d71ad0d2c41e2c4be6b048c45ede6d5d2f5b"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "120bc0a834b408b96a9cfd6c5a164d2b4e3c176760fa439923f2570d49dcb58b"
+      "sha256": "68729982e602ae80e0dd6e26c35da17a29ba0fc3111ec9949bd6a0f8fe031c06"
     }
   }
 }

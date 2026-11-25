@@ -582,6 +582,7 @@ src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-emulate @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
+src/platform/packages/shared/kbn-connector-topics @elastic/workflows-eng @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-core-server-benchmarks @elastic/kibana-core
 src/platform/packages/shared/kbn-cps-server-utils @elastic/kibana-core
@@ -1537,7 +1538,6 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/timelines @elastic/security-investigations
 x-pack/solutions/security/test
 x-pack/solutions/security/test_helpers/detections-response-ftr-services @elastic/security-detection-engineering
 x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
@@ -2706,6 +2706,7 @@ src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
 src/platform/packages/shared/kbn-connector-specs/src/lib/clients/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/generic_db_connector* @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/mssql_sql* @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
@@ -2755,6 +2756,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/inbound_webhook/** @e
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_sql_server/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/monday_com/** @elastic/workchat-eng
@@ -3308,6 +3310,10 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/hunt.md @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
+
+# AlertZero Triage Watch
+/x-pack/solutions/security/plugins/alertzero/server/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/alert_triage @elastic/security-investigations
 
 # AlertZero Worker settings contract
 # Keep this section below every AlertZero Worker section: CODEOWNERS uses the last match.

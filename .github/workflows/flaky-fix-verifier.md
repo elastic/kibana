@@ -38,7 +38,7 @@ permissions:
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
 #   presence alone is enough to gate this.
 if: >-
-  !github.event.repository.fork &&
+  github.repository == 'elastic/kibana' &&
   (
     github.event_name == 'workflow_dispatch' ||
     (
