@@ -43,12 +43,14 @@ describe('dashboardPanelAttachmentDataSchema', () => {
 
 describe('getDashboardPanelAttachmentId', () => {
   it('derives an id from the dashboard attachment and panel ids, distinct per dashboard copy', () => {
-    expect(
-      getDashboardPanelAttachmentId({ dashboardAttachmentId: 'dashboard-1', panelId: 'panel-1' })
-    ).toBe(`${DASHBOARD_PANEL_ATTACHMENT_TYPE}-dashboard-1-panel-1`);
+    const id = getDashboardPanelAttachmentId({
+      dashboardAttachmentId: 'dashboard-1',
+      panelId: 'panel-1',
+    });
+    expect(id).toMatch(new RegExp(`^${DASHBOARD_PANEL_ATTACHMENT_TYPE}-[0-9a-z]+$`));
     expect(
       getDashboardPanelAttachmentId({ dashboardAttachmentId: 'dashboard-2', panelId: 'panel-1' })
-    ).toBe(`${DASHBOARD_PANEL_ATTACHMENT_TYPE}-dashboard-2-panel-1`);
+    ).not.toBe(id);
   });
 });
 

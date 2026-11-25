@@ -15,8 +15,6 @@ import type {
 import { DASHBOARD_PANEL_ATTACHMENT_TYPE } from './constants';
 
 const MAX_ID_LENGTH = 256;
-/** The bound `generate_dashboard` puts on the `attachment_id` of panel content. */
-const MAX_POINTER_ID_LENGTH = 256;
 export const DASHBOARD_PANEL_LABEL_MAX_LENGTH = 512;
 
 /** Points at one panel of a dashboard attachment; never carries the panel config. */
@@ -57,7 +55,7 @@ const hashIds = (ids: readonly string[]): string => {
 
 /**
  * Deterministic, so re-sending a panel replaces its staged pointer or versions the sent one. Includes the dashboard attachment id
- * because dashboard copies share panel ids. Ids too long to copy the panel by are hashed.
+ * because dashboard copies share panel ids. Hashed, so neither id can run into the other and the id stays short enough to copy the panel by.
  */
 export const getDashboardPanelAttachmentId = ({
   dashboardAttachmentId,
@@ -65,12 +63,7 @@ export const getDashboardPanelAttachmentId = ({
 }: {
   dashboardAttachmentId: string;
   panelId: string;
-}): string => {
-  const id = `${DASHBOARD_PANEL_ATTACHMENT_TYPE}-${dashboardAttachmentId}-${panelId}`;
-  return id.length <= MAX_POINTER_ID_LENGTH
-    ? id
-    : `${DASHBOARD_PANEL_ATTACHMENT_TYPE}-${hashIds([dashboardAttachmentId, panelId])}`;
-};
+}): string => `${DASHBOARD_PANEL_ATTACHMENT_TYPE}-${hashIds([dashboardAttachmentId, panelId])}`;
 
 export const isDashboardPanelAttachment = (
   attachment: VersionedAttachment
