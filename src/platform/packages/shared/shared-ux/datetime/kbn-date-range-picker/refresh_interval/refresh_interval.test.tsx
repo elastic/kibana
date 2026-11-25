@@ -71,6 +71,27 @@ describe('RefreshInterval', () => {
     );
   });
 
+  it('keeps a decimal count below one when the unit changes', () => {
+    const onChange = jest.fn();
+    renderWithEuiTheme(
+      <RefreshInterval
+        value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 'm' }}
+        onChange={onChange}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount'), {
+      target: { value: '0.5' },
+    });
+    fireEvent.change(screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit'), {
+      target: { value: 'h' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ intervalDisplayUnit: 'h', intervalMs: 1_800_000 })
+    );
+  });
+
   it('re-syncs the count field when intervalMs stays the same but intervalDisplayUnit is updated externally', () => {
     const Harness = () => {
       const [value, setValue] = useState<AutoRefreshSettings>({
@@ -309,6 +330,27 @@ describe('RefreshInterval', () => {
         expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(2);
       }
     );
+
+    it('keeps a decimal count that meets the minimum in the picked unit', () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <RefreshInterval
+          value={{ isEnabled: true, isPaused: false, intervalMs: 60_000, intervalDisplayUnit: 's' }}
+          onChange={onChange}
+          minIntervalMs={5000}
+        />
+      );
+
+      const count = screen.getByTestId('dateRangePickerAutoRefreshIntervalCount');
+      const unit = screen.getByTestId('dateRangePickerAutoRefreshIntervalUnit');
+      fireEvent.change(count, { target: { value: '0.5' } });
+      fireEvent.blur(count, { relatedTarget: unit });
+      fireEvent.change(unit, { target: { value: 'm' } });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ intervalDisplayUnit: 'm', intervalMs: 30_000 })
+      );
+    });
 
     it('raises the count to the minimum when switching to a smaller unit', () => {
       const onChange = jest.fn();

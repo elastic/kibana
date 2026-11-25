@@ -145,7 +145,10 @@ export function RefreshInterval({
     (e: ChangeEvent<HTMLSelectElement>) => {
       const newUnit = e.target.value as AutoRefreshIntervalUnit;
       const currentCount = isApplicableCount(countInput) ? countInput : 1;
-      const count = Math.max(currentCount, getMinCount(minIntervalMs, newUnit));
+      const count =
+        autoRefreshIntervalToMs(currentCount, newUnit) >= minIntervalMs
+          ? currentCount
+          : getMinCount(minIntervalMs, newUnit);
 
       onChange({
         ...value,
