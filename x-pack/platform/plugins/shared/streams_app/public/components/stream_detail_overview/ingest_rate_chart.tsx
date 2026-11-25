@@ -48,7 +48,7 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { OverviewTimeFilter } from './overview_time_filter';
-import { IngestChartStatistics, type IngestChartTotals } from './ingest_chart_statistics';
+import { IngestChartStatistics } from './ingest_chart_statistics';
 
 export function getChartTimeZone(uiSettings: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
@@ -84,13 +84,10 @@ export function IngestRateChartContent({
   streamName,
   esqlSource,
   canReadFailureStore,
-  totals,
 }: {
   streamName: string;
   esqlSource: string;
   canReadFailureStore: boolean;
-  /** Precomputed totals for sources that span several streams; skips the per-stream fetches. */
-  totals?: IngestChartTotals;
 }) {
   const {
     core: { uiSettings },
@@ -323,7 +320,6 @@ export function IngestRateChartContent({
         timeEnd={timeState.end}
         esqlSource={esqlSource}
         streamName={streamName}
-        totals={totals}
         histogramUnavailable={histogramUnavailable}
       />
     </EuiPanel>

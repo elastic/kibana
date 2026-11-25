@@ -32,7 +32,7 @@ import { environmentFilter } from '../helpers/environment';
 import { eventCount } from './queries';
 
 /** What a field that is not a name says, per value: the device name of `browser.mobile`. */
-const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
+export const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
   SOURCE_MOBILE_FIELDS.map((field) => [
     field,
     { true: DEVICE_MOBILE_LABEL, false: DEVICE_DESKTOP_LABEL },
@@ -44,7 +44,7 @@ const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEn
  * browser, OS, device or country means the same in the Overview and the Sessions where they have
  * one; the device then falls back to `browser.mobile`.
  */
-const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
+export const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   browser: SESSION_ATTRIBUTE_FIELDS.browser,
   os: SESSION_ATTRIBUTE_FIELDS.os,
   device: [...SESSION_ATTRIBUTE_FIELDS.device, ...SOURCE_MOBILE_FIELDS],

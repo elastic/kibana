@@ -15,7 +15,6 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   EqlRuleCreateProps,
-  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -59,8 +58,6 @@ import {
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
-  ESQL_QUERY_BAR,
-  ESQL_QUERY_BAR_INPUT_AREA,
   ESQL_TYPE,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
@@ -102,7 +99,6 @@ import {
   RULE_INDICES,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
-  RULE_NAME_OVERRIDE_FOR_ESQL,
   RULE_TIMESTAMP_OVERRIDE,
   RULES_CREATION_FORM,
   RULES_CREATION_PREVIEW_BUTTON,
@@ -439,12 +435,6 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
-export const fillOverrideEsqlRuleName = (value: string) => {
-  cy.get(RULE_NAME_OVERRIDE_FOR_ESQL).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${value}{enter}`);
-  });
-};
-
 // called after import rule from saved timeline
 // if alerts index is created, it is included in the timeline
 // to be consistent in multiple test runs, remove it if it's there
@@ -634,50 +624,6 @@ export const fillDefineNewTermsRule = (rule: NewTermsRuleCreateProps) => {
 export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
   fillDefineNewTermsRule(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-};
-
-/**
- * Pastes query into the ES|QL Monaco editor via a synthetic ClipboardEvent.
- * This avoids flakiness in the tests when typing in the ES|QL query bar.
- */
-export const fillEsqlQueryBar = (query: string) => {
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('exist').click({ force: true });
-
-  const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(`${selectAll}{del}`, { force: true });
-
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).then(($textarea) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData('text/plain', query);
-    const pasteEvent = new ClipboardEvent('paste', {
-      clipboardData: dataTransfer,
-      bubbles: true,
-      cancelable: true,
-    });
-    $textarea[0].dispatchEvent(pasteEvent);
-  });
-
-  cy.get(ESQL_QUERY_BAR).contains(query);
-};
-
-export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
-  cy.get(ESQL_QUERY_BAR).contains('ES|QL query');
-  fillEsqlQueryBar(rule.query);
-
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
-};
-
-/**
- * fills only required(name, description) and specific to ES|QL(rule name override) fields on about page
- */
-export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
-  fillRuleName(rule.name);
-  fillDescription(rule.description);
-
-  expandAdvancedSettings();
-  // this field defined to be returned in rule query
-  fillOverrideEsqlRuleName(rule.rule_name_override ?? '');
-  getAboutContinueButton().click();
 };
 
 /**
@@ -975,20 +921,6 @@ export const openSuppressionFieldsTooltipAndCheckLicense = () => {
   cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
   // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
   cy.get(TOOLTIP).contains('Platinum license');
-};
-
-/**
- * intercepts esql_async request that contains esqlQuery and adds alias to it
- */
-export const interceptEsqlQueryFieldsRequest = (
-  esqlQuery: string,
-  alias: string = 'esqlQueryFields'
-) => {
-  cy.intercept('POST', '/internal/search/esql_async', (req) => {
-    if (req.body?.params?.query?.includes?.(esqlQuery)) {
-      req.alias = alias;
-    }
-  });
 };
 
 export const selectDoesNotMatchOperator = (rowNumber: number = 0) => {
