@@ -1454,6 +1454,26 @@ describe('ServiceAccountWorkloadBindings', () => {
         expect(audit.withoutRequest.log).not.toHaveBeenCalled();
       });
 
+      it('logs nothing when the binding check of a retried first mint cannot read the store', async () => {
+        store.getVerified
+          .mockResolvedValueOnce(binding())
+          .mockRejectedValueOnce(Boom.serverUnavailable('saved objects unavailable'));
+        backend.createFakeRequest.mockImplementation(async ({ mintInterceptor }) => {
+          await mintInterceptor!(jest.fn().mockRejectedValue(exchangeFailure(true))).catch(
+            () => undefined
+          );
+          await mintInterceptor!(jest.fn());
+          return mintedRequest;
+        });
+
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+        ).rejects.toMatchObject({ output: { statusCode: 503 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+      });
+
       describe('on a re-mint', () => {
         const captureRefreshInterceptor = async (): Promise<ServiceAccountMintInterceptor> => {
           await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
