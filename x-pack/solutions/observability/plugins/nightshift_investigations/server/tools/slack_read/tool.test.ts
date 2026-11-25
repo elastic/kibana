@@ -122,6 +122,22 @@ describe('platform.nightshift.slack_read', () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
+  it('does not read through a Slack connector that has outbound actions turned off', async () => {
+    const { run, execute, get } = setup(['team-slack'], { agentId: 'custom-agent' });
+    get.mockResolvedValueOnce({
+      id: 'team-slack',
+      actionTypeId: '.slack2',
+      config: {},
+      isOutboundActionsEnabled: false,
+    });
+
+    const result = await run({ subAction: 'listChannels' });
+
+    expect(result.type).toBe('error');
+    expect(result.data.message).toContain("disabled on connector 'team-slack'");
+    expect(execute).not.toHaveBeenCalled();
+  });
+
   it('names the other Slack connectors when a read fails', async () => {
     const { run, execute } = setup(['team-slack']);
     execute.mockResolvedValue({ status: 'error', message: 'relay unavailable' });

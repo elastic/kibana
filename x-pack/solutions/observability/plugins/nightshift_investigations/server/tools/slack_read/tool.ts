@@ -14,8 +14,8 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, resolveAllowedConnectorIds } from '@kbn/agent-builder-server';
 import {
   connectorsSpecs,
+  getUsableSelectedActions,
   isSelectedActionEnabled,
-  type SelectedActions,
 } from '@kbn/connector-specs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
@@ -199,7 +199,7 @@ When a result has hasMore true, call again with its nextCursor to read the next 
           .map((other) => `'${other}'`)
           .join(', ')}.`
       : '';
-    const selectedActions = connector.config?.selectedActions as SelectedActions;
+    const selectedActions = getUsableSelectedActions(connector);
     if (!isSelectedActionEnabled(subAction, selectedActions)) {
       return errorResult(
         `Sub-action '${subAction}' is disabled on connector '${id}'.${otherConnectorsHint}`,
