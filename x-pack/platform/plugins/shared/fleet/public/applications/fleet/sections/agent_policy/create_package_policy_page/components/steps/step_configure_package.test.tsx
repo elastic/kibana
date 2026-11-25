@@ -712,7 +712,7 @@ describe('isSingleInputAndStreams behavior', () => {
     mockUpdatePackagePolicy.mockClear();
   });
 
-  it('should render toggle switch for single policy template, single input, and single stream', async () => {
+  it('should render toggle switch and expand stream settings by default for single policy template, single input, and single stream', async () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       singleInputPackageInfo,
@@ -732,7 +732,11 @@ describe('isSingleInputAndStreams behavior', () => {
       expect(
         renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
       ).toBeInTheDocument();
+      expect(renderResult.getByTestId('PackagePolicy.InputConfig.streams')).toBeInTheDocument();
     });
+    expect(
+      renderResult.getByRole('button', { name: 'Change default settings for Collect logs' })
+    ).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('should render toggle switch when there are multiple inputs', async () => {

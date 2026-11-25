@@ -1493,6 +1493,39 @@ describe('When on the package policy create page', () => {
           expect(renderResult.getByText('Recommended')).toBeInTheDocument();
         });
       });
+
+      test('should render the setup technology selector as checkable cards in its own Deployment step when agentless is the default deployment', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ agentless: { enabled: true, isDefault: true } })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+        expect(renderResult.getByRole('heading', { name: 'Deployment' })).toBeInTheDocument();
+        expect(renderResult.queryByText('Deployment options')).not.toBeInTheDocument();
+        expect(
+          renderResult.getByText('Best for simple setup and faster onboarding.')
+        ).toBeInTheDocument();
+      });
+
+      test('should render the setup technology selector inline when agentless is not the default deployment', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ agentless: { enabled: true } })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+        expect(renderResult.queryByRole('heading', { name: 'Deployment' })).not.toBeInTheDocument();
+        expect(renderResult.getByText('Deployment options')).toBeInTheDocument();
+      });
     });
   });
 });
