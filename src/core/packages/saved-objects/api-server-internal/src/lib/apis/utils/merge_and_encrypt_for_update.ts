@@ -53,27 +53,37 @@ export const mergeAndEncryptForUpdate = async ({
     return encryptionHelper.optionallyEncryptAttributes(type, id, namespace, updatedAttributes);
   }
 
-  const { decryptCurrent, encryptRequirement } = encryptionHelper.getUpdateEncryptionRequirements(
-    type,
-    updatedAttributes
-  );
+  const requirements = encryptionHelper.getUpdateEncryptionRequirements(type, updatedAttributes);
+
+  if (requirements.encryptRequirement !== 'post-merge') {
+    // The merged attributes are stored as they are. Return before anything is decrypted, so that
+    // decrypted attributes can never be stored.
+    return mergeForUpdate({
+      targetAttributes: { ...storedAttributes },
+      updatedAttributes,
+      typeMappings,
+    });
+  }
 
   let targetAttributes = { ...storedAttributes };
   // stored encrypted attributes that are written back exactly as they are stored
   const retainedEncryptedAttributes: Record<string, unknown> = {};
+  // supplied encrypted attributes, which replace the stored ones as a whole
+  const suppliedEncryptedAttributes: Record<string, unknown> = {};
 
-  if (encryptRequirement === 'post-merge') {
-    // drop the stored ciphertext of every encrypted attribute the update replaces, so that it is
-    // neither decrypted nor merged with the supplied plaintext
-    const suppliedAttributes = updatedAttributes as Record<string, unknown>;
-    for (const attributeName of encryptionHelper.getEncryptedAttributes(type)) {
-      if (suppliedAttributes[attributeName] !== undefined) {
-        delete targetAttributes[attributeName];
-      }
+  // An encrypted attribute is stored as a single ciphertext, so a supplied one always replaces
+  // the stored one as a whole. Drop the stored ciphertext, so that it is not decrypted, and keep
+  // the supplied value out of the merge, so that the merge cannot change its structure.
+  const { ...attributesToMerge } = updatedAttributes as Record<string, unknown>;
+  for (const attributeName of encryptionHelper.getEncryptedAttributes(type)) {
+    if (attributesToMerge[attributeName] !== undefined) {
+      suppliedEncryptedAttributes[attributeName] = attributesToMerge[attributeName];
+      delete attributesToMerge[attributeName];
+      delete targetAttributes[attributeName];
     }
   }
 
-  if (decryptCurrent) {
+  if (requirements.decryptCurrent) {
     try {
       targetAttributes = await encryptionHelper.optionallyDecryptAttributes(
         type,
@@ -98,13 +108,11 @@ export const mergeAndEncryptForUpdate = async ({
 
   const mergedAttributes = mergeForUpdate({
     targetAttributes,
-    updatedAttributes,
+    updatedAttributes: attributesToMerge,
     typeMappings,
   });
 
-  if (encryptRequirement !== 'post-merge') {
-    return mergedAttributes;
-  }
+  Object.assign(mergedAttributes, suppliedEncryptedAttributes);
 
   return {
     ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, mergedAttributes)),

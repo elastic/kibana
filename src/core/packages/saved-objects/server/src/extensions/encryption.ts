@@ -108,12 +108,22 @@ export interface ISavedObjectsEncryptionExtension {
 }
 
 /**
- * The SavedObjectsUpdateEncryptionRequirements interface describes how the repository must handle
+ * The SavedObjectsUpdateEncryptionRequirements type describes how the repository must handle
  * encryption when it merges the attributes of a partial update into a stored object.
+ *
+ * The stored attributes are only ever decrypted to be encrypted again after the merge, so the type
+ * does not allow decryption without encryption: that would store the decrypted attributes.
  */
-export interface SavedObjectsUpdateEncryptionRequirements {
-  /** Whether the stored attributes must be decrypted before the merge. */
-  decryptCurrent: boolean;
-  /** Whether the merged attributes must be encrypted: not at all, or after the merge. */
-  encryptRequirement: 'none' | 'post-merge';
-}
+export type SavedObjectsUpdateEncryptionRequirements =
+  | {
+      /** The stored attributes are not decrypted. */
+      decryptCurrent: false;
+      /** The merged attributes are stored as they are, without encryption. */
+      encryptRequirement: 'none';
+    }
+  | {
+      /** Whether the stored attributes must be decrypted before the merge. */
+      decryptCurrent: boolean;
+      /** The merged attributes must be encrypted after the merge. */
+      encryptRequirement: 'post-merge';
+    };

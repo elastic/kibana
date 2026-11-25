@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE =
     'saved-object-with-secret-and-multiple-spaces';
   const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
+  const SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE = 'saved-object-with-object-attributes';
 
   const TYPE_WITH_PREDICTABLE_ID = 'type-with-predictable-ids';
 
@@ -821,6 +822,156 @@ export default function ({ getService }: FtrProviderContext) {
           () => `/s/${SPACE_ID}/api/saved_objects/`,
           (id, type) => generateRawId(id, type, SPACE_ID)
         );
+      });
+    });
+
+    describe('partial updates of object-valued attributes', () => {
+      interface ObjectAttributes {
+        publicObject: { kind: string; nested: { one: string; two: string } };
+        privateObject: { token: string; nested?: { key: string } };
+        privateProperty: string;
+      }
+
+      let originalAttributes: ObjectAttributes;
+      let savedObject: SavedObject;
+
+      async function createSavedObject(): Promise<SavedObject> {
+        const { body } = await supertest
+          .post(`/api/saved_objects/${SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE}`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ attributes: originalAttributes })
+          .expect(200);
+        return body;
+      }
+
+      async function getDecryptedAttributes({ id }: SavedObject) {
+        const { body } = await supertest
+          .get(
+            `/api/saved_objects/get-decrypted-as-internal-user/${SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE}/${id}`
+          )
+          .expect(200);
+        return body.attributes;
+      }
+
+      beforeEach(async () => {
+        originalAttributes = {
+          publicObject: {
+            kind: randomness.string(),
+            nested: { one: randomness.string(), two: randomness.string() },
+          },
+          privateObject: { token: randomness.string(), nested: { key: randomness.string() } },
+          privateProperty: randomness.string(),
+        };
+        savedObject = await createSavedObject();
+      });
+
+      afterEach(async () => {
+        await es.deleteByQuery({
+          index: '.kibana',
+          q: `type:${SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE}`,
+          refresh: true,
+          body: {},
+        });
+      });
+
+      it('#getDecryptedAsInternalUser decrypts and returns all attributes', async () => {
+        expect(await getDecryptedAttributes(savedObject)).to.eql(originalAttributes);
+      });
+
+      it('#update keeps an object decryptable if a part of an AAD attribute has changed', async () => {
+        const updatedTwo = randomness.string();
+        await supertest
+          .put(`/api/saved_objects/${SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE}/${savedObject.id}`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ attributes: { publicObject: { nested: { two: updatedTwo } } } })
+          .expect(200);
+
+        // The encrypted attributes are bound to the merged AAD attribute, not to the part of it
+        // that was supplied to the update.
+        expect(await getDecryptedAttributes(savedObject)).to.eql({
+          ...originalAttributes,
+          publicObject: {
+            kind: originalAttributes.publicObject.kind,
+            nested: { one: originalAttributes.publicObject.nested.one, two: updatedTwo },
+          },
+        });
+      });
+
+      it('#update replaces an encrypted attribute as a whole', async () => {
+        const updatedPrivateObject = { token: randomness.string() };
+        await supertest
+          .put(`/api/saved_objects/${SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE}/${savedObject.id}`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ attributes: { privateObject: updatedPrivateObject } })
+          .expect(200);
+
+        // An encrypted attribute is stored as a single ciphertext, so the supplied value is not
+        // merged into the stored one: `nested` is gone.
+        expect(await getDecryptedAttributes(savedObject)).to.eql({
+          ...originalAttributes,
+          privateObject: updatedPrivateObject,
+        });
+      });
+
+      it('#update keeps an object decryptable if a part of an AAD attribute and an encrypted attribute have changed', async () => {
+        const updatedKind = randomness.string();
+        const updatedPrivateObject = { token: randomness.string() };
+        await supertest
+          .put(`/api/saved_objects/${SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE}/${savedObject.id}`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            attributes: {
+              publicObject: { kind: updatedKind },
+              privateObject: updatedPrivateObject,
+            },
+          })
+          .expect(200);
+
+        expect(await getDecryptedAttributes(savedObject)).to.eql({
+          ...originalAttributes,
+          publicObject: { ...originalAttributes.publicObject, kind: updatedKind },
+          privateObject: updatedPrivateObject,
+        });
+      });
+
+      it('#bulkUpdate keeps objects decryptable if a part of an AAD attribute or an encrypted attribute has changed', async () => {
+        const otherSavedObject = await createSavedObject();
+
+        const updatedTwo = randomness.string();
+        const updatedPrivateObject = { token: randomness.string() };
+        const { body: bulkUpdateResponse } = await supertest
+          .put('/api/saved_objects/_bulk_update')
+          .set('kbn-xsrf', 'xxx')
+          .send([
+            {
+              type: SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE,
+              id: savedObject.id,
+              attributes: { publicObject: { nested: { two: updatedTwo } } },
+            },
+            {
+              type: SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE,
+              id: otherSavedObject.id,
+              attributes: { privateObject: updatedPrivateObject },
+            },
+          ])
+          .expect(200);
+
+        expect(bulkUpdateResponse.saved_objects).to.have.length(2);
+        for (const updatedObject of bulkUpdateResponse.saved_objects) {
+          expect(updatedObject.error).to.be(undefined);
+        }
+
+        expect(await getDecryptedAttributes(savedObject)).to.eql({
+          ...originalAttributes,
+          publicObject: {
+            kind: originalAttributes.publicObject.kind,
+            nested: { one: originalAttributes.publicObject.nested.one, two: updatedTwo },
+          },
+        });
+        expect(await getDecryptedAttributes(otherSavedObject)).to.eql({
+          ...originalAttributes,
+          privateObject: updatedPrivateObject,
+        });
       });
     });
 

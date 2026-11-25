@@ -28,6 +28,7 @@ import {
   type ISavedObjectsEncryptionExtension,
   type SavedObjectsRawDocSource,
   type SavedObjectBulkResult,
+  type SavedObjectsUpdateEncryptionRequirements,
 } from '@kbn/core-saved-objects-server';
 import {
   bulkCreateSuccess,
@@ -436,6 +437,27 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         expect(getIndexedAttributes()).toEqual({ ...encryptedSO.attributes, attrThree: 'updated' });
       });
 
+      it('never decrypts the stored attributes if the merged attributes are not encrypted', async () => {
+        // the type does not allow these requirements, they would store the decrypted attributes
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'none',
+        } as unknown as SavedObjectsUpdateEncryptionRequirements);
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          { attrThree: 'updated' },
+          { namespace }
+        );
+
+        expect(mockEncryptionExt.decryptAttributes).not.toHaveBeenCalled();
+        expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
+        expect(getIndexedAttributes()).toEqual({ ...encryptedSO.attributes, attrThree: 'updated' });
+      });
+
       it('encrypts the merged attributes without decrypting if all encrypted attributes are replaced', async () => {
         mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
           decryptCurrent: false,
@@ -536,6 +558,39 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         const expectedMergedAttributes = {
           ...encryptedSO.attributes,
           attrSecret: 'new-secret',
+          attrNotSoSecret: 'not-so-secret',
+        };
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          descriptor,
+          expectedMergedAttributes
+        );
+        expect(getIndexedAttributes()).toEqual({ ...expectedMergedAttributes, encrypted: true });
+      });
+
+      it('does not change the structure of a supplied encrypted attribute', async () => {
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'post-merge',
+        });
+        mockEncryptionExt.decryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          attrNotSoSecret: 'not-so-secret',
+        }));
+        // a merge would turn an object with numeric keys into an array
+        const suppliedSecret = { 0: 'first-secret', label: 'second-secret', nested: { 0: 'x' } };
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          { attrSecret: suppliedSecret },
+          { namespace }
+        );
+
+        const expectedMergedAttributes = {
+          ...encryptedSO.attributes,
+          attrSecret: suppliedSecret,
           attrNotSoSecret: 'not-so-secret',
         };
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
@@ -972,6 +1027,32 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         expect(getBulkIndexedAttributes()).toEqual(
           expect.objectContaining({ ...expectedMergedAttributes, encrypted: true })
         );
+      });
+
+      it('does not change the structure of a supplied encrypted attribute', async () => {
+        mockEncryptionExt.getEncryptedAttributes.mockReturnValue(
+          new Set(['attrSecret', 'attrNotSoSecret'])
+        );
+        mockEncryptionExt.decryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          attrNotSoSecret: 'not-so-secret',
+        }));
+        // a merge would turn an object with numeric keys into an array
+        const suppliedSecret = { 0: 'first-secret', label: 'second-secret', nested: { 0: 'x' } };
+
+        await bulkUpdateSuccess(client, repository, registry, [
+          {
+            type: encryptedSO.type,
+            id: encryptedSO.id,
+            attributes: { attrSecret: suppliedSecret },
+          },
+        ]);
+
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          expect.objectContaining({ type: encryptedSO.type, id: encryptedSO.id }),
+          expect.objectContaining({ attrSecret: suppliedSecret, attrNotSoSecret: 'not-so-secret' })
+        );
+        expect(getBulkIndexedAttributes().attrSecret).toEqual(suppliedSecret);
       });
 
       it('writes the update and keeps the stored encrypted attributes if they cannot be decrypted', async () => {

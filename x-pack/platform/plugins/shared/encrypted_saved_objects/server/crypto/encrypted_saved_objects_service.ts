@@ -252,6 +252,16 @@ export class EncryptedSavedObjectsService {
       return { decryptCurrent: false, encryptRequirement: 'none' };
     }
 
+    // Without the primary encryption key nothing can be encrypted again, even if a decryption-only
+    // key can still decrypt the stored attributes. An update that supplies no encrypted attribute
+    // must still go through, so the stored encrypted attributes are kept exactly as they are.
+    if (suppliedSecretsCount === 0 && !this.options.primaryCrypto) {
+      this.options.logger.debug(
+        `The encrypted attributes of saved object type "${type}" are kept as stored during update, because encryption is disabled (missing encryption key).`
+      );
+      return { decryptCurrent: false, encryptRequirement: 'none' };
+    }
+
     // The merged attributes must be encrypted as a whole. The stored attributes only have to be
     // decrypted if some of the encrypted attributes are not replaced by the update.
     return {

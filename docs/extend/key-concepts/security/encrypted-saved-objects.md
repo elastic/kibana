@@ -147,7 +147,7 @@ should be included.
 
 ### Partial Updates
 
-Any change to an ESO's encrypted values or AAD-included values requires re-encryption against the complete object.
+Any change to the encrypted or AAD-included values of an ESO requires re-encryption against the complete object.
 
 The `update` and `bulkUpdate` APIs of the Saved Objects client and repository support partial updates of ESOs, including changes to encrypted and AAD-included
 attributes. They merge the provided attributes into the stored object and then encrypt the result:
@@ -156,9 +156,18 @@ attributes. They merge the provided attributes into the stored object and then e
 - If the update provides every encrypted attribute of the type, the merged object is encrypted. The stored object is not decrypted.
 - Otherwise the stored object is decrypted first, so that the encrypted attributes that are not part of the update can be re-encrypted.
 
+This means that any caller that is allowed to update an object can change an AAD-included attribute: the stored encrypted attributes are re-encrypted against
+the new value and stay decryptable. AAD only detects changes that are written outside the Saved Objects API, for example directly to Elasticsearch. Do not rely on
+AAD to stop an authorized update from changing an attribute. If an attribute must not change after the object is created, enforce that in the code that owns the
+type.
+
 An update never fails because the stored object cannot be decrypted, for example because the encryption key is not available. In that case a warning is logged,
-the update is written, and the encrypted attributes that are not part of the update are kept exactly as they are stored. They remain undecryptable until every
-encrypted attribute of the object is provided again.
+the update is written, and the encrypted attributes that are not part of the update are kept exactly as they are stored. Each of them remains undecryptable until
+an update provides it again. An update that provides an encrypted attribute always replaces its stored value without decrypting it, so providing only the
+attributes that cannot be decrypted is enough to repair the object.
+
+The same applies when Kibana has no encryption key and the update provides no encrypted attribute: nothing can be re-encrypted, so the update is written and the
+stored encrypted attributes are kept exactly as they are stored. An update that provides an encrypted attribute fails when Kibana has no encryption key.
 
 This protection applies only when attributes are merged, which is the default. With `mergeAttributes: false` the provided attributes replace the stored ones, so
 the entire object must be provided.
