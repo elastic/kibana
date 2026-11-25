@@ -20,13 +20,16 @@ import {
 } from '@elastic/charts';
 import {
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -49,10 +52,11 @@ import {
 } from '../../../../ebt_constants';
 import { usePersistedChoice } from '../../../../hooks/use_persisted_choice';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { loadTimeLabel, PAGE_LOADS_LABEL } from '../../../../labels';
+import { loadTimeLabel, OPEN_IN_DISCOVER_LABEL, PAGE_LOADS_LABEL } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
 import { formatDurationMs } from '../../../../utils/format_duration';
+import type { OverviewDiscoverHrefs } from '../hooks/use_overview_discover_hrefs';
 
 const CHART_HEIGHT = 128;
 
@@ -72,6 +76,16 @@ const TRENDS_SUBTITLE = i18n.translate(
     defaultMessage: 'Page loads and their load time over the selected range',
   }
 );
+
+const PAGE_LOADS_HINT = i18n.translate('xpack.digitalExperience.overview.trends.pageLoadsHint', {
+  defaultMessage:
+    'Full page loads in each interval of the time range; in-app navigations are not counted. The figure beside the label is the total.',
+});
+
+const LOAD_TIME_HINT = i18n.translate('xpack.digitalExperience.overview.trends.loadTimeHint', {
+  defaultMessage:
+    'The selected percentile of the load event end of the page loads in each interval. Page loads that reported no load event do not contribute. The figure beside the label is over the whole range.',
+});
 
 const NO_PAGE_LOADS = i18n.translate('xpack.digitalExperience.overview.trends.noDataDescription', {
   defaultMessage: 'No page loads in the selected time range',
@@ -200,6 +214,8 @@ function TrendChart({
 /** One metric of the Trends panel: its label and value over the range, above its chart. */
 function TrendRow({
   label,
+  hint,
+  discoverHref,
   value,
   isLoading,
   hasData,
@@ -208,6 +224,10 @@ function TrendRow({
   'data-test-subj': dataTestSubj,
 }: {
   label: string;
+  /** How the metric is calculated. */
+  hint: string;
+  /** Opens the events behind the metric in Discover. */
+  discoverHref: string | undefined;
   value: ReactNode;
   isLoading: boolean;
   hasData: boolean;
@@ -228,6 +248,32 @@ function TrendRow({
             {label}
           </EuiText>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={hint}
+            type="info"
+            size="s"
+            iconProps={{ 'data-test-subj': `${dataTestSubj}Hint` }}
+          />
+        </EuiFlexItem>
+        {discoverHref && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={OPEN_IN_DISCOVER_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="discoverApp"
+                size="xs"
+                color="text"
+                href={discoverHref}
+                aria-label={`${OPEN_IN_DISCOVER_LABEL}: ${label}`}
+                data-test-subj={`${dataTestSubj}Discover`}
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER,
+                  element: APPLICATION_OVERVIEW_EBT_ELEMENTS.DISCOVER_LINK,
+                })}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
         {!isLoading && (
           <EuiFlexItem grow={false}>
             <EuiText size="m">
@@ -260,6 +306,7 @@ export function OverviewTrends({
   loadTimePercentileMs,
   percentile,
   onPercentileChange,
+  discoverHrefs,
   isLoading,
   onTimeRangeSelect,
 }: {
@@ -273,6 +320,8 @@ export function OverviewTrends({
   /** The percentile of the load time and its trend. */
   percentile: OverviewPercentile;
   onPercentileChange: (percentile: OverviewPercentile) => void;
+  /** Where each metric opens its events in Discover. */
+  discoverHrefs: OverviewDiscoverHrefs;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
@@ -352,6 +401,8 @@ export function OverviewTrends({
       <TrendRow
         data-test-subj="digitalExperienceOverviewPageLoadsTrend"
         label={PAGE_LOADS_LABEL}
+        hint={PAGE_LOADS_HINT}
+        discoverHref={discoverHrefs.pageLoads}
         value={formatNumber(pageLoads)}
         isLoading={isLoading}
         hasData={hasPageLoads}
@@ -369,6 +420,8 @@ export function OverviewTrends({
       <TrendRow
         data-test-subj="digitalExperienceOverviewLoadTimeTrend"
         label={loadTimeLabel(percentile)}
+        hint={LOAD_TIME_HINT}
+        discoverHref={discoverHrefs.loadTime}
         value={
           loadTimePercentileMs === null ? (
             <EmptyCellValue />

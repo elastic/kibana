@@ -18,6 +18,7 @@ import type { FilterValue } from '../../../../common/filter_values';
 import type { OverviewFilters, OverviewPercentile } from '../../../../common/overview_filters';
 import type { ApplicationErrorsResponse } from '../../../../common/types/errors';
 import type {
+  ApplicationEntryPagesResponse,
   ApplicationOverviewKpisResponse,
   ApplicationOverviewResponse,
 } from '../../../../common/types/overview';
@@ -66,6 +67,10 @@ jest.mock('../../../hooks/use_application_links', () => {
     },
   };
 });
+// Links as the page's own `href`, so the test can tell which query a tile opens.
+jest.mock('../../../hooks/use_discover_href', () => ({
+  useDiscoverHrefOf: () => (esql: string | undefined) => esql ? `/discover/${esql}` : undefined,
+}));
 jest.mock('../../../hooks/use_environment');
 jest.mock('../../../hooks/use_overview_filters');
 jest.mock('../../../hooks/use_overview_search');
@@ -90,6 +95,9 @@ jest.mock('../../../hooks/use_time_range', () => ({
 const OVERVIEW_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/overview';
 
 const KPIS_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/overview/kpis';
+
+const ENTRY_PAGES_ENDPOINT =
+  'GET /internal/digital_experience/applications/{serviceName}/overview/entry-pages';
 
 const USAGE_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/usage';
 
@@ -118,10 +126,21 @@ const respondWith = (pageLoads: number) => async (endpoint: string) => {
   if (endpoint === KPIS_ENDPOINT) {
     return kpisResponse(pageLoads);
   }
+  if (endpoint === ENTRY_PAGES_ENDPOINT) {
+    return ENTRY_PAGES_RESPONSE;
+  }
   return endpoint === ERRORS_ENDPOINT ? ERRORS_RESPONSE : response(pageLoads);
 };
 
 const respond = respondWith(1533);
+
+const ENTRY_PAGES_RESPONSE: ApplicationEntryPagesResponse = {
+  entryPages: [
+    { page: '/', sessions: 30, bounceRate: 0.4 },
+    { page: '/products', sessions: 10, bounceRate: 0.1 },
+  ],
+  totalSessions: 40,
+};
 
 const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
 
@@ -201,6 +220,15 @@ const kpisResponse = (pageLoads: number): ApplicationOverviewKpisResponse => ({
   jsErrors: compared(3, 3),
   failedHttpRequests: compared(0.25, 0.25),
   requestLatency: compared(180, null),
+  discover: {
+    sessions: 'sessions-query',
+    errorFreeSessions: 'error-free-query',
+    pageLoads: 'page-loads-query',
+    loadTime: 'load-time-query',
+    jsErrors: 'js-errors-query',
+    failedHttpRequests: 'failed-requests-query',
+    requestLatency: 'latency-query',
+  },
   counts: {
     sessionsWithErrors: 40,
     loadTimeSamples: pageLoads,
@@ -819,9 +847,9 @@ describe('OtelOverview', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
 
-    // The Overview, its KPIs, its usage and its top errors, on mount and on Refresh.
+    // The Overview, its KPIs, its usage, its entry pages and its top errors, on mount and on Refresh.
     await waitFor(() => {
-      return expect(fetch).toHaveBeenCalledTimes(8);
+      return expect(fetch).toHaveBeenCalledTimes(10);
     });
   });
 
@@ -901,6 +929,77 @@ describe('OtelOverview', () => {
 
     expect(await screen.findByTitle('https://shop.example.com/')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceOverviewUsageError')).not.toBeInTheDocument();
+  });
+
+  it('lists the entry pages with their sessions and bounce rate, each opening its sessions', async () => {
+    renderOverview();
+
+    const panel = await screen.findByTestId('digitalExperienceOverviewEntryPages');
+    expect(await within(panel).findByTitle('/products')).toBeInTheDocument();
+    expect(within(panel).getByText('30')).toBeInTheDocument();
+    expect(within(panel).getByText('40%')).toBeInTheDocument();
+    expect(
+      within(panel).getAllByTestId('digitalExperienceOverviewEntryPageSessionsLink')[0]
+    ).toHaveAttribute('href', '/sessions');
+  });
+
+  it('narrows the entry pages by the Overview filters', async () => {
+    mockFilters({ browser: include('Chrome') });
+    renderOverview();
+
+    await waitFor(() =>
+      expectFetchedWith(
+        {
+          start: timeRange.rangeFrom,
+          end: timeRange.rangeTo,
+          filters: encodeOverviewFilters({ browser: include('Chrome') }) ?? '',
+        },
+        ENTRY_PAGES_ENDPOINT
+      )
+    );
+  });
+
+  it('shows a retryable error instead of the entry pages only', async () => {
+    let entryPagesFail = true;
+    fetch.mockImplementation(async (endpoint: string) => {
+      if (endpoint !== ENTRY_PAGES_ENDPOINT) {
+        return respond(endpoint);
+      }
+      if (entryPagesFail) {
+        throw new Error('Could not load the entry pages.');
+      }
+      return ENTRY_PAGES_RESPONSE;
+    });
+    renderOverview();
+
+    expect(
+      await screen.findByTestId('digitalExperienceOverviewEntryPagesError')
+    ).toBeInTheDocument();
+    await findPageLoads('1,533');
+    expect(screen.getByTestId('digitalExperienceOverviewTopPages')).toBeInTheDocument();
+
+    entryPagesFail = false;
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewEntryPagesRetry'));
+
+    expect(await screen.findByTitle('/products')).toBeInTheDocument();
+  });
+
+  it('opens each tile and trend in Discover with the query of the KPI response', async () => {
+    renderOverview();
+
+    await findPageLoads('1,533');
+    expect(screen.getByTestId('digitalExperienceOverviewJsErrorsDiscover')).toHaveAttribute(
+      'href',
+      '/discover/js-errors-query'
+    );
+    expect(screen.getByTestId('digitalExperienceOverviewPageLoadsTrendDiscover')).toHaveAttribute(
+      'href',
+      '/discover/page-loads-query'
+    );
+    expect(screen.getByTestId('digitalExperienceOverviewLoadTimeTrendDiscover')).toHaveAttribute(
+      'href',
+      '/discover/load-time-query'
+    );
   });
 
   it('shows the usage panels when the Overview fails', async () => {

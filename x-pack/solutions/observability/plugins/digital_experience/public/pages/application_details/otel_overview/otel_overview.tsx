@@ -20,6 +20,7 @@ import type {
 } from '../../../../common/overview_filters';
 import { PAGE_FILTER_NOTE_NAMES } from '../../../../common/overview_filters';
 import type {
+  ApplicationEntryPagesResponse,
   ApplicationOverview,
   ApplicationOverviewKpisResponse,
   ApplicationOverviewResponse,
@@ -44,6 +45,7 @@ import type { ApplicationErrors } from '../../errors/hooks/use_application_error
 import { useApplicationErrors } from '../../errors/hooks/use_application_errors';
 import { AllFiltersFlyout } from './components/all_filters_flyout';
 import { BreakdownsPanel } from './components/breakdowns_panel';
+import { EntryPagesPanel } from './components/entry_pages_panel';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
 import { FrustrationPanel } from './components/frustration_panel';
 import { OverviewFilterPills } from './components/overview_filters';
@@ -52,6 +54,10 @@ import { OverviewToolbar } from './components/overview_toolbar';
 import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
+import {
+  useOverviewDiscoverHrefs,
+  type OverviewDiscoverHrefs,
+} from './hooks/use_overview_discover_hrefs';
 import { usePickerOptions } from './hooks/use_picker_options';
 import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
@@ -67,6 +73,11 @@ const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetch
 const KPIS_FETCH_ERROR_TITLE = i18n.translate(
   'xpack.digitalExperience.overview.kpisFetchErrorTitle',
   { defaultMessage: 'Could not load the KPIs' }
+);
+
+const ENTRY_PAGES_FETCH_ERROR_TITLE = i18n.translate(
+  'xpack.digitalExperience.overview.entryPagesFetchErrorTitle',
+  { defaultMessage: 'Could not load the entry pages' }
 );
 
 const USAGE_FETCH_ERROR_TITLE = i18n.translate(
@@ -104,6 +115,18 @@ const kpisRequestOf = (
   };
 };
 
+/** The request for the pages sessions started on, narrowed by `searchParams`. */
+const entryPagesRequestOf = (
+  searchParams: OverviewSearchParams
+): ApplicationRequest<ApplicationEntryPagesResponse> => {
+  return (apiClient, options) => {
+    return apiClient.fetch(
+      'GET /internal/digital_experience/applications/{serviceName}/overview/entry-pages',
+      withOverviewFilters(options, searchParams)
+    );
+  };
+};
+
 /** Shown while loading: no metric is a measured zero. */
 const emptyOverview = (
   serviceName: string,
@@ -123,6 +146,7 @@ function OverviewPanels({
   trendHistogram,
   percentile,
   onPercentileChange,
+  discoverHrefs,
   isLoading,
   onTimeRangeSelect,
 }: {
@@ -132,6 +156,8 @@ function OverviewPanels({
   /** The percentile asked for, which the panels name before its response arrives. */
   percentile: OverviewPercentile;
   onPercentileChange: (percentile: OverviewPercentile) => void;
+  /** Where the trends open their events in Discover. */
+  discoverHrefs: OverviewDiscoverHrefs;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
@@ -149,6 +175,7 @@ function OverviewPanels({
             loadTimePercentileMs={overview.loadTime.percentileMs}
             percentile={percentile}
             onPercentileChange={onPercentileChange}
+            discoverHrefs={discoverHrefs}
             isLoading={isLoading}
             onTimeRangeSelect={onTimeRangeSelect}
           />
@@ -162,12 +189,14 @@ function OverviewPanels({
 function UsageAndErrorsPanels({
   serviceName,
   usage: { response, isLoading, error, refresh },
+  entryPages,
   topErrors,
   filters,
   onSelectFilter,
 }: {
   serviceName: string;
   usage: ApplicationData<ApplicationUsageResponse>;
+  entryPages: ApplicationData<ApplicationEntryPagesResponse>;
   topErrors: ApplicationErrors;
   /** The Overview's filters, to show which rows are selected. */
   filters: OverviewFilters;
@@ -216,6 +245,24 @@ function UsageAndErrorsPanels({
             onSelectFilter={onSelectFilter}
           />
         </>
+      )}
+      <EuiSpacer size="m" />
+      {/* Its own request, from the session summaries: a failure replaces only this panel. */}
+      {entryPages.error ? (
+        <LoadErrorPrompt
+          data-test-subj="digitalExperienceOverviewEntryPagesError"
+          retryDataTestSubj="digitalExperienceOverviewEntryPagesRetry"
+          retryEbtElement={APPLICATION_OVERVIEW_EBT_ELEMENTS.ENTRIES_RETRY}
+          title={ENTRY_PAGES_FETCH_ERROR_TITLE}
+          error={entryPages.error}
+          onRetry={entryPages.refresh}
+        />
+      ) : (
+        <EntryPagesPanel
+          entryPages={entryPages.response?.entryPages ?? []}
+          isLoading={entryPages.isLoading}
+          sessionsHref={sessionsHref}
+        />
       )}
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="stretch">
@@ -291,6 +338,12 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const overview = useApplicationData(serviceName, overviewRequest);
   const kpis = useApplicationData(serviceName, kpisRequest);
   const usage = useApplicationData(serviceName, usageRequest);
+  const entryPagesRequest = useMemo(() => entryPagesRequestOf(searchParams), [searchParams]);
+  const entryPages = useApplicationData(serviceName, entryPagesRequest);
+  // The queries are the KPI request's, so they are as current as the tiles they open.
+  const discoverHrefs = useOverviewDiscoverHrefs(
+    kpis.isLoading ? undefined : kpis.response?.discover
+  );
   const topErrors = useApplicationErrors(serviceName);
   // The pickers swap their lists for a spinner while loading, so they only load until they have one.
   const pickerOptions = usePickerOptions(serviceName, overview.response);
@@ -302,6 +355,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
     overview.refresh();
     kpis.refresh();
     usage.refresh();
+    entryPages.refresh();
     topErrors.refresh();
   };
 
@@ -359,6 +413,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
         <OverviewKpis
           kpis={kpis.isLoading ? undefined : kpis.response}
           percentile={percentile}
+          discoverHrefs={discoverHrefs}
           isComparing={compare === 'true'}
           isLoading={kpis.isLoading}
         />
@@ -379,6 +434,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           trendHistogram={overview.response?.overview.trendHistogram}
           percentile={percentile}
           onPercentileChange={setPercentile}
+          discoverHrefs={discoverHrefs}
           isLoading={overview.isLoading}
           onTimeRangeSelect={setTimeRange}
         />
@@ -387,6 +443,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
       <UsageAndErrorsPanels
         serviceName={serviceName}
         usage={usage}
+        entryPages={entryPages}
         topErrors={topErrors}
         filters={filters}
         onSelectFilter={selectFilterValue}

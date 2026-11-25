@@ -7,12 +7,27 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiStat } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPanel,
+  EuiStat,
+  EuiToolTip,
+} from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
+import {
+  DIGITAL_EXPERIENCE_EBT_ACTIONS,
+  APPLICATION_OVERVIEW_EBT_ELEMENTS,
+} from '../ebt_constants';
+import { OPEN_IN_DISCOVER_LABEL } from '../labels';
 
 /** A KPI panel of a KPI row; the value keeps its place while loading, so the row does not jump. */
 export function KpiPanel({
   label,
   hint,
+  discoverHref,
   value,
   isLoading,
   footer,
@@ -21,6 +36,8 @@ export function KpiPanel({
   label: string;
   /** How the value is calculated. */
   hint?: string;
+  /** Opens the events behind the value in Discover; no button without it. */
+  discoverHref?: string;
   value: ReactNode;
   isLoading: boolean;
   /** Below the value, e.g. its change against the previous period. */
@@ -42,6 +59,24 @@ export function KpiPanel({
               {footer}
             </EuiStat>
           </EuiFlexItem>
+          {discoverHref && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={OPEN_IN_DISCOVER_LABEL} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="discoverApp"
+                  size="xs"
+                  color="text"
+                  href={discoverHref}
+                  aria-label={`${OPEN_IN_DISCOVER_LABEL}: ${label}`}
+                  data-test-subj={`${dataTestSubj}Discover`}
+                  {...getEbtProps({
+                    action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER,
+                    element: APPLICATION_OVERVIEW_EBT_ELEMENTS.DISCOVER_LINK,
+                  })}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
           {hint && (
             <EuiFlexItem grow={false}>
               <EuiIconTip

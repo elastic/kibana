@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibanaServices } from './use_kibana_services';
 
@@ -27,5 +27,26 @@ export const useDiscoverHref = (
         ? locator.getRedirectUrl({ query: { esql }, timeRange })
         : undefined,
     [esql, timeRange, locator, canOpenDiscover]
+  );
+};
+
+/**
+ * Builds the links to Discover for ES|QL queries over one time range, which `undefined` stands in
+ * for when Discover isn't available. The function changes only with the time range, so it can sit
+ * in the dependencies of a memo.
+ */
+export const useDiscoverHrefOf = (
+  timeRange: { from: string; to: string } | undefined
+): ((esql: string | undefined) => string | undefined) => {
+  const { share, application } = useKibanaServices();
+  const canOpenDiscover = Boolean(application.capabilities.discover_v2?.show);
+  const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
+  return useCallback(
+    (esql) =>
+      esql && timeRange && locator && canOpenDiscover
+        ? locator.getRedirectUrl({ query: { esql }, timeRange })
+        : undefined,
+    [timeRange, locator, canOpenDiscover]
   );
 };

@@ -23,6 +23,8 @@ export interface ComparedKpiPanelProps {
   title: string;
   /** How the value is calculated. */
   tooltip: string;
+  /** Opens the events behind the value in Discover. */
+  discoverHref?: string;
   value: ComparedValue | undefined;
   formatValue: (value: number) => string;
   changeUnit: ChangeUnit;
@@ -69,6 +71,7 @@ const previousPeriodLabel = (previous: string) =>
 export function ComparedKpiPanel({
   title,
   tooltip,
+  discoverHref,
   value,
   formatValue,
   changeUnit,
@@ -85,6 +88,7 @@ export function ComparedKpiPanel({
       data-test-subj={dataTestSubj}
       label={title}
       hint={tooltip}
+      discoverHref={discoverHref}
       isLoading={isLoading}
       value={
         <span data-test-subj={`${dataTestSubj}Value`}>

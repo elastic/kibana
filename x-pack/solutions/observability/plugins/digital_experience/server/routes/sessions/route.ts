@@ -138,7 +138,7 @@ const sessionNotFoundMessage = (sessionId: string) =>
  * Maps a read failure to a client error: an Elasticsearch 403 names the index privileges the
  * reads need; anything else is logged and hidden, as Elasticsearch details name users and indices.
  */
-const toReadError = (error: unknown, logger: Logger, what: string) => {
+export const toReadError = (error: unknown, logger: Logger, what: string) => {
   if (isResponseError(error) && error.statusCode === 403) {
     return forbidden(NO_ACCESS_MESSAGE);
   }

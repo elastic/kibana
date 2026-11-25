@@ -10,6 +10,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { ApplicationOverviewKpisResponse } from '../../../../../common/types/overview';
+import type { OverviewDiscoverHrefs } from '../hooks/use_overview_discover_hrefs';
 import {
   ComparedKpiPanel,
   type ComparedKpiPanelProps,
@@ -18,7 +19,7 @@ import { useFormatters } from '../../../../hooks/use_formatters';
 import { loadTimeLabel, PAGE_LOADS_LABEL, SESSIONS_LABEL } from '../../../../labels';
 import { formatDurationMs } from '../../../../utils/format_duration';
 
-type Kpi = Exclude<keyof ApplicationOverviewKpisResponse, 'percentile' | 'counts'>;
+type Kpi = Exclude<keyof ApplicationOverviewKpisResponse, 'percentile' | 'counts' | 'discover'>;
 
 type KpiCounts = ApplicationOverviewKpisResponse['counts'];
 
@@ -154,6 +155,7 @@ const kpiPanels = ({
 export function OverviewKpis({
   kpis,
   percentile,
+  discoverHrefs,
   isComparing,
   isLoading,
 }: {
@@ -161,6 +163,8 @@ export function OverviewKpis({
   kpis: ApplicationOverviewKpisResponse | undefined;
   /** The percentile the load time is at, named in its label before its response arrives. */
   percentile: OverviewPercentile;
+  /** Where each tile opens its events in Discover. */
+  discoverHrefs: OverviewDiscoverHrefs;
   isComparing: boolean;
   isLoading: boolean;
 }) {
@@ -179,6 +183,7 @@ export function OverviewKpis({
           key={kpi}
           {...panel}
           value={kpis?.[kpi]}
+          discoverHref={discoverHrefs[kpi]}
           isComparing={isComparing}
           isLoading={isLoading}
         />

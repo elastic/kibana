@@ -56,6 +56,26 @@ export interface ApplicationOverviewResponse {
   filters: OverviewFilterOptions;
 }
 
+/** The tiles of the Overview that open Discover, each over the events behind its value. */
+export const DISCOVER_TILES = [
+  'sessions',
+  'errorFreeSessions',
+  'pageLoads',
+  'loadTime',
+  'jsErrors',
+  'failedHttpRequests',
+  'requestLatency',
+] as const;
+
+export type DiscoverTile = (typeof DISCOVER_TILES)[number];
+
+/**
+ * The ES|QL that Discover opens for each tile: the events behind its value, with the Overview's
+ * environment, filters and KQL query written in. It reads the time range from Discover's own
+ * (`?_tstart` and `?_tend`).
+ */
+export type OverviewDiscoverQueries = Record<DiscoverTile, string>;
+
 /**
  * The Overview's KPI row: each value over the time range against the period of equal length
  * before it. A value is `null` without the data to compute it.
@@ -75,6 +95,8 @@ export interface ApplicationOverviewKpisResponse {
   failedHttpRequests: ComparedValue;
   /** The average duration of the HTTP requests, in milliseconds. */
   requestLatency: ComparedValue;
+  /** What each tile opens in Discover, for the KPI row and the charts of the same events. */
+  discover: OverviewDiscoverQueries;
   /** The current period's counts that the tooltips name. */
   counts: {
     sessionsWithErrors: number;
@@ -82,4 +104,24 @@ export interface ApplicationOverviewKpisResponse {
     httpRequests: number;
     failedHttpRequests: number;
   };
+}
+
+/** A page that sessions started on, and how those sessions went. */
+export interface EntryPage {
+  /** The path the session landed on, as the session summaries name it. */
+  page: string;
+  sessions: number;
+  /** The share of these sessions that left without visiting another page, from 0 to 1. */
+  bounceRate: number;
+}
+
+/**
+ * The pages sessions started on over the time range, environment and the filters the session
+ * summaries have too (browser, OS, device, country and app version), from the most sessions.
+ */
+export interface ApplicationEntryPagesResponse {
+  /** Up to ten, with the most sessions first. */
+  entryPages: EntryPage[];
+  /** The sessions with an entry page, the denominator of each page's share. */
+  totalSessions: number;
 }

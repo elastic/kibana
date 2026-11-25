@@ -71,6 +71,35 @@ describe('getOtelOverviewKpis', () => {
     });
   });
 
+  it('returns the Discover query of each tile, with the environment, filters and KQL query', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockResolvedValue(esqlResponse([CURRENT_ROW]));
+
+    const { discover } = await getOtelOverviewKpis({
+      esClient,
+      serviceName: 'storefront-web',
+      start: 2 * HOUR,
+      end: 3 * HOUR,
+      environment: 'production',
+      filters: { browser: [{ value: 'Firefox', exclude: false }] },
+      kueryText: 'user.id : "42"',
+    });
+
+    expect(Object.keys(discover).sort()).toEqual([
+      'errorFreeSessions',
+      'failedHttpRequests',
+      'jsErrors',
+      'loadTime',
+      'pageLoads',
+      'requestLatency',
+      'sessions',
+    ]);
+    expect(discover.pageLoads).toContain('service.name == "storefront-web"');
+    expect(discover.pageLoads).toContain('service.environment == "production"');
+    expect(discover.pageLoads).toContain('Firefox');
+    expect(discover.pageLoads).toContain('KQL(');
+  });
+
   it('reads the previous period with the same query, application and environment', async () => {
     const { client, esClient } = createTracedEsClientMock();
     client.esql.query.mockResolvedValue(esqlResponse([CURRENT_ROW]));
