@@ -57,6 +57,8 @@ export { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_
 export { getAddLensPanelAction } from './trigger_actions/add_lens_panel_action';
 export { AddESQLPanelAction } from './trigger_actions/open_lens_config/add_esql_panel_action';
 export { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
+export { createOpenInLensAction } from './trigger_actions/built_in_actions/open_in_lens_action';
+export { createSaveToDashboardAction } from './trigger_actions/built_in_actions/save_to_dashboard_action';
 export { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 export { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 

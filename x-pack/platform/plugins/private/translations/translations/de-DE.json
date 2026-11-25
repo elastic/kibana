@@ -27441,7 +27441,6 @@
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",
     "xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel": "Feldgrenze",
     "xpack.datasetQuality.detail.qualityIssuesSectionTitle": "Qualitätsprobleme",
-    "xpack.datasetQuality.details.chartOpenInLensText": "In Lens öffnen",
     "xpack.datasetQuality.details.checkBreakdownFieldEcsFailed": "Wir konnten die Metadaten des Aufschlüsselungsfeldes nicht abrufen.",
     "xpack.datasetQuality.details.currentIssuesToggleSwitch": "Nur aktuelle Probleme",
     "xpack.datasetQuality.details.currentIssuesToggleSwitchTooltip": "Aktivieren Sie diese Option, um nur Probleme anzuzeigen, die in der neuesten Version des Datensatzes erkannt wurden. Deaktivieren Sie diese Option, um alle innerhalb des konfigurierten Zeitraums erkannten Probleme anzuzeigen.",

@@ -27498,7 +27498,6 @@
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",
     "xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel": "フィールド上限",
     "xpack.datasetQuality.detail.qualityIssuesSectionTitle": "品質の問題",
-    "xpack.datasetQuality.details.chartOpenInLensText": "Lensで開く",
     "xpack.datasetQuality.details.checkBreakdownFieldEcsFailed": "内訳フィールドメタデータを取得できませんでした。",
     "xpack.datasetQuality.details.currentIssuesToggleSwitch": "現在の問題のみ",
     "xpack.datasetQuality.details.currentIssuesToggleSwitchTooltip": "有効にすると、データセットの最新バージョンで検出された問題のみが表示されます。無効にすると、設定した時間範囲内で検出されたすべての問題が表示されます。",

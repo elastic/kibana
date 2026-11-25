@@ -27496,7 +27496,6 @@
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",
     "xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel": "字段限制",
     "xpack.datasetQuality.detail.qualityIssuesSectionTitle": "质量问题",
-    "xpack.datasetQuality.details.chartOpenInLensText": "在 Lens 中打开",
     "xpack.datasetQuality.details.checkBreakdownFieldEcsFailed": "无法检索细目字段元数据。",
     "xpack.datasetQuality.details.currentIssuesToggleSwitch": "仅限当前问题。",
     "xpack.datasetQuality.details.currentIssuesToggleSwitchTooltip": "启用以仅显示在最新版本的数据集中检测到的问题。禁用以显示在配置的时间范围内检测到的所有问题。",

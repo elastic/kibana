@@ -7,32 +7,21 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { LensBuiltInActionId } from '@kbn/lens-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import { i18n } from '@kbn/i18n';
-import type { Action } from '@kbn/ui-actions-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_LOGS_DATA_VIEW, FAILURE_STORE_SELECTOR } from '../../common/constants';
 import { getLensAttributes as getDegradedLensAttributes } from '../components/dataset_quality_details/overview/document_trends/degraded_docs/lens_attributes';
 import { getLensAttributes as getFailedLensAttributes } from '../components/dataset_quality_details/overview/document_trends/failed_docs/lens_attributes';
 import type { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
-import { useKibanaContextForPlugin } from '../utils';
 import { useCreateDataView } from './use_create_dataview';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { useEsqlRedirectLink } from './use_esql_redirect_link';
 import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
 
-const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInLensText', {
-  defaultMessage: 'Open in Lens',
-});
-
-const ACTION_OPEN_IN_LENS = 'ACTION_OPEN_IN_LENS';
-
 export const useQualityIssuesDocsChart = () => {
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { lens },
-  } = useKibanaContextForPlugin();
   const {
     service,
     dataStream,
@@ -118,43 +107,14 @@ export const useQualityIssuesDocsChart = () => {
     euiTheme.colors.vis.euiColorVis6,
   ]);
 
-  const openInLensCallback = useCallback(() => {
-    if (attributes) {
-      trackDetailsNavigated(navigationTargets.Lens, navigationSources.Chart);
-      lens.navigateToPrefilledEditor({
-        id: '',
-        time_range: timeRange,
-        attributes,
-      });
-    }
-  }, [
-    attributes,
-    lens,
-    navigationSources.Chart,
-    navigationTargets.Lens,
-    timeRange,
-    trackDetailsNavigated,
-  ]);
-
-  const getOpenInLensAction = useMemo(() => {
-    return {
-      id: ACTION_OPEN_IN_LENS,
-      type: 'link',
-      order: 17,
-      getDisplayName(): string {
-        return openInLensText;
-      },
-      getIconType(): string {
-        return 'chartArea';
-      },
-      async isCompatible(): Promise<boolean> {
-        return true;
-      },
-      async execute(): Promise<void> {
-        return openInLensCallback();
-      },
-    };
-  }, [openInLensCallback]);
+  const handleBuiltInAction = useCallback(
+    (actionId: LensBuiltInActionId) => {
+      if (actionId === 'openInLens') {
+        trackDetailsNavigated(navigationTargets.Lens, navigationSources.Chart);
+      }
+    },
+    [navigationSources.Chart, navigationTargets.Lens, trackDetailsNavigated]
+  );
 
   const degradedEsqlQuery = `FROM ${datasetDetails.rawName} METADATA _ignored | WHERE _ignored IS NOT NULL | SORT @timestamp DESC`;
   const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures | SORT @timestamp DESC`;
@@ -172,8 +132,6 @@ export const useQualityIssuesDocsChart = () => {
     sendTelemetry,
   });
 
-  const extraActions: Action[] = [getOpenInLensAction];
-
   const breakdown = useMemo(() => {
     return {
       dataViewField: breakdownDataViewField,
@@ -188,7 +146,7 @@ export const useQualityIssuesDocsChart = () => {
     attributes,
     dataView,
     breakdown,
-    extraActions,
+    onBuiltInAction: handleBuiltInAction,
     isChartLoading,
     redirectLinkProps,
     handleDocsTrendChartChange,

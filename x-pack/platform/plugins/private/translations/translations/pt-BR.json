@@ -27521,7 +27521,6 @@
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",
     "xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel": "limite de campo",
     "xpack.datasetQuality.detail.qualityIssuesSectionTitle": "Problemas de qualidade",
-    "xpack.datasetQuality.details.chartOpenInLensText": "Abrir no Lens",
     "xpack.datasetQuality.details.checkBreakdownFieldEcsFailed": "Não conseguimos recuperar os metadados do campo de detalhamento.",
     "xpack.datasetQuality.details.currentIssuesToggleSwitch": "Somente problemas atuais",
     "xpack.datasetQuality.details.currentIssuesToggleSwitchTooltip": "Ative para exibir apenas os problemas detectados na versão mais recente do conjunto de dados. Desative para exibir todos os problemas detectados dentro do intervalo de tempo configurado.",

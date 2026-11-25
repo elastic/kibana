@@ -138,6 +138,10 @@ import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import {
+  ACTION_OPEN_IN_LENS,
+  ACTION_SAVE_TO_DASHBOARD,
+} from './trigger_actions/built_in_actions/constants';
+import {
   ACTION_CREATE_ESQL_CHART,
   ACTION_EDIT_LENS_EMBEDDABLE,
 } from './trigger_actions/open_lens_config/constants';
@@ -761,32 +765,55 @@ export class LensPlugin {
       );
     }
 
+    const navigateToPrefilledEditor: LensPublicStart['navigateToPrefilledEditor'] = (
+      input,
+      { openInNewTab = false, originatingApp = '', originatingPath, skipAppLeave = false } = {}
+    ) => {
+      // for openInNewTab, we set the time range in url via getEditPath below
+      if (input?.time_range && !openInNewTab) {
+        startDependencies.data.query.timefilter.timefilter.setTime(input.time_range);
+      }
+      const transfer = new EmbeddableStateTransfer(
+        core.application.navigateToApp,
+        core.application.currentAppId$
+      );
+      transfer.navigateToEditor(APP_ID, {
+        openInNewTab,
+        path: getEditPath(undefined, (openInNewTab && input?.time_range) || undefined),
+        state: {
+          originatingApp,
+          originatingPath,
+          valueInput: input,
+        },
+        skipAppLeave,
+      });
+    };
+
+    startDependencies.uiActions.addTriggerActionAsync(
+      ON_OPEN_PANEL_MENU,
+      ACTION_OPEN_IN_LENS,
+      async () => {
+        const { createOpenInLensAction } = await import('./async_services');
+        return createOpenInLensAction({
+          application: core.application,
+          navigateToPrefilledEditor,
+        });
+      }
+    );
+
+    startDependencies.uiActions.addTriggerActionAsync(
+      ON_OPEN_PANEL_MENU,
+      ACTION_SAVE_TO_DASHBOARD,
+      async () => {
+        const { createSaveToDashboardAction } = await import('./async_services');
+        return createSaveToDashboardAction(core, startDependencies);
+      }
+    );
+
     return {
       EmbeddableComponent: LensRenderer,
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
-      navigateToPrefilledEditor: (
-        input,
-        { openInNewTab = false, originatingApp = '', originatingPath, skipAppLeave = false } = {}
-      ) => {
-        // for openInNewTab, we set the time range in url via getEditPath below
-        if (input?.time_range && !openInNewTab) {
-          startDependencies.data.query.timefilter.timefilter.setTime(input.time_range);
-        }
-        const transfer = new EmbeddableStateTransfer(
-          core.application.navigateToApp,
-          core.application.currentAppId$
-        );
-        transfer.navigateToEditor(APP_ID, {
-          openInNewTab,
-          path: getEditPath(undefined, (openInNewTab && input?.time_range) || undefined),
-          state: {
-            originatingApp,
-            originatingPath,
-            valueInput: input,
-          },
-          skipAppLeave,
-        });
-      },
+      navigateToPrefilledEditor,
       canUseEditor: () => {
         return Boolean(core.application.capabilities.visualize_v2?.show);
       },

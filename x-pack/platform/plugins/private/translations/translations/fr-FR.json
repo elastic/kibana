@@ -27404,7 +27404,6 @@
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",
     "xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel": "limite de champ",
     "xpack.datasetQuality.detail.qualityIssuesSectionTitle": "Problèmes de qualité",
-    "xpack.datasetQuality.details.chartOpenInLensText": "Ouvrir dans Lens",
     "xpack.datasetQuality.details.checkBreakdownFieldEcsFailed": "Nous n'avons pas pu récupérer les métadonnées du champ de répartition.",
     "xpack.datasetQuality.details.currentIssuesToggleSwitch": "Problèmes actuels uniquement",
     "xpack.datasetQuality.details.currentIssuesToggleSwitchTooltip": "Activez cette option pour afficher uniquement les problèmes détectés dans la version la plus récente de l'ensemble de données. Désactivez cette option pour afficher tous les problèmes détectés dans la plage temporelle configurée.",

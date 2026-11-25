@@ -6,9 +6,15 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { InlineEditLensEmbeddableContext } from '@kbn/lens-plugin/public';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import {
+  LENS_SAVE_TO_DASHBOARD_ACTION_ID,
+  type InlineEditLensEmbeddableContext,
+  type LensApi,
+  type TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActionButtonType,
   type ActionButton,
@@ -61,7 +67,7 @@ export function BaseVisualization({
   height = DEFAULT_VISUALIZATION_HEIGHT,
 }: BaseVisualizationProps) {
   const { lens, uiActions, application, unifiedSearch } = services;
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const lensApiRef = useRef<LensApi>();
   const [lensLoadEvent, setLensLoadEvent] = useState<
     InlineEditLensEmbeddableContext['lensEvent'] | null
   >(null);
@@ -92,8 +98,25 @@ export function BaseVisualization({
     []
   );
 
-  const onOpenSave = useCallback(() => setIsSaveModalOpen(true), []);
-  const onCloseSave = useCallback(() => setIsSaveModalOpen(false), []);
+  const onApiAvailable = useCallback((api: unknown) => {
+    lensApiRef.current = api as LensApi;
+  }, []);
+
+  const onOpenSave = useCallback(async () => {
+    const lensApi = lensApiRef.current;
+    if (!lensApi) {
+      return;
+    }
+
+    // the Save to dashboard action is provided by the Lens embeddable
+    const saveToDashboardAction = (await uiActions.getAction(
+      LENS_SAVE_TO_DASHBOARD_ACTION_ID
+    )) as Action<{ embeddable: LensApi }>;
+    await saveToDashboardAction.execute({
+      embeddable: lensApi,
+      trigger: { id: ON_OPEN_PANEL_MENU },
+    });
+  }, [uiActions]);
   const saveToDashboard = useCallback(() => {
     if (canWriteDashboards) {
       onOpenSave();
@@ -166,18 +189,12 @@ export function BaseVisualization({
               style={{ height: '100%' }}
               onBrushEnd={onBrushEnd}
               onLoad={onLoad}
+              telemetrySource="chat"
+              onApiAvailable={onApiAvailable}
             />
           )
         )}
       </div>
-      {isSaveModalOpen && lensInputWithTimeRange && (
-        <lens.SaveModalComponent
-          initialInput={lensInputWithTimeRange}
-          onClose={onCloseSave}
-          isSaveable={false}
-          telemetrySource="chat"
-        />
-      )}
     </>
   );
 }
