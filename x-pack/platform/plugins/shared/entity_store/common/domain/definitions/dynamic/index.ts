@@ -26,7 +26,6 @@ export {
   dynamicMetricSchema,
   dynamicSourceSchema,
   dynamicValueLabelsSchema,
-  isConcreteIndexPattern,
   isLiteralFieldPath,
 } from './dynamic_block_schema';
 export type {
