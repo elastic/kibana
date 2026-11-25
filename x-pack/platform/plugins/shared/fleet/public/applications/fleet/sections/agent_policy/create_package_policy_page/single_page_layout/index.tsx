@@ -81,11 +81,6 @@ import {
   StepSelectHosts,
 } from '../components';
 
-import {
-  computeDefaultVarGroupSelections,
-  getHiddenVarGroupOptionsForPolicyTemplate,
-  type VarGroupSelection,
-} from '../services/var_group_helpers';
 import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
 import { applyIlmPolicyChange } from '../services/apply_ilm_policy';
 
@@ -240,6 +235,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    packageVarGroups,
+    identityFederationProvider,
+    onIdentityFederationReadyChange,
+    isIdentityFederationSaveBlocked,
     submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
@@ -282,27 +281,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
     [setHasAgentPolicyError]
   );
-
-  // Derive var_group_selections from policy for StepConfigurePackagePolicy
-  // Note: StepDefinePackagePolicy handles its own initialization and state management
-  const varGroups = packageInfo?.var_groups;
-  // Options unsupported by the policy template the page is scoped to (e.g. opened
-  // from the integrations browse page) are hidden from selectors and defaults
-  const hiddenVarGroupOptions = useMemo(
-    () =>
-      getHiddenVarGroupOptionsForPolicyTemplate(
-        packageInfo,
-        integrationToEnable,
-        isAgentlessSelected
-      ),
-    [packageInfo, integrationToEnable, isAgentlessSelected]
-  );
-  const varGroupSelections = useMemo((): VarGroupSelection => {
-    if (packagePolicy.var_group_selections) {
-      return packagePolicy.var_group_selections;
-    }
-    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected, hiddenVarGroupOptions);
-  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected, hiddenVarGroupOptions]);
 
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {
@@ -443,6 +421,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   useEffect(() => {
     if (addIntegrationFlyoutProps?.isSubmitted && formState !== 'LOADING') {
+      if (isIdentityFederationSaveBlocked) {
+        addIntegrationFlyoutProps.onSubmitCompleted(false);
+        return;
+      }
       setFormState('LOADING');
       onSubmit({ skipConfirmModal: true })
         .then(() => {
@@ -455,13 +437,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           addIntegrationFlyoutProps?.onSubmitCompleted();
         });
     }
-  }, [addIntegrationFlyoutProps, onSubmit, setFormState, formState]);
+  }, [
+    addIntegrationFlyoutProps,
+    onSubmit,
+    setFormState,
+    formState,
+    isIdentityFederationSaveBlocked,
+  ]);
 
   useEffect(() => {
     addIntegrationFlyoutProps?.updateHasErrors(
       Boolean(
         packageInfo &&
-          (formState === 'INVALID' || hasAgentPolicyError || isAgentVersionAcknowledgementMissing)
+          (formState === 'INVALID' ||
+            hasAgentPolicyError ||
+            isAgentVersionAcknowledgementMissing ||
+            isIdentityFederationSaveBlocked)
       )
     );
   }, [
@@ -469,6 +460,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     formState,
     hasAgentPolicyError,
     isAgentVersionAcknowledgementMissing,
+    isIdentityFederationSaveBlocked,
     addIntegrationFlyoutProps,
   ]);
 
@@ -679,7 +671,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             deploymentSelector={
               !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
             }
-            hideInVarGroupOptions={hiddenVarGroupOptions}
+            packageVarGroups={packageVarGroups}
+            classicIdentityFederation={
+              identityFederationProvider && {
+                provider: identityFederationProvider,
+                onReadyChange: onIdentityFederationReadyChange,
+              }
+            }
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
@@ -692,7 +690,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               validationResults={validationResults}
               submitAttempted={submitAttempted}
               isAgentlessSelected={isAgentlessSelected}
-              varGroupSelections={varGroupSelections}
+              varGroupSelections={packageVarGroups.selections}
               bottomExtension={
                 createBottomExtensionView && packagePolicy.package?.name ? (
                   <ExtensionWrapper>
@@ -731,8 +729,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
-      varGroupSelections,
-      hiddenVarGroupOptions,
+      packageVarGroups,
+      identityFederationProvider,
+      onIdentityFederationReadyChange,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
       createDatasetTemplates,
@@ -1074,7 +1073,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                           hasAgentPolicyError ||
                           !validationResults ||
                           isFleetExtensionLoaded === false ||
-                          isAgentVersionAcknowledgementMissing
+                          isAgentVersionAcknowledgementMissing ||
+                          isIdentityFederationSaveBlocked
                         }
                         iconType="save"
                         color="primary"

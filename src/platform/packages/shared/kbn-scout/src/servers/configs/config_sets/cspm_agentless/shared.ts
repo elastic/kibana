@@ -38,6 +38,9 @@ export const cspmAgentlessServerArgs = [
   // Enable cloud connector feature flag in Security Solution
   '--uiSettings.overrides.securitySolution:enableCloudConnector=true',
 
+  '--feature_flags.overrides.fleet.awsIdentityFederationEnabled=true',
+  '--feature_flags.overrides.fleet.enableIacProvisioner=true',
+
   // Pre-install cloud_security_posture package at startup
   '--xpack.fleet.packages.0.name=cloud_security_posture',
   `--xpack.fleet.packages.0.version=${CSPM_PACKAGE_VERSION}`,

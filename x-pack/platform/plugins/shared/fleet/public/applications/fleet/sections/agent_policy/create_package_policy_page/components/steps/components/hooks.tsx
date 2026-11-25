@@ -20,10 +20,16 @@ import {
   inferVarGroupSelections,
   sanitizeVarGroupSelections,
 } from '../../../../../../../../../common/services';
-import { useGetOutputs, useLicense } from '../../../../../../hooks';
+import {
+  useDisabledIdentityFederationProviders,
+  useGetOutputs,
+  useLicense,
+} from '../../../../../../hooks';
 
 import {
   computeDefaultVarGroupSelections,
+  getHiddenVarGroupOptionsForDisabledProviders,
+  mergeHiddenVarGroupOptions,
   type VarGroupSelection,
 } from '../../../services/var_group_helpers';
 import {
@@ -299,4 +305,34 @@ export function useVarGroupSelections({
   ]);
 
   return { selections, handleSelectionChange };
+}
+
+export function usePackagePolicyVarGroups({
+  varGroups,
+  packagePolicy,
+  hideInVarGroupOptions,
+  ...options
+}: Omit<UseVarGroupSelectionsParams, 'savedSelections' | 'streamVars' | 'varsForInference'>) {
+  const savedSelections = packagePolicy?.var_group_selections;
+  const disabledIdentityFederationProviders = useDisabledIdentityFederationProviders();
+  const effectiveHideInVarGroupOptions = useMemo(
+    () =>
+      mergeHiddenVarGroupOptions(
+        hideInVarGroupOptions,
+        getHiddenVarGroupOptionsForDisabledProviders(
+          varGroups,
+          disabledIdentityFederationProviders,
+          savedSelections
+        )
+      ),
+    [hideInVarGroupOptions, varGroups, disabledIdentityFederationProviders, savedSelections]
+  );
+  const selection = useVarGroupSelections({
+    ...options,
+    varGroups,
+    packagePolicy,
+    savedSelections,
+    hideInVarGroupOptions: effectiveHideInVarGroupOptions,
+  });
+  return { ...selection, effectiveHideInVarGroupOptions, disabledIdentityFederationProviders };
 }

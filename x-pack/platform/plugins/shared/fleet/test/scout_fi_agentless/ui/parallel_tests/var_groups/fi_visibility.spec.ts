@@ -55,11 +55,8 @@ const AGENTLESS_RADIO_ID = 'SetupTechnologySelector_agentless';
 /** Radio button ID for the agent-based setup technology option. */
 const AGENT_BASED_RADIO_ID = 'SetupTechnologySelector_agent-based';
 
-/**
- * Role ARN field of NewCloudConnectorForm — rendered by CloudConnectorSetup when
- * identity_federation is the active var_group option (same form CSPM uses).
- */
-const FI_ROLE_ARN = 'awsRoleArnInput';
+/** Launch action of the shared AWS setup on classic create. */
+const FI_LAUNCH = 'awsIdentityFederationSetup-launchCloudFormation';
 
 /**
  * External ID field of the AWS cloud connector form. Only renders when the manifest
@@ -167,7 +164,7 @@ test.describe(
         await expect(selector).toHaveValue(IDENTITY_FEDERATION);
 
         // The FI form must be visible when identity_federation is the active option
-        await expect(page.getByTestId(FI_ROLE_ARN)).toBeVisible();
+        await expect(page.getByTestId(FI_LAUNCH)).toBeVisible();
 
         // role_arn is the ONLY credential field — external_id was removed in #284522
         await expect(page.getByTestId(FI_EXTERNAL_ID)).not.toBeAttached();
@@ -214,13 +211,13 @@ test.describe(
         // Start state: select identity_federation, FI form is visible
         await page.getByTestId(CREDENTIAL_TYPE_SELECTOR).selectOption(IDENTITY_FEDERATION);
         await expect(page.getByTestId(CREDENTIAL_TYPE_SELECTOR)).toHaveValue(IDENTITY_FEDERATION);
-        await expect(page.getByTestId(FI_ROLE_ARN)).toBeVisible();
+        await expect(page.getByTestId(FI_LAUNCH)).toBeVisible();
 
         // Switch to direct_access_key
         await page.getByTestId(CREDENTIAL_TYPE_SELECTOR).selectOption(DIRECT_ACCESS_KEY);
 
         // FI form must disappear after switching away from identity_federation
-        await expect(page.getByTestId(FI_ROLE_ARN)).not.toBeAttached();
+        await expect(page.getByTestId(FI_LAUNCH)).not.toBeAttached();
 
         // Selector value must reflect the change
         await expect(page.getByTestId(CREDENTIAL_TYPE_SELECTOR)).toHaveValue(DIRECT_ACCESS_KEY);
@@ -228,7 +225,7 @@ test.describe(
         // Switch back to identity_federation — the FI form must be restored
         await page.getByTestId(CREDENTIAL_TYPE_SELECTOR).selectOption(IDENTITY_FEDERATION);
         await expect(page.getByTestId(CREDENTIAL_TYPE_SELECTOR)).toHaveValue(IDENTITY_FEDERATION);
-        await expect(page.getByTestId(FI_ROLE_ARN)).toBeVisible();
+        await expect(page.getByTestId(FI_LAUNCH)).toBeVisible();
       }
     );
 
@@ -259,7 +256,7 @@ test.describe(
           // Selecting it must activate the FI form
           await selector.selectOption(IDENTITY_FEDERATION);
           await expect(selector).toHaveValue(IDENTITY_FEDERATION);
-          await expect(page.getByTestId(FI_ROLE_ARN)).toBeVisible();
+          await expect(page.getByTestId(FI_LAUNCH)).toBeVisible();
         }
       );
     }

@@ -39,24 +39,18 @@ import type {
   NewPackagePolicy,
   RegistryVarsEntry,
   AgentPolicy,
+  CloudProvider,
 } from '../../../../../types';
 
 import { Loading } from '../../../../../components';
 import {
-  useDisabledIdentityFederationProviders,
   useGetEpmDatastreams,
   useGetIlmPoliciesQuery,
   useStartServices,
   useVarGroupCloudConnector,
 } from '../../../../../hooks';
 
-import {
-  isAdvancedVar,
-  shouldShowVar,
-  isVarRequiredByVarGroup,
-  getHiddenVarGroupOptionsForDisabledProviders,
-  mergeHiddenVarGroupOptions,
-} from '../../services';
+import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants/epm';
@@ -65,9 +59,9 @@ import {
   PackagePolicyConditionField,
   PackagePolicyInputVarField,
   VarGroupSelector,
-  useVarGroupSelections,
 } from './components';
-import { useOutputs } from './components/hooks';
+import { useOutputs, usePackagePolicyVarGroups } from './components/hooks';
+import { ClassicAwsIdentityFederationSetup } from './components/classic_aws_identity_federation_setup';
 import { PackagePolicyOutputSelect } from './components/package_policy_output_select';
 import { useNamespaceCustomization } from './use_namespace_customization';
 
@@ -96,6 +90,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   packagePolicyId?: string;
   deploymentSelector?: React.ReactNode;
   hideInVarGroupOptions?: Record<string, string[]>;
+  packageVarGroups?: ReturnType<typeof usePackagePolicyVarGroups>;
+  classicIdentityFederation?: {
+    provider: CloudProvider;
+    onReadyChange: (isReady: boolean) => void;
+  };
 }> = memo(
   ({
     namespacePlaceholder,
@@ -113,6 +112,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     packagePolicyId,
     deploymentSelector,
     hideInVarGroupOptions,
+    packageVarGroups,
+    classicIdentityFederation,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const varGroups = packageInfo.var_groups;
@@ -126,37 +127,19 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-    // Identity federation options for CSPs switched off via LaunchDarkly are hidden alongside
-    // any options the caller already hides (e.g. unsupported by the scoped policy template).
-    const disabledIdentityFederationProviders = useDisabledIdentityFederationProviders();
-    const effectiveHideInVarGroupOptions = useMemo(
-      () =>
-        mergeHiddenVarGroupOptions(
-          hideInVarGroupOptions,
-          getHiddenVarGroupOptionsForDisabledProviders(
-            varGroups,
-            disabledIdentityFederationProviders,
-            packagePolicy.var_group_selections
-          )
-        ),
-      [
-        hideInVarGroupOptions,
-        varGroups,
-        disabledIdentityFederationProviders,
-        packagePolicy.var_group_selections,
-      ]
-    );
-
-    const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
-      useVarGroupSelections({
-        varGroups,
-        savedSelections: packagePolicy.var_group_selections,
-        isAgentlessEnabled: isAgentlessSelected,
-        onSelectionsChange: updatePackagePolicy,
-        packagePolicy,
-        hideInVarGroupOptions: effectiveHideInVarGroupOptions,
-        isEditPage,
-      });
+    const localPackageVarGroups = usePackagePolicyVarGroups({
+      varGroups: packageVarGroups ? undefined : varGroups,
+      isAgentlessEnabled: isAgentlessSelected,
+      onSelectionsChange: updatePackagePolicy,
+      packagePolicy,
+      hideInVarGroupOptions,
+      isEditPage,
+    });
+    const {
+      selections: varGroupSelections,
+      handleSelectionChange: handleVarGroupSelectionChange,
+      effectiveHideInVarGroupOptions,
+    } = packageVarGroups ?? localPackageVarGroups;
 
     const {
       isSelected: isCloudConnectorSelected,
@@ -902,18 +885,31 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       {/* Cloud connector and required credential vars follow in the same right column */}
                       {isLastGroup && isCloudConnectorSelected && cloudProvider && (
                         <EuiFlexItem>
-                          <CloudConnectorSetup
-                            newPolicy={packagePolicy}
-                            packageInfo={packageInfo}
-                            updatePolicy={handleCloudConnectorUpdate}
-                            isEditPage={isEditPage}
-                            hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
-                            cloud={cloud}
-                            cloudProvider={cloudProvider}
-                            templateName={packageInfo.name}
-                            iacTemplateUrl={iacTemplateUrl}
-                            accountType={accountType}
-                          />
+                          {cloudProvider === 'aws' &&
+                          classicIdentityFederation?.provider === cloudProvider ? (
+                            <ClassicAwsIdentityFederationSetup
+                              packageName={packageInfo.name}
+                              packageVersion={packageInfo.version}
+                              inputs={packagePolicy.inputs}
+                              accountType={accountType}
+                              cloud={cloud}
+                              iacTemplateUrl={iacTemplateUrl}
+                              onReadyChange={classicIdentityFederation.onReadyChange}
+                            />
+                          ) : (
+                            <CloudConnectorSetup
+                              newPolicy={packagePolicy}
+                              packageInfo={packageInfo}
+                              updatePolicy={handleCloudConnectorUpdate}
+                              isEditPage={isEditPage}
+                              hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
+                              cloud={cloud}
+                              cloudProvider={cloudProvider}
+                              templateName={packageInfo.name}
+                              iacTemplateUrl={iacTemplateUrl}
+                              accountType={accountType}
+                            />
+                          )}
                         </EuiFlexItem>
                       )}
 

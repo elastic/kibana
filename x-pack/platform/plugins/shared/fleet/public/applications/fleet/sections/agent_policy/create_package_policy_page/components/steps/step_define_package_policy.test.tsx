@@ -9,6 +9,7 @@ import React from 'react';
 import { waitFor, act, fireEvent } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
+import { AwsIdentityFederationSetup } from '../../../../../../../components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import { getInheritedNamespace } from '../../../../../../../../common/services';
 
@@ -21,6 +22,15 @@ import { useGetPackagePoliciesQuery, useGetIlmPoliciesQuery } from '../../../../
 import { useOutputs } from './components/hooks';
 
 import { StepDefinePackagePolicy } from './step_define_package_policy';
+
+jest.mock(
+  '../../../../../../../components/cloud_connector/aws_connect_setup/aws_identity_federation_setup',
+  () => ({
+    AwsIdentityFederationSetup: jest.fn(() => (
+      <div data-test-subj="sharedAwsIdentityFederationSetup" />
+    )),
+  })
+);
 
 jest.mock('./components/hooks', () => ({
   ...jest.requireActual('./components/hooks'),
@@ -521,6 +531,82 @@ describe('StepDefinePackagePolicy', () => {
         expect.objectContaining({ condition: "host.os.type == 'linux'" })
       );
     });
+  });
+
+  it('hosts the AWS setup with the current enabled inputs on classic create', () => {
+    const awsPackage: PackageInfo = {
+      ...packageInfo,
+      name: 'aws',
+      version: '8.17.0',
+      var_groups: [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              provider: 'aws',
+              vars: ['role_arn'],
+            },
+          ],
+        },
+      ],
+    };
+    const awsPolicy: NewPackagePolicy = {
+      ...packagePolicy,
+      supports_agentless: true,
+      var_group_selections: { credential_type: 'identity_federation' },
+      inputs: [
+        { type: 'httpjson', enabled: true, policy_template: 'guardduty', streams: [] },
+        { type: 'aws-s3', enabled: false, policy_template: 'guardduty', streams: [] },
+      ],
+    };
+    const onReadyChange = jest.fn();
+    const step = (policy: NewPackagePolicy) => (
+      <StepDefinePackagePolicy
+        packageInfo={awsPackage}
+        packagePolicy={policy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isAgentlessSelected
+        classicIdentityFederation={{ provider: 'aws', onReadyChange }}
+      />
+    );
+
+    renderResult = testRenderer.render(step(awsPolicy));
+
+    expect(renderResult.getByTestId('sharedAwsIdentityFederationSetup')).toBeInTheDocument();
+    expect(jest.mocked(AwsIdentityFederationSetup).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        onReadyChange,
+        integrations: [
+          {
+            name: 'aws',
+            version: '8.17.0',
+            policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }],
+          },
+        ],
+      })
+    );
+
+    renderResult.rerender(
+      step({ ...awsPolicy, inputs: awsPolicy.inputs.map((input) => ({ ...input, enabled: true })) })
+    );
+
+    expect(jest.mocked(AwsIdentityFederationSetup).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        integrations: [
+          {
+            name: 'aws',
+            version: '8.17.0',
+            policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3', 'httpjson'] }],
+          },
+        ],
+      })
+    );
   });
 
   describe('var group selections state management', () => {

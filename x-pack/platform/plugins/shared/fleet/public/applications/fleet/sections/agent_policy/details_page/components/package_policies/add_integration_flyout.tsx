@@ -134,10 +134,13 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
     headingElement: 'h2',
   };
 
-  const onSubmitCompleted = useCallback(() => {
-    setIsSubmitted(false);
-    onClose();
-  }, [onClose]);
+  const onSubmitCompleted = useCallback(
+    (close = true) => {
+      setIsSubmitted(false);
+      if (close) onClose();
+    },
+    [onClose]
+  );
 
   return (
     <Suspense fallback={<Loading />}>

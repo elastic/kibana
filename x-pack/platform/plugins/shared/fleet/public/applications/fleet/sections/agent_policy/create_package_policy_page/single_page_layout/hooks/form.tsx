@@ -60,13 +60,19 @@ import type { AgentVersionBlock } from '../../../../../../../../common/types';
 import { getMaxPackageName } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
-import { detectTargetCsp } from '../../../../../../../../common/services/cloud_connectors';
+import { AWS_CLOUD_PROVIDER } from '../../../../../../../../common/types/models/cloud_connector';
+import {
+  detectTargetCsp,
+  getCloudConnectorOption,
+} from '../../../../../../../../common/services/cloud_connectors';
 import {
   validatePackagePolicy,
   validationHasErrors,
   isInputVisibleForVarGroupSelections,
 } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
+import { getHiddenVarGroupOptionsForPolicyTemplate } from '../../services/var_group_helpers';
+import { usePackagePolicyVarGroups } from '../../components/steps/components/hooks';
 import type { PackagePolicyFormState, SavedPolicyResult } from '../../types';
 import type { RegistryVarGroup } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
@@ -518,6 +524,44 @@ export function useOnSubmit({
     getAgentlessStatusForPackage(packageInfo).isAgentless &&
     selectedSetupTechnology === SetupTechnology.AGENTLESS;
 
+  const hiddenVarGroupOptions = useMemo(
+    () =>
+      getHiddenVarGroupOptionsForPolicyTemplate(
+        packageInfo,
+        integrationToEnable,
+        isAgentlessSelected
+      ),
+    [packageInfo, integrationToEnable, isAgentlessSelected]
+  );
+  const packageVarGroups = usePackagePolicyVarGroups({
+    varGroups: isInitialized ? varGroups : undefined,
+    isAgentlessEnabled: isAgentlessSelected,
+    onSelectionsChange: updatePackagePolicy,
+    packagePolicy,
+    hideInVarGroupOptions: hiddenVarGroupOptions,
+  });
+  const { provider: selectedProvider } = getCloudConnectorOption(
+    varGroups,
+    packageVarGroups.selections
+  );
+  const identityFederationProvider =
+    isAgentlessSelected &&
+    selectedProvider === AWS_CLOUD_PROVIDER &&
+    !packageVarGroups.disabledIdentityFederationProviders.includes(selectedProvider)
+      ? selectedProvider
+      : undefined;
+  const [identityFederationReady, onIdentityFederationReadyChange] = useState(false);
+  useEffect(() => {
+    if (!identityFederationProvider) onIdentityFederationReadyChange(false);
+  }, [identityFederationProvider]);
+  const identityFederationSubmitState = identityFederationProvider
+    ? identityFederationReady
+      ? 'pendingAttachment'
+      : 'notReady'
+    : 'inactive';
+  // The classic editor will attach the selected identity to the policy in ingest-dev#10669.
+  const isIdentityFederationSaveBlocked = identityFederationSubmitState !== 'inactive';
+
   const newInputs = useMemo(() => {
     const varGroupSelections = packagePolicy.var_group_selections ?? {};
 
@@ -611,6 +655,8 @@ export function useOnSubmit({
       force?: boolean;
       skipConfirmModal?: boolean;
     } = {}) => {
+      if (isIdentityFederationSaveBlocked) return;
+
       setSubmitAttempted(true);
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
@@ -881,6 +927,7 @@ export function useOnSubmit({
       }
     },
     [
+      isIdentityFederationSaveBlocked,
       formState,
       hasErrors,
       agentCount,
@@ -932,6 +979,10 @@ export function useOnSubmit({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    packageVarGroups,
+    identityFederationProvider,
+    onIdentityFederationReadyChange,
+    isIdentityFederationSaveBlocked,
     submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,

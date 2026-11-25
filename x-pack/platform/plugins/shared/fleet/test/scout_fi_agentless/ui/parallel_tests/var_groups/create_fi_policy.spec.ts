@@ -5,21 +5,7 @@
  * 2.0.
  */
 
-/**
- * Scout tests for the Federated Identity create → save → edit round-trip
- * (kibana#283131, "Broader Federated Identity E2E coverage").
- *
- * The agentless controller is never reachable in PR CI, so — following the
- * scout_cspm_agentless precedent — the browser→Kibana API calls are intercepted
- * with page.route():
- *   - POST /api/fleet/cloud_connectors      → captured + mocked (Create Identity)
- *   - POST /api/fleet/managed_integrations  → captured + mocked (policy save)
- *   - GET  /api/fleet/managed_integrations/{id} → canned FI policy (edit page)
- *
- * The assertions on the captured request bodies are the actual test: the policy
- * payload must carry `var_group_selections.credential_type: identity_federation`
- * and a role_arn, and must never contain an external_id (removed in #284522).
- */
+/** Scout coverage for the shared create setup and the existing saved-policy edit form. */
 
 import { expect } from '@kbn/scout/ui';
 import { tags, test } from '@kbn/scout';
@@ -27,8 +13,7 @@ import type { ScoutPage } from '@kbn/scout';
 
 import {
   mockPackagePoliciesEmpty,
-  mockCloudConnectorsCreate,
-  mockManagedIntegrationsCreate,
+  mockCloudConnectorsEmpty,
 } from '../../../../scout/ui/fixtures/mocks';
 
 // ---------------------------------------------------------------------------
@@ -39,9 +24,6 @@ const CREDENTIAL_TYPE_SELECTOR = 'varGroupSelector-credential_type';
 const SETUP_TECH_SELECTOR = 'setup-technology-selector';
 const AGENTLESS_RADIO_ID = 'SetupTechnologySelector_agentless';
 
-/** NewCloudConnectorForm fields — the form CloudConnectorSetup renders for aws. */
-const FI_CONNECTOR_NAME = 'cloudConnectorNameInput';
-const FI_ROLE_ARN = 'awsRoleArnInput';
 const FI_EXTERNAL_ID = 'awsCloudConnectorExternalId';
 
 const SAVE_BUTTON = 'createPackagePolicySaveButton';
@@ -71,17 +53,12 @@ async function ensureAgentlessSelected(page: ScoutPage) {
   }
 }
 
-/** Recursively asserts a captured request body never mentions external_id (#284522). */
-function expectNoExternalId(body: unknown) {
-  expect(JSON.stringify(body)).not.toContain('external_id');
-}
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
 test.describe(
-  'AWS Federated Identity — create, save, and edit round-trip',
+  'AWS Federated Identity — classic create and saved-policy edit',
   { tag: tags.stateful.classic },
   () => {
     test.setTimeout(3 * 60 * 1000);
@@ -90,85 +67,22 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test(
-      'GuardDuty agentless: an FI policy saves with role_arn only ' +
-        '(regression guard for #284522 — no external_id anywhere in the payload)',
-      async ({ page }) => {
-        let capturedConnectorBody: Record<string, unknown> | null = null;
-        let capturedPolicyBody: Record<string, unknown> | null = null;
+    test('GuardDuty agentless: the shared form keeps Save blocked while attachment is pending', async ({
+      page,
+    }) => {
+      await mockPackagePoliciesEmpty(page);
+      await mockCloudConnectorsEmpty(page);
 
-        await mockPackagePoliciesEmpty(page);
-        await mockCloudConnectorsCreate(page, (body) => {
-          capturedConnectorBody = body;
-        });
-        await mockManagedIntegrationsCreate(page, (body) => {
-          capturedPolicyBody = body;
-        });
+      await page.gotoApp('integrations/detail/aws/add-integration/guardduty');
+      await ensureAgentlessSelected(page);
+      await page.getByTestId(CREDENTIAL_TYPE_SELECTOR).selectOption(IDENTITY_FEDERATION);
 
-        await page.gotoApp('integrations/detail/aws/add-integration/guardduty');
-        await ensureAgentlessSelected(page);
-        await page
-          .getByTestId(CREDENTIAL_TYPE_SELECTOR)
-          .waitFor({ state: 'visible', timeout: 30_000 });
-
-        // Select identity_federation and wait for the cloud connector form
-        await page.getByTestId(CREDENTIAL_TYPE_SELECTOR).selectOption(IDENTITY_FEDERATION);
-        await page.getByTestId(FI_ROLE_ARN).waitFor({ state: 'visible', timeout: 30_000 });
-
-        // The form asks for a connector name and role ARN only — no external_id (#284522)
-        await expect(page.getByTestId(FI_EXTERNAL_ID)).not.toBeAttached();
-        await page.getByTestId(FI_CONNECTOR_NAME).fill(CONNECTOR_NAME);
-        await page.getByTestId(FI_ROLE_ARN).fill(ROLE_ARN);
-
-        // Fill the required GuardDuty stream vars (no manifest defaults)
-        await page.getByRole('textbox', { name: 'Detector ID' }).fill('12abc34d567e8fa901bc2d34');
-        await page.getByRole('textbox', { name: 'AWS Region' }).fill('us-east-1');
-
-        // Save the package policy — the cloud connector is created as part of the
-        // policy request (same flow as the CSPM scout suite)
-        const saveButton = page.getByTestId(SAVE_BUTTON);
-        await expect(saveButton).toBeEnabled({ timeout: 10_000 });
-        await saveButton.click();
-
-        // Some flows show a confirmation modal before submitting — accept it if present
-        const confirmButton = page.getByTestId('confirmModalConfirmButton');
-        try {
-          await confirmButton.waitFor({ state: 'visible', timeout: 5_000 });
-          await confirmButton.click();
-        } catch {
-          // No modal — the save submitted directly.
-        }
-
-        // The managed integration create request is the round-trippable policy payload
-        await expect
-          .poll(() => capturedPolicyBody, {
-            message: 'Waiting for managed integration create request',
-            timeout: 30_000,
-          })
-          .not.toBeNull();
-
-        const policy = capturedPolicyBody! as {
-          var_group_selections?: Record<string, string>;
-          vars?: Record<string, unknown>;
-          cloud_connector?: { enabled?: boolean; name?: string };
-        };
-
-        // The var_group selection must persist the credential type
-        expect(policy.var_group_selections?.credential_type).toBe(IDENTITY_FEDERATION);
-
-        // The policy request carries the cloud connector to create
-        expect(policy.cloud_connector?.enabled).toBe(true);
-
-        // role_arn only — external_id must not appear anywhere in the payload (#284522)
-        expectNoExternalId(capturedPolicyBody);
-
-        // If the UI created the connector via a direct POST instead, that request
-        // must also be external_id-free
-        if (capturedConnectorBody) {
-          expectNoExternalId(capturedConnectorBody);
-        }
-      }
-    );
+      await expect(
+        page.getByTestId('awsIdentityFederationSetup-launchCloudFormation')
+      ).toBeVisible();
+      await expect(page.getByTestId(FI_EXTERNAL_ID)).not.toBeAttached();
+      await expect(page.getByTestId(SAVE_BUTTON)).toBeDisabled();
+    });
 
     test(
       'Edit page: a saved FI policy round-trips — identity_federation selected and ' +

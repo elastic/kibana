@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { useState } from 'react';
 import type { RenderHookResult } from '@testing-library/react';
 import { act, waitFor } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
-import type { PackageInfo } from '../../../../../types';
+import type { NewAgentPolicy, PackageInfo } from '../../../../../types';
+import { SetupTechnology } from '../../../../../types';
+import { sendCreateAgentlessPolicy } from '../../../../../../../hooks/use_request/agentless_policy';
 
 import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
@@ -1334,6 +1337,69 @@ describe('useOnSubmit', () => {
         reportEnrollmentSucceeded: jest.fn(),
       });
     });
+
+    it.each([{}, { skipConfirmModal: true }, { force: true }])(
+      'blocks a ready AWS identity without a new policy attachment (%j)',
+      async (submitOptions) => {
+        const awsFederationPackage: PackageInfo = {
+          ...awsPackageInfo,
+          var_groups: [
+            {
+              name: 'credential_type',
+              title: 'Setup Access',
+              selector_title: 'Preferred method',
+              options: [
+                {
+                  name: 'identity_federation',
+                  title: 'Identity Federation',
+                  provider: 'aws',
+                  vars: ['role_arn'],
+                  hide_in_deployment_modes: ['default'],
+                },
+                { name: 'direct_access_key', title: 'Direct Access Keys', vars: [] },
+              ],
+            },
+          ],
+        };
+        renderResult = testRenderer.renderHook(() => {
+          const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
+            name: 'test',
+            namespace: 'default',
+          });
+          return useOnSubmit({
+            agentCount: 0,
+            packageInfo: awsFederationPackage,
+            withSysMonitoring: false,
+            selectedPolicyTab: SelectedPolicyTab.NEW,
+            newAgentPolicy,
+            queryParamsPolicyId: undefined,
+            hasFleetAddAgentsPrivileges: true,
+            setNewAgentPolicy,
+            setSelectedPolicyTab: jest.fn(),
+          });
+        });
+        await waitFor(() => expect(renderResult.result.current.isInitialized).toBe(true));
+        act(() => {
+          renderResult.result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
+          renderResult.result.current.updatePackagePolicy({
+            var_group_selections: { credential_type: 'identity_federation' },
+            cloud_connector_id: 'copied-connector',
+          });
+        });
+        await waitFor(() => expect(renderResult.result.current.isAgentlessSelected).toBe(true));
+        act(() => {
+          renderResult.result.current.onIdentityFederationReadyChange?.(true);
+        });
+
+        await act(async () => {
+          await renderResult.result.current.onSubmit(submitOptions);
+        });
+
+        expect(renderResult.result.current.submitAttempted).toBe(false);
+        expect(sendCreateAgentlessPolicy).not.toHaveBeenCalled();
+        expect(mockReportDeployClicked).not.toHaveBeenCalled();
+      }
+    );
 
     it('calls reportCredentialsAdded and reportDeployClicked with enabled input types on agentless submit', async () => {
       renderResult = testRenderer.renderHook(() =>
