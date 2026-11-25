@@ -72,7 +72,9 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     );
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor({
+    onChange,
+  }: SourceEditorArgs<EMSFileSourceDescriptor>): ReactElement<any> | null {
     return (
       <UpdateSourceEditor
         onChange={onChange}
