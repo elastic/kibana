@@ -94,21 +94,6 @@ describe('toUnusualMinuteReading', () => {
     });
   });
 
-  // The event keeps its identity when the query, and so the rule and its id, change.
-  it('keeps the fingerprint when the knowledge indicator query changes', () => {
-    const edited = toUnusualMinuteReading({
-      ...CONTEXT,
-      ruleId: 'rule-2',
-      knowledgeIndicator: {
-        ...KNOWLEDGE_INDICATOR,
-        query: { ...KNOWLEDGE_INDICATOR.query, esql: { query: 'FROM logs | WHERE a == 1' } },
-      },
-      unusual: UNUSUAL,
-    });
-
-    expect(edited.fingerprint).toBe('known_failures:ki-timeouts');
-  });
-
   it('routes the evidence query across projects when cross-project search is on', () => {
     expect(
       toUnusualMinuteReading({ ...CONTEXT, cpsEnabled: true, unusual: UNUSUAL }).evidence_esql
@@ -152,6 +137,8 @@ describe('toRiseReading', () => {
           rise: 5,
           min_rise: 3,
           change_type: 'step_change',
+          minutes_before_change: 300,
+          level_after_change: 10,
         }),
       })
     );

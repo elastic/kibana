@@ -102,7 +102,16 @@ export function toRiseReading({
       normal_level: levelBefore,
       rise: rise.rise,
       min_rise: rise.min_rise,
-      ...(change ? { change_type: change.type, p_value: change.pvalue } : {}),
+      // The rest of the change point, so the judge sees how long the level before it held and
+      // where it went.
+      ...(change
+        ? {
+            change_type: change.type,
+            p_value: change.pvalue,
+            minutes_before_change: change.before_minutes,
+            level_after_change: change.after_median,
+          }
+        : {}),
     },
   });
 }
