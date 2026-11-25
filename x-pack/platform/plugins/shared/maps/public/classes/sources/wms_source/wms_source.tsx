@@ -18,7 +18,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
 });
 
-export class WMSSource extends AbstractSource implements IRasterSource {
+export class WMSSource extends AbstractSource<WMSSourceDescriptor> implements IRasterSource {
   static type = SOURCE_TYPES.WMS;
   readonly _descriptor: WMSSourceDescriptor;
   static createDescriptor({

@@ -29,11 +29,12 @@ import {
 import { loadIndexSettings } from './load_index_settings';
 import type { OnSourceChangeArgs } from '../../source';
 import { ScalingDocumenationPopover } from './scaling_documenation_popover';
+import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 
 interface Props {
   filterByMapBounds: boolean;
   indexPatternId: string;
-  onChange: (args: OnSourceChangeArgs) => void;
+  onChange: (args: OnSourceChangeArgs<ESSearchSourceDescriptor>) => void;
   scalingType: SCALING_TYPES;
   supportsClustering: boolean;
   clusteringDisabledReason?: string | null;

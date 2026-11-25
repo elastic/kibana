@@ -47,9 +47,9 @@ Fetches list of all streams<br/><br/>[Required authorization] Route required pri
     bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(get_streams_request, 'body'),
-    ...getShapeAt(get_streams_request, 'path'),
     ...getShapeAt(get_streams_request, 'query'),
+    ...getShapeAt(get_streams_request, 'path'),
+    ...getShapeAt(get_streams_request, 'body'),
     fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),

@@ -30,10 +30,11 @@ import type { IESSource } from '../es_source';
 import type { OnSourceChangeArgs } from '../source';
 import type { IField } from '../../fields/field';
 import { ScalingForm } from './util/scaling_form';
+import type { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
 
 interface Props {
   indexPatternId: string;
-  onChange(...args: OnSourceChangeArgs[]): void;
+  onChange(...args: OnSourceChangeArgs<ESSearchSourceDescriptor>[]): void;
   tooltipFields: ESDocField[];
   sortField: string;
   sortOrder: SortDirection;

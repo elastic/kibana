@@ -69,6 +69,12 @@ export const attributeField = (name: string): string => `attributes.${name}`;
 /** A resource attribute as stored in the OTel indices, e.g. `resource.attributes.service.name`. */
 export const resourceAttributeField = (name: string): string => `resource.attributes.${name}`;
 
+/**
+ * The low-cardinality route of the page a browser record was written on, like `/products/{slug}`:
+ * EDOT Browser adds it to logs, except to resource timings. `@kbn/apm-types` doesn't name it.
+ */
+export const URL_TEMPLATE = 'url.template';
+
 /** One per install of a mobile app, which `@kbn/apm-types` doesn't name. */
 export const APP_INSTALLATION_ID = 'app.installation.id';
 
@@ -92,9 +98,21 @@ export const EVENT_CLICK = 'click';
 export const EVENT_USER_ACTION_CLICK = 'browser.user_action.click';
 export const EVENT_RESOURCE_TIMING = 'browser.resource_timing';
 
+/**
+ * EDOT Browser frustration signals, one log event per occurrence, timestamped at the first click.
+ * Not clicks: the clicks they summarize are `browser.user_action.click` events already.
+ */
+export const EVENT_RAGE_CLICK = 'browser.frustration.rage_click';
+export const EVENT_DEAD_CLICK = 'browser.frustration.dead_click';
+export const EVENT_ERROR_CLICK = 'browser.frustration.error_click';
+export const FRUSTRATION_EVENTS = [EVENT_RAGE_CLICK, EVENT_DEAD_CLICK, EVENT_ERROR_CLICK] as const;
+
 /** Page loads and in-app navigations, which sessions count as page views. */
 export const PAGE_VIEW_EVENTS = [EVENT_DOCUMENT_LOAD, EVENT_NAVIGATION] as const;
 export const CLICK_EVENTS = [EVENT_CLICK, EVENT_USER_ACTION_CLICK] as const;
+
+/** Clicks in a rage click burst. */
+export const FRUSTRATION_CLICK_COUNT = 'browser.frustration.click_count';
 
 /** Fields of the browser events, not in `@kbn/apm-types`. */
 export const EXCEPTION_STACKTRACE = 'exception.stacktrace';

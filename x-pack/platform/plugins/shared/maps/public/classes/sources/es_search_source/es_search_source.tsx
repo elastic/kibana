@@ -164,7 +164,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._descriptor.geo_field;
   }
 
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor(
+    sourceEditorArgs: SourceEditorArgs<ESSearchSourceDescriptor>
+  ): ReactElement<any> | null {
     if (this._isTopHits()) {
       return (
         <TopHitsUpdateSourceEditor

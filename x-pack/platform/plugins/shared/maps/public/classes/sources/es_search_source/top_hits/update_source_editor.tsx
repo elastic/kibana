@@ -35,11 +35,12 @@ import type { OnSourceChangeArgs } from '../../source';
 import { TopHitsForm } from './top_hits_form';
 import type { ESSearchSource } from '../es_search_source';
 import type { IField } from '../../../fields/field';
+import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 
 interface Props {
   filterByMapBounds: boolean;
   indexPatternId: string;
-  onChange: (args: OnSourceChangeArgs) => void;
+  onChange: (args: OnSourceChangeArgs<ESSearchSourceDescriptor>) => void;
   tooltipFields: IField[];
   topHitsGroupByTimeseries: boolean;
   topHitsSplitField: string;

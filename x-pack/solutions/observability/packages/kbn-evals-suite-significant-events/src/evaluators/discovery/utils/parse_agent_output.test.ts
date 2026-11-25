@@ -455,6 +455,33 @@ describe('extractSignificantEventsFromToolCall', () => {
     expect(extractSignificantEventsFromToolCall(steps)).toEqual([]);
   });
 
+  it('excludes a rejected write from continuation seeding', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-rejected',
+        params: { items: [{ event_id: 'event-1', status: 'active' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  written: false,
+                  reason: 'bulk_error',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractSignificantEventsFromToolCall(steps)).toEqual([]);
+  });
+
   it('extracts successful items from a bulk write and its partial-failure retry', () => {
     const steps: ConverseStep[] = [
       {

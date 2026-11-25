@@ -505,6 +505,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: exception
               summary:
                 type: string
@@ -577,6 +578,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: query
               summary:
                 type: string
@@ -596,6 +598,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: risk_score
               summary:
                 type: string
@@ -619,6 +622,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: threshold
               summary:
                 type: string
@@ -656,6 +660,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: schedule
               summary:
                 type: string
@@ -678,6 +683,7 @@ steps:
           - type: object
             properties:
               change_type:
+                type: string
                 const: manual
               summary:
                 type: string

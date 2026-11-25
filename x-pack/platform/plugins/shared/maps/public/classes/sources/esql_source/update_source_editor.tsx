@@ -26,9 +26,10 @@ import { GeoPrecisionResolutionEditor } from './geo_precision_resolution_editor'
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 import type { getFields } from './esql_utils';
 import type { NormalizedESQLSourceDescriptor } from './esql_source';
+import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 
 interface Props {
-  onChange(...args: OnSourceChangeArgs[]): void;
+  onChange(...args: OnSourceChangeArgs<ESQLSourceDescriptor>[]): void;
   sourceDescriptor: NormalizedESQLSourceDescriptor;
   getDataViewFields: () => Promise<ReturnType<typeof getFields>>;
 }
@@ -83,8 +84,7 @@ export function UpdateSourceEditor(props: Props) {
             onESQLChange={(change) => {
               setDateFields(change.dateFields);
               setGeoFields(change.geoFields);
-              const changes: OnSourceChangeArgs[] = [
-                { propName: 'dataViewId', value: change.adhocDataViewId },
+              const changes: OnSourceChangeArgs<ESQLSourceDescriptor>[] = [
                 { propName: 'esql', value: change.esql },
               ];
               function ensureField(key: 'date_field' | 'geo_field', fields: string[]) {
@@ -121,7 +121,7 @@ export function UpdateSourceEditor(props: Props) {
               props.onChange({ propName: 'geo_field', value: fieldName });
             }}
             onNarrowByFieldChange={(narrowByField: boolean) => {
-              const changes: OnSourceChangeArgs[] = [
+              const changes: OnSourceChangeArgs<ESQLSourceDescriptor>[] = [
                 { propName: 'narrow_by_map_bounds', value: narrowByField },
               ];
               // auto select first geo field when enabling narrowByMapBounds and geoField is not set
@@ -157,7 +157,7 @@ export function UpdateSourceEditor(props: Props) {
               props.onChange({ propName: 'date_field', value: fieldName });
             }}
             onNarrowByFieldChange={(narrowByField: boolean) => {
-              const changes: OnSourceChangeArgs[] = [
+              const changes: OnSourceChangeArgs<ESQLSourceDescriptor>[] = [
                 { propName: 'narrow_by_global_time', value: narrowByField },
               ];
               // auto select first date field when enabling narrowByGlobalTime and dateField is not set
