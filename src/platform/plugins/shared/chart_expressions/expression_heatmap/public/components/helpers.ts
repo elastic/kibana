@@ -121,7 +121,8 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
 /** Numeric key, or the lower bound of an ES|QL range such as "0.4..0.45". */
 const bucketLowerBound = (value: unknown): number | undefined => {
   if (typeof value === 'number') {
-    return value;
+    // typeof NaN and Infinity is 'number'; neither is a histogram step.
+    return Number.isFinite(value) ? value : undefined;
   }
   // Categorical labels stay out. getLowerBound('10') would otherwise become 10.
   if (typeof value !== 'string' || !value.includes('..')) {
@@ -142,56 +143,58 @@ export const fillMissingHeatmapYBuckets = (
     return rows;
   }
 
-  const rowsByIndex = new Map<number, Datatable['rows']>();
-  const rowsOutsideHistogram: Datatable['rows'] = [];
-  let template: Datatable['rows'][number] | undefined;
-  let minIndex = Infinity;
-  let maxIndex = -Infinity;
-
-  for (const row of rows) {
+  const rowIndexes = rows.map((row) => {
     const y = bucketLowerBound(row[yAccessor]);
-    if (y == null) {
-      rowsOutsideHistogram.push(row);
-      continue;
-    }
-    const index = Math.round(y / interval);
-    template ??= row;
-    minIndex = Math.min(minIndex, index);
-    maxIndex = Math.max(maxIndex, index);
-    const bucketRows = rowsByIndex.get(index) ?? [];
-    bucketRows.push(row);
-    rowsByIndex.set(index, bucketRows);
-  }
-
-  if (!template || !Number.isFinite(minIndex)) {
+    return y == null ? undefined : Math.round(y / interval);
+  });
+  const templatePosition = rowIndexes.findIndex((index) => index != null);
+  if (templatePosition === -1) {
     return rows;
   }
+  const template = rows[templatePosition];
 
-  const span = maxIndex - minIndex + 1;
+  const presentIndexes = [...new Set(rowIndexes)]
+    .filter((index): index is number => index != null)
+    .sort((a, b) => a - b);
+  const minIndex = presentIndexes[0];
+  const maxIndex = presentIndexes[presentIndexes.length - 1];
   if (
-    rowsByIndex.size === span ||
+    presentIndexes.length === maxIndex - minIndex + 1 ||
     !Number.isSafeInteger(minIndex) ||
     !Number.isSafeInteger(maxIndex)
   ) {
     return rows;
   }
 
-  const filled: Datatable['rows'] = [];
+  const nextPresentIndex = new Map<number, number>();
+  for (let i = 0; i < presentIndexes.length - 1; i++) {
+    nextPresentIndex.set(presentIndexes[i], presentIndexes[i + 1]);
+  }
+
   const yIsRange = typeof template[yAccessor] === 'string';
-  for (let bucketIndex = minIndex; bucketIndex <= maxIndex; bucketIndex++) {
-    const existing = rowsByIndex.get(bucketIndex);
-    if (existing) {
-      filled.push(...existing);
+  const seen = new Set<number>();
+  const filled: Datatable['rows'] = [];
+  for (let position = 0; position < rows.length; position++) {
+    const row = rows[position];
+    filled.push(row);
+    const index = rowIndexes[position];
+    if (index == null || seen.has(index)) {
       continue;
     }
-    const lower = bucketIndex * interval;
-    filled.push({
-      ...template,
-      [yAccessor]: yIsRange ? `${lower}..${(bucketIndex + 1) * interval}` : lower,
-      [valueAccessor]: null,
-    });
+    seen.add(index);
+    // Blank rows go right after the first row of the bucket below them. That is never before
+    // the template row, so the template's X value is already placed and no X order changes.
+    const next = nextPresentIndex.get(index) ?? index + 1;
+    for (let bucketIndex = index + 1; bucketIndex < next; bucketIndex++) {
+      const lower = bucketIndex * interval;
+      filled.push({
+        ...template,
+        [yAccessor]: yIsRange ? `${lower}..${(bucketIndex + 1) * interval}` : lower,
+        [valueAccessor]: null,
+      });
+    }
   }
-  return rowsOutsideHistogram.length > 0 ? filled.concat(rowsOutsideHistogram) : filled;
+  return filled;
 };
 
 export const getSortPredicate = (column: DatatableColumn, predicate?: HeatmapSortPredicate) => {

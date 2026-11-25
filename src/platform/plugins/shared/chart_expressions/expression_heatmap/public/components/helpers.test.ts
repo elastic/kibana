@@ -311,4 +311,46 @@ describe('fillMissingHeatmapYBuckets', () => {
 
     expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', 1)).toBe(rows);
   });
+
+  const firstAppearance = (filled: Array<Record<string, unknown>>, key: string) => [
+    ...new Set(filled.map((entry) => entry[key])),
+  ];
+
+  it('keeps the X order when a Y gap is filled', () => {
+    const rows = [
+      { x: 'a', y: 0, value: 1 },
+      { x: 'b', y: 2, value: 2 },
+      { x: 'c', y: 0, value: 3 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(firstAppearance(filled, 'x')).toEqual(['a', 'b', 'c']);
+    expect(filled.find((entry) => entry.y === 1)).toMatchObject({ x: 'a', value: null });
+  });
+
+  it('keeps rows that are not histogram keys in place', () => {
+    const rows = [
+      { x: 'z', y: null, value: 9 },
+      { x: 'a', y: 0, value: 1 },
+      { x: 'b', y: 3, value: 2 },
+      { x: 'c', y: 0, value: 3 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(firstAppearance(filled, 'x')).toEqual(['z', 'a', 'b', 'c']);
+    expect(filled.map((entry) => entry.y)).toEqual([null, 0, 1, 2, 3, 0]);
+  });
+
+  it('leaves a NaN Y key in place and still fills a real gap', () => {
+    const rows = [
+      { x: 'a', y: NaN, value: 9 },
+      { x: 'b', y: 0, value: 1 },
+      { x: 'c', y: 2, value: 2 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(filled[0]).toBe(rows[0]);
+    expect(filled.map((entry) => entry.y)).toEqual([NaN, 0, 1, 2]);
+    expect(filled.find((entry) => entry.y === 1)).toMatchObject({ x: 'b', value: null });
+  });
 });
