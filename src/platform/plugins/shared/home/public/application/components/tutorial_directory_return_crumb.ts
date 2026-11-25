@@ -83,7 +83,7 @@ function getReturnHref({
 
 function getReturnAppLinkText(returnAppId: string): string {
   if (returnAppId === 'observabilityOnboarding') return addDataLinkText;
-  if (returnAppId === HOME_RETURN_APP_ID) return homeLinkText;
+  if (returnAppId === HOME_RETURN_APP_ID || returnAppId === 'searchHomepage') return homeLinkText;
   if (returnAppId === 'searchGettingStarted') return gettingStartedLinkText;
   return previousPageLinkText;
 }

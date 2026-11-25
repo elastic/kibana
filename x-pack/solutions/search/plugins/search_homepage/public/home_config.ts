@@ -8,6 +8,7 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchHomePageProps } from '@kbn/elasticsearch-home/public';
+import { PLUGIN_ID } from '../common';
 
 const TELEMETRY_PREFIX = 'searchHomepage';
 const STORAGE_KEY_PREFIX = 'searchHomepage';
@@ -72,7 +73,13 @@ export const getSearchHomeConfig = ({
         defaultMessage: 'Upload a file',
       }),
       onClick: () =>
-        application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' }),
+        application.navigateToApp('home', {
+          // Lets the Add data back link return to this page instead of Integrations.
+          path: `#/tutorial_directory/fileDataViz?${new URLSearchParams({
+            returnAppId: PLUGIN_ID,
+            returnPath: '/',
+          }).toString()}`,
+        }),
       testSubj: 'addDataUploadFileLink',
       telemetryId: `${TELEMETRY_PREFIX}-addData-uploadFile`,
     },

@@ -144,3 +144,15 @@ describe('Search getting started return params', () => {
     });
   });
 });
+
+describe('Search homepage return params', () => {
+  it('names Home as the back destination', () => {
+    expect(
+      getTutorialDirectoryAppHeaderBack({
+        hash: '#/tutorial_directory/fileDataViz?returnAppId=searchHomepage&returnPath=%2F',
+        addBasePath,
+        getUrlForApp,
+      })
+    ).toEqual({ label: 'Home', href: '/app/searchHomepage/' });
+  });
+});
