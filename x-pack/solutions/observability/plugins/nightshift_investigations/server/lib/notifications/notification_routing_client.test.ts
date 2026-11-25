@@ -180,11 +180,11 @@ describe('notification routing attachments', () => {
     await client.record('a', {
       status: 'failed',
       error: 'Slack is unavailable',
-      reason_code: 'rate_limited',
+      failure_reason_code: 'rate_limited',
     });
     await client.record('a', { status: 'sent', message_ts: '2.3', channel: 'C123' });
     expect((await client.get())?.attempts[0].error).toBeUndefined();
-    expect((await client.get())?.attempts[0].reason_code).toBeUndefined();
+    expect((await client.get())?.attempts[0].failure_reason_code).toBeUndefined();
     await expect(client.record('other', { status: 'failed' })).rejects.toThrow('disappeared');
   });
 

@@ -313,7 +313,7 @@ describe('investigation notification lifecycle', () => {
     execute.mockResolvedValueOnce({
       status: 'error',
       message,
-      errorMeta: { slackDeliveryReason: 'channel_not_connected' },
+      errorMeta: { slackDeliveryFailureReason: 'channel_not_connected' },
     } as never);
     expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
     const started = await client.get();
@@ -321,7 +321,7 @@ describe('investigation notification lifecycle', () => {
       phase: 'started',
       status: 'failed',
       error: message,
-      reason_code: 'channel_not_connected',
+      failure_reason_code: 'channel_not_connected',
     });
     expect(started && getSlackDeliveryStatus(started)).toMatchObject([
       { phase: 'started', status: 'failed', reason: 'channel_not_connected' },

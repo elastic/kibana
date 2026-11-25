@@ -326,7 +326,7 @@ export class NotificationRoutingClient {
             ? {
                 ...entry,
                 error: undefined,
-                reason_code: undefined,
+                failure_reason_code: undefined,
                 message_ts: undefined,
                 external_conversation_id: undefined,
                 sent_at: undefined,

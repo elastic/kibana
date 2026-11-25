@@ -263,40 +263,6 @@ describe('getChildWorkflowExecutions', () => {
     });
   });
 
-  it('returns child metadata without reading its steps when steps are omitted', async () => {
-    mockWorkflowDataClient.getByIds
-      .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))
-      .mockResolvedValueOnce(
-        mockWorkflowGetByIds([
-          {
-            id: 'child-exec-1',
-            spaceId: 'default',
-            workflowId: 'child-wf-1',
-            stepExecutionIds: ['child-step-1'],
-          },
-        ])
-      );
-    mockStepDataClient.getByIds.mockResolvedValueOnce(
-      mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')])
-    );
-
-    const children = await getChildWorkflowExecutions({
-      ...baseParams,
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      omitStepExecutions: true,
-    });
-
-    expect(children).toEqual([
-      expect.objectContaining({
-        workflowId: 'child-wf-1',
-        executionId: 'child-exec-1',
-        stepExecutions: [],
-      }),
-    ]);
-    expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
-  });
-
   it('should filter out child executions from a different space', async () => {
     mockWorkflowDataClient.getByIds
       .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))

@@ -402,7 +402,7 @@ describe('WorkflowsService (facade)', () => {
       const service = await buildService();
 
       await service.getWorkflowExecution('exec-1', 'default', { includeInput: true });
-      await service.getChildWorkflowExecutions('parent-1', 'default', { omitStepExecutions: true });
+      await service.getChildWorkflowExecutions('parent-1', 'default');
       await service.getExecutionStepExecutions(
         { executionId: 'exec-1', page: 1, size: 100 },
         'default'
@@ -419,8 +419,7 @@ describe('WorkflowsService (facade)', () => {
       });
       expect(executionQuerySpies.getChildWorkflowExecutions).toHaveBeenCalledWith(
         'parent-1',
-        'default',
-        { omitStepExecutions: true }
+        'default'
       );
       expect(executionQuerySpies.getExecutionStepExecutions).toHaveBeenCalledWith(
         { executionId: 'exec-1', page: 1, size: 100 },

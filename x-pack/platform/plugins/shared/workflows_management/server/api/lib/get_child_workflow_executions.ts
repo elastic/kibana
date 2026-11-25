@@ -24,7 +24,6 @@ interface GetChildWorkflowExecutionsParams {
   stepExecutionsDataClient: StepExecutionsDataClient;
   parentExecutionId: string;
   spaceId: string;
-  omitStepExecutions?: boolean;
 }
 
 interface ChildRef {
@@ -92,7 +91,6 @@ export const getChildWorkflowExecutions = async ({
   stepExecutionsDataClient,
   parentExecutionId,
   spaceId,
-  omitStepExecutions = false,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
   const { items: parentItems, missing: parentMissing } =
     await workflowExecutionsDataClient.getByIds([parentExecutionId], {
@@ -129,9 +127,9 @@ export const getChildWorkflowExecutions = async ({
     spaceId
   );
 
-  const allChildStepExecutionIds = omitStepExecutions
-    ? []
-    : Array.from(childDocMap.values()).flatMap((doc) => doc.stepExecutionIds ?? []);
+  const allChildStepExecutionIds = Array.from(childDocMap.values()).flatMap(
+    (doc) => doc.stepExecutionIds ?? []
+  );
 
   const childStepExecutions =
     allChildStepExecutionIds.length > 0

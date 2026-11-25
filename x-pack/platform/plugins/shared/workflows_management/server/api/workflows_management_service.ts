@@ -676,15 +676,10 @@ export class WorkflowsService {
 
   public async getChildWorkflowExecutions(
     parentExecutionId: string,
-    spaceId: string,
-    options?: { omitStepExecutions?: boolean }
+    spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
     await this.ensureInitialized();
-    return this.executionQueryService.getChildWorkflowExecutions(
-      parentExecutionId,
-      spaceId,
-      options
-    );
+    return this.executionQueryService.getChildWorkflowExecutions(parentExecutionId, spaceId);
   }
 
   public async getExecutionStepExecutions(

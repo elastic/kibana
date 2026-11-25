@@ -28,7 +28,7 @@ export interface ConnectorActionErrorMeta {
    * (for example, base64 expansion).
    */
   estimatedOutputBytes?: number;
-  slackDeliveryReason?: SlackDeliveryFailureReason;
+  slackDeliveryFailureReason?: SlackDeliveryFailureReason;
 }
 
 const connectorActionErrorMeta = new WeakMap<object, ConnectorActionErrorMeta>();
@@ -110,11 +110,13 @@ export const setConnectorActionErrorMeta = (
 
   const contentLengthBytes = getFinitePositiveNumber(meta.contentLengthBytes);
   const estimatedOutputBytes = getFinitePositiveNumber(meta.estimatedOutputBytes);
-  const { slackDeliveryReason } = meta;
+  const { slackDeliveryFailureReason } = meta;
   const sanitizedMeta = {
     ...(contentLengthBytes !== undefined ? { contentLengthBytes } : {}),
     ...(estimatedOutputBytes !== undefined ? { estimatedOutputBytes } : {}),
-    ...(isSlackDeliveryFailureReason(slackDeliveryReason) ? { slackDeliveryReason } : {}),
+    ...(isSlackDeliveryFailureReason(slackDeliveryFailureReason)
+      ? { slackDeliveryFailureReason }
+      : {}),
   };
 
   connectorActionErrorMeta.set(error, {

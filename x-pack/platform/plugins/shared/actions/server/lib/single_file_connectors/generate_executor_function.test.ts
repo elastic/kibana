@@ -1401,7 +1401,7 @@ describe('generateExecutorFunction', () => {
 
         expect(result).toMatchObject({
           status: 'error',
-          errorMeta: { slackDeliveryReason: reason },
+          errorMeta: { slackDeliveryFailureReason: reason },
         });
       }
     );

@@ -72,11 +72,13 @@ export const slackNotificationHandler: NotificationHandler = {
       params,
       getOutcome: (response) => {
         if (response.status !== 'ok') {
-          const failureReason = response.errorMeta?.slackDeliveryReason;
+          const failureReason = response.errorMeta?.slackDeliveryFailureReason;
           return {
             status: 'failed',
             error: response.serviceMessage || response.message || 'Slack delivery failed',
-            ...(isSlackDeliveryFailureReason(failureReason) ? { reason_code: failureReason } : {}),
+            ...(isSlackDeliveryFailureReason(failureReason)
+              ? { failure_reason_code: failureReason }
+              : {}),
           };
         }
         const data = response.data;

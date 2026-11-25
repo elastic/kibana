@@ -31,7 +31,7 @@ const RELAY_CHANNEL_SOURCE = 'relay-bindings' as const;
 
 const createSlackDeliveryError = (message: string, reason: SlackDeliveryFailureReason): Error => {
   const error = new Error(message);
-  setConnectorActionErrorMeta(error, { slackDeliveryReason: reason });
+  setConnectorActionErrorMeta(error, { slackDeliveryFailureReason: reason });
   return error;
 };
 

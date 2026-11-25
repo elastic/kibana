@@ -1503,14 +1503,12 @@ export class WorkflowsManagementApi {
   public async getChildWorkflowExecutions(
     parentExecutionId: string,
     spaceId: string,
-    request: KibanaRequest,
-    options?: { omitStepExecutions?: boolean }
+    request: KibanaRequest
   ): Promise<ChildWorkflowExecutionItem[]> {
     await this.assertExecutionAccess(parentExecutionId, spaceId, 'read', request);
     const children = await this.workflowsService.getChildWorkflowExecutions(
       parentExecutionId,
-      spaceId,
-      options
+      spaceId
     );
     const workflows = await this.workflowsService.getWorkflowsByIds(
       [...new Set(children.map(({ workflowId }) => workflowId))],
