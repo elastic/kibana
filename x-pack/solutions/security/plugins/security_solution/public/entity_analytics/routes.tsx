@@ -22,10 +22,8 @@ import {
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 import { EntityAnalyticsNewHomePage } from './pages/entity_analytics_new_home_page';
-import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useKibana } from '../common/lib/kibana';
 
 // ---- Management routes ----
@@ -98,34 +96,22 @@ const EntityAnalyticsEntityStoreRedirectContainer: React.FC = React.memo(() => {
 EntityAnalyticsEntityStoreRedirectContainer.displayName =
   'EntityAnalyticsEntityStoreRedirectContainer';
 
-// ---- Privileged user monitoring routes ----
-const EntityAnalyticsPrivilegedUserMonitoringWrapper = () => (
-  <PluginTemplateWrapper>
-    <EntityAnalyticsPrivilegedUserMonitoringPage />
-  </PluginTemplateWrapper>
-);
-
+// ---- Privileged user monitoring redirect route ----
 const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(() => {
-  const isEntityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
-
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH}
         exact
-        render={({ location }) =>
-          isEntityStoreV2Enabled ? (
-            <Redirect
-              to={{
-                ...location,
-                pathname: ENTITY_ANALYTICS_MANAGEMENT_PATH,
-                search: location.search,
-              }}
-            />
-          ) : (
-            <EntityAnalyticsPrivilegedUserMonitoringWrapper />
-          )
-        }
+        render={({ location }) => (
+          <Redirect
+            to={{
+              ...location,
+              pathname: `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/watchlists`,
+              search: location.search,
+            }}
+          />
+        )}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -186,10 +172,7 @@ export const routes = [
   },
   {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-    component: withSecurityRoutePageWrapper(
-      EntityAnalyticsPrivilegedUserMonitoringContainer,
-      SecurityPageName.entityAnalyticsPrivilegedUserMonitoring
-    ),
+    component: EntityAnalyticsPrivilegedUserMonitoringContainer,
   },
   {
     path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
