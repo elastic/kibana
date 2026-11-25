@@ -67,8 +67,8 @@ export const isEpisodesTableColumnId = (value: unknown): value is EpisodesTableC
 
 /**
  * Turns a stored value into a valid, de-duplicated, ordered list of column ids, or `undefined` when
- * nothing in it is usable. An empty list is kept: the grid then shows the time column and its
- * document summary column.
+ * nothing in it is usable. An empty list is kept: the grid then shows only the time column, plus its
+ * document summary column when the data view has a time field.
  */
 export const resolveEpisodesTableVisibleColumns = (stored: unknown): string[] | undefined => {
   const knownIds = Array.isArray(stored)

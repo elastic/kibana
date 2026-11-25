@@ -168,6 +168,7 @@ const renderTable = (
 describe('EpisodesTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockColumnSelectorDragEnd = undefined;
     (getRowHeight as unknown as jest.Mock).mockReturnValue(1);
     setEpisodes([]);
     setRulesCache({});
