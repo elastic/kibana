@@ -27,7 +27,9 @@ export function FlyoutMetadataCard({
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ maxWidth: '100%' }}>
+          {children}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

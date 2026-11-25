@@ -8,10 +8,12 @@
 import type { z } from '@kbn/zod';
 import type {
   compositeSloDefinitionSchema,
+  compositeSloWithSummaryResponseSchema,
   storedCompositeSloDefinitionSchema,
 } from '@kbn/slo-schema';
 
-type CompositeSLODefinition = z.infer<typeof compositeSloDefinitionSchema>;
-type StoredCompositeSLODefinition = z.infer<typeof storedCompositeSloDefinitionSchema>;
+type CompositeSLODefinition = z.output<typeof compositeSloDefinitionSchema>;
+type StoredCompositeSLODefinition = z.input<typeof storedCompositeSloDefinitionSchema>;
+type CompositeSLOWithSummary = z.output<typeof compositeSloWithSummaryResponseSchema>;
 
-export type { CompositeSLODefinition, StoredCompositeSLODefinition };
+export type { CompositeSLODefinition, CompositeSLOWithSummary, StoredCompositeSLODefinition };

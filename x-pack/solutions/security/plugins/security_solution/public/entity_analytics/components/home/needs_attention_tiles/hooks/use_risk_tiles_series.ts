@@ -8,7 +8,8 @@
 import { useMemo } from 'react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useTileQueryInputs } from './use_tile_query_inputs';
-import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import type { EntityFilters } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import {
   buildRiskTilesSeriesQuery,

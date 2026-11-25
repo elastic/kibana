@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/expandable-flyout'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-threat-hunting'
+  defaultOwner: '@elastic/security-investigations'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/expandable-flyout'
   description: Moon project for @kbn/expandable-flyout
   channel: ''
-  owner: '@elastic/security-threat-hunting'
+  owner: '@elastic/security-investigations'
   sourceRoot: x-pack/solutions/security/packages/expandable-flyout
 dependsOn:
   - '@kbn/i18n'

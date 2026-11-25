@@ -12,6 +12,27 @@ import { keepHeadAndTail } from './keep_head_and_tail';
 /** The most tool calls `evaluate()` accepts for one round. */
 export const MAX_EVIDENCE_TOOL_CALLS = 200;
 
+/** An earlier round's tool calls with their results, the first and last ones when there are many. */
+const earlierToolCalls = (round: ConversationRound): ToolCallEvidence[] => {
+  const calls = round.steps.flatMap((step) =>
+    step.type === ConversationRoundStepType.toolCall
+      ? [
+          {
+            tool_call_id: step.tool_call_id,
+            tool_id: step.tool_id,
+            arguments: step.params,
+            result: step.results,
+          },
+        ]
+      : []
+  );
+  const { headEnd, tailStart } = keepHeadAndTail(
+    calls.map(() => 1),
+    MAX_EVIDENCE_TOOL_CALLS
+  );
+  return [...calls.slice(0, headEnd), ...calls.slice(tailStart)];
+};
+
 /**
  * The evidence judges grade for one round: its user input, tool calls and final response. When
  * there are more tool calls than `evaluate()` accepts, keeps the first and last ones, as the
@@ -23,9 +44,12 @@ export const MAX_EVIDENCE_TOOL_CALLS = 200;
 export const buildOnlineEvalsEvidence = ({
   round,
   alertOutcome,
+  earlierRounds,
 }: {
   round: ConversationRound;
   alertOutcome?: string;
+  /** The rounds before this one, so judges can grade a later round against what they answered and found. */
+  earlierRounds?: ConversationRound[];
 }): EvaluateEvidence => {
   const boundNotes = new Map<string, string[]>();
   for (const step of round.steps) {
@@ -65,6 +89,14 @@ export const buildOnlineEvalsEvidence = ({
   const closingReasoning = pendingNotes.join('\n');
   const referenceData = {
     ...(alertOutcome === undefined ? {} : { alert_outcome: alertOutcome }),
+    ...(earlierRounds && earlierRounds.length > 0
+      ? {
+          earlier_rounds: earlierRounds.map((earlier) => ({
+            answer: earlier.response.message,
+            tool_calls: earlierToolCalls(earlier),
+          })),
+        }
+      : {}),
     ...(closingReasoning ? { closing_reasoning: closingReasoning } : {}),
   };
 

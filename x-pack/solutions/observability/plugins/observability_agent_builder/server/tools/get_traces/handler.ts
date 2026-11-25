@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -21,6 +21,7 @@ import { DEFAULT_TRACE_FIELDS } from './constants';
 export async function getToolHandler({
   core,
   plugins,
+  request,
   logger,
   esClient,
   start,
@@ -33,6 +34,7 @@ export async function getToolHandler({
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  request: KibanaRequest;
   logger: Logger;
   esClient: IScopedClusterClient;
   start: string;
@@ -43,7 +45,7 @@ export async function getToolHandler({
   maxTraces: number;
   maxDocsPerTrace: number;
 }) {
-  const dataSources = await getObservabilityDataSources({ core, plugins, logger });
+  const dataSources = await getObservabilityDataSources({ core, plugins, request, logger });
   const apmIndexPatterns = [
     dataSources.apmIndexPatterns.transaction,
     dataSources.apmIndexPatterns.span,

@@ -19,3 +19,5 @@ export const plugin = async (ctx: PluginInitializerContext) => {
 
 export type { AcceptedQuery } from './agent_builder/skills/ki_query_generation';
 export type { SignificantEventsRouteRepository } from './routes';
+export type { SignificantEventsServerStart } from './types';
+export type { KnowledgeIndicatorReader } from './lib/knowledge_indicators/contract/knowledge_indicator_reader';

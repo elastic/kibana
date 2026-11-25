@@ -17,6 +17,7 @@ import { isTaskManagerStatEvent, isTaskRunEvent } from '../task_events';
 import type { SerializedHistogram } from './lib';
 import { getTaskTypeGroup, MetricCounterService, SimpleHistogram } from './lib';
 import type { ITaskMetricsAggregator } from './types';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 
 const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
@@ -113,6 +114,17 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     const success = isOk((taskEvent as TaskRun).event);
     const taskType = task.taskType.replaceAll('.', '__');
     const taskTypeGroup = getTaskTypeGroup(taskRunResult.taskTypeGroup);
+    const userError = !success && isUserError((taskRunResult as ErroredTask).error);
+    const rescheduledFailure = !success && result === TaskRunResult.RetryScheduled;
+
+    taskManagerMetricsTelemetry.recordTaskRun({
+      taskType: task.taskType,
+      taskTypeGroup: taskRunResult.taskTypeGroup,
+      success,
+      errorType: success ? undefined : userError ? 'user' : 'framework',
+      timedOut: isExpired,
+      rescheduledFailure,
+    });
 
     // increment the total counters
     this.incrementCounters(TaskRunKeys.TOTAL, taskType, taskTypeGroup);
@@ -125,7 +137,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
       // increment total error counts
       this.incrementCounters(TaskRunKeys.TOTAL_ERRORS, taskType, taskTypeGroup);
 
-      if (isUserError((taskRunResult as ErroredTask).error)) {
+      if (userError) {
         // increment the user error counters
         this.incrementCounters(TaskRunKeys.USER_ERRORS, taskType, taskTypeGroup);
       } else {
@@ -133,7 +145,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
         this.incrementCounters(TaskRunKeys.FRAMEWORK_ERRORS, taskType, taskTypeGroup);
       }
 
-      if (result === TaskRunResult.RetryScheduled) {
+      if (rescheduledFailure) {
         // increment rescheduled failures
         this.incrementCounters(TaskRunKeys.RESCHEDULED_FAILURES, taskType, taskTypeGroup);
       }

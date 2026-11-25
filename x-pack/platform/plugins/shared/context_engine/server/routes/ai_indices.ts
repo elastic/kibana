@@ -18,6 +18,7 @@ import type {
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { DeleteWorkflowsApi } from '../types';
 import {
@@ -29,8 +30,11 @@ import {
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_DREAMING_PATH,
+  DREAMING_TEMPLATES_PATH,
+  AI_INDEX_DREAMING_RUN_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_GROUPS_PATH,
   AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
@@ -39,6 +43,7 @@ import {
 import type {
   AiIndexHttpItem,
   AiIndexItem,
+  AiIndexSaveWarning,
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
   GetAiIndexResponse,
@@ -50,11 +55,20 @@ import type {
 import type {
   DeleteKiResponse,
   GetKiResponse,
+  ListKiGroupsResponse,
   ListKisResponse,
   RestoreKiResponse,
   UpdateKiResponse,
 } from '../../common/http_api/knowledge_indicators';
-import { DREAMING_DISABLED, type GetAiIndexDreamingResponse } from '../../common/dreaming';
+import {
+  DREAMING_DISABLED,
+  type GetAiIndexDreamingResponse,
+  type RunAiIndexDreamingResponse,
+} from '../../common/dreaming';
+import type { ListDreamingTemplatesResponse } from '../../common/dreaming_templates';
+import { DreamingNotSetUpError } from '../dreaming/dreaming_not_set_up_error';
+import { DreamingRunNothingStartedError } from '../dreaming/dreaming_run_nothing_started_error';
+import type { DreamingScheduleService } from '../dreaming/schedule';
 import { apiPrivileges } from '../../common/features';
 import {
   InvalidAiIndexDestError,
@@ -85,8 +99,9 @@ import type { AiIndexChangeField, AiIndexChangeNotifier } from '../ai_indices/ch
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
-import { getKis } from '../ai_indices/ki_list';
+import { getKiGroups, getKis } from '../ai_indices/ki_list';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
+import { DREAMING_TEMPLATES } from '../dreaming/dreaming_templates';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { validateEsqlSources } from '../ai_indices/validate_esql_sources';
 import { validateTraces } from '../ai_indices/validate_traces';
@@ -100,12 +115,14 @@ import {
   createAiIndexResponseSchema,
   deleteAiIndexQuerySchema,
   deleteAiIndexResponseSchema,
+  describeAiIndexQuerySchema,
   describeAiIndexResponseSchema,
   errorResponseSchema,
   feedbackAnalysisSchema,
   getKiQuerySchema,
   kiIdParamsSchema,
   listAiIndexResponseSchema,
+  listKiGroupsQuerySchema,
   listKisQuerySchema,
   putAiIndexBodySchema,
   queryAiIndicesBodySchema,
@@ -117,10 +134,16 @@ import {
   deleteKiResponseSchema,
   restoreKiResponseSchema,
 } from './schemas/ai_indices_schema';
-import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming_schema';
+import {
+  dreamingConfigSchema,
+  dreamingResponseSchema,
+  getDreamingResponseSchema,
+  runDreamingResponseSchema,
+} from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
-import { withContextEngineFeatureFlag } from './with_feature_flag';
+import { CONTEXT_ENGINE_DOCS_NOTE, SOURCE_AUTOMATIONS_NOTE } from './constants';
+import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -137,20 +160,29 @@ const DELETE_SECURITY: RouteSecurity = {
   },
 };
 
+const RUN_DREAMING_SECURITY: RouteSecurity = {
+  authz: {
+    // Managed dreaming workflows read prior executions as the caller during last_run / last_output.
+    requiredPrivileges: [
+      apiPrivileges.writeContextEngine,
+      ...WorkflowsManagementOperationPrivileges.execute,
+      ...WorkflowsManagementOperationPrivileges.readManagedExecution,
+    ],
+  },
+};
+
 const CONTEXT_ENGINE_DISABLED_NOTE =
   'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
 
-const CONTEXT_ENGINE_DOCS_NOTE =
-  '**For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**';
-
 const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
 
-const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
-  WorkflowsManagementOperationPrivileges.delete.every(
-    (privilege) => request.authzResult?.[privilege] === true
-  );
+const hasWorkflowPrivileges = (
+  request: KibanaRequest,
+  privileges: readonly WorkflowsManagementApiActions[]
+): boolean => privileges.every((privilege) => request.authzResult?.[privilege] === true);
 
-const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
+const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
+  hasWorkflowPrivileges(request, WorkflowsManagementOperationPrivileges.delete);
 
 const toPublicAiIndex = ({
   dreaming: _dreaming,
@@ -197,7 +229,9 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
     error instanceof AiIndexAlreadyExistsError ||
     error instanceof AiIndexIdConflictError ||
     error instanceof KiConflictError ||
-    error instanceof KiDeletedError
+    error instanceof KiDeletedError ||
+    error instanceof DreamingNotSetUpError ||
+    error instanceof DreamingRunNothingStartedError
   ) {
     return response.conflict({ body: { message: error.message } });
   }
@@ -234,6 +268,7 @@ export const registerAiIndexRoutes = ({
   getActions,
   getAgentBuilder,
   getWorkflowsManagementApi,
+  getDreamingScheduleService,
   getSpaces,
   analyticsService,
 }: {
@@ -250,6 +285,7 @@ export const registerAiIndexRoutes = ({
   getActions: () => Promise<ActionsPluginStart>;
   getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
+  getDreamingScheduleService: () => DreamingScheduleService;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
   analyticsService: ContextEngineAnalyticsService;
 }) => {
@@ -265,7 +301,7 @@ export const registerAiIndexRoutes = ({
     request: KibanaRequest;
     previous: AiIndexItem | undefined;
     saved?: readonly AiIndexChangeField[];
-  }) => {
+  }): Promise<AiIndexSaveWarning[]> => {
     let current: AiIndexItem;
     try {
       current = await getAiIndexService().get(aiIndexId, spaceId);
@@ -275,9 +311,9 @@ export const registerAiIndexRoutes = ({
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return;
+      return [];
     }
-    await aiIndexChanges.notify({
+    return aiIndexChanges.notify({
       aiIndexId,
       spaceId,
       request,
@@ -295,6 +331,7 @@ export const registerAiIndexRoutes = ({
       summary: 'Create an AI Index',
       description: [
         'Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.',
+        SOURCE_AUTOMATIONS_NOTE,
         CONTEXT_ENGINE_DISABLED_NOTE,
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
@@ -344,7 +381,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, memory_enabled: _memoryEnabled, ...properties } = request.body;
         try {
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -359,8 +396,16 @@ export const registerAiIndexRoutes = ({
           const spaceId = resolveSpaceId(await getSpaces(), request);
           await getAiIndexService().create(id, spaceId, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await notifySaved({ aiIndexId: id, spaceId, request, previous: undefined });
-          const body: CreateAiIndexResponse = { status: 'created' };
+          const warnings = await notifySaved({
+            aiIndexId: id,
+            spaceId,
+            request,
+            previous: undefined,
+          });
+          const body: CreateAiIndexResponse = {
+            status: 'created',
+            ...(warnings.length > 0 && { warnings }),
+          };
           return response.created({ body });
         } catch (error) {
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id, error }));
@@ -378,6 +423,7 @@ export const registerAiIndexRoutes = ({
       summary: 'Create or update an AI Index',
       description: [
         'Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.',
+        SOURCE_AUTOMATIONS_NOTE,
         CONTEXT_ENGINE_DISABLED_NOTE,
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
@@ -436,7 +482,7 @@ export const registerAiIndexRoutes = ({
           const aiIndexService = getAiIndexService();
           const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
           const { memory_enabled: _memoryEnabled, ...properties } = request.body;
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -452,8 +498,11 @@ export const registerAiIndexRoutes = ({
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await notifySaved({ aiIndexId, spaceId, request, previous });
-          const body: PutAiIndexResponse = { status };
+          const warnings = await notifySaved({ aiIndexId, spaceId, request, previous });
+          const body: PutAiIndexResponse = {
+            status,
+            ...(warnings.length > 0 && { warnings }),
+          };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
           auditLogger.log(
@@ -588,7 +637,7 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Query AI Indices',
       description: [
-        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows.`,
+        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows. When the body carries \`user_id\`, rows are also limited to documents with that \`user_id\` or no \`user_id\`.`,
         'The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.',
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.',
         CONTEXT_ENGINE_DISABLED_NOTE,
@@ -652,7 +701,7 @@ export const registerAiIndexRoutes = ({
       summary: 'Describe an AI Index',
       description: [
         `Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to ${MAX_AI_INDEX_DESCRIBE_FIELDS} fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.`,
-        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.',
+        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response. When `user_id` is given, the counts are limited to documents with that `user_id` or no `user_id`.',
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
         CONTEXT_ENGINE_DISABLED_NOTE,
         CONTEXT_ENGINE_DOCS_NOTE,
@@ -668,6 +717,7 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
+            query: describeAiIndexQuerySchema,
           },
           response: {
             200: {
@@ -697,8 +747,11 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const { aiIndexId } = request.params;
+        const { user_id: userId } = request.query;
         try {
-          const body = await getAiIndexDataReadService({ esClient, request }).describe(aiIndexId);
+          const body = await getAiIndexDataReadService({ esClient, request }).describe(aiIndexId, {
+            userId,
+          });
           return response.ok({ body });
         } catch (error) {
           return handleReadError(error, response, logger);
@@ -729,8 +782,9 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
-        const { size, type, status, query, sort } = request.query;
+        const { size, type, exclude_types: excludeType, status, query, sort } = request.query;
         const statuses = status !== undefined ? [status].flat() : undefined;
+        const excludeTypes = excludeType !== undefined ? [excludeType].flat() : undefined;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -739,6 +793,67 @@ export const registerAiIndexRoutes = ({
             dest: aiIndex.dest,
             size,
             ...(type !== undefined ? { type } : {}),
+            ...(excludeTypes !== undefined ? { excludeTypes } : {}),
+            ...(statuses !== undefined ? { statuses } : {}),
+            ...(query !== undefined ? { query } : {}),
+            sort,
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  // Group Knowledge Indicators by type. A static segment wins over `{kiId}` in hapi routing.
+  router.versioned
+    .get({
+      path: AI_INDEX_KI_GROUPS_PATH,
+      security: READ_SECURITY,
+      access: 'internal',
+      summary: 'Group Knowledge Indicators by type',
+      description:
+        'Returns the biggest Knowledge Indicator types with their counts and first KIs, the total, and `total_other`: the KIs that match the filters but are in none of the returned groups. Counts and rows are read in two steps, so they can differ by a few KIs while KIs are written.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: aiIndexIdParamsSchema,
+            query: listKiGroupsQuerySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
+        const {
+          max_groups: maxGroups,
+          types: type,
+          exclude_types: excludeType,
+          preview_size: previewSize,
+          status,
+          query,
+          sort,
+        } = request.query;
+        const statuses = status !== undefined ? [status].flat() : undefined;
+        const types = type !== undefined ? [type].flat() : undefined;
+        const excludeTypes = excludeType !== undefined ? [excludeType].flat() : undefined;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const body: ListKiGroupsResponse = await getKiGroups(esClient, {
+            dest: aiIndex.dest,
+            maxGroups,
+            ...(types !== undefined ? { types } : {}),
+            ...(excludeTypes !== undefined ? { excludeTypes } : {}),
+            previewSize,
             ...(statuses !== undefined ? { statuses } : {}),
             ...(query !== undefined ? { query } : {}),
             sort,
@@ -856,6 +971,7 @@ export const registerAiIndexRoutes = ({
                 kiId,
                 ki: request.body.ki,
                 writer,
+                personEdit: true,
                 backingIndex,
               });
               return { output: result };
@@ -1081,6 +1197,26 @@ export const registerAiIndexRoutes = ({
 
   router.versioned
     .get({
+      path: DREAMING_TEMPLATES_PATH,
+      security: READ_SECURITY,
+      access: 'internal',
+      summary: 'List example dreaming configurations',
+      description:
+        'Returns the built-in example dreaming configurations offered when setting up an AI Index. Returns a 404 response while the global memory setting is off.',
+    })
+    .addVersion(
+      { version: AI_INDEX_INTERNAL_API_VERSION, validate: false },
+      withContextEngineFeatureFlag(async (_ctx, request, response) => {
+        if (!(await isMemoryEnabled(request))) {
+          return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
+        }
+        const body: ListDreamingTemplatesResponse = { templates: DREAMING_TEMPLATES };
+        return response.ok({ body });
+      })
+    );
+
+  router.versioned
+    .get({
       path: AI_INDEX_DREAMING_PATH,
       security: READ_SECURITY,
       access: 'internal',
@@ -1094,7 +1230,7 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: { params: aiIndexIdParamsSchema },
           response: {
-            200: { body: dreamingResponseSchema },
+            200: { body: getDreamingResponseSchema },
             404: { body: errorResponseSchema },
           },
         },
@@ -1106,8 +1242,10 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const { dreaming } = await getAiIndexService().get(aiIndexId, spaceId);
-          const body: GetAiIndexDreamingResponse = { dreaming: dreaming ?? DREAMING_DISABLED };
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const dreaming = aiIndex.dreaming ?? DREAMING_DISABLED;
+          const workflowIds = getDreamingScheduleService().getWorkflowIds({ aiIndex, spaceId });
+          const body: GetAiIndexDreamingResponse = { dreaming, workflow_ids: workflowIds };
           return response.ok({ body });
         } catch (error) {
           return handleAiIndexError(error, response, logger);
@@ -1150,7 +1288,62 @@ export const registerAiIndexRoutes = ({
           const dreaming = await aiIndexService.setDreaming(aiIndexId, spaceId, request.body);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
           await notifySaved({ aiIndexId, spaceId, request, previous, saved: ['dreaming'] });
-          const body: GetAiIndexDreamingResponse = { dreaming };
+          const aiIndexForIds =
+            previous !== undefined
+              ? { ...previous, dreaming }
+              : await aiIndexService.get(aiIndexId, spaceId);
+          const workflowIds = getDreamingScheduleService().getWorkflowIds({
+            aiIndex: aiIndexForIds,
+            spaceId,
+          });
+          const body: GetAiIndexDreamingResponse = { dreaming, workflow_ids: workflowIds };
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: AI_INDEX_DREAMING_RUN_PATH,
+      security: RUN_DREAMING_SECURITY,
+      access: 'internal',
+      summary: 'Run dreaming workflows for an AI Index now',
+      description:
+        'Starts the dreaming, trace dreaming and relationships workflows for an AI Index using its saved configuration. Returns a 404 response while the global memory setting is off.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: { params: aiIndexIdParamsSchema },
+          response: {
+            200: { body: runDreamingResponseSchema },
+            403: { body: errorResponseSchema },
+            404: { body: errorResponseSchema },
+            409: { body: errorResponseSchema },
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        if (!(await isMemoryEnabled(request))) {
+          return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
+        }
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const body: RunAiIndexDreamingResponse = await getDreamingScheduleService().run({
+            aiIndex,
+            spaceId,
+            request,
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(

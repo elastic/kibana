@@ -13,7 +13,6 @@ export { nsToPretty } from './ns_to_pretty';
 export {
   getInitialSearchProfilerIndex,
   getInitialSearchProfilerQuery,
-  isSearchProfilerQueryPersistable,
   readSearchProfilerState,
   updateSearchProfilerQueryState,
   updateSearchProfilerState,

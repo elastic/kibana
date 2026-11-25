@@ -52,6 +52,17 @@ A change that also touches code Nightshift doesn't own alone is never Low, even 
 
 Look for correctness bugs, missing error handling at boundaries, and missing tests for new behavior. A skipped or deleted test needs a stated reason and a tracking issue, and a focused test (`.only`) must not merge. Do not apply the High checks unless the change touches one of those areas.
 
+For UI changes, check that every user-facing string goes through `i18n.translate` or `FormattedMessage`. Untranslated UI text is a finding, not a style nit. The `@kbn/i18n/strings_should_be_translated_with_i18n` lint rule only catches text written directly inside JSX tags, so look for the cases it misses:
+
+- String literals in UI props such as `label`, `title`, `placeholder`, `tooltip`, `content`, `aria-label` and EUI `*AriaLabel` props, including template literals like `` `Remove the ${keyword} filter` ``.
+- Display labels kept in constants or option arrays, for example `{ id: '1', label: 'Mon' }`.
+- Raw enum or API values rendered as text, including through `upperFirst`, `capitalize` or `text-transform: capitalize`. Expect a translated label map instead.
+- English words passed as `values` into a translated message, for example `values: { action: isEnabled ? 'Pause' : 'Enable' }`. Each variant needs its own full message so translators control word order.
+- Sentences built by concatenating a translated string with English text, for example `` `${summary} ${scopes} failed.` ``.
+- `new Error('…')` or fallback strings like `'Unknown error'` that end up in a toast or an error panel.
+
+Skip strings that never reach the UI: log messages, telemetry `_meta` descriptions, LLM prompts, API route descriptions, and errors that only fire when a guarded query can't run.
+
 ## Checks for Low changes
 
 Low changes get the least human attention, so check them properly. Do not comment on style.
@@ -67,3 +78,4 @@ Low changes get the least human attention, so check them properly. Do not commen
 - Switching an agent's default to `Shared` without updating already-installed private agents leaves existing spaces broken (reported as P2 in PR 299097).
 - A Scout test that tells "denied by privilege" apart from other failures only by matching an error message is brittle, even in a test-only PR (raised by a reviewer in PR 296353).
 - Adding `apiTest.skip` or `apiTest.fixme` makes a test-only PR Medium, not Low (PRs 297943 and 299161).
+- Hardcoded UI strings that the i18n lint rule doesn't catch should be reported: weekday labels in an options array, raw feature-type enums shown through `upperFirst` (`Log_samples`), and `'Pause' : 'Enable'` passed into a `'{action} {name}'` message all shipped untranslated (fixed in PR 305646).

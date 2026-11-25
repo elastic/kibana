@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie!.cookieString())
         .send({
-          avatar: { initials: 'some-initials', color: '#f3f3f3' },
+          avatar: { initials: 'SI', color: '#f3f3f3' },
           userSettings: { darkMode: 'dark', contrastMode: 'high' },
         })
         .expect(200);
@@ -127,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
             "avatar": Object {
               "color": "#f3f3f3",
               "imageUrl": null,
-              "initials": "some-initials",
+              "initials": "SI",
             },
             "userSettings": Object {
               "contrastMode": "high",
@@ -229,7 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
             "avatar": Object {
               "color": "#f3f3f3",
               "imageUrl": null,
-              "initials": "some-initials",
+              "initials": "SI",
             },
             "userSettings": Object {
               "contrastMode": "high",
@@ -329,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
             "avatar": Object {
               "color": "#f3f3f3",
               "imageUrl": null,
-              "initials": "some-initials",
+              "initials": "SI",
             },
             "userSettings": Object {
               "contrastMode": "high",

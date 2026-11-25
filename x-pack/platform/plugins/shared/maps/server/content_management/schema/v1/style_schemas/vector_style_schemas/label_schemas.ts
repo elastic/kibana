@@ -73,18 +73,18 @@ export const labelZoomRangeSchema = lazySchema(() =>
     .object({
       options: z
         .object({
-          useLayerZoomRange: z.boolean(),
-          minZoom: z.number(),
-          maxZoom: z.number(),
+          use_layer_zoom_range: z.boolean(),
+          min_zoom: z.number(),
+          max_zoom: z.number(),
         })
         .strict(),
     })
     .strict()
     .default({
       options: {
-        useLayerZoomRange: true,
-        minZoom: MIN_ZOOM,
-        maxZoom: MAX_ZOOM,
+        use_layer_zoom_range: true,
+        min_zoom: MIN_ZOOM,
+        max_zoom: MAX_ZOOM,
       },
     })
     .meta({
