@@ -17,6 +17,7 @@ import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useAddToTimeline as useAddProvidersToTimeline } from '../../../../common/hooks/use_add_to_timeline';
 import { useStyles } from './styles';
 import { useAddToTimeline } from '../hooks/use_add_to_timeline';
 import { TITLE } from './translations';
@@ -166,18 +167,12 @@ export const AddToTimelineContextMenu: FC<AddToTimelineProps> = ({
   showPopover,
   'data-test-subj': dataTestSubj,
 }) => {
-  const styles = useStyles();
   const {
     application: { capabilities },
   } = useKibana().services;
 
   const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
-  const contextMenuRef = useRef<HTMLButtonElement>(null);
-
-  const { analytics, i18n: i18nStart, theme } = useKibana().services;
-  const startServices = { analytics, i18n: i18nStart, theme };
-
-  const addToTimelineButton = useAddToTimelineButton();
+  const addProvidersToTimeline = useAddProvidersToTimeline();
 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
@@ -190,37 +185,22 @@ export const AddToTimelineContextMenu: FC<AddToTimelineProps> = ({
   const valueToAnnounce = typeof data === 'string' ? data : '';
   const announcement = ADD_TO_TIMELINE_ANNOUNCEMENT(valueToAnnounce);
 
-  const addToTimelineProps: AddToTimelineButtonProps = {
-    dataProvider,
-    field: key,
-    ownFocus: false,
-    startServices,
-  };
-
-  // Use case is for the barchart legend (for example).
-  // We can't use the addToTimelineButton directly because the UI doesn't work in a EuiContextMenu.
-  // We hide it and use the defaultFocusedButtonRef props to programmatically click it.
-  addToTimelineProps.defaultFocusedButtonRef = contextMenuRef;
-
   return (
-    <>
-      <div css={styles.displayNone}>{addToTimelineButton(addToTimelineProps)}</div>
-      <EuiContextMenuItem
-        key="addToTimeline"
-        icon={ICON_TYPE}
-        onClick={() => {
-          contextMenuRef.current?.click();
-          if (onAnnounce) {
-            showPopover?.(false);
-            // setTimeout necessary so that this announcement isn't instantly overridden
-            setTimeout(() => onAnnounce(announcement), 0);
-          }
-        }}
-        data-test-subj={dataTestSubj}
-      >
-        {TITLE}
-      </EuiContextMenuItem>
-    </>
+    <EuiContextMenuItem
+      key="addToTimeline"
+      icon={ICON_TYPE}
+      onClick={() => {
+        addProvidersToTimeline(dataProvider);
+        if (onAnnounce) {
+          showPopover?.(false);
+          // setTimeout necessary so that this announcement isn't instantly overridden
+          setTimeout(() => onAnnounce(announcement), 0);
+        }
+      }}
+      data-test-subj={dataTestSubj}
+    >
+      {TITLE}
+    </EuiContextMenuItem>
   );
 };
 
