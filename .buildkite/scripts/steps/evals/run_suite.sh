@@ -758,14 +758,22 @@ pin_baseline() {
   local ingest_failures=""
   if command -v buildkite-agent >/dev/null 2>&1; then
     composite="$(buildkite-agent meta-data get "kbn-evals:execution-id:${EVAL_SUITE_ID}:${EVAL_PROJECT}" 2>/dev/null || true)"
-    ingest_failures="$(buildkite-agent meta-data get "kbn-evals:score-ingest-failures:${EVAL_SUITE_ID}:${EVAL_PROJECT}" 2>/dev/null || true)"
+    # evaluate.ts records score-export failures under this key, scoped by job ID so a
+    # clean retry of the step is not poisoned by a previous attempt's marker. With
+    # `--default ''` an unset key reads as empty with exit 0, so a non-zero exit is a
+    # metadata API error: pinning without knowing whether the export completed fails closed.
+    if ! ingest_failures="$(buildkite-agent meta-data get "kbn-evals:score-ingest-failures:${EVAL_SUITE_ID}:${EVAL_PROJECT}:${BUILDKITE_JOB_ID:-}" --default '' 2>/dev/null)"; then
+      echo "Could not read the score-ingest-failure marker for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; refusing to pin without confirmation that the score export completed."
+      return 1
+    fi
   fi
   if [[ -z "$composite" ]]; then
     echo "No execution ID recorded for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; cannot pin baseline."
     return 1
   fi
-  # evaluate.ts records score-export failures here: a green run can still have holes in
-  # its exported scores, and a baseline must be a complete snapshot.
+  # A green run can still have holes in its exported scores, and a baseline must be a
+  # complete snapshot. evaluate.ts also fails the eval step itself when a pin-enabled run
+  # loses scores; this marker is the backstop in case that signal is lost.
   if [[ -n "$ingest_failures" ]]; then
     echo "Score export reported ${ingest_failures} ingest failure(s) for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; refusing to pin an incomplete baseline."
     return 1

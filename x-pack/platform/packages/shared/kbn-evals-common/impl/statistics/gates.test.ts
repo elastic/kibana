@@ -124,6 +124,25 @@ describe('evaluateRegressionGates', () => {
     expect(report.results.find((r) => r.evaluatorName === 'Relevance')?.verdict).toBe('fail');
   });
 
+  it('does not let the float slack erase a deliberately tiny threshold', () => {
+    const report = evaluateRegressionGates(
+      [
+        // A 1e-12 nonsignificant worsening sits three orders of magnitude under the 1e-9
+        // warn threshold: a fixed absolute tolerance would gate it anyway.
+        slice({
+          baseline: { mean: 1, used: 30, missing: 0, stability: null },
+          target: { mean: 1 - 1e-12, used: 30, missing: 0, stability: null },
+          pValue: 0.9,
+        }),
+      ],
+      {
+        defaults: { ...DEFAULT_REGRESSION_GATES.defaults, warnRelativeChange: 1e-9 },
+      }
+    );
+
+    expect(report.verdict).toBe('pass');
+  });
+
   it('applies per-evaluator overrides on top of the defaults', () => {
     const report = evaluateRegressionGates(
       [

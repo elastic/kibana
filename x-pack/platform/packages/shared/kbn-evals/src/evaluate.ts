@@ -426,13 +426,17 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             );
             // Any worker reporting a failure marks the execution unpinnable: the flag's
             // presence is the signal, so concurrent workers overwriting it is harmless.
+            // Keyed by job so a clean retry of the step starts unmarked (Buildkite
+            // metadata is build-scoped and a key can never be unset).
             if (scoreIngestFailures > 0) {
               execFileSync(
                 'buildkite-agent',
                 [
                   'meta-data',
                   'set',
-                  `kbn-evals:score-ingest-failures:${suiteId}:${connectorId}`,
+                  `kbn-evals:score-ingest-failures:${suiteId}:${connectorId}:${
+                    process.env.BUILDKITE_JOB_ID ?? ''
+                  }`,
                   String(scoreIngestFailures),
                 ],
                 { stdio: 'ignore' }
@@ -447,6 +451,17 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         } catch {
           // Not running inside Buildkite; skip silently.
         }
+      }
+
+      // On a baseline-pinning run the exported scores ARE the deliverable: a hole in them
+      // must fail the step itself rather than ride on the metadata marker, whose write or
+      // read could fail and let the pin proceed on an incomplete execution.
+      if (scoreIngestFailures > 0 && process.env.EVAL_PIN_BASELINE === '1') {
+        throw new Error(
+          `${scoreIngestFailures} score(s) failed to export on a baseline-pinning run ` +
+            `(EVAL_PIN_BASELINE=1); failing the run so an incomplete execution cannot be ` +
+            `pinned as the baseline.`
+        );
       }
     },
     {

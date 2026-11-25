@@ -6,7 +6,7 @@
  */
 
 import Fs from 'fs';
-import { createFlagError } from '@kbn/dev-cli-errors';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import {
@@ -154,6 +154,18 @@ export const compareCmd: Command<void> = {
       }
     };
 
+    // An aborted comparison must stay distinguishable from a completed report-only
+    // verdict: in markdown mode the note is the PR-visible outcome and the command exits
+    // cleanly, but in terminal mode there is no comment to carry it, so the command
+    // fails for callers to see that no verdict was computed.
+    const abortComparison = (heading: string, message: string): void => {
+      log.error(message);
+      if (format !== 'markdown') {
+        throw createFailError(message);
+      }
+      emitMarkdownNote(heading, message);
+    };
+
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
       log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
@@ -226,8 +238,7 @@ export const compareCmd: Command<void> = {
           `Cannot determine the task model from execution ID \`${targetExperimentId}\`: a pinned ` +
           `baseline is resolved per task model. Pass the full composite execution ID ` +
           `(\`bk-BUILD::suite::model\`).`;
-        log.error(message);
-        emitMarkdownNote('⚠️ Pinned-baseline comparison skipped', message);
+        abortComparison('⚠️ Pinned-baseline comparison skipped', message);
         return;
       }
       const taskModelId = targetExperimentId.split('::').pop();
@@ -243,8 +254,7 @@ export const compareCmd: Command<void> = {
         const message = `The pinned-baseline registry could not be reached: ${
           error instanceof Error ? error.message : String(error)
         }`;
-        log.error(message);
-        emitMarkdownNote('⚠️ Pinned-baseline comparison unavailable', message);
+        abortComparison('⚠️ Pinned-baseline comparison unavailable', message);
         return;
       }
       if (!pinned) {
@@ -393,9 +403,23 @@ export const compareCmd: Command<void> = {
       const message = `The pinned baseline's scores could not be read: ${
         error instanceof Error ? error.message : String(error)
       }`;
-      log.error(message);
-      emitMarkdownNote('⚠️ Pinned-baseline comparison unavailable', message);
+      abortComparison('⚠️ Pinned-baseline comparison unavailable', message);
       return;
+    }
+
+    // An empty target is a missing-run problem, not a judge problem: handle it before
+    // the judge match, or a run that exported nothing would be reported as a judge
+    // mismatch and point reviewers at the baseline instead of at the missing scores.
+    if (targetExperimentScores.length === 0) {
+      if (pinnedBaselineId) {
+        abortComparison(
+          '⚠️ Pinned-baseline comparison unavailable',
+          `No scores found for this run (execution \`${targetExperimentId}\`). The run may ` +
+            `have failed before exporting scores, or the execution ID resolved incorrectly.`
+        );
+        return;
+      }
+      throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
     }
 
     // Scores from different judges are not comparable: refuse the comparison instead of
@@ -407,14 +431,9 @@ export const compareCmd: Command<void> = {
         targetScores: targetExperimentScores,
       });
       if (mismatch) {
-        log.error(mismatch);
-        emitMarkdownNote('⚠️ Comparison invalid: judge mismatch', mismatch);
+        abortComparison('⚠️ Comparison invalid: judge mismatch', mismatch);
         return;
       }
-    }
-
-    if (targetExperimentScores.length === 0) {
-      throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
     }
 
     if (baselineExperimentScores.length === 0) {

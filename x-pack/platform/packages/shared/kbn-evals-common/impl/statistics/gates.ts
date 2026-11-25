@@ -67,11 +67,13 @@ const formatPercent = (fraction: number): string =>
   `${(fraction * 100).toFixed(1).replace(/\.0$/, '')}%`;
 
 // Floating-point slack for the threshold comparisons: a drop from 1 to 0.92 computes as
-// 0.07999999999999996, which would slip under an exact 0.08 warn threshold.
-const THRESHOLD_EPSILON = 1e-9;
+// 0.07999999999999996, which would slip under an exact 0.08 warn threshold. The slack is
+// relative to the threshold, so a deliberately tiny threshold keeps its meaning instead
+// of being flattened to zero by a fixed tolerance.
+const RELATIVE_THRESHOLD_EPSILON = 1e-9;
 
 const meetsThreshold = (relativeChange: number, threshold: number): boolean =>
-  relativeChange >= threshold - THRESHOLD_EPSILON;
+  relativeChange >= threshold * (1 - RELATIVE_THRESHOLD_EPSILON);
 
 const gateSlice = (
   result: ComparisonResult,

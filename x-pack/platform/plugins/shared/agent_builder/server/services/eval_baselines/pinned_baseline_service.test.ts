@@ -487,6 +487,37 @@ describe('PinnedBaselineService', () => {
     });
   });
 
+  it('pin holds the expected count against the winning pointer after losing the race', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create, search } = createDataStreamsMock();
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+
+    // This request's own scores satisfy the expectation (1), but the concurrent winner
+    // published a 7-score snapshot: returning success would hand the caller a baseline
+    // that does not meet the count it demanded.
+    search
+      .mockResolvedValueOnce({ hits: { hits: [] } })
+      .mockResolvedValueOnce({ hits: { hits: [getStoredPointerHit()] } });
+    create
+      .mockImplementationOnce(async ({ documents }: { documents: Array<{ _id: string }> }) => ({
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      }))
+      .mockImplementationOnce(async () => ({
+        errors: false,
+        items: [{ create: { status: 409 } }],
+      }));
+
+    await expect(
+      service.pin({
+        pointer: getPointer(),
+        scores: [{ id: 'score-doc-1', document: getScoreDocument() }],
+        spaceIds: ['default'],
+        expectedScoreCount: 1,
+      })
+    ).rejects.toThrow(/would hold 7 score\(s\), but 1 were expected/);
+  });
+
   it('repin promotes the stored snapshot without reading any source scores', async () => {
     const logger = loggingSystemMock.createLogger();
     const { coreDataStreams, create, search } = createDataStreamsMock();

@@ -196,9 +196,17 @@ export class PinnedBaselineService {
     );
     if (conflicts > 0) {
       // A concurrent first pin won the write-once pointer: its view of the snapshot is
-      // the published one, so answer with what is stored rather than this request's.
+      // the published one, so answer with what is stored rather than this request's —
+      // and hold the caller's expected count against the winner, which may have
+      // snapshotted a different set of scores than the ones this request validated.
       const storedPointer = await this.findPointerById(client, pointer.baseline_id);
       if (storedPointer) {
+        assertExpectedScoreCount({
+          baselineId: pointer.baseline_id,
+          actualCount: storedPointer.baseline.score_count,
+          expectedCount: expectedScoreCount,
+          stored: true,
+        });
         return pointerToResponse(storedPointer);
       }
     }

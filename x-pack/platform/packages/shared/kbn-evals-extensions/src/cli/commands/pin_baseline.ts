@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createFlagError } from '@kbn/dev-cli-errors';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import {
@@ -94,6 +94,20 @@ export const pinBaselineCmd: Command<void> = {
       pinnedBy,
       expectedScoreCount: expectedScores,
     });
+
+    // A current route would have rejected a count mismatch before publishing, so a
+    // success carrying a different count proves the server ignored the field — an older
+    // route version that silently strips unknown body keys. Fail loudly instead of
+    // reporting a count-guarded pin that was never guarded.
+    if (expectedScores !== undefined && baseline.score_count !== expectedScores) {
+      throw createFailError(
+        `--expect-scores ${expectedScores} was not enforced: the pin succeeded with ` +
+          `${baseline.score_count} score(s), so this evaluations cluster runs an older pin ` +
+          `route that ignores expected_score_count. The registry now points at baseline ` +
+          `${baseline.baseline_id}; pin a known-good execution to roll back, and upgrade ` +
+          `the evaluations Kibana before relying on count-guarded pins.`
+      );
+    }
 
     if (expectedScores === undefined) {
       const liveScores = await evalsClient.getExperimentScores(executionId, {
