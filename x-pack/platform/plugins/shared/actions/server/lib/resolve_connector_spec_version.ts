@@ -19,7 +19,7 @@ const isValidVersionSegment = (part?: string): boolean => {
   return Number.isSafeInteger(value) && value >= 0 && String(value) === part;
 };
 
-const parseSpecVersion = (value: string): { major: number; minor?: number } | undefined => {
+export const parseSpecVersion = (value: string): { major: number; minor?: number } | undefined => {
   if (value.length > CONNECTOR_SPEC_VERSION_MAX_LENGTH) return undefined;
 
   const [majorPart, minorPart, ...rest] = value.split('.');
@@ -34,7 +34,6 @@ const parseSpecVersion = (value: string): { major: number; minor?: number } | un
   return { major: Number(majorPart), minor: Number(minorPart) };
 };
 
-/** Resolves a connector's schema version and builds validators for the selected spec. */
 export const resolveConnectorSpecVersion = ({
   actionType,
   specVersion,
