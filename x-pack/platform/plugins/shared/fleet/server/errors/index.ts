@@ -63,6 +63,11 @@ export class RegistryResponseError extends RegistryError {
 
 export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
+/**
+ * An update by query stopped before it went through all of its documents: it was cancelled for
+ * running too long, or it timed out. The documents it did update stay updated.
+ */
+export class UpdateByQueryIncompleteError extends FleetError {}
 export class PackageBreakingChangesNotAcknowledgedError extends FleetError {
   constructor(message: string, breakingChanges: BreakingChangesLog) {
     super(message);
