@@ -93,52 +93,59 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
   const queryClient = useQueryClient();
   const id = proposal?.id;
   const rootProposalId = proposal?.rootProposalId;
-  const isRevision = (proposal?.revision ?? 1) > 1;
+  const revision = proposal?.revision ?? 1;
+  const isRevision = revision > 1;
 
   useEffect(() => {
     if (!isRevision || !id || !rootProposalId) {
       return;
     }
     // Cards of the chain that still read as open, or that show a load error.
-    const findStaleHashes = (): Set<string> => {
-      const staleHashes = new Set<string>();
-      const cachedDetails = queryClient.getQueriesData<ProposalWithMetadata>({
-        queryKey: queryKeys.proposals.details,
-      });
-      for (const [queryKey, cached] of cachedDetails) {
-        const isOtherInChain = cached?.rootProposalId === rootProposalId && cached.id !== id;
-        const isReplaced = Boolean(cached?.supersededBy) || cached?.status === 'superseded';
-        // A failed refetch keeps the old data, but the card shows a load error instead of it.
-        const query = queryClient.getQueryCache().find(queryKey, { exact: true });
-        const isShowingError = query?.state.status === 'error';
-        const isShowingReplacement = isReplaced && !isShowingError;
-        if (query && isOtherInChain && !isShowingReplacement) {
-          staleHashes.add(query.queryHash);
-        }
-      }
-      return staleHashes;
-    };
+    const findStaleQueries = () =>
+      queryClient
+        .getQueriesData<ProposalWithMetadata>({ queryKey: queryKeys.proposals.details })
+        .flatMap(([queryKey, cached]) => {
+          // A retry keeps the revision number of the proposal it copies, so only a strictly
+          // later revision is safe to skip. An earlier proposal never has a later number.
+          const isLater = (cached?.revision ?? 1) > revision;
+          const isOtherInChain =
+            cached?.rootProposalId === rootProposalId && cached.id !== id && !isLater;
+          const isReplaced = Boolean(cached?.supersededBy) || cached?.status === 'superseded';
+          // A failed refetch keeps the old data, but the card shows a load error instead of it.
+          const query = queryClient.getQueryCache().find(queryKey, { exact: true });
+          const isShowingError = query?.state.status === 'error';
+          const isShowingReplacement = isReplaced && !isShowingError;
+          return query && isOtherInChain && !isShowingReplacement ? [query] : [];
+        });
+    const hashesOf = (queries: ReturnType<typeof findStaleQueries>): Set<string> =>
+      new Set(queries.map(({ queryHash }) => queryHash));
 
     // One call scans the cache once. `cancelRefetch: false` joins a request already in flight,
     // so a decision that waits for its own refresh is not cut short.
-    const refreshStaleCards = async (): Promise<void> => {
-      const staleHashes = findStaleHashes();
-      if (staleHashes.size === 0) {
-        return;
-      }
-      await queryClient.invalidateQueries(
+    const refresh = (hashes: Set<string>): Promise<void> =>
+      queryClient.invalidateQueries(
         {
           queryKey: queryKeys.proposals.details,
-          predicate: ({ queryHash }) => staleHashes.has(queryHash),
+          predicate: ({ queryHash }) => hashes.has(queryHash),
         },
         { cancelRefetch: false }
       );
-    };
 
+    const stale = findStaleQueries();
+    if (stale.length === 0) {
+      return;
+    }
     // A joined request can return a state that the server read before this revision existed.
-    // Check once more after the refresh. Do not repeat, so the number of requests stays bounded.
-    void refreshStaleCards().then(refreshStaleCards);
-  }, [queryClient, id, rootProposalId, isRevision]);
+    // Check those cards once more after the refresh. Do not repeat, so the number of requests
+    // stays bounded. A card that got a new request already shows the current server state.
+    const joined = hashesOf(stale.filter(({ state }) => state.fetchStatus === 'fetching'));
+    void refresh(hashesOf(stale)).then(() => {
+      const stillOpen = hashesOf(
+        findStaleQueries().filter(({ queryHash }) => joined.has(queryHash))
+      );
+      return stillOpen.size > 0 ? refresh(stillOpen) : undefined;
+    });
+  }, [queryClient, id, rootProposalId, revision, isRevision]);
 };
 
 /**

@@ -607,6 +607,64 @@ describe('useProposal', () => {
       expect(fetchesOfEarlier()).toHaveLength(2);
     });
 
+    it('does not refresh a later revision when an earlier revision loads after it', async () => {
+      const proposals: Record<string, object> = {
+        'p-2': {
+          id: 'p-2',
+          rootProposalId: 'p-1',
+          revision: 2,
+          status: 'superseded',
+          supersededBy: 'p-3',
+        },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const current = renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+      await waitFor(() => expect(current.result.current.isSuccess).toBe(true));
+      const earlier = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-3'))).toHaveLength(1);
+    });
+
+    it('does not repeat the refresh for a card whose own new request still reads open', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.isSuccess).toBe(true));
+      const latest = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(latest.result.current.isSuccess).toBe(true));
+      await act(async () => {});
+
+      // One read to load it, and one refresh that reads the server again. No second refresh.
+      expect(http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'))).toHaveLength(2);
+    });
+
+    it('refreshes the original of a retried revision, which has the same revision number', async () => {
+      const proposals: Record<string, object> = {
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'failed' },
+        'p-2b': { id: 'p-2b', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const original = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(original.result.current.data?.status).toBe('failed'));
+
+      proposals['p-2'] = { ...proposals['p-2'], supersededBy: 'p-2b' };
+      renderHook(() => useProposal('p-2b'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(original.result.current.data?.supersededBy).toBe('p-2b'));
+    });
+
     it('checks once more when the refresh returns a state that still reads as open', async () => {
       const proposals: Record<string, object> = {
         'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
