@@ -25,8 +25,9 @@ export const PUBSUB_MAX_ID_LENGTH = 256;
  */
 export interface PubSubEventInit<TData> {
   /**
-   * Stable, source-derived id, unique within the topic. Reuse it when retrying the same delivery
-   * so a durable bus can recognise the duplicate. Phase 1 does not deduplicate.
+   * Stable, source-derived id, unique within the topic, at most {@link PUBSUB_MAX_ID_LENGTH}
+   * UTF-16 code units. Reuse it when retrying the same delivery so a durable bus can recognise
+   * the duplicate. Phase 1 does not deduplicate.
    */
   readonly id: string;
   /**
