@@ -57,6 +57,8 @@ describe('registerStepDefinitions', () => {
       'context-engine.gatherMaintenance',
       'context-engine.applyMaintenanceChanges',
       'context-engine.recordMaintenanceRun',
+      'context-engine.getDreamingCursor',
+      'context-engine.setDreamingCursor',
     ]);
   });
 });

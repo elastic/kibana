@@ -128,6 +128,15 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     ]);
   });
 
+  it('sets the step size and Liquid limits itself rather than taking the engine defaults', () => {
+    expect(render().settings).toEqual(
+      expect.objectContaining({
+        'max-step-size': '10mb',
+        liquid: { parseLimit: 150000, renderLimit: 2000, memoryLimit: 30000000 },
+      })
+    );
+  });
+
   it('builds as an execution graph, as the workflow engine runs it', () => {
     expect(() => convertToWorkflowGraph(render())).not.toThrow();
   });

@@ -10,6 +10,11 @@ tags:
   - scheduled
 settings:
   timeout: '1h'
+  max-step-size: '10mb'
+  liquid:
+    parseLimit: 150000
+    renderLimit: 2000
+    memoryLimit: 30000000
   concurrency:
     key: __CONCURRENCY_KEY__
     strategy: queue
@@ -138,6 +143,7 @@ steps:
     steps:
       - name: batches
         type: foreach
+        max-iterations: 100
         foreach: '${{ steps.gather.output.batches }}'
         steps:
           - name: maintain
@@ -408,6 +414,7 @@ steps:
     steps:
       - name: plans
         type: foreach
+        max-iterations: 100
         foreach: '${{ variables.plans }}'
         steps:
           - name: apply_batch

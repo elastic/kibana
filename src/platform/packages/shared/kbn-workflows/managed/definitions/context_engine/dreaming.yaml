@@ -9,6 +9,11 @@ tags:
   - scheduled
 settings:
   timeout: '30m'
+  max-step-size: '10mb'
+  liquid:
+    parseLimit: 150000
+    renderLimit: 2000
+    memoryLimit: 30000000
   concurrency:
     key: __CONCURRENCY_KEY__
     strategy: queue
@@ -89,6 +94,13 @@ steps:
             includeOutput: true
             omitStepExecutions: true
 
+  - name: cursor
+    type: context-engine.getDreamingCursor
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: memories
+      max_hours: 720
+
   - name: read_memories
     type: elasticsearch.search
     with:
@@ -132,14 +144,14 @@ steps:
                 should:
                   - range:
                       updated_at:
-                        gt: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+                        gt: '{{ inputs.since | default: steps.cursor.output.from | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
                   - bool:
                       filter:
                         - term:
-                            updated_at: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+                            updated_at: '{{ inputs.since | default: steps.cursor.output.from | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
                         - range:
                             id:
-                              gt: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after_id }}{% endif %}'
+                              gt: '{% if inputs.since == blank %}{% if steps.cursor.output.found %}{{ steps.cursor.output.after }}{% else %}{{ steps.last_output.output.context.output.resume_after_id }}{% endif %}{% endif %}'
                 minimum_should_match: 1
             - bool:
                 should:
@@ -184,6 +196,7 @@ steps:
     steps:
       - name: batches
         type: foreach
+        max-iterations: 500
         foreach: >-
           {%- assign batches = "" | split: "" -%}
           {%- assign audiences = variables.memories | group_by_exp: "memory", "memory.permissions | json" -%}
@@ -467,6 +480,18 @@ steps:
               deleted: '${{ variables.deleted | plus: steps.apply_changes.output.deleted }}'
               rejected: '${{ variables.rejected | plus: steps.apply_changes.output.rejected.size }}'
               would_write: '${{ variables.would_write | concat: steps.apply_changes.output.would_write }}'
+
+  - name: checkpoint
+    type: if
+    condition: '${{ inputs.dry_run != true and inputs.since == blank }}'
+    steps:
+      - name: save_cursor
+        type: context-engine.setDreamingCursor
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          source: memories
+          from: '{{ variables.resume_from | default: execution.startedAt }}'
+          after: '{{ variables.resume_after_id }}'
 
   - name: dry_run_result
     type: if

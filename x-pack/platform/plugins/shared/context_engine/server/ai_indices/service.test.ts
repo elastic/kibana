@@ -924,6 +924,92 @@ describe('AiIndexService', () => {
         ).rejects.toBeInstanceOf(AiIndexConflictError);
       });
     });
+
+    describe('dreaming cursors', () => {
+      const cursor = {
+        from: '2026-07-09T10:00:00.000Z',
+        after: 'memory-9',
+        date_saved: '2026-07-09T10:05:00.000Z',
+      };
+
+      it('reads the cursor of a source, and nothing before one is saved', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, dreaming_cursors: { traces: cursor } }));
+
+        await expect(
+          service.getDreamingCursor('customer_support', DEFAULT_SPACE, 'traces')
+        ).resolves.toEqual(cursor);
+        await expect(
+          service.getDreamingCursor('customer_support', DEFAULT_SPACE, 'memories')
+        ).resolves.toBeUndefined();
+      });
+
+      it('saves a cursor beside the one of the other source, leaving the rest untouched', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, dreaming_cursors: { traces: cursor } }));
+
+        await service.setDreamingCursor('customer_support', DEFAULT_SPACE, 'memories', {
+          from: '2026-07-10T00:00:00.000Z',
+          after: 'memory-12',
+        });
+
+        const [indexArgs] = storageClient.index.mock.calls[0];
+        expect(indexArgs.document).toEqual(
+          expect.objectContaining({
+            dreaming_cursors: {
+              traces: cursor,
+              memories: {
+                from: '2026-07-10T00:00:00.000Z',
+                after: 'memory-12',
+                date_saved: expect.any(String),
+              },
+            },
+            description: aiIndexDocument.description,
+            dest: aiIndexDocument.dest,
+            date_created: aiIndexDocument.date_created,
+            date_modified: aiIndexDocument.date_modified,
+          })
+        );
+        expect(indexArgs.if_seq_no).toBe(7);
+      });
+
+      it('retries when a concurrent write wins', async () => {
+        mockSearchHits(storedHit(aiIndexDocument));
+        storageClient.index
+          .mockRejectedValueOnce(createConflictError())
+          .mockResolvedValueOnce({} as never);
+
+        await service.setDreamingCursor('customer_support', DEFAULT_SPACE, 'memories', {
+          from: '2026-07-10T00:00:00.000Z',
+        });
+
+        expect(storageClient.index).toHaveBeenCalledTimes(2);
+      });
+
+      it('survives a full replacement of the AI index', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, dreaming_cursors: { memories: cursor } }));
+
+        await service.put('customer_support', DEFAULT_SPACE, properties);
+
+        const [indexArgs] = storageClient.index.mock.calls[0];
+        expect(indexArgs.document?.dreaming_cursors).toEqual({ memories: cursor });
+      });
+
+      it('is not part of the AI index the API returns', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, dreaming_cursors: { memories: cursor } }));
+
+        await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.not.toHaveProperty(
+          'dreaming_cursors'
+        );
+      });
+
+      it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+        await expect(
+          service.getDreamingCursor('missing', DEFAULT_SPACE, 'memories')
+        ).rejects.toBeInstanceOf(AiIndexNotFoundError);
+        await expect(
+          service.setDreamingCursor('missing', DEFAULT_SPACE, 'memories', { from: 'x' })
+        ).rejects.toBeInstanceOf(AiIndexNotFoundError);
+      });
+    });
   });
 
   describe('get', () => {

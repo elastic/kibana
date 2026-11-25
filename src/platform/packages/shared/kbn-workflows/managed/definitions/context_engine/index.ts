@@ -94,7 +94,7 @@ export const memoryConcurrencyKeyFor = (instanceKey: string): string =>
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 7,
+  version: 8,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
@@ -124,7 +124,7 @@ export type ContextEngineTraceDreamingWorkflowTemplateValues =
 export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 6,
+  version: 7,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRACE_DREAMING_YAML, {
@@ -151,7 +151,7 @@ export type ContextEngineTraceDreamingBatchWorkflowTemplateValues =
 export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRACE_DREAMING_BATCH_YAML, {
@@ -178,7 +178,7 @@ export type ContextEngineRelationshipsWorkflowTemplateValues =
 export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
   id: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 4,
+  version: 5,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(RELATIONSHIPS_YAML, {
@@ -217,7 +217,7 @@ export interface ContextEngineMaintenanceWorkflowTemplateValues
 export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW = {
   id: CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(MAINTENANCE_YAML, {

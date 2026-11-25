@@ -23,6 +23,7 @@ import type {
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
 import type { AiIndexDreamingConfig } from '../../common/dreaming';
+import type { DreamingCursorSource } from '../../common/step_types/dreaming_cursor';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import { AI_INDEX_ID_PATTERN } from '../../common/validation';
 import { createSpaceDslFilter } from '../utils/space_filter';
@@ -39,6 +40,7 @@ import type {
   AiIndexStorageClient,
   StoredAiIndexDocument,
   StoredDreamingConfig,
+  StoredDreamingCursor,
 } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
 import { buildTraceQueries } from './trace_queries';
@@ -97,8 +99,11 @@ const withoutIgnoredProperties = ({
 
 const keptFields = (
   existing: AiIndexDocument | undefined
-): Pick<AiIndexDocument, 'dreaming' | 'memory_enabled'> => ({
+): Pick<AiIndexDocument, 'dreaming' | 'dreaming_cursors' | 'memory_enabled'> => ({
   ...(existing?.dreaming !== undefined && { dreaming: existing.dreaming }),
+  ...(existing?.dreaming_cursors !== undefined && {
+    dreaming_cursors: existing.dreaming_cursors,
+  }),
   ...(existing?.memory_enabled !== undefined && { memory_enabled: existing.memory_enabled }),
 });
 
@@ -260,13 +265,13 @@ export class AiIndexService {
     spaceId: string,
     document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
     existing: Awaited<ReturnType<typeof this.findDocument>>,
-    options?: { docId?: string }
+    options?: { docId?: string; keepDateModified?: boolean }
   ): Promise<'created' | 'updated'> {
     const now = new Date().toISOString();
     const fullDocument: AiIndexDocument = {
       ...document,
       date_created: existing?.document.date_created ?? now,
-      date_modified: now,
+      date_modified: options?.keepDateModified && existing ? existing.document.date_modified : now,
     };
 
     try {
@@ -353,6 +358,64 @@ export class AiIndexService {
     await this.writeDocument(aiIndexId, spaceId, { ...existing.document, dreaming }, existing);
 
     return dreaming;
+  }
+
+  /** Where the last dreaming page of a source stopped, or undefined before any run saved one. */
+  async getDreamingCursor(
+    aiIndexId: string,
+    spaceId: string,
+    source: DreamingCursorSource
+  ): Promise<StoredDreamingCursor | undefined> {
+    const existing = await this.findDocument(aiIndexId, spaceId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    return existing.document.dreaming_cursors?.[source];
+  }
+
+  /**
+   * Saves where a dreaming page of a source stopped, leaving the rest of the entry untouched.
+   * Retries on concurrent writes, so a config edit made while a run is saving is not lost.
+   */
+  async setDreamingCursor(
+    aiIndexId: string,
+    spaceId: string,
+    source: DreamingCursorSource,
+    cursor: { from: string; after?: string }
+  ): Promise<void> {
+    await pRetry(
+      async () => {
+        const existing = await this.findDocument(aiIndexId, spaceId);
+        if (!existing) {
+          throw new AiIndexNotFoundError(aiIndexId);
+        }
+        await this.writeDocument(
+          aiIndexId,
+          spaceId,
+          {
+            ...existing.document,
+            dreaming_cursors: {
+              ...existing.document.dreaming_cursors,
+              [source]: {
+                from: cursor.from,
+                ...(cursor.after !== undefined && cursor.after !== '' && { after: cursor.after }),
+                date_saved: new Date().toISOString(),
+              },
+            },
+          },
+          existing,
+          { keepDateModified: true }
+        );
+      },
+      {
+        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
+        onFailedAttempt: (error) => {
+          if (!(error instanceof AiIndexConflictError)) {
+            throw error;
+          }
+        },
+      }
+    );
   }
 
   /** Every AI index in the space with the workflow ids of its automations, for spend attribution. */
