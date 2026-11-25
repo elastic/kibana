@@ -113,6 +113,7 @@ export const AutomationsTable = ({
     {
       field: 'name',
       name: listLabels.automationColumn,
+      width: '160px',
       sortable: true,
       render: (_name: string, automation: Automation) => (
         <AutomationNameCell
@@ -128,7 +129,7 @@ export const AutomationsTable = ({
     {
       field: 'author',
       name: listLabels.author,
-      width: '120px',
+      width: '96px',
       sortable: getAuthorName,
       render: (_author: string, automation: Automation) => (
         <AutomationAuthorCell name={getAuthorName(automation)} />
@@ -136,6 +137,7 @@ export const AutomationsTable = ({
     },
     {
       name: listLabels.trigger,
+      width: '104px',
       render: ({ trigger }: Automation) => {
         const triggers = new Map(
           trigger.rows.map((row) => {
@@ -168,6 +170,7 @@ export const AutomationsTable = ({
     },
     {
       name: listLabels.destinationColumn,
+      width: '176px',
       render: ({ completions = [], trigger }: Automation) => {
         const destinations = completions.flatMap(({ action, targetMode, destination }) => {
           if (action !== 'post_to_slack') return [];
@@ -196,6 +199,7 @@ export const AutomationsTable = ({
     {
       field: 'lastRunAt',
       name: listLabels.lastRunColumn,
+      width: '144px',
       nameTooltip: { content: listLabels.lastRunTooltip },
       sortable: ({ id }) => lastRuns?.[id] ?? '',
       render: (_value: undefined, { id }: Automation) => {
@@ -235,7 +239,7 @@ export const AutomationsTable = ({
       field: 'usage',
       name: listLabels.usage,
       nameTooltip: { content: listLabels.usageTooltip },
-      width: '128px',
+      width: '152px',
       align: 'right' as const,
       sortable: (automation) => usedToday.get(automation.id) ?? 0,
       render: (_usage: unknown, automation: Automation) => (
@@ -322,7 +326,7 @@ export const AutomationsTable = ({
   useEffect(() => onOrderChange(orderKey ? orderKey.split('|') : []), [orderKey, onOrderChange]);
 
   return (
-    <div ref={setContainer}>
+    <div ref={setContainer} css={{ minWidth: 0, overflowX: 'auto' }}>
       <EuiInMemoryTable
         items={automations}
         columns={columns}
@@ -334,7 +338,7 @@ export const AutomationsTable = ({
         pagination={{ pageIndex, pageSize, pageSizeOptions: [10, 25, 50] }}
         rowHeader="name"
         tableCaption={listLabels.title}
-        tableLayout="auto"
+        tableLayout="fixed"
         hasBackground={false}
         rowProps={(automation: Automation) => ({
           onClick: (event: React.MouseEvent<HTMLElement>) => {

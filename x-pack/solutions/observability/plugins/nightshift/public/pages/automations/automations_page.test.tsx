@@ -765,10 +765,12 @@ describe('AutomationsPage', () => {
       ).toBeVisible();
     });
 
-    it('shows unavailable instead of the cached timestamp after a failed refresh', () => {
+    it('shows the last run error and lets users retry while keeping the automation visible', () => {
+      const retryLastRuns = jest.fn();
       mockUseAutomationsLastRuns.mockReturnValue({
         data: { triage: '2026-10-01T12:00:00.000Z' },
         isError: true,
+        refetch: retryLastRuns,
       });
 
       renderPage();
@@ -776,6 +778,9 @@ describe('AutomationsPage', () => {
       const row = rowOf('Triage incoming alerts');
       expect(within(row).getByText('Unavailable')).toBeVisible();
       expect(row.querySelector('time')).not.toBeInTheDocument();
+      expect(screen.getByText('Could not load last run times')).toBeVisible();
+      fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+      expect(retryLastRuns).toHaveBeenCalledTimes(1);
     });
 
     it('toggles an automation', () => {
