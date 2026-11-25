@@ -23,7 +23,7 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { BootstrapRenderer } from './bootstrap_renderer';
-import { bootstrapRendererFactory } from './bootstrap_renderer';
+import { bootstrapRendererFactory, getChunkFilenamesForPlugins } from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
@@ -54,6 +54,38 @@ const createUiPlugins = (): UiPlugins => ({
   public: new Map(),
   internal: new Map(),
   browserConfigs: new Map(),
+});
+
+describe('getChunkFilenamesForPlugins', () => {
+  it('returns the sorted union for core and selected plugin entries', () => {
+    expect(
+      getChunkFilenamesForPlugins(
+        {
+          allChunks: ['all.js'],
+          entrypointChunks: {
+            core: ['shared.js', 'plugin-core.js'],
+            security: ['shared.js', 'plugin-security.js'],
+          },
+        },
+        ['core', 'security']
+      )
+    ).toEqual(['plugin-core.js', 'plugin-security.js', 'shared.js']);
+  });
+
+  it('falls back to allChunks for an older or incomplete manifest', () => {
+    expect(getChunkFilenamesForPlugins({ allChunks: ['all.js'] }, ['core', 'security'])).toEqual([
+      'all.js',
+    ]);
+    expect(
+      getChunkFilenamesForPlugins(
+        {
+          allChunks: ['all.js'],
+          entrypointChunks: { core: ['plugin-core.js'] },
+        },
+        ['core', 'security']
+      )
+    ).toEqual(['all.js']);
+  });
 });
 
 describe('bootstrapRenderer', () => {
@@ -446,6 +478,27 @@ describe('bootstrapRenderer', () => {
     );
   });
 
+  it('passes core and the page bundle closure to the generated bootstrap', async () => {
+    getPluginsBundlePathsMock.mockReturnValue(
+      new Map([
+        ['security', { bundlePath: '/security.js', publicPath: '/security/' }],
+        ['spaces', { bundlePath: '/spaces.js', publicPath: '/spaces/' }],
+      ])
+    );
+
+    await renderer({
+      request: httpServerMock.createKibanaRequest(),
+      uiSettingsClient,
+      isAnonymousPage: true,
+    });
+
+    expect(renderTemplateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pluginIdsToLoad: ['core', 'security', 'spaces'],
+      })
+    );
+  });
+
   describe('external plugins', () => {
     const bundlesHref = '/base-path/buildShaShort/bundles';
 
@@ -507,6 +560,11 @@ describe('bootstrapRenderer', () => {
         })
       );
       expect(publicPathMap).not.toHaveProperty('extFirst');
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pluginIdsToLoad: ['core', 'internalPlugin', 'extSecond'],
+        })
+      );
     });
 
     it('keeps the detection order of external plugins regardless of bundle path order', async () => {
@@ -546,6 +604,7 @@ describe('bootstrapRenderer', () => {
       colorMode: 'light',
       jsDependencyPaths: ['path-1', 'path-2'],
       publicPathMap: expect.any(String),
+      pluginIdsToLoad: ['core'],
       useHMR: expect.any(Boolean),
     });
   });

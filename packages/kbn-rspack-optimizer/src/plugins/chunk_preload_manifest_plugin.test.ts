@@ -11,16 +11,21 @@ import { ChunkPreloadManifestPlugin } from './chunk_preload_manifest_plugin';
 
 const createMockChunk = (
   files: string[],
-  idNameHints: string[] = []
-): { files: Set<string>; idNameHints: Set<string> } => ({
+  idNameHints: string[] = [],
+  name?: string
+): { files: Set<string>; idNameHints: Set<string>; name?: string } => ({
   files: new Set(files),
   idNameHints: new Set(idNameHints),
+  name,
 });
 
 const createMockCompiler = (opts: {
   cacheGroups?: Record<string, { name?: string | false }>;
   chunks: Array<{ files: Set<string>; idNameHints: Set<string> }>;
-  entrypoints?: Map<string, { childrenIterable: Array<{ chunks: typeof opts.chunks }> }>;
+  entrypoints?: Map<
+    string,
+    { childrenIterable: Array<{ name?: string; chunks: typeof opts.chunks }> }
+  >;
 }) => {
   let processAssetsFn: () => void;
   const emittedAssets: Array<{ name: string; source: string }> = [];
@@ -85,13 +90,13 @@ describe('ChunkPreloadManifestPlugin', () => {
   it('does not preload name:false cache groups, even as kibana entrypoint children', () => {
     const lazyChunk = createMockChunk(['jquery-flot.js'], ['jqueryFlot']);
     const sharedChunk = createMockChunk(['vendors.js'], ['vendors']);
-    const asyncChunk = createMockChunk(['async-plugin.js']);
+    const asyncChunk = createMockChunk(['async-plugin.js'], [], 'plugin-test');
 
     const entrypoints = new Map([
       [
         'kibana',
         {
-          childrenIterable: [{ chunks: [lazyChunk, asyncChunk] }],
+          childrenIterable: [{ name: 'plugin-test', chunks: [lazyChunk, sharedChunk, asyncChunk] }],
         },
       ],
     ]);
@@ -112,17 +117,19 @@ describe('ChunkPreloadManifestPlugin', () => {
     const manifest = JSON.parse(getEmittedAssets()[0].source);
     expect(manifest.allChunks).toEqual(['async-plugin.js', 'vendors.js']);
     expect(manifest.allChunks).not.toContain('jquery-flot.js');
+    expect(manifest.entrypointChunks.test).toEqual(['async-plugin.js', 'vendors.js']);
+    expect(manifest.entrypointChunks.test).not.toContain('jquery-flot.js');
   });
 
   it('includes all async chunks from kibana entrypoint children in allChunks', () => {
     const sharedChunk = createMockChunk(['shared.js'], ['vendor']);
-    const asyncChunk = createMockChunk(['async-plugin.js']);
+    const asyncChunk = createMockChunk(['async-plugin.js'], [], 'plugin-test');
 
     const entrypoints = new Map([
       [
         'kibana',
         {
-          childrenIterable: [{ chunks: [asyncChunk] }],
+          childrenIterable: [{ name: 'plugin-test', chunks: [sharedChunk, asyncChunk] }],
         },
       ],
     ]);
@@ -140,6 +147,69 @@ describe('ChunkPreloadManifestPlugin', () => {
     const manifest = JSON.parse(getEmittedAssets()[0].source);
     expect(manifest.allChunks).toContain('shared.js');
     expect(manifest.allChunks).toContain('async-plugin.js');
+  });
+
+  it('maps each plugin to its entry chunk and exact shared prerequisites', () => {
+    const vendorsChunk = createMockChunk(['vendors.js'], ['vendors'], 'vendors');
+    const fooChunk = createMockChunk(['plugin-foo.js'], [], 'plugin-foo');
+    const barChunk = createMockChunk(['plugin-bar.js'], [], 'plugin-bar');
+
+    const entrypoints = new Map([
+      [
+        'kibana',
+        {
+          childrenIterable: [
+            { name: 'plugin-foo', chunks: [vendorsChunk, fooChunk] },
+            { name: 'plugin-bar', chunks: [barChunk] },
+          ],
+        },
+      ],
+    ]);
+
+    const { compiler, runProcessAssets, getEmittedAssets } = createMockCompiler({
+      cacheGroups: { vendors: { name: 'vendors' } },
+      chunks: [vendorsChunk, fooChunk, barChunk],
+      entrypoints,
+    });
+
+    const plugin = new ChunkPreloadManifestPlugin();
+    plugin.apply(compiler as any);
+    runProcessAssets();
+
+    const manifest = JSON.parse(getEmittedAssets()[0].source);
+    expect(manifest.entrypointChunks).toEqual({
+      bar: ['plugin-bar.js'],
+      foo: ['plugin-foo.js', 'vendors.js'],
+    });
+  });
+
+  it('merges and deduplicates multiple targets for the same plugin', () => {
+    const sharedChunk = createMockChunk(['shared.js'], [], 'shared');
+    const pluginChunk = createMockChunk(['plugin-security.js'], [], 'plugin-security');
+
+    const entrypoints = new Map([
+      [
+        'kibana',
+        {
+          childrenIterable: [
+            { name: 'plugin-security', chunks: [sharedChunk, pluginChunk] },
+            { name: 'plugin-security', chunks: [sharedChunk, pluginChunk] },
+          ],
+        },
+      ],
+    ]);
+
+    const { compiler, runProcessAssets, getEmittedAssets } = createMockCompiler({
+      chunks: [sharedChunk, pluginChunk],
+      entrypoints,
+    });
+
+    const plugin = new ChunkPreloadManifestPlugin();
+    plugin.apply(compiler as any);
+    runProcessAssets();
+
+    const manifest = JSON.parse(getEmittedAssets()[0].source);
+    expect(manifest.entrypointChunks.security).toEqual(['plugin-security.js', 'shared.js']);
   });
 
   it('deduplicates shared chunks in allChunks', () => {
@@ -202,7 +272,7 @@ describe('ChunkPreloadManifestPlugin', () => {
     expect(manifest.allChunks).toEqual(['a-shared.js', 'z-shared.js']);
   });
 
-  it('emits valid JSON with { allChunks } shape', () => {
+  it('emits valid JSON with allChunks and entrypointChunks', () => {
     const chunk = createMockChunk(['test.js'], ['group']);
 
     const { compiler, runProcessAssets, getEmittedAssets } = createMockCompiler({
@@ -218,8 +288,8 @@ describe('ChunkPreloadManifestPlugin', () => {
     expect(emitted).toHaveLength(1);
     expect(emitted[0].name).toBe('chunk-manifest.json');
     const manifest = JSON.parse(emitted[0].source);
-    expect(manifest).not.toHaveProperty('sharedChunks');
     expect(manifest).toHaveProperty('allChunks');
+    expect(manifest).toHaveProperty('entrypointChunks');
   });
 
   it('includes named shared chunks in allChunks when there is no kibana entrypoint', () => {

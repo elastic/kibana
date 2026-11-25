@@ -11,7 +11,10 @@ import { PluginType } from '@kbn/core-base-common';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 
-const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
+const createUiPlugins = (
+  pluginDeps: Record<string, string[]>,
+  anonymousPluginIds: string[] = []
+) => {
   const uiPlugins: UiPlugins = {
     internal: new Map(),
     public: new Map(),
@@ -33,6 +36,7 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
       requiredPlugins: [],
       runtimePluginDependencies: [],
       requiredBundles: deps,
+      enabledOnAnonymousPages: anonymousPluginIds.includes(pluginId),
     });
 
     deps.forEach((dep) => addPlugin(dep, []));
@@ -77,5 +81,21 @@ describe('getPluginsBundlePaths', () => {
       bundlePath: '/regular-bundle-path/plugin/b/8.0.0/b.plugin.js',
       publicPath: '/regular-bundle-path/plugin/b/8.0.0/',
     });
+  });
+
+  it('returns only anonymous plugins and their transitive required bundles', () => {
+    const pluginBundlePaths = getPluginsBundlePaths({
+      bundlesHref: '/regular-bundle-path',
+      uiPlugins: createUiPlugins(
+        {
+          anonymous: ['bundleDependency'],
+          authenticated: [],
+        },
+        ['anonymous']
+      ),
+      isAnonymousPage: true,
+    });
+
+    expect([...pluginBundlePaths.keys()].sort()).toEqual(['anonymous', 'bundleDependency']);
   });
 });

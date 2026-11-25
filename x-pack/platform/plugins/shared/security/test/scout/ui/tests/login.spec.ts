@@ -29,6 +29,52 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('userMenuAvatar')).toBeVisible();
   });
 
+  test('loads only plugin entries selected for the login page', async ({
+    context,
+    page,
+    pageObjects,
+    perfTracker,
+    log,
+  }) => {
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Network.enable');
+    perfTracker.captureBundleResponses(cdp);
+
+    await pageObjects.login.goto();
+    await page.testSubj.locator('loginSubmit').waitFor({ state: 'visible' });
+    await perfTracker.waitForJsLoad(cdp);
+
+    const stats = perfTracker.collectJsBundleStats(page.url());
+    const selectedPluginIds = await page.evaluate(
+      () =>
+        (
+          window as typeof window & {
+            __kbnPluginIdsToLoad__?: string[];
+          }
+        ).__kbnPluginIdsToLoad__ ?? []
+    );
+    const loadedPluginEntryIds = stats.plugins.flatMap(({ name, bundles }) =>
+      bundles.some((bundle) => /^plugin-.+\.[a-f0-9]{8,}\.js$/i.test(bundle.name)) ? [name] : []
+    );
+    log.info(
+      `Login loaded ${loadedPluginEntryIds.length} plugin entries across ${
+        stats.bundleCount
+      } JavaScript bundles (${stats.totalSize} transferred bytes): ${loadedPluginEntryIds
+        .sort()
+        .join(', ')}`
+    );
+
+    expect(selectedPluginIds).toContain('core');
+    expect(selectedPluginIds).toContain('security');
+    expect(loadedPluginEntryIds).toContain('core');
+    expect(loadedPluginEntryIds).toContain('security');
+    expect(
+      loadedPluginEntryIds.filter((pluginId) => !selectedPluginIds.includes(pluginId))
+    ).toStrictEqual([]);
+    expect(loadedPluginEntryIds).not.toContain('dashboard');
+    expect(loadedPluginEntryIds).not.toContain('discover');
+  });
+
   test('displays message acknowledging logout', async ({ page, pageObjects }) => {
     await pageObjects.login.loginWithUsernamePassword(username, password);
     await pageObjects.home.goto();
