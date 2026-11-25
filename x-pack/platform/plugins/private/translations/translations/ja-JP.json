@@ -2160,7 +2160,6 @@
     "controls.optionsList.popover.allOptionsTitle": "すべてのオプションを表示",
     "controls.optionsList.popover.ariaLabel": "{fieldName}コントロールのフィルター候補",
     "controls.optionsList.popover.cardinalityLabel": "{totalOptions, number}個の{totalOptions, plural, one {option} other {オプション}}",
-    "controls.optionsList.popover.documentCountScreenReaderText": "{documentCount, number} {documentCount, plural, one {document} other {個のドキュメント}}に出現します",
     "controls.optionsList.popover.documentCountTooltip": "この値は、{documentCount, number} {documentCount, plural, one {document} other {個のドキュメント}}に出現します",
     "controls.optionsList.popover.empty": "オプションが見つかりません",
     "controls.optionsList.popover.emptySelectionPlaceholder": "値を選択",

@@ -2158,7 +2158,6 @@
     "controls.optionsList.popover.allOptionsTitle": "显示所有选项",
     "controls.optionsList.popover.ariaLabel": "针对 {fieldName} 控件的筛选建议",
     "controls.optionsList.popover.cardinalityLabel": "{totalOptions, number} {totalOptions, plural, one {option} other {选项}}",
-    "controls.optionsList.popover.documentCountScreenReaderText": "出现在 {documentCount, number} 个{documentCount, plural, one {document} other {文档}}中",
     "controls.optionsList.popover.documentCountTooltip": "此值出现在 {documentCount, number} {documentCount, plural, one {document} other {文档}} 中",
     "controls.optionsList.popover.empty": "找不到选项",
     "controls.optionsList.popover.emptySelectionPlaceholder": "选择值",

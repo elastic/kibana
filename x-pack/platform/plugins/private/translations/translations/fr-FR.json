@@ -2158,7 +2158,6 @@
     "controls.optionsList.popover.allOptionsTitle": "Afficher toutes les options",
     "controls.optionsList.popover.ariaLabel": "Suggestions de filtre pour le contrôle {fieldName}",
     "controls.optionsList.popover.cardinalityLabel": "{totalOptions, number} {totalOptions, plural, one {option} other {options}}",
-    "controls.optionsList.popover.documentCountScreenReaderText": "Apparaît dans {documentCount, number} {documentCount, plural, one {document} other {documents}}",
     "controls.optionsList.popover.documentCountTooltip": "Cette valeur apparaît dans {documentCount, number} {documentCount, plural, one {document} other {documents}}",
     "controls.optionsList.popover.empty": "Aucune option trouvée",
     "controls.optionsList.popover.emptySelectionPlaceholder": "Sélectionner une valeur",
