@@ -259,65 +259,24 @@ actions:
         description: Dashboards documentation
         url: https://www.elastic.co/docs/explore-analyze/dashboards
       x-displayName: Dashboards
-
   # ──────────────────────────────────────────────
-  # Control `config` discriminators
-  # The `field` variant defaults `values_source` (legacy compat), so the generator omits its discriminator
-  # mapping entry and renderers label that variant with its raw component name. Add the entry back.
+  # Temporary: hide the `lens-dashboard-app` panel type
+  # It is registered only while the `lens.apiFormat` flag is on (dev mode defaults to on, which is how
+  # the OAS snapshot is captured), and is not part of the public Dashboards API.
+  # Route validation still accepts it. Remove these actions once the `lens.apiFormat` flag is removed.
   # ──────────────────────────────────────────────
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-options-list-control'].properties.config.discriminator.mapping"
-    description: Add the `field` discriminator mapping entry
-    update:
-      field: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-pinned-options-list-dsl-control-schema-field'
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-range-slider-control'].properties.config.discriminator.mapping"
-    description: Add the `field` discriminator mapping entry
-    update:
-      field: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-pinned-range-slider-control-schema-field'
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'].properties.config.discriminator.mapping"
-    description: Add the `field` discriminator mapping entry
-    update:
-      field: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'].properties.config.discriminator.mapping"
-    description: Add the `field` discriminator mapping entry
-    update:
-      field: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'
-
-  # The `field` variant's `values_source` is generated as `anyOf: [{ enum: [field] }]` with a default, which renderers
-  # can't merge with the discriminator row (they show `values_source` twice). Flatten it to the same plain
-  # `type: string` + `enum` shape the `esql` variants use. The `remove` must run before the `update`.
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-pinned-options-list-dsl-control-schema-field'].properties.values_source.anyOf"
-    description: Remove the `anyOf` wrapper from `values_source`
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app']"
+    description: Remove the lens-dashboard-app panel schema
     remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-pinned-options-list-dsl-control-schema-field'].properties.values_source"
-    description: Describe `values_source` as a plain enum
-    update:
-      type: string
-      enum:
-        - field
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-pinned-range-slider-control-schema-field'].properties.values_source.anyOf"
-    description: Remove the `anyOf` wrapper from `values_source`
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].properties.panels.items.anyOf[0].discriminator.mapping['lens-dashboard-app']"
+    description: Remove lens-dashboard-app from the dashboard panel discriminator mapping
     remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-pinned-range-slider-control-schema-field'].properties.values_source"
-    description: Describe `values_source` as a plain enum
-    update:
-      type: string
-      enum:
-        - field
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'].properties.values_source.anyOf"
-    description: Remove the `anyOf` wrapper from `values_source`
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].properties.panels.items.anyOf[0].oneOf[?(@['$ref']=='#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app')]"
+    description: Remove lens-dashboard-app from the dashboard panel oneOf
     remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'].properties.values_source"
-    description: Describe `values_source` as a plain enum
-    update:
-      type: string
-      enum:
-        - field
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'].properties.values_source.anyOf"
-    description: Remove the `anyOf` wrapper from `values_source`
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-section'].properties.panels.items.discriminator.mapping['lens-dashboard-app']"
+    description: Remove lens-dashboard-app from the section panel discriminator mapping
     remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'].properties.values_source"
-    description: Describe `values_source` as a plain enum
-    update:
-      type: string
-      enum:
-        - field
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-section'].properties.panels.items.oneOf[?(@['$ref']=='#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app')]"
+    description: Remove lens-dashboard-app from the section panel oneOf
+    remove: true

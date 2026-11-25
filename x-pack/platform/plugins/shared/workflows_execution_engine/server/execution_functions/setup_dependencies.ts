@@ -168,13 +168,15 @@ export async function setupDependencies(
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
     workflowExecutionRepository,
+    stepExecutionRepository,
     logger
   );
 
   const stepIoService = new StepIoService({
     stepRepository: stepExecutionRepository,
     state: workflowExecutionState,
-    evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
+    maxBytes: config.eviction.maxCacheSize.getValueInBytes(),
+    maxEntryBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,
   });
 
@@ -190,7 +192,6 @@ export async function setupDependencies(
   // Create workflow runtime first (simpler, fewer dependencies)
   const workflowRuntime = new WorkflowExecutionRuntimeManager({
     workflowExecution: workflowExecution as EsWorkflowExecution,
-    workflowExecutionGraph,
     workflowExecutionCursor,
     workflowLogger,
     workflowExecutionState,
