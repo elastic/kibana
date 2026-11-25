@@ -92,6 +92,39 @@ export const GetDetectionRuleInputSchema = lazySchema(() =>
 );
 export type GetDetectionRuleInput = z.infer<typeof GetDetectionRuleInputSchema>;
 
+const MAX_TACTIC_LENGTH = 100;
+const MAX_TECHNIQUE_ID_LENGTH = 20;
+
+const MitreTechniqueSchema = lazySchema(() =>
+  z.object({
+    technique: z
+      .string()
+      .min(1)
+      .max(MAX_TECHNIQUE_ID_LENGTH)
+      .describe('MITRE ATT&CK technique ID, e.g. "T1059".'),
+    subTechniques: z
+      .array(z.string().min(1).max(MAX_TECHNIQUE_ID_LENGTH))
+      .max(50)
+      .optional()
+      .describe('Sub-technique IDs, e.g. ["T1059.001"].'),
+  })
+);
+
+const MitreTacticSchema = lazySchema(() =>
+  z.object({
+    tactic: z
+      .string()
+      .min(1)
+      .max(MAX_TACTIC_LENGTH)
+      .describe('MITRE ATT&CK tactic name, e.g. "Execution", "Persistence".'),
+    techniques: z
+      .array(MitreTechniqueSchema)
+      .max(50)
+      .optional()
+      .describe('Techniques associated with this tactic.'),
+  })
+);
+
 const AlertTemplateSchema = lazySchema(() =>
   z.object({
     title: z
@@ -111,10 +144,13 @@ const AlertTemplateSchema = lazySchema(() =>
       .optional()
       .describe('Analyst recommendations when this alert fires.'),
     tactics: z
-      .array(z.string().min(1).max(20))
+      .array(MitreTacticSchema)
       .max(20)
       .optional()
-      .describe('List of MITRE ATT&CK technique IDs, e.g. ["T1059", "T1055"].'),
+      .describe(
+        'MITRE ATT&CK tactics. Each entry has a tactic name (e.g. "Execution") and an optional ' +
+          'techniques array where each technique has a technique ID (e.g. "T1059") and optional subTechniques.'
+      ),
   })
 );
 
