@@ -56,6 +56,10 @@ export const runEsql = async <TRow extends object>(
   }
 };
 
+/** A field's value as the session summaries keep it: trimmed, and empty or `null` as missing. */
+export const cleanedValue = (field: string): string =>
+  `CASE(TRIM(TO_STRING(${field})) IN ("", "null"), null, TRIM(TO_STRING(${field})))`;
+
 /**
  * The documents of `[start, end)`, in `environment` when set, as an ES|QL `filter`. Half-open, so
  * a period and the one before it don't share the document at their boundary.

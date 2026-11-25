@@ -106,6 +106,23 @@ export const registerProcessEventsRoute = (
     );
 };
 
+// Ensure all added events conform to SearchHit<unknown>
+const normalizeToSearchHit = (event: any): SearchHit<unknown> => {
+  // If already a SearchHit (has _index), return as is
+  if (event && typeof event._index === 'string') {
+    return event;
+  }
+  // Otherwise, add minimal required SearchHit fields
+  return {
+    _index: '', // Provide a default or meaningful value if available
+    _id: '',
+    _score: null,
+    _source: event._source,
+    fields: {},
+    sort: [],
+  };
+};
+
 export const fetchEventsAndScopedAlerts = async (
   client: ElasticsearchClient,
   alertsClient: AlertsClient,
@@ -117,6 +134,11 @@ export const fetchEventsAndScopedAlerts = async (
   pageSize = PROCESS_EVENTS_PER_PAGE
 ) => {
   const cursorMillis = cursor && new Date(cursor).getTime() + (forward ? -1 : 1);
+  // The event query ignores a cursor that is not a date, so the alert range must too: Elasticsearch
+  // rejects the range and the alert search then returns no alerts. A cursor that JavaScript parses can
+  // still be rejected by the alert date field (for example 2022/05/08), so send the parsed time.
+  const cursorTime = cursor ? new Date(cursor).getTime() : NaN;
+  const alertsCursor = Number.isNaN(cursorTime) ? undefined : new Date(cursorTime).toISOString();
   const size = Math.min(pageSize, PROCESS_EVENTS_PER_PAGE);
 
   const search = await client.search({
@@ -167,6 +189,20 @@ export const fetchEventsAndScopedAlerts = async (
   const total =
     typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
 
+  if (events.length === 0 && forward && alertsCursor) {
+    // No process event follows the cursor, but alerts raised after it (for example after the alert Session View
+    // opened from) can still exist, so search them from the cursor on.
+    const alertsBody = await searchAlerts(
+      alertsClient,
+      sessionEntityId,
+      ALERTS_PER_PROCESS_EVENTS_PAGE,
+      undefined,
+      [alertsCursor]
+    );
+
+    return { total, events: alertsBody.events.map(normalizeToSearchHit) };
+  }
+
   if (events.length > 0) {
     // go grab any alerts which happened in this page of events.
     const firstEvent = _.first(events)?._source as ProcessEvent;
@@ -184,8 +220,8 @@ export const fetchEventsAndScopedAlerts = async (
       // can be newer than its last event.
       if (forward && events.length < size) {
         alertsRange = [range[0]];
-      } else if (!forward && cursor) {
-        alertsRange = [range[0], cursor];
+      } else if (!forward && alertsCursor) {
+        alertsRange = [range[0], alertsCursor];
       } else {
         alertsRange = range;
       }
@@ -205,23 +241,6 @@ export const fetchEventsAndScopedAlerts = async (
       sessionEntityId,
       range
     );
-
-    // Ensure all added events conform to SearchHit<unknown>
-    const normalizeToSearchHit = (event: any): SearchHit<unknown> => {
-      // If already a SearchHit (has _index), return as is
-      if (event && typeof event._index === 'string') {
-        return event;
-      }
-      // Otherwise, add minimal required SearchHit fields
-      return {
-        _index: '', // Provide a default or meaningful value if available
-        _id: '',
-        _score: null,
-        _source: event._source,
-        fields: {},
-        sort: [],
-      };
-    };
 
     events = [
       ...events,
