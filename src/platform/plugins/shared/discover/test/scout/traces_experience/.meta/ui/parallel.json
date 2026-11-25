@@ -1,5 +1,5 @@
 {
-  "sha1": "4100d9b2cb4908a3ab6c5413a76d8799fed3fc6e",
+  "sha1": "044059e64d74d34b41f8c00b1dd0716a4d3006e8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -283,8 +283,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 31,
-        "column": 61
+        "line": 36,
+        "column": 25
       }
     },
     {
@@ -299,8 +299,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 51,
-        "column": 15
+        "line": 53,
+        "column": 24
       }
     },
     {
@@ -315,8 +315,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 94,
-        "column": 15
+        "line": 95,
+        "column": 19
       }
     },
     {
@@ -331,8 +331,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 105,
-        "column": 85
+        "line": 110,
+        "column": 71
       }
     },
     {
@@ -347,8 +347,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
-        "line": 141,
-        "column": 22
+        "line": 140,
+        "column": 29
       }
     },
     {

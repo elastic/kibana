@@ -16,6 +16,11 @@ import {
   teardownTracesExperience,
 } from '../fixtures';
 
+/** How long the chart gets to answer one hover with the bands it draws from it. */
+const HOVER_ANSWER_MS = 1000;
+/** How long the hovers are repeated while the focused map loads and the chart takes it in. */
+const BANDS_TIMEOUT_MS = 15_000;
+
 spaceTest.describe(
   'Traces in Discover - latency map',
   {
@@ -157,8 +162,8 @@ spaceTest.describe(
           // the chart has its new cells: hovered again until the chart has answered.
           await expect(async () => {
             await charts.hoverLatencyMap();
-            await expect(charts.latencyMapBand(1)).toBeVisible({ timeout: 1000 });
-          }).toPass({ timeout: 15_000 });
+            await expect(charts.latencyMapBand(1)).toBeVisible({ timeout: HOVER_ANSWER_MS });
+          }).toPass({ timeout: BANDS_TIMEOUT_MS });
         });
 
         await spaceTest.step('clicking a band selects the group', async () => {
