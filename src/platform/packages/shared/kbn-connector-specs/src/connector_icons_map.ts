@@ -454,6 +454,23 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
+        )
+    ),
+  ],
+
+  [
+    '.sentinelone2',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
+    ),
+  ],
   [
     '.postgresql',
     lazy(() => import(/* webpackChunkName: "connectorIconPostgresql" */ './specs/postgresql/icon')),
