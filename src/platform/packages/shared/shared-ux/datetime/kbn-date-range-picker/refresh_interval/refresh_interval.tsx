@@ -65,6 +65,10 @@ const getMinCount = (minIntervalMs: number, unit: AutoRefreshIntervalUnit): numb
 const isApplicableCount = (count: number | ''): count is number =>
   typeof count === 'number' && count > 0;
 
+/** Whether `intervalMs` can be applied: above zero and not below the minimum. */
+const isApplicableInterval = (intervalMs: number, minIntervalMs: number): boolean =>
+  intervalMs > 0 && intervalMs >= minIntervalMs;
+
 /**
  * "Refresh every" form: a switch to turn auto-refresh on and off, an interval count and a unit.
  * Turning auto-refresh on also starts the timer, so a second click on play is not needed.
@@ -112,7 +116,7 @@ export function RefreshInterval({
       if (!isApplicableCount(parsed)) return;
 
       const intervalMs = autoRefreshIntervalToMs(parsed, derived.unit);
-      if (intervalMs >= minIntervalMs) {
+      if (isApplicableInterval(intervalMs, minIntervalMs)) {
         onChange({ ...value, intervalMs, intervalDisplayUnit: derived.unit });
       }
     },
@@ -145,10 +149,10 @@ export function RefreshInterval({
     (e: ChangeEvent<HTMLSelectElement>) => {
       const newUnit = e.target.value as AutoRefreshIntervalUnit;
       const currentCount = isApplicableCount(countInput) ? countInput : 1;
-      const count =
-        autoRefreshIntervalToMs(currentCount, newUnit) >= minIntervalMs
-          ? currentCount
-          : getMinCount(minIntervalMs, newUnit);
+      const currentIntervalMs = autoRefreshIntervalToMs(currentCount, newUnit);
+      const count = isApplicableInterval(currentIntervalMs, minIntervalMs)
+        ? currentCount
+        : getMinCount(minIntervalMs, newUnit);
 
       onChange({
         ...value,
