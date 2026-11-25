@@ -31,6 +31,30 @@ const listResponse = (properties: Record<string, unknown>) => ({
   },
 });
 
+// Items numbered in sequence, whose number selects the next page.
+const sequencedResponse = {
+  '200': {
+    description: 'ok',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            channels: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['id'],
+                properties: { id: { type: 'integer', format: 'int32', example: 7 } },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 const query = (...names: string[]) =>
   names.map((name) => ({
     name,
@@ -125,13 +149,62 @@ const spec = {
           { name: 'search_after', in: 'query', schema: { type: 'string' } },
           { name: 'size', in: 'query', schema: { type: 'integer', maximum: 100 } },
         ],
-        responses: listResponse({}),
+        responses: listResponse({
+          channels: {
+            type: 'array',
+            items: {
+              ...channel,
+              properties: { ...channel.properties, sort: { type: 'array', items: {} } },
+            },
+          },
+        }),
       },
     },
     '/charges': {
       get: {
         parameters: query('starting_after_cursor', 'limit'),
         responses: listResponse({}),
+      },
+    },
+    '/since': {
+      get: {
+        parameters: [
+          { name: 'since', in: 'query', schema: { type: 'integer', format: 'int32' } },
+          ...query('limit'),
+        ],
+        responses: sequencedResponse,
+      },
+    },
+    '/since-search': {
+      post: {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: { since: { type: 'integer' }, limit: { type: 'integer' } },
+              },
+            },
+          },
+        },
+        responses: sequencedResponse,
+      },
+    },
+    '/bare-hits': {
+      get: {
+        parameters: query('starting_after_cursor', 'limit'),
+        responses: {
+          '200': {
+            description: 'ok',
+            content: { 'application/json': { schema: { type: 'array', items: channel } } },
+          },
+        },
+      },
+    },
+    '/flagged-hits': {
+      get: {
+        parameters: query('starting_after_cursor', 'limit'),
+        responses: listResponse({ has_more: { type: 'boolean' } }),
       },
     },
     '/users/{id}/items': {
@@ -266,6 +339,42 @@ const pagination: PaginatedOperation[] = [
       style: 'cursor',
       request: { cursorParam: 'starting_after_cursor', sizeParam: 'limit' },
       response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/since' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'since', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'POST', path: '/since-search' },
+    pagination: {
+      style: 'cursor',
+      request: { in: 'body', cursorParam: 'since', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/bare-hits' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'starting_after_cursor', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: '', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/flagged-hits' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'starting_after_cursor', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id', hasMorePath: 'has_more' },
       defaultSize: 2,
     },
   },
@@ -478,6 +587,90 @@ describe('withPagination', () => {
       expect(cursor).not.toBe('C1-2');
       expect(typeof cursor).toBe('string');
       expect(second.body.channels).toHaveLength(1);
+    });
+
+    it('writes a numeric cursor over a number, so the item still matches its schema', async () => {
+      const { fetch, calls } = createMock(3);
+
+      const first = await getJson(fetch, '/since?limit=2');
+      const cursor = first.body.channels[1].id;
+      const second = await getJson(fetch, `/since?limit=2&since=${cursor}`);
+
+      expect(typeof cursor).toBe('number');
+      expect(second.body.channels).toHaveLength(1);
+      expect(calls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
+    });
+
+    it('maps recorded numeric cursors to their position', async () => {
+      const since = { method: 'GET', path: '/since' };
+      const { fetch } = createRecordedMock([
+        {
+          operation: since,
+          request: { query: { limit: '2' } },
+          response: { status: 200, body: { channels: [{ id: 5 }, { id: 4 }] } },
+        },
+        {
+          operation: since,
+          request: { query: { limit: '2', since: '4' } },
+          response: { status: 200, body: { channels: [{ id: 3 }] } },
+        },
+      ]);
+
+      const first = await getJson(fetch, '/since?limit=2');
+      const second = await getJson(fetch, '/since?limit=2&since=4');
+
+      expect([first.body.channels, second.body.channels]).toEqual([
+        [{ id: 5 }, { id: 4 }],
+        [{ id: 3 }],
+      ]);
+    });
+
+    it('reads a numeric cursor from a JSON body', async () => {
+      const { fetch } = createMock(3);
+      const search = async (body: object) => {
+        const response = await fetch('https://api.example.com/since-search', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        return response.json();
+      };
+
+      const first = await search({});
+      const second = await search({ since: first.channels[1].id });
+
+      expect(second.channels).toHaveLength(1);
+    });
+
+    it('pages a body that is the collection itself', async () => {
+      const { fetch } = createMock(3);
+
+      const first = await getJson(fetch, '/bare-hits');
+      const second = await getJson(fetch, `/bare-hits?starting_after_cursor=${first.body[1].id}`);
+
+      expect(second.body).toHaveLength(1);
+    });
+
+    it('pages past the recorded items it is padded to', async () => {
+      const { fetch } = createRecordedMock([hitsPage(undefined, [hit('a', 3), hit('b', 2)])], 3);
+
+      const first = await getJson(fetch, '/hits?size=2');
+      const second = await getJson(
+        fetch,
+        `/hits?size=2&search_after=${first.body.channels[1].sort}`
+      );
+
+      expect(ids(second.body)).toHaveLength(1);
+    });
+
+    it('reports whether more pages follow', async () => {
+      const { fetch } = createMock(3);
+
+      const first = await getJson(fetch, '/flagged-hits');
+      const cursor = first.body.channels[1].id;
+      const second = await getJson(fetch, `/flagged-hits?starting_after_cursor=${cursor}`);
+
+      expect([first.body.has_more, second.body.has_more]).toEqual([true, false]);
     });
 
     it('answers 400 for cursors the mock did not issue', async () => {

@@ -58,8 +58,8 @@ interface Located {
  * How a vendor operation pages, as declared in the connector's manifest. Paths into bodies use
  * lodash syntax; keys containing dots are quoted, e.g. `["@odata.nextLink"]`. An empty
  * `itemsPath` means the body is the collection itself, which leaves no room in it for a next
- * cursor, URL or total: such operations page by offset, page number, `Link` header or a cursor
- * in a header.
+ * cursor, URL or total: such operations page by offset, page number, `Link` header, or a cursor
+ * in a header or in the last item.
  */
 export type PaginationDescriptor =
   | {
@@ -145,6 +145,9 @@ type RequestParameters = Pick<ContractRequest, 'query' | 'headers' | 'body'>;
 const DEFAULT_COLLECTION_SIZE = 3;
 const DEFAULT_PAGE_SIZE = 10;
 const CURSOR_PREFIX = 'contract-mock:';
+// A numeric cursor field needs a numeric cursor: the mock's own start here, above likely IDs
+// and within int32.
+const NUMERIC_CURSOR_BASE = 2_000_000_000;
 // Opaque next-page URLs carry the mock's own cursor.
 const OPAQUE_REQUEST: CursorRequest = { cursorParam: MOCK_PAGE_PARAM };
 
@@ -152,12 +155,18 @@ const encodeCursor = (position: number): string =>
   Buffer.from(`${CURSOR_PREFIX}${position}`).toString('base64url');
 
 const decodeCursor = (cursor: string): number | undefined => {
+  if (/^\d+$/.test(cursor) && Number(cursor) >= NUMERIC_CURSOR_BASE) {
+    return Number(cursor) - NUMERIC_CURSOR_BASE;
+  }
   const decoded = Buffer.from(cursor, 'base64url').toString();
   const position = Number(decoded.slice(CURSOR_PREFIX.length));
   return decoded.startsWith(CURSOR_PREFIX) && Number.isInteger(position) && position >= 0
     ? position
     : undefined;
 };
+
+// Cursors are compared as strings, whether the vendor sends them as strings or numbers.
+const asCursor = (value: unknown): unknown => (typeof value === 'number' ? String(value) : value);
 
 const readParameter = (
   { query, headers, body }: RequestParameters,
@@ -210,7 +219,7 @@ const readStart = (
   recordedPositions?: ReadonlyMap<string, number>
 ): number | undefined => {
   if ('cursorParam' in request) {
-    const cursor = read(request.cursorParam);
+    const cursor = asCursor(read(request.cursorParam));
     if (cursor === undefined || cursor === '') {
       return 0;
     }
@@ -283,18 +292,23 @@ const LINK_NEXT = /<([^>]+)>[^,]*rel="?next"?/;
 const getItems = (body: unknown, itemsPath: string): unknown =>
   itemsPath === '' ? body : isRecord(body) ? get(body, itemsPath) : undefined;
 
-// The items with `cursor` written over the value at `path` in the last one, as a string where it
-// holds one and as a one-element array otherwise.
+// The items with the cursor for `position` written over the value at `path` in the last one, in
+// that value's shape: a one-element array, a number or else a string.
 const withLastItemCursor = (
   items: readonly unknown[],
-  path: string,
-  cursor: string
+  { path, position, recorded }: { path: string; position: number; recorded?: string }
 ): readonly unknown[] => {
   const item = cloneDeep(last(items));
   if (!isRecord(item)) {
     return items;
   }
-  set(item, path, typeof get(item, path) === 'string' ? cursor : [cursor]);
+  const held: unknown = get(item, path);
+  if (typeof held === 'number') {
+    set(item, path, Number(recorded ?? NUMERIC_CURSOR_BASE + position));
+  } else {
+    const cursor = recorded ?? encodeCursor(position);
+    set(item, path, Array.isArray(held) ? [cursor] : cursor);
+  }
   return [...items.slice(0, -1), item];
 };
 
@@ -316,7 +330,7 @@ const readRecordedNext = (
     }
     const items = getItems(body, itemsPath);
     const held: unknown = Array.isArray(items) ? get(last(items), nextPath) : undefined;
-    return Array.isArray(held) ? held.join(',') : held;
+    return Array.isArray(held) ? held.join(',') : asCursor(held);
   } else if (pagination.style === 'link') {
     url = LINK_NEXT.exec(header('link') ?? '')?.[1];
   } else if (pagination.style === 'next_url') {
@@ -358,7 +372,7 @@ const readRecordedPage = (
   };
   const read = (name: string) => readParameter(parameters, parameterLocation(pagination), name);
   const pageRequest = requestOf(pagination);
-  const cursor = 'cursorParam' in pageRequest ? read(pageRequest.cursorParam) : '';
+  const cursor = 'cursorParam' in pageRequest ? asCursor(read(pageRequest.cursorParam)) : '';
   const next = readRecordedNext(pagination, response);
   return typeof cursor === 'string' && cursor !== ''
     ? [{ items, cursor, next }]
@@ -548,7 +562,11 @@ const paginate = (
   // A last item's cursor points past it, on the last page too: the next page is then empty.
   const items =
     pagination.style === 'cursor' && pagination.response.in === 'last_item'
-      ? withLastItemCursor(slice, pagination.response.nextPath, cursorAt(start + slice.length))
+      ? withLastItemCursor(slice, {
+          path: pagination.response.nextPath,
+          position: start + slice.length,
+          recorded: recorded?.cursors.get(start + slice.length),
+        })
       : slice;
   const page: object =
     itemsPath === '' || !isRecord(body) ? items : set(cloneDeep(body), itemsPath, items);
