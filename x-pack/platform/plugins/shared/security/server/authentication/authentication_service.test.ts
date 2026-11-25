@@ -943,6 +943,24 @@ describe('AuthenticationService', () => {
         ).toHaveBeenCalledTimes(1);
       });
 
+      it('retries with the credential alone even with the UIAM service', async () => {
+        const uiam = uiamServiceMock.create();
+        service.start({ ...mockStartAuthenticationParams, uiam });
+        serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
+          authorization: 'Bearer essu_fresh_token',
+        });
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer essu_stale_token' },
+        });
+
+        await selfClientHandler(handlerOptions(request), toolkit);
+
+        expect(uiam.getAuthenticationHeaders).not.toHaveBeenCalled();
+        expect(toolkit.retry).toHaveBeenCalledWith({
+          authHeaders: { authorization: 'Bearer essu_fresh_token' },
+        });
+      });
+
       it('retries with the replaced credential for a service-account-bound fake request', async () => {
         serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
           authorization: 'Bearer essu_fresh_token',
@@ -1195,6 +1213,67 @@ describe('AuthenticationService', () => {
           });
           // The session machinery must never run for fake requests.
           expect(reauthenticate).not.toHaveBeenCalled();
+        });
+
+        describe('with the UIAM service', () => {
+          let uiam: ReturnType<typeof uiamServiceMock.create>;
+          const request = httpServerMock.createFakeKibanaRequest({
+            headers: { authorization: 'Bearer essu_stale_token' },
+          });
+
+          beforeEach(() => {
+            uiam = uiamServiceMock.create();
+            service.start({ ...mockStartAuthenticationParams, uiam });
+          });
+
+          it('retries a re-minted UIAM token with an assertion of its own', async () => {
+            serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
+              authorization: 'Bearer essu_fresh_token',
+            });
+
+            await unauthorizedErrorHandler(
+              { error: fakeRequestError, request },
+              mockUnauthorizedErrorToolkit
+            );
+
+            expect(uiam.getAuthenticationHeaders).toHaveBeenCalledTimes(1);
+            expect(uiam.getAuthenticationHeaders).toHaveBeenCalledWith('essu_fresh_token');
+            expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+              authHeaders: {
+                authorization: 'Bearer essu_fresh_token',
+                'x-client-authentication': 'Assertion some-assertion',
+              },
+            });
+          });
+
+          it('retries a re-minted credential that is not a UIAM token as is', async () => {
+            serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
+              authorization: 'Bearer regular_fresh_token',
+            });
+
+            await unauthorizedErrorHandler(
+              { error: fakeRequestError, request },
+              mockUnauthorizedErrorToolkit
+            );
+
+            expect(uiam.getAuthenticationHeaders).not.toHaveBeenCalled();
+            expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+              authHeaders: { authorization: 'Bearer regular_fresh_token' },
+            });
+          });
+
+          it('does not handle the error when no replacement is minted', async () => {
+            serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue(null);
+
+            await unauthorizedErrorHandler(
+              { error: fakeRequestError, request },
+              mockUnauthorizedErrorToolkit
+            );
+
+            expect(uiam.getAuthenticationHeaders).not.toHaveBeenCalled();
+            expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+            expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+          });
         });
 
         it('does not handle the error when the request is not service-account-bound', async () => {

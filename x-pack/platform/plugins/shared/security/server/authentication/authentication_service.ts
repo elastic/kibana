@@ -21,7 +21,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamBearerCredential } from '@kbn/core-security-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -122,6 +122,7 @@ export class AuthenticationService {
   private authenticator?: Authenticator;
   private session?: PublicMethodsOf<Session>;
   private authHeadersStorage?: IAuthHeadersStorage;
+  private uiam?: UiamServicePublic;
 
   constructor(private readonly logger: Logger) {}
 
@@ -368,7 +369,19 @@ export class AuthenticationService {
           const authHeaders = await getServiceAccounts()
             ?.backend.reauthenticateFakeRequest(request)
             .catch(() => null);
-          return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
+          if (!authHeaders) {
+            return toolkit.notHandled();
+          }
+
+          // A signed assertion is bound to its credential, so a re-minted UIAM token is sent with
+          // one of its own, as a renewed session token is.
+          const credential = HTTPAuthorizationHeader.parseFromValue(authHeaders.authorization);
+          return toolkit.retry({
+            authHeaders:
+              this.uiam && credential && isUiamBearerCredential(credential)
+                ? this.uiam.getAuthenticationHeaders(credential.credentials)
+                : authHeaders,
+          });
         }
 
         const credentials = await this.authenticator.reauthenticate(request, failedAuthHeaders);
@@ -447,6 +460,8 @@ export class AuthenticationService {
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
+
+    this.uiam = uiam;
 
     const { authHeadersStorage } = this;
     if (!authHeadersStorage) {
