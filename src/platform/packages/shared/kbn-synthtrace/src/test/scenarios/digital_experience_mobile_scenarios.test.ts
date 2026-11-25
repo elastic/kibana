@@ -37,6 +37,7 @@ import type { SynthGenerator } from '../../lib/utils/with_client';
 import singleInstallation from '../../scenarios/digital_experience_mobile_single_installation';
 import singleSession from '../../scenarios/digital_experience_mobile_single_session';
 import native from '../../scenarios/digital_experience_mobile_native';
+import releases from '../../scenarios/digital_experience_mobile_releases';
 import mixed from '../../scenarios/digital_experience_mixed';
 import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
@@ -328,7 +329,7 @@ describe('digital experience mobile scenarios', () => {
       const otelServices = new Set(
         docs.flatMap((doc) => (isOtel(doc) ? [otelServiceOf(doc)] : []))
       );
-      [...REACT_NATIVE_SERVICES, ...NATIVE_SERVICES].forEach((service) =>
+      [...REACT_NATIVE_SERVICES, ...NATIVE_SERVICES, 'release-train-mobile'].forEach((service) =>
         expect(otelServices).toContain(service)
       );
       const classicServices = new Set(
@@ -349,6 +350,64 @@ describe('digital experience mobile scenarios', () => {
       REACT_NATIVE_SERVICES.forEach((service) =>
         expect(mobileServicesWithSessionStart).not.toContain(service)
       );
+    });
+  });
+
+  describe('digital_experience_mobile_releases', () => {
+    const from = new Date('2026-10-16T00:00:00.000Z').getTime();
+    const to = from + 24 * 60 * MINUTE_MS;
+    const rolloutStart = from + 12 * 60 * MINUTE_MS;
+    let docs: OtelDocument[];
+
+    beforeAll(async () => {
+      docs = await run(releases, { scenarioOpts: { seed: 'releases', scale: 0.25 }, from, to });
+    });
+
+    const versionOf = (doc: OtelDocument) => String(resourceOf(doc)['service.version']);
+
+    it('writes one app on seven releases, more than the five the release health names', () => {
+      expect(new Set(docs.map((doc) => resourceOf(doc)['service.name']))).toEqual(
+        new Set(['release-train-mobile'])
+      );
+      expect(new Set(docs.map(versionOf)).size).toBe(7);
+    });
+
+    it('rolls the newest release out halfway into the run, so it first appears inside it', () => {
+      const newest = docs.filter((doc) => versionOf(doc) === '6.0.0');
+
+      const firstSeen = Math.min(...newest.map((doc) => Number(doc['@timestamp'])));
+
+      expect(newest.length).toBeGreaterThan(0);
+      // Not even a session that ends after the start but started before it
+      expect(firstSeen).toBeGreaterThanOrEqual(rolloutStart);
+      expect(firstSeen).toBeLessThan(to);
+    });
+
+    it('raises the error rate of the newest release on Android too, where only transport failures are exceptions', async () => {
+      const androidDocs = await run(releases, {
+        scenarioOpts: { seed: 'releases-android', scale: 0.25, platform: 'android' },
+        from,
+        to,
+      });
+      // Exceptions per session, as the mobile error rate counts them
+      const errorRateOf = (isNewest: boolean) => {
+        const ofRelease = androidDocs.filter((doc) => (versionOf(doc) === '6.0.0') === isNewest);
+        const sessions = new Set(
+          ofRelease.flatMap((doc) => {
+            const sessionId = attributesOf(doc)['session.id'];
+            return sessionId === undefined ? [] : [sessionId];
+          })
+        );
+        const exceptions = ofRelease.filter(
+          (doc) => attributesOf(doc)['exception.type'] !== undefined
+        );
+        return exceptions.length / sessions.size;
+      };
+
+      expect(new Set(androidDocs.map((doc) => resourceOf(doc)['os.name']))).toEqual(
+        new Set(['Android'])
+      );
+      expect(errorRateOf(true)).toBeGreaterThan(2 * errorRateOf(false));
     });
   });
 });
