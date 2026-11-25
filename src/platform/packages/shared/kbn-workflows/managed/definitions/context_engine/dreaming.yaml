@@ -281,13 +281,13 @@ steps:
                 An EXISTING item with attributes["memory.edited_by"] was edited by a person, and its text cannot change. When a memory changes or contradicts what it says, write what the memory says as a new item, and do not return the edited item's ref for that memory. When a memory only restates it, record the sighting as usual.
                 {%- if consts.fact_types.size > 0 %}
 
-                Facts are read on their own, so write each one to stand alone: name what it is about in its title and content, keep every name, number, code and date exactly as stated, and give dates in full rather than as "yesterday" or "next week", working them out from when the memory was saved (its updated_at).
+                Facts are read on their own, so write each one to stand alone: name what it is about in its title and content, keep every name, number, code and date exactly as stated, and give dates in full rather than as "yesterday" or "next week", working them out from when the memory was saved (its updated_at). When a memory says something happened, was done or changed without saying when, write when it was known, such as "as of January 8, 2023", from when the memory was saved.
 
                 State the knowledge itself rather than copying the memory, and leave out how it was found and where it came from. When a memory holds several separate pieces of knowledge, write a fact for each.
                 {%- endif %}
                 {%- if consts.entity_types.size > 0 %}
 
-                Give every entity a content summary of what is known about it: its attribute values and the main facts about it. Name each entity by its canonical name, the same way every time: an entity is kept by its type and name, so one named the same as an EXISTING entity or in other MEMORIES is the same entity.
+                Give every entity a content summary of what is known about it: its attribute values and the main facts about it. Name each entity by its canonical name, the same way every time: an entity is kept by its type and name, so one named the same as an EXISTING entity or in other MEMORIES is the same entity. Something the MEMORIES do not name, such as the user's sister, is still an entity: name it the way they refer to it, such as "Sister".
                 {%- endif %}
 
                 Give an entity or fact access_patterns when the MEMORIES show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the MEMORIES; return none rather than invent an index or field. Each has:

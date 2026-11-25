@@ -316,6 +316,17 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       expect(rendered).toContain('Name each entity by its canonical name, the same way every time');
     });
 
+    it('dates what happened from when the memory was saved, and keeps unnamed entities', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain(
+        'without saying when, write when it was known, such as "as of January 8, 2023", from when the memory was saved'
+      );
+      expect(rendered).toContain(
+        "Something the MEMORIES do not name, such as the user's sister, is still an entity"
+      );
+    });
+
     it('tells the model not to create a kind with no types configured', () => {
       expect(prompt({ entityTypes: [] })).toContain(
         'ENTITY TYPES:\nnone: do not create entities.\n\nINSTRUCTIONS:'
