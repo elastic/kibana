@@ -22,8 +22,7 @@ export interface UnsupportedSource {
   reason: string;
 }
 
-/** Answers why feature identification would refuse to sample the source, with its own guard. */
-export const getSamplingProblem = async ({
+export const canOnboard = async ({
   index,
   esClient,
   logger,
@@ -31,15 +30,17 @@ export const getSamplingProblem = async ({
   index: string;
   esClient: ElasticsearchClient;
   logger: Logger;
-}): Promise<string | undefined> => {
+}): Promise<{ canOnboard: true } | { canOnboard: false; reason: string }> => {
   const signal = timeoutSignal(PROBE_TIMEOUT_MS);
   try {
     const probe = await probeSampleColumns({ esClient, index, logger, signal });
-    return probe.kind === 'unsupported' ? probe.problem : undefined;
+    return probe.kind === 'unsupported'
+      ? { canOnboard: false, reason: probe.problem }
+      : { canOnboard: true };
   } catch (error) {
     // The probe could not answer: the run decides.
     logger.debug(() => `Probe of [${index}] failed: ${parseError(error).message}`);
-    return undefined;
+    return { canOnboard: true };
   } finally {
     signal.dispose();
   }
@@ -85,22 +86,23 @@ export const selectSupportedCandidates = async ({
     );
     const batch = candidates.slice(next, next + batchSize);
     next += batch.length;
-    const problems = await Promise.all(
+    const results = await Promise.all(
       batch.map(async ({ sourceId }) => {
         const index = viewNames.get(sourceId);
         if (index === undefined) {
           throw new Error(`Missing view name for source [${sourceId}]`);
         }
-        return getSamplingProblem({ index, esClient, logger });
+        return canOnboard({ index, esClient, logger });
       })
     );
 
     batch.forEach((candidate, position) => {
-      const reason = problems[position];
-      if (reason === undefined) {
+      const result = results[position];
+      if (result.canOnboard) {
         toSchedule.push(candidate);
         return;
       }
+      const { reason } = result;
       const { sourceId, sourceSlug } = candidate;
       logger.debug(() => `Not scheduling onboarding of source ${sourceId}: ${reason}`);
       unsupported.push({ sourceId, sourceSlug, reason });

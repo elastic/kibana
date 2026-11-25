@@ -13,7 +13,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { forbidden } from '@hapi/boom';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { getSamplingProblem } from '../extraction/select_supported_candidates';
+import { canOnboard } from '../extraction/select_supported_candidates';
 import { internalKIOnboardingRoutes } from './route';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
@@ -21,7 +21,7 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
 }));
 
 jest.mock('../extraction/select_supported_candidates', () => ({
-  getSamplingProblem: jest.fn(),
+  canOnboard: jest.fn(),
 }));
 
 const mockResolveNightshiftModelForRequest = jest.fn(async ({ step }: { step: string }) =>
@@ -187,14 +187,10 @@ describe('canOnboardRoute', () => {
       }),
     } as unknown as Parameters<typeof canOnboardRoute.handler>[0];
 
-    jest.mocked(getSamplingProblem).mockResolvedValueOnce('no @timestamp');
-    await expect(canOnboardRoute.handler(handlerParams)).resolves.toEqual({
-      canOnboard: false,
-      reason: 'no @timestamp',
-    });
-
-    jest.mocked(getSamplingProblem).mockResolvedValueOnce(undefined);
-    await expect(canOnboardRoute.handler(handlerParams)).resolves.toEqual({ canOnboard: true });
+    const refusal = { canOnboard: false, reason: 'no @timestamp' } as const;
+    jest.mocked(canOnboard).mockResolvedValueOnce(refusal);
+    await expect(canOnboardRoute.handler(handlerParams)).resolves.toEqual(refusal);
+    expect(canOnboard).toHaveBeenCalledWith(expect.objectContaining({ index: 'view-logs-test' }));
   });
 });
 

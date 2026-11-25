@@ -28,7 +28,7 @@ import {
   MAX_SOURCES_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
-import { getSamplingProblem } from '../extraction/select_supported_candidates';
+import { canOnboard } from '../extraction/select_supported_candidates';
 
 const timestampFromString = z
   .string()
@@ -270,12 +270,7 @@ const canOnboardRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const { source } = await sourcesClient.get(params.path.sourceId);
-    const reason = await getSamplingProblem({
-      index: source.view_name,
-      esClient: streamDataEsClient,
-      logger,
-    });
-    return reason === undefined ? { canOnboard: true } : { canOnboard: false, reason };
+    return canOnboard({ index: source.view_name, esClient: streamDataEsClient, logger });
   },
 });
 
