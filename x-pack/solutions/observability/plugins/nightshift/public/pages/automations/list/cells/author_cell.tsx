@@ -9,10 +9,12 @@ import React from 'react';
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export const AutomationAuthorCell = ({ name }: { name: string }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ minWidth: 0 }}>
     <EuiFlexItem grow={false}>
       <EuiAvatar size="s" name={name} />
     </EuiFlexItem>
-    <EuiFlexItem className="eui-textTruncate">{name}</EuiFlexItem>
+    <EuiFlexItem className="eui-textTruncate" css={{ minWidth: 0 }} title={name}>
+      {name}
+    </EuiFlexItem>
   </EuiFlexGroup>
 );

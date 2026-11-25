@@ -271,6 +271,7 @@ export const AutomationsPage = (): React.ReactElement => {
             announceOnMount
             size="s"
             title={listLabels.lastRunLoadErrorTitle}
+            text={listLabels.lastRunLoadErrorDescription}
             actionProps={{
               primary: {
                 children: RETRY_BUTTON_LABEL,

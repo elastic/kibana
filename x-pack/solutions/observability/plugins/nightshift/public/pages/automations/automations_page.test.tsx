@@ -779,6 +779,7 @@ describe('AutomationsPage', () => {
       expect(within(row).getByText('Unavailable')).toBeVisible();
       expect(row.querySelector('time')).not.toBeInTheDocument();
       expect(screen.getByText('Could not load last run times')).toBeVisible();
+      expect(screen.getByText('This only affects the Last run column.')).toBeVisible();
       fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
       expect(retryLastRuns).toHaveBeenCalledTimes(1);
     });

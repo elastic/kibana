@@ -113,7 +113,7 @@ export const AutomationsTable = ({
     {
       field: 'name',
       name: listLabels.automationColumn,
-      width: '160px',
+      width: '108px',
       sortable: true,
       render: (_name: string, automation: Automation) => (
         <AutomationNameCell
@@ -129,7 +129,7 @@ export const AutomationsTable = ({
     {
       field: 'author',
       name: listLabels.author,
-      width: '96px',
+      width: '98px',
       sortable: getAuthorName,
       render: (_author: string, automation: Automation) => (
         <AutomationAuthorCell name={getAuthorName(automation)} />
@@ -137,7 +137,7 @@ export const AutomationsTable = ({
     },
     {
       name: listLabels.trigger,
-      width: '104px',
+      width: '84px',
       render: ({ trigger }: Automation) => {
         const triggers = new Map(
           trigger.rows.map((row) => {
@@ -170,7 +170,7 @@ export const AutomationsTable = ({
     },
     {
       name: listLabels.destinationColumn,
-      width: '176px',
+      width: '130px',
       render: ({ completions = [], trigger }: Automation) => {
         const destinations = completions.flatMap(({ action, targetMode, destination }) => {
           if (action !== 'post_to_slack') return [];
@@ -199,7 +199,7 @@ export const AutomationsTable = ({
     {
       field: 'lastRunAt',
       name: listLabels.lastRunColumn,
-      width: '144px',
+      width: '112px',
       nameTooltip: { content: listLabels.lastRunTooltip },
       sortable: ({ id }) => lastRuns?.[id] ?? '',
       render: (_value: undefined, { id }: Automation) => {
@@ -219,7 +219,7 @@ export const AutomationsTable = ({
     ...runCountColumns.map(({ status, name, tooltip, width, getViewLabel }) => ({
       field: `runs-${status}`,
       name,
-      nameTooltip: { content: tooltip },
+      description: tooltip,
       width,
       align: 'right' as const,
       sortable: (automation: Automation) => runCounts.get(automation.id)?.[status] ?? 0,
@@ -238,8 +238,8 @@ export const AutomationsTable = ({
     {
       field: 'usage',
       name: listLabels.usage,
-      nameTooltip: { content: listLabels.usageTooltip },
-      width: '152px',
+      description: listLabels.usageTooltip,
+      width: '112px',
       align: 'right' as const,
       sortable: (automation) => usedToday.get(automation.id) ?? 0,
       render: (_usage: unknown, automation: Automation) => (
@@ -254,7 +254,7 @@ export const AutomationsTable = ({
     {
       field: 'isEnabled',
       name: listLabels.enabled,
-      width: '96px',
+      width: '74px',
       sortable: true,
       render: (isEnabled: boolean, automation: Automation) => (
         <EuiToolTip content={editDisabledReason}>
@@ -295,7 +295,7 @@ export const AutomationsTable = ({
       ? [
           {
             name: '',
-            width: '40px',
+            width: '32px',
             align: 'right' as const,
             render: (automation: Automation) => (
               <AutomationActions
@@ -339,6 +339,7 @@ export const AutomationsTable = ({
         rowHeader="name"
         tableCaption={listLabels.title}
         tableLayout="fixed"
+        compressed
         hasBackground={false}
         rowProps={(automation: Automation) => ({
           onClick: (event: React.MouseEvent<HTMLElement>) => {
