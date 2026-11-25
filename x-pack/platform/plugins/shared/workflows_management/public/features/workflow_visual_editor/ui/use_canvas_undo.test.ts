@@ -27,10 +27,13 @@ const press = (init: KeyboardEventInit, target: EventTarget = window) => {
   return event;
 };
 
-const renderUndo = (editor: Editor | null, store: string, withRef = true) => {
+const renderUndo = (editor: Editor | null, store: string, withRef = true, enabled = true) => {
   const editorRef: MutableRefObject<Editor | null> = { current: editor };
   const yamlStringRef: MutableRefObject<string> = { current: store };
-  return renderHook(() => useCanvasUndo(withRef ? editorRef : undefined, yamlStringRef));
+  return renderHook(
+    ({ isEnabled }) => useCanvasUndo(withRef ? editorRef : undefined, yamlStringRef, isEnabled),
+    { initialProps: { isEnabled: enabled } }
+  );
 };
 
 describe('useCanvasUndo', () => {
@@ -87,7 +90,7 @@ describe('useCanvasUndo', () => {
     const { editor, trigger } = makeEditor('name: a\n');
     const editorRef: MutableRefObject<Editor | null> = { current: editor };
     const yamlStringRef: MutableRefObject<string> = { current: 'name: a\n' };
-    renderHook(() => useCanvasUndo(editorRef, yamlStringRef));
+    renderHook(() => useCanvasUndo(editorRef, yamlStringRef, true));
 
     yamlStringRef.current = 'name: b\n';
     press({ key: 'z', metaKey: true });
@@ -145,6 +148,24 @@ describe('useCanvasUndo', () => {
     unmount();
     expect(press({ key: 'z', metaKey: true }).defaultPrevented).toBe(false);
     expect(trigger).not.toHaveBeenCalled();
+  });
+
+  it('leaves ⌘Z alone while disabled, and takes over again once enabled', () => {
+    const { editor, trigger } = makeEditor('name: a\n');
+    const { rerender } = renderUndo(editor, 'name: a\n', true, false);
+
+    const ignored = press({ key: 'z', metaKey: true });
+    expect(ignored.defaultPrevented).toBe(false);
+    expect(trigger).not.toHaveBeenCalled();
+
+    rerender({ isEnabled: true });
+    const handled = press({ key: 'z', metaKey: true });
+    expect(handled.defaultPrevented).toBe(true);
+    expect(trigger).toHaveBeenCalledTimes(1);
+
+    rerender({ isEnabled: false });
+    expect(press({ key: 'z', metaKey: true }).defaultPrevented).toBe(false);
+    expect(trigger).toHaveBeenCalledTimes(1);
   });
 
   it('swallows the key press when the editor ref is still empty, as before', () => {

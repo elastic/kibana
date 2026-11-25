@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiToolTip,
   useEuiShadow,
 } from '@elastic/eui';
@@ -413,7 +414,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
            * The bottom bar floats (position:absolute) and overlays both layers.
            */}
           <div css={[styles.editorLayer, styles.yamlLayer]} {...(showGraph ? { inert: '' } : {})}>
-            <React.Suspense fallback={null}>
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
               <WorkflowYAMLEditor
                 highlightDiff={highlightDiff}
                 onStepRun={handleStepRun}
@@ -439,7 +440,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
               ]}
               {...(showGraph ? {} : { inert: '' })}
             >
-              <React.Suspense fallback={null}>
+              <React.Suspense fallback={<EuiLoadingSpinner />}>
                 <WorkflowVisualEditor
                   // Without the permission to test a step the visual editor offers no Run controls.
                   onStepRun={canTestStep ? handleStepRun : undefined}
@@ -475,7 +476,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
         </EuiFlexItem>
         {isExecutionGraphEnabled && (
           <EuiFlexItem css={styles.visualEditor}>
-            <React.Suspense fallback={null}>
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
               <ExecutionGraph />
             </React.Suspense>
           </EuiFlexItem>

@@ -107,7 +107,7 @@ function ViewToggle({
     {
       id: 'graph',
       iconType: 'workflow',
-      label: i18n.translate('workflowsUi.bottomBar.editorViewGraph', {
+      label: i18n.translate('workflowsUi.bottomBar.editorViewVisualBuilder', {
         defaultMessage: 'Visual builder',
       }),
     },

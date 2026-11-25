@@ -166,13 +166,15 @@ export function WorkflowConstantsEditor({
         }
         titleSize="xs"
         body={
-          <p>
-            {i18n.translate('workflows.workflowSettingsFlyout.noConstantsBody', {
-              defaultMessage:
-                'Constants are fixed values reused across steps — a channel name, an API base URL, a case owner. They are stored in the workflow definition and visible to anyone who can edit it. Reference them as {reference}.',
-              values: { reference: 'consts.<name>' },
-            })}
-          </p>
+          <EuiText size="s">
+            <p>
+              {i18n.translate('workflows.workflowSettingsFlyout.noConstantsBody', {
+                defaultMessage:
+                  'Constants are fixed values reused across steps — a channel name, an API base URL, a case owner. They are stored in the workflow definition and visible to anyone who can edit it. Reference them as {reference}.',
+                values: { reference: 'consts.<name>' },
+              })}
+            </p>
+          </EuiText>
         }
         actions={
           readOnly || hideInlineAddButton ? undefined : (
@@ -189,11 +191,6 @@ export function WorkflowConstantsEditor({
           )
         }
         data-test-subj="workflowSettingsConstEmpty"
-        css={{
-          '.euiEmptyPrompt__content .euiText': {
-            fontSize: '0.875rem',
-          },
-        }}
       />
     );
   }

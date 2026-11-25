@@ -11,6 +11,7 @@ export {
   CONTAINER_STEP_TYPES,
   FOREACH_GROUP_EMPTY_HEIGHT,
   TRIGGER_STEP_TYPES,
+  isStep,
   type EdgeBranchType,
   type FallbackLane,
   type ForeachGroup,

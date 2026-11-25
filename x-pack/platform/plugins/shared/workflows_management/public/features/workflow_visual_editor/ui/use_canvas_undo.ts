@@ -31,13 +31,17 @@ const OWN_UNDO_TARGETS =
  *    works.
  *  - An undo changes the YAML under an open step panel; the shell notices
  *    (`resolveExternalStepFragment`) and gives the panel the step as it now is (`syncedFragment`).
+ *
+ * `enabled` only controls the key listener: the canvas stays mounted (read-only) when the user
+ * cannot author or is looking at the YAML view, and there ⌘Z must keep its default behaviour.
  */
 export const useCanvasUndo = (
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | null> | undefined,
-  yamlStringRef: MutableRefObject<string>
+  yamlStringRef: MutableRefObject<string>,
+  enabled: boolean
 ): void => {
   useEffect(() => {
-    if (!editorRef) return undefined;
+    if (!enabled || !editorRef) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
       // Shift turns ⌘Z into redo, which the workflow has no canvas gesture for.
       if (event.shiftKey) return;
@@ -57,5 +61,5 @@ export const useCanvasUndo = (
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [editorRef, yamlStringRef]);
+  }, [enabled, editorRef, yamlStringRef]);
 };

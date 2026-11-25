@@ -461,26 +461,6 @@ export const WorkflowDetailHeader = React.memo(
 
     const appMenu = useMemo<AppMenuConfig>(() => {
       const items: AppMenuItemType[] = [];
-      if (workflowId && !isManagedWorkflow) {
-        items.push({
-          id: 'workflowAccess',
-          overflow: true,
-          label: i18n.translate('workflows.access.openButtonLabel', { defaultMessage: 'Access' }),
-          iconType: 'users',
-          run: () => setIsAccessOpen(true),
-          testId: 'workflowAccessButton',
-          disableButton: !canManageAccess,
-          tooltipContent: !canManageAccess
-            ? workflow?.permissions?.manage === false
-              ? i18n.translate('workflows.access.ownerOnlyTooltip', {
-                  defaultMessage: 'Only the workflow owner can manage access.',
-                })
-              : i18n.translate('workflows.access.updatePrivilegeTooltip', {
-                  defaultMessage: 'You need the Workflows Update privilege to manage access.',
-                })
-            : undefined,
-        });
-      }
       // History first (order 0), then Executions (order 1) — matches header chrome.
       if (historyItem) {
         items.push(historyItem);
@@ -530,8 +510,6 @@ export const WorkflowDetailHeader = React.memo(
       isYamlSynced,
       hasUnsavedChanges,
       saveWorkflowTooltipContent,
-      canManageAccess,
-      workflow?.permissions?.manage,
     ]);
 
     const share = useMemo(() => {

@@ -22,7 +22,10 @@ import {
   overlayValueSample,
   toReferenceIconType,
 } from './build_data_reference_catalog';
-import { getDocumentOrderPredecessors } from './get_document_order_predecessors';
+import {
+  getAllDocumentOrderSteps,
+  getDocumentOrderPredecessors,
+} from './get_document_order_predecessors';
 import { getStepScope } from './get_step_scope';
 
 describe('getDocumentOrderPredecessors', () => {
@@ -100,6 +103,53 @@ describe('getDocumentOrderPredecessors', () => {
       'fallback_case',
       'fan',
     ]);
+  });
+
+  describe('fallback steps', () => {
+    const steps = [
+      { name: 'a', type: 'console' },
+      {
+        name: 'b',
+        type: 'console',
+        'on-failure': { fallback: [{ name: 'recover', type: 'console' }] },
+      },
+      { name: 'c', type: 'console' },
+      {
+        name: 'each',
+        type: 'foreach',
+        steps: [{ name: 'body', type: 'console' }],
+        'iteration-on-failure': { fallback: [{ name: 'skip', type: 'console' }] },
+      },
+      { name: 'after', type: 'console' },
+    ];
+    const names = (stepName: string) =>
+      getDocumentOrderPredecessors(steps, stepName).map((s) => s.name);
+
+    it('does not offer steps that come after the step that failed', () => {
+      expect(names('recover')).toEqual(['a', 'b']);
+    });
+
+    it('keeps the body of the loop whose iteration failed', () => {
+      expect(names('skip')).toEqual(['a', 'b', 'recover', 'c', 'each', 'body']);
+    });
+
+    it('offers the steps of a fallback to the steps that follow it', () => {
+      expect(names('c')).toEqual(['a', 'b', 'recover']);
+      expect(names('after')).toEqual(['a', 'b', 'recover', 'c', 'each', 'body', 'skip']);
+    });
+
+    it('lists fallback steps when scoping to the whole workflow', () => {
+      expect(getAllDocumentOrderSteps(steps).map((s) => s.name)).toEqual([
+        'a',
+        'b',
+        'recover',
+        'c',
+        'each',
+        'body',
+        'skip',
+        'after',
+      ]);
+    });
   });
 });
 

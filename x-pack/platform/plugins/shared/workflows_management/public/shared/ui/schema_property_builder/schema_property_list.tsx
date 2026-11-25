@@ -506,7 +506,6 @@ export function SchemaPropertyList({
   findReferencingSteps,
   readOnly = false,
 }: SchemaPropertyListProps) {
-  const { euiTheme } = useEuiTheme();
   const droppableId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-drop` });
   const deleteModalTitleId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-delete-title` });
   const renameModalTitleId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-rename-title` });
@@ -605,7 +604,11 @@ export function SchemaPropertyList({
       <EuiEmptyPrompt
         title={<h3>{resolvedEmptyTitle}</h3>}
         titleSize="xs"
-        body={<p>{resolvedEmptyBody}</p>}
+        body={
+          <EuiText size="s">
+            <p>{resolvedEmptyBody}</p>
+          </EuiText>
+        }
         actions={
           readOnly ? undefined : (
             <EuiButtonEmpty
@@ -619,11 +622,6 @@ export function SchemaPropertyList({
           )
         }
         data-test-subj={`${dataTestSubjPrefix}-empty`}
-        css={{
-          '.euiEmptyPrompt__content .euiText': {
-            fontSize: euiTheme.font.scale.s * euiTheme.base,
-          },
-        }}
       />
     );
   }

@@ -391,6 +391,12 @@ export function DataReferencePicker({
         />
       }
       display="block"
+      // Keep the popover chrome out of flex layout; the panel portals to body.
+      css={{
+        position: 'absolute',
+        width: 0,
+        ...popoverBoxPosition(typeaheadAnchor, underControl),
+      }}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       hasArrow={false}
@@ -490,13 +496,6 @@ export function DataReferencePicker({
               flexDirection: 'column',
             }
           : {}),
-        // Keep the popover chrome out of flex layout; the panel portals to body.
-        '& > .euiPopover': {
-          position: 'absolute',
-          width: 0,
-          display: 'block !important',
-          ...popoverBoxPosition(typeaheadAnchor, underControl),
-        },
       }}
     >
       <div

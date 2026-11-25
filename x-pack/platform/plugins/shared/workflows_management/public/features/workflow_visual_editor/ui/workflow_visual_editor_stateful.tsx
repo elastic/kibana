@@ -293,7 +293,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const workflowId = useSelector(selectWorkflowId);
   const loadedConnectors = useSelector(selectConnectors);
   const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
-  const { selectedStepId, setSelectedStep, setEditorView } = useWorkflowUrlState();
+  const { selectedStepId, setSelectedStep, setEditorView, editorView } = useWorkflowUrlState();
   const dispatch = useDispatch();
   // The insert menu is a lazy chunk shared with the YAML editor: fetch it while idle.
   useWarmActionsMenu();
@@ -1092,7 +1092,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setPendingInsert((current) => (current?.phase === 'choosing' ? null : current));
   }, []);
 
-  useCanvasUndo(editorRef, yamlStringRef);
+  // The canvas stays mounted read-only (flag off, executions tab) and behind the YAML view.
+  useCanvasUndo(editorRef, yamlStringRef, canEdit && editorView === 'graph');
 
   if (!workflow) {
     return (

@@ -76,7 +76,9 @@ const renderPanel = () => {
 };
 
 const expandField = (key: string) => {
-  const row = screen.getByTestId(`workflowStepConfigField-with.${key}`).closest('.euiFormRow');
+  const row = screen
+    .getByTestId(`workflowStepConfigField-with.${key}`)
+    .closest('.workflowStepConfigFieldRow');
   expect(row).not.toBeNull();
   fireEvent.click(within(row as HTMLElement).getByTestId('workflowStepConfigDataReferenceExpand'));
   return screen.getByTestId('workflowFieldEditorSubFlyoutTextarea') as HTMLTextAreaElement;

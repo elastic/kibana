@@ -5,44 +5,27 @@
  * 2.0.
  */
 
+import type { StepChildSlot } from '@kbn/workflows';
+import { isStep, visitStepChildSlots } from '@kbn/workflows';
+
 export interface PrecedingStepRef {
   readonly name: string;
   readonly type: string;
 }
 
-const isStepLike = (
-  value: unknown
-): value is { name: string; type: string } & Record<string, unknown> =>
-  typeof value === 'object' &&
-  value !== null &&
-  typeof (value as { name?: unknown }).name === 'string' &&
-  typeof (value as { type?: unknown }).type === 'string';
-
-/** Nested step lists on composite steps, in the order they appear in the YAML. */
-const visitChildLists = (
-  step: Record<string, unknown>,
-  visit: (children: ReadonlyArray<unknown>) => void
-): void => {
-  if (Array.isArray(step.steps)) visit(step.steps);
-  if (Array.isArray(step.else)) visit(step.else);
-  if (Array.isArray(step.branches)) {
-    for (const branch of step.branches as Array<{ steps?: unknown[] }>) {
-      if (Array.isArray(branch.steps)) visit(branch.steps);
-    }
-  }
-  if (Array.isArray(step.cases)) {
-    for (const caseItem of step.cases as Array<{ steps?: unknown[] }>) {
-      if (Array.isArray(caseItem.steps)) visit(caseItem.steps);
-    }
-  }
-  if (Array.isArray(step.default)) visit(step.default);
-};
+/**
+ * A fallback runs after the step's own body started, so the lists that come before it in the
+ * same step may have run; the other arms of an `if`, `switch` or `parallel` never run before it.
+ */
+const isFallbackSlot = ({ kind }: StepChildSlot): boolean =>
+  kind === 'fallback' || kind === 'iteration-fallback';
 
 /**
  * Steps that appear before `currentStepName` in document order (depth-first), leaving out the
  * other branches of the steps it sits in (the other arm of an `if`, other cases, other parallel
  * branches), since those never run before it. Branches of steps that come before it stay, as
- * they may have run. Used by the data-reference picker Steps group.
+ * they may have run. Steps inside an `on-failure` or `iteration-on-failure` fallback keep the
+ * body of the step that failed. Used by the data-reference picker Steps group.
  *
  * TODO: extend for foreach.item and branch-local context so nested
  * scope matches runtime availability, not only document order.
@@ -58,19 +41,19 @@ export const getDocumentOrderPredecessors = (
   const visit = (list: ReadonlyArray<unknown>): void => {
     for (const item of list) {
       if (found) return;
-      if (isStepLike(item)) {
+      if (isStep(item)) {
         if (item.name === currentStepName) {
           found = true;
           return;
         }
         predecessors.push({ name: item.name, type: item.type });
         const ownEnd = predecessors.length;
-        visitChildLists(item, (children) => {
+        visitStepChildSlots(item, (slot, children) => {
           if (found) return;
           const listStart = predecessors.length;
           visit(children);
           // The current step is in this list, so the lists before it did not run.
-          if (found) predecessors.splice(ownEnd, listStart - ownEnd);
+          if (found && !isFallbackSlot(slot)) predecessors.splice(ownEnd, listStart - ownEnd);
         });
       }
     }
@@ -92,9 +75,9 @@ export const getAllDocumentOrderSteps = (
 
   const visit = (list: ReadonlyArray<unknown>): void => {
     for (const item of list) {
-      if (isStepLike(item)) {
+      if (isStep(item)) {
         all.push({ name: item.name, type: item.type });
-        visitChildLists(item, visit);
+        visitStepChildSlots(item, (_slot, children) => visit(children));
       }
     }
   };

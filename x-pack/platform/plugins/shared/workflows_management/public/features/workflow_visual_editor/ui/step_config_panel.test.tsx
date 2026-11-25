@@ -338,7 +338,22 @@ describe('StepConfigPanel', () => {
     const originalResizeObserver = global.ResizeObserver;
     const isMeasurer = (element: HTMLElement) =>
       element.id.startsWith('workflowStepConfigDescription');
-    const hasInlineHelp = (key: string) => row(key).querySelector('.euiFormHelpText') !== null;
+    // The inline help is whatever the control is described by, other than the hidden measurer copy
+    // of the description: the row's own help text, which it wires to the control by id. Ids are
+    // constant under jest, so each id is looked up within its own row.
+    const inlineHelpIn = (key: string): HTMLElement | null => {
+      const describedBy = (
+        screen
+          .getByTestId(`workflowStepConfigField-with.${key}`)
+          .getAttribute('aria-describedby') ?? ''
+      ).split(' ');
+      return (
+        Array.from(row(key).querySelectorAll<HTMLElement>('[id]')).find(
+          (element) => describedBy.includes(element.id) && !isMeasurer(element)
+        ) ?? null
+      );
+    };
+    const hasInlineHelp = (key: string) => inlineHelpIn(key) !== null;
 
     beforeEach(() => {
       charsPerTwoLines = 60;
@@ -371,7 +386,10 @@ describe('StepConfigPanel', () => {
 
     it('keeps a short description under its control, with no icon', () => {
       renderDescribed();
-      expect(within(row('short')).getByText(SHORT, { selector: '.euiFormHelpText' })).toBeVisible();
+      const help = inlineHelpIn('short');
+      expect(help).not.toBeNull();
+      expect(help).toHaveTextContent(new RegExp(`^${SHORT}$`));
+      expect(help).toBeVisible();
       expect(icon('short')).toBeNull();
     });
 
@@ -407,7 +425,7 @@ describe('StepConfigPanel', () => {
       expect(descriptionIn('long')).toHaveTextContent(LONG);
       expect(isDescribedBy('long')).toBe(true);
       // A short one is the row's own help text, which the row wires up itself.
-      expect(row('short').querySelector('.euiFormHelpText')).toHaveTextContent(SHORT);
+      expect(inlineHelpIn('short')).toHaveTextContent(SHORT);
     });
 
     it('follows the panel width: a description that stops fitting moves behind the icon', () => {
@@ -425,11 +443,9 @@ describe('StepConfigPanel', () => {
     it('keeps the fixed-only hint under the control when only the description moves', () => {
       renderDescribed('name: d\ntype: described\nwith:\n  short: 1\n  long: 2\n  fixed: 3\n');
       expect(icon('fixed')).toBeInTheDocument();
-      expect(
-        within(row('fixed')).getByText('Read exactly as typed. Not a template.', {
-          selector: '.euiFormHelpText',
-        })
-      ).toBeInTheDocument();
+      const help = inlineHelpIn('fixed');
+      expect(help).not.toBeNull();
+      expect(help).toHaveTextContent('Read exactly as typed. Not a template.');
     });
 
     it('keeps a moved description reachable while the field shows an error', () => {
@@ -664,13 +680,15 @@ with:
     expect(screen.getByTestId('workflowStepConfigAddOptionalField')).toBeInTheDocument();
 
     // Optional stays flush-right on both promoted and picker-added fields; ✕ is hover/focus.
-    const urlRow = screen.getByTestId('workflowStepConfigField-with.url').closest('.euiFormRow');
+    const urlRow = screen
+      .getByTestId('workflowStepConfigField-with.url')
+      .closest('.workflowStepConfigFieldRow');
     expect(urlRow).toHaveTextContent('Optional');
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
     const queryRow = screen
       .getByTestId('workflowStepConfigField-with.query')
-      .closest('.euiFormRow');
+      .closest('.workflowStepConfigFieldRow');
     expect(queryRow).toHaveTextContent('Optional');
     expect(screen.getByTestId('workflowStepConfigRemoveOptional-with.query')).toBeInTheDocument();
   });
@@ -1213,10 +1231,10 @@ with:
     // Body + Headers are code fields in Required; each gets an @ control.
     const bodyRow = screen
       .getByTestId('workflowStepConfigField-with.body')
-      .closest('.euiFormRow') as HTMLElement;
+      .closest('.workflowStepConfigFieldRow') as HTMLElement;
     const headersRow = screen
       .getByTestId('workflowStepConfigField-with.headers')
-      .closest('.euiFormRow') as HTMLElement;
+      .closest('.workflowStepConfigFieldRow') as HTMLElement;
     expect(within(bodyRow).getByTestId('workflowStepConfigDataReference')).toBeInTheDocument();
     expect(within(headersRow).getByTestId('workflowStepConfigDataReference')).toBeInTheDocument();
 
@@ -1224,7 +1242,7 @@ with:
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
     const queryRow = screen
       .getByTestId('workflowStepConfigField-with.query')
-      .closest('.euiFormRow') as HTMLElement;
+      .closest('.workflowStepConfigFieldRow') as HTMLElement;
     expect(within(queryRow).getByTestId('workflowStepConfigDataReference')).toBeInTheDocument();
 
     // Select (method) has no affordance.
@@ -1234,7 +1252,7 @@ with:
     ).toBeFalsy();
     expect(
       method
-        .closest('.euiFormRow')
+        .closest('.workflowStepConfigFieldRow')
         ?.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
     ).toBeNull();
 
@@ -1318,7 +1336,7 @@ with:
       renderPanel();
       const message = activateField('workflowStepConfigField-with.message');
       const affordance = message
-        .closest('.euiFormRow')
+        .closest('.workflowStepConfigFieldRow')
         ?.querySelector('[data-test-subj="workflowStepConfigDataReference"]');
       expect(affordance).not.toBeNull();
       expect(affordance).toBeEnabled();
@@ -1545,7 +1563,7 @@ with:
 
     const messageRow = screen
       .getByTestId('workflowStepConfigField-with.message')
-      .closest('.euiFormRow');
+      .closest('.workflowStepConfigFieldRow');
     expect(messageRow).not.toBeNull();
     fireEvent.click(
       within(messageRow as HTMLElement).getByTestId('workflowStepConfigDataReferenceExpand')
@@ -1584,7 +1602,7 @@ with:
     renderPanel();
     const messageRow = screen
       .getByTestId('workflowStepConfigField-with.message')
-      .closest('.euiFormRow') as HTMLElement;
+      .closest('.workflowStepConfigFieldRow') as HTMLElement;
     expect(
       within(messageRow).getByTestId('workflowStepConfigDataReferenceExpand')
     ).toBeInTheDocument();
@@ -1592,7 +1610,7 @@ with:
     // connector-id is picked from a list (Fixed | Data), so like a select it has no expand control
     const connectorRow = screen
       .getByTestId('workflowStepConfigField-connector-id')
-      .closest('.euiFormRow') as HTMLElement;
+      .closest('.workflowStepConfigFieldRow') as HTMLElement;
     expect(
       within(connectorRow).queryByTestId('workflowStepConfigDataReferenceExpand')
     ).not.toBeInTheDocument();
@@ -1636,7 +1654,7 @@ with:
     );
 
     fireEvent.click(
-      within(body.closest('.euiFormRow') as HTMLElement).getByTestId(
+      within(body.closest('.workflowStepConfigFieldRow') as HTMLElement).getByTestId(
         'workflowStepConfigDataReferenceExpand'
       )
     );

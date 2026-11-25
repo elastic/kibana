@@ -154,12 +154,14 @@ export function WorkflowOutputsEditor({
         }
         titleSize="xs"
         body={
-          <p>
-            {i18n.translate('workflows.workflowSettingsFlyout.noOutputsBody', {
-              defaultMessage:
-                'Outputs are the public contract returned to calling workflows and API callers. Workflows that only act on other systems often need none.',
-            })}
-          </p>
+          <EuiText size="s">
+            <p>
+              {i18n.translate('workflows.workflowSettingsFlyout.noOutputsBody', {
+                defaultMessage:
+                  'Outputs are the public contract returned to calling workflows and API callers. Workflows that only act on other systems often need none.',
+              })}
+            </p>
+          </EuiText>
         }
         actions={
           readOnly || hideInlineAddButton ? undefined : (
@@ -176,11 +178,6 @@ export function WorkflowOutputsEditor({
           )
         }
         data-test-subj="workflowSettingsOutputEmpty"
-        css={{
-          '.euiEmptyPrompt__content .euiText': {
-            fontSize: '0.875rem',
-          },
-        }}
       />
     );
   }
