@@ -829,7 +829,7 @@ export function validateOtlpPositiveCount(value: string) {
   }
 }
 
-const GO_DURATION_COMPONENT_REGEX = /(\d*(?:\.\d*)?)(ns|us|µs|μs|ms|s|m|h)/g;
+const GO_DURATION_COMPONENT_REGEX = /(\d*)(?:\.(\d*))?(ns|us|µs|μs|ms|s|m|h)/g;
 const GO_DURATION_UNIT_NS: Record<string, number> = {
   ns: 1,
   us: 1e3,
@@ -848,8 +848,15 @@ export function parseOtlpDurationNs(value: string): number | undefined {
     return undefined;
   }
   return [...duration.matchAll(GO_DURATION_COMPONENT_REGEX)].reduce(
-    // like the collector, each component is truncated to whole nanoseconds
-    (total, [, amount, unit]) => total + Math.trunc(Number(amount) * GO_DURATION_UNIT_NS[unit]),
+    // like the collector, the whole part of each component is exact, and its fraction is
+    // truncated to whole nanoseconds
+    (total, [, whole, fraction = '', unit]) => {
+      const unitNs = GO_DURATION_UNIT_NS[unit];
+      const fractionNs = fraction
+        ? Math.trunc(Number(fraction) * (unitNs / 10 ** fraction.length))
+        : 0;
+      return total + Number(whole || 0) * unitNs + fractionNs;
+    },
     0
   );
 }
