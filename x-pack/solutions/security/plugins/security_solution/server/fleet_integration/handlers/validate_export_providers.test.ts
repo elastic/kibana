@@ -106,6 +106,12 @@ describe('validateExportProviders()', () => {
       expect(getError(policy).message).toBe('mac.response_actions must be an object');
     });
 
+    it('should reject a response_actions key other than export_providers', () => {
+      const policy = set(buildPolicy([buildProvider()]), 'mac.response_actions.foo', true);
+
+      expect(getError(policy).message).toBe('mac.response_actions: "foo" is not supported');
+    });
+
     it('should reject an export_providers that is not an array', () => {
       const policy = set(policyFactory(), 'linux.response_actions', {
         export_providers: buildProvider(),

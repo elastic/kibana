@@ -227,6 +227,16 @@ export const validateExportProviders = (policy: PolicyConfig): void => {
       throw new EndpointIntegrationFleetError(`${os}.response_actions must be an object`);
     }
 
+    const unsupportedKey = Object.keys(responseActions as Record<string, unknown>).find(
+      (key) => key !== 'export_providers'
+    );
+
+    if (unsupportedKey !== undefined) {
+      throw new EndpointIntegrationFleetError(
+        `${os}.response_actions: ${quoteForMessage(unsupportedKey)} is not supported`
+      );
+    }
+
     const exportProviders: unknown = (responseActions as Record<string, unknown>).export_providers;
 
     if (exportProviders === undefined) {
