@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { APP_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
 import { setManifestVersion, setProtectionUpdatesNote } from '../fixtures/protection_updates_data';
@@ -61,13 +60,13 @@ spaceTest.describe(
           oneWeekAgo.format('YYYY-MM-DD')
         );
 
-        // The page has no UI signal for "no note found", so wait for the lookup itself; armed before
-        // the page loads, it gets the same budget as the page load.
+        // The page has no UI signal for "no note found", so wait for the lookup itself. It is armed
+        // before the page loads so the response cannot be missed.
         const noteLookup = page.waitForResponse(
           (response) =>
             response.request().method() === 'GET' &&
             response.url().includes(`/api/endpoint/protection_updates_note/${endpointPolicy.id}`),
-          { timeout: APP_LOAD_TIMEOUT_MS }
+          { timeout: 0 }
         );
         // Keeps the promise from rejecting unobserved if a step before the await below throws.
         noteLookup.catch(() => {});
@@ -83,6 +82,8 @@ spaceTest.describe(
         await expect(protectionUpdates.versionToDeployViewMode).toBeVisible();
         await expect(protectionUpdates.versionToDeployPicker).toBeHidden();
         await expect(protectionUpdates.saveButton).toBeDisabled();
+        // Awaited only once the tab is ready: the lookup has no own timer (bounded by the test
+        // timeout), so a cold load cannot expire it before the tab's own readiness budget.
         expect((await noteLookup).status()).toBe(404);
         // With no note to show, a read-only user gets no note section at all.
         await expect(protectionUpdates.noteTitle).toBeHidden();
