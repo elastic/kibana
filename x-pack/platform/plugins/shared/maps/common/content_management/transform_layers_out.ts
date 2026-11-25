@@ -8,6 +8,7 @@
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { SOURCE_TYPES } from '../constants';
 import type { ESQLSourceDescriptor } from '../descriptor_types';
+import { isMapsOwnedSource } from './is_maps_owned_source';
 import type { StoredLayer } from '../../server';
 
 export function transformLayersOut(layers: StoredLayer[]) {
@@ -27,13 +28,15 @@ export function transformLayersOut(layers: StoredLayer[]) {
         };
         transformed.sourceDescriptor = restOfSource;
       }
-      transformed.sourceDescriptor = convertCamelCasedKeysToSnakeCase(
-        transformed.sourceDescriptor
-      ) as typeof transformed.sourceDescriptor;
+      if (isMapsOwnedSource(transformed.sourceDescriptor)) {
+        transformed.sourceDescriptor = convertCamelCasedKeysToSnakeCase(
+          transformed.sourceDescriptor
+        ) as typeof transformed.sourceDescriptor;
+      }
     }
     if ('joins' in transformed && Array.isArray(transformed.joins)) {
       transformed.joins = transformed.joins.map((join) =>
-        join.right
+        join.right && isMapsOwnedSource(join.right)
           ? {
               ...join,
               right: convertCamelCasedKeysToSnakeCase(join.right) as typeof join.right,
