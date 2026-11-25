@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  PercentilesAggregation,
-  ValueCountAggregation,
-} from '../../../lib/helpers/aggregations';
+import type { PercentilesAggregation } from '../../../lib/helpers/aggregations';
 import type { WebVitalAggregations } from '../../../lib/helpers/web_vitals';
 import type { ByEnvironmentAggregations } from '../../../lib/otel/environments';
 import type { FilterOptionsAggregations } from '../../../lib/otel/overview_filters';
@@ -31,18 +28,8 @@ export type OverviewLogsAggregations = ByEnvironmentAggregations<
     pageLoads: {
       doc_count: number;
       loadTime: PercentilesAggregation;
-      loadTimeSamples: ValueCountAggregation;
       trend: { buckets: TrendBucket[] };
     };
-    jsErrors: { doc_count: number };
   }
 > &
   FilterOptionsAggregations;
-
-/** `spansSearch`: the HTTP requests in the selected environment only. */
-export interface OverviewSpansAggregations {
-  inEnvironment: {
-    requests: { doc_count: number };
-    failed: { doc_count: number };
-  };
-}

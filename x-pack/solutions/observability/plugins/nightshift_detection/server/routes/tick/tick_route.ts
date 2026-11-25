@@ -15,7 +15,7 @@ import type { DetectionEngineTickBody } from '../../../common/tick';
 import { ScopedTickRunner } from '../../lib/engine/scoped_tick_runner';
 import { DetectionAccountService } from '../../lib/service_account/detection_account';
 import { BaseEngineRoute } from '../base_engine_route';
-import { DETECTION_ENGINE_API_PATH } from '../constants';
+import { DETECTION_ENGINE_API_PATH } from '../../../common/constants';
 import { EngineRouteContext } from '../engine_route_context';
 
 /**

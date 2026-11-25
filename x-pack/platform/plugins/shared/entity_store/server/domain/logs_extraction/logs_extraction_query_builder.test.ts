@@ -43,6 +43,55 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  describe('entity id cursor placement', () => {
+    const ID_COLUMN = 'recent.entity.EngineMetadata.UntypedId';
+    const CURSOR_FILTER = `| WHERE ${ID_COLUMN} > "cursor-id"`;
+    const buildWithCursor = (type: EntityType, withCursor = true) =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition(type, 'default'),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        ...(withCursor ? { pagination: { idCursor: 'cursor-id' } } : {}),
+      });
+
+    it.each(['host', 'user'] as const)(
+      '%s: the cursor filters raw rows before STATS and LOOKUP JOIN, and only once',
+      async (type) => {
+        const query = buildWithCursor(type);
+        const cursorIdx = query.indexOf(CURSOR_FILTER);
+        expect(cursorIdx).toBeGreaterThan(query.indexOf(`${ID_COLUMN} = `));
+        expect(cursorIdx).toBeLessThan(query.indexOf('| STATS'));
+        expect(cursorIdx).toBeLessThan(query.indexOf('LOOKUP JOIN'));
+        expect(query.split(CURSOR_FILTER)).toHaveLength(2);
+        await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+      }
+    );
+
+    it.each(['host', 'user'] as const)('%s: no cursor filter on the first page', (type) => {
+      expect(buildWithCursor(type, false)).not.toContain(`${ID_COLUMN} >`);
+    });
+
+    it('user (postAggFilter): SORT and LIMIT stay after the postAggFilter', () => {
+      const query = buildWithCursor('user');
+      const lookupIdx = query.indexOf('LOOKUP JOIN');
+      const sortIdx = query.indexOf(`| SORT ${ID_COLUMN} ASC`);
+      expect(getEntityDefinition('user', 'default').extraction.postAggFilter).toBeDefined();
+      expect(sortIdx).toBeGreaterThan(lookupIdx);
+      expect(query.indexOf('| LIMIT 10000')).toBeGreaterThan(sortIdx);
+    });
+
+    it('host (no postAggFilter): SORT and LIMIT stay before LOOKUP JOIN', () => {
+      const query = buildWithCursor('host');
+      expect(query.indexOf('| LIMIT 10000')).toBeLessThan(query.indexOf('LOOKUP JOIN'));
+      expect(query.indexOf('| LIMIT 10000')).toBeGreaterThan(
+        query.indexOf(`| SORT ${ID_COLUMN} ASC`)
+      );
+    });
+  });
+
   it('excludes managed fields from STATS, merge EVAL, and produces a valid query', async () => {
     const base = getEntityDefinition('host', 'default');
     // Inject a managed field alongside a normal log-derived field to verify orthogonality.

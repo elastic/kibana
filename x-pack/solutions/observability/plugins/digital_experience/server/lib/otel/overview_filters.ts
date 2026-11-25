@@ -14,7 +14,7 @@ import {
   OVERVIEW_FILTER_MAX_LENGTHS,
   OVERVIEW_FILTER_NAMES,
   OVERVIEW_FILTER_SIZE,
-  PAGE_FILTER_NAMES,
+  URL_FILTER_NAMES,
   type ListedFilterName,
   type OverviewFilterName,
   type OverviewFilterOptions,
@@ -27,12 +27,13 @@ import {
   SOURCE_APP_VERSION_FIELDS,
   SOURCE_MOBILE_FIELDS,
   SOURCE_URL_FIELD,
+  SOURCE_URL_TEMPLATE_FIELD,
 } from '../../../common/otel_source_fields';
 import { environmentFilter } from '../helpers/environment';
 import { eventCount } from './queries';
 
 /** What a field that is not a name says, per value: the device name of `browser.mobile`. */
-const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
+export const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
   SOURCE_MOBILE_FIELDS.map((field) => [
     field,
     { true: DEVICE_MOBILE_LABEL, false: DEVICE_DESKTOP_LABEL },
@@ -44,13 +45,16 @@ const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEn
  * browser, OS, device or country means the same in the Overview and the Sessions where they have
  * one; the device then falls back to `browser.mobile`.
  */
-const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
+export const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   browser: SESSION_ATTRIBUTE_FIELDS.browser,
   os: SESSION_ATTRIBUTE_FIELDS.os,
   device: [...SESSION_ATTRIBUTE_FIELDS.device, ...SOURCE_MOBILE_FIELDS],
   country: SESSION_ATTRIBUTE_FIELDS.countryIso,
   appVersion: SOURCE_APP_VERSION_FIELDS,
-  pageUrl: [SOURCE_URL_FIELD],
+  // The route the app reports, like `/products/{slug}`, groups the URLs of a page; without one, as
+  // with an SDK that doesn't add routes, the page is its URL
+  pageUrl: [SOURCE_URL_TEMPLATE_FIELD, SOURCE_URL_FIELD],
+  // The text of the URL itself, which the route doesn't have
   pageContains: [SOURCE_URL_FIELD],
 };
 
@@ -141,24 +145,24 @@ const filterClause = (
 };
 
 /**
- * The selected filters that narrow every document of the Overview, except `exclude`'s own. The
- * page filters are left out: the web vitals, errors and clicks carry no page URL yet, so they
- * narrow the page loads only (`pageLoadFilters`).
+ * The selected filters that narrow every log of the Overview, except `exclude`'s own. The filters
+ * on the URL text are left out: the web vitals and JS errors carry no URL, so they narrow the page
+ * loads only (`pageLoadFilters`).
  */
 export const documentFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
   OVERVIEW_FILTER_NAMES.filter(
-    (name) => !PAGE_FILTER_NAMES.some((page) => page === name) && name !== exclude
+    (name) => !URL_FILTER_NAMES.some((url) => url === name) && name !== exclude
   ).flatMap((name) => filterClause(name, filters));
 
-/** The selected page filters, which narrow the page loads (except `exclude`'s own). */
+/** The selected filters on the URL text, which narrow the page loads (except `exclude`'s own). */
 export const pageLoadFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
-  PAGE_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
+  URL_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
     filterClause(name, filters)
   );
 
