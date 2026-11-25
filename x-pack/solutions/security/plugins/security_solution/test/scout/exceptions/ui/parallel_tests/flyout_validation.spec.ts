@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { AddExceptionButtonType, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import {
-  FLYOUT_VALIDATION_INDEX_PREFIX,
-  FLYOUT_VALIDATION_ROLE,
-} from '../fixtures/flyout_validation_role';
+
+const SOURCE_INDEX_PREFIX = 'auditbeat-scout-exceptions-flyout';
 
 spaceTest.describe(
   'Exceptions flyout builder',
@@ -21,7 +19,7 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ esClient, apiServices, scoutSpace }) => {
       const idSegment = scoutSpace.id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      sourceIndex = `${FLYOUT_VALIDATION_INDEX_PREFIX}-${idSegment}`;
+      sourceIndex = `${SOURCE_INDEX_PREFIX}-${idSegment}`;
 
       await esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true });
       await esClient.indices.create({
@@ -30,6 +28,18 @@ spaceTest.describe(
           properties: {
             '@timestamp': { type: 'date' },
             agent: { properties: { type: { type: 'keyword' } } },
+            process: {
+              properties: {
+                elf: {
+                  properties: {
+                    sections: {
+                      type: 'nested',
+                      properties: { name: { type: 'keyword' }, address: { type: 'keyword' } },
+                    },
+                  },
+                },
+              },
+            },
             unique_value: { properties: { test: { type: 'keyword' } } },
           },
         },
@@ -66,7 +76,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, kbnUrl, scoutSpace }) => {
       const { ruleDetailsPage, addExceptionFlyoutPage } = pageObjects;
 
-      await browserAuth.loginWithCustomRole(FLYOUT_VALIDATION_ROLE);
+      await browserAuth.loginAsPlatformEngineer();
       await ruleDetailsPage.goto({
         kbnUrl,
         spaceId: scoutSpace.id,
@@ -88,6 +98,21 @@ spaceTest.describe(
       // The field list loads asynchronously, so poll instead of reading the options once.
       await expect.poll(() => flyout.searchFieldOptions('unique')).toContain('unique_value.test');
     });
+
+    spaceTest(
+      'nests the condition of a field that is mapped as nested',
+      async ({ pageObjects }) => {
+        const { addExceptionFlyoutPage: flyout } = pageObjects;
+
+        await flyout.selectField('agent.type');
+        await flyout.addException(AddExceptionButtonType.NESTED);
+        await flyout.selectNestedLeafField('process.elf.sections.name', 1);
+
+        await expect
+          .poll(() => flyout.getConditionFields())
+          .toStrictEqual(['agent.type', 'process.elf.sections', 'name']);
+      }
+    );
 
     spaceTest('suggests values of the selected field', async ({ pageObjects }) => {
       const { addExceptionFlyoutPage: flyout } = pageObjects;

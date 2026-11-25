@@ -95,9 +95,9 @@ describe('ExceptionBuilderComponent user flows', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           isOrDisabled={false}
-          listId="list_id"
-          listNamespaceType="single"
-          listType="detection"
+          listId={undefined}
+          listNamespaceType={undefined}
+          listType="rule_default"
           ruleName="Test rule"
           onChange={onChange}
           showValueListModal={MockedShowValueListModal}
@@ -204,6 +204,25 @@ describe('ExceptionBuilderComponent user flows', () => {
       entry: { field: 'blooberty', operator: 'included', type: 'match', value: 'blah' },
       errorExists: false,
     });
+  });
+
+  it('does not report a custom field when custom fields are not allowed', async () => {
+    const { onChange } = renderBuilder({ allowCustomFieldOptions: false });
+
+    const input = getFieldInput(getRows(0)[0]);
+    await user.click(input);
+    await user.type(input, 'blooberty{Enter}');
+    await typeValue('valuesAutocompleteMatch', 'blah');
+
+    expect(onChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        exceptionItems: [
+          expect.objectContaining({
+            entries: [expect.objectContaining({ field: 'blooberty' })],
+          }),
+        ],
+      })
+    );
   });
 
   describe('rows keep their field when other rows are added or removed', () => {

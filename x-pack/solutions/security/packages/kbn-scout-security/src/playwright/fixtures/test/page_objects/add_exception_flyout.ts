@@ -6,6 +6,7 @@
  */
 import { subj } from '@kbn/test-subj-selector';
 import { type ScoutPage, type Locator } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 export enum AddExceptionButtonType {
   OR = 'or',
@@ -93,10 +94,11 @@ export class AddExceptionFlyoutPage {
   }
 
   /**
-   * Picks one condition of the builder by position and waits until it is visible. A position that
-   * does not exist fails here with a clear timeout.
+   * Picks one condition of the builder by position. It first waits until the builder shows more
+   * conditions than the position, so a position that does not exist fails here with a clear message.
    */
   private async entryAt(index: number): Promise<Locator> {
+    await expect.poll(() => this.entryContainers.count()).toBeGreaterThan(index);
     // eslint-disable-next-line playwright/no-nth-methods -- condition rows have no identity of their own; callers name the position
     const entry = this.entryContainers.nth(index);
     await entry.waitFor({ state: 'visible' });
@@ -111,9 +113,33 @@ export class AddExceptionFlyoutPage {
     return this.page.components.comboBox(comboBoxTestSubj, this.entryContainers);
   }
 
-  /** Picks a field that exists in the rule's index patterns in the only condition. */
-  async selectField(field: string) {
-    await this.onlyEntryCombo('fieldAutocompleteComboBox').setSelectedOptions([field]);
+  /** Picks a field that exists in the rule's index patterns in the condition at `entryIndex`. */
+  async selectField(field: string, entryIndex = 0) {
+    const entryScope = await this.entryAt(entryIndex);
+    await this.page.components
+      .comboBox('fieldAutocompleteComboBox', entryScope)
+      .setSelectedOptions([field]);
+  }
+
+  /**
+   * Picks a leaf of a nested field in the condition at `entryIndex`. The row then shows the nested
+   * parent path instead of the leaf, so this does not wait for the leaf to show as the selection.
+   */
+  async selectNestedLeafField(field: string, entryIndex: number) {
+    const entryScope = await this.entryAt(entryIndex);
+    await entryScope
+      .locator(subj('fieldAutocompleteComboBox'))
+      .locator(subj('comboBoxSearchInput'))
+      .fill(field);
+    await this.page.getByRole('option', { name: field, exact: true }).click();
+  }
+
+  /** Selected field of every condition row, in order. A row without a field reads as an empty string. */
+  async getConditionFields(): Promise<string[]> {
+    return this.entryContainers
+      .locator(subj('fieldAutocompleteComboBox'))
+      .locator(subj('comboBoxSearchInput'))
+      .evaluateAll((inputs) => inputs.map((input) => (input as HTMLInputElement).value));
   }
 
   /** Types into the field search box without selecting, then returns the visible options. */

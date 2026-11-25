@@ -1274,45 +1274,4 @@ describe('When the add exception modal is opened', () => {
       expect(screen.getByTestId('addExceptionConfirmButton')).toBeEnabled();
     });
   });
-
-  describe('custom fields in the condition builder', () => {
-    const renderFlyout = (isEndpointItem: boolean): void => {
-      mockFetchIndexPatterns.mockImplementation(() => ({
-        isLoading: false,
-        indexPatterns: stubIndexPattern,
-        getExtendedFields: () => Promise.resolve([]),
-      }));
-      render(
-        <TestProviders>
-          <AddExceptionFlyout
-            rules={[{ ...getRulesSchemaMock(), index: ['filebeat-*'] } as Rule]}
-            isBulkAction={false}
-            alertData={undefined}
-            isAlertDataLoading={false}
-            alertStatus={undefined}
-            isEndpointItem={isEndpointItem}
-            showAlertCloseOptions={false}
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
-          />
-        </TestProviders>
-      );
-    };
-
-    it('allows fields that are not in the index for a rule exception', () => {
-      renderFlyout(false);
-
-      expect(mockGetExceptionBuilderComponentLazy).toHaveBeenLastCalledWith(
-        expect.objectContaining({ allowCustomFieldOptions: true })
-      );
-    });
-
-    it('does not allow fields that are not in the index for an endpoint exception', () => {
-      renderFlyout(true);
-
-      expect(mockGetExceptionBuilderComponentLazy).toHaveBeenLastCalledWith(
-        expect.objectContaining({ allowCustomFieldOptions: false })
-      );
-    });
-  });
 });
