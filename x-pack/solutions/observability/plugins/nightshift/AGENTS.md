@@ -82,7 +82,7 @@ Every user action in `public/` must send an EBT click event. Use click tags firs
 - Add new action and element names to `public/common/ebt_constants.ts`. Do not inline strings.
 - Before you add or change a tag, fetch the EBT click tracking guidelines and follow them:
   `gh api repos/elastic/observability-dev/contents/docs/telemetry/ebt-click-tracking-guidelines.md -H "Accept: application/vnd.github.raw"`
-- Use a native `button` or link for every tagged control. A custom control that acts on a key handler without a `click` event is not tracked. Route its keyboard activation through the same `click` path.
+- Use EUI controls (`EuiButton`, `EuiButtonIcon`, `EuiLink`) for every tagged control. They fire `click` on Enter and Space. A custom control that acts on a key handler without a `click` event is not tracked. Route its keyboard activation through the same `click` path.
 - Do not track typing in fields. Click tracking records click intents only.
 - Do not leave `@kbn/telemetry(ebt_props_should_be_present)` warnings on code you add or change.
 - A tag on an ancestor counts: `track_clicks.ts` reads the whole ancestor chain. Do not tag a container that holds other controls. A click on an untagged child then sends the container's action, and a click on a tagged child sends both.
