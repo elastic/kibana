@@ -282,11 +282,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             ? options.inspector?.adapter
             : new RequestAdapter();
           if (!options.inspector?.adapter) {
+            const { isCached, ...json } = response;
             const requestResponder = requestAdapter.start(requestName, {
               id: request.id,
             });
             requestResponder.json(request.body);
-            requestResponder.ok({ json: response });
+            requestResponder.ok({ json, isCached });
           }
 
           handleWarnings({
