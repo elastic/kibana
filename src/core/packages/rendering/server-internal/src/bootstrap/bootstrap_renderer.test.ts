@@ -491,6 +491,45 @@ describe('bootstrapRenderer', () => {
     );
   });
 
+  it('uses selected preload paths from a valid chunk manifest', async () => {
+    const bundlesHref = '/base-path/buildShaShort/bundles';
+    const readFileSyncSpy = jest.spyOn(Fs, 'readFileSync').mockReturnValue(
+      JSON.stringify({
+        allChunks: ['fallback.js'],
+        entrypointChunks: {
+          core: ['plugin-core.js', 'shared.js'],
+          security: ['plugin-security.js', 'shared.js'],
+        },
+      })
+    );
+    getPluginsBundlePathsMock.mockReturnValue(
+      new Map([['security', { bundlePath: '/security.js', publicPath: '/security/' }]])
+    );
+
+    try {
+      await renderer({
+        request: httpServerMock.createKibanaRequest(),
+        uiSettingsClient,
+      });
+
+      expect(readFileSyncSpy).toHaveBeenCalledWith(
+        fromRoot('target/public/bundles/chunk-manifest.json'),
+        'utf-8'
+      );
+      expect(getRspackDependencyPathsMock).toHaveBeenCalledWith(
+        bundlesHref,
+        [],
+        [
+          `${bundlesHref}/plugin-core.js`,
+          `${bundlesHref}/plugin-security.js`,
+          `${bundlesHref}/shared.js`,
+        ]
+      );
+    } finally {
+      readFileSyncSpy.mockRestore();
+    }
+  });
+
   it('passes core and the page bundle closure to the generated bootstrap', async () => {
     getPluginsBundlePathsMock.mockReturnValue(
       new Map([

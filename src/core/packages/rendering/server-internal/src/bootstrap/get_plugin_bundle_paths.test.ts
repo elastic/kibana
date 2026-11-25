@@ -15,10 +15,12 @@ const createUiPlugins = ({
   requiredBundles,
   requiredPlugins = {},
   anonymousPluginIds = [],
+  internalOnlyPluginIds = [],
 }: {
   requiredBundles: Record<string, string[]>;
   requiredPlugins?: Record<string, string[]>;
   anonymousPluginIds?: string[];
+  internalOnlyPluginIds?: string[];
 }) => {
   const uiPlugins: UiPlugins = {
     internal: new Map(),
@@ -34,6 +36,9 @@ const createUiPlugins = ({
       publicTargetDir: '',
       publicAssetsDir: '',
     } satisfies InternalPluginInfo);
+    if (internalOnlyPluginIds.includes(pluginId)) {
+      return;
+    }
     uiPlugins.public.set(pluginId, {
       id: pluginId,
       configPath: 'config-path',
@@ -117,17 +122,21 @@ describe('getPluginsBundlePaths', () => {
   });
 
   it('returns required plugins of bundle-only dependencies', () => {
+    const uiPlugins = createUiPlugins({
+      requiredBundles: {
+        anonymous: ['standaloneBundle'],
+      },
+      requiredPlugins: {
+        standaloneBundle: ['standaloneBundleDependency'],
+      },
+      anonymousPluginIds: ['anonymous'],
+      internalOnlyPluginIds: ['standaloneBundle', 'standaloneBundleDependency'],
+    });
+
+    expect(uiPlugins.public.has('standaloneBundle')).toBe(false);
     const pluginBundlePaths = getPluginsBundlePaths({
       bundlesHref: '/regular-bundle-path',
-      uiPlugins: createUiPlugins({
-        requiredBundles: {
-          anonymous: ['standaloneBundle'],
-        },
-        requiredPlugins: {
-          standaloneBundle: ['standaloneBundleDependency'],
-        },
-        anonymousPluginIds: ['anonymous'],
-      }),
+      uiPlugins,
       isAnonymousPage: true,
     });
 
