@@ -71,7 +71,7 @@ const BASIC_SHAPES: ReadonlySet<string> = new Set([
   'polyline',
   'polygon',
 ]);
-// DOMPurify drops <use> and strips the href <image> needs, so only these still draw after sanitization.
+// <use> and <image> draw only if sanitization keeps their href, so only these are sure to draw.
 const DRAWING_ELEMENTS: ReadonlySet<string> = new Set([...BASIC_SHAPES, 'text']);
 // `overflow` has no effect on a basic shape, so Illustrator's `style="overflow:visible;"` on <use> can be dropped.
 const OVERFLOW_DECLARATION = /^overflow\s*:\s*[a-z]+$/i;
@@ -507,8 +507,8 @@ const readStops = (gradient: Element): Stops => {
   };
 };
 
-// DOMPurify strips href and drops <use>, so gradients inheriting through href would paint nothing and clip
-// paths built from <use> would hide their shape.
+// Sanitization strips any href that is not a plain same-document reference, so gradients inheriting through
+// it would paint nothing and clip paths built from <use> would hide their shape.
 const planReferences = (
   elements: readonly Element[],
   elementsById: ReadonlyMap<string, Element>
@@ -657,7 +657,7 @@ interface InlinedSvg {
   readonly dependencies: ReadonlyMap<string, number>;
 }
 
-// Undefined when anything reachable still needs an href that sanitization strips.
+// Undefined when anything reachable still needs an href that sanitization may strip.
 const collectDependencies = (
   ids: readonly string[],
   elements: readonly Element[],

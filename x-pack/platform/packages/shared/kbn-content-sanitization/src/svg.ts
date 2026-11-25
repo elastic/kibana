@@ -7,6 +7,15 @@
 
 import { sanitizeWithInlinedStyles } from './inline_svg_styles';
 
+const HREF_ATTRIBUTES: ReadonlySet<string> = new Set(['href', 'xlink:href']);
+// Same-document references only, e.g. <use href="#shape">; anything else could load a remote resource.
+const FRAGMENT_REFERENCE = /^#[\w.:-]+$/;
+// Embedded raster images only: an SVG data URI would be a second document that escapes sanitization.
+const RASTER_DATA_URI = /^data:image\/(?:png|jpe?g|gif|webp);base64,[\sA-Za-z0-9+/]+={0,2}$/i;
+
+const isSafeHref = (tagName: string, value: string): boolean =>
+  FRAGMENT_REFERENCE.test(value) || (tagName === 'image' && RASTER_DATA_URI.test(value));
+
 export function isBase64Encoded(str: unknown): boolean {
   if (typeof str !== 'string' || str.length === 0) {
     return false;
@@ -62,7 +71,7 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
     // Configure DOMPurify for SVG
     purify.setConfig({
       USE_PROFILES: { svg: true, svgFilters: true },
-      ADD_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'g', 'defs'],
+      ADD_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'g', 'defs', 'use'],
       FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'foreignObject'],
       FORBID_ATTR: [
         'onerror',
@@ -72,11 +81,14 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
         'eval',
         'javascript',
         'formaction',
-        'xlink:href',
-        'href',
         'src',
         'data',
       ],
+    });
+    purify.addHook('uponSanitizeAttribute', (node, data) => {
+      if (HREF_ATTRIBUTES.has(data.attrName)) {
+        data.keepAttr = isSafeHref(node.nodeName.toLowerCase(), data.attrValue);
+      }
     });
 
     // Sanitize and convert the result back to a Buffer
