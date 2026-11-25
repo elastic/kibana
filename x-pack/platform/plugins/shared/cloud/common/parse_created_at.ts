@@ -7,8 +7,12 @@
 
 import type { Logger } from '@kbn/logging';
 
+// `new Date()` also accepts partial or zone-less values (e.g. `2026`, or a time with no `Z`, which is read in the
+// local time zone), so the format is checked first.
+const ISO_TIMESTAMP_WITH_ZONE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+
 /**
- * Parses the `xpack.cloud.serverless.created_at` setting (an ISO-8601 timestamp) into a `Date`.
+ * Parses the `xpack.cloud.serverless.created_at` setting (an ISO-8601 timestamp with a time zone) into a `Date`.
  *
  * @param value The raw setting value.
  * @param logger Used to report a value that is set but cannot be parsed.
@@ -18,9 +22,9 @@ export function parseCreatedAt(value: string | undefined, logger: Logger): Date 
   if (!value) return undefined;
 
   const createdAt = new Date(value);
-  if (Number.isNaN(createdAt.getTime())) {
+  if (!ISO_TIMESTAMP_WITH_ZONE.test(value) || Number.isNaN(createdAt.getTime())) {
     logger.warn(
-      `cloud.serverless.created_at config value "${value}" could not be parsed as an ISO-8601 date; ignoring it.`
+      `cloud.serverless.created_at config value "${value}" could not be parsed as an ISO-8601 timestamp with a time zone; ignoring it.`
     );
     return undefined;
   }

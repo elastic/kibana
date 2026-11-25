@@ -118,7 +118,7 @@ describe('Cloud Experiments server plugin', () => {
         expect.objectContaining({
           kibana: expect.objectContaining({
             key: 'project-id',
-            created_at: createdAt,
+            created_at: '2026-11-04T14:16:56.000Z',
             csp: 'aws',
             region: 'us-east-1',
           }),

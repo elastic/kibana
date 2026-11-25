@@ -80,7 +80,7 @@ describe('MetadataService', () => {
     test('emits created_at, csp and region in the kibana context when provided', async () => {
       metadataService.setup({
         ...initialMetadata,
-        created_at: new Date('2026-11-04T14:16:56.000Z'),
+        created_at: '2026-11-04T14:16:56.000Z',
         csp: 'aws',
         region: 'us-east-1',
       });
@@ -88,7 +88,7 @@ describe('MetadataService', () => {
         ...multiContextFormat,
         kibana: {
           ...multiContextFormat.kibana,
-          created_at: new Date('2026-11-04T14:16:56.000Z'),
+          created_at: '2026-11-04T14:16:56.000Z',
           csp: 'aws',
           region: 'us-east-1',
         },

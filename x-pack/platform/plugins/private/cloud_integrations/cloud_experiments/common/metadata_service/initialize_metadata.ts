@@ -32,7 +32,7 @@ export function initializeMetadata({
   // Creation time, CSP and region are only sent for Serverless projects.
   const serverlessOnly = cloud.isServerlessEnabled
     ? {
-        created_at: cloud.serverless.createdAt,
+        created_at: cloud.serverless.createdAt?.toISOString(),
         csp: cloud.csp,
         region: cloud.region,
       }

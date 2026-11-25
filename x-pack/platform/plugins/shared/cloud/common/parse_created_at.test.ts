@@ -29,11 +29,26 @@ describe('parseCreatedAt', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns undefined and logs a warning once when the value cannot be parsed', () => {
-    expect(parseCreatedAt('not-a-date', logger)).toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(
-      'cloud.serverless.created_at config value "not-a-date" could not be parsed as an ISO-8601 date; ignoring it.'
+  it('accepts a UTC offset in place of Z', () => {
+    expect(parseCreatedAt('2026-11-04T09:16:56.000-05:00', logger)).toEqual(
+      new Date('2026-11-04T14:16:56.000Z')
     );
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it.each(['not-a-date', '1', '2026', '2026-11-04', 'Nov 4 2026', '2026-11-04T14:16:56'])(
+    'returns undefined and logs a warning once for %p, which is not an ISO-8601 timestamp with a time zone',
+    (value) => {
+      expect(parseCreatedAt(value, logger)).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `cloud.serverless.created_at config value "${value}" could not be parsed as an ISO-8601 timestamp with a time zone; ignoring it.`
+      );
+    }
+  );
+
+  it('rejects a well-formed timestamp that is not a real date', () => {
+    expect(parseCreatedAt('2026-13-45T00:00:00Z', logger)).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 });

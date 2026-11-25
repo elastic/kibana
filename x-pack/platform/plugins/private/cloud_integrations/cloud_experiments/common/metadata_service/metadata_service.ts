@@ -77,10 +77,10 @@ export interface FlatMetadata {
    */
   orchestrator_target?: string;
   /**
-   * When the Serverless project was created (only available on serverless)
+   * When the Serverless project was created, as an ISO-8601 string (only available on serverless)
    * @group Kibana Static Values
    */
-  created_at?: Date;
+  created_at?: string;
   /**
    * The cloud service provider hosting the Serverless project (only available on serverless)
    * @group Kibana Static Values
