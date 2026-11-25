@@ -18,7 +18,7 @@ import { useEndpointActions } from '../../hooks/use_endpoint_actions';
 import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { useKibana } from '../../hooks/use_kibana';
 import { groupEndpointsByModel } from '../../utils/eis_utils';
-import { ModelDetailFlyout } from '../model_detail_flyout/model_detail_flyout';
+import { ModelDetailFlyout } from './model_detail_flyout/model_detail_flyout';
 import { DeleteAction } from '../all_inference_endpoints/render_table_columns/render_actions/actions/delete/delete_action';
 import { EisModelsListingProvider } from './eis_models_listing_provider';
 import { EisSelfManagedEmptyPrompt } from './eis_self_managed_empty_prompt';

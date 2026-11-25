@@ -9,12 +9,12 @@ import React, { useCallback, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageTemplate } from '@elastic/eui';
-import { ElasticInferenceServiceModelsHeader } from './elastic_inference_service/header';
-import { ElasticInferenceServiceModelsPage } from './elastic_inference_service/elastic_inference_service_models_page';
-import { ManageRegionsModal } from './elastic_inference_service/manage_regions_modal';
-import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { useEisPageState } from '../hooks/use_eis_page_state';
-import { ELASTIC_INFERENCE_SERVICE_BREADCRUMB } from '../translations';
+import { ElasticInferenceServiceModelsHeader } from './header';
+import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_models_page';
+import { ManageRegionsModal } from './manage_regions_modal';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useEisPageState } from '../../hooks/use_eis_page_state';
+import { ELASTIC_INFERENCE_SERVICE_BREADCRUMB } from '../../translations';
 
 export const ElasticInferenceService = () => {
   useBreadcrumbs(ELASTIC_INFERENCE_SERVICE_BREADCRUMB);

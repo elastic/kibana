@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReasoningEffortLevel } from '../../../common/types';
-import { isReasoningEffortLevel } from '../../../common/type_guards';
+import type { ReasoningEffortLevel } from '../../../../common/types';
+import { isReasoningEffortLevel } from '../../../../common/type_guards';
 import { ReasoningTokenUsageNote } from './reasoning_token_usage_note';
 
 const REASONING_EFFORT_OPTIONS: Array<{

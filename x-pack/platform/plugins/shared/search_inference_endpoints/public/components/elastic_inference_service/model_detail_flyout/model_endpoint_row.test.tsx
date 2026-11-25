@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { EisInferenceEndpoint } from '../../../common/types';
+import type { EisInferenceEndpoint } from '../../../../common/types';
 
 import { ModelEndpointRow } from './model_endpoint_row';
 
