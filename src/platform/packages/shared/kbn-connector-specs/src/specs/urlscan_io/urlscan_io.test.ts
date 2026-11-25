@@ -505,6 +505,19 @@ describe('URLScan.io connector', () => {
       expect(result.hasMore).toBe(false);
     });
 
+    // Anonymous and free callers only search recent history, so an empty page proves less.
+    it('reports how far back a limited search reached', async () => {
+      const { ctx, client } = createContext({ authType: 'none' });
+      client.get.mockResolvedValue({
+        data: { results: [], search_date_limit_days: 30 },
+        headers: {},
+      });
+      const result = (await action('searchScans').handler(ctx, { q: 'x' })) as {
+        searchDateLimitDays?: number;
+      };
+      expect(result.searchDateLimitDays).toBe(30);
+    });
+
     it('surfaces the rate-limit budget from the response headers', async () => {
       const { ctx, client } = createContext();
       client.get.mockResolvedValue({

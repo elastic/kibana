@@ -451,6 +451,7 @@ export interface SearchResponse {
   total?: number;
   took?: number;
   has_more?: boolean;
+  search_date_limit_days?: number;
 }
 
 export interface QuotaWindow {

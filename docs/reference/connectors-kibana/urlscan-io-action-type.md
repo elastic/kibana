@@ -47,7 +47,7 @@ Authentication
 ## Connector actions [urlscan-io-connector-actions]
 
 `searchScans`
-:   Searches historical scans with an Elasticsearch query-string query, for example `page.domain:example.com AND date:>now-7d`. Returns one row per prior scan: UUID, URL, title, domain, IP, ASN, country, TLS issuer, domain age, and links to the full result and screenshot. Call it before submitting a new scan, since a recent prior sighting answers the question without spending scan quota.
+:   Searches historical scans with an Elasticsearch query-string query, for example `page.domain:example.com AND date:>now-7d`. Returns one row per prior scan: UUID, URL, title, domain, IP, ASN, country, TLS issuer, domain age, and links to the full result and screenshot. Call it before submitting a new scan, since a recent prior sighting answers the question without spending scan quota. Anonymous and free accounts search recent history only, and the response then gives the number of days in `searchDateLimitDays`.
 
 `getResult`
 :   Retrieves a finished scan by UUID. Returns the verdict (malicious flag, score, categories, impersonated brands), the page identity, scan statistics, the lists of contacted domains, IPs, ASNs, and response hashes, and any files the page downloaded. Requires an API key.
@@ -79,7 +79,7 @@ Authentication
 * **The rate-limited actions report their budget.** URLScan.io limits requests per minute, per hour, and per day, separately for each kind of action, and answers HTTP 429 when a window is exhausted. `searchScans`, `getResult`, `scanUrl`, and `scanUrlAndWait` return a `rateLimit` block read from the response headers. `getQuota`, `getDom`, and `getScreenshot` do not, because those endpoints are not rate limited and send no such headers; use `getQuota` for the full picture before a batch.
 * **Your plan restricts which fields you can search.** `getQuota` returns `queryableFields`. A query on a field outside that list fails with HTTP 403 and a message naming the field, which is a plan limit rather than a problem with the API key. Verdict fields are commonly restricted, so filter on page, task, IP, or hash fields and read the verdict from `getResult` instead.
 * **A large result can exceed the default response cap.** A raw result for a media-heavy page can pass 1 MB, which surfaces as `maxContentLength size of 1048576 exceeded`. In a workflow, raise the limit on the `getResult` or `scanUrlAndWait` step with `max-step-size` (for example `10mb`).
-* **Search results are capped by subscription tier**, and the API silently returns fewer results than requested rather than failing: an anonymous caller asking for 101 receives 100. Paginate with the `searchAfter` cursor each response returns; results run newest first, so each page walks further back in time. The reported `total` is exact only up to 10,000, beyond which it is a floor and `hasMore` is `true`.
+* **Search results are capped by subscription tier**, and the API silently returns fewer results than requested rather than failing: an anonymous caller asking for 101 receives 100. Paginate with the `searchAfter` cursor each response returns; results run newest first, so each page walks further back in time. To read every page, continue until one comes back empty. The reported `total` is exact only up to 10,000, beyond which it is a floor and `hasMore` is `true`; `hasMore` is `false` for smaller totals even when older results remain.
 
 ## Get API credentials [urlscan-io-api-credentials]
 

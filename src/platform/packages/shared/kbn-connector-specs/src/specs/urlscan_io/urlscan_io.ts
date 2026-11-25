@@ -587,7 +587,8 @@ Gotchas that matter:
 - Your plan restricts which fields you may search. getQuota returns queryableFields; a query on anything outside it fails with 403 "Your current plan does not allow you to search field X", which is a plan limit and NOT a problem with the API key. Verdict fields (verdicts.score, verdicts.overall.malicious) are commonly restricted, so filter on page/task/ip/hash fields and read verdicts from getResult instead.
 - getResult on a heavy page can exceed the 1mb default cap Kibana puts on a connector response, which surfaces as "maxContentLength size of 1048576 exceeded". Real results are usually well under that but a media-heavy page can pass 2mb. In a workflow, raise the step's own limit with max-step-size (for example 10mb) on the getResult or scanUrlAndWait step.
 - searchScans caps results at your subscription tier and silently returns fewer than you asked for rather than erroring. Paginate with the searchAfter value the action returns; results run newest first, so each page walks further back in time.
-- The total on a search response is exact only up to 10000; past that hasMore is true and the count is a floor.`,
+- The total on a search response is exact only up to 10000; past that hasMore is true and the count is a floor. hasMore is not a sign of more pages: it is false for smaller totals even when older results remain.
+- Anonymous and free callers search recent history only. searchDateLimitDays says how many days, so treat an empty result as "not seen in that window" before concluding a URL is new.`,
 
   actions: {
     searchScans: {
@@ -597,7 +598,9 @@ Gotchas that matter:
         'Search historical URLScan.io scans with an Elasticsearch query-string query. Returns one row per prior scan: uuid, URL, title, domain, IP, ASN, country, TLS issuer, domain age, and a link to the full result and screenshot. ' +
         'Call this BEFORE submitting a new scan: a recent prior sighting answers the question without spending scan quota, and it is the primary way to check whether an indicator has been seen before. ' +
         'Query by any indicator, for example "page.domain:example.com", "ip:8.8.8.8", "hash:<sha256>", or "page.asn:AS15169", and bound it by date where you can. ' +
-        'Works without an API key on a reduced per-IP budget, so this action stays available even on an unauthenticated connector.',
+        'Works without an API key on a reduced per-IP budget, so this action stays available even on an unauthenticated connector. ' +
+        'To read older results, pass the returned searchAfter back until a page comes back empty; do not stop on hasMore, which is false whenever total is under 10000 even when more results remain. ' +
+        'When searchDateLimitDays is returned, the search only reached that many days back, so an empty result does not mean the indicator was never seen.',
       input: SearchScansInputSchema,
       handler: async (ctx, input: SearchScansInput) => {
         try {
@@ -617,9 +620,12 @@ Gotchas that matter:
           const last = results[results.length - 1];
           return {
             results: results.map(trimSearchHit),
-            // Exact only up to 10000; beyond that it is a floor and hasMore is true.
+            // Exact only up to 10000; beyond that it is a floor and hasMore is true. hasMore is
+            // false below that even when older pages remain.
             total: data.total,
             hasMore: data.has_more === true,
+            // Only sent to anonymous and free callers, whose searches stop this many days back.
+            searchDateLimitDays: data.search_date_limit_days,
             tookMs: data.took,
             // Ready to pass straight back in as searchAfter for the next (older) page.
             searchAfter: last?.sort === undefined ? undefined : last.sort.join(','),
