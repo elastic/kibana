@@ -23,7 +23,7 @@ import {
 import { RULES_LIST_LABELS } from '../../translations';
 
 type RuleItem = ContentListItem &
-  BoostRuleListItem & { source: BoostRuleListItem; appliesTo: number; storageSizeInBytes: number };
+  BoostRuleListItem & { source: BoostRuleListItem; appliesTo: number; storageSizeInBytes?: number };
 
 const { ItemsProvider: RuleItemsProvider, useItemLookup } = createItemLookup<RuleItem>();
 
