@@ -86,32 +86,6 @@ describe('useSubmitMessage', () => {
     );
   });
 
-  it('tells the caller about the new conversation before sending and navigating', async () => {
-    setState({});
-    const calls: string[] = [];
-    sendMessage.mockImplementation(() => calls.push('send'));
-    navigateToAgentBuilderUrl.mockImplementation(() => calls.push('navigate'));
-    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
-
-    await act(() =>
-      result.current.submitMessage('hello', {
-        onConversationCreated: (id) => calls.push(`created:${id}`),
-      })
-    );
-
-    expect(calls).toEqual(['created:conv-1', 'send', 'navigate']);
-  });
-
-  it('does not report a new conversation when one already exists', async () => {
-    setState({ conversationId: 'existing' });
-    const onConversationCreated = jest.fn();
-    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
-
-    await act(() => result.current.submitMessage('hello', { onConversationCreated }));
-
-    expect(onConversationCreated).not.toHaveBeenCalled();
-  });
-
   it('reports that the conversation is being created while the request is in flight', async () => {
     setState({});
     let resolveCreate: (value: typeof created) => void = () => {};
@@ -129,58 +103,6 @@ describe('useSubmitMessage', () => {
 
     await waitFor(() => expect(result.current.isCreatingConversation).toBe(false));
     expect(sendMessage).toHaveBeenCalledWith({ message: 'hello', conversationId: 'conv-1' });
-  });
-
-  it('shares the creating state between hooks, so one can hold the other', async () => {
-    setState({});
-    let resolveCreate: (value: typeof created) => void = () => {};
-    create.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)));
-    const { result } = renderHook(
-      () => ({ first: useSubmitMessage(), second: useSubmitMessage() }),
-      {
-        wrapper,
-      }
-    );
-    expect(result.current.second.isCreatingConversation).toBe(false);
-
-    let pending: Promise<void>;
-    act(() => {
-      pending = result.current.first.submitMessage('hello');
-    });
-
-    await waitFor(() => expect(result.current.second.isCreatingConversation).toBe(true));
-
-    resolveCreate(created);
-    await act(() => pending);
-
-    await waitFor(() => expect(result.current.second.isCreatingConversation).toBe(false));
-  });
-
-  it('creates one conversation when two submits come before the controls rerender', async () => {
-    setState({});
-    let resolveCreate: (value: typeof created) => void = () => {};
-    create.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)));
-    const { result } = renderHook(
-      () => ({ input: useSubmitMessage(), starters: useSubmitMessage() }),
-      { wrapper }
-    );
-
-    let pending: Promise<void>[] = [];
-    act(() => {
-      pending = [
-        result.current.starters.submitMessage('from a starter'),
-        result.current.input.submitMessage('from the input'),
-      ];
-    });
-    resolveCreate(created);
-    await act(() => Promise.all(pending));
-
-    expect(create).toHaveBeenCalledTimes(1);
-    expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(sendMessage).toHaveBeenCalledWith({
-      message: 'from a starter',
-      conversationId: 'conv-1',
-    });
   });
 
   it('switches the embedded conversation by state instead of navigating', async () => {

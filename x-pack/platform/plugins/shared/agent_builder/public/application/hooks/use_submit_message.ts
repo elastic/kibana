@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useIsMutating, useMutation, useQueryClient } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -19,20 +19,17 @@ import { useNavigation } from './use_navigation';
 import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
 
-export interface SubmitMessageOptions {
-  /** Handles a rejection before streaming; return true to suppress the default toast. */
-  onRejected?: (error: unknown) => boolean;
-  /** Called with the id of the conversation this submit created, before the message is sent. */
-  onConversationCreated?: (conversationId: string) => void;
-}
-
 /**
  * Single source of truth for "send this message". A new conversation is created on the server
  * first, so it exists, is cached and is in the sidebar before anything streams into it; then the
  * user is moved to it, by URL in the routed app or by state in the embeddable.
- * `isCreatingConversation` is true while any request creating a conversation is in flight, from this
- * hook or another one, so the input and the conversation starters hold submits for each other.
+ * `isCreatingConversation` is true while that request is in flight, so the input can hold submits.
  */
+export interface SubmitMessageOptions {
+  /** Handles a rejection before streaming; return true to suppress the default toast. */
+  onRejected?: (error: unknown) => boolean;
+}
+
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();
   const { sendMessage } = useConversationStream();
@@ -43,7 +40,7 @@ export const useSubmitMessage = () => {
   const queryClient = useQueryClient();
   const { addErrorToast } = useToasts();
 
-  const { mutateAsync: createConversation } = useMutation({
+  const { mutateAsync: createConversation, isLoading: isCreatingConversation } = useMutation({
     mutationKey: mutationKeys.createConversation,
     mutationFn: (id: string) => conversationsService.create({ agentId: id }),
     onSuccess: (created) => {
@@ -52,21 +49,15 @@ export const useSubmitMessage = () => {
     },
     onError: (error) => addErrorToast({ title: formatAgentBuilderErrorMessage(error) }),
   });
-  const isCreatingConversation =
-    useIsMutating({ mutationKey: mutationKeys.createConversation }) > 0;
 
   const submitMessage = useCallback(
-    async (message: string, { onRejected, onConversationCreated }: SubmitMessageOptions = {}) => {
+    async (message: string, { onRejected }: SubmitMessageOptions = {}) => {
       if (conversationId) {
         sendMessage({ message, conversationId, ...(onRejected ? { onRejected } : {}) });
         return;
       }
       if (!agentId) {
         throw new Error('agentId is required to start a conversation');
-      }
-
-      if (queryClient.isMutating({ mutationKey: mutationKeys.createConversation }) > 0) {
-        return;
       }
 
       let created;
@@ -76,7 +67,6 @@ export const useSubmitMessage = () => {
         return;
       }
 
-      onConversationCreated?.(created.id);
       sendMessage({ message, conversationId: created.id });
 
       if (isEmbeddedContext) {
@@ -91,7 +81,6 @@ export const useSubmitMessage = () => {
       conversationId,
       sendMessage,
       agentId,
-      queryClient,
       createConversation,
       isEmbeddedContext,
       setConversationId,

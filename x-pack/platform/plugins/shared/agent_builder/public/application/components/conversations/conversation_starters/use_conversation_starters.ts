@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import type { MutableRefObject } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { ConversationStarter } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { useAgentId } from '../../../hooks/use_conversation';
-import { useSubmitMessage } from '../../../hooks/use_submit_message';
-import { useAgentSendState } from '../../../hooks/agents/use_agent_send_state';
-import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
-import { useCarryOverDraft } from '../../../hooks/use_input_draft';
-import { useActiveSpaceId } from '../../../context/active_space_context';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
-import type { TakeInputDraft } from '../conversation_input/conversation_input';
+import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { DEFAULT_CONVERSATION_STARTERS } from './default_conversation_starters';
 import type { ConversationStartersSource } from './resolve_conversation_starters';
 import { resolveConversationStarters } from './resolve_conversation_starters';
@@ -26,35 +20,16 @@ const STARTERS_SOURCE: ConversationStartersSource = 'default';
 
 /**
  * The starters to show, and how to send one. They are shown for the default Elastic AI agent only,
- * and only while the experimental features setting is on, until their copy is final. Nothing is returned while the agent loads or when the user can't run it, so starters never appear
- * for an input that can't send.
+ * and only while the experimental features setting is on, until their copy is final. A click sends
+ * the label as the message, which creates the conversation and moves the user to it.
  */
-export const useConversationStarters = ({
-  isInputUploading = false,
-  takeInputDraftRef,
-}: {
-  isInputUploading?: boolean;
-  takeInputDraftRef?: MutableRefObject<TakeInputDraft | null>;
-} = {}) => {
+export const useConversationStarters = () => {
   const agentId = useAgentId();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const { agentExists, isBoundAgentForbidden, isAgentModelLoading } = useAgentSendState(agentId);
-  const spaceId = useActiveSpaceId();
-  const { sessionTag } = useConversationContext();
-  const { currentUser } = useCurrentUser();
-  const { takeNewChatDraft, saveDraftTo } = useCarryOverDraft({
-    spaceId,
-    sessionTag,
-    username: currentUser?.user.username,
-    agentId,
-  });
-
+  const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-  const canShow =
-    isExperimentalFeaturesEnabled &&
-    agentExists &&
-    !isBoundAgentForbidden &&
-    agentId === agentBuilderDefaultAgentId;
+
+  const canShow = isExperimentalFeaturesEnabled && agentId === agentBuilderDefaultAgentId;
 
   const starters = useMemo(
     () =>
@@ -66,24 +41,15 @@ export const useConversationStarters = ({
 
   const onSelect = useCallback(
     ({ label }: ConversationStarter) => {
-      void submitMessage(label, {
-        // What was typed isn't sent: it moves to the input of the conversation that starts. It stays
-        // where it is if the conversation can't be created.
-        onConversationCreated: (conversationId) => {
-          const typedText = takeInputDraftRef?.current
-            ? takeInputDraftRef.current()
-            : takeNewChatDraft();
-          if (typedText) saveDraftTo(conversationId, typedText);
-        },
-      });
+      void submitMessage(label);
     },
-    [takeInputDraftRef, takeNewChatDraft, saveDraftTo, submitMessage]
+    [submitMessage]
   );
 
   return {
     starters,
     source: STARTERS_SOURCE,
     onSelect,
-    isDisabled: isCreatingConversation || isAgentModelLoading || isInputUploading,
+    isDisabled: isCreatingConversation || isAgentModelLoading,
   };
 };

@@ -9,34 +9,18 @@ import { useCallback } from 'react';
 
 const IMAGE_LINK_RE = /\[[^\]]*\]\(image:\/\/[^)]*\)/g;
 
-interface DraftOwner {
-  spaceId: string;
-  sessionTag: string | undefined;
-  username: string | undefined;
-  agentId: string | undefined;
-}
-
-/** The storage key of a draft, or null when it can't be told whose draft it is. */
-const getDraftKey = (
-  { spaceId, sessionTag, username, agentId }: DraftOwner,
+const buildKey = (
+  spaceId: string,
+  sessionTag: string,
+  username: string,
+  agentId: string,
   conversationId: string | undefined
-): string | null =>
-  username && agentId
-    ? `agent-builder:draft:${encodeURIComponent(spaceId)}:${encodeURIComponent(
-        sessionTag ?? 'default'
-      )}:${encodeURIComponent(username)}:${encodeURIComponent(agentId)}:${
-        conversationId ? encodeURIComponent(conversationId) : 'new'
-      }`
-    : null;
-
-/**
- * What of the typed content is kept as a draft: without image links, since uploaded images are not
- * restored with it, and nothing at all when only whitespace is left.
- */
-export const toDraftContent = (content: string): string | null => {
-  const stripped = content.replace(IMAGE_LINK_RE, '');
-  return stripped.trim() ? stripped : null;
-};
+) =>
+  `agent-builder:draft:${encodeURIComponent(spaceId)}:${encodeURIComponent(
+    sessionTag
+  )}:${encodeURIComponent(username)}:${encodeURIComponent(agentId)}:${
+    conversationId ? encodeURIComponent(conversationId) : 'new'
+  }`;
 
 const getFromStorage = (key: string): string | null => {
   try {
@@ -69,17 +53,26 @@ export const useInputDraft = ({
   username,
   agentId,
   conversationId,
-}: DraftOwner & { conversationId: string | undefined }) => {
-  const key = getDraftKey({ spaceId, sessionTag, username, agentId }, conversationId);
+}: {
+  spaceId: string;
+  sessionTag: string | undefined;
+  username: string | undefined;
+  agentId: string | undefined;
+  conversationId: string | undefined;
+}) => {
+  const key =
+    username && agentId
+      ? buildKey(spaceId, sessionTag ?? 'default', username, agentId, conversationId)
+      : null;
 
   const draft = key ? getFromStorage(key) : null;
 
   const saveDraft = useCallback(
     (content: string) => {
       if (!key) return;
-      const draftContent = toDraftContent(content);
-      if (draftContent) {
-        writeToStorage(key, draftContent);
+      const stripped = content.replace(IMAGE_LINK_RE, '');
+      if (stripped.trim()) {
+        writeToStorage(key, stripped);
       } else {
         removeFromStorage(key);
       }
@@ -97,11 +90,15 @@ export const useInputDraft = ({
       target: { agentId: string | undefined; conversationId: string | undefined },
       content: string
     ) => {
-      const targetKey = getDraftKey(
-        { spaceId, sessionTag, username, agentId: target.agentId },
+      if (!username || !target.agentId) return;
+      const targetKey = buildKey(
+        spaceId,
+        sessionTag ?? 'default',
+        username,
+        target.agentId,
         target.conversationId
       );
-      if (!targetKey || getFromStorage(targetKey)) return;
+      if (getFromStorage(targetKey)) return;
       // The image data is not kept with the draft, so its link would restore a phantom placeholder.
       writeToStorage(targetKey, content.replace(IMAGE_LINK_RE, ''));
     },
@@ -109,30 +106,4 @@ export const useInputDraft = ({
   );
 
   return { draft, saveDraft, clearDraft, keepUnsentFor };
-};
-
-/**
- * Moves what was typed in a new chat to the input of the conversation that starts from it, for when
- * the conversation is started without sending that text, e.g. by a conversation starter.
- */
-export const useCarryOverDraft = ({ spaceId, sessionTag, username, agentId }: DraftOwner) => {
-  /** Returns the draft of the new chat and removes it, so it doesn't come back in the next new chat. */
-  const takeNewChatDraft = useCallback((): string | null => {
-    const key = getDraftKey({ spaceId, sessionTag, username, agentId }, undefined);
-    if (!key) return null;
-    const draft = getFromStorage(key);
-    removeFromStorage(key);
-    return draft;
-  }, [spaceId, sessionTag, username, agentId]);
-
-  /** Stores a draft for a conversation, read by its input when it opens. */
-  const saveDraftTo = useCallback(
-    (conversationId: string, content: string) => {
-      const key = getDraftKey({ spaceId, sessionTag, username, agentId }, conversationId);
-      if (key && content.trim()) writeToStorage(key, content);
-    },
-    [spaceId, sessionTag, username, agentId]
-  );
-
-  return { takeNewChatDraft, saveDraftTo };
 };
