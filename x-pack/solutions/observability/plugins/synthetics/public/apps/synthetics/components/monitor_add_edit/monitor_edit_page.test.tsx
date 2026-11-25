@@ -198,4 +198,24 @@ describe('MonitorEditPage', () => {
     // error
     expect(getByText('Unable to load monitor configuration')).toBeInTheDocument();
   });
+
+  it('renders monitor not found prompt on 404', async () => {
+    const { getByText } = render(<MonitorEditPage />, {
+      state: {
+        serviceLocations: {
+          locations: [{ id: 'us_central', label: 'Us Central' }],
+          locationsLoaded: true,
+          loading: false,
+        },
+        monitorDetails: {
+          syntheticsMonitorLoading: false,
+          syntheticsMonitorError: {
+            body: { statusCode: 404, error: 'Not Found', message: 'Not Found' },
+          },
+        },
+      },
+    });
+
+    expect(getByText('Monitor not found')).toBeInTheDocument();
+  });
 });

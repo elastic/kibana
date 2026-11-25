@@ -15,7 +15,7 @@ import { OutPortal } from 'react-reverse-portal';
 import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
 import { DisabledCallout } from '../monitors_page/management/disabled_callout';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
-import { EditMonitorNotFound } from './edit_monitor_not_found';
+import { MonitorNotFoundPrompt } from '../monitor_details/monitor_not_found_page';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
 import {
@@ -33,7 +33,6 @@ import { LocationsLoadingError } from './locations_loading_error';
 import { MonitorDetailsLinkPortal } from './monitor_details_portal';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
-import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 import { useGetUrlParams } from '../../hooks';
 import { EDIT_MONITOR_TITLE, MonitorBackPage, SyntheticsHeaderToolbar } from '../common/app_header';
 import { InspectMonitorPortalNode, MonitorTypePortalNode } from './portals';
@@ -60,14 +59,14 @@ export const MonitorEditPage: React.FC = () => {
     dispatch(getMonitorAction.get({ monitorId, spaceId }));
   }, [dispatch, monitorId, spaceId]);
 
-  const monitorNotFoundError = useMonitorNotFound(error, data?.id);
+  const monitorNotFoundError = error?.body?.statusCode === 404;
 
-  useMonitorAddEditBreadcrumbs(true, { monitorNotFound: Boolean(monitorNotFoundError) });
+  useMonitorAddEditBreadcrumbs(true, { monitorNotFound: monitorNotFoundError });
 
   const canUsePublicLocations = useCanUsePublicLocations(data?.[ConfigKey.LOCATIONS]);
 
   if (monitorNotFoundError) {
-    return <EditMonitorNotFound />;
+    return <MonitorNotFoundPrompt />;
   }
 
   const isReadOnly =

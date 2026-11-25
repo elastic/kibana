@@ -108,13 +108,3 @@ export const resetMonitorBulkAPI = async ({
 }> => {
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_RESET, { ids });
 };
-
-export const deletePackagePolicy = async (
-  packagePolicyId: string
-): Promise<{
-  apiKey: { encoded: string };
-}> => {
-  return await apiService.delete(
-    SYNTHETICS_API_URLS.DELETE_PACKAGE_POLICY.replace('{packagePolicyId}', packagePolicyId)
-  );
-};

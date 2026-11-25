@@ -64,7 +64,6 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
     const url = useEditMonitorLocator({
       configId,
       monitorSpaces,
-      packagePolicyId: currentPolicy.id,
       locators,
     });
 
