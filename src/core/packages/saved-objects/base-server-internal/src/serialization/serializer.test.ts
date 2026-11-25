@@ -1517,6 +1517,13 @@ describe('the stored ACL', () => {
     _id: 'foo:bar',
     _source: { type: 'foo', foo: {}, ...source } as SavedObjectsRawDoc['_source'],
   });
+  const withAcl = { includeAcl: true };
+
+  it('leaves the ACL out unless the caller sets includeAcl', () => {
+    const doc = rawDoc({ acl: { version: 1, owner: { type: 'user', id: 'u_owner' } } });
+    expect(namespaceAgnosticSerializer.rawToSavedObject(doc)).not.toHaveProperty('acl');
+    expect(namespaceAgnosticSerializer.rawToSavedObject(doc, withAcl).acl).toBeDefined();
+  });
 
   it('reads the ACL from the `acl` object, dotted root keys, and arrays', () => {
     const actual = namespaceAgnosticSerializer.rawToSavedObject(
@@ -1528,15 +1535,18 @@ describe('the stored ACL', () => {
           entries: [{ type: 'user', id: 'u_alice', access: 'edit', added_at: ADDED_AT }],
         },
         'acl.owner.id': 'u_owner',
-      })
+      }),
+      withAcl
     );
     expect(actual.acl).toEqual(STORED_ACL);
   });
 
   it('reads the ACL for every type, whether or not access control is enabled', () => {
     const source = { acl: { version: 1, owner: { type: 'user', id: 'u_owner' } } };
-    expect(accessControlDisabledSerializer.rawToSavedObject(rawDoc(source)).acl).toBeDefined();
-    expect(singleNamespaceSerializer.rawToSavedObject(rawDoc(source)).acl).toBeDefined();
+    expect(
+      accessControlDisabledSerializer.rawToSavedObject(rawDoc(source), withAcl).acl
+    ).toBeDefined();
+    expect(singleNamespaceSerializer.rawToSavedObject(rawDoc(source), withAcl).acl).toBeDefined();
   });
 
   it.each([
@@ -1544,7 +1554,9 @@ describe('the stored ACL', () => {
     ['an empty ACL object', { acl: {} }],
     ['a null ACL', { acl: null }],
   ])('reads no ACL from a document with %s', (description, source) => {
-    expect(namespaceAgnosticSerializer.rawToSavedObject(rawDoc(source))).not.toHaveProperty('acl');
+    expect(
+      namespaceAgnosticSerializer.rawToSavedObject(rawDoc(source), withAcl)
+    ).not.toHaveProperty('acl');
   });
 
   it('writes the ACL as one `acl` object that indexes to the same values', () => {
@@ -1566,10 +1578,11 @@ describe('the stored ACL', () => {
 
   it('keeps the ACL through a round trip', () => {
     const saved = namespaceAgnosticSerializer.rawToSavedObject(
-      rawDoc({ acl: { version: 1, owner: { type: 'user' } }, 'acl.owner.id': 'u_owner' })
+      rawDoc({ acl: { version: 1, owner: { type: 'user' } }, 'acl.owner.id': 'u_owner' }),
+      withAcl
     );
     const raw = namespaceAgnosticSerializer.savedObjectToRaw(saved);
-    expect(namespaceAgnosticSerializer.rawToSavedObject(raw).acl).toEqual(saved.acl);
+    expect(namespaceAgnosticSerializer.rawToSavedObject(raw, withAcl).acl).toEqual(saved.acl);
     expect(raw._source).not.toHaveProperty(['acl.owner.id']);
   });
 });

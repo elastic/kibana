@@ -148,4 +148,12 @@ export interface SavedObjectsRawDocParseOptions {
    * @default 'raw'
    */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+
+  /**
+   * Whether the result includes the object's stored ACL (`acl`). Off by default. A caller that
+   * writes the converted object back must set it, or the write drops the ACL.
+   *
+   * @default false
+   */
+  includeAcl?: boolean;
 }

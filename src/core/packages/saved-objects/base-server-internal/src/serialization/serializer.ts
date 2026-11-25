@@ -91,7 +91,11 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
   ): SavedObjectSanitizedDoc<T> {
     this.checkIsRawSavedObject(doc, options); // throws a descriptive error if the document is not a saved object
 
-    const { namespaceTreatment = 'strict', migrationVersionCompatibility = 'raw' } = options;
+    const {
+      namespaceTreatment = 'strict',
+      migrationVersionCompatibility = 'raw',
+      includeAcl = false,
+    } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
     const {
       type,
@@ -106,10 +110,10 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
         : undefined,
     } = _source;
 
-    // Every type keeps its ACL through migrations and rewrites. Repository APIs leave it out of
-    // their results unless the caller asks for it. Pass the whole source: Elasticsearch also indexes
-    // dotted root keys such as `"acl.owner.id"`, so they are part of the stored ACL.
-    const acl = readAclFromRawSource(_source);
+    // The result has an ACL only when the caller asks for it. Migrations ask, so every rewrite keeps
+    // it. Pass the whole source: Elasticsearch also indexes dotted root keys such as
+    // `"acl.owner.id"`, so they are part of the stored ACL.
+    const acl = includeAcl ? readAclFromRawSource(_source) : undefined;
 
     const version =
       _seq_no != null || _primary_term != null

@@ -46,12 +46,12 @@ export class SerializerHelper {
     options?: SavedObjectsRawDocParseOptions,
     { includeAcl = false }: { includeAcl?: boolean } = {}
   ): SavedObject<T> {
-    const savedObject = this.serializer.rawToSavedObject(raw, options);
+    const savedObject = this.serializer.rawToSavedObject(raw, { ...options, includeAcl });
     const { namespace, type } = savedObject;
     if (this.registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
 
-    return omit(savedObject, includeAcl ? ['namespace'] : ['namespace', 'acl']) as SavedObject<T>;
+    return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 }

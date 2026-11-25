@@ -206,7 +206,8 @@ function convertToRawAddMigrationVersion(
   options: { namespaceTreatment: 'lax' },
   serializer: ISavedObjectsSerializer
 ): SavedObjectSanitizedDoc<unknown> {
-  const savedObject = serializer.rawToSavedObject(rawDoc, options);
+  // The migrated document is written back, so it must keep its stored ACL.
+  const savedObject = serializer.rawToSavedObject(rawDoc, { ...options, includeAcl: true });
   if (!savedObject.migrationVersion && !savedObject.typeMigrationVersion) {
     savedObject.typeMigrationVersion = '';
   }
