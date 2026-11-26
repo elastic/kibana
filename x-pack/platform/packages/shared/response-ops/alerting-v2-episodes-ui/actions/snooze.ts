@@ -57,6 +57,14 @@ const countReplacedSnoozes = (
   extension?: EpisodeActionExtension<EpisodeSnoozePayload>
 ): number => episodes.filter((ep) => isSnoozable(ep, extension) && isCurrentlySnoozed(ep)).length;
 
+const countInactive = (
+  episodes: AlertEpisode[],
+  extension?: EpisodeActionExtension<EpisodeSnoozePayload>
+): number =>
+  episodes.filter(
+    (ep) => isSnoozable(ep, extension) && ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE
+  ).length;
+
 const supportsConditions = (episodes: AlertEpisode[], sourceSupports: boolean): boolean =>
   episodes.every((ep) =>
     ep.source_id == null ? NATIVE_EPISODES_SUPPORT_CONDITIONAL_SNOOZE : sourceSupports
@@ -99,6 +107,7 @@ export const createSnoozeAction = (
         additionalDataSource?.supportsConditionalSnooze ?? false
       ),
       replacedSnoozeCount: countReplacedSnoozes(episodes, extension),
+      inactiveSnoozeCount: countInactive(episodes, extension),
     });
     if (payload === undefined) return;
 

@@ -250,6 +250,35 @@ describe('openSnoozeModal', () => {
     expect(screen.queryByTestId('snoozeModalReplacedSnoozeWarning')).not.toBeInTheDocument();
   });
 
+  it('warns that snoozing inactive alerts silences their next alert', async () => {
+    openSnoozeModal(makeDeps(), { inactiveSnoozeCount: 1 });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snoozeModalInactiveAlertsWarning')).toHaveTextContent(
+        '1 selected alert is no longer active'
+      );
+    });
+  });
+
+  it('omits the inactive warning when every selected alert is active', async () => {
+    openSnoozeModal(makeDeps(), { inactiveSnoozeCount: 0 });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snoozeModal')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('snoozeModalInactiveAlertsWarning')).not.toBeInTheDocument();
+  });
+
+  it('shows both warnings when the selection is inactive and already snoozed', async () => {
+    openSnoozeModal(makeDeps(), { inactiveSnoozeCount: 2, replacedSnoozeCount: 2 });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snoozeModalInactiveAlertsWarning')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('snoozeModalReplacedSnoozeWarning')).toBeInTheDocument();
+  });
+
   it("loads the field_change options from the data source's searchable fields", async () => {
     const fetchSearchFields = jest.fn().mockResolvedValue([
       {
