@@ -10,25 +10,21 @@
 import type { MutableRefObject } from 'react';
 
 /**
- * Suppresses publishing editor text while a generated preview is inserted in the model.
- * Hold before the preview edit; release before accept/reject so those edits publish.
+ * True while a generated preview is inserted in the editor model. The editor does not
+ * publish model changes to the query while it is set, so the preview is never saved.
  */
-export interface QueryPublishGate {
-  hold: () => void;
-  release: () => void;
-}
+export type PreviewPendingRef = MutableRefObject<boolean>;
 
-export type QueryPublishGateRef = MutableRefObject<QueryPublishGate>;
-
-export const runWithPublishHold = <T>(
-  gate: QueryPublishGateRef | undefined,
+/** Marks the preview as pending before inserting it; clears the mark if the insert throws. */
+export const insertPendingPreview = <T>(
+  previewPendingRef: PreviewPendingRef | undefined,
   insertPreview: () => T
 ): T => {
-  gate?.current.hold();
+  if (previewPendingRef) previewPendingRef.current = true;
   try {
     return insertPreview();
   } catch (error) {
-    gate?.current.release();
+    if (previewPendingRef) previewPendingRef.current = false;
     throw error;
   }
 };

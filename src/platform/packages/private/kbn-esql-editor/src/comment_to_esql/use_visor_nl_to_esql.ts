@@ -14,8 +14,8 @@ import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { VisorNlResultHandler } from '../types';
-import { runWithPublishHold } from './query_publish_gate';
-import type { QueryPublishGateRef } from './query_publish_gate';
+import { insertPendingPreview } from './preview_pending';
+import type { PreviewPendingRef } from './preview_pending';
 import { useReplaceReview } from './use_replace_review';
 import type { ReviewState } from './use_replace_review';
 import { getVisorNlInsertPlan } from './visor_nl_insert';
@@ -26,7 +26,7 @@ interface UseVisorNlToEsqlParams {
   onSubmit: (query: string) => void;
   onAfterInsert?: () => void;
   telemetryService?: ESQLEditorTelemetryService;
-  queryPublishGate: QueryPublishGateRef;
+  previewPendingRef: PreviewPendingRef;
 }
 
 const generatedBlockStillPresent = (
@@ -48,7 +48,7 @@ export const useVisorNlToEsql = ({
   onSubmit,
   onAfterInsert,
   telemetryService,
-  queryPublishGate,
+  previewPendingRef,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
@@ -110,7 +110,7 @@ export const useVisorNlToEsql = ({
     contextKeyId: 'esqlVisorReviewActive',
     rejectAction,
     editSourceId: 'nl-to-esql-visor',
-    queryPublishGate,
+    previewPendingRef,
     onAfterAccept,
     onAfterReject,
   });
@@ -161,12 +161,12 @@ export const useVisorNlToEsql = ({
       };
 
       if (plan.insert) {
-        runWithPublishHold(queryPublishGate, insertAndReview);
+        insertPendingPreview(previewPendingRef, insertAndReview);
       } else {
         insertAndReview();
       }
     },
-    [editorRef, editorModel, reject, showReview, onAfterInsert, queryPublishGate]
+    [editorRef, editorModel, reject, showReview, onAfterInsert, previewPendingRef]
   );
 
   // Run accepts an untouched preview. Once the user has edited the buffer, drop the

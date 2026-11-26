@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ReviewActionsWidget } from './review_actions_widget';
-import type { QueryPublishGateRef } from './query_publish_gate';
+import type { PreviewPendingRef } from './preview_pending';
 import { CODE_ADDED_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
 export interface ReviewState {
@@ -29,8 +29,8 @@ interface UseReplaceReviewParams {
   contextKeyId: string;
   rejectAction: { id: string; label: string };
   editSourceId: string;
-  /** Released when the review ends so the following accept/reject edit can publish. */
-  queryPublishGate?: QueryPublishGateRef;
+  /** Cleared when the review ends so the following accept/reject edit can publish. */
+  previewPendingRef?: PreviewPendingRef;
   onAfterAccept?: (state: ReviewState, acceptedQuery: string) => void;
   onAfterReject?: (state: ReviewState) => void;
 }
@@ -54,7 +54,7 @@ export const useReplaceReview = ({
   contextKeyId,
   rejectAction,
   editSourceId,
-  queryPublishGate,
+  previewPendingRef,
   onAfterAccept,
   onAfterReject,
 }: UseReplaceReviewParams) => {
@@ -65,8 +65,8 @@ export const useReplaceReview = ({
   const reviewStateRef = useRef<ReviewState | null>(null);
 
   const cleanup = useCallback(() => {
-    // Release before any follow-up edit so accept/reject still publish.
-    queryPublishGate?.current.release();
+    // Clear before any follow-up edit so accept/reject still publish.
+    if (previewPendingRef) previewPendingRef.current = false;
 
     decorationsRef.current?.clear();
     decorationsRef.current = undefined;
@@ -79,7 +79,7 @@ export const useReplaceReview = ({
 
     contextKeyRef.current?.set(false);
     reviewStateRef.current = null;
-  }, [queryPublishGate]);
+  }, [previewPendingRef]);
 
   useEffect(() => cleanup, [cleanup]);
 

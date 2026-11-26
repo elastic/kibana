@@ -255,9 +255,9 @@ describe('useReplaceReview', () => {
     expect(params.onAfterAccept).toHaveBeenCalledTimes(1);
   });
 
-  it('cleanup releases the query publish gate', () => {
-    const release = jest.fn();
-    const params = makeParams({ queryPublishGate: { current: { hold: jest.fn(), release } } });
+  it('cleanup clears the pending preview mark', () => {
+    const previewPendingRef = { current: true };
+    const params = makeParams({ previewPendingRef });
     const { editor } = buildEditor();
     params.editorRef.current = editor;
     params.editorModel.current = buildModel();
@@ -267,7 +267,7 @@ describe('useReplaceReview', () => {
     act(() => result.current.showReview(REVIEW_STATE));
     act(() => result.current.cleanup());
 
-    expect(release).toHaveBeenCalledTimes(1);
+    expect(previewPendingRef.current).toBe(false);
   });
 
   it('cleanup clears decorations and resets the context key', () => {

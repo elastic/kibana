@@ -17,8 +17,8 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { GENERATING_HINT_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
-import { runWithPublishHold } from '../comment_to_esql/query_publish_gate';
-import type { QueryPublishGateRef } from '../comment_to_esql/query_publish_gate';
+import { insertPendingPreview } from '../comment_to_esql/preview_pending';
+import type { PreviewPendingRef } from '../comment_to_esql/preview_pending';
 import { useReplaceReview } from '../comment_to_esql/use_replace_review';
 
 type SuggestFixHandler = (
@@ -73,7 +73,7 @@ interface UseSuggestFixParams {
   onSubmit: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
   onAfterInsert?: () => void;
-  queryPublishGate?: QueryPublishGateRef;
+  previewPendingRef?: PreviewPendingRef;
 }
 
 export const useSuggestFix = ({
@@ -85,7 +85,7 @@ export const useSuggestFix = ({
   onSubmit,
   telemetryService,
   onAfterInsert,
-  queryPublishGate,
+  previewPendingRef,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
 
@@ -140,7 +140,7 @@ export const useSuggestFix = ({
       }),
     },
     editSourceId: 'esql-suggest-fix',
-    queryPublishGate,
+    previewPendingRef,
     onAfterAccept: (state, acceptedQuery) => {
       trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
       onSubmit(acceptedQuery);
@@ -217,7 +217,7 @@ export const useSuggestFix = ({
         }
 
         // Hold publishing until accept/reject so the preview is not saved as the query.
-        runWithPublishHold(queryPublishGate, () => {
+        insertPendingPreview(previewPendingRef, () => {
           const insertMaxCol = model.getLineMaxColumn(lastChangedOriginalLine);
           editor.executeEdits('esql-suggest-fix', [
             {
@@ -277,7 +277,7 @@ export const useSuggestFix = ({
       showReview,
       notifications.toasts,
       clearGeneratingDecoration,
-      queryPublishGate,
+      previewPendingRef,
     ]
   );
 

@@ -18,8 +18,8 @@ import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/te
 import { ReviewActionsWidget } from './review_actions_widget';
 import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
-import { runWithPublishHold } from './query_publish_gate';
-import type { QueryPublishGateRef } from './query_publish_gate';
+import { insertPendingPreview } from './preview_pending';
+import type { PreviewPendingRef } from './preview_pending';
 import {
   findTargetComment,
   insertGeneratedCode,
@@ -54,7 +54,7 @@ interface UseCommentToEsqlParams {
   // When set, generation auto-accepts: removes the comment line, keeps generated code, and calls this callback with the final query instead of showing the review UI.
   autoAcceptCallbackRef?: MutableRefObject<((finalQuery: string) => void) | undefined>;
   onAfterInsert?: () => void;
-  queryPublishGate?: QueryPublishGateRef;
+  previewPendingRef?: PreviewPendingRef;
 }
 
 export const useCommentToEsql = ({
@@ -68,7 +68,7 @@ export const useCommentToEsql = ({
   telemetryService,
   autoAcceptCallbackRef,
   onAfterInsert,
-  queryPublishGate,
+  previewPendingRef,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
@@ -127,7 +127,7 @@ export const useCommentToEsql = ({
   );
 
   const cleanup = useCallback(() => {
-    queryPublishGate?.current.release();
+    if (previewPendingRef) previewPendingRef.current = false;
 
     decorationsRef.current?.clear();
     decorationsRef.current = undefined;
@@ -145,7 +145,7 @@ export const useCommentToEsql = ({
     clearCommentAnchor();
     clearGeneratingDecoration();
     abortInFlight();
-  }, [clearCommentAnchor, clearGeneratingDecoration, abortInFlight, queryPublishGate]);
+  }, [clearCommentAnchor, clearGeneratingDecoration, abortInFlight, previewPendingRef]);
 
   // Keeps the generated code and runs the query; false if no review is pending
   // (an in-flight generation is left alone in that case).
@@ -424,7 +424,7 @@ export const useCommentToEsql = ({
       const currentCommentLine = anchorRanges[0]?.startLineNumber;
       if (!currentCommentLine || !isModelStillValid(liveModel, currentCommentLine)) return;
 
-      runWithPublishHold(queryPublishGate, () => {
+      insertPendingPreview(previewPendingRef, () => {
         const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
           editor,
           liveModel,
@@ -441,7 +441,7 @@ export const useCommentToEsql = ({
         if (autoAcceptCallbackRef?.current) {
           const cb = autoAcceptCallbackRef.current;
           autoAcceptCallbackRef.current = undefined;
-          queryPublishGate?.current.release();
+          if (previewPendingRef) previewPendingRef.current = false;
           const currentEditor = editorRef.current;
           if (currentEditor && liveModel) {
             currentEditor.executeEdits('nl-to-esql-auto-accept', [
@@ -479,7 +479,7 @@ export const useCommentToEsql = ({
     onAfterInsert,
     showReview,
     clearGeneratingDecoration,
-    queryPublishGate,
+    previewPendingRef,
   ]);
 
   return {

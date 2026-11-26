@@ -10,7 +10,6 @@
 import { renderHook, act } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import type { MutableRefObject } from 'react';
-import type { QueryPublishGateRef } from './query_publish_gate';
 import { useVisorNlToEsql } from './use_visor_nl_to_esql';
 
 const ORIGINAL = 'FROM logs-*';
@@ -74,31 +73,29 @@ describe('useVisorNlToEsql', () => {
       current: model as unknown as monaco.editor.ITextModel,
     };
     const onSubmit = jest.fn();
-    const hold = jest.fn();
-    const release = jest.fn();
-    const queryPublishGate: QueryPublishGateRef = { current: { hold, release } };
+    const previewPendingRef = { current: false };
 
     const rendered = renderHook(() =>
       useVisorNlToEsql({
         editorRef,
         editorModel,
         onSubmit,
-        queryPublishGate,
+        previewPendingRef,
       })
     );
 
-    return { ...rendered, onSubmit, hold, release, executeEdits, model };
+    return { ...rendered, onSubmit, previewPendingRef, executeEdits, model };
   };
 
   it('inserts the suggestion without submitting it', () => {
     const model = buildModel(ORIGINAL);
-    const { result, onSubmit, hold } = renderVisor(model);
+    const { result, onSubmit, previewPendingRef } = renderVisor(model);
 
     act(() => {
       result.current.showVisorReview(GENERATED, { onAccept: jest.fn() });
     });
 
-    expect(hold).toHaveBeenCalled();
+    expect(previewPendingRef.current).toBe(true);
     expect(model.getValue()).toBe(PREVIEW);
     expect(onSubmit).not.toHaveBeenCalled();
   });
