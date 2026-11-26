@@ -471,8 +471,6 @@ describe('IndexPattern', () => {
           name: 'scriptedFieldWithEmptyFormatter',
           type: 'number',
           esTypes: ['long'],
-          searchable: true,
-          aggregatable: true,
         })
       ).toEqual(
         expect.objectContaining({
@@ -487,8 +485,6 @@ describe('IndexPattern', () => {
           name: 'durationSeconds',
           type: 'number',
           esTypes: ['long'],
-          searchable: true,
-          aggregatable: true,
           defaultFormatter: 's',
         })
       ).toBeInstanceOf(MockFieldFormatter);

@@ -47,7 +47,7 @@ const fieldsToTest = [
   { name: 'client.ip', type: 'ip', esTypes: ['ip'] },
   { name: 'location', type: 'geo_point', esTypes: ['geo_point'] },
   { name: 'conflicting', type: 'unknown', esTypes: ['unsupported'] },
-].map((field) => ({ ...field, searchable: true, aggregatable: false }));
+];
 
 const buildDataView = (
   fieldFormats: FieldFormatsRegistry,
@@ -58,12 +58,29 @@ const buildDataView = (
     spec: {
       id: 'logs',
       title: 'logs-*',
-      fields: Object.fromEntries(fieldsToTest.map((field) => [field.name, field])),
+      fields: Object.fromEntries(
+        fieldsToTest.map((field) => [
+          field.name,
+          { ...field, searchable: true, aggregatable: false },
+        ])
+      ),
       ...spec,
     },
   });
 
+const getDataViewField = (dataView: DataView, name: string) => {
+  const field = dataView.fields.getByName(name);
+  if (!field) {
+    throw new Error(`The data view has no field ${name}`);
+  }
+  return field;
+};
+
 describe('getFormatter', () => {
+  beforeEach(() => {
+    EsqlSource.clearCache();
+  });
+
   describe('of an ES|QL source', () => {
     it('is the default formatter of the type of the field', async () => {
       const fieldFormats = buildFieldFormats();
@@ -82,7 +99,7 @@ describe('getFormatter', () => {
       const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
 
       const ids = fieldsToTest.map((field) => {
-        const fromDataView = dataView.getFormatterForField(field);
+        const fromDataView = dataView.getFormatterForField(getDataViewField(dataView, field.name));
         const fromSource = source.getFormatter(field, fieldFormats);
 
         expect(fromSource.toJSON()).toEqual(fromDataView.toJSON());
@@ -95,6 +112,34 @@ describe('getFormatter', () => {
       );
     });
 
+    it('formats a field of source.fields and of the filterable source as they are', async () => {
+      const fieldFormats = buildFieldFormats();
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [
+          { id: 'bytes', name: 'bytes', meta: { type: 'number', esType: 'long' } },
+          { id: 'host', name: 'host', meta: { type: 'string', esType: 'keyword' } },
+        ],
+      });
+      const filterableSource = await source.toFilterableSource();
+
+      expect(source.getFormatter(source.fields[0], fieldFormats).type.id).toBe('number');
+      expect(source.getFormatter(source.fields[1], fieldFormats).type.id).toBe('string');
+      expect(source.getFormatter(filterableSource.fields[0], fieldFormats).type.id).toBe('number');
+    });
+
+    it('does not apply the mapping default of a field, an ES|QL column has none', async () => {
+      const fieldFormats = buildFieldFormats();
+      const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
+
+      const formatter = source.getFormatter(
+        { name: 'size', type: 'number', esTypes: ['long'], defaultFormatter: 'byte' },
+        fieldFormats
+      );
+
+      expect(formatter.type.id).toBe('number');
+    });
+
     it('differs from a data view that has a custom format for the field', async () => {
       const fieldFormats = buildFieldFormats();
       const dataView = buildDataView(fieldFormats, {
@@ -103,7 +148,9 @@ describe('getFormatter', () => {
       const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
       const bytes = fieldsToTest[2];
 
-      expect(dataView.getFormatterForField(bytes).type.id).toBe('percent');
+      expect(dataView.getFormatterForField(getDataViewField(dataView, bytes.name)).type.id).toBe(
+        'percent'
+      );
       expect(source.getFormatter(bytes, fieldFormats).type.id).toBe('number');
     });
   });
@@ -118,10 +165,36 @@ describe('getFormatter', () => {
 
       fieldsToTest.forEach((field) => {
         expect(source.getFormatter(field).toJSON()).toEqual(
-          dataView.getFormatterForField(field).toJSON()
+          dataView.getFormatterForField(getDataViewField(dataView, field.name)).toJSON()
         );
       });
       expect(source.getFormatter(fieldsToTest[2]).type.id).toBe('percent');
+    });
+
+    it('is the formatter of the data view for its own fields, as classes', () => {
+      const fieldFormats = buildFieldFormats();
+      const dataView = buildDataView(fieldFormats);
+      const source = new DataViewSource(dataView);
+
+      dataView.fields.getAll().forEach((field) => {
+        expect(source.getFormatter(field).toJSON()).toEqual(
+          dataView.getFormatterForField(field).toJSON()
+        );
+      });
+    });
+
+    it('honors the mapping default of a field', () => {
+      const fieldFormats = buildFieldFormats();
+      const source = new DataViewSource(buildDataView(fieldFormats));
+
+      const formatter = source.getFormatter({
+        name: 'size',
+        type: 'number',
+        esTypes: ['long'],
+        defaultFormatter: 'byte',
+      });
+
+      expect(formatter.type.id).toBe('bytes');
     });
   });
 });

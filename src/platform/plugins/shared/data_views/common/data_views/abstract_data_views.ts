@@ -29,8 +29,6 @@ import { metaUnitsToFormatter } from './meta_units_to_formatter';
 
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 
-import type { DataViewField } from '../fields';
-
 interface SavedObjectBody {
   fieldAttrs?: string;
   title?: string;
@@ -268,7 +266,9 @@ export abstract class AbstractDataView {
    * Provide a field, get its formatter
    * @param field field to get formatter for
    */
-  getFormatterForField(field: DataViewField | DataViewField['spec']): FieldFormat {
+  getFormatterForField(
+    field: Pick<FieldSpec, 'name' | 'type' | 'esTypes' | 'defaultFormatter'>
+  ): FieldFormat {
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
     if (fieldFormat) {
       return fieldFormat;
