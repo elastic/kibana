@@ -38,6 +38,7 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
+import { getObservableDedupeKey } from '../../../common/observables/get_observable_dedupe_key';
 import { emitObservablesAddedEvent } from './trigger_utils';
 
 const ensureUpdateAuthorized = async (
@@ -89,7 +90,7 @@ export const applyObservablesToCase = async (
   // them — even when two stored rows share the same typeKey+value (reachable
   // via SO import or data written before the dedupe path was added).
   const existingKeys = new Set(
-    currentObservables.map(({ typeKey, value }) => `${typeKey}-${value}`)
+    currentObservables.map(({ typeKey, value }) => getObservableDedupeKey(typeKey, value))
   );
 
   // Dedupe incoming entries against existing ones and against each other.
@@ -97,7 +98,7 @@ export const applyObservablesToCase = async (
   // skips repeats, so it is safe to call for every incoming entry.
   const incomingMap = new Map<string, Observable>();
   observables.forEach((observable) => {
-    if (existingKeys.has(`${observable.typeKey}-${observable.value}`)) {
+    if (existingKeys.has(getObservableDedupeKey(observable.typeKey, observable.value))) {
       return;
     }
     processObservables(incomingMap, observable);
