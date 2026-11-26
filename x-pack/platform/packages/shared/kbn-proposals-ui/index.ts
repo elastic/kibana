@@ -23,6 +23,7 @@ export {
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
+  isProposalAborted,
   isProposalExpired,
 } from './src/proposal_helpers';
 export type {

@@ -1894,10 +1894,23 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('distinguishes an expiry by the status axis', () => {
-        expect(String(decision?.with?.expired)).toContain(
-          "steps.escalation_gate.output.status == 'expired'"
-        );
+      // `aborted` means the gate stopped before its deadline: nobody decided it either, so
+      // it takes the expired arm too.
+      it.each([
+        ['expired', true],
+        ['aborted', true],
+        ['succeeded', false],
+        ['no_action', false],
+      ])('distinguishes an expiry by the status axis: %s is %s', (status, expected) => {
+        expect(
+          createWorkflowLiquidEngine().evalValueSync(
+            String(decision?.with?.expired)
+              .replace(/^\$\{\{/, '')
+              .replace(/\}\}$/, '')
+              .trim(),
+            { steps: { escalation_gate: { output: { status } } } }
+          )
+        ).toBe(expected);
       });
 
       // An approval whose handoff failed reports `approved` + `failed`, which is not

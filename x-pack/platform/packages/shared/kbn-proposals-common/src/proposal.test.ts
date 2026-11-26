@@ -14,6 +14,7 @@ import {
   proposalChartsSummaryQuerySchema,
   proposalStatusSchema,
   SETTLED_PROPOSAL_STATUSES,
+  undecidedEndStatus,
 } from './proposal';
 import { reviseProposalResponseSchema } from './revision';
 
@@ -101,7 +102,7 @@ describe('isProposalSettling', () => {
 });
 
 describe('isTerminal', () => {
-  it.each(['succeeded', 'failed', 'expired', 'no_action', 'superseded'] as const)(
+  it.each(['succeeded', 'failed', 'expired', 'aborted', 'no_action', 'superseded'] as const)(
     'treats %s as settled',
     (status) => {
       expect(isTerminal(status)).toBe(true);
@@ -113,10 +114,36 @@ describe('isTerminal', () => {
   });
 });
 
+describe('undecidedEndStatus', () => {
+  const now = Date.parse('2026-09-01T12:00:00.000Z');
+
+  it('reads expired once the deadline has passed', () => {
+    expect(undecidedEndStatus({ expiresAt: '2026-09-01T11:59:59.000Z' }, now)).toBe('expired');
+  });
+
+  it('reads expired at the deadline itself', () => {
+    expect(undecidedEndStatus({ expiresAt: '2026-09-01T12:00:00.000Z' }, now)).toBe('expired');
+  });
+
+  it('reads aborted when the deadline is still ahead', () => {
+    expect(undecidedEndStatus({ expiresAt: '2026-09-02T00:00:00.000Z' }, now)).toBe('aborted');
+  });
+
+  it('reads aborted when there is no deadline to pass', () => {
+    expect(undecidedEndStatus({}, now)).toBe('aborted');
+  });
+});
+
 describe('proposal status groups', () => {
   it('lists the open and settled statuses', () => {
     expect(OPEN_PROPOSAL_STATUSES).toEqual(['pending', 'executing']);
-    expect(SETTLED_PROPOSAL_STATUSES).toEqual(['succeeded', 'failed', 'expired', 'no_action']);
+    expect(SETTLED_PROPOSAL_STATUSES).toEqual([
+      'succeeded',
+      'failed',
+      'expired',
+      'aborted',
+      'no_action',
+    ]);
   });
 
   it('never puts a status in both groups', () => {

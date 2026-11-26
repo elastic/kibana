@@ -54,6 +54,7 @@ export {
   isGatelessProposal,
   isTodoProposal,
   isExpired,
+  isAborted,
   isProposalSettling,
   isAwaitingRetry,
   isTerminal,
@@ -76,6 +77,7 @@ export {
   proposalChartsSummaryQuerySchema,
   proposalStatusSchema,
   proposalUserSchema,
+  undecidedEndStatus,
 } from './src/proposal';
 
 export type {

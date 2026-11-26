@@ -58,6 +58,13 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   expiredBadge: i18n.translate('xpack.proposals.approvalModal.expiredBadge', {
     defaultMessage: 'Expired',
   }),
+  abortedBadge: i18n.translate('xpack.proposals.approvalModal.abortedBadge', {
+    defaultMessage: 'Aborted',
+  }),
+  /** Replaces the deadline in the caption of an aborted proposal. */
+  abortedCaption: i18n.translate('xpack.proposals.approvalModal.caption.aborted', {
+    defaultMessage: 'Stopped before a decision',
+  }),
   applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
     defaultMessage: 'Applying',
   }),
@@ -120,11 +127,14 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   failedAttemptCalloutTitle: i18n.translate('xpack.proposals.approvalModal.failedAttemptCallout', {
     defaultMessage: 'This attempt failed to execute the action',
   }),
-  // Deliberately silent on *why* it expired: `isProposalExpired` is true both once the deadline
-  // passes and when the workflow settles a proposal as `status: 'expired'` beforehand (e.g. after
-  // exhausting its retry attempts), and this wording has to be true for either cause.
+  // Deliberately silent on *why* it expired: records settled before `aborted` existed read
+  // `status: 'expired'` even when the workflow stopped before the deadline, and this wording has
+  // to be true for either cause.
   expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
     defaultMessage: 'Expired and can no longer be applied',
+  }),
+  abortedCalloutTitle: i18n.translate('xpack.proposals.approvalModal.abortedCallout', {
+    defaultMessage: 'Stopped before a decision and can no longer be applied',
   }),
   /** Precedes the linked workflow name, e.g. "Runs workflow Open a follow-up case". */
   actionWorkflowLabel: i18n.translate('xpack.proposals.approvalModal.actionDetails.workflowLabel', {

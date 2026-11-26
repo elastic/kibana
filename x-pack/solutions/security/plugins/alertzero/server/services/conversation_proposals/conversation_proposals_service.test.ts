@@ -487,7 +487,7 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           decidedWithinHours: 72,
-          statuses: ['succeeded', 'failed', 'expired', 'no_action'],
+          statuses: ['succeeded', 'failed', 'expired', 'aborted', 'no_action'],
           excludeSuperseded: true,
           size: 25,
           from: 0,

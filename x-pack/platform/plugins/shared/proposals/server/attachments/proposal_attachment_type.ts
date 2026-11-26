@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ProposalAttachmentData, ProposalWithMetadata } from '@kbn/proposals-common';
 import {
+  isAborted,
   isExpired,
   PROPOSAL_ATTACHMENT_TYPE,
   proposalAttachmentDataSchema,
@@ -25,11 +26,11 @@ export interface ProposalAttachmentTypeDeps {
 /**
  * Where the decision stands, as the agent needs to understand it.
  *
- * Expiry is reported by the banner instead: an expired proposal has no decision
- * to report, and `Decision: pending` underneath `EXPIRED` told the agent one was
- * still coming.
+ * Expiry and abortion are reported by the banner instead: such a proposal has no
+ * decision to report, and `Decision: pending` underneath `EXPIRED` told the agent
+ * one was still coming.
  */
-const describeOutcome = (proposal: ProposalWithMetadata, expired: boolean): string => {
+const describeOutcome = (proposal: ProposalWithMetadata, closedUndecided: boolean): string => {
   if (proposal.supersededBy !== undefined || proposal.status === 'superseded') {
     return (
       'REPLACED: this proposal is historical and cannot be acted on.' +
@@ -38,7 +39,7 @@ const describeOutcome = (proposal: ProposalWithMetadata, expired: boolean): stri
         : '')
     );
   }
-  if (expired) {
+  if (closedUndecided) {
     return '';
   }
   if (proposal.status === 'pending') {
@@ -52,6 +53,7 @@ const describeOutcome = (proposal: ProposalWithMetadata, expired: boolean): stri
 /** Formats the complete revision content and state the agent needs to read and revise it. */
 const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
   const expired = isExpired(proposal);
+  const aborted = isAborted(proposal);
 
   const lines: string[] = [
     `## Proposal: ${proposal.title}`,
@@ -64,7 +66,10 @@ const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
     // before its deadline, and `Decision deadline` below would then print a
     // future date directly under a banner claiming it was behind us.
     expired ? 'EXPIRED: this proposal can no longer be decided.' : '',
-    describeOutcome(proposal, expired),
+    aborted
+      ? 'ABORTED: the workflow behind this proposal stopped before a decision; it can no longer be decided.'
+      : '',
+    describeOutcome(proposal, expired || aborted),
     'Proposal data (comment and actionInput describe this complete revision):',
     JSON.stringify(
       {
@@ -164,5 +169,5 @@ export const createProposalAttachmentType = ({
     '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id) so ' +
     'the analyst can act on it directly in the chat.\n' +
     '- Replaced proposals are historical and non-actionable. Consult the replacement attachment for its current state before describing any next steps.\n' +
-    '- If the proposal is expired or already decided, say so in your response but still render the card.',
+    '- If the proposal is expired, aborted or already decided, say so in your response but still render the card.',
 });

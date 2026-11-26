@@ -32,6 +32,8 @@ export type ApprovalPhase =
   | ApprovalOutcomeStatus
   | 'failed'
   | 'expired'
+  /** Nobody decided because the workflow behind it stopped before the deadline. */
+  | 'aborted'
   | 'no_action'
   /** A to-do proposal (`isTodoProposal`) the analyst marked as applied. */
   | 'marked_applied';
@@ -96,6 +98,13 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         color: 'warning',
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.expiredBadge,
+        isLoading: false,
+      };
+    case 'aborted':
+      return {
+        color: 'warning',
+        iconType: 'stop',
+        label: APPROVAL_MODAL_TRANSLATIONS.abortedBadge,
         isLoading: false,
       };
     case 'no_action':

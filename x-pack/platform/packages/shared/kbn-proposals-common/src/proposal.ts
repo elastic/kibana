@@ -33,18 +33,23 @@ export type ProposalDecisionMode = z.infer<typeof proposalDecisionModeSchema>;
  * approval of a proposal that carries no action; without it both would sit at
  * `pending` forever, indistinguishable from awaiting. `expired` means nobody
  * answered in time, so `dismissed` no longer does double duty for "declined"
- * and "deadline passed".
+ * and "deadline passed". `aborted` means nobody answered because the workflow
+ * behind the proposal stopped before its deadline (cancelled, timed out, failed,
+ * or out of attempts), so a deadline still ahead is never reported as passed.
  */
-export const proposalStatusSchema = z.enum([
-  'pending',
-  'executing',
-  'succeeded',
-  'failed',
-  'expired',
-  'no_action',
-  /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
-  'superseded',
-]);
+export const proposalStatusSchema = lazySchema(() =>
+  z.enum([
+    'pending',
+    'executing',
+    'succeeded',
+    'failed',
+    'expired',
+    'aborted',
+    'no_action',
+    /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
+    'superseded',
+  ])
+);
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 
 /** Same vocabulary an action declares about itself, so the two cannot drift. */
@@ -377,7 +382,7 @@ export const MAX_PROPOSALS_PAGE_OFFSET = 10_000 - MAX_PROPOSALS_PAGE_SIZE;
  * "Awaiting a human" is `status: 'pending'` and needs no filter of its own:
  * `pending` is only ever valid while undecided, so the status already says it.
  * The complementary query — "no human ever answered", which also takes in
- * `expired` — is not expressible here, because nothing needs it yet.
+ * `expired` and `aborted` — is not expressible here, because nothing needs it yet.
  */
 export const proposalFiltersSchema = z.object({
   status: proposalStatusSchema.optional(),
@@ -472,9 +477,10 @@ export interface ProposalChartsSummaryResponse {
  *
  * Reads the status, not the decision: `pending` is the only status valid while
  * undecided *and* unsettled, so it is the whole condition. The decision is the
- * wrong axis here because an `expired` proposal has none either — it was
- * settled by a deadline rather than a person — and treating that as "still
- * open" puts a decision nobody can make back in the queue.
+ * wrong axis here because an `expired` or `aborted` proposal has none either —
+ * it was settled by a deadline or a stopped workflow rather than a person — and
+ * treating that as "still open" puts a decision nobody can make back in the
+ * queue.
  */
 export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'pending';
@@ -525,6 +531,21 @@ export const isAwaitingRetry = (
 export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'expired';
 
+/** Settled because the workflow behind it stopped before anyone decided and before its deadline. */
+export const isAborted = (proposal: Pick<Proposal, 'status'>): boolean =>
+  proposal.status === 'aborted';
+
+/**
+ * The terminal status for an undecided proposal that is settled without an explicit one:
+ * `expired` once its deadline has passed, `aborted` before it. No deadline means none can
+ * pass, so a proposal without `expiresAt` is `aborted`.
+ */
+export const undecidedEndStatus = (
+  proposal: Pick<Proposal, 'expiresAt'>,
+  now: number
+): 'expired' | 'aborted' =>
+  proposal.expiresAt !== undefined && Date.parse(proposal.expiresAt) <= now ? 'expired' : 'aborted';
+
 /**
  * Gives the phase of each status. It is a `Record` over every `ProposalStatus`. If you add a
  * status and do not place it here, the compiler reports an error. The groups below come from this
@@ -542,6 +563,7 @@ const PROPOSAL_STATUS_PHASE = {
   succeeded: 'settled',
   failed: 'settled',
   expired: 'settled',
+  aborted: 'settled',
   no_action: 'settled',
   superseded: 'replaced',
 } as const satisfies Record<ProposalStatus, 'open' | 'settled' | 'replaced'>;

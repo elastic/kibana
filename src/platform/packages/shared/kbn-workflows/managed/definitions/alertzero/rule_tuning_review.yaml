@@ -1571,7 +1571,7 @@ steps:
   # failure non-retryable, and none of the actions here do that today. Then
   # `approved` is true and `applied` is false: the alerts stay untagged, but the
   # investigation closes as approved. Any other action failure is re-offered,
-  # and an approval whose action failed through every retry settles as expired
+  # and an approval whose action failed through every retry settles as aborted
   # and reports no decision, so it counts as neither approved nor dismissed and
   # the alerts stay untagged for the next sweep.
   - name: record_proposal_action_decision

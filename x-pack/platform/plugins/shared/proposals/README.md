@@ -86,7 +86,7 @@ AlertZero's Workers do not call `system-create-proposal`. They call `system-crea
 
 Two properties make this safe to copy for another producer:
 
-- **It must outlive the gate it waits on.** `workflow.execute` parks the caller in `WAITING_FOR_CHILD` for as long as the decision is held, and the engine's default workflow timeout is 6h. Because `expiresIn` is caller-configurable there is no fixed window to size against, so the bridge tracks the gate's `52w` sentinel rather than any particular deadline. A bridge that leaves `settings.timeout` unset is cancelled mid-decision, and the cancel reaches the gate, which runs no handler: the decision is lost, and the proposal is only settled `expired` the next time it is read (see [Settling orphaned proposals](#settling-orphaned-proposals)).
+- **It must outlive the gate it waits on.** `workflow.execute` parks the caller in `WAITING_FOR_CHILD` for as long as the decision is held, and the engine's default workflow timeout is 6h. Because `expiresIn` is caller-configurable there is no fixed window to size against, so the bridge tracks the gate's `52w` sentinel rather than any particular deadline. A bridge that leaves `settings.timeout` unset is cancelled mid-decision, and the cancel reaches the gate, which runs no handler: the decision is lost, and the proposal is only settled `aborted` (or `expired`, once its deadline has passed) the next time it is read (see [Settling orphaned proposals](#settling-orphaned-proposals)).
 - **It must re-declare the gate's `outputs`.** Callers read `steps.<step>.output.decision`, `.status` and `.proposalId`. A bridge that does not forward them leaves every one of those expressions undefined — falsy, so approval branches simply stop firing, with nothing logged.
 
 `create_proposal.test.ts` next to the bridge pins both, plus input parity with the gate, so an input added to `system-create-proposal` fails the build rather than being silently dropped at the hop. `proposal_origin.test.ts` in the AlertZero plugin sweeps every AlertZero definition to keep the bridge the only thing that reaches the gate.
@@ -96,20 +96,21 @@ Two properties make this safe to copy for another producer:
 `decision` records what a human concluded; `status` records where the proposal got to. They are separate fields because they answer different questions and settle at different times.
 
 - **`decision: approved | dismissed`** — absent until someone decides, and immutable once set. Groups with `decidedBy` / `decidedAt` / `decisionMode` / `rationale` / `dismissReason`.
-- **`status: pending | executing | succeeded | failed | expired | no_action`** — always defined.
+- **`status: pending | executing | succeeded | failed | expired | aborted | no_action`** — always defined.
 
 The split exists because a single field could not express both: `status` has to say whether an approved action succeeded, and `decision` has to survive that outcome so the queue knows a human already answered.
 
 Because `pending` is only ever valid while undecided, the two axes give you two distinct reads rather than one:
 
 - **`status: 'pending'`** — undecided *and not yet settled*: "awaiting a human right now". This is what a decision queue filters on.
-- **`decision` does not exist** — `status ∈ {pending, expired}`: "no human ever answered", including deadlines that passed unanswered.
+- **`decision` does not exist** — `status ∈ {pending, expired, aborted}`: "no human ever answered", including deadlines that passed unanswered and workflows that stopped before anyone could.
 
 Nothing needs the second today, so only the first is exposed as a filter.
 
 Two of the statuses exist to stop other values doing double duty:
 
 - **`expired`** means nobody answered in time, so `dismissed` no longer has to cover both "a human declined" and "the deadline passed".
+- **`aborted`** means nobody answered because the gate workflow stopped before the deadline: it was cancelled, timed out at the workflow level, failed, or ran out of attempts. Without it such a proposal read `expired` while its deadline was still ahead. A proposal with no `expiresAt` has no deadline to pass, so it can only be `aborted`.
 - **`no_action`** means a human answered and nothing will execute: a dismissal of any kind, or an approval of a proposal carrying no action. It reads as "no action was executed" under both. Without it, both cases would sit at `pending` forever, indistinguishable from awaiting.
 
 The only valid combinations, enforced by `ProposalsService.update`:
@@ -118,6 +119,7 @@ The only valid combinations, enforced by `ProposalsService.update`:
 | --- | --- | --- |
 | absent | `pending` | Awaiting a human |
 | absent | `expired` | The deadline passed unanswered |
+| absent | `aborted` | The gate workflow stopped before the deadline, unanswered |
 | `dismissed` | `no_action` | Declined |
 | `approved` | `no_action` | Accepted, but there is nothing to run |
 | `approved` | `executing` | The action is running |
@@ -139,9 +141,9 @@ A to-do runs nothing and nobody waits on its outcome, so it carries no gate work
 - **Workflow steps cannot touch one.** `update()` — the entry point behind `proposals.updateProposal` and `proposals.settleIncompleteProposal` — refuses a gateless proposal; the direct path writes through the private `applyUpdate()` instead.
 - **Consequences.** A to-do has no deadline, so it stays `pending` until someone decides it or its investigation is closed; it does not appear in the platform Inbox, which lists parked `waitForApproval` steps; deciding it needs only `manage_proposals`, not Workflows `execute`; and it emits no workflows HITL audit events. To-dos created before this change keep their gate and deadline.
 
-Note the consequence for an undecided proposal: `expired` is its *only* terminal status, since every execution state requires an approval. A malfunction before anyone decided therefore settles as "no decision was reached" rather than as a failure.
+Note the consequence for an undecided proposal: `expired` and `aborted` are its *only* terminal statuses, since every execution state requires an approval. A malfunction before anyone decided therefore settles as "no decision was reached" rather than as a failure. When a settle has to pick between the two without being told, it reads the deadline (`undecidedEndStatus` in `@kbn/proposals-common`): `expired` once `expiresAt` has passed, `aborted` before it.
 
-Two independent guards replace what used to be one terminal check: a status cannot *change* once it is `succeeded | failed | expired | no_action`, and a `decision` cannot be overwritten once set. They are independent because the axes settle independently — the decision guard is what refuses a second approver on a proposal that is still `pending` behind the gate.
+Two independent guards replace what used to be one terminal check: a status cannot *change* once it is `succeeded | failed | expired | aborted | no_action`, and a `decision` cannot be overwritten once set. They are independent because the axes settle independently — the decision guard is what refuses a second approver on a proposal that is still `pending` behind the gate.
 
 Re-writing the *same* terminal status is deliberately allowed, so settling stays idempotent. The workflow's failure handler records `failed` on a record the loop may have already failed — if the clone step throws after `record_action_failure` succeeded, say — and refusing that would replace the real error with a conflict about recording it.
 
@@ -170,7 +172,7 @@ re-offered. `revise()` writes a new revision, points the predecessor at it with
 `supersededBy`, and marks that predecessor `superseded`; both rows carry the same
 `rootProposalId`, so the chain is one query rather than a pointer walk. Only the
 head is live: `excludeSuperseded` hides the rest from the queue, and `revise()`
-refuses a proposal that is already superseded, decided, or expired, so a chain
+refuses a proposal that is already superseded, decided, expired or aborted, so a chain
 cannot fork and cannot be extended past its deadline.
 
 The gate does not re-park on a revision. It stays parked on the *original*
@@ -344,7 +346,7 @@ The gate sits inside a `while` loop, because releasing a gate is not the same th
 
 1. **Park on the gate** for whatever is left of the deadline, under a step-level `on-failure: continue` so a timeout stays inside the loop instead of reaching the workflow-level handler — which is what makes an unanswered proposal end the run as `completed` with an output, instead of `failed`. The remaining time is computed here, in the only branch that needs it; the autonomy path never waits. The key is honoured by the engine but unmodelled by `WaitForApprovalStepSchema` — see "Known limitations" and [#19315](https://github.com/elastic/security-team/issues/19315).
 2. **Copy the gate outcome into variables immediately**, inside the iteration that produced it — `waitForApproval` is not exempt from output eviction, and a step output resolves to its latest execution, so a later iteration that skipped the gate would read this pass's values. Whether the gate timed out travels the same way, because the branch that handles it runs past the point where `steps.await_decision` is still readable.
-3. **Settle `expired` if the gate timed out**, via `settleIncompleteProposal` (adopts the live head itself, no privilege check), so expiry needs no decider and settles whatever identity woke the run. A proposal that reaches the gate already past its deadline — a cloned retry after a long action — parks for a second (`at_least: 1`) and times out into the same branch. It comes before the resolution, because a timed-out gate answers blank and the child would otherwise record a dismissal nobody made. Budget exhaustion settles the same way after the loop exits.
+3. **Settle `expired` if the gate timed out**, via `settleIncompleteProposal` (adopts the live head itself, no privilege check), so expiry needs no decider and settles whatever identity woke the run. A proposal that reaches the gate already past its deadline — a cloned retry after a long action — parks for a second (`at_least: 1`) and times out into the same branch. It comes before the resolution, because a timed-out gate answers blank and the child would otherwise record a dismissal nobody made. Budget exhaustion settles through the same step after the loop exits, as `aborted`, since the deadline has not passed.
 4. **Resolve the answer in `system-resolve-proposal`**, as whoever answered (`run-as-mode: default`), or as the caller's service account when its autonomy approved (`run-as-mode: inherit`). `run-as-mode` has to be literal, so these are two steps, each adopting only its own result. The child, in order:
    1. checks the resumer's privilege and reports `refused` when denied, having written nothing — skipped on the autonomy path, which has no resumer;
    2. adopts the chain's live head, because a revision appended during the park would have superseded the carried id and `updateProposal` refuses a superseded row;
@@ -358,7 +360,7 @@ The child reads the chain explicitly once per answer. Incomplete settles — gat
 
 Three invariants the loop depends on:
 
-- **`max-iterations` exits into `settle_unfinished`.** A `while` is in `flowControlStepTypes`, which `handleWorkflowLevelOnFailure` skips, so the error `on-limit: fail` throws would reach no handler at all — hence `on-limit: continue`, which leaves the loop for a post-loop settle that records `expired`. The deadline is still what normally settles: every park is bounded by the time left on it, so the expiry check is reached on the first iteration after it passes. The iteration limit is a runaway guard — see "Known limitations".
+- **`max-iterations` exits into `settle_unfinished`.** A `while` is in `flowControlStepTypes`, which `handleWorkflowLevelOnFailure` skips, so the error `on-limit: fail` throws would reach no handler at all — hence `on-limit: continue`, which leaves the loop for a post-loop settle that records `aborted`. The deadline is still what normally settles: every park is bounded by the time left on it, so the expiry check is reached on the first iteration after it passes. The iteration limit is a runaway guard — see "Known limitations".
 - **No `iteration-timeout`.** It wraps the loop body in a step-timeout zone, which would cut the parked gate short.
 - **Never read a loop-body step output after the loop.** Those are evicted on exit. `data.set` variables survive both the loop and a HITL park, which is why everything the loop carries lives in one.
 
@@ -375,7 +377,7 @@ Conditions use a single `and` or a single comparison throughout. Liquid has no o
 | `proposals.cloneProposal` | manage | Fails the step |
 | `proposals.checkDecidePrivileges` | manage | **Returns `false`** |
 
-`settleIncompleteProposal` deliberately skips `manage_proposals`: gate expiry, attempt-budget exhaustion, and the workflow-level fallback may run under a denied resumer's API key, and `updateProposal` would fail the settle. It adopts the live head, then writes `failed` or `expired` (explicit status, or discriminated from whether the record already has a decision).
+`settleIncompleteProposal` deliberately skips `manage_proposals`: gate expiry, attempt-budget exhaustion, and the workflow-level fallback may run under a denied resumer's API key, and `updateProposal` would fail the settle. It adopts the live head, then writes `failed`, `expired` or `aborted`: the explicit status when one is passed, otherwise `failed` when the record already has a decision, and for an undecided one `expired` once its deadline has passed and `aborted` before it.
 
 Each failure mode gets its own `ExecutionError.type` (`PermissionError`, `ConflictError`, `ExpiredError`, `NotFoundError`, `ValidationError`, `ApiError`), because the type is the only part of an error a workflow can branch on — `ExecutionError` carries just `{ type, message, details? }`, and all three timeout sources already share `TimeoutError`.
 
@@ -491,7 +493,7 @@ Two routes are deliberately absent. There is **no update route**: `status` is a 
 
 An open queue filters on `status: 'pending'`, which is the whole "awaiting" condition. `excludeExpired` is still worth passing alongside it, because it filters on the deadline *date* rather than the status: between the deadline passing and the gate workflow settling the record there is task lag during which it still reads `pending`.
 
-A recently expired proposal *does* reach a closed queue, through `decidedWithinHours`: `update` stamps `decidedAt` whenever it settles a proposal, including one nobody decided, so "you missed this" surfaces as activity. It carries no `decision`, though — which is why a consumer must classify on the status. `isAwaitingDecision()` exists for exactly that, and classifying on the decision instead puts an unanswerable proposal back in the open queue.
+A recently expired or aborted proposal *does* reach a closed queue, through `decidedWithinHours`: `update` stamps `decidedAt` whenever it settles a proposal, including one nobody decided, so "you missed this" surfaces as activity. It carries no `decision`, though — which is why a consumer must classify on the status. `isAwaitingDecision()` exists for exactly that, and classifying on the decision instead puts an unanswerable proposal back in the open queue.
 
 **The two decision routes are privilege-checked bridges to the gate, not writers.** Each loads the proposal, asserts no decision exists yet, asserts the deadline has not passed, compares the submitted `actionInput` against the record on an approval, and resumes. The workflow behind the gate records the decision.
 
@@ -517,7 +519,7 @@ The service surface follows from that: `releaseGate()` makes that one write, `cl
 
 A cancelled or timed-out gate execution runs no handler, so nothing in the workflow settles its proposal; a parent whose own timeout cancels the gate is enough ([#20138](https://github.com/elastic/security-team/issues/20138)). The service settles those proposals itself, whenever they are read (`get`, `list`) or decided (`releaseGate`):
 
-- **Only an ended gate settles.** The gates of the `pending` and `executing` proposals being read are fetched with a single `getWorkflowExecutionStatuses`. A terminal gate settles a `pending` proposal as `expired` and an `executing` one as `failed`, with an `executionError` naming the status the gate ended in. A gate that ended can never write again, so this settle cannot race the gate.
+- **Only an ended gate settles.** The gates of the `pending` and `executing` proposals being read are fetched with a single `getWorkflowExecutionStatuses`. A terminal gate settles a `pending` proposal as `aborted` — or `expired` if its deadline has already passed by the time it is read — and an `executing` one as `failed`, with an `executionError` naming the status the gate ended in. A gate that ended can never write again, so this settle cannot race the gate.
 - **The deadline alone never settles.** A live gate expires its own proposal at the deadline, and a decision released just before the deadline may still be on its way to the gate, whose write would conflict with an `expired` written first and lose an approval the route already answered. `releaseGate` refuses a decision past the deadline before reading the gate, but writes nothing.
 - **A gate that cannot be read is left alone.** An execution that is missing, or that the caller cannot read, settles nothing.
 - **It is best effort.** Every settle goes through `update()`, so its guards decide a race, and a lost race or a failed lookup is logged rather than thrown. A read never fails because of a settle.
@@ -525,7 +527,8 @@ A cancelled or timed-out gate execution runs no handler, so nothing in the workf
 What follows from settling on read:
 
 - A read can write, and the write records no actor. `decidedAt` is when the read settled the proposal, not when its gate ended, so `chartsSummary` counts the close then.
-- A status-filtered `list` drops the rows it settled and lowers `total` by as many, so that page comes back short.
+- A `list` whose status filters let `pending` or `executing` through first sweeps every orphan it could count, not just its page: it looks up the matching unsettled proposals with a gate (up to 1,000), reads their gates in one `getWorkflowExecutionStatuses` and settles the ended ones before it searches. A count-only read (`size: 0`) returns no rows to settle, so without the sweep a collapsed queue would count orphans that opening it then settles away ([#20922](https://github.com/elastic/security-team/issues/20922)). Each orphan settles once, so the sweep's cost after that is one search and one bulk read.
+- Past the sweep's cap, or when its lookup fails, a status-filtered `list` still settles its own page, drops the rows it settled and lowers `total` by as many, so that page comes back short.
 - `countPendingByConversationIds` is an aggregation and settles nothing. An orphan whose deadline is still ahead keeps counting as pending until a `get` or `list` reads it.
 - A `pending` proposal past its deadline whose gate is still live, or cannot be read, keeps reading `pending` until the gate settles it. The queues already treat it as closed through `excludeExpired`.
 
@@ -618,7 +621,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 ## Known limitations
 
 - **Two steps rely on an `on-failure` their schema does not model** ([#19315](https://github.com/elastic/security-team/issues/19315)). Neither `WaitForApprovalStepSchema` nor `WorkflowExecuteStepSchema` merges `StepWithOnFailureSchema`, unlike the connector-derived schema every custom step gets — so zod drops the key on any path that validates steps against the full schema. The engine honours it on both: a HITL wait fails through the ordinary `failStep` path with a `TimeoutError`, and `handleStepLevelOnFailure` wraps any step declaring the key with no exclusion by type. Both are load-bearing here — the gate's settles an unanswered proposal, the action's keeps a failed action inside the loop to be cloned — and they reach the engine only because managed workflows install under `lightweightValidation`, which does not validate steps. The schema-parity test beside the definition pins exactly these two so a third cannot appear unnoticed, and so the list shrinks when #19315 lands.
-- **An exhausted iteration budget settles as `expired`.** `max-iterations` is 200 with `on-limit: continue`, so hitting it exits the loop into `settle_unfinished`, which calls `settleIncompleteProposal` with `status: expired` and reports `final_status: expired`. Reaching the limit means something spun — a resumer who keeps failing the decide check, or a long chain of action retries.
+- **An exhausted iteration budget settles as `aborted`.** `max-iterations` is 200 with `on-limit: continue`, so hitting it exits the loop into `settle_unfinished`, which calls `settleIncompleteProposal` with `status: aborted` and reports `final_status: aborted`. Reaching the limit means something spun — a resumer who keeps failing the decide check, or a long chain of action retries.
 - **A write can still lose a race to a revision.** Every write is preceded by the one adopt, but a revision landing in the window between them makes the write conflict. A gate released through the approve or dismiss route is immune, since `revise()` refuses its proposal from the release on; this is reachable only through the other resume surfaces. Nothing retries, so a conflict reaches the workflow-level handler — which adopts and settles the live head rather than stranding it. Losing a decision to a millisecond race is bad but bounded, and a retry per write would undo the single-adopt simplification. If it ever matters, the fix is one retry around the whole post-adopt section, not one per write.
 - **A decision resumed past the deadline is accepted for a few seconds.** The engine schedules the gate's timeout task at the deadline, but it fires when Task Manager claims it, and `resume()` only checks expiry when the wake carries no input. A resume arriving in that gap is taken. The approve and dismiss routes are not affected — `releaseGate` refuses a proposal past its deadline — so this is reachable only through the platform's generic resume API or the Inbox. Not worth a step in the loop to catch at 72h deadlines.
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.

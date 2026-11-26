@@ -274,7 +274,8 @@ steps:
         ${{ steps.create_and_gate_proposal.output.decision == 'approved'
           and steps.create_and_gate_proposal.output.status == 'succeeded' }}
       dismissed: "${{ steps.create_and_gate_proposal.output.decision == 'dismissed' }}"
-      expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
+      # `aborted`: the gate stopped before its deadline. Nobody decided it either.
+      expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' or steps.create_and_gate_proposal.output.status == 'aborted' }}"
 
   # Reported here, not in the action: the report step verifies that every ancestor
   # is an AlertZero-managed execution, and the action's chain passes through the

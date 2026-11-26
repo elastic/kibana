@@ -40,7 +40,8 @@ settings:
     # One step, not a get-then-update chain: workflow-level fallback steps are
     # renamed to `workflow-level-on-failure_<failed>_<name>`, so Liquid
     # `steps.<yaml-name>` references resolve to nothing. The settle step adopts
-    # the live head and discriminates decided→failed / undecided→expired itself.
+    # the live head and discriminates itself: decided→failed, and undecided→
+    # expired once the deadline has passed, aborted before it.
     # It does not check manage_proposals — a denied resumer's API key may be on
     # the task when this runs.
     fallback:
@@ -507,6 +508,8 @@ steps:
   # terminal status. Leaving it there would strand the record `pending` against
   # a finished execution, which is the outcome this whole definition exists to
   # prevent — so the budget gets the same treatment as every other way out.
+  # `aborted`, not `expired`: the gate re-parks against the remaining deadline,
+  # so a loop that ran out of attempts stopped before that deadline passed.
   #
   # settleIncompleteProposal adopts the live head and skips manage_proposals, so
   # a denied resumer who burned the budget cannot leave the record pending.
@@ -518,12 +521,12 @@ steps:
         type: proposals.settleIncompleteProposal
         with:
           proposalId: '{{ variables.current_proposal_id }}'
-          status: expired
+          status: aborted
           executionError: 'No decision was reached within the attempt budget.'
       - name: complete_unfinished
         type: data.set
         with:
-          final_status: expired
+          final_status: aborted
 
   # Reads variables, never loop-body step outputs: those are evicted on exit.
   - name: output_result

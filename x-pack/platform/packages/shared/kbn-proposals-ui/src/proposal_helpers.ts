@@ -35,11 +35,15 @@ const impactCaptionPart = (proposal: ApprovalProposal): string | undefined => {
 
 /**
  * Returns `undefined` when there is no deadline, or once someone has decided, since the deadline
- * no longer applies then. A past deadline still returns text.
+ * no longer applies then. A past deadline still returns text. An aborted proposal says so instead
+ * of naming the deadline, which is usually still ahead and would read as live.
  */
 const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => {
   if (!proposal.expiresAt || proposal.decision) {
     return undefined;
+  }
+  if (isProposalAborted(proposal)) {
+    return APPROVAL_MODAL_TRANSLATIONS.abortedCaption;
   }
   const deadline = formatDateTime(proposal.expiresAt);
   if (isProposalExpired(proposal)) {
@@ -110,7 +114,7 @@ export const getProposalCaption = (
 /**
  * The read-only decision `ApprovalContent` renders in place of its Approve/Decline buttons.
  * `undefined` only while a proposal is genuinely still awaiting one: a proposal can reach a
- * terminal state — expired, chiefly — without a `decision` ever being made, so `!proposal.decision`
+ * terminal state — expired or aborted — without a `decision` ever being made, so `!proposal.decision`
  * alone is not sufficient to mean "pending". Missing `decidedBy`/`decidedAt` is not a reason to hide
  * a real decision: `decidedBy` can be genuinely absent (no resolvable identity), in which case a
  * fallback name still names *someone* rather than reverting to "awaiting a decision" for a proposal
@@ -121,7 +125,7 @@ export const getProposalCaption = (
  * caller falls back to its own plain caption rather than rendering a fabricated "by Unknown".
  */
 export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecision | undefined => {
-  if (!proposal.decision && !isProposalExpired(proposal)) {
+  if (!proposal.decision && !isProposalExpired(proposal) && !isProposalAborted(proposal)) {
     return undefined;
   }
   const actorName = proposal.decision
@@ -148,8 +152,8 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
 };
 
 /**
- * Expiry is checked first because it is orthogonal to the approved/declined axis below: a proposal
- * whose gate timed out never received a `decision` at all, so `proposal.decision !== 'approved'`
+ * Expiry and abortion are checked first because they are orthogonal to the approved/declined axis
+ * below: a proposal whose gate timed out or stopped never received a `decision` at all, so `proposal.decision !== 'approved'`
  * would otherwise read it as declined — an outcome nobody chose.
  *
  * Approving only resumes the gate workflow — the action it starts still runs afterward, so a
@@ -163,6 +167,9 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
 const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, 'pending'> => {
   if (isProposalExpired(proposal)) {
     return 'expired';
+  }
+  if (isProposalAborted(proposal)) {
+    return 'aborted';
   }
   if (proposal.decision !== 'approved') {
     return 'declined';
@@ -191,10 +198,17 @@ export const getProposalTone = (proposal: ApprovalProposal): 'primary' | 'danger
 };
 
 /**
- * `status: 'expired'` is the workflow's reliable settlement for an unanswered proposal (on
- * attempt exhaustion, or a failure) before the deadline itself passes. A deadline that has passed
- * but not yet been swept to this status still reads `pending` here; that lag is accepted rather
- * than compared against `expiresAt` directly.
+ * `status: 'expired'` is the workflow's settlement for a proposal nobody answered by its deadline.
+ * A deadline that has passed but not yet been swept to this status still reads `pending` here;
+ * that lag is accepted rather than compared against `expiresAt` directly. Records settled before
+ * `aborted` existed can also read `expired` with their deadline still ahead.
  */
 export const isProposalExpired = (proposal: ApprovalProposal): boolean =>
   proposal.status === 'expired';
+
+/**
+ * `status: 'aborted'` is the workflow's settlement for an unanswered proposal whose gate stopped
+ * before the deadline: cancelled, timed out, failed, or out of attempts.
+ */
+export const isProposalAborted = (proposal: ApprovalProposal): boolean =>
+  proposal.status === 'aborted';

@@ -29,6 +29,7 @@ import {
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
+  isProposalAborted,
   isProposalExpired,
 } from './proposal_helpers';
 import { ProposalCaption } from './proposal_caption';
@@ -66,7 +67,7 @@ export interface ApprovalContentProps {
   readOnly?: boolean;
   /**
    * Approves the proposal. Label is "Approve", or "Mark as applied" for a to-do
-   * (`isTodoProposal`). Disabled when expired. Omit to hide the button.
+   * (`isTodoProposal`). Disabled when expired or aborted. Omit to hide the button.
    */
   onApprove?: () => void | Promise<void>;
   /** Extra empty buttons beside Approve/Decline. */
@@ -137,6 +138,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const [rationale, setRationale] = useState('');
 
     const isExpired = isProposalExpired(proposal);
+    const isAborted = isProposalAborted(proposal);
     const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
     const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
@@ -155,7 +157,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           ...(isTodo && { iconType: 'check' as const }),
           onClick: onApprove,
           color: 'primary',
-          isDisabled: isReplaced || isExpired || readOnly,
+          isDisabled: isReplaced || isExpired || isAborted || readOnly,
           disabledReason: readOnlyDisabledReason,
           'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
         }
@@ -370,6 +372,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
           isExpired={!isReplaced && isExpired}
           expiredReason={proposal.rationale}
+          isAborted={!isReplaced && isAborted}
+          abortedReason={proposal.executionError ?? proposal.rationale}
           data-test-subj={dataTestSubj}
         />
 

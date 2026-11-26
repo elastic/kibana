@@ -239,7 +239,9 @@ describe('create-investigation-proposal workflow', () => {
 
       expect(settle?.condition).toContain('variables.completed != true');
       expect(record?.type).toBe('proposals.settleIncompleteProposal');
-      expect(record?.with?.status).toBe('expired');
+      // The deadline has not passed — the workflow stopped short of it.
+      expect(record?.with?.status).toBe('aborted');
+      expect(step('complete_unfinished')?.with?.final_status).toBe('aborted');
       expect(top.indexOf('settle_unfinished')).toBeGreaterThan(top.indexOf('decision_loop'));
       expect(top.indexOf('settle_unfinished')).toBeLessThan(top.indexOf('output_result'));
     });
@@ -646,7 +648,7 @@ describe('create-investigation-proposal workflow', () => {
       );
     });
 
-    it('omits status so the step discriminates decided→failed / undecided→expired', () => {
+    it('omits status so the step discriminates decided→failed / undecided→expired or aborted', () => {
       // All three timeout sources share `type: TimeoutError`, and
       // `ExecutionError` carries nothing else to tell them apart — so the
       // record's own decision is what chooses the terminal status.

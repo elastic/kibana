@@ -109,6 +109,25 @@ describe('Forensics proposal gate', () => {
       expect(inputs.impact).toBeUndefined();
       expect(inputs.category).toBeUndefined();
     });
+
+    // `aborted` means the gate stopped before its deadline. Nobody decided it either, so
+    // it reports through the same `expired` output as a passed deadline.
+    it.each([
+      ['forensics', gate],
+      ['hunt', huntGate],
+    ])('reports an aborted %s gate as expired, like a passed deadline', (_name, workflow) => {
+      const proposalExpired = stepIn(workflow.steps, 'resolve_gate_wrapper_output')?.with
+        ?.proposal_expired as string;
+      const isExpired = (status: string) =>
+        evaluateExpression(proposalExpired, {
+          steps: { create_and_gate_proposal: { output: { status } } },
+        });
+
+      expect(isExpired('expired')).toBe(true);
+      expect(isExpired('aborted')).toBe(true);
+      expect(isExpired('succeeded')).toBe(false);
+      expect(isExpired('pending')).toBe(false);
+    });
   });
 
   // Two runs that reach one host at the same time can both resolve the subject as free.

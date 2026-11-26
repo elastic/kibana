@@ -11,6 +11,7 @@ import {
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
+  isProposalAborted,
   isProposalExpired,
 } from './proposal_helpers';
 import type { ApprovalProposal } from './types';
@@ -142,6 +143,20 @@ describe('getProposalCaption', () => {
     ).toBe(`Configure • High impact • Expired on ${formattedDeadline}`);
   });
 
+  it('says the workflow stopped, not when it would have expired, once the proposal is aborted', () => {
+    expect(
+      getProposalCaption(
+        proposal({
+          category: 'configure',
+          impact: 'high',
+          status: 'aborted',
+          expiresAt: '2999-01-05T17:00:00.000Z',
+        }),
+        { includeRiskDetails: true }
+      )
+    ).toBe('Configure • High impact • Stopped before a decision');
+  });
+
   it('omits the deadline once someone has decided, since it no longer applies', () => {
     expect(
       getProposalCaption(
@@ -238,6 +253,13 @@ describe('getProposalDecision', () => {
     ).toMatchObject({ status: 'declined' });
   });
 
+  it('reads an aborted proposal as aborted, with nobody named as having decided it', () => {
+    expect(getProposalDecision(proposal({ status: 'aborted' }))).toMatchObject({
+      status: 'aborted',
+      actorName: undefined,
+    });
+  });
+
   it("reports a failed action's error as its reason", () => {
     expect(
       getProposalDecision(
@@ -260,7 +282,22 @@ describe('isProposalExpired', () => {
     expect(isProposalExpired(proposal({ status: 'expired' }))).toBe(true);
   });
 
+  it('is false for an aborted proposal, whose deadline did not pass', () => {
+    expect(isProposalExpired(proposal({ status: 'aborted' }))).toBe(false);
+  });
+
   it('is false for a proposal still awaiting a decision', () => {
     expect(isProposalExpired(proposal())).toBe(false);
+  });
+});
+
+describe('isProposalAborted', () => {
+  it('is true once the workflow settles the status as aborted', () => {
+    expect(isProposalAborted(proposal({ status: 'aborted' }))).toBe(true);
+  });
+
+  it('is false for an expired proposal and for one still awaiting a decision', () => {
+    expect(isProposalAborted(proposal({ status: 'expired' }))).toBe(false);
+    expect(isProposalAborted(proposal())).toBe(false);
   });
 });

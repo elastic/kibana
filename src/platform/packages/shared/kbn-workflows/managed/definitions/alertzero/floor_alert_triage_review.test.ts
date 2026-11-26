@@ -648,6 +648,8 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     [{ status: 'succeeded', decision: 'approved' }, 'approved'],
     [{ status: 'no_action', decision: 'dismissed' }, 'dismissed'],
     [{ status: 'expired', decision: '' }, 'expired'],
+    // A gate that stopped before its deadline decided nothing either.
+    [{ status: 'aborted', decision: '' }, 'expired'],
     [{ status: 'pending', decision: '' }, 'unknown'],
     [{}, 'unknown'],
   ])('resolves %j to "%s"', (output, expected) => {
