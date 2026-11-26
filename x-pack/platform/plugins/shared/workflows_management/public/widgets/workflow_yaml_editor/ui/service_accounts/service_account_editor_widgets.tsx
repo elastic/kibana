@@ -531,6 +531,8 @@ export const ServiceAccountEditorWidgets = ({
           }}
           onMouseEnter={() => clearTimeout(closeTimer.current)}
           onMouseLeave={() => {
+            // The cursor-anchored picker must outlive a pointer-leave; only hover opened the details.
+            if (popup.kind !== 'details') return;
             closeTimer.current = setTimeout(() => {
               if (!node.contains(document.activeElement)) closeRef.current();
             }, 250);

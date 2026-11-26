@@ -18,6 +18,7 @@ import { compareLevels, type EntryAccess } from '../levels';
 import {
   evaluateAcl,
   generalAccessPermits,
+  getOperationsAtAccess,
   isRestricted,
   toObjectDecision,
   type AclDecision,
@@ -211,6 +212,49 @@ describe('generalAccessPermits', () => {
   it('permits nothing for an operation the policy does not define', () => {
     expect(generalAccessPermits(FIXTURE_POLICY, undefined, 'manage_access')).toBe(false);
     expect(generalAccessPermits(FIXTURE_POLICY, undefined, 'teleport')).toBe(false);
+  });
+});
+
+describe('getOperationsAtAccess', () => {
+  it('lists every operation that needs the access or less, and access management at manage', () => {
+    expect(sorted(getOperationsAtAccess(FIXTURE_POLICY, 'none'))).toEqual([]);
+    expect(sorted(getOperationsAtAccess(FIXTURE_POLICY, 'view'))).toEqual(['view']);
+    expect(sorted(getOperationsAtAccess(FIXTURE_POLICY, 'use'))).toEqual(['use', 'view']);
+    expect(sorted(getOperationsAtAccess(FIXTURE_POLICY, 'edit'))).toEqual([
+      'delete',
+      'edit',
+      'use',
+      'view',
+    ]);
+    expect(sorted(getOperationsAtAccess(FIXTURE_POLICY, 'manage'))).toEqual([
+      'delete',
+      'edit',
+      'manage_access',
+      'use',
+      'view',
+    ]);
+  });
+
+  // The fixture policy lets entries grant only `use`, and never lets general access be `view`.
+  it('answers for access that neither general access nor entries can take', () => {
+    expect(FIXTURE_POLICY.entryAccess).not.toContain('view');
+    expect(FIXTURE_POLICY.generalAccess).not.toContain('view');
+    expect(sorted(getOperationsAtAccess(FIXTURE_POLICY, 'view'))).toEqual(['view']);
+  });
+
+  it('matches the operations of a decision at the same access', () => {
+    for (const [access] of LEVEL_OPERATIONS) {
+      const decision = evaluateAcl({
+        policy: { ...FIXTURE_POLICY, entryAccess: [access] },
+        acl: acl({
+          entries: [{ type: ['user'], id: [GRANTEE.id], access: [access], added_at: [] }],
+        }),
+        principal: GRANTEE,
+      });
+      expect({ access, operations: sorted(getOperationsAtAccess(FIXTURE_POLICY, access)) }).toEqual(
+        { access, operations: sorted(decision.operations) }
+      );
+    }
   });
 });
 

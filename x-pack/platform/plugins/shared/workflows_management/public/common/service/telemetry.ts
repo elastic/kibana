@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { WorkflowValidationRuleId } from '@kbn/workflows';
+import type { TemplateOriginFieldsSource, WorkflowValidationRuleId } from '@kbn/workflows';
+import { pickTemplateOriginFields } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import type { YamlValidationDiagnostic, YamlValidationResult } from '@kbn/workflows-yaml';
 import type {
@@ -76,8 +77,18 @@ export class WorkflowsBaseTelemetry {
     workflowDefinition?: Partial<WorkflowYaml> | null;
     origin?: WorkflowTelemetryOrigin;
     aiAssisted?: boolean;
+    /** Template the workflow was created from, read from the created workflow DTO. */
+    templateOrigin?: TemplateOriginFieldsSource;
   }) => {
-    const { workflowId, error, editorType, workflowDefinition, origin, aiAssisted } = params;
+    const {
+      workflowId,
+      error,
+      editorType,
+      workflowDefinition,
+      origin,
+      aiAssisted,
+      templateOrigin,
+    } = params;
 
     // Always extract metadata - extractWorkflowMetadata returns defaults if workflowDefinition is null/undefined
     const metadata = extractWorkflowMetadata(workflowDefinition);
@@ -88,6 +99,7 @@ export class WorkflowsBaseTelemetry {
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...(aiAssisted !== undefined && { aiAssisted }),
+      ...pickTemplateOriginFields(templateOrigin),
       enabled: metadata.enabled,
       stepCount: metadata.stepCount,
       connectorTypes: metadata.connectorTypes,
@@ -134,6 +146,8 @@ export class WorkflowsBaseTelemetry {
     bulkActionCount?: number;
     origin?: WorkflowTelemetryOrigin;
     aiAssisted?: boolean;
+    /** Template the workflow was created from, read from the workflow DTO. */
+    templateOrigin?: TemplateOriginFieldsSource;
   }) => {
     const {
       workflowId,
@@ -148,6 +162,7 @@ export class WorkflowsBaseTelemetry {
       isBulkAction = false,
       origin,
       aiAssisted,
+      templateOrigin,
     } = params;
 
     // Check if enabled changed (directly or via YAML update)
@@ -184,6 +199,7 @@ export class WorkflowsBaseTelemetry {
           ...(origin && { origin }),
           hasCustomEventTrigger,
           error,
+          templateOrigin,
         });
         return;
       }
@@ -200,6 +216,7 @@ export class WorkflowsBaseTelemetry {
       ...(origin && { origin }),
       ...(aiAssisted !== undefined && { aiAssisted }),
       ...(updatedFields.length > 0 && { updatedFields }),
+      ...pickTemplateOriginFields(templateOrigin),
       ...this.getBaseResultParams(error),
     });
   };
@@ -256,6 +273,8 @@ export class WorkflowsBaseTelemetry {
     error?: Error;
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
+    /** Template the workflow was created from, read from the workflow DTO. */
+    templateOrigin?: TemplateOriginFieldsSource;
   }) => {
     const {
       workflowId,
@@ -266,6 +285,7 @@ export class WorkflowsBaseTelemetry {
       error,
       editorType,
       origin,
+      templateOrigin,
     } = params;
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
@@ -278,6 +298,7 @@ export class WorkflowsBaseTelemetry {
       ...(hasCustomEventTrigger !== undefined && { hasCustomEventTrigger }),
       ...(editorType && { editorType }),
       ...(origin && { origin }),
+      ...pickTemplateOriginFields(templateOrigin),
       ...this.getBaseResultParams(error),
     });
   };

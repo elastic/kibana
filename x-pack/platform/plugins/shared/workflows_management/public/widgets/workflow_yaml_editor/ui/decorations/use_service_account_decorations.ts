@@ -23,9 +23,10 @@ interface ServiceAccountReference {
 const getReference = (model: monaco.editor.ITextModel): ServiceAccountReference | null => {
   const document = parseDocument(model.getValue());
   const value = document.getIn(['settings', 'run_as'], true);
-  if (!isScalar(value) || value.type === 'BLOCK_LITERAL' || value.type === 'BLOCK_FOLDED')
-    return null;
+  if (!isScalar(value)) return null;
   if (value.value === null || value.value === '') {
+    // An empty block scalar leaves no inline spot for the placeholder.
+    if (value.type === 'BLOCK_LITERAL' || value.type === 'BLOCK_FOLDED') return null;
     const settings = document.getIn(['settings'], true);
     if (!isMap(settings)) return null;
     const key = settings.items.find(
@@ -52,7 +53,6 @@ const getReference = (model: monaco.editor.ITextModel): ServiceAccountReference 
   if (typeof value.value !== 'string' || !value.range) return null;
   const start = model.getPositionAt(value.range[0]);
   const end = model.getPositionAt(value.range[1]);
-  if (start.lineNumber !== end.lineNumber) return null;
   return {
     id: value.value,
     range: {

@@ -390,7 +390,8 @@ export abstract class DiscoverLayout extends DiscoverSave {
   }
 
   getCustomDescriptionFormError(): Locator {
-    return this.page.testSubj.locator('customDescriptionRow').locator('.euiFormErrorText');
+    // EuiFormRow gives each error the id `<rowId>-error-<index>`
+    return this.page.testSubj.locator('customDescriptionRow').locator('[id*="-error-"]');
   }
 
   async saveOpenFieldEditor({ confirmChange = false }: { confirmChange?: boolean } = {}) {
@@ -641,9 +642,7 @@ export abstract class DiscoverLayout extends DiscoverSave {
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
     // The list is virtualised; clicking while EUI is still filtering misses the option
     // and leaves the popover open.
-    await selectable.and(this.page.locator('[data-is-searching="false"]')).waitFor({
-      state: 'attached',
-    });
+    await expect(selectable).toHaveAttribute('data-search-term', field);
     await selectable.locator(`.euiSelectableListItem[value="${value}"]`).click();
     await selectable.waitFor({ state: 'hidden' });
   }

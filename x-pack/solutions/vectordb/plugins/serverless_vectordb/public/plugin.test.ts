@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import type { App, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { hasSeenOnboarding } from '@kbn/vectordb-onboarding';
 import { ServerlessVectordbPlugin } from './plugin';
 import { CONSOLE_DEFAULT_CONTENT } from './console_default_content';
+import type { ServerlessVectordbStartDependencies } from './types';
 
 jest.mock('@kbn/vectordb-onboarding', () => ({
   ...jest.requireActual('@kbn/vectordb-onboarding'),
@@ -72,5 +73,57 @@ describe('ServerlessVectordbPlugin setup', () => {
 
       expect(await runUpdater(app)).toEqual({ hideChrome: true });
     });
+  });
+});
+
+describe('ServerlessVectordbPlugin start', () => {
+  const startPlugin = (integratedOnboardingEnabled: boolean) => {
+    const plugin = new ServerlessVectordbPlugin();
+    const coreSetup = coreMock.createSetup();
+    plugin.setup(coreSetup, {});
+    const app: App = coreSetup.application.register.mock.calls[0][0];
+
+    const coreStart = coreMock.createStart();
+    coreStart.settings.client.get$.mockReturnValue(of('agent'));
+    const integratedOnboardingEnabled$ = new BehaviorSubject(integratedOnboardingEnabled);
+    plugin.start(coreStart, {
+      navigation: { initNavigation: jest.fn() },
+      elasticsearchHome: { getIntegratedOnboardingEnabled$: () => integratedOnboardingEnabled$ },
+    } as unknown as ServerlessVectordbStartDependencies);
+
+    return { app, integratedOnboardingEnabled$, plugin };
+  };
+
+  describe('with integrated onboarding off', () => {
+    it('keeps the setup chrome state and the registered deep links', async () => {
+      const { app } = startPlugin(false);
+
+      expect(await runUpdater(app)).toEqual({ hideChrome: true });
+    });
+  });
+
+  describe('with integrated onboarding on', () => {
+    it('shows the chrome and drops the Getting started deep link', async () => {
+      const { app } = startPlugin(true);
+
+      expect(await runUpdater(app)).toEqual({ hideChrome: false, deepLinks: [] });
+    });
+  });
+
+  it('restores the setup state when the flag turns off at runtime', async () => {
+    const { app, integratedOnboardingEnabled$ } = startPlugin(true);
+
+    integratedOnboardingEnabled$.next(false);
+
+    expect(await runUpdater(app)).toEqual({ hideChrome: true });
+  });
+
+  it('stops following the flag once stopped', async () => {
+    const { app, integratedOnboardingEnabled$, plugin } = startPlugin(false);
+
+    plugin.stop();
+    integratedOnboardingEnabled$.next(true);
+
+    expect(await runUpdater(app)).toEqual({ hideChrome: true });
   });
 });

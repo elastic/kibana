@@ -12,6 +12,7 @@ import {
   SecretConfigurationSchemaValidation,
 } from '../../common/auth/schemas/v1';
 import { AuthConfiguration } from '../../common/auth';
+import { AUTH_SCHEME_REGEX } from '../constants';
 
 export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 
@@ -31,6 +32,7 @@ export const ConfigSchema = lazySchema(() =>
       clientId: AuthConfiguration.clientId,
       scope: AuthConfiguration.scope,
       additionalFields: AuthConfiguration.additionalFields,
+      tokenType: z.string().min(1).max(128).regex(AUTH_SCHEME_REGEX).optional(),
       proxyUrl: z.string().url().nullable().default(null),
       proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
       hasProxyAuth: z.boolean().default(false),

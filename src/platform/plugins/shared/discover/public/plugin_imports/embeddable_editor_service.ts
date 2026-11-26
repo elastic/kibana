@@ -6,17 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  DiscoverSessionTab,
-  SavedSearchByValueAttributes,
-} from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { SearchEmbeddableByReferenceState } from '../../common/embeddable/types';
+import type {
+  DiscoverSessionEmbeddableByValueState,
+  SearchEmbeddableByReferenceState,
+} from '../../common/embeddable/types';
 import type { SearchEmbeddablePanelApiState } from '../embeddable/types';
 
 /**
@@ -43,7 +44,7 @@ export enum TransferAction {
    */
   SaveSession,
   /**
-   * A Save By Value operation. Sends the serialised embeddable attributes to the editor.
+   * A Save By Value operation. Sends the public by-value panel state to the editor.
    */
   SaveByValue,
   /**
@@ -60,7 +61,11 @@ interface TransferOptionsBase {
 
 interface ByValueTransferOptions extends TransferOptionsBase {
   state: {
-    byValueState: SavedSearchByValueAttributes;
+    tab: DiscoverSessionApiEmbeddableTab;
+    /** Omit to keep the title of the panel being edited. */
+    title?: string;
+    /** Omit to keep the description of the panel being edited. */
+    description?: string;
     controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
   };
 }
@@ -198,11 +203,18 @@ export class EmbeddableEditorService {
     targetsOriginatingEditor: boolean
   ): GetSerializedStateResult {
     if (action === TransferAction.SaveByValue) {
-      const { state } = options as ByValueTransferOptions;
+      const { tab, title, description, controlGroupState } = (options as ByValueTransferOptions)
+        .state;
+      // Dashboard merges the package into the panel state, so omitted panel settings are kept
+      const serializedState: DiscoverSessionEmbeddableByValueState = {
+        ...(title !== undefined && { title }),
+        ...(description !== undefined && { description }),
+        tabs: [tab],
+      };
       return {
-        serializedState: { attributes: state.byValueState },
+        serializedState,
         controlGroupState: reconcileControlGroupState({
-          controlGroupState: state.controlGroupState ?? {},
+          controlGroupState: controlGroupState ?? {},
           dashboardControlGroupState: this.getEditorInput().dashboardControlGroupState,
         }),
       };

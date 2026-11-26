@@ -8,11 +8,12 @@
  */
 
 /**
- * Performs a greater than or equal comparison between two values.
+ * Checks whether one value is greater than or equal to another. If either argument is an array, the function returns `true` only if every element satisfies the comparison.
  * @param {number|number[]} a a number or an array of numbers
  * @param {number|number[]} b a number or an array of numbers
- * @return {boolean} Returns true if `a` is greater than or equal to `b`, false otherwise. When either argument is an array the comparison is applied element-wise and true is returned only if every element satisfies it.
- * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
+ * @return {boolean} `true` if `a` is greater than or equal to `b`, `false` otherwise. If `a` or `b` is an array, returns `true` only if every element satisfies the comparison.
+ * @throws `'Missing b value'` if `b` is not provided
+ * @throws `'Array length mismatch'` if `a` and `b` are arrays of different lengths
  * @example
  * gte(1, 1) // returns true
  * gte(1, 2) // returns false

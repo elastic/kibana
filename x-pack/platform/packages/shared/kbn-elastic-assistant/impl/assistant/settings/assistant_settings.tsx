@@ -16,7 +16,7 @@ import {
   EuiSplitPanel,
 } from '@elastic/eui';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useConversationsUpdater } from './use_settings_updater/use_conversations_updater';

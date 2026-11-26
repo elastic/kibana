@@ -10,6 +10,13 @@ import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse, TimeSeriesPoint } from '../../../../common/types/applications';
 import type { ApplicationOverviewResponse } from '../../../../common/types/overview';
+import {
+  deleteOwnedSessions,
+  ingestOwnedSessionsAt,
+  setUpOwnedSessions,
+  type OwnedSessions,
+  type OwnedSessionsSetup,
+} from '../../common/fixtures/sessions_data';
 import { testData } from '../fixtures';
 import { LOCAL_PAGE_LOADS, expectedCountsByKey } from '../../common/fixtures/time_zone_data';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
@@ -21,11 +28,12 @@ const {
   APPLICATIONS_PATH,
   COMMON_HEADERS,
   NEW_YORK_TIME_ZONE,
-  OVERVIEW_PATH,
   THIRTY_DAYS,
-  TIME_ZONE_ENVIRONMENT,
+  TIME_ZONE_APP,
   withQuery,
 } = testData;
+
+const TIME_ZONE_OVERVIEW_PATH = `${APPLICATIONS_PATH}/${TIME_ZONE_APP}/overview`;
 
 const localTime = (timestamp: number) => moment.tz(timestamp, NEW_YORK_TIME_ZONE);
 const isLocalMidnight = (timestamp: number) => localTime(timestamp).format('HH:mm') === '00:00';
@@ -46,15 +54,38 @@ const expectCounts = (points: TimeSeriesPoint[], expected: Map<number, number>) 
   }
 };
 
+// In their own environment, so the list reads only them.
+const SESSIONS: OwnedSessions = {
+  idPrefix: 'dx-time-zone',
+  environment: 'sessions-time-zone-test',
+  count: 3,
+};
+
 apiTest.describe(
   'Digital Experience histogram buckets in the time zone',
   { tag: DIGITAL_EXPERIENCE_TAGS },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
+    let setup: OwnedSessionsSetup | undefined;
+    // Sessions are kept for 30 days, so theirs are around a recent New York midnight: 30 days
+    // ending at the next one get 12-hour buckets, as `THIRTY_DAYS` does.
+    const lastMidnight = moment.tz(NEW_YORK_TIME_ZONE).startOf('day');
+    const sessionsDay = lastMidnight.clone().subtract(5, 'days');
+    const at = (hour: number, minute: number) =>
+      sessionsDay.clone().set({ hour, minute }).valueOf();
+    const sessionStarts = [at(11, 59), at(12, 0), at(23, 59)];
+    const sessionsRange = {
+      start: lastMidnight.clone().add(1, 'day').subtract(30, 'days').toISOString(),
+      end: lastMidnight.clone().add(1, 'day').toISOString(),
+    };
+
+    apiTest.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       await apiServices.core.settings(FLAG_ON_OVERRIDE);
+      setup = await setUpOwnedSessions(esClient, kbnClient);
+      await ingestOwnedSessionsAt(esClient, SESSIONS, sessionStarts);
     });
 
-    apiTest.afterAll(async ({ apiServices }) => {
+    apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
+      await deleteOwnedSessions(esClient, kbnClient, SESSIONS, setup);
       await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
@@ -97,50 +128,62 @@ apiTest.describe(
       isBucketStart,
       expectedCounts,
     } of TIME_ZONE_CASES) {
-      apiTest(`counts the page loads by ${buckets}`, async ({ apiClient, samlAuth }) => {
+      apiTest(`counts the Overview page loads by ${buckets}`, async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+        const response = await apiClient.get(
+          withQuery(TIME_ZONE_OVERVIEW_PATH, {
+            ...range,
+            ...(timeZone ? { timeZone } : {}),
+          }),
+          { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const { trend, trendHistogram } = (response.body as ApplicationOverviewResponse).overview;
+        expect(trendHistogram).toStrictEqual({
+          interval,
+          start: Date.parse(range.start),
+          end: Date.parse(range.end),
+        });
+        const points = trend.map(({ timestamp, pageLoads }) => ({
+          timestamp,
+          count: pageLoads,
+        }));
+        expect(points.every(({ timestamp }) => isBucketStart(timestamp))).toBe(true);
+        expectCounts(points, expectedCounts);
+      });
+    }
+
+    apiTest(
+      'counts the page loads of the sessions by 12 hours from local midnight and noon',
+      async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
         const response = await apiClient.get(
           withQuery(APPLICATIONS_PATH, {
-            ...range,
-            ...(timeZone ? { timeZone } : {}),
-            environment: TIME_ZONE_ENVIRONMENT,
+            ...sessionsRange,
+            timeZone: NEW_YORK_TIME_ZONE,
+            environment: SESSIONS.environment,
           }),
           { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
         );
 
         expect(response).toHaveStatusCode(200);
         const { pageLoadsOverTime } = response.body as ApplicationsResponse;
-        expect(pageLoadsOverTime.histogram).toStrictEqual({
-          interval,
-          start: Date.parse(range.start),
-          end: Date.parse(range.end),
-        });
-        expect(pageLoadsOverTime.otel.every(({ timestamp }) => isBucketStart(timestamp))).toBe(
-          true
+        expect(pageLoadsOverTime.histogram.interval).toStrictEqual({ value: 43200, unit: 's' });
+        expect(
+          pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnightOrNoon(timestamp))
+        ).toBe(true);
+        expectCounts(
+          pageLoadsOverTime.otel,
+          new Map([
+            [at(0, 0), 1],
+            [at(12, 0), 2],
+          ])
         );
-        expectCounts(pageLoadsOverTime.otel, expectedCounts);
-      });
-    }
-
-    apiTest('buckets the Overview trend in the time zone', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
-      const response = await apiClient.get(
-        withQuery(OVERVIEW_PATH, { ...THIRTY_DAYS, timeZone: NEW_YORK_TIME_ZONE }),
-        { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      const { trend, trendHistogram } = (response.body as ApplicationOverviewResponse).overview;
-      expect(trendHistogram).toStrictEqual({
-        interval: { value: 43200, unit: 's' },
-        start: Date.parse(THIRTY_DAYS.start),
-        end: Date.parse(THIRTY_DAYS.end),
-      });
-      expect(trend.length).toBeGreaterThan(0);
-      expect(trend.every(({ timestamp }) => isLocalMidnightOrNoon(timestamp))).toBe(true);
-    });
+      }
+    );
 
     apiTest('returns 400 for an unknown time zone', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');

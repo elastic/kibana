@@ -83,6 +83,16 @@ describe('CreateAiIndexModal', () => {
     expect(screen.getByTestId('contextCreateAiIndexModalConfirmButton')).toBeDisabled();
   });
 
+  it('stops the OS or browser from capitalizing or correcting the name', () => {
+    renderWithProviders(coreMock.createStart());
+
+    const input = screen.getByTestId('contextAiIndexNameInput');
+
+    expect(input).toHaveAttribute('autocapitalize', 'none');
+    expect(input).toHaveAttribute('autocorrect', 'off');
+    expect(input).toHaveAttribute('spellcheck', 'false');
+  });
+
   it('shows an error and stays disabled when the name is too long', () => {
     renderWithProviders(coreMock.createStart());
 

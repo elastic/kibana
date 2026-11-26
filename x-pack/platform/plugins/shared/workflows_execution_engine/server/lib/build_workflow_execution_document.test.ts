@@ -347,6 +347,25 @@ describe('buildWorkflowExecutionDocument', () => {
     });
   });
 
+  describe('execution chain', () => {
+    const hop = { executionId: 'parent-exec', invocation: 'sync', workflowId: 'parent' } as const;
+
+    it('should copy the context execution chain to the indexed root field when the run is a child', () => {
+      const workflowExecution = buildWorkflowExecutionDocument({
+        ...baseParams,
+        context: { executionChain: [{ ...hop, extra: 'dropped' }] },
+      });
+
+      expect(workflowExecution.executionChain).toEqual([hop]);
+    });
+
+    it('should omit the root execution chain when the context has none', () => {
+      const workflowExecution = buildWorkflowExecutionDocument(baseParams);
+
+      expect(workflowExecution).not.toHaveProperty('executionChain');
+    });
+  });
+
   it('copies managed workflow billable metadata', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
@@ -362,6 +381,32 @@ describe('buildWorkflowExecutionDocument', () => {
       billable: true,
     });
     expect(workflowExecution.workflowUid).toBeUndefined();
+  });
+
+  it('copies the template origin of a workflow created from a template', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: {
+        ...baseWorkflow,
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'remix',
+      },
+    });
+
+    expect(workflowExecution).toMatchObject({
+      templateSlug: 'triage-alerts',
+      templateVersion: '1.2.0',
+      templateOrigin: 'remix',
+    });
+  });
+
+  it('omits the template origin for a workflow not created from a template', () => {
+    const workflowExecution = buildWorkflowExecutionDocument(baseParams);
+
+    expect(workflowExecution).not.toHaveProperty('templateSlug');
+    expect(workflowExecution).not.toHaveProperty('templateVersion');
+    expect(workflowExecution).not.toHaveProperty('templateOrigin');
   });
 
   it('copies workflowUid from the workflow document and omits it for an ephemeral run', () => {

@@ -18,6 +18,7 @@ import {
   createSLORepositoryMock,
   createSummaryClientMock,
 } from '../mocks';
+import { thirtyDaysRolling } from '../fixtures/time_window';
 import { createCompositeSlo } from './create_composite_slo';
 import { computeAndPersistCompositeSummaryDoc } from './composite_summary_writer';
 
@@ -44,11 +45,11 @@ describe('createCompositeSlo', () => {
     name: 'Payments composite',
     description: 'Sensitive description',
     members: [
-      { sloId: 'slo-a', weight: 1, instanceId: 'host-1' },
-      { sloId: 'slo-b', weight: 2 },
+      { sloId: 'slo-id-a', weight: 1, instanceId: 'host-1' },
+      { sloId: 'slo-id-b', weight: 2 },
     ],
     compositeMethod: 'weightedAverage' as const,
-    timeWindow: { duration: '30d', type: 'rolling' as const },
+    timeWindow: thirtyDaysRolling(),
     budgetingMethod: 'occurrences' as const,
     objective: { target: 0.99 },
     spaceId: 'default',
@@ -75,6 +76,19 @@ describe('createCompositeSlo', () => {
     ]);
     expect(JSON.stringify(events)).not.toContain('Payments composite');
     expect(JSON.stringify(events)).not.toContain('Sensitive description');
+  });
+
+  it('stores Date timestamps and returns the wire form', async () => {
+    const { compositeRepository, dependencies } = setup();
+
+    const result = await createCompositeSlo(params, dependencies);
+
+    const stored = compositeRepository.create.mock.calls[0][0];
+    expect(stored.createdAt).toBeInstanceOf(Date);
+    expect(stored.updatedAt).toEqual(stored.createdAt);
+    expect(result.timeWindow).toEqual({ duration: '30d', type: 'rolling' });
+    expect(result.createdAt).toBe(stored.createdAt.toISOString());
+    expect(result.updatedAt).toBe(stored.updatedAt.toISOString());
   });
 
   it('does not report when creating the definition fails', async () => {

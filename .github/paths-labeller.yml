@@ -5,7 +5,7 @@
     - 'src/platform/packages/shared/kbn-workflows/**/*.*'
     - 'src/platform/packages/shared/kbn-workflows-ui/**/*.*'
     - 'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.*'
-    - 'src/platform/plugins/shared/workflows_extensions/**/*.*'
+    - 'x-pack/platform/plugins/shared/workflows_extensions/**/*.*'
     - 'x-pack/platform/plugins/shared/workflows_management/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/**/*.*'
@@ -76,3 +76,7 @@
     - '.buildkite/scripts/steps/evals/**/*.*'
     - 'x-pack/platform/plugins/shared/inference/**/*.*'
     - 'x-pack/platform/packages/shared/ai-infra/**/*.*'
+# The investigator's reply rules and the eval that scores them; the label runs the writeup eval.
+- 'evals:nightshift-investigations-writeup':
+    - 'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/response_style.md.text'
+    - 'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/evals/writeup/**/*.*'

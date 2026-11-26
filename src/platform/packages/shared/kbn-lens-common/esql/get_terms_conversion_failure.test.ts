@@ -93,6 +93,33 @@ describe('getTermsConversionFailure', () => {
     ).toBe('terms_other_bucket_not_supported');
   });
 
+  it('returns terms_other_bucket_same_field_not_supported when both Top values use the same field', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: true }),
+        context({ termsBucketCount: 2, supportsOtherBucket: true, hasDuplicateTermsField: true })
+      )
+    ).toBe('terms_other_bucket_same_field_not_supported');
+  });
+
+  it('allows two Top values on the same field when Other is off', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: false }),
+        context({ termsBucketCount: 2, hasDuplicateTermsField: true })
+      )
+    ).toBeUndefined();
+  });
+
+  it('prefers the positional other bucket reason over the same field reason', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: true }),
+        context({ termsBucketCount: 2, hasDuplicateTermsField: true })
+      )
+    ).toBe('terms_other_bucket_not_supported');
+  });
+
   it('prefers unsupported nesting over other bucket when both apply', () => {
     expect(
       getTermsConversionFailure(
