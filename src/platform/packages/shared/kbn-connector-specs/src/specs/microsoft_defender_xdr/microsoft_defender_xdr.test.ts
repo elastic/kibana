@@ -256,11 +256,9 @@ describe('MicrosoftDefenderXdr actions', () => {
     const toolActions = [
       'listIncidents',
       'getIncident',
-      'updateIncident',
       'addIncidentComment',
       'listAlerts',
       'getAlert',
-      'updateAlert',
       'addAlertComment',
       'runHuntingQuery',
       'listDetectionRules',
@@ -279,6 +277,8 @@ describe('MicrosoftDefenderXdr actions', () => {
   it('destructive actions have isTool: false', () => {
     const spec = MicrosoftDefenderXdr as ConnectorSpec;
     const nonToolActions = [
+      'updateIncident',
+      'updateAlert',
       'mergeIncidents',
       'createDetectionRule',
       'updateDetectionRule',

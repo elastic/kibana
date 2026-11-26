@@ -18,8 +18,9 @@ export const threatIntelActions: Record<string, ActionDefinition<any, any, any>>
     isTool: true,
     scope: 'read',
     description:
-      'Retrieve Microsoft Defender Threat Intelligence (MDTI) data for a hostname or IP address — ' +
-      'including associated threat actors, malware families, infrastructure relationships, and first/last seen dates. ' +
+      'Retrieve the Microsoft Defender Threat Intelligence (MDTI) host record for a hostname or IP address — ' +
+      'returning the host ID, first-seen date, and last-seen date. ' +
+      'Does not return threat-actor associations or malware-family associations; use getThreatIntelHostReputation for a risk score and getPassiveDnsRecords or getWhoisRecord for infrastructure pivoting. ' +
       'Requires the ThreatIntelligence.Read.All Graph permission.',
     input: GetThreatIntelHostInputSchema,
     handler: async (ctx, input: GetThreatIntelHostInput) =>

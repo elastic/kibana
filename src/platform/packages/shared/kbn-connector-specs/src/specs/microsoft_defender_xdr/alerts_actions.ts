@@ -60,7 +60,7 @@ export const alertActions: Record<string, ActionDefinition<any, any, any>> = {
   },
 
   updateAlert: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description:
       'Update a Microsoft Defender XDR alert independently of its parent incident — change status ' +

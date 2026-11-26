@@ -67,7 +67,7 @@ export const incidentActions: Record<string, ActionDefinition<any, any, any>> = 
   },
 
   updateIncident: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description:
       'Update a Microsoft Defender XDR incident — change status (active/resolved/inProgress), ' +

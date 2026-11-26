@@ -94,12 +94,12 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 |---|---|---|---|---|
 | `listIncidents` | Incident management | — | `filter`, `top`, `skip`, `includeAlerts` | `SecurityIncident.ReadWrite.All` |
 | `getIncident` | Incident management | `incidentId` | — | `SecurityIncident.ReadWrite.All` |
-| `updateIncident` | Incident management | `incidentId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity`, `customTags` | `SecurityIncident.ReadWrite.All` |
+| `updateIncident` _(API only)_ | Incident management | `incidentId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity`, `customTags` | `SecurityIncident.ReadWrite.All` |
 | `addIncidentComment` | Incident management | `incidentId`, `comment` | — | `SecurityIncident.ReadWrite.All` |
 | `mergeIncidents` _(API only)_ | Incident management | `incidentIds` (≥ 2 IDs) | `comment` | `SecurityIncident.ReadWrite.All` |
 | `listAlerts` | Alert management | — | `filter`, `top`, `skip` | `SecurityAlert.ReadWrite.All` |
 | `getAlert` | Alert management | `alertId` | — | `SecurityAlert.ReadWrite.All` |
-| `updateAlert` | Alert management | `alertId` + at least one field | `status`, `assignedTo`, `classification`, `determination` | `SecurityAlert.ReadWrite.All` |
+| `updateAlert` _(API only)_ | Alert management | `alertId` + at least one field | `status`, `assignedTo`, `classification`, `determination` | `SecurityAlert.ReadWrite.All` |
 | `addAlertComment` | Alert management | `alertId`, `comment` | — | `SecurityAlert.ReadWrite.All` |
 | `runHuntingQuery` | Advanced hunting | `query` | `timespan` | `ThreatHunting.Read.All` |
 | `listDetectionRules` | Custom detection rules | — | `top`, `skip` | `CustomDetection.Read.All` |
@@ -121,7 +121,7 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 `getIncident`
 :   Retrieves full details for a single incident by its numeric ID, including all related alerts, evidence, and affected assets. Device evidence items include `mdeDeviceId` and `deviceDnsName`, which can be passed to the Microsoft Defender for Endpoint connector for containment or live-response actions.
 
-`updateIncident`
+`updateIncident` _(API only)_
 :   Updates an incident — change `status` (`active`, `resolved`, `inProgress`, `redirected`), assign to an analyst (`assignedTo`), set `classification` and `determination`, adjust `severity`, or replace `customTags`. Only the fields you provide are changed. To add a comment, use `addIncidentComment` instead.
 
 `addIncidentComment`
@@ -138,8 +138,8 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 `getAlert`
 :   Retrieves full details for a single alert, including evidence (affected devices, users, files, processes, and network connections). Device evidence includes `mdeDeviceId` for use with the Microsoft Defender for Endpoint connector.
 
-`updateAlert`
-:   Updates an alert independently of its parent incident — change `status` (`new`, `inProgress`, `resolved`), assign to an analyst (`assignedTo`), or set `classification` and `determination`. Alert severity cannot be changed via PATCH. Use for triage that does not warrant touching the full incident yet. Provide only the fields you want to change.
+`updateAlert` _(API only)_
+:   Updates an alert independently of its parent incident — change `status` (`new`, `inProgress`, `resolved`), assign to an analyst (`assignedTo`), or set `classification` and `determination`. Alert severity cannot be changed via PATCH. Provide only the fields you want to change.
 
 `addAlertComment`
 :   Appends a comment to an alert's activity log. Use to record triage notes, analyst observations, or escalation decisions directly on the alert for audit trail purposes.
@@ -169,7 +169,7 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 ### Threat intelligence
 
 `getThreatIntelHost`
-:   Retrieves Microsoft Defender Threat Intelligence (MDTI) data for a hostname or IP address — including associated threat actors, malware families, infrastructure relationships, and first/last seen dates. The `host` parameter accepts FQDNs, IPv4 addresses, or IPv6 addresses.
+:   Retrieves the Microsoft Defender Threat Intelligence (MDTI) host record for a hostname or IP address — returning the host ID, first-seen date, and last-seen date. Does not include threat-actor associations or malware-family associations; use `getThreatIntelHostReputation` for a risk score, or `getPassiveDnsRecords` / `getWhoisRecord` for infrastructure pivoting. The `host` parameter accepts FQDNs, IPv4 addresses, or IPv6 addresses.
 
 `getThreatIntelHostReputation`
 :   Returns the MDTI reputation score and classification for a hostname or IP address. The score ranges from 0–100 (higher = more malicious). Classification is one of `malicious`, `suspicious`, or `neutral`, with the rules that influenced the score.
