@@ -11,8 +11,8 @@ import type { AlertEventDocument } from '@kbn/alerting-v2-schemas';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-// v10 adds `routing.tags`. Increment whenever
-// `ALERT_EVENTS_MAPPINGS` changes so the update is applied to the current write index.
+// v10 adds `routing.tags`. Increment whenever `ALERT_EVENTS_MAPPINGS` changes
+// so the update is applied to the current write index.
 export const ALERT_EVENTS_DATA_STREAM_VERSION = 10;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 export const ALERT_EVENTS_RESOURCE_KEY = `data_stream:${ALERT_EVENTS_DATA_STREAM}`;
