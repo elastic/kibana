@@ -1265,6 +1265,31 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
     });
 
+    it('should not update output if preconfigured kafka output only differs by proxy_id', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-kafka-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          password: 'unsecurePassword',
+          ssl: {
+            key: 'unsecureKey',
+          },
+          // Kafka clears proxy_id on save, so it must never be seen as a change (#267281)
+          proxy_id: 'non-existent-proxy',
+        } as PreconfiguredOutput,
+      ]);
+
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
     it('should not update output if preconfigured remote ES output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
