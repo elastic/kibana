@@ -69,6 +69,13 @@ describe('useFormatters', () => {
     );
   });
 
+  it("shows a number with the decimals asked for, in the user's number locale", () => {
+    expect(renderFormatters().formatDecimal(2.5, 2)).toBe('2.50');
+    expect(renderFormatters({ 'format:number:defaultLocale': 'de' }).formatDecimal(0.1234, 3)).toBe(
+      '0,123'
+    );
+  });
+
   it('formats dates with the date format in the configured time zone', () => {
     const { formatDate, timeZone } = renderFormatters({ 'dateFormat:tz': 'America/New_York' });
 

@@ -10,7 +10,12 @@ import type { TimeRange } from '@kbn/es-query';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from './feature';
-import { APPLICATION_TAB_IDS, type ApplicationTabId } from './types/applications';
+import {
+  APPLICATION_TAB_IDS,
+  REPORT_TEMPLATE_IDS,
+  type ApplicationTabId,
+  type ReportTemplateId,
+} from './types/applications';
 
 export const DIGITAL_EXPERIENCE_LOCATOR_ID = 'DIGITAL_EXPERIENCE_LOCATOR';
 
@@ -71,10 +76,15 @@ export interface DigitalExperienceLocatorParams
   serviceName?: string;
   /** The tab of the application; the Overview when unset or unknown. */
   tab?: ApplicationTabId;
+  /** The report open on the Reports tab; the template gallery when unset or unknown. */
+  report?: ReportTemplateId;
 }
 
 const isTab = (tab: unknown): tab is ApplicationTabId =>
   APPLICATION_TAB_IDS.some((known) => known === tab);
+
+const isReport = (report: unknown): report is ReportTemplateId =>
+  REPORT_TEMPLATE_IDS.some((known) => known === report);
 
 const isQueryValue = (value: unknown): value is QueryValue =>
   (typeof value === 'string' && value !== '') ||
@@ -94,12 +104,17 @@ export const pickLocatorQuery = (params: Record<string, unknown>): Record<string
     })
   );
 
-const pathOf = ({ serviceName, tab }: DigitalExperienceLocatorParams): string => {
+const pathOf = ({ serviceName, tab, report }: DigitalExperienceLocatorParams): string => {
   if (!serviceName) {
     return '/';
   }
   const application = `/${encodeURIComponent(serviceName)}`;
-  return isTab(tab) && tab !== 'overview' ? `${application}/${tab}` : application;
+  if (!isTab(tab) || tab === 'overview') {
+    return application;
+  }
+  return tab === 'reports' && isReport(report)
+    ? `${application}/reports/${report}`
+    : `${application}/${tab}`;
 };
 
 export class DigitalExperienceLocatorDefinition

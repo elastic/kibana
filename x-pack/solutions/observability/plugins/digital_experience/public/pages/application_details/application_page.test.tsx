@@ -203,6 +203,7 @@ describe('ApplicationPage', () => {
       serviceName: 'my-app',
       source: 'otel',
       tab: 'errors',
+      report: undefined,
     });
     expect(onClick).toHaveBeenCalledTimes(1);
   });

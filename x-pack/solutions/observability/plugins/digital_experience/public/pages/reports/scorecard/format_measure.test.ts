@@ -9,6 +9,7 @@ import { formatMeasureChange, formatMeasureValue } from './format_measure';
 
 const formatters = {
   formatNumber: (value: number) => String(value),
+  formatDecimal: (value: number, decimals: number) => value.toFixed(decimals),
   formatKpiPercent: (share: number) => `${(share * 100).toFixed(1)}%`,
   formatSignedPercent: (share: number) => `${share > 0 ? '+' : ''}${(share * 100).toFixed(1)}%`,
 };
@@ -21,6 +22,11 @@ describe('formatMeasureValue', () => {
     [0.1234, 'score', '0.123'],
     [1.26, 'rate', '1.3'],
     [0.015, 'ratio', '1.5%'],
+    [0, 'ratio', '0.0%'],
+    [1, 'ratio', '100.0%'],
+    [0.0001, 'ratio', '<0.1%'],
+    [0.9999, 'ratio', '>99.9%'],
+    [0.001, 'ratio', '0.1%'],
   ] as const)('formats %s as %s', (value, unit, expected) => {
     expect(formatMeasureValue(value, unit, formatters)).toBe(expected);
   });

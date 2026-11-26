@@ -97,6 +97,7 @@ describe('ScorecardReport', () => {
       formatNumber: (value) => String(value),
       formatPercent: (share) => `${(share * 100).toFixed(1)}%`,
       formatErrorRate: (rate) => String(rate),
+      formatDecimal: (value, decimals) => value.toFixed(decimals),
       formatKpiPercent: (share) => `${(share * 100).toFixed(1)}%`,
       formatSignedNumber: (value) => String(value),
       formatSignedPercent: (share) => `${share > 0 ? '+' : ''}${(share * 100).toFixed(1)}%`,

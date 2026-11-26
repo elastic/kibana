@@ -15,7 +15,11 @@ import {
   pickLocatorQuery,
   type DigitalExperienceLocatorParams,
 } from '../../common/locator';
-import type { ApplicationSource, ApplicationTabId } from '../../common/types/applications';
+import type {
+  ApplicationSource,
+  ApplicationTabId,
+  ReportTemplateId,
+} from '../../common/types/applications';
 import { canCreateShortUrl } from '../capabilities';
 import { useKibanaServices } from './use_kibana_services';
 
@@ -27,22 +31,25 @@ const SHARE_TOOLTIP = i18n.translate('xpack.digitalExperience.share.tooltip', {
   defaultMessage: 'Share application',
 });
 
-/** An application's page as the locator names it: its tab and the state its URL holds. */
+/** An application's page as the locator names it: its tab, report and the state its URL holds. */
 export const getShareParams = ({
   serviceName,
   source,
   tab,
+  report,
   search,
 }: {
   serviceName: string;
   source: ApplicationSource;
   tab: ApplicationTabId;
+  report?: ReportTemplateId;
   search: string;
 }): DigitalExperienceLocatorParams => ({
   ...pickLocatorQuery(qs.parse(search)),
   serviceName,
   tab,
   source,
+  ...(report ? { report } : {}),
 });
 
 /**
@@ -54,10 +61,12 @@ export const useShareAction = ({
   serviceName,
   source,
   tab,
+  report,
 }: {
   serviceName: string;
   source: ApplicationSource;
   tab: ApplicationTabId;
+  report?: ReportTemplateId;
 }): AppHeaderShareAction | undefined => {
   const { share, application } = useKibanaServices();
   const { search } = useLocation();
@@ -69,7 +78,7 @@ export const useShareAction = ({
       if (!locator) {
         return;
       }
-      const params = getShareParams({ serviceName, source, tab, search });
+      const params = getShareParams({ serviceName, source, tab, report, search });
       share.toggleShareContextMenu({
         isDirty: false,
         allowShortUrl,
@@ -85,7 +94,7 @@ export const useShareAction = ({
         onClose: returnFocus,
       });
     },
-    [allowShortUrl, locator, search, serviceName, share, source, tab]
+    [allowShortUrl, locator, report, search, serviceName, share, source, tab]
   );
 
   return useMemo(

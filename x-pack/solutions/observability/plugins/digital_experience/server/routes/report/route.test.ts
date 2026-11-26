@@ -123,7 +123,7 @@ describe('GET /internal/digital_experience/applications/{serviceName}/report/sco
       expect.objectContaining({
         esClient,
         start: start - (end - start),
-        end: start,
+        end: start - 1,
         environment: 'production',
       })
     );

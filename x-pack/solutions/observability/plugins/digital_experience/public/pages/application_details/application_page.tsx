@@ -201,7 +201,7 @@ function WebApplicationPage({
     scorecardReportHref,
     sessionsHref,
   } = useApplicationLinks(serviceName, source);
-  const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
+  const shareAction = useShareAction({ serviceName, source, tab: selectedTab, report });
   // In the URL, so a reload or Share keeps it; the EDOT Browser Overview's KPIs read it.
   const { value: compare, setValue: setCompare } = useQueryParam('compare');
   const isComparing = compare === 'true';

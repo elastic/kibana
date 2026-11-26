@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ReportTemplateId } from '../../../common/types/applications';
 
-export type ReportTemplateId = 'scorecard';
+export type { ReportTemplateId };
 
 export interface ReportTemplate {
   id: ReportTemplateId;

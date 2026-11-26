@@ -55,6 +55,11 @@ export const MOBILE_APPLICATION_TAB_IDS = [
 
 export type MobileApplicationTabId = (typeof MOBILE_APPLICATION_TAB_IDS)[number];
 
+/** The reports an application can have; each opens below the Reports tab, named after itself. */
+export const REPORT_TEMPLATE_IDS = ['scorecard'] as const;
+
+export type ReportTemplateId = (typeof REPORT_TEMPLATE_IDS)[number];
+
 /** Share of samples per rating, each between 0 and 1; the three add up to 1. */
 export interface VitalRatings {
   good: number;

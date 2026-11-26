@@ -12,6 +12,7 @@ import { getOtelOverview } from '../../routes/overview/otel/get_otel_overview';
 import { getOtelOverviewKpis } from '../../routes/overview/otel/get_otel_overview_kpis';
 import type { ApplicationSearchParams } from '../../routes/application_tab_route';
 import { createDigitalExperienceTracedEsClient } from '../create_digital_experience_traced_es_client';
+import { sortEnvironments } from '../helpers/environment';
 import { getHistogramInterval } from '../helpers/time_series';
 import { buildScorecard } from './scorecard';
 
@@ -52,7 +53,9 @@ export const getScorecardReport = async ({
       esClient: createDigitalExperienceTracedEsClient({ client, logger, abortSignal: signal }),
     }),
     overviewOf(start, end),
-    overviewOf(previousPeriod.start, previousPeriod.end),
+    // Up to the last millisecond before `start`: the Overview's range includes both ends, and a
+    // sample at the boundary belongs to the current period only.
+    overviewOf(previousPeriod.start, previousPeriod.end - 1),
   ]);
 
   return buildScorecard({
@@ -60,7 +63,8 @@ export const getScorecardReport = async ({
     current: current.overview,
     previous: previous.overview,
     environment,
-    environments: current.environments,
+    // Also those that sent nothing in this period, to tell where a drop in traffic comes from.
+    environments: sortEnvironments([...current.environments, ...previous.environments]),
     period: { start, end },
     previousPeriod,
     generatedAt: Date.now(),
