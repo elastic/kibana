@@ -16,6 +16,7 @@ export enum EntityType {
   host = 'host',
   service = 'service',
   generic = 'generic',
+  ai_agent = 'ai_agent',
 }
 
 export enum EntityIdentifierFields {
@@ -30,4 +31,6 @@ export const EntityTypeToIdentifierField: Record<EntityType, EntityIdentifierFie
   [EntityType.user]: EntityIdentifierFields.userName,
   [EntityType.service]: EntityIdentifierFields.serviceName,
   [EntityType.generic]: EntityIdentifierFields.generic,
+  // Agents have no single identity field: their EUID composes three.
+  [EntityType.ai_agent]: EntityIdentifierFields.generic,
 };

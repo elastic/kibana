@@ -50,6 +50,7 @@ export const AfterKeys = lazySchema(() =>
     user: EntityAfterKey.optional(),
     service: EntityAfterKey.optional(),
     generic: EntityAfterKey.optional(),
+    ai_agent: EntityAfterKey.optional(),
   })
 );
 export type AfterKeys = z.infer<typeof AfterKeys>;
@@ -86,7 +87,9 @@ export const DateRange = lazySchema(() =>
 );
 export type DateRange = z.infer<typeof DateRange>;
 
-export const IdentifierType = lazySchema(() => z.enum(['host', 'user', 'service', 'generic']));
+export const IdentifierType = lazySchema(() =>
+  z.enum(['host', 'user', 'service', 'generic', 'ai_agent'])
+);
 export type IdentifierType = z.infer<typeof IdentifierType>;
 export type IdentifierTypeEnum = typeof IdentifierType.enum;
 export const IdentifierTypeEnum = IdentifierType.enum;
@@ -292,6 +295,7 @@ export const RiskScoreWeightInternal = lazySchema(() =>
         user: RiskScoreEntityIdentifierWeights.optional(),
         service: RiskScoreEntityIdentifierWeights.optional(),
         generic: RiskScoreEntityIdentifierWeights.optional(),
+        ai_agent: RiskScoreEntityIdentifierWeights.optional(),
       })
     ),
     RiskScoreWeightGlobalShared.merge(
@@ -300,6 +304,7 @@ export const RiskScoreWeightInternal = lazySchema(() =>
         user: RiskScoreEntityIdentifierWeights,
         service: RiskScoreEntityIdentifierWeights.optional(),
         generic: RiskScoreEntityIdentifierWeights.optional(),
+        ai_agent: RiskScoreEntityIdentifierWeights.optional(),
       })
     ),
     RiskScoreWeightGlobalShared.merge(
@@ -308,6 +313,7 @@ export const RiskScoreWeightInternal = lazySchema(() =>
         user: RiskScoreEntityIdentifierWeights.optional(),
         service: RiskScoreEntityIdentifierWeights,
         generic: RiskScoreEntityIdentifierWeights.optional(),
+        ai_agent: RiskScoreEntityIdentifierWeights.optional(),
       })
     ),
   ])

@@ -78,6 +78,7 @@ const createEntityStoreEntityIdsByType = (
   host: [],
   service: [],
   generic: [],
+  ai_agent: [],
   ...overrides,
 });
 

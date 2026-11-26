@@ -50,6 +50,11 @@ components:
               items:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
               description: A list of generic risk scores
+            ai_agent:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              description: A list of AI agent risk scores
             refresh:
               type: string
               enum: [wait_for]

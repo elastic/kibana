@@ -9,6 +9,7 @@ import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { ruleExecutionLogMock } from '../../../../rule_monitoring/mocks';
 import { createAlert } from '../__mocks__/alerts';
 import type { EnrichmentFunction } from '../types';
+import type { SecurityRuleServices } from '../../../types';
 import {
   ALERT_AI_AGENT_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_AI_AGENT_RISK_SCORE_CALCULATED_SCORE_NORM,
@@ -53,7 +54,14 @@ describe('createV2AiAgentRiskEnrichments', () => {
   const run = async (
     events: Array<ReturnType<typeof createAlert>>,
     entityStoreCrudClient: EntityStoreCRUDClient
-  ) => createV2AiAgentRiskEnrichments({ entityStoreCrudClient, logger, events, spaceId: 'default' });
+  ) =>
+    createV2AiAgentRiskEnrichments({
+      services: {} as SecurityRuleServices,
+      entityStoreCrudClient,
+      logger,
+      events,
+      spaceId: 'default',
+    });
 
   it("stamps the agent's own event when the agent is in the store", async () => {
     const event = createAlert('1', agentFields());

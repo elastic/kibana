@@ -102,6 +102,42 @@ export interface EuidCompositeAggregation {
   after_key?: Record<string, string>;
 }
 
+/** At most one stamped EUID per entity type (host, user, service, ai_agent). */
+const STAMPED_EUID_POSITIONS = 4;
+
+/**
+ * Selects the alerts that resolve to an entity of this type and prefers the pre-stamped EUID over
+ * the EVAL-derived one.
+ *
+ * An alert with a stamped EUID for the type is kept even when the definition's documents filter
+ * rejects it. Agent descendants (`process.ai_agent.is_descendant: true`) are stamped with their
+ * agent but rejected by the agent filter, and the agent fields aren't mapped in the alerts index,
+ * so for agents the stamp is the only way in. Stamped values are scanned at every position with
+ * MV_SLICE, because keyword doc values come back sorted, not in write order, mirroring the Painless
+ * loop in buildEuidRuntimeMappingWithStoredFieldFastPath.
+ */
+const buildStampedEuidClauses = (
+  entityType: EntityType,
+  containsIdFilter: string
+): { alertsWithEuidClause: string; storedEuidCoalesceClause: string } => {
+  const f = ALERT_ENTITY_ID;
+  const p = `"${entityType}:"`;
+  const branches = Array.from(
+    { length: STAMPED_EUID_POSITIONS },
+    (_, i) =>
+      `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, ${i}, ${i})), ${p}), MV_FIRST(MV_SLICE(${f}, ${i}, ${i}))`
+  );
+
+  return {
+    alertsWithEuidClause: [
+      '| WHERE kibana.alert.risk_score IS NOT NULL',
+      `| EVAL stamped_entity_id = CASE(${branches.join(', ')})`,
+      `| WHERE stamped_entity_id IS NOT NULL OR (${containsIdFilter})`,
+    ].join('\n    '),
+    storedEuidCoalesceClause: '| EVAL entity_id = COALESCE(stamped_entity_id, entity_id)',
+  };
+};
+
 /**
  * Returns an ES|QL query that:
  * 1. Filters documents where the entity has an identifiable EUID
@@ -150,19 +186,10 @@ export const getBaseScoreESQL = (
     ? `entity_id <= "${escapeEsqlStringLiteral(bounds.upper)}"`
     : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
-
-  // Prefer the pre-stamped field over the EVAL-derived value. The array holds at most one EUID
-  // per entity type (host/user/service), so at most 3 elements. Scan all positions with
-  // MV_SLICE so multi-entity alerts are handled regardless of write order, mirroring the
-  // Painless loop in buildEuidRuntimeMappingWithStoredFieldFastPath.
-  const f = ALERT_ENTITY_ID;
-  const p = `"${entityType}:"`;
-  const storedEuidCoalesceClause =
-    `| EVAL entity_id = CASE(` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
-    `entity_id)`;
+  const { alertsWithEuidClause, storedEuidCoalesceClause } = buildStampedEuidClauses(
+    entityType,
+    containsIdFilter
+  );
 
   // Filter on entity_id (computed from cheap field evals) BEFORE the
   // CONCAT/base64 builders run, so non-matching alerts skip the per-row
@@ -170,7 +197,7 @@ export const getBaseScoreESQL = (
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${index} METADATA _index
-    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    ${alertsWithEuidClause}
     ${fieldEvalsClause}
     ${euidEvalClause}
     ${storedEuidCoalesceClause}
@@ -349,14 +376,10 @@ const buildResolutionScoreESQL = ({
     withTypeId: true,
   })}`;
 
-  const f = ALERT_ENTITY_ID;
-  const p = `"${entityType}:"`;
-  const storedEuidCoalesceClause =
-    `| EVAL entity_id = CASE(` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
-    `entity_id)`;
+  const { alertsWithEuidClause, storedEuidCoalesceClause } = buildStampedEuidClauses(
+    entityType,
+    containsIdFilter
+  );
 
   // Compute entity_id (cheap), then override with the pre-stamped field when present,
   // then LOOKUP JOIN to recover resolution_target_id, then filter on resolution_target_id
@@ -367,7 +390,7 @@ const buildResolutionScoreESQL = ({
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
-    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    ${alertsWithEuidClause}
     ${fieldEvalsClause}
     ${euidEvalClause}
     ${storedEuidCoalesceClause}

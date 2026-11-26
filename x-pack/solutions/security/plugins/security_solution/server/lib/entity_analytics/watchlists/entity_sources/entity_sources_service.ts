@@ -409,7 +409,13 @@ export const createEntitySourcesService = ({
             [
               {
                 source,
-                entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+                entityStoreEntityIdsByType: {
+                  user: [],
+                  host: [],
+                  service: [],
+                  generic: [],
+                  ai_agent: [],
+                },
                 correlationMap: new Map(),
                 watchlistsByEuid: lastWatchlistsByEuid,
                 pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,

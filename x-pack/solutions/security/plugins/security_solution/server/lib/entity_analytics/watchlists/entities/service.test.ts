@@ -52,6 +52,7 @@ describe('Watchlist entities service', () => {
         user: ['user:jdoe'],
         host: ['host:server-1'],
         service: ['service:api'],
+        ai_agent: [],
         generic: [],
       },
     });

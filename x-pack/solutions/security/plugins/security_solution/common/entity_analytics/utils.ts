@@ -8,7 +8,12 @@
 import { DEFAULT_ALERTS_INDEX } from '../constants';
 import { EntityType } from './types';
 
-const ENTITY_ANALYTICS_ENTITY_TYPES = [EntityType.user, EntityType.host, EntityType.service];
+const ENTITY_ANALYTICS_ENTITY_TYPES = [
+  EntityType.user,
+  EntityType.host,
+  EntityType.service,
+  EntityType.ai_agent,
+];
 
 export const getEntityAnalyticsEntityTypes = (): EntityType[] => ENTITY_ANALYTICS_ENTITY_TYPES;
 

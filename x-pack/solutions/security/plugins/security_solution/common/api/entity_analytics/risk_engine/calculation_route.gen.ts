@@ -59,6 +59,13 @@ export const RiskScoresCalculationResponse = lazySchema(() =>
           .optional()
           .describe('A list of generic risk scores'),
         /**
+         * A list of AI agent risk scores
+         */
+        ai_agent: z
+          .array(EntityRiskScoreRecord)
+          .optional()
+          .describe('A list of AI agent risk scores'),
+        /**
          * If 'wait_for' the request will wait for the index refresh.
          */
         refresh: z

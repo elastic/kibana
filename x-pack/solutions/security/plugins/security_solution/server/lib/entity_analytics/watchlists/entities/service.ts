@@ -171,6 +171,7 @@ const createEmptyEntityStoreEntityIdsByType = (): EntityStoreEntityIdsByType => 
   [EntityType.host]: [],
   [EntityType.service]: [],
   [EntityType.generic]: [],
+  [EntityType.ai_agent]: [],
 });
 
 export const ENTITY_STORE_PAGE_SIZE = 10_000;
