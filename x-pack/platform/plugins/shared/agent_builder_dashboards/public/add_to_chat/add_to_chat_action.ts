@@ -29,6 +29,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
@@ -69,6 +70,8 @@ export interface DashboardAddToChatActionDeps {
   areEqual: AreDashboardStatesEqual;
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
+  /** The search session's start time, which panels resolve relative time ranges against. */
+  nowProvider: Pick<DataPublicPluginStart['nowProvider'], 'get'>;
   stagedDashboards: StagedDashboards;
   toasts: NotificationsStart['toasts'];
 }
@@ -135,23 +138,34 @@ const getPointerLabel = (
   );
 };
 
+/** Custom Content panels fetch with the dashboard's full time range, ignoring the time slider. */
+const appliesTimeslice = (embeddable: HasType): boolean =>
+  embeddable.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE;
+
 /**
  * The bounds the panel showed, absolute so the agent reads the same data however late the message
- * is sent: the time slider's selection, which panels without their own time range use, else the
- * dashboard's time range.
+ * is sent: the time slider's selection for panels that apply it, else the dashboard's time range
+ * resolved against the same `now` as the panel's search.
  */
-const getShownTimeRange = (
-  dashboardApi: DashboardApi
-): { from: string; to: string } | undefined => {
-  const timeslice = apiPublishesTimeslice(dashboardApi)
-    ? dashboardApi.timeslice$.getValue()
-    : undefined;
+const getShownTimeRange = ({
+  dashboardApi,
+  embeddable,
+  now,
+}: {
+  dashboardApi: DashboardApi;
+  embeddable: HasType;
+  now: Date;
+}): { from: string; to: string } | undefined => {
+  const timeslice =
+    appliesTimeslice(embeddable) && apiPublishesTimeslice(dashboardApi)
+      ? dashboardApi.timeslice$.getValue()
+      : undefined;
   if (timeslice) {
     const [from, to] = timeslice;
     return { from: new Date(from).toISOString(), to: new Date(to).toISOString() };
   }
   const timeRange = dashboardApi.timeRange$.getValue();
-  return timeRange ? getAbsoluteTimeRange(timeRange) : undefined;
+  return timeRange ? getAbsoluteTimeRange(timeRange, { forceNow: now }) : undefined;
 };
 
 const hasPanel = (attachment: ConversationDashboardAttachment, panelId: string): boolean => {
@@ -187,6 +201,7 @@ export const createDashboardAddToChatAction = (
     areEqual,
     canWriteDashboards,
     draftAttachmentId,
+    nowProvider,
     stagedDashboards,
     toasts,
   } = deps;
@@ -243,7 +258,7 @@ export const createDashboardAddToChatAction = (
       const dashboardData = dashboardStateToAttachmentData(dashboardState);
       const panel = findPanelById(dashboardData.panels, embeddable.uuid);
       // the dashboard state has a time range only when the dashboard stores one
-      const timeRange = getShownTimeRange(dashboardApi);
+      const timeRange = getShownTimeRange({ dashboardApi, embeddable, now: nowProvider.get() });
       const buildDashboardAttachment = (
         id: string,
         origin: string | undefined

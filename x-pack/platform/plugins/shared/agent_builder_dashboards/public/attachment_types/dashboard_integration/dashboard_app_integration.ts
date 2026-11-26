@@ -149,12 +149,13 @@ export const registerDashboardAppIntegration = ({
     if (!attachmentId) {
       return;
     }
+    // the dashboard takes the attachment's updates, e.g. a copy opened for agent changes
+    stagedDashboards.add(attachmentId, api);
     // the conversation already has what the dashboard shows, e.g. the agent's applied changes
     if (isShown) {
       chat.unstage(attachmentId);
       return;
     }
-    stagedDashboards.add(attachmentId, api);
     chat.stage({ id: attachmentId, origin, data: dashboardStateToAttachmentData(dashboardState) });
   };
 

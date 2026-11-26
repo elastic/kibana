@@ -89,6 +89,7 @@ export class AgentBuilderDashboardsPlugin
           dashboardAppApi$: plugins.dashboard.dashboardAppClientApi$,
           canWriteDashboards,
           draftAttachmentId,
+          nowProvider: plugins.data.nowProvider,
           stagedDashboards,
           toasts: core.notifications.toasts,
         });
