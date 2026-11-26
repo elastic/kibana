@@ -32,10 +32,12 @@ describe('Inference Settings API', () => {
     create: jest.fn(),
     get: jest.fn(),
   };
+  const uiSettingsGet = jest.fn();
   const mockCore = {
     savedObjects: {
       getClient: jest.fn().mockReturnValue(mockSOClient),
     },
+    uiSettings: { client: { get: uiSettingsGet } },
   };
 
   let context: jest.Mocked<RequestHandlerContext>;
@@ -137,6 +139,49 @@ describe('Inference Settings API', () => {
 
       expect(getConnectorById).toHaveBeenCalledWith('chat-1', expect.anything(), 'chat_completion');
       expect(getConnectorById).toHaveBeenCalledWith('decision-1', expect.anything(), 'decision');
+      expect(mockRouter.response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ invalidEndpoints: ['chat-1'] }),
+        })
+      );
+    });
+
+    it('does not check the endpoints of a feature hidden by its visibility condition', async () => {
+      mockFeatureRegistry.getAll.mockReturnValueOnce([
+        { featureId: 'chat_child', parentFeatureId: 'parent', taskType: 'chat_completion' },
+        {
+          featureId: 'decision_child',
+          parentFeatureId: 'parent',
+          taskType: 'decision',
+          visibilityCondition: { key: 'experimental', value: true },
+        },
+      ]);
+      mockFeatureRegistry.get.mockImplementation((featureId: string) => ({
+        featureId,
+        taskType: featureId === 'decision_child' ? 'decision' : 'chat_completion',
+        recommendedEndpoints: [],
+      }));
+      uiSettingsGet.mockResolvedValue(false);
+      mockSOClient.get.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        attributes: {
+          features: [
+            { feature_id: 'chat_child', endpoints: [{ id: 'chat-1' }] },
+            { feature_id: 'decision_child', endpoints: [{ id: 'decision-1' }] },
+          ],
+        },
+        references: [],
+      });
+
+      await mockRouter.callRoute({});
+
+      expect(getConnectorById).toHaveBeenCalledWith('chat-1', expect.anything(), 'chat_completion');
+      expect(getConnectorById).not.toHaveBeenCalledWith(
+        'decision-1',
+        expect.anything(),
+        'decision'
+      );
       expect(mockRouter.response.ok).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({ invalidEndpoints: ['chat-1'] }),

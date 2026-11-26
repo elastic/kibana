@@ -264,6 +264,14 @@ describe('getConnectorList', () => {
     ]);
   });
 
+  it('throws when the inference endpoints of another task type cannot be retrieved', async () => {
+    getInferenceEndpointsMock.mockRejectedValue(new Error('forbidden'));
+
+    await expect(
+      getConnectorList({ actions, request, esClient, logger, taskType: 'decision' })
+    ).rejects.toThrow('forbidden');
+  });
+
   it('omits ocr-only inference endpoints from the connector list', async () => {
     getInferenceEndpointsMock.mockResolvedValue([
       {

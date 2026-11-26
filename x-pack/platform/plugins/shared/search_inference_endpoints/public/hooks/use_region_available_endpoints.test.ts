@@ -58,4 +58,10 @@ describe('useRegionAvailableEndpoints', () => {
 
     expect(result.current.availableEndpointIds).toEqual(['ep-denied']);
   });
+
+  it('checks the models of the given task type', () => {
+    renderHook(() => useRegionAvailableEndpoints(['ep-denied'], 'decision'));
+
+    expect(mockUseConnectors).toHaveBeenCalledWith('decision');
+  });
 });

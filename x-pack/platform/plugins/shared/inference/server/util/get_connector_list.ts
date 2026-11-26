@@ -64,6 +64,11 @@ export const getConnectorList = async (
     getInferenceEndpoints({ esClient, taskType }),
   ]);
 
+  // Another task type has no stack connectors to fall back on, so a failed lookup is an error.
+  if (taskType !== COMPLETION_TASK_TYPE && endpointsResult.status === 'rejected') {
+    throw endpointsResult.reason;
+  }
+
   if (connectorsResult.status === 'rejected' && endpointsResult.status === 'rejected') {
     throw new Error(
       `Failed to retrieve connectors and inference endpoints: ${connectorsResult.reason}, ${endpointsResult.reason}`

@@ -12,6 +12,7 @@ import { AppHeader } from '@kbn/app-header';
 import { BottomBar } from '@kbn/management-settings-components-form';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
+import { DECISION_TASK_TYPE } from '@kbn/inference-common';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
@@ -64,6 +65,12 @@ export const ModelSettings: React.FC = () => {
   const { enableAi, featureSpecificModels } = defaultModelState;
   const defaultModelValidation = useDefaultModelValidation(defaultModelState);
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
+  const hasDecisionFeature = sections.some(({ children }) =>
+    children.some(({ taskType }) => taskType === DECISION_TASK_TYPE)
+  );
+  const { data: decisionConnectors } = useConnectors(DECISION_TASK_TYPE, {
+    enabled: hasDecisionFeature,
+  });
   const {
     services: { application, http },
   } = useKibana();
@@ -72,7 +79,7 @@ export const ModelSettings: React.FC = () => {
   const deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = useMemo(() => {
     if (connectorsLoading || !connectors) return new Map();
     return new Map(
-      connectors
+      [...connectors, ...(decisionConnectors ?? [])]
         .filter((connector) => isModelDeprecated(connector.metadata))
         .map((connector) => [
           connector.connectorId,
@@ -83,7 +90,7 @@ export const ModelSettings: React.FC = () => {
           },
         ])
     );
-  }, [connectors, connectorsLoading]);
+  }, [connectors, connectorsLoading, decisionConnectors]);
   const [deprecatedAssignedModels, eolAssignedModels] = useMemo(() => {
     const eolModels = new Set<string>();
     const deprecatedModels = new Set<string>();

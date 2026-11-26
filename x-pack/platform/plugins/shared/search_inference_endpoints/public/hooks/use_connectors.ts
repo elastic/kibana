@@ -14,7 +14,10 @@ import { useKibana } from './use_kibana';
 const INFERENCE_CONNECTORS_API = '/internal/inference/connectors';
 
 /** Lists the models of a task type: chat models by default, else that task type's inference endpoints. */
-export const useConnectors = (taskType: InferenceTaskType = CHAT_COMPLETION_TASK_TYPE) => {
+export const useConnectors = (
+  taskType: InferenceTaskType = CHAT_COMPLETION_TASK_TYPE,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
   const { services } = useKibana();
   const isChatCompletion = taskType === CHAT_COMPLETION_TASK_TYPE;
 
@@ -28,5 +31,6 @@ export const useConnectors = (taskType: InferenceTaskType = CHAT_COMPLETION_TASK
 
       return response.connectors;
     },
+    enabled,
   });
 };

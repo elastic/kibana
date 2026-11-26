@@ -74,8 +74,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
   const listRef = useRef<HTMLDivElement>(null);
-  const { regionDeniedEndpointIds, availableEndpointIds } =
-    useRegionAvailableEndpoints(endpointIds);
+  const { regionDeniedEndpointIds, availableEndpointIds } = useRegionAvailableEndpoints(
+    endpointIds,
+    feature.taskType
+  );
   const {
     hasAvailableRecommendedEndpoints,
     isUsingRecommendedDefaults,
