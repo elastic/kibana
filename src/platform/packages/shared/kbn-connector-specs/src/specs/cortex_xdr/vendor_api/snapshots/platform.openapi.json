@@ -1,0 +1,4846 @@
+{
+  "components": {
+    "schemas": {
+      "reply": {
+        "properties": {
+          "err_code": {
+            "type": "string"
+          },
+          "err_extra": {
+            "type": "string"
+          },
+          "err_msg": {
+            "type": "string"
+          }
+        },
+        "title": "reply",
+        "type": "object"
+      },
+      "violation": {
+        "properties": {
+          "endpoint_id": {
+            "type": "string"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "product": {
+            "type": "string"
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "serial": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "vendor_id": {
+            "type": "string"
+          },
+          "violation_id": {
+            "type": "integer"
+          }
+        },
+        "title": "violation",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Cortex XDR Platform APIs"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/public_api/v1/actions/file_retrieval_details": {
+      "post": {
+        "operationId": "postFileRetrievalDetails",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "group_action_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "group_action_id"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "properties": {
+                            "endpoint_ID": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/actions/get_action_status": {
+      "post": {
+        "operationId": "postGetActionStatus",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "group_action_id": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "group_action_id"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "properties": {
+                            "agent_id": {
+                              "enum": [
+                                "PENDING",
+                                "IN_PROGRESS",
+                                "CANCELLED",
+                                "PENDING_ABORT",
+                                "ABORTED",
+                                "EXPIRED",
+                                "COMPLETED_PARTIAL",
+                                "COMPLETED_SUCCESSFULLY",
+                                "FAILED",
+                                "TIMEOUT"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        },
+                        "errorReasons": {
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        },
+                        "errorReasons": {
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        },
+                        "errorReasons": {
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        },
+                        "errorReasons": {
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        },
+                        "errorReasons": {
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/audits/agents_reports": {
+      "post": {
+        "operationId": "post-public_api-v1-audits-agents_reports",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id",
+                                "endpoint_name",
+                                "type",
+                                "sub_type",
+                                "result",
+                                "timestamp",
+                                "domain",
+                                "xdr_version",
+                                "category",
+                                "trapsversion"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "gte",
+                                "lte"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "integer"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "search_from": {
+                        "type": "integer"
+                      },
+                      "search_to": {
+                        "default": 100,
+                        "type": "integer"
+                      },
+                      "sort": {
+                        "properties": {
+                          "field": {
+                            "enum": [
+                              "type",
+                              "category",
+                              "trapsversion",
+                              "timestamp",
+                              "domain"
+                            ],
+                            "type": "string"
+                          },
+                          "keyword": {
+                            "default": "desc",
+                            "enum": [
+                              "asc",
+                              "desc"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "keyword"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "items": {
+                            "properties": {
+                              "CATEGORY": {
+                                "type": "string"
+                              },
+                              "DESCRIPTION": {
+                                "type": "string"
+                              },
+                              "DOMAIN": {
+                                "type": "string"
+                              },
+                              "ENDPOINTID": {
+                                "type": "string"
+                              },
+                              "ENDPOINTNAME": {
+                                "type": "string"
+                              },
+                              "REASON": {
+                                "type": "string"
+                              },
+                              "RECEIVEDTIME": {
+                                "type": "number"
+                              },
+                              "RESULT": {
+                                "type": "string"
+                              },
+                              "SUBTYPE": {
+                                "type": "string"
+                              },
+                              "TIMESTAMP": {
+                                "format": "float",
+                                "type": "number"
+                              },
+                              "TRAPSVERSION": {
+                                "type": "string"
+                              },
+                              "TYPE": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "result_count": {
+                          "type": "integer"
+                        },
+                        "total_count": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/audits/management_logs": {
+      "post": {
+        "operationId": "postManagementLogs",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "email",
+                                "type",
+                                "sub_type",
+                                "result",
+                                "timestamp"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "gte",
+                                "lte"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "integer"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "search_from": {
+                        "type": "integer"
+                      },
+                      "search_to": {
+                        "default": 100,
+                        "type": "integer"
+                      },
+                      "sort": {
+                        "properties": {
+                          "field": {
+                            "enum": [
+                              "type",
+                              "sub-type",
+                              "result"
+                            ],
+                            "type": "string"
+                          },
+                          "keyword": {
+                            "default": "desc",
+                            "enum": [
+                              "asc",
+                              "desc"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "keyword"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "data": {
+                          "items": {
+                            "properties": {
+                              "AUDIT_ADDITIONAL_INFORMATION": {
+                                "properties": {
+                                  "endpoint_count": {
+                                    "type": "integer"
+                                  },
+                                  "endpoint_names": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "AUDIT_ASSET_JSON": {
+                                "type": "string"
+                              },
+                              "AUDIT_ASSET_NAMES": {
+                                "type": "string"
+                              },
+                              "AUDIT_CASE_ID": {
+                                "type": "integer"
+                              },
+                              "AUDIT_DESCRIPTION": {
+                                "type": "string"
+                              },
+                              "AUDIT_ENTITY": {
+                                "enum": [
+                                  "LIVE_TERMINAL",
+                                  "RULES",
+                                  "RULES_EXCEPTIONS",
+                                  "AUTH",
+                                  "RESPONSE",
+                                  "INCIDENT_MANAGEMENT",
+                                  "ALERT_MANAGEMENT",
+                                  "INCIDENT_TIMELINE_EVENT",
+                                  "ENDPOINT_MANAGEMENT",
+                                  "ENDPOINT_GROUPS",
+                                  "ALERT_WHITELIST",
+                                  "PUBLIC_API",
+                                  "DISTRIBUTIONS",
+                                  "STARRED_INCIDENTS",
+                                  "POLICY_PROFILES",
+                                  "DEVICE_CONTROL_PROFILES",
+                                  "DEVICE_CONTROL_POLICY",
+                                  "PROTECTION_PROFILES",
+                                  "DEVICE_CONTROL_PROFILE",
+                                  "HOST_FIREWALL_PROFILE",
+                                  "HOST_DISK_ENCRYPTION_PROFILE",
+                                  "POLICY_RULES",
+                                  "PROTECTION_POLICY",
+                                  "DEVICE_CONTROL_TEMP_EXCEPTIONS",
+                                  "DEVICE_CONTROL_GLOBAL_EXCEPTIONS",
+                                  "DEVICE_CONTROL_CUSTOM_DEVICE",
+                                  "GLOBAL_EXCEPTIONS",
+                                  "MSSP",
+                                  "REPORTING",
+                                  "DASHBOARD",
+                                  "BROKER_API",
+                                  "BROKER_VM",
+                                  "MTH",
+                                  "MDR",
+                                  "ALERT_NOTIFICATIONS",
+                                  "INTEGRATIONS",
+                                  "QUERY",
+                                  "SCRIPT_EXECUTION",
+                                  "ALERT_RULES",
+                                  "COLLECTION",
+                                  "API_KEY",
+                                  "EDL",
+                                  "VA_RESCAN_ENDPOINT",
+                                  "HI_RESCAN_ENDPOINT",
+                                  "REMEDIATION",
+                                  "INGEST_DATA",
+                                  "LICENSING",
+                                  "AGENT_CONFIGURATION",
+                                  "PERMISSIONS",
+                                  "SCORING_RULES",
+                                  "LAYOUT_RULES",
+                                  "PLAYBOOK_TRIGGERS",
+                                  "FEATURED_ALERT_FIELDS",
+                                  "SYSTEM",
+                                  "TENANT_TAKEOVER",
+                                  "SCOUTER_POLICY",
+                                  "SCOUTER_PROFILE",
+                                  "SCOUTER_GROUPS",
+                                  "ALLOWED_DOMAINS",
+                                  "QUERY_LIBRARY",
+                                  "TENANT_CONFIGURATION",
+                                  "SCOUTER_CONFIGURATION",
+                                  "HOST_FIREWALL",
+                                  "XIF",
+                                  "XDM",
+                                  "ACTION_CENTER",
+                                  "XCLOUD_INTEGRATION",
+                                  "DATASETS",
+                                  "XSOAR",
+                                  "SECURITY_SETTINGS",
+                                  "ALERT_EXCLUSION",
+                                  "INDICATOR_RULES",
+                                  "EVENT_FORWARDING",
+                                  "ASSET_INVENTORY",
+                                  "SERVER_SETTINGS",
+                                  "ASSET_ROLES",
+                                  "CUSTOM_FIELDS",
+                                  "AUTOMATION_RULES",
+                                  "AGENT_EXCEPTION_RULES",
+                                  "REMEDIATION_PATH_RULES"
+                                ],
+                                "type": "string"
+                              },
+                              "AUDIT_ENTITY_SUBTYPE": {
+                                "type": "string"
+                              },
+                              "AUDIT_HOSTNAME": {
+                                "type": "string"
+                              },
+                              "AUDIT_ID": {
+                                "type": "integer"
+                              },
+                              "AUDIT_INSERT_TIME": {
+                                "type": "integer"
+                              },
+                              "AUDIT_LINK": {
+                                "type": "string"
+                              },
+                              "AUDIT_OBJECT_ID": {
+                                "type": "string"
+                              },
+                              "AUDIT_OWNER_EMAIL": {
+                                "type": "string"
+                              },
+                              "AUDIT_OWNER_NAME": {
+                                "type": "string"
+                              },
+                              "AUDIT_REASON": {
+                                "type": "string"
+                              },
+                              "AUDIT_RESULT": {
+                                "type": "string"
+                              },
+                              "AUDIT_SESSION_ID": {
+                                "type": "integer"
+                              },
+                              "AUDIT_SEVERITY": {
+                                "type": "string"
+                              },
+                              "AUDIT_SOURCE_IP": {
+                                "type": "string"
+                              },
+                              "AUDIT_USER_AGENT": {
+                                "type": "string"
+                              },
+                              "AUDIT_USER_ROLES": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "result_count": {
+                          "type": "integer"
+                        },
+                        "total_count": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/device_control/get_violations": {
+      "post": {
+        "operationId": "postGetViolations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id_list",
+                                "type",
+                                "timestamp",
+                                "ip_list",
+                                "vendor",
+                                "vendor_id",
+                                "product",
+                                "product_id",
+                                "serial",
+                                "hostname",
+                                "violation_id_list",
+                                "username"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "gte",
+                                "lte"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "items": {
+                                    "oneOf": [
+                                      {
+                                        "type": "integer"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "integer"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "search_from": {
+                        "type": "integer"
+                      },
+                      "search_to": {
+                        "type": "integer"
+                      },
+                      "sort": {
+                        "properties": {
+                          "field": {
+                            "enum": [
+                              "endpoint_id_list",
+                              "type",
+                              "timestamp",
+                              "ip_list",
+                              "vendor",
+                              "vendor_id",
+                              "product",
+                              "product_id",
+                              "serial",
+                              "hostname",
+                              "violation_id_list",
+                              "username"
+                            ],
+                            "type": "string"
+                          },
+                          "value": {
+                            "default": "desc",
+                            "enum": [
+                              "asc",
+                              "desc"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "value"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "result_count": {
+                          "type": "integer"
+                        },
+                        "total_count": {
+                          "type": "integer"
+                        },
+                        "violations": {
+                          "items": {
+                            "$ref": "#/components/schemas/violation"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/abort_scan": {
+      "post": {
+        "operationId": "postAbortScan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "oneOf": [
+                          {
+                            "items": {
+                              "properties": {
+                                "field": {
+                                  "enum": [
+                                    "endpoint_id_list",
+                                    "dist_name",
+                                    "first_seen",
+                                    "last_seen",
+                                    "ip_list",
+                                    "group_name",
+                                    "platform",
+                                    "alias",
+                                    "isolate",
+                                    "hostname",
+                                    "username"
+                                  ],
+                                  "type": "string"
+                                },
+                                "operator": {
+                                  "enum": [
+                                    "in",
+                                    "gte",
+                                    "lte"
+                                  ],
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "oneOf": [
+                                    {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "integer"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "field",
+                                "operator",
+                                "value"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "incident_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "filters"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "action_id": {
+                          "type": "string"
+                        },
+                        "endpoints_count": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/file_retrieval": {
+      "post": {
+        "operationId": "post-public_api-v1-endpoints-file_retrieval",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "files": {
+                        "properties": {
+                          "linux": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "macos": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "windows": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id_list"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "incident_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "filters",
+                      "files"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "action_id": {
+                          "type": "string"
+                        },
+                        "endpoints_count": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "402": {},
+          "403": {},
+          "500": {}
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/get_endpoint": {
+      "post": {
+        "operationId": "post-public_api-v1-endpoints-get_endpoint",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id_list",
+                                "endpoint_status",
+                                "dist_name",
+                                "first_seen",
+                                "last_seen",
+                                "ip_list",
+                                "group_name",
+                                "platform",
+                                "alias",
+                                "isolate",
+                                "hostname",
+                                "public_ip_list",
+                                "cloud_provider",
+                                "cloud_region",
+                                "cloud_provider_account_id",
+                                "cloud_instance_id",
+                                "cloud_id"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "gte",
+                                "lte"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "search_from": {
+                        "type": "integer"
+                      },
+                      "search_to": {
+                        "type": "integer"
+                      },
+                      "sort": {
+                        "properties": {
+                          "field": {
+                            "default": "first_seen",
+                            "enum": [
+                              "endpoint_id",
+                              "first_seen",
+                              "last_seen"
+                            ],
+                            "type": "string"
+                          },
+                          "keyword": {
+                            "default": "DESC",
+                            "enum": [
+                              "ASC",
+                              "DESC"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "keyword"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "endpoints": {
+                          "items": {
+                            "properties": {
+                              "active_directory": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "alias": {
+                                "type": "string"
+                              },
+                              "assigned_extensions_policy": {
+                                "type": "string"
+                              },
+                              "assigned_prevention_policy": {
+                                "type": "string"
+                              },
+                              "cloud_id": {
+                                "type": "string"
+                              },
+                              "cloud_instance_id": {
+                                "type": "string"
+                              },
+                              "cloud_provider": {
+                                "type": "string"
+                              },
+                              "cloud_provider_account_id": {
+                                "type": "string"
+                              },
+                              "cloud_region": {
+                                "type": "string"
+                              },
+                              "content_release_timestamp": {
+                                "type": "integer"
+                              },
+                              "content_status": {
+                                "type": "string"
+                              },
+                              "content_version": {
+                                "type": "string"
+                              },
+                              "domain": {
+                                "type": "string"
+                              },
+                              "endpointTags": {
+                                "type": "string"
+                              },
+                              "endpoint_id": {
+                                "type": "string"
+                              },
+                              "endpoint_name": {
+                                "type": "string"
+                              },
+                              "endpoint_status": {
+                                "type": "string"
+                              },
+                              "endpoint_type": {
+                                "type": "string"
+                              },
+                              "endpoint_version": {
+                                "type": "string"
+                              },
+                              "first_seen": {
+                                "type": "integer"
+                              },
+                              "group_name": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "install_date": {
+                                "type": "integer"
+                              },
+                              "installation_package": {
+                                "type": "string"
+                              },
+                              "ip": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "ipv6": {
+                                "items": {
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "is_isolated": {
+                                "type": "string"
+                              },
+                              "isolated_date": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "last_content_update_time": {
+                                "type": "integer"
+                              },
+                              "last_seen": {
+                                "type": "integer"
+                              },
+                              "mac_address": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "operating_system": {
+                                "type": "string"
+                              },
+                              "operational_status": {
+                                "type": "string"
+                              },
+                              "operational_status_description": {
+                                "type": "string"
+                              },
+                              "operational_status_details": {
+                                "items": {
+                                  "properties": {
+                                    "reason": {
+                                      "type": "string"
+                                    },
+                                    "title": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "os_type": {
+                                "type": "string"
+                              },
+                              "os_version": {
+                                "type": "string"
+                              },
+                              "public_ip": {
+                                "type": "string"
+                              },
+                              "scan_status": {
+                                "type": "string"
+                              },
+                              "users": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "result_count": {
+                          "type": "integer"
+                        },
+                        "total_count": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/get_policy": {
+      "post": {
+        "operationId": "postGetPolicy",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "endpoint_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "endpoint_id"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "policy_name": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/isolate": {
+      "post": {
+        "operationId": "post-public_api-v1-endpoints-isolate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "endpoint_id": {
+                        "type": "string"
+                      },
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id_list"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "incident_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "endpoint_id"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "action_id": {
+                          "type": "string"
+                        },
+                        "endpoints_count": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "402": {},
+          "403": {},
+          "500": {}
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/quarantine": {
+      "post": {
+        "operationId": "postQuarantine",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "file_hash": {
+                        "type": "string"
+                      },
+                      "file_path": {
+                        "type": "string"
+                      },
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id_list"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "filters",
+                      "file_path",
+                      "file_hash"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "action_id": {
+                          "type": "string"
+                        },
+                        "endpoints_count": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/restore": {
+      "post": {
+        "operationId": "postRestore",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "endpoint_id": {
+                        "type": "string"
+                      },
+                      "file_hash": {
+                        "type": "string"
+                      },
+                      "incident_id": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "file_hash"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "action_id": {
+                          "type": "string"
+                        },
+                        "endpoints_count": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/scan": {
+      "post": {
+        "operationId": "postScan",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "enum": [
+                          "all"
+                        ],
+                        "type": "string"
+                      },
+                      "incident_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "filters"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "action_id": {
+                          "type": "string"
+                        },
+                        "endpoints_count": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/endpoints/unisolate": {
+      "post": {
+        "operationId": "postUnisolate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "endpoint_id": {
+                        "type": "string"
+                      },
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id_list"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "incident_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "endpoint_id"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "action_id": {
+                          "type": "string"
+                        },
+                        "endpoints_count": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/hash_exceptions/allowlist": {
+      "post": {
+        "operationId": "postAllowlist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "comment": {
+                        "type": "string"
+                      },
+                      "hash_list": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "incident_id": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "hash_list"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/hash_exceptions/blocklist": {
+      "post": {
+        "operationId": "postBlocklist",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "comment": {
+                        "type": "string"
+                      },
+                      "hash_list": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "incident_id": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "hash_list"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/indicators/get": {
+      "post": {
+        "operationId": "post-public_api-v1-indicators-get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "extended_view": {
+                        "type": "boolean"
+                      },
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "indicator",
+                                "type",
+                                "severity",
+                                "expiration_date",
+                                "default_expiration_enabled",
+                                "comment",
+                                "reputation",
+                                "reliability"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "EQ",
+                                "NEQ",
+                                "IN",
+                                "GTE",
+                                "LTE"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "items": {},
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "integer"
+                                },
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "boolean"
+                                }
+                              ]
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "search_from": {
+                        "type": "integer"
+                      },
+                      "search_to": {
+                        "type": "integer"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "objects": {
+                      "items": {
+                        "properties": {
+                          "comment": {
+                            "type": "string"
+                          },
+                          "expiration_date": {
+                            "type": "integer"
+                          },
+                          "indicator": {
+                            "type": "string"
+                          },
+                          "rule_id": {
+                            "type": "integer"
+                          },
+                          "severity": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "objects_count": {
+                      "type": "integer"
+                    },
+                    "objects_type": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public_api/v1/indicators/insert": {
+      "post": {
+        "operationId": "post-public_api-v1-indicators-insert",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "items": {
+                      "properties": {
+                        "comment": {
+                          "type": "string"
+                        },
+                        "default_expiration_enabled": {
+                          "type": "boolean"
+                        },
+                        "expiration_date": {
+                          "type": "integer"
+                        },
+                        "indicator": {
+                          "type": "string"
+                        },
+                        "reliability": {
+                          "enum": [
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                            "G"
+                          ]
+                        },
+                        "reputation": {
+                          "enum": [
+                            "GOOD",
+                            "BAD",
+                            "SUSPICIOUS",
+                            "UNKNOWN",
+                            "NO_REPUTATION"
+                          ]
+                        },
+                        "rule_id": {
+                          "type": "number"
+                        },
+                        "severity": {
+                          "enum": [
+                            "SEV_010_INFO",
+                            "SEV_020_LOW",
+                            "SEV_030_MEDIUM",
+                            "SEV_040_HIGH"
+                          ]
+                        },
+                        "type": {
+                          "enum": [
+                            "HASH",
+                            "IP",
+                            "PATH",
+                            "DOMAIN_NAME",
+                            "FILENAME",
+                            "MIXED"
+                          ]
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "added_objects": {
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "updated_objects": {
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public_api/v1/quarantine/status": {
+      "post": {
+        "operationId": "postStatus",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "files": {
+                        "items": {
+                          "properties": {
+                            "endpoint_id": {
+                              "type": "string"
+                            },
+                            "file_hash": {
+                              "type": "string"
+                            },
+                            "file_path": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "files"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "items": {
+                        "properties": {
+                          "endpoint_id": {
+                            "type": "string"
+                          },
+                          "file_hash": {
+                            "type": "string"
+                          },
+                          "file_path": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "boolean"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/scripts/get_script_execution_results": {
+      "post": {
+        "operationId": "postGetScriptExecutionResults",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "action_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "action_id"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "date_created": {
+                          "type": "string"
+                        },
+                        "error_message": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "items": {
+                            "properties": {
+                              "domain": {
+                                "type": "string"
+                              },
+                              "endpoint_id": {
+                                "type": "string"
+                              },
+                              "endpoint_ip_address": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "endpoint_name": {
+                                "type": "string"
+                              },
+                              "endpoint_status": {
+                                "type": "string"
+                              },
+                              "execution_status": {
+                                "type": "string"
+                              },
+                              "failed_files": {
+                                "type": "integer"
+                              },
+                              "retention_date": {},
+                              "retrieved_files": {
+                                "type": "integer"
+                              },
+                              "standard_output": {}
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "script_description": {
+                          "type": "string"
+                        },
+                        "script_name": {
+                          "type": "string"
+                        },
+                        "script_parameters": {
+                          "items": {
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/scripts/get_scripts": {
+      "post": {
+        "operationId": "postGetScripts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "name",
+                                "description",
+                                "created_by",
+                                "script_uid",
+                                "modification_date",
+                                "windows_supported",
+                                "linux_supported",
+                                "macos_supported",
+                                "is_high_risk"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "gte",
+                                "lte"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "integer"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "filters"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "result_count": {
+                          "type": "integer"
+                        },
+                        "scripts": {
+                          "items": {
+                            "properties": {
+                              "created_by": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "is_high_risk": {
+                                "type": "boolean"
+                              },
+                              "linux_supported": {
+                                "type": "boolean"
+                              },
+                              "macos_supported": {
+                                "type": "boolean"
+                              },
+                              "modification_date": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "script_id": {
+                                "type": "string"
+                              },
+                              "script_uid": {
+                                "type": "string"
+                              },
+                              "windows_supported": {
+                                "type": "boolean"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "total_count": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/scripts/run_script": {
+      "post": {
+        "operationId": "postRunScript",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id_list"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "default": "in",
+                              "enum": [
+                                "in"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "incident_id": {
+                        "type": "string"
+                      },
+                      "parameters_values": {
+                        "properties": {
+                          "x": {
+                            "type": "string"
+                          },
+                          "y": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "x",
+                          "y"
+                        ],
+                        "type": "object"
+                      },
+                      "script_uid": {
+                        "type": "string"
+                      },
+                      "timeout": {
+                        "default": 600,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "filters",
+                      "script_uid"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "action_id": {
+                          "type": "integer"
+                        },
+                        "endpoints_count": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/tags/agents/assign": {
+      "post": {
+        "operationId": "postAssign",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id",
+                                "endpoint_id_list",
+                                "last_seen",
+                                "first_seen",
+                                "dist_name",
+                                "ip_list",
+                                "platform",
+                                "alias",
+                                "hostname",
+                                "isolate",
+                                "username",
+                                "scan_status",
+                                "group_name",
+                                "endpoint_status",
+                                "operational_status",
+                                "public_ip_list",
+                                "cloud_provider",
+                                "cloud_region",
+                                "cloud_provider_account_id",
+                                "cloud_instance_id",
+                                "cloud_id"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "gte",
+                                "lte"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "integer"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "tag": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/tags/agents/remove": {
+      "post": {
+        "operationId": "postRemove",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "endpoint_id_list",
+                                "endpoint_status",
+                                "dist_name",
+                                "ip_list",
+                                "group_name",
+                                "platform",
+                                "alias",
+                                "isolate",
+                                "hostname",
+                                "cloud_provider",
+                                "cloud_region",
+                                "cloud_provider_account_id",
+                                "cloud_instance_id",
+                                "cloud_id"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "gte",
+                                "lte"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "integer"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "operator",
+                            "value"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "tag": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/xql/get_query_results": {
+      "post": {
+        "operationId": "postGetQueryResults",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "format": {
+                        "enum": [
+                          "json",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      "limit": {
+                        "type": "integer"
+                      },
+                      "pending_flag": {
+                        "type": "boolean"
+                      },
+                      "query_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "query_id"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "number_of_results": {
+                          "type": "integer"
+                        },
+                        "query_cost": {
+                          "additionalProperties": {
+                            "type": "number"
+                          },
+                          "type": "object"
+                        },
+                        "remaining_quota": {
+                          "type": "number"
+                        },
+                        "results": {
+                          "properties": {
+                            "data": {
+                              "items": {
+                                "properties": {
+                                  "_product": {
+                                    "type": "string"
+                                  },
+                                  "_time": {
+                                    "type": "integer"
+                                  },
+                                  "_vendor": {
+                                    "type": "string"
+                                  },
+                                  "agent_os_type": {
+                                    "type": "string"
+                                  },
+                                  "agent_version": {
+                                    "type": "string"
+                                  },
+                                  "event_id": {
+                                    "type": "string"
+                                  },
+                                  "event_sub_type": {
+                                    "type": "string"
+                                  },
+                                  "event_type": {
+                                    "type": "string"
+                                  },
+                                  "insert_timestamp": {
+                                    "type": "integer"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reply"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    },
+    "/public_api/v1/xql/start_xql_query": {
+      "post": {
+        "operationId": "postStartXqlQuery",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "query": {
+                        "type": "string"
+                      },
+                      "tenants": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "timeframe": {
+                        "properties": {
+                          "from": {
+                            "type": "integer"
+                          },
+                          "relativeTime": {
+                            "type": "integer"
+                          },
+                          "to": {
+                            "type": "integer"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "query"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "request_data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "err_code": {
+                          "type": "integer"
+                        },
+                        "err_extra": {
+                          "properties": {
+                            "err_msg": {
+                              "type": "string"
+                            },
+                            "query_cost": {
+                              "type": "integer"
+                            },
+                            "remaining_quota": {
+                              "type": "integer"
+                            },
+                            "total_daily_concurrent_rejected_queries": {
+                              "type": "integer"
+                            },
+                            "total_daily_running_queries": {
+                              "type": "integer"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "err_msg": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "err_code": {
+                          "type": "integer"
+                        },
+                        "err_extra": {
+                          "properties": {
+                            "err_msg": {
+                              "type": "string"
+                            },
+                            "query_cost": {
+                              "type": "integer"
+                            },
+                            "remaining_quota": {
+                              "type": "integer"
+                            },
+                            "total_daily_concurrent_rejected_queries": {
+                              "type": "integer"
+                            },
+                            "total_daily_running_queries": {
+                              "type": "integer"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "err_msg": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "err_code": {
+                          "type": "integer"
+                        },
+                        "err_extra": {
+                          "properties": {
+                            "err_msg": {
+                              "type": "string"
+                            },
+                            "query_cost": {
+                              "type": "integer"
+                            },
+                            "remaining_quota": {
+                              "type": "integer"
+                            },
+                            "total_daily_concurrent_rejected_queries": {
+                              "type": "integer"
+                            },
+                            "total_daily_running_queries": {
+                              "type": "integer"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "err_msg": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "err_code": {
+                          "type": "integer"
+                        },
+                        "err_extra": {
+                          "properties": {
+                            "err_msg": {
+                              "type": "string"
+                            },
+                            "query_cost": {
+                              "type": "integer"
+                            },
+                            "remaining_quota": {
+                              "type": "integer"
+                            },
+                            "total_daily_concurrent_rejected_queries": {
+                              "type": "integer"
+                            },
+                            "total_daily_running_queries": {
+                              "type": "integer"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "err_msg": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "err_code": {
+                          "type": "integer"
+                        },
+                        "err_extra": {
+                          "properties": {
+                            "err_msg": {
+                              "type": "string"
+                            },
+                            "query_cost": {
+                              "type": "integer"
+                            },
+                            "remaining_quota": {
+                              "type": "integer"
+                            },
+                            "total_daily_concurrent_rejected_queries": {
+                              "type": "integer"
+                            },
+                            "total_daily_running_queries": {
+                              "type": "integer"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "err_msg": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://api-yourfqdn"
+          }
+        ]
+      }
+    }
+  },
+  "security": [],
+  "servers": [
+    {
+      "url": "https://api-yourfqdn"
+    }
+  ]
+}

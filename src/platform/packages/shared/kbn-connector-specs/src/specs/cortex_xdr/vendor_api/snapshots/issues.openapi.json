@@ -1,0 +1,1166 @@
+{
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Issue": {
+        "properties": {
+          "_insert_time": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "action_status": {
+            "type": "string"
+          },
+          "agentic_assistant_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "agentic_response_conversation_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "agentic_response_status": {
+            "nullable": true,
+            "type": "string"
+          },
+          "asset_accounts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_categories": {
+            "items": {
+              "enum": [
+                "Storage Bucket",
+                "Virtual Machine",
+                "Database Instance",
+                "Container",
+                "Serverless Function",
+                "Load Balancer",
+                "Firewall",
+                "VPN Gateway",
+                "IAM Role",
+                "IAM User",
+                "IAM Group",
+                "IAM Policy",
+                "Service Account",
+                "Kubernetes Cluster",
+                "Kubernetes Pod",
+                "Kubernetes Node",
+                "Network Interface",
+                "Subnet",
+                "VPC",
+                "Security Group",
+                "DNS Zone",
+                "Certificate",
+                "Key Vault",
+                "Disk",
+                "Snapshot",
+                "Image",
+                "Queue",
+                "Topic",
+                "API Gateway",
+                "CDN",
+                "Other"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_classes": {
+            "items": {
+              "enum": [
+                "Compute",
+                "Data",
+                "Network",
+                "Identity",
+                "Security",
+                "Management",
+                "Application",
+                "IoT",
+                "Other"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_cloud_account_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_external_provider_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_group_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "asset_group_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_providers": {
+            "items": {
+              "enum": [
+                "AWS",
+                "Azure",
+                "GCP",
+                "Oracle Cloud",
+                "IBM Cloud",
+                "Alibaba Cloud",
+                "Other"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_regions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "assigned_to": {
+            "type": "string"
+          },
+          "assigned_to_pretty": {
+            "type": "string"
+          },
+          "case_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "category": {
+            "enum": [
+              "CONFIGURATION",
+              "VULNERABILITY",
+              "MALWARE",
+              "IDENTITY",
+              "NETWORK",
+              "DATA_LOSS",
+              "COMPLIANCE",
+              "RUNTIME",
+              "SECRETS",
+              "IAC",
+              "CI_CD_RISKS",
+              "DRIFT",
+              "API_SECURITY",
+              "POSTURE",
+              "COMPUTE",
+              "LICENSE",
+              "OPERATIONAL_RISK",
+              "AI_SECURITY"
+            ],
+            "type": "string"
+          },
+          "custom_fields": {
+            "type": "object"
+          },
+          "description": {
+            "type": "string"
+          },
+          "detection.method": {
+            "enum": [
+              "TRAPS",
+              "MAGNIFIER",
+              "ANALYTICS_BIOC",
+              "FW",
+              "BIOC",
+              "IOC",
+              "THREAT_INTELLIGENCE",
+              "MTH",
+              "CORRELATION",
+              "PRISMA_CLOUD",
+              "PRISMA_CLOUD_COMPUTE",
+              "XPANSE",
+              "IOT",
+              "CREATE_ALERT_PUBLIC_API",
+              "HEALTH",
+              "EMAIL_ATTACHMENT",
+              "ATTACK_PATH",
+              "POSTURE_POLICY",
+              "CAS_DRIFT_SCANNER",
+              "CLOUD_NETWORK_ANALYZER",
+              "CAS_IAC_SCANNER",
+              "CAS_SECRET_SCANNER",
+              "CAS_CI_CD_RISK_SCANNER",
+              "CLI_SCANNER",
+              "CIEM_SCANNER",
+              "API_TRAFFIC_MONITOR",
+              "API_POSTURE_SCANNER",
+              "AGENTLESS_DISK_SCANNER",
+              "KUBERNETES_SCANNER",
+              "COMPUTE_POLICY",
+              "CSPM_SCANNER",
+              "CAS_CVE_SCANNER",
+              "CAS_LICENSE_SCANNER",
+              "SECRETS_SCANNER",
+              "CAS_SAST_SCANNER",
+              "DATA_POLICY",
+              "CAS_OPERATIONAL_RISK_SCANNER",
+              "VULNERABILITY_POLICY",
+              "AISPM_RULE_ENGINE",
+              "DLP",
+              "MIRRORING",
+              "AURL",
+              "USER_REPORTED_PHISHING",
+              "GRAPH_ENGINE"
+            ],
+            "type": "string"
+          },
+          "detection.rule_id": {
+            "type": "string"
+          },
+          "domain": {
+            "enum": [
+              "Security",
+              "Health",
+              "Hunting",
+              "IT",
+              "Posture"
+            ],
+            "type": "string"
+          },
+          "exception_expiration": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "exception_ids": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "extended_description": {
+            "type": "string"
+          },
+          "external_id": {
+            "type": "string"
+          },
+          "findings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "initial_evidence": {
+            "type": "string"
+          },
+          "is_excepted": {
+            "type": "boolean"
+          },
+          "is_excluded": {
+            "type": "boolean"
+          },
+          "is_starred": {
+            "type": "boolean"
+          },
+          "last_update_timestamp": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "mitre_tactics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "mitre_techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "normalized_fields": {
+            "$ref": "#/components/schemas/NormalizedFields"
+          },
+          "observation_time": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "remediation": {
+            "type": "string"
+          },
+          "resolution_status_modified_ts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "severity": {
+            "enum": [
+              "INFO",
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "CRITICAL"
+            ],
+            "type": "string"
+          },
+          "status.progress": {
+            "enum": [
+              "New",
+              "In Progress",
+              "Resolved"
+            ],
+            "type": "string"
+          },
+          "status.resolution_comment": {
+            "type": "string"
+          },
+          "status.resolution_reason": {
+            "enum": [
+              "RESOLVED_THREAT_HANDLED",
+              "RESOLVED_KNOWN_ISSUE",
+              "RESOLVED_DUPLICATE",
+              "RESOLVED_FALSE_POSITIVE",
+              "RESOLVED_OTHER",
+              "RESOLVED_TRUE_POSITIVE",
+              "RESOLVED_SECURITY_TESTING",
+              "RESOLVED_RISK_ACCEPTED",
+              "RESOLVED_FIXED",
+              "RESOLVED_DISMISSED",
+              "RESOLVED_AUTO_RESOLVE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NormalizedFields": {
+        "properties": {
+          "xdm.application_protocol": {
+            "type": "string"
+          },
+          "xdm.cloud.function.id": {
+            "type": "string"
+          },
+          "xdm.cloud.function.name": {
+            "type": "string"
+          },
+          "xdm.cloud.function.request_id": {
+            "type": "string"
+          },
+          "xdm.cloud.function.runtime": {
+            "type": "string"
+          },
+          "xdm.cloud.function.version": {
+            "type": "string"
+          },
+          "xdm.cloud.project": {
+            "type": "string"
+          },
+          "xdm.cloud.project_id": {
+            "type": "string"
+          },
+          "xdm.cloud.provider": {
+            "type": "string"
+          },
+          "xdm.cloud.region": {
+            "type": "string"
+          },
+          "xdm.domain": {
+            "type": "string"
+          },
+          "xdm.email.attachment.filename": {
+            "type": "string"
+          },
+          "xdm.email.attachment.sha256": {
+            "type": "string"
+          },
+          "xdm.email.sender": {
+            "type": "string"
+          },
+          "xdm.event.type": {
+            "type": "string"
+          },
+          "xdm.file.filename": {
+            "type": "string"
+          },
+          "xdm.file.group_id": {
+            "type": "string"
+          },
+          "xdm.file.group_name": {
+            "type": "string"
+          },
+          "xdm.file.last_modified": {
+            "type": "integer"
+          },
+          "xdm.file.metadata_change_time": {
+            "type": "integer"
+          },
+          "xdm.file.owner_id": {
+            "type": "string"
+          },
+          "xdm.file.owner_name": {
+            "type": "string"
+          },
+          "xdm.file.path": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.file.permissions.group": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.file.permissions.others": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.file.permissions.owner": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.file.position.end.character": {
+            "type": "integer"
+          },
+          "xdm.file.position.end.line": {
+            "type": "integer"
+          },
+          "xdm.file.position.start.character": {
+            "type": "integer"
+          },
+          "xdm.file.position.start.line": {
+            "type": "integer"
+          },
+          "xdm.file.sha256": {
+            "type": "string"
+          },
+          "xdm.file.size": {
+            "type": "integer"
+          },
+          "xdm.malware.layer_id": {
+            "type": "string"
+          },
+          "xdm.malware.verdict": {
+            "type": "string"
+          },
+          "xdm.malware.virus_total_link": {
+            "type": "string"
+          },
+          "xdm.observer.name": {
+            "type": "string"
+          },
+          "xdm.observer.sub_type": {
+            "type": "string"
+          },
+          "xdm.observer.type": {
+            "type": "string"
+          },
+          "xdm.observer.unique_identifier": {
+            "type": "string"
+          },
+          "xdm.secret.layer_id": {
+            "type": "string"
+          },
+          "xdm.secret.secret_type": {
+            "type": "string"
+          },
+          "xdm.secret.snippet": {
+            "type": "string"
+          },
+          "xdm.secret.unique_identifier": {
+            "type": "string"
+          },
+          "xdm.software_package.dependency_type": {
+            "type": "string"
+          },
+          "xdm.software_package.installation_type": {
+            "type": "string"
+          },
+          "xdm.software_package.language": {
+            "type": "string"
+          },
+          "xdm.software_package.layer_id": {
+            "type": "string"
+          },
+          "xdm.software_package.package_manager": {
+            "type": "string"
+          },
+          "xdm.software_package.purl": {
+            "type": "string"
+          },
+          "xdm.software_package.type": {
+            "type": "string"
+          },
+          "xdm.software_package.version": {
+            "type": "string"
+          },
+          "xdm.source.agent.identifier": {
+            "type": "string"
+          },
+          "xdm.source.agent.installation_id": {
+            "type": "string"
+          },
+          "xdm.source.host.fqdn": {
+            "type": "string"
+          },
+          "xdm.source.host.hostname": {
+            "type": "string"
+          },
+          "xdm.source.host.ipv4_addresses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.host.os_family": {
+            "type": "string"
+          },
+          "xdm.source.identity.username": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.ipv4": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.location.country": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.process.causality_id": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.process.command_line": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.process.executable.filename": {
+            "type": "string"
+          },
+          "xdm.source.process.executable.path": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.process.executable.sha256": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.process.executable.signature_status": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.source.process.name": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.agent.identifier": {
+            "type": "string"
+          },
+          "xdm.target.file.filename": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.file.sha256": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.host.hostname": {
+            "type": "string"
+          },
+          "xdm.target.host.ipv4_addresses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.host.ipv6_addresses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.identity.username": {
+            "type": "string"
+          },
+          "xdm.target.ipv4": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.ipv6": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.location.country": {
+            "type": "string"
+          },
+          "xdm.target.module.filename": {
+            "type": "string"
+          },
+          "xdm.target.module.sha256": {
+            "type": "string"
+          },
+          "xdm.target.port": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "xdm.target.process.command_line": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.process.executable.filename": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.process.executable.path": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.process.executable.sha256": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.process.executable.signature_status": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.process.executable.signer": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.process.name": {
+            "type": "string"
+          },
+          "xdm.target.registry.data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.registry.key": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.registry.value": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.target.url": {
+            "type": "string"
+          },
+          "xdm.url": {
+            "type": "string"
+          },
+          "xdm.vulnerability.cve_id": {
+            "type": "string"
+          },
+          "xdm.vulnerability.cve_risk_factors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.vulnerability.cvss_score": {
+            "format": "float",
+            "type": "number"
+          },
+          "xdm.vulnerability.cvss_vector": {
+            "type": "string"
+          },
+          "xdm.vulnerability.fix_versions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "xdm.vulnerability.severity": {
+            "enum": [
+              "INFO",
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "CRITICAL"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateIssue": {
+        "properties": {
+          "severity": {
+            "enum": [
+              "INFO",
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "CRITICAL"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "New",
+              "In Progress",
+              "Resolved"
+            ],
+            "type": "string"
+          },
+          "status_resolution_comment": {
+            "type": "string"
+          },
+          "status_resolution_reason": {
+            "enum": [
+              "Resolved - Threat Handled",
+              "Resolved - Known Issue",
+              "Resolved - Duplicate Issue",
+              "Resolved - False Positive",
+              "Resolved - Other",
+              "Resolved - True Positive",
+              "Resolved - Security Testing",
+              "Resolved - Risk Accepted",
+              "Resolved - Fixed",
+              "Resolved - Dismissed"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Issues APIs"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/public_api/v1/issue/search": {
+      "post": {
+        "operationId": "getIssues",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "id",
+                                "external_id",
+                                "detection.method",
+                                "issue_domain",
+                                "severity",
+                                "_insert_time",
+                                "last_modified",
+                                "status.progress",
+                                "assigned_to",
+                                "assigned_to_pretty",
+                                "observation_time",
+                                "category",
+                                "detection.rule_id",
+                                "asset_ids",
+                                "asset_names",
+                                "asset_classes",
+                                "asset_group_ids",
+                                "asset_categories",
+                                "asset_regions",
+                                "asset_providers",
+                                "asset_accounts",
+                                "asset_types",
+                                "asset_external_provider_ids",
+                                "asset_cloud_account_names",
+                                "xdm.compliance.standard_id",
+                                "xdm.compliance.category_id",
+                                "xdm.compliance.control_id",
+                                "xdm.policy_id",
+                                "asset_group_names",
+                                "asset_tags",
+                                "xdm.resolution_sla",
+                                "xdm.resolution_timer"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "gte",
+                                "lte",
+                                "gt",
+                                "lt"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "items": {
+                                    "type": "integer"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "integer"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "include_actions": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "include_evidences": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "include_fields": {
+                        "default": [],
+                        "items": {
+                          "enum": [
+                            "normalized_fields",
+                            "custom_fields"
+                          ],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "search_from": {
+                        "default": 0,
+                        "type": "integer"
+                      },
+                      "search_to": {
+                        "default": 100,
+                        "type": "integer"
+                      },
+                      "sort": {
+                        "properties": {
+                          "field": {
+                            "enum": [
+                              "id",
+                              "severity",
+                              "observation_time",
+                              "xdm.resolution_sla",
+                              "xdm.resolution_timer"
+                            ],
+                            "type": "string"
+                          },
+                          "keyword": {
+                            "enum": [
+                              "asc",
+                              "desc"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "DATA": {
+                          "items": {
+                            "$ref": "#/components/schemas/Issue"
+                          },
+                          "type": "array"
+                        },
+                        "FILTER_COUNT": {
+                          "type": "integer"
+                        },
+                        "TOTAL_COUNT": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/public_api/v1/issue/{issue-id}": {
+      "post": {
+        "operationId": "updateIssue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issue-id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "update_data": {
+                        "$ref": "#/components/schemas/UpdateIssue"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
+  "security": [],
+  "servers": [
+    {
+      "url": "https://api-yourfqdn"
+    }
+  ]
+}

@@ -473,4 +473,8 @@ export const ConnectorIconsMap: Map<
   ],
 
   ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
+  [
+    '.cortex_xdr',
+    lazy(() => import(/* webpackChunkName: "connectorIconCortexXdr" */ './specs/cortex_xdr/icon')),
+  ],
 ]);

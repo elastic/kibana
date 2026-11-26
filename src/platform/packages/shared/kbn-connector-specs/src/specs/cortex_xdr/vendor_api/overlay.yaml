@@ -1,0 +1,137 @@
+overlay: 1.0.0
+info:
+  title: Cortex XDR 6.0 public API corrections
+  version: 1.0.0
+actions:
+  - target: $.servers[?@.url == 'https://api-yourfqdn']
+    description: >-
+      Each tenant serves the API from its own host, "https://api-{fqdn}" as the docs write it
+      (https://cortex-docs.paloaltonetworks.com/xdr-api/make-your-first-api-call.md), which the
+      connector takes from its config. The spec names the placeholder host https://api-yourfqdn.
+    update:
+      url: https://{host}
+      variables:
+        host:
+          default: api-yourfqdn
+
+  - target: $.paths.*.*.servers[?@.url == 'https://api-yourfqdn']
+    description: >-
+      The same placeholder host, repeated on most platform operations; see above.
+    update:
+      url: https://{host}
+      variables:
+        host:
+          default: api-yourfqdn
+
+  - target: $.paths['/public_api/v1/endpoints/isolate'].post.requestBody.content['application/json'].schema.properties.request_data.required
+    description: >-
+      The spec requires endpoint_id, but its own property descriptions say endpoint_id is "Only
+      required if isolating one endpoint" and filters is "Only required if isolating more than one
+      endpoint", and its request example sends filters alone. The two forms are alternatives
+      (https://cortex-docs.paloaltonetworks.com/xdr-api/cortex-platform/response-action.md).
+    remove: true
+
+  - target: $.paths['/public_api/v1/endpoints/unisolate'].post.requestBody.content['application/json'].schema.properties.request_data.required
+    description: >-
+      Same as isolate: endpoint_id and filters are documented as alternatives (endpoint_id for one
+      endpoint, filters for several), so neither is required on its own
+      (https://cortex-docs.paloaltonetworks.com/xdr-api/cortex-platform/response-action.md).
+    remove: true
+
+  - target: $.paths['/public_api/v1/endpoints/isolate'].post.requestBody.content['application/json'].schema.properties.request_data.properties.filters.items.properties.value
+    description: >-
+      The operation description says "Request is limited to 1000 endpoints."
+    update:
+      maxItems: 1000
+
+  - target: $.paths['/public_api/v1/endpoints/quarantine'].post.requestBody.content['application/json'].schema.properties.request_data.properties.filters.items.properties.value
+    description: >-
+      The operation description says "You can select up to 1000 endpoints."
+    update:
+      maxItems: 1000
+
+  - target: $.paths['/public_api/v1/scripts/run_script'].post.requestBody.content['application/json'].schema.properties.request_data.properties.filters.items.properties.value
+    description: >-
+      The operation description says "The script can be run on up to 1000 endpoints."
+    update:
+      maxItems: 1000
+
+  - target: $.paths['/public_api/v1/endpoints/file_retrieval'].post.requestBody.content['application/json'].schema.properties.request_data.properties.filters.items.properties.value
+    description: >-
+      The operation description says "You can retrieve up to 20 files, from no more than 10
+      endpoints."
+    update:
+      maxItems: 10
+
+  - target: $.paths['/public_api/v1/endpoints/scan'].post.requestBody.content['application/json'].schema.properties.request_data.properties.filters
+    description: >-
+      filters is typed as the string "all" only, while its own description reads "An array of
+      filter fields. To scan all endpoints, use the value `all`." and the request example sends an
+      array of filters. The sibling Cancel Scan operation types the same field as an array of
+      filters or a string. Replaced below with that shape.
+    remove: true
+
+  - target: $.paths['/public_api/v1/endpoints/scan'].post.requestBody.content['application/json'].schema.properties.request_data.properties
+    description: >-
+      filters as documented in prose and in the request example: an array of filter fields, or
+      the string "all".
+    update:
+      filters:
+        oneOf:
+          - type: array
+            items:
+              type: object
+              required: [field, operator, value]
+              properties:
+                field:
+                  type: string
+                  enum: [endpoint_id_list, dist_name, first_seen, last_seen, ip_list, group_name, platform, alias, isolate, hostname, scan_status]
+                operator:
+                  type: string
+                  enum: [in, gte, lte]
+                value:
+                  oneOf:
+                    - type: array
+                      items:
+                        type: string
+                    - type: integer
+                    - type: string
+          - type: string
+            enum: [all]
+
+  - target: $.paths['/public_api/v1/endpoints/get_endpoint'].post.requestBody.content['application/json'].schema.properties.request_data.properties.filters.items.properties.field.enum
+    description: >-
+      scan_status is missing from the field enum, but the operation's own request example filters
+      on it ({"field": "scan_status", "operator": "in", "value": ["none", "pending", ...]}), and the
+      Assign Tags operation lists it among the same endpoint filter fields.
+    update:
+      - scan_status
+
+  - target: $.paths['/public_api/v1/scripts/run_script'].post.requestBody.content['application/json'].schema.properties.request_data.properties.parameters_values.required
+    description: >-
+      parameters_values is described as a dictionary of the script's parameter names and values
+      ("You can obtain these values by running Get Script Metadata"); the required x and y
+      properties are the example script's parameters, not a fixed shape.
+    remove: true
+
+  - target: $.paths['/public_api/v1/scripts/run_script'].post.requestBody.content['application/json'].schema.properties.request_data.properties.parameters_values.properties
+    description: >-
+      See above: the parameter names depend on the script, so the example properties are dropped.
+    remove: true
+
+  - target: $.components.schemas.UpdateCase.properties.user_severity.enum
+    description: >-
+      The Update Case documentation says "Use an empty string to clear the severity" and that a
+      caller without the Change Severity permission gets 403 "for any request that includes
+      user_severity, including an empty string", but the enum leaves the empty string out
+      (https://cortex-docs.paloaltonetworks.com/xdr-api/cases-apis/cases.md).
+    update:
+      - ''
+
+  - target: $.components.schemas.UpdateCase.properties.resolve_reason.enum
+    description: >-
+      resolve_reason's own description says "The built-in values listed below may vary per tenant
+      and case domain; additional custom resolution reasons may also be available. If an invalid
+      value is provided, the API will return an error listing the valid options for that specific
+      case." The list is not closed, so the enum is dropped.
+    remove: true

@@ -1,0 +1,411 @@
+{
+  "operations": {
+    "addEndpointTag": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/tags/agents/assign",
+        "source": "platform"
+      }
+    ],
+    "allowlistFiles": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/hash_exceptions/allowlist",
+        "source": "platform"
+      }
+    ],
+    "blocklistFiles": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/hash_exceptions/blocklist",
+        "source": "platform"
+      }
+    ],
+    "cancelScan": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/endpoints/abort_scan",
+        "source": "platform"
+      }
+    ],
+    "getActionStatus": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/actions/get_action_status",
+        "source": "platform"
+      }
+    ],
+    "getAuditLogs": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.data",
+            "totalPath": "reply.total_count"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/audits/agents_reports",
+        "source": "platform"
+      },
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.data",
+            "totalPath": "reply.total_count"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/audits/management_logs",
+        "source": "platform"
+      }
+    ],
+    "getCaseDetails": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/public_api/v1/case/artifacts/{case-id}/",
+        "source": "cases"
+      },
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.DATA",
+            "totalPath": "reply.FILTER_COUNT"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/case/search",
+        "source": "cases"
+      },
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.DATA",
+            "totalPath": "reply.FILTER_COUNT"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/issue/search",
+        "source": "issues"
+      }
+    ],
+    "getCases": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.DATA",
+            "totalPath": "reply.FILTER_COUNT"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/case/search",
+        "source": "cases"
+      }
+    ],
+    "getDeviceControlViolations": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.violations",
+            "totalPath": "reply.total_count"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/device_control/get_violations",
+        "source": "platform"
+      }
+    ],
+    "getEndpoints": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.endpoints",
+            "totalPath": "reply.total_count"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/endpoints/get_endpoint",
+        "source": "platform"
+      }
+    ],
+    "getIndicators": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "objects",
+            "totalPath": "objects_count"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/indicators/get",
+        "source": "platform"
+      }
+    ],
+    "getIssues": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.DATA",
+            "totalPath": "reply.FILTER_COUNT"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/issue/search",
+        "source": "issues"
+      }
+    ],
+    "getPolicy": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/endpoints/get_policy",
+        "source": "platform"
+      }
+    ],
+    "getQuarantineStatus": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/quarantine/status",
+        "source": "platform"
+      }
+    ],
+    "getRetrievedFileDetails": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/actions/file_retrieval_details",
+        "source": "platform"
+      }
+    ],
+    "getRiskyUsers": [],
+    "getScriptResults": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/scripts/get_script_execution_results",
+        "source": "platform"
+      }
+    ],
+    "getScripts": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/public_api/v1/scripts/get_scripts",
+        "source": "platform"
+      }
+    ],
+    "getXqlResults": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/public_api/v1/xql/get_query_results",
+        "source": "platform"
+      }
+    ],
+    "insertIndicators": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/indicators/insert",
+        "source": "platform"
+      }
+    ],
+    "isolateEndpoint": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.endpoints",
+            "totalPath": "reply.total_count"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/endpoints/get_endpoint",
+        "source": "platform"
+      },
+      {
+        "method": "post",
+        "path": "/public_api/v1/endpoints/isolate",
+        "source": "platform"
+      }
+    ],
+    "quarantineFile": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/endpoints/quarantine",
+        "source": "platform"
+      }
+    ],
+    "removeEndpointTag": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/tags/agents/remove",
+        "source": "platform"
+      }
+    ],
+    "restoreFile": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/endpoints/restore",
+        "source": "platform"
+      }
+    ],
+    "retrieveFile": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/endpoints/file_retrieval",
+        "source": "platform"
+      }
+    ],
+    "runScript": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/scripts/run_script",
+        "source": "platform"
+      }
+    ],
+    "runXqlQuery": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/xql/start_xql_query",
+        "source": "platform"
+      }
+    ],
+    "scanEndpoint": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/endpoints/scan",
+        "source": "platform"
+      }
+    ],
+    "unisolateEndpoint": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "in": "body",
+            "offsetParam": "request_data.search_from"
+          },
+          "response": {
+            "itemsPath": "reply.endpoints",
+            "totalPath": "reply.total_count"
+          },
+          "style": "offset"
+        },
+        "path": "/public_api/v1/endpoints/get_endpoint",
+        "source": "platform"
+      },
+      {
+        "method": "post",
+        "path": "/public_api/v1/endpoints/unisolate",
+        "source": "platform"
+      }
+    ],
+    "updateCase": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/case/update/{case-id}",
+        "source": "cases"
+      }
+    ],
+    "updateIssue": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/issue/{issue-id}",
+        "source": "issues"
+      }
+    ]
+  },
+  "sources": {
+    "cases": {
+      "apiVersion": "Cortex XDR 6.0",
+      "fetchedAt": "2026-11-23T06:59:07.352Z",
+      "format": "openapi",
+      "url": "https://openapi.gitbook.com/o/r4DIGbR5VLvkZy3gAYsu/spec/release-xdr-platform-cases-papi.json"
+    },
+    "issues": {
+      "apiVersion": "Cortex XDR 6.0",
+      "fetchedAt": "2026-11-23T06:59:07.401Z",
+      "format": "openapi",
+      "url": "https://openapi.gitbook.com/o/r4DIGbR5VLvkZy3gAYsu/spec/release-xdr-platform-issues-papi.json"
+    },
+    "platform": {
+      "apiVersion": "Cortex XDR 6.0",
+      "fetchedAt": "2026-11-23T06:59:45.595Z",
+      "format": "openapi",
+      "url": "https://openapi.gitbook.com/o/r4DIGbR5VLvkZy3gAYsu/spec/release-xdr-platform-cortex-platform-papi.json"
+    }
+  },
+  "unmatched": {
+    "getRetrievedFileDetails": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/download/{api_value}",
+        "reason": "The archive download route is documented only in the prose of Get File Retrieval Details (curl -XPOST \"https://api-{fqdn}/public_api/v1/download/<api_value>\"), https://cortex-docs.paloaltonetworks.com/xdr-api/cortex-platform/response-action.md; no spec operation describes it. It returns a binary zip."
+      }
+    ],
+    "getRiskyUsers": [
+      {
+        "method": "post",
+        "path": "/public_api/v1/get_risky_users",
+        "reason": "Documented only in the Cortex XDR 3.x API reference (Get Risky Users, https://cortex-docs.paloaltonetworks.com/xdr-3-api/cortex-xdr-3.x-apis/system-management.md); the 6.0 specs have no risky-users operation and the route is not marked deprecated."
+      }
+    ]
+  }
+}
