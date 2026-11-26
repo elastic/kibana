@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/notifications-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: '@elastic/response-ops'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/notifications-plugin'
   description: Moon project for @kbn/notifications-plugin
   channel: ''
-  owner: '@elastic/appex-sharedux'
+  owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/notifications
 dependsOn:
   - '@kbn/core'

@@ -55,7 +55,7 @@ const makeStoredEvent = (
     signals: [],
     title: 'Test event',
     symptom_hypothesis: 'Test hypothesis',
-    summary: 'Test summary',
+    summary: 'P99 latency breached SLO',
     confidence: 0.8,
     ...overrides,
   } as SignificantEvent);

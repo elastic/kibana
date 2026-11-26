@@ -36,18 +36,27 @@ interface PathFieldProps {
   value: FormValue | undefined;
   onChange: (value: FormValue | undefined) => void;
   scope: ObjectValue;
-  label: string;
-  helpText?: string;
+  label?: React.ReactNode;
+  helpText?: React.ReactNode;
   error?: string;
-  labelAppend?: React.ReactNode;
+  compressed?: boolean;
 }
 
 const asString = (value: FormValue | undefined): string | undefined =>
   typeof value === 'string' && value !== '' ? value : undefined;
 
 /**
+ * The `location` or `context` a path is in. A path whose name has a prefix, such as `new_name`,
+ * goes with the field of its scope that has the same prefix, `new_location`, when there is one.
+ */
+const readScope = (scope: ObjectValue, pathName: string | undefined, name: string) => {
+  const prefix = pathName?.slice(0, pathName.lastIndexOf('_') + 1) ?? '';
+  return asString(prefix && `${prefix}${name}` in scope ? scope[`${prefix}${name}`] : scope[name]);
+};
+
+/**
  * A path picker in the style of the processing editor's field selector. Paths
- * are suggested from the catalogue path set for the sibling `location` or `context`.
+ * are suggested from the catalogue path set for the `location` or `context` of its scope.
  */
 export function PathField({
   field,
@@ -57,11 +66,11 @@ export function PathField({
   label,
   helpText,
   error,
-  labelAppend,
+  compressed,
 }: PathFieldProps) {
   const { metadata, telemetry } = useDefinitionFormContext();
-  const location = asString(scope[LOCATION_FIELD]);
-  const context = asString(scope[CONTEXT_FIELD]);
+  const location = readScope(scope, field.name, LOCATION_FIELD);
+  const context = readScope(scope, field.name, CONTEXT_FIELD);
 
   const suggestions = useMemo<Suggestion[]>(
     () =>
@@ -81,7 +90,6 @@ export function PathField({
       onChange={(next) => onChange(next === '' ? undefined : next)}
       label={label}
       helpText={helpText}
-      labelAppend={labelAppend}
       placeholder={
         field.ui?.placeholder ??
         i18n.translate('xpack.streams.componentDefinitionForm.path.placeholder', {
@@ -91,9 +99,10 @@ export function PathField({
       suggestions={suggestions}
       showIcon
       fullWidth
+      compressed={compressed}
       isInvalid={error !== undefined}
       error={error}
-      dataTestSubj={`componentDefinitionFormPath-${field.name}`}
+      dataTestSubj={`componentDefinitionFormPath-${field.name ?? 'item'}`}
     />
   );
 }

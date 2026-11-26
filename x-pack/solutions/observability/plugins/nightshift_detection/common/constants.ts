@@ -15,3 +15,15 @@ export const NIGHTSHIFT_DETECTION_TIERED_FEATURE: PricingProductFeature = {
 };
 
 export const NIGHTSHIFT_DETECTION_TIERED_FEATURES = [NIGHTSHIFT_DETECTION_TIERED_FEATURE];
+
+/** Base path of the engine's internal routes. */
+export const DETECTION_ENGINE_API_PATH = '/internal/nightshift/detection';
+
+/**
+ * App id of the engine inspector, a temporary page for the engine's developers. It has no nav
+ * link and is deleted before the plugin is turned on anywhere.
+ */
+export const DETECTION_INSPECTOR_APP_ID = 'nightshiftDetectionDebug';
+
+/** `source` of every signal the engine writes. */
+export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';

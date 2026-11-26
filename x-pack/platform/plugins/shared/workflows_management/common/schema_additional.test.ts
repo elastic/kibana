@@ -6,6 +6,7 @@
  */
 
 import { getWorkflowJsonSchema, isDynamicConnector, StepCategory } from '@kbn/workflows';
+import type { StepExposure } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { CONNECTOR_SUB_ACTIONS_MAP } from './connector_sub_actions_map';
 import {
@@ -21,6 +22,7 @@ import {
   getCachedDynamicConnectorTypes,
   getCachedInferenceConnectorInstances,
   getDeprecatedStepMetadataMap,
+  getStepExposure,
   getWorkflowZodSchema,
 } from './schema';
 import { EmailParamsSchema } from './stack_connectors_schema/email';
@@ -605,6 +607,46 @@ describe('schema - additional coverage', () => {
       expect(registered).toBeDefined();
       expect(registered?.summary).toBe('Map Collection');
       expect(registered?.description).toBe(longDescription);
+    });
+  });
+
+  describe('getStepExposure', () => {
+    const createStepDefinition = (id: string, exposure?: StepExposure) =>
+      ({
+        id,
+        label: id,
+        description: id,
+        category: StepCategory.Kibana,
+        inputSchema: z.object({}),
+        outputSchema: z.object({}),
+        exposure,
+      } as never);
+
+    const stepDefinitions = new Map([
+      ['custom.unset', createStepDefinition('custom.unset')],
+      ['custom.open', createStepDefinition('custom.open', 'open')],
+      ['custom.internal', createStepDefinition('custom.internal', 'internal')],
+      ['custom.managedOnly', createStepDefinition('custom.managedOnly', 'managed_only')],
+    ]);
+
+    beforeEach(() => {
+      jest
+        .spyOn(stepSchemas, 'getStepDefinition')
+        .mockImplementation((stepTypeId: string) => stepDefinitions.get(stepTypeId));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it.each([
+      ['custom.unset', 'open'],
+      ['custom.open', 'open'],
+      ['custom.internal', 'internal'],
+      ['custom.managedOnly', 'managed_only'],
+      ['not.registered', 'open'],
+    ])('returns the exposure of %s', (stepType, expectedExposure) => {
+      expect(getStepExposure(stepType)).toBe(expectedExposure);
     });
   });
 });

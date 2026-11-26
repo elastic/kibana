@@ -297,6 +297,7 @@ export function initializeFetch({
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
+              uiSettings: discoverServices.uiSettings,
               scopedProfilesManager,
               searchSessionId,
               esqlVariables,
@@ -416,7 +417,7 @@ export function initializeFetch({
       api.fetchWarnings$.next(collectWarnings());
     } catch (error) {
       if (!moreAbortController.signal.aborted) {
-        setSearchError(error);
+        discoverServices.data.search.showError(error);
       }
     } finally {
       // A refetch that replaced this request owns the loading state now

@@ -13,12 +13,12 @@ import { Logger as CoreLogger, PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
+import { DETECTION_SIGNAL_SOURCE } from '../../../common/constants';
 import {
-  DETECTION_SIGNAL_SOURCE,
   storedDetectionSignalSchema,
   type DetectionSignal,
 } from '../../../common/detection_signal';
-import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
+import { DetectionEngineSystemClient } from '../engine/tokens';
 import { getErrorMessage } from '../errors/get_error_message';
 import { getSeriesKey, type SeriesId } from '../strategies/series_key';
 import type { DetectionSignalReading } from '../strategies/types';

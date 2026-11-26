@@ -23,6 +23,8 @@ import {
   EuiTextArea,
   EuiSpacer,
   EuiText,
+  useEuiFontSize,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -66,6 +68,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   const optionalMessageId = useGeneratedHtmlId();
   const editTagModalTitleId = useGeneratedHtmlId();
   const ifMounted = useIfMounted();
+  const { euiTheme } = useEuiTheme();
+  const { lineHeight: errorTextLineHeight } = useEuiFontSize('xs');
   const [submitting, setSubmitting] = useState<boolean>(false);
   const lastNameValue = useRef(tag.name);
 
@@ -80,6 +84,10 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
     [initialTag, tag]
   );
   const nameHasBeenModified = tag.name !== lastNameValue.current;
+  // Matches EuiFormErrorText (xs padding plus one xs line), so a row keeps its height when its error appears.
+  const reservedErrorSpace = {
+    paddingBlockEnd: `calc(${euiTheme.size.xs} + ${errorTextLineHeight})`,
+  };
 
   const setName = useMemo(() => setField('name'), [setField]);
   const setColor = useMemo(() => setField('color'), [setField]);
@@ -139,6 +147,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             <EuiFlexItem grow={3}>
               <EuiFormRow
                 data-test-subj="createModalRow-name"
+                css={validation.errors.name ? undefined : reservedErrorSpace}
                 fullWidth={true}
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.name', {
                   defaultMessage: 'Name',
@@ -161,6 +170,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             <EuiFlexItem grow={2}>
               <EuiFormRow
                 data-test-subj="createModalRow-color"
+                css={validation.errors.color ? undefined : reservedErrorSpace}
                 fullWidth={true}
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.color', {
                   defaultMessage: 'Color',
@@ -171,7 +181,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   <EuiButtonEmpty
                     onClick={() => setColor(getRandomColor())}
                     size="xs"
-                    css={{ height: '18px', fontSize: '0.75rem' }}
+                    // Fit the label's line so the color field lines up with the name field.
+                    css={{ blockSize: euiTheme.size.base, verticalAlign: 'top' }}
                     aria-label={i18n.translate(
                       'xpack.savedObjectsTagging.management.createModal.color.randomizeAriaLabel',
                       {
@@ -231,7 +242,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="baseline">
               <EuiFlexItem grow={false}>
@@ -248,7 +259,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={onClose} data-test-subj="createModalCancelButton">
                   <FormattedMessage

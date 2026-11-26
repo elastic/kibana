@@ -29,6 +29,7 @@ import type { WorkflowExecutionQueryService } from './workflow_execution_query_s
 import type { IndexWorkflowDocumentOptions } from './workflow_occ_types';
 import type { WorkflowValidationService } from './workflow_validation_service';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import { getStepExposure } from '../../common/schema';
 import * as workflowDeletion from '../api/lib/workflow_deletion';
 import {
   disableAllWorkflows as disableAllWorkflowsLib,
@@ -36,6 +37,7 @@ import {
 } from '../api/lib/workflow_disable_all';
 import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
+import { WorkflowIndexUnavailableError } from '../lib/transient_es_errors';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -48,6 +50,11 @@ jest.mock('../lib/log_workflow_changes', () => ({
 jest.mock('../api/lib/workflow_disable_all', () => ({
   ...jest.requireActual('../api/lib/workflow_disable_all'),
   disableAllWorkflows: jest.fn(),
+}));
+
+jest.mock('../../common/schema', () => ({
+  ...jest.requireActual('../../common/schema'),
+  getStepExposure: jest.fn(() => 'open'),
 }));
 
 const mockedLogWorkflowChanges = logWorkflowChanges as jest.MockedFunction<
@@ -173,6 +180,7 @@ describe('WorkflowCrudService', () => {
       const service = new WorkflowCrudService(deps);
 
       await service.prepareWorkflowDocumentForStorage({
+        isManaged: false,
         id: 'managed-workflow',
         yaml: lightweightWorkflowYaml,
         actor: 'system',
@@ -743,11 +751,14 @@ describe('WorkflowCrudService', () => {
         const service = new WorkflowCrudService(deps);
         const read = service.getWorkflowDocumentsWithVersionByIds(['wf-1']);
         const assertion = expect(read).rejects.toThrow(
-          'Could not read workflow wf-1: No shard available for [MultiGetShardRequest/unset]'
+          new WorkflowIndexUnavailableError(
+            'Could not read workflow wf-1: No shard available for [MultiGetShardRequest/unset]'
+          )
         );
         await jest.advanceTimersByTimeAsync(100 + 200 + 400 + 800 + 1600);
 
         await assertion;
+        await expect(read).rejects.toBeInstanceOf(WorkflowIndexUnavailableError);
         expect(mget).toHaveBeenCalledTimes(6);
       });
     });
@@ -852,6 +863,88 @@ describe('WorkflowCrudService', () => {
       ]);
     });
 
+    it.each([502, 503, 504])(
+      'reports items that failed with status %i as index unavailable',
+      async (status) => {
+        const { deps, client } = makeDeps();
+        client.bulk.mockResolvedValue({
+          items: [
+            {
+              create: {
+                _id: 'wf-unavailable',
+                status,
+                error: { type: 'node_not_connected_exception', reason: 'node disconnected' },
+              },
+            },
+          ],
+        });
+
+        const service = new WorkflowCrudService(deps);
+        const [result] = await service.bulkWriteWorkflowDocuments([
+          { id: 'wf-unavailable', document: makeSource() },
+        ]);
+
+        expect(result.status === 'failed' && result.error).toBeInstanceOf(
+          WorkflowIndexUnavailableError
+        );
+      }
+    );
+
+    it('reports items that failed for good with a plain error', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          {
+            create: {
+              _id: 'wf-invalid',
+              status: 400,
+              error: { type: 'document_parsing_exception', reason: 'strict mapping' },
+            },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const [result] = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-invalid', document: makeSource() },
+      ]);
+
+      expect(result.status === 'failed' && result.error).not.toBeInstanceOf(
+        WorkflowIndexUnavailableError
+      );
+    });
+
+    it('reports items whose shard was not available with an index unavailable error', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          {
+            create: {
+              _id: 'wf-unassigned',
+              status: 503,
+              error: {
+                type: 'unavailable_shards_exception',
+                reason: 'primary shard is not active',
+              },
+            },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const [result] = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-unassigned', document: makeSource() },
+      ]);
+
+      expect(result).toEqual({
+        status: 'failed',
+        error: new WorkflowIndexUnavailableError('primary shard is not active'),
+      });
+      expect(result.status === 'failed' && result.error).toBeInstanceOf(
+        WorkflowIndexUnavailableError
+      );
+    });
+
     it('reports every item as rejected when Elasticsearch rejects the whole request as too busy', async () => {
       const { deps, client } = makeDeps();
       const tooManyRequests = new errors.ResponseError({
@@ -931,6 +1024,58 @@ describe('WorkflowCrudService', () => {
           }),
         })
       );
+      const [{ document }] = client.index.mock.calls[0];
+      expect(document).not.toHaveProperty('templateSlug');
+      expect(document).not.toHaveProperty('templateOrigin');
+    });
+
+    it('stores a workflow that uses a managed-only step as invalid and disabled', async () => {
+      jest
+        .mocked(getStepExposure)
+        .mockImplementation((stepType: string) =>
+          stepType === 'console' ? 'managed_only' : 'open'
+        );
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await service.createWorkflow({ yaml: validYaml }, 'default', request);
+      jest.mocked(getStepExposure).mockImplementation(() => 'open');
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ valid: false, enabled: false, definition: null }),
+        })
+      );
+    });
+
+    it('stores the template origin of a workflow created from a template', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.createWorkflow({ yaml: validYaml }, 'default', request, {
+        templateOrigin: {
+          templateSlug: 'triage-alerts',
+          templateVersion: '1.2.0',
+          templateOrigin: 'catalog',
+        },
+      });
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            templateSlug: 'triage-alerts',
+            templateVersion: '1.2.0',
+            templateOrigin: 'catalog',
+          }),
+        })
+      );
+      expect(result).toMatchObject({
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'catalog',
+      });
     });
 
     it('logs workflow create to change history after a successful index', async () => {
@@ -2380,7 +2525,9 @@ describe('WorkflowCrudService', () => {
 
       const service = new WorkflowCrudService(deps);
       await expect(
-        service.updateWorkflow('missing', { enabled: false }, 'default', request)
+        service.updateWorkflow('missing', { enabled: false }, 'default', request, {
+          isManaged: false,
+        })
       ).rejects.toThrow('Workflow with id missing not found');
       expect(client.index).not.toHaveBeenCalled();
     });
@@ -2405,7 +2552,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { tags: ['t1', 't2'] } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(result.id).toBe('wf-1');
@@ -2421,6 +2569,51 @@ describe('WorkflowCrudService', () => {
           }),
         })
       );
+    });
+
+    describe('with a managed-only step in the YAML', () => {
+      const yaml = [
+        'name: Uses a managed-only step',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: log',
+        '    type: console',
+        '    with:',
+        '      message: hi',
+      ].join('\n');
+
+      beforeEach(() => {
+        jest
+          .mocked(getStepExposure)
+          .mockImplementation((stepType: string) =>
+            stepType === 'console' ? 'managed_only' : 'open'
+          );
+      });
+
+      afterEach(() => {
+        jest.mocked(getStepExposure).mockImplementation(() => 'open');
+      });
+
+      it.each([
+        { isManaged: false, valid: false },
+        { isManaged: true, valid: true },
+      ])('stores valid=$valid when isManaged=$isManaged', async ({ isManaged, valid }) => {
+        const { deps, client } = makeDeps();
+        client.search.mockResolvedValue({
+          hits: {
+            hits: [{ _id: 'wf-1', _source: makeSource(), _seq_no: 5, _primary_term: 1 }],
+          },
+        });
+
+        const service = new WorkflowCrudService(deps);
+        await service.updateWorkflow('wf-1', { yaml }, 'default', request, { isManaged });
+
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({ document: expect.objectContaining({ valid }) })
+        );
+      });
     });
 
     it('logs workflow update to change history after a successful write', async () => {
@@ -2445,7 +2638,9 @@ describe('WorkflowCrudService', () => {
       });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { tags: ['t1', 't2'] } as any, 'default', request);
+      await service.updateWorkflow('wf-1', { tags: ['t1', 't2'] } as any, 'default', request, {
+        isManaged: false,
+      });
 
       expect(mockedLogWorkflowChanges).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2485,7 +2680,7 @@ describe('WorkflowCrudService', () => {
       });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', {} as any, 'default', request);
+      await service.updateWorkflow('wf-1', {} as any, 'default', request, { isManaged: false });
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2518,7 +2713,7 @@ describe('WorkflowCrudService', () => {
       });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', {} as any, 'default', request);
+      await service.updateWorkflow('wf-1', {} as any, 'default', request, { isManaged: false });
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2548,7 +2743,9 @@ describe('WorkflowCrudService', () => {
       });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request, {
+        isManaged: false,
+      });
 
       expect(client.index.mock.calls[0][0].document.lastUpdatedBy).toBe('alice');
     });
@@ -2599,7 +2796,9 @@ describe('WorkflowCrudService', () => {
         });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request, {
+        isManaged: false,
+      });
 
       expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'wf-1', tags: ['new'] }),
@@ -2639,7 +2838,9 @@ describe('WorkflowCrudService', () => {
       });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request, {
+        isManaged: false,
+      });
 
       expect(deps.logger.warn).toHaveBeenCalledWith(
         'Skipping scheduler sync for workflow wf-1 in space *: task scheduler is unavailable'
@@ -2691,7 +2892,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { tags: ['t1', 't2'] } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(result.id).toBe('wf-1');
@@ -2741,7 +2943,9 @@ describe('WorkflowCrudService', () => {
       });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request, {
+        isManaged: false,
+      });
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2770,7 +2974,8 @@ describe('WorkflowCrudService', () => {
         'wf-global',
         { tags: ['global', 'updated'] } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(client.search).toHaveBeenCalledWith(
@@ -2838,7 +3043,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { yaml: lightweightWorkflowYaml } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(applyYamlUpdateSpy).toHaveBeenCalledTimes(1);
@@ -2898,7 +3104,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { yaml: yamlWithoutTopLevelEnabled } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(result.validationErrors).toEqual([]);
@@ -2991,7 +3198,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { yaml: yamlWithoutTopLevelEnabled } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(client.index).toHaveBeenNthCalledWith(
@@ -3037,7 +3245,7 @@ describe('WorkflowCrudService', () => {
       const service = new WorkflowCrudService(makeDeps().deps);
       const definition = await service.getDefinitionToStore(
         yamlWithoutTopLevelEnabled,
-        { id: 'wf-1', enabled: false },
+        { id: 'wf-1', enabled: false, managed: false },
         'default',
         request
       );
@@ -3083,7 +3291,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { enabled: true } satisfies Partial<EsWorkflow>,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(client.index).toHaveBeenCalledWith(
@@ -3134,7 +3343,9 @@ describe('WorkflowCrudService', () => {
         .mockResolvedValueOnce({ result: 'updated', _seq_no: 9, _primary_term: 1 });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { tags: ['t1', 't2'] } as any, 'default', request);
+      await service.updateWorkflow('wf-1', { tags: ['t1', 't2'] } as any, 'default', request, {
+        isManaged: false,
+      });
 
       expect(applyFieldUpdatesSpy).toHaveBeenCalledTimes(2);
       expect(applyFieldUpdatesSpy).toHaveBeenNthCalledWith(
@@ -3191,7 +3402,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { yaml: 'invalid: yaml:' } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(result.validationErrors).toEqual(['YAML parse error']);
@@ -3244,7 +3456,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { yaml: 'name: Renamed Invalid Workflow' } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(client.index).toHaveBeenCalledWith(
@@ -3279,7 +3492,8 @@ describe('WorkflowCrudService', () => {
         'wf-1',
         { yaml: lightweightWorkflowYaml } as any,
         'default',
-        request
+        request,
+        { isManaged: false }
       );
 
       expect(applyYamlUpdateSpy).not.toHaveBeenCalled();
@@ -3342,7 +3556,9 @@ describe('WorkflowCrudService', () => {
         });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request, {
+        isManaged: false,
+      });
 
       expect(taskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
       expect(client.index).toHaveBeenCalled();
@@ -3372,7 +3588,7 @@ describe('WorkflowCrudService', () => {
 
       const service = new WorkflowCrudService(deps);
       await expect(
-        service.updateWorkflow('wf-1', { enabled: false }, 'default', request)
+        service.updateWorkflow('wf-1', { enabled: false }, 'default', request, { isManaged: false })
       ).rejects.toThrow('tm down');
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -3407,7 +3623,13 @@ describe('WorkflowCrudService', () => {
 
       const service = new WorkflowCrudService(deps);
       await expect(
-        service.updateWorkflow('workflow-in-another-space', { enabled: false }, 'default', request)
+        service.updateWorkflow(
+          'workflow-in-another-space',
+          { enabled: false },
+          'default',
+          request,
+          { isManaged: false }
+        )
       ).rejects.toThrow('Workflow with id workflow-in-another-space not found');
 
       expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
@@ -3434,7 +3656,7 @@ describe('WorkflowCrudService', () => {
 
       const service = new WorkflowCrudService(deps);
       await expect(
-        service.updateWorkflow('wf-1', { enabled: false }, 'default', request)
+        service.updateWorkflow('wf-1', { enabled: false }, 'default', request, { isManaged: false })
       ).rejects.toThrow('index unavailable');
 
       expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
@@ -3471,7 +3693,9 @@ describe('WorkflowCrudService', () => {
       });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request, {
+        isManaged: false,
+      });
 
       expect(client.search).toHaveBeenCalledTimes(2);
       expect(client.search.mock.calls[1][0]).toEqual(
@@ -3528,7 +3752,9 @@ describe('WorkflowCrudService', () => {
         });
 
       const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request, {
+        isManaged: false,
+      });
 
       expect(taskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
       expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
@@ -3761,7 +3987,8 @@ describe('WorkflowCrudService administrator writes', () => {
         'scheduled',
         { description: 'Fixed typo' },
         'default',
-        request
+        request,
+        { isManaged: false }
       );
       if (isEditor) {
         await expect(update).resolves.toMatchObject({ id: 'scheduled' });
@@ -3818,7 +4045,8 @@ describe('WorkflowCrudService administrator writes', () => {
         'private-workflow',
         { enabled: false },
         'default',
-        request
+        request,
+        { isManaged: false }
       );
       await expect(update).rejects.toThrow();
       expect(client.index).not.toHaveBeenCalled();
@@ -5304,7 +5532,9 @@ describe('workflow page lifecycle', () => {
       },
     });
 
-    await service.updateWorkflow('wf-1', { tags: ['t'] } as any, 'default', request);
+    await service.updateWorkflow('wf-1', { tags: ['t'] } as any, 'default', request, {
+      isManaged: false,
+    });
 
     expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -5364,7 +5594,9 @@ describe('workflow page lifecycle', () => {
       const { service, client, pagesService, request } = setup();
       storeLive(client);
 
-      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request);
+      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request, {
+        isManaged: false,
+      });
 
       expect(pagesService.retireRemovedPages).toHaveBeenCalledWith({
         workflowId: 'wf-1',
@@ -5383,7 +5615,9 @@ describe('workflow page lifecycle', () => {
       pagesService.retireRemovedPages.mockRejectedValue(new Error('retire failed'));
 
       await expect(
-        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request)
+        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request, {
+          isManaged: false,
+        })
       ).rejects.toThrow('retire failed');
       expect(client.index).not.toHaveBeenCalled();
     });
@@ -5392,7 +5626,9 @@ describe('workflow page lifecycle', () => {
       const { service, client, pagesService, request } = setup();
       storeLive(client);
 
-      await service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request);
+      await service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request, {
+        isManaged: false,
+      });
 
       expect(pagesService.unpublishWorkflowPages).toHaveBeenCalledWith({
         workflowId: 'wf-1',
@@ -5412,7 +5648,9 @@ describe('workflow page lifecycle', () => {
       pagesService.unpublishWorkflowPages.mockRejectedValue(new Error('unpublish failed'));
 
       await expect(
-        service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request)
+        service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request, {
+          isManaged: false,
+        })
       ).rejects.toThrow('unpublish failed');
       expect(client.index).not.toHaveBeenCalled();
     });
@@ -5421,7 +5659,9 @@ describe('workflow page lifecycle', () => {
       const { service, client, pagesService, request } = setup();
       storeLive(client, { definition: null, valid: false });
 
-      await service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request);
+      await service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request, {
+        isManaged: false,
+      });
 
       expect(pagesService.unpublishWorkflowPages).not.toHaveBeenCalled();
     });
@@ -5436,7 +5676,9 @@ describe('workflow page lifecycle', () => {
       });
 
       await expect(
-        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request)
+        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request, {
+          isManaged: false,
+        })
       ).rejects.toThrow('You do not have access to this workflow.');
       expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
     });
@@ -5459,7 +5701,9 @@ describe('workflow page lifecycle', () => {
       const { service, client, pagesService, request } = setup();
       storeLive(client, { yaml: noPageYaml, definition: null });
 
-      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request);
+      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request, {
+        isManaged: false,
+      });
 
       expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
       expect(pagesService.syncWorkflowPages).not.toHaveBeenCalled();
@@ -5469,7 +5713,9 @@ describe('workflow page lifecycle', () => {
       const { service, client, pagesService, request } = setup();
       storeLive(client, { definition: null, valid: false });
 
-      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request);
+      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request, {
+        isManaged: false,
+      });
 
       expect(pagesService.retireRemovedPages).toHaveBeenCalled();
     });
@@ -5482,7 +5728,7 @@ describe('workflow page lifecycle', () => {
       storeLive(client);
       pagesService.retireRemovedPages.mockRejectedValue(new Error('page store down'));
 
-      await service.updateWorkflow('wf-1', update as any, 'default', request);
+      await service.updateWorkflow('wf-1', update as any, 'default', request, { isManaged: false });
 
       expect(client.index).toHaveBeenCalled();
       expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
@@ -5526,7 +5772,9 @@ describe('workflow page lifecycle', () => {
       });
 
       await expect(
-        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request)
+        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request, {
+          isManaged: false,
+        })
       ).rejects.toThrow('manage_security');
       expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
       expect(client.index).not.toHaveBeenCalled();

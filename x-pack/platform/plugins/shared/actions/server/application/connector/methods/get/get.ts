@@ -96,6 +96,9 @@ export async function get({
       isDeprecated: isConnectorDeprecated(result.attributes),
       isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
       authMode,
+      ...(result.attributes.specVersion !== undefined
+        ? { specVersion: result.attributes.specVersion }
+        : {}),
     };
   }
 

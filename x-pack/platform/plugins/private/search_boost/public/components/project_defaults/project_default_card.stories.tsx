@@ -19,7 +19,6 @@ type CardData = Pick<ProjectDefaultCardProps, 'ruleName' | 'profile' | 'matches'
 
 const match = (name: string, overrides: Partial<BoostRuleMatch> = {}): BoostRuleMatch => ({
   name,
-  isHidden: false,
   ...overrides,
 });
 
@@ -34,8 +33,7 @@ const CARD_DATA: Readonly<Record<BoostProfileType, CardData>> = {
       match('kibana_sample_data_ecommerce'),
       match('synonyms'),
       match('users'),
-      match('.hidden-1', { isHidden: true }),
-      match('.hidden-2', { isHidden: true }),
+      match('.internal-alerts'),
     ],
   },
   data_streams: {

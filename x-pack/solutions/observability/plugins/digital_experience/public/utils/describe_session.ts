@@ -55,25 +55,33 @@ export const journeyOf = ({
       });
 };
 
-/** What stands out about a session: something broke, or the user left at once. */
+/** What stands out about a session: something broke or frustrated the user, or they left at once. */
 export type SessionSignal =
   | { id: 'jsErrors' | 'failedRequests'; count: number; color: 'danger' | 'warning' }
+  | { id: 'frustration'; count: number; color: 'danger' }
   | { id: 'bounced'; color: 'hollow' };
 
 /**
- * The signals of a session, in the order every surface shows them: what broke first, then whether
- * the user left at once. Each surface writes its own labels, as long as it has room for.
+ * The signals of a session, in the order every surface shows them: what broke first, then the
+ * user's frustration, then whether they left at once. Each surface writes its own labels, as long as it has room for.
  */
 export const sessionSignals = ({
   jsErrorCount,
   failedRequestCount,
+  frustration,
   bounced,
-}: Pick<SessionSummary, 'jsErrorCount' | 'failedRequestCount' | 'bounced'>): SessionSignal[] => [
+}: Pick<
+  SessionSummary,
+  'jsErrorCount' | 'failedRequestCount' | 'frustration' | 'bounced'
+>): SessionSignal[] => [
   ...(jsErrorCount > 0
     ? [{ id: 'jsErrors' as const, count: jsErrorCount, color: 'danger' as const }]
     : []),
   ...(failedRequestCount > 0
     ? [{ id: 'failedRequests' as const, count: failedRequestCount, color: 'warning' as const }]
+    : []),
+  ...(frustration.total > 0
+    ? [{ id: 'frustration' as const, count: frustration.total, color: 'danger' as const }]
     : []),
   ...(bounced ? [{ id: 'bounced' as const, color: 'hollow' as const }] : []),
 ];

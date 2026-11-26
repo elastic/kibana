@@ -6,17 +6,22 @@
  */
 
 /** Which eval scores a stored dataset, and so which spec file registers it. */
-export type StoredDatasetEval = 'investigation' | 'connector-probe';
+export type StoredDatasetEval =
+  | 'investigation'
+  | 'connector-probe'
+  | 'recovery'
+  | 'recovery-production';
 
 /**
  * A dataset stored on the evaluations cluster, by its exact `name`. `id` names it in
  * `NIGHTSHIFT_DATASETS` and in the Playwright describe title; scores are attributed to `name`.
- * `shard` is the CI shard in `evals.suites.json` that runs it.
+ * `shard`, when set, is the CI shard in `evals.suites.json` that runs it; without one the dataset is
+ * opt-in through `NIGHTSHIFT_DATASETS`.
  */
 export interface StoredDataset {
   id: string;
   eval: StoredDatasetEval;
-  shard: string;
+  shard?: string;
   name: string;
   /** Fails the run before any example runs when the loaded dataset lacks one of these tags. */
   requiredTags?: readonly string[];
@@ -39,13 +44,34 @@ export const STORED_DATASETS: readonly StoredDataset[] = [
     shard: 'customer0-connector-probes',
     name: 'nightshift/ns-connector-elastic',
   },
+  {
+    id: 'recovery',
+    eval: 'recovery',
+    // No CI shard runs it yet: `NIGHTSHIFT_DATASETS=recovery`.
+    // Its examples hold customer telemetry, so they are not in the repository: the run that scores
+    // it registers them from NIGHTSHIFT_RECOVERY_EXAMPLES_FILE (see the README).
+    name: 'ns-recovery-round-1811',
+    // getDatasetCustomContext holds these to the recovery's time instead of the alert's.
+    requiredTags: ['customer0-recovery'],
+  },
+  {
+    id: 'recovery-production',
+    eval: 'recovery-production',
+    // Replays what the production agent did on these recoveries; no investigation runs.
+    // Opt-in: `NIGHTSHIFT_DATASETS=recovery-production`.
+    name: 'ns-recovery-production-1811',
+    requiredTags: ['customer0-recovery'],
+  },
 ];
 
 /** The ids of the stored datasets a CI shard runs; empty for any other shard. */
 export const storedDatasetIdsForShard = (
   shardId: string | undefined,
   datasets: readonly StoredDataset[] = STORED_DATASETS
-): string[] => datasets.filter(({ shard }) => shard === shardId).map(({ id }) => id);
+): string[] =>
+  shardId === undefined
+    ? []
+    : datasets.filter(({ shard }) => shard === shardId).map(({ id }) => id);
 
 /** The stored datasets with the given ids that the given eval scores, in config order. */
 export const selectStoredDatasets = (

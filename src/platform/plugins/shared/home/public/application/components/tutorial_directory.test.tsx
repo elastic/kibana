@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -18,6 +18,7 @@ import type { TutorialDirectoryHeaderLinkComponent } from '../../services/tutori
 import { TutorialDirectory } from './tutorial_directory';
 
 const mockSetBreadcrumbs = jest.fn();
+const mockDocTitleChange = jest.fn();
 const mockHistoryPush = jest.fn();
 const mockGetAddDataTabs = jest.fn<AddDataTab[], []>(() => []);
 const mockGetDirectoryHeaderLinks = jest.fn<TutorialDirectoryHeaderLinkComponent[], []>(() => []);
@@ -36,6 +37,7 @@ jest.mock('../kibana_services', () => ({
     },
     chrome: {
       setBreadcrumbs: mockSetBreadcrumbs,
+      docTitle: { change: mockDocTitleChange },
     },
     application: {
       getUrlForApp: mockGetUrlForApp,
@@ -58,6 +60,7 @@ jest.mock('@kbn/home-sample-data-tab', () => ({
 describe('TutorialDirectory', () => {
   beforeEach(() => {
     mockSetBreadcrumbs.mockClear();
+    mockDocTitleChange.mockClear();
     mockHistoryPush.mockClear();
     mockGetAddDataTabs.mockReturnValue([]);
     mockGetDirectoryHeaderLinks.mockReturnValue([]);
@@ -89,6 +92,25 @@ describe('TutorialDirectory', () => {
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
       '/app/integrations/browse'
+    );
+  });
+
+  it('sets the document title from the selected tab and updates it when the tab changes', async () => {
+    mockGetAddDataTabs.mockReturnValue([
+      {
+        id: 'fileDataViz',
+        name: 'Upload file',
+        getComponent: () => <div data-test-subj="uploadFileTab" />,
+      },
+    ]);
+    renderDirectory();
+
+    await screen.findByTestId('homeTab-sampleData');
+    expect(mockDocTitleChange).toHaveBeenLastCalledWith(['Sample data', 'Add data']);
+
+    fireEvent.click(screen.getByTestId('homeTab-fileDataViz'));
+    await waitFor(() =>
+      expect(mockDocTitleChange).toHaveBeenLastCalledWith(['Upload file', 'Add data'])
     );
   });
 
