@@ -7,6 +7,7 @@
 
 import type { KbnClient, KibanaRole } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { fetchEndpointMetadataList } from '../../../../../scripts/endpoint/common/endpoint_metadata_services';
 import {
@@ -82,6 +83,34 @@ const FLEET_INTEGRATIONS_CASES: readonly RbacCase[] = FEATURE_PRIVILEGES.flatMap
   })
 );
 
+const withPolicyManagement = (role: KibanaRole, privilege: 'read' | 'all'): KibanaRole => ({
+  ...role,
+  kibana: role.kibana.map(({ feature, ...rest }) => ({
+    ...rest,
+    feature: {
+      ...feature,
+      [SECURITY_FEATURE_ID]: [
+        ...(feature[SECURITY_FEATURE_ID] ?? []),
+        `policy_management_${privilege}`,
+      ],
+    },
+  })),
+});
+
+// Policy management lets the page list the Defend policy without Integrations once it is read
+// from the current feature version (elastic/kibana#307734); that must not show the hosts
+// onboarding either.
+const POLICY_MANAGEMENT_CASES: readonly RbacCase[] = (['read', 'all'] as const).map(
+  (privilege) => ({
+    title: `hides the hosts onboarding with policy management ${privilege}, fleet all and integrations none`,
+    role: withPolicyManagement(
+      getEndpointListRole({ fleet: 'all', integrations: 'none' }),
+      privilege
+    ),
+    expected: POLICY_ONBOARDING,
+  })
+);
+
 spaceTest.describe(
   'Endpoint list RBAC with a Defend policy and no hosts',
   { tag: tags.stateful.classic },
@@ -108,7 +137,7 @@ spaceTest.describe(
       title,
       role,
       expected: { readyWhen, visible, hidden },
-    } of FLEET_INTEGRATIONS_CASES) {
+    } of [...FLEET_INTEGRATIONS_CASES, ...POLICY_MANAGEMENT_CASES]) {
       spaceTest(title, async ({ browserAuth, pageObjects }) => {
         const { endpointListEmptyState } = pageObjects;
 
