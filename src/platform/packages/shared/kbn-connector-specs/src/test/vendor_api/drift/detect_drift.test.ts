@@ -239,6 +239,27 @@ describe('detectDrift', () => {
     ]);
   });
 
+  it('names the operation a request the latest spec rejects was matched to', async () => {
+    documents[SPEC_URL] = specYaml().replace(
+      '    get:\n',
+      '    get:\n      security: [{ bearerAuth: [] }]\n'
+    ).concat(`components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+`);
+    diffEntries = [entry('api-security-added', 3)];
+
+    const drift = await detect();
+
+    expect(drift.actions).toMatchObject([
+      {
+        action: 'getItems',
+        latestProblems: [expect.stringContaining('Request has no credentials for the operation')],
+        latestViolations: [{ source: 'main', operation: 'GET /items' }],
+      },
+    ]);
+  });
+
   it('finds operations whose path prefix moved into the server URL, and the correction that hides it', async () => {
     const versioned: ConnectorSpec = {
       ...connector,
