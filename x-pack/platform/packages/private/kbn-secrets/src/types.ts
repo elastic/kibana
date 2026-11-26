@@ -10,10 +10,13 @@ export interface SecretMetadata {
   /** Unique per space and lowercase. Immutable, because consumers reference it. */
   readonly name: string;
   readonly description?: string;
-  /** Username of the author. `null` when the request had no user, for example with security off. */
+  /**
+   * User profile id of the author. `null` when the request had no profile: with an API key, a
+   * service account, or security off.
+   */
   readonly createdBy: string | null;
   readonly createdAt: string;
-  /** Username of the last author. `null` when the request had no user. */
+  /** User profile id of the last author. `null` when the request had no profile. */
   readonly updatedBy: string | null;
   readonly updatedAt: string;
 }

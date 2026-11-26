@@ -66,7 +66,7 @@ export class SecretsPlugin
       getClient: ({ request }) =>
         createSecretsClient({
           storage: getStorage({ spaceId: request.spaceId }),
-          username: security.authc.getCurrentUser(request)?.username ?? null,
+          profileId: security.authc.getCurrentUser(request)?.profile_uid ?? null,
         }),
     };
   }

@@ -14,8 +14,8 @@ import { validateSecret } from './validate_secret';
 export interface CreateSecretsClientParams {
   /** The secrets of one space. */
   readonly storage: SecretsStorage;
-  /** Recorded as the author of created and updated secrets. `null` when there is no user. */
-  readonly username: string | null;
+  /** User profile id recorded as the author of created and updated secrets. `null` without one. */
+  readonly profileId: string | null;
 }
 
 const withoutValue = ({ value, ...metadata }: SecretEntry): SecretMetadata => metadata;
@@ -27,7 +27,7 @@ const toStoredDescription = (description: string | undefined): string | undefine
 /** Creates the secrets client of one space. */
 export const createSecretsClient = ({
   storage,
-  username,
+  profileId,
 }: CreateSecretsClientParams): SecretsClient => {
   const findOrThrow = async (name: string): Promise<StoredSecret> => {
     const stored = await storage.get({ name });
@@ -60,9 +60,9 @@ export const createSecretsClient = ({
         name,
         description: toStoredDescription(description),
         value,
-        createdBy: username,
+        createdBy: profileId,
         createdAt: timestamp,
-        updatedBy: username,
+        updatedBy: profileId,
         updatedAt: timestamp,
       };
       await storage.create({ entry });
@@ -83,7 +83,7 @@ export const createSecretsClient = ({
         value: value ?? existing.value,
         description:
           description === undefined ? existing.description : toStoredDescription(description),
-        updatedBy: username,
+        updatedBy: profileId,
         updatedAt: new Date().toISOString(),
       };
       try {
