@@ -38,7 +38,7 @@ export class ResourcesReconcileTask {
       [TYPE]: {
         title: 'SLO resources reconcile task',
         description: 'Reinstalls missing or outdated SLO shared resources',
-        timeout: '5m',
+        timeout: '2m',
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
