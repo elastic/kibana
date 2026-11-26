@@ -116,3 +116,7 @@ export {
   type HuntEvidenceFieldKey,
   type HuntResult,
 } from './hunt/hunt_result';
+export {
+  FindOrCreateWorkerInvestigationRequestBody,
+  FindOrCreateWorkerInvestigationResponse,
+} from './investigations/find_or_create_investigation_route.gen';

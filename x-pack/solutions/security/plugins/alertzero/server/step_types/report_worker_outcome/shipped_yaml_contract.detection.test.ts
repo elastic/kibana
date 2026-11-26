@@ -75,7 +75,9 @@ describe('shipped Rule Tuning and Rule Coverage Worker YAML and the reportWorker
           ),
           {
             steps: {
-              create_investigation: { output: { conversation_id: INVESTIGATION_ID } },
+              find_or_create_investigation: {
+                output: { investigationConversationId: INVESTIGATION_ID },
+              },
               diagnose_rule: {
                 output: { structured_output: { change_type: 'query', confidence: 'high' } },
               },

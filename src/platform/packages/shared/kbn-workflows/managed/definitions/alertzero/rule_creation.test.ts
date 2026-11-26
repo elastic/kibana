@@ -177,18 +177,35 @@ describe('Detection Rule Creation worker', () => {
     // The comment shows a few fields, but the action creates the whole body. A draft
     // the analyst cannot inspect on the investigation is not proposed.
     it.each([
-      ['a ready draft that was attached', true, null, true],
-      ['a ready draft whose attachment failed', true, { message: 'boom' }, false],
-      ['a draft that was never ready', false, null, false],
-    ])('decides whether to propose %s', (_scenario, ok, attachError, expected) => {
+      ['a ready draft that was attached', true, true, true],
+      ['a ready draft that did not reach the investigation', true, false, false],
+      ['a draft that was never ready', false, true, false],
+    ])('decides whether to propose %s', (_scenario, ok, attached, expected) => {
       expect(stepByName('propose_creation')?.if).toBe(
         '${{ steps.proposal_ready.output.ok == true }}'
       );
       expect(
         evaluate(flagOf('proposal_ready', 'ok'), {
-          steps: { draft_ready: { output: { ok } }, attach_draft: { error: attachError } },
+          steps: {
+            draft_ready: { output: { ok } },
+            attach_draft: attached ? { output: { attachment_id: 'rule-draft-run-1' } } : {},
+          },
         })
       ).toBe(expected);
+    });
+
+    // The caller keeps one investigation per gap, so a re-review after an expired
+    // proposal finds the earlier review's draft card there, and an analyst may have
+    // removed it, which leaves an id that refuses every later write. Each review's
+    // draft is its own card, named after the review's run, so neither case arises.
+    it("gives each review's draft a card of its own, named after the run", () => {
+      const attach = stepByName('attach_draft');
+
+      expect(attach?.type).toBe('ai.attachment.add');
+      expect(attach?.with?.id).toBe('rule-draft-{{ execution.id }}');
+      expect(stepByName('resume_draft')).toBeUndefined();
+      expect(stepByName('draft_attached')).toBeUndefined();
+      expect(String(stepByName('proposal_ready')?.with?.ok)).not.toContain('(');
     });
 
     // NO_DATA comes back the same on every run. INVALID_OUTPUT, a tool error (no code)
@@ -490,16 +507,22 @@ describe('Detection Rule Creation worker', () => {
         'the attachment error for a draft that could not be copied',
         { ok: true },
         { reason: '' },
-        { message: 'boom' },
+        { attach_draft: { error: { message: 'boom' } } },
         'The draft could not be attached to the investigation: boom',
       ],
-      ['nothing for a proposed draft', { ok: true }, { reason: '' }, null, ''],
-    ])('reports %s as skip_reason', (_scenario, ready, structured, attachError, expected) => {
+      [
+        'nothing for a proposed draft',
+        { ok: true },
+        { reason: '' },
+        { attach_draft: { output: { attachment_id: 'rule-draft-run-1' } } },
+        '',
+      ],
+    ])('reports %s as skip_reason', (_scenario, ready, structured, writers, expected) => {
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(emit.skip_reason, {
         steps: {
           draft_ready: { output: ready },
           draft_creation: { output: { structured_output: structured } },
-          attach_draft: { error: attachError },
+          ...writers,
         },
       });
       expect(rendered).toBe(expected);

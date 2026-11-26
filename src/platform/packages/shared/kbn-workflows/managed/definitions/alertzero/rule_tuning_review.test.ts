@@ -167,6 +167,17 @@ describe('rule_tuning_review exception name', () => {
     expect(actionInput).toBe(NAME_OUTPUT);
   });
 
+  // A resumed review lands on an Investigation that already holds the earlier review's
+  // exception card, which the analyst may have removed. Each review proposes its own
+  // item, so each gets a card named after its run and never writes over the earlier one.
+  it("gives each review's exception a card of its own, named after the run", () => {
+    const attach = stepByName('attach_exception');
+
+    expect(attach?.type).toBe('ai.attachment.add');
+    expect(attach?.with?.id).toBe('proposed-exception-{{ execution.id }}');
+    expect(stepByName('resume_exception_attachment')).toBeUndefined();
+  });
+
   describe('name template', () => {
     it('uses the descriptive name from the agent', () => {
       expect(renderName('Known non-threat hosts excluded from indicator match')).toBe(
