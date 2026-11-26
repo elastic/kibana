@@ -42,7 +42,14 @@ export const EntityInventorySearchBar = () => {
   const { SearchBar } = unifiedSearch.ui;
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="flexStart"
+      responsive={false}
+      css={css`
+        min-height: ${euiTheme.size.xxl};
+      `}
+    >
       <EuiFlexItem>
         <SearchBar
           key={searchBarKey}
@@ -84,7 +91,7 @@ export const EntityInventorySearchBar = () => {
           grow={false}
           css={css`
             justify-content: center;
-            min-height: ${euiTheme.size.xxl};
+            min-height: ${euiTheme.size.xl};
           `}
         >
           <EuiText size="xs" color="subdued" data-test-subj="entityInventoryMaxTimeRangeHint">
