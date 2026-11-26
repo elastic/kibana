@@ -14,8 +14,6 @@ export interface ReportTemplate {
   title: string;
   description: string;
   iconType: string;
-  /** Templates that are listed but can't be opened yet. */
-  isAvailable: boolean;
 }
 
 /** The reports an application can have, in display order; fixed in code. */
@@ -29,7 +27,6 @@ export const REPORT_TEMPLATES: readonly ReportTemplate[] = [
       defaultMessage:
         'Page loads, load time, errors and Core Web Vitals, each compared with the previous period.',
     }),
-    iconType: 'visArea',
-    isAvailable: false,
+    iconType: 'chartArea',
   },
 ];
