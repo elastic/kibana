@@ -8,7 +8,13 @@
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import { AttachmentLimitChecker } from '.';
 import { createAttachmentServiceMock } from '../../services/mocks';
-import { createAlertRequests, createFileRequests, createUserRequests } from './test_utils';
+import {
+  createAlertRequests,
+  createFileRequests,
+  createPersistableStateRequests,
+  createUserRequests,
+} from './test_utils';
+import { LENS_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 
 describe('AttachmentLimitChecker', () => {
   const mockAttachmentService = createAttachmentServiceMock();
@@ -147,6 +153,27 @@ describe('AttachmentLimitChecker', () => {
         ).rejects.toMatchInlineSnapshot(
           `[Error: Case has reached the maximum allowed number (1000) of attached alerts.]`
         );
+      });
+    });
+
+    describe('persistable state and external references', () => {
+      it('throws when a mixed legacy and unified request takes a case with 99 attachments past 100', async () => {
+        expect.assertions(1);
+
+        mockAttachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
+          99
+        );
+
+        await expect(
+          checker.validate([
+            ...createPersistableStateRequests(1),
+            { type: LENS_ATTACHMENT_TYPE, data: { state: {} }, owner: 'test' },
+          ])
+        ).rejects.toMatchObject({
+          message:
+            'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments.',
+          output: { statusCode: 400 },
+        });
       });
     });
   });
