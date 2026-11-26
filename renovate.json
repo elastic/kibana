@@ -2620,6 +2620,11 @@
       "addLabels": ["Team:EUI"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "description": "Replacement PRs rebase on every Renovate run and never pass CI without manual code changes",
+      "matchUpdateTypes": ["replacement"],
+      "enabled": false
     }
   ],
   "customManagers": [

@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -39,7 +40,7 @@ const EditPackPageComponent = () => {
   const { packId } = useParams<{ packId: string }>();
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const { isLoading, data, error } = usePack({ packId });
+  const { isLoading, data, error } = usePack({ packId, withEffectivePolicyIds: true });
   const deletePackMutation = useDeletePack({ packId, withRedirect: true });
   const copyPackMutation = useCopyPack({ packId });
   // Full lockdown: a readPacks-only user can view but not edit anything.
@@ -110,6 +111,7 @@ const EditPackPageComponent = () => {
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
+              color="text"
               onClick={handleDuplicateClick}
               iconType="copy"
               isLoading={copyPackMutation.isLoading}
@@ -120,12 +122,12 @@ const EditPackPageComponent = () => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
+            <EuiButtonEmpty color="danger" onClick={handleDeleteClick} iconType="trash">
               <FormattedMessage
                 id="xpack.osquery.editPack.deletePackButtonLabel"
                 defaultMessage="Delete pack"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null,

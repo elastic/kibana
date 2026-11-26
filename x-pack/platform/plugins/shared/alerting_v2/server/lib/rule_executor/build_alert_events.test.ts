@@ -218,6 +218,31 @@ describe('createAlertEventsBatchBuilder', () => {
     });
   });
 
+  describe('events without a query row', () => {
+    it('does not give a reason to continued-breach, recovered or no-data events', () => {
+      const base = {
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert' as const,
+      };
+
+      const docs = [
+        ...buildContinuedBreachAlertEvents({ ...base, groupHashes: ['g1'] }),
+        ...buildNoDataAlertEvents({ ...base, groupHashes: ['g1'] }),
+        ...buildRecoveryAlertEvents({
+          ...base,
+          activeGroupHashes: [{ group_hash: 'g1' }] as never,
+          breachedGroupHashes: new Set<string>(),
+        }),
+      ];
+
+      expect(docs.length).toBeGreaterThan(0);
+      docs.forEach((doc) => expect(doc).not.toHaveProperty('reason'));
+    });
+  });
+
   describe('maxGroupsPerExecution', () => {
     const createBuilder = (maxGroupsPerExecution: number) =>
       createAlertEventsBatchBuilder({

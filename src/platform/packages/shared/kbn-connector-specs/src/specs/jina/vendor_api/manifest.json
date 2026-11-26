@@ -44,14 +44,14 @@
   },
   "sources": {
     "reader": {
-      "apiVersion": "0.5.0+6943abb",
+      "apiVersion": "0.5.0+8d8b39a",
       "fetchedAt": "2026-11-03T08:14:41.382Z",
       "format": "openapi",
       "url": "https://r.jina.ai/openapi.json"
     },
     "search": {
-      "apiVersion": "0.5.0+6943abb",
-      "fetchedAt": "2026-11-03T08:14:41.828Z",
+      "apiVersion": "0.5.0+8d8b39a",
+      "fetchedAt": "2026-11-23T11:10:35.099Z",
       "format": "openapi",
       "url": "https://s.jina.ai/openapi.json"
     }

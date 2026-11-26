@@ -23,12 +23,11 @@ export interface MobilePanelFilters {
  * The documents of a mobile panel, filtered; the time range and environment are applied apart.
  * Values from the request are params, which `inlineParams` writes into the query for Discover.
  */
-export const mobilePanelQuery = ({
-  serviceName,
-  osName,
-  release,
-}: MobilePanelFilters): ComposerQuery => {
-  let query = mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} == ${{
+export const mobilePanelQuery = (
+  { serviceName, osName, release }: MobilePanelFilters,
+  documents: ComposerQuery = mobileDocuments()
+): ComposerQuery => {
+  let query = documents.pipe`WHERE ${mobileColumn('serviceName')} == ${{
     service_name: serviceName,
   }}`;
   if (osName) {
