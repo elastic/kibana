@@ -416,8 +416,14 @@ describe('floor_alert_triage_review — dismiss mapping', () => {
   // A triage decision treats az:inconclusive without az:model_fp as a human verdict against the
   // false positive, so every path where a human rejected the closure must drop it.
   it('only a human rejection removes az:model_fp: a dismissal, or an alert removed before approval', () => {
-    ['retag_dismissed_alerts', 'retag_dismissed_read_failed', 'retag_approved_leftovers'].forEach(
-      (name) => expect(stepByName(name)?.with?.drop_model_fp).toBe(true)
+    ['retag_dismissed_alerts', 'retag_dismissed_read_failed'].forEach((name) =>
+      expect(stepByName(name)?.with?.drop_model_fp).toBe(true)
+    );
+    // Without the live revision, alerts that joined later and were approved are not excluded.
+    const leftovers = stepByName('retag_approved_leftovers')?.with?.drop_model_fp as string;
+    expect(evalExpr(leftovers, { steps: { get_live_revision: {} } })).toBe(true);
+    expect(evalExpr(leftovers, { steps: { get_live_revision: { error: { message: 'x' } } } })).toBe(
+      false
     );
     ['retag_expired_alerts', 'retag_unknown_alerts', 'retag_proposal_failed'].forEach((name) =>
       expect(stepByName(name)?.with?.drop_model_fp).toBeUndefined()

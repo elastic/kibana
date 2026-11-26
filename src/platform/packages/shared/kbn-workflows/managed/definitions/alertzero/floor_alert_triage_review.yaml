@@ -381,7 +381,9 @@ steps:
       # The alerts the approval closed keep az:false_positive. The ones an analyst removed from
       # the proposal were not closed, and nothing else would revisit them, so they are re-tagged.
       # The closed alerts are excluded by id, because the search can still see them as open.
-      # Removing an alert is a human judgement against the closure, so az:model_fp goes too.
+      # Removing an alert is a human judgement against the closure, so az:model_fp goes too. Only
+      # when the live revision was read: otherwise alerts that joined later and were approved are
+      # not excluded, and the sweep for az:model_fp reaches them even when they are closed.
       - name: retag_approved_leftovers
         type: alertzero.triage.retagProposalAlerts
         on-failure:
@@ -393,7 +395,7 @@ steps:
           proposal_id: "{{ inputs.proposal_id | default: steps.create_fp_proposal.output.proposalId }}"
           alert_ids: "${{ variables.retag_alert_ids }}"
           exclude_alert_ids: "${{ variables.live_alert_ids }}"
-          drop_model_fp: true
+          drop_model_fp: "${{ steps.get_live_revision.error == blank }}"
 
       # The sweep's failures reach the telemetry count and the comment. A step that failed as a whole
       # reports none, because the leftovers are unknown, so the comment says the sweep failed.
