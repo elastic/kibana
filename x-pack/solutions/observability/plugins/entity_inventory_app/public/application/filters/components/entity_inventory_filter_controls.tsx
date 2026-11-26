@@ -12,12 +12,12 @@ import { getEbtProps } from '@kbn/ebt-click';
 import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import {
   ENTITY_INVENTORY_EBT_ACTIONS,
   ENTITY_INVENTORY_EBT_DETAILS,
   ENTITY_INVENTORY_EBT_ELEMENTS,
 } from '../../../ebt_constants';
-import type { EntityInventoryAttributeValuesParams } from '../../../inventory_api_types';
 import { AttributeFilter } from './attribute_filter';
 import { FilterSelect } from './filter_select';
 import { getFilterControls, getTypesInScope } from '../utils/get_filter_controls';
@@ -38,7 +38,7 @@ interface EntityInventoryFilterControlsProps {
   isLoading?: boolean;
   error?: Error;
   pageCategory?: string;
-  timeRange: EntityInventoryAttributeValuesParams['timeRange'];
+  timeRange: TimeRange;
   selection: FilterControlsSelection;
   onSelectionChange: (selection: FilterControlsSelection) => void;
 }

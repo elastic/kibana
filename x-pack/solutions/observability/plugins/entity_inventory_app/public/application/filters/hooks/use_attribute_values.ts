@@ -6,17 +6,25 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import type { TimeRange } from '@kbn/es-query';
 import type { AttributeValuesResponse } from '@kbn/entity-inventory-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { toAbsoluteTimeRange } from '../../utils/to_absolute_time_range';
-import type { EntityInventoryAttributeValuesParams } from '../../../inventory_api_types';
+
+export interface AttributeValuesParams {
+  attribute: string;
+  types: string[];
+  filters: Record<string, string[]>;
+  selected: string[];
+  timeRange: TimeRange;
+}
 
 type AttributeValuesState = Pick<AttributeValuesResponse, 'values' | 'invalidSelections'> & {
   isLoading: boolean;
   error?: Error;
 };
 
-export const useAttributeValues = (params: EntityInventoryAttributeValuesParams) => {
+export const useAttributeValues = (params: AttributeValuesParams) => {
   const {
     services: { inventoryApi },
   } = useKibana();

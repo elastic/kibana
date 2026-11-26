@@ -11,8 +11,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AttributeValuesResponse } from '@kbn/entity-inventory-plugin/common';
 import { createFixtureEntityInventoryApiClient } from '../../../__fixtures__/inventory_client';
 import { createAppServicesMock } from '../../../mocks';
-import type { EntityInventoryAttributeValuesParams } from '../../../inventory_api_types';
 import { useAttributeValues } from './use_attribute_values';
+import type { AttributeValuesParams } from './use_attribute_values';
 
 const mockGetFilterValues = jest.fn();
 
@@ -29,7 +29,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   </KibanaContextProvider>
 );
 
-const params: EntityInventoryAttributeValuesParams = {
+const params: AttributeValuesParams = {
   attribute: 'os.type',
   types: ['host'],
   filters: {},
@@ -44,7 +44,7 @@ const response = (values: string[], invalidSelections: string[] = []): Attribute
   errors: [],
 });
 
-const render = (initialProps: EntityInventoryAttributeValuesParams = params) =>
+const render = (initialProps: AttributeValuesParams = params) =>
   renderHook((hookParams) => useAttributeValues(hookParams), { initialProps, wrapper });
 
 const lastBody = () => mockGetFilterValues.mock.calls[mockGetFilterValues.mock.calls.length - 1][0];
