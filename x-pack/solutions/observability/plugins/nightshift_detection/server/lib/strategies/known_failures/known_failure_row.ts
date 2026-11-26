@@ -101,9 +101,10 @@ export function decodeKnownFailureRow(row: RuleRow): KnownFailureMeasurement | u
 function parseMinuteCount(packed: string): { minute: number; count: number } | undefined {
   const separator = packed.lastIndexOf('=');
   const minute = Date.parse(packed.slice(0, separator));
-  const count = Number(packed.slice(separator + 1));
-  return separator > 0 && Number.isFinite(minute) && Number.isInteger(count)
-    ? { minute, count }
+  // Digits only: `Number('')` is 0, and a count is never negative.
+  const countText = packed.slice(separator + 1);
+  return separator > 0 && Number.isFinite(minute) && /^\d+$/.test(countText)
+    ? { minute, count: Number(countText) }
     : undefined;
 }
 

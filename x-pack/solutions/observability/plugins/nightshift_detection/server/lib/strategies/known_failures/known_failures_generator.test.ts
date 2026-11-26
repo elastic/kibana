@@ -370,12 +370,23 @@ describe('KnownFailuresGenerator', () => {
     expect(withSameRule.readings).toEqual([expect.objectContaining({ value: minute })]);
   });
 
-  it('notes a row without the Known failures columns and judges the others', async () => {
+  // `Number('')` is 0, so an empty count would read as a quiet minute.
+  it.each([
+    ['without the Known failures columns', { recent_max: 26 }],
+    [
+      'with an empty count',
+      { ...createRow(-5, [2]).data, newest_minute_counts: ['2026-11-20T10:00:00.000Z='] },
+    ],
+    [
+      'with a negative count',
+      { ...createRow(-5, [2]).data, newest_minute_counts: ['2026-11-20T10:00:00.000Z=-3'] },
+    ],
+  ])('notes a row %s and judges the others', async (_label, data) => {
     const result = await new KnownFailuresGenerator().generate(
       createContext({
         rows: [
           createRow(0, [2, 2, 40, 2, 2, 2, 2]),
-          { rule_id: RULE_ID, scheduled_timestamp: WINDOW.from, data: { recent_max: 26 } },
+          { rule_id: RULE_ID, scheduled_timestamp: WINDOW.from, data },
         ],
       })
     );
