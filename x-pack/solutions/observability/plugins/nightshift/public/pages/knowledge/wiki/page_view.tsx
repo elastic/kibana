@@ -194,6 +194,7 @@ export function WikiPageView({ pageId, canManage, onArchived }: WikiPageViewProp
           role="alertdialog"
           onClose={() => setIsConfirmingArchive(false)}
           data-test-subj="nightshiftWikiArchiveConfirm"
+          initialFocus="[data-test-subj='nightshiftWikiPageViewArchiveButton']"
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={archiveTitleId}>

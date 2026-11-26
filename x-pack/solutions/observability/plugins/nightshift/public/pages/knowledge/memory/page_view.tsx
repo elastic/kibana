@@ -386,6 +386,7 @@ export function MemoryPageView({
           role="alertdialog"
           onClose={() => setDeleteTarget(undefined)}
           data-test-subj="nightshiftMemoryDeleteConfirm"
+          initialFocus="[data-test-subj='nightshiftMemoryPageViewDeletePermanentlyButton']"
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={modalTitleId}>
