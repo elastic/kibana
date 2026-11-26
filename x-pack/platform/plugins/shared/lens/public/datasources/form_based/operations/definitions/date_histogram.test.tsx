@@ -465,7 +465,7 @@ describe('date_histogram', () => {
         });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](thirdLayer);
-      expect(newLayer).toHaveProperty('columns.col1.params.interval', '1M');
+      expect(newLayer).toHaveProperty('columns.col1.params.interval', '1w');
     });
 
     it('should allow turning off time range sync', () => {
