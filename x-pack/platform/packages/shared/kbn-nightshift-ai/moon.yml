@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/ai-tools'
   - '@kbn/apm-utils'
   - '@kbn/core'
-  - '@kbn/es-query'
   - '@kbn/es-types'
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
@@ -44,6 +43,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

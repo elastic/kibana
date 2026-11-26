@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { validateDuration, validateMaxDuration } from './validation';
 import {
@@ -57,9 +57,13 @@ const seriesIdSchema = lazySchema(() =>
     .regex(/^[A-Za-z0-9_-]+$/, 'Must contain only letters, digits, underscores, and hyphens.')
 );
 
-/** Semantics every client-addressable id carries; append to its `.describe()`. */
+/** Semantics every rule id carries; append to its `.describe()`. */
 const ENTITY_ID_NOTE =
   'Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.';
+
+/** Semantics every action policy id carries; append to its `.describe()`. */
+const ACTION_POLICY_ID_NOTE =
+  "You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data.";
 
 const durationSchema = lazySchema(() =>
   z
@@ -174,6 +178,17 @@ const queryIntSchema = ({ min, max }: { min: number; max: number }) =>
     z.number().int().min(min).max(max)
   );
 
+/**
+ * An ISO datetime that must lie strictly in the future at validation time.
+ * Used by every snooze body: a snooze until a past instant is already expired,
+ * so it is rejected with 400 rather than stored and echoed back. `now` is read
+ * when the request is parsed, so the check is against the moment of the call.
+ */
+const futureIsoDateTime = () =>
+  isoDateTime().refine((value) => Date.parse(value) > Date.now(), {
+    message: 'Must be an ISO datetime in the future.',
+  });
+
 export {
   durationSchema,
   entityIdSchema,
@@ -183,6 +198,8 @@ export {
   optionalWithDescription,
   arrayOrSingleSchema,
   queryIntSchema,
+  futureIsoDateTime,
   ENTITY_ID_NOTE,
+  ACTION_POLICY_ID_NOTE,
   ESTIMATED_COUNT_NOTE,
 };

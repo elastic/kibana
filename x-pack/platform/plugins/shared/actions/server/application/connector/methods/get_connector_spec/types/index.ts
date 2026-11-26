@@ -6,3 +6,4 @@
  */
 
 export type { GetConnectorSpecParams } from './params';
+export type { GetConnectorSpecResult } from './result';

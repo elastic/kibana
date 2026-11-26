@@ -11,61 +11,130 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
+import { RunWorkflowInputsModal, requiresUserSuppliedInputs } from '@kbn/workflows-ui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { useAutomationRowMenuItems } from '../../hooks/use_automation_row_menu_items';
+import { useKibana } from '../../hooks/use_kibana';
+import { useLatestWorkflowExecution } from '../../hooks/use_latest_workflow_execution';
+import { useRefreshKnowledgeDocumentsAfterRun } from '../../hooks/use_refresh_knowledge_documents_after_run';
+import { useRunAutomation } from '../../hooks/use_run_automation';
+import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_path';
+import { hasReadableWorkflow, type WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { ItemRow } from '../item_row';
 import { ItemRowIcon } from '../item_row_icon';
 import { AutomationDeleteConfirmModal } from './automation_delete_confirm_modal';
 import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
+import { WorkflowLastExecution } from './workflow_last_execution';
+
+const runLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.runAction', {
+  defaultMessage: 'Run',
+});
+const runningLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.running', {
+  defaultMessage: 'Running. Open the execution.',
+});
 
 interface AutomationRowProps {
+  aiIndexId?: string;
   automation: AiIndexAutomation;
-  name: string | undefined;
-  enabled: boolean | undefined;
+  workflowSummary?: WorkflowSummary;
   editHref: string;
   isReadOnly: boolean;
-  isDisabled: boolean;
+  isBusy: boolean;
+  canRun: boolean;
   onDelete: () => Promise<boolean>;
 }
 
 export const AutomationRow = ({
+  aiIndexId,
   automation,
-  name,
-  enabled,
+  workflowSummary,
   editHref,
   isReadOnly,
-  isDisabled,
+  isBusy,
+  canRun,
   onDelete,
 }: AutomationRowProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const displayName = name ?? automation.value;
+  const [isInputsModalOpen, setIsInputsModalOpen] = useState(false);
+  const [startedExecutionId, setStartedExecutionId] = useState<string>();
+  const clearStartedExecutionId = useCallback(() => setStartedExecutionId(undefined), []);
+  const { runAutomation, isLoading } = useRunAutomation({ onStarted: setStartedExecutionId });
+  const {
+    services: { application },
+  } = useKibana();
+  const displayName = workflowSummary?.name ?? automation.value;
+  const enabled = workflowSummary?.enabled;
+  const definition = workflowSummary?.definition;
+  const hasWorkflowDefinition = hasReadableWorkflow(workflowSummary);
+  const awaitedExecutionIds = startedExecutionId === undefined ? undefined : [startedExecutionId];
+  const latest = useLatestWorkflowExecution([automation.value], {
+    enabled: hasWorkflowDefinition,
+    awaitedExecutionIds,
+    onAwaitedObserved: clearStartedExecutionId,
+  });
+  useRefreshKnowledgeDocumentsAfterRun(aiIndexId, latest.isRunning);
+  const latestExecution = latest.executions?.[0]?.execution;
+  const isRunning = isLoading || latest.isRunning;
+  const runningExecutionId = latest.activeExecutionId ?? startedExecutionId;
+  const runningHref = runningExecutionId
+    ? application.getUrlForApp(WORKFLOWS_APP_ID, {
+        path: getWorkflowExecutionPath(automation.value, runningExecutionId),
+      })
+    : undefined;
+  const latestExecutionHref = latestExecution
+    ? application.getUrlForApp(WORKFLOWS_APP_ID, {
+        path: getWorkflowExecutionPath(automation.value, latestExecution.id),
+      })
+    : undefined;
+
   const actionsAriaLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.actionsAriaLabel',
     { defaultMessage: 'Actions for {name}', values: { name: displayName } }
   );
 
+  const normalizedInputs = useMemo(() => getInputsFromDefinition(definition), [definition]);
+  const needsManualInputs = useMemo(
+    () => requiresUserSuppliedInputs(normalizedInputs),
+    [normalizedInputs]
+  );
+
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const openPreview = useCallback(() => setIsPreviewOpen(true), []);
   const openDeleteModal = useCallback(() => setIsDeleteModalOpen(true), []);
+  const handleRun = useCallback(() => {
+    if (!hasWorkflowDefinition) {
+      return;
+    }
+    if (needsManualInputs) {
+      setIsInputsModalOpen(true);
+    } else {
+      runAutomation(automation.value);
+    }
+  }, [automation.value, hasWorkflowDefinition, needsManualInputs, runAutomation]);
 
   const menuItems = useAutomationRowMenuItems({
     editHref,
     isReadOnly,
-    isDisabled,
+    isBusy,
     onCloseMenu: closeMenu,
     onPreview: openPreview,
     onDelete: openDeleteModal,
   });
+  const isRunDisabled = isBusy || enabled === false || !hasWorkflowDefinition;
 
   return (
     <>
@@ -73,30 +142,72 @@ export const AutomationRow = ({
         label={displayName}
         icon={<ItemRowIcon iconType="workflow" />}
         actions={
-          <EuiPopover
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-            isOpen={isMenuOpen}
-            closePopover={() => setIsMenuOpen(false)}
-            aria-label={actionsAriaLabel}
-            button={
-              <EuiToolTip content={actionsAriaLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="ellipsis"
-                  color="text"
-                  aria-label={actionsAriaLabel}
-                  onClick={() => setIsMenuOpen((open) => !open)}
-                  data-test-subj="contextAutomationRowActionsButton"
-                  {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                    action: CONTEXT_ENGINE_UI_EBT.action.automations.ROW_ACTIONS_MENU,
-                  })}
-                />
-              </EuiToolTip>
-            }
-          >
-            <EuiContextMenuPanel items={menuItems} />
-          </EuiPopover>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            {isRunning ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={runningLabel} disableScreenReaderOutput>
+                  {runningHref ? (
+                    <EuiLink
+                      href={runningHref}
+                      aria-label={runningLabel}
+                      data-test-subj="contextAutomationRunning"
+                    >
+                      <EuiLoadingSpinner size="m" />
+                    </EuiLink>
+                  ) : (
+                    <EuiLoadingSpinner
+                      size="m"
+                      aria-label={runningLabel}
+                      data-test-subj="contextAutomationRunning"
+                    />
+                  )}
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : canRun ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={runLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="play"
+                    color="text"
+                    aria-label={runLabel}
+                    isDisabled={isRunDisabled}
+                    onClick={handleRun}
+                    data-test-subj="contextRunAutomationButton"
+                    {...getEbtProps({
+                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                      action: CONTEXT_ENGINE_UI_EBT.action.automations.RUN_WORKFLOW,
+                    })}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                isOpen={isMenuOpen}
+                closePopover={() => setIsMenuOpen(false)}
+                aria-label={actionsAriaLabel}
+                button={
+                  <EuiToolTip content={actionsAriaLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="ellipsis"
+                      color="text"
+                      aria-label={actionsAriaLabel}
+                      onClick={() => setIsMenuOpen((open) => !open)}
+                      data-test-subj="contextAutomationRowActionsButton"
+                      {...getEbtProps({
+                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                        action: CONTEXT_ENGINE_UI_EBT.action.automations.ROW_ACTIONS_MENU,
+                      })}
+                    />
+                  </EuiToolTip>
+                }
+              >
+                <EuiContextMenuPanel items={menuItems} />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         data-test-subj="contextAiIndexAutomationRow"
       >
@@ -119,6 +230,28 @@ export const AutomationRow = ({
               </EuiBadge>
             </EuiFlexItem>
           ) : null}
+          {latest.isError ? (
+            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+              <EuiText size="xs" color="danger" data-test-subj="contextAutomationLastExecution">
+                {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.statusUnavailable', {
+                  defaultMessage: 'Status unavailable',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          ) : hasWorkflowDefinition && latest.executions !== undefined ? (
+            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+              <WorkflowLastExecution
+                {...(latestExecution
+                  ? {
+                      status: latestExecution.status,
+                      startedAt: latestExecution.startedAt,
+                    }
+                  : { hasExecution: false })}
+                href={latestExecution ? latestExecutionHref : undefined}
+                data-test-subj="contextAutomationLastExecution"
+              />
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </ItemRow>
       {isPreviewOpen ? (
@@ -138,6 +271,17 @@ export const AutomationRow = ({
               setIsDeleteModalOpen(false);
             }
           }}
+        />
+      ) : null}
+      {isInputsModalOpen && normalizedInputs ? (
+        <RunWorkflowInputsModal
+          workflowName={displayName}
+          inputs={normalizedInputs}
+          onSubmit={(values) => {
+            setIsInputsModalOpen(false);
+            runAutomation(automation.value, values);
+          }}
+          onCancel={() => setIsInputsModalOpen(false)}
         />
       ) : null}
     </>

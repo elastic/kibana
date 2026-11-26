@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-timeline-search-strategy",
+  "owner": [
+    "@elastic/security-investigations"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

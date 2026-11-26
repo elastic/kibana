@@ -35,6 +35,7 @@ import { InlineReleaseBadge } from '../../../components';
 import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
+import { CollectionSizeBadge } from '../screens/home/components/collection_size_badge';
 
 import {
   InstallationStatus,
@@ -72,6 +73,7 @@ export function PackageCard({
   installStatus,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
+  collectionSize,
   groupMembers,
   titleLineClamp,
   titleBadge,
@@ -183,6 +185,15 @@ export function PackageCard({
         </span>
       </EuiFlexItem>
     );
+  } else if (collectionSize) {
+    collectionBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <CollectionSizeBadge count={collectionSize} />
+        </span>
+      </EuiFlexItem>
+    );
   }
 
   let contentBadge: React.ReactNode | null = null;
@@ -284,10 +295,10 @@ export function PackageCard({
         title={
           titleLineClamp ? (
             <EuiToolTip content={displayTitle} position="top" display="block">
-              <CardTitle title={displayTitle} titleBadge={titleBadge} />
+              <CardTitle title={displayTitle} titleBadge={titleBadge} titleSize={titleSize} />
             </EuiToolTip>
           ) : (
-            <CardTitle title={displayTitle} titleBadge={titleBadge} />
+            <CardTitle title={displayTitle} titleBadge={titleBadge} titleSize={titleSize} />
           )
         }
         titleSize={titleSize}
@@ -352,29 +363,32 @@ export function PackageCard({
   );
 }
 
-const CardTitle = React.memo<Pick<IntegrationCardItem, 'title' | 'titleBadge'>>(
-  ({ title, titleBadge }) => {
-    if (!titleBadge) {
-      return title;
-    }
-    return (
-      <EuiFlexGroup
-        direction="row"
-        alignItems="flexStart"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiTitle>
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
+const CardTitle = React.memo<
+  Required<Pick<IntegrationCardItem, 'titleSize'>> &
+    Pick<IntegrationCardItem, 'title' | 'titleBadge'>
+>(({ title, titleBadge, titleSize }) => {
+  if (!titleBadge) {
+    return title;
   }
-);
+  return (
+    <EuiFlexGroup
+      direction="row"
+      alignItems="flexStart"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        {/* Same size as the card title, otherwise the badge variant renders much taller and pushes
+              the content below (e.g. the variant-count badge) out of the card's max height. */}
+        <EuiTitle size={titleSize}>
+          <h3>{title}</h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 
 function quickstartBadge(isQuickstart: boolean): { label: string; color: 'accent' } | undefined {
   return isQuickstart

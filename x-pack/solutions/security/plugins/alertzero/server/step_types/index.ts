@@ -5,75 +5,65 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ActionsService } from '../services/actions/actions_service';
-import type { HuntServices } from '../services/watches/hunt/types';
 import {
-  getTriageHeadroomStepDefinition,
-  getTriageLoadAlertsStepDefinition,
-  getTriagePlanSweepStepDefinition,
-} from './alert_triage/alert_triage_steps';
-import { getPackageReportStepDefinition } from './package_report';
+  WORKER_SERVER_DEFINITIONS,
+  type WorkerServerContext,
+  type WorkerServerDefinition,
+} from '../workers';
+import { getResolveProposalsStepDefinition } from './resolve_proposals';
 import {
   getSummarizeInvestigationStepDefinition,
   type SummarizeInvestigationStepDependencies,
 } from './summarize_investigation';
-import type { PackageReportStepDependencies } from './package_report/package_report_step';
 import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
 import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
 
+/** Registers the shared steps, then every step each Worker declares. */
 export const registerStepDefinitions = ({
   workflowsExtensions,
-  getActionsService,
-  getConversations,
-  getExecution,
-  resolveConnectorId,
-  getHuntServices,
-  getResolveHostEnrollment,
-  isContextEngineEnabled,
-  getInternalEsClient,
-  getTaskManager,
-  logger,
+  context,
+  resolveChatModel,
+  readProposals,
+  workers = WORKER_SERVER_DEFINITIONS,
 }: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  getActionsService: () => ActionsService;
-  getConversations: () => AgentBuilderPluginStart['conversations'];
-  getExecution: SummarizeInvestigationStepDependencies['executeAgent'];
-  resolveConnectorId?: SummarizeInvestigationStepDependencies['resolveConnectorId'];
-  getHuntServices: () => HuntServices;
-  getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
-  isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
-  getInternalEsClient?: () => ElasticsearchClient;
-  getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
-  logger?: Logger;
-}) => {
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
+  context: WorkerServerContext;
+  resolveChatModel: SummarizeInvestigationStepDependencies['resolveChatModel'];
+  readProposals: NonNullable<SummarizeInvestigationStepDependencies['readProposals']>;
+  workers?: readonly WorkerServerDefinition[];
+}): void => {
+  const { assertStarted, getConversations, getProposalsPlugin, logger } = context;
   workflowsExtensions.registerStepDefinition(
-    getPackageReportStepDefinition({
-      getActionsService,
+    getResolveProposalsStepDefinition({
+      getProposalsService: () => {
+        assertStarted();
+        return getProposalsPlugin().getProposalsService();
+      },
+      getProposalPrivileges: () => {
+        assertStarted();
+        return getProposalsPlugin().getProposalPrivileges();
+      },
       getConversations,
-      getHuntServices,
-      getResolveHostEnrollment,
-      isContextEngineEnabled,
-      getInternalEsClient,
       logger,
     })
   );
   workflowsExtensions.registerStepDefinition(
     getSummarizeInvestigationStepDefinition({
       getConversationClient: (request) => getConversations().getScopedClient({ request }),
-      executeAgent: (params) => getExecution(params),
-      resolveConnectorId,
+      resolveChatModel,
+      readProposals,
+      logger,
     })
   );
-  workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
-  workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
-  workflowsExtensions.registerStepDefinition(getTriageLoadAlertsStepDefinition());
+  for (const worker of workers) {
+    for (const definition of worker.getStepDefinitions?.(context) ?? []) {
+      workflowsExtensions.registerStepDefinition(definition);
+    }
+  }
 };
 
-export { getPackageReportStepDefinition } from './package_report';
+export { getResolveProposalsStepDefinition } from './resolve_proposals';
 
 export { OPT_IN_TIMEOUT_MS as REPORT_STEP_OPT_IN_TIMEOUT_MS } from './report_worker_outcome/report_worker_outcome_step';
 

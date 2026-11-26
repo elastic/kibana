@@ -35,6 +35,8 @@ describe('Create artifact hook', () => {
   it('create an artifact', async () => {
     const exceptionItem = { ...getExceptionListItemSchemaMock(), list_id: getFakeListId() };
 
+    const { meta, ...expectedBody } = exceptionItem;
+
     fakeHttpServices.post.mockClear();
     fakeHttpServices.post.mockResolvedValueOnce(exceptionItem);
     const onSuccessMock: jest.Mock = jest.fn();
@@ -55,7 +57,7 @@ describe('Create artifact hook', () => {
       expect(fakeHttpServices.post).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/exception_lists/items', {
         version: '2023-10-31',
-        body: JSON.stringify(exceptionItem),
+        body: JSON.stringify(expectedBody),
       });
     });
   });

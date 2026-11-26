@@ -20,7 +20,7 @@ describe('api', () => {
     http.get.mockResolvedValue(allCasesSnake);
 
     it('should return the correct response', async () => {
-      // The public `_find` path decodes with the strict `CasesFindResponseRt`, which intentionally
+      // The public `_find` path decodes with the strict `CasesFindResponseSchema`, which intentionally
       // omits `mttr` (that field is internal `_search`-only). So even though the fixture carries an
       // `mttr`, the public response must not.
       expect(await getCases({ http, query: { from: 'now-1d' } })).toEqual({

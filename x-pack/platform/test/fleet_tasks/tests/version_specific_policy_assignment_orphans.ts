@@ -11,7 +11,9 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_VERSION_SEPARATOR,
 } from '@kbn/fleet-plugin/common/constants';
+import { getSentinelVersionPolicyId } from '@kbn/fleet-plugin/common/services';
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
+import { waitForPolicyBaseIdBackfill } from '../../fleet_api_integration/helpers';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
 export default function (providerContext: FtrProviderContextWithServices) {
@@ -43,6 +45,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
   describe('orphaned agents without policy_base_id (expensive queries disabled)', () => {
     let parentId: string;
     const variantId = () => `${parentId}${AGENT_POLICY_VERSION_SEPARATOR}9.4`;
+    // The sentinel version is enabled in the config, so agents are moved to `#sentinel` instead of the parent
+    const sentinelId = () => getSentinelVersionPolicyId(parentId);
 
     async function indexVariantDoc() {
       await es.index({
@@ -61,6 +65,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      // Otherwise the setup backfill can set policy_base_id on the agents of the tests
+      await waitForPolicyBaseIdBackfill(providerContext);
       // Fail fast with a clear message instead of two opaque timeouts: a leftover policy with
       // version conditions makes Phase 1 run a wildcard query that fails with expensive queries off.
       const versionConditioned = await es.search({
@@ -122,7 +128,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
     it('reassigns an agent without policy_base_id and deletes the variant doc', async () => {
       await indexVariantDoc();
       await createAgentDoc(providerContext, 'agent-no-base', variantId(), '9.4.0');
-      // Not an orphan: plain (non-versioned) policy id without policy_base_id.
+      // Not an orphan: plain (non-versioned) policy id without policy_base_id, moved by the sentinel assignment.
       await createAgentDoc(providerContext, 'agent-plain', parentId, '9.4.0');
       // OpAMP collectors are not moved, and do not keep the variant doc from being deleted.
       await createAgentDoc(providerContext, 'opamp-collector', variantId(), '9.4.0', true, {
@@ -131,11 +137,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
       await retry.tryForTime(TASK_TIMEOUT, async () => {
         const agent = await getAgent('agent-no-base');
-        expect(agent.policy_id).to.be(parentId);
+        expect(agent.policy_id).to.be(sentinelId());
         const docs = await getFleetPolicies(parentId);
         expect(docs.some((p: any) => p.policy_id === variantId())).to.be(false);
+        expect((await getAgent('agent-plain')).policy_id).to.be(sentinelId());
       });
-      expect((await getAgent('agent-plain')).policy_id).to.be(parentId);
       expect((await getAgent('opamp-collector')).policy_id).to.be(variantId());
     });
 
@@ -145,7 +151,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
       await retry.tryForTime(TASK_TIMEOUT, async () => {
         const agent = await getAgent('agent-no-base-no-doc');
-        expect(agent.policy_id).to.be(parentId);
+        expect(agent.policy_id).to.be(sentinelId());
       });
     });
   });

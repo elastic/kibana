@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { errors } from '@elastic/elasticsearch';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 /*
  * A handful of helper functions for testing the task manager.
@@ -16,6 +17,21 @@ const nativeTimeout = setTimeout;
 
 export function mockLogger() {
   return loggingSystemMock.createLogger();
+}
+
+/**
+ * Creates the error the Elasticsearch client throws when a request fails with the given HTTP status.
+ */
+export function createEsResponseError(
+  statusCode: number,
+  type: string = 'exception'
+): errors.ResponseError {
+  return new errors.ResponseError(
+    elasticsearchServiceMock.createApiResponse({
+      statusCode,
+      body: { error: { type, reason: type }, status: statusCode },
+    })
+  );
 }
 export interface Resolvable {
   resolve: () => void;

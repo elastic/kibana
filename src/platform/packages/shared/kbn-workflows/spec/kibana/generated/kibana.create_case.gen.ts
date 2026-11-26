@@ -26,7 +26,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
+import { KibanaFetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 
 // export contract
 export const CREATE_CASE_CONTRACT: InternalConnectorContract = {
@@ -62,10 +62,10 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     ],
   },
   paramsSchema: z.object({
-    ...getShapeAt(create_case_default_space_request, 'body'),
-    ...getShapeAt(create_case_default_space_request, 'path'),
     ...getShapeAt(create_case_default_space_request, 'query'),
-    fetcher: FetcherConfigSchema,
+    ...getShapeAt(create_case_default_space_request, 'path'),
+    ...getShapeAt(create_case_default_space_request, 'body'),
+    fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),
   outputSchema: create_case_default_space_response,

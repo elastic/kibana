@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import type { QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
+import { useCallback, useEffect } from 'react';
+import type { MutationKey, QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
   useInfiniteQuery,
   useIsMutating,
@@ -21,8 +21,11 @@ import {
   MAX_PROPOSALS_PAGE_SIZE,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
+  PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
+  isAwaitingRetry,
   isProposalSettling,
+  isTerminal,
 } from '@kbn/proposals-common';
 import type {
   ApproveProposalRequest,
@@ -32,11 +35,158 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import { mutationKeys, queryKeys } from '../query_keys';
+import type { DecisionKind } from './in_flight_decisions';
+import { inFlightDecisions, useIsDecisionInFlight } from './in_flight_decisions';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 import { useProposalDecisionSignal } from './use_proposal_decision_signal';
 
+/**
+ * How long to wait for the retry of a failed action. After that, the failed action is final.
+ * The 30 seconds is a guess. It is long enough for a normal retry.
+ * A state saved on the failed action is the better fix.
+ * FIXME: https://github.com/elastic/security-team/issues/2050
+ */
+export const RETRY_WAIT_MS = 30_000;
+
+const awaitingRetrySince = new Map<string, number>();
+
+/** Whether this read of the proposal shows its decision, or no decision can follow. */
+export const isDecisionShown = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'> | undefined
+): boolean =>
+  proposal !== undefined &&
+  (Boolean(proposal.decision) ||
+    isTerminal(proposal.status) ||
+    proposal.supersededBy !== undefined);
+
+const hasUnseenDecision = (
+  proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
+): boolean => inFlightDecisions.hasUnseen(proposal.id) && !isDecisionShown(proposal);
+
+/** Running, or failed with no retry yet for up to `RETRY_WAIT_MS`. Poll while this is true. */
+export const isInFlux = (
+  proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
+): boolean => {
+  if (hasUnseenDecision(proposal) || isProposalSettling(proposal)) {
+    return true;
+  }
+  if (!isAwaitingRetry(proposal)) {
+    return false;
+  }
+  const since = awaitingRetrySince.get(proposal.id) ?? Date.now();
+  awaitingRetrySince.set(proposal.id, since);
+  return Date.now() - since < RETRY_WAIT_MS;
+};
+
 const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
-  response?.proposals.some(isProposalSettling) ?? false;
+  response?.proposals.some(isInFlux) ?? false;
+
+const isConflict = (error: unknown): boolean =>
+  isHttpFetchError(error) && error.response?.status === 409;
+
+const isReplacedProposal = (
+  proposal: Pick<ProposalWithMetadata, 'supersededBy' | 'status'> | undefined
+): boolean => Boolean(proposal?.supersededBy) || proposal?.status === 'superseded';
+
+/**
+ * A revision supersedes its predecessors without any event reaching their cards, and a pending
+ * card does not poll. When a later revision shows up, refetch the earlier ones so they read as
+ * replaced (with buttons disabled).
+ */
+const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined): void => {
+  const queryClient = useQueryClient();
+  const id = proposal?.id;
+  const rootProposalId = proposal?.rootProposalId;
+  const revision = proposal?.revision ?? 1;
+  const isRevision = revision > 1;
+
+  useEffect(() => {
+    if (!isRevision || !id || !rootProposalId) {
+      return;
+    }
+    // Cards of the chain that still read as open, or that show a load error.
+    const findStaleQueries = () =>
+      queryClient
+        .getQueriesData<ProposalWithMetadata>({ queryKey: queryKeys.proposals.details })
+        .flatMap(([queryKey, cached]) => {
+          // A retry keeps the revision number of the proposal it copies, so only a strictly
+          // later revision is safe to skip. An earlier proposal never has a later number.
+          const isLater = (cached?.revision ?? 1) > revision;
+          const isOtherInChain =
+            cached?.rootProposalId === rootProposalId && cached.id !== id && !isLater;
+          const isReplaced = isReplacedProposal(cached);
+          // A failed refetch keeps the old data, but the card shows a load error instead of it.
+          const query = queryClient.getQueryCache().find(queryKey, { exact: true });
+          const isShowingError = query?.state.status === 'error';
+          const isShowingReplacement = isReplaced && !isShowingError;
+          return query && isOtherInChain && !isShowingReplacement ? [query] : [];
+        });
+    const hashesOf = (queries: ReturnType<typeof findStaleQueries>): Set<string> =>
+      new Set(queries.map(({ queryHash }) => queryHash));
+
+    // One call scans the cache once. `cancelRefetch: false` joins a request already in flight,
+    // so a decision that waits for its own refresh is not cut short.
+    const refresh = (hashes: Set<string>): Promise<void> =>
+      queryClient.invalidateQueries(
+        {
+          queryKey: queryKeys.proposals.details,
+          predicate: ({ queryHash }) => hashes.has(queryHash),
+        },
+        { cancelRefetch: false }
+      );
+
+    const stale = findStaleQueries();
+    if (stale.length === 0) {
+      return;
+    }
+    // A joined request can return a state that the server read before this revision existed.
+    // Check those cards once more after the refresh. Do not repeat, so the number of requests
+    // stays bounded. A card that got a new request already shows the current server state.
+    const joined = hashesOf(stale.filter(({ state }) => state.fetchStatus === 'fetching'));
+    void refresh(hashesOf(stale)).then(() => {
+      const stillOpen = hashesOf(
+        findStaleQueries().filter(({ queryHash }) => joined.has(queryHash))
+      );
+      return stillOpen.size > 0 ? refresh(stillOpen) : undefined;
+    });
+  }, [queryClient, id, rootProposalId, revision, isRevision]);
+};
+
+/**
+ * The other side of `useRefreshEarlierRevisions`: that one only finds earlier cards that already
+ * have data. A card whose first read was still loading then, and reads open when it arrives,
+ * checks once for a cached later proposal of its chain. The revision between them can be missing
+ * from the cache, so a later revision number counts, not only a direct successor. A retry keeps
+ * the revision number, so it never counts. The check does not repeat, so requests stay bounded.
+ */
+const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): void => {
+  const queryClient = useQueryClient();
+  const id = proposal?.id;
+  const rootProposalId = proposal?.rootProposalId;
+  const revision = proposal?.revision ?? 1;
+  const isOpen = proposal !== undefined && !isReplacedProposal(proposal);
+
+  useEffect(() => {
+    if (!id || !isOpen) {
+      return;
+    }
+    const hasCachedSuccessor = queryClient
+      .getQueriesData<ProposalWithMetadata>({ queryKey: queryKeys.proposals.details })
+      .some(
+        ([, cached]) =>
+          cached?.supersedes === id ||
+          (rootProposalId !== undefined &&
+            cached?.rootProposalId === rootProposalId &&
+            (cached?.revision ?? 1) > revision)
+      );
+    if (hasCachedSuccessor) {
+      void queryClient.invalidateQueries(
+        { queryKey: queryKeys.proposals.detail(id), exact: true },
+        { cancelRefetch: false }
+      );
+    }
+  }, [queryClient, id, rootProposalId, revision, isOpen]);
+};
 
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
@@ -154,7 +304,7 @@ export const useProposal = (id: string | undefined) => {
   const { services } = useKibana();
   useProposalDecisionSignal();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.proposals.detail(id),
     queryFn: async (): Promise<ProposalWithMetadata> => {
       if (!id) {
@@ -169,9 +319,14 @@ export const useProposal = (id: string | undefined) => {
     },
     enabled: Boolean(id),
     refetchInterval: (data) =>
-      data && isProposalSettling(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
+      data && isInFlux(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
+
+  useRefreshEarlierRevisions(query.data);
+  useRefreshWhenSuperseded(query.data);
+
+  return query;
 };
 
 /**
@@ -212,9 +367,8 @@ const DECISION_POLL_MAX_ATTEMPTS = 8;
  * bridge that specific gap, rather than settling on the first refetch, which can beat the write
  * and read `pending` once more with no decision to fall back on either.
  *
- * Bounded: a slow write should not hang the mutation forever. Giving up here does not lose the
- * update — `usePendingProposals`/`useConversationProposals`/`useProposal`'s own settling-aware
- * poll still catches it once the write lands, just on their cadence instead of this one.
+ * The wait stops after `DECISION_POLL_MAX_ATTEMPTS` tries, so a slow write cannot hang the
+ * mutation. `settleDecision` then marks the decision as unseen.
  *
  * Best-effort: the decide POST already succeeded by the time this runs, so a read failure here
  * (a transient network blip, a 5xx) is not a decision failure and must not be treated as one —
@@ -238,6 +392,12 @@ const waitForDecision = async (http: HttpSetup, id: string): Promise<void> => {
   }
 };
 
+/** Waits for the decision, then marks it unseen until a read of the proposal shows it. */
+const settleDecision = async (http: HttpSetup, kind: DecisionKind, id: string): Promise<void> => {
+  await waitForDecision(http, id);
+  inFlightDecisions.markUnseen(kind, id);
+};
+
 /**
  * Approving submits the action input the analyst was shown, so the API can
  * refuse an approval that no longer matches the record.
@@ -253,10 +413,14 @@ export const useApproveProposal = () => {
         version: PROPOSALS_API_VERSION,
         body: JSON.stringify(body),
       }),
+    onMutate: ({ id }) => inFlightDecisions.start('approve', id),
     onSuccess: async (_data, { id }) => {
-      await waitForDecision(services.http!, id);
+      await settleDecision(services.http!, 'approve', id);
       await invalidateProposals(queryClient);
     },
+    // Refetch on error so the card shows the real state rather than a decidable one.
+    onError: (error) => (isConflict(error) ? invalidateProposals(queryClient) : undefined),
+    onSettled: (_data, _error, { id }) => inFlightDecisions.end('approve', id),
   });
 };
 
@@ -271,8 +435,34 @@ export const useDismissProposal = () => {
         version: PROPOSALS_API_VERSION,
         body: JSON.stringify(body),
       }),
+    onMutate: ({ id }) => inFlightDecisions.start('decline', id),
     onSuccess: async (_data, { id }) => {
-      await waitForDecision(services.http!, id);
+      await settleDecision(services.http!, 'decline', id);
+      await invalidateProposals(queryClient);
+    },
+    // Refetch so the card shows the real state rather than a decidable one.
+    onError: (error) => (isConflict(error) ? invalidateProposals(queryClient) : undefined),
+    onSettled: (_data, _error, { id }) => inFlightDecisions.end('decline', id),
+  });
+};
+
+/**
+ * Marks a to-do proposal that was marked as applied as not applied. The server re-offers it as a
+ * pending successor before it answers, so the proposals are refetched right away.
+ */
+export const useReopenProposal = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: mutationKeys.proposals.reopen,
+    mutationFn: ({ id }: { id: string }): Promise<{ proposalId: string }> =>
+      services.http!.post<{ proposalId: string }>(
+        PROPOSAL_REOPEN_URL.replace('{id}', encodeURIComponent(id)),
+        { version: PROPOSALS_API_VERSION }
+      ),
+    onMutate: ({ id }) => inFlightDecisions.clearUnseen(id),
+    onSuccess: async () => {
       await invalidateProposals(queryClient);
     },
   });
@@ -287,21 +477,30 @@ export const useDismissProposal = () => {
  * Takes the `QueryClient` to track it on, since the surface that closes (the flyout's status
  * toggle) can run in a different client than the one the cards read `Declining` from. Defaults
  * to the one in context.
+ *
+ * `afterDecision` runs once the decision is recorded. The tracker stays open until it finishes.
+ * Use it to refresh the data first, so the row never reads old data after "Declining" ends.
  */
 export const useSettleDeclinedProposal = () => {
   const { services } = useKibana();
   const contextClient = useQueryClient();
 
   return useCallback(
-    async (id: string, queryClient: QueryClient = contextClient): Promise<void> => {
+    async (
+      id: string,
+      queryClient: QueryClient = contextClient,
+      afterDecision?: () => Promise<void>
+    ): Promise<void> => {
       // Built on the cache rather than through a `MutationObserver`: an observer stays attached
       // to the mutation it started, which keeps it out of garbage collection for the life of a
       // long-lived shared client. Nothing observes this one, so it is removed once settled.
       const mutationCache = queryClient.getMutationCache();
       const mutation = mutationCache.build(queryClient, {
         mutationKey: mutationKeys.proposals.decline,
-        mutationFn: ({ id: proposalId }: { id: string }): Promise<void> =>
-          waitForDecision(services.http!, proposalId),
+        mutationFn: async ({ id: proposalId }: { id: string }): Promise<void> => {
+          await waitForDecision(services.http!, proposalId);
+          await afterDecision?.();
+        },
         variables: { id },
       });
       try {
@@ -314,6 +513,21 @@ export const useSettleDeclinedProposal = () => {
   );
 };
 
+const useIsDecisionRunning = (
+  kind: DecisionKind,
+  mutationKey: MutationKey,
+  id: string | undefined,
+  decisionShown: boolean
+): boolean => {
+  const inThisClient =
+    useIsMutating({
+      mutationKey,
+      predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
+    }) > 0;
+  const inAnyClient = useIsDecisionInFlight(kind, id, decisionShown);
+  return inThisClient || inAnyClient;
+};
+
 /**
  * Whether *this* proposal's approve/decline is currently in flight, read from the shared
  * mutation cache rather than component state — so the answer is the same for the flyout row and
@@ -323,15 +537,19 @@ export const useSettleDeclinedProposal = () => {
  * `useIsMutating` only ever returns a count, so the predicate is what actually scopes it to one
  * proposal — every approve (or decline) shares the same `mutationKey`, and `variables` is the
  * `{ id, body }` a specific `mutate`/`mutateAsync` call was made with.
+ *
+ * The shared store adds the decisions that another `QueryClient` started, and the decisions whose
+ * request ended but whose result the data of this row (`decisionShown`, see `isDecisionShown`) does
+ * not show yet. This applies to the decline hook too.
  */
-export const useIsApprovingProposal = (id: string | undefined): boolean =>
+export const useIsApprovingProposal = (id: string | undefined, decisionShown: boolean): boolean =>
+  useIsDecisionRunning('approve', mutationKeys.proposals.approve, id, decisionShown);
+
+export const useIsReopeningProposal = (id: string | undefined): boolean =>
   useIsMutating({
-    mutationKey: mutationKeys.proposals.approve,
+    mutationKey: mutationKeys.proposals.reopen,
     predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
   }) > 0;
 
-export const useIsDecliningProposal = (id: string | undefined): boolean =>
-  useIsMutating({
-    mutationKey: mutationKeys.proposals.decline,
-    predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
-  }) > 0;
+export const useIsDecliningProposal = (id: string | undefined, decisionShown: boolean): boolean =>
+  useIsDecisionRunning('decline', mutationKeys.proposals.decline, id, decisionShown);

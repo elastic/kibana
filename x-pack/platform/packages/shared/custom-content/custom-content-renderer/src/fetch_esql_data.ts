@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import dateMath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type {
   AggregateQuery,
@@ -17,9 +19,10 @@ import type {
 } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { ISearchGeneric } from '@kbn/search-types';
-import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
+import type { ISearchMethods } from '@kbn/search-types';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 export type EsqlDataResult = ESQLSearchResponse;
 
@@ -30,20 +33,50 @@ export interface FetchEsqlOptions {
   filters?: Filter[];
   esQueryConfig?: EsQueryConfig;
   esqlVariables?: ESQLControlVariable[];
+  /** Records the request so the panel's Inspect action can show it. */
+  requestAdapter?: RequestAdapter;
+  /** Leaves the adapter's earlier requests in place, for a caller that fetches several queries at once. */
+  keepRequests?: boolean;
+  /** Names the request in the Inspect action, to tell it from the others when several are fetched at once. */
+  requestTitle?: string;
 }
 
+const INSPECTOR_REQUEST_TITLE = i18n.translate('xpack.customContent.inspector.requestTitle', {
+  defaultMessage: 'Data',
+});
+
+const INSPECTOR_REQUEST_DESCRIPTION = i18n.translate(
+  'xpack.customContent.inspector.requestDescription',
+  {
+    defaultMessage: 'This request queries Elasticsearch to fetch the data for the custom panel.',
+  }
+);
+
 export async function fetchEsqlData(
-  search: ISearchGeneric,
+  search: Pick<ISearchMethods, 'esql'>,
   http: HttpStart,
   esqlQuery: string,
   timeRange: TimeRange | undefined,
   signal: AbortSignal,
   options?: FetchEsqlOptions
 ): Promise<EsqlDataResult> {
-  const { isApproximate, projectRouting, query, filters, esQueryConfig, esqlVariables } =
-    options ?? {};
+  const {
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+    esQueryConfig,
+    esqlVariables,
+    requestAdapter,
+    keepRequests,
+    requestTitle = INSPECTOR_REQUEST_TITLE,
+  } = options ?? {};
 
-  let timeRangeFilter: { range: Record<string, unknown> } | undefined;
+  // One request per fetch, so the Requests view shows the latest query instead of a growing list.
+  // A superseded fetch is dropped by the newer fetch's reset, so it never leaves a stale entry.
+  if (!keepRequests) requestAdapter?.reset();
+
+  let timeRangeFilter: estypes.QueryDslQueryContainer | undefined;
   if (timeRange) {
     let timeField: string | undefined;
     try {
@@ -76,16 +109,27 @@ export async function fetchEsqlData(
 
   const filter = hasConstraints ? { bool: { ...esBoolQuery.bool, filter: allFilters } } : undefined;
 
-  const { response } = await getESQLResults({
-    esqlQuery,
-    search,
-    signal,
-    filter,
-    timeRange,
-    ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
-    ...(projectRouting !== undefined ? { projectRouting } : {}),
-    ...(esqlVariables?.length ? { variables: esqlVariables } : {}),
-  });
+  const { rawResponse } = await search.esql(
+    {
+      query: esqlQuery,
+      ...(filter ? { filter } : {}),
+      ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
+      ...(projectRouting !== undefined ? { projectRouting } : {}),
+      kibanaQueryContext: { timeRange, esqlVariables },
+    },
+    {
+      abortSignal: signal,
+      ...(requestAdapter
+        ? {
+            inspector: {
+              adapter: requestAdapter,
+              title: requestTitle,
+              description: INSPECTOR_REQUEST_DESCRIPTION,
+            },
+          }
+        : {}),
+    }
+  );
 
-  return response;
+  return rawResponse;
 }

@@ -35,9 +35,24 @@ function NoDataMessage() {
   );
 }
 
+function FetchFailureMessage() {
+  return (
+    <EuiText color="subdued" data-test-subj="apmServiceMapPopoverFetchFailure">
+      {i18n.translate('xpack.apm.serviceMap.popover.fetchFailureText', {
+        defaultMessage: 'The data could not be loaded.',
+      })}
+    </EuiText>
+  );
+}
+
 interface StatsListProps {
   isLoading: boolean;
   data: Partial<DependencyNodeReturn>;
+  /**
+   * The request failed and the host suppressed the global error toast, so the
+   * failure is reported inline instead of as missing data.
+   */
+  hasFailed?: boolean;
 }
 
 interface Item {
@@ -49,7 +64,7 @@ interface Item {
   comparisonSeriesColor: string;
 }
 
-export function StatsList({ data, isLoading }: StatsListProps) {
+export function StatsList({ data, isLoading, hasFailed = false }: StatsListProps) {
   const { currentPeriod = {}, previousPeriod } = data;
   const { cpuUsage, failedTransactionsRate, memoryUsage, transactionStats } = currentPeriod;
 
@@ -123,7 +138,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
   }
 
   if (!hasData) {
-    return <NoDataMessage />;
+    return hasFailed ? <FetchFailureMessage /> : <NoDataMessage />;
   }
 
   return (

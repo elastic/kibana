@@ -15,8 +15,12 @@ import type {
 import { isColumn, isOptionNode, isSource } from '@elastic/esql';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { getAvailableMetadataFields, isValidMetadataField } from '../options/metadata';
-import { getMessageFromId } from '../../definitions/utils';
+import { errors, getMessageFromId } from '../../definitions/utils';
 import { validateSources } from '../../definitions/utils/validation/sources';
+import {
+  findNamedSubqueryForSource,
+  isNamedSubqueryDeclaredBefore,
+} from '../../definitions/utils/named_subqueries';
 import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
@@ -47,7 +51,16 @@ export const validate = (
     }
   }
   const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
-  messages.push(...validateSources(sources, context));
+  const indexSources: ESQLSource[] = [];
+  for (const source of sources) {
+    const namedSubquery = findNamedSubqueryForSource(source, context?.namedSubqueries ?? []);
+    if (!namedSubquery) {
+      indexSources.push(source);
+    } else if (isNamedSubqueryDeclaredBefore(namedSubquery, source)) {
+      messages.push(errors.subqueryNotSupportedInTs(source));
+    }
+  }
+  messages.push(...validateSources(indexSources, context));
 
   return messages;
 };

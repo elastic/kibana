@@ -23,9 +23,21 @@ const mockGrid = jest.fn((_props: Partial<UnifiedChangePointGridProps>) => null)
 const mockDocuments$ = new BehaviorSubject<DataDocumentsMsg>({
   fetchStatus: FetchStatus.UNINITIALIZED,
 });
+const mockDiscoverServices = {
+  capabilities: {
+    dashboard_v2: {} as { createNew?: boolean; showWriteControls?: boolean },
+  },
+  dataViews: {},
+  embeddable: {},
+  notifications: {},
+};
 
 jest.mock('@kbn/change-point-chart-viewer', () => ({
   LazyChangePointExperienceGrid: (props: Partial<UnifiedChangePointGridProps>) => mockGrid(props),
+}));
+
+jest.mock('../../../../hooks/use_discover_services', () => ({
+  useDiscoverServices: () => mockDiscoverServices,
 }));
 
 jest.mock('../../../../application/main/state_management/redux', () => ({
@@ -92,7 +104,28 @@ const renderSync = ({
 describe('ChangePointChartSectionSync', () => {
   beforeEach(() => {
     mockGrid.mockClear();
+    mockDiscoverServices.capabilities.dashboard_v2 = {};
     mockDocuments$.next({ fetchStatus: FetchStatus.UNINITIALIZED });
+  });
+
+  it('does not add a dashboard action without dashboard access', () => {
+    renderSync();
+
+    expect(getGridProps()?.actions?.addPageToDashboard).toBeUndefined();
+  });
+
+  it('provides the add-to-dashboard action when the user can create a dashboard', () => {
+    mockDiscoverServices.capabilities.dashboard_v2 = { createNew: true };
+    renderSync();
+
+    expect(getGridProps()?.actions?.addPageToDashboard).toEqual(expect.any(Function));
+  });
+
+  it('provides the add-to-dashboard action when the user can edit a dashboard', () => {
+    mockDiscoverServices.capabilities.dashboard_v2 = { showWriteControls: true };
+    renderSync();
+
+    expect(getGridProps()?.actions?.addPageToDashboard).toEqual(expect.any(Function));
   });
 
   it('fills the missing table from completed documents for the same ES|QL source', () => {

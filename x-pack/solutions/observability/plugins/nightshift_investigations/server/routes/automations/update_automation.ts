@@ -6,13 +6,21 @@
  */
 
 import { badRequest, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
-import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
+import {
+  automationCompletionSchema,
+  savedAutomationCompletionSchema,
+  promptTemplateSchema,
+} from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
+import { isElasticAppSlackChannelCompletion } from '../../lib/automations/slack_completion';
+import { validateSlackChannelsBound } from '../../lib/automations/validate_slack_channels_bound';
+import { validateThreadCompletion } from '../../lib/automations/validate_thread_completion';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
 
@@ -37,34 +45,45 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['manage_nightshift'] },
   },
-  params: z.object({
-    path: z.object({ id: z.string().min(1).max(512) }),
-    body: z.object({
-      name: z.string().min(1).max(500).optional(),
-      description: z.string().max(5000).nullable().optional(),
-      tags: z.array(z.string().max(32)).max(50).optional(),
-      isEnabled: z.boolean().optional(),
-      trigger: z.object({ rows: z.array(triggerRowSchema).min(1).max(100) }).optional(),
-      execution: z
-        .object({
-          promptTemplate: promptTemplateSchema.nullable().optional(),
-          reasoningMode: z.enum(['investigate', 'observe']).optional(),
-          agentId: z.string().max(512).optional(),
-          connectorId: z.string().max(512).optional(),
-        })
-        .optional(),
-      completions: z.array(automationCompletionSchema).max(10).optional(),
-      runtime: z
-        .object({
-          dailyDispatchLimit: z.number().int().min(0).nullable().optional(),
-          timeoutSeconds: z.number().int().min(1).optional(),
-          dedupeWindowSeconds: z.number().int().min(0).optional(),
-          overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
-        })
-        .optional(),
-    }),
-  }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ id: z.string().min(1).max(512) }),
+      body: z.object({
+        name: z.string().min(1).max(500).optional(),
+        description: z.string().max(5000).nullable().optional(),
+        tags: z.array(z.string().max(32)).max(50).optional(),
+        isEnabled: z.boolean().optional(),
+        trigger: z.object({ rows: z.array(triggerRowSchema).min(1).max(100) }).optional(),
+        execution: z
+          .object({
+            promptTemplate: promptTemplateSchema.nullable().optional(),
+            reasoningMode: z.enum(['investigate', 'observe']).optional(),
+            agentId: z.string().max(512).optional(),
+            connectorId: z.string().max(512).optional(),
+          })
+          .optional(),
+        completions: z.array(savedAutomationCompletionSchema).max(10).optional(),
+        runtime: z
+          .object({
+            dailyDispatchLimit: z.number().int().min(1).nullable().optional(),
+            timeoutSeconds: z.number().int().min(1).optional(),
+            dedupeWindowSeconds: z.number().int().min(0).optional(),
+            overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
+          })
+          .optional(),
+      }),
+    })
+  ),
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    isUniversalAlertingAvailable,
+    getSlackChannelBindingChecker,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -73,12 +92,18 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
+    // Before any write: refuses callers who could not write the bound workflow.
+    const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      request,
+      spaceId
+    );
 
     const existing = await soClient.get<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id
     );
     const { body } = params;
+    const pauseOnly = body.isEnabled === false && Object.keys(body).length === 1;
     const merged: NightshiftAutomationAttributes = {
       ...applyChanges(existing.attributes, {
         name: body.name,
@@ -93,31 +118,68 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       updatedAt: new Date().toISOString(),
     };
 
-    const completions = z.array(automationCompletionSchema).max(10).safeParse(merged.completions);
-    if (!completions.success) throw badRequest(completions.error.message);
-    merged.completions = completions.data;
-
-    validateScheduledAutomation(merged);
+    if (!pauseOnly) {
+      const isBeingEnabled = body.isEnabled === true && !existing.attributes.isEnabled;
+      const completions = z
+        .array(isBeingEnabled ? savedAutomationCompletionSchema : automationCompletionSchema)
+        .max(10)
+        .safeParse(merged.completions);
+      if (!completions.success) throw badRequest(completions.error.message);
+      merged.completions = completions.data;
+      validateScheduledAutomation(merged);
+      if (body.completions !== undefined || body.trigger !== undefined || isBeingEnabled) {
+        validateThreadCompletion(merged);
+        await validateSlackChannelsBound({
+          automation: merged,
+          request,
+          checker: getSlackChannelBindingChecker(),
+          storedDestinations: new Set(
+            existing.attributes.completions
+              .filter(isElasticAppSlackChannelCompletion)
+              .flatMap(({ destination }) => (destination ? [destination.trim()] : []))
+          ),
+        });
+      }
+    }
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
       try {
         await workflowsManagement.management.updateWorkflow(
           existing.attributes.workflowId,
-          { yaml: generateWorkflowYaml(params.path.id, merged) },
+          pauseOnly
+            ? { enabled: false }
+            : {
+                yaml: generateWorkflowYaml({
+                  automationId: params.path.id,
+                  automation: merged,
+                  serviceAccountId,
+                  universalAlerts: isUniversalAlertingAvailable(),
+                }),
+              },
           spaceId,
           request
         );
       } catch (err) {
-        throw badRequest(`Failed to update backing workflow: ${err.message}`);
+        if (err instanceof WorkflowNotFoundError) {
+          if (!pauseOnly) {
+            throw badRequest(
+              'The backing workflow was deleted. Open the automation and use Repair.'
+            );
+          }
+        } else {
+          throw badRequest(`Failed to update backing workflow: ${err.message}`);
+        }
       }
+    } else if (!pauseOnly) {
+      throw badRequest('The backing workflow is missing. Open the automation and use Repair.');
     }
 
     await soClient.update<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id,
       merged,
-      { mergeAttributes: false }
+      { mergeAttributes: false, ...(existing.version ? { version: existing.version } : {}) }
     );
 
     return { id: params.path.id, ...merged };

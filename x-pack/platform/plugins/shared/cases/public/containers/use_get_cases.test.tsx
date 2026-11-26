@@ -215,7 +215,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: 'free text',
@@ -249,7 +249,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: 'free text',
@@ -280,7 +280,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: 'free text',
@@ -312,7 +312,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: '',

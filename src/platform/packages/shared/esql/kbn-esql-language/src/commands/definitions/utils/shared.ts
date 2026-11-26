@@ -10,15 +10,13 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
+import { getFlattenedKeyColumn } from './columns';
 
 export { getTrailingIdentifier } from './regex';
 
-export const techPreviewLabel = i18n.translate(
-  'kbn-esql-language.esql.autocomplete.techPreviewLabel',
-  {
-    defaultMessage: `Technical Preview`,
-  }
-);
+export const techPreviewLabel = i18n.translate('esqlLanguage.esql.autocomplete.techPreviewLabel', {
+  defaultMessage: `Technical Preview`,
+});
 
 /**
  * Checks the suggestion text for overlap with the current query.
@@ -150,7 +148,7 @@ export function getColumnByName(
   { columns }: ICommandContext
 ): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const unescaped = unescapeColumnName(columnName);
-  return columns.get(unescaped);
+  return columns.get(unescaped) ?? getFlattenedKeyColumn(unescaped, columns);
 }
 
 /**

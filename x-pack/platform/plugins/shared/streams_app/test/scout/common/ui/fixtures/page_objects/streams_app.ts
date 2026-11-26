@@ -11,7 +11,6 @@ import { euiSelectors } from '@kbn/scout';
 import moment from 'moment';
 import {
   AppMenu,
-  EsqlEditor,
   KibanaCodeEditorWrapper,
   type EuiDataGridObject,
   type Locator,
@@ -36,27 +35,15 @@ export class StreamsApp {
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
   public readonly dateProcessorFormatsComboBox;
+  private readonly globalToastList;
   public readonly stepsListSaveSettledToast;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
   public readonly kibanaMonacoEditor;
-  private readonly esqlEditor: EsqlEditor;
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
-  public readonly createStreamButton;
-  public readonly createQueryStreamButton;
-  public readonly childStreamTypeSelector;
-  public readonly queryStreamFlyout;
-  public readonly queryStreamFlyoutSaveButton;
-  public readonly queryStreamCreatedSuccessToast;
-  public readonly childQueryStreamCreatedSuccessToast;
-  public readonly queryStreamUpdatedSuccessToast;
-  public readonly queryStreamDetailsQueryViewerCodeBlock;
-  public readonly deleteQueryStreamModalInput;
-  public readonly queryStreamDeletedSuccessToast;
-  public readonly queryStreamCreateErrorToast;
   public readonly fetchMoreMatchingSamplesButton;
   // Canvas
   public readonly canvasTab;
@@ -78,11 +65,20 @@ export class StreamsApp {
   public readonly canvasEmptyState;
   public readonly canvasSearch;
   public readonly canvasSearchNoMatches;
+  public readonly canvasEdgeMenuButton;
+  public readonly canvasEdgeMenuAddProcessing;
+  public readonly canvasEdgeMenuAddRouting;
+  public readonly canvasProcessingNode;
+  public readonly processingFlyout;
+  public readonly processingFlyoutSave;
+  public readonly canvasDataStreamsNode;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
   public readonly streamsDestinationsTable;
   public readonly streamsDestinationsSearch;
+  public readonly newExperienceCallout;
+  public readonly newExperienceCalloutOpenMapButton;
   private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
@@ -100,36 +96,18 @@ export class StreamsApp {
     this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
+    this.globalToastList = this.page.components.toast();
     // Either terminal outcome of a steps list "Save changes" round-trip.
-    this.stepsListSaveSettledToast = this.page
-      .getByText("Stream's processors updated")
-      .or(this.page.getByText("An issue occurred saving processors' changes."));
+    this.stepsListSaveSettledToast = this.toastWithText("Stream's processors updated").or(
+      this.toastWithText("An issue occurred saving processors' changes.")
+    );
     this.fieldTypeSuperSelect = this.page.components.superSelect('streamsAppFieldFormTypeSelect');
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
-    this.esqlEditor = new EsqlEditor(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = this.page.components.superSelect('streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
-    this.createStreamButton = this.page.getByTestId('streamsAppCreateStreamButton');
-    this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
-    this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
-    this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
-    this.queryStreamFlyoutSaveButton = this.page.getByTestId(
-      'streamsAppQueryStreamFlyoutSaveButton'
-    );
-    this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
-    this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
-    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated');
-    this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
-      'queryStreamDetailsQueryViewerCodeBlock'
-    );
-    this.deleteQueryStreamModalInput = this.page.getByTestId(
-      'streamsAppDeleteStreamModalStreamNameInput'
-    );
-    this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
-    this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
     this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
       'streamsAppFetchMoreMatchingSamplesButton'
     );
@@ -153,11 +131,29 @@ export class StreamsApp {
     this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
     this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
     this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
+    this.canvasEdgeMenuButton = this.page.testSubj.locator('streamsCanvasEdgeMenuButton');
+    this.canvasEdgeMenuAddProcessing = this.page.testSubj.locator(
+      'streamsCanvasEdgeMenu-addProcessing'
+    );
+    this.canvasEdgeMenuAddRouting = this.page.testSubj.locator('streamsCanvasEdgeMenu-addRouting');
+    this.canvasProcessingNode = this.page.testSubj.locator('streamsCanvasProcessingNode');
+    this.processingFlyout = this.page.testSubj.locator('streamsProcessingFlyout');
+    this.processingFlyoutSave = this.page.testSubj.locator('streamsProcessingFlyoutSave');
+    this.canvasDataStreamsNode = this.page.testSubj.locator('streamsCanvasDataStreamsNode');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
     this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
     this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
+    this.newExperienceCallout = this.page.testSubj.locator('streamsNewExperienceCallout');
+    this.newExperienceCalloutOpenMapButton = this.page.testSubj.locator(
+      'streamsNewExperienceCalloutOpenMap'
+    );
+  }
+
+  // Scoped to the toast list: core's screen reader announcer repeats every toast's text page-wide.
+  private toastWithText(text: string): Locator {
+    return this.globalToastList.toasts.getByText(text);
   }
 
   async goto() {
@@ -165,15 +161,21 @@ export class StreamsApp {
   }
 
   async gotoStreamMainPage() {
-    await this.page.gotoApp(`streams`);
+    await this.page.gotoApp(`streams`, {
+      readyWhen: this.page.testSubj.locator('streamsTable'),
+    });
   }
 
-  async gotoStreamManagementTab(streamName: string, tabName: string) {
-    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
+  async gotoStreamManagementTab(
+    streamName: string,
+    tabName: string,
+    options?: Parameters<ScoutPage['gotoApp']>[1]
+  ) {
+    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`, options);
   }
 
-  async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'partitioning');
+  async gotoPartitioningTab(streamName: string, options?: Parameters<ScoutPage['gotoApp']>[1]) {
+    await this.gotoStreamManagementTab(streamName, 'partitioning', options);
   }
 
   async gotoDataRetentionTab(streamName: string) {
@@ -181,7 +183,13 @@ export class StreamsApp {
   }
 
   async gotoDataQualityTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'dataQuality');
+    // The KPI cards sit behind the stream definition fetch, the dataset quality controller and two
+    // lazy chunks, and this card only gets its test subject once the last chunk has resolved
+    await this.gotoStreamManagementTab(streamName, 'dataQuality', {
+      readyWhen: this.page.testSubj.locator(
+        'datasetQualityDetailsSummaryKpiCard-Degraded documents'
+      ),
+    });
   }
 
   async gotoOverviewTab(streamName: string) {
@@ -201,25 +209,29 @@ export class StreamsApp {
   }
 
   async gotoStreamsLayout() {
-    await this.page.gotoApp('streams/new-experience');
+    await this.page.gotoApp('streams/v2');
   }
 
   async gotoStreamsLayoutTab(tabName: string) {
-    await this.page.gotoApp(`streams/new-experience/${tabName}`);
+    await this.page.gotoApp(`streams/v2/unit/default/${tabName}`);
   }
 
   getStreamsLayoutTab(tabName: string) {
     return this.page.testSubj.locator(`streamsLayoutTab-${tabName}`);
   }
 
+  async dismissNewExperienceCallout() {
+    await this.newExperienceCallout.getByTestId('euiDismissCalloutButton').click();
+  }
+
   async clickStreamsLayoutTab(tabName: string) {
     await this.getStreamsLayoutTab(tabName).click();
   }
 
-  /** Opens the canvas with its search pre-filled from the URL. */
+  /** Opens the map with its search pre-filled from the URL. */
   async gotoCanvasSearch(query: string) {
-    await this.page.gotoApp('streams/new-experience/canvas', {
-      params: { canvasState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
+    await this.page.gotoApp('streams/v2/unit/default/map', {
+      params: { mapState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
     });
   }
 
@@ -227,13 +239,6 @@ export class StreamsApp {
     return this.streamsDestinationsTable
       .getByRole('row')
       .filter({ hasText: destinationName })
-      .getByTestId('streamsShowOnCanvasAction');
-  }
-
-  getSourceShowOnCanvasButton(sourceName: string) {
-    return this.streamsSourcesTable
-      .getByRole('row')
-      .filter({ hasText: sourceName })
       .getByTestId('streamsShowOnCanvasAction');
   }
 
@@ -248,12 +253,49 @@ export class StreamsApp {
       .filter({ hasText: streamName });
   }
 
-  getCanvasProcessingButton(streamName: string) {
-    return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingButton');
-  }
-
   getCanvasNodeByAriaLabel(ariaLabel: string) {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
+  }
+
+  /** Edge ids contain `->`, which `testSubj` selectors would read as a child combinator. */
+  getCanvasEdge(edgeId: string) {
+    return this.page.locator(`[data-test-subj="streamsCanvasEdge-${edgeId}"]`);
+  }
+
+  /** The drag anchors React Flow renders on a line's ends only while the line can be reconnected. */
+  getCanvasEdgeReconnectAnchors(edgeId: string) {
+    return this.page.locator(`[data-testid="rf__edge-${edgeId}"] .react-flow__edgeupdater`);
+  }
+
+  /**
+   * Hovers a canvas line. A smooth-step line always passes through the centre of its bounding
+   * box, which is where the pointer goes. `force` is needed because hovering renders the line's
+   * menu button at that point, which Playwright would otherwise treat as intercepting the hover.
+   */
+  async hoverCanvasEdge(edgeId: string) {
+    const edge = this.getCanvasEdge(edgeId);
+    await expect(edge).toBeVisible();
+    await edge.hover({ force: true });
+  }
+
+  /** Hovers a canvas line and opens its "Add processing / Add routing" menu. */
+  async openCanvasEdgeMenu(edgeId: string) {
+    await this.hoverCanvasEdge(edgeId);
+    await this.canvasEdgeMenuButton.click();
+  }
+
+  /** Adds an `add_fields` processor that upserts a literal value into an attribute of the record. */
+  async addAddFieldsProcessor(name: string, value: string) {
+    // The catalogue offers several processors, so the editor starts without one chosen.
+    await this.processingFlyout
+      .getByTestId('streamsProcessingFlyoutProcessorType')
+      .getByRole('combobox')
+      .click();
+    // The option's name also carries its status badge.
+    await this.page.getByRole('option', { name: /^Add fields/ }).click();
+    await this.processingFlyout.getByTestId('componentDefinitionFormString-name').fill(name);
+    await this.processingFlyout.getByTestId('componentDefinitionFormLiteral-value').fill(value);
+    await this.processingFlyout.getByTestId('streamsProcessingFlyoutEditorSubmit').click();
   }
 
   /**
@@ -296,10 +338,14 @@ export class StreamsApp {
     await this.clickCanvasNode(node, { button: 'right' });
   }
 
-  async openCanvasPaneContextMenu() {
+  async rightClickCanvasPane() {
     await this.page
       .locator('.react-flow__pane')
       .click({ button: 'right', position: { x: 5, y: 5 } });
+  }
+
+  async openCanvasPaneContextMenu() {
+    await this.rightClickCanvasPane();
     await expect(this.canvasContextMenu).toBeVisible();
   }
 
@@ -348,25 +394,24 @@ export class StreamsApp {
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
     // Use .first() because some pages (like Retention) may have multiple date pickers
     const newControlButton = this.page.testSubj.locator('dateRangePickerControlButton').first();
-    try {
-      await newControlButton.waitFor({ state: 'visible', timeout: 5_000 });
-      // New DateRangePicker stores the range as ISO strings on data-date-range
-      // for absolute dates. Compare canonical ISO on both sides to avoid the
-      // display-format differences between the legacy and new pickers.
-      const dateRange = (await newControlButton.getAttribute('data-date-range')) ?? '';
-      const [actualStart, actualEnd] = dateRange.split(' to ').map((s) => s.trim());
-      const expectedStart = moment.utc(expectedRange.from, LEGACY_DATE_FORMAT, true).toISOString();
-      const expectedEnd = moment.utc(expectedRange.to, LEGACY_DATE_FORMAT, true).toISOString();
-      expect(actualStart, `Date picker 'start date' is incorrect`).toBe(expectedStart);
-      expect(actualEnd, `Date picker 'end date' is incorrect`).toBe(expectedEnd);
+    const legacyStartButton = this.page.testSubj
+      .locator('superDatePickerstartDatePopoverButton')
+      .first();
+    // `waitFor` is not a strict-mode action, so it tolerates whichever picker variant mounted.
+    await newControlButton.or(legacyStartButton).waitFor({ state: 'visible', timeout: 10_000 });
+
+    if ((await newControlButton.count()) > 0) {
+      const toIso = (value: string) => moment.utc(value, LEGACY_DATE_FORMAT, true).toISOString();
+      await expect(newControlButton, `Date picker time range is incorrect`).toHaveAttribute(
+        'data-date-range',
+        `${toIso(expectedRange.from)} to ${toIso(expectedRange.to)}`
+      );
       return;
-    } catch {
-      // New picker not present; fall through to legacy assertions.
     }
-    await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
-      `Date picker 'start date' is incorrect`
-    ).toHaveText(expectedRange.from);
+
+    await expect(legacyStartButton, `Date picker 'start date' is incorrect`).toHaveText(
+      expectedRange.from
+    );
     await expect(
       this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
@@ -553,28 +598,7 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    // Draft streams fetch samples via ES|QL from the parent, which can be slow
     await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
-  }
-
-  /**
-   * Draft-stream samples are fetched via ES|QL from the parent stream's `$.` view,
-   * which the server creates asynchronously. Until it propagates, the query fails with
-   * "Unknown index" and the data-source machine treats that as terminal (empty grid, no
-   * auto-retry), so the preview grid — and the view-mode toggle inside its toolbar — never
-   * render and any wait times out. Re-trigger the fetch via the refresh button until the
-   * grid appears, so a not-yet-propagated parent view is retried rather than fatally awaited.
-   */
-  async waitForDraftPreviewSamples() {
-    const grid = this.page.getByTestId('euiDataGridBody');
-    const refreshButton = this.page.getByRole('button', { name: 'Refresh data preview' });
-
-    await expect(async () => {
-      if (await grid.isVisible()) return;
-      // `click` auto-waits for the button to be enabled (i.e. not mid-load) before refetching.
-      await refreshButton.click({ timeout: 15_000 });
-      await expect(grid).toBeVisible({ timeout: 10_000 });
-    }).toPass({ timeout: 90_000 });
   }
 
   async saveRoutingRule() {
@@ -998,11 +1022,24 @@ export class StreamsApp {
     await expect.poll(async () => readySignal.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   }
 
+  // Toasts rendered in the globalToastList can overlay buttons (Save / Delete) and
+  // intercept pointer events, causing flaky click timeouts. Use before clicking a
+  // primary action that lives near the bottom of the viewport.
+  async waitForEmptyGlobalToastList(timeout: number = 15_000) {
+    await expect(this.page.testSubj.locator('globalToastList').locator(':scope > *')).toHaveCount(
+      0,
+      { timeout }
+    );
+  }
+
   async clickSaveStepsListChanges() {
     // Clearing the toast list first keeps the Save button clickable and guarantees that a
     // toast awaited after the click belongs to this save rather than a previous one.
     await this.waitForEmptyGlobalToastList();
-    await this.page.getByRole('button', { name: 'Save changes' }).click();
+    const saveButton = this.page.getByRole('button', { name: 'Save changes' });
+    // Disabled while a simulation is in flight, which outlives the implicit `actionTimeout`.
+    await expect(saveButton).toBeEnabled({ timeout: 30_000 });
+    await saveButton.click();
   }
 
   /**
@@ -1512,127 +1549,8 @@ export class StreamsApp {
     await this.concatLiteralInput.fill(value);
   }
 
-  async openCreateStreamPopover() {
-    await this.createStreamButton.click();
-  }
-
   async openStreamsSettings() {
     await this.appMenu.clickItem('streamsAppSettingsButton');
-  }
-
-  async clickCreateQueryStreamButton() {
-    await this.openCreateStreamPopover();
-    await this.createQueryStreamButton.click();
-  }
-
-  async clickQueryStreamFlyoutSaveButton() {
-    await this.queryStreamFlyoutSaveButton.click();
-  }
-
-  async selectChildStreamType(type: 'Query' | 'Index') {
-    await this.childStreamTypeSelector.getByRole('button', { name: type }).click();
-  }
-
-  async clickQueryModeCreateQueryStreamButton() {
-    await this.page.getByTestId('streamsAppQueryModeCreateButton').click();
-  }
-
-  async clickQueryStreamFormCreateButton() {
-    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
-  }
-
-  async clickQueryStreamLink(streamName: string) {
-    await this.page.getByTestId(`streamsAppQueryStreamEntryButton-${streamName}`).click();
-  }
-
-  async clickQueryStreamDetailsTab(tabName: string) {
-    await this.page.getByTestId(`queryStreamDetails-${tabName}-tab`).click();
-  }
-
-  async clickQueryStreamDetailsEditQueryButton() {
-    await this.page.getByTestId('queryStreamDetailsEditQueryButton').click();
-  }
-
-  async clickDeleteQueryStreamButton() {
-    await this.appMenu.clickItem('streamsDeleteStreamButton');
-  }
-
-  async fillDeleteQueryStreamModalInput(value: string) {
-    await this.deleteQueryStreamModalInput.fill(value);
-  }
-
-  async clickDeleteQueryStreamModalDeleteButton() {
-    // Toast notifications rendered in the globalToastList can overlap the confirm
-    // button and intercept pointer events. Wait until the list is empty before clicking.
-    await this.waitForEmptyGlobalToastList();
-    await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
-  }
-
-  // Toasts rendered in the globalToastList can overlay buttons (Save / Delete) and
-  // intercept pointer events, causing flaky click timeouts. Use before clicking a
-  // primary action that lives near the bottom of the viewport.
-  async waitForEmptyGlobalToastList(timeout: number = 15_000) {
-    await expect(this.page.testSubj.locator('globalToastList').locator(':scope > *')).toHaveCount(
-      0,
-      { timeout }
-    );
-  }
-
-  async clickQueryStreamEditButton(streamName: string) {
-    await this.page.getByTestId(`streamsAppQueryStreamEditButton-${streamName}`).click();
-  }
-
-  async clickQueryStreamFormSaveButton() {
-    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
-  }
-
-  async saveInlineQueryStreamEdit() {
-    await this.clickQueryStreamFormSaveButton();
-    await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
-  }
-
-  async saveFlyoutQueryStreamCreate() {
-    await this.waitForEmptyGlobalToastList();
-    await this.clickQueryStreamFlyoutSaveButton();
-    await this.queryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
-  }
-
-  async saveFlyoutQueryStreamEdit() {
-    await this.waitForEmptyGlobalToastList();
-    await this.clickQueryStreamFlyoutSaveButton();
-    await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
-  }
-
-  async clickQueryStreamFormDeleteButton() {
-    await this.page.getByTestId('streamsAppQueryStreamFormDeleteButton').click();
-  }
-
-  async createRootQueryStream(name: string, esqlQuery: string) {
-    await this.clickCreateQueryStreamButton();
-    await this.fillRoutingRuleName(name);
-    await this.esqlEditor.setQuery(esqlQuery);
-    await this.saveFlyoutQueryStreamCreate();
-  }
-
-  async openCreateChildQueryStreamForm() {
-    await this.clickQueryModeCreateQueryStreamButton();
-    await this.esqlEditor.waitReady();
-  }
-
-  async fillChildQueryStreamForm(childName: string, esqlQuery: string) {
-    await this.fillRoutingRuleName(childName);
-    await this.esqlEditor.setQuery(esqlQuery);
-  }
-
-  async saveChildQueryStream() {
-    await this.clickQueryStreamFormCreateButton();
-    await this.childQueryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
-  }
-
-  async createChildQueryStreamFromPartitioningTab(childName: string, esqlQuery: string) {
-    await this.openCreateChildQueryStreamForm();
-    await this.fillChildQueryStreamForm(childName, esqlQuery);
-    await this.saveChildQueryStream();
   }
 
   async clickFetchMoreUntilThresholdReached({ maxClicks = 10 } = {}) {
@@ -1651,14 +1569,5 @@ export class StreamsApp {
         .waitFor({ state: 'hidden', timeout: 10000 })
         .catch(() => {});
     }
-  }
-
-  async deleteQueryStreamFromOverviewTab(streamName: string) {
-    await this.clickStreamNameLink(streamName);
-    await this.clickQueryStreamDetailsTab('overview');
-    await this.clickDeleteQueryStreamButton();
-    await this.fillDeleteQueryStreamModalInput(streamName);
-    await this.clickDeleteQueryStreamModalDeleteButton();
-    await this.queryStreamDeletedSuccessToast.waitFor({ state: 'visible' });
   }
 }

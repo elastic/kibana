@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/evals'
   - '@kbn/tooling-log'
   - '@kbn/kbn-client'
+  - '@kbn/alertzero-common'
 tags:
   - functional-tests
   - package
@@ -31,6 +32,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

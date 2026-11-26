@@ -1,0 +1,251 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL,
+  DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY,
+  isHitlExternalResumeEnabled,
+  WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
+} from '@kbn/workflows';
+import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
+import type { ConnectorExecutor } from '../../connector_executor';
+import { getKibanaUrl } from '../../utils/get_kibana_url';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { ContextDependencies } from '../../workflow_context_manager/types';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { hasExternalHitlChannels } from '../hitl_notifications/has_external_hitl_channels';
+import {
+  buildWaitForApprovalResumeLinks,
+  sendWaitForApprovalNotifications,
+} from '../hitl_notifications/send_wait_for_approval_notifications';
+import type { CancellableNode, NodeImplementation } from '../node_implementation';
+import {
+  invalidateHitlExternalResumeTokenIfPresent,
+  mintHitlExternalResumeToken,
+  persistHitlExternalResumeToken,
+} from '../wait_for_input_step/hitl_external_resume_helpers';
+import {
+  getResolvedDynamicTimeout,
+  hasHitlWaitExpired,
+  persistResolvedDynamicTimeout,
+} from '../wait_for_input_step/hitl_timeout_helpers';
+import {
+  emitHitlWaitingAudit,
+  failHitlWaitOnTimeout,
+  resumeHitlWaitStep,
+  shouldSkipHitlWaitEntry,
+  tryEnterHitlWait,
+} from '../wait_for_input_step/hitl_wait_helpers';
+
+export class WaitForApprovalStepImpl implements NodeImplementation, CancellableNode {
+  constructor(
+    private node: WaitForApprovalGraphNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
+    private workflowRuntime: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger,
+    private connectorExecutor: ConnectorExecutor,
+    private dependencies: ContextDependencies
+  ) {}
+
+  async onCancel(): Promise<void> {
+    await invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
+  }
+
+  async run(): Promise<void> {
+    if (shouldSkipHitlWaitEntry(this.stepExecutionRuntime)) {
+      this.workflowLogger.logDebug(
+        `Step '${this.node.stepId}' run aborted before wait-entry; skipping`,
+        { event: { action: 'hitl:aborted' } }
+      );
+      return;
+    }
+
+    if (tryEnterHitlWait(this.stepExecutionRuntime)) {
+      await this.enterWait();
+      return;
+    }
+
+    this.workflowLogger.logDebug(`Step '${this.node.stepId}' resuming with approval input`, {
+      event: { action: 'hitl:resuming' },
+    });
+    await this.resume();
+  }
+
+  private async enterWait(): Promise<void> {
+    const dynamicTimeout = persistResolvedDynamicTimeout(
+      this.stepExecutionRuntime,
+      this.node.configuration.timeout,
+      DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT
+    );
+    const withConfig = this.node.configuration?.with;
+    const ctx = this.stepExecutionRuntime.contextManager;
+    const approveLabel =
+      withConfig?.approveLabel !== undefined
+        ? ctx.renderValueAccordingToContext(withConfig.approveLabel)
+        : DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL;
+    const rejectLabel =
+      withConfig?.rejectLabel !== undefined
+        ? ctx.renderValueAccordingToContext(withConfig.rejectLabel)
+        : DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL;
+    const message =
+      withConfig?.message !== undefined
+        ? String(ctx.renderValueAccordingToContext(withConfig.message))
+        : '';
+
+    const stepInput: Record<string, unknown> = {
+      ...(message.length > 0 && { message }),
+      approveLabel,
+      rejectLabel,
+      schema: WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
+    };
+
+    this.stepExecutionRuntime.setInput(stepInput);
+
+    const channels = withConfig?.channels;
+    if (
+      hasExternalHitlChannels(channels) &&
+      isHitlExternalResumeEnabled(this.dependencies.config?.hitlExternalResume?.enabled)
+    ) {
+      const execution = this.workflowRuntime.getWorkflowExecution();
+      const spaceId = this.dependencies.spaceId ?? execution.spaceId;
+      if (!spaceId) {
+        throw new Error('External approval notifications require a space');
+      }
+
+      const resumeToken = mintHitlExternalResumeToken({
+        stepExecutionRuntime: this.stepExecutionRuntime,
+        execution,
+        timeout: dynamicTimeout,
+      });
+      persistHitlExternalResumeToken(this.stepExecutionRuntime, resumeToken, stepInput);
+
+      await this.sendExternalNotifications({
+        channels,
+        message,
+        approveLabel,
+        rejectLabel,
+        token: resumeToken.token,
+        execution,
+        spaceId,
+      });
+    }
+
+    this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for approval`, {
+      event: { action: 'hitl:waiting' },
+    });
+    emitHitlWaitingAudit({
+      executionId: this.workflowRuntime.getWorkflowExecution().id,
+      stepExecutionId: this.stepExecutionRuntime.stepExecutionId,
+      stepType: this.node.stepType,
+    });
+  }
+
+  private async sendExternalNotifications({
+    channels,
+    message,
+    approveLabel,
+    rejectLabel,
+    token,
+    execution,
+    spaceId,
+  }: {
+    channels: NonNullable<
+      NonNullable<WaitForApprovalGraphNode['configuration']['with']>['channels']
+    >;
+    message: string;
+    approveLabel: string;
+    rejectLabel: string;
+    token: string;
+    execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
+    spaceId: string;
+  }): Promise<void> {
+    const resumeLinks = buildWaitForApprovalResumeLinks({
+      kibanaUrl: getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup),
+      spaceId,
+      executionId: execution.id,
+      stepId: this.stepExecutionRuntime.stepExecutionId,
+      token,
+    });
+
+    await sendWaitForApprovalNotifications({
+      channels,
+      message,
+      approveLabel,
+      rejectLabel,
+      resumeLinks,
+      slackInteractiveResume: {
+        executionId: execution.id,
+        stepId: this.stepExecutionRuntime.stepExecutionId,
+        token,
+        spaceId,
+      },
+      spaceId,
+      workflowId: execution.workflowId,
+      executionId: execution.id,
+      renderTemplate: (template) =>
+        String(
+          this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(template, {
+            context: {
+              hitl: {
+                [HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY]: resumeLinks.approveUrl,
+                [HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY]: resumeLinks.rejectUrl,
+              },
+            },
+          })
+        ),
+      connectorExecutor: this.connectorExecutor,
+      abortController: this.stepExecutionRuntime.abortController,
+    });
+  }
+
+  private async resume(): Promise<void> {
+    const execution = this.workflowRuntime.getWorkflowExecution();
+    const resumeInput = execution.context?.resumeInput as Record<string, unknown> | undefined;
+
+    const timeout = getResolvedDynamicTimeout(
+      this.stepExecutionRuntime,
+      this.node.configuration.timeout,
+      DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT
+    );
+    const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
+
+    if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {
+      await invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
+      failHitlWaitOnTimeout({
+        stepExecutionRuntime: this.stepExecutionRuntime,
+        executionId: execution.id,
+        stepType: this.node.stepType,
+        error: new ExecutionError({
+          type: 'TimeoutError',
+          message: `Approval wait exceeded the configured timeout of ${timeout}.`,
+        }),
+      });
+      return;
+    }
+
+    await invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
+
+    resumeHitlWaitStep({
+      stepExecutionRuntime: this.stepExecutionRuntime,
+      workflowRuntime: this.workflowRuntime,
+      workflowLogger: this.workflowLogger,
+      stepId: this.node.stepId,
+      transformResumeInput: (input, respondedBy) => {
+        const approved = input?.approved;
+        return {
+          response: { approved: approved === true },
+          respondedBy,
+        };
+      },
+    });
+  }
+}

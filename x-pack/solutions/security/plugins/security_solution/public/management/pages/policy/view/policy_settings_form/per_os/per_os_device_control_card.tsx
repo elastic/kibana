@@ -40,9 +40,9 @@ const DEVICE_CONTROL_OS_VALUES: Immutable<DeviceControlOSes[]> = [
 ];
 
 export const PER_OS_DEVICE_CONTROL_CARD_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.deviceControl',
+  'xpack.securitySolution.endpoint.policy.details.deviceControl.type',
   {
-    defaultMessage: 'Device Control',
+    defaultMessage: 'Device control',
   }
 );
 

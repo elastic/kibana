@@ -47,13 +47,13 @@ Authentication
 ## Connector actions [urlscan-io-connector-actions]
 
 `searchScans`
-:   Searches historical scans with an Elasticsearch query-string query, for example `page.domain:example.com AND date:>now-7d`. Returns one row per prior scan: UUID, URL, title, domain, IP, ASN, country, TLS issuer, domain age, and links to the full result and screenshot. Call it before submitting a new scan, since a recent prior sighting answers the question without spending scan quota.
+:   Searches historical scans with an Elasticsearch query-string query, for example `page.domain:example.com AND date:>now-7d`. Returns one row per prior scan: UUID, URL, title, domain, IP, ASN, country, TLS issuer, domain age, and links to the full result and screenshot. Call it before submitting a new scan, since a recent prior sighting answers the question without spending scan quota. Anonymous and free accounts search recent history only, and the response then gives the number of days in `searchDateLimitDays`.
 
 `getResult`
 :   Retrieves a finished scan by UUID. Returns the verdict (malicious flag, score, categories, impersonated brands), the page identity, scan statistics, the lists of contacted domains, IPs, ASNs, and response hashes, and any files the page downloaded. Requires an API key.
 
 `scanUrl`
-:   Submits a URL for scanning and returns the scan UUID immediately. The scan itself is asynchronous and takes roughly 10 to 30 seconds, so the result is not available when this action returns. Requires an API key.
+:   Submits a URL for scanning and returns the scan UUID immediately. The scan itself is asynchronous and takes roughly 10 to 30 seconds, so the result is not available when this action returns. Accepts up to 10 tags of at most 30 characters each, as does `scanUrlAndWait`. Requires an API key.
 
 `scanUrlAndWait`
 :   Submits a URL and polls until the scan finishes, returning the completed result in one step. The action to reach for when triaging a single URL. If the scan outlives the timeout it returns the UUID with `completed: false` rather than failing, so you can collect the verdict later with `getResult`. Requires an API key.
@@ -79,7 +79,10 @@ Authentication
 * **The rate-limited actions report their budget.** URLScan.io limits requests per minute, per hour, and per day, separately for each kind of action, and answers HTTP 429 when a window is exhausted. `searchScans`, `getResult`, `scanUrl`, and `scanUrlAndWait` return a `rateLimit` block read from the response headers. `getQuota`, `getDom`, and `getScreenshot` do not, because those endpoints are not rate limited and send no such headers; use `getQuota` for the full picture before a batch.
 * **Your plan restricts which fields you can search.** `getQuota` returns `queryableFields`. A query on a field outside that list fails with HTTP 403 and a message naming the field, which is a plan limit rather than a problem with the API key. Verdict fields are commonly restricted, so filter on page, task, IP, or hash fields and read the verdict from `getResult` instead.
 * **A large result can exceed the default response cap.** A raw result for a media-heavy page can pass 1 MB, which surfaces as `maxContentLength size of 1048576 exceeded`. In a workflow, raise the limit on the `getResult` or `scanUrlAndWait` step with `max-step-size` (for example `10mb`).
-* **Search results are capped by subscription tier**, and the API silently returns fewer results than requested rather than failing: an anonymous caller asking for 101 receives 100. Paginate with the `searchAfter` cursor each response returns; results run newest first, so each page walks further back in time. The reported `total` is exact only up to 10,000, beyond which it is a floor and `hasMore` is `true`.
+* **Search results come in capped pages, newest first.**
+  * Your subscription tier caps how many results one `searchScans` call returns. If `size` is higher than the cap, the API returns the cap instead of failing. For example, an anonymous caller who asks for 101 results gets 100. To find your cap, check `maxSearchResults` in the `getQuota` response.
+  * To read older results, pass the `searchAfter` cursor from each response to the next call. To read every page, keep going until a page comes back empty or without a `searchAfter`. A call without the cursor starts over at the newest results.
+  * `hasMore` tells you whether `total` is exact, not whether more results remain. `total` is exact up to 10,000 results. Above that, it's a lower bound and `hasMore` is `true`. Below 10,000, `hasMore` is `false` even when more results remain, so don't use it to decide when to stop paging.
 
 ## Get API credentials [urlscan-io-api-credentials]
 
@@ -90,4 +93,4 @@ An API key enables scanning, result retrieval, and DOM retrieval. The search, sc
 3. Copy the key, which is a UUID-shaped value.
 4. When you create the connector in {{kib}}, choose **API key** as the authentication type and paste the key. {{kib}} sends it in the `api-key` header, which is the only header name the API accepts.
 
-To confirm the key is working, run the connector's **Test** action or the `getQuota` action: an accepted key reports a quota scope of `user`, while `ip-address` means no key is being applied.
+To confirm the key is working, run the connector's **Test** action or the `getQuota` action: `ip-address` means no key is being applied, while an accepted key reports the account's scope, such as `user` or `team`.

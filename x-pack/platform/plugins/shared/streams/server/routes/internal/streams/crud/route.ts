@@ -11,12 +11,17 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   ClassicIngestStreamEffectiveLifecycle,
   EffectiveFailureStore,
+  Streams,
 } from '@kbn/streams-schema';
-import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import type { StreamSummary } from '../../../../../common';
+import {
+  MAX_RESOLVE_INDEX_PATTERN_LENGTH,
+  MAX_RESOLVE_INDEX_PATTERNS,
+  collectResolvedIndexNames,
+  type StreamSummary,
+} from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle, getFailureStore } from '../../../../lib/streams/stream_crud';
 
@@ -42,25 +47,13 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
-    const { streamsClient, scopedClusterClient, uiSettingsClient } = await getScopedClients({
+    const { streamsClient, scopedClusterClient } = await getScopedClients({
       request,
     });
 
-    const [allStreams, isQueryStreamsEnabled] = await Promise.all([
-      streamsClient.listStreamsWithDataStreamExistence(),
-      uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
-    ]);
+    const allStreams = await streamsClient.listStreamsWithDataStreamExistence();
 
-    const availableStreams = allStreams.filter(({ stream }) => {
-      const isQueryStream = Streams.QueryStream.Definition.is(stream);
-
-      // Only include query streams if query streams are enabled
-      return !isQueryStream || (isQueryStream && isQueryStreamsEnabled);
-    });
-
-    const streamNames = availableStreams
-      .filter(({ exists }) => exists)
-      .map(({ stream }) => stream.name);
+    const streamNames = allStreams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
 
     const streamPrivilegesMap = new Map<string, { read_failure_store: boolean }>();
 
@@ -84,11 +77,7 @@ export const listStreamsRoute = createServerRoute({
       dataStreams.data_streams.map((dataStream) => [dataStream.name, dataStream])
     );
 
-    const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
-      if (Streams.QueryStream.Definition.is(stream)) {
-        return { stream, privileges: { read_failure_store: false } };
-      }
-
+    const enrichedStreams = allStreams.map<ListStreamDetail>(({ stream }) => {
       const match = dataStreamsByName.get(stream.name);
       const privileges = streamPrivilegesMap.get(stream.name);
       const canReadFailureStore = privileges?.read_failure_store ?? false;
@@ -220,6 +209,36 @@ export const resolveIndexRoute = createServerRoute({
   },
 });
 
+export const resolveIndexPatternsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_resolve_index_patterns',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      patterns: z
+        .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
+        .min(1)
+        .max(MAX_RESOLVE_INDEX_PATTERNS),
+    }),
+  }),
+  handler: async ({ request, params, getScopedClients }): Promise<{ indices: string[] }> => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const resolved = await scopedClusterClient.asCurrentUser.indices.resolveIndex({
+      name: params.body.patterns.join(','),
+      expand_wildcards: 'open',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    return { indices: collectResolvedIndexNames(resolved) };
+  },
+});
+
 const BULK_GET_SUMMARIES_MAX_NAMES = 10_000;
 
 export const bulkGetStreamSummariesRoute = createServerRoute({
@@ -253,5 +272,6 @@ export const internalCrudRoutes = {
   ...listClassicStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
+  ...resolveIndexPatternsRoute,
   ...bulkGetStreamSummariesRoute,
 };

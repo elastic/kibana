@@ -1,0 +1,185 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
+import { useMemoryEnabled } from '../../../hooks/use_memory_enabled';
+import { SettingsTab } from './settings_tab';
+
+jest.mock('../../../hooks/use_memory_enabled', () => ({
+  useMemoryEnabled: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_ai_index_dreaming', () => ({
+  useAiIndexDreaming: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_navigation', () => ({
+  useNavigation: () => ({
+    navigateToContextEngine: jest.fn(),
+    createContextEngineUrl: (path: string) => `/app/context_engine${path}`,
+  }),
+}));
+
+jest.mock('./general_section', () => ({
+  GeneralSection: () => <div data-test-subj="contextAiIndexSettingsGeneral" />,
+}));
+
+jest.mock('../automations_panel', () => ({
+  AutomationsPanel: () => <div data-test-subj="contextAutomationsPanelStub" />,
+}));
+
+jest.mock('./dreaming_panel', () => ({
+  DreamingPanel: () => <div data-test-subj="contextAiIndexDreamingPanel" />,
+}));
+
+jest.mock('./advanced_section', () => ({
+  AdvancedSection: () => <div data-test-subj="contextAiIndexSettingsAdvanced" />,
+}));
+
+const aiIndex: GetAiIndexResponse = {
+  id: 'tickets',
+  managed: false,
+  dest: { type: 'index', value: 'ai-index-idx-tickets' },
+  automations: [],
+  sources: [],
+  traces: [],
+  date_created: '2026-11-01T00:00:00.000Z',
+  date_modified: '2026-11-01T00:00:00.000Z',
+};
+
+const renderTab = (
+  props: Partial<React.ComponentProps<typeof SettingsTab>> = {},
+  memoryEnabled: boolean = false,
+  pathname: string = '/ai_index/tickets/settings'
+) => {
+  jest.mocked(useMemoryEnabled).mockReturnValue(memoryEnabled);
+  const renderUi = () => (
+    <I18nProvider>
+      <EuiProvider>
+        <MemoryRouter initialEntries={[pathname]}>
+          <SettingsTab
+            isLoading={false}
+            aiIndex={undefined}
+            aiIndexId="tickets"
+            onSaved={jest.fn()}
+            isAutomationsUnlocked={false}
+            indexManagementHref={undefined}
+            {...props}
+          />
+        </MemoryRouter>
+      </EuiProvider>
+    </I18nProvider>
+  );
+  const result = render(renderUi());
+  return { ...result, rerenderTab: () => result.rerender(renderUi()) };
+};
+
+describe('SettingsTab', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest
+      .mocked(useAiIndexDreaming)
+      .mockReturnValue({ dreaming: undefined, isLoading: false, workflowIds: [] });
+  });
+
+  it('always renders the General section', () => {
+    renderTab();
+
+    expect(screen.getByTestId('contextAiIndexSettingsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsGeneral')).toBeInTheDocument();
+  });
+
+  it('does not render Advanced when aiIndex is undefined', () => {
+    renderTab();
+
+    expect(screen.queryByTestId('contextAiIndexSettingsAdvanced')).not.toBeInTheDocument();
+  });
+
+  it('renders Advanced when aiIndex is defined', () => {
+    renderTab({ aiIndex });
+
+    expect(screen.getByTestId('contextAiIndexSettingsAdvanced')).toBeInTheDocument();
+  });
+
+  it('renders Dreaming only when memory is enabled and aiIndex is defined', () => {
+    renderTab({ aiIndex }, true);
+
+    expect(screen.getByTestId('contextAiIndexDreamingPanel')).toBeInTheDocument();
+  });
+
+  it('does not render Dreaming when memory is disabled', () => {
+    renderTab({ aiIndex }, false);
+
+    expect(screen.queryByTestId('contextAiIndexDreamingPanel')).not.toBeInTheDocument();
+  });
+
+  it('does not render Dreaming without aiIndex even when memory is enabled', () => {
+    renderTab({}, true);
+
+    expect(screen.queryByTestId('contextAiIndexDreamingPanel')).not.toBeInTheDocument();
+  });
+
+  it('shows the locked Automations panel when automations are not unlocked', () => {
+    renderTab({ isAutomationsUnlocked: false });
+
+    expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAutomationsPanelStub')).not.toBeInTheDocument();
+  });
+
+  it('shows the Automations panel when automations are unlocked', () => {
+    renderTab({ aiIndex, isAutomationsUnlocked: true });
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsPanelStub')).toBeInTheDocument();
+  });
+  describe('when a link targets #automations', () => {
+    const scrollIntoView = jest.fn();
+    const automationsPath = '/ai_index/tickets/settings#automations';
+
+    beforeEach(() => {
+      Element.prototype.scrollIntoView = scrollIntoView;
+    });
+
+    it('does not scroll while Dreaming is still loading', () => {
+      jest
+        .mocked(useAiIndexDreaming)
+        .mockReturnValue({ dreaming: undefined, isLoading: true, workflowIds: [] });
+
+      renderTab({ aiIndex }, true, automationsPath);
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('scrolls to Automations when Dreaming finishes loading on the mounted page', () => {
+      jest
+        .mocked(useAiIndexDreaming)
+        .mockReturnValue({ dreaming: undefined, isLoading: true, workflowIds: [] });
+      const { rerenderTab } = renderTab({ aiIndex }, true, automationsPath);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      jest
+        .mocked(useAiIndexDreaming)
+        .mockReturnValue({ dreaming: undefined, isLoading: false, workflowIds: [] });
+      rerenderTab();
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    });
+
+    it('scrolls to Automations once Dreaming has loaded', () => {
+      renderTab({ aiIndex }, true, automationsPath);
+
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    });
+  });
+});

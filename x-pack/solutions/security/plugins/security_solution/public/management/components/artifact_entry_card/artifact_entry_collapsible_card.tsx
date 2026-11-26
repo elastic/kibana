@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, useGeneratedHtmlId } from '@elastic/eui';
 import type { AnyArtifact } from './types';
 import type { CommonArtifactEntryCardProps } from './artifact_entry_card';
 import { CardContainerPanel } from './components/card_container_panel';
@@ -39,6 +39,9 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
   }) => {
     const artifact = useNormalizedArtifact(item);
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const expandedSectionId = useGeneratedHtmlId({
+      prefix: 'artifactEntryCollapsibleCardDetails',
+    });
 
     return (
       <CardContainerPanel {...commonProps} item={item as AnyArtifact} data-test-subj={dataTestSubj}>
@@ -50,6 +53,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
             expanded={expanded}
             showEnabledColumn={showEnabledColumn}
             onExpandCollapse={onExpandCollapse}
+            expandedSectionId={expandedSectionId}
             data-test-subj={getTestId('header')}
           />
         </CardSectionPanel>
@@ -57,7 +61,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
           <>
             <EuiHorizontalRule margin="xs" />
 
-            <CardSectionPanel>
+            <CardSectionPanel id={expandedSectionId}>
               {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
               <CriteriaComponent

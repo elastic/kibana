@@ -7,8 +7,12 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
+export type EntityInventoryAppServerSetup = Record<string, never>;
+
 export class EntityInventoryAppPlugin implements Plugin {
-  setup(_core: CoreSetup): void {}
+  setup(_core: CoreSetup): EntityInventoryAppServerSetup {
+    return {};
+  }
 
   start(_core: CoreStart): void {}
 }

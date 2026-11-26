@@ -107,6 +107,8 @@ export function ServiceFlyoutApmCharts({
             latencyAggregationType={latencyAggregationType}
             setLatencyAggregationType={setLatencyAggregationType}
             latencySelectEbt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
+            // Single-row header so the three plots start at the same height.
+            compactHeader
           />
           <FailedTransactionChart {...commonProps} chartId="serviceFlyoutErrorRate" />
           <ThroughputChart {...commonProps} chartId="serviceFlyoutThroughput" />

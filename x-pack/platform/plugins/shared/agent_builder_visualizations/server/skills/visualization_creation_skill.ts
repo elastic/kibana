@@ -45,7 +45,7 @@ Do **not** use this skill when:
 
 - **${
     platformCoreTools.createVisualization
-  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case. You say what to build in \`target\`, discriminated by \`target.type\`: \`lens\`, \`vega\`, \`custom_content\`, or \`attachment\` (update an existing visualization).
+  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case. You say what to build in \`target\`, discriminated by \`target.type\`: \`vis\` (Lens), \`vega\`, \`custom_content\`, or \`attachment\` (update an existing visualization).
 - **${
     platformCoreTools.generateEsql
   }**: Optional. Only for genuinely complex aggregations/joins you want to control and validate precisely; pass the result to ${
@@ -85,10 +85,10 @@ Do **not** use this skill when:
      - \`query\` (required, specific and field-accurate)
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
      - \`target\` (required) — one of:
-       - \`{ "type": "lens", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
+       - \`{ "type": "vis", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
        - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <ES|QL from generate_esql or the user> }\` for a custom Vega-Lite visualization
-       - \`{ "type": "custom_content", "esql"?: <ES|QL from generate_esql or the user>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
-       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"? }\` to update an existing visualization
+       - \`{ "type": "custom_content", "dataQueries": [...] }\` or \`{ "type": "custom_content", "removeAllQueries": true }\` for an HTML layout — always pass one: \`dataQueries\` has a query generated for each entry, \`removeAllQueries\` is for a panel that genuinely has no data
+       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "dataQueries"?, "removeAllQueries"? }\` (\`esql\` for Lens and Vega, \`dataQueries\` and \`removeAllQueries\` for custom content) to update an existing visualization
        \`esql\` is optional everywhere it appears: pass it only when the query came from ${
          platformCoreTools.generateEsql
        } or the user pasted it, otherwise it is generated for you.
@@ -146,22 +146,22 @@ ${
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
   - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts of **different measures** (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
 - Pass \`target.type: "custom_content"\` only when **neither chart grammar** can express the request: an HTML/CSS layout such as a KPI scorecard with colored status badges, a health or status board, a panel mixing narrative text with live values, or when the user explicitly asks for a custom or HTML panel. Anything that is a standard time series, bar, pie, metric or table belongs on Lens; anything faceted, layered or scatter-shaped belongs on Vega. Reach for custom content last.
-- Otherwise pass \`target.type: "lens"\` with the required best-fitting \`chartType\`. Legend statistics of one series stay on Lens xy — see the average/min/max distinction above.
+- Otherwise pass \`target.type: "vis"\` with the required best-fitting \`chartType\`. Legend statistics of one series stay on Lens xy — see the average/min/max distinction above.
 - When updating an existing attachment, pass \`target.type: "attachment"\` with its \`attachment_id\` — edits keep the existing renderer.
 
 ### Custom content
 
 Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Do not write HTML, and never pass a template: the markup is generated server-side.
 
-You decide whether the panel has data:
-- Omit \`target.esql\` and a query is generated from \`query\` (the common case), or pass a query from ${
+You always decide whether the panel has data and say so; there is no default:
+- Pass \`target.dataQueries\` for a panel with live data: one entry per query, each saying what ONE query returns, and a query is generated for it from \`query\` and the description (the common case). The entry can carry a query from ${
     platformCoreTools.generateEsql
-  } or the user.
-- Pass \`target.has_data: false\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`has_data: false\` to get past a failed query generation; fix the index or fields and retry instead. Do not pass \`esql: null\` to mean "no data" — that is treated as omitting the query so one is generated.
+  } or the user as \`esql\`.
+- Pass \`target.removeAllQueries: true\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use it to get past a failed query generation; fix the index or fields and retry instead.
 
-To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass an \`esql\` from ${
-    platformCoreTools.generateEsql
-  } or the user to add or replace data, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
+When a panel needs data of more than one shape — headline numbers above a ranked list, say — pass one \`dataQueries\` entry per query. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ "description": "total requests and the number of 5xx errors, as one row" }\`, then \`{ "description": "the five hosts with the most requests" }\`; \`query\` stays the layout and says how each query is used. Keep a panel to a few queries (at most ten). On an update, pass \`dataQueries\` only for the queries you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one; queries you do not list are kept, and \`removeAllQueries: true\` removes them all. A layout or style edit omits \`dataQueries\` and keeps every query.
+
+To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Layout, copy and style edits (colors, sizes, wording) keep the stored queries, so pass no \`dataQueries\`. Pass a \`dataQueries\` entry at the position of the query to change when the edit needs different data, such as a new measure, grouping, filter or time window ("also show the average bytes"): without it the stored query is kept and the new data can never appear, and with a \`description\` the stored query is regenerated, keeping what the request does not change. Give \`esql\` only when the user supplied one. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
     platformCoreTools.generateEsql
   }) and retry; do not fall back to writing markup yourself.
 
@@ -194,7 +194,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 {
   "query": "Show average system.cpu.total.pct over time grouped by host.name",
   "index": "metrics-system.cpu-default",
-  "target": { "type": "lens", "chartType": "xy" }
+  "target": { "type": "vis", "chartType": "xy" }
 }
 \`\`\`
 
@@ -204,7 +204,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 {
   "query": "Show error count over the last 7 days",
   "index": "logs-*",
-  "target": { "type": "lens", "chartType": "xy" },
+  "target": { "type": "vis", "chartType": "xy" },
   "time_range": { "from": "now-7d", "to": "now" }
 }
 \`\`\`
@@ -216,7 +216,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
   "query": "Top 10 source IPs by request count",
   "index": "logs-nginx.access-default",
   "target": {
-    "type": "lens",
+    "type": "vis",
     "chartType": "xy",
     "esql": "FROM logs-nginx.access-default | STATS requests = COUNT(*) BY source.ip | SORT requests DESC | LIMIT 10"
   }
@@ -239,7 +239,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 {
   "query": "A status board with one card per host showing its log count and a colored badge",
   "index": "logs-*",
-  "target": { "type": "custom_content" }
+  "target": { "type": "custom_content", "dataQueries": [{ "description": "the log count per host" }] }
 }
 \`\`\`
 
@@ -248,7 +248,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 \`\`\`json
 {
   "query": "A header banner reading 'Production overview' with a short subtitle",
-  "target": { "type": "custom_content", "has_data": false }
+  "target": { "type": "custom_content", "removeAllQueries": true }
 }
 \`\`\`
 

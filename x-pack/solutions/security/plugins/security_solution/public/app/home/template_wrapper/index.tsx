@@ -14,7 +14,6 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { AlertsContextProvider } from '../../../detections/components/alerts_table/alerts_context';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
-import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
@@ -38,6 +37,58 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
 >`
   .kbnSolutionNav__sidebar:not(.kbnSolutionNav__sidebar--shrink) {
     background-color: ${({ theme }) => theme.colors.emptyShade};
+  }
+
+  /* EuiPageTemplate writes min-height inline (max(0, 100vh)). While a panel is maximized,
+     that minimum is taller than the app content area and is not a definite height, so
+     Dashboard's height: 100% collapses. Pin this page to the content box instead. */
+  /* dshDashboardViewport--panelExpanded: dashboard_viewport.tsx
+     dshLayout-isMaximizedPanel: dashboard_grid.tsx */
+  &:has(.dshDashboardViewport--panelExpanded) {
+    height: var(--kbn-application--content-height, 100vh);
+    max-height: var(--kbn-application--content-height, 100vh);
+    min-height: 0 !important;
+    flex-shrink: 1;
+    overflow: hidden;
+
+    /* Sticky top is the Kibana header offset. Inside this fixed-height grid that offset
+       pushes the filter bar down over the page title. The bar already has its own row. */
+    #securitySolutionStickyKQL {
+      position: static;
+    }
+
+    > main {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* At the m breakpoint Dashboard sets min-height to 100vh minus the sticky header.
+       That is taller than the space under the search bar, title, and toolbar, so
+       overflow: hidden clips the panel. The slot already has a definite height. */
+    .dshLayout-isMaximizedPanel {
+      min-height: 0;
+    }
+
+    .securityPageWrapper {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+
+      .securityPageWrapper__content {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+      }
+    }
   }
 
     .${IS_DRAGGING_CLASS_NAME} & {
@@ -93,6 +144,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
             <GlobalKQLHeader />
             <KibanaPageTemplate.Section
               className="securityPageWrapper"
+              contentProps={{ className: 'securityPageWrapper__content' }}
               data-test-subj="pageContainer"
               paddingSize={rest.paddingSize ?? 'l'}
               alignment="top"
@@ -101,7 +153,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
             >
               <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
                 {children}
-                <SecuritySolutionFlyout />
               </ExpandableFlyoutProvider>
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
@@ -109,7 +160,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
                 <EuiThemeProvider colorMode={globalColorMode}>
                   <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
                     <Timeline />
-                    <TimelineFlyout />
                   </ExpandableFlyoutProvider>
                 </EuiThemeProvider>
               </KibanaPageTemplate.BottomBar>

@@ -8,18 +8,22 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import type { Dispatch, PointerEvent as ReactPointerEvent, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiPortal, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiPortal, useEuiTheme } from '@elastic/eui';
 import { SpacingMeasurement } from './spacing_measurement';
 import { getElementFromPoint } from '../../lib/dom/get_element_from_point';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 import { calculateSpacingLines } from '../../lib/dom/calculate_spacing';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
-import { MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { useInspectionOverlayMount } from '../../lib/inspection_overlay_state';
 import { useEscapeKey } from '../../hooks/use_escape_key';
 import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
+import {
+  useOverlayClickCapture,
+  useThrottledDocumentPointerMove,
+} from '../../hooks/use_overlay_pointer_events';
 import { GlobalCursorOverride } from '../global_cursor_override';
 
 interface Props {
@@ -42,17 +46,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
   const [spacingLines, setSpacingLines] = useState<SpacingLine[]>([]);
   const anchorBadgeRef = useRef<HTMLDivElement>(null);
 
-  const overlayCss = useMemo(
-    () =>
-      css({
-        backgroundColor: transparentize(euiTheme.colors.backgroundFilledText, 0.1),
-        inset: 0,
-        position: 'fixed',
-        zIndex: zIndex.overlay,
-        pointerEvents: 'auto',
-      }),
-    [euiTheme.colors.backgroundFilledText, zIndex.overlay]
-  );
+  useInspectionOverlayMount('measure');
 
   const handleEscape = useCallback(() => setIsMeasuring(false), [setIsMeasuring]);
   useEscapeKey(handleEscape);
@@ -69,45 +63,38 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
     el.style.top = `${clamped.top}px`;
   }, [anchorRect]);
 
-  const rafRef = useRef<number>(0);
-
   const handlePointerMove = useCallback(
-    (event: ReactPointerEvent) => {
-      cancelAnimationFrame(rafRef.current);
+    (event: PointerEvent) => {
       const { clientX, clientY } = event;
-      rafRef.current = requestAnimationFrame(() => {
-        const synth = { clientX, clientY } as PointerEvent;
-        const target = getElementFromPoint(synth);
+      const synth = new MouseEvent('mousemove', { clientX, clientY });
+      const target = getElementFromPoint(synth);
 
-        if (!target) {
-          setHoverRect(null);
-          setSpacingLines([]);
-          return;
+      if (!target) {
+        setHoverRect(null);
+        setSpacingLines([]);
+        return;
+      }
+
+      const rect = target.getBoundingClientRect();
+      setHoverRect(rect);
+
+      if (anchorElement && anchorElement.isConnected && anchorElement !== target) {
+        const freshAnchorRect = anchorElement.getBoundingClientRect();
+        setAnchorRect(freshAnchorRect);
+        const lines = calculateSpacingLines(freshAnchorRect, rect);
+        setSpacingLines(lines);
+      } else {
+        if (anchorElement && !anchorElement.isConnected) {
+          setAnchorElement(null);
+          setAnchorRect(null);
         }
-
-        const rect = target.getBoundingClientRect();
-        setHoverRect(rect);
-
-        if (anchorElement && anchorElement.isConnected && anchorElement !== target) {
-          const freshAnchorRect = anchorElement.getBoundingClientRect();
-          setAnchorRect(freshAnchorRect);
-          const lines = calculateSpacingLines(freshAnchorRect, rect);
-          setSpacingLines(lines);
-        } else {
-          if (anchorElement && !anchorElement.isConnected) {
-            setAnchorElement(null);
-            setAnchorRect(null);
-          }
-          setSpacingLines([]);
-        }
-      });
+        setSpacingLines([]);
+      }
     },
     [anchorElement]
   );
 
-  useEffect(() => {
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
+  useThrottledDocumentPointerMove(handlePointerMove);
 
   const handleClick = useCallback((event: MouseEvent) => {
     const target = getElementFromPoint(event);
@@ -122,28 +109,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
     setSpacingLines([]);
   }, []);
 
-  const handleMouseEvent = useCallback(
-    (event: MouseEvent) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const eventTarget = event.target as HTMLElement;
-      const isTargetDisabled = eventTarget?.hasAttribute?.('disabled');
-      if (event.type === 'click' || isTargetDisabled) {
-        handleClick(event);
-      }
-    },
-    [handleClick]
-  );
-
-  useEffect(() => {
-    document.addEventListener('pointerdown', handleMouseEvent, true);
-    document.addEventListener('click', handleMouseEvent, true);
-
-    return () => {
-      document.removeEventListener('pointerdown', handleMouseEvent, true);
-      document.removeEventListener('click', handleMouseEvent, true);
-    };
-  }, [handleMouseEvent]);
+  useOverlayClickCapture({ onActivate: handleClick });
 
   const anchorHighlightCss = useMemo(
     () =>
@@ -159,14 +125,8 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
 
   return (
     <EuiPortal>
+      <div data-test-subj="measureOverlayContainer" hidden aria-hidden />
       <GlobalCursorOverride cursor="crosshair" />
-      <div
-        css={overlayCss}
-        id={MEASURE_OVERLAY_ID}
-        data-test-subj="measureOverlayContainer"
-        onPointerMove={handlePointerMove}
-        aria-hidden="true"
-      />
       {anchorRect && (
         <>
           <div className={anchorHighlightCss} data-test-subj="measureAnchorHighlight" />

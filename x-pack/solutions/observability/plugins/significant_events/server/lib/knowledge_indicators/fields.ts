@@ -9,6 +9,7 @@
 
 export const TIMESTAMP = '@timestamp';
 export const ID = 'id';
+export const REVISION_ID = 'revision_id';
 export const TYPE = 'type';
 export const TITLE = 'title';
 export const DESCRIPTION = 'description';

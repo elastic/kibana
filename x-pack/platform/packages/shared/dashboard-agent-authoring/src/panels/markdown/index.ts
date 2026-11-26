@@ -6,15 +6,14 @@
  */
 
 import { MARKDOWN_EMBEDDABLE_TYPE, markdownStateSchema } from '@kbn/dashboard-markdown-schemas';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineConfigPanelKind } from '../panel_kind';
 
 /**
  * Markdown panel logic.
  *
- * Markdown is authored by value: `source: 'config'` (`type: 'markdown'`) whose
- * `config` is passed through to the embeddable unchanged. This module owns the
- * `config`-source input schemas.
+ * Markdown is authored by value: `type: 'markdown'` content whose `config` is
+ * passed through to the embeddable unchanged.
  */
 
 /** By-value markdown panel config: the embeddable's markdown state, with bounded `content`. */
@@ -22,32 +21,20 @@ const markdownPanelConfigSchema = markdownStateSchema.extend({
   content: markdownStateSchema.shape.content.max(50000),
 });
 
-/**
- * The markdown variant of a `config`-source panel input, discriminated by
- * `type: 'markdown'`.
- */
-const markdownPanelConfigInputSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('markdown'),
-  config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content }).'),
-});
-
-/**
- * The markdown variant of an `edit_panels` item: targets an existing markdown
- * panel by id and replaces its config. Derived from the add schema so the
- * `source`/`type`/`config` shape stays in sync.
- */
-const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema.extend({
-  panelId: z.string().max(256).describe('Existing markdown panel id to update.'),
-  config: markdownPanelConfigSchema.describe(
-    'New markdown panel config (e.g. { content }). Fully replaces the existing config.'
-  ),
-});
+/** The markdown member of the panel content union. */
+const markdownPanelContentSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('markdown'),
+    config: markdownPanelConfigSchema.describe(
+      'Markdown panel config (e.g. { content }). On an existing panel, fully replaces its config.'
+    ),
+  })
+);
 
 export const markdownPanelKind = defineConfigPanelKind({
   type: 'markdown',
   embeddableType: MARKDOWN_EMBEDDABLE_TYPE,
   label: 'markdown',
-  addInputSchema: markdownPanelConfigInputSchema,
-  editInputSchema: editMarkdownPanelConfigInputSchema,
+  selection: { priority: 3, whenToUse: 'static text, links, or notes with no data.' },
+  contentSchema: markdownPanelContentSchema,
 });

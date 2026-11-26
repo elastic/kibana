@@ -9,15 +9,17 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
 import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
-import type { ActionsService } from '../../services/actions/actions_service';
 import type { HuntServices } from '../../services/watches/hunt/types';
-import { createAlsoRaisedByAppender } from '../../services/watches/hunt/packaging/converge_on_live_proposal';
-import { createInvestigationOpenChecker } from '../../services/watches/hunt/packaging/check_investigation_open';
+import {
+  createAlsoRaisedByAppender,
+  createExistingProposalsCounter,
+  createInvestigationOpenChecker,
+  createProposalSlotResolver,
+} from '../../services/proposals/dedup';
 import { createOpenProposalChecker } from '../../services/watches/hunt/packaging/check_open_proposals';
-import { createExistingProposalsCounter } from '../../services/watches/hunt/packaging/check_existing_proposals';
 import { makeRehydrateProcessSelectors } from '../../services/watches/hunt/packaging/rehydrate_process_selectors';
-import { createProposalSlotResolver } from '../../services/watches/hunt/packaging/resolve_proposal_slot';
 import {
   PackageReportIdentityError,
   runPackageReport,
@@ -29,7 +31,7 @@ import {
 } from '../../services/watches/hunt/packaging/write_coverage_kis';
 
 export interface PackageReportStepDependencies {
-  getActionsService: () => ActionsService;
+  getActionsService: () => ActionCatalogClient;
   getConversations: () => AgentBuilderPluginStart['conversations'];
   /** For the Proposals look-ups: the settlement baseline, each finding's slot, and the converge revision. */
   getHuntServices: () => HuntServices;
@@ -111,7 +113,9 @@ export const getPackageReportStepDefinition = ({
 
         const listRespondActions: RunPackageReportDeps['listRespondActions'] = async (sid) => {
           try {
-            const listed = await getActionsService().list(sid, request, ['respond', 'investigate']);
+            const listed = await getActionsService().list(sid, request, {
+              categories: ['respond', 'investigate'],
+            });
             return { ok: true, actions: listed.actions };
           } catch {
             return { ok: false, reason: 'catalog_error' };
@@ -171,6 +175,7 @@ export const getPackageReportStepDefinition = ({
           coordinator: {
             reportIntentTargets: input.reportIntentTargets,
             behaviors: input.behaviors,
+            coverageGaps: input.coverageGaps,
           },
           attachments: conversation.attachments,
           deps: {

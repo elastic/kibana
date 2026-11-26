@@ -10,6 +10,7 @@ import type { BaseLanguageModelCallOptions } from '@langchain/core/language_mode
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
+import { throwIfModelRefusal } from './model_refusal_error';
 
 const LLM_TYPE = 'InferenceClientLlm';
 
@@ -100,6 +101,13 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
         ...(this.#timeout ? { timeout: this.#timeout } : {}),
         ...(this.#systemPrompt ? { system: this.#systemPrompt } : {}),
         ...(this.#telemetryMetadata ? { metadata: this.#telemetryMetadata } : {}),
+      });
+
+      throwIfModelRefusal({
+        connectorId: this.#connectorId,
+        content: response.content,
+        model: this.#model,
+        refusal: response.refusal,
       });
 
       return response.content;

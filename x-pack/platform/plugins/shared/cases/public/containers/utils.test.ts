@@ -67,7 +67,7 @@ describe('utils', () => {
       );
 
       expect(toast).toEqual({
-        title: 'Alerts in "My case" have been synced',
+        title: 'Detections in "My case" have been synced',
         className: 'eui-textBreakWord',
       });
     });
@@ -105,7 +105,7 @@ describe('utils', () => {
       );
 
       expect(toast).toEqual({
-        title: 'Alerts in "My case" have been synced',
+        title: 'Detections in "My case" have been synced',
         className: 'eui-textBreakWord',
       });
     });
@@ -152,7 +152,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
-        text: 'Updated the statuses of attached alerts.',
+        text: 'Updated the statuses of attached detections.',
         className: 'eui-textBreakWord',
       });
     });

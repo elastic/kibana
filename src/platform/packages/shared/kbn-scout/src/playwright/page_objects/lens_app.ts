@@ -17,6 +17,12 @@ import { KibanaCodeEditorWrapper } from '../ui_components';
  */
 const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
 
+/**
+ * Budget for a chart to mount and settle. Both steps wait on the first expression render, so they
+ * cover the data fetch and regularly exceed the 10s `actionTimeout` meant for clicks.
+ */
+const CHART_RENDER_TIMEOUT_MS = 30_000;
+
 interface ChartSwitchPopoverOptions {
   search?: string;
   visType?: string;
@@ -724,7 +730,7 @@ export class LensApp {
     await workspace.waitFor({ state: 'visible', timeout: 20_000 });
 
     const container = workspace.getByTestId(chartSubj);
-    await container.waitFor({ state: 'visible' });
+    await container.waitFor({ state: 'visible', timeout: CHART_RENDER_TIMEOUT_MS });
 
     const afterCount = options?.afterCount;
     const clearPrevRenderCount = async () => {
@@ -766,8 +772,7 @@ export class LensApp {
           return prev === count;
         },
         { subj: chartSubj, minExclusive: afterCount ?? null },
-        // Chart data + render-count settle often exceeds the 10s actionTimeout; keep below the 60s test timeout.
-        { polling: 500, timeout: 30_000 }
+        { polling: 500, timeout: CHART_RENDER_TIMEOUT_MS }
       );
     } finally {
       // Clear even on timeout so a leftover prev===count can't false-settle the next call.

@@ -5,25 +5,12 @@
  * 2.0.
  */
 
-import { difference, first, values } from 'lodash';
 import { euiPaletteColorBlind } from '@elastic/eui';
+import { Color } from './color';
+import type { Palette } from './color';
 
-export enum Color {
-  color0 = 'color0',
-  color1 = 'color1',
-  color2 = 'color2',
-  color3 = 'color3',
-  color4 = 'color4',
-  color5 = 'color5',
-  color6 = 'color6',
-  color7 = 'color7',
-  color8 = 'color8',
-  color9 = 'color9',
-}
-
-export type Palette = {
-  [K in keyof typeof Color]: string;
-};
+export { Color, sampleColor } from './color';
+export type { Palette } from './color';
 
 const euiPalette = euiPaletteColorBlind();
 
@@ -46,8 +33,3 @@ export const defaultPalette: Palette = {
 export const createPaletteTransformer = (palette: Palette) => (color: Color) => palette[color];
 
 export const colorTransformer = createPaletteTransformer(defaultPalette);
-
-export const sampleColor = (usedColors: Color[] = []): Color => {
-  const available = difference(values(Color) as Color[], usedColors);
-  return first(available) || Color.color0;
-};

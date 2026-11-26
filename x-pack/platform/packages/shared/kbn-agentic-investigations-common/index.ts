@@ -24,6 +24,8 @@ export {
   type CardActionType,
 } from './src/components/actions/base_actions';
 
+export { toPlainSummary } from './src/utils/to_plain_summary';
+
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
 export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
@@ -31,29 +33,14 @@ export { type ConversationsActionsGroupProps } from './src/components/conversati
 
 export { ConversationQueue } from './src/components/conversation_queue/conversation_queue';
 
-export {
-  ConversationDetailsFlyoutHeader,
-  type ConversationDetailsFlyoutHeaderProps,
-} from './src/components/details/flyout_header';
-export {
-  ConversationDetailsFlyoutFooter,
-  type ConversationDetailsFlyoutFooterProps,
-  type CloseInvestigationModalRenderProps,
-} from './src/components/details/flyout_footer';
-export {
-  ConversationHeaderBlocks,
-  type ConversationHeaderBlocksProps,
-} from './src/components/details/header_blocks';
+export { type CloseInvestigationModalRenderProps } from './src/components/modals/investigation_action_modals';
 export {
   OverviewTab,
   type OverviewTabProps,
   type OverviewSections,
 } from './src/components/details/details_flyout_tab_contents';
-export {
-  EscalationFlyoutHeader,
-  type EscalationFlyoutHeaderProps,
-} from './src/components/details/escalation_flyout_header';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
+export { SeverityPicker, type SeverityPickerProps } from './src/components/details/severity_picker';
 export {
   SEVERITY_COLORS,
   SEVERITY_LABELS,
@@ -100,15 +87,17 @@ export {
   type AssigneesSlotRenderProps,
   type RenderStatus,
   type StatusSlotRenderProps,
+  type RenderSeverity,
+  type SeveritySlotRenderProps,
   type RenderLinkedInvestigations,
-  type RenderSyncIndicator,
-  type SyncIndicatorSlotRenderProps,
+  type DetailsFlyoutContext,
+  type InvestigationDetailsFlyoutContext,
+  type EscalationDetailsFlyoutContext,
   type LinkedInvestigationsSlotRenderProps,
   type RenderOverview,
   type OverviewSlotRenderProps,
   type RenderLiveState,
   type LiveStateSlotRenderProps,
-  type RenderTitle,
   type TitleSlotRenderProps,
 } from './src/template_ui/types';
 export {
@@ -133,15 +122,12 @@ export {
   renderImpactDetails,
 } from './src/components/impact/impact_details_renderer';
 export {
-  entityStoreIdType,
-  impactEntityFlyoutType,
-  type ImpactEntityFlyoutType,
-  type ImpactEntityTarget,
-} from './src/components/impact/open_impact_entity';
-export { Impact, useEntityFilter, type ImpactPill } from './src/components/filters/impact';
+  Impact,
+  useEntityFilter,
+  type ImpactPill,
+  type PagedImpactPills,
+} from './src/components/filters/impact';
 
-export { BaseActionModal } from './src/components/modals/base_action_modal';
-export { MODAL_TRANSLATIONS } from './src/components/modals/translations';
 export {
   InvestigationActionModals,
   type InvestigationActionModalsProps,

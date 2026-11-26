@@ -35,6 +35,11 @@ type UnknownAttachmentWithLabel = Attachment<
   { attachmentLabel?: string } & Record<string, unknown>
 >;
 
+type AlertsBatchAttachment = Attachment<
+  string,
+  { alertIds?: unknown[]; tags?: unknown[]; attachmentLabel?: string }
+>;
+
 interface AttachmentTypeConfig {
   type: SecurityAgentBuilderAttachments;
   label: string;
@@ -80,21 +85,22 @@ export const registerAttachmentUiDefinitions = ({
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
   });
 
-  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
-    SecurityAgentBuilderAttachments.alerts,
-    {
-      getLabel: (attachment) => {
-        const count = attachment.data?.alertIds?.length ?? 0;
-        return count > 0
-          ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
-              defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
-              values: { count },
-            })
-          : ALERTS_DEFAULT_LABEL;
-      },
-      getIcon: () => 'bell',
-    }
-  );
+  attachments.addAttachmentType<AlertsBatchAttachment>(SecurityAgentBuilderAttachments.alerts, {
+    getLabel: (attachment) => {
+      // The label renders synchronously, so a batch referenced by tag cannot count its alerts.
+      if (attachment.data?.tags?.length) {
+        return attachment.data.attachmentLabel ?? ALERTS_DEFAULT_LABEL;
+      }
+      const count = attachment.data?.alertIds?.length ?? 0;
+      return count > 0
+        ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
+            defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+            values: { count },
+          })
+        : ALERTS_DEFAULT_LABEL;
+    },
+    getIcon: () => 'bell',
+  });
 };
 
 /**
@@ -150,6 +156,22 @@ export const registerInvestigationIocsAttachment = ({
  * `security.search_entities`), which are gated on `entityAnalyticsEntityStoreV2`, so non-V2
  * environments never exercise this renderer even though it's registered unconditionally.
  */
+/**
+ * The impact entity opener links into Security entity flyouts, so it is registered only in
+ * Security solution spaces. If the active space can't be resolved, fall back to registering.
+ */
+const isSecuritySolutionSpace = async (spaces?: SpacesPluginStart): Promise<boolean> => {
+  if (!spaces) {
+    return true;
+  }
+  try {
+    const { solution } = await spaces.getActiveSpace();
+    return solution === 'security';
+  } catch {
+    return true;
+  }
+};
+
 export const registerEntityAttachment = ({
   attachments,
   application,
@@ -158,8 +180,8 @@ export const registerEntityAttachment = ({
   experimentalFeatures,
   resolveSecurityCanvasContext,
   searchSession,
-  uiSettings,
   rendering,
+  spaces,
   registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
@@ -169,18 +191,25 @@ export const registerEntityAttachment = ({
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
   rendering: CoreStart['rendering'];
+  spaces?: SpacesPluginStart;
   registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
-  registerImpactEntityOpener?.((entity) => {
-    void import(
-      /* webpackChunkName: "security_impact_entity_flyout" */
-      './open_impact_entity_flyout'
-    ).then(({ openImpactEntityFlyout }) =>
-      openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
-    );
-  });
+  if (registerImpactEntityOpener) {
+    void isSecuritySolutionSpace(spaces).then((isSecuritySpace) => {
+      if (!isSecuritySpace) {
+        return;
+      }
+      registerImpactEntityOpener((entity) => {
+        void import(
+          /* webpackChunkName: "security_impact_entity_flyout" */
+          './open_impact_entity_flyout'
+        ).then(({ openImpactEntityFlyout }) =>
+          openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+        );
+      });
+    });
+  }
 
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
@@ -195,7 +224,6 @@ export const registerEntityAttachment = ({
         chrome,
         resolveSecurityCanvasContext,
         searchSession,
-        uiSettings,
       })
     );
   });
@@ -277,17 +305,13 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_analytics_dashboard_attachment" */
@@ -298,9 +322,7 @@ export const registerEntityAnalyticsDashboardAttachment = ({
       application,
       agentBuilder,
       chrome,
-      experimentalFeatures,
       searchSession,
-      uiSettings,
     });
   });
 };
@@ -323,8 +345,6 @@ export const registerEntityGraphAttachment = ({
   agentBuilder,
   chrome,
   searchSession,
-  experimentalFeatures,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -332,8 +352,6 @@ export const registerEntityGraphAttachment = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   searchSession?: ISessionService;
-  experimentalFeatures: ExperimentalFeatures;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_graph_attachment" */
@@ -347,8 +365,6 @@ export const registerEntityGraphAttachment = ({
         agentBuilder,
         chrome,
         searchSession,
-        experimentalFeatures,
-        uiSettings,
       })
     );
   });
@@ -365,17 +381,13 @@ export const registerEntityRiskScoreHistoryAttachment = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_risk_score_history_attachment" */
@@ -387,9 +399,7 @@ export const registerEntityRiskScoreHistoryAttachment = ({
         application,
         agentBuilder,
         chrome,
-        experimentalFeatures,
         searchSession,
-        uiSettings,
       })
     );
   });
@@ -435,7 +445,7 @@ export const registerExceptionAttachment = ({
 /**
  * Registers the `security.rulePreview` attachment renderer (inline alert table showing
  * preview results). Dynamically imports {@link ./rule_preview_attachment} so the heavy
- * transitive deps (SecuritySolutionFlyout, RulePreviewAlertsTable, sourcerer, etc.)
+ * transitive deps (RulePreviewAlertsTable, sourcerer, etc.)
  * stay off the main `securitySolution` page-load bundle.
  */
 export const registerRulePreviewAttachment = ({

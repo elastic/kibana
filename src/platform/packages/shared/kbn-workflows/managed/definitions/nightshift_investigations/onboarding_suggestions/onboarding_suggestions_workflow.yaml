@@ -59,7 +59,7 @@ steps:
         suggest their first investigations. Explore quickly and broadly, do not dig into any single
         problem, and do not report investigation progress.
 
-        1. Read /workspace/elastic.md and /workspace/connectors.md. They say how to query the
+        1. Read /workspace/.connector-docs/elastic.md and /workspace/connectors.md. They say how to query the
            cluster's telemetry and which sandbox secrets you may request (for example a GitHub
            token or the URL and API key of another Elastic deployment).
         2. Look at the cluster, skipping what does not exist:
