@@ -126,11 +126,9 @@ const resolveTokenUrl = (
   // Relative servers such as `/v1` have no origin, and their token URLs match on the path only.
   const [, origin = '', basePath = base] = ORIGIN.exec(base) ?? [];
   if (url.startsWith('//')) {
-    // `''.split(':')` is `['']`, not `[undefined]`, so a server with no scheme would otherwise
-    // take the empty one and build `://host/path`, which matches nothing. Leave the reference
-    // unresolved instead.
-    const [scheme] = origin.split(':');
-    return { url: withoutQuery(scheme ? `${scheme}:${url}` : url), variables };
+    // A server such as `/v1` has no scheme to take, and the URL only matches by host with one.
+    const scheme = origin.split(':')[0] || 'https';
+    return { url: withoutQuery(`${scheme}:${url}`), variables };
   }
   const path = url.startsWith('/')
     ? url

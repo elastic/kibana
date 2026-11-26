@@ -53,12 +53,12 @@ describe('resolveTokenUrlAgainstServers', () => {
     expect(resolveTokenUrlAgainstServers('/oauth2/v1/token', [])).toEqual(['/oauth2/v1/token']);
   });
 
-  it('leaves a scheme-relative token URL alone when the server has no scheme to take', () => {
+  it('uses https for a scheme-relative token URL when the server has no scheme', () => {
     expect(resolveTokenUrlAgainstServers('//auth.example.com/token', [])).toEqual([
-      '//auth.example.com/token',
+      'https://auth.example.com/token',
     ]);
     expect(resolveTokenUrlAgainstServers('//auth.example.com/token', ['/v1'])).toEqual([
-      '//auth.example.com/token',
+      'https://auth.example.com/token',
     ]);
   });
 
@@ -125,6 +125,33 @@ describe('token endpoints', () => {
       ['OAuth token', 200],
       ['GET /items', 200],
     ]);
+  });
+
+  it('serves a scheme-relative token URL on its host when the server has no scheme', async () => {
+    const schemeRelative = {
+      ...spec,
+      servers: [{ url: '/v1' }],
+      components: {
+        securitySchemes: {
+          oauth: {
+            type: 'oauth2',
+            flows: { clientCredentials: { tokenUrl: '//auth.example.com/token', scopes: {} } },
+          },
+        },
+      },
+    };
+    const { fetch: mockFetch } = createEmulatorFetch({ specs: [schemeRelative] });
+    const post = (url: string) =>
+      mockFetch(url, {
+        method: 'POST',
+        headers: FORM,
+        body: 'grant_type=client_credentials&client_id=id',
+      });
+
+    const served = await post('https://auth.example.com/token');
+    const asPath = await post('https://other.example.com//auth.example.com/token');
+
+    expect([served.status, asPath.status]).toEqual([200, 404]);
   });
 
   it('resolves relative token and refresh URLs against the server', async () => {
