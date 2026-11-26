@@ -200,27 +200,20 @@ describe('Cloud Plugin', () => {
         expect(setup.serverless.projectType).toBe('security');
       });
 
-      describe('serverless.createdAt', () => {
-        it('is the parsed `serverless.created_at`', () => {
-          const { setup } = setupPlugin({
-            serverless: {
-              project_id: 'my-awesome-project',
-              created_at: '2026-11-04T14:16:56.000Z',
-            },
-          });
-          expect(setup.serverless.createdAt).toEqual(new Date('2026-11-04T14:16:56.000Z'));
+      describe('createdAt', () => {
+        it('is the parsed `created_at`', () => {
+          const { setup } = setupPlugin({ created_at: '2026-11-04T14:16:56.000Z' });
+          expect(setup.createdAt).toEqual(new Date('2026-11-04T14:16:56.000Z'));
         });
 
-        it('is undefined when `serverless.created_at` is not set', () => {
-          const { setup } = setupPlugin({ serverless: { project_id: 'my-awesome-project' } });
-          expect(setup.serverless.createdAt).toBeUndefined();
+        it('is undefined when `created_at` is not set', () => {
+          const { setup } = setupPlugin({});
+          expect(setup.createdAt).toBeUndefined();
         });
 
-        it('is undefined when `serverless.created_at` cannot be parsed', () => {
-          const { setup } = setupPlugin({
-            serverless: { project_id: 'my-awesome-project', created_at: 'not-a-date' },
-          });
-          expect(setup.serverless.createdAt).toBeUndefined();
+        it('is undefined when `created_at` cannot be parsed', () => {
+          const { setup } = setupPlugin({ created_at: 'not-a-date' });
+          expect(setup.createdAt).toBeUndefined();
         });
       });
       describe('exposes isInTrial', () => {

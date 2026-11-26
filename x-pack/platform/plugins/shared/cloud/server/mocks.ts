@@ -38,7 +38,6 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       projectType: undefined,
       productTier: undefined,
       orchestratorTarget: undefined,
-      createdAt: undefined,
     },
     isInTrial: jest.fn().mockReturnValue(false),
     trialDaysLeft: jest.fn().mockReturnValue(undefined),

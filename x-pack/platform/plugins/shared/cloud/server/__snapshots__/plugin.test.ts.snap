@@ -10,6 +10,7 @@ Object {
   "cloudDefaultPort": undefined,
   "cloudHost": undefined,
   "cloudId": "cloudId",
+  "createdAt": undefined,
   "csp": "aws",
   "deploymentId": "deployment-id",
   "elasticsearchClusterId": undefined,
@@ -31,7 +32,6 @@ Object {
   "projectsUrl": "https://cloud.elastic.co/projects/",
   "region": undefined,
   "serverless": Object {
-    "createdAt": undefined,
     "orchestratorTarget": undefined,
     "organizationInTrial": undefined,
     "productTier": undefined,

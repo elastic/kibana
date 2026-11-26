@@ -29,14 +29,6 @@ export function initializeMetadata({
   logger: Logger;
 }) {
   const offering = initializerContext.env.packageInfo.buildFlavor;
-  // Creation time, CSP and region are only sent for Serverless projects.
-  const serverlessOnly = cloud.isServerlessEnabled
-    ? {
-        created_at: cloud.serverless.createdAt?.toISOString(),
-        csp: cloud.csp,
-        region: cloud.region,
-      }
-    : {};
 
   metadataService.setup({
     instanceKey: cloud.serverless?.projectId || cloud.deploymentId,
@@ -48,7 +40,9 @@ export function initializeMetadata({
     project_type: cloud.serverless.projectType,
     product_tier: cloud.serverless.productTier,
     orchestrator_target: cloud.serverless.orchestratorTarget,
-    ...serverlessOnly,
+    created_at: cloud.createdAt?.toISOString(),
+    csp: cloud.csp,
+    region: cloud.region,
     organizationKey: cloud.organizationId,
     trial_end_date: cloud.trialEndDate,
     is_elastic_staff: cloud.isElasticStaffOwned,

@@ -18,7 +18,7 @@ const isRealCalendarDay = (year: number, month: number, day: number): boolean =>
   new Date(Date.UTC(year, month - 1, day)).getUTCDate() === day;
 
 /**
- * Parses the `xpack.cloud.serverless.created_at` setting (an ISO-8601 timestamp with a time zone) into a `Date`.
+ * Parses the `xpack.cloud.created_at` setting (an ISO-8601 timestamp with a time zone) into a `Date`.
  *
  * @param value The raw setting value.
  * @param logger Used to report a value that is set but cannot be parsed.
@@ -27,12 +27,12 @@ const isRealCalendarDay = (year: number, month: number, day: number): boolean =>
 export function parseCreatedAt(value: string | undefined, logger: Logger): Date | undefined {
   if (!value) return undefined;
 
-  const createdAt = new Date(value);
   const parts = ISO_TIMESTAMP_WITH_ZONE.exec(value);
   const [year, month, day] = parts ? parts.slice(1).map(Number) : [];
-  if (!parts || !isRealCalendarDay(year, month, day) || Number.isNaN(createdAt.getTime())) {
+  const createdAt = parts && isRealCalendarDay(year, month, day) ? new Date(value) : undefined;
+  if (!createdAt || Number.isNaN(createdAt.getTime())) {
     logger.warn(
-      `cloud.serverless.created_at config value "${value}" could not be parsed as an ISO-8601 timestamp with a time zone; ignoring it.`
+      `cloud.created_at config value "${value}" could not be parsed as an ISO-8601 timestamp with a time zone; ignoring it.`
     );
     return undefined;
   }

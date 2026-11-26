@@ -188,6 +188,7 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.cloud.performance_url (string?)',
   'xpack.cloud.users_and_roles_url (string?)',
   'xpack.cloud.projects_url (string?|never)',
+  'xpack.cloud.created_at (string?)',
   'xpack.cloudSecurityPosture.enableExperimental (array?)',
   // can't be used to infer urls or customer id from the outside
   'xpack.cloud.serverless.project_id (string?)',

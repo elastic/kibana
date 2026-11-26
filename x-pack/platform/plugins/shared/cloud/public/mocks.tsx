@@ -42,7 +42,6 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       projectName: undefined,
       projectType: undefined,
       productTier: undefined,
-      createdAt: undefined,
     },
     getUrls: jest.fn().mockReturnValue({}),
     getPrivilegedUrls: jest.fn().mockResolvedValue({}),

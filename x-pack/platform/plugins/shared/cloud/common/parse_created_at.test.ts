@@ -42,7 +42,7 @@ describe('parseCreatedAt', () => {
       expect(parseCreatedAt(value, logger)).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        `cloud.serverless.created_at config value "${value}" could not be parsed as an ISO-8601 timestamp with a time zone; ignoring it.`
+        `cloud.created_at config value "${value}" could not be parsed as an ISO-8601 timestamp with a time zone; ignoring it.`
       );
     }
   );

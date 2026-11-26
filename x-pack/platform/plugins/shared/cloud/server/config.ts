@@ -75,6 +75,9 @@ const configSchema = schema.object({
   cname: schema.maybe(schema.string()),
   csp: schema.maybe(schema.string()),
   region: schema.maybe(schema.string()),
+  // YAML reads an unquoted `created_at: 2026` as a number; coerce it so parseCreatedAt can ignore it with a warning
+  // instead of failing validation.
+  created_at: schema.maybe(schema.string({ coerceFromNumber: true })),
   deployments_url: schema.string({ defaultValue: '/deployments' }),
   deployment_url: schema.maybe(schema.string()),
   create_deployment_url: schema.string({ defaultValue: '/deployments/create' }),
@@ -113,9 +116,6 @@ const configSchema = schema.object({
         product_tier: schema.maybe(createProductTiersSchema()),
         orchestrator_target: schema.maybe(schema.string()),
         in_trial: schema.maybe(schema.boolean()),
-        // YAML reads an unquoted `created_at: 2026` as a number; coerce it so parseCreatedAt can ignore it with a
-        // warning instead of failing validation.
-        created_at: schema.maybe(schema.string({ coerceFromNumber: true })),
       },
       // avoid future chicken-and-egg situation with the component populating the config
       { unknowns: 'ignore' }
@@ -131,6 +131,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     cname: true,
     csp: true,
     region: true,
+    created_at: true,
     deployments_url: true,
     deployment_url: true,
     create_deployment_url: true,
@@ -156,7 +157,6 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
       product_tier: true,
       orchestrator_target: true,
       in_trial: true,
-      created_at: true,
     },
     onboarding: {
       default_solution: true,

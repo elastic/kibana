@@ -31,6 +31,7 @@ export interface CloudConfigType {
   cname?: string;
   csp?: string;
   region?: string;
+  created_at?: string;
   base_url?: string;
   profile_url?: string;
   deployments_url?: string;
@@ -58,7 +59,6 @@ export interface CloudConfigType {
     product_tier?: KibanaProductTier;
     orchestrator_target?: string;
     in_trial?: boolean;
-    created_at?: string;
   };
 }
 
@@ -104,6 +104,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cname,
       csp,
       region,
+      createdAt: parseCreatedAt(this.config.created_at, this.logger),
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
@@ -127,7 +128,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // Use `core.pricing` when checking if a feature is available for the current product tier.
         productTier: this.config.serverless?.product_tier,
         organizationInTrial: this.config.serverless?.in_trial,
-        createdAt: parseCreatedAt(this.config.serverless?.created_at, this.logger),
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);

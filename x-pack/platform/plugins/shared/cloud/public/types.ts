@@ -217,6 +217,11 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   region?: string;
   /**
+   * When the deployment or project was created.
+   * Undefined if the creation time is unknown or could not be parsed.
+   */
+  createdAt?: Date;
+  /**
    * Method to retrieve privileged URLs for the Cloud plugin.
    */
   getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
@@ -321,11 +326,6 @@ export interface CloudSetup extends CloudBasicUrls {
      * Whether the serverless project belongs to an organization currently in trial.
      */
     organizationInTrial?: boolean;
-    /**
-     * When the serverless project was created.
-     * Undefined if the creation time is unknown or could not be parsed.
-     */
-    createdAt?: Date;
   };
   /**
    * Method to retrieve if the organization is in trial.

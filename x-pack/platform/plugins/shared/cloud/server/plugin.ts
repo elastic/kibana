@@ -61,6 +61,11 @@ export interface CloudSetup {
    */
   region?: string;
   /**
+   * When the deployment or project was created.
+   * Undefined if the creation time is unknown or could not be parsed.
+   */
+  createdAt?: Date;
+  /**
    * The Elastic Cloud Organization that owns this deployment/project.
    */
   organizationId?: string;
@@ -192,11 +197,6 @@ export interface CloudSetup {
      * Whether the serverless project belongs to an organization currently in trial.
      */
     organizationInTrial?: boolean;
-    /**
-     * When the serverless project was created.
-     * Undefined if the creation time is unknown or could not be parsed.
-     */
-    createdAt?: Date;
   };
   /**
    * Method to retrieve if the organization is in trial.
@@ -367,6 +367,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudId: this.config.id,
       csp: this.config.csp,
       region: this.config.region,
+      createdAt: parseCreatedAt(this.config.created_at, this.logger),
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
@@ -400,7 +401,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // Use `core.pricing` when checking if a feature is available for the current product tier.
         productTier,
         organizationInTrial: this.config.serverless?.in_trial,
-        createdAt: parseCreatedAt(this.config.serverless?.created_at, this.logger),
       },
       isInTrial: this.isInTrial.bind(this),
       trialDaysLeft: this.trialDaysLeft.bind(this),
