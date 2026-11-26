@@ -14,13 +14,13 @@ describe('isCompositeSloEnabled', () => {
     const getBooleanValue$ = jest.fn().mockReturnValue(of(true));
 
     await expect(isCompositeSloEnabled({ getBooleanValue$ })).resolves.toBe(true);
-    expect(getBooleanValue$).toHaveBeenCalledWith(SLO_COMPOSITE_ENABLED, false);
+    expect(getBooleanValue$).toHaveBeenCalledWith(SLO_COMPOSITE_ENABLED, true);
   });
 
   it('reads from getBooleanValue on the request-handler context', async () => {
     const getBooleanValue = jest.fn().mockResolvedValue(false);
 
     await expect(isCompositeSloEnabled({ getBooleanValue })).resolves.toBe(false);
-    expect(getBooleanValue).toHaveBeenCalledWith(SLO_COMPOSITE_ENABLED, false);
+    expect(getBooleanValue).toHaveBeenCalledWith(SLO_COMPOSITE_ENABLED, true);
   });
 });

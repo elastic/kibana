@@ -9,10 +9,17 @@
 
 import { DEVICE_PROFILES, pickDeviceProfile } from './device_profiles';
 import { EdotReactNativeApp, type EdotReactNativeAppOptions } from './edot_react_native_app';
-import { session } from './edot_react_native_session';
+import { DEFAULT_DWELL, session } from './edot_react_native_session';
 import { MOBILE_HEALTH_PROFILES } from './health_profiles';
 
-export type { DeviceProfile, DeviceProfileId, MobilePlatform } from './device_profiles';
+export {
+  MOBILE_PLATFORM,
+  MOBILE_PLATFORMS,
+  type DeviceProfile,
+  type DeviceProfileId,
+  type MobilePlatform,
+} from './device_profiles';
+export { MOBILE_SPAN_KIND } from './edot_react_native_span';
 export type { MobileHealthProfile } from './health_profiles';
 export type { EdotAndroidClient } from './edot_android_client';
 export type { EdotIosClient, IosAppState } from './edot_ios_client';
@@ -40,4 +47,6 @@ export const edotReactNative = {
   deviceProfiles: DEVICE_PROFILES,
   pickDeviceProfile,
   healthProfiles: MOBILE_HEALTH_PROFILES,
+  /** How long the user stays on a screen once it has appeared, unless a session says otherwise. */
+  defaultDwell: DEFAULT_DWELL,
 };

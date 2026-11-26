@@ -7,6 +7,7 @@
 
 import { injectable, multiInject, optional } from 'inversify';
 import { DuplicateStrategyError } from '../errors/duplicate_strategy_error';
+import { InvalidStrategyScheduleError } from '../errors/invalid_strategy_schedule_error';
 import { DetectionStrategy } from './detection_strategy';
 
 /** The detection strategies bound in the container, by id. */
@@ -40,5 +41,22 @@ const indexStrategiesById = (strategies: DetectionStrategy[]): Map<string, Detec
     throw new DuplicateStrategyError(duplicate.descriptor.id);
   }
 
+  // Checked here, at start, and not per tick: a strategy that can't be planned would otherwise
+  // fail every tick of every strategy in the space.
+  const unplannable = strategies.find(({ descriptor }) => !hasPlannableSchedule(descriptor));
+  if (unplannable) {
+    throw new InvalidStrategyScheduleError(unplannable.descriptor.id);
+  }
+
   return new Map(strategies.map((strategy) => [strategy.descriptor.id, strategy]));
 };
+
+/**
+ * Windows are whole minutes: a zero cadence divides by zero and a fractional one breaks the
+ * whole-minute windows, either planning a window of `NaN` that is saved as the strategy's progress.
+ */
+const hasPlannableSchedule = ({
+  cadence_minutes: cadence,
+  settle_minutes: settle,
+}: DetectionStrategy['descriptor']): boolean =>
+  Number.isInteger(cadence) && cadence >= 1 && Number.isInteger(settle) && settle >= 0;

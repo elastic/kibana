@@ -8,13 +8,13 @@
 import type React from 'react';
 import { useCallback, useState, useMemo } from 'react';
 
-import type { OnColumnFocused } from '@kbn/timelines-plugin/public';
+import type { OnColumnFocused } from '../../../../../../common/utils/accessibility';
 import {
   isArrowDownOrArrowUp,
   isArrowUp,
   isEscape,
   focusColumn,
-} from '@kbn/timelines-plugin/public';
+} from '../../../../../../common/utils/accessibility';
 
 type FocusOwnership = 'not-owned' | 'owned';
 

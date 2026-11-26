@@ -61,7 +61,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
       key="0"
     >
       <Category
-        color="#16C5C0"
+        color="#00BDA0"
         isLinesOnly={false}
         isPointsOnly={true}
         label="US_format"
@@ -72,7 +72,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
       key="1"
     >
       <Category
-        color="#A6EDEA"
+        color="#93F0D9"
         isLinesOnly={false}
         isPointsOnly={true}
         label="CN_format"

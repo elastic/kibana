@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { ClipboardEvent, KeyboardEvent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { ClipboardEvent, FocusEvent, KeyboardEvent } from 'react';
 import type { SerializedStyles } from '@emotion/react';
-import { tabularCopyMarkers } from '@elastic/eui';
+import { keys, tabularCopyMarkers } from '@elastic/eui';
+import { tabbable } from 'tabbable';
 
 import type { DataGridCellAddress, DataGridCommandResult } from './data_grid_api';
 import type { DataGridColumn } from './data_grid_column';
@@ -33,11 +34,27 @@ interface DataGridCellProps<TRow extends object> {
   readonly activateFocusedCell: (address: DataGridCellAddress) => void;
   readonly announceCopySuccess: () => void;
   readonly announceCopyFailure: () => void;
+  readonly announceCellContentEntered: () => void;
+  readonly contentEntryHintId: string;
 }
 
 const hasExplicitTextSelection = (): boolean => {
   const selection = window.getSelection();
   return Boolean(selection && !selection.isCollapsed && selection.toString().length > 0);
+};
+
+// Returns the tab stop after (or before) the one holding the target, wrapping around the cell.
+const getWrappedTabStop = (
+  tabStops: ReadonlyArray<HTMLElement | SVGElement>,
+  target: Node,
+  backwards: boolean
+): HTMLElement | SVGElement => {
+  const ownIndex = tabStops.findIndex((tabStop) => tabStop === target);
+  const currentIndex =
+    ownIndex >= 0 ? ownIndex : tabStops.findLastIndex((tabStop) => tabStop.contains(target));
+  const start = currentIndex >= 0 ? currentIndex : backwards ? 0 : -1;
+  const step = backwards ? -1 : 1;
+  return tabStops[(start + step + tabStops.length) % tabStops.length];
 };
 
 export const DataGridCell = <TRow extends object>({
@@ -56,6 +73,8 @@ export const DataGridCell = <TRow extends object>({
   activateFocusedCell,
   announceCopySuccess,
   announceCopyFailure,
+  announceCellContentEntered,
+  contentEntryHintId,
 }: DataGridCellProps<TRow>): React.ReactElement => {
   const { rowId, columnId } = address;
   const stableAddress = useMemo(() => ({ rowId, columnId }), [columnId, rowId]);
@@ -64,17 +83,24 @@ export const DataGridCell = <TRow extends object>({
     (element: HTMLDivElement | null) => registerCell(stableAddress, element),
     [registerCell, stableAddress]
   );
+  const [hasContentTabStops, setHasContentTabStops] = useState(false);
+  // Focus on the cell or inside its content, such as a clicked link, makes it the active cell. Focus
+  // on the cell itself checks for tab stops, so the cell can describe how to enter its content.
   const onFocus = useCallback(
-    (event: React.FocusEvent<HTMLDivElement>) => {
+    (event: FocusEvent<HTMLDivElement>) => {
+      activateFocusedCell(stableAddress);
       if (event.target === event.currentTarget) {
-        activateFocusedCell(stableAddress);
+        setHasContentTabStops(tabbable(event.currentTarget).length > 0);
       }
     },
     [activateFocusedCell, stableAddress]
   );
 
-  const cellContext = { row, ...stableAddress, displayIndex };
-  const textValue = getDataGridCellTextValue(column, cellContext, value);
+  const cellContext = useMemo(
+    () => ({ row, ...stableAddress, displayIndex }),
+    [displayIndex, row, stableAddress]
+  );
+
   const onCopy = useCallback(
     (event: ClipboardEvent<HTMLDivElement>) => {
       if (event.target !== event.currentTarget || hasExplicitTextSelection()) {
@@ -82,18 +108,61 @@ export const DataGridCell = <TRow extends object>({
       }
 
       try {
-        event.clipboardData.setData('text/plain', textValue);
+        event.clipboardData.setData(
+          'text/plain',
+          getDataGridCellTextValue(column, cellContext, value)
+        );
         event.preventDefault();
         announceCopySuccess();
       } catch {
         announceCopyFailure();
       }
     },
-    [announceCopyFailure, announceCopySuccess, textValue]
+    [announceCopyFailure, announceCopySuccess, cellContext, column, value]
   );
+  // Inside the content, Escape returns to the cell and Tab wraps among the cell's tab stops.
+  // Unhandled keys, and Tab in content without tab stops, are left to the grid and browser.
+  const onContentKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const { key, shiftKey, target, currentTarget: cellElement } = event;
+      if (event.defaultPrevented || !(target instanceof Node) || !cellElement.contains(target)) {
+        return;
+      }
+
+      if (key === keys.ESCAPE) {
+        event.preventDefault();
+        event.stopPropagation();
+        void focusCell(stableAddress);
+        return;
+      }
+      if (key !== keys.TAB) {
+        return;
+      }
+      const tabStops = tabbable(cellElement);
+      if (tabStops.length === 0) {
+        return;
+      }
+      event.preventDefault();
+      getWrappedTabStop(tabStops, target, shiftKey).focus();
+    },
+    [focusCell, stableAddress]
+  );
+
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (event.target !== event.currentTarget) {
+        onContentKeyDown(event);
+        return;
+      }
+
+      // Enter moves focus into the content, so that a second Enter activates a link natively.
+      if (event.key === keys.ENTER) {
+        const [firstTabStop] = tabbable(event.currentTarget);
+        if (firstTabStop) {
+          event.preventDefault();
+          firstTabStop.focus();
+          announceCellContentEntered();
+        }
         return;
       }
 
@@ -112,7 +181,7 @@ export const DataGridCell = <TRow extends object>({
         void focusCell(navigationIntent.target);
       }
     },
-    [columnIds, focusCell, rowIds, stableAddress]
+    [announceCellContentEntered, columnIds, focusCell, onContentKeyDown, rowIds, stableAddress]
   );
 
   return (
@@ -121,7 +190,7 @@ export const DataGridCell = <TRow extends object>({
       role="gridcell"
       tabIndex={isActive ? 0 : -1}
       aria-colindex={columnIndex + 1}
-      aria-label={textValue}
+      aria-describedby={hasContentTabStops ? contentEntryHintId : undefined}
       css={cellStyles}
       onFocus={onFocus}
       onCopy={onCopy}

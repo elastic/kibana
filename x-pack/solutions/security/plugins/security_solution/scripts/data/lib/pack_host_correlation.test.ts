@@ -149,7 +149,7 @@ describe('buildProcessDoc', () => {
     expect(doc).toMatchObject({
       '@timestamp': new Date(anchorMs + cmd.offsetMs).toISOString(),
       agent: { id: config.agentId, type: 'endpoint' },
-      host: { name: config.hostName, id: config.host.hostId },
+      host: { name: config.hostName, id: config.host.hostId, ip: config.host.ip },
       process: { pid: cmd.pid, entity_id: cmd.entityId, name: cmd.name },
     });
   });

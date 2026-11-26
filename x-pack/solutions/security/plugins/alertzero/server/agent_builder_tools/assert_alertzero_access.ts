@@ -65,7 +65,7 @@ export const assertAlertZeroEnabled = async (
   request: KibanaRequest
 ): Promise<void> => {
   if (!(await isSpaceSupported({ isServerless, spaces, request }))) {
-    throw new Error('AlertZero is available only in a Security solution space.');
+    throw new Error('AlertZero is available only in Security solution and Classic spaces.');
   }
   const savedObjectsClient = core.savedObjects.getScopedClient(request);
   const uiSettingsClient = core.uiSettings.asScopedToClient(savedObjectsClient);

@@ -12,6 +12,8 @@ import { createMemoryHistory } from 'history';
 import type { History } from 'history';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED } from '../../common/feature_flags';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
@@ -188,6 +190,18 @@ describe('EntityInventoryShell', () => {
     expect(getTypes).toHaveBeenCalledTimes(1);
   });
 
+  it('requests the lists that stay mounted again when the page changes', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getEntities = jest.fn(fixtureClient.getEntities);
+    const hostRequests = () => getEntities.mock.calls.filter(([type]) => type === 'host');
+    const { history } = renderShellAt('/hosts', { ...fixtureClient, getEntities });
+    await waitFor(() => expect(hostRequests()).toHaveLength(1));
+
+    act(() => history.push('/all-resources'));
+
+    await waitFor(() => expect(hostRequests()).toHaveLength(2));
+  });
+
   it('keeps the column choices of a type while another page is open', async () => {
     const { history } = renderShellAt('/hosts');
     expect(await screen.findByTestId('entityInventoryTable')).not.toHaveAttribute(
@@ -282,5 +296,27 @@ describe('renderApp', () => {
     act(() => unmount());
 
     expect(params.element.childElementCount).toBe(0);
+  });
+
+  it('follows the performance overlay flag while mounted, and stops on unmount', () => {
+    const core = createCoreStartMock();
+    const overlayEnabled$ = new BehaviorSubject(false);
+    core.featureFlags.getBooleanValue$.mockReturnValue(overlayEnabled$);
+    const params = coreMock.createAppMountParameters(APP_BASE_PATH);
+
+    let unmount: () => void = () => {};
+    act(() => {
+      unmount = renderApp(core, createStartDependenciesMock(), params, createPublicConfigMock());
+    });
+
+    expect(core.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+      ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED,
+      false
+    );
+    expect(overlayEnabled$.observed).toBe(true);
+
+    act(() => unmount());
+
+    expect(overlayEnabled$.observed).toBe(false);
   });
 });
