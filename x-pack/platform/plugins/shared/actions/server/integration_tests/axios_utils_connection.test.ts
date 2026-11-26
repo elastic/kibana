@@ -335,6 +335,76 @@ describe('axios connections', () => {
         await request({ axios, url: redirectUrl, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('Redirected');
     });
+
+    describe('headers', () => {
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer confidential',
+        'X-API-Key': 'confidential',
+        'X-Routing-Key': 'confidential',
+      };
+      const servers: http.Server[] = [];
+      const listen = async (handler: http.RequestListener): Promise<string> => {
+        const { url, server } = await startHttpServer(handler);
+        servers.push(server);
+        return url;
+      };
+
+      afterEach(() => {
+        servers.splice(0).forEach((server) => server.close());
+      });
+
+      test('it drops credential headers when redirecting to another origin', async () => {
+        const targetUrl = await listen(echoRequest);
+        const redirectUrl = await listen((req, res) => {
+          // 307 keeps the method and body, so the safe content headers must survive the redirect
+          res.writeHead(307, { Location: `${targetUrl}/landing` });
+          res.end();
+        });
+
+        const configurationUtilities = getACUfromConfig();
+        const { data } = await request({
+          axios,
+          url: redirectUrl,
+          method: 'post',
+          data: { hello: 'world' },
+          headers,
+          logger,
+          configurationUtilities,
+        });
+
+        expect(data.headers['content-type']).toBe('application/json');
+        expect(data.body).toBe('{"hello":"world"}');
+        expect(data.headers).not.toHaveProperty('authorization');
+        expect(data.headers).not.toHaveProperty('x-api-key');
+        expect(data.headers).not.toHaveProperty('x-routing-key');
+      });
+
+      test('it keeps credential headers when redirecting within the same origin', async () => {
+        const targetUrl = await listen((req, res) => {
+          if (req.url === '/start') {
+            res.writeHead(302, { Location: '/landing' });
+            res.end();
+            return;
+          }
+          echoRequest(req, res);
+        });
+
+        const configurationUtilities = getACUfromConfig();
+        const { data } = await request({
+          axios,
+          url: `${targetUrl}/start`,
+          headers,
+          logger,
+          configurationUtilities,
+        });
+
+        expect(data.path).toBe('/landing');
+        expect(data.headers.authorization).toBe('Bearer confidential');
+        expect(data.headers['x-api-key']).toBe('confidential');
+        expect(data.headers['x-routing-key']).toBe('confidential');
+      });
+    });
   });
 
   // targetHttps and proxyHttps should also range over [false, true], but currently
@@ -578,6 +648,28 @@ const TlsOptions = {
   key: KIBANA_KEY,
   ca: CA,
 };
+
+function echoRequest(req: http.IncomingMessage, res: http.ServerResponse) {
+  let body = '';
+  req.on('data', (chunk) => (body += chunk));
+  req.on('end', () => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ path: req.url, headers: req.headers, body }));
+  });
+}
+
+async function startHttpServer(
+  handler: http.RequestListener
+): Promise<{ url: string; server: http.Server }> {
+  const port = await getPort();
+  const server = http.createServer(handler);
+  server.unref();
+  const readySignal = createReadySignal<{ url: string; server: http.Server }>();
+  server.listen(port, 'localhost', () => {
+    readySignal.signal({ url: `http://localhost:${port}`, server });
+  });
+  return readySignal.wait();
+}
 
 interface CreateServerOptions {
   useHttps: boolean;
