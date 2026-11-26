@@ -52,6 +52,17 @@ describe('requestEarsRefreshToken', () => {
     } as unknown as AxiosResponse);
   });
 
+  it('does not follow redirects, so the body is never resent to another host', async () => {
+    await requestEarsRefreshToken(
+      'my-provider',
+      logger,
+      { refreshToken: 'stored-refresh-token' },
+      configurationUtilities
+    );
+
+    expect(mockRequest).toHaveBeenCalledWith(expect.objectContaining({ maxRedirects: 0 }));
+  });
+
   it('passes sslOverrides from getEARSSSLSettings to the request call', async () => {
     const sslSettings: SSLSettings = { verificationMode: 'full', cert: Buffer.from('cert') };
     configurationUtilities.getEARSSSLSettings.mockReturnValue(sslSettings);

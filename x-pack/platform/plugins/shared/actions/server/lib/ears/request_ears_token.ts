@@ -51,6 +51,8 @@ export async function requestEarsToken(
     },
     configurationUtilities,
     sslOverrides: configurationUtilities.getEARSSSLSettings(),
+    // The body carries the authorization code or refresh token; never resend it to a redirect target.
+    maxRedirects: 0,
     validateStatus: () => true,
   });
 

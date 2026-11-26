@@ -145,7 +145,9 @@ describe('OAuth password authentication', () => {
     nock(origin)
       .post('/api/token', tokenBody)
       .reply(307, '', { Location: 'https://other.example.com/token' });
-    await expect(configure()).rejects.toThrow('OAuth password token request failed (HTTP 307).');
+    await expect(configure()).rejects.toThrow(
+      'OAuth token endpoint https://threatq.example.com/api/token returned a redirect (HTTP 307).'
+    );
     expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
   });
 });

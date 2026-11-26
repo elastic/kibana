@@ -102,9 +102,17 @@ export async function requestOAuthToken<T>(
     },
     ...(basicAuth ? { auth: basicAuth } : {}),
     configurationUtilities,
-    ...(grantType === 'password' ? { maxRedirects: 0 } : {}),
+    // Token requests carry client secrets, codes or refresh tokens in the body, which a 307/308
+    // redirect would resend to the new host, so token endpoints are never followed.
+    maxRedirects: 0,
     validateStatus: () => true,
   });
+
+  if (res.status >= 300 && res.status < 400) {
+    const message = `OAuth token endpoint ${tokenUrl} returned a redirect (HTTP ${res.status}). Configure the token URL it redirects to.`;
+    logger.warn(message);
+    throw new Error(message);
+  }
 
   if (res.status >= 200 && res.status < 300) {
     if (typeof res.data !== 'object' || res.data == null) {

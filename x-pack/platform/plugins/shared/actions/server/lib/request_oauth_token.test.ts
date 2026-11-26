@@ -50,6 +50,30 @@ describe('requestOAuthToken', () => {
     }
   );
 
+  test.each(['client_credentials', 'authorization_code', 'refresh_token'])(
+    'does not follow a redirect from the token endpoint for the %s grant',
+    async (grantType) => {
+      axiosInstanceMock.mockResolvedValueOnce({
+        status: 307,
+        headers: { location: 'https://other.example.com/token' },
+        data: '',
+      });
+
+      await expect(
+        requestOAuthToken('https://test/token', grantType, actionsConfigMock.create(), mockLogger, {
+          clientId: 'id',
+          clientSecret: 'secret',
+        })
+      ).rejects.toThrow(
+        'OAuth token endpoint https://test/token returned a redirect (HTTP 307). Configure the token URL it redirects to.'
+      );
+      expect(axiosInstanceMock).toHaveBeenCalledWith(
+        'https://test/token',
+        expect.objectContaining({ maxRedirects: 0 })
+      );
+    }
+  );
+
   test('making a token request with the required options', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
@@ -120,6 +144,7 @@ describe('requestOAuthToken', () => {
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
+          "maxRedirects": 0,
           "method": "post",
           "proxy": false,
           "timeout": 360000,
