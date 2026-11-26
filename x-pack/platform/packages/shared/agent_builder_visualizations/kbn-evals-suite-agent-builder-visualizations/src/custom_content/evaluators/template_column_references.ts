@@ -83,11 +83,13 @@ const readLoopQuery = ({
   if (kind !== TokenKind.PropertyAccess) {
     return undefined;
   }
-  const [root, first, second] = readSegments(input.slice(begin, end)) ?? [];
+  const segments = readSegments(input.slice(begin, end)) ?? [];
+  const [root, first, second] = segments;
   if (root === 'rows') {
-    return 0;
+    return segments.length === 1 ? 0 : undefined;
   }
-  return root === 'queries' && isQueryPosition(first) && second === 'rows' ? first : undefined;
+  const isQueryRows = isQueryPosition(first) && second === 'rows' && segments.length === 3;
+  return root === 'queries' && isQueryRows ? first : undefined;
 };
 
 /** The loops of these templates that are not inside another loop, however deep in other tags. */

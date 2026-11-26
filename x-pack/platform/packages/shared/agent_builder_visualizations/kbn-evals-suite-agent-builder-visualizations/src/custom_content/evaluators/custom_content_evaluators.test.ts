@@ -602,6 +602,13 @@ describe('Template columns of several queries', () => {
     expect([...(references.get(0) ?? [])].sort()).toEqual(['0', '1', 'host']);
   });
 
+  it('does not take a loop over the cells of one row for a loop over rows', () => {
+    const references = readColumnReferencesByQuery(
+      '{% for pair in rows[0] %}{{ pair[0] }}: {{ pair[1].value }}{% endfor %}'
+    );
+    expect(references.get(0)).toEqual([]);
+  });
+
   it('does not read a query whose position is not a whole number', () => {
     expect([
       ...readColumnReferencesByQuery(
@@ -688,31 +695,14 @@ describe('Template columns of several queries', () => {
     expect(result.score).toBe(0.5);
   });
 
-  it('skips a static panel whose template only uses its own variables', async () => {
-    const result = await run(
-      withColumns({}),
-      outputWith({ template: '{% assign max = 5 %}{% assign rows = "x" %}{{ max }}{{ rows }}' })
-    );
-    expect(result.score).toBeNull();
-    const reviewed = await run(
-      withColumns({}),
-      outputWith({ template: '{% assign max = 5 %}{{ max }}' })
-    );
-    expect(reviewed.score).toBeNull();
-  });
-
-  it('fails a static panel whose template reads an unassigned max or rows', async () => {
-    const result = await run(withColumns({}), outputWith({ template: '<p>{{ max }}</p>' }));
-    expect(result).toMatchObject({ score: 0, label: 'unbound-columns' });
-  });
-
-  it('fails a static panel whose template reads a query', async () => {
-    const result = await run(
-      withColumns({}),
-      outputWith({ template: '<p>{{ queries[1].rows.size }}</p>' })
-    );
-    expect(result).toMatchObject({ score: 0, label: 'unbound-columns' });
-    expect(result.explanation).toContain('queries[1]');
+  it('skips a static panel, which is shown as written and never rendered with Liquid', async () => {
+    for (const template of [
+      '<code>{{ rows.size }}</code>',
+      '<p>{{ queries[1].rows.size }}</p>',
+      '{% assign max = 5 %}{{ max }}',
+    ]) {
+      expect((await run(withColumns({}), outputWith({ template }))).score).toBeNull();
+    }
   });
 
   it('reports a second query that did not run', async () => {
