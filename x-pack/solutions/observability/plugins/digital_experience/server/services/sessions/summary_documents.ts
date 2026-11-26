@@ -8,7 +8,12 @@
 import { createHash } from 'crypto';
 import type { estypes } from '@elastic/elasticsearch';
 import { CORE_WEB_VITAL, type CoreWebVital } from '../../../common/core_web_vitals';
-import { SESSIONS_JOURNEY_SIZE, toPagePath } from '../../../common/sessions';
+import {
+  SESSIONS_FRUSTRATION_VALUES,
+  SESSIONS_JOURNEY_SIZE,
+  toPagePath,
+} from '../../../common/sessions';
+import { DEVICE_DESKTOP_LABEL, DEVICE_MOBILE_LABEL } from '../../../common/otel_source_fields';
 import type { SessionAttribute } from '../../../common/session_attribute_fields';
 import { numberOr, stringOrNull, stringsOf } from '../../lib/helpers/values';
 import type { SessionDocument, WebVitalSamples } from './sessions_index';
@@ -23,6 +28,15 @@ export const toEsqlRows = ({ columns, values }: estypes.EsqlEsqlResult): EsqlRow
 const attributeOf = (row: EsqlRow, attribute: SessionAttribute): string | null =>
   stringOrNull(row[attributeColumn(attribute)]);
 
+const MOBILE_DEVICE_LABELS: Record<string, string> = {
+  true: DEVICE_MOBILE_LABEL,
+  false: DEVICE_DESKTOP_LABEL,
+};
+
+/** The device model or type, else "Mobile" or "Desktop", as the Overview's device filter reads it. */
+const deviceOf = (row: EsqlRow): string | null =>
+  attributeOf(row, 'device') ?? MOBILE_DEVICE_LABELS[attributeOf(row, 'mobile') ?? ''] ?? null;
+
 /** Pages without repeats, from page URLs the summary query returns in first-view order. */
 const toJourney = (urls: string[]): string[] =>
   urls.reduce<string[]>((journey, url) => {
@@ -31,6 +45,13 @@ const toJourney = (urls: string[]): string[] =>
       ? [...journey, page]
       : journey;
   }, []);
+
+/** Up to `SESSIONS_FRUSTRATION_VALUES` distinct values, in the order of their signals. */
+const distinctCapped = (values: string[]): string[] =>
+  [...new Set(values)].slice(0, SESSIONS_FRUSTRATION_VALUES);
+
+const toFrustrationPages = (urls: string[]): string[] =>
+  distinctCapped(urls.flatMap((url) => toPagePath(url) ?? []));
 
 const byVital = <T>(valueOf: (vital: CoreWebVital) => T): Record<CoreWebVital, T> => ({
   lcp: valueOf(CORE_WEB_VITAL.lcp),
@@ -58,7 +79,8 @@ export const sessionDocumentId = (serviceName: string, sessionId: string): strin
     .update(JSON.stringify([serviceName, sessionId]))
     .digest('base64url');
 
-const searchValues = (values: Array<string | null>): string[] => [
+/** The lowercased values, without repeats, that a search of the summaries matches. */
+export const searchValues = (values: Array<string | null>): string[] => [
   ...new Set(values.flatMap((value) => (value ? [value.toLowerCase()] : []))),
 ];
 
@@ -89,7 +111,7 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
     return [
       {
         session: { id: sessionId },
-        service: { name: serviceName },
+        service: { name: serviceName, version: attributeOf(row, 'appVersion') },
         start_time: startTime,
         end_time: endTime,
         duration_ms: Number.isFinite(durationMs) ? durationMs : 0,
@@ -98,6 +120,16 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
         page_load_count: numberOr(row.page_load_count, 0),
         click_count: numberOr(row.click_count, 0),
         js_error_count: numberOr(row.js_error_count, 0),
+        load_time: {
+          p75: numberOr(row.load_time_p75, null),
+          count: numberOr(row.load_time_samples, 0),
+        },
+        rage_click_count: numberOr(row.rage_click_count, 0),
+        dead_click_count: numberOr(row.dead_click_count, 0),
+        error_click_count: numberOr(row.error_click_count, 0),
+        frustration_count: numberOr(row.frustration_count, 0),
+        frustration_targets: distinctCapped(stringsOf(row.frustration_targets)),
+        frustration_pages: toFrustrationPages(stringsOf(row.frustration_urls)),
         http_request_count: numberOr(row.http_request_count, 0),
         http_failed_request_count: numberOr(row.http_failed_request_count, 0),
         // Bounced when the visit never left the page it landed on: the pages it saw, not the
@@ -114,7 +146,7 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
           browser,
           browser_version: attributeOf(row, 'browserVersion'),
           os,
-          device: attributeOf(row, 'device'),
+          device: deviceOf(row),
         },
         geo: { country_iso: countryIso, region: attributeOf(row, 'region'), city },
         web_vitals: byVital((vital) => numberOr(row[`${vital}_p75`], null)),

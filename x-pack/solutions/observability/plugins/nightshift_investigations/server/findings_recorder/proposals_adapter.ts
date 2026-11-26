@@ -6,16 +6,75 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
-import type { RecorderProposals } from './run_pass';
+import {
+  ProposalConflictError,
+  ProposalNotFoundError,
+  type ProposalsPluginStart,
+} from '@kbn/proposals-plugin/server';
+import {
+  MAX_PROPOSALS_PAGE_SIZE,
+  PROPOSAL_CATEGORY_TODO,
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+  type ActionCatalogEntry,
+  type Proposal,
+} from '@kbn/proposals-common';
+import type { ExistingRecorderProposal, RecorderProposals } from './run_pass';
 
-/** The titles read per conversation. A conversation has a handful of proposals, not hundreds. */
+/** The closed proposals read per conversation, newest first, as history for the recorder. */
 const MAX_LISTED_PROPOSALS = 50;
+/** The action workflows shown to the recorder. Each one costs prompt tokens on every final pass. */
+export const MAX_RECORDER_ACTIONS = 20;
+/**
+ * Per workflow, so one long description or schema (the `action` tag is easy to copy along with a
+ * workflow) cannot crowd out the rest of the final-pass prompt.
+ */
+export const MAX_RECORDER_ACTION_DESCRIPTION_LENGTH = 500;
+export const MAX_RECORDER_ACTION_SCHEMA_LENGTH = 2000;
+
+const fitsPrompt = ({ inputSchema }: ActionCatalogEntry): boolean =>
+  JSON.stringify(inputSchema ?? {}).length <= MAX_RECORDER_ACTION_SCHEMA_LENGTH;
+
+const shortenDescription = (action: ActionCatalogEntry): ActionCatalogEntry => {
+  const { description } = action;
+  if (!description || description.length <= MAX_RECORDER_ACTION_DESCRIPTION_LENGTH) {
+    return action;
+  }
+  return {
+    ...action,
+    description: `${description.slice(0, MAX_RECORDER_ACTION_DESCRIPTION_LENGTH)}…`,
+  };
+};
+
+const toExisting = ({
+  id,
+  title,
+  comment,
+  status,
+  decision,
+  impact,
+  confidence,
+  actionWorkflowId,
+  actionInput,
+  expiresAt,
+  gateReleasedAt,
+}: Proposal): ExistingRecorderProposal => ({
+  id,
+  title,
+  comment,
+  status,
+  ...(decision ? { decision } : {}),
+  impact,
+  confidence,
+  ...(actionWorkflowId ? { actionWorkflowId, ...(actionInput ? { actionInput } : {}) } : {}),
+  ...(expiresAt ? { expiresAt } : {}),
+  ...(gateReleasedAt ? { gateReleasedAt } : {}),
+});
 
 /**
- * What the findings recorder needs from the proposals plugin: the titles already proposed in a
- * conversation, and a way to propose.
+ * What the findings recorder needs from the proposals plugin: the proposals already on a
+ * conversation, the action workflows a proposal can run, and a way to propose a new one or revise
+ * an open one in place.
  */
 export const createRecorderProposals = ({
   proposals,
@@ -23,45 +82,133 @@ export const createRecorderProposals = ({
 }: {
   proposals: ProposalsPluginStart;
   getSpaceId: (request: KibanaRequest) => string;
-}): RecorderProposals => ({
-  listTitles: async ({ request, conversationId }) => {
-    // The list reads as the internal user, so the caller's own privilege decides what they may see.
-    // Without it, a user who can use the investigation but not proposals would have the titles
-    // shown to the recorder's model.
-    try {
-      await proposals.getProposalPrivileges().assertCanRead(request);
-    } catch {
-      return [];
-    }
-    const { proposals: found } = await proposals.getProposalsService().list(
-      {
-        conversationId,
-        origin: 'nightshift',
-        excludeSuperseded: true,
-        excludeExpired: false,
-        size: MAX_LISTED_PROPOSALS,
-        from: 0,
-      },
-      getSpaceId(request),
-      request
-    );
-    return found.map(({ title }) => title);
-  },
-
-  propose: async ({ request, conversationId, proposal }) => {
+}): RecorderProposals => {
+  // These carry no action workflow: the analyst carries each one out and marks it applied.
+  // Dropping one is therefore not a judgement about an action the agent would have taken,
+  // so declining it — and closing the investigation on top of it — asks for no reason.
+  const proposeTodo = async ({
+    request,
+    conversationId,
+    proposal: { title, comment, impact, confidence },
+  }: Parameters<RecorderProposals['propose']>[0]) => {
     await proposals.createProposal({
       request,
       spaceId: getSpaceId(request),
       conversationId,
-      // These carry no action workflow: the analyst carries each one out and marks it applied.
-      // Dropping one is therefore not a judgement about an action the agent would have taken,
-      // so declining it — and closing the investigation on top of it — asks for no reason.
       proposal: {
-        ...proposal,
+        title,
+        comment,
+        impact,
+        confidence,
         origin: 'nightshift',
         category: PROPOSAL_CATEGORY_TODO,
         skipDiscardReason: true,
       },
     });
-  },
-});
+  };
+
+  return {
+    list: async ({ request, conversationId }) => {
+      // The list reads as the internal user, so the caller's own privilege decides what they may see.
+      // Without it, a user who can use the investigation but not proposals would have the proposals
+      // shown to the recorder's model.
+      try {
+        await proposals.getProposalPrivileges().assertCanRead(request);
+      } catch {
+        return [];
+      }
+      const spaceId = getSpaceId(request);
+      const service = proposals.getProposalsService();
+      const query = {
+        conversationId,
+        origin: 'nightshift' as const,
+        excludeSuperseded: true,
+        excludeExpired: false,
+        order: 'newest' as const,
+        from: 0,
+      };
+      // Every pending proposal counts against the open limit, so they are read on their own: newer
+      // closed ones could otherwise fill the page and push an older pending one out of it.
+      const [{ proposals: pending }, { proposals: recent }] = await Promise.all([
+        service.list(
+          { ...query, status: 'pending', size: MAX_PROPOSALS_PAGE_SIZE },
+          spaceId,
+          request
+        ),
+        service.list({ ...query, size: MAX_LISTED_PROPOSALS }, spaceId, request),
+      ]);
+      const closed = recent.filter(({ status }) => status !== 'pending');
+      // Newest first from the store; oldest first gives stable P1, P2, ... handles.
+      return [...pending.reverse(), ...closed.reverse()].map(toExisting);
+    },
+
+    // Only the space's own workflows: managed actions belong to the solution that installed them
+    // (AlertZero's host isolation, say) and are not Nightshift's to propose. And only `always-gate`
+    // ones: the input is written by the model, so a person must approve every run of it.
+    // A workflow whose input schema is too large to show is left out rather than cut: the model
+    // could not fill a truncated schema correctly, and an unlisted workflow cannot be proposed.
+    listActions: async ({ request }) => {
+      const { actions } = await proposals.listActions(getSpaceId(request), request, {
+        managedFilter: 'unmanaged',
+      });
+      return actions
+        .filter((action) => action.approvalPolicy === 'always-gate' && fitsPrompt(action))
+        .slice(0, MAX_RECORDER_ACTIONS)
+        .map(shortenDescription);
+    },
+
+    propose: async (args) => {
+      const { request, conversationId, proposal } = args;
+      const { action_workflow_id: actionWorkflowId, action_input: actionInput } = proposal;
+      if (!actionWorkflowId) {
+        await proposeTodo(args);
+        return;
+      }
+      // Gated: approving it runs the workflow as the person who approved it. Its category,
+      // and its impact when the model gave none, come from the workflow's own metadata.
+      await proposals.createProposal({
+        request,
+        spaceId: getSpaceId(request),
+        conversationId,
+        proposal: {
+          title: proposal.title,
+          comment: proposal.comment,
+          impact: proposal.impact,
+          confidence: proposal.confidence,
+          origin: 'nightshift',
+          actionWorkflowId,
+          actionInput,
+        },
+      });
+    },
+
+    // The id is the one the model was shown, never resolved to a later revision: a person who
+    // revised the proposal meanwhile superseded that id, so `revise()` refuses it rather than
+    // writing the model's text, built from the older version, over theirs.
+    revise: async ({ request, proposalId, proposal }) => {
+      await proposals.getProposalPrivileges().assertCanManage(request);
+      const impact = proposalImpactSchema.safeParse(proposal.impact).data;
+      const confidence = proposalConfidenceSchema.safeParse(proposal.confidence).data;
+      try {
+        await proposals.getProposalsService().revise(
+          {
+            id: proposalId,
+            title: proposal.title,
+            comment: proposal.comment,
+            ...(impact !== undefined ? { impact } : {}),
+            ...(confidence !== undefined ? { confidence } : {}),
+            ...(proposal.action_input !== undefined ? { actionInput: proposal.action_input } : {}),
+          },
+          getSpaceId(request),
+          request
+        );
+        return true;
+      } catch (error) {
+        if (error instanceof ProposalConflictError || error instanceof ProposalNotFoundError) {
+          return false;
+        }
+        throw error;
+      }
+    },
+  };
+};

@@ -43,7 +43,11 @@ describe('EvaluateMatchersStep', () => {
     if (result.type !== 'continue') {
       throw new Error(`expected step output 'continue', got '${result.type}'`);
     }
-    return result.data?.matched ?? [];
+    const matched = result.data?.matched;
+    if (!matched) {
+      throw new Error('expected step output to carry matched pairs');
+    }
+    return matched;
   };
 
   it('returns matched pairs for alerts with global catch-all policies', async () => {

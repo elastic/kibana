@@ -84,6 +84,7 @@ const run = (
     omitSkippedTests: true,
     updateIssues: true,
     commentCooldownDays: 3,
+    reopenGraceHours: 24,
     replacePerTestIssues: false,
     dryRun: false,
     ...overrides,
@@ -397,6 +398,8 @@ describe('reportFlakySuiteIssues', () => {
     // The fixture's newest failure is at 06:12 on 2026-09-09
     const closedBefore = { state: 'closed' as const, closed_at: '2026-09-05T00:00:00Z' };
     const closedAfter = { state: 'closed' as const, closed_at: '2026-09-09T08:00:00Z' };
+    // 18 hours before the newest failure, e.g. by the merge of a fix that build didn't have yet
+    const closedWithinGrace = { state: 'closed' as const, closed_at: '2026-09-08T12:00:00Z' };
 
     it('files a suite issue over a per-test issue closed before the test failed again, linking it', async () => {
       const previous = scoutTestIssue(43, 'pw-1', closedBefore);
@@ -523,6 +526,56 @@ describe('reportFlakySuiteIssues', () => {
         action: 'updated',
         reopened: true,
         issue: { number: 42 },
+      });
+    });
+
+    it("keeps the suite's own issue closed when the suite only failed within --reopen-grace-hours of the close", async () => {
+      const kept = createGithubApi([suiteIssue(42, closedWithinGrace)]);
+      const reopened = createGithubApi([suiteIssue(42, closedWithinGrace)]);
+      const info = jest.spyOn(log, 'info');
+
+      const keptSummary = await run(kept, { report: flakyReport([flakyTest()]) });
+      const reopenedSummary = await run(reopened, {
+        report: flakyReport([flakyTest()]),
+        reopenGraceHours: 12,
+      });
+
+      expectNoWrites(kept);
+      expect(keptSummary.actions[0]).toMatchObject({
+        action: 'skipped',
+        reason: 'tracked',
+        issue: { number: 42, state: 'closed' },
+      });
+      expect(info).toHaveBeenCalledWith(
+        expect.stringContaining('keep #42 closed, the suite only failed in the 24 hours after')
+      );
+      expect(reopened.editIssue).toHaveBeenCalledWith(42, {
+        body: expect.any(String),
+        state: 'open',
+      });
+      expect(reopenedSummary.actions[0]).toMatchObject({ action: 'updated', reopened: true });
+      info.mockRestore();
+    });
+
+    it('keeps counting a per-test issue whose test only failed within --reopen-grace-hours of the close', async () => {
+      const kept = createGithubApi([scoutTestIssue(43, 'pw-1', closedWithinGrace)]);
+      const superseded = createGithubApi([scoutTestIssue(43, 'pw-1', closedWithinGrace)]);
+
+      const keptSummary = await run(kept, { report: flakyReport([trackedTest()]) });
+      const supersededSummary = await run(superseded, {
+        report: flakyReport([trackedTest()]),
+        reopenGraceHours: 12,
+      });
+
+      expectNoWrites(kept);
+      expect(keptSummary.actions[0]).toMatchObject({
+        action: 'skipped',
+        reason: 'tracked',
+        issue: { number: 43, state: 'closed' },
+      });
+      expect(supersededSummary.actions[0]).toMatchObject({
+        action: 'created',
+        supersedes: [expect.objectContaining({ number: 43 })],
       });
     });
   });

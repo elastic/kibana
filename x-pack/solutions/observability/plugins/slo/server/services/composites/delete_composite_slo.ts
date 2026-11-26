@@ -7,6 +7,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
+import type { SloTelemetryReporter } from '../../lib/telemetry';
+import {
+  COMPOSITE_SLO_DELETED_EBT_EVENT_TYPE,
+  toCompositeSloDeletedEbtData,
+} from '../../lib/telemetry';
 import { retryTransientEsErrors } from '../../utils/retry';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import { buildCompositeSloSummaryDocId } from './composite_slo_summary_index';
@@ -15,6 +20,7 @@ interface Dependencies {
   esClient: ElasticsearchClient;
   compositeRepository: CompositeSLORepository;
   logger: Logger;
+  telemetry: SloTelemetryReporter;
 }
 
 interface Params {
@@ -24,9 +30,11 @@ interface Params {
 
 export async function deleteCompositeSlo(
   { id, spaceId }: Params,
-  { esClient, compositeRepository, logger }: Dependencies
+  { esClient, compositeRepository, logger, telemetry }: Dependencies
 ): Promise<void> {
   await compositeRepository.deleteById(id);
+
+  telemetry.report(COMPOSITE_SLO_DELETED_EBT_EVENT_TYPE, () => toCompositeSloDeletedEbtData(id));
 
   const docId = buildCompositeSloSummaryDocId(spaceId, id);
   try {

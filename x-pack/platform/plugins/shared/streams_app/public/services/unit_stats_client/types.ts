@@ -15,11 +15,62 @@ export type StatsWindow = { kind: 'default' } | { kind: 'range'; start: string; 
 
 export type StatsStatus = 'loading' | 'ready' | 'noData' | 'error' | 'stale';
 
+/**
+ * What failed, per second, and what share of the attempts that is. `unit` says what `rate` counts:
+ * `{item}` for Elasticsearch and `{request}` (upload attempts) for S3. The percentage is a share of
+ * the same thing, in percent. Never add or compare a rate of requests to a rate of items. `null`
+ * means no data.
+ */
+export interface FailureRateView {
+  rate: number | null;
+  unit: string;
+  percentage: number | null;
+}
+
+/** One cause of failures. Either field is `null` when the destination did not report it. */
+export interface FailureCauseView extends FailureRateView {
+  collection: string | null;
+  reason: string | null;
+}
+
+/** The failures of one class, with its causes. The percentage of a cause is a share of all attempts. */
+export interface FailureClassView extends FailureRateView {
+  breakdown: FailureCauseView[];
+}
+
+/**
+ * What was attempted and what failed in each bucket of `bucketMs`, as counts in `unit`, for the
+ * delivery chart of the flyout. `failed` includes both classes, so the delivered count is `total`
+ * minus `failed`, and the failures of other causes are `failed` minus the two classes. A bucket
+ * with no attempts has no point, so `window` says what the series covers. It is only there when the
+ * request asked for it, and the destination type can report it.
+ */
+export interface DeliverySeriesView {
+  bucketMs: number;
+  unit: string;
+  /** The time that the series covers, as ISO times. */
+  window: { start: string; end: string };
+  points: Array<{
+    start: string;
+    total: number;
+    failed: number;
+    authentication: number;
+    authorization: number;
+  }>;
+}
+
+export interface DestinationFailedView {
+  total: FailureRateView;
+  authentication: FailureClassView;
+  authorization: FailureClassView;
+  series?: DeliverySeriesView;
+}
+
 /** Rates are per second and durations are in seconds, as the API returns them. `null` means no data. */
 export interface DestinationStatsView {
   eventsRate: number | null;
   eventsTotal: number | null;
-  failedRate: number | null;
+  failed: DestinationFailedView;
   latencyAverage: number | null;
   series: { bucketMs: number; points: Array<{ start: string; value: number }> };
 }

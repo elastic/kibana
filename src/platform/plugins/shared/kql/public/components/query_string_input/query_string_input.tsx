@@ -552,7 +552,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                   Learn more in our {link}."
                   values={{
                     link: (
-                      <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
+                      <EuiLink href={docLinks.links.query.kueryQueryNestedFields} target="_blank">
                         <FormattedMessage
                           id="kql.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
                           defaultMessage="docs"

@@ -47,6 +47,7 @@ import { PluginsStatusService } from './cached_plugins_status';
 import { logCoreStatusChanges } from './log_core_services_status';
 import { logPluginsStatusChanges } from './log_plugins_status';
 import { logOverallStatusChanges } from './log_overall_status';
+import { registerStatusOtelMetrics } from './register_status_otel_metrics';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
@@ -154,6 +155,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
     // Create unused subscriptions to ensure all underlying lazy observables are started.
     this.subscriptions.push(this.overall$.subscribe(), coreOverall$.subscribe());
+
+    registerStatusOtelMetrics({ overall$: this.overall$, core$, stop$: this.stop$ });
 
     const commonRouteDeps = {
       config: {
