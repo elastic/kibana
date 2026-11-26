@@ -67,6 +67,11 @@ export interface TracesLatencyMapViewProps {
   isChartLoading?: boolean;
   /** The id of the document open in Discover's flyout, if any. */
   expandedDocId?: string;
+  /**
+   * Metadata fields declared on Discover's query. A shared link refetches through that query,
+   * so `_id` and `_index` are kept on the record only when the query asks for both.
+   */
+  metadataFields?: readonly string[];
 }
 
 /**
@@ -119,6 +124,7 @@ export function TracesLatencyMapView({
   actions,
   isChartLoading,
   expandedDocId,
+  metadataFields = [],
 }: TracesLatencyMapViewProps) {
   const { updateESQLQuery, setExpandedDoc } = actions;
   const selectionClause = filters.find(isSelectionCondition);
@@ -323,13 +329,14 @@ export function TracesLatencyMapView({
         return;
       }
       const row = Object.fromEntries(columns.map((column, i) => [column.name, firstRow[i]]));
-      // With its real identity (METADATA _id, _index) the traces document profile
-      // recognizes the record and the flyout can write a URL reference; the fallback id
-      // keeps a span without metadata openable, shown as given. A reference is restored
-      // through the Discover query itself, selection and all: a span outside the selection
-      // could never come back that way, so it is opened without the identity to link to,
-      // its fields (the index among them, for the profile) as they are.
-      const restorable = !selection || isCellWithin(cell, selection);
+      // Discover writes a link from raw._id/_index and restores it by re-running the editor
+      // query. That only works when the query declares both metadata fields and the span is
+      // inside its selection. Otherwise the identity stays off raw. flattened keeps the row,
+      // index included, so the traces document profile still recognizes it.
+      const queryCanRefetchIdentity =
+        metadataFields.includes('_id') && metadataFields.includes('_index');
+      const restorable =
+        queryCanRefetchIdentity && (!selection || isCellWithin(cell, selection));
       const { _id, _index, ...withoutIdentity } = row;
       const raw = (restorable ? row : withoutIdentity) as DataTableRecord['raw'];
       const id =
@@ -345,7 +352,7 @@ export function TracesLatencyMapView({
         { initialTabId: 'doc_view_obs_traces_overview' }
       );
     },
-    [setExpandedDoc, indexPattern, baseFilters, searchEsql, selection]
+    [setExpandedDoc, indexPattern, baseFilters, searchEsql, selection, metadataFields]
   );
 
   if (!source) return null;

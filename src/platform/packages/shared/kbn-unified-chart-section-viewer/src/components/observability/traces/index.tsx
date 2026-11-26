@@ -215,6 +215,7 @@ function TraceMetricsGrid({
           actions={actions}
           isChartLoading={isChartLoading}
           expandedDocId={expandedDocId}
+          metadataFields={esqlQuery.metadataFields}
         />
       </ChartsGrid>
     );

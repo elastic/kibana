@@ -328,7 +328,10 @@ describe('TracesLatencyMapView', () => {
     );
   });
 
-  const spanWithIdentity: ESQLSearchResponse = {
+  /** The editor query can refetch a document only when it declares both identity fields. */
+const identityMetadata = ['_id', '_index'];
+
+const spanWithIdentity: ESQLSearchResponse = {
     columns: [
       { name: 'service.name', type: 'keyword' },
       { name: '_id', type: 'keyword' },
@@ -337,9 +340,9 @@ describe('TracesLatencyMapView', () => {
     values: [['cart', 'span-1', '.ds-traces-apm-000001']],
   };
 
-  it('gives the opened span its real identity when the metadata is there', async () => {
+  it('gives the opened span its real identity when the editor query can refetch it', async () => {
     answerWith(spanWithIdentity);
-    const { actions, mapProps } = renderView();
+    const { actions, mapProps } = renderView({ metadataFields: identityMetadata });
     await act(() => mapProps.onCellClick!(cell));
     // The identity lets the traces document profile recognize the record, and the flyout
     // write a URL reference from raw._id/_index.
@@ -358,6 +361,7 @@ describe('TracesLatencyMapView', () => {
     answerWith(spanWithIdentity);
     const { actions, mapProps } = renderView({
       filters: ['service.name == "cart"', selectionClause],
+      metadataFields: identityMetadata,
     });
     await act(() => mapProps.onCellClick!(cell));
     const [record] = actions.setExpandedDoc.mock.lastCall ?? [];
@@ -373,6 +377,7 @@ describe('TracesLatencyMapView', () => {
     const inside = { ...cell, from: selection.from, to: '2026-10-26T10:01:00.000Z' };
     const { actions, mapProps } = renderView({
       filters: ['service.name == "cart"', selectionClause],
+      metadataFields: identityMetadata,
     });
     await act(() =>
       mapProps.onCellClick!({ ...inside, minDuration: 1_000_000, maxDuration: 2_000_000 })
@@ -384,6 +389,7 @@ describe('TracesLatencyMapView', () => {
     answerWith(spanWithIdentity);
     const { actions, mapProps } = renderView({
       filters: ['service.name == "cart"', selectionClause],
+      metadataFields: identityMetadata,
     });
     // A cell edge is a fraction of a nanosecond below the written bound, which rounded up.
     await act(() =>
@@ -425,9 +431,23 @@ describe('TracesLatencyMapView', () => {
     expect(jest.mocked(LatencyMap).mock.lastCall?.[0].activeCell).toBeUndefined();
   });
 
+  it('opens a span without an identity to link to when the editor query lacks metadata', async () => {
+    // Discover restores a link through the editor query. Without METADATA _id, _index that
+    // restore cannot run, so the id stays off raw. The fields, index included, stay for the profile.
+    answerWith(spanWithIdentity);
+    const { actions, mapProps } = renderView();
+    await act(() => mapProps.onCellClick!(cell));
+    const [record] = actions.setExpandedDoc.mock.lastCall ?? [];
+    expect(record?.id).toBe(`traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`);
+    expect(record?.raw).toEqual({ 'service.name': 'cart' });
+    expect(record?.flattened).toEqual(
+      expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' })
+    );
+  });
+
   it('keeps the clicked cell active while its document is open, and releases it when the flyout closes', async () => {
     answerWith(spanWithIdentity);
-    const view = renderView();
+    const view = renderView({ metadataFields: identityMetadata });
     await act(() => view.mapProps.onCellClick!(cell));
     const lastMapProps = () => jest.mocked(LatencyMap).mock.lastCall?.[0] as LatencyMapProps;
     expect(lastMapProps().activeCell).toEqual(cell);
@@ -442,7 +462,7 @@ describe('TracesLatencyMapView', () => {
 
   it('releases the active cell when another document opens, or the map changes', async () => {
     answerWith(spanWithIdentity);
-    const view = renderView();
+    const view = renderView({ metadataFields: identityMetadata });
     await act(() => view.mapProps.onCellClick!(cell));
     view.rerender({ expandedDocId: '.ds-traces-apm-000001::span-1::' });
     const lastMapProps = () => jest.mocked(LatencyMap).mock.lastCall?.[0] as LatencyMapProps;
