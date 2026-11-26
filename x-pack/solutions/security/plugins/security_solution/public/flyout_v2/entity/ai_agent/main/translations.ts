@@ -97,6 +97,10 @@ export const SUSPENDED = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.suspended',
   { defaultMessage: 'Suspended' }
 );
+export const ENABLED = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.context.enabled',
+  { defaultMessage: 'Enabled' }
+);
 export const HR_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.hr',
   { defaultMessage: 'HR status' }

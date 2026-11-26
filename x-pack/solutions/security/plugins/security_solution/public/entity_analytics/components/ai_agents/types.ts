@@ -72,6 +72,8 @@ export interface IdpAccount {
   readonly status?: string;
   readonly deprovisioned?: boolean;
   readonly suspended?: boolean;
+  /** Entra ID reports `account_enabled` rather than a status. */
+  readonly enabled?: boolean;
   readonly mfaEnabled?: boolean;
   readonly fullName?: string;
 }

@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
@@ -15,7 +16,7 @@ import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../../../common/lib/telemetry';
 import { getGraphEntryPoint } from '../../../../shared/utils/get_graph_entry_point';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
-import { GRAPH_OPEN_FULL } from '../translations';
+import { GRAPH_OPEN_FULL, TAB_GRAPH } from '../translations';
 
 export interface GraphTabProps {
   readonly entityId: string;
@@ -91,16 +92,18 @@ export const GraphTab = memo(({ entityId, entityName, scopeId, onShowAgent }: Gr
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <GraphVisualization
-        mode="entity"
-        scopeId={scopeId}
-        entityId={entityId}
-        entryPoint={entryPoint}
-        onShowDocument={onShowDocument}
-        onShowEntity={onShowEntity}
-        onShowNetwork={onShowNetwork}
-        onShowGrouped={noop}
-      />
+      <KibanaSectionErrorBoundary sectionName={TAB_GRAPH}>
+        <GraphVisualization
+          mode="entity"
+          scopeId={scopeId}
+          entityId={entityId}
+          entryPoint={entryPoint}
+          onShowDocument={onShowDocument}
+          onShowEntity={onShowEntity}
+          onShowNetwork={onShowNetwork}
+          onShowGrouped={noop}
+        />
+      </KibanaSectionErrorBoundary>
     </div>
   );
 });

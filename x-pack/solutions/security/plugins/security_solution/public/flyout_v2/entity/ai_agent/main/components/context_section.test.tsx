@@ -186,7 +186,7 @@ describe('ContextSection', () => {
       ],
     });
     const person = screen.getByTestId(AI_AGENT_TEST_IDS.person);
-    expect(person).toHaveTextContent('Terminated on 2026-12-01');
+    expect(person).toHaveTextContent('Terminated on Dec 1, 2026');
     expect(person).toHaveTextContent('On');
     expect(person).toHaveTextContent('IdP statusNot reported');
   });

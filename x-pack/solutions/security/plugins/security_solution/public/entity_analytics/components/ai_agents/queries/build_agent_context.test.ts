@@ -10,7 +10,7 @@ import { buildAgentContextQuery, buildAgentInventoryQuery } from './agent_querie
 import { buildOtelEventsQuery } from './activity_queries';
 import { toAgentRow, toHrRecord, toIdpAccount, toRelatedEntity } from './parse_rows';
 import type { AgentRow, RelatedEntity } from '../types';
-import { parseAgentId, parseAgentVersion } from '../utils';
+import { getToolShellCommand, parseAgentId, parseAgentVersion } from '../utils';
 
 const identity = {
   entityId: 'ai_agent:claude_code@host-1@ec2-user',
@@ -198,10 +198,22 @@ describe('utils', () => {
 
   it('parses versions from native installs only', () => {
     expect(parseAgentVersion('/home/u/.local/share/claude/versions/2.1.332')).toBe('2.1.332');
+    expect(parseAgentVersion('/opt/homebrew/Caskroom/claude-code/2.1.332/claude')).toBe('2.1.332');
     expect(
       parseAgentVersion('/usr/lib/node_modules/@anthropic-ai/claude-code/cli.js')
     ).toBeUndefined();
     expect(parseAgentVersion(undefined)).toBeUndefined();
+  });
+});
+
+describe('getToolShellCommand', () => {
+  it('reads the command a Claude Code tool shell evaluates, unescaping quotes', () => {
+    const wrap = (command: string) =>
+      `/bin/bash -c source /home/u/.claude/shell-snapshots/snapshot-bash-1.sh 2>/dev/null || true && eval '${command}' < /dev/null && pwd -P >| /tmp/claude-1-cwd`;
+    expect(getToolShellCommand(wrap('git status'))).toBe('git status');
+    expect(getToolShellCommand(wrap("echo '\\''hi'\\''"))).toBe("echo 'hi'");
+    expect(getToolShellCommand("bash -c eval 'git status'")).toBeUndefined();
+    expect(getToolShellCommand(undefined)).toBeUndefined();
   });
 });
 
@@ -223,6 +235,7 @@ describe('queries', () => {
     expect(query).toContain(
       'MV_CONTAINS(entity.relationships.acts_on_behalf_of.raw_identifiers.user.email, "a\\"b@x")'
     );
+    expect(query).toContain('"user:ec2-user@host-1@local"');
   });
 
   it('ties OTel to Defend by session through the ECS field with the Claude fallback', () => {

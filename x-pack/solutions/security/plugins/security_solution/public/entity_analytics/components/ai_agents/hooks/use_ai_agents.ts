@@ -82,7 +82,20 @@ const esqlRecords = async (
 ): Promise<EsqlRecord[]> =>
   esqlResponseToRecords<EsqlRecord>(await runEsqlQuery(search, query, `ai_agents_${id}`, signal));
 
-/** Runs a query whose source may be missing; a failure reads as "no data" for that layer. */
+/** A space with no alerts yet has no alerts alias, which ES|QL reports as an unknown index. */
+const isMissingIndexError = (error: unknown): boolean => {
+  const message = error instanceof Error ? error.message : '';
+  const attributes =
+    typeof error === 'object' && error !== null && 'attributes' in error
+      ? JSON.stringify(error.attributes)
+      : '';
+  return /Unknown index|index_not_found/.test(`${message} ${attributes}`);
+};
+
+/**
+ * Runs a query whose source may be missing. A missing index reads as no data, any other failure
+ * as "couldn't read" for that layer.
+ */
 const optionalRecords = async (
   search: SearchService,
   query: string,
@@ -93,7 +106,7 @@ const optionalRecords = async (
     return { records: await esqlRecords(search, query, id, signal), failed: false };
   } catch (error) {
     if (signal?.aborted) throw error;
-    return { records: [], failed: true };
+    return { records: [], failed: !isMissingIndexError(error) };
   }
 };
 

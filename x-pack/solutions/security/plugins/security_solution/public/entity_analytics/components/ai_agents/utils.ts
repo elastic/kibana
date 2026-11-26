@@ -71,12 +71,15 @@ export const parseAgentId = (entityId: string): AgentIdentity | undefined => {
 
 /**
  * The version from a native install path: `~/.local/share/claude/versions/<version>` for Claude
- * Code and `~/.local/share/cursor-agent/versions/<version>/node` for Cursor CLI. Other installs
- * (npm, Homebrew) have no version in the path.
+ * Code, `~/.local/share/cursor-agent/versions/<version>/node` for Cursor CLI and
+ * `/opt/homebrew/Caskroom/claude-code/<version>/claude` for Homebrew. npm, Windows and the Cursor
+ * IDE have no version in the path.
  */
 export const parseAgentVersion = (executable: string | undefined): string | undefined => {
   if (!executable) return undefined;
-  const match = executable.match(/\/versions\/([^/]+)(?:\/node)?$/);
+  const match =
+    executable.match(/\/versions\/([^/]+)(?:\/node)?$/) ??
+    executable.match(/\/Caskroom\/claude-code\/([^/]+)\/claude$/);
   return match?.[1];
 };
 
@@ -97,3 +100,13 @@ export const getAgentDisplayName = (agentName: string): string =>
   AGENT_DISPLAY_NAMES[agentName] ?? agentName;
 
 export const isClaudeCode = (agentName: string): boolean => agentName === 'claude_code';
+
+/**
+ * The command inside a Claude Code tool shell, which wraps each Bash tool call as
+ * `bash -c source <shell snapshot> && ... && eval '<command>' < /dev/null && pwd -P >| <cwd file>`.
+ */
+export const getToolShellCommand = (commandLine: string | undefined): string | undefined => {
+  if (!commandLine?.includes('shell-snapshots')) return undefined;
+  const match = commandLine.match(/&& eval '((?:[^']|'\\'')*)'/);
+  return match?.[1].replace(/'\\''/g, "'");
+};

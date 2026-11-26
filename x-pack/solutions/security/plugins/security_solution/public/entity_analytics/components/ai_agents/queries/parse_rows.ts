@@ -103,6 +103,7 @@ export const toIdpAccount = (row: EsqlRecord): IdpAccount | undefined => {
     status: firstString(row.status),
     deprovisioned: toBoolean(row.deprovisioned) ?? (accountEnabled === false ? true : undefined),
     suspended: toBoolean(row.suspended),
+    enabled: accountEnabled,
     mfaEnabled: toBoolean(row.mfa_enabled),
     fullName: firstString(row.full_name),
   };

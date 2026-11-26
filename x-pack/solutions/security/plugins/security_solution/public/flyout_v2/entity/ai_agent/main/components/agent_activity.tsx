@@ -43,7 +43,10 @@ import type {
   AgentIdentity,
   AgentRow,
 } from '../../../../../entity_analytics/components/ai_agents/types';
-import { isClaudeCode } from '../../../../../entity_analytics/components/ai_agents/utils';
+import {
+  getToolShellCommand,
+  isClaudeCode,
+} from '../../../../../entity_analytics/components/ai_agents/utils';
 import { GAP_IDS } from '../../../../../entity_analytics/components/ai_agents/gaps';
 import {
   MOCK_DATA_BADGE,
@@ -116,7 +119,8 @@ const ProcessStepRow = memo(
     onOpenProcessTree: (step: ProcessStep) => void;
   }) => {
     const { process, sideEffects, ranAsOtherUser, isAgentProcess } = step;
-    const label = process.commandLine ?? process.name;
+    const toolCommand = getToolShellCommand(process.commandLine);
+    const label = toolCommand ?? process.commandLine ?? process.name;
     const canOpenTree = !!process.documentId && !!process.index && !!process.entryLeaderEntityId;
     return (
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
@@ -131,6 +135,7 @@ const ProcessStepRow = memo(
           {label ? (
             <EuiCode
               transparentBackground
+              title={toolCommand ? process.commandLine : undefined}
               css={css`
                 word-break: break-all;
               `}
@@ -143,6 +148,16 @@ const ProcessStepRow = memo(
             </EuiText>
           )}
           <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+            {toolCommand !== undefined && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.toolShell"
+                    defaultMessage="Tool shell"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
             {isAgentProcess && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow">

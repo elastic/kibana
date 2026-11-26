@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { AssetCriticalityBadge } from '../../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { useGetWatchlists } from '../../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
@@ -39,6 +39,7 @@ import {
   ACTS_FOR_TITLE,
   CRITICALITY_LABEL,
   DEPROVISIONED,
+  ENABLED,
   HOST_NOT_FOUND,
   HOST_TITLE,
   HR_LABEL,
@@ -112,7 +113,8 @@ const isTerminated = (status: string | undefined): boolean =>
 const idpStatusText = (account: IdpAccount): string => {
   if (account.deprovisioned) return DEPROVISIONED;
   if (account.suspended) return SUSPENDED;
-  return account.status ?? IDP_UNKNOWN;
+  if (account.status) return account.status;
+  return account.enabled ? ENABLED : IDP_UNKNOWN;
 };
 
 const PersonCard = memo(
@@ -220,7 +222,18 @@ const PersonCard = memo(
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.hrStatusWithDate"
                       defaultMessage="{status} on {date}"
-                      values={{ status: person.hr.status, date: person.hr.terminationDate }}
+                      values={{
+                        status: person.hr.status,
+                        date: (
+                          <FormattedDate
+                            value={person.hr.terminationDate}
+                            year="numeric"
+                            month="short"
+                            day="numeric"
+                            timeZone="UTC"
+                          />
+                        ),
+                      }}
                     />
                   ) : (
                     person.hr.status

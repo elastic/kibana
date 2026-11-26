@@ -24,6 +24,7 @@ import {
   OKTA_USER_INDEX,
 } from '../constants';
 import type { AgentIdentity } from '../types';
+import { getLocalUserEntityId } from '../utils';
 
 /** Raw IdP user documents may carry fields the integration doesn't map; load them from `_source`. */
 const SET_UNMAPPED_LOAD = 'SET unmapped_fields="load";';
@@ -111,7 +112,13 @@ export const buildAgentContextQuery = ({
 }: AgentContextQueryParams): string => {
   const { entityId, hostId } = identity;
   const directIds = Array.from(
-    new Set([entityId, `host:${hostId}`, ...dependsOnIds, ...accountIds])
+    new Set([
+      entityId,
+      `host:${hostId}`,
+      getLocalUserEntityId(identity),
+      ...dependsOnIds,
+      ...accountIds,
+    ])
   );
   const conditions = [
     `entity.id IN (${toList(directIds)})`,
