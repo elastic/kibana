@@ -14,7 +14,9 @@ export { dynamicBlockSchema };
 export type { DynamicBlock } from './dynamic';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
+export const EntityType = lazySchema(() =>
+  z.enum(['user', 'host', 'service', 'generic', 'ai_agent'])
+);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
@@ -219,13 +221,15 @@ const identityFieldSchema = lazySchema(() =>
   z.union([calculatedIdentityFieldLogicSchema, singleFieldIdentitySchema])
 );
 
-// Field value: literal string, single source reference, or composition (CONCAT of fields).
+// Field value: literal string, single source reference, or composition (CONCAT of fields, after an
+// optional literal prefix such as an EUID type prefix).
 const fieldValueSchema = lazySchema(() =>
   z.union([
     z.string().max(MAX_LITERAL_LENGTH),
     z.object({ source: fieldNameSchema }),
     z.object({
       composition: z.object({
+        prefix: z.optional(z.string().max(MAX_LITERAL_LENGTH)),
         fields: z.array(fieldNameSchema).min(1).max(MAX_COMPOSITION_FIELDS),
         sep: z.string().max(MAX_LITERAL_LENGTH),
       }),

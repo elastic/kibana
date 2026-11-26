@@ -477,6 +477,26 @@ const version12: SavedObjectsFullModelVersion = {
   },
 };
 
+const engineDescriptorSchemaV13 = engineDescriptorSchemaV12.extends({
+  type: schema.oneOf([
+    schema.literal('user'),
+    schema.literal('host'),
+    schema.literal('service'),
+    schema.literal('generic'),
+    schema.literal('ai_agent'),
+  ]),
+});
+
+// Adds the ai_agent entity type. `type` is already mapped as a keyword, so there is no mappings
+// addition, and existing descriptors keep their value, so there is no backfill.
+const version13: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV13,
+    forwardCompatibility: engineDescriptorSchemaV13.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
@@ -495,6 +515,7 @@ export const EngineDescriptorType: SavedObjectsType = {
     10: version10,
     11: version11,
     12: version12,
+    13: version13,
   },
   hiddenFromHttpApis: true,
 };

@@ -132,10 +132,11 @@ describe('getMergedConfig', () => {
       saved.clear();
     });
 
-    it('ships with service and generic cadence overrides only, so user and host stay on the store-wide code defaults', () => {
+    it('ships with service, generic and ai_agent cadence overrides only, so user and host stay on the store-wide code defaults', () => {
       expect(DEFAULT_CONFIG_BY_TYPE).toEqual({
         service: { frequency: '10m' },
         generic: { frequency: '30m' },
+        ai_agent: { frequency: '10m' },
       });
     });
 

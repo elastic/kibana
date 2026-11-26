@@ -18,6 +18,7 @@ import { hostEntityDefinition } from './host';
 import { buildUserEntityDefinition, userEntityDefinition } from './user';
 import { serviceEntityDefinition } from './service';
 import { genericEntityDefinition } from './generic';
+import { aiAgentEntityDefinition } from './ai_agent';
 
 export interface EntityDefinitionOptions {
   excludedUserNames?: string[];
@@ -29,6 +30,7 @@ const entitiesDefinitionRegistry = {
   user: userEntityDefinition,
   service: serviceEntityDefinition,
   generic: genericEntityDefinition,
+  ai_agent: aiAgentEntityDefinition,
 } as const satisfies Record<EntityType, ManagedEntityDefinitionWithoutId>;
 
 const getRegisteredDefinition = (type: EntityType): ManagedEntityDefinitionWithoutId => {

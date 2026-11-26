@@ -275,6 +275,12 @@ export const EntityField = lazySchema(() =>
            */
           supervises: EntityRelationship.optional().describe('Entities supervised by this entity.'),
           /**
+           * Accounts whose delegated credentials this entity acts with (for example, the account an AI agent is signed in as).
+           */
+          acts_on_behalf_of: EntityRelationship.optional().describe(
+            'Accounts whose delegated credentials this entity acts with (for example, the account an AI agent is signed in as).'
+          ),
+          /**
            * Resolution metadata linking this entity to another.
            */
           resolution: z

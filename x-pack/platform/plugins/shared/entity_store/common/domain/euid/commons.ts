@@ -181,12 +181,12 @@ export function resolveFieldValueSchema(doc: any, value: FieldValueSchema): stri
   if ('source' in value) {
     return getFieldValue(doc, value.source);
   }
-  const { fields, sep } = value.composition;
+  const { prefix = '', fields, sep } = value.composition;
   const values = fields.map((f) => getFieldValue(doc, f));
   if (values.some((v) => v === undefined)) {
     return undefined;
   }
-  return values.join(sep);
+  return `${prefix}${values.join(sep)}`;
 }
 
 /**

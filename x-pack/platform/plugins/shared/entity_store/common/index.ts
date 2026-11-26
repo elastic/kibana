@@ -118,7 +118,9 @@ export const getErrorMessage = (error: unknown): string => {
 
 // Entity types (slim definitions; for EUID translation use common/euid_helpers)
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
+export const EntityType = lazySchema(() =>
+  z.enum(['user', 'host', 'service', 'generic', 'ai_agent'])
+);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 

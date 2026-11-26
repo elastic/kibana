@@ -17,6 +17,15 @@ describe('getUnmappedLatestFieldPlaceholders', () => {
     );
     expect(getUnmappedLatestFieldPlaceholders()).toEqual([
       '| EVAL user.entity.id = TO_STRING(null)',
+      '| EVAL entity.relationships.acts_on_behalf_of.ids = TO_STRING(null)',
+      '| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = TO_STRING(null)',
+      '| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = TO_STRING(null)',
+      '| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = TO_STRING(null)',
+      '| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = TO_STRING(null)',
+      '| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = TO_STRING(null)',
+      '| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = TO_STRING(null)',
+      '| EVAL process.ai_agent.name = TO_STRING(null)',
+      '| EVAL process.executable = TO_STRING(null)',
     ]);
   });
 

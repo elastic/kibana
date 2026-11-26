@@ -1,6 +1,259 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for ai_agent entity description 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
+  | WHERE
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
+      AND (TO_STRING(process.ai_agent.name) IS NOT NULL AND TO_STRING(process.ai_agent.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND (TO_STRING(process.ai_agent.is_descendant) IS NULL OR TO_STRING(process.ai_agent.is_descendant) == \\"false\\"))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ process_ai_agent_name_present = TO_STRING(process.ai_agent.name) IS NOT NULL AND TO_STRING(process.ai_agent.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ process_ai_agent_name_present_or_null = CASE(process_ai_agent_name_present, TO_STRING(process.ai_agent.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ recent.entity.EngineMetadata.UntypedId = CONCAT(process_ai_agent_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", user_name_present_or_null)
+| EVAL entity.relationships.depends_on.entity.id = CASE((TRUE), CONCAT(\\"host:\\", TO_STRING(host.id)), TO_STRING(entity.relationships.depends_on.entity.id)),
+    entity.relationships.acts_on_behalf_of.user.email = CASE((TRUE), TO_STRING(process.ai_agent.email), TO_STRING(entity.relationships.acts_on_behalf_of.user.email))
+| STATS
+    recent.timestamp = MAX(@timestamp),
+    recent.entity.name = LAST(TO_STRING(entity.name), @timestamp) WHERE TO_STRING(entity.name) IS NOT NULL,
+ recent.process.ai_agent.name = LAST(TO_STRING(process.ai_agent.name), @timestamp) WHERE TO_STRING(process.ai_agent.name) IS NOT NULL,
+ recent.host.id = LAST(TO_STRING(host.id), @timestamp) WHERE TO_STRING(host.id) IS NOT NULL,
+ recent.host.name = LAST(TO_STRING(host.name), @timestamp) WHERE TO_STRING(host.name) IS NOT NULL,
+ recent.user.name = LAST(TO_STRING(user.name), @timestamp) WHERE TO_STRING(user.name) IS NOT NULL,
+ recent.process.executable = LAST(TO_STRING(process.executable), @timestamp) WHERE TO_STRING(process.executable) IS NOT NULL,
+ recent.process.ai_agent.api_key_auth = LAST(TO_BOOLEAN(process.ai_agent.api_key_auth), @timestamp) WHERE TO_BOOLEAN(process.ai_agent.api_key_auth) IS NOT NULL,
+ recent.asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE TO_STRING(asset.id) IS NOT NULL,
+ recent.asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE TO_STRING(asset.name) IS NOT NULL,
+ recent.asset.owner = LAST(TO_STRING(asset.owner), @timestamp) WHERE TO_STRING(asset.owner) IS NOT NULL,
+ recent.asset.serial_number = LAST(TO_STRING(asset.serial_number), @timestamp) WHERE TO_STRING(asset.serial_number) IS NOT NULL,
+ recent.asset.model = LAST(TO_STRING(asset.model), @timestamp) WHERE TO_STRING(asset.model) IS NOT NULL,
+ recent.asset.vendor = LAST(TO_STRING(asset.vendor), @timestamp) WHERE TO_STRING(asset.vendor) IS NOT NULL,
+ recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE TO_STRING(asset.environment) IS NOT NULL,
+ recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE TO_STRING(asset.criticality) IS NOT NULL,
+ recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL,
+ recent.event.module = VALUES(TO_STRING(event.module)),
+ recent.event.dataset = VALUES(TO_STRING(event.dataset)),
+ recent.data_stream.dataset = VALUES(TO_STRING(data_stream.dataset)),
+ recent.entity.source = VALUES(TO_STRING(entity.source)),
+ recent.entity.type = LAST(TO_STRING(entity.type), @timestamp) WHERE TO_STRING(entity.type) IS NOT NULL,
+ recent.entity.sub_type = LAST(TO_STRING(entity.sub_type), @timestamp) WHERE TO_STRING(entity.sub_type) IS NOT NULL,
+ recent.entity.url = LAST(TO_STRING(entity.url), @timestamp) WHERE TO_STRING(entity.url) IS NOT NULL,
+ recent.entity.attributes.asset = LAST(TO_BOOLEAN(entity.attributes.asset), @timestamp) WHERE TO_BOOLEAN(entity.attributes.asset) IS NOT NULL,
+ recent.entity.attributes.managed = LAST(TO_BOOLEAN(entity.attributes.managed), @timestamp) WHERE TO_BOOLEAN(entity.attributes.managed) IS NOT NULL,
+ recent.entity.attributes.mfa_enabled = LAST(TO_BOOLEAN(entity.attributes.mfa_enabled), @timestamp) WHERE TO_BOOLEAN(entity.attributes.mfa_enabled) IS NOT NULL,
+ recent.entity.attributes.storage_class = LAST(TO_STRING(entity.attributes.storage_class), @timestamp) WHERE TO_STRING(entity.attributes.storage_class) IS NOT NULL,
+ recent.entity.attributes.permissions = VALUES(TO_STRING(entity.attributes.permissions)),
+ recent.entity.attributes.known_redirects = VALUES(TO_STRING(entity.attributes.known_redirects)),
+ recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(entity.attributes.oauth_consent_restriction) IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(entity.lifecycle.last_activity) IS NOT NULL,
+ recent.entity.relationships.administers.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.administers.host.id)),
+ recent.entity.relationships.administers.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.administers.user.id)),
+ recent.entity.relationships.administers.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.administers.user.email)),
+ recent.entity.relationships.administers.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.administers.host.name)),
+ recent.entity.relationships.administers.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.administers.user.name)),
+ recent.entity.relationships.administers.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.administers.service.name)),
+ recent.entity.relationships.administers.ids = VALUES(TO_STRING(entity.relationships.administers.entity.id)),
+ recent.entity.relationships.communicates_with.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.communicates_with.host.id)),
+ recent.entity.relationships.communicates_with.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.communicates_with.user.id)),
+ recent.entity.relationships.communicates_with.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.communicates_with.user.email)),
+ recent.entity.relationships.communicates_with.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.communicates_with.host.name)),
+ recent.entity.relationships.communicates_with.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.communicates_with.user.name)),
+ recent.entity.relationships.communicates_with.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.communicates_with.service.name)),
+ recent.entity.relationships.communicates_with.ids = VALUES(TO_STRING(entity.relationships.communicates_with.entity.id)),
+ recent.entity.relationships.depends_on.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.depends_on.host.id)),
+ recent.entity.relationships.depends_on.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.depends_on.user.id)),
+ recent.entity.relationships.depends_on.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.depends_on.user.email)),
+ recent.entity.relationships.depends_on.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.depends_on.host.name)),
+ recent.entity.relationships.depends_on.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.depends_on.user.name)),
+ recent.entity.relationships.depends_on.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.depends_on.service.name)),
+ recent.entity.relationships.depends_on.ids = VALUES(TO_STRING(entity.relationships.depends_on.entity.id)),
+ recent.entity.relationships.owns_inferred.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.owns_inferred.host.id)),
+ recent.entity.relationships.owns_inferred.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.owns_inferred.user.id)),
+ recent.entity.relationships.owns_inferred.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.owns_inferred.user.email)),
+ recent.entity.relationships.owns_inferred.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.owns_inferred.host.name)),
+ recent.entity.relationships.owns_inferred.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.owns_inferred.user.name)),
+ recent.entity.relationships.owns_inferred.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.owns_inferred.service.name)),
+ recent.entity.relationships.owns_inferred.ids = VALUES(TO_STRING(entity.relationships.owns_inferred.entity.id)),
+ recent.entity.relationships.accesses_infrequently.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.accesses_infrequently.host.id)),
+ recent.entity.relationships.accesses_infrequently.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.accesses_infrequently.user.id)),
+ recent.entity.relationships.accesses_infrequently.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.accesses_infrequently.user.email)),
+ recent.entity.relationships.accesses_infrequently.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.accesses_infrequently.host.name)),
+ recent.entity.relationships.accesses_infrequently.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.accesses_infrequently.user.name)),
+ recent.entity.relationships.accesses_infrequently.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.accesses_infrequently.service.name)),
+ recent.entity.relationships.accesses_infrequently.ids = VALUES(TO_STRING(entity.relationships.accesses_infrequently.entity.id)),
+ recent.entity.relationships.accesses_frequently.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.accesses_frequently.host.id)),
+ recent.entity.relationships.accesses_frequently.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.accesses_frequently.user.id)),
+ recent.entity.relationships.accesses_frequently.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.accesses_frequently.user.email)),
+ recent.entity.relationships.accesses_frequently.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.accesses_frequently.host.name)),
+ recent.entity.relationships.accesses_frequently.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.accesses_frequently.user.name)),
+ recent.entity.relationships.accesses_frequently.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.accesses_frequently.service.name)),
+ recent.entity.relationships.accesses_frequently.ids = VALUES(TO_STRING(entity.relationships.accesses_frequently.entity.id)),
+ recent.entity.relationships.owns.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.owns.host.id)),
+ recent.entity.relationships.owns.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.owns.user.id)),
+ recent.entity.relationships.owns.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.owns.user.email)),
+ recent.entity.relationships.owns.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.owns.host.name)),
+ recent.entity.relationships.owns.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.owns.user.name)),
+ recent.entity.relationships.owns.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.owns.service.name)),
+ recent.entity.relationships.owns.ids = VALUES(TO_STRING(entity.relationships.owns.entity.id)),
+ recent.entity.relationships.supervises.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.supervises.host.id)),
+ recent.entity.relationships.supervises.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.supervises.user.id)),
+ recent.entity.relationships.supervises.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.supervises.user.email)),
+ recent.entity.relationships.supervises.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.supervises.host.name)),
+ recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.supervises.user.name)),
+ recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.supervises.service.name)),
+ recent.entity.relationships.supervises.ids = VALUES(TO_STRING(entity.relationships.supervises.entity.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.host.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.user.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.user.email)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.host.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.user.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.service.name)),
+ recent.entity.relationships.acts_on_behalf_of.ids = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.entity.id))
+    BY recent.entity.EngineMetadata.UntypedId
+| SORT recent.entity.EngineMetadata.UntypedId ASC
+| LIMIT 10000
+| EVAL recent.entity.id = CONCAT(\\"ai_agent:\\", recent.entity.EngineMetadata.UntypedId)
+| EVAL entity.relationships.acts_on_behalf_of.ids = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = TO_STRING(null)
+| EVAL process.ai_agent.name = TO_STRING(null)
+| EVAL process.executable = TO_STRING(null)
+| LOOKUP JOIN _coordinator:latest-index
+      ON recent.entity.id == entity.id
+| EVAL recent.entity.name = CASE((TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\"), CONCAT(TO_STRING(recent.process.ai_agent.name), \\"@\\", TO_STRING(recent.user.name), \\"@\\", TO_STRING(recent.host.name)), recent.entity.name),
+    recent.entity.name = CASE((NOT (TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\")), CONCAT(TO_STRING(recent.process.ai_agent.name), \\"@\\", TO_STRING(recent.user.name)), recent.entity.name)
+| EVAL entity.name = COALESCE(recent.entity.name, entity.name),
+ process.ai_agent.name = COALESCE(recent.process.ai_agent.name, process.ai_agent.name),
+ host.id = COALESCE(recent.host.id, host.id),
+ host.name = COALESCE(recent.host.name, host.name),
+ user.name = COALESCE(recent.user.name, user.name),
+ process.executable = COALESCE(recent.process.executable, process.executable),
+ process.ai_agent.api_key_auth = COALESCE(recent.process.ai_agent.api_key_auth, process.ai_agent.api_key_auth),
+ asset.id = COALESCE(recent.asset.id, asset.id),
+ asset.name = COALESCE(recent.asset.name, asset.name),
+ asset.owner = COALESCE(recent.asset.owner, asset.owner),
+ asset.serial_number = COALESCE(recent.asset.serial_number, asset.serial_number),
+ asset.model = COALESCE(recent.asset.model, asset.model),
+ asset.vendor = COALESCE(recent.asset.vendor, asset.vendor),
+ asset.environment = COALESCE(recent.asset.environment, asset.environment),
+ asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
+ asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
+ event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 49),
+ event.dataset = MV_SLICE(MV_UNION(recent.event.dataset, event.dataset), 0, 49),
+ data_stream.dataset = MV_SLICE(MV_UNION(recent.data_stream.dataset, data_stream.dataset), 0, 49),
+ entity.source = MV_SLICE(MV_UNION(recent.entity.source, entity.source), 0, 49),
+ entity.type = COALESCE(recent.entity.type, entity.type),
+ entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
+ entity.url = COALESCE(recent.entity.url, entity.url),
+ entity.attributes.asset = COALESCE(recent.entity.attributes.asset, entity.attributes.asset),
+ entity.attributes.managed = COALESCE(recent.entity.attributes.managed, entity.attributes.managed),
+ entity.attributes.mfa_enabled = COALESCE(recent.entity.attributes.mfa_enabled, entity.attributes.mfa_enabled),
+ entity.attributes.storage_class = COALESCE(recent.entity.attributes.storage_class, entity.attributes.storage_class),
+ entity.attributes.permissions = MV_SLICE(MV_UNION(recent.entity.attributes.permissions, entity.attributes.permissions), 0, 49),
+ entity.attributes.known_redirects = MV_SLICE(MV_UNION(recent.entity.attributes.known_redirects, entity.attributes.known_redirects), 0, 49),
+ entity.attributes.oauth_consent_restriction = COALESCE(recent.entity.attributes.oauth_consent_restriction, entity.attributes.oauth_consent_restriction),
+ entity.lifecycle.first_seen = COALESCE(entity.lifecycle.first_seen, recent.entity.lifecycle.first_seen),
+ entity.lifecycle.last_seen = COALESCE(recent.entity.lifecycle.last_seen, entity.lifecycle.last_seen),
+ entity.lifecycle.last_activity = COALESCE(recent.entity.lifecycle.last_activity, entity.lifecycle.last_activity),
+ entity.relationships.administers.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.host.id, entity.relationships.administers.raw_identifiers.host.id), 0, 49),
+ entity.relationships.administers.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.id, entity.relationships.administers.raw_identifiers.user.id), 0, 49),
+ entity.relationships.administers.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.email, entity.relationships.administers.raw_identifiers.user.email), 0, 49),
+ entity.relationships.administers.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.host.name, entity.relationships.administers.raw_identifiers.host.name), 0, 49),
+ entity.relationships.administers.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.name, entity.relationships.administers.raw_identifiers.user.name), 0, 49),
+ entity.relationships.administers.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.service.name, entity.relationships.administers.raw_identifiers.service.name), 0, 49),
+ entity.relationships.administers.ids = MV_SLICE(MV_UNION(recent.entity.relationships.administers.ids, entity.relationships.administers.ids), 0, 49),
+ entity.relationships.communicates_with.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.communicates_with.raw_identifiers.host.id, entity.relationships.communicates_with.raw_identifiers.host.id), 0, 49),
+ entity.relationships.communicates_with.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.communicates_with.raw_identifiers.user.id, entity.relationships.communicates_with.raw_identifiers.user.id), 0, 49),
+ entity.relationships.communicates_with.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.communicates_with.raw_identifiers.user.email, entity.relationships.communicates_with.raw_identifiers.user.email), 0, 49),
+ entity.relationships.communicates_with.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.communicates_with.raw_identifiers.host.name, entity.relationships.communicates_with.raw_identifiers.host.name), 0, 49),
+ entity.relationships.communicates_with.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.communicates_with.raw_identifiers.user.name, entity.relationships.communicates_with.raw_identifiers.user.name), 0, 49),
+ entity.relationships.communicates_with.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.communicates_with.raw_identifiers.service.name, entity.relationships.communicates_with.raw_identifiers.service.name), 0, 49),
+ entity.relationships.communicates_with.ids = MV_SLICE(MV_UNION(recent.entity.relationships.communicates_with.ids, entity.relationships.communicates_with.ids), 0, 49),
+ entity.relationships.depends_on.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.depends_on.raw_identifiers.host.id, entity.relationships.depends_on.raw_identifiers.host.id), 0, 49),
+ entity.relationships.depends_on.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.depends_on.raw_identifiers.user.id, entity.relationships.depends_on.raw_identifiers.user.id), 0, 49),
+ entity.relationships.depends_on.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.depends_on.raw_identifiers.user.email, entity.relationships.depends_on.raw_identifiers.user.email), 0, 49),
+ entity.relationships.depends_on.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.depends_on.raw_identifiers.host.name, entity.relationships.depends_on.raw_identifiers.host.name), 0, 49),
+ entity.relationships.depends_on.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.depends_on.raw_identifiers.user.name, entity.relationships.depends_on.raw_identifiers.user.name), 0, 49),
+ entity.relationships.depends_on.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.depends_on.raw_identifiers.service.name, entity.relationships.depends_on.raw_identifiers.service.name), 0, 49),
+ entity.relationships.depends_on.ids = MV_SLICE(MV_UNION(recent.entity.relationships.depends_on.ids, entity.relationships.depends_on.ids), 0, 49),
+ entity.relationships.owns_inferred.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.owns_inferred.raw_identifiers.host.id, entity.relationships.owns_inferred.raw_identifiers.host.id), 0, 49),
+ entity.relationships.owns_inferred.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.owns_inferred.raw_identifiers.user.id, entity.relationships.owns_inferred.raw_identifiers.user.id), 0, 49),
+ entity.relationships.owns_inferred.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.owns_inferred.raw_identifiers.user.email, entity.relationships.owns_inferred.raw_identifiers.user.email), 0, 49),
+ entity.relationships.owns_inferred.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.owns_inferred.raw_identifiers.host.name, entity.relationships.owns_inferred.raw_identifiers.host.name), 0, 49),
+ entity.relationships.owns_inferred.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.owns_inferred.raw_identifiers.user.name, entity.relationships.owns_inferred.raw_identifiers.user.name), 0, 49),
+ entity.relationships.owns_inferred.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.owns_inferred.raw_identifiers.service.name, entity.relationships.owns_inferred.raw_identifiers.service.name), 0, 49),
+ entity.relationships.owns_inferred.ids = MV_SLICE(MV_UNION(recent.entity.relationships.owns_inferred.ids, entity.relationships.owns_inferred.ids), 0, 49),
+ entity.relationships.accesses_infrequently.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_infrequently.raw_identifiers.host.id, entity.relationships.accesses_infrequently.raw_identifiers.host.id), 0, 49),
+ entity.relationships.accesses_infrequently.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_infrequently.raw_identifiers.user.id, entity.relationships.accesses_infrequently.raw_identifiers.user.id), 0, 49),
+ entity.relationships.accesses_infrequently.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_infrequently.raw_identifiers.user.email, entity.relationships.accesses_infrequently.raw_identifiers.user.email), 0, 49),
+ entity.relationships.accesses_infrequently.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_infrequently.raw_identifiers.host.name, entity.relationships.accesses_infrequently.raw_identifiers.host.name), 0, 49),
+ entity.relationships.accesses_infrequently.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_infrequently.raw_identifiers.user.name, entity.relationships.accesses_infrequently.raw_identifiers.user.name), 0, 49),
+ entity.relationships.accesses_infrequently.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_infrequently.raw_identifiers.service.name, entity.relationships.accesses_infrequently.raw_identifiers.service.name), 0, 49),
+ entity.relationships.accesses_infrequently.ids = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_infrequently.ids, entity.relationships.accesses_infrequently.ids), 0, 49),
+ entity.relationships.accesses_frequently.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_frequently.raw_identifiers.host.id, entity.relationships.accesses_frequently.raw_identifiers.host.id), 0, 49),
+ entity.relationships.accesses_frequently.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_frequently.raw_identifiers.user.id, entity.relationships.accesses_frequently.raw_identifiers.user.id), 0, 49),
+ entity.relationships.accesses_frequently.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_frequently.raw_identifiers.user.email, entity.relationships.accesses_frequently.raw_identifiers.user.email), 0, 49),
+ entity.relationships.accesses_frequently.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_frequently.raw_identifiers.host.name, entity.relationships.accesses_frequently.raw_identifiers.host.name), 0, 49),
+ entity.relationships.accesses_frequently.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_frequently.raw_identifiers.user.name, entity.relationships.accesses_frequently.raw_identifiers.user.name), 0, 49),
+ entity.relationships.accesses_frequently.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_frequently.raw_identifiers.service.name, entity.relationships.accesses_frequently.raw_identifiers.service.name), 0, 49),
+ entity.relationships.accesses_frequently.ids = MV_SLICE(MV_UNION(recent.entity.relationships.accesses_frequently.ids, entity.relationships.accesses_frequently.ids), 0, 49),
+ entity.relationships.owns.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.owns.raw_identifiers.host.id, entity.relationships.owns.raw_identifiers.host.id), 0, 49),
+ entity.relationships.owns.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.owns.raw_identifiers.user.id, entity.relationships.owns.raw_identifiers.user.id), 0, 49),
+ entity.relationships.owns.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.owns.raw_identifiers.user.email, entity.relationships.owns.raw_identifiers.user.email), 0, 49),
+ entity.relationships.owns.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.owns.raw_identifiers.host.name, entity.relationships.owns.raw_identifiers.host.name), 0, 49),
+ entity.relationships.owns.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.owns.raw_identifiers.user.name, entity.relationships.owns.raw_identifiers.user.name), 0, 49),
+ entity.relationships.owns.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.owns.raw_identifiers.service.name, entity.relationships.owns.raw_identifiers.service.name), 0, 49),
+ entity.relationships.owns.ids = MV_SLICE(MV_UNION(recent.entity.relationships.owns.ids, entity.relationships.owns.ids), 0, 49),
+ entity.relationships.supervises.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.host.id, entity.relationships.supervises.raw_identifiers.host.id), 0, 49),
+ entity.relationships.supervises.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.id, entity.relationships.supervises.raw_identifiers.user.id), 0, 49),
+ entity.relationships.supervises.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.email, entity.relationships.supervises.raw_identifiers.user.email), 0, 49),
+ entity.relationships.supervises.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.host.name, entity.relationships.supervises.raw_identifiers.host.name), 0, 49),
+ entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
+ entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
+ entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id, entity.relationships.acts_on_behalf_of.raw_identifiers.host.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id, entity.relationships.acts_on_behalf_of.raw_identifiers.user.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email, entity.relationships.acts_on_behalf_of.raw_identifiers.user.email), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name, entity.relationships.acts_on_behalf_of.raw_identifiers.host.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name, entity.relationships.acts_on_behalf_of.raw_identifiers.user.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name, entity.relationships.acts_on_behalf_of.raw_identifiers.service.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.ids = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.ids, entity.relationships.acts_on_behalf_of.ids), 0, 49),
+              @timestamp = recent.timestamp,
+ entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.EngineMetadata.Type = \\"ai_agent\\",
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id)
+| RENAME
+    recent.entity.id AS entity.id,
+    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
+| KEEP entity*,
+process*,
+host*,
+user*,
+asset*,
+event*,
+data_stream*,
+@timestamp"
+`;
+
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -90,6 +343,13 @@ FROM test-index-*
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.supervises.service.name)),
  recent.entity.relationships.supervises.ids = VALUES(TO_STRING(entity.relationships.supervises.entity.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.host.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.user.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.user.email)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.host.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.user.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.service.name)),
+ recent.entity.relationships.acts_on_behalf_of.ids = VALUES(TO_STRING(entity.relationships.acts_on_behalf_of.entity.id)),
  recent.cloud.account.id = LAST(TO_STRING(cloud.account.id), @timestamp) WHERE TO_STRING(cloud.account.id) IS NOT NULL,
  recent.cloud.account.name = LAST(TO_STRING(cloud.account.name), @timestamp) WHERE TO_STRING(cloud.account.name) IS NOT NULL,
  recent.cloud.availability_zone = LAST(TO_STRING(cloud.availability_zone), @timestamp) WHERE TO_STRING(cloud.availability_zone) IS NOT NULL,
@@ -129,6 +389,13 @@ FROM test-index-*
 | SORT recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
 | EVAL recent.entity.id = recent.entity.EngineMetadata.UntypedId
+| EVAL entity.relationships.acts_on_behalf_of.ids = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = TO_STRING(null)
 | LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
@@ -205,6 +472,13 @@ FROM test-index-*
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id, entity.relationships.acts_on_behalf_of.raw_identifiers.host.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id, entity.relationships.acts_on_behalf_of.raw_identifiers.user.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email, entity.relationships.acts_on_behalf_of.raw_identifiers.user.email), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name, entity.relationships.acts_on_behalf_of.raw_identifiers.host.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name, entity.relationships.acts_on_behalf_of.raw_identifiers.user.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name, entity.relationships.acts_on_behalf_of.raw_identifiers.service.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.ids = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.ids, entity.relationships.acts_on_behalf_of.ids), 0, 49),
  cloud.account.id = COALESCE(recent.cloud.account.id, cloud.account.id),
  cloud.account.name = COALESCE(recent.cloud.account.name, cloud.account.name),
  cloud.availability_zone = COALESCE(recent.cloud.availability_zone, cloud.availability_zone),
@@ -256,7 +530,9 @@ asset*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -402,11 +678,25 @@ FROM test-index-*
  recent.entity.relationships.supervises.raw_identifiers.host.name = VALUES(TO_STRING(host.entity.relationships.supervises.host.name)),
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(host.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(host.entity.relationships.supervises.service.name)),
- recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id))
+ recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.host.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.user.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.user.email)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.host.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.user.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.service.name)),
+ recent.entity.relationships.acts_on_behalf_of.ids = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.entity.id))
     BY recent.entity.EngineMetadata.UntypedId
 | SORT recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
+| EVAL entity.relationships.acts_on_behalf_of.ids = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = TO_STRING(null)
 | LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
@@ -535,6 +825,13 @@ FROM test-index-*
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id, entity.relationships.acts_on_behalf_of.raw_identifiers.host.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id, entity.relationships.acts_on_behalf_of.raw_identifiers.user.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email, entity.relationships.acts_on_behalf_of.raw_identifiers.user.email), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name, entity.relationships.acts_on_behalf_of.raw_identifiers.host.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name, entity.relationships.acts_on_behalf_of.raw_identifiers.user.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name, entity.relationships.acts_on_behalf_of.raw_identifiers.service.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.ids = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.ids, entity.relationships.acts_on_behalf_of.ids), 0, 49),
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
@@ -700,12 +997,26 @@ FROM test-index-*
  recent.entity.relationships.supervises.raw_identifiers.host.name = VALUES(TO_STRING(host.entity.relationships.supervises.host.name)),
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(host.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(host.entity.relationships.supervises.service.name)),
- recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id))
+ recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.host.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.user.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.user.email)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.host.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.user.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.service.name)),
+ recent.entity.relationships.acts_on_behalf_of.ids = VALUES(TO_STRING(host.entity.relationships.acts_on_behalf_of.entity.id))
     BY recent.entity.EngineMetadata.UntypedId
 | SORT recent.entity.EngineMetadata.UntypedId ASC
 | WHERE recent.entity.EngineMetadata.UntypedId > \\"123\\"
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
+| EVAL entity.relationships.acts_on_behalf_of.ids = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = TO_STRING(null)
 | LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
@@ -834,6 +1145,13 @@ FROM test-index-*
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id, entity.relationships.acts_on_behalf_of.raw_identifiers.host.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id, entity.relationships.acts_on_behalf_of.raw_identifiers.user.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email, entity.relationships.acts_on_behalf_of.raw_identifiers.user.email), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name, entity.relationships.acts_on_behalf_of.raw_identifiers.host.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name, entity.relationships.acts_on_behalf_of.raw_identifiers.user.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name, entity.relationships.acts_on_behalf_of.raw_identifiers.service.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.ids = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.ids, entity.relationships.acts_on_behalf_of.ids), 0, 49),
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
@@ -853,7 +1171,9 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -962,11 +1282,25 @@ FROM test-index-*
  recent.entity.relationships.supervises.raw_identifiers.host.name = VALUES(TO_STRING(service.entity.relationships.supervises.host.name)),
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(service.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(service.entity.relationships.supervises.service.name)),
- recent.entity.relationships.supervises.ids = VALUES(TO_STRING(service.entity.relationships.supervises.entity.id))
+ recent.entity.relationships.supervises.ids = VALUES(TO_STRING(service.entity.relationships.supervises.entity.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = VALUES(TO_STRING(service.entity.relationships.acts_on_behalf_of.host.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = VALUES(TO_STRING(service.entity.relationships.acts_on_behalf_of.user.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = VALUES(TO_STRING(service.entity.relationships.acts_on_behalf_of.user.email)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = VALUES(TO_STRING(service.entity.relationships.acts_on_behalf_of.host.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = VALUES(TO_STRING(service.entity.relationships.acts_on_behalf_of.user.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = VALUES(TO_STRING(service.entity.relationships.acts_on_behalf_of.service.name)),
+ recent.entity.relationships.acts_on_behalf_of.ids = VALUES(TO_STRING(service.entity.relationships.acts_on_behalf_of.entity.id))
     BY recent.entity.EngineMetadata.UntypedId
 | SORT recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"service:\\", recent.entity.EngineMetadata.UntypedId)
+| EVAL entity.relationships.acts_on_behalf_of.ids = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = TO_STRING(null)
 | LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
@@ -1064,6 +1398,13 @@ FROM test-index-*
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id, entity.relationships.acts_on_behalf_of.raw_identifiers.host.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id, entity.relationships.acts_on_behalf_of.raw_identifiers.user.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email, entity.relationships.acts_on_behalf_of.raw_identifiers.user.email), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name, entity.relationships.acts_on_behalf_of.raw_identifiers.host.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name, entity.relationships.acts_on_behalf_of.raw_identifiers.user.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name, entity.relationships.acts_on_behalf_of.raw_identifiers.service.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.ids = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.ids, entity.relationships.acts_on_behalf_of.ids), 0, 49),
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"service\\",
@@ -1080,7 +1421,9 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -1223,12 +1566,26 @@ TRUE, _euid_branch_2_formula, NULL)
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(user.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(user.entity.relationships.supervises.service.name)),
  recent.entity.relationships.supervises.ids = VALUES(TO_STRING(user.entity.relationships.supervises.entity.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.host.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.user.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.user.email)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.host.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.user.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.service.name)),
+ recent.entity.relationships.acts_on_behalf_of.ids = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.entity.id)),
  recent.host.entity.id = VALUES(TO_STRING(host.entity.id)),
  recent.host.id = VALUES(TO_STRING(host.id)),
  recent.host.name = LAST(TO_STRING(host.name), @timestamp) WHERE TO_STRING(host.name) IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
 | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
 | EVAL user.entity.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.ids = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = TO_STRING(null)
 | LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | WHERE TO_STRING(entity.id) IS NOT NULL OR TO_STRING(recent.entity.namespace) == \\"local\\" OR MV_CONTAINS(TO_STRING(recent.event.kind), \\"asset\\") 
@@ -1340,6 +1697,13 @@ TRUE, _euid_branch_2_formula, NULL)
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id, entity.relationships.acts_on_behalf_of.raw_identifiers.host.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id, entity.relationships.acts_on_behalf_of.raw_identifiers.user.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email, entity.relationships.acts_on_behalf_of.raw_identifiers.user.email), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name, entity.relationships.acts_on_behalf_of.raw_identifiers.host.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name, entity.relationships.acts_on_behalf_of.raw_identifiers.user.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name, entity.relationships.acts_on_behalf_of.raw_identifiers.service.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.ids = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.ids, entity.relationships.acts_on_behalf_of.ids), 0, 49),
  host.entity.id = MV_SLICE(MV_UNION(recent.host.entity.id, host.entity.id), 0, 49),
  host.id = MV_SLICE(MV_UNION(recent.host.id, host.id), 0, 49),
  host.name = COALESCE(recent.host.name, host.name),
@@ -1361,7 +1725,9 @@ host*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery sampling stage emits SAMPLE after the source clause and before EVAL when the rate is below 1 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery sampling stage emits SAMPLE after the source clause and before EVAL when the rate is below 1 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -1506,12 +1872,26 @@ TRUE, _euid_branch_2_formula, NULL)
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(user.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(user.entity.relationships.supervises.service.name)),
  recent.entity.relationships.supervises.ids = VALUES(TO_STRING(user.entity.relationships.supervises.entity.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.host.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.user.id)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.user.email)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.host.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.user.name)),
+ recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.service.name)),
+ recent.entity.relationships.acts_on_behalf_of.ids = VALUES(TO_STRING(user.entity.relationships.acts_on_behalf_of.entity.id)),
  recent.host.entity.id = VALUES(TO_STRING(host.entity.id)),
  recent.host.id = VALUES(TO_STRING(host.id)),
  recent.host.name = LAST(TO_STRING(host.name), @timestamp) WHERE TO_STRING(host.name) IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
 | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
 | EVAL user.entity.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.ids = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = TO_STRING(null)
+| EVAL entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = TO_STRING(null)
 | LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | WHERE TO_STRING(entity.id) IS NOT NULL OR TO_STRING(recent.entity.namespace) == \\"local\\" OR MV_CONTAINS(TO_STRING(recent.event.kind), \\"asset\\") 
@@ -1623,6 +2003,13 @@ TRUE, _euid_branch_2_formula, NULL)
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.id, entity.relationships.acts_on_behalf_of.raw_identifiers.host.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.id, entity.relationships.acts_on_behalf_of.raw_identifiers.user.id), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.email, entity.relationships.acts_on_behalf_of.raw_identifiers.user.email), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.host.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.host.name, entity.relationships.acts_on_behalf_of.raw_identifiers.host.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.user.name, entity.relationships.acts_on_behalf_of.raw_identifiers.user.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.raw_identifiers.service.name, entity.relationships.acts_on_behalf_of.raw_identifiers.service.name), 0, 49),
+ entity.relationships.acts_on_behalf_of.ids = MV_SLICE(MV_UNION(recent.entity.relationships.acts_on_behalf_of.ids, entity.relationships.acts_on_behalf_of.ids), 0, 49),
  host.entity.id = MV_SLICE(MV_UNION(recent.host.entity.id, host.entity.id), 0, 49),
  host.id = MV_SLICE(MV_UNION(recent.host.id, host.id), 0, 49),
  host.name = COALESCE(recent.host.name, host.name),

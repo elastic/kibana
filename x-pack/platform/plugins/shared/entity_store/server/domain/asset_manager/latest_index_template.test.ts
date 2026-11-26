@@ -22,7 +22,7 @@ describe('getLatestEntityIndexTemplateConfig', () => {
     });
     expect(config.template?.mappings?._meta).toHaveProperty(
       LATEST_INDEX_MAPPINGS_VERSION_META_KEY,
-      1
+      2
     );
   });
 

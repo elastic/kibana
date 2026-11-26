@@ -223,16 +223,17 @@ describe('buildLogsExtractionEsqlQuery', () => {
     it('sets user.entity.id to null right before the join so an unmapped lookup column resolves', async () => {
       const query = buildFor('user');
 
-      const placeholder =
-        '| EVAL user.entity.id = TO_STRING(null)\n| LOOKUP JOIN _coordinator:latest-index';
+      const placeholder = '| EVAL user.entity.id = TO_STRING(null)\n';
+      const join = '| LOOKUP JOIN _coordinator:latest-index';
       expect(query).toContain(placeholder);
       expect(query.indexOf(placeholder)).toBeGreaterThan(query.indexOf('| STATS'));
-      expect(query.split('TO_STRING(null)')).toHaveLength(2);
+      expect(query.indexOf(placeholder)).toBeLessThan(query.indexOf(join));
+      expect(query.split('user.entity.id = TO_STRING(null)')).toHaveLength(2);
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
 
     it('adds no placeholder to a definition that does not store the field', () => {
-      expect(buildFor('host')).not.toContain('TO_STRING(null)');
+      expect(buildFor('host')).not.toContain('user.entity.id = TO_STRING(null)');
     });
   });
 

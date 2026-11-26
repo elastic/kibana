@@ -29,6 +29,7 @@ describe('entitiesDefinitionRegistry', () => {
     user: 'User',
     service: 'Service',
     generic: 'Generic',
+    ai_agent: 'AI agent',
   };
 
   it.each(ALL_ENTITY_TYPES)('%s has a display name and a description', (entityType) => {

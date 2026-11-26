@@ -43,14 +43,14 @@ describe('conditionToPainless', () => {
   it('translates field eq predicate', () => {
     const condition = { field: 'event.kind', eq: 'asset' };
     expect(conditionToPainless(condition)).toBe(
-      `(${nonEmpty('event.kind')} && doc['event.kind'].value == "asset")`
+      `(${nonEmpty('event.kind')} && String.valueOf(doc['event.kind'].value) == "asset")`
     );
   });
 
   it('translates field neq predicate', () => {
     const condition = { field: 'event.outcome', neq: 'failure' };
     expect(conditionToPainless(condition)).toBe(
-      `(!(${nonEmpty('event.outcome')}) || doc['event.outcome'].value != "failure")`
+      `(!(${nonEmpty('event.outcome')}) || String.valueOf(doc['event.outcome'].value) != "failure")`
     );
   });
 
@@ -99,7 +99,9 @@ describe('conditionToPainless', () => {
 
   it('translates not condition', () => {
     const condition = { not: { field: 'event.outcome', eq: 'failure' } };
-    const inner = `(${nonEmpty('event.outcome')} && doc['event.outcome'].value == "failure")`;
+    const inner = `(${nonEmpty(
+      'event.outcome'
+    )} && String.valueOf(doc['event.outcome'].value) == "failure")`;
     expect(conditionToPainless(condition)).toBe(`!(${inner})`);
   });
 
@@ -166,7 +168,7 @@ describe('conditionToPainless', () => {
   it('should use doc access for eq when field is not in evaluatedVars', () => {
     expect(
       conditionToPainless({ field: 'user.name', eq: 'alice' }, { evaluatedVars: userEvaluatedVars })
-    ).toBe(`(${nonEmpty('user.name')} && doc['user.name'].value == "alice")`);
+    ).toBe(`(${nonEmpty('user.name')} && String.valueOf(doc['user.name'].value) == "alice")`);
   });
 
   it('should mix evaluated var and doc fields in and conditions', () => {
@@ -182,7 +184,7 @@ describe('conditionToPainless', () => {
     expect(result).toBe(
       `(entity_namespace != null && entity_namespace == "${
         USER_ENTITY_NAMESPACE.Local
-      }" && (${nonEmpty('user.name')} && doc['user.name'].value == "x"))`
+      }" && (${nonEmpty('user.name')} && String.valueOf(doc['user.name'].value) == "x"))`
     );
   });
 

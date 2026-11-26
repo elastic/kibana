@@ -202,14 +202,17 @@ function fieldValueToEsqlExpression(value: FieldValueSchema): string {
   if ('source' in value) {
     return castField(value.source);
   }
-  const { fields, sep } = value.composition;
+  const { prefix, fields, sep } = value.composition;
   const escapedSep = escapeEsqlStringLiteral(sep);
   // CONCAT requires string arguments — always use TO_STRING for compositions.
   const parts = fields.flatMap((f, i) =>
     i === 0 ? [`TO_STRING(${f})`] : [`"${escapedSep}"`, `TO_STRING(${f})`]
   );
-  return `CONCAT(${parts.join(', ')})`;
+  return `CONCAT(${compositionPrefixParts(prefix).concat(parts).join(', ')})`;
 }
+
+const compositionPrefixParts = (prefix: string | undefined): string[] =>
+  prefix ? [`"${escapeEsqlStringLiteral(prefix)}"`] : [];
 
 /** When set, condition and field references use post-STATS columns (see {@link buildPostStatsLogicalToColumnMap}). */
 export interface BuildSetFieldsByConditionPostStatsContext {
@@ -396,7 +399,7 @@ function fieldValueToEsqlExpressionAfterStats(
       entityFields.find((f) => f.destination === value.source);
     return ef ? fieldToEsqlExpressionUsingColumn(ef, col) : `TO_STRING(${col})`;
   }
-  const { fields, sep } = value.composition;
+  const { prefix, fields, sep } = value.composition;
   const escapedSep = escapeEsqlStringLiteral(sep);
   const parts = fields.flatMap((path, i) => {
     const col = logicalToColumn.get(path) ?? path;
@@ -406,7 +409,7 @@ function fieldValueToEsqlExpressionAfterStats(
     const fragment = ef ? fieldToEsqlExpressionUsingColumn(ef, col) : `TO_STRING(${col})`;
     return i === 0 ? [fragment] : [`"${escapedSep}"`, fragment];
   });
-  return `CONCAT(${parts.join(', ')})`;
+  return `CONCAT(${compositionPrefixParts(prefix).concat(parts).join(', ')})`;
 }
 
 export function buildPaginationSection(

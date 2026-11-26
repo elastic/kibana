@@ -110,6 +110,28 @@ const SAMPLE_DOCUMENTS: Record<EntityType, SampleDocument[]> = {
     { label: 'entity.id', doc: { entity: { id: 'arn:aws:iam::123456789012:user/alice' } } },
     { label: 'no identity', doc: { message: 'nothing to see here' } },
   ],
+  ai_agent: [
+    {
+      label: "agent's own event",
+      doc: {
+        process: { ai_agent: { name: 'claude_code', is_descendant: false } },
+        host: { id: 'host-id-1', name: 'server-1' },
+        user: { name: 'alice' },
+      },
+    },
+    {
+      label: 'descendant under sudo',
+      doc: {
+        process: { ai_agent: { name: 'claude_code', is_descendant: true } },
+        host: { id: 'host-id-1', name: 'server-1' },
+        user: { name: 'root' },
+      },
+    },
+    {
+      label: 'no user.name',
+      doc: { process: { ai_agent: { name: 'cursor' } }, host: { id: 'host-id-1' } },
+    },
+  ],
 };
 
 const ENTITY_RECORDS: Record<EntityType, Record<string, unknown>> = {
@@ -120,6 +142,12 @@ const ENTITY_RECORDS: Record<EntityType, Record<string, unknown>> = {
   },
   service: { service: { name: ['checkout-api'] }, entity: { id: 'service:checkout-api' } },
   generic: { entity: { id: 'arn:aws:iam::123456789012:user/alice' } },
+  ai_agent: {
+    process: { ai_agent: { name: 'claude_code' } },
+    host: { id: 'host-id-1' },
+    user: { name: 'alice' },
+    entity: { id: 'ai_agent:claude_code@host-id-1@alice' },
+  },
 };
 
 /** Observed raw values fed to the namespace source prefix helper for every candidate field. */

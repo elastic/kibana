@@ -43,6 +43,7 @@ export const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
   'accesses_frequently',
   'owns',
   'supervises',
+  'acts_on_behalf_of',
 ] as const;
 
 export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[number];
