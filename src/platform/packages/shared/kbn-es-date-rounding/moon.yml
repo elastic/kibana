@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/es-date-rounding'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-discover'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/es-date-rounding'
   description: Moon project for @kbn/es-date-rounding
   channel: ''
-  owner: '@elastic/kibana-discover'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/packages/shared/kbn-es-date-rounding
 dependsOn: []
 tags:
