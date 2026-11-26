@@ -118,9 +118,11 @@ describe('OnPreRouting', () => {
     });
 
     let urlAfterForwarding;
+    let kibanaRoutePathAfterForwarding;
     registerOnPreRouting((req, res, t) => {
       // used by legacy platform
       urlAfterForwarding = ensureRawRequest(req).raw.req.url;
+      kibanaRoutePathAfterForwarding = req.route.path;
       return t.next();
     });
 
@@ -130,6 +132,7 @@ describe('OnPreRouting', () => {
 
     expect(urlBeforeForwarding).toBe('/initial');
     expect(urlAfterForwarding).toBe('/redirectUrl');
+    expect(kibanaRoutePathAfterForwarding).toBe('/redirectUrl');
   });
 
   it('provides original request url', async () => {
@@ -587,6 +590,62 @@ describe('OnPostAuth', () => {
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
     expect(callingOrder).toEqual(['first', 'second']);
+  });
+
+  it('observes headers added by authentication', async () => {
+    const {
+      registerAuth,
+      registerOnPreAuth,
+      registerOnPostAuth,
+      server: innerServer,
+      createRouter,
+    } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    let preAuthHeader;
+    let postAuthHeader;
+
+    registerOnPreAuth((req, res, t) => {
+      preAuthHeader = req.headers['x-authenticated'];
+      return t.next();
+    });
+    registerAuth((req, res, t) =>
+      t.authenticated({ requestHeaders: { 'x-authenticated': 'true' } })
+    );
+    registerOnPostAuth((req, res, t) => {
+      postAuthHeader = req.headers['x-authenticated'];
+      return t.next();
+    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => res.ok()
+    );
+
+    await server.start();
+    await supertest(innerServer.listener).get('/').expect(200);
+
+    expect(preAuthHeader).toBeUndefined();
+    expect(postAuthHeader).toBe('true');
+  });
+
+  it('observes authorization results from earlier interceptors', async () => {
+    const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    let observedAuthzResult;
+
+    registerOnPostAuth((req, res, t) => t.authzResultNext({ feature: true }));
+    registerOnPostAuth((req, res, t) => {
+      observedAuthzResult = req.authzResult;
+      return t.next();
+    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => res.ok({ body: req.authzResult })
+    );
+
+    await server.start();
+    await supertest(innerServer.listener).get('/').expect(200, { feature: true });
+
+    expect(observedAuthzResult).toEqual({ feature: true });
   });
 
   it('supports redirection from the interceptor', async () => {
@@ -1391,6 +1450,36 @@ describe('OnPreResponse', () => {
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
     expect(callingOrder).toEqual(['first', 'second']);
+  });
+
+  it(`doesn't share request object between interceptors`, async () => {
+    const {
+      registerOnPreResponse,
+      server: innerServer,
+      createRouter,
+    } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    registerOnPreResponse((req, res, t) => {
+      // @ts-expect-error customField property is not defined on request object
+      req.customField = { value: 42 };
+      return t.next();
+    });
+    registerOnPreResponse((req, res, t) => {
+      // @ts-expect-error customField property is not defined on request object
+      if (typeof req.customField !== 'undefined') {
+        throw new Error('Request object was mutated');
+      }
+      return t.next();
+    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => res.ok({ body: 'ok' })
+    );
+
+    await server.start();
+
+    await supertest(innerServer.listener).get('/').expect(200, 'ok');
   });
 
   it('supports additional headers attachments', async () => {

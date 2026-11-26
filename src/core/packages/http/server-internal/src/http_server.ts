@@ -721,7 +721,7 @@ export class HttpServer {
         // directly here because this handler is async and would use its
         // own user-activity
         try {
-          const kibanaRequest = CoreKibanaRequest.from(request);
+          const kibanaRequest = CoreKibanaRequest.fromForLifecycle(request, 'postAuth');
           const redactedSessionId = await this.redactedSessionIdGetter(kibanaRequest);
           (request.app as KibanaRequestState).redactedSessionId = redactedSessionId;
         } catch {

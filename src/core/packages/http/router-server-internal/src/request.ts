@@ -11,8 +11,6 @@ import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
-import { fromEvent, NEVER } from 'rxjs';
-import { shareReplay, first, filter } from 'rxjs';
 import { isNil, omitBy } from 'lodash';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
@@ -50,11 +48,71 @@ import { isSafeMethod } from './route';
 import { KibanaSocket, resolveRawSocket } from './socket';
 import { patchRequest } from './patch_requests';
 import { RequestTimingImpl } from './timing';
+import { createRequestEvents } from './request_events';
 
 // patching at module load
 patchRequest();
 
 const requestSymbol = Symbol('request');
+
+export type KibanaRequestSnapshotPhase = 'preRouting' | 'preAuth' | 'postAuth' | 'preResponse';
+
+type KibanaRequestSnapshotStage = KibanaRequestSnapshotPhase | 'auth' | 'handler';
+
+interface KibanaRequestSharedSnapshot {
+  readonly id: string;
+  readonly uuid: string;
+  readonly spaceId: SpaceId;
+  readonly basePath: string;
+  readonly serverTiming: RequestTiming;
+  readonly isFakeRequest: boolean;
+  readonly httpVersion: string;
+  readonly protocol: HttpProtocol;
+  readonly socket: IKibanaSocket;
+  readonly events: KibanaRequestEvents;
+}
+
+interface KibanaRequestPhaseSnapshot {
+  readonly phase: KibanaRequestSnapshotStage;
+  readonly url: URL;
+  readonly rewrittenUrl?: URL;
+  readonly headers: Headers;
+  readonly isSystemRequest: boolean;
+  readonly isInternalApiRequest: boolean;
+  readonly route: KibanaRequest['route'];
+}
+
+type KibanaRequestPhaseSeed = Partial<
+  Pick<KibanaRequestPhaseSnapshot, 'url' | 'rewrittenUrl' | 'headers' | 'route'>
+>;
+
+interface KibanaRequestSnapshot {
+  readonly shared: KibanaRequestSharedSnapshot;
+  phase?: KibanaRequestPhaseSnapshot;
+}
+
+const requestSnapshotCache = new WeakMap<Request, KibanaRequestSnapshot>();
+
+const getReusablePhaseSeed = (
+  snapshot: KibanaRequestPhaseSnapshot | undefined,
+  stage: KibanaRequestSnapshotStage
+): KibanaRequestPhaseSeed | undefined => {
+  if (snapshot === undefined) {
+    return undefined;
+  }
+
+  const urlSeed: KibanaRequestPhaseSeed = {
+    url: snapshot.url,
+    rewrittenUrl: snapshot.rewrittenUrl,
+  };
+
+  // Hapi selects the route between pre-routing and pre-auth. It remains stable afterwards.
+  if (snapshot.phase !== 'preRouting' && stage !== 'preRouting') {
+    return { ...urlSeed, route: snapshot.route };
+  }
+
+  return urlSeed;
+};
 
 const isRouteSecurityGetter = (
   security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
@@ -75,6 +133,113 @@ export class CoreKibanaRequest<
   Method extends RouteMethod = any
 > implements KibanaRequest<Params, Query, Body, Method>
 {
+  /** Creates a fresh lifecycle facade backed by request- and phase-scoped snapshots. */
+  public static fromForLifecycle(
+    request: Request,
+    phase: KibanaRequestSnapshotPhase
+  ): CoreKibanaRequest {
+    return CoreKibanaRequest.fromWithSnapshot(
+      request,
+      { params: {}, query: {}, body: {} },
+      true,
+      phase
+    );
+  }
+
+  /** Creates a fresh authentication facade backed by the request-wide snapshot. */
+  public static fromForAuth(request: Request): CoreKibanaRequest {
+    return CoreKibanaRequest.fromWithSnapshot(
+      request,
+      { params: {}, query: {}, body: {} },
+      false,
+      'auth'
+    );
+  }
+
+  /** Validates a request and creates a fresh handler facade backed by cached snapshots. */
+  public static fromForHandler<P, Q, B>(
+    request: Request,
+    routeSchemas:
+      | RouteValidator<P, Q, B>
+      | RouteValidatorFullConfigRequest<P, Q, B>
+      | undefined = undefined
+  ): CoreKibanaRequest<P, Q, B> {
+    let requestParts: { params: P; query: Q; body: B };
+    if (routeSchemas === undefined) {
+      requestParts = { query: {} as Q, params: {} as P, body: {} as B };
+    } else {
+      const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
+      requestParts = CoreKibanaRequest.validate(sanitizeRequest(request), routeValidator);
+    }
+
+    return CoreKibanaRequest.fromWithSnapshot(request, requestParts, true, 'handler');
+  }
+
+  private static fromWithSnapshot<P, Q, B>(
+    request: Request,
+    requestParts: { params: P; query: Q; body: B },
+    withoutSecretHeaders: boolean,
+    stage: KibanaRequestSnapshotStage
+  ): CoreKibanaRequest<P, Q, B> {
+    const cachedSnapshot = requestSnapshotCache.get(request);
+    const exactPhaseSnapshot =
+      cachedSnapshot?.phase?.phase === stage ? cachedSnapshot.phase : undefined;
+    const phaseSeed = exactPhaseSnapshot ?? getReusablePhaseSeed(cachedSnapshot?.phase, stage);
+    const kibanaRequest = new CoreKibanaRequest<P, Q, B>(
+      request,
+      requestParts.params,
+      requestParts.query,
+      requestParts.body,
+      withoutSecretHeaders,
+      cachedSnapshot?.shared,
+      phaseSeed
+    );
+
+    const sharedSnapshot = cachedSnapshot?.shared ?? {
+      id: kibanaRequest.id,
+      uuid: kibanaRequest.uuid,
+      spaceId: kibanaRequest.spaceId,
+      basePath: kibanaRequest.basePath,
+      serverTiming: kibanaRequest.serverTiming,
+      isFakeRequest: kibanaRequest.isFakeRequest,
+      httpVersion: kibanaRequest.httpVersion,
+      protocol: kibanaRequest.protocol,
+      socket: kibanaRequest.socket,
+      events: kibanaRequest.events,
+    };
+    const updatedPhaseSnapshot = exactPhaseSnapshot ?? {
+      phase: stage,
+      url: kibanaRequest.url,
+      rewrittenUrl: kibanaRequest.rewrittenUrl,
+      headers: kibanaRequest.headers,
+      isSystemRequest: kibanaRequest.isSystemRequest,
+      isInternalApiRequest: kibanaRequest.isInternalApiRequest,
+      route: kibanaRequest.route,
+    };
+
+    if (cachedSnapshot === undefined) {
+      requestSnapshotCache.set(request, {
+        shared: sharedSnapshot,
+        phase: updatedPhaseSnapshot,
+      });
+    } else if (exactPhaseSnapshot === undefined) {
+      cachedSnapshot.phase = updatedPhaseSnapshot;
+    }
+
+    return kibanaRequest;
+  }
+
+  /** Invalidates the current phase snapshot after its raw request changes. */
+  public static invalidateLifecycleSnapshot(
+    request: Request,
+    phase: KibanaRequestSnapshotPhase
+  ): void {
+    const cachedSnapshot = requestSnapshotCache.get(request);
+    if (cachedSnapshot?.phase?.phase === phase) {
+      cachedSnapshot.phase = undefined;
+    }
+  }
+
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
@@ -183,36 +348,70 @@ export class CoreKibanaRequest<
     public readonly body: Body,
     // @ts-expect-error we will use this flag as soon as http request proxy is supported in the core
     // until that time we have to expose all the headers
-    private readonly withoutSecretHeaders: boolean
+    private readonly withoutSecretHeaders: boolean,
+    sharedSnapshot?: KibanaRequestSharedSnapshot,
+    phaseSnapshot?: KibanaRequestPhaseSeed
   ) {
     // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
     // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
     const appState = request.app as KibanaRequestState | undefined;
-    const isRealReq = isRealRawRequest(request);
+    const realRequest =
+      sharedSnapshot?.isFakeRequest === false
+        ? (request as Request)
+        : isRealRawRequest(request)
+        ? request
+        : undefined;
+    const isRealReq = realRequest !== undefined;
 
-    // Initialize timing state if not present
-    if (appState && !appState.timingState) {
-      appState.timingState = { events: [] };
+    if (sharedSnapshot) {
+      this.id = sharedSnapshot.id;
+      this.uuid = sharedSnapshot.uuid;
+      this.spaceId = sharedSnapshot.spaceId;
+      this.basePath = sharedSnapshot.basePath;
+      this.serverTiming = sharedSnapshot.serverTiming;
+      this.isFakeRequest = sharedSnapshot.isFakeRequest;
+      this.httpVersion = sharedSnapshot.httpVersion;
+      this.protocol = sharedSnapshot.protocol;
+      this.socket = sharedSnapshot.socket;
+      this.events = sharedSnapshot.events;
+    } else {
+      // Initialize timing state if not present
+      if (appState && !appState.timingState) {
+        appState.timingState = { events: [] };
+      }
+
+      this.id = appState?.requestId ?? uuidv4();
+      this.uuid = appState?.requestUuid ?? uuidv4();
+      // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
+      // FakeRawRequests carry it as a top-level field.
+      this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
+      this.basePath = appState?.basePath ?? '';
+      this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
+      this.isFakeRequest = !isRealReq;
+      this.injectHostInfo(request);
+      this.httpVersion = realRequest ? getHttpVersionFromRequest(realRequest) : '1.0';
+      this.protocol = getProtocolFromHttpVersion(this.httpVersion);
+      this.socket = realRequest
+        ? new KibanaSocket(resolveRawSocket(realRequest.raw.req))
+        : KibanaSocket.getFakeSocket();
+      this.events = createRequestEvents(realRequest);
     }
 
-    this.id = appState?.requestId ?? uuidv4();
-    this.uuid = appState?.requestUuid ?? uuidv4();
-    // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
-    // FakeRawRequests carry it as a top-level field.
-    this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
-    this.basePath = appState?.basePath ?? '';
-    this.rewrittenUrl = appState?.rewrittenUrl;
-    this.authzResult = appState?.authzResult;
-    this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
-    this.injectHostInfo(request);
-
-    this.url = request.url ?? new URL('https://fake-request/url');
-    this.headers = isRealReq
-      ? (deepFreeze({ ...request.headers }) as unknown as Headers)
-      : (request.headers as unknown as Headers);
+    if (phaseSnapshot) {
+      this.url = phaseSnapshot.url ?? request.url ?? new URL('https://fake-request/url');
+      this.rewrittenUrl =
+        'url' in phaseSnapshot ? phaseSnapshot.rewrittenUrl : appState?.rewrittenUrl;
+    } else {
+      this.url = request.url ?? new URL('https://fake-request/url');
+      this.rewrittenUrl = appState?.rewrittenUrl;
+    }
+    this.headers =
+      phaseSnapshot?.headers ??
+      (isRealReq
+        ? (deepFreeze({ ...request.headers }) as unknown as Headers)
+        : (request.headers as unknown as Headers));
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
-    this.isFakeRequest = !isRealReq;
     // set to false if elasticInternalOrigin is explicitly set to false
     // otherwise check for the header or the query param
     this.isInternalApiRequest =
@@ -220,22 +419,17 @@ export class CoreKibanaRequest<
         ? false
         : X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
           this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM);
+    this.route = (phaseSnapshot?.route ??
+      deepFreeze(this.getRouteInfo(request))) as RecursiveReadonly<KibanaRequestRoute<Method>>;
+
+    this.authzResult = appState?.authzResult;
+    this.apiVersion = undefined;
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
       value: request,
       enumerable: false,
     });
-
-    this.httpVersion = isRealReq ? getHttpVersionFromRequest(request) : '1.0';
-    this.apiVersion = undefined;
-    this.protocol = getProtocolFromHttpVersion(this.httpVersion);
-
-    this.route = deepFreeze(this.getRouteInfo(request));
-    this.socket = isRealReq
-      ? new KibanaSocket(resolveRawSocket(request.raw.req))
-      : KibanaSocket.getFakeSocket();
-    this.events = this.getEvents(request);
 
     this.auth = {
       // missing in fakeRequests, so we cast to false
@@ -292,24 +486,6 @@ export class CoreKibanaRequest<
 
   [inspect.custom]() {
     return this.toJSON();
-  }
-
-  private getEvents(request: RawRequest): KibanaRequestEvents {
-    if (isFakeRawRequest(request)) {
-      return {
-        aborted$: NEVER,
-        completed$: NEVER,
-      };
-    }
-
-    const completed$ = fromEvent<void>(request.raw.res, 'close').pipe(shareReplay(1), first());
-    // the response's underlying connection was terminated prematurely
-    const aborted$ = completed$.pipe(filter(() => !isCompleted(request)));
-
-    return {
-      aborted$,
-      completed$,
-    } as const;
   }
 
   private getRouteInfo(request: RawRequest): KibanaRequestRoute<Method> {
@@ -497,15 +673,6 @@ function isFakeRawRequest(request: RawRequest): request is FakeRawRequest {
  */
 export function isRealRequest(request: unknown): request is KibanaRequest | Request {
   return (isKibanaRequest(request) && !request.isFakeRequest) || isRealRawRequest(request);
-}
-
-function isCompleted(request: Request) {
-  const { res } = request.raw;
-  // For http/1, it is sufficient to check `writableFinished` because `writableEnded` is always true when the response is finished.
-  // For http/2, we need to check both `writableFinished` and `writableEnded` to be true to be sure the response is finished.
-  // This allows Kibana's aborted$ event to be emitted when the client cancels the request, regardless of the protocol.
-  // The addition of `writableEnded` works around inconsistencies in Node.js, which are resolved in Node.js 27+: https://github.com/nodejs/node/pull/63249
-  return res.writableFinished && res.writableEnded;
 }
 
 /**

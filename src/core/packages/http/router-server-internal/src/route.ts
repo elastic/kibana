@@ -147,10 +147,13 @@ export function validateHapiRequest(
   | { ok?: never; error: { response: IKibanaResponse; validationFailure: ValidationFailure } } {
   let kibanaRequest: Mutable<AnyKibanaRequest>;
   try {
-    kibanaRequest = CoreKibanaRequest.from(request, routeSchemas) as Mutable<AnyKibanaRequest>;
+    kibanaRequest = CoreKibanaRequest.fromForHandler(
+      request,
+      routeSchemas
+    ) as Mutable<AnyKibanaRequest>;
     kibanaRequest.apiVersion = version;
   } catch (error) {
-    kibanaRequest = CoreKibanaRequest.from(request) as Mutable<AnyKibanaRequest>;
+    kibanaRequest = CoreKibanaRequest.fromForHandler(request) as Mutable<AnyKibanaRequest>;
     kibanaRequest.apiVersion = version;
 
     const validationError = normalizeRequestValidationError(error);

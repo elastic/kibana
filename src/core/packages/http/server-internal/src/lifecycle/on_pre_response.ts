@@ -72,7 +72,11 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
           : response.statusCode;
         const headers: ResponseHeaders = isResponseBoom ? {} : response.headers;
 
-        const result = await fn(CoreKibanaRequest.from(request), { statusCode, headers }, toolkit);
+        const result = await fn(
+          CoreKibanaRequest.fromForLifecycle(request, 'preResponse'),
+          { statusCode, headers },
+          toolkit
+        );
 
         if (preResponseResult.isNext(result)) {
           if (result.headers) {

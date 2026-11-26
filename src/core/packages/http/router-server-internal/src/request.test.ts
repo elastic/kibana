@@ -11,6 +11,7 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
 
+import { v4 as uuidv4 } from 'uuid';
 import type { RouteOptions } from '@hapi/hapi';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import type { FakeRawRequest, RouteSecurity } from '@kbn/core-http-server';
@@ -121,6 +122,163 @@ describe('CoreKibanaRequest', () => {
           custom: 'one',
           authorization: 'token',
         });
+      });
+    });
+
+    describe('lifecycle snapshots', () => {
+      it('reuses request initialization between fresh facades in the same phase', () => {
+        const uuidMock = jest.mocked(uuidv4);
+        uuidMock.mockClear();
+        const request = hapiMocks.createRequest({
+          headers: { custom: 'one' },
+        });
+
+        const first = CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
+        const second = CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
+
+        expect(uuidMock).toHaveBeenCalledTimes(2);
+        expect(second).not.toBe(first);
+        expect(second.headers).toBe(first.headers);
+        expect(second.route).toBe(first.route);
+        expect(second.socket).toBe(first.socket);
+        expect(second.events).toBe(first.events);
+        expect(second.serverTiming).toBe(first.serverTiming);
+        expect(second.params).not.toBe(first.params);
+        expect(second.query).not.toBe(first.query);
+        expect(second.body).not.toBe(first.body);
+        expect(second.auth).not.toBe(first.auth);
+        expect(Object.isFrozen(second.headers)).toBe(true);
+        expect(Object.isFrozen(second.route)).toBe(true);
+
+        (first as CoreKibanaRequest & { customField?: number }).customField = 42;
+        expect(
+          (second as CoreKibanaRequest & { customField?: number }).customField
+        ).toBeUndefined();
+      });
+
+      it('observes header changes while carrying stable routed metadata forward', () => {
+        const request = hapiMocks.createRequest({
+          headers: { authorization: 'Bearer before-auth' },
+        });
+        const preAuth = CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
+
+        request.headers.authorization = 'Bearer after-auth';
+        const postAuth = CoreKibanaRequest.fromForLifecycle(request, 'postAuth');
+
+        expect(postAuth.headers.authorization).toBe('Bearer after-auth');
+        expect(postAuth.headers).not.toBe(preAuth.headers);
+        expect(postAuth.route).toBe(preAuth.route);
+        expect(postAuth.url).toBe(preAuth.url);
+        expect(postAuth.socket).toBe(preAuth.socket);
+        expect(postAuth.events).toBe(preAuth.events);
+        expect(postAuth.serverTiming).toBe(preAuth.serverTiming);
+      });
+
+      it('keeps facade auth and authorization state fresh while reusing snapshots', () => {
+        const request = hapiMocks.createRequest();
+        const first = CoreKibanaRequest.fromForLifecycle(request, 'postAuth');
+
+        request.auth.isAuthenticated = false;
+        Object.assign(request.app, { authzResult: { feature: true } });
+        const second = CoreKibanaRequest.fromForLifecycle(request, 'postAuth');
+
+        expect(second.headers).toBe(first.headers);
+        expect(second.route).toBe(first.route);
+        expect(second.auth.isAuthenticated).toBe(false);
+        expect(second.authzResult).toEqual({ feature: true });
+      });
+
+      it('rebuilds snapshots after invalidation', () => {
+        const request = hapiMocks.createRequest({
+          headers: { custom: 'before-rewrite' },
+        });
+        const initial = CoreKibanaRequest.fromForLifecycle(request, 'preRouting');
+
+        request.headers.custom = 'after-rewrite';
+        expect(CoreKibanaRequest.fromForLifecycle(request, 'preRouting').headers.custom).toBe(
+          'before-rewrite'
+        );
+
+        CoreKibanaRequest.invalidateLifecycleSnapshot(request, 'preRouting');
+        const refreshed = CoreKibanaRequest.fromForLifecycle(request, 'preRouting');
+
+        expect(refreshed.headers.custom).toBe('after-rewrite');
+        expect(refreshed.headers).not.toBe(initial.headers);
+        expect(refreshed.route).not.toBe(initial.route);
+        expect(refreshed.socket).toBe(initial.socket);
+        expect(refreshed.events).toBe(initial.events);
+        expect(refreshed.serverTiming).toBe(initial.serverTiming);
+      });
+
+      it('does not reuse lifecycle snapshots for validated requests', () => {
+        const request = hapiMocks.createRequest({
+          params: { id: 'request-id' },
+        });
+        const lifecycleRequest = CoreKibanaRequest.fromForLifecycle(request, 'postAuth');
+
+        const validatedRequest = CoreKibanaRequest.from(request, {
+          params: schema.object({ id: schema.string() }),
+        });
+
+        expect(lifecycleRequest.params).toEqual({});
+        expect(validatedRequest.params).toEqual({ id: 'request-id' });
+        expect(validatedRequest.headers).not.toBe(lifecycleRequest.headers);
+        expect(validatedRequest.route).not.toBe(lifecycleRequest.route);
+        expect(validatedRequest.socket).not.toBe(lifecycleRequest.socket);
+        expect(validatedRequest.events).not.toBe(lifecycleRequest.events);
+        expect(validatedRequest.serverTiming).not.toBe(lifecycleRequest.serverTiming);
+      });
+
+      it('reuses request initialization for authentication and validated handlers', () => {
+        const uuidMock = jest.mocked(uuidv4);
+        uuidMock.mockClear();
+        const request = hapiMocks.createRequest({
+          headers: { authorization: 'Bearer before-auth' },
+          params: { id: 'request-id' },
+        });
+
+        const preAuth = CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
+        const auth = CoreKibanaRequest.fromForAuth(request);
+
+        request.headers.authorization = 'Bearer after-auth';
+        request.auth.isAuthenticated = true;
+        const postAuth = CoreKibanaRequest.fromForLifecycle(request, 'postAuth');
+        const handler = CoreKibanaRequest.fromForHandler(request, {
+          params: schema.object({ id: schema.string() }),
+        });
+
+        expect(uuidMock).toHaveBeenCalledTimes(2);
+        expect(auth).not.toBe(preAuth);
+        expect(handler).not.toBe(postAuth);
+        expect(auth.headers).not.toBe(preAuth.headers);
+        expect(postAuth.headers.authorization).toBe('Bearer after-auth');
+        expect(handler.params).toEqual({ id: 'request-id' });
+        expect(handler.auth.isAuthenticated).toBe(true);
+        expect(auth.route).toBe(preAuth.route);
+        expect(postAuth.route).toBe(auth.route);
+        expect(handler.route).toBe(postAuth.route);
+        expect(handler.socket).toBe(preAuth.socket);
+        expect(handler.events).toBe(preAuth.events);
+        expect(handler.serverTiming).toBe(preAuth.serverTiming);
+      });
+
+      it('validates fresh request parts for every handler facade', () => {
+        const request = hapiMocks.createRequest({
+          params: { id: 'first-id' },
+        });
+        const routeSchemas = {
+          params: schema.object({ id: schema.string() }),
+        };
+
+        const first = CoreKibanaRequest.fromForHandler(request, routeSchemas);
+        request.params.id = 'second-id';
+        const second = CoreKibanaRequest.fromForHandler(request, routeSchemas);
+
+        expect(first.params).toEqual({ id: 'first-id' });
+        expect(second.params).toEqual({ id: 'second-id' });
+        expect(second).not.toBe(first);
+        expect(second.route).toBe(first.route);
+        expect(second.headers).toBe(first.headers);
       });
     });
 

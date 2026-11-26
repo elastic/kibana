@@ -55,12 +55,14 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
     request: Request,
     responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
-    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-
     try {
-      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(
+        CoreKibanaRequest.fromForLifecycle(request, 'preRouting'),
+        lifecycleResponseFactory,
+        toolkit
+      );
       if (isKibanaResponse(result)) {
-        return hapiResponseAdapter.handle(result);
+        return new HapiResponseAdapter(responseToolkit).handle(result);
       }
 
       if (preRoutingResult.isNext(result)) {
@@ -71,6 +73,7 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
         const app = request.app as KibanaRequestState;
         app.rewrittenUrl = app.rewrittenUrl ?? request.url;
         request.setUrl(result.url);
+        CoreKibanaRequest.invalidateLifecycleSnapshot(request, 'preRouting');
         // Also update the raw request URL so legacy-platform proxying sees the rewritten URL.
         request.raw.req.url = result.url;
         return responseToolkit.continue;
@@ -80,7 +83,7 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
       );
     } catch (error) {
       log.error(error);
-      return hapiResponseAdapter.toInternalError();
+      return new HapiResponseAdapter(responseToolkit).toInternalError();
     }
   };
 }
