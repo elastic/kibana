@@ -12,6 +12,7 @@ import { bulkMuteAlerts } from '@kbn/response-ops-alerts-apis/apis/bulk_mute_ale
 import { bulkUnmuteAlerts } from '@kbn/response-ops-alerts-apis/apis/bulk_unmute_alerts';
 import { snoozeAlertInstance } from '@kbn/response-ops-alerts-apis/apis/snooze_alert_instance';
 import { unsnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/apis/unsnooze_alert_instance';
+import { getAlertSnoozeStateByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
@@ -23,6 +24,7 @@ import type {
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 import type { ClassicAlertActionContext } from './utils/map_alert';
 import { getErrorMessage } from '../actions/helpers';
+import { INDEFINITE_SNOOZE_NOT_APPLIED } from '../actions/translations';
 
 /** Reads a classic row's action context, which the source is not required to set. */
 export const getActionContext = (episode: {
@@ -53,6 +55,18 @@ const groupTargetsByRuleId = (targets: SnoozeTarget[]): SnoozeTarget[][] => {
     byRuleId.set(target.ruleId, ruleTargets);
   }
   return [...byRuleId.values()];
+};
+
+const filterMutedTargets = async (
+  targets: SnoozeTarget[],
+  http: HttpStart
+): Promise<SnoozeTarget[]> => {
+  const { data } = await getAlertSnoozeStateByRule({
+    http,
+    ruleIds: [...new Set(targets.map(({ ruleId }) => ruleId))],
+  });
+  const mutedByRuleId = new Map(data.map(({ id, mutedAlertIds }) => [id, new Set(mutedAlertIds)]));
+  return targets.filter(({ ruleId, instanceId }) => mutedByRuleId.get(ruleId)?.has(instanceId));
 };
 
 const groupByIndex = (episodes: AlertEpisode[]): Array<{ index: string; ids: string[] }> => {
@@ -180,12 +194,34 @@ const snoozeExtension: EpisodeActionExtension<EpisodeSnoozePayload> = {
       const replacedTargets = toSnoozeTargets(eps.filter(hasSnoozedInstance));
       succeeded = eps.length - replacedTargets.length;
 
+      if (replacedTargets.length === 0) {
+        return { succeeded, failed, errors };
+      }
+
+      let mutedTargets: SnoozeTarget[];
+      try {
+        mutedTargets = await filterMutedTargets(replacedTargets, http);
+      } catch (e) {
+        return {
+          succeeded: succeeded + replacedTargets.length,
+          failed: replacedTargets.length,
+          errors: [getErrorMessage(e)],
+        };
+      }
+
+      const unmutedCount = replacedTargets.length - mutedTargets.length;
+      if (unmutedCount > 0) {
+        failed += unmutedCount;
+        errors.push(INDEFINITE_SNOOZE_NOT_APPLIED);
+      }
+
+      succeeded += mutedTargets.length;
+
       await Promise.allSettled(
-        groupTargetsByRuleId(replacedTargets).map(async (sameRuleTargets) => {
+        groupTargetsByRuleId(mutedTargets).map(async (sameRuleTargets) => {
           for (const { ruleId, instanceId } of sameRuleTargets) {
             try {
               await unsnoozeAlertInstance({ http, id: ruleId, instanceId });
-              succeeded++;
             } catch (e) {
               failed++;
               errors.push(getErrorMessage(e));

@@ -53,6 +53,13 @@ export const CONDITIONAL_SNOOZE_ACTIVE_ONLY = i18n.translate(
   }
 );
 
+export const INDEFINITE_SNOOZE_NOT_APPLIED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.indefiniteSnoozeNotApplied',
+  {
+    defaultMessage: 'The alert could not be snoozed indefinitely.',
+  }
+);
+
 export const getInactiveSnoozeWarning = (count: number): string =>
   i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.inactiveSnoozeWarning', {
     defaultMessage:
