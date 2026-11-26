@@ -41,7 +41,7 @@ import {
   isRuleDraftAttachment,
 } from './helpers';
 import type { RuleAttachment } from './helpers';
-import { isAlertZeroRuleAttachmentId } from '../../../../common/agent_builder/alertzero_rule_attachments';
+import { isDetectionWatchRuleAttachmentId } from '../../../../common/agent_builder/detection_watch_rule_attachments';
 import { buildPendingChangeButtons } from './rule_action_buttons';
 import {
   INDEX_FIELD_LABEL,
@@ -162,10 +162,12 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   }, [originalRule, rule]);
 
   const savedRuleId = getRuleIdFromAttachment(attachment);
-  // Offer save actions only on the latest card version, and never on a rule card that AlertZero
-  // attached to an investigation.
+  // Offer save actions only on the latest card version, and never on a rule card that a
+  // Detection Watch worker attached to an investigation.
   const hasPendingChanges =
-    hasDiff && isLatestAttachmentVersion(attachment) && !isAlertZeroRuleAttachmentId(attachment.id);
+    hasDiff &&
+    isLatestAttachmentVersion(attachment) &&
+    !isDetectionWatchRuleAttachmentId(attachment.id);
 
   const pendingChangeButtons = useMemo(
     () =>

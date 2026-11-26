@@ -1284,7 +1284,7 @@ describe('RuleInlineContent integration', () => {
     });
 
     it.each(['tuned-rule', 'coverage-rule'])(
-      'registers no buttons for the AlertZero investigation card "%s", even when it differs from the saved rule',
+      'registers no buttons for the Detection Watch rule card "%s", even when it differs from the saved rule',
       (id) => {
         const { registerActionButtons } = renderCard({ savedRule: changedSavedRule, id });
 
