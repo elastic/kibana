@@ -156,6 +156,12 @@
     "entity_analytics:entity_details:qa:serverless": "npm run run-tests:ea:trial_complete entity_details serverless qaPeriodicEnv",
 
 
+    "entity_analytics:monitoring:server:serverless": "npm run initialize-server:ea:trial_complete monitoring serverless",
+    "entity_analytics:monitoring:runner:serverless": "npm run run-tests:ea:trial_complete monitoring serverless serverlessEnv",
+    "entity_analytics:monitoring:qa:serverless": "npm run run-tests:ea:trial_complete monitoring serverless qaPeriodicEnv",
+    "entity_analytics:monitoring:qa:serverless:release": "npm run run-tests:ea:trial_complete monitoring serverless qaEnv",
+    "entity_analytics:monitoring:server:ess": "npm run initialize-server:ea:trial_complete monitoring ess",
+    "entity_analytics:monitoring:runner:ess": "npm run run-tests:ea:trial_complete monitoring ess essEnv --",
 
     "entity_analytics:risk_score:server:serverless": "npm run initialize-server:ea:trial_complete risk_score_maintainer serverless",
     "entity_analytics:risk_score:runner:serverless": "npm run run-tests:ea:trial_complete risk_score_maintainer serverless serverlessEnv",

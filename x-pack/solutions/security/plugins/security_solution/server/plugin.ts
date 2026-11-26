@@ -148,6 +148,7 @@ import {
 } from '../common/endpoint/constants';
 
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
+import { removeRetiredPrivmonTasks } from './lib/entity_analytics/utils/remove_retired_privmon_tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
 import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
@@ -1146,19 +1147,22 @@ export class Plugin implements ISecuritySolutionPlugin {
         .catch(() => {}); // it shouldn't refuse, but just in case
 
       // The privilege monitoring task type is no longer registered. Remove any
-      // leftover Task Manager documents (up to 100 per start) so they don't linger
-      // as orphans after upgrade.
-      const taskRepo = core.savedObjects.createInternalRepository(['task']);
-      taskRepo
-        .find({
-          type: 'task',
-          filter: `task.attributes.taskType: "entity_analytics:monitoring:privileges:engine"`,
-          perPage: 100,
+      // leftover Task Manager documents so they don't linger as orphans after upgrade.
+      // This does not block startup, and anything it misses is retried on the next start.
+      removeRetiredPrivmonTasks({
+        taskRepo: core.savedObjects.createInternalRepository(['task']),
+        logger: this.logger,
+      })
+        .then((removed) => {
+          if (removed > 0) {
+            this.logger.info(`Removed ${removed} leftover privilege monitoring task document(s)`);
+          }
         })
-        .then(({ saved_objects: tasks }) =>
-          Promise.all(tasks.map((task) => taskRepo.delete('task', task.id).catch(() => {})))
-        )
-        .catch(() => {});
+        .catch((error) => {
+          this.logger.warn(
+            `Failed to remove leftover privilege monitoring task documents: ${error.message}`
+          );
+        });
     }
 
     const uiSettingsClient = core.uiSettings.asScopedToClient(

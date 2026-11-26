@@ -113,6 +113,8 @@ enabled:
   - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/entity_resolution/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/entity_resolution/essentials_tier_pli_gating/configs/serverless.config.ts
   - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/monitoring/basic_license_essentials_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/monitoring/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/entity_details/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/watchlists/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/serverless.config.ts
