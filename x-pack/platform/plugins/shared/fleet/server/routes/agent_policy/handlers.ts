@@ -15,7 +15,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-import { isEmpty, uniq } from 'lodash';
+import { isEmpty, pick, uniq } from 'lodash';
 
 import yaml from 'yaml';
 
@@ -37,6 +37,7 @@ import {
 import { type AgentClient } from '../../services/agents';
 import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
 import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
+import { buildAgentVersionConditionAgentsFilter } from '../../services/package_policies/agent_version_guard';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -108,6 +109,19 @@ interface AssignedAgentsCountAggregation {
   >;
 }
 
+interface ActiveAgentsCountAggregation {
+  buckets: Record<string, { versions?: { buckets: Array<{ key: string; doc_count: number }> } }>;
+}
+
+/** The fields set by {@link populateAssignedAgentsCount}. */
+const ASSIGNED_AGENTS_COUNT_FIELDS = [
+  'agents',
+  'unprivileged_agents',
+  'fips_agents',
+  'agents_per_version',
+  'active_agents_per_version',
+] as const;
+
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
   agentPolicies: AgentPolicy[]
@@ -150,11 +164,40 @@ export async function populateAssignedAgentsCount(
           versions: { terms: { field: 'agent.version', size: 1000 } },
         },
       },
+      // The agents a package-level agent version condition applies to, filtered by status with the
+      // same rules as Fleet's check, which depend on each policy's inactivity timeout. Unlike that
+      // check, agents are matched to their policy with the same `policy_id` kuery as the counts
+      // above, so the counts can differ in edge cases: the UI then relies on Fleet's response.
+      active_policies: {
+        filters: {
+          filters: Object.fromEntries(
+            agentPolicies.map(({ id, inactivity_timeout: inactivityTimeout }) => {
+              const { filter, must_not: mustNot } =
+                buildAgentVersionConditionAgentsFilter(inactivityTimeout);
+              return [
+                id,
+                {
+                  bool: {
+                    filter: [
+                      toElasticsearchQuery(fromKueryExpression(buildPolicyIdOrVariantsKuery(id))),
+                      ...filter,
+                    ],
+                    must_not: mustNot,
+                  },
+                },
+              ];
+            })
+          ),
+        },
+        aggs: { versions: { terms: { field: 'agent.version', size: 1000 } } },
+      },
     },
   });
 
   const buckets =
     (aggregations?.policies as AssignedAgentsCountAggregation | undefined)?.buckets ?? {};
+  const activeBuckets =
+    (aggregations?.active_policies as ActiveAgentsCountAggregation | undefined)?.buckets ?? {};
 
   for (const agentPolicy of agentPolicies as GetAgentPoliciesResponseItem[]) {
     const bucket = buckets[agentPolicy.id];
@@ -165,6 +208,9 @@ export async function populateAssignedAgentsCount(
       version: version.key,
       count: version.doc_count,
     }));
+    agentPolicy.active_agents_per_version = (
+      activeBuckets[agentPolicy.id]?.versions?.buckets ?? []
+    ).map((version) => ({ version: version.key, count: version.doc_count }));
   }
 }
 
@@ -299,8 +345,15 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       withPackagePolicies,
       ignoreMissing,
     });
+    // Count before sanitizing: the counts depend on each policy's inactivity timeout
+    if (authzFleetAgentRead) {
+      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
+    }
     if (!authzFleetReadAgentPolicies) {
-      items = items.map(sanitizeItemForReadAgentOnly);
+      items = items.map((item) => ({
+        ...sanitizeItemForReadAgentOnly(item),
+        ...pick(item, ASSIGNED_AGENTS_COUNT_FIELDS),
+      }));
     } else if (withPackagePolicies && request.query.format === inputsFormat.Simplified) {
       items.map((item) => {
         if (isEmpty(item.package_policies)) {
@@ -318,9 +371,6 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
     const body: BulkGetAgentPoliciesResponse = {
       items,
     };
-    if (authzFleetAgentRead) {
-      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
-    }
 
     return response.ok({ body });
   } catch (error) {
@@ -860,7 +910,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
+      { standalone: request.query.standalone === true, redactSecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body: GetFullAgentConfigMapResponse = {
@@ -878,7 +928,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
-      redactProxySecrets: !canReadSettings,
+      redactSecrets: !canReadSettings,
     });
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
@@ -958,7 +1008,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
+      { standalone: request.query.standalone === true, redactSecrets: !canReadSettings }
     );
     if (!fullAgentConfigMap) {
       return response.customError({
@@ -978,7 +1028,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
-      redactProxySecrets: !canReadSettings,
+      redactSecrets: !canReadSettings,
     });
     if (!fullAgentPolicy) {
       return response.customError({

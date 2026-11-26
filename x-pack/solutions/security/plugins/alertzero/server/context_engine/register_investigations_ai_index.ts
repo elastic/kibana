@@ -11,6 +11,10 @@ import {
   HUNT_COVERAGE_AI_INDEX_DEST,
   HUNT_COVERAGE_AI_INDEX_ID,
 } from '../../common/step_types/package_report';
+import {
+  TRIAGE_DECISIONS_AI_INDEX_DEST,
+  TRIAGE_DECISIONS_AI_INDEX_ID,
+} from '../../common/step_types/triage_decisions_index';
 
 /**
  * Backing index for Attack Discovery fingerprints. The match step in
@@ -48,6 +52,17 @@ export const registerInvestigationsAiIndex = ({
       'that already describes it. Not a forensics handoff.',
     memory_enabled: false,
     dest: getAiIndexDest('index', ATTACK_FINGERPRINT_AI_INDEX_ID),
+    automations: [],
+    sources: [],
+    traces: [],
+  });
+
+  contextEngine.registerAiIndex(TRIAGE_DECISIONS_AI_INDEX_ID, {
+    description:
+      'Internal alert triage decisions: false-positive patterns that triage workers match ' +
+      'against later alerts. Not for analysts to query.',
+    memory_enabled: false,
+    dest: TRIAGE_DECISIONS_AI_INDEX_DEST,
     automations: [],
     sources: [],
     traces: [],

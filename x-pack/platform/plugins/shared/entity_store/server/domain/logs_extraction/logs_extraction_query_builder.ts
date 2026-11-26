@@ -37,7 +37,8 @@ import {
   aggregationStats,
   fieldsToKeep,
   extractPaginationParams,
-  buildPaginationSection,
+  buildPaginationCursorFilter,
+  buildPaginationSortAndLimit,
   mapPostAggFilterFieldsToRecentForEsql,
   NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
@@ -126,6 +127,11 @@ export function buildLogsExtractionEsqlQuery({
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
 
+  // Entity ids at or before the cursor were already emitted by an earlier page, so their rows
+  // are dropped before STATS, LOOKUP JOIN and postAggFilter spend work on them. It must sit
+  // after the EVAL that computes the id and before anything that aggregates by it.
+  parts.push(...buildPaginationCursorFilter(MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
+
   if (extraction.whenConditionTrueSetFieldsPreAgg?.length) {
     for (const entry of extraction.whenConditionTrueSetFieldsPreAgg) {
       parts.push(buildSetFieldsByCondition(entry));
@@ -141,7 +147,7 @@ export function buildLogsExtractionEsqlQuery({
   // If there is no post aggregation filter we can paginate before the lookup join
   // and save some performance
   if (!postAggFilter) {
-    parts.push(...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
+    parts.push(...buildPaginationSortAndLimit(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS));
   }
 
   // Builds the main entity id
@@ -162,7 +168,7 @@ export function buildLogsExtractionEsqlQuery({
       buildPostAggFilter(mapPostAggFilterFieldsToRecentForEsql(postAggFilter, entityDefinition))
     );
     // then we can paginate after the post aggregation filter
-    parts.push(...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
+    parts.push(...buildPaginationSortAndLimit(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS));
   }
 
   if (extraction.whenConditionTrueSetFieldsAfterStats?.length) {
