@@ -152,8 +152,8 @@ export abstract class BaseAtomicNodeImplementation<
   }
 
   /** Input recorded on the first entry of this step execution. */
-  private recordedInput(): Record<string, unknown> {
-    const stored = this.stepExecutionRuntime.getCurrentStepResult()?.input;
+  private async recordedInput(): Promise<Record<string, unknown>> {
+    const stored = await this.stepExecutionRuntime.getCurrentStepInput();
     if (stored != null && typeof stored === 'object' && !Array.isArray(stored)) {
       return stored as Record<string, unknown>;
     }
@@ -184,7 +184,7 @@ export abstract class BaseAtomicNodeImplementation<
     let suspended = false;
     try {
       if (this.stepExecutionRuntime.isInputRecorded) {
-        input = this.recordedInput();
+        input = await this.recordedInput();
       } else {
         input = await this.getInput();
         this.stepExecutionRuntime.setInput(input);

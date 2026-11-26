@@ -185,16 +185,14 @@ describe('AlertEpisodeDetailsFlyout', () => {
         events: { ui: { activeConversation$: of(activeConversation) } },
       }) as unknown as NonNullable<typeof mockServices.agentBuilder>;
 
-    const openTakeActionMenu = () =>
-      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
-
     it('does not offer add to chat when Agent Builder is not provided', () => {
       mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
 
       render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
-      openTakeActionMenu();
 
-      expect(screen.queryByTestId('alertingV2EpisodeTakeAction-addToChat')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
     });
 
     it('does not offer add to chat until the episode is loaded', () => {
@@ -204,9 +202,10 @@ describe('AlertEpisodeDetailsFlyout', () => {
         <AlertEpisodeDetailsFlyout {...baseProps} services={{ ...mockServices, agentBuilder }} />,
         { wrapper: Wrapper }
       );
-      openTakeActionMenu();
 
-      expect(screen.queryByTestId('alertingV2EpisodeTakeAction-addToChat')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
     });
 
     it('opens a new conversation with the alert when the chat is not bound', () => {
@@ -217,8 +216,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         <AlertEpisodeDetailsFlyout {...baseProps} services={{ ...mockServices, agentBuilder }} />,
         { wrapper: Wrapper }
       );
-      openTakeActionMenu();
-      fireEvent.click(screen.getByTestId('alertingV2EpisodeTakeAction-addToChat'));
+      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutAddToChatButton'));
 
       expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
       expect(agentBuilder.openChat).toHaveBeenCalledWith(
@@ -237,8 +235,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         <AlertEpisodeDetailsFlyout {...baseProps} services={{ ...mockServices, agentBuilder }} />,
         { wrapper: Wrapper }
       );
-      openTakeActionMenu();
-      fireEvent.click(screen.getByTestId('alertingV2EpisodeTakeAction-addToChat'));
+      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutAddToChatButton'));
 
       expect(agentBuilder.openChat).not.toHaveBeenCalled();
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
@@ -316,11 +313,9 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabMetadata')).not.toBeInTheDocument();
   });
 
-  it('calls onClose when the footer close button is clicked', () => {
-    const onClose = jest.fn();
-    render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
-    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutCloseButton'));
-    expect(onClose).toHaveBeenCalled();
+  it('does not render a close button in the footer', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+    expect(screen.queryByTestId('alertingV2EpisodeFlyoutCloseButton')).not.toBeInTheDocument();
   });
 
   it('calls onClose when the header close icon is clicked', () => {

@@ -241,6 +241,30 @@ describe('esql query helpers', () => {
     it('should return @timestamp for PromQL if there is no time param', () => {
       expect(parseTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
     });
+
+    it('should return the time field used inside a LET the query reads', () => {
+      expect(
+        parseTimeFieldFromESQLQuery(
+          'LET a = (FROM logs | WHERE event.ingested >= ?_tstart); FROM a'
+        )
+      ).toBe('event.ingested');
+    });
+
+    it('should prefer the time field of the main query over the one of a LET', () => {
+      expect(
+        parseTimeFieldFromESQLQuery(
+          'LET a = (FROM logs | WHERE event.ingested >= ?_tstart); FROM a | WHERE event.created >= ?_tstart'
+        )
+      ).toBe('event.created');
+    });
+
+    it('should return the time field used inside a LET read by an IN subquery', () => {
+      expect(
+        parseTimeFieldFromESQLQuery(
+          'LET ids = (FROM logs | WHERE event.ingested >= ?_tstart | KEEP id); FROM metrics | WHERE id IN (FROM ids)'
+        )
+      ).toBe('event.ingested');
+    });
   });
 
   describe('getKqlSearchQueries', () => {
@@ -361,6 +385,15 @@ describe('esql query helpers', () => {
     it('should return the query with FROM command if TS command is found', function () {
       const query = convertTimeseriesCommandToFrom('TS index1 | KEEP field1, field2 | SORT field1');
       expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should convert the main TS command even if a LET body starts with TS', function () {
+      const query = convertTimeseriesCommandToFrom(
+        'LET a = (TS index2 | KEEP host); TS index1 | WHERE host IN (FROM a)'
+      );
+      expect(query).toEqual(
+        'LET a = (TS index2 | KEEP host); FROM index1 | WHERE host IN (FROM a)'
+      );
     });
   });
 

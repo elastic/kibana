@@ -138,7 +138,10 @@ export class LensServerPlugin implements Plugin<
     core
       .getStartServices()
       .then(async ([{ featureFlags }]) => {
-        const flags = await fetchLensFeatureFlags(featureFlags);
+        const flags = await fetchLensFeatureFlags(
+          featureFlags,
+          this.initializerContext.env.mode.dev
+        );
         builder.setEnabled(flags.apiFormat);
 
         // Need to wait for feature flags to be set before registering transforms

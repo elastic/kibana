@@ -44,8 +44,6 @@ export const ADD_NESTED_BTN = '[data-test-subj="exceptionsNestedButton"]';
 
 export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]';
 
-export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
-
 export const EXCEPTIONS_OVERFLOW_ACTIONS_BTN =
   '[data-test-subj="sharedListOverflowCardButtonIcon"]';
 
@@ -84,29 +82,9 @@ export const EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModal
 
 export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContainer"]';
 
-export const EXCEPTION_FIELD_LIST =
-  '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
-
-export const EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP =
-  '[data-test-subj="mappingConflictsTooltip"]';
-
-export const EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON =
-  '[data-test-subj="mappingConflictsWarningIcon"]';
-
-export const EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON =
-  '[data-test-subj="mappingConflictsAccordionIcon"]';
-
-export const EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION =
-  '[data-test-subj="mappingConflictsDescription"]';
-
 export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exceptionFlyoutTitle"]';
 
 export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="editExceptionConfirmButton"]';
-
-export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
-  '[data-test-subj="exceptionsFlyoutVersionConflict"]';
-
-export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCalloutContainer"]';
 
 // Exceptions all items view in Rule pages
 export const NO_EXCEPTIONS_EXIST_PROMPT =

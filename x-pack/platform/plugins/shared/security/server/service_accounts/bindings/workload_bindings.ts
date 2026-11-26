@@ -778,6 +778,14 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     // Set once the first mint returns. A failure before then fails `createFakeRequest`, and is
     // audited by the catch below instead.
     const execution: { request?: KibanaRequest } = {};
+    const rebindCheck = this.rebindCheck(coordinates, serviceAccountId, (error) => {
+      if (execution.request) {
+        executionAudit.revoked(execution.request, serviceAccountId, error);
+      }
+    });
+    // A retry runs the binding check again, so the error below can come from that check and not
+    // only from the exchange.
+    let exchangeError: unknown;
 
     try {
       const request = await this.backend.createFakeRequest({
@@ -785,18 +793,18 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
         spaceId: coordinates.spaceId,
         boundAt,
         maxLifetimeMs: Number.POSITIVE_INFINITY,
-        mintInterceptor: this.rebindCheck(coordinates, serviceAccountId, (error) => {
-          if (execution.request) {
-            executionAudit.revoked(execution.request, serviceAccountId, error);
-          }
-        }),
+        mintInterceptor: (mint) =>
+          rebindCheck(() =>
+            mint().catch((error) => {
+              exchangeError = error;
+              throw error;
+            })
+          ),
       });
       execution.request = request;
       return request;
     } catch (e) {
-      // The initial mint goes straight to the exchange, so nothing here was raised by the
-      // interceptor.
-      if (isTerminalMintFailure(e, { raisedByInterceptor: false })) {
+      if (isTerminalMintFailure(e, { raisedByInterceptor: e !== exchangeError })) {
         executionAudit.failed(e, serviceAccountId);
       }
       throw e;

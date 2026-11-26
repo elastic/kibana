@@ -25,6 +25,7 @@ import {
   findKiRevision,
   isKiDeleted,
   putKiRevision,
+  rewrittenKiTimestamp,
   type KiRevision,
   type KiWriter,
   type StoredKi,
@@ -148,12 +149,13 @@ const storedDocument = (
   document: Omit<DreamedKi, 'governance'>,
   kiId: string,
   current: DreamedKi | undefined,
-  writer: KiWriter
+  writer: KiWriter,
+  dest: AiIndexDest
 ): StoredKi => {
   const now = new Date().toISOString();
   return {
     ...document,
-    '@timestamp': now,
+    '@timestamp': rewrittenKiTimestamp(dest, current, now),
     id: kiId,
     updated_at: now,
     governance: {
@@ -258,7 +260,7 @@ const planDocument = async (
   }
   planned.set(kiId, {
     change: previous?.change === 'created' || !current ? 'created' : 'updated',
-    ki: storedDocument(document, kiId, current, writer),
+    ki: storedDocument(document, kiId, current, writer, dest),
   });
   return current ? 'updated' : 'created';
 };
@@ -295,7 +297,7 @@ const writeDocument = async (
       if (!document) {
         return 'skipped' as const;
       }
-      const stored = storedDocument(document, kiId, current, writer);
+      const stored = storedDocument(document, kiId, current, writer, dest);
       await putKiRevision({
         esClient,
         aiIndexId,

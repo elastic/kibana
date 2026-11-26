@@ -418,8 +418,9 @@ export function buildKafkaAuthData(
 
   if (output.auth_type === kafkaAuthType.Kerberos) {
     // the `kerberos` settings switch the agent to the GSSAPI mechanism by themselves: a `sasl`
-    // mechanism or top-level credentials next to them are not valid. Only the settings of the
-    // authentication type in use are sent, the password comes with the secrets.
+    // mechanism or top-level credentials next to them are not valid. The username is always sent:
+    // it is the principal to look up in the keytab, or the one to log in with. The keytab is only
+    // sent for the keytab authentication, and the password comes with the secrets.
     const {
       auth_type: kerberosAuthType,
       keytab,
@@ -433,7 +434,8 @@ export function buildKafkaAuthData(
           kerberos: {
             enabled: true,
             auth_type: kerberosAuthType,
-            ...(isKeytab ? { keytab } : { username: kerberosUsername }),
+            username: kerberosUsername,
+            ...(isKeytab ? { keytab } : {}),
             ...others,
           },
         }

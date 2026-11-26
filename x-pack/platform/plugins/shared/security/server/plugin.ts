@@ -48,6 +48,7 @@ import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
+import { OlsService } from './authorization/ols/ols_service';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
@@ -237,6 +238,8 @@ export class SecurityPlugin implements Plugin<
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
+  private olsService?: OlsService;
+
   private elasticsearchUrl?: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -392,6 +395,8 @@ export class SecurityPlugin implements Plugin<
       features,
       getCurrentUser,
       customBranding: core.customBranding,
+      // The OLS service exists only after start. Checks made before it skip recovery.
+      getPrivilegeCheckRecovery: () => this.olsService,
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
@@ -597,6 +602,25 @@ export class SecurityPlugin implements Plugin<
       getUserProfiles: (uids) => this.getUserProfileService().bulkGet({ uids }),
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       workloadTypes: this.getWorkloadTypes(),
+    });
+
+    this.olsService = new OlsService({
+      enabled: config.authz.ols.enabled,
+      spacesEnabled: !!spaces,
+      clusterClient,
+      authz: this.authorizationSetup!,
+      audit: this.auditSetup!,
+      // Core does not expose access policies yet, so no type is protected and the service decides
+      // nothing until the Core security delegate reads them from the Saved Objects type registry.
+      policies: { getAccessPolicy: () => undefined, getAllTypes: () => [] },
+      userProfiles: this.userProfileStart,
+      getAuthenticatedPrincipal: core.security.authc.getPrincipal,
+      hasSession: async (request) => !!(await session.getSID(request)),
+      // Service accounts are read as Kibana, for UIAM and Elasticsearch alike. A disabled account
+      // still exists, while a revoked UIAM account doesn't.
+      serviceAccountExists: async (id) =>
+        !!(await this.serviceAccountsStart?.backend.getSummary(id)),
+      logger: this.logger.get('ols'),
     });
 
     this.authorizationService.start({

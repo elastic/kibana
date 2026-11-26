@@ -36,16 +36,17 @@ export interface DestinationIndexStats {
   docs: StatsByIndex;
   degradedDocs: StatsByIndex;
   failedDocs: StatsByIndex;
-  ingestedDocs: StatsByIndex;
   storageBytes: StatsByIndex;
 }
 
 export interface DestinationIndexRow {
   name: string;
   isDataStream: boolean;
-  /** Stats are `undefined` when unknown: loading, failed, or not a data stream. */
-  documents?: number;
-  throughput?: number;
+  /** Documents the destination wrote to the index in the time range, from its metrics. */
+  documents: number;
+  /** `documents` per second over the time range. */
+  throughput: number;
+  /** Stats of the index are `undefined` when unknown: loading, failed, or not a data stream. */
   storageBytes?: number;
   quality?: QualityIndicators;
   health?: ResolvedDestinationIndexHealth;
@@ -88,8 +89,10 @@ export const getReadableFailureStoreNames = (
   );
 
 /**
- * Loads document, ingestion, quality, and storage stats for the given data streams only.
- * Names are sent in batches; the five stats of a batch load in parallel, batches one after another.
+ * Loads the quality and storage stats of the given data streams only. What the destination wrote
+ * to each comes with the resolved indices instead, from its metrics, because the data stream also
+ * holds what other writers sent. Names are sent in batches; the four stats of a batch load in
+ * parallel, batches one after another.
  * Failed documents are only requested for `failureStoreNames`, as one unreadable failure store
  * would fail the whole request. A stat is `undefined` when any of its batches failed.
  */
@@ -111,7 +114,6 @@ export const loadDestinationIndexStats = async ({
     docs: {},
     degradedDocs: {},
     failedDocs: {},
-    ingestedDocs: {},
     storageBytes: {},
   };
   const collect = async (
@@ -140,7 +142,6 @@ export const loadDestinationIndexStats = async ({
     if (signal.aborted) {
       break;
     }
-    const rangeBody = { start: timeRange.start, end: timeRange.end, streams };
     const failureStreams = streams.filter((name) => readableFailureStores.has(name));
     await Promise.all([
       collect('docs', async () =>
@@ -164,18 +165,12 @@ export const loadDestinationIndexStats = async ({
           ? toEntries(
               await streamsRepositoryClient.fetch('POST /internal/streams/doc_counts/failed', {
                 signal,
-                params: { body: { ...rangeBody, streams: failureStreams } },
+                params: {
+                  body: { start: timeRange.start, end: timeRange.end, streams: failureStreams },
+                },
               })
             )
           : []
-      ),
-      collect('ingestedDocs', async () =>
-        toEntries(
-          await streamsRepositoryClient.fetch('POST /internal/streams/doc_counts/ingestion', {
-            signal,
-            params: { body: rangeBody },
-          })
-        )
       ),
       collect('storageBytes', async () =>
         (
@@ -213,19 +208,19 @@ const getIndexQuality = (
 export const buildDestinationIndexRows = (
   indices: readonly ResolvedDestinationIndex[],
   stats: DestinationIndexStats | undefined
-): DestinationIndexRow[] => {
-  const timeRangeSec = stats ? (stats.timeRange.end - stats.timeRange.start) / 1000 : 0;
-  return indices.map((index): DestinationIndexRow => {
-    if (!index.is_data_stream) {
-      return { name: index.name, isDataStream: false, retentionMs: 0 };
-    }
-    const ingested = stats?.ingestedDocs;
-    return {
+): DestinationIndexRow[] =>
+  indices.map((index): DestinationIndexRow => {
+    const writes = {
       name: index.name,
+      documents: index.documents,
+      throughput: index.ingestion_rate,
+    };
+    if (!index.is_data_stream) {
+      return { ...writes, isDataStream: false, retentionMs: 0 };
+    }
+    return {
+      ...writes,
       isDataStream: true,
-      documents: stats?.docs ? (stats.docs[index.name] ?? 0) : undefined,
-      throughput:
-        ingested && timeRangeSec > 0 ? (ingested[index.name] ?? 0) / timeRangeSec : undefined,
       storageBytes: stats?.storageBytes ? (stats.storageBytes[index.name] ?? 0) : undefined,
       quality: stats ? getIndexQuality(index, stats) : undefined,
       health: index.health,
@@ -236,7 +231,6 @@ export const buildDestinationIndexRows = (
         : (lifecycleToRetentionMs(index.lifecycle) ?? 0),
     };
   });
-};
 
 const HEALTH_RANK: Record<ResolvedDestinationIndexHealth, number> = { red: 0, yellow: 1, green: 2 };
 const QUALITY_RANK: Record<QualityIndicators, number> = { poor: 0, degraded: 1, good: 2 };

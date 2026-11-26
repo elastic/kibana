@@ -30,8 +30,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
 import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -198,6 +204,11 @@ function ConnectorTypeRow({
   const isMobile = useIsMobile();
   const hasConnectors = connectors.length > 0;
 
+  const createEbtProps = getEbtProps({
+    action: NIGHTSHIFT_EBT_ACTIONS.OPEN_ADD_SANDBOX_CONNECTOR,
+    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+    detail: actionType.id,
+  });
   const createButton = isMobile ? (
     <EuiToolTip
       position="top"
@@ -212,6 +223,7 @@ function ConnectorTypeRow({
         onClick={onCreate}
         aria-label={`${createLabel}: ${item.name}`}
         data-test-subj={`${actionType.id}-create`}
+        {...createEbtProps}
       />
     </EuiToolTip>
   ) : (
@@ -223,6 +235,7 @@ function ConnectorTypeRow({
       onClick={onCreate}
       aria-label={`${createLabel}: ${item.name}`}
       data-test-subj={`${actionType.id}-create`}
+      {...createEbtProps}
     >
       {createLabel}
     </EuiButton>
@@ -305,6 +318,11 @@ function ConnectorTypeRow({
                       { defaultMessage: 'Disable {name}', values: { name: connector.name } }
                     )}
                     data-test-subj={`nightshiftConnectorEnabled-${connector.id}`}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                      detail: NIGHTSHIFT_EBT_DETAILS.DISABLE,
+                    })}
                   >
                     {i18n.translate('xpack.nightshift.addConnectorFlyout.enabledLabel', {
                       defaultMessage: 'Enabled',
@@ -321,6 +339,11 @@ function ConnectorTypeRow({
                       values: { name: connector.name },
                     })}
                     data-test-subj={`nightshiftConnectorEnable-${connector.id}`}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                      detail: NIGHTSHIFT_EBT_DETAILS.ENABLE,
+                    })}
                   >
                     {i18n.translate('xpack.nightshift.addConnectorFlyout.enableLabel', {
                       defaultMessage: 'Enable',

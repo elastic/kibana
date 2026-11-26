@@ -355,6 +355,7 @@ describe('CoreApp', () => {
       prebootUIPlugins.internal.set('some-plugin', {
         publicAssetsDir: '/foo',
         publicTargetDir: '/bar',
+        requiredPlugins: [],
         requiredBundles: [],
         version: '1.0.0',
       });
@@ -370,6 +371,7 @@ describe('CoreApp', () => {
       prebootUIPlugins.internal.set('some-plugin-2', {
         publicAssetsDir: '/foo',
         publicTargetDir: '/bar',
+        requiredPlugins: [],
         requiredBundles: [],
         version: '1.0.0',
       });
@@ -493,6 +495,7 @@ describe('CoreApp', () => {
     uiPlugins.internal.set('some-plugin', {
       publicAssetsDir: '/foo',
       publicTargetDir: '/bar',
+      requiredPlugins: [],
       requiredBundles: [],
       version: '1.0.0',
     });
@@ -508,12 +511,14 @@ describe('CoreApp', () => {
     uiPlugins.internal.set('some-plugin-2', {
       publicAssetsDir: '/foo',
       publicTargetDir: '/bar',
+      requiredPlugins: [],
       requiredBundles: [],
       version: '1.0.0',
     });
     uiPlugins.internal.set('some-plugin-3-internal', {
       publicAssetsDir: '/foo-internal',
       publicTargetDir: '/bar-internal',
+      requiredPlugins: [],
       requiredBundles: [],
       version: '1.0.0',
     });

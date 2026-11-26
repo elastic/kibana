@@ -97,8 +97,11 @@ export async function getFullAgentPolicy(
     standalone?: boolean;
     agentPolicy?: AgentPolicy;
     agentVersion?: string;
-    /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
-    redactProxySecrets?: boolean;
+    /**
+     * When true, redact secrets from the response: proxy_headers and ssl.key from all proxy
+     * references, and the Fleet Server host's agent key (`fleet.ssl.key`)
+     */
+    redactSecrets?: boolean;
     spaceId?: string;
   }
 ): Promise<FullAgentPolicy | null> {
@@ -111,7 +114,7 @@ export async function getFullAgentPolicy(
   );
 
   const standalone = options?.standalone ?? false;
-  const redactProxySecrets = options?.redactProxySecrets ?? false;
+  const redactSecrets = options?.redactSecrets ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
@@ -240,7 +243,7 @@ export async function getFullAgentPolicy(
       output,
       getOutputProxy(output),
       standalone,
-      redactProxySecrets
+      redactSecrets
     );
     return acc;
   }, {});
@@ -352,7 +355,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSources, downloadSourceProxy, redactProxySecrets),
+      download: getBinarySourceSettings(downloadSources, downloadSourceProxy, redactSecrets),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -503,7 +506,7 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies, redactProxySecrets);
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies, redactSecrets);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -580,7 +583,7 @@ export async function getFullAgentPolicy(
 export function generateFleetConfig(
   fleetServerHost: FleetServerHost,
   proxies: FleetProxy[],
-  redactProxySecrets = false
+  redactSecrets = false
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHost.host_urls,
@@ -600,7 +603,8 @@ export function generateFleetConfig(
       ...(fleetServerHost.ssl?.agent_certificate && {
         certificate: fleetServerHost.ssl.agent_certificate,
       }),
-      ...(fleetServerHost.ssl?.agent_key &&
+      ...(!redactSecrets &&
+        fleetServerHost.ssl?.agent_key &&
         !fleetServerHost.secrets?.ssl?.agent_key && {
           key: fleetServerHost.ssl.agent_key,
         }),
@@ -618,7 +622,7 @@ export function generateFleetConfig(
     : null;
   if (fleetServerHostproxy) {
     config.proxy_url = fleetServerHostproxy.url;
-    if (!redactProxySecrets && fleetServerHostproxy.proxy_headers) {
+    if (!redactSecrets && fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
     if (
@@ -633,7 +637,7 @@ export function generateFleetConfig(
           certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         }),
         ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
-        ...(!redactProxySecrets &&
+        ...(!redactSecrets &&
           fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
@@ -679,7 +683,7 @@ export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
   standalone = false,
-  redactProxySecrets = false
+  redactSecrets = false
 ): FullAgentPolicyOutput {
   if (isOtlpOutput(output)) {
     // otlp_exporter config and secrets are compiled into the OTel collector block by generateOtelcolExporter.
@@ -822,7 +826,7 @@ export function transformOutputToFullPolicyOutput(
 
   if (proxy && type !== outputType.Kafka) {
     newOutput.proxy_url = proxy.url;
-    if (!redactProxySecrets && proxy.proxy_headers) {
+    if (!redactSecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;
     }
 
@@ -841,7 +845,7 @@ export function transformOutputToFullPolicyOutput(
       }
       newOutput.ssl.certificate = proxy.certificate;
     }
-    if (!redactProxySecrets && proxy.certificate_key) {
+    if (!redactSecrets && proxy.certificate_key) {
       if (!newOutput.ssl) {
         newOutput.ssl = {};
       }
@@ -1117,7 +1121,7 @@ function buildShipperQueueData(shipper: ShipperOutput) {
 export function getBinarySourceSettings(
   downloadSources: DownloadSource[],
   downloadSourceProxy: FleetProxy | undefined,
-  redactProxySecrets = false
+  redactSecrets = false
 ) {
   const primarySource = downloadSources[0];
 
@@ -1202,7 +1206,7 @@ export function getBinarySourceSettings(
     if (downloadSourceProxy.url) {
       config.proxy_url = downloadSourceProxy.url;
     }
-    if (!redactProxySecrets && downloadSourceProxy.proxy_headers) {
+    if (!redactSecrets && downloadSourceProxy.proxy_headers) {
       config.proxy_headers = downloadSourceProxy.proxy_headers;
     }
     // if the proxy is configured, get the ssl settings from it
@@ -1213,7 +1217,7 @@ export function getBinarySourceSettings(
       ...(downloadSourceProxy?.certificate && {
         certificate: downloadSourceProxy.certificate,
       }),
-      ...(!redactProxySecrets &&
+      ...(!redactSecrets &&
         downloadSourceProxy?.certificate_key && {
           key: downloadSourceProxy?.certificate_key,
         }),
@@ -1224,14 +1228,17 @@ export function getBinarySourceSettings(
 }
 
 /**
- * Strip proxy_headers and proxy-derived ssl.key from a FullAgentPolicy that was already
+ * Strip proxy_headers and secret ssl keys from a FullAgentPolicy that was already
  * composed (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
  * Mutates in place and returns the policy for convenience.
  *
+ * fleet.ssl.key is always redacted: it is either a proxy's certificate_key or the Fleet
+ * Server host's agent key.
+ *
  * proxyUrlsWithCertKey: URLs of proxies that have a certificate_key. When provided,
- * ssl.key is redacted on fleet/agent.download sections only if their proxy_url is in this
- * set — distinguishing proxy-derived keys from the entity's own TLS keys. Without this
- * set, ssl.key on fleet/agent.download is left untouched (conservative: avoids
+ * ssl.key is redacted on the agent.download section only if its proxy_url is in this
+ * set — distinguishing proxy-derived keys from the download source's own TLS key. Without
+ * this set, ssl.key on agent.download is left untouched (conservative: avoids
  * over-redaction but may miss proxy keys).
  */
 export function redactProxySecretsFromPolicy(
@@ -1249,12 +1256,9 @@ export function redactProxySecretsFromPolicy(
   }
   if (policy.fleet && 'hosts' in policy.fleet) {
     delete policy.fleet.proxy_headers;
-    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
-    if (
-      policy.fleet.proxy_url &&
-      proxyUrlsWithCertKey?.has(policy.fleet.proxy_url) &&
-      policy.fleet.ssl
-    ) {
+    // fleet.ssl.key is either the proxy's certificate_key or the Fleet Server host's agent key,
+    // and both are secrets, so always redact it. The certificate and CAs are kept.
+    if (policy.fleet.ssl) {
       delete policy.fleet.ssl.key;
     }
   }

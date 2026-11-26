@@ -20,25 +20,25 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
-import { buildDreamingTemplateConfig } from '../../../common/dreaming_templates';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
+import { DreamingConfigEditor } from '../components/dreaming_config/dreaming_config_editor';
+import { DreamingTemplatePicker } from '../components/dreaming_setup/dreaming_template_picker';
+import { useDreamingSetupDraft } from '../components/dreaming_setup/use_dreaming_setup_draft';
 import {
-  DreamingConfigEditor,
-  draftBuildsAnything,
-  draftOf,
-  typesOfDraft,
-  type DreamingConfigDraft,
-} from '../components/dreaming_config/dreaming_config_editor';
+  applyDisabledTitle,
+  customHelpText,
+  loadErrorTitle,
+  summaryHelpText,
+  summaryLabel,
+} from '../components/dreaming_setup/translations';
 import { useApplyDreamingTemplate } from '../hooks/use_apply_dreaming_template';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
-import { useDreamingTemplates } from '../hooks/use_dreaming_templates';
 import { useNavigation } from '../hooks/use_navigation';
 import {
   ContextEngineSubPageHeader,
@@ -54,77 +54,17 @@ const pageTitle = i18n.translate('xpack.contextEngine.dreamingTemplate.title', {
   defaultMessage: 'Set up dreaming',
 });
 
-const loadErrorTitle = i18n.translate('xpack.contextEngine.dreamingTemplate.loadErrorTitle', {
-  defaultMessage: 'Unable to load the examples',
+const applyButtonLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.applyButton', {
+  defaultMessage: 'Turn on dreaming',
 });
 
-/** The template ID for starting from scratch instead of from an example. */
-export const CUSTOM_TEMPLATE_ID = 'custom';
-
-const EMPTY_DRAFT: DreamingConfigDraft = draftOf({});
+const examplesLabel = i18n.translate('xpack.contextEngine.dreamingTemplate.examplesLabel', {
+  defaultMessage: 'What are you building?',
+});
 
 const Highlight = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
   return <span css={{ color: euiTheme.colors.textPrimary }}>{children}</span>;
-};
-
-const usePillStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const base = css`
-    border-radius: ${euiTheme.size.xl};
-    padding-inline: ${euiTheme.size.m};
-    font-weight: ${euiTheme.font.weight.regular};
-    background: transparent;
-    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-    color: ${euiTheme.colors.textParagraph};
-    &:hover:not(:disabled) {
-      background: ${euiTheme.colors.backgroundBaseSubdued};
-    }
-  `;
-  return {
-    base,
-    selected: css`
-      ${base};
-      font-weight: ${euiTheme.font.weight.medium};
-      background: ${euiTheme.colors.backgroundLightPrimary};
-      border-color: ${euiTheme.colors.borderBasePrimary};
-      color: ${euiTheme.colors.textPrimary};
-      &:hover:not(:disabled) {
-        background: ${euiTheme.colors.backgroundLightPrimary};
-      }
-    `,
-  };
-};
-
-interface PillProps {
-  label: string;
-  isSelected: boolean;
-  iconType?: string;
-  onClick: () => void;
-  'data-test-subj': string;
-}
-
-const Pill = ({
-  label,
-  isSelected,
-  iconType,
-  onClick,
-  'data-test-subj': dataTestSubj,
-}: PillProps) => {
-  const styles = usePillStyles();
-  return (
-    <EuiButton
-      size="s"
-      css={isSelected ? styles.selected : styles.base}
-      color={isSelected ? 'primary' : 'text'}
-      iconType={isSelected ? 'check' : iconType}
-      isSelected={isSelected}
-      onClick={onClick}
-      data-test-subj={dataTestSubj}
-    >
-      {label}
-    </EuiButton>
-  );
 };
 
 /**
@@ -144,56 +84,38 @@ export const DreamingTemplatePage = () => {
 
 const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
-  const { templates, isLoading, error } = useDreamingTemplates();
-  const [pickedId, setPickedId] = useState<string>();
-  const [editedSummary, setEditedSummary] = useState<string>();
-  const [edited, setEdited] = useState<{ id: string; draft: DreamingConfigDraft }>();
-  const selectedId = pickedId ?? templates[0]?.id;
-  const isCustom = selectedId === CUSTOM_TEMPLATE_ID;
-  const selected = isCustom ? undefined : templates.find(({ id }) => id === selectedId);
+  const {
+    templates,
+    isLoading,
+    error,
+    selectedId,
+    isCustom,
+    selected,
+    select,
+    summary,
+    setSummary,
+    draft,
+    setDraft,
+    canApply,
+    buildConfig,
+  } = useDreamingSetupDraft();
   const { applyTemplate, isSaving } = useApplyDreamingTemplate();
   const detailPath = getAiIndexDetailPath(aiIndexId);
 
   useContextEngineBreadcrumbs([{ text: aiIndexId, path: detailPath }, { text: pageTitle }]);
 
-  const proposed = useMemo(
-    () =>
-      isCustom
-        ? EMPTY_DRAFT
-        : selected
-          ? draftOf(selected.dreaming, { entitiesEnabled: false })
-          : undefined,
-    [isCustom, selected]
-  );
-  const draft = edited !== undefined && edited.id === selectedId ? edited.draft : proposed;
-  const summary = editedSummary ?? (isCustom ? '' : (selected?.summary ?? ''));
-
-  const select = (id: string) => {
-    if (id !== selectedId) {
-      setPickedId(id);
-      setEditedSummary(undefined);
-    }
-  };
-
   const continueToAiIndex = () =>
     navigateToContextEngine(detailPath, undefined, AI_INDEX_CREATED_LOCATION_STATE);
 
   const applyAndContinue = async () => {
-    if (!draft) {
+    const config = buildConfig();
+    if (!config) {
       return;
     }
-    const config = buildDreamingTemplateConfig(
-      {
-        dreaming: { ...(isCustom ? {} : selected?.dreaming), ...typesOfDraft(draft) },
-      },
-      summary
-    );
     if (await applyTemplate({ aiIndexId, config })) {
       continueToAiIndex();
     }
   };
-
-  const canApply = draft !== undefined && draftBuildsAnything(draft);
 
   return (
     <ContextEnginePageTemplate data-test-subj="contextDreamingTemplatePage">
@@ -247,70 +169,31 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
               <EuiSpacer size="xl" />
               <EuiFormRow
                 fullWidth
-                label={i18n.translate('xpack.contextEngine.dreamingTemplate.examplesLabel', {
-                  defaultMessage: 'What are you building?',
-                })}
-                helpText={
-                  isCustom
-                    ? i18n.translate('xpack.contextEngine.dreamingTemplate.customHelpText', {
-                        defaultMessage: 'Start empty and add your own fact types.',
-                      })
-                    : selected?.description
-                }
+                label={examplesLabel}
+                helpText={isCustom ? customHelpText : selected?.description}
               >
-                {isLoading ? (
-                  <EuiSkeletonText lines={2} data-test-subj="contextDreamingTemplatesLoading" />
-                ) : (
-                  <EuiFlexGroup gutterSize="s" wrap responsive={false} role="group">
-                    {templates.map(({ id, name }) => (
-                      <EuiFlexItem grow={false} key={id}>
-                        <Pill
-                          label={name}
-                          isSelected={id === selectedId}
-                          onClick={() => select(id)}
-                          data-test-subj={`contextDreamingTemplateOption-${id}`}
-                        />
-                      </EuiFlexItem>
-                    ))}
-                    <EuiFlexItem grow={false}>
-                      <Pill
-                        label={i18n.translate('xpack.contextEngine.dreamingTemplate.custom', {
-                          defaultMessage: 'Custom',
-                        })}
-                        iconType="plus"
-                        isSelected={isCustom}
-                        onClick={() => select(CUSTOM_TEMPLATE_ID)}
-                        data-test-subj={`contextDreamingTemplateOption-${CUSTOM_TEMPLATE_ID}`}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
+                <DreamingTemplatePicker
+                  ariaLabel={examplesLabel}
+                  templates={templates}
+                  selectedId={selectedId}
+                  isLoading={isLoading}
+                  onSelect={select}
+                />
               </EuiFormRow>
               <EuiSpacer size="l" />
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate('xpack.contextEngine.dreamingTemplate.summaryLabel', {
-                  defaultMessage: 'Describe your company, your agent and the knowledge it needs',
-                })}
-                helpText={i18n.translate('xpack.contextEngine.dreamingTemplate.summaryHelpText', {
-                  defaultMessage: 'Your description opens the instructions dreaming follows.',
-                })}
-              >
+              <EuiFormRow fullWidth label={summaryLabel} helpText={summaryHelpText}>
                 <EuiTextArea
                   fullWidth
                   rows={3}
                   value={summary}
                   isLoading={isLoading}
-                  onChange={(event) => setEditedSummary(event.target.value)}
+                  onChange={(event) => setSummary(event.target.value)}
                   data-test-subj="contextDreamingTemplateSummary"
                 />
               </EuiFormRow>
               <EuiHorizontalRule margin="xl" />
               {draft && selectedId ? (
-                <DreamingConfigEditor
-                  draft={draft}
-                  onChange={(next) => setEdited({ id: selectedId, draft: next })}
-                />
+                <DreamingConfigEditor draft={draft} onChange={setDraft} />
               ) : (
                 <EuiSkeletonText lines={8} />
               )}
@@ -333,19 +216,10 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
                     onClick={applyAndContinue}
                     isLoading={isSaving}
                     isDisabled={!canApply}
-                    title={
-                      canApply
-                        ? undefined
-                        : i18n.translate('xpack.contextEngine.dreamingTemplate.applyDisabled', {
-                            defaultMessage:
-                              'Add a fact type, or turn on entities, for dreaming to learn something.',
-                          })
-                    }
+                    title={canApply ? undefined : applyDisabledTitle}
                     data-test-subj="contextDreamingTemplateSave"
                   >
-                    {i18n.translate('xpack.contextEngine.dreamingTemplate.applyButton', {
-                      defaultMessage: 'Turn on dreaming',
-                    })}
+                    {applyButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

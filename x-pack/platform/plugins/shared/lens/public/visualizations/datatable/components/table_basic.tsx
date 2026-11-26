@@ -27,6 +27,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridControlColumn,
   EuiDataGridColumn,
+  EuiDataGridProps,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
@@ -93,6 +94,13 @@ const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
   border: 'horizontal',
   header: 'shade',
   footer: 'shade',
+};
+
+// Keep the vertical scrollbar so the grid's clientWidth, which EUI sizes columns from,
+// does not change when rows start or stop overflowing
+// (https://github.com/elastic/kibana/issues/208426).
+const DATA_GRID_VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
+  style: { overflow: 'auto scroll' },
 };
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
@@ -697,6 +705,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           }
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
+          virtualizationOptions={DATA_GRID_VIRTUALIZATION_OPTIONS}
           renderFooterCellValue={renderSummaryRow}
           ref={dataGridRef}
         />
@@ -707,7 +716,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
 const datatableContainerStyles = css`
   height: 100%;
-  overflow: auto hidden;
+  width: 100%;
+  // DataGrid owns scrolling. Its width must not propagate to the Lens wrappers, or their
+  // scrollbars steal width and feed EUI's column-width ResizeObserver loop
+  // (https://github.com/elastic/kibana/issues/208426).
+  contain: inline-size;
+  overflow: hidden;
   user-select: text;
 
   .lnsTableCell--multiline {

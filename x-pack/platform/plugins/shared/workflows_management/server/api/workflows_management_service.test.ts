@@ -311,7 +311,9 @@ describe('WorkflowsService (facade)', () => {
       await service.bulkCreateWorkflows([{ name: 'n' } as any], 'default', request, {
         overwrite: true,
       });
-      await service.updateWorkflow('wf-1', { name: 'new' } as any, 'default', request);
+      await service.updateWorkflow('wf-1', { name: 'new' } as any, 'default', request, {
+        isManaged: false,
+      });
       await service.deleteWorkflows(['wf-1'], 'default', { force: true }, request);
       await service.disableAllWorkflows('my-space', request);
 
@@ -337,7 +339,8 @@ describe('WorkflowsService (facade)', () => {
         'wf-1',
         { name: 'new' },
         'default',
-        request
+        request,
+        { isManaged: false }
       );
       expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(
         ['wf-1'],
@@ -439,6 +442,7 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getAvailableConnectors('default', request);
       await service.validateWorkflow('name: wf', 'default', request, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: false,
       });
@@ -449,7 +453,7 @@ describe('WorkflowsService (facade)', () => {
         'name: wf',
         'default',
         request,
-        { includeVariableRules: false, includeEsqlRules: false }
+        { includeVariableRules: false, includeEsqlRules: false, isManaged: false }
       );
       expect(validationSpies.getWorkflowZodSchema).toHaveBeenCalledWith(
         { loose: false },

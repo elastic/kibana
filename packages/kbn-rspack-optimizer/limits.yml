@@ -137,6 +137,7 @@ pageLoadAssetSize:
   navigation: 14840
   newsfeed: 10708
   nightshift: 5665
+  nightshiftDetection: 1500
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630

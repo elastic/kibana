@@ -25,15 +25,7 @@ interface StatSeries {
   data: StatDataPoint[];
 }
 
-export interface IngestChartTotals {
-  /** Undefined when the value could not be loaded. */
-  docs?: number;
-  storageBytes?: number;
-  loading: boolean;
-  storageError?: boolean;
-}
-
-const UNKNOWN_STAT_VALUE = '-';
+export const UNKNOWN_STAT_VALUE = '-';
 
 export interface IngestChartStatisticsProps {
   allTimeseries: StatSeries[];
@@ -43,15 +35,9 @@ export interface IngestChartStatisticsProps {
   timeStart: number;
   /** End of the current time range as a Unix timestamp in ms. */
   timeEnd: number;
-  /** ES|QL source for the stream (stream name, or query view for query streams). */
+  /** ES|QL source for the stream. */
   esqlSource: string;
   streamName: string;
-  /** Query streams are views over other streams and have no dedicated index, so storage / total docs are not shown. */
-  isQueryStream: boolean;
-  /** Draft streams have no backing data stream, so storage / total docs are not shown. */
-  isDraft: boolean;
-  /** Precomputed totals for sources that span several streams; skips the per-stream fetches. */
-  totals?: IngestChartTotals;
   /** The histogram failed, so values derived from it are unknown rather than zero. */
   histogramUnavailable?: boolean;
 }
@@ -65,9 +51,6 @@ export function IngestChartStatistics({
   timeEnd,
   esqlSource,
   streamName,
-  isQueryStream,
-  isDraft,
-  totals,
   histogramUnavailable = false,
 }: IngestChartStatisticsProps) {
   const {
@@ -81,20 +64,13 @@ export function IngestChartStatistics({
     },
   } = useKibana();
 
-  // Query and Draft streams are temporary in nature and don't have real backing indices.
-  const showTotalDocs = !isQueryStream && !isDraft;
-  const showStorageSize = !isQueryStream && !isDraft && !isServerless;
-  const hasTotals = totals !== undefined;
-
   const totalDocsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      showTotalDocs && !hasTotals
-        ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
-            signal,
-            params: { query: { stream: streamName } },
-          })
-        : Promise.resolve([]),
-    [hasTotals, showTotalDocs, streamName, streamsRepositoryClient]
+      streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
+        signal,
+        params: { query: { stream: streamName } },
+      }),
+    [streamName, streamsRepositoryClient]
   );
 
   // Count docs for the equivalent period one week ago to compute trends.
@@ -113,13 +89,13 @@ export function IngestChartStatistics({
 
   const storeStatsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      !isQueryStream && !isServerless && !hasTotals
+      !isServerless
         ? streamsRepositoryClient.fetch('GET /internal/streams/{name}/_store_stats', {
             signal,
             params: { path: { name: streamName } },
           })
         : Promise.resolve({ store_size_bytes: 0 }),
-    [hasTotals, isQueryStream, isServerless, streamName, streamsRepositoryClient]
+    [isServerless, streamName, streamsRepositoryClient]
   );
 
   const { docsInRange, peakRateDocsSec, avgDocsPerDay } = useMemo(() => {
@@ -136,19 +112,15 @@ export function IngestChartStatistics({
     };
   }, [allTimeseries, intervalMs, timeStart, timeEnd]);
 
-  const totalDocs = hasTotals
-    ? totals.docs
-    : totalDocsFetch.error
-      ? undefined
-      : (totalDocsFetch.value?.find((s) => s.stream === streamName)?.count ?? 0);
-  const totalDocsLoading = hasTotals ? totals.loading : totalDocsFetch.loading;
-  const storageBytes = hasTotals
-    ? totals.storageBytes
-    : storeStatsFetch.error
-      ? undefined
-      : (storeStatsFetch.value?.store_size_bytes ?? 0);
-  const storageLoading = hasTotals ? totals.loading : storeStatsFetch.loading;
-  const storageError = hasTotals ? totals.storageError : Boolean(storeStatsFetch.error);
+  const totalDocs = totalDocsFetch.error
+    ? undefined
+    : (totalDocsFetch.value?.find((s) => s.stream === streamName)?.count ?? 0);
+  const totalDocsLoading = totalDocsFetch.loading;
+  const storageBytes = storeStatsFetch.error
+    ? undefined
+    : (storeStatsFetch.value?.store_size_bytes ?? 0);
+  const storageLoading = storeStatsFetch.loading;
+  const storageError = Boolean(storeStatsFetch.error);
 
   const previousDocsInRange = useMemo(() => {
     const result = previousPeriodFetch.value;
@@ -167,26 +139,24 @@ export function IngestChartStatistics({
       <EuiHorizontalRule margin="m" />
 
       <EuiFlexGroup responsive wrap={false} gutterSize="xl">
-        {showTotalDocs && (
-          <StatCell
-            data-test-subj="streamsAppIngestStatDocsTotal"
-            title={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.label', {
-              defaultMessage: 'Docs total',
-            })}
-            value={
-              totalDocsLoading ? (
-                <EuiLoadingSpinner size="m" />
-              ) : totalDocs === undefined ? (
-                UNKNOWN_STAT_VALUE
-              ) : (
-                formatNumber(totalDocs, '0,0')
-              )
-            }
-            unit={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.unit', {
-              defaultMessage: 'total docs',
-            })}
-          />
-        )}
+        <StatCell
+          data-test-subj="streamsAppIngestStatDocsTotal"
+          title={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.label', {
+            defaultMessage: 'Docs total',
+          })}
+          value={
+            totalDocsLoading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : totalDocs === undefined ? (
+              UNKNOWN_STAT_VALUE
+            ) : (
+              formatNumber(totalDocs, '0,0')
+            )
+          }
+          unit={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.unit', {
+            defaultMessage: 'total docs',
+          })}
+        />
 
         <StatCell
           data-test-subj="streamsAppIngestStatDocsInRange"
@@ -225,7 +195,7 @@ export function IngestChartStatistics({
           }
         />
 
-        {showStorageSize && (
+        {!isServerless && (
           <StatCell
             title={i18n.translate('xpack.streams.ingestChartStatistics.storageSize.label', {
               defaultMessage: 'Storage size',
@@ -275,14 +245,14 @@ function computeTrend(current: number, previous: number | null): number | null {
  * - >= 1   → one optional decimal (e.g. "5.7")
  * - < 1    → two decimals (e.g. "0.52")
  */
-function formatDocsPerSec(value: number): string {
+export function formatDocsPerSec(value: number): string {
   if (value >= 100) return formatNumber(value, '0,0');
   if (value >= 1) return formatNumber(value, '0.[0]');
   return formatNumber(value, '0.00');
 }
 
 /** Splits a formatted bytes string (e.g. "14.2 GB") into its numeric and unit parts. */
-function splitFormattedBytes(bytes: number): { value: string; unit: string } {
+export function splitFormattedBytes(bytes: number): { value: string; unit: string } {
   const formatted = formatBytes(bytes);
   const lastSpace = formatted.lastIndexOf(' ');
   if (lastSpace === -1) return { value: formatted, unit: '' };

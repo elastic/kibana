@@ -2355,7 +2355,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     id: string,
     agentVersion: string,
-    options?: { standalone: boolean; redactProxySecrets?: boolean }
+    options?: { standalone: boolean; redactSecrets?: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
     if (fullAgentPolicy) {
@@ -2407,7 +2407,7 @@ class AgentPolicyService {
       standalone?: boolean;
       agentPolicy?: AgentPolicy;
       agentVersion?: string;
-      redactProxySecrets?: boolean;
+      redactSecrets?: boolean;
       spaceId?: string;
     }
   ): Promise<FullAgentPolicy | null> {

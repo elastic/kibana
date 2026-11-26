@@ -88,7 +88,7 @@ export class AgentBuilderWorkflowsPlugin implements Plugin<
       resumeWorkflowExecutionTool({ workflowsManagement, getSecurity }),
       listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
-      executeWorkflowTool({ workflowsManagement, getSecurity }),
+      executeWorkflowTool({ workflowsManagement, getSecurity, logger: this.logger }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 

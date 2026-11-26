@@ -159,6 +159,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
       'default',
       request,
       WorkflowChangeHistoryAction.workflowRestore,
+      { isManaged: false },
       {
         eventId: 'event-v3',
         sequence: 3,

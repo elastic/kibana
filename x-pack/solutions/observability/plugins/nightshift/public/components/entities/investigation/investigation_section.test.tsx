@@ -245,4 +245,57 @@ describe('InvestigationSection', () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('No open investigations')).not.toBeInTheDocument();
   });
+
+  it('shows the refresh warning callout when a collapsed Closed section has rows and refetch fails', () => {
+    const onRetry = jest.fn();
+    const closedInvestigation: InvestigationSummary = {
+      ...investigation,
+      metadata: { ...investigation.metadata, status: 'closed' },
+    };
+    const { rerender } = render(
+      <I18nProvider>
+        <InvestigationSection
+          id="closed"
+          investigations={[closedInvestigation]}
+          total={1}
+          hasMore={false}
+          isOpen={false}
+          onShowMore={jest.fn()}
+          onRetry={onRetry}
+        />
+      </I18nProvider>
+    );
+
+    expect(
+      screen.queryByText('Showing the last loaded results; refreshing failed.')
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <I18nProvider>
+        <InvestigationSection
+          id="closed"
+          investigations={[closedInvestigation]}
+          total={1}
+          hasMore={false}
+          isOpen={false}
+          error={new Error('Network unavailable')}
+          onShowMore={jest.fn()}
+          onRetry={onRetry}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Showing the last loaded results; refreshing failed.')).toBeVisible();
+    expect(screen.queryByText('Unable to load investigations')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSectionToggle-closed')).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent('1');
+
+    const retry = screen.getByRole('button', { name: 'Retry loading Closed investigations' });
+    expect(retry).toBeVisible();
+    fireEvent.click(retry);
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
 });

@@ -469,7 +469,7 @@ export class TaskManagerPlugin implements Plugin<
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,
         store: taskStore,
-        taskTypes: new Set(this.definitions.getAllTypes()),
+        getTaskTypes: () => this.definitions.getAllTypes(),
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
 

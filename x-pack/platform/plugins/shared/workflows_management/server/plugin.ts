@@ -30,6 +30,7 @@ import {
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { getWorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { registerLibraryEventTypes, registerLibraryUsageCollector } from './library';
 import { WorkflowPagesService } from './pages/workflow_pages_service';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
@@ -72,6 +73,14 @@ export class WorkflowsPlugin implements Plugin<
     this.logger.debug('Workflows Management: Setup');
 
     registerUISettings(core, plugins);
+    registerLibraryEventTypes(core.analytics);
+    if (plugins.usageCollection) {
+      registerLibraryUsageCollector({
+        usageCollection: plugins.usageCollection,
+        libraryConfig: this.config.library,
+        getStartServices: core.getStartServices,
+      });
+    }
 
     plugins.features?.registerKibanaFeature(
       getWorkflowsManagementFeatureConfig({ pagesEnabled: this.config.pages.enabled })
@@ -141,6 +150,7 @@ export class WorkflowsPlugin implements Plugin<
       spaces,
       workflowsService,
       audit,
+      analytics: core.analytics,
     });
 
     core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(

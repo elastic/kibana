@@ -690,7 +690,14 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     // On matching labels, hand LLM evals to the dedicated `kibana-evals-pr-llm-evals` pipeline via a
     // fire-and-forget trigger step (not inline) so their runtime is off the PR's critical path.
-    const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
+    const evalsTrigger = getEvalTriggerStep(
+      GITHUB_PR_LABELS,
+      prChanges.flatMap((change) =>
+        change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
+      ),
+      // GitHub lists at most 3,000 files for a PR (see `doAnyChangesMatch`).
+      prChanges.length >= 3000
+    );
     if (evalsTrigger) {
       pipeline.push(evalsTrigger);
     }

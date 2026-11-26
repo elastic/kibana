@@ -11,6 +11,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
 import { i18n as i18nLib, EN_LOCALE } from '@kbn/i18n';
+import { getBrowserTracingConfiguration } from '@kbn/apm-config-loader';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import type { Logger } from '@kbn/logging';
@@ -316,6 +317,7 @@ export class RenderingService {
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
+    const edotBrowserConfig = getBrowserTracingConfiguration() ?? null;
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
@@ -371,6 +373,7 @@ export class RenderingService {
         },
         clusterInfo,
         apmConfig,
+        edotBrowserConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,

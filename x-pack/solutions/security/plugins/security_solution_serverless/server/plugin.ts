@@ -17,6 +17,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
+  AGENT_BUILDER_THREADS_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import {
   SECURITY_CONTEXT_ENGINE_PROJECT_SETTINGS,
@@ -154,6 +155,9 @@ export class SecuritySolutionServerlessPlugin implements Plugin<
       }
       if (!projectSettings.includes(AGENT_BUILDER_API_DISCOVERY_SETTING_ID)) {
         projectSettings.push(AGENT_BUILDER_API_DISCOVERY_SETTING_ID);
+      }
+      if (!projectSettings.includes(AGENT_BUILDER_THREADS_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_THREADS_SETTING_ID);
       }
       for (const settingId of SECURITY_CONTEXT_ENGINE_PROJECT_SETTINGS) {
         if (!projectSettings.includes(settingId)) {

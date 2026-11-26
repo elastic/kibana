@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { assertAiIndicesWritable } from './assert_ai_indices_writable';
-import { AiIndexNotFoundError, AiIndexNotWritableError } from './errors';
+import { AiIndexNotFoundError, AiIndexWriteForbiddenError } from './errors';
 
 const makeAiIndex = (id: string, destValue = `ai-index-ds-${id}`): AiIndexItem =>
   ({
@@ -75,7 +75,7 @@ describe('assertAiIndicesWritable', () => {
     expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
   });
 
-  it('throws AiIndexNotWritableError when write is false or omitted from hasPrivileges', async () => {
+  it('throws AiIndexWriteForbiddenError when write is false or omitted from hasPrivileges', async () => {
     aiIndexService.get.mockImplementation(async (id) => makeAiIndex(id));
     esClient.security.hasPrivileges.mockResolvedValueOnce({
       index: { 'ai-index-ds-ops': { write: true } },
@@ -88,6 +88,6 @@ describe('assertAiIndicesWritable', () => {
         spaceId: 'default',
         aiIndexIds: ['ops', 'sales'],
       })
-    ).rejects.toThrow(AiIndexNotWritableError);
+    ).rejects.toThrow(AiIndexWriteForbiddenError);
   });
 });
