@@ -27738,6 +27738,7 @@ paths:
                         exists_selected: false
                         field_name: response.keyword
                         ignore_validations: false
+                        required: false
                         run_past_timeout: false
                         search_technique: prefix
                         selected_options: []
