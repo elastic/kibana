@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
+import { WORKFLOWS_EXECUTION_STORAGE_SOURCE_FLAG } from './feature_flags';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
+import { createDataClientBundle } from './repositories/data_access_layer';
 import {
   mockDataClientBundleInitSetup,
   mockDataClientBundleInitStart,
@@ -87,5 +90,53 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
     expect(mockDataClientBundleInitStart).toHaveBeenCalledTimes(1);
     expect(startContract.__internalStorage.workflowExecutionsDataClient).toBeDefined();
     expect(startContract.__internalStorage.stepExecutionsDataClient).toBeDefined();
+  });
+
+  it('switches the data client when the storage source feature flag changes', () => {
+    const initializerContext = coreMock.createPluginInitializerContext({
+      logging: { console: false },
+      eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
+    });
+    const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
+    const logger = initializerContext.logger.get();
+    const warnSpy = jest.spyOn(logger, 'warn');
+
+    plugin.setup(coreMock.createSetup() as any, {
+      taskManager: taskManagerMock.createSetup(),
+      cloud: {} as any,
+      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+    });
+
+    const bundle = (createDataClientBundle as jest.Mock).mock.results[0].value as {
+      switchSource: jest.Mock;
+    };
+    const source$ = new Subject<string>();
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getStringValue$.mockReturnValue(source$);
+
+    plugin.start(coreStart, {
+      taskManager: taskManagerMock.createStart(),
+      actions: {} as any,
+      cloud: {} as any,
+      workflowsExtensions: {} as any,
+      licensing: licensingMock.createStart(),
+    });
+
+    expect(coreStart.featureFlags.getStringValue$).toHaveBeenCalledWith(
+      WORKFLOWS_EXECUTION_STORAGE_SOURCE_FLAG,
+      'plain_index'
+    );
+
+    source$.next('data_stream');
+    expect(bundle.switchSource).toHaveBeenCalledWith('data_stream');
+
+    source$.next('elasticsearch');
+    expect(bundle.switchSource).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('elasticsearch'));
+
+    plugin.stop();
+    source$.next('plain_index');
+    expect(bundle.switchSource).toHaveBeenCalledTimes(1);
   });
 });

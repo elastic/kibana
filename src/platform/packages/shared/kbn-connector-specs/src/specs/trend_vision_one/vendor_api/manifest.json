@@ -1,0 +1,225 @@
+{
+  "operations": {
+    "addAlertNote": [
+      {
+        "method": "post",
+        "path": "/v3.0/workbench/alerts/{alertId}/notes",
+        "source": "vision_one"
+      }
+    ],
+    "addToExceptionList": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/threatintel/suspiciousObjectExceptions",
+        "source": "vision_one"
+      }
+    ],
+    "addToSuspiciousObjectList": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/threatintel/suspiciousObjects",
+        "source": "vision_one"
+      }
+    ],
+    "collectForensicFile": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/endpoints/collectFile",
+        "source": "vision_one"
+      }
+    ],
+    "deleteEmailMessage": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/emails/delete",
+        "source": "vision_one"
+      }
+    ],
+    "disableUserAccount": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/domainAccounts/disable",
+        "source": "vision_one"
+      }
+    ],
+    "enableUserAccount": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/domainAccounts/enable",
+        "source": "vision_one"
+      }
+    ],
+    "forceUserSignOut": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/domainAccounts/signOut",
+        "source": "vision_one"
+      }
+    ],
+    "getAlertDetails": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v3.0/workbench/alerts/{id}",
+        "source": "vision_one"
+      }
+    ],
+    "getResponseTaskStatus": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v3.0/response/tasks/{id}",
+        "source": "vision_one"
+      }
+    ],
+    "getSandboxAnalysisResult": [
+      {
+        "method": "get",
+        "path": "/v3.0/sandbox/analysisResults/{id}",
+        "source": "vision_one"
+      }
+    ],
+    "isolateEndpoint": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/endpoints/isolate",
+        "source": "vision_one"
+      }
+    ],
+    "listAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "missing",
+          "request": {
+            "cursorParam": "skipToken"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/v3.0/workbench/alerts",
+        "source": "vision_one"
+      }
+    ],
+    "listEndpoints": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "end": "missing",
+          "request": {
+            "cursorParam": "skipToken",
+            "sizeParam": "top"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/v3.0/endpointSecurity/endpoints",
+        "source": "vision_one"
+      }
+    ],
+    "listObservedAttackTechniques": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextBatchToken",
+            "sizeParam": "top"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/v3.0/oat/detections",
+        "source": "vision_one"
+      }
+    ],
+    "quarantineEmailMessage": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/emails/quarantine",
+        "source": "vision_one"
+      }
+    ],
+    "removeFromSuspiciousObjectList": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/threatintel/suspiciousObjects/delete",
+        "source": "vision_one"
+      }
+    ],
+    "restoreEndpointConnection": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/endpoints/restore",
+        "source": "vision_one"
+      }
+    ],
+    "submitFileToSandbox": [
+      {
+        "method": "post",
+        "path": "/v3.0/sandbox/files/analyze",
+        "source": "vision_one"
+      }
+    ],
+    "submitUrlsToSandbox": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/sandbox/urls/analyze",
+        "source": "vision_one"
+      }
+    ],
+    "terminateProcess": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/v3.0/response/endpoints/terminateProcess",
+        "source": "vision_one"
+      }
+    ],
+    "updateAlertStatus": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v3.0/workbench/alerts/{id}",
+        "source": "vision_one"
+      },
+      {
+        "method": "patch",
+        "path": "/v3.0/workbench/alerts/{id}",
+        "source": "vision_one"
+      }
+    ]
+  },
+  "sources": {
+    "vision_one": {
+      "apiVersion": "v3.0",
+      "fetchedAt": "2026-11-25T02:45:54.136Z",
+      "format": "openapi",
+      "url": "https://automation.trendmicro.com/sp-api-open-v3.0.json"
+    }
+  }
+}

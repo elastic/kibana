@@ -96,6 +96,17 @@ interface ResolutionErrorEvent extends ResolutionEventBase {
   operation: string;
 }
 
+interface ResolutionRuleStatePayload {
+  id: string;
+  enabled: boolean;
+  defaultEnabled: boolean;
+}
+
+interface ResolutionRulesStateEvent {
+  namespace: string;
+  rules: ResolutionRuleStatePayload[];
+}
+
 interface ResolutionStateEvent {
   entityType: string;
   namespace: string;
@@ -179,7 +190,7 @@ export interface EntityMaintainerRunSummaryEvent {
   namespace: string;
   /** UUID shared by all events from one scheduled run; joins to logs */
   runId: string;
-  /** Sub-run discriminator; only risk-score uses this (one event per entity type) */
+  /** Sub-run discriminator: entity_type for risk score, rule for resolution rules */
   scope?: {
     /** Scope discriminator kind (e.g. "entity_type") */
     kind: string;
@@ -448,16 +459,17 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
       properties: {
         kind: {
           type: 'keyword',
-          _meta: { description: 'Scope discriminator kind (e.g. "entity_type")' },
+          _meta: { description: 'Scope discriminator kind (e.g. "entity_type", "rule")' },
         },
         value: {
           type: 'keyword',
-          _meta: { description: 'Scope value (e.g. "host", "user", "service", "generic")' },
+          _meta: { description: 'Scope value (e.g. "host", "user", or a resolution rule id)' },
         },
       },
       _meta: {
         optional: true,
-        description: 'Sub-run discriminator; only risk-score uses this (one event per entity type)',
+        description:
+          'Sub-run discriminator: entity_type for risk score (one event per entity type), rule for resolution rules (one event per rule)',
       },
     },
     durationMs: {
@@ -825,6 +837,40 @@ export const ENTITY_STORE_RESOLUTION_STATE_EVENT = {
   },
 } as const satisfies EventTypeOpts<ResolutionStateEvent>;
 
+export const ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT = {
+  eventType: 'entity_store_resolution_rules_state',
+  schema: {
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana space the resolution rules belong to (e.g. "default")',
+      },
+    },
+    rules: {
+      type: 'array',
+      items: {
+        properties: {
+          id: {
+            type: 'keyword',
+            _meta: { description: 'Resolution rule identifier (e.g. "email_exact_match")' },
+          },
+          enabled: {
+            type: 'boolean',
+            _meta: { description: 'Whether the rule is enabled in this space' },
+          },
+          defaultEnabled: {
+            type: 'boolean',
+            _meta: { description: 'Whether the rule is enabled by default' },
+          },
+        },
+      },
+      _meta: {
+        description: 'Effective enabled state of every resolution rule in this space',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<ResolutionRulesStateEvent>;
+
 export const ENTITY_STORE_RESOLUTION_ERROR_EVENT = {
   eventType: 'entity_store_resolution_error',
   schema: {
@@ -932,6 +978,7 @@ const events = [
   ENTITY_STORE_RESOLUTION_GROUP_VIEW_EVENT,
   ENTITY_STORE_RESOLUTION_ERROR_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
+  ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -955,6 +1002,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_RESOLUTION_GROUP_VIEW_EVENT.eventType]: ResolutionGroupViewEvent;
   [ENTITY_STORE_RESOLUTION_ERROR_EVENT.eventType]: ResolutionErrorEvent;
   [ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType]: ResolutionStateEvent;
+  [ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT.eventType]: ResolutionRulesStateEvent;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
