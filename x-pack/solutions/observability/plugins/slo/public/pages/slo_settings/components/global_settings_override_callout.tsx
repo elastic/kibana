@@ -15,26 +15,7 @@ interface Props {
 }
 
 export function GlobalSettingsOverrideCallout({ sliRetention }: Props) {
-  const { enabled, periodDays, updatedAt, effective } = sliRetention;
-
-  const appliedValue = i18n.translate('xpack.slo.globalSettings.overrideCallout.appliedValue', {
-    defaultMessage:
-      'The {setting} setting in kibana.yml overrides these settings. Applied value: {enabled, select, true {enabled} other {disabled}}, {periodDays} days.',
-    values: {
-      setting: 'xpack.slo.sliRetention',
-      enabled: String(effective.enabled),
-      periodDays: effective.periodDays,
-    },
-  });
-
-  const savedValue =
-    updatedAt !== null
-      ? i18n.translate('xpack.slo.globalSettings.overrideCallout.savedValue', {
-          defaultMessage:
-            'The saved value ({enabled, select, true {enabled} other {disabled}}, {periodDays} days) applies once the setting is removed from kibana.yml.',
-          values: { enabled: String(enabled), periodDays },
-        })
-      : undefined;
+  const { effective } = sliRetention;
 
   return (
     <KbnWarningCallout
@@ -42,7 +23,15 @@ export function GlobalSettingsOverrideCallout({ sliRetention }: Props) {
       title={i18n.translate('xpack.slo.globalSettings.overrideCallout.title', {
         defaultMessage: 'SLI retention is set in kibana.yml',
       })}
-      text={savedValue ? `${appliedValue} ${savedValue}` : appliedValue}
+      text={i18n.translate('xpack.slo.globalSettings.overrideCallout.appliedValue', {
+        defaultMessage:
+          'The {setting} setting in kibana.yml takes precedence over these settings until it is removed. Applied value: {enabled, select, true {enabled} other {disabled}}, {periodDays} days.',
+        values: {
+          setting: 'xpack.slo.sliRetention',
+          enabled: String(effective.enabled),
+          periodDays: effective.periodDays,
+        },
+      })}
     />
   );
 }

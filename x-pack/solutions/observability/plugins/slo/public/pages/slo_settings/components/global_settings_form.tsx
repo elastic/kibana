@@ -103,7 +103,6 @@ export function GlobalSettingsForm({ settings }: Props) {
                   {...field}
                   label={enableLabel}
                   checked={value}
-                  disabled={isOverridden}
                   data-test-subj="sloGlobalSettingsRetentionSwitch"
                   onChange={(e) => onChange(e.target.checked)}
                 />
@@ -147,7 +146,7 @@ export function GlobalSettingsForm({ settings }: Props) {
                   max={SLI_RETENTION_MAX_PERIOD_DAYS}
                   step={1}
                   isInvalid={fieldState.invalid}
-                  disabled={isOverridden || !isRetentionEnabled}
+                  disabled={!isRetentionEnabled}
                   data-test-subj="sloGlobalSettingsRetentionPeriod"
                   onChange={(e) => onChange(Number(e.target.value))}
                   append={i18n.translate('xpack.slo.globalSettings.retentionPeriodUnit', {
@@ -166,7 +165,7 @@ export function GlobalSettingsForm({ settings }: Props) {
               isLoading={isUpdating}
               data-test-subj="sloGlobalSettingsCancelButton"
               onClick={() => reset()}
-              isDisabled={isOverridden || !isDirty}
+              isDisabled={!isDirty}
             >
               {i18n.translate('xpack.slo.globalSettings.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
@@ -180,7 +179,7 @@ export function GlobalSettingsForm({ settings }: Props) {
               color="primary"
               fill
               type="submit"
-              isDisabled={isOverridden || !isDirty || !isValid}
+              isDisabled={!isDirty || !isValid}
             >
               {i18n.translate('xpack.slo.globalSettings.applyButtonLabel', {
                 defaultMessage: 'Apply',

@@ -46,15 +46,6 @@ const overriddenNeverSaved: GetSLOGlobalSettingsResponse = {
   },
 };
 
-const overriddenSaved: GetSLOGlobalSettingsResponse = {
-  sliRetention: {
-    enabled: false,
-    periodDays: 400,
-    updatedAt: UPDATED_AT,
-    effective: { enabled: true, periodDays: 200, source: 'config' },
-  },
-};
-
 const getSwitch = () => screen.getByTestId('sloGlobalSettingsRetentionSwitch');
 const getPeriod = () => screen.getByTestId('sloGlobalSettingsRetentionPeriod');
 const getSaveButton = () => screen.getByTestId('sloGlobalSettingsSaveButton');
@@ -93,24 +84,17 @@ describe('GlobalSettingsForm', () => {
     expect(getPeriod()).toBeDisabled();
   });
 
-  it('is read-only with a callout showing the effective value when overridden in kibana.yml', () => {
+  it('stays editable with a callout showing the effective value when overridden in kibana.yml', async () => {
     render(<GlobalSettingsForm settings={overriddenNeverSaved} />);
 
-    expect(getSwitch()).toBeDisabled();
-    expect(getPeriod()).toBeDisabled();
-    expect(getSaveButton()).toBeDisabled();
     const callout = screen.getByTestId('sloGlobalSettingsOverrideCallout');
     expect(callout).toHaveTextContent('xpack.slo.sliRetention');
+    expect(callout).toHaveTextContent('takes precedence over these settings until it is removed');
     expect(callout).toHaveTextContent('Applied value: enabled, 200 days.');
-    expect(callout).not.toHaveTextContent('The saved value');
-  });
 
-  it('mentions the saved value in the callout when one exists', () => {
-    render(<GlobalSettingsForm settings={overriddenSaved} />);
-
-    expect(screen.getByTestId('sloGlobalSettingsOverrideCallout')).toHaveTextContent(
-      'The saved value (disabled, 400 days) applies once the setting is removed from kibana.yml.'
-    );
+    await userEvent.click(getSwitch());
+    expect(getPeriod()).toBeEnabled();
+    await waitFor(() => expect(getSaveButton()).toBeEnabled());
   });
 
   it('asks for confirmation before enabling retention', async () => {
