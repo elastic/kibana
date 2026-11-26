@@ -1892,6 +1892,7 @@ describe('Task Runner', () => {
         recoveredAlertsFromState: {},
         ruleLabel: "test:1: 'rule-name'",
         runTimestamp: undefined,
+        shouldUntrackOrphanedAlerts: true,
         snoozedInstances: [],
         startedAt: new Date(DATE_1970),
       });
