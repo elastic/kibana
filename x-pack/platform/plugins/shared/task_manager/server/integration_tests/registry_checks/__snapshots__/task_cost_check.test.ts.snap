@@ -155,10 +155,6 @@ Array [
     "taskType": "alerting_v2:alert_actions_cleanup",
   },
   Object {
-    "cost": 1,
-    "taskType": "apm:republish_rum_policy",
-  },
-  Object {
     "cost": 4,
     "taskType": "digital_experience:mobile-sessions-summaries",
   },

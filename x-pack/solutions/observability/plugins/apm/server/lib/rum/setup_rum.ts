@@ -11,7 +11,7 @@ import { boundedString, schema } from '@kbn/config-schema';
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { TaskCost, throwRetryableError } from '@kbn/task-manager-plugin/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 import type { APMPluginStartDependencies } from '../../types';
 import { assertDeploymentWideRumWrite } from './rum_authz';
 import {
@@ -71,7 +71,6 @@ export const setupRum = (
       title: 'Republish the APM RUM policy',
       description: 'Restores the latest saved RUM policy in Agentless API',
       timeout: '30s',
-      cost: TaskCost.Tiny,
       createTaskRunner: ({ signal }: RunContext) => ({
         async run() {
           const policy = await service;

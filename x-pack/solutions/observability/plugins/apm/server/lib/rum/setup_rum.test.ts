@@ -16,7 +16,6 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { AgentlessRumPolicy } from '@kbn/fleet-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { RUM_POLICY_TYPE } from './rum_policy_service';
 import { setupRum } from './setup_rum';
@@ -286,7 +285,7 @@ describe('setupRum', () => {
       start();
 
       expect(taskSetup.registerTaskDefinitions).toHaveBeenCalledWith({
-        [TASK_TYPE]: expect.objectContaining({ timeout: '30s', cost: TaskCost.Tiny }),
+        [TASK_TYPE]: expect.objectContaining({ timeout: '30s' }),
       });
       await expect(runTask()).resolves.toBeUndefined();
       expect(agentless.publish).not.toHaveBeenCalled();
