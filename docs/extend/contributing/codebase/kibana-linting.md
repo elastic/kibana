@@ -16,10 +16,10 @@ Another tool we use for enforcing consistent coding style is EditorConfig, which
 
 ## Setup Guide for VS Code Users [_setup_guide_for_vs_code_users]
 
-Install the [Oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode). It reports oxlint errors as you type in JavaScript and TypeScript files. Oxlint does not discover `oxlint.config.mjs` automatically, so point the extension at it in your workspace settings:
+Install the [Oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode). It reports oxlint errors as you type in JavaScript and TypeScript files. Oxlint does not discover `oxlint.config.mjs` automatically; bootstrap (`node scripts/update_vscode_config`) points the extension at it in your workspace settings:
 
 ```json
-"oxc.configPath": "oxlint.config.mjs"
+"oxc.configPath": "${workspaceFolder}/oxlint.config.mjs"
 ```
 
 The extension can automatically fix trivial lint errors when you save a file by adding this line in your settings.
@@ -36,13 +36,10 @@ The ESLint extension is not needed; {{kib}} no longer runs ESLint.
 
 Code formatting is handled by [oxfmt](https://oxc.rs/docs/guide/usage/formatter), not by oxlint. The configuration lives in [`.oxfmtrc.json`](https://github.com/elastic/kibana/blob/main/.oxfmtrc.json) and applies to JavaScript and TypeScript files only. Run `node scripts/oxfmt [paths...]` to format files, or `node scripts/oxfmt --check` to report unformatted files without changing them; CI runs the latter. When fixing lint errors from the command line, run `node scripts/lint --fix` first and `node scripts/oxfmt` second so the lint fixes get formatted.
 
-For format-on-save, install the [Oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode) (other editors are covered in the [oxfmt editor guide](https://oxc.rs/docs/guide/usage/formatter/editors)) and set it as the default formatter for JavaScript and TypeScript:
+Bootstrap also sets the Oxc extension as the default formatter for JavaScript and TypeScript in your workspace settings, so Prettier extensions don't reformat these files. For format-on-save, install the [Oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode) (other editors are covered in the [oxfmt editor guide](https://oxc.rs/docs/guide/usage/formatter/editors)) and enable it in your settings:
 
 ```json
-"[javascript][javascriptreact][typescript][typescriptreact]": {
-  "editor.defaultFormatter": "oxc.oxc-vscode",
-  "editor.formatOnSave": true
-}
+"editor.formatOnSave": true
 ```
 
 Avoid using the [`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the {{kib}} project. Its output differs from oxfmt's in places and it would format files that the project deliberately leaves untouched.

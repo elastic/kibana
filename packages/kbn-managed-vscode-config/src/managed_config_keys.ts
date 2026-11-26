@@ -74,6 +74,18 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
       },
     ],
   },
+  // oxlint only auto-discovers `.oxlintrc.json` and `oxlint.config.ts`/`.mts`, so point the Oxc
+  // extension at our config explicitly.
+  {
+    key: 'oxc.configPath',
+    value: '${workspaceFolder}/oxlint.config.mjs',
+  },
+  // Format JS/TS with oxfmt through the Oxc extension (oxc.oxc-vscode). Without it, a Prettier
+  // extension would format with Prettier's defaults since the repo has no Prettier config.
+  ...['javascript', 'javascriptreact', 'typescript', 'typescriptreact'].map((language) => ({
+    key: `[${language}]`,
+    value: { 'editor.defaultFormatter': 'oxc.oxc-vscode' },
+  })),
 ];
 
 /**
