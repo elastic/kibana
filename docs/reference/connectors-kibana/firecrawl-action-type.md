@@ -33,9 +33,9 @@ The Firecrawl connector has the following actions:
 `scrape`
 :   Scrape a single URL and extract content (for example, Markdown or HTML).
     - `url` (required): The URL to scrape.
-    - `formats` (optional): Output formats: `markdown`, `html`, `links`, `screenshot`, `extract`. Defaults to Markdown.
     - `onlyMainContent` (optional): Return only main content, excluding navigation and footer elements. Defaults to true.
-    - `waitFor` (optional): Delay in milliseconds before fetching (useful for JavaScript-rendered pages).
+    - `waitFor` (optional): Delay in milliseconds before fetching, from 0 to 60000 (useful for JavaScript-rendered pages). Defaults to 0.
+    - `maxMarkdownLength` (optional): Maximum characters of Markdown to return, from 1000 to 500000. Defaults to 100000.
 
 `search`
 :   Search the web and optionally get full content from results.
@@ -46,16 +46,24 @@ The Firecrawl connector has the following actions:
 :   Map a website to discover indexed URLs.
     - `url` (required): Base URL to map.
     - `search` (optional): Search term to filter or order URLs by relevance.
-    - `limit` (optional): Maximum URLs to return. Defaults to 5000.
+    - `limit` (optional): Maximum URLs to return, from 1 to 100000. Defaults to 5000.
     - `includeSubdomains` (optional): Include subdomains. Defaults to true.
-    - `ignoreQueryParameters` (optional): Deduplicate by path only. Defaults to true.
 
 `crawl`
-:   Start an asynchronous crawl of a website. Returns a job ID. Use `getCrawlStatus` to poll for results.
+:   Start an asynchronous crawl of a website. Returns a job ID. Use `getCrawlStatus` to poll for results, or use `crawlAndWait` to wait for the results in one action.
     - `url` (required): Base URL to start crawling from.
-    - `limit` (optional): Maximum pages to crawl. Defaults to 100.
+    - `limit` (optional): Maximum pages to crawl, from 1 to 100. Defaults to 20.
     - `maxDiscoveryDepth` (optional): Maximum discovery depth.
     - `allowExternalLinks` (optional): Follow external links. Defaults to false.
+
+`crawlAndWait`
+:   Crawl a website and wait for the crawl to finish. Prefer it for small or well-known sites; use `crawl` and `getCrawlStatus` for large sites or when the duration is unpredictable. The action returns the URL, title and a short Markdown snippet (500 characters) for at most 30 pages, even when `limit` is higher. It fails if the crawl is still running after `maxWaitMs`.
+    - `url` (required): Base URL to start crawling from.
+    - `limit` (optional): Maximum pages to crawl, from 1 to 100. Defaults to 20.
+    - `maxDiscoveryDepth` (optional): Maximum discovery depth.
+    - `allowExternalLinks` (optional): Follow external links. Defaults to false.
+    - `pollIntervalMs` (optional): How often to poll the crawl job, in milliseconds, from 1000 to 60000. Defaults to 3000.
+    - `maxWaitMs` (optional): How long to wait for the crawl, in milliseconds, from 5000 to 3600000. Defaults to 1800000 (30 minutes). The deadline is checked between polls, so the action can run up to `pollIntervalMs` longer than this value.
 
 `getCrawlStatus`
 :   Get the status and results of a crawl job.

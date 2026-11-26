@@ -16,6 +16,8 @@ import { getShapeAt } from '../../../common/utils/zod';
 
 // TODO: unwrap and combine the shapes at the build time instead of at the runtime
 // Union is important because if we use object we override parameters from "body", "path", "query" with the same name with the latest one
+// "body" goes last: when a key is in both "body" and "query" (e.g. `_source`), the request builder sends it in the body,
+// so the body type must win.
 export function generateParamsSchemaString(
   operationIds: string[],
   extendParams: Record<string, string>,
@@ -31,9 +33,9 @@ export function generateParamsSchemaString(
 
   if (operationIds.length === 1) {
     return `z.object({
-      ...getShapeAt(${getRequestSchemaName(operationIds[0])}, 'body'),
-      ...getShapeAt(${getRequestSchemaName(operationIds[0])}, 'path'),
       ...getShapeAt(${getRequestSchemaName(operationIds[0])}, 'query'),
+      ...getShapeAt(${getRequestSchemaName(operationIds[0])}, 'path'),
+      ...getShapeAt(${getRequestSchemaName(operationIds[0])}, 'body'),
       ${extendParamsString}
     })`;
   }
@@ -41,9 +43,9 @@ export function generateParamsSchemaString(
   return `z.union([${operationIds
     .map(
       (operationId) => `z.object({
-      ...getShapeAt(${getRequestSchemaName(operationId)}, 'body'),
-      ...getShapeAt(${getRequestSchemaName(operationId)}, 'path'),
       ...getShapeAt(${getRequestSchemaName(operationId)}, 'query'),
+      ...getShapeAt(${getRequestSchemaName(operationId)}, 'path'),
+      ...getShapeAt(${getRequestSchemaName(operationId)}, 'body'),
       ${extendParamsString}
     })`
     )

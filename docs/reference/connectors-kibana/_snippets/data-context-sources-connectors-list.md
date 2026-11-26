@@ -43,6 +43,7 @@
 - [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
 - [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.
 - [Kubernetes](/reference/connectors-kibana/kubernetes-action-type.md): Read and modify resources in a Kubernetes cluster through its REST API.
+- [Microsoft SQL Server](/reference/connectors-kibana/microsoft-sql-server-action-type.md): Query tables, search rows, explore schema, and execute SQL in a Microsoft SQL Server database.
 - [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams, and start a workflow from channel, chat, and team events.
 - [Monday.com](/reference/connectors-kibana/monday-com-action-type.md): Search boards, read and create items, post updates, and manage workspaces in Monday.com.
 - [MongoDB](/reference/connectors-kibana/mongodb-action-type.md): Query MongoDB collections using find, aggregate, count, and listCollections, and write with insertOne, updateOne, and deleteOne in workflows.
@@ -55,6 +56,7 @@
 - [PagerDuty](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access and manage incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 - [PostHog](/reference/connectors-kibana/posthog-action-type.md): Triage error-tracking issues, run HogQL queries, and control feature flags.
 - [Prometheus](/reference/connectors-kibana/prometheus-action-type.md): Run PromQL queries, and read, silence, and manage alerts and alert groups in Alertmanager.
+- [Redis](/reference/connectors-kibana/redis-action-type.md): Browse keys, read values of every data type, inspect server info, and run commands in Redis.
 - [Rootly](/reference/connectors-kibana/rootly-action-type.md): Declare and drive incidents through their lifecycle.
 - [Salesforce](/reference/connectors-kibana/salesforce-action-type.md): Query and retrieve data from your Salesforce org using SOQL and the REST API.
 - [Sentry](/reference/connectors-kibana/sentry-action-type.md): Triage Sentry issues and provision issue alert rules.
@@ -85,6 +87,10 @@
 **Email security**
 
 - [Sublime Security](/reference/connectors-kibana/sublime-security-action-type.md): Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security.
+
+**Endpoint security**
+
+- [SentinelOne (v2)](/reference/connectors-kibana/sentinelone-v2-action-type.md): Find and isolate endpoints, triage and mitigate threats, run remote scripts, retrieve files, and manage blocklists, exclusions, indicators, firewall and detection rules.
 
 **Threat intelligence**
 

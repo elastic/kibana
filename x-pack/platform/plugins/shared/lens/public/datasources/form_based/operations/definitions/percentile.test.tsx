@@ -681,9 +681,9 @@ describe('percentile', () => {
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
       await user.clear(input);
-      await user.type(input, '12.1212312312312312');
+      await user.type(input, '12.121231231231');
       jest.advanceTimersByTime(256);
-      expect(input).toHaveValue(12.1212312312312312);
+      expect(input).toHaveValue(12.121231231231);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(
         screen.getByText('Only 4 numbers allowed after the decimal point.')

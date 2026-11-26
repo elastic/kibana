@@ -455,4 +455,23 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   ['.idira', lazy(() => import(/* webpackChunkName: "connectorIconIdira" */ './specs/idira/icon'))],
+
+  [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
+        )
+    ),
+  ],
+
+  [
+    '.sentinelone2',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
+    ),
+  ],
+
+  ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
 ]);
