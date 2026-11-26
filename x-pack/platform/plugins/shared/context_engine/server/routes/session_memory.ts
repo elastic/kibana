@@ -9,6 +9,7 @@ import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_API_VERSION,
@@ -37,12 +38,26 @@ import {
   sessionMemoryForgetAuditEvent,
   sessionMemoryRememberAuditEvent,
 } from '../audit/audit_events';
+import { BackgroundWriteTracker } from '../session_memory/background_write_tracker';
 import type { SessionMemoryService } from '../session_memory/types';
 import { resolveSpaceId } from '../utils/resolve_space_id';
 import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
 import { MEMORY_WRITE_SECURITY, resolveMemoryUser, toError } from './memory_user';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
 import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
+
+const REMEMBER_CAPACITY_MESSAGE =
+  'Too many session memory writes are already in progress. Retry shortly.';
+const REMEMBER_RETRY_AFTER_SECONDS = '1';
+
+const toSafeWriteError = (error: unknown): Error => {
+  const name = error instanceof Error && error.name ? error.name : 'Error';
+  const message =
+    isResponseError(error) && error.statusCode !== undefined
+      ? `${name} (status ${error.statusCode})`
+      : name;
+  return Object.assign(new Error(message), { name });
+};
 
 const rememberBodySchema = schema.object({
   id: schema.maybe(
@@ -52,7 +67,7 @@ const rememberBodySchema = schema.object({
       validate: validateNonBlank,
       meta: {
         description:
-          'The id of an existing memory to revise. The revision replaces the memory in full, and the route does not check whether the id exists. Omit this field to generate a new id.',
+          'The id of an existing memory to revise. The revision replaces the memory in full and returns 404 if the memory does not exist, was forgotten, or belongs to another user or space. Omit this field to generate a new id.',
       },
     })
   ),
@@ -213,6 +228,7 @@ export const registerSessionMemoryRoutes = ({
   getSessionMemoryService,
   getAiIndexService,
   isMemoryEnabled,
+  backgroundWrites,
   logger,
 }: {
   router: IRouter;
@@ -220,8 +236,11 @@ export const registerSessionMemoryRoutes = ({
   getSessionMemoryService: () => Promise<SessionMemoryService>;
   getAiIndexService: () => AiIndexService;
   isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
+  backgroundWrites?: BackgroundWriteTracker;
   logger: Logger;
 }) => {
+  const writeTracker = backgroundWrites ?? new BackgroundWriteTracker({ logger });
+
   router.versioned
     .post({
       path: SESSION_MEMORY_REMEMBER_PATH,
@@ -230,11 +249,12 @@ export const registerSessionMemoryRoutes = ({
       summary: 'Remember a session memory',
       description: [
         'Writes one memory to the session memory store. Pass `id` to revise an existing memory. The revision replaces the memory in full.',
-        'Returns 202 with the memory id and writes the memory in the background, because semantic indexing runs inside the write. The memory becomes searchable after the background write completes.',
+        'Returns 202 with the memory id and writes the memory in the background, because semantic indexing runs inside the write. The memory becomes searchable after the background write completes and Elasticsearch refreshes, so revising a memory immediately after creating it can return 404 until the write is visible.',
         "Requires the `contextEngine:write` privilege. Without `user_id`, the route writes the memory for the caller's user profile, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.",
         'Each AI index in `ai_index_ids` must exist in this space, and the caller requires the Elasticsearch `write` privilege on its backing index. Otherwise, the route rejects the request and writes nothing.',
         'After authorization, validation, and feature-flag checks pass, the route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.',
-        'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.',
+        'Returns 429 with a `Retry-After` header when this Kibana instance is at its in-flight background write limit.',
+        'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), when an AI index in `ai_index_ids` does not exist, or when `id` does not match an active memory of the target user in this space.',
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
@@ -260,7 +280,13 @@ export const registerSessionMemoryRoutes = ({
             },
             404: {
               body: errorResponseSchema,
-              description: 'Context Engine or memory is turned off, or an AI index does not exist.',
+              description:
+                'Context Engine or memory is turned off, an AI index does not exist, or `id` does not match an active memory of the target user in this space.',
+            },
+            429: {
+              body: errorResponseSchema,
+              description:
+                'Too many background memory writes are already in progress on this Kibana instance. Retry after the `Retry-After` interval.',
             },
           },
         },
@@ -336,6 +362,15 @@ export const registerSessionMemoryRoutes = ({
         let service: SessionMemoryService;
         try {
           service = await getSessionMemoryService();
+          if (id !== undefined) {
+            const existing = await service.get({ space, userId: resolvedUser.userId }, id);
+            if (!existing) {
+              return reject(
+                Object.assign(new Error(`Session memory '${id}' not found`), { name: 'NotFound' }),
+                'notFound'
+              );
+            }
+          }
         } catch (error) {
           audit({ memoryId: id, error: toError(error) });
           throw error;
@@ -351,14 +386,26 @@ export const registerSessionMemoryRoutes = ({
             );
             audit({ memoryId });
           } catch (error) {
-            const normalizedError = toError(error);
+            const safeError = toSafeWriteError(error);
             logger.error(
-              `Failed to remember session memory [id=${memoryId}]: ${normalizedError.message}`
+              `Failed to remember session memory [id=${memoryId}]: ${safeError.message}`
             );
-            audit({ memoryId, error: normalizedError });
+            audit({ memoryId, error: safeError });
           }
         };
-        void writeInBackground();
+        if (!writeTracker.tryStart(writeInBackground)) {
+          audit({
+            memoryId: id,
+            error: Object.assign(new Error(REMEMBER_CAPACITY_MESSAGE), {
+              name: 'TooManyRequests',
+            }),
+          });
+          return response.customError({
+            statusCode: 429,
+            body: { message: REMEMBER_CAPACITY_MESSAGE },
+            headers: { 'Retry-After': REMEMBER_RETRY_AFTER_SECONDS },
+          });
+        }
 
         const body: RememberSessionMemoryResponse = { id: memoryId };
         return response.accepted({ body });

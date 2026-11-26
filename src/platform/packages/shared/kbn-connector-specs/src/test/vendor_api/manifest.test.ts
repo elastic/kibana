@@ -68,6 +68,26 @@ describe('serializeManifest', () => {
     expect(parseManifest(serializeManifest(opaque))).toEqual(opaque);
   });
 
+  const lastItemCursor = {
+    style: 'cursor',
+    request: { cursorParam: 'search_after' },
+    response: { in: 'last_item', itemsPath: 'results', nextPath: 'sort' },
+  };
+
+  it('accepts a cursor held in the last item', () => {
+    const declared = withPagination(lastItemCursor) as VendorApiManifest;
+
+    expect(parseManifest(serializeManifest(declared))).toEqual(declared);
+  });
+
+  it('rejects an end signal for a cursor held in the last item, which has none', () => {
+    const invalid = withPagination({ ...lastItemCursor, end: 'null' }) as VendorApiManifest;
+
+    expect(() => serializeManifest(invalid)).toThrow(
+      'does not apply to a cursor held in the last item'
+    );
+  });
+
   it.each([
     ['an unknown field', { ...manifest, extra: true }],
     [
@@ -134,6 +154,31 @@ describe('Markdown reference sources', () => {
         withSource({ format: 'brave-markdown', url: 'https://x.com/llms.txt', pages: [] })
       )
     ).toThrow();
+  });
+});
+
+describe('Aglio reference sources', () => {
+  const withSource = (source: Record<string, unknown>) =>
+    JSON.stringify({
+      ...manifest,
+      sources: { docs: { fetchedAt: '2026-10-07T00:00:00Z', ...source } },
+    });
+
+  it('accepts an Aglio page as a source', () => {
+    const json = withSource({
+      format: 'threatq-html',
+      url: 'https://helpcenter.threatq.com/assets/HTML/api/ThreatQ_REST_API_Reference_v6.16.0.html',
+    });
+
+    expect(parseManifest(json).sources.docs.format).toBe('threatq-html');
+  });
+
+  it('takes no pages, which only Markdown references have', () => {
+    expect(() =>
+      parseManifest(
+        withSource({ format: 'threatq-html', url: 'https://x.com/a.html', pages: ['a/'] })
+      )
+    ).toThrow('only applies to Markdown references');
   });
 });
 

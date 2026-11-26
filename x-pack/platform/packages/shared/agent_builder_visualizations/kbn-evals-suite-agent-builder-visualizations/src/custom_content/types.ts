@@ -17,16 +17,24 @@ export type CustomContentDatasetExample = Example<
   {
     /** Whether the panel ends up with live data (a query) or is static (no query). */
     data: 'static' | 'query';
-    /** Exact `LIMIT` the query must end with. When omitted, only the chart default of 10 is rejected. */
-    limit?: number;
+    /** Exact `LIMIT`s, each matched to a different query in any position. Unmatched queries must not use the chart default of 10. */
+    limit?: number | number[];
+    /** How many queries the panel ends up with: an exact number, or a lower bound. */
+    queryCount?: number | { min: number };
+    /** Where the panel must be stored. When omitted, either is fine. */
+    storedIn?: 'visualization' | 'dashboard';
     /** Labels the executed query must return as rows, in this order (for example funnel steps). */
     rowOrder?: string[];
     /** `style` keeps the query and changes the template; `data` changes the query. */
     edit?: 'style' | 'data';
     /** The measure a data edit adds, as it is written in the query, which the template must then show. */
     addsMeasure?: string;
-    /** Text the final query must contain, ignoring case and whitespace. */
+    /** Text the final queries must contain, ignoring case and whitespace, in any of them. */
     queryContains?: string[];
+    /** Fields the final panel groups by (`STATS … BY`), each in a query that groups by none of the other listed fields, however the grouping is aliased. */
+    groupsBy?: string[];
+    /** Positions of the queries a data edit must leave exactly as they were. */
+    unchangedQueries?: number[];
   },
   {
     agentId?: string;

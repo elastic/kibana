@@ -1,5 +1,5 @@
 {
-  "sha1": "3e4840d140cbff029d9eff7285aaaaa8458e3580",
+  "sha1": "31ae88a921506bcc850d048a01db3e74a69fce3f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -139,6 +139,34 @@
       }
     },
     {
+      "id": "a0baab8af6f69d7-bdc6a3f5215ebe2",
+      "title": "Digital Experience frustration dashboard opens from the Overview with the dashboard panels and the frustrated elements",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/frustration_dashboard.spec.ts",
+        "line": 69,
+        "column": 11
+      }
+    },
+    {
+      "id": "a0baab8af6f69d7-1e793837d1290f3",
+      "title": "Digital Experience frustration dashboard saves the panels as a dashboard and opens it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/frustration_dashboard.spec.ts",
+        "line": 129,
+        "column": 13
+      }
+    },
+    {
       "id": "b1c1d174a14ef6b-90fdfb7c74424e0",
       "title": "Digital Experience mobile applications lists the mobile applications and opens the page of one",
       "expectedStatus": "passed",
@@ -150,6 +178,34 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/mobile_application.spec.ts",
         "line": 19,
         "column": 5
+      }
+    },
+    {
+      "id": "b1c1d174a14ef6b-1e1fc8d5deeb70c",
+      "title": "Digital Experience mobile applications shows the release health of an application with enough sessions, drawn",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/mobile_application.spec.ts",
+        "line": 100,
+        "column": 13
+      }
+    },
+    {
+      "id": "b1c1d174a14ef6b-1c02ea8b4719dc2",
+      "title": "Digital Experience mobile applications filters the page by a release from its table, and takes the filter off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/mobile_application.spec.ts",
+        "line": 128,
+        "column": 79
       }
     },
     {
