@@ -20,13 +20,22 @@ const mockSecondUser = {
     username: 'test_guy_stevens',
   },
 };
+const mockThirdUser = {
+  ...MOCK_USER_PROFILE,
+  uid: 'user-3',
+  user: {
+    email: 'test_ada_lane@elastic.co',
+    full_name: 'Ada Lane',
+    username: 'test_ada_lane',
+  },
+};
 const mockUseUserProfiles = jest.fn();
 jest.mock('./use_user_profiles', () => ({
   useUserProfiles: () => mockUseUserProfiles(),
 }));
 jest.mock('./use_suggest_user_profiles', () => ({
   useSuggestUserProfiles: () => ({
-    data: [MOCK_USER_PROFILE, mockSecondUser],
+    data: [MOCK_USER_PROFILE, mockSecondUser, mockThirdUser],
   }),
 }));
 const testProps = {
@@ -109,5 +118,37 @@ describe('UserProfilesSearch', () => {
       screen.getByTestId(`userProfileSelectableOption-${mockSecondUser.user.username}`)
     );
     expect(testProps.onUsersSelect).toHaveBeenCalledWith([mockSecondUser, MOCK_USER_PROFILE]);
+  });
+
+  it('keeps every selected user when the profile lookup returns only some of them', () => {
+    const enrichedFirstUser = { ...MOCK_USER_PROFILE, data: { avatar: { initials: 'VB' } } };
+    mockUseUserProfiles.mockReturnValue({ data: [enrichedFirstUser] });
+    render(
+      <TestProviders>
+        <UserProfilesSearch
+          {...testProps}
+          forbiddenUsers={[]}
+          selectedUsers={[MOCK_USER_PROFILE, mockSecondUser]}
+        />
+      </TestProviders>
+    );
+    expect(
+      screen
+        .getByTestId(`userProfileSelectableOption-${MOCK_USER_PROFILE.user.username}`)
+        .getAttribute('aria-checked')
+    ).toEqual('true');
+    expect(
+      screen
+        .getByTestId(`userProfileSelectableOption-${mockSecondUser.user.username}`)
+        .getAttribute('aria-checked')
+    ).toEqual('true');
+    fireEvent.click(
+      screen.getByTestId(`userProfileSelectableOption-${mockThirdUser.user.username}`)
+    );
+    expect(testProps.onUsersSelect).toHaveBeenCalledWith([
+      mockThirdUser,
+      enrichedFirstUser,
+      mockSecondUser,
+    ]);
   });
 });
