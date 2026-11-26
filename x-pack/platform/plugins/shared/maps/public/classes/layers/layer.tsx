@@ -89,7 +89,9 @@ export interface ILayer {
   getStyle(): IStyle;
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(
+    sourceEditorArgs: SourceEditorArgs<Record<string, unknown>>
+  ): ReactElement<any> | null;
   isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
@@ -369,7 +371,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.query ? this._descriptor.query : null;
   }
 
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs<Record<string, unknown>>) {
     return this.getSourceForEditing().renderSourceSettingsEditor(sourceEditorArgs);
   }
 
