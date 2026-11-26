@@ -62,7 +62,7 @@ export interface InitializeSingleTabsParams {
   profileState?: ProfileStateMap;
 }
 
-interface InitializeSingleTabResult {
+export interface InitializeSingleTabResult {
   showNoDataPage: boolean;
   /** The ID of the saved data view of the tab when it no longer exists */
   missingDataViewId?: string;
