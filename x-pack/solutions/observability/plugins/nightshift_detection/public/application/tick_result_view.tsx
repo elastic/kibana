@@ -89,7 +89,7 @@ export function TickResultView({ result, signalsHref }: TickResultViewProps) {
             run {result.run_id}
           </EuiText>
         </EuiFlexItem>
-        {signalsHref && (
+        {signalsHref !== undefined && (
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <EuiLink

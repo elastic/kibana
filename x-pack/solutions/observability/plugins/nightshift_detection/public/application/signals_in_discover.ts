@@ -48,7 +48,9 @@ export function createGetSignalsHref({
 
 /**
  * The minutes a tick could have stamped its signals with: a signal's `@timestamp` is the minute
- * its tick started on the server, which falls between the call's start and end.
+ * its tick started on the server, which falls between the call's start and end. The range uses
+ * the browser's clock, so a browser clock off from the server's can miss a tick that started
+ * near a minute boundary; the header link still finds its signals.
  */
 export function getTickTimeRange({
   startedAt,
