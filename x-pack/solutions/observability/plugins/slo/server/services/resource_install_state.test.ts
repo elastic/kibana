@@ -28,6 +28,7 @@ const setup = () => {
 describe('ResourceInstallState', () => {
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('installs once under the resource installer lock and memoizes the success', async () => {
@@ -219,11 +220,10 @@ describe('ResourceInstallState', () => {
   });
 
   it('does not install when the lock is acquired after the wait budget elapsed', async () => {
-    jest.useFakeTimers();
     const { installer, lockManager, state } = setup();
     lockManager.withLock.mockImplementation(async (_lockId, callback) => {
       // the budget elapses while the acquisition is pending, before the timer callback runs
-      jest.setSystemTime(Date.now() + 31_000);
+      jest.spyOn(performance, 'now').mockReturnValue(performance.now() + 31_000);
       return callback();
     });
 
@@ -233,13 +233,44 @@ describe('ResourceInstallState', () => {
     expect(installer.install).not.toHaveBeenCalled();
   });
 
+  it('installs when the wall clock jumps forward while the lock is acquired', async () => {
+    jest.useFakeTimers();
+    const { installer, lockManager, state } = setup();
+    lockManager.withLock.mockImplementation(async (_lockId, callback) => {
+      jest.setSystemTime(Date.now() + 31_000);
+      return callback();
+    });
+
+    await expect(state.ensureInstalled()).resolves.toBeUndefined();
+    expect(installer.install).toHaveBeenCalledTimes(1);
+  });
+
   it('rethrows an abort unwrapped and does not log it as an install failure', async () => {
     const { installer, logger, state } = setup();
+    const abortController = new AbortController();
     const abortError = new EsErrors.RequestAbortedError('Request aborted');
-    installer.install.mockRejectedValue(abortError);
+    installer.install.mockImplementation(async () => {
+      abortController.abort();
+      throw abortError;
+    });
 
-    await expect(state.reconcile()).rejects.toBe(abortError);
+    await expect(state.reconcile(DEFAULT_RETRY_OPTIONS, abortController.signal)).rejects.toBe(
+      abortError
+    );
 
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('treats an abort error raised without cancellation as an install failure', async () => {
+    const { installer, logger, state } = setup();
+    installer.install.mockRejectedValue(new EsErrors.RequestAbortedError('Response too large'));
+
+    await expect(
+      state.reconcile(DEFAULT_RETRY_OPTIONS, new AbortController().signal)
+    ).rejects.toThrow(
+      new SLOResourcesNotInstalled('SLO resources are not installed yet, try again later')
+    );
+
+    expect(logger.warn).toHaveBeenCalledWith('Failed to install SLO resources: Response too large');
   });
 });

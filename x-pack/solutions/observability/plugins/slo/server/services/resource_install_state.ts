@@ -72,9 +72,10 @@ export class ResourceInstallState {
   }
 
   private async install(retryOptions: RetryOptions): Promise<void> {
-    const deadline = Date.now() + LOCK_WAIT_TIMEOUT_MS;
+    // Monotonic clock: a wall-clock jump must not shorten or extend the lock wait.
+    const deadline = performance.now() + LOCK_WAIT_TIMEOUT_MS;
     while (!(await this.installWithinLockWait(retryOptions, deadline))) {
-      if (Date.now() >= deadline) {
+      if (performance.now() >= deadline) {
         throw new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE);
       }
       this.dependencies.logger.debug(
@@ -92,13 +93,13 @@ export class ResourceInstallState {
       timer = setTimeout(() => {
         lockWaitExpired = true;
         reject(new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE));
-      }, Math.max(deadline - Date.now(), 0));
+      }, Math.max(deadline - performance.now(), 0));
     });
     const attempt = this.installUnderLock(retryOptions, undefined, {
       onLockAcquired: () => {
         clearTimeout(timer);
         // An abandoned attempt that acquires the lock late must not install.
-        if (lockWaitExpired || Date.now() >= deadline) {
+        if (lockWaitExpired || performance.now() >= deadline) {
           throw new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE);
         }
       },
@@ -125,8 +126,9 @@ export class ResourceInstallState {
       if (isLockAcquisitionError(err)) {
         return false;
       }
-      // A cancellation is not an install failure: callers handle it separately.
-      if (err instanceof SLOResourcesNotInstalled || isAbortError(err)) {
+      // A cancellation is not an install failure: callers handle it separately. ES can also raise an
+      // abort error on its own (e.g. maxResponseSize), which is a real failure.
+      if (err instanceof SLOResourcesNotInstalled || (signal?.aborted && isAbortError(err))) {
         throw err;
       }
       // The detail stays in the logs; API clients only get a generic message.
