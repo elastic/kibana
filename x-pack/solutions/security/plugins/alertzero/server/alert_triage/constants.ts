@@ -133,6 +133,14 @@ export const TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX = 'az:closed_by_decision:';
 /** Added with `az:inconclusive` to an alert a dismissed pattern kept out of analysis. */
 export const TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX = 'az:skipped_by_decision:';
 /**
+ * The tags of one decision. The sweep writes them and revoke finds the alerts by them, so every
+ * place that needs one builds it here.
+ */
+export const closedByDecisionTag = (decisionId: string): string =>
+  `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${decisionId}`;
+export const skippedByDecisionTag = (decisionId: string): string =>
+  `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${decisionId}`;
+/**
  * Notes one sweep writes at most. Each note is one call and takes about a second, 20 at a time, so
  * this bounds the step to about a minute. A decision closes or skips only as many alerts as notes are
  * left; the rest stay untagged and take the normal path, and are counted in `left_for_notes`.
@@ -158,11 +166,11 @@ export const DECISION_CAP_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const DECISION_AUTO_CLOSE_SEVERITIES: readonly string[] = ['low', 'medium'];
 
 /**
- * The trust flag of the signer, per key kind that names one. Such a key leaves out the file hash, and
- * a subject name alone can be copied into a forged certificate, so `on` acts on a match only when
- * the signer is trusted.
+ * The trust flag of the signer, per key kind that `on` can act on and that names one. Such a key
+ * leaves out the file hash, and a subject name alone can be copied into a forged certificate, so
+ * `on` acts on a match only when the signer is trusted. A process key is not here: `on` holds every
+ * process key in shadow.
  */
 export const DECISION_SIGNER_TRUST_FIELDS: Readonly<Record<string, string>> = {
-  process: 'process.code_signature.trusted',
   library: 'dll.code_signature.trusted',
 } satisfies Partial<Record<Kind, string>>;
