@@ -10,46 +10,45 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   RATE_LIMIT_RETRY_DELAYS_MS,
   extractPage,
-  findDocumentExtractionEndpoint,
+  listDocumentExtractionEndpoints,
 } from './document_extraction';
 
 const createEsError = (statusCode: number) =>
   Object.assign(new Error(`status ${statusCode}`), { statusCode });
 
-describe('findDocumentExtractionEndpoint', () => {
+describe('listDocumentExtractionEndpoints', () => {
   let esClient: ElasticsearchClientMock;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  it('prefers the Elastic Inference Service endpoint among the document_extraction endpoints', async () => {
+  it('lists the document_extraction endpoints, the Elastic Inference Service ones first', async () => {
     esClient.transport.request.mockResolvedValue({
       endpoints: [
         { inference_id: 'custom-jina', service: 'jinaai' },
         { inference_id: '.jina-reader', service: 'elastic' },
+        { inference_id: 'another', service: 'other' },
         { inference_id: 'other-elastic', service: 'elastic' },
       ],
     });
 
-    await expect(findDocumentExtractionEndpoint(esClient)).resolves.toBe('.jina-reader');
+    await expect(listDocumentExtractionEndpoints(esClient)).resolves.toEqual([
+      { inferenceId: '.jina-reader', service: 'elastic' },
+      { inferenceId: 'other-elastic', service: 'elastic' },
+      { inferenceId: 'custom-jina', service: 'jinaai' },
+      { inferenceId: 'another', service: 'other' },
+    ]);
     expect(esClient.transport.request).toHaveBeenCalledWith({
       method: 'GET',
       path: '/_inference/document_extraction/_all',
     });
   });
 
-  it('falls back to the first endpoint, and to undefined when there is none', async () => {
-    esClient.transport.request.mockResolvedValueOnce({
-      endpoints: [
-        { inference_id: 'custom-jina', service: 'jinaai' },
-        { inference_id: 'another', service: 'other' },
-      ],
-    });
-    await expect(findDocumentExtractionEndpoint(esClient)).resolves.toBe('custom-jina');
+  it('lists nothing when there is no endpoint', async () => {
+    esClient.transport.request.mockResolvedValue({ endpoints: [] });
 
-    esClient.transport.request.mockResolvedValueOnce({ endpoints: [] });
-    await expect(findDocumentExtractionEndpoint(esClient)).resolves.toBeUndefined();
+    await expect(listDocumentExtractionEndpoints(esClient)).resolves.toEqual([]);
   });
 });
 

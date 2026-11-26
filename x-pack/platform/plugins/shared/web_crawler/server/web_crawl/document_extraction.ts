@@ -37,19 +37,28 @@ export interface ExtractedPage {
 const asNonEmptyString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
 
-/** Resolves the `document_extraction` endpoint to crawl with, preferring the Elastic Inference Service one. */
-export const findDocumentExtractionEndpoint = async (
+export interface DocumentExtractionEndpoint {
+  inferenceId: string;
+  service: string;
+}
+
+/**
+ * Lists the `document_extraction` endpoints a crawl can use. The Elastic Inference Service ones
+ * come first, so the first endpoint is the one to crawl with when none is asked for.
+ */
+export const listDocumentExtractionEndpoints = async (
   esClient: ElasticsearchClient
-): Promise<string | undefined> => {
+): Promise<DocumentExtractionEndpoint[]> => {
   const { endpoints } = await esClient.transport.request<{ endpoints: InferenceEndpoint[] }>({
     method: 'GET',
     path: `/_inference/${DOCUMENT_EXTRACTION_TASK_TYPE}/_all`,
   });
+  const isElastic = ({ service }: InferenceEndpoint) => service === ELASTIC_INFERENCE_SERVICE;
 
-  const endpoint =
-    endpoints.find(({ service }) => service === ELASTIC_INFERENCE_SERVICE) ?? endpoints[0];
-
-  return endpoint?.inference_id;
+  return [
+    ...endpoints.filter(isElastic),
+    ...endpoints.filter((endpoint) => !isElastic(endpoint)),
+  ].map(({ inference_id: inferenceId, service }) => ({ inferenceId, service }));
 };
 
 export const waitFor = (delayMs: number, signal: AbortSignal): Promise<void> =>
