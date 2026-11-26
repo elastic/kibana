@@ -32,12 +32,18 @@ export const buildUntrackedAlert = <AlertData extends RuleAlertData>({
   timestamp,
 }: BuildUntrackedAlertOpts<AlertData>): Alert & AlertData => {
   const timeRangeStart = get(alert, ALERT_TIME_RANGE)?.gte ?? get(alert, ALERT_START);
+  // Elasticsearch rejects a time range that ends before it starts. An alert that starts after
+  // the timestamp, for example because another node's clock is ahead, ends at its own start.
+  const end =
+    timeRangeStart && new Date(timeRangeStart).getTime() > new Date(timestamp).getTime()
+      ? timeRangeStart
+      : timestamp;
 
   const alertUpdates = {
     [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
-    [ALERT_END]: timestamp,
+    [ALERT_END]: end,
     [ALERT_TRACKED]: false,
-    ...(timeRangeStart ? { [ALERT_TIME_RANGE]: { gte: timeRangeStart, lte: timestamp } } : {}),
+    ...(timeRangeStart ? { [ALERT_TIME_RANGE]: { gte: timeRangeStart, lte: end } } : {}),
   };
 
   // Some rule types write these fields nested. Drop the nested copy so the document does not

@@ -76,6 +76,35 @@ describe('buildUntrackedAlert', () => {
     expect(untrackedAlert[ALERT_TIME_RANGE]).toEqual({ gte: start, lte: timestamp });
   });
 
+  test('ends the alert at its start when the alert starts after the timestamp', () => {
+    const futureStart = '2023-03-29T12:37:28.159Z';
+    const untrackedAlert = buildUntrackedAlert<{}>({
+      alert: {
+        ...existingFlattenedActiveAlert,
+        [ALERT_START]: futureStart,
+        [ALERT_TIME_RANGE]: { gte: futureStart },
+      },
+      timestamp,
+    });
+
+    expect(untrackedAlert[ALERT_END]).toEqual(futureStart);
+    expect(untrackedAlert[ALERT_TIME_RANGE]).toEqual({ gte: futureStart, lte: futureStart });
+  });
+
+  test('ends the alert at the timestamp when the alert start is not a valid date', () => {
+    const untrackedAlert = buildUntrackedAlert<{}>({
+      alert: {
+        ...existingFlattenedActiveAlert,
+        [ALERT_START]: 'not-a-date',
+        [ALERT_TIME_RANGE]: { gte: 'not-a-date' },
+      },
+      timestamp,
+    });
+
+    expect(untrackedAlert[ALERT_END]).toEqual(timestamp);
+    expect(untrackedAlert[ALERT_TIME_RANGE]).toEqual({ gte: 'not-a-date', lte: timestamp });
+  });
+
   test('does not write a time range when the alert document has no start', () => {
     const untrackedAlert = buildUntrackedAlert<{}>({
       alert: omit(existingFlattenedActiveAlert, [ALERT_TIME_RANGE, ALERT_START]) as Alert,
