@@ -212,11 +212,11 @@ describe('getConnectingTime', () => {
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
     expect(colourPalette).toEqual({
-      blocked: '#d3f6f5',
+      blocked: '#c9f8ec',
       connect: '#dfedff',
-      dns: '#8be2e0',
+      dns: '#80ded0',
       font: '#61a2ff',
-      html: '#a6edea',
+      html: '#93f0d9',
       image: '#ee72a6',
       media: '#ffc7db',
       other: '#f6726a',
@@ -226,7 +226,7 @@ describe('Palettes', () => {
       ssl: '#f7b9d3',
       stylesheet: '#bfdbff',
       wait: '#fcd883',
-      xhr: '#16c5c0',
+      xhr: '#00bda0',
     });
   });
 });
@@ -244,7 +244,7 @@ describe('getSeriesAndDomain', () => {
       Array [
         Object {
           "config": Object {
-            "colour": "#d3f6f5",
+            "colour": "#c9f8ec",
             "id": 0,
             "isHighlighted": true,
           },
@@ -254,7 +254,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#8be2e0",
+            "colour": "#80ded0",
             "id": 0,
             "isHighlighted": true,
           },
@@ -314,7 +314,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#d3f6f5",
+            "colour": "#c9f8ec",
             "id": 1,
             "isHighlighted": true,
           },
@@ -362,7 +362,7 @@ describe('getSeriesAndDomain', () => {
       Array [
         Object {
           "config": Object {
-            "colour": "#d3f6f5",
+            "colour": "#c9f8ec",
             "id": 0,
             "isHighlighted": true,
           },
@@ -372,7 +372,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#8be2e0",
+            "colour": "#80ded0",
             "id": 0,
             "isHighlighted": true,
           },

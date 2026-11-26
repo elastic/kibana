@@ -7,19 +7,24 @@
 
 import { toQueryList } from '@kbn/agent-builder-visualizations-common';
 import { LOGS_VISUALIZATIONS } from '../../../src/fixtures/logs_visualizations';
-import { SECTIONED_LOGS_DASHBOARD_DSL_VEGA } from '../../../src/fixtures/sectioned_logs_dashboard';
+import {
+  SECTIONED_LOGS_DASHBOARD,
+  SECTIONED_LOGS_DASHBOARD_DSL_VEGA,
+} from '../../../src/fixtures/sectioned_logs_dashboard';
 import { TOP_LEVEL, type DashboardDatasetExample } from '../../../src/types';
 import { layoutEditExample } from './factories';
 
 const editScenario = (gold: Parameters<typeof layoutEditExample>[0]): DashboardDatasetExample =>
-  layoutEditExample({ ...gold, behaviour: 'edit_scenario' });
+  layoutEditExample({ behaviour: 'edit_scenario', ...gold });
 
 /**
  * Edits of the seeded sectioned logs dashboard beyond moving ES|QL panels:
  * the non-ES|QL panel kinds, controls, data the cluster does not have,
  * visualizations from earlier in the conversation, section renames, and
- * panel pointers that scope only the message they come with.
- * Each example combines several asks, so one run covers more than one gap.
+ * panel pointers that scope only the message they come with, and dashboard
+ * options (tagged `settings_edit`). Each example combines several asks, so
+ * one run covers more than one gap. The section rename must also leave every
+ * dashboard setting alone.
  */
 export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
   editScenario({
@@ -95,6 +100,7 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
       placements: [{ item: 'top-referrers', in: TOP_LEVEL, below: 'kpi-requests' }],
     },
     structure: { sectionCount: 4, sections: [{ titleIncludesAny: ['audience'], minPanels: 2 }] },
+    settings: {},
   }),
   editScenario({
     question:
@@ -158,5 +164,15 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
       { panel: 'errors-5xx', color: 'red' },
     ],
     laterMessageKeepsDashboard: true,
+  }),
+  editScenario({
+    question: 'hide the panel titles and borders and stop syncing the cursor across panels',
+    // A setting the prompt does not name, which must stay off.
+    dashboard: { ...SECTIONED_LOGS_DASHBOARD, options: { use_margins: false } },
+    layoutEdit: { changes: [] },
+    settings: {
+      options: { hide_panel_titles: true, hide_panel_borders: true, sync_cursor: false },
+    },
+    behaviour: 'settings_edit',
   }),
 ];
