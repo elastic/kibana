@@ -25,7 +25,7 @@ The credential is created by a Sophos Central **Super Admin**. No scope or role 
 
 1. Sign in to [Sophos Central Admin](https://central.sophos.com).
 2. Go to **My Products → General Settings → API Credentials Management**, or **Global Settings → API Credentials** in some console versions.
-3. Select **Add Credential** and enter a name.
+3. Select **Add Credential**, enter a name, and select **Add**.
 4. Copy the **Client ID** and **Client Secret**.
 
 ### Connector configuration [sophos-central-connector-configuration]
