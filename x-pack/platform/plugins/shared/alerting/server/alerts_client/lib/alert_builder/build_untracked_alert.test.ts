@@ -91,6 +91,24 @@ describe('buildUntrackedAlert', () => {
     expect(untrackedAlert[ALERT_TIME_RANGE]).toEqual({ gte: futureStart, lte: futureStart });
   });
 
+  test.each([
+    ['2023-03-29T12:17:28.159', timestamp],
+    ['2023-03-29T12:37:28.159', '2023-03-29T12:37:28.159Z'],
+    ['2023-03-29T13:37:28.159+01:00', '2023-03-29T12:37:28.159Z'],
+    ['1680093448159', '2023-03-29T12:37:28.159Z'],
+  ])('uses the Elasticsearch date format when comparing the range start %s', (gte, end) => {
+    const untrackedAlert = buildUntrackedAlert<{}>({
+      alert: {
+        ...existingFlattenedActiveAlert,
+        [ALERT_TIME_RANGE]: { gte },
+      },
+      timestamp,
+    });
+
+    expect(untrackedAlert[ALERT_END]).toEqual(end);
+    expect(untrackedAlert[ALERT_TIME_RANGE]).toEqual({ gte, lte: end });
+  });
+
   test('ends the alert at the timestamp when the alert start is not a valid date', () => {
     const untrackedAlert = buildUntrackedAlert<{}>({
       alert: {
