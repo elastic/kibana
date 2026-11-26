@@ -67,7 +67,7 @@ export const InfoStrip = ({
               {...(ebt && getEbtProps(ebt))}
               css={{ cursor: 'pointer', inlineSize: '100%' }}
               onClick={onClick}
-              onKeyDown={(event) => event.key === 'Enter' && onClick()}
+              onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.click()}
             >
               {cell}
             </div>
