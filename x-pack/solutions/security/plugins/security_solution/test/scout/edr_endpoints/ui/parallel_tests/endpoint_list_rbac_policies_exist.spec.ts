@@ -32,15 +32,17 @@ interface ExpectedEmptyState {
   readonly hidden: readonly EmptyStateElement[];
 }
 
+// `noFleetAccess` renders under the same loaded-privileges condition as the button, so each case
+// waits for a visible outcome before asserting the other one is absent.
 const HOSTS_ONBOARDING: ExpectedEmptyState = {
   readyWhen: 'onboardingSteps',
   visible: ['emptyHostsTable', 'onboardingSteps'],
-  hidden: [],
+  hidden: ['noFleetAccess'],
 };
 
 const POLICY_ONBOARDING: ExpectedEmptyState = {
   readyWhen: 'policyOnboardingInstructions',
-  visible: ['emptyPolicyTable'],
+  visible: ['emptyPolicyTable', 'noFleetAccess'],
   hidden: ['onboardingStartButton'],
 };
 
