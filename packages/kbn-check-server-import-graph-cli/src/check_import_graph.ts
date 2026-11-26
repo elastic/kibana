@@ -10,6 +10,8 @@
 import Fs from 'fs';
 import Path from 'path';
 
+import fastGlob from 'fast-glob';
+
 import { ImportLocator } from '@kbn/import-locator';
 import type { ImportResolver } from '@kbn/import-resolver';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -17,10 +19,39 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 import { walkImportGraph, type ImportTarget } from './walk_import_graph';
 
-// How FTR loads test files: `loadTestFile(require.resolve('./x'))`, `testFiles: [resolve(__dirname, './x')]`.
+// How FTR loads test files: `loadTestFile(require.resolve('./x'))`, `testFiles: [resolve(__dirname, 'x')]`.
 const TEST_FILE_PATH =
-  /\b(?:require\.resolve\(\s*|resolve\(\s*__dirname\s*,\s*)['"]([^'"]+)['"]\s*\)/g;
+  /\b(?:require\.resolve\(\s*['"]([^'"]+)['"]|resolve\(\s*__dirname\s*,\s*['"]([^'"]+)['"])\s*\)/g;
+// Templated paths like `require.resolve(`../${name}/apis/`)` follow every entry the template matches.
+const TEMPLATE_TEST_FILE_PATH = /\brequire\.resolve\(\s*`(\.{1,2}\/[^`]*)`\s*\)/g;
+const INTERPOLATION = /\$\{[^}]*\}/;
+const WHOLE_INTERPOLATION = /^\$\{[^}]*\}$/;
 const SOURCE_FILE = /\.[cm]?[jt]sx?$/;
+
+const toRequest = (from: string, absolute: string): string => {
+  const request = Path.relative(from, absolute);
+  return request.startsWith('.') ? request : `./${request}`;
+};
+
+const expandTemplatePath = (template: string, dir: string): string[] => {
+  const segments = template.split('/').filter(Boolean);
+  const firstDynamic = segments.findIndex((segment) => INTERPOLATION.test(segment));
+  if (firstDynamic === -1) {
+    return [template];
+  }
+  const cwd = Path.resolve(dir, ...segments.slice(0, firstDynamic));
+  const pattern = segments
+    .slice(firstDynamic)
+    .map((segment) =>
+      WHOLE_INTERPOLATION.test(segment)
+        ? '**'
+        : segment.split(INTERPOLATION).map(fastGlob.escapePath).join('*')
+    )
+    .join('/');
+  return fastGlob
+    .sync(pattern, { cwd, onlyFiles: false, ignore: ['**/node_modules/**', '**/*.d.ts'] })
+    .map((match) => toRequest(dir, Path.resolve(cwd, match)));
+};
 
 const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
 
@@ -31,8 +62,16 @@ const createGetImports = (resolver: ImportResolver, followTestFilePaths: boolean
     const source = Fs.readFileSync(file, 'utf8');
     const requests = new Set(locator.get(file, source));
     if (followTestFilePaths) {
-      for (const [, request] of source.matchAll(TEST_FILE_PATH)) {
-        requests.add(request);
+      for (const [, requirePath, dirnamePath] of source.matchAll(TEST_FILE_PATH)) {
+        // `resolve(__dirname, 'x')` is relative even without `./`.
+        requests.add(
+          requirePath ?? (dirnamePath.startsWith('.') ? dirnamePath : `./${dirnamePath}`)
+        );
+      }
+      for (const [, template] of source.matchAll(TEMPLATE_TEST_FILE_PATH)) {
+        for (const request of expandTemplatePath(template, Path.dirname(file))) {
+          requests.add(request);
+        }
       }
     }
 

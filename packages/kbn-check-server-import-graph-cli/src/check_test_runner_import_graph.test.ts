@@ -46,6 +46,17 @@ describe('checkTestRunnerImportGraph', () => {
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
 
+  it('follows resolve(__dirname) without ./ and only the files a templated require.resolve() matches', async () => {
+    const { passed, output } = await run(fixture('ftr', 'bare_config.ts'));
+
+    expect(passed).toBe(false);
+    expect(output).toContain('1 banned import(s) are reachable from FTR and Scout entry points');
+    expect(output).toContain(
+      Path.relative(REPO_ROOT, fixture('ftr', 'dynamic', 'suite', 'apis', 'index.ts'))
+    );
+    expect(output).not.toContain(Path.relative(REPO_ROOT, fixture('ftr', 'dynamic', 'helper.ts')));
+  });
+
   it('passes when the test files import only EUI-free modules', async () => {
     const { passed, output } = await run(fixture('ftr', 'clean_config.ts'));
 
