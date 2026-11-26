@@ -146,6 +146,12 @@ const expectedKeys = (
   return [...new Set(keys)].sort((a, b) => a - b);
 };
 
+const expectedDocumentCount = ({ from, to }: BucketKeysCase): number => {
+  const start = Date.parse(from);
+  const end = Date.parse(to);
+  return new Set(ALL_TIMESTAMPS.filter((timestamp) => timestamp >= start && timestamp < end)).size;
+};
+
 apiTest.describe(
   'ES date rounding parity for ES|QL bucket keys',
   { tag: tags.deploymentAgnostic },
@@ -182,15 +188,16 @@ apiTest.describe(
 
           for (const bucketSpan of bucketKeysCase.spans) {
             const rounding = toRounding(bucketSpan);
+            const params = [
+              { _tstart: new Date(Date.parse(bucketKeysCase.from)).toISOString() },
+              { _tend: new Date(Date.parse(bucketKeysCase.to)).toISOString() },
+            ];
             const response = await esClient.esql.query({
               query: `FROM "${INDEX}"
               | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
               | STATS BY bucket = BUCKET(@timestamp, ${esqlSpan(bucketSpan)})
               | SORT bucket`,
-              params: [
-                { _tstart: new Date(Date.parse(bucketKeysCase.from)).toISOString() },
-                { _tend: new Date(Date.parse(bucketKeysCase.to)).toISOString() },
-              ],
+              params,
               time_zone: timeZone,
             });
             const esqlKeys = response.values.map(([bucket]) => Date.parse(String(bucket)));
@@ -201,6 +208,33 @@ apiTest.describe(
               esqlKeys.slice(0, -1).map((key) => nextBucketKey(key, rounding, timeZone)),
               `${label} next keys`
             ).toStrictEqual(esqlKeys.slice(1));
+
+            // The distinct keys above cannot tell whether a document landed in the wrong bucket
+            // when both buckets stay populated, so compare the bucket of every document.
+            const perDocument = await esClient.esql.query({
+              query: `FROM "${INDEX}"
+              | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
+              | STATS BY timestamp = @timestamp, bucket = BUCKET(@timestamp, ${esqlSpan(
+                bucketSpan
+              )})
+              | SORT timestamp
+              | LIMIT 10000`,
+              params,
+              time_zone: timeZone,
+            });
+            const mismatches = perDocument.values
+              .map(([timestamp, bucket]) => ({
+                timestamp: String(timestamp),
+                esKey: new Date(Date.parse(String(bucket))).toISOString(),
+                key: new Date(
+                  roundToBucketKey(Date.parse(String(timestamp)), rounding, timeZone)
+                ).toISOString(),
+              }))
+              .filter(({ esKey, key }) => esKey !== key);
+            expect(perDocument.values, `${label} documents`).toHaveLength(
+              expectedDocumentCount(bucketKeysCase)
+            );
+            expect(mismatches, `${label} documents in the wrong bucket`).toStrictEqual([]);
           }
         }
       );
