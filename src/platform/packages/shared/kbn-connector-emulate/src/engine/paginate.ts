@@ -167,6 +167,17 @@ const decodeNumericCursor = (cursor: string): number | undefined =>
     ? Number(cursor) - NUMERIC_CURSOR_BASE
     : undefined;
 
+// A last-item cursor is a number only where the item before its position holds one.
+const decodeLastItemCursor = (
+  cursor: string,
+  { collection, path }: { collection: readonly unknown[]; path: string }
+): number | undefined => {
+  const position = decodeNumericCursor(cursor);
+  return position !== undefined && typeof get(collection[position - 1], path) === 'number'
+    ? position
+    : decodeCursor(cursor);
+};
+
 // Cursors are compared as strings, whether the vendor sends them as strings or numbers.
 const asCursor = (value: unknown): unknown => (typeof value === 'number' ? String(value) : value);
 
@@ -224,8 +235,11 @@ const readStart = (
   size: number,
   {
     recordedPositions,
-    numericCursors = false,
-  }: { recordedPositions?: ReadonlyMap<string, number>; numericCursors?: boolean } = {}
+    decode = decodeCursor,
+  }: {
+    recordedPositions?: ReadonlyMap<string, number>;
+    decode?: (cursor: string) => number | undefined;
+  } = {}
 ): number | undefined => {
   if ('cursorParam' in request) {
     const cursor = asCursor(read(request.cursorParam));
@@ -233,8 +247,7 @@ const readStart = (
       return 0;
     }
     return typeof cursor === 'string'
-      ? recordedPositions?.get(cursor) ??
-          (numericCursors ? decodeNumericCursor(cursor) : decodeCursor(cursor))
+      ? recordedPositions?.get(cursor) ?? decode(cursor)
       : undefined;
   }
   if ('offsetParam' in request) {
@@ -572,8 +585,10 @@ const paginate = (
       : undefined;
   const start = readStart(requestOf(pagination), read, size, {
     recordedPositions: recorded?.positions,
-    numericCursors:
-      lastItemPath !== undefined && typeof get(collection[0], lastItemPath) === 'number',
+    decode:
+      lastItemPath === undefined
+        ? decodeCursor
+        : (cursor) => decodeLastItemCursor(cursor, { collection, path: lastItemPath }),
   });
   if (start === undefined) {
     return BAD_CURSOR;

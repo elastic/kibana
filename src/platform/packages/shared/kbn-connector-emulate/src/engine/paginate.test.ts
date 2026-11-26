@@ -175,6 +175,12 @@ const spec = {
         responses: sequencedResponse,
       },
     },
+    '/sparse': {
+      get: {
+        parameters: [{ name: 'since', in: 'query', schema: {} }, ...query('limit')],
+        responses: listResponse({ channels: { type: 'array', items: { type: 'object' } } }),
+      },
+    },
     '/since-search': {
       post: {
         requestBody: {
@@ -344,6 +350,15 @@ const pagination: PaginatedOperation[] = [
   },
   {
     operation: { method: 'GET', path: '/since' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'since', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/sparse' },
     pagination: {
       style: 'cursor',
       request: { cursorParam: 'since', sizeParam: 'limit' },
@@ -630,6 +645,27 @@ describe('withPagination', () => {
         [{ id: 5 }, { id: 4 }],
         [{ id: 3 }],
       ]);
+    });
+
+    it.each([
+      ['the first item omits the field', [{ name: 'a' }, { id: 4 }, { id: 3 }], 'number'],
+      ['only the first item holds a number', [{ id: 5 }, { name: 'b' }, { id: 3 }], 'string'],
+    ])('follows the cursor it issued when %s', async (_, channels, type) => {
+      const { fetch } = createRecordedMock([
+        {
+          operation: { method: 'GET', path: '/sparse' },
+          request: { query: { limit: '3' } },
+          response: { status: 200, body: { channels } },
+        },
+      ]);
+
+      // A smaller page than recorded, so its cursor is the mock's own.
+      const first = await getJson(fetch, '/sparse?limit=2');
+      const cursor = first.body.channels[1].id;
+      const second = await getJson(fetch, `/sparse?limit=2&since=${cursor}`);
+
+      expect(typeof cursor).toBe(type);
+      expect(second).toEqual({ status: 200, body: { channels: [{ id: expect.anything() }] } });
     });
 
     it('reads a numeric cursor from a JSON body', async () => {
