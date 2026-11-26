@@ -34,7 +34,6 @@ import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerAutomationSuggestionRoutes } from './routes/automation_suggestions';
 import { registerSessionEventsRoutes } from './routes/session_events';
-import { BackgroundWriteTracker } from './routes/background_write_tracker';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
 import { registerSpendRoutes } from './routes/spend';
@@ -58,6 +57,7 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { BackgroundWriteTracker } from './session_memory/background_write_tracker';
 import { createSessionMemoryService } from './session_memory/service';
 import { createSessionEventsService } from './session_events/service';
 import { SignalsService } from './signals/service';
@@ -261,6 +261,12 @@ export class ContextEnginePlugin
       }
       return this.scheduleService;
     };
+    const getDreamingScheduleService = () => {
+      if (!this.dreamingScheduleService) {
+        throw new Error('Dreaming schedule service not available; plugin has not started');
+      }
+      return this.dreamingScheduleService;
+    };
     const isContextEngineEnabled = async (spaceId: string) => {
       const [coreStart] = await coreSetup.getStartServices();
       return isContextEngineEnabledInSpace({
@@ -343,6 +349,7 @@ export class ContextEnginePlugin
         return agentBuilder.found ? agentBuilder.contract : undefined;
       },
       getWorkflowsManagementApi: () => this.workflowsManagementApiPromise,
+      getDreamingScheduleService,
       getSpaces: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.spaces;
@@ -392,6 +399,14 @@ export class ContextEnginePlugin
         isContextEngineEnabled,
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
+        getSessionMemoryService: async () => {
+          const [, , contextEngineStart] = await coreSetup.getStartServices();
+          return contextEngineStart.getSessionMemoryService();
+        },
+        getSessionEventsService: async () => {
+          const [, , contextEngineStart] = await coreSetup.getStartServices();
+          return contextEngineStart.getSessionEventsService();
+        },
       },
     });
 

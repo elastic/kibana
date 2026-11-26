@@ -32,18 +32,15 @@ import type {
 } from '../../common/http_api/session_memory';
 import { validateAiIndexId, validateNonBlank } from '../../common/validation';
 import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writable';
-import { AiIndexNotFoundError, AiIndexNotWritableError } from '../ai_indices/errors';
+import { AiIndexNotFoundError, AiIndexWriteForbiddenError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import {
   sessionMemoryForgetAuditEvent,
   sessionMemoryRememberAuditEvent,
 } from '../audit/audit_events';
+import { BackgroundWriteTracker } from '../session_memory/background_write_tracker';
 import type { SessionMemoryService } from '../session_memory/types';
 import { resolveSpaceId } from '../utils/resolve_space_id';
-import {
-  BackgroundWriteTracker,
-  type BackgroundWriteRejectionReason,
-} from './background_write_tracker';
 import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
 import { MEMORY_WRITE_SECURITY, resolveMemoryUser, toError } from './memory_user';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
@@ -51,8 +48,6 @@ import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_fe
 
 const REMEMBER_CAPACITY_MESSAGE =
   'Too many session memory writes are already in progress. Retry shortly.';
-const REMEMBER_STOPPING_MESSAGE =
-  'Kibana is shutting down and cannot accept new session memory writes. Retry shortly.';
 const REMEMBER_RETRY_AFTER_SECONDS = '1';
 
 const toSafeWriteError = (error: unknown): Error => {
@@ -62,19 +57,6 @@ const toSafeWriteError = (error: unknown): Error => {
       ? `${name} (status ${error.statusCode})`
       : name;
   return Object.assign(new Error(message), { name });
-};
-
-const rejectionMessage = (reason: BackgroundWriteRejectionReason): string => {
-  switch (reason) {
-    case 'capacity':
-      return REMEMBER_CAPACITY_MESSAGE;
-    case 'stopping':
-      return REMEMBER_STOPPING_MESSAGE;
-    default: {
-      const exhaustive: never = reason;
-      throw new Error(`Unsupported rejection reason: ${String(exhaustive)}`);
-    }
-  }
 };
 
 const rememberBodySchema = schema.object({
@@ -370,7 +352,7 @@ export const registerSessionMemoryRoutes = ({
           if (error instanceof AiIndexNotFoundError) {
             return reject(error, 'notFound');
           }
-          if (error instanceof AiIndexNotWritableError) {
+          if (error instanceof AiIndexWriteForbiddenError) {
             return reject(error, 'forbidden');
           }
           audit({ memoryId: id, error: toError(error) });
@@ -411,16 +393,16 @@ export const registerSessionMemoryRoutes = ({
             audit({ memoryId, error: safeError });
           }
         };
-        const admission = writeTracker.tryStart(writeInBackground);
-        if (!admission.accepted) {
-          const message = rejectionMessage(admission.reason);
+        if (!writeTracker.tryStart(writeInBackground)) {
           audit({
             memoryId: id,
-            error: Object.assign(new Error(message), { name: 'TooManyRequests' }),
+            error: Object.assign(new Error(REMEMBER_CAPACITY_MESSAGE), {
+              name: 'TooManyRequests',
+            }),
           });
           return response.customError({
             statusCode: 429,
-            body: { message },
+            body: { message: REMEMBER_CAPACITY_MESSAGE },
             headers: { 'Retry-After': REMEMBER_RETRY_AFTER_SECONDS },
           });
         }
@@ -501,13 +483,12 @@ export const registerSessionMemoryRoutes = ({
           return response.forbidden({ body: { message: resolvedUser.error.message } });
         }
 
-        const scope = {
-          space: resolveSpaceId(await getSpaces(), request),
-          userId: resolvedUser.userId,
-        };
-
         let body: ForgetSessionMemoriesResponse;
         try {
+          const scope = {
+            space: resolveSpaceId(await getSpaces(), request),
+            userId: resolvedUser.userId,
+          };
           const results = await (await getSessionMemoryService()).forget(scope, uniqueIds);
           body = { results };
         } catch (error) {

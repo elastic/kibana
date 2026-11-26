@@ -8,42 +8,33 @@
 import { randomUUID } from 'crypto';
 import { Client } from '@elastic/elasticsearch';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, registerAiIndex, testData } from '../fixtures';
+import { apiTest, testData } from '../fixtures';
 
-const {
-  AI_INDEX_COLLECTION_PATH,
-  API_HEADERS,
-  CONTEXT_ENGINE_READ,
-  SESSION_MEMORY_FORGET_PATH,
-  SESSION_MEMORY_REMEMBER_PATH,
-} = testData;
+const { API_HEADERS, CONTEXT_ENGINE_READ, SESSION_MEMORY_FORGET_PATH } = testData;
 
 const SESSION_MEMORY_DATA_STREAM = '.context-engine-session-memory';
 const KIBANA_ORIGIN_HEADERS = { 'x-elastic-product-origin': 'kibana' };
-const GLOBAL_SETTINGS_PATH = '/internal/kibana/global_settings';
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-
-interface GlobalUiSettingsResponse {
-  settings?: Record<string, { userValue?: boolean }>;
-}
 
 const RUN_ID = randomUUID().slice(0, 8);
-const OTHER_SPACE_ID = `ce-remember-other-${RUN_ID}`;
-const WRITABLE_INDEX = `ai-index-idx-scout-remember-writable-${RUN_ID}`;
-const FORBIDDEN_INDEX = `ai-index-idx-scout-remember-forbidden-${RUN_ID}`;
-const WRITABLE_AI_INDEX_ID = `scout-remember-writable-${RUN_ID}`;
-const FORBIDDEN_AI_INDEX_ID = `scout-remember-forbidden-${RUN_ID}`;
-const DEFAULT_SPACE_AI_INDEX_ID = `scout-remember-default-space-${RUN_ID}`;
-const TARGET_USER_ID = `scout-remember-other-user-${RUN_ID}`;
-const SEED_ROLE_NAME = `ce-scout-remember-seed-${RUN_ID}`;
-const SEED_USERNAME = `ce-scout-remember-seed-${RUN_ID}`;
+const OTHER_SPACE_ID = `ce-memory-other-${RUN_ID}`;
+const SESSION_ID = `scout-memory-session-${RUN_ID}`;
+const TARGET_USER_ID = `scout-memory-other-user-${RUN_ID}`;
+const SEED_ROLE_NAME = `ce-scout-memory-seed-${RUN_ID}`;
+const SEED_USERNAME = `ce-scout-memory-seed-${RUN_ID}`;
 const SEED_PASSWORD = `scout-seed-${randomUUID()}`;
-const SEEDED_REVISABLE_MEMORY_ID = `mem-revisable-${RUN_ID}`;
-const SEEDED_FORGOTTEN_MEMORY_ID = `mem-forgotten-${RUN_ID}`;
+const OWN_OTHER_SPACE_MEMORY_ID = `mem-own-other-${RUN_ID}`;
+const OWN_DEFAULT_SPACE_MEMORY_ID = `mem-own-default-${RUN_ID}`;
+const TARGET_OTHER_SPACE_MEMORY_ID = `mem-target-other-${RUN_ID}`;
+const TARGET_DEFAULT_SPACE_MEMORY_ID = `mem-target-default-${RUN_ID}`;
+const SEEDED_MEMORY_IDS = [
+  OWN_OTHER_SPACE_MEMORY_ID,
+  OWN_DEFAULT_SPACE_MEMORY_ID,
+  TARGET_OTHER_SPACE_MEMORY_ID,
+  TARGET_DEFAULT_SPACE_MEMORY_ID,
+];
 
 const spacePath = (spaceId: string, path: string) => `s/${spaceId}/${path}`;
 
@@ -53,10 +44,7 @@ const READ_ONLY_ROLE: KibanaRole = {
 };
 
 const OTHER_SPACE_WRITE_ROLE: KibanaRole = {
-  elasticsearch: {
-    cluster: [],
-    indices: [{ names: [WRITABLE_INDEX], privileges: ['write'] }],
-  },
+  elasticsearch: { cluster: [], indices: [] },
   kibana: [
     {
       base: [],
@@ -67,10 +55,7 @@ const OTHER_SPACE_WRITE_ROLE: KibanaRole = {
 };
 
 const DEFAULT_SPACE_MANAGE_MEMORY_ROLE: KibanaRole = {
-  elasticsearch: {
-    cluster: [],
-    indices: [{ names: [WRITABLE_INDEX], privileges: ['write'] }],
-  },
+  elasticsearch: { cluster: [], indices: [] },
   kibana: [
     {
       base: [],
@@ -86,10 +71,7 @@ const DEFAULT_SPACE_MANAGE_MEMORY_ROLE: KibanaRole = {
 };
 
 const OTHER_SPACE_MANAGE_MEMORY_ROLE: KibanaRole = {
-  elasticsearch: {
-    cluster: [],
-    indices: [{ names: [WRITABLE_INDEX], privileges: ['write'] }],
-  },
+  elasticsearch: { cluster: [], indices: [] },
   kibana: [
     {
       base: [],
@@ -100,36 +82,17 @@ const OTHER_SPACE_MANAGE_MEMORY_ROLE: KibanaRole = {
 };
 
 apiTest.describe(
-  'context engine session memory _remember API',
+  'context engine session memory _forget API',
   { tag: tags.stateful.classic },
   () => {
-    let initialMemorySetting: { value: boolean | undefined } | undefined;
     let seedEsClient: Client;
-    let adminCredentials: RoleApiCredentials;
     let readOnlyCredentials: RoleApiCredentials;
     let otherSpaceWriteCredentials: RoleApiCredentials;
     let defaultSpaceManageMemoryCredentials: RoleApiCredentials;
     let otherSpaceManageMemoryCredentials: RoleApiCredentials;
-    const trackedMemoryIds = [SEEDED_REVISABLE_MEMORY_ID, SEEDED_FORGOTTEN_MEMORY_ID];
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient, esClient, apiClient, config }) => {
-      const { data } = await kbnClient.request<GlobalUiSettingsResponse>({
-        method: 'GET',
-        path: GLOBAL_SETTINGS_PATH,
-      });
-      initialMemorySetting = {
-        value: data.settings?.[CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]?.userValue,
-      };
-
-      await kbnClient.uiSettings.updateGlobal({
-        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
-      });
-      await kbnClient.uiSettings.waitForEventualCacheRefresh();
-
+    apiTest.beforeAll(async ({ requestAuth, kbnClient, esClient, config }) => {
       await kbnClient.spaces.create({ id: OTHER_SPACE_ID, name: 'CE session memory other space' });
-
-      await esClient.indices.create({ index: WRITABLE_INDEX });
-      await esClient.indices.create({ index: FORBIDDEN_INDEX });
 
       await esClient.security.putRole({
         name: SEED_ROLE_NAME,
@@ -155,7 +118,6 @@ apiTest.describe(
         tls: { rejectUnauthorized: false },
       });
 
-      adminCredentials = await requestAuth.getApiKey('admin');
       readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
       otherSpaceWriteCredentials = await requestAuth.getApiKeyForCustomRole(OTHER_SPACE_WRITE_ROLE);
       defaultSpaceManageMemoryCredentials = await requestAuth.getApiKeyForCustomRole(
@@ -173,41 +135,23 @@ apiTest.describe(
       expect(callerProfileUid).toBeDefined();
 
       const seededTimestamp = new Date(Date.now() - 60_000).toISOString();
+      const seedDocs = [
+        { id: OWN_OTHER_SPACE_MEMORY_ID, space: OTHER_SPACE_ID, user_id: callerProfileUid },
+        { id: OWN_DEFAULT_SPACE_MEMORY_ID, space: DEFAULT_SPACE_ID, user_id: callerProfileUid },
+        { id: TARGET_OTHER_SPACE_MEMORY_ID, space: OTHER_SPACE_ID, user_id: TARGET_USER_ID },
+        { id: TARGET_DEFAULT_SPACE_MEMORY_ID, space: DEFAULT_SPACE_ID, user_id: TARGET_USER_ID },
+      ];
       const bulkResult = await seedEsClient.bulk({
-        operations: [SEEDED_REVISABLE_MEMORY_ID, SEEDED_FORGOTTEN_MEMORY_ID].flatMap((id) => [
+        operations: seedDocs.flatMap((doc) => [
           { create: { _index: SESSION_MEMORY_DATA_STREAM } },
-          {
-            '@timestamp': seededTimestamp,
-            id,
-            space: OTHER_SPACE_ID,
-            session_id: `session-seed-${RUN_ID}`,
-            user_id: callerProfileUid,
-          },
+          { '@timestamp': seededTimestamp, session_id: SESSION_ID, ...doc },
         ]),
         refresh: true,
       });
       expect(bulkResult.errors).toBe(false);
-
-      const adminHeaders = { ...adminCredentials.apiKeyHeader, ...API_HEADERS };
-      for (const [path, id, index] of [
-        [spacePath(OTHER_SPACE_ID, AI_INDEX_COLLECTION_PATH), WRITABLE_AI_INDEX_ID, WRITABLE_INDEX],
-        [
-          spacePath(OTHER_SPACE_ID, AI_INDEX_COLLECTION_PATH),
-          FORBIDDEN_AI_INDEX_ID,
-          FORBIDDEN_INDEX,
-        ],
-        [AI_INDEX_COLLECTION_PATH, DEFAULT_SPACE_AI_INDEX_ID, WRITABLE_INDEX],
-      ] as const) {
-        const response = await apiClient.post(path, {
-          headers: adminHeaders,
-          responseType: 'json',
-          body: registerAiIndex(id, { type: 'index', value: index }),
-        });
-        expect(response).toHaveStatusCode(201);
-      }
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
+    apiTest.afterAll(async ({ kbnClient, esClient }) => {
       try {
         if (seedEsClient) {
           try {
@@ -218,7 +162,7 @@ apiTest.describe(
             await seedEsClient.deleteByQuery(
               {
                 index: SESSION_MEMORY_DATA_STREAM,
-                query: { terms: { id: trackedMemoryIds } },
+                query: { terms: { id: SEEDED_MEMORY_IDS } },
                 refresh: true,
               },
               { ignore: [404] }
@@ -227,23 +171,8 @@ apiTest.describe(
             await seedEsClient.close();
           }
         }
-        if (adminCredentials) {
-          const adminHeaders = { ...adminCredentials.apiKeyHeader, ...API_HEADERS };
-          await Promise.allSettled([
-            ...[WRITABLE_AI_INDEX_ID, FORBIDDEN_AI_INDEX_ID].map((id) =>
-              apiClient.delete(spacePath(OTHER_SPACE_ID, `${AI_INDEX_COLLECTION_PATH}/${id}`), {
-                headers: adminHeaders,
-                responseType: 'json',
-              })
-            ),
-            apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${DEFAULT_SPACE_AI_INDEX_ID}`, {
-              headers: adminHeaders,
-              responseType: 'json',
-            }),
-          ]);
-        }
+      } finally {
         await Promise.allSettled([
-          esClient.indices.delete({ index: [WRITABLE_INDEX, FORBIDDEN_INDEX] }, { ignore: [404] }),
           esClient.security
             .deleteUser({ username: SEED_USERNAME }, { ignore: [404] })
             .finally(() =>
@@ -251,32 +180,15 @@ apiTest.describe(
             ),
           kbnClient.spaces.delete(OTHER_SPACE_ID),
         ]);
-      } finally {
-        if (initialMemorySetting) {
-          if (initialMemorySetting.value === undefined) {
-            await kbnClient.request({
-              method: 'DELETE',
-              path: `${GLOBAL_SETTINGS_PATH}/${CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID}`,
-            });
-          } else {
-            await kbnClient.uiSettings.updateGlobal({
-              [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: initialMemorySetting.value,
-            });
-          }
-          await kbnClient.uiSettings.waitForEventualCacheRefresh();
-        }
       }
     });
 
     apiTest('enforces contextEngine:write per space', async ({ apiClient }) => {
-      const body = {
-        session_id: `session-denied-${RUN_ID}`,
-        content: 'caller lacks write privilege',
-      };
+      const body = { ids: [OWN_OTHER_SPACE_MEMORY_ID] };
 
       await apiTest.step('rejects a read-only caller in the non-default space', async () => {
         const response = await apiClient.post(
-          spacePath(OTHER_SPACE_ID, SESSION_MEMORY_REMEMBER_PATH),
+          spacePath(OTHER_SPACE_ID, SESSION_MEMORY_FORGET_PATH),
           {
             headers: { ...readOnlyCredentials.apiKeyHeader, ...API_HEADERS },
             responseType: 'json',
@@ -285,111 +197,65 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(403);
+        expect(response.body).toMatchObject({
+          message: expect.stringContaining('contextEngine:write'),
+        });
       });
 
       await apiTest.step(
         'rejects a caller whose write privilege is scoped to another space',
         async () => {
-          const response = await apiClient.post(SESSION_MEMORY_REMEMBER_PATH, {
+          const response = await apiClient.post(SESSION_MEMORY_FORGET_PATH, {
             headers: { ...otherSpaceWriteCredentials.apiKeyHeader, ...API_HEADERS },
             responseType: 'json',
             body,
           });
 
           expect(response).toHaveStatusCode(403);
+          expect(response.body).toMatchObject({
+            message: expect.stringContaining('contextEngine:write'),
+          });
         }
       );
     });
 
     apiTest(
-      'accepts a memory for the caller in the non-default space without manage_memory',
+      'forgets only the caller memories in the request space without manage_memory',
       async ({ apiClient }) => {
         const headers = { ...otherSpaceWriteCredentials.apiKeyHeader, ...API_HEADERS };
-        const path = spacePath(OTHER_SPACE_ID, SESSION_MEMORY_REMEMBER_PATH);
+        const path = spacePath(OTHER_SPACE_ID, SESSION_MEMORY_FORGET_PATH);
 
-        await apiTest.step('generates an id when omitted', async () => {
-          const response = await apiClient.post(path, {
-            headers,
-            responseType: 'json',
-            body: {
-              session_id: `session-own-${RUN_ID}`,
-              ai_index_ids: [WRITABLE_AI_INDEX_ID],
-              content: 'root cause was a connection pool limit',
-            },
-          });
-
-          expect(response).toHaveStatusCode(202);
-          const body = response.body as { id?: unknown };
-          expect(Object.keys(body)).toStrictEqual(['id']);
-          expect(body.id).toMatch(UUID_PATTERN);
-          trackedMemoryIds.push(body.id as string);
-        });
-
-        await apiTest.step('accepts revising an existing active memory id', async () => {
-          const response = await apiClient.post(path, {
-            headers,
-            responseType: 'json',
-            body: {
-              id: SEEDED_REVISABLE_MEMORY_ID,
-              session_id: `session-own-${RUN_ID}`,
-              ai_index_ids: [WRITABLE_AI_INDEX_ID],
-              content: 'revised root cause after follow-up investigation',
-            },
-          });
-
-          expect(response).toHaveStatusCode(202);
-          expect(response.body).toStrictEqual({ id: SEEDED_REVISABLE_MEMORY_ID });
-        });
-
-        await apiTest.step('returns 404 when revising a forgotten memory id', async () => {
-          const forgetResponse = await apiClient.post(
-            spacePath(OTHER_SPACE_ID, SESSION_MEMORY_FORGET_PATH),
-            {
+        await apiTest.step(
+          'forgets a memory in the request space and hides one seeded in the default space',
+          async () => {
+            const response = await apiClient.post(path, {
               headers,
               responseType: 'json',
-              body: { ids: [SEEDED_FORGOTTEN_MEMORY_ID] },
-            }
-          );
-          expect(forgetResponse).toHaveStatusCode(200);
-          expect(forgetResponse.body).toStrictEqual({
-            results: [{ id: SEEDED_FORGOTTEN_MEMORY_ID, outcome: 'forgotten' }],
-          });
+              body: { ids: [OWN_OTHER_SPACE_MEMORY_ID, OWN_DEFAULT_SPACE_MEMORY_ID] },
+            });
 
-          await seedEsClient.indices.refresh({ index: SESSION_MEMORY_DATA_STREAM });
+            expect(response).toHaveStatusCode(200);
+            expect(response.body).toStrictEqual({
+              results: [
+                { id: OWN_OTHER_SPACE_MEMORY_ID, outcome: 'forgotten' },
+                { id: OWN_DEFAULT_SPACE_MEMORY_ID, outcome: 'not_found' },
+              ],
+            });
+          }
+        );
 
+        await seedEsClient.indices.refresh({ index: SESSION_MEMORY_DATA_STREAM });
+
+        await apiTest.step('reports already_forgotten on a second request', async () => {
           const response = await apiClient.post(path, {
             headers,
             responseType: 'json',
-            body: {
-              id: SEEDED_FORGOTTEN_MEMORY_ID,
-              session_id: `session-own-${RUN_ID}`,
-              ai_index_ids: [WRITABLE_AI_INDEX_ID],
-              content: 'attempting to revise a forgotten memory',
-            },
+            body: { ids: [OWN_OTHER_SPACE_MEMORY_ID] },
           });
 
-          expect(response).toHaveStatusCode(404);
-          expect(response.body).toMatchObject({
-            message: expect.stringContaining(SEEDED_FORGOTTEN_MEMORY_ID),
-          });
-        });
-
-        await apiTest.step('returns 404 when revising an unknown memory id', async () => {
-          const unknownId = `mem-missing-${RUN_ID}`;
-          const response = await apiClient.post(path, {
-            headers,
-            responseType: 'json',
-            body: {
-              id: unknownId,
-              session_id: `session-own-${RUN_ID}`,
-              ai_index_ids: [WRITABLE_AI_INDEX_ID],
-              content: 'mitigated by raising max_connections',
-            },
-          });
-
-          expect(response).toHaveStatusCode(404);
-          expect(response.body).toMatchObject({
-            message: expect.stringContaining(unknownId),
+          expect(response).toHaveStatusCode(200);
+          expect(response.body).toStrictEqual({
+            results: [{ id: OWN_OTHER_SPACE_MEMORY_ID, outcome: 'already_forgotten' }],
           });
         });
       }
@@ -398,12 +264,10 @@ apiTest.describe(
     apiTest(
       'resolves contextEngine:manage_memory in the request space when targeting another user',
       async ({ apiClient }) => {
-        const path = spacePath(OTHER_SPACE_ID, SESSION_MEMORY_REMEMBER_PATH);
+        const path = spacePath(OTHER_SPACE_ID, SESSION_MEMORY_FORGET_PATH);
         const otherUserBody = {
-          session_id: `session-managed-${RUN_ID}`,
           user_id: TARGET_USER_ID,
-          ai_index_ids: [WRITABLE_AI_INDEX_ID],
-          content: 'memory written on behalf of another user',
+          ids: [TARGET_OTHER_SPACE_MEMORY_ID, TARGET_DEFAULT_SPACE_MEMORY_ID],
         };
 
         await apiTest.step('rejects when manage_memory is missing', async () => {
@@ -436,7 +300,7 @@ apiTest.describe(
         );
 
         await apiTest.step(
-          'accepts when manage_memory is granted in the request space',
+          'forgets only the target user memory in the request space when manage_memory is granted',
           async () => {
             const response = await apiClient.post(path, {
               headers: { ...otherSpaceManageMemoryCredentials.apiKeyHeader, ...API_HEADERS },
@@ -444,58 +308,12 @@ apiTest.describe(
               body: otherUserBody,
             });
 
-            expect(response).toHaveStatusCode(202);
-            const body = response.body as { id?: unknown };
-            expect(Object.keys(body)).toStrictEqual(['id']);
-            expect(body.id).toMatch(UUID_PATTERN);
-            trackedMemoryIds.push(body.id as string);
-          }
-        );
-      }
-    );
-
-    apiTest(
-      'checks AI index existence and Elasticsearch write privileges in the request space',
-      async ({ apiClient }) => {
-        const headers = { ...otherSpaceWriteCredentials.apiKeyHeader, ...API_HEADERS };
-        const path = spacePath(OTHER_SPACE_ID, SESSION_MEMORY_REMEMBER_PATH);
-
-        await apiTest.step(
-          'returns 403 when the caller lacks write on the backing index',
-          async () => {
-            const response = await apiClient.post(path, {
-              headers,
-              responseType: 'json',
-              body: {
-                session_id: `session-forbidden-index-${RUN_ID}`,
-                ai_index_ids: [FORBIDDEN_AI_INDEX_ID],
-                content: 'targeting forbidden AI index',
-              },
-            });
-
-            expect(response).toHaveStatusCode(403);
-            expect(response.body).toMatchObject({
-              message: expect.stringContaining(FORBIDDEN_AI_INDEX_ID),
-            });
-          }
-        );
-
-        await apiTest.step(
-          'returns 404 when the AI index is only registered in another space',
-          async () => {
-            const response = await apiClient.post(path, {
-              headers,
-              responseType: 'json',
-              body: {
-                session_id: `session-missing-index-${RUN_ID}`,
-                ai_index_ids: [DEFAULT_SPACE_AI_INDEX_ID],
-                content: 'targeting AI index in another space',
-              },
-            });
-
-            expect(response).toHaveStatusCode(404);
-            expect(response.body).toMatchObject({
-              message: expect.stringContaining(DEFAULT_SPACE_AI_INDEX_ID),
+            expect(response).toHaveStatusCode(200);
+            expect(response.body).toStrictEqual({
+              results: [
+                { id: TARGET_OTHER_SPACE_MEMORY_ID, outcome: 'forgotten' },
+                { id: TARGET_DEFAULT_SPACE_MEMORY_ID, outcome: 'not_found' },
+              ],
             });
           }
         );

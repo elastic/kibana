@@ -178,24 +178,24 @@ Refer to the linked documentation for step-by-step instructions using the index 
   },
   paramsSchema: z.union([
     z.object({
-      ...getShapeAt(bulk_request, 'body'),
-      ...getShapeAt(bulk_request, 'path'),
       ...getShapeAt(bulk_request, 'query'),
+      ...getShapeAt(bulk_request, 'path'),
+      ...getShapeAt(bulk_request, 'body'),
     }),
     z.object({
-      ...getShapeAt(bulk1_request, 'body'),
-      ...getShapeAt(bulk1_request, 'path'),
       ...getShapeAt(bulk1_request, 'query'),
+      ...getShapeAt(bulk1_request, 'path'),
+      ...getShapeAt(bulk1_request, 'body'),
     }),
     z.object({
-      ...getShapeAt(bulk2_request, 'body'),
-      ...getShapeAt(bulk2_request, 'path'),
       ...getShapeAt(bulk2_request, 'query'),
+      ...getShapeAt(bulk2_request, 'path'),
+      ...getShapeAt(bulk2_request, 'body'),
     }),
     z.object({
-      ...getShapeAt(bulk3_request, 'body'),
-      ...getShapeAt(bulk3_request, 'path'),
       ...getShapeAt(bulk3_request, 'query'),
+      ...getShapeAt(bulk3_request, 'path'),
+      ...getShapeAt(bulk3_request, 'body'),
     }),
   ]),
   outputSchema: z.union([bulk_response, bulk1_response, bulk2_response, bulk3_response]),

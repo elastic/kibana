@@ -612,9 +612,9 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           'match',
           ['to-string', ['get', 'foobar']],
           'US',
-          '#16C5C0',
+          '#00BDA0',
           'CN',
-          '#A6EDEA',
+          '#93F0D9',
           'grey',
         ]);
       });

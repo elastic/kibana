@@ -8,7 +8,11 @@
 import { expect } from '@kbn/scout/ui';
 import { escapeRegExp } from 'lodash';
 import { getBoostTestData } from '../../common/boost_test_data';
-import { SEARCH_BOOST_READ_ROLE } from '../../common/roles';
+import {
+  SEARCH_BOOST_READ_DELETE_DATA_STREAMS_ROLE,
+  SEARCH_BOOST_READ_ROLE,
+  SEARCH_BOOST_READ_WITH_INDEX_MANAGEMENT_ROLE,
+} from '../../common/roles';
 import { test } from '../fixtures';
 
 const testData = getBoostTestData('scout-ui-details');
@@ -47,9 +51,7 @@ test.describe('Search boost details pages', { tag: ['@local-serverless-vectordb'
 
     await test.step('lists the matching indices', async () => {
       await expect(
-        page
-          .getByTestId('searchBoostMatchesTable')
-          .getByText(testData.productsIndex, { exact: true })
+        searchBoost.matchesTable.getByText(testData.productsIndex, { exact: true })
       ).toBeVisible();
     });
 
@@ -57,6 +59,80 @@ test.describe('Search boost details pages', { tag: ['@local-serverless-vectordb'
       const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
       expect(violations).toStrictEqual([]);
     });
+
+    await test.step('shows index names as text without access to Index Management', async () => {
+      await expect(searchBoost.matchLink(testData.reviewsIndex)).toBeVisible();
+      for (const role of ['link', 'button'] as const) {
+        await expect(
+          searchBoost.matchesTable.getByRole(role, { name: testData.reviewsIndex, exact: true })
+        ).toHaveCount(0);
+      }
+    });
+  });
+
+  test('opens an index in Index Management for users who can open it', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
+    const { searchBoost } = pageObjects;
+    await browserAuth.loginWithCustomRole(SEARCH_BOOST_READ_WITH_INDEX_MANAGEMENT_ROLE);
+    await searchBoost.gotoDetails('rules', testData.patternRule);
+
+    await searchBoost.matchLink(testData.reviewsIndex).click();
+
+    await expect(page).toHaveURL(
+      new RegExp(
+        `/index_management/indices/index_details\\?indexName=${escapeRegExp(testData.reviewsIndex)}`
+      )
+    );
+    await expect(page.getByTestId('indexDetailsContent')).toBeVisible();
+  });
+
+  test('opens a data stream in a flyout over the rule', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
+    const { searchBoost } = pageObjects;
+    await browserAuth.loginWithCustomRole(SEARCH_BOOST_READ_WITH_INDEX_MANAGEMENT_ROLE);
+    await searchBoost.gotoDetails('rules', testData.dataStreamsRule);
+
+    await searchBoost.matchLink(testData.dataStream).click();
+
+    await expect(searchBoost.dataStreamFlyout).toBeVisible();
+    await expect(searchBoost.dataStreamFlyout.getByTestId('dataStreamDetailPanelTitle')).toHaveText(
+      testData.dataStream
+    );
+    // The title also shows while loading and on errors.
+    await expect(searchBoost.dataStreamFlyout.getByTestId('indicesDetail')).toBeVisible();
+    await expect(page).toHaveURL(
+      new RegExp(`/search_boost/rules/${escapeRegExp(testData.dataStreamsRule)}$`)
+    );
+  });
+
+  test('loads again once the data stream is deleted from the flyout', async ({
+    browserAuth,
+    esClient,
+    page,
+    pageObjects,
+  }) => {
+    const { searchBoost } = pageObjects;
+    const { deletableDataStream } = testData;
+    await esClient.indices.createDataStream({ name: deletableDataStream });
+
+    await browserAuth.loginWithCustomRole(SEARCH_BOOST_READ_DELETE_DATA_STREAMS_ROLE);
+    await searchBoost.gotoDetails('rules', testData.dataStreamsRule);
+    await searchBoost.matchLink(deletableDataStream).click();
+    await expect(searchBoost.dataStreamFlyout).toBeVisible();
+
+    await page.testSubj.locator('manageDataStreamButton').click();
+    await page.testSubj.locator('deleteDataStreamButton').click();
+    await page.testSubj.locator('confirmModalConfirmButton').click();
+
+    await expect(searchBoost.dataStreamFlyout).toBeHidden();
+    await expect(searchBoost.matchLink(deletableDataStream)).toBeHidden();
+    await expect(searchBoost.matchLink(testData.dataStream)).toBeVisible();
   });
 
   test("opens a rule's profile and lists the rules using it", async ({ page, pageObjects }) => {

@@ -36,7 +36,7 @@ const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
  * `not-rated` holds the investigations nothing works on that have no severity: the agent did not
  * record one, for example because its run ended early. There is no failed state.
  */
-export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated';
+export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated' | 'closed';
 
 export interface InvestigationSectionState extends FetchInvestigationsResult {
   id: InvestigationSectionId;
@@ -62,9 +62,14 @@ export interface InvestigationSectionsResult {
   /** Running investigations per the API total (not capped by the in-progress page size). */
   activeInvestigationCount: number;
   isInitialLoading: boolean;
+  /** True while any open section is still on its first load (ignores Closed). */
+  isOpenInitialLoading: boolean;
   isFetching: boolean;
   /** Investigations matching the current filters, each counted once: the sections are disjoint. */
   totalCount: number;
+  /** Open investigations matching the current filters (excludes Closed). */
+  openTotalCount: number;
+  /** Open investigations loaded across the open sections (excludes Closed). */
   loadedCount: number;
   refetchAll: () => void;
 }
@@ -136,6 +141,13 @@ export const useInvestigationSections = ({
     ...updatedWindow,
   });
 
+  const closed = useFetchInvestigations({
+    inProgress: false,
+    status: 'closed',
+    query,
+    ...updatedWindow,
+  });
+
   const hasSearchQuery = Boolean(query?.trim());
   const severityCountsTimeQuery = {
     ...(updatedAfter ? { updated_after: updatedAfter } : {}),
@@ -197,6 +209,7 @@ export const useInvestigationSections = ({
   const { refetch: refetchMedium } = medium;
   const { refetch: refetchLow } = low;
   const { refetch: refetchNotRated } = notRated;
+  const { refetch: refetchClosed } = closed;
   const { refetch: refetchSeverityCounts } = severityCountsQuery;
   const { refetch: refetchUnfilteredSeverityCounts } = unfilteredSeverityCountsQuery;
 
@@ -236,6 +249,7 @@ export const useInvestigationSections = ({
     refetchMedium();
     refetchLow();
     refetchNotRated();
+    refetchClosed();
     void refetchSeverityCounts();
     if (hasSearchQuery) {
       void refetchUnfilteredSeverityCounts();
@@ -251,11 +265,12 @@ export const useInvestigationSections = ({
     refetchMedium,
     refetchLow,
     refetchNotRated,
+    refetchClosed,
     refetchSeverityCounts,
     refetchUnfilteredSeverityCounts,
   ]);
 
-  const sections = useMemo(
+  const openSections = useMemo(
     () => [
       toSectionState({ id: 'in-progress', queryResult: inProgress }),
       toSectionState({ id: 'critical', queryResult: critical }),
@@ -265,6 +280,11 @@ export const useInvestigationSections = ({
       toSectionState({ id: 'not-rated', queryResult: notRated }),
     ],
     [inProgress, critical, high, medium, low, notRated]
+  );
+
+  const sections = useMemo(
+    () => [...openSections, toSectionState({ id: 'closed', queryResult: closed })],
+    [openSections, closed]
   );
 
   const severityCounts = useMemo(
@@ -297,7 +317,7 @@ export const useInvestigationSections = ({
   }, [sections, refetchSeverityCounts, hasSearchQuery, refetchUnfilteredSeverityCounts]);
 
   // Status toggles in the investigation flyout run on an isolated QueryClient, so closing a
-  // finished investigation would not invalidate this page's open-only lists/counts otherwise.
+  // finished investigation would not refresh this page's open/closed lists and counts otherwise.
   useStatusSignal(refetchAll);
 
   return {
@@ -312,9 +332,11 @@ export const useInvestigationSections = ({
     hasActiveInvestigations,
     activeInvestigationCount,
     isInitialLoading: sections.some((section) => section.isInitialLoading),
+    isOpenInitialLoading: openSections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
-    loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
+    openTotalCount: openSections.reduce((sum, section) => sum + section.total, 0),
+    loadedCount: openSections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   };
 };

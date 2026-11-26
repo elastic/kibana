@@ -12,7 +12,6 @@ import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { BackgroundWriteTracker } from './background_write_tracker';
 import { registerSessionMemoryRoutes } from './session_memory';
 import {
   MAX_KI_CONTENT_LENGTH,
@@ -29,6 +28,7 @@ import {
 import { apiPrivileges } from '../../common/features';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { BackgroundWriteTracker } from '../session_memory/background_write_tracker';
 import type { SessionMemoryService } from '../session_memory/types';
 
 interface RegisteredRoute {
@@ -62,6 +62,7 @@ describe('session memory routes', () => {
   let logger: ReturnType<typeof loggerMock.create>;
   let auditLog: jest.Mock;
   let service: jest.Mocked<SessionMemoryService>;
+  let getSpaces: jest.Mock<Promise<SpacesPluginStart>>;
   let authzResult: Record<string, boolean>;
   let backgroundWrites: BackgroundWriteTracker;
   let registerRoutes: (tracker?: BackgroundWriteTracker) => void;
@@ -120,8 +121,13 @@ describe('session memory routes', () => {
         revisedAt: '2026-11-08T09:00:00.000Z',
       })),
       forget: jest.fn(),
+      readRevised: jest.fn(),
     };
     getSessionMemoryService = jest.fn(async () => service);
+    getSpaces = jest.fn(
+      async () =>
+        ({ spacesService: { getSpaceId: () => 'marketing' } } as unknown as SpacesPluginStart)
+    );
 
     const router = {
       versioned: {
@@ -139,8 +145,7 @@ describe('session memory routes', () => {
     registerRoutes = (tracker = backgroundWrites) => {
       registerSessionMemoryRoutes({
         router,
-        getSpaces: async () =>
-          ({ spacesService: { getSpaceId: () => 'marketing' } } as unknown as SpacesPluginStart),
+        getSpaces,
         getSessionMemoryService,
         getAiIndexService: () => aiIndexService as unknown as AiIndexService,
         isMemoryEnabled: async () => memoryEnabled,
@@ -339,6 +344,29 @@ describe('session memory routes', () => {
         }),
       ]);
     });
+  });
+
+  it('audits a failure for every memory and rethrows when resolving the space fails', async () => {
+    const error = new Error('spaces unavailable');
+    getSpaces.mockRejectedValueOnce(error);
+
+    await expect(callRoute({ user_id: 'jdoe', ids: ['a', 'b', 'a'] })).rejects.toBe(error);
+
+    expect(service.forget).not.toHaveBeenCalled();
+    expect(auditedEvents()).toEqual([
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+        error: { code: 'Error', message: 'spaces unavailable' },
+        user: { target: { id: 'jdoe' } },
+        kibana: { saved_object: { type: 'session_memory', id: 'a' } },
+      }),
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+        error: { code: 'Error', message: 'spaces unavailable' },
+        user: { target: { id: 'jdoe' } },
+        kibana: { saved_object: { type: 'session_memory', id: 'b' } },
+      }),
+    ]);
   });
 
   it('audits a failure for every memory and rethrows when the service throws', async () => {
@@ -936,7 +964,7 @@ describe('session memory routes', () => {
 
         expect(response.customError).toHaveBeenCalledWith({
           statusCode: 429,
-          body: { message: expect.stringContaining('shutting down') },
+          body: { message: expect.stringContaining('Too many session memory writes') },
           headers: { 'Retry-After': '1' },
         });
         expect(service.remember).toHaveBeenCalledTimes(1);

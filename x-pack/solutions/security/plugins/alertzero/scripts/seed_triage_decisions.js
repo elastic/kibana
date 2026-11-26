@@ -77,6 +77,15 @@ const RULE_UUID = '7c1f0c9e-5a3b-4f6e-9a21-0c0ffee00001';
 const RULE_REVISION = 1;
 const RULE_NAME = 'Triage decisions fixture: unsigned updater runs';
 
+const UI_RULE = {
+  ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000b0001',
+  ruleName: 'Triage UI test: vendor updater runs',
+};
+const UI_OTHER_RULE = {
+  ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000b0002',
+  ruleName: 'Triage UI test: vendor updater runs (copy)',
+};
+
 const RISK_SCORES = { low: 21, medium: 47, high: 73 };
 const PATTERNS = {
   A: { executable: 'C:\\Program Files\\Acme\\Updater\\acme-update.exe', subject: 'Acme Corp' },
@@ -296,14 +305,6 @@ const bulk = async (index, action, rows) => {
 
 // ── UI mode ───────────────────────────────────────────────────────────────────
 
-const UI_RULE = {
-  ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000b0001',
-  ruleName: 'Triage UI test: vendor updater runs',
-};
-const UI_OTHER_RULE = {
-  ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000b0002',
-  ruleName: 'Triage UI test: vendor updater runs (copy)',
-};
 const UI_UPDATER = 'C:\\Program Files\\Acme\\Updater\\acme-update.exe';
 // Pattern U: the strict key is the rule, the executable, the signer and the parent executable.
 const uiAlert = (overrides = {}) => {

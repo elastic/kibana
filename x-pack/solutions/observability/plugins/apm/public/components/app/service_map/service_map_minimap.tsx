@@ -12,13 +12,22 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceMapNode } from '../../../../common/service_map';
-import { isServiceGroupNodeData, isServiceNodeData } from '../../../../common/service_map';
+import {
+  isServiceGroupBoxNodeData,
+  isServiceGroupNodeData,
+  isServiceNodeData,
+} from '../../../../common/service_map';
 
 export function ServiceMapMinimap() {
   const { euiTheme } = useEuiTheme();
 
   const nodeColor = useCallback(
     (node: ServiceMapNode) => {
+      // The box of an open group is as big as the group and has its members drawn over it: a subdued
+      // fill, so it frames them instead of being a block like a dependency.
+      if (isServiceGroupBoxNodeData(node.data)) {
+        return euiTheme.colors.lightShade;
+      }
       if (isServiceNodeData(node.data) || isServiceGroupNodeData(node.data)) {
         const { anomalyScore } = node.data.serviceAnomalyStats ?? {};
         if (anomalyScore !== undefined) {

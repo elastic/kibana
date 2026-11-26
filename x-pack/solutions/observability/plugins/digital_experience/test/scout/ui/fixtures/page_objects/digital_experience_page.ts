@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AppMenu } from '@kbn/scout-oblt';
 import type {
   EuiBasicTableObject,
   EuiSelectableObject,
@@ -15,6 +16,8 @@ import type {
 import { TIME_RANGE } from '../../../common/fixtures/constants';
 
 const APP_PATH = '/app/digital_experience';
+
+const panelHeadingTestId = (title: string) => `embeddablePanelHeading-${title.replace(/\s/g, '')}`;
 
 type OverviewFilterName =
   | 'browser'
@@ -57,6 +60,13 @@ export class DigitalExperiencePage {
   public readonly networkSlowestResources: Locator;
   public readonly otelOverviewTopClicks: Locator;
   public readonly otelOverviewFrustration: Locator;
+  public readonly frustrationDashboardLink: Locator;
+  public readonly frustrationPageTitle: Locator;
+  public readonly frustrationDashboardSlot: Locator;
+  public readonly frustrationDashboardErrors: Locator;
+  public readonly frustrationPanelsRendering: Locator;
+  public readonly frustrationSaveAsDashboard: Locator;
+  public readonly appMenu: AppMenu;
   public readonly overviewClearFilters: Locator;
   public readonly overviewAllFilters: Locator;
   public readonly overviewFiltersFlyout: Locator;
@@ -96,6 +106,10 @@ export class DigitalExperiencePage {
   public readonly mobileTab: Locator;
   public readonly mobileApplicationsTable: EuiBasicTableObject;
   public readonly mobileKpis: Locator;
+  public readonly mobileReleaseHealth: Locator;
+  public readonly mobileReleaseTable: Locator;
+  public readonly mobileReleaseErrorRateChart: Locator;
+  public readonly mobileReleaseAdoptionChart: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
   public readonly mobileCompareToggle: Locator;
@@ -131,6 +145,24 @@ export class DigitalExperiencePage {
     this.networkSlowestResources = page.getByTestId('digitalExperienceNetworkSlowestResources');
     this.otelOverviewTopClicks = page.getByTestId('digitalExperienceOverviewTopClicks');
     this.otelOverviewFrustration = page.getByTestId('digitalExperienceOverviewFrustration');
+    this.frustrationDashboardLink = page.getByTestId(
+      'digitalExperienceOverviewFrustrationDashboardLink'
+    );
+    this.frustrationPageTitle = page.getByRole('heading', {
+      level: 1,
+      name: 'Frustration signals',
+    });
+    this.frustrationDashboardSlot = page.getByTestId('digitalExperienceFrustrationDashboardSlot');
+    this.frustrationDashboardErrors = this.frustrationDashboardSlot.locator(
+      '[data-test-subj="embeddableError"], [data-test-subj="embeddable-lens-failure"]'
+    );
+    this.frustrationPanelsRendering = this.frustrationDashboardSlot.locator(
+      '[data-test-subj="embeddablePanel"]:not([data-render-complete="true"])'
+    );
+    this.frustrationSaveAsDashboard = page.getByTestId(
+      'digitalExperienceFrustrationSaveAsDashboard'
+    );
+    this.appMenu = new AppMenu(page);
     this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
     this.overviewAllFilters = page.getByTestId('digitalExperienceOverviewAllFilters');
     this.overviewFiltersFlyout = page.getByTestId('digitalExperienceOverviewFiltersFlyout');
@@ -175,6 +207,14 @@ export class DigitalExperiencePage {
       'digitalExperienceMobileApplicationsTable'
     );
     this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
+    this.mobileReleaseHealth = page.getByTestId('digitalExperienceMobileReleaseHealth');
+    this.mobileReleaseTable = page.getByTestId('digitalExperienceMobileReleaseTable');
+    this.mobileReleaseErrorRateChart = page.getByTestId(
+      'digitalExperienceMobileReleaseErrorRateChart'
+    );
+    this.mobileReleaseAdoptionChart = page.getByTestId(
+      'digitalExperienceMobileReleaseAdoptionChart'
+    );
     // The header's badges, one per platform the application reported on.
     this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
@@ -193,6 +233,30 @@ export class DigitalExperiencePage {
   mobileApplicationRow(serviceName: string): Locator {
     return this.mobileApplicationsTable.rows.filter({
       has: this.page.getByRole('link', { name: serviceName, exact: true }),
+    });
+  }
+
+  /**
+   * The legend item of `release` in a Release health chart (`chart`), which only shows once the
+   * chart is drawn. `@elastic/charts` names it by the series; there's no test subject to add.
+   */
+  mobileReleaseChartSeries(chart: Locator, release: string): Locator {
+    return chart.locator(`[data-ech-series-name="${release}"]`);
+  }
+
+  /** The control in the Release health table that filters the page by `release`. */
+  mobileReleaseFilter(release: string): Locator {
+    return this.mobileReleaseTable.getByRole('button', {
+      name: `Filter by release ${release}`,
+      exact: true,
+    });
+  }
+
+  /** The selected release's pill in the Release health table, which takes the filter off. */
+  mobileReleaseFilterRemove(release: string): Locator {
+    return this.mobileReleaseTable.getByRole('button', {
+      name: `Stop filtering by release ${release}`,
+      exact: true,
     });
   }
 
@@ -220,14 +284,8 @@ export class DigitalExperiencePage {
     await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
   }
 
-  /**
-   * Turns the mobile page's Compare on or off from its header, whose narrow layouts move the menu
-   * items into the overflow menu.
-   */
+  /** Turns Compare on or off from the mobile page's Health summary. */
   async toggleMobileCompare(): Promise<void> {
-    if (!(await this.mobileCompareToggle.isVisible())) {
-      await this.page.getByTestId('app-menu-overflow-button').click();
-    }
     await this.mobileCompareToggle.click();
   }
 
@@ -277,6 +335,11 @@ export class DigitalExperiencePage {
     return this.applicationsTable.rows.filter({
       has: this.page.getByRole('link', { name: serviceName, exact: true }),
     });
+  }
+
+  /** The source badge of a row, rendered from the same source its application link points at. */
+  applicationSource(serviceName: string): Locator {
+    return this.applicationRow(serviceName).getByTestId('digitalExperienceApplicationSource');
   }
 
   classicDataHint(serviceName: string): Locator {
@@ -385,6 +448,33 @@ export class DigitalExperiencePage {
   /** The row of an element in the Overview's Frustration panel, found by its CSS selector. */
   frustrationRow(selector: string): Locator {
     return this.page.getByTestId(`digitalExperienceOverviewFrustrationRow-${selector}`);
+  }
+
+  /** The heading of a panel of the frustration dashboard, found by its title. */
+  frustrationPanelHeading(title: string): Locator {
+    return this.frustrationDashboardSlot.getByTestId(panelHeadingTestId(title));
+  }
+
+  /** The heading of a panel of a dashboard the frustration panels were saved as. */
+  savedDashboardPanelHeading(title: string): Locator {
+    return this.page.getByTestId(panelHeadingTestId(title));
+  }
+
+  /** A panel of the frustration dashboard, with its heading and content, found by its title. */
+  frustrationPanel(title: string): Locator {
+    return this.frustrationDashboardSlot
+      .getByTestId('embeddablePanel')
+      .filter({ has: this.page.getByTestId(panelHeadingTestId(title)) });
+  }
+
+  /** The button that collapses or expands a section of the frustration dashboard. */
+  frustrationSectionToggle(sectionId: string): Locator {
+    return this.frustrationDashboardSlot.getByTestId(`kbnGridSectionTitle-${sectionId}`);
+  }
+
+  /** The metric of a metric panel of the frustration dashboard, found by its title. */
+  frustrationMetric(title: string): Locator {
+    return this.frustrationPanel(title).getByTestId('mtrVis');
   }
 
   /** The "Open sessions" link of an element's row in the Frustration panel. */
