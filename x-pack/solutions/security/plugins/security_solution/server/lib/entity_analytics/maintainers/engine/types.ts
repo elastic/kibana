@@ -360,14 +360,16 @@ export type RelationshipIntegrationConfig =
  * Step 1 of the customActor presence-gate fix already derives actor *fields*
  * from `customActor.fields`; #266748 is what derives the actor *entity type*.
  */
-export function entityTypeFromEuid(euid: string | null): 'user' | 'host' | 'service' {
-  return euid?.split(':')[0] as 'user' | 'host' | 'service';
+export type ActorEntityType = 'user' | 'host' | 'service' | 'ai_agent';
+
+export function entityTypeFromEuid(euid: string | null): ActorEntityType {
+  return euid?.split(':')[0] as ActorEntityType;
 }
 
 export interface EntityRelationshipRecord {
   /** Full EUID with type prefix, e.g. "user:alice@okta". Null if actor eval failed. */
   entityId: string | null;
-  entityType: 'user' | 'host' | 'service';
+  entityType: ActorEntityType;
   /**
    * relType → euid[]
    * e.g. { communicates_with: ['host:D3F5C9B9-...', 'user:bob@corp'] }
@@ -386,4 +388,5 @@ export type RelationshipMaintainerName =
   | 'administers'
   | 'supervises'
   | 'owns'
-  | 'owns_inferred';
+  | 'owns_inferred'
+  | 'acts_on_behalf_of';
