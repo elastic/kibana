@@ -1635,6 +1635,29 @@ describe('runFindingsPass with workspace files', () => {
     expect(buildRecorderSystemPrompt({ final: false })).not.toContain('chart');
   });
 
+  it('asks for every time in the Markdown fields as a time tag, in every pass', () => {
+    const live = buildRecorderSystemPrompt({ final: false });
+    const final = buildRecorderSystemPrompt({ final: true });
+    const tag = '<time datetime="2026-08-09T14:02:00Z"></time>';
+
+    for (const prompt of [live, final]) {
+      expect(prompt).toContain('## Times');
+      expect(prompt).toContain(tag);
+      expect(prompt).toContain('Never write a bare time such as 14:02Z or 14:02 UTC');
+      expect(prompt).toContain('a window is two tags');
+      expect(prompt).toContain('Keep the tag out of every value that is plain text');
+      // The examples and the time-window rule use tags, not bare UTC times.
+      expect(prompt).toContain(
+        'as a start tag and an end tag: <time datetime="2026-08-09T06:00:00Z"></time> to <time datetime="2026-08-09T09:00:00Z"></time>'
+      );
+      expect(prompt.replace('such as 14:02Z or 14:02 UTC', '')).not.toMatch(
+        /(?<![\d:])\d{2}:\d{2}Z/
+      );
+    }
+    expect(live).toContain('In the summary and every hypothesis reason');
+    expect(final).toContain('In the summary, the verdict, the impact and every hypothesis reason');
+  });
+
   it('sends the prompt that matches the pass', async () => {
     const files = setupFiles([answerWith(output)]);
     await files.run();

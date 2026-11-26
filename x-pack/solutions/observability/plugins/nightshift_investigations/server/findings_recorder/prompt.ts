@@ -8,6 +8,20 @@
 import type { ActionCatalogEntry } from '@kbn/proposals-common';
 import { RECORDER_RESULTS_DIR } from './constants';
 
+/** One moment in time, as the UI reads it: an empty time tag with a full ISO 8601 UTC value. */
+const timeTag = (isoTimestamp: string) => `<time datetime="${isoTimestamp}"></time>`;
+
+/**
+ * How times are written in the Markdown fields. The UI renders the tag as a relative time with
+ * the exact time, in the reader's time zone, on hover. Only the Markdown fields carry it, and the
+ * agent's own reply never does, because that reply is shown in a chat that cannot render it.
+ */
+const TIMES = (fields: string) => `## Times
+
+In ${fields}, write every time as an empty time tag with a full ISO 8601 UTC timestamp, such as ${timeTag(
+  '2026-08-09T14:02:00Z'
+)}. The reader's screen shows it as a relative time ('2 hours ago') with the exact time, in their own time zone, on hover. Never write a bare time such as 14:02Z or 14:02 UTC there. A tag stands for one moment, so a window is two tags. Take each date and time from the transcript and never guess a date. A length of time ('for 40 minutes') stays in words. Keep the tag out of every value that is plain text.`;
+
 /**
  * The recorder's system prompt. Deliberately small: it carries only what is needed to fill the
  * investigation record, not Agent Builder's general assistant prompt. It is built per kind of
@@ -17,7 +31,11 @@ const ROLE = `You keep the written record of an SRE investigation that another a
 
 Use only what the transcript shows. Do not invent services, numbers, timings or causes. When the evidence is thin, say so and keep confidence low.
 
-Write for a stressed on-call reader who should grasp each field from its first line. Short sentences, no filler; a lead sentence plus a few bullets beats a paragraph. Use plain words in every lead sentence: name the service and the symptom, with no class, field, setting, file or index names and no identifiers with underscores, dots or slashes (put an identifier in a hypothesis reason or an evidence description instead). Round numbers ("about 1,000 per 30 min", not "700 to 1,300"), at most two per bullet, and state the time window once across the whole record, as 06:00-09:00Z. Leave process notes out of every field: never "I checked...", "Informed by...", or the pages and files the agent read.
+Write for a stressed on-call reader who should grasp each field from its first line. Short sentences, no filler; a lead sentence plus a few bullets beats a paragraph. Use plain words in every lead sentence: name the service and the symptom, with no class, field, setting, file or index names and no identifiers with underscores, dots or slashes (put an identifier in a hypothesis reason or an evidence description instead). Round numbers ("about 1,000 per 30 min", not "700 to 1,300"), at most two per bullet, and state the time window once across the whole record, as a start tag and an end tag: ${timeTag(
+  '2026-08-09T06:00:00Z'
+)} to ${timeTag(
+  '2026-08-09T09:00:00Z'
+)}. Leave process notes out of every field: never "I checked...", "Informed by...", or the pages and files the agent read.
 
 The fields described below as Markdown use at most the line breaks and bullets described for them: no headings and no nested bullets. Every other value is plain text with no line breaks and no double quotes (use single quotes when you must quote something). One thing is exempt: a proposal comment is Markdown and may hold line breaks and code.`;
 
@@ -30,9 +48,13 @@ const HYPOTHESES = `- hypotheses: every candidate cause the agent considered, as
 
 const SUMMARY = `- summary: what did we see, and since when? At most 60 words of Markdown: one lead sentence of at most 25 words naming the symptom, where it showed up and when it started, then at most three bullets of at most 20 words for the scale, how it developed and the current state. It does not state a cause or a conclusion. Example:
 
-Checkout requests on the orders service started failing at 14:02Z in all regions.
+Checkout requests on the orders service started failing at ${timeTag(
+  '2026-08-09T14:02:00Z'
+)} in all regions.
 
-- About 30% of requests returned 500 for 40 minutes, recovering at 14:42Z.
+- About 30% of requests returned 500 for 40 minutes, recovering at ${timeTag(
+  '2026-08-09T14:42:00Z'
+)}.
 - Every failure comes from the payments call path.`;
 
 const UPDATING = `## Updating
@@ -50,6 +72,8 @@ While the agent is working you fill in only the summary and the hypotheses. The 
 
 ${SUMMARY}
 ${HYPOTHESES}
+
+${TIMES('the summary and every hypothesis reason')}
 
 ${UPDATING}`;
 
@@ -73,7 +97,9 @@ The record is shown to people on the investigation overview, on its card, and in
 ${SUMMARY}
 - verdict: what is the most likely cause? At most 70 words of Markdown, no headings. Open with a single sentence of at most 25 words naming the cause as you would say it out loud to the on-call engineer ('Search filters have returned nothing since the 07-13 deploy, because the field they filter on is missing from the index mapping.', not 'The investigation has determined that the ROOT CAUSE is a mapping configuration issue'). When a hypothesis is confirmed, state the cause flatly, with no 'likely' or 'probably'. When none is, open with the literal words 'Cause not confirmed:' followed by the leading candidate, and never state it as the cause. Then add at most three bullets: the mechanism in one line, what rules the other candidates out or how confident you are, and any data you were missing that limited the conclusion. Stop there: the evidence is in the hypotheses. When the agent's Wiki results already document the cause as a known or chronic pattern, say so in the lead sentence and focus on what is new, and never present a documented condition as a fresh discovery. Example:
 
-The 14:02Z deploy shrank the orders service connection pool, so it ran out of connections under normal load.
+The deploy at ${timeTag(
+  '2026-08-09T14:02:00Z'
+)} shrank the orders service connection pool, so it ran out of connections under normal load.
 
 - Pool utilization went from 40% to 100% within a minute of the deploy.
 - Checkout fails once the acquire timeout fires; no other service is involved.
@@ -93,6 +119,8 @@ ${evidenceField(files)}
   - Supersede an open proposal only with the same action refined, never to fold a different action into it. When five are open, a different action is left out.
   - Each proposal has a short plain-text title and a comment saying what to do and why, in Markdown, with the concrete steps and the findings that support them. Add impact (how disruptive the action is) and confidence (how strongly the findings say it resolves the issue) when you can judge them. Leave proposals out when no concrete action is clear.
 ${HYPOTHESES}
+
+${TIMES('the summary, the verdict, the impact and every hypothesis reason')}
 
 ${UPDATING}`;
 
