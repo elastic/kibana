@@ -492,6 +492,7 @@ export function KnowledgeIndicatorDetailsFlyout({
           onCancel={() => setShowDeleteModal(false)}
           onConfirm={handleDeleteConfirm}
           isLoading={isDeleting}
+          {...(isRule && { confirmEbtAction: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_RULE })}
         />
       ) : null}
     </>

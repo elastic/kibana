@@ -40,6 +40,7 @@ interface DeleteTableItemsModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
+  confirmEbtAction?: string;
 }
 
 export function DeleteTableItemsModal({
@@ -48,6 +49,7 @@ export function DeleteTableItemsModal({
   onConfirm,
   onCancel,
   isLoading = false,
+  confirmEbtAction = NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_KNOWLEDGE_INDICATORS,
 }: DeleteTableItemsModalProps) {
   const listItems = useMemo(
     () =>
@@ -104,7 +106,7 @@ export function DeleteTableItemsModal({
           color="danger"
           onClick={onConfirm}
           {...getEbtProps({
-            action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_KNOWLEDGE_INDICATORS,
+            action: confirmEbtAction,
             element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_DELETE_MODAL,
           })}
           isLoading={isLoading}

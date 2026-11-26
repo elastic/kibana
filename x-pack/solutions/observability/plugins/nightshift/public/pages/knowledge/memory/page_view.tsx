@@ -329,7 +329,7 @@ export function MemoryPageView({
                           )}
                           data-test-subj="nightshiftMemorySourceTaskLink"
                           {...getEbtProps({
-                            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_KNOWLEDGE_INDICATOR_SOURCE,
+                            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_MEMORY_SOURCE_TASK,
                             element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
                           })}
                         >
