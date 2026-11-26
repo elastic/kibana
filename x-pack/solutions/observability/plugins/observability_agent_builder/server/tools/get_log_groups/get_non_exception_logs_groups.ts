@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   QueryDslBoolQuery,
   QueryDslQueryContainer,
@@ -19,6 +19,7 @@ import { getCategorizedLogs, getSamplingProbability } from './get_categorized_lo
 
 export async function getNonExceptionLogGroups({
   core,
+  request,
   logger,
   esClient,
   index,
@@ -29,6 +30,7 @@ export async function getNonExceptionLogGroups({
   size,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
+  request: KibanaRequest;
   logger: Logger;
   esClient: IScopedClusterClient;
   index?: string;
@@ -38,7 +40,7 @@ export async function getNonExceptionLogGroups({
   fields: string[];
   size: number;
 }) {
-  const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
+  const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, request, logger }));
   const boolFilters = [
     ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
     ...kqlFilter(kuery),

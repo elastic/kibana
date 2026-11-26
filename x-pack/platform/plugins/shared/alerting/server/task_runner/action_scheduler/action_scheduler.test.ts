@@ -18,6 +18,7 @@ import type { InjectActionParamsOpts } from '../inject_action_params';
 import { injectActionParams } from '../inject_action_params';
 import type { RuleTypeParams, SanitizedRule, GetViewInAppRelativeUrlFnOpts } from '../../types';
 import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
+import { RuleResultService } from '../../monitoring/rule_result_service';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource, TaskPriority } from '@kbn/task-manager-plugin/server';
@@ -342,6 +343,70 @@ describe('Action Scheduler', () => {
     } catch (err) {
       expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
     }
+  });
+
+  test('skips the actions of a connector that is not found and reports a warning', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: true,
+      items: [
+        {
+          actionTypeId: 'test',
+          id: '1',
+          uuid: '111-111',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'test',
+          id: '2',
+          uuid: '222-222',
+          response: ExecutionResponseType.CONNECTOR_NOT_FOUND_ERROR,
+        },
+      ],
+    });
+    const actions = [
+      {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: { foo: true },
+        uuid: '111-111',
+      },
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: 'test',
+        params: { foo: true },
+        uuid: '222-222',
+      },
+    ];
+    const ruleResultService = new RuleResultService();
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ruleResultService,
+        rule: {
+          ...defaultSchedulerContext.rule,
+          actions,
+        },
+      })
+    );
+
+    await actionScheduler.run({
+      activeAlerts: generateAlert({ id: 2 }),
+      recoveredAlerts: {},
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
+    expect(ruleRunMetricsStore.getStatusByConnectorType('test').numberOfTriggeredActions).toBe(1);
+    expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
+    expect(ruleResultService.getLastRunWarnings()).toEqual([
+      'Actions were not triggered because their connectors no longer exist: 2',
+    ]);
+    expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(1);
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '1', uuid: '111-111' })
+    );
   });
 
   test('limits actionsPlugin.execute per action group', async () => {

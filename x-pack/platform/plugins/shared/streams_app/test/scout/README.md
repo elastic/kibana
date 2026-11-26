@@ -11,12 +11,11 @@ not to run tests concurrently.
 ```
 test/scout/
 ├── common/ui/{fixtures,page_objects}/   # shared fixtures, NOT a namespace (no playwright.config.ts)
-├── processing/ui/     14 specs   data processing / enrichment pipeline
+├── processing/ui/     13 specs   data processing / enrichment pipeline
 ├── routing/ui/         9 specs   data routing / partitioning (incl. AI suggestions)
 ├── lifecycle/ui/      10 specs   data retention — owned by @elastic/kibana-management
 ├── data_quality/ui/    1 spec    data quality tab — owned by @elastic/kibana-management
 ├── schema/ui/          3 specs   data mapping / schema editor
-├── query_streams/ui/  11 specs   query streams (stateful-classic only)
 ├── core/ui/            9 specs   enablement, layout shell, list view, stream detail chrome
 └── integrations/ui/    4 specs   cross-app surfaces (Discover, ES|QL, TSDB)
 ```
@@ -61,9 +60,8 @@ node scripts/scout.js start-server --arch serverless --domain [search|observabil
 Then run the tests in another terminal. Pick the config matching the namespace
 you want to run — every namespace has exactly one config at
 `test/scout/<namespace>/ui/playwright.config.ts`, where `<namespace>` is one of
-`processing`, `routing`, `lifecycle`, `data_quality`, `schema`, `query_streams`,
-`core`, `integrations`. `query_streams` only has stateful-classic specs, so it
-is a no-op under `--grep serverless-observability`.
+`processing`, `routing`, `lifecycle`, `data_quality`, `schema`, `core`,
+`integrations`.
 
 ```bash
 # ESS
