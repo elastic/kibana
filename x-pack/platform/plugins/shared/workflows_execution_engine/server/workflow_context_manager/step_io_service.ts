@@ -456,9 +456,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         }
       }
     }
-    return ids
-      .filter((id) => found.has(id))
-      .map((id) => ({ id, [type]: found.get(id) ?? null }));
+    return ids.filter((id) => found.has(id)).map((id) => ({ id, [type]: found.get(id) ?? null }));
   }
 
   private recordSize(executionId: string, field: 'inputSize' | 'outputSize', size: number): void {

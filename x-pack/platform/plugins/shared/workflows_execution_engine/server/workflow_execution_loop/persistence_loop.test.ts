@@ -25,12 +25,13 @@ const makeParams = (
     },
     stepIoService: {
       getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
-      flush: jest.fn().mockImplementation(
-        () =>
+      flush: jest
+        .fn()
+        .mockImplementation(() =>
           flushDelay > 0
             ? new Promise<boolean>((resolve) => setTimeout(() => resolve(false), flushDelay))
             : Promise.resolve(false)
-      ),
+        ),
       hasPendingIo: jest.fn().mockReturnValue(false),
     },
     workflowExecutionState: {
@@ -174,9 +175,11 @@ describe('persistenceLoop', () => {
       pending = order.length === 1;
       return false;
     });
-    (params.workflowExecutionState.flushWorkflowAndSteps as jest.Mock).mockImplementation(async () => {
-      order.push('state');
-    });
+    (params.workflowExecutionState.flushWorkflowAndSteps as jest.Mock).mockImplementation(
+      async () => {
+        order.push('state');
+      }
+    );
 
     await flushState(params);
 
@@ -194,9 +197,11 @@ describe('persistenceLoop', () => {
       order.push('io');
       return true;
     });
-    (params.workflowExecutionState.flushWorkflowAndSteps as jest.Mock).mockImplementation(async () => {
-      order.push('state');
-    });
+    (params.workflowExecutionState.flushWorkflowAndSteps as jest.Mock).mockImplementation(
+      async () => {
+        order.push('state');
+      }
+    );
 
     await flushState(params);
 
