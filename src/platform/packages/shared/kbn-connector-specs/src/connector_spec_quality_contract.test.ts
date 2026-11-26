@@ -32,20 +32,28 @@ const AVAILABILITY_STATEMENTS = {
 type Availability = keyof typeof AVAILABILITY_STATEMENTS;
 const NOT_YET_AVAILABLE_MARKER = '_(not yet available)_';
 const API_ONLY_MARKER = '_(API only)_';
-/** True when a heading line contains either non-tool marker anywhere (used to detect marked headings). */
+/** True when a line contains either non-tool marker anywhere. */
 const lineIncludesNonToolMarker = (line: string): boolean =>
   line.includes(NOT_YET_AVAILABLE_MARKER) || line.includes(API_ONLY_MARKER);
-/** True when a heading line ends with either non-tool marker (used to identify action headings). */
-const lineEndsWithNonToolMarker = (line: string): boolean =>
-  line.endsWith(NOT_YET_AVAILABLE_MARKER) || line.endsWith(API_ONLY_MARKER);
-const stripNonToolMarker = (line: string): string => {
-  if (line.endsWith(NOT_YET_AVAILABLE_MARKER)) {
-    return line.slice(0, -NOT_YET_AVAILABLE_MARKER.length).trim();
+/**
+ * Returns the text before the non-tool marker when the line is an action heading — that is,
+ * when the marker is followed by nothing or only applicability badge markup (`{...}`). Returns
+ * `undefined` for prose lines that mention the marker mid-sentence. Both documentation tests use
+ * this parser so they derive the same heading key regardless of trailing markup after the marker.
+ */
+const headingBeforeNonToolMarker = (line: string): string | undefined => {
+  for (const marker of [NOT_YET_AVAILABLE_MARKER, API_ONLY_MARKER]) {
+    const idx = line.indexOf(marker);
+    if (idx === -1) {
+      continue;
+    }
+    const trailing = line.slice(idx + marker.length).trim();
+    // Accept as an action heading only when nothing follows the marker, or only badge markup does.
+    if (trailing === '' || trailing.startsWith('{')) {
+      return line.slice(0, idx).trim();
+    }
   }
-  if (line.endsWith(API_ONLY_MARKER)) {
-    return line.slice(0, -API_ONLY_MARKER.length).trim();
-  }
-  return line;
+  return undefined;
 };
 const WORKFLOW_USE_CLAIM =
   /\b(workflow[- ]only|workflow steps?|reserved for workflows|available to workflows|(?:from|in|for|by) (?:a |your )?workflows?|workflows? or agents?|workflows and agents|workflow authors?)\b/gi;
@@ -268,9 +276,7 @@ describe('connector spec quality contracts', () => {
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
           .map((line) => ({
-            name: toHeadingKey(
-              line.split(NOT_YET_AVAILABLE_MARKER).join('').split(API_ONLY_MARKER).join('')
-            ),
+            name: toHeadingKey(headingBeforeNonToolMarker(line) ?? line),
             marked: lineIncludesNonToolMarker(line),
           }));
         const unmarked = Object.entries(spec.actions)
@@ -301,9 +307,11 @@ describe('connector spec quality contracts', () => {
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
           .map((line) => line.trim())
-          .filter(lineEndsWithNonToolMarker)
-          .map(stripNonToolMarker)
-          .filter((heading) => !unavailableActionKeys.has(toHeadingKey(heading)));
+          .flatMap((line) => {
+            const h = headingBeforeNonToolMarker(line);
+            return h !== undefined ? [toHeadingKey(h)] : [];
+          })
+          .filter((headingKey) => !unavailableActionKeys.has(headingKey));
 
         expect(wronglyMarked).toEqual([]);
       }
