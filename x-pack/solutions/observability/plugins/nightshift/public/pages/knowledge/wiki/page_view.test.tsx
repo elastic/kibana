@@ -15,7 +15,11 @@ import type { WikiPage } from './types';
 
 jest.mock('./use_wiki');
 
-const mockArchive = jest.fn();
+const mockArchive = jest.fn(
+  (_variables: { id: string; version: string }, options?: { onSuccess?: () => void }) =>
+    options?.onSuccess?.()
+);
+const mockOnArchived = jest.fn();
 const wikiPage: WikiPage = {
   id: 'wiki_checkout',
   slug: 'checkout',
@@ -30,7 +34,8 @@ const wikiPage: WikiPage = {
 
 describe('WikiPageView archive confirmation', () => {
   beforeEach(() => {
-    mockArchive.mockReset();
+    mockArchive.mockClear();
+    mockOnArchived.mockClear();
     (useWikiPage as jest.Mock).mockReturnValue({
       data: { page: wikiPage },
       isLoading: false,
@@ -43,7 +48,7 @@ describe('WikiPageView archive confirmation', () => {
   const openConfirm = async () => {
     render(
       <I18nProvider>
-        <WikiPageView pageId={wikiPage.id} canManage onArchived={jest.fn()} />
+        <WikiPageView pageId={wikiPage.id} canManage onArchived={mockOnArchived} />
       </I18nProvider>
     );
     await userEvent.click(screen.getByTestId('nightshiftWikiPageArchive'));
@@ -57,7 +62,7 @@ describe('WikiPageView archive confirmation', () => {
     expect(mockArchive).not.toHaveBeenCalled();
   });
 
-  it('archives the page with its version when the user confirms', async () => {
+  it('archives the page with its version and reports it when the user confirms', async () => {
     await openConfirm();
     await userEvent.click(screen.getByTestId('nightshiftWikiPageViewArchiveButton'));
 
@@ -65,5 +70,6 @@ describe('WikiPageView archive confirmation', () => {
       { id: wikiPage.id, version: 'v1' },
       expect.any(Object)
     );
+    expect(mockOnArchived).toHaveBeenCalledTimes(1);
   });
 });
