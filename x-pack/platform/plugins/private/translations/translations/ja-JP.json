@@ -50557,7 +50557,6 @@
     "xpack.proposals.dismissReason.other": "その他",
     "xpack.proposals.dismissReason.riskAccepted": "対応は不要です（リスクは許容範囲です）",
     "xpack.proposals.featureName": "提案されたアクション",
-    "xpack.proposals.proposalCard.conflictError": "この提案は判断に利用できなくなりました。 現在のステータスを確認するには、ページを更新してください。",
     "xpack.proposals.proposalCard.dismiss": "閉じる",
     "xpack.proposals.proposalCard.genericError": "決定を記録できませんでした。再試行してください。",
     "xpack.proposals.proposalCard.loadError": "この提案を読み込めません。ページを更新してみてください。",

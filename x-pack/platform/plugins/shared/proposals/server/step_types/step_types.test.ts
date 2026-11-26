@@ -50,7 +50,10 @@ const allowAll = (): jest.Mocked<ProposalPrivilegesChecker> => ({
   canManage: jest.fn().mockResolvedValue(true),
 });
 
-const createContext = (input: Record<string, unknown>): StepHandlerContext<never, never> =>
+const createContext = (
+  input: Record<string, unknown>,
+  runInputs?: Record<string, unknown>
+): StepHandlerContext<never, never> =>
   ({
     input,
     rawInput: input,
@@ -59,6 +62,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
       getContext: jest.fn().mockReturnValue({
         execution: { id: EXECUTION_ID, executedBy: 'worker-user' },
         workflow: { id: WORKFLOW_ID, spaceId: SPACE_ID },
+        inputs: runInputs,
       }),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
@@ -538,6 +542,50 @@ describe('proposals.createProposal step', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  it('should create a gateless proposal with nothing parked on it when gate is none', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', gate: 'none' });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        origin: 'context_engine',
+        comment: 'Add a knowledge indicator',
+        actionWorkflowId: 'system-context-engine-apply-improvement',
+        actionInput: { improvementId: 'improvement-1' },
+        gate: 'none',
+      })
+    );
+
+    const [params] = create.mock.calls[0];
+    expect(params).toMatchObject({
+      gate: 'none',
+      actionWorkflowId: 'system-context-engine-apply-improvement',
+      actionInput: { improvementId: 'improvement-1' },
+    });
+    // Approving it must not resume this execution, and nothing would settle a deadline.
+    expect(params).not.toHaveProperty('workflowExecutionId');
+    expect(params).not.toHaveProperty('expiresAt');
+  });
+
+  it('should refuse a gateless proposal with a deadline before writing anything', async () => {
+    const create = jest.fn();
+    const { definition } = createDefinition(create);
+
+    await expect(
+      definition.handler(
+        createContext({
+          conversationId: 'conv-1',
+          origin: 'context_engine',
+          comment: 'Add a knowledge indicator',
+          gate: 'none',
+          expiresIn: '24h',
+        })
+      )
+    ).rejects.toMatchObject({ type: 'ValidationError' });
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('should fail the step with a typed error when the service fails', async () => {
     const create = jest.fn().mockRejectedValue(new Error('index unavailable'));
     const { definition } = createDefinition(create);
@@ -595,6 +643,43 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, CALLER, {
       linkActionExecution: true,
     });
+  });
+
+  it('should name the release mark its run was started for, from the run inputs', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'executing' });
+
+    await updateDefinition(update).handler(
+      createContext(
+        { proposalId: 'proposal-1', status: 'executing' },
+        { proposalId: 'proposal-1', releasedAt: '2026-09-01T00:02:00.000Z' }
+      )
+    );
+
+    expect(update).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      { ...CALLER, releasedAt: '2026-09-01T00:02:00.000Z' },
+      { linkActionExecution: true }
+    );
+  });
+
+  it('should name how its run was started, as the engine recorded it', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'executing' });
+    const context = createContext({ proposalId: 'proposal-1', status: 'executing' });
+    const runContext = context.contextManager.getContext();
+    jest.mocked(context.contextManager.getContext).mockReturnValue({
+      ...runContext,
+      execution: { ...runContext.execution, triggeredBy: 'proposals' },
+    });
+
+    await updateDefinition(update).handler(context);
+
+    expect(update).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      { ...CALLER, triggeredBy: 'proposals' },
+      { linkActionExecution: true }
+    );
   });
 
   it('should resolve the decider from the execution request, not the passed username', async () => {
@@ -1014,7 +1099,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-2', status: 'expired', executionError: 'timed out' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { unprivileged: true }
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-2',
@@ -1037,7 +1123,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'expired' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { unprivileged: true }
     );
   });
 
@@ -1059,7 +1146,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { unprivileged: true }
     );
     expect(result.output?.status).toBe('failed');
     expect(result.output?.decision).toBe('approved');
@@ -1081,7 +1169,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { unprivileged: true }
     );
   });
 
@@ -1098,6 +1187,9 @@ describe('proposals.settleIncompleteProposal step', () => {
       createContext({ proposalId: 'proposal-1', status: 'expired' })
     );
 
-    expect(service.update).toHaveBeenCalled();
+    // It writes only to what its own run owns instead, which the service checks.
+    expect(service.update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, CALLER, {
+      unprivileged: true,
+    });
   });
 });

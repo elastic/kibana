@@ -11,6 +11,7 @@ import {
   settleIncompleteProposalStepCommonDefinition,
 } from '@kbn/proposals-common';
 import type { ProposalsService } from '../services/proposals_service';
+import { getWorkflowCaller } from './get_workflow_caller';
 import { parseStepInput } from './parse_step_input';
 import { toStepError } from './to_step_error';
 
@@ -19,7 +20,8 @@ import { toStepError } from './to_step_error';
  * is running under a resumer who lacks `manage_proposals`. Privilege checks
  * live on the decide path (`checkDecidePrivileges` + `updateProposal`); this
  * step deliberately skips them so gate expiry, attempt-budget exhaustion, and
- * the workflow-level fallback can still leave the record terminal.
+ * the workflow-level fallback can still leave the record terminal. In exchange
+ * it may only settle a proposal its own run owns.
  */
 export const getSettleIncompleteProposalStepDefinition = ({
   getProposalsService,
@@ -35,7 +37,7 @@ export const getSettleIncompleteProposalStepDefinition = ({
           context.input
         );
         const workflowContext = context.contextManager.getContext();
-        const spaceId = workflowContext.workflow.spaceId;
+        const { spaceId } = workflowContext.workflow;
         const request = context.contextManager.getFakeRequest();
         const service = getProposalsService();
 
@@ -53,11 +55,8 @@ export const getSettleIncompleteProposalStepDefinition = ({
             executionError: input.executionError,
           },
           spaceId,
-          {
-            workflowId: workflowContext.workflow.id,
-            executionId: workflowContext.execution.id,
-            request,
-          }
+          getWorkflowCaller(workflowContext, request),
+          { unprivileged: true }
         );
 
         return {

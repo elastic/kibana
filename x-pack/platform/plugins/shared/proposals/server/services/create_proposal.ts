@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
@@ -16,12 +17,13 @@ import {
 import type {
   Proposal,
   ProposalConfidence,
+  ProposalGate,
   ProposalImpact,
   ProposalOrigin,
 } from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from './check_proposal_privileges';
 import type { ProposalsService } from './proposals_service';
-import { ProposalInvalidActionInputError } from './errors';
+import { ProposalInvalidActionInputError, ProposalInvalidIdError } from './errors';
 
 /** `triggeredBy` of every gate run this plugin starts on a caller's behalf. */
 export const PROPOSALS_TRIGGER_SOURCE = 'proposals';
@@ -38,31 +40,44 @@ export interface NewProposal {
   confidence?: string;
   category?: string;
   /**
-   * Action workflow to run once a person approves the proposal. Takes the gated path: approving
-   * runs the workflow as the approver, with `actionInput` as its single input. Checked before the
-   * gate starts, so a workflow the space does not have or an input it does not accept is refused
-   * here rather than failing the gate after the caller was answered.
+   * Waives the discard reason: declining the proposal is recorded without asking why. Honoured
+   * on the gateless path only — a gated proposal's dismissal is recorded behind its gate, which
+   * does not carry the flag.
+   */
+  skipDiscardReason?: boolean;
+  /**
+   * Who decides the proposal. `none` writes it directly and decides it through the service, with
+   * no execution parked behind it; `workflow` starts `system-create-proposal`. Omitted, a to-do is
+   * gateless and everything else is gated.
+   */
+  gate?: ProposalGate;
+  /**
+   * Action workflow to run once a person approves the proposal: approving runs the workflow as the
+   * approver, with `actionInput` as its single input. Checked before anything is created, so a
+   * workflow the space cannot run or an input it does not accept is refused here rather than once
+   * someone approves.
    */
   actionWorkflowId?: string;
   /** The action workflow's single `actionInput` object. Only meaningful with `actionWorkflowId`. */
   actionInput?: Record<string, unknown>;
   /**
-   * Waives the discard reason: declining the proposal is recorded without asking why. Honoured
-   * on the direct path only — a proposal that runs an action is decided behind its gate, and
-   * that decision is always justified.
+   * The id to create the proposal under, for a caller that derives it from what it proposes. An
+   * id that already exists is refused with `ProposalAlreadyExistsError` on the gateless path, and
+   * fails the gate's create step on the gated one, which also requires a UUID. Unique across
+   * spaces, not within one, so derive it from the space too.
    */
-  skipDiscardReason?: boolean;
+  id?: string;
 }
 
 export interface CreatedProposal {
   /**
-   * The gate that will decide the proposal. Absent for a to-do, which the
-   * service writes and decides directly.
+   * The gate that will decide the proposal. Absent for a gateless proposal,
+   * which the service writes and decides directly.
    */
   workflowExecutionId?: string;
   /**
    * Absent when the gate workflow had not stored it by the end of the wait.
-   * Always present for a to-do, which is created synchronously.
+   * Always present for a gateless proposal, which is created synchronously.
    */
   proposal?: Proposal;
 }
@@ -92,10 +107,12 @@ const asConfidence = (value: string | undefined): ProposalConfidence | undefined
  * Creates a proposal in a conversation as the user behind the request. Shared by the agent tool
  * and by in-process callers that propose without an agent run.
  *
- * Two paths, picked by category and nothing else. A to-do is carried out by the analyst and runs
- * nothing, so it is written directly and decided by the service: a gate behind it would only park
- * an execution nobody resumes until the analyst gets to it. Everything else keeps the gate, which
- * is what records a decision that executes an action.
+ * Two paths, picked by the caller's `gate`. Omitted, it is inferred from the category: a to-do is
+ * carried out by the analyst and runs nothing, so it is written directly and decided by the
+ * service, since a gate behind it would only park an execution nobody resumes until the analyst
+ * gets to it. Everything else keeps the gate. A caller that proposes many actions at once, with no
+ * deadline, asks for `none` explicitly: approving one starts its action as the approver without
+ * an execution having been parked on it.
  */
 export const createProposalCreator = ({
   getProposalsService,
@@ -142,7 +159,9 @@ export const createProposalCreator = ({
       skipDiscardReason,
       actionWorkflowId,
       actionInput,
+      id,
     } = proposal;
+    const gate = proposal.gate ?? (category === PROPOSAL_CATEGORY_TODO ? 'none' : 'workflow');
 
     if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
       throw new ProposalInvalidActionInputError(
@@ -151,10 +170,15 @@ export const createProposalCreator = ({
       );
     }
 
-    if (category === PROPOSAL_CATEGORY_TODO) {
-      // Workflows are not consulted at all here, so a to-do needs only
-      // `manage_proposals` — the privilege the gated branch checks as well.
-      await privileges.assertCanManage(request);
+    if (gate === 'none') {
+      // A proposal without an action never consults Workflows, so it needs only
+      // `manage_proposals` — the privilege the gated branch checks as well. One
+      // with an action does: its action is resolved now and started on approval.
+      if (actionWorkflowId === undefined) {
+        await privileges.assertCanManage(request);
+      } else {
+        await assertAvailable(request);
+      }
       const created = await getProposalsService().create(
         {
           gate: 'none',
@@ -162,7 +186,10 @@ export const createProposalCreator = ({
           title,
           comment,
           origin,
-          category: PROPOSAL_CATEGORY_TODO,
+          ...(category !== undefined && { category }),
+          ...(actionWorkflowId !== undefined && { actionWorkflowId }),
+          ...(actionInput !== undefined && { actionInput }),
+          ...(id !== undefined && { id }),
           ...(skipDiscardReason !== undefined && { skipDiscardReason }),
           ...(asImpact(impact) !== undefined && { impact: asImpact(impact) }),
           confidence: asConfidence(confidence) ?? 'medium',
@@ -172,6 +199,11 @@ export const createProposalCreator = ({
       return { proposal: created };
     }
 
+    // The gate's create step only takes a UUID, and a run it fails would only show here as a
+    // proposal that never appears.
+    if (id !== undefined && !z.uuid().safeParse(id).success) {
+      throw new ProposalInvalidIdError(`A gated proposal's id must be a UUID, got [${id}]`);
+    }
     await assertAvailable(request);
     if (actionWorkflowId !== undefined) {
       await getProposalsService().assertActionProposable(
@@ -195,6 +227,7 @@ export const createProposalCreator = ({
         ...(category !== undefined && { category }),
         ...(actionWorkflowId !== undefined && { actionWorkflowId }),
         ...(actionInput !== undefined && { actionInput }),
+        ...(id !== undefined && { proposalId: id }),
       },
       // Not `manual`: the engine evaluates a `${{ }}` input of a manual run as an expression, and
       // these inputs are model-written. Our own source keeps them literal, so what was validated

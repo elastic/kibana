@@ -50542,7 +50542,6 @@
     "xpack.proposals.dismissReason.other": "其他",
     "xpack.proposals.dismissReason.riskAccepted": "无需执行任何操作（风险可接受）",
     "xpack.proposals.featureName": "拟议的操作",
-    "xpack.proposals.proposalCard.conflictError": "此提案已无法再进行决策。请刷新页面以查看其当前状态。",
     "xpack.proposals.proposalCard.dismiss": "消除",
     "xpack.proposals.proposalCard.genericError": "无法记录该决策。请重试。",
     "xpack.proposals.proposalCard.loadError": "无法加载此提案。请尝试刷新页面。",

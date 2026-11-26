@@ -7,6 +7,7 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { createProposalStepCommonDefinition } from '@kbn/proposals-common';
+import { ProposalInvalidGateError } from '../services/errors';
 import { resolveExpiresAt } from './resolve_expires_at';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
@@ -57,24 +58,35 @@ export const getCreateProposalStepDefinition = ({
           resolveWorkerUser,
         });
 
+        if (input.gate === 'none' && input.expiresIn !== undefined) {
+          throw new ProposalInvalidGateError(
+            'A gateless proposal cannot carry expiresIn: nothing would settle it at the deadline'
+          );
+        }
+        const shared = {
+          conversationId: input.conversationId,
+          title: input.title,
+          comment: input.comment,
+          actionWorkflowId: input.actionWorkflowId,
+          actionInput: input.actionInput,
+          impact: input.impact,
+          category: input.category,
+          confidence: input.confidence ?? 'medium',
+          origin: input.origin,
+          id: input.proposalId,
+        };
+
         const proposal = await getProposalsService().create(
-          {
-            conversationId: input.conversationId,
-            title: input.title,
-            comment: input.comment,
-            actionWorkflowId: input.actionWorkflowId,
-            actionInput: input.actionInput,
-            impact: input.impact,
-            category: input.category,
-            confidence: input.confidence ?? 'medium',
-            origin: input.origin,
-            expiresAt: resolveExpiresAt(input.expiresIn),
-            id: input.proposalId,
-            workflowExecutionId,
-            // Always gated, including a to-do: a Worker that waits on the
-            // analyst has an execution parked on the decision.
-            gate: 'workflow',
-          },
+          // Gated unless the caller says otherwise, including a to-do: a Worker
+          // that waits on the analyst has an execution parked on the decision.
+          input.gate === 'none'
+            ? { ...shared, gate: 'none' }
+            : {
+                ...shared,
+                gate: 'workflow',
+                expiresAt: resolveExpiresAt(input.expiresIn),
+                workflowExecutionId,
+              },
           {
             spaceId,
             request,

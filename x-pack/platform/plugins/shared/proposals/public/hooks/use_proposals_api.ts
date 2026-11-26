@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { MutationKey, QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
   useInfiniteQuery,
@@ -24,6 +25,7 @@ import {
   PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
   isAwaitingRetry,
+  isGatelessProposal,
   isProposalSettling,
   isTerminal,
 } from '@kbn/proposals-common';
@@ -48,29 +50,101 @@ import { useProposalDecisionSignal } from './use_proposal_decision_signal';
  */
 export const RETRY_WAIT_MS = 30_000;
 
+const APPROVAL_LIFTED_ERROR = i18n.translate('xpack.proposals.decision.approvalLiftedError', {
+  defaultMessage: 'The approval did not go through, and the proposal is still open. Try again.',
+});
+
 const awaitingRetrySince = new Map<string, number>();
 
-/** Whether this read of the proposal shows its decision, or no decision can follow. */
+type LiftableProposal = Pick<Proposal, 'id'> &
+  Partial<Pick<Proposal, 'gate' | 'gateReleasedAt' | 'liftedGateReleasedAt'>>;
+
+/**
+ * Whether this read shows that the gateless approval which stamped `releasedAt` will not decide
+ * the proposal: the server lifted that mark, or a later approval's, because its resolve run ended
+ * without deciding it. Only the latest lift is kept, and a later approval can only be stamped once
+ * this one is over, so a later lift ends this one too. A read from before the approval cannot show
+ * either.
+ */
+const isApprovalLifted = (
+  { gate, gateReleasedAt, liftedGateReleasedAt }: Omit<LiftableProposal, 'id'>,
+  releasedAt: string | undefined
+): boolean =>
+  isGatelessProposal({ gate }) &&
+  gateReleasedAt === undefined &&
+  releasedAt !== undefined &&
+  liftedGateReleasedAt !== undefined &&
+  Date.parse(liftedGateReleasedAt) >= Date.parse(releasedAt);
+
+/**
+ * Whether this read of the proposal shows its decision, or no decision can follow: the unseen
+ * approval of a gateless proposal was lifted (see `isApprovalLifted`).
+ */
 export const isDecisionShown = (
-  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'> | undefined
+  proposal: (Pick<Proposal, 'decision' | 'status' | 'supersededBy'> & LiftableProposal) | undefined
 ): boolean =>
   proposal !== undefined &&
   (Boolean(proposal.decision) ||
     isTerminal(proposal.status) ||
-    proposal.supersededBy !== undefined);
+    proposal.supersededBy !== undefined ||
+    isApprovalLifted(proposal, inFlightDecisions.unseenReleasedAt(proposal.id)));
+
+/**
+ * Whether this read of the proposal shows that it can no longer be decided as it was shown. A
+ * gateless proposal's mark counts, since its own query polls it from there (see `isBeingDecided`);
+ * a gated one's does not, since a gate keeps its mark while its decision is still on its way.
+ */
+const hasMovedOn = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy' | 'gate' | 'gateReleasedAt'>
+): boolean =>
+  Boolean(proposal.decision) ||
+  isTerminal(proposal.status) ||
+  proposal.supersededBy !== undefined ||
+  (isGatelessProposal(proposal) && proposal.gateReleasedAt !== undefined);
+
+/**
+ * A gateless proposal someone approved whose decision is not written yet. Reading it again is what
+ * settles an approval whose run died, so polling it always ends. Gated proposals are left out: a
+ * gate keeps its mark across a re-park, so there it does not mean a decision is on its way.
+ */
+const isBeingDecided = (proposal: Pick<Proposal, 'gate' | 'status' | 'gateReleasedAt'>): boolean =>
+  isGatelessProposal(proposal) &&
+  proposal.status === 'pending' &&
+  proposal.gateReleasedAt !== undefined;
 
 const hasUnseenDecision = (
-  proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
+  proposal: Pick<
+    Proposal,
+    | 'id'
+    | 'decision'
+    | 'status'
+    | 'supersededBy'
+    | 'gate'
+    | 'gateReleasedAt'
+    | 'liftedGateReleasedAt'
+  >
 ): boolean => inFlightDecisions.hasUnseen(proposal.id) && !isDecisionShown(proposal);
 
-/** Running, or failed with no retry yet for up to `RETRY_WAIT_MS`. Poll while this is true. */
+/**
+ * Running, or failed with no retry yet for up to `RETRY_WAIT_MS`. Poll while this is true. A failed
+ * gateless action is never retried, so it does not wait.
+ */
 export const isInFlux = (
-  proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
+  proposal: Pick<
+    Proposal,
+    | 'id'
+    | 'decision'
+    | 'status'
+    | 'supersededBy'
+    | 'gate'
+    | 'gateReleasedAt'
+    | 'liftedGateReleasedAt'
+  >
 ): boolean => {
-  if (hasUnseenDecision(proposal) || isProposalSettling(proposal)) {
+  if (hasUnseenDecision(proposal) || isProposalSettling(proposal) || isBeingDecided(proposal)) {
     return true;
   }
-  if (!isAwaitingRetry(proposal)) {
+  if (isGatelessProposal(proposal) || !isAwaitingRetry(proposal)) {
     return false;
   }
   const since = awaitingRetrySince.get(proposal.id) ?? Date.now();
@@ -360,6 +434,53 @@ const DECISION_POLL_INTERVAL_MS = 750;
 const DECISION_POLL_MAX_ATTEMPTS = 8;
 
 /**
+ * Polls the proposal until a read of it satisfies `isDone`, for at most
+ * `DECISION_POLL_MAX_ATTEMPTS` reads. A failed read counts as not done yet.
+ * Returns the read that satisfied `isDone`, if any.
+ */
+const pollProposal = async (
+  http: HttpSetup,
+  id: string,
+  isDone: (proposal: ProposalWithMetadata) => boolean
+): Promise<ProposalWithMetadata | undefined> => {
+  for (let attempt = 0; attempt < DECISION_POLL_MAX_ATTEMPTS; attempt++) {
+    try {
+      const proposal = await http.get<ProposalWithMetadata>(
+        `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
+        { version: PROPOSALS_API_VERSION }
+      );
+      if (isDone(proposal)) {
+        return proposal;
+      }
+    } catch {
+      // Treated the same as "not done yet".
+    }
+    await new Promise((resolve) => setTimeout(resolve, DECISION_POLL_INTERVAL_MS));
+  }
+  return undefined;
+};
+
+/**
+ * A 409 means the proposal moved on without this read of it: someone else decided it, or it
+ * settled. Nothing polls a proposal this tab did not decide, so the stale copy would keep offering
+ * a decision that can no longer be made. The refetch is awaited, so the mutation's error is shown
+ * beside the current state rather than ahead of it. The write that won can still be unsearchable
+ * then, so the proposal is polled until a read shows it moved on, and refetched once more.
+ */
+const refreshOnConflict = async (
+  http: HttpSetup,
+  queryClient: ReturnType<typeof useQueryClient>,
+  error: unknown,
+  id: string
+): Promise<void> => {
+  if (!isConflict(error)) {
+    return;
+  }
+  await invalidateProposals(queryClient);
+  void pollProposal(http, id, hasMovedOn).then(() => invalidateProposals(queryClient));
+};
+
+/**
  * `/approve` and `/dismiss` only resume the gate — see their route handlers for why the decision
  * itself is written by the gate workflow's own post-gate step, asynchronously, after the resume
  * call already returned. Polling the proposal directly, before invalidating anything, is what
@@ -376,31 +497,42 @@ const DECISION_POLL_MAX_ATTEMPTS = 8;
  * surface "could not be recorded" for a decision the gate had already released.
  */
 const waitForDecision = async (http: HttpSetup, id: string): Promise<void> => {
-  for (let attempt = 0; attempt < DECISION_POLL_MAX_ATTEMPTS; attempt++) {
-    try {
-      const proposal = await http.get<ProposalWithMetadata>(
-        `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
-        { version: PROPOSALS_API_VERSION }
-      );
-      if (proposal.decision) {
-        return;
-      }
-    } catch {
-      // Treated the same as "not decided yet" — see the best-effort note above.
-    }
-    await new Promise((resolve) => setTimeout(resolve, DECISION_POLL_INTERVAL_MS));
-  }
+  await pollProposal(http, id, (proposal) => Boolean(proposal.decision));
 };
 
-/** Waits for the decision, then marks it unseen until a read of the proposal shows it. */
-const settleDecision = async (http: HttpSetup, kind: DecisionKind, id: string): Promise<void> => {
-  await waitForDecision(http, id);
-  inFlightDecisions.markUnseen(kind, id);
+/**
+ * Waits for the decision, then marks it unseen until a read of the proposal shows it. An approval
+ * the server lifted while this waited is not marked: no read of it would ever show a decision, and
+ * a row whose data already shows the lift is not rendered again to notice the mark. Returns whether
+ * it was lifted.
+ */
+const settleDecision = async (
+  http: HttpSetup,
+  kind: DecisionKind,
+  id: string,
+  decided?: Proposal
+): Promise<boolean> => {
+  const releasedAt =
+    kind === 'approve' && decided !== undefined && isGatelessProposal(decided)
+      ? decided.gateReleasedAt
+      : undefined;
+  const settled = await pollProposal(
+    http,
+    id,
+    (proposal) => Boolean(proposal.decision) || isApprovalLifted(proposal, releasedAt)
+  );
+  if (settled !== undefined && isApprovalLifted(settled, releasedAt)) {
+    return true;
+  }
+  inFlightDecisions.markUnseen(kind, id, releasedAt);
+  return false;
 };
 
 /**
  * Approving submits the action input the analyst was shown, so the API can
- * refuse an approval that no longer matches the record.
+ * refuse an approval that no longer matches the record. An approval the server
+ * lifted while it settled rejects once the proposal is refetched, so the card
+ * shows the failure beside the proposal it can approve again.
  */
 export const useApproveProposal = () => {
   const { services } = useKibana();
@@ -414,12 +546,14 @@ export const useApproveProposal = () => {
         body: JSON.stringify(body),
       }),
     onMutate: ({ id }) => inFlightDecisions.start('approve', id),
-    onSuccess: async (_data, { id }) => {
-      await settleDecision(services.http!, 'approve', id);
+    onSuccess: async (approved, { id }) => {
+      const lifted = await settleDecision(services.http!, 'approve', id, approved);
       await invalidateProposals(queryClient);
+      if (lifted) {
+        throw new Error(APPROVAL_LIFTED_ERROR);
+      }
     },
-    // Refetch on error so the card shows the real state rather than a decidable one.
-    onError: (error) => (isConflict(error) ? invalidateProposals(queryClient) : undefined),
+    onError: (error, { id }) => refreshOnConflict(services.http!, queryClient, error, id),
     onSettled: (_data, _error, { id }) => inFlightDecisions.end('approve', id),
   });
 };
@@ -440,8 +574,7 @@ export const useDismissProposal = () => {
       await settleDecision(services.http!, 'decline', id);
       await invalidateProposals(queryClient);
     },
-    // Refetch so the card shows the real state rather than a decidable one.
-    onError: (error) => (isConflict(error) ? invalidateProposals(queryClient) : undefined),
+    onError: (error, { id }) => refreshOnConflict(services.http!, queryClient, error, id),
     onSettled: (_data, _error, { id }) => inFlightDecisions.end('decline', id),
   });
 };
@@ -465,6 +598,7 @@ export const useReopenProposal = () => {
     onSuccess: async () => {
       await invalidateProposals(queryClient);
     },
+    onError: (error, { id }) => refreshOnConflict(services.http!, queryClient, error, id),
   });
 };
 
