@@ -36,8 +36,14 @@ const API_ONLY_MARKER = '_(API only)_';
 const lineIncludesNonToolMarker = (line: string): boolean =>
   line.includes(NOT_YET_AVAILABLE_MARKER) || line.includes(API_ONLY_MARKER);
 /**
+ * Matches the trailing content after a non-tool marker that is acceptable on an action heading:
+ * empty, or one or more `{applies_to}`backtick-quoted-role`` applicability badges (and nothing else).
+ * This rejects prose that follows the marker mid-sentence or badge-like tokens for other attributes.
+ */
+const APPLIES_TO_SUFFIX_RE = /^(\{applies_to\}`[^`]*`\s*)*$/;
+/**
  * Returns the text before the non-tool marker when the line is an action heading — that is,
- * when the marker is followed by nothing or only applicability badge markup (`{...}`). Returns
+ * when the marker is followed by nothing or only `{applies_to}` badge markup. Returns
  * `undefined` for prose lines that mention the marker mid-sentence. Both documentation tests use
  * this parser so they derive the same heading key regardless of trailing markup after the marker.
  */
@@ -48,8 +54,8 @@ const headingBeforeNonToolMarker = (line: string): string | undefined => {
       continue;
     }
     const trailing = line.slice(idx + marker.length).trim();
-    // Accept as an action heading only when nothing follows the marker, or only badge markup does.
-    if (trailing === '' || trailing.startsWith('{')) {
+    // Accept as an action heading only when nothing follows the marker, or only {applies_to} badges do.
+    if (APPLIES_TO_SUFFIX_RE.test(trailing)) {
       return line.slice(0, idx).trim();
     }
   }
@@ -428,6 +434,36 @@ describe('connector spec quality contracts', () => {
           'action.tree.children[].name',
         ],
       });
+    });
+  });
+
+  describe('non-tool marker heading parser', () => {
+    it('returns the heading for a line with the marker only', () => {
+      expect(headingBeforeNonToolMarker('#### Update tamper protection _(API only)_')).toBe(
+        '#### Update tamper protection'
+      );
+    });
+
+    it('returns the heading for a line with the marker followed by an {applies_to} badge (regression: endsWith check would miss this)', () => {
+      expect(
+        headingBeforeNonToolMarker(
+          '#### Update tamper protection _(API only)_ {applies_to}`stack: preview 9.7`'
+        )
+      ).toBe('#### Update tamper protection');
+    });
+
+    it('returns undefined for a prose line that mentions the marker mid-sentence', () => {
+      expect(
+        headingBeforeNonToolMarker(
+          'This action is _(API only)_ and cannot be called from Agent Builder.'
+        )
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when non-badge content follows the marker', () => {
+      expect(
+        headingBeforeNonToolMarker('#### Update tamper protection _(API only)_ {something unrelated}')
+      ).toBeUndefined();
     });
   });
 
