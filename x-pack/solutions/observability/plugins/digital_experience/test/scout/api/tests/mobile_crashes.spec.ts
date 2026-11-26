@@ -20,6 +20,7 @@ import type {
 import {
   BREAKDOWN_DEVICE_MODELS,
   CRASH_APPS,
+  IOS_CRASHED_OS_VERSION,
   IOS_CRASHED_RELEASE,
   NPE_LATEST_SESSION,
 } from '../../common/fixtures/mobile_crash_data';
@@ -166,9 +167,15 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       const detail = await getDetail(apiClient, CRASH_APPS.ios, group.fingerprint, {
         release: IOS_CRASHED_RELEASE,
       });
+      // The OS too: its report's, not the updated one of the launch that sent it.
       expect(detail.latestCrash).toMatchObject({
         release: IOS_CRASHED_RELEASE,
+        osVersion: IOS_CRASHED_OS_VERSION,
         sessionId: 'CRASH-IOS-SESSION-2',
+      });
+      expect(detail.osVersions).toStrictEqual({
+        top: [{ key: IOS_CRASHED_OS_VERSION, count: 1 }],
+        other: 0,
       });
       expect(detail.releases).toStrictEqual({
         top: [{ key: IOS_CRASHED_RELEASE, count: 1 }],

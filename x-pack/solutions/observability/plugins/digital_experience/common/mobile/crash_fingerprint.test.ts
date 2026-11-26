@@ -7,6 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import {
+  IOS_REPORT_OS_VERSION_RULE,
   IOS_REPORT_RELEASE_RULE,
   crashFingerprint,
   crashFrameRuleFlags,
@@ -74,6 +75,15 @@ describe('crash fingerprint rules', () => {
     );
   });
 
+  it('reads an iOS report with CRLF line breaks as the same report', () => {
+    expect(fingerprintOf('iosCrlf')).toBe(fingerprintOf('iosLaunchA'));
+  });
+
+  it("groups iOS reports without a crashed thread by type, never by their header's identifier", () => {
+    expect(fingerprintOf('iosHeaderOnlyA')).toBe(fingerprintOf('iosHeaderOnlyB'));
+    expect(crashFramesOf(CRASH_FINGERPRINT_CASES.iosHeaderOnlyA)).toBe('');
+  });
+
   it('ignores the address of a symbolicated iOS frame, which changes per launch', () => {
     expect(fingerprintOf('iosSymbolicatedA')).toBe(fingerprintOf('iosSymbolicatedB'));
     expect(crashFramesOf(CRASH_FINGERPRINT_CASES.iosSymbolicatedA)).toBe(
@@ -101,6 +111,25 @@ describe('crash fingerprint rules', () => {
 
   it('keeps the stored fingerprint over the computed one', () => {
     expect(fingerprintOf('stored')).toBe('ingest-fingerprint');
+  });
+});
+
+describe('IOS_REPORT_OS_VERSION_RULE', () => {
+  const osVersionOf = (stacktrace: string) =>
+    stacktrace.replace(
+      new RegExp(
+        IOS_REPORT_OS_VERSION_RULE.pattern,
+        `g${crashFrameRuleFlags(IOS_REPORT_OS_VERSION_RULE)}`
+      ),
+      IOS_REPORT_OS_VERSION_RULE.replacement
+    );
+
+  it("reads the version of an iOS report's OS Version line", () => {
+    expect(osVersionOf(CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace)).toBe('17.6.1');
+  });
+
+  it('is empty for a report without an OS Version line', () => {
+    expect(osVersionOf(CRASH_FINGERPRINT_CASES.iosHeaderOnlyA.stacktrace)).toBe('');
   });
 });
 

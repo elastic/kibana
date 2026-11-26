@@ -248,6 +248,71 @@ describe('getCrashGroups', () => {
   });
 });
 
+describe('getCrashGroups, the lookback', () => {
+  it('fingerprints the crashes of every type when a group has a stored fingerprint', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(esqlResponse([groupRow('npe', { stored_fingerprints: 1 })]))
+      .mockResolvedValueOnce(esqlResponse([historyRow('npe')]))
+      .mockResolvedValueOnce(esqlResponse([{ latest_release: '4.2.0' }]));
+
+    await getCrashGroups({
+      esClient,
+      filters: { serviceName: 'trailmap-android' },
+      start: START,
+      end: END,
+    });
+
+    // Its computed crashes can have another type than the stored one the group shows.
+    const [, [historyRequest]] = client.esql.query.mock.calls;
+    expect(historyRequest.query).not.toContain('`attributes.exception.type` IN');
+  });
+});
+
+describe('getCrashGroups, the newest release', () => {
+  it('never marks new a group with crashes without a release, which could be older', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(esqlResponse([groupRow('npe')]))
+      .mockResolvedValueOnce(esqlResponse([historyRow('npe', { unversioned: 2 })]));
+
+    const [group] = await getCrashGroups({
+      esClient,
+      filters: { serviceName: 'trailmap-android' },
+      start: START,
+      end: END,
+    });
+
+    expect(group.newInRelease).toBeNull();
+    // No group can be new, so the newest release, which reads every document, isn't looked for.
+    expect(client.esql.query).toHaveBeenCalledTimes(2);
+  });
+
+  it('looks for the newest release only once a group crashed on one release alone', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(esqlResponse([groupRow('npe'), groupRow('oom')]))
+      .mockResolvedValueOnce(
+        esqlResponse([
+          historyRow('npe', { releases: ['4.1.0', '4.2.0'] }),
+          historyRow('oom', { releases: '4.2.0' }),
+        ])
+      )
+      .mockResolvedValueOnce(esqlResponse([{ latest_release: '4.2.0' }]));
+
+    const groups = await getCrashGroups({
+      esClient,
+      filters: { serviceName: 'trailmap-android' },
+      start: START,
+      end: END,
+    });
+
+    expect(groups.map(({ newInRelease }) => newInRelease)).toEqual([null, '4.2.0']);
+    const [, , [latestRequest]] = client.esql.query.mock.calls;
+    expect(latestRequest.query).toContain('latest_release');
+  });
+});
+
 describe('getCrashReleases', () => {
   it('counts the crashes per release that crashed, whatever the release filter', async () => {
     const { client, esClient } = createTracedEsClientMock();

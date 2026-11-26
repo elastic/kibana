@@ -10,7 +10,7 @@ import type { ESQLAstExpression, ESQLColumn } from '@elastic/esql/types';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
 import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
-import { crashFingerprint, isIosReport, reportRelease } from './crash_fingerprint';
+import { crashFingerprint, isIosReport, reportOsVersion, reportRelease } from './crash_fingerprint';
 import { mobileDocuments } from './documents';
 import type { RESULT_COLUMNS } from './fields';
 import { inValues, mobileColumn, resultColumn } from './fields';
@@ -34,9 +34,29 @@ export interface CrashEventsParams extends MobilePanelFilters {
 }
 
 /**
+ * When a crash happened: the earlier of `@timestamp` and its observed time, as EDOT iOS sends a
+ * crash on the next launch with only its observed time set to the crash. An observed time from
+ * before a crash can be sent late is no crash time, e.g. the zero an exporter can leave.
+ */
+const crashTimeOf = (): ESQLAstExpression => {
+  const observed = esql.exp`TO_DATETIME(${mobileColumn('observedTimestamp')})`;
+  // The arithmetic is on the observed time: `@timestamp` reads as `NULL` where no index maps it.
+  return esql.exp`LEAST(@timestamp, CASE(
+    ${observed} + ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)} >= @timestamp,
+    ${observed},
+    @timestamp
+  ))`;
+};
+
+/** A keyword that is `NULL` when empty, as some SDKs send an empty value for none. */
+const nonEmpty = (column: ESQLAstExpression): ESQLAstExpression =>
+  esql.exp`CASE(${column} != "", ${column}, NULL)`;
+
+/**
  * The crashes of an application that `inRange` keeps by their `crash_time`, the earlier of their
- * two times, each with its `crash_release`, the release that crashed. The release filter is on the
- * latter: EDOT iOS sends a crash with the resource of the next launch, which may run an update.
+ * two times, each with its `crash_release` and `crash_os_version`, the release and OS that crashed:
+ * EDOT iOS sends a crash with the resource of the next launch, which may run an update, so an iOS
+ * report's own lines win. The release filter is on `crash_release`.
  */
 const crashesInRange = (
   { release, ...filters }: MobilePanelFilters,
@@ -45,16 +65,16 @@ const crashesInRange = (
   const crashTime = resultColumn('crashTime');
   const crashRelease = resultColumn('crashRelease');
   const crashes = mobilePanelQuery(filters, mobileDocuments({ indices: [OTEL_LOGS_INDEX] }))
-    .pipe`WHERE ${inValues('eventName', CRASH_EVENTS)}`
-    .pipe`EVAL ${crashTime} = LEAST(@timestamp, COALESCE(TO_DATETIME(${mobileColumn(
-    'observedTimestamp'
-  )}), @timestamp))`;
-  const query = inRange(crashes, crashTime).pipe`EVAL ${crashRelease} = ${reportRelease()}`
-    .pipe`EVAL ${crashRelease} = CASE(
-      ${crashRelease} IS NULL OR ${crashRelease} == "",
-      ${mobileColumn('serviceVersion')},
-      ${crashRelease}
-    )`;
+    .pipe`WHERE ${inValues('eventName', CRASH_EVENTS)}`.pipe`EVAL ${crashTime} = ${crashTimeOf()}`;
+  const crashOsVersion = resultColumn('crashOsVersion');
+  const query = inRange(crashes, crashTime).pipe`EVAL ${crashRelease} = ${reportRelease()},
+      ${crashOsVersion} = ${reportOsVersion()}`.pipe`EVAL
+      ${crashRelease} = COALESCE(${nonEmpty(crashRelease)}, ${nonEmpty(
+    mobileColumn('serviceVersion')
+  )}),
+      ${crashOsVersion} = COALESCE(${nonEmpty(crashOsVersion)}, ${nonEmpty(
+    mobileColumn('osVersion')
+  )})`;
   return release ? query.pipe`WHERE ${crashRelease} == ${{ release }}` : query;
 };
 
@@ -105,7 +125,8 @@ export interface CrashReleaseRow {
 /**
  * Keeps the crashes that can be in a group of one of `types`, before the costly fingerprint: a
  * computed fingerprint hashes the type, so all of its crashes have it (`null` for none), while a
- * stored one can be of any type.
+ * stored one can be of any type. Only for types of crashes whose fingerprint was computed: a
+ * group's computed crashes can have another type than a stored one's.
  */
 export const withCrashTypes = (
   query: ComposerQuery,
@@ -139,16 +160,19 @@ export const withCrashGroupStats = (query: ComposerQuery): ComposerQuery => {
   const users = resultColumn('users');
   const events = resultColumn('events');
   return query.pipe`STATS
-      ${users} = COUNT_DISTINCT(${mobileColumn('installationId')}),
+      ${users} = COUNT_DISTINCT(${nonEmpty(mobileColumn('installationId'))}),
       ${events} = COUNT(*),
-      ${resultColumn('sessions')} = COUNT_DISTINCT(${mobileColumn('sessionId')}),
+      ${resultColumn('sessions')} = COUNT_DISTINCT(${nonEmpty(mobileColumn('sessionId'))}),
       ${resultColumn('firstSeen')} = MIN(${crashTime}),
       ${resultColumn('lastSeen')} = MAX(${crashTime}),
       ${resultColumn('exceptionType')} = LAST(${mobileColumn('exceptionType')}, ${crashTime}),
       ${resultColumn('message')} = LAST(${mobileColumn('exceptionMessage')}, ${crashTime}),
       ${resultColumn('firstRelease')} = FIRST(${resultColumn('crashRelease')}, ${crashTime}),
       ${resultColumn('lastRelease')} = LAST(${resultColumn('crashRelease')}, ${crashTime}),
-      ${resultColumn('iosReports')} = COUNT(*) WHERE ${isIosReport()}
+      ${resultColumn('iosReports')} = COUNT(*) WHERE ${isIosReport()},
+      ${resultColumn('storedFingerprints')} = COUNT(*) WHERE ${mobileColumn(
+    'exceptionFingerprint'
+  )} IS NOT NULL
     BY ${resultColumn('fingerprint')}`.pipe`SORT ${users} DESC, ${events} DESC`
     .pipe`LIMIT ${ERROR_GROUPS_ROWS}`;
 };
@@ -168,6 +192,7 @@ export const withCrashGroupHistory = (
   const crashTime = resultColumn('crashTime');
   return query.pipe`WHERE ${isListed}`.pipe`STATS
       ${resultColumn('releases')} = VALUES(${resultColumn('crashRelease')}),
+      ${resultColumn('unversioned')} = COUNT(*) WHERE ${resultColumn('crashRelease')} IS NULL,
       ${resultColumn('firstSeen')} = MIN(${crashTime}),
       ${resultColumn('firstRelease')} = FIRST(${resultColumn('crashRelease')}, ${crashTime})
     BY ${fingerprint}`.pipe`LIMIT ${fingerprints.length}`;
@@ -187,12 +212,16 @@ export interface CrashGroupRow {
   [RESULT_COLUMNS.lastRelease]?: string | null;
   /** Crashes reported as EDOT iOS reports, whose fingerprint changes with every build. */
   [RESULT_COLUMNS.iosReports]?: number | null;
+  /** Crashes whose fingerprint was stored, so of any type, rather than computed from their type. */
+  [RESULT_COLUMNS.storedFingerprints]?: number | null;
 }
 
 /** The row of `withCrashGroupHistory`: one release is a string, several an array. */
 export interface CrashGroupHistoryRow {
   [RESULT_COLUMNS.fingerprint]: string;
   [RESULT_COLUMNS.releases]?: string | string[] | null;
+  /** Crashes without a release, which `releases` leaves out. */
+  [RESULT_COLUMNS.unversioned]?: number | null;
   [RESULT_COLUMNS.firstSeen]: string;
   [RESULT_COLUMNS.firstRelease]?: string | null;
 }
@@ -208,9 +237,10 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
       ${resultColumn('message')} = ${mobileColumn('exceptionMessage')},
       ${resultColumn('stacktrace')} = ${mobileColumn('exceptionStacktrace')},
       ${resultColumn('release')} = ${resultColumn('crashRelease')},
-      ${resultColumn('osVersion')} = ${CRASH_BREAKDOWNS.osVersions()},
+      ${resultColumn('osVersion')} = ${resultColumn('crashOsVersion')},
       ${resultColumn('deviceModel')} = ${CRASH_BREAKDOWNS.deviceModels()},
-      ${resultColumn('sessionId')} = ${mobileColumn('sessionId')},
+      ${resultColumn('sessionId')} = ${nonEmpty(mobileColumn('sessionId'))},
+      ${resultColumn('storedFingerprint')} = ${mobileColumn('exceptionFingerprint')},
       ${resultColumn('reportedAt')} = @timestamp`.pipe`KEEP ${[
     resultColumn('crashTime'),
     resultColumn('reportedAt'),
@@ -221,6 +251,7 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
     resultColumn('osVersion'),
     resultColumn('deviceModel'),
     resultColumn('sessionId'),
+    resultColumn('storedFingerprint'),
   ]}`;
 
 /** What a crash group is broken down by in its detail. */
@@ -228,10 +259,11 @@ export const CRASH_BREAKDOWNS: Readonly<
   Record<'releases' | 'osVersions' | 'deviceModels', () => ESQLAstExpression>
 > = {
   releases: () => resultColumn('crashRelease'),
-  osVersions: () => mobileColumn('osVersion'),
+  osVersions: () => resultColumn('crashOsVersion'),
+  // The identifier where the name is missing or empty.
   deviceModels: () =>
-    esql.exp`COALESCE(${mobileColumn('deviceModelName')}, ${mobileColumn(
-      'deviceModelIdentifier'
+    esql.exp`COALESCE(${nonEmpty(mobileColumn('deviceModelName'))}, ${nonEmpty(
+      mobileColumn('deviceModelIdentifier')
     )})`,
 };
 
@@ -269,6 +301,8 @@ export interface LatestCrashRow {
   [RESULT_COLUMNS.osVersion]?: string | null;
   [RESULT_COLUMNS.deviceModel]?: string | null;
   [RESULT_COLUMNS.sessionId]?: string | null;
+  /** Set when the crash's fingerprint was stored, so its type says nothing of the group's. */
+  [RESULT_COLUMNS.storedFingerprint]?: string | null;
 }
 
 /** The row of `withCrashBreakdown`. */

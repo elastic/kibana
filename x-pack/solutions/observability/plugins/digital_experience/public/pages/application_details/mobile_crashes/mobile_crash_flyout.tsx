@@ -105,7 +105,7 @@ const BEFORE_CRASH_SUBTITLE = i18n.translate(
   'xpack.digitalExperience.mobile.crashes.flyout.beforeCrashSubtitle',
   {
     defaultMessage:
-      "The latest crash's session: its last requests, screens, taps, logs and errors before the crash.",
+      "The latest crash's session: its last requests, screens, taps, warning and error logs, and handled errors before the crash.",
   }
 );
 

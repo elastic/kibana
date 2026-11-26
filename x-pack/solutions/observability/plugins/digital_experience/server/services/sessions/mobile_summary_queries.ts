@@ -138,7 +138,8 @@ const MOBILE_SESSION_STATS: Stat[] = [
 /**
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
  * times and latest attributes. A crash counts at the time it happened, the earlier of its two
- * times: EDOT iOS sends it on the next launch with only its observed time set to the crash.
+ * times: EDOT iOS sends it on the next launch with only its observed time set to the crash. An
+ * observed time from before a crash can be sent late, e.g. an exporter's zero, is ignored.
  */
 export const mobileSessionSummaryQuery: SummaryQueryOf = (
   { changedTo, rebuildFrom },
@@ -156,7 +157,8 @@ ${mobileSessionEvents('rebuild_from', 'changed_to')}
        ${HTTP_REQUEST_EVALS},
        ${ATTRIBUTE_RANK},
        ${SEEN_EVALS.join(',\n       ')}
-| EVAL event_time = CASE(is_crash, LEAST(@timestamp, COALESCE(TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}), @timestamp)), @timestamp)
+| EVAL observed_time = TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP})
+| EVAL event_time = CASE(is_crash AND observed_time + ${MOBILE_MAX_CRASH_DELAY_HOURS} hours >= @timestamp, LEAST(@timestamp, observed_time), @timestamp)
 | STATS ${renderStats(MOBILE_SESSION_STATS, '        ')}
   BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}

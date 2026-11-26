@@ -63,6 +63,9 @@ export const APP_WIDGET_ID = 'app.widget.id';
 /** A log record's text and level, in the OTel logs indices. */
 export const OTEL_LOG_BODY = 'body.text';
 export const OTEL_SEVERITY_TEXT = 'severity_text';
+export const OTEL_SEVERITY_NUMBER = 'severity_number';
+/** The lowest OTel severity number of a warning: `WARN` is 13 to 16, then `ERROR` and `FATAL`. */
+export const OTEL_SEVERITY_WARN = 13;
 /** A span's duration in nanoseconds, in the OTel traces indices. */
 export const OTEL_SPAN_DURATION = 'duration';
 /** The instrumentation scope of EDOT iOS view controller spans: one per screen shown. */

@@ -94,45 +94,59 @@ export const getCrashGroups = async ({
   const allReleases = omit(filters, 'release');
   // The whole range too, so a group the range shows on an older release is never new.
   const lookbackStart = Math.min(start, end - CRASH_NEW_LOOKBACK_DAYS * DAY_MS);
-  const [historyRows, [latest]] = await Promise.all([
-    runEsql<CrashGroupHistoryRow>(
-      esClient,
-      'get_mobile_crash_group_history',
-      withCrashGroupHistory(
-        withCrashFingerprint(
-          // Only the crashes that can be in the listed groups are fingerprinted, over 30 days.
-          withCrashTypes(
-            crashEvents({ ...allReleases, start: lookbackStart, end }),
-            rows.map((row) => row[RESULT_COLUMNS.exceptionType] ?? null)
-          )
-        ),
-        rows.map((row) => row[RESULT_COLUMNS.fingerprint])
+  const lookbackCrashes = crashEvents({ ...allReleases, start: lookbackStart, end });
+  // Only the crashes that can be in the listed groups are fingerprinted, over 30 days, unless a
+  // group has a stored fingerprint: its type need not be its computed crashes'.
+  const hasStoredFingerprints = rows.some((row) => row[RESULT_COLUMNS.storedFingerprints]);
+  const historyRows = await runEsql<CrashGroupHistoryRow>(
+    esClient,
+    'get_mobile_crash_group_history',
+    withCrashGroupHistory(
+      withCrashFingerprint(
+        hasStoredFingerprints
+          ? lookbackCrashes
+          : withCrashTypes(
+              lookbackCrashes,
+              rows.map((row) => row[RESULT_COLUMNS.exceptionType] ?? null)
+            )
       ),
-      timeFilter(lookbackStart, end + CRASH_DELAY_MS, environment)
+      rows.map((row) => row[RESULT_COLUMNS.fingerprint])
     ),
-    runEsql<LatestReleaseRow>(
-      esClient,
-      'get_mobile_latest_release',
-      withLatestReleases(mobilePanelQuery(allReleases)),
-      timeFilter(lookbackStart, end, environment)
-    ),
-  ]);
-
-  const latestRelease = latest?.[RESULT_COLUMNS.latestRelease] ?? null;
+    timeFilter(lookbackStart, end + CRASH_DELAY_MS, environment)
+  );
   const historyByFingerprint = new Map(
     historyRows.map((row) => [row[RESULT_COLUMNS.fingerprint], row])
   );
-  return rows.map((row) => {
+  // The one release a group crashed on in the lookback, when it can be new: an EDOT iOS report's
+  // fingerprint has offsets that change with every build, so each build's crashes would look new
+  // (#75), and a crash without a release could have been on an older one.
+  const onlyReleaseOf = (row: CrashGroupRow): string | null => {
     const history = historyByFingerprint.get(row[RESULT_COLUMNS.fingerprint]);
     const releases = castArray(history?.[RESULT_COLUMNS.releases] ?? []);
-    // An EDOT iOS report's fingerprint has offsets that change with every build, so each build's
-    // crashes would look new; those groups get no badge until frames are readable (#75).
-    const isNew =
-      !row[RESULT_COLUMNS.iosReports] &&
-      latestRelease !== null &&
-      releases.length === 1 &&
-      releases[0] === latestRelease;
-    return toCrashGroup(row, history, isNew ? latestRelease : null);
+    return !row[RESULT_COLUMNS.iosReports] &&
+      !history?.[RESULT_COLUMNS.unversioned] &&
+      releases.length === 1
+      ? releases[0]
+      : null;
+  };
+
+  // The newest release reads 30 days of every document, so only when a group can be new.
+  const [latest] = rows.some((row) => onlyReleaseOf(row) !== null)
+    ? await runEsql<LatestReleaseRow>(
+        esClient,
+        'get_mobile_latest_release',
+        withLatestReleases(mobilePanelQuery(allReleases)),
+        timeFilter(lookbackStart, end, environment)
+      )
+    : [];
+  const latestRelease = latest?.[RESULT_COLUMNS.latestRelease] ?? null;
+  return rows.map((row) => {
+    const isNew = latestRelease !== null && onlyReleaseOf(row) === latestRelease;
+    return toCrashGroup(
+      row,
+      historyByFingerprint.get(row[RESULT_COLUMNS.fingerprint]),
+      isNew ? latestRelease : null
+    );
   });
 };
 

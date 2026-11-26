@@ -10,6 +10,7 @@ import {
   EVENT_EXCEPTION,
   EVENT_SCREEN_CLICK,
   EVENT_WIDGET_CLICK,
+  OTEL_SEVERITY_WARN,
   SCREEN_LOAD_SPAN,
   SPAN_KIND_CLIENT,
   VIEW_CONTROLLER_SCOPE,
@@ -38,7 +39,10 @@ const KIND = {
   log: 'log',
 } as const satisfies Record<MobileSessionEventKind, MobileSessionEventKind>;
 
-/** The kind of a mobile event, or `null` for one a session timeline doesn't list. */
+/**
+ * The kind of a mobile event, or `null` for one a session timeline doesn't list. Logs are listed
+ * from warnings up, so chatty debug and info logs can't push the screens, taps and requests out.
+ */
 const eventKind = () =>
   esql.exp`CASE(
     ${mobileColumn('spanKind')} == ${SPAN_KIND_CLIENT} AND ${mobileColumn(
@@ -52,7 +56,9 @@ const eventKind = () =>
     ${KIND.tap},
     ${mobileColumn('eventName')} == ${EVENT_EXCEPTION},
     ${KIND.error},
-    ${mobileColumn('eventName')} IS NULL AND ${mobileColumn('severity')} IS NOT NULL,
+    ${mobileColumn('eventName')} IS NULL AND ${mobileColumn(
+    'severityNumber'
+  )} >= ${OTEL_SEVERITY_WARN},
     ${KIND.log},
     NULL
   )`;

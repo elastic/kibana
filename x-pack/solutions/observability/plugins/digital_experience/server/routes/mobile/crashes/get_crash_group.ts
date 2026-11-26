@@ -46,7 +46,8 @@ export interface GetCrashGroupParams {
 
 const toBreakdown = (rows: CrashBreakdownRow[]): CrashBreakdown => {
   const top = rows
-    .filter((row) => row[RESULT_COLUMNS.value] != null)
+    // A missing or empty value is counted in "Other", not shown as a blank one.
+    .filter((row) => row[RESULT_COLUMNS.value] != null && row[RESULT_COLUMNS.value] !== '')
     .slice(0, CRASH_BREAKDOWN_TOP)
     .map((row) => ({ key: String(row[RESULT_COLUMNS.value]), count: row[RESULT_COLUMNS.count] }));
   const total = rows[0]?.[RESULT_COLUMNS.total] ?? 0;
@@ -146,13 +147,14 @@ export const getCrashGroup = async ({
     };
   }
   const latestCrash = toCrash(latestRow);
-  // The group's crashes have the latest one's type, unless it has a stored fingerprint, so the
-  // breakdowns only fingerprint the crashes of that type.
+  // The group's computed crashes have the latest one's type when its fingerprint was computed too,
+  // so the breakdowns only fingerprint the crashes of that type, and the stored ones.
+  const types = latestRow[RESULT_COLUMNS.storedFingerprint] ? undefined : [latestCrash.type];
   const breakdown = (name: CrashBreakdownName) =>
     runEsql<CrashBreakdownRow>(
       esClient,
       `get_mobile_crash_group_${name}`,
-      withCrashBreakdown(groupCrashes([latestCrash.type]), name),
+      withCrashBreakdown(groupCrashes(types), name),
       filter
     ).then(toBreakdown);
 

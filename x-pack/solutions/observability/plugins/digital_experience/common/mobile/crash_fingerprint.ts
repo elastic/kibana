@@ -29,10 +29,13 @@ export const CRASH_FRAME_RULES = {
     { pattern: '\\n.*', replacement: '', dotAll: true },
     { pattern: '0x[0-9a-fA-F]+|\\d+', replacement: '#' },
   ],
-  // EDOT iOS sends an unsymbolicated PLCrashReporter excerpt, whose load addresses change per launch
+  // EDOT iOS sends an unsymbolicated PLCrashReporter excerpt, whose load addresses change per
+  // launch. A report without a crashed thread has no frames, as its header changes with each crash
   ios: [
+    { pattern: '\\r', replacement: '' },
     {
-      pattern: '^.*?(?:Last Exception Backtrace:|Thread \\d+ Crashed:)\\n(.*?)(?:\\n\\n.*)?$',
+      pattern:
+        '^(?:.*?(?:Last Exception Backtrace:|Thread \\d+ Crashed:)\\n(.*?)(?:\\n\\n.*)?|.*)$',
       replacement: '$1',
       dotAll: true,
     },
@@ -73,6 +76,17 @@ export const IOS_REPORT_RELEASE_RULE = {
   dotAll: true,
 } as const satisfies CrashFrameRule;
 
+/**
+ * The OS version in a PLCrashReporter report's `OS Version:` line, e.g. `17.6.1` of
+ * `iPhone OS 17.6.1 (21G93)`, or an empty string without one: the OS that crashed, which the next
+ * launch's resource may have updated.
+ */
+export const IOS_REPORT_OS_VERSION_RULE = {
+  pattern: '^(?:.*?\\nOS Version: +[^0-9\\n]*([0-9][0-9.]*).*|.*)$',
+  replacement: '$1',
+  dotAll: true,
+} as const satisfies CrashFrameRule;
+
 /** How a PLCrashReporter text report starts, which no exception's message or frames do. */
 export const IOS_REPORT_MARKER = 'Incident Identifier:';
 
@@ -98,15 +112,17 @@ const withRule = (input: ESQLAstExpression, rule: CrashFrameRule): ESQLAstExpres
 const withRules = (input: ESQLAstExpression, kind: CrashKind): ESQLAstExpression =>
   CRASH_FRAME_RULES[kind].reduce<ESQLAstExpression>(withRule, input);
 
+const fromIosReport = (rule: CrashFrameRule): ESQLAstExpression =>
+  esql.exp`CASE(${isIosReport()}, ${withRule(mobileColumn('exceptionStacktrace'), rule)}, NULL)`;
+
 /**
  * The release in an EDOT iOS report's `Version:` line, as an ES|QL expression: `NULL` for other
  * crashes, and an empty string for a report without one.
  */
-export const reportRelease = (): ESQLAstExpression =>
-  esql.exp`CASE(${isIosReport()}, ${withRule(
-    mobileColumn('exceptionStacktrace'),
-    IOS_REPORT_RELEASE_RULE
-  )}, NULL)`;
+export const reportRelease = (): ESQLAstExpression => fromIosReport(IOS_REPORT_RELEASE_RULE);
+
+/** The OS version in an EDOT iOS report's `OS Version:` line, as `reportRelease` reads its release. */
+export const reportOsVersion = (): ESQLAstExpression => fromIosReport(IOS_REPORT_OS_VERSION_RULE);
 
 /** The frames a crash is grouped on, as an ES|QL expression. */
 export const crashFrames = (): ESQLAstExpression =>

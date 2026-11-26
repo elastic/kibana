@@ -65,8 +65,9 @@ const android = {
   osName: 'Android',
 } as const;
 
-/** The release the delayed iOS crash happened on, before the update that sent it. */
+/** The release and OS the delayed iOS crash happened on, before the updates that sent it. */
 export const IOS_CRASHED_RELEASE = '8.4.0';
+export const IOS_CRASHED_OS_VERSION = '17.5';
 
 const ios = {
   serviceName: CRASH_APPS.ios,
@@ -141,18 +142,23 @@ const CRASHES: Crash[] = [
     observedTimestamp: at('12:15:00'),
     stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace,
   },
-  // Crashed on the older release, and sent after the app was updated: its resource has the new
-  // release, its report the one that crashed.
+  // Crashed on the older release and OS, and sent after both were updated: its resource has the
+  // new ones, its report the ones that crashed.
   {
     ...ios,
     installationId: 'crash-ios-device-2',
     sessionId: 'CRASH-IOS-SESSION-2',
     timestamp: at('13:20:00'),
     observedTimestamp: at('12:55:00'),
-    stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace.replace(
-      `Version:         ${ios.version} (850)`,
-      `Version:         ${IOS_CRASHED_RELEASE} (840)`
-    ),
+    stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace
+      .replace(
+        `Version:         ${ios.version} (850)`,
+        `Version:         ${IOS_CRASHED_RELEASE} (840)`
+      )
+      .replace(
+        `OS Version:      iPhone OS ${ios.osVersion} (21G93)`,
+        `OS Version:      iPhone OS ${IOS_CRASHED_OS_VERSION} (21F79)`
+      ),
   },
   {
     ...ios,
@@ -172,7 +178,9 @@ const CRASHES: Crash[] = [
   },
   // More device models than a breakdown shows, and two crashes without one, which rank first and
   // take a row: "Other" must count both, and the top must still be five models.
+  // The first has the zero observed time an exporter can leave: still a crash of the range.
   ...[...BREAKDOWN_DEVICE_MODELS, undefined, undefined].map((deviceModel, index) => ({
+    ...(index === 0 ? { observedTimestamp: '1970-01-01T00:00:00.000Z' } : {}),
     serviceName: CRASH_APPS.breakdowns,
     osName: 'Android' as const,
     version: '1.0.0',

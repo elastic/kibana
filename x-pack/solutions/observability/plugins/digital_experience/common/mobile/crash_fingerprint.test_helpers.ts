@@ -68,6 +68,8 @@ const iosReport = ({
     `Path:            /private/var/containers/Bundle/Application/${incident}/RideIos.app/RideIos`,
     'Version:         8.5.0 (850)',
     '',
+    'OS Version:      iPhone OS 17.6.1 (21G93)',
+    '',
     'Exception Type:  SIGSEGV',
     'Crashed Thread:  0',
     '',
@@ -190,6 +192,23 @@ export const CRASH_FINGERPRINT_CASES = {
       lastExceptionBacktrace: true,
     }),
   },
+  // Line breaks as some exporters write them, and reports cut before their crashed thread.
+  iosCrlf: {
+    type: 'SIGSEGV',
+    stacktrace: iosReport({ incident: '0D8B5C1E-7F42-4A9B-B3C6-2E1D9F0A4B7C', slide: 0x9c000 })
+      .split('\n')
+      .join('\r\n'),
+  },
+  iosHeaderOnlyA: {
+    type: 'SIGKILL',
+    stacktrace:
+      'Incident Identifier: 5A1E2B3C-0000-0000-0000-000000000001\nVersion:         8.5.0 (850)',
+  },
+  iosHeaderOnlyB: {
+    type: 'SIGKILL',
+    stacktrace:
+      'Incident Identifier: 7C9D8E6F-0000-0000-0000-000000000002\nVersion:         8.5.0 (850)',
+  },
   iosSymbolicatedA: {
     type: 'NSInvalidArgumentException',
     stacktrace: symbolicatedIosReport(0x4000),
@@ -235,6 +254,9 @@ export const EXPECTED_CRASH_FINGERPRINTS: Record<keyof typeof CRASH_FINGERPRINT_
   iosLaunchB: '2ff3f68c306a93625ec7cfe1d2db4587704a34b76bbfa9ed31afd8f69e8a0014',
   iosExceptionA: 'b514cfbd8ddc65d16c3b79fb02481d43247ac3fb6860d3ecdb3058af88ecf709',
   iosExceptionB: 'b514cfbd8ddc65d16c3b79fb02481d43247ac3fb6860d3ecdb3058af88ecf709',
+  iosCrlf: '2ff3f68c306a93625ec7cfe1d2db4587704a34b76bbfa9ed31afd8f69e8a0014',
+  iosHeaderOnlyA: '3005496ec4d1df64b0b8dd7156f3dad8f0620a373c2670c1a7f5ac1888d1eaed',
+  iosHeaderOnlyB: '3005496ec4d1df64b0b8dd7156f3dad8f0620a373c2670c1a7f5ac1888d1eaed',
   iosSymbolicatedA: 'f5a8725a56365c22ec6ee0aa21420567f609035ed6c378035cf881a4cf2c737b',
   iosSymbolicatedB: 'f5a8725a56365c22ec6ee0aa21420567f609035ed6c378035cf881a4cf2c737b',
   javascriptIndex5: '6fa897602de144d6484f9c78f7c7b442366dc466558d05a95c0c33b4d33190c2',

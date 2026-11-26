@@ -253,4 +253,58 @@ describe('getCrashGroup', () => {
     // The latest crash and the three breakdowns; no session query.
     expect(client.esql.query).toHaveBeenCalledTimes(4);
   });
+
+  it('counts an empty value in "Other", not as a blank one', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockImplementation(async ({ query }) => {
+      if (query.includes('LIMIT 1 |')) {
+        return esqlResponse([{ ...LATEST, session_id: null }]);
+      }
+      return esqlResponse(
+        query.includes('BY value =')
+          ? [
+              { value: 'Pixel 8', count: 3, total: 5 },
+              { value: '', count: 2, total: 5 },
+            ]
+          : []
+      );
+    });
+
+    const detail = await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      start: START,
+      end: END,
+    });
+
+    expect(detail.deviceModels).toEqual({ top: [{ key: 'Pixel 8', count: 3 }], other: 2 });
+  });
+
+  it("fingerprints the crashes of every type when the latest crash's fingerprint was stored", async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockImplementation(async ({ query }) =>
+      esqlResponse(
+        query.includes('LIMIT 1 |')
+          ? [{ ...LATEST, session_id: null, stored_fingerprint: 'abc' }]
+          : []
+      )
+    );
+
+    await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      start: START,
+      end: END,
+    });
+
+    const breakdownRequests = client.esql.query.mock.calls
+      .map(([request]) => request)
+      .filter(({ query }) => query.includes('BY value ='));
+    expect(breakdownRequests).toHaveLength(3);
+    breakdownRequests.forEach(({ query }) =>
+      expect(query).not.toContain('`attributes.exception.type` IN')
+    );
+  });
 });

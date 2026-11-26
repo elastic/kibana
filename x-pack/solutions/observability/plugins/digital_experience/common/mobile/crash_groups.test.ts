@@ -37,7 +37,7 @@ describe('crashEvents', () => {
 
   it('keeps the crashes that happened in the range, by the earlier of their two times', () => {
     expect(query).toContain(
-      'EVAL crash_time = LEAST(@timestamp, COALESCE(TO_DATETIME(observed_timestamp), @timestamp))'
+      'EVAL crash_time = LEAST(@timestamp, CASE(TO_DATETIME(observed_timestamp) + 24 hours >= @timestamp, TO_DATETIME(observed_timestamp), @timestamp))'
     );
     expect(query).toContain(
       'WHERE crash_time >= TO_DATETIME(?crash_start) AND crash_time < TO_DATETIME(?crash_end)'
@@ -51,9 +51,9 @@ describe('crashEvents', () => {
     ]);
   });
 
-  it("filters by the release that crashed: an iOS report's own, else the resource's", () => {
+  it("filters by the release that crashed, and reads the OS that crashed: an iOS report's own, else the resource's", () => {
     expect(query).toContain(
-      '| EVAL crash_release = CASE(`attributes.exception.stacktrace` LIKE "Incident Identifier:*", REPLACE(`attributes.exception.stacktrace`, "(?s)^(?:.*?\\\\nVersion: +(\\\\S+))?.*$", "$1"), NULL) | EVAL crash_release = CASE(crash_release IS NULL OR crash_release == "", `service.version`, crash_release) | WHERE crash_release == ?release'
+      '| EVAL crash_release = CASE(`attributes.exception.stacktrace` LIKE "Incident Identifier:*", REPLACE(`attributes.exception.stacktrace`, "(?s)^(?:.*?\\\\nVersion: +(\\\\S+))?.*$", "$1"), NULL), crash_os_version = CASE(`attributes.exception.stacktrace` LIKE "Incident Identifier:*", REPLACE(`attributes.exception.stacktrace`, "(?s)^(?:.*?\\\\nOS Version: +[^0-9\\\\n]*([0-9][0-9.]*).*|.*)$", "$1"), NULL) | EVAL crash_release = COALESCE(CASE(crash_release != "", crash_release, NULL), CASE(`service.version` != "", `service.version`, NULL)), crash_os_version = COALESCE(CASE(crash_os_version != "", crash_os_version, NULL), CASE(`resource.attributes.os.version` != "", `resource.attributes.os.version`, NULL)) | WHERE crash_release == ?release'
     );
     expect(query).not.toContain('WHERE `service.version` ==');
   });
@@ -79,9 +79,14 @@ describe('withCrashGroupStats', () => {
   ).print('basic');
 
   it('counts each group by installations, events and sessions', () => {
-    expect(query).toContain('users = COUNT_DISTINCT(`resource.attributes.app.installation.id`)');
+    // An empty id is none, as the flyout reads an empty session.
+    expect(query).toContain(
+      'users = COUNT_DISTINCT(CASE(`resource.attributes.app.installation.id` != "", `resource.attributes.app.installation.id`, NULL))'
+    );
     expect(query).toContain('events = COUNT(*)');
-    expect(query).toContain('sessions = COUNT_DISTINCT(`attributes.session.id`)');
+    expect(query).toContain(
+      'sessions = COUNT_DISTINCT(CASE(`attributes.session.id` != "", `attributes.session.id`, NULL))'
+    );
   });
 
   it('reads the first and last crash, and the latest type and message, by crash time', () => {
@@ -90,6 +95,10 @@ describe('withCrashGroupStats', () => {
     expect(query).toContain('first_release = FIRST(crash_release, crash_time)');
     expect(query).toContain('last_release = LAST(crash_release, crash_time)');
     expect(query).toContain('BY fingerprint');
+    // Stored fingerprints, which can be of any type, so the group's type can't narrow its crashes.
+    expect(query).toContain(
+      'stored_fingerprints = COUNT(*) WHERE `attributes.exception.fingerprint` IS NOT NULL'
+    );
     // EDOT iOS reports, whose fingerprint changes with every build, so they are never marked new.
     expect(query).toContain(
       'ios_reports = COUNT(*) WHERE `attributes.exception.stacktrace` LIKE "Incident Identifier:*"'
@@ -110,7 +119,8 @@ describe('withCrashGroupHistory', () => {
 
     expect(query).toContain('| WHERE fingerprint IN ("abc", "d\\"e")');
     expect(query).toContain(
-      '| STATS releases = VALUES(crash_release), first_seen = MIN(crash_time), first_release = FIRST(crash_release, crash_time) BY fingerprint | LIMIT 2'
+      // The crashes without a release too, which `VALUES` leaves out.
+      '| STATS releases = VALUES(crash_release), unversioned = COUNT(*) WHERE crash_release IS NULL, first_seen = MIN(crash_time), first_release = FIRST(crash_release, crash_time) BY fingerprint | LIMIT 2'
     );
   });
 });
@@ -152,7 +162,7 @@ describe('crash group detail', () => {
 
   it('reads the latest crash with its stack trace and session', () => {
     expect(withLatestCrash(groupCrashes()).print('basic')).toContain(
-      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, os_version = `resource.attributes.os.version`, device_model = COALESCE(`resource.attributes.device.model.name`, `resource.attributes.device.model.identifier`), session_id = `attributes.session.id`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, os_version, device_model, session_id'
+      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, os_version = crash_os_version, device_model = COALESCE(CASE(`resource.attributes.device.model.name` != "", `resource.attributes.device.model.name`, NULL), CASE(`resource.attributes.device.model.identifier` != "", `resource.attributes.device.model.identifier`, NULL)), session_id = CASE(`attributes.session.id` != "", `attributes.session.id`, NULL), stored_fingerprint = `attributes.exception.fingerprint`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, os_version, device_model, session_id, stored_fingerprint'
     );
   });
 
@@ -162,10 +172,10 @@ describe('crash group detail', () => {
       '| INLINE STATS total = COUNT(*) | STATS count = COUNT(*), total = MAX(total) BY value = crash_release | SORT count DESC, value | LIMIT 6'
     );
     expect(withCrashBreakdown(groupCrashes(), 'osVersions').print('basic')).toContain(
-      'BY value = `resource.attributes.os.version`'
+      'BY value = crash_os_version'
     );
     expect(withCrashBreakdown(groupCrashes(), 'deviceModels').print('basic')).toContain(
-      'BY value = COALESCE(`resource.attributes.device.model.name`, `resource.attributes.device.model.identifier`)'
+      'BY value = COALESCE(CASE(`resource.attributes.device.model.name` != "", `resource.attributes.device.model.name`, NULL), CASE(`resource.attributes.device.model.identifier` != "", `resource.attributes.device.model.identifier`, NULL))'
     );
   });
 });
