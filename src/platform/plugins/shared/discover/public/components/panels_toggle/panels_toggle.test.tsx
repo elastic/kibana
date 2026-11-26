@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type MutableRefObject } from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
@@ -23,6 +23,7 @@ describe('Panels toggle component', () => {
     hideChart, // this tells us if the chart is currently collapsed or not
     hideTable, // this tells us if the table is currently collapsed or not
     hideSidebar, // this tells us if the sidebar is currently collapsed or not
+    chartButtonFocusOnMountRef,
   }: PanelsToggleProps & { hideChart: boolean; hideTable: boolean; hideSidebar: boolean }) => {
     const toolkit = getDiscoverInternalStateMock();
 
@@ -36,13 +37,17 @@ describe('Panels toggle component', () => {
       })
     );
 
-    renderWithKibanaRenderContext(
+    const renderResult = renderWithKibanaRenderContext(
       <DiscoverToolkitTestProvider toolkit={toolkit}>
-        <PanelsToggle omitChartButton={omitChartButton} omitTableButton={omitTableButton} />
+        <PanelsToggle
+          omitChartButton={omitChartButton}
+          omitTableButton={omitTableButton}
+          chartButtonFocusOnMountRef={chartButtonFocusOnMountRef}
+        />
       </DiscoverToolkitTestProvider>
     );
 
-    return toolkit;
+    return { ...toolkit, unmount: renderResult.unmount };
   };
 
   it('should render correctly when sidebar is visible and histogram is visible', async () => {
@@ -209,5 +214,43 @@ describe('Panels toggle component', () => {
       expect(storageSetSpy).toHaveBeenCalledWith('discover:tableHidden', true);
       expect(toolkit.getCurrentTab().appState.hideTable).toBe(true);
     });
+  });
+
+  it('should flag chartButtonFocusOnMountRef when the chart is toggled, and focus the chart button of the next mounted toggle', async () => {
+    const user = userEvent.setup();
+    const chartButtonFocusOnMountRef: MutableRefObject<boolean> = { current: false };
+    const { unmount } = await renderComponent({
+      hideChart: false,
+      hideTable: false,
+      hideSidebar: false,
+      chartButtonFocusOnMountRef,
+    });
+
+    await user.click(screen.getByTestId('dscHideHistogramButton'));
+
+    expect(chartButtonFocusOnMountRef.current).toBe(true);
+
+    // the chart toolbar toggle unmounts and the table toolbar toggle mounts in its place
+    unmount();
+    await renderComponent({
+      hideChart: true,
+      hideTable: false,
+      hideSidebar: false,
+      chartButtonFocusOnMountRef,
+    });
+
+    expect(screen.getByTestId('dscShowHistogramButton')).toHaveFocus();
+    expect(chartButtonFocusOnMountRef.current).toBe(false);
+  });
+
+  it('should not take focus on mount when chartButtonFocusOnMountRef is not flagged', async () => {
+    await renderComponent({
+      hideChart: true,
+      hideTable: false,
+      hideSidebar: false,
+      chartButtonFocusOnMountRef: { current: false },
+    });
+
+    expect(screen.getByTestId('dscShowHistogramButton')).not.toHaveFocus();
   });
 });
