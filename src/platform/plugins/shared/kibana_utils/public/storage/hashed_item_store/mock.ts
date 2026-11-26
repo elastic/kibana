@@ -8,8 +8,12 @@
  */
 
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
+import { hashedItemStore } from '@kbn/kibana-utils-browser';
 
 /**
  * @deprecated Instantiate `StubBrowserStorage` directly.
  */
 export const mockStorage = new StubBrowserStorage();
+
+// Preserve the legacy mock module's storage injection after moving the singleton to the package.
+Object.assign(hashedItemStore, { storage: mockStorage });
