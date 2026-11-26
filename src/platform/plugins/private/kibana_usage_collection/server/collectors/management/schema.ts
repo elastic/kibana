@@ -583,6 +583,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
     },
   },
+  'agentBuilder:threads': {
+    type: 'boolean',
+    _meta: { description: 'Whether Agent Builder threads are enabled.' },
+  },
   'agentBuilder:includeFrozenByDefault': {
     type: 'boolean',
     _meta: {
@@ -843,22 +847,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Content packs in Streams',
     },
   },
-  'observability:streamsEnableQueryStreams': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Query streams in Streams',
-    },
-  },
   'observability:streamsEnableWiredStreamViews': {
     type: 'boolean',
     _meta: {
       description: 'Enable ES|QL views for wired streams',
-    },
-  },
-  'observability:streamsEnableDraftStreams': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable draft streams with read-time ES|QL views',
     },
   },
   'observability:streamsEnableCanvas': {

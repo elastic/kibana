@@ -249,7 +249,7 @@ Object {
           "xAccessor": "column-timestamp-success-id-generated-uuid",
           "yConfig": Array [
             Object {
-              "color": "#16C5C0",
+              "color": "#00BDA0",
               "forAccessor": "column-event-outcome-success-id-generated-uuid",
             },
           ],

@@ -415,7 +415,7 @@ describe('edotBrowser', () => {
 
       expect(rage).toMatchObject({
         _index: LOGS_INDEX,
-        event_name: 'browser.frustration.rage_click',
+        event_name: 'elastic.frustration.rage_click',
         scope: { name: '@elastic/opentelemetry-browser' },
       });
       expect(rage).not.toHaveProperty('severity_number');
@@ -425,14 +425,14 @@ describe('edotBrowser', () => {
         'browser.page.x': 120,
         'browser.page.y': 480,
         'url.full': url,
-        'browser.frustration.click_count': 5,
+        'elastic.frustration.click_count': 5,
       });
       expect(error.attributes).toMatchObject({
         'exception.type': 'TypeError',
         'exception.message': 'x is undefined',
       });
-      expect(error.attributes).not.toHaveProperty(['browser.frustration.click_count']);
-      expect(dead.event_name).toBe('browser.frustration.dead_click');
+      expect(error.attributes).not.toHaveProperty(['elastic.frustration.click_count']);
+      expect(dead.event_name).toBe('elastic.frustration.dead_click');
       expect(dead.attributes).not.toHaveProperty(['browser.css_selector']);
     });
 
@@ -679,6 +679,7 @@ describe('edotBrowser', () => {
           slowdown: 1,
           reportExceptions: true,
           reportResourceTimings: true,
+          reportPageRoutes: true,
           impatience: 1,
           persistentHits: new Map(),
         },
@@ -754,6 +755,7 @@ describe('edotBrowser', () => {
       end,
       reportExceptions,
       reportResourceTimings,
+      reportPageRoutes,
       frustrationRandom,
     }: {
       seed?: number;
@@ -767,6 +769,7 @@ describe('edotBrowser', () => {
       end?: number;
       reportExceptions?: boolean;
       reportResourceTimings?: boolean;
+      reportPageRoutes?: boolean;
       frustrationRandom?: () => number;
     } = {}) =>
       edotBrowser
@@ -779,6 +782,7 @@ describe('edotBrowser', () => {
           dwell,
           reportExceptions,
           reportResourceTimings,
+          reportPageRoutes,
           frustrationRandom,
           random: seededRandom(seed),
         })
@@ -1077,7 +1081,7 @@ describe('edotBrowser', () => {
     it('reports frustration signals only with a source of its own, leaving the rest as it is', () => {
       const frustrationOf = (docs: EdotBrowserDocument[]) =>
         docs.filter(
-          (doc) => 'event_name' in doc && String(doc.event_name).startsWith('browser.frustration.')
+          (doc) => 'event_name' in doc && String(doc.event_name).startsWith('elastic.frustration.')
         );
       const sessions = Array.from({ length: 50 }, (_, seed) => ({
         without: createSession({ seed, health: HEALTH_PROFILES.critical }),
@@ -1094,9 +1098,9 @@ describe('edotBrowser', () => {
       );
 
       expect([...kinds].sort()).toEqual([
-        'browser.frustration.dead_click',
-        'browser.frustration.error_click',
-        'browser.frustration.rage_click',
+        'elastic.frustration.dead_click',
+        'elastic.frustration.error_click',
+        'elastic.frustration.rage_click',
       ]);
       sessions.forEach((session) => {
         expect(frustrationOf(session.without)).toEqual([]);
@@ -1134,7 +1138,7 @@ describe('edotBrowser', () => {
         docs.filter(
           (doc) =>
             'event_name' in doc &&
-            doc.event_name === `browser.frustration.${kind}` &&
+            doc.event_name === `elastic.frustration.${kind}` &&
             (selector === undefined || doc.attributes?.['browser.css_selector'] === selector)
         );
       const clicksOn = (docs: EdotBrowserDocument[], selector: string) =>
@@ -1801,6 +1805,78 @@ describe('edotBrowser', () => {
       clicks.forEach(({ attributes }) => {
         expect(attributes).toMatchObject({ 'browser.tag_name': 'DIV' });
         expect(attributes).not.toHaveProperty(['browser.css_selector']);
+      });
+    });
+
+    describe('page routes', () => {
+      const ROUTED_SITE: EdotBrowserSite = {
+        ...SITE,
+        pages: [
+          { path: '/' },
+          {
+            path: '/products/trail-shoes',
+            route: '/products/{slug}',
+            requests: [{ method: 'GET', url: '/api/products/trail-shoes' }],
+          },
+          { path: '/orders/48213' },
+        ],
+      };
+      const ROUTES: Record<string, string> = {
+        '/': '/',
+        '/products/trail-shoes': '/products/{slug}',
+        '/orders/48213': '/orders/{id}',
+      };
+      const routedSession = (reportPageRoutes?: boolean) =>
+        createSession({ site: ROUTED_SITE, pageViews: 12, reportPageRoutes });
+      const templateOf = (doc: ReturnType<typeof createSession>[number]) =>
+        doc.attributes?.['url.template'];
+      const isEvent = (doc: ReturnType<typeof createSession>[number], name: string) =>
+        'event_name' in doc && doc.event_name === name;
+
+      it('adds the route of the page to the logs, the one the app tells or the inferred one', () => {
+        const pageLoads = routedSession().filter((doc) =>
+          isEvent(doc, 'browser.navigation_timing')
+        );
+
+        expect(pageLoads.length).toBeGreaterThan(0);
+        pageLoads.forEach((doc) => {
+          const { pathname } = new URL(String(doc.attributes?.['url.full']));
+          expect(templateOf(doc)).toBe(ROUTES[pathname]);
+        });
+      });
+
+      it('adds it to the logs that carry no URL too, and to nothing but routes of the site', () => {
+        const logs = routedSession().filter((doc) => 'event_name' in doc && doc.event_name);
+        const webVitals = logs.filter((doc) => isEvent(doc, 'browser.web_vital'));
+
+        expect(webVitals.length).toBeGreaterThan(0);
+        logs
+          .filter((doc) => !isEvent(doc, 'browser.resource_timing'))
+          .forEach((doc) => expect(Object.values(ROUTES)).toContain(templateOf(doc)));
+      });
+
+      it('leaves resource timings and client spans without it', () => {
+        const docs = routedSession();
+        const timings = docs.filter((doc) => isEvent(doc, 'browser.resource_timing'));
+        const spans = docs.filter((doc) => 'kind' in doc && doc.kind === 'Client');
+
+        expect(timings.length).toBeGreaterThan(0);
+        expect(spans.length).toBeGreaterThan(0);
+        [...timings, ...spans].forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+      });
+
+      it('writes no route when the app does not report them, and nothing else changes', () => {
+        const withRoutes = routedSession();
+        const withoutRoutes = routedSession(false);
+        const withoutTemplate = ({ attributes = {}, ...doc }: (typeof withRoutes)[number]) => ({
+          ...doc,
+          attributes: Object.fromEntries(
+            Object.entries(attributes).filter(([key]) => key !== 'url.template')
+          ),
+        });
+
+        withoutRoutes.forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+        expect(withRoutes.map(withoutTemplate)).toEqual(withoutRoutes.map(withoutTemplate));
       });
     });
 

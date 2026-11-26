@@ -12,6 +12,7 @@ import {
   RETROSPECTIVE_GUARDRAIL_CONTEXT,
   getDatasetCustomContext,
   ORCA_CUSTOM_CONTEXT,
+  RECOVERY_GUARDRAIL_CONTEXT,
   readCustomContext,
 } from './custom_context';
 
@@ -31,6 +32,15 @@ describe('getDatasetCustomContext', () => {
         tags: ['nightshift', 'customer0', 'golden'],
       })
     ).toEqual(customer0Context);
+  });
+
+  it('bounds recovery datasets to the recovery instead of the alert, even when also tagged customer0', () => {
+    expect(
+      getDatasetCustomContext({
+        name: 'ns-recovery-round-1811',
+        tags: ['nightshift', 'customer0', 'customer0-recovery'],
+      })
+    ).toEqual([...CUSTOMER0_CUSTOM_CONTEXT, RECOVERY_GUARDRAIL_CONTEXT]);
   });
 
   it('applies no context to other datasets', () => {
