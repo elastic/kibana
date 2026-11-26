@@ -31,6 +31,7 @@ const RULES: DeletedRule[] = [
 const renderModal = (props: Partial<DeleteProfileModalProps> = {}) => {
   const onCancel = jest.fn();
   const onConfirm = jest.fn();
+  const onRetryLoad = jest.fn();
   render(
     <DeleteProfileModal
       profileName="catalog-fast"
@@ -38,10 +39,11 @@ const renderModal = (props: Partial<DeleteProfileModalProps> = {}) => {
       rules={RULES}
       onCancel={onCancel}
       onConfirm={onConfirm}
+      onRetryLoad={onRetryLoad}
       {...props}
     />
   );
-  return { onCancel, onConfirm };
+  return { onCancel, onConfirm, onRetryLoad };
 };
 
 const getBody = () => screen.getByTestId('searchBoostDeleteProfileModalBody').textContent;
@@ -211,6 +213,39 @@ describe('DeleteProfileModal', () => {
       }
     });
 
+    it('lets keyboard users focus the rules list, showing the focus ring around open tables', async () => {
+      renderModal();
+
+      // The first tab stop is the modal itself.
+      await userEvent.tab();
+      await userEvent.tab();
+
+      const list = screen.getByRole('region', { name: 'Boost rules to be deleted' });
+      expect(list).toHaveFocus();
+      expect(list.parentElement).toHaveStyleRule('outline', expect.stringContaining('solid'), {
+        target: ":has(> [role='region']:focus-visible)",
+      });
+    });
+
+    it('lets keyboard users move from an open rule into its own scrolling table', async () => {
+      const fallbacks = Array.from({ length: 15 }, (_, index) => ({
+        name: `logs-nginx-${String(index + 1).padStart(2, '0')}`,
+      }));
+      renderModal({ rules: [{ name: 'logs-nginx', fallbacks }, ...RULES] });
+      const [, , logsNginx] = getRuleRows();
+
+      await userEvent.click(within(logsNginx).getByRole('button'));
+      await userEvent.tab();
+
+      const table = within(logsNginx).getByRole('table');
+      expect(table).toHaveFocus();
+      expect(table).toHaveStyleRule('overflow-y', 'auto');
+      expect(within(table).getAllByTestId('searchBoostDeletedRuleTableRow')).toHaveLength(15);
+      expect(
+        within(table).getAllByTestId('searchBoostDeletedRuleTableRow').at(-1)
+      ).toHaveTextContent('logs-nginx-15');
+    });
+
     it('removes a table as soon as its rule closes when motion is reduced', async () => {
       setCanAnimate(false);
       renderModal();
@@ -231,5 +266,56 @@ describe('DeleteProfileModal', () => {
 
     expect(onCancel).toHaveBeenCalledTimes(1);
     expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables confirming while the rules that use the profile load', () => {
+    renderModal({ rules: [], isLoading: true });
+
+    expect(screen.queryByTestId('searchBoostDeleteProfileModalBody')).not.toBeInTheDocument();
+    expect(screen.getByTestId('searchBoostModalConfirm')).toBeDisabled();
+  });
+
+  it('shows a load error with a way to try again, and disables confirming', async () => {
+    const { onRetryLoad } = renderModal({
+      rules: [],
+      loadError: new Error('Request timed out'),
+    });
+
+    expect(screen.getByTestId('searchBoostModalLoadError').textContent).toContain(
+      'Request timed out'
+    );
+    expect(screen.getByTestId('searchBoostModalConfirm')).toBeDisabled();
+
+    await userEvent.click(screen.getByTestId('searchBoostModalRetryLoad'));
+
+    expect(onRetryLoad).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a spinner in the confirm button while deleting', () => {
+    renderModal({ isDeleting: true });
+
+    const confirmButton = screen.getByTestId('searchBoostModalConfirm');
+    expect(within(confirmButton).getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('closes with Escape or the close button', async () => {
+    const { onCancel } = renderModal();
+
+    await userEvent.tab();
+    await userEvent.keyboard('{Escape}');
+    await userEvent.click(screen.getByRole('button', { name: 'Closes this modal window' }));
+
+    expect(onCancel).toHaveBeenCalledTimes(2);
+  });
+
+  it("can't be closed while deleting", async () => {
+    const { onCancel } = renderModal({ isDeleting: true });
+
+    expect(screen.getByTestId('searchBoostModalCancel')).toBeDisabled();
+    await userEvent.tab();
+    await userEvent.keyboard('{Escape}');
+    await userEvent.click(screen.getByRole('button', { name: 'Closes this modal window' }));
+
+    expect(onCancel).not.toHaveBeenCalled();
   });
 });

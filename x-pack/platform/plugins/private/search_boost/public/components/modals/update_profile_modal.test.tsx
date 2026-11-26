@@ -98,6 +98,41 @@ describe('UpdateProfileModal', () => {
     expect(screen.queryByTestId('searchBoostUpdateProfileModalTable')).not.toBeInTheDocument();
   });
 
+  it('only offers saving over the profile when saving as new is left out', () => {
+    renderModal({ saveAsNew: undefined });
+
+    expect(getBody()).toBe(
+      'Saving these profile changes will affect the 2 indices that currently use it.'
+    );
+    expect(screen.queryByRole('button', { name: 'Save as new' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+  });
+
+  it.each([
+    ['indices', 1, 'Saving these profile changes will affect the 1 index that currently uses it.'],
+    [
+      'data_streams',
+      1,
+      'Saving these profile changes will affect the 1 data stream that currently uses it.',
+    ],
+    [
+      'data_streams',
+      2,
+      'Saving these profile changes will affect the 2 data streams that currently use it.',
+    ],
+  ] as const)('words the body for %s, %i affected, without saving as new', (type, count, body) => {
+    renderModal({
+      type,
+      targets: Array.from({ length: count }, (_, index) => ({
+        name: `target-${index}`,
+        ruleName: 'rule',
+      })),
+      saveAsNew: undefined,
+    });
+
+    expect(getBody()).toBe(body);
+  });
+
   it('disables "Save as new" while saving', () => {
     renderModal({ isSaving: true });
 

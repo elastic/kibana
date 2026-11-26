@@ -39,7 +39,7 @@ export interface UpdateProfileModalProps extends AffectedLoadState {
   isSaving?: boolean;
   onCancel: () => void;
   onSave: () => void;
-  saveAsNew: SaveAsNewProps;
+  saveAsNew?: SaveAsNewProps;
 }
 
 const RULE_COLUMNS: ReadonlyArray<ModalTableColumn<ProfileTarget>> = [
@@ -61,18 +61,18 @@ export const UpdateProfileModal = ({
   const [isNaming, setIsNaming] = useState(false);
   // Follows the suggested name until the user edits it.
   const [editedName, setEditedName] = useState<string>();
-  // The name last saved; format errors only show once the user has tried to save.
-  const [savedName, setSavedName] = useState<string>();
+  // Format errors only show once the user has tried to save.
+  const [hasTriedToSave, setHasTriedToSave] = useState(false);
 
-  if (isNaming) {
+  if (isNaming && saveAsNew) {
     const { suggestedName, nameError, onSave: onSaveAsNew } = saveAsNew;
     const newName = editedName ?? suggestedName;
     const formatError = validateName(newName);
     const passedError = nameError?.name === newName ? nameError.message : undefined;
-    const error = savedName !== undefined && formatError ? formatError.message : passedError;
+    const error = hasTriedToSave && formatError ? formatError.message : passedError;
 
     const saveNewName = () => {
-      setSavedName(newName);
+      setHasTriedToSave(true);
       if (!formatError) {
         onSaveAsNew(newName);
       }
@@ -111,18 +111,20 @@ export const UpdateProfileModal = ({
       onCancel={onCancel}
       onConfirm={onSave}
       secondaryAction={
-        <EuiButton
-          size="s"
-          onClick={() => setIsNaming(true)}
-          isDisabled={isSaving || isLoading || Boolean(loadError)}
-          data-test-subj="searchBoostUpdateProfileSaveAsNew"
-        >
-          {SAVE_AS_NEW_LABEL}
-        </EuiButton>
+        saveAsNew && (
+          <EuiButton
+            size="s"
+            onClick={() => setIsNaming(true)}
+            isDisabled={isSaving || isLoading || Boolean(loadError)}
+            data-test-subj="searchBoostUpdateProfileSaveAsNew"
+          >
+            {SAVE_AS_NEW_LABEL}
+          </EuiButton>
+        )
       }
       description={
         targets.length > 0
-          ? getUpdateProfileBody(type, targets.length)
+          ? getUpdateProfileBody(type, targets.length, saveAsNew !== undefined)
           : UPDATE_PROFILE_UNUSED_BODY[type]
       }
       data-test-subj="searchBoostUpdateProfileModal"

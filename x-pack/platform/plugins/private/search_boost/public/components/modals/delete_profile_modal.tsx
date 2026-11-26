@@ -14,9 +14,8 @@ import { DeletedRulesList } from './deleted_rules_list';
 import {
   DELETE_PROFILE_BODY,
   DELETE_PROFILE_CONFIRM,
-  UNDO_WARNING,
-  getDeleteProfileFallBack,
-  getDeleteProfileRulesDeleted,
+  getDeleteProfileBodyWithFallbacks,
+  getDeleteProfileBodyWithRules,
   getDeleteProfileTitle,
   getDeleteProfileWithRulesConfirm,
 } from '../../translations';
@@ -32,14 +31,16 @@ export interface DeleteProfileModalProps extends AffectedLoadState {
 
 const getSummary = (type: BoostProfileType, rules: readonly DeletedRule[]): string => {
   const fallbacks = rules.flatMap((rule) => rule.fallbacks);
+  if (fallbacks.length === 0) {
+    return getDeleteProfileBodyWithRules(rules.length);
+  }
   const isEveryFallbackKnown = fallbacks.every(({ nextRuleName }) => nextRuleName !== undefined);
-  return [
-    getDeleteProfileRulesDeleted(rules.length),
-    ...(fallbacks.length > 0
-      ? [getDeleteProfileFallBack(type, fallbacks.length, isEveryFallbackKnown)]
-      : []),
-    UNDO_WARNING,
-  ].join(' ');
+  return getDeleteProfileBodyWithFallbacks(
+    type,
+    rules.length,
+    fallbacks.length,
+    isEveryFallbackKnown
+  );
 };
 
 export const DeleteProfileModal = ({

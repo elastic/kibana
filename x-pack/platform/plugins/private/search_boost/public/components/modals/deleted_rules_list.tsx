@@ -15,7 +15,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiText,
-  useEuiFocusRing,
+  euiOutline,
   useEuiOverflowScroll,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -91,9 +91,9 @@ const useClosingRuleNames = () => {
 };
 
 export const DeletedRulesList = ({ type, rules }: DeletedRulesListProps) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const scrollStyles = useEuiOverflowScroll('y');
-  const focusRingStyles = useEuiFocusRing('inset');
   const accordionIdPrefix = useGeneratedHtmlId({ prefix: 'searchBoostDeletedRule' });
   const [openRuleName, setOpenRuleName] = useState<string>();
   const { closingRuleNames, startClosing, finishClosing } = useClosingRuleNames();
@@ -104,7 +104,17 @@ export const DeletedRulesList = ({ type, rules }: DeletedRulesListProps) => {
   );
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="none"
+      // The scrolling panel can't draw its own focus ring: the open rule's table would cover it.
+      css={css`
+        &:has(> [role='region']:focus-visible) {
+          ${euiOutline(euiThemeContext, 'outset')}
+        }
+      `}
+    >
       {/* The panel draws its border with a pseudo-element, so an inner panel scrolls instead. */}
       <EuiPanel
         color="transparent"
@@ -116,10 +126,6 @@ export const DeletedRulesList = ({ type, rules }: DeletedRulesListProps) => {
         tabIndex={0}
         css={css`
           ${scrollStyles}
-          /* The scroll styles hide the focus ring, which keyboard users need on this tab stop. */
-          &:focus {
-            ${focusRingStyles}
-          }
           max-block-size: ${euiTheme.base * 18}px;
         `}
         data-test-subj="searchBoostDeletedRulesList"

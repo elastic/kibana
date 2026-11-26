@@ -494,10 +494,6 @@ export const BOOST_RULE_COLUMN = i18n.translate('xpack.searchBoost.modals.boostR
   defaultMessage: 'Boost rule',
 });
 
-export const UNDO_WARNING = i18n.translate('xpack.searchBoost.modals.undoWarning', {
-  defaultMessage: "You can't undo this action.",
-});
-
 export const getDeleteRuleTitle = (name: string): string =>
   i18n.translate('xpack.searchBoost.deleteRuleModal.title', {
     defaultMessage: 'Delete boost rule "{name}"?',
@@ -551,41 +547,42 @@ export const DELETE_PROFILE_BODY = i18n.translate('xpack.searchBoost.deleteProfi
   defaultMessage: "This permanently deletes the profile. You can't undo this action.",
 });
 
-export const getDeleteProfileRulesDeleted = (count: number): string =>
-  i18n.translate('xpack.searchBoost.deleteProfileModal.rulesDeleted', {
+export const getDeleteProfileBodyWithRules = (ruleCount: number): string =>
+  i18n.translate('xpack.searchBoost.deleteProfileModal.bodyWithRules', {
     defaultMessage:
-      '{count, plural, one {Deleting this profile will also delete the boost rule that uses it.} other {Deleting this profile will also delete the # boost rules that use it.}}',
-    values: { count },
+      "{ruleCount, plural, one {Deleting this profile will also delete the boost rule that uses it.} other {Deleting this profile will also delete the # boost rules that use it.}} You can't undo this action.",
+    values: { ruleCount },
   });
 
-export const getDeleteProfileFallBack = (
+export const getDeleteProfileBodyWithFallbacks = (
   type: BoostProfileType,
-  count: number,
+  ruleCount: number,
+  targetCount: number,
   isEveryFallbackKnown: boolean
 ): string => {
   if (isEveryFallbackKnown) {
     return type === 'data_streams'
-      ? i18n.translate('xpack.searchBoost.deleteProfileModal.dataStreamsFallBack', {
+      ? i18n.translate('xpack.searchBoost.deleteProfileModal.dataStreamsBodyWithFallbacks', {
           defaultMessage:
-            '{count, plural, one {The # affected data stream will fall back to the next matching rule.} other {The # affected data streams will fall back to the next matching rule.}}',
-          values: { count },
+            "{ruleCount, plural, one {Deleting this profile will also delete the boost rule that uses it.} other {Deleting this profile will also delete the # boost rules that use it.}} {targetCount, plural, one {The # affected data stream will fall back to the next matching rule.} other {The # affected data streams will fall back to the next matching rule.}} You can't undo this action.",
+          values: { ruleCount, targetCount },
         })
-      : i18n.translate('xpack.searchBoost.deleteProfileModal.indicesFallBack', {
+      : i18n.translate('xpack.searchBoost.deleteProfileModal.indicesBodyWithFallbacks', {
           defaultMessage:
-            '{count, plural, one {The # affected index will fall back to the next matching rule.} other {The # affected indices will fall back to the next matching rule.}}',
-          values: { count },
+            "{ruleCount, plural, one {Deleting this profile will also delete the boost rule that uses it.} other {Deleting this profile will also delete the # boost rules that use it.}} {targetCount, plural, one {The # affected index will fall back to the next matching rule.} other {The # affected indices will fall back to the next matching rule.}} You can't undo this action.",
+          values: { ruleCount, targetCount },
         });
   }
   return type === 'data_streams'
-    ? i18n.translate('xpack.searchBoost.deleteProfileModal.dataStreamsSomeFallBack', {
+    ? i18n.translate('xpack.searchBoost.deleteProfileModal.dataStreamsBodyWithSomeFallbacks', {
         defaultMessage:
-          '{count, plural, one {The # affected data stream will fall back to the next matching rule, if there is one.} other {The # affected data streams will fall back to the next matching rule, if there is one.}}',
-        values: { count },
+          "{ruleCount, plural, one {Deleting this profile will also delete the boost rule that uses it.} other {Deleting this profile will also delete the # boost rules that use it.}} {targetCount, plural, one {The # affected data stream will fall back to the next matching rule, if there is one.} other {The # affected data streams will fall back to the next matching rule, if there is one.}} You can't undo this action.",
+        values: { ruleCount, targetCount },
       })
-    : i18n.translate('xpack.searchBoost.deleteProfileModal.indicesSomeFallBack', {
+    : i18n.translate('xpack.searchBoost.deleteProfileModal.indicesBodyWithSomeFallbacks', {
         defaultMessage:
-          '{count, plural, one {The # affected index will fall back to the next matching rule, if there is one.} other {The # affected indices will fall back to the next matching rule, if there is one.}}',
-        values: { count },
+          "{ruleCount, plural, one {Deleting this profile will also delete the boost rule that uses it.} other {Deleting this profile will also delete the # boost rules that use it.}} {targetCount, plural, one {The # affected index will fall back to the next matching rule, if there is one.} other {The # affected indices will fall back to the next matching rule, if there is one.}} You can't undo this action.",
+        values: { ruleCount, targetCount },
       });
 };
 
@@ -618,9 +615,8 @@ export const DELETE_PROFILE_CONFIRM = i18n.translate(
 
 export const getDeleteProfileWithRulesConfirm = (ruleCount: number): string =>
   i18n.translate('xpack.searchBoost.deleteProfileModal.confirmWithRules', {
-    defaultMessage:
-      'Delete {profileCount, plural, one {# profile} other {# profiles}} and {ruleCount, plural, one {# rule} other {# rules}}',
-    values: { profileCount: 1, ruleCount },
+    defaultMessage: 'Delete 1 profile and {ruleCount, plural, one {# rule} other {# rules}}',
+    values: { ruleCount },
   });
 
 export const getUpdateProfileTitle = (profileName: string): string =>
@@ -629,7 +625,7 @@ export const getUpdateProfileTitle = (profileName: string): string =>
     values: { profileName },
   });
 
-export const getUpdateProfileBody = (type: BoostProfileType, count: number): string =>
+const getUpdateProfileBodyWithSaveAsNew = (type: BoostProfileType, count: number): string =>
   type === 'data_streams'
     ? i18n.translate('xpack.searchBoost.updateProfileModal.dataStreamsBody', {
         defaultMessage:
@@ -641,6 +637,28 @@ export const getUpdateProfileBody = (type: BoostProfileType, count: number): str
           '{count, plural, one {Saving these profile changes will affect the # index that currently uses it. Alternatively, you may save it as a new boost profile to avoid affecting this index.} other {Saving these profile changes will affect the # indices that currently use it. Alternatively, you may save it as a new boost profile to avoid affecting these indices.}}',
         values: { count },
       });
+
+const getUpdateProfileBodyWithoutSaveAsNew = (type: BoostProfileType, count: number): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.searchBoost.updateProfileModal.dataStreamsOnlyUpdateBody', {
+        defaultMessage:
+          '{count, plural, one {Saving these profile changes will affect the # data stream that currently uses it.} other {Saving these profile changes will affect the # data streams that currently use it.}}',
+        values: { count },
+      })
+    : i18n.translate('xpack.searchBoost.updateProfileModal.indicesOnlyUpdateBody', {
+        defaultMessage:
+          '{count, plural, one {Saving these profile changes will affect the # index that currently uses it.} other {Saving these profile changes will affect the # indices that currently use it.}}',
+        values: { count },
+      });
+
+export const getUpdateProfileBody = (
+  type: BoostProfileType,
+  count: number,
+  canSaveAsNew: boolean
+): string =>
+  canSaveAsNew
+    ? getUpdateProfileBodyWithSaveAsNew(type, count)
+    : getUpdateProfileBodyWithoutSaveAsNew(type, count);
 
 export const UPDATE_PROFILE_UNUSED_BODY: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.searchBoost.updateProfileModal.indicesUnusedBody', {

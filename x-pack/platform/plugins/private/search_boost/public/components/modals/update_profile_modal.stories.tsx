@@ -35,15 +35,17 @@ const meta: Meta<typeof UpdateProfileModal> = {
             onSave();
             close();
           }}
-          saveAsNew={{
-            ...saveAsNew,
-            onSave: (name) => {
-              saveAsNew.onSave(name);
-              if (saveAsNew.nameError?.name !== name) {
-                close();
-              }
-            },
-          }}
+          saveAsNew={
+            saveAsNew && {
+              ...saveAsNew,
+              onSave: (name) => {
+                saveAsNew.onSave(name);
+                if (saveAsNew.nameError?.name !== name) {
+                  close();
+                }
+              },
+            }
+          }
         />
       )}
     />
@@ -86,6 +88,10 @@ export const DataStreams: Story = {
     type: 'data_streams',
     targets: [target('logs-oracle-default', { ruleName: 'logs-oracle' })],
   },
+};
+
+export const WithoutSaveAsNew: Story = {
+  args: { saveAsNew: undefined },
 };
 
 export const SaveAsNewNameTaken: Story = {

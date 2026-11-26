@@ -161,11 +161,23 @@ describe('DeleteRuleModal', () => {
     expect(within(confirmButton).getByRole('progressbar')).toBeInTheDocument();
   });
 
+  it('closes with Escape or the close button', async () => {
+    const { onCancel } = renderModal();
+
+    await userEvent.tab();
+    await userEvent.keyboard('{Escape}');
+    await userEvent.click(screen.getByRole('button', { name: 'Closes this modal window' }));
+
+    expect(onCancel).toHaveBeenCalledTimes(2);
+  });
+
   it("can't be closed while deleting", async () => {
     const { onCancel } = renderModal({ isDeleting: true });
 
     expect(screen.getByTestId('searchBoostModalCancel')).toBeDisabled();
+    await userEvent.tab();
     await userEvent.keyboard('{Escape}');
+    await userEvent.click(screen.getByRole('button', { name: 'Closes this modal window' }));
 
     expect(onCancel).not.toHaveBeenCalled();
   });

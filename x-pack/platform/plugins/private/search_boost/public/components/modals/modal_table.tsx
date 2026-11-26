@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { ReactNode } from 'react';
 import {
   EuiFlexGroup,
@@ -12,9 +13,9 @@ import {
   EuiFormLabel,
   EuiPanel,
   EuiText,
-  useEuiFocusRing,
-  useEuiOverflowScroll,
+  euiOutline,
   useEuiTheme,
+  useEuiYScrollWithShadows,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -48,9 +49,10 @@ export const ModalTable = <T,>({
   isNested = false,
   'data-test-subj': dataTestSubj,
 }: ModalTableProps<T>) => {
-  const { euiTheme } = useEuiTheme();
-  const scrollStyles = useEuiOverflowScroll('y', true);
-  const focusRingStyles = useEuiFocusRing('inset');
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  // Only the end fades, so the sticky headers stay fully visible.
+  const scrollStyles = useEuiYScrollWithShadows({ side: 'end' });
   const inlinePadding = isNested ? 0 : euiTheme.size.base;
 
   const rows = items.map((item) => (
@@ -72,33 +74,22 @@ export const ModalTable = <T,>({
 
   return (
     <EuiPanel
-      role="table"
-      aria-label={ariaLabel}
       hasBorder={!isNested}
       hasShadow={false}
       color={isNested ? 'transparent' : 'plain'}
       paddingSize="none"
+      // The scrolling panel can't draw its own focus ring: the sticky headers would cover it.
+      css={css`
+        &:has(> [role='table']:focus-visible) {
+          ${euiOutline(euiThemeContext, 'outset')}
+        }
+      `}
       data-test-subj={dataTestSubj}
     >
-      {/* The scrolling area's top padding replaces the headers' bottom padding. */}
-      <EuiFlexGroup
-        role="row"
-        gutterSize="s"
-        responsive={false}
-        css={{
-          paddingBlockStart: isNested ? 0 : euiTheme.size.base,
-          paddingInline: inlinePadding,
-        }}
-      >
-        {columns.map(({ id, name }) => (
-          <EuiFlexItem key={id} role="columnheader" css={cellStyles}>
-            <EuiFormLabel>{name}</EuiFormLabel>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
       {/* The outer panel draws its border with a pseudo-element, so an inner panel scrolls. */}
       <EuiPanel
-        role="rowgroup"
+        role="table"
+        aria-label={ariaLabel}
         tabIndex={0}
         color="transparent"
         hasBorder={false}
@@ -106,14 +97,28 @@ export const ModalTable = <T,>({
         paddingSize="none"
         css={css`
           ${scrollStyles}
-          /* The scroll styles hide the focus ring, which keyboard users need on this tab stop. */
-          &:focus {
-            ${focusRingStyles}
-          }
-          max-block-size: ${euiTheme.base * (isNested ? 10 : 15)}px;
-          padding: ${euiTheme.size.s} ${inlinePadding} ${isNested ? 0 : euiTheme.size.m};
+          max-block-size: ${euiTheme.base * (isNested ? 11 : 17)}px;
+          padding: 0 ${inlinePadding} ${isNested ? 0 : euiTheme.size.m};
         `}
       >
+        {/* Inside the scrolling area, so a scrollbar narrows the headers and the rows alike. */}
+        <EuiFlexGroup
+          role="row"
+          gutterSize="s"
+          responsive={false}
+          css={css`
+            position: sticky;
+            inset-block-start: 0;
+            padding-block: ${isNested ? 0 : euiTheme.size.base} ${euiTheme.size.s};
+            background-color: ${euiTheme.colors.backgroundBasePlain};
+          `}
+        >
+          {columns.map(({ id, name }) => (
+            <EuiFlexItem key={id} role="columnheader" css={cellStyles}>
+              <EuiFormLabel>{name}</EuiFormLabel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
         {rows}
       </EuiPanel>
     </EuiPanel>
