@@ -77,7 +77,12 @@ interface WhoamiResult {
 }
 
 async function whoami(ctx: ActionContext): Promise<WhoamiResult> {
-  const response = await ctx.client.get(`${GLOBAL_API_URL}/whoami/v1`, { timeout: 10_000 });
+  const configuredTimeout = ctx.client.defaults?.timeout;
+  const whoamiTimeout =
+    configuredTimeout && configuredTimeout > 0 ? Math.min(10_000, configuredTimeout) : 10_000;
+  const response = await ctx.client.get(`${GLOBAL_API_URL}/whoami/v1`, {
+    timeout: whoamiTimeout,
+  });
   const data = response.data as {
     id?: string;
     idType?: string;
@@ -432,11 +437,25 @@ export const SophosCentral: ConnectorSpec = {
         'permitted on this alert). Use allowedActions to pick the right value for actOnAlert.',
       input: GetAlertInputSchema,
       handler: async (ctx, input: GetAlertInput) => {
+        let data: Record<string, unknown>;
         try {
-          return await request(ctx, 'GET', `/common/v1/alerts/${input.alertId}`);
+          data = await request<Record<string, unknown>>(
+            ctx,
+            'GET',
+            `/common/v1/alerts/${input.alertId}`
+          );
         } catch (err) {
           throwApiError(err, `Failed to get alert ${input.alertId}`);
         }
+        // authPua authorises a potentially unwanted application, relaxing tenant protection.
+        // Filter it out so agents only see actions this connector supports.
+        if (Array.isArray(data?.allowedActions)) {
+          return {
+            ...data,
+            allowedActions: (data.allowedActions as string[]).filter((a) => a !== 'authPua'),
+          };
+        }
+        return data;
       },
     },
 
@@ -483,7 +502,13 @@ export const SophosCentral: ConnectorSpec = {
       input: ActOnAlertsBulkInputSchema,
       handler: async (ctx, input: ActOnAlertsBulkInput) => {
         // Resolve tenant and region once before iterating over IDs
-        const { tenantId, dataRegion } = await whoami(ctx);
+        let tenantId: string;
+        let dataRegion: string;
+        try {
+          ({ tenantId, dataRegion } = await whoami(ctx));
+        } catch (err) {
+          throwApiError(err, 'Failed to resolve Sophos tenant');
+        }
         const results: Array<{ alertId: string; status: string; result?: string; error?: string }> =
           [];
         let acceptedCount = 0;
@@ -756,7 +781,8 @@ export const SophosCentral: ConnectorSpec = {
       description:
         "Add a SHA-256 file hash to the Sophos Central tenant's global blocked list. " +
         'Only SHA-256 hashes are supported for the blocked list. If the hash is already ' +
-        'blocked the action returns the existing item (soft success, no error).',
+        'blocked the action returns `{ alreadyBlocked: true, sha256 }` (soft success, no error). ' +
+        'Use `listBlockedItems` if you need the blocked item ID.',
       input: AddBlockedItemInputSchema,
       handler: async (ctx, input: AddBlockedItemInput) => {
         try {
@@ -845,7 +871,13 @@ export const SophosCentral: ConnectorSpec = {
         'complete before fetching results.',
       input: ListDetectionsInputSchema,
       handler: async (ctx, input: ListDetectionsInput) => {
-        const { tenantId, dataRegion } = await whoami(ctx);
+        let tenantId: string;
+        let dataRegion: string;
+        try {
+          ({ tenantId, dataRegion } = await whoami(ctx));
+        } catch (err) {
+          throwApiError(err, 'Failed to resolve Sophos tenant');
+        }
 
         let runId = input.runId;
 

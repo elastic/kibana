@@ -334,28 +334,31 @@ export const ListDetectionsInputSchema = lazySchema(() =>
     severity: z
       .array(z.number().int().min(0).max(10))
       .max(11)
+      .transform((arr) => [...new Set(arr)])
       .optional()
       .describe('Filter by severity level (0–10, where 10 is most severe).'),
     type: z
       .array(z.enum(DETECTION_TYPE))
       .max(3)
+      .transform((arr) => [...new Set(arr)])
       .optional()
       .describe('Filter by detection type: process, threat, or vulnerability.'),
     category: z
       .array(z.enum(DETECTION_CATEGORY))
       .max(8)
+      .transform((arr) => [...new Set(arr)])
       .optional()
       .describe(
         'Filter by category: cloud, compound, email, endpoint, firewall, iam, backupAndRecovery, network.'
       ),
     from: z
       .string()
-      .max(50)
+      .datetime({ offset: true })
       .optional()
       .describe('Start of the date range, ISO 8601 format (e.g. 2024-01-01T00:00:00.000Z).'),
     to: z
       .string()
-      .max(50)
+      .datetime({ offset: true })
       .optional()
       .describe('End of the date range, ISO 8601 format (e.g. 2024-12-31T23:59:59.999Z).'),
     page: z

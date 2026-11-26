@@ -644,6 +644,28 @@ describe('getAlert', () => {
     );
     expect(result).toEqual({ id: ALERT_ID, severity: 'high' });
   });
+
+  it('filters authPua from allowedActions so agents cannot authorise PUA', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    client.request.mockResolvedValue({
+      data: {
+        id: ALERT_ID,
+        severity: 'high',
+        allowedActions: ['acknowledge', 'authPua', 'clearThreat'],
+      },
+    });
+    const ctx = makeCtx(client);
+
+    const result = await SophosCentral.actions.getAlert.handler(ctx as never, {
+      alertId: ALERT_ID,
+    });
+
+    expect((result as Record<string, unknown>).allowedActions).toEqual([
+      'acknowledge',
+      'clearThreat',
+    ]);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -917,10 +939,10 @@ describe('deisolateEndpoint', () => {
 // ---------------------------------------------------------------------------
 
 describe('scanEndpoint', () => {
-  it('POSTs to /endpoint/v1/endpoints/scans with ids', async () => {
+  it('POSTs to /endpoint/v1/endpoints/scans with ids and returns items/errors', async () => {
     const client = makeClient();
     stubWhoami(client);
-    client.request.mockResolvedValue({ data: { requestId: 'scan-abc' } });
+    client.request.mockResolvedValue({ data: { items: [{ id: ENDPOINT_ID }], errors: [] } });
     const ctx = makeCtx(client);
 
     const result = await SophosCentral.actions.scanEndpoint.handler(ctx as never, {
@@ -934,7 +956,25 @@ describe('scanEndpoint', () => {
         data: { ids: [ENDPOINT_ID] },
       })
     );
-    expect(result).toEqual({ requestId: 'scan-abc' });
+    expect(result).toEqual({ items: [{ id: ENDPOINT_ID }], errors: [] });
+  });
+
+  it('throws when all endpoints fail to scan', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    client.request.mockResolvedValue({
+      data: {
+        items: [],
+        errors: [
+          { id: ENDPOINT_ID, errorCode: 'DeviceNotFound', errorMessage: 'Device not found' },
+        ],
+      },
+    });
+    const ctx = makeCtx(client);
+
+    await expect(
+      SophosCentral.actions.scanEndpoint.handler(ctx as never, { ids: [ENDPOINT_ID] })
+    ).rejects.toThrow('Failed to trigger endpoint scan');
   });
 });
 
