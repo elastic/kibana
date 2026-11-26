@@ -102,7 +102,7 @@ describe('toUnusualMinuteReading', () => {
 
   // The rule's length check leaves KEEP out, so a long one could push the evidence past the signal
   // format and drop the whole reading.
-  it('leaves the indicator’s KEEP out of evidence that would not fit a signal', () => {
+  it('counts the matches per minute when the indicator’s KEEP would not fit a signal', () => {
     const keep = `KEEP ${Array.from({ length: 2_000 }, (_, index) => `field_${index}`).join(', ')}`;
     const reading = toUnusualMinuteReading({
       ...CONTEXT,
@@ -116,7 +116,9 @@ describe('toUnusualMinuteReading', () => {
       unusual: UNUSUAL,
     });
 
-    expect(reading.evidence_esql).toMatch(/\| LIMIT 100$/);
+    // Not the lines without the KEEP: those would show the fields the indicator left out.
+    expect(reading.evidence_esql).toMatch(/\| STATS matches = COUNT\(\*\) BY period/);
+    expect(reading.evidence_esql).not.toMatch(/field_0/);
     expect(
       wrapReading({
         reading,

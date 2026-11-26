@@ -259,26 +259,27 @@ interface EvidenceRange {
  * The newest lines the knowledge indicator matched over `[from, to)`, with literal timestamps, so
  * the judge can run it later and read what failed. Its `KEEP` and `DROP` come after the cap, so the
  * lines show the fields the indicator chose, and a `KEEP` without `@timestamp` cannot break the sort.
- * They are left out when they would take the query past what a signal stores: the rule's length
- * check does not count them, and a reading with a longer query would be dropped whole.
+ * When they would take the query past what a signal stores, the matches per minute stand in: the
+ * rule's length check does not count them, a reading with a longer query would be dropped whole,
+ * and the lines without them would show fields the indicator chose to leave out.
  *
  * @throws Error when the indicator cannot be counted, as {@link compileKnownFailureQuery} does.
  */
 export function compileEvidenceQuery({ esql, from, to, cpsEnabled }: EvidenceRange): string {
   const { filters, fieldChoice } = getCountableCommands(esql);
-  const toEvidence = (choice: string[]) =>
-    withProjectRouting({
-      query: [
-        ...filters,
-        toTimeRange({ from, to }),
-        'SORT @timestamp DESC',
-        `LIMIT ${EVIDENCE_LINES}`,
-        ...choice,
-      ].join('\n| '),
-      cpsEnabled,
-    });
-  const evidence = toEvidence(fieldChoice);
-  return evidence.length <= MAX_TEXT_LENGTH ? evidence : toEvidence([]);
+  const evidence = withProjectRouting({
+    query: [
+      ...filters,
+      toTimeRange({ from, to }),
+      'SORT @timestamp DESC',
+      `LIMIT ${EVIDENCE_LINES}`,
+      ...fieldChoice,
+    ].join('\n| '),
+    cpsEnabled,
+  });
+  return evidence.length <= MAX_TEXT_LENGTH
+    ? evidence
+    : compileCountEvidenceQuery({ esql, from, to, cpsEnabled, bucketMinutes: 1 });
 }
 
 /**
