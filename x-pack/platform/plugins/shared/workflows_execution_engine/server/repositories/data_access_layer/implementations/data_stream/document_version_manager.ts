@@ -12,6 +12,9 @@ import type { DocumentVersionFields } from '../../types';
 
 const VERSION_CACHE_MAX = 32;
 const VERSION_CACHE_TTL_MS = 60_000;
+// getByIds uses the same window: a document that just rolled over is still in the
+// previous backing index, and a search cannot see a write that has not refreshed.
+const REALTIME_BACKING_INDEX_WINDOW = 2;
 
 export interface DocumentVersionManagerDeps {
   esClient: ElasticsearchClient;
@@ -70,26 +73,32 @@ export class DocumentVersionManager {
   }
 
   private async bulkGetFreshVersions(
-    ids: string[],
-    writeIndex?: string
+    ids: string[]
   ): Promise<Record<string, Required<DocumentVersionFields>>> {
     if (ids.length === 0) {
       return {};
     }
 
-    const resolvedWriteIndex =
-      writeIndex ?? (await this.deps.metadataManager.getMetaOrLoad()).writableIndex;
+    const { backingIndexes, writableIndex } = await this.deps.metadataManager.getMetaOrLoad();
+    const realtimeIndexes = backingIndexes
+      .slice(-REALTIME_BACKING_INDEX_WINDOW)
+      .concat(this.deps.additionalIndexesToQuery ?? []);
+    const indexes = realtimeIndexes.length > 0 ? realtimeIndexes : [writableIndex];
     const result: Record<string, Required<DocumentVersionFields>> = {};
+    const found = new Set<string>();
 
     const mgetResponse = await this.deps.esClient.mget({
-      docs: ids.map((id) => ({ _index: resolvedWriteIndex, _id: id, _source: false })),
+      docs: ids.flatMap((id) =>
+        indexes.map((index) => ({ _index: index, _id: id, _source: false as const }))
+      ),
     });
 
-    const missing: string[] = [];
     for (const doc of mgetResponse.docs) {
       if (
         'found' in doc &&
         doc.found &&
+        doc._id &&
+        !found.has(doc._id) &&
         doc._seq_no !== undefined &&
         doc._primary_term !== undefined
       ) {
@@ -98,12 +107,13 @@ export class DocumentVersionManager {
           seqNo: doc._seq_no,
           primaryTerm: doc._primary_term,
         };
+        found.add(doc._id);
         this.cache.set(doc._id, version);
         result[doc._id] = version;
-      } else {
-        missing.push(doc._id);
       }
     }
+
+    const missing = ids.filter((id) => !found.has(id));
 
     if (missing.length > 0) {
       const searchResponse = await this.deps.esClient.search({
