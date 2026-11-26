@@ -55,7 +55,7 @@ export const mdeAuth: NonNullable<ConnectorSpec['auth']> = {
       defaults: { tokenEndpointAuthMethod: 'client_secret_post' },
       overrides: {
         fields: {
-          tokenUrl: secureTokenUrl(),
+          tokenUrl: lazySchema(() => secureTokenUrl()),
           scope: lazySchema(() => z.string().trim().min(1)),
         },
         meta: {
@@ -88,7 +88,7 @@ export const mdeAuth: NonNullable<ConnectorSpec['auth']> = {
       defaults: { algorithm: 'PS256', certificateBinding: 'x5t#S256' },
       overrides: {
         fields: {
-          tokenUrl: secureTokenUrl(),
+          tokenUrl: lazySchema(() => secureTokenUrl()),
           scope: lazySchema(() => z.string().trim().min(1)),
         },
         meta: {
