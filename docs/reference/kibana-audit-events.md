@@ -1,5 +1,8 @@
 ---
 navigation_title: Kibana audit events
+applies_to:
+  stack: ga
+  serverless: ga
 ---
 
 # Kibana audit events
