@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy, keyBy, orderBy, sortBy, sortedUniq } from 'lodash';
+import { groupBy, orderBy, sortBy } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toAppStart } from '../../../common/mobile/app_starts';
 import { RESULT_COLUMNS } from '../../../common/mobile/fields';
@@ -33,7 +33,11 @@ import type {
 } from '../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../lib/esql';
 import { getHistogramInterval } from '../../lib/helpers/time_series';
-import { getBucketTimestamps } from '../../lib/mobile/bucket_timestamps';
+import {
+  allBucketTimestamps,
+  fillBuckets,
+  getBucketTimestamps,
+} from '../../lib/mobile/bucket_timestamps';
 
 export interface GetMobileReleasesParams {
   esClient: TracedElasticsearchClient;
@@ -195,22 +199,21 @@ export const getMobileReleases = async ({
   const timestamps =
     pointRows.length === 0
       ? []
-      : sortedUniq(sortBy([...bucketTimestamps, ...pointRows.map(({ point }) => point.timestamp)]));
+      : allBucketTimestamps(
+          bucketTimestamps,
+          pointRows.map(({ point }) => point.timestamp)
+        );
   const pointsByRelease = groupBy(pointRows, 'release');
 
-  const series: MobileReleaseSeries[] = releases.map(({ release, isOther }) => {
-    const byTimestamp = keyBy(
+  const series: MobileReleaseSeries[] = releases.map(({ release, isOther }) => ({
+    release,
+    isOther,
+    points: fillBuckets(
       (pointsByRelease[release] ?? []).map(({ point }) => point),
-      'timestamp'
-    );
-    return {
-      release,
-      isOther,
-      points: timestamps.map(
-        (timestamp) => byTimestamp[timestamp] ?? { timestamp, sessions: 0, errorRate: null }
-      ),
-    };
-  });
+      timestamps,
+      (timestamp) => ({ timestamp, sessions: 0, errorRate: null })
+    ),
+  }));
 
   // The first document in the range, unless the release has one before it
   const seenBefore = new Set(seenRows.map(({ [RESULT_COLUMNS.release]: release }) => release));

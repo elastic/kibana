@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { keyBy, sortBy, sortedUniq } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
 import type { HistogramInterval } from '../../../common/types/applications';
@@ -46,4 +47,20 @@ export const getBucketTimestamps = async ({
     },
   });
   return aggregations?.buckets.buckets.map(({ key }) => key) ?? [];
+};
+
+/** Every bucket of the range and of the points, sorted, so a chart never draws across an empty one. */
+export const allBucketTimestamps = (
+  bucketTimestamps: readonly number[],
+  pointTimestamps: readonly number[]
+): number[] => sortedUniq(sortBy([...bucketTimestamps, ...pointTimestamps]));
+
+/** A point per timestamp: the series' own, or `emptyPoint` where it has none. */
+export const fillBuckets = <TPoint extends { timestamp: number }>(
+  points: readonly TPoint[],
+  timestamps: readonly number[],
+  emptyPoint: (timestamp: number) => TPoint
+): TPoint[] => {
+  const byTimestamp = keyBy(points, 'timestamp');
+  return timestamps.map((timestamp) => byTimestamp[timestamp] ?? emptyPoint(timestamp));
 };

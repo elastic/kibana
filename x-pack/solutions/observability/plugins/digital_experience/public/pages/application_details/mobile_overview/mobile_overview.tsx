@@ -34,14 +34,10 @@ import {
 } from '../../../labels';
 import { ComparedKpiPanel } from '../../../components/compared_kpi_panel';
 import type { ComparedKpiPanelProps } from '../../../components/compared_kpi_panel';
-import type { StartType } from '../../../../common/mobile/app_starts';
+import { START_TYPE_LIST, type StartType } from '../../../../common/mobile/app_starts';
+import type { MobileKpisResponse } from '../../../../common/types/mobile';
 import { formatDurationMs } from '../../../utils/format_duration';
-import {
-  APP_START_DESCRIPTIONS,
-  APP_START_TITLES,
-  NO_APP_STARTS_LABEL,
-  appStartTooltip,
-} from './app_start_labels';
+import { APP_START_TITLES, NO_APP_STARTS_LABEL, appStartTooltip } from './app_start_labels';
 import { Performance } from './performance/performance';
 import { useMobileAppStarts } from './performance/use_mobile_app_starts';
 import { ReleaseHealth } from './release_health/release_health';
@@ -66,13 +62,13 @@ type MobileKpi = 'sessions' | 'users' | 'errorRate' | (typeof APP_START_KPIS)[St
 const MOBILE_KPIS: ReadonlyArray<
   Pick<
     ComparedKpiPanelProps,
-    'title' | 'tooltip' | 'changeUnit' | 'higherIsBetter' | 'data-test-subj'
+    'title' | 'changeUnit' | 'higherIsBetter' | 'emptyLabel' | 'data-test-subj'
   > & {
     kpi: MobileKpi;
+    /** How the value is calculated, or a function of the response, e.g. to name the samples. */
+    tooltip: string | ((kpis: MobileKpisResponse | undefined, isComparing: boolean) => string);
     /** The user's number format unless set. */
     formatValue?: (formatters: Formatters) => (value: number) => string;
-    /** An app start average: its tooltip names the starts, and it reads "No data" without any. */
-    startType?: StartType;
   }
 > = [
   {
@@ -106,12 +102,19 @@ const MOBILE_KPIS: ReadonlyArray<
     higherIsBetter: false,
     formatValue: ({ formatErrorRate }) => formatErrorRate,
   },
-  ...(['cold', 'warm'] as const).map((startType) => ({
+  ...START_TYPE_LIST.map((startType) => ({
     kpi: APP_START_KPIS[startType],
-    startType,
     'data-test-subj': APP_START_TEST_SUBJECTS[startType],
     title: APP_START_TITLES[startType],
-    tooltip: APP_START_DESCRIPTIONS[startType],
+    tooltip: (kpis: MobileKpisResponse | undefined, isComparing: boolean) => {
+      const start = kpis?.[APP_START_KPIS[startType]];
+      return appStartTooltip(
+        startType,
+        start?.count ?? 0,
+        isComparing ? start?.previousCount : undefined
+      );
+    },
+    emptyLabel: NO_APP_STARTS_LABEL,
     changeUnit: 'relative' as const,
     higherIsBetter: false,
     formatValue: () => formatDurationMs,
@@ -282,17 +285,13 @@ export function MobileOverview({
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
-                {MOBILE_KPIS.map(({ kpi, formatValue, startType, ...panel }) => (
+                {MOBILE_KPIS.map(({ kpi, formatValue, tooltip, ...panel }) => (
                   <ComparedKpiPanel
                     key={kpi}
                     {...panel}
-                    {...(startType && {
-                      tooltip: appStartTooltip(
-                        startType,
-                        currentKpis?.[APP_START_KPIS[startType]].count ?? 0
-                      ),
-                      emptyLabel: NO_APP_STARTS_LABEL,
-                    })}
+                    tooltip={
+                      typeof tooltip === 'string' ? tooltip : tooltip(currentKpis, isComparing)
+                    }
                     value={currentKpis?.[kpi]}
                     formatValue={formatValue?.(formatters) ?? formatNumber}
                     isComparing={isComparing}

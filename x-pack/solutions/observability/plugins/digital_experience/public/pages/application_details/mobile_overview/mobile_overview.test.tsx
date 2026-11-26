@@ -181,9 +181,14 @@ describe('MobileOverview', () => {
     );
 
     fireEvent.mouseOver(screen.getByTestId('digitalExperienceMobileKpiColdStartHint'));
-    expect(await screen.findByText(/Based on 3 cold starts\./)).toBeInTheDocument();
+    // With Compare on, the starts of the previous period too, so a change on a few reads as such
+    expect(
+      await screen.findByText(/Based on 3 cold starts, and 2 cold starts in the previous period\./)
+    ).toBeInTheDocument();
     fireEvent.mouseOver(screen.getByTestId('digitalExperienceMobileKpiWarmStartHint'));
-    expect(await screen.findByText(/Based on 2 warm starts\./)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Based on 2 warm starts, and 0 warm starts in the previous period\./)
+    ).toBeInTheDocument();
   });
 
   it('reads "No data" on the app start tiles when the SDK sent no app starts', async () => {

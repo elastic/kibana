@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { keyBy, sortBy, sortedUniq } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   toAppStart,
@@ -17,7 +16,11 @@ import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobil
 import type { MobileAppStartPoint, MobileAppStartsResponse } from '../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../lib/esql';
 import { getHistogramInterval } from '../../lib/helpers/time_series';
-import { getBucketTimestamps } from '../../lib/mobile/bucket_timestamps';
+import {
+  allBucketTimestamps,
+  fillBuckets,
+  getBucketTimestamps,
+} from '../../lib/mobile/bucket_timestamps';
 
 export interface GetMobileAppStartsParams {
   esClient: TracedElasticsearchClient;
@@ -28,8 +31,6 @@ export interface GetMobileAppStartsParams {
   /** The time zone of the series' buckets. */
   timeZone: string;
 }
-
-const NO_STARTS = { avg: null, count: 0 };
 
 /** The average cold and warm start per bucket of the range, every bucket included. */
 export const getMobileAppStarts = async ({
@@ -69,15 +70,17 @@ export const getMobileAppStarts = async ({
       warm: toAppStart(row, 'warm'),
     })
   );
-  const byTimestamp = keyBy(points, 'timestamp');
   // Every bucket, so the charts leave a gap where there were no starts
-  const timestamps = sortedUniq(
-    sortBy([...bucketTimestamps, ...points.map(({ timestamp }) => timestamp)])
+  const timestamps = allBucketTimestamps(
+    bucketTimestamps,
+    points.map(({ timestamp }) => timestamp)
   );
   return {
     histogram,
-    points: timestamps.map(
-      (timestamp) => byTimestamp[timestamp] ?? { timestamp, cold: NO_STARTS, warm: NO_STARTS }
-    ),
+    points: fillBuckets(points, timestamps, (timestamp) => ({
+      timestamp,
+      cold: toAppStart(undefined, 'cold'),
+      warm: toAppStart(undefined, 'warm'),
+    })),
   };
 };

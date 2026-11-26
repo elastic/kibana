@@ -29,7 +29,7 @@ import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
 import { formatDurationMs } from '../../../../utils/format_duration';
 import { getTimeChartXDomain } from '../../../../utils/histogram_interval';
-import { ChartPanel } from '../release_health/release_charts';
+import { ChartPanel } from '../chart_panel';
 import {
   APP_START_DESCRIPTIONS,
   APP_START_TITLES,
@@ -77,6 +77,10 @@ export function AppStartChart({
 }) {
   const baseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
+  const lineColors: Readonly<Record<StartType, string>> = {
+    cold: euiTheme.colors.vis.euiColorVis0,
+    warm: euiTheme.colors.vis.euiColorVis1,
+  };
   const { formatDate, timeZone } = useFormatters();
   const data = useMemo(
     () =>
@@ -139,9 +143,7 @@ export function AppStartChart({
         <LineSeries
           id={`${type}Start`}
           name={APP_START_TITLES[type]}
-          color={
-            type === 'cold' ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.vis.euiColorVis1
-          }
+          color={lineColors[type]}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="timestamp"

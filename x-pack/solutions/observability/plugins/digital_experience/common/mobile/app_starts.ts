@@ -14,9 +14,9 @@ import { MAX_SERIES_ROWS, toEsqlDuration } from './series';
 /** The event EDOT Android and EDOT iOS write once a launch shows its first frame. */
 export const APP_START_EVENT = 'elastic.app.start';
 
-/** The `start.type` values the views read; `hot` is reserved by the SDKs and left out. */
-export const START_TYPES = { cold: 'cold', warm: 'warm' } as const;
-export type StartType = keyof typeof START_TYPES;
+/** The `start.type` values the views read, in order; `hot` is reserved by the SDKs and left out. */
+export const START_TYPE_LIST = ['cold', 'warm'] as const;
+export type StartType = (typeof START_TYPE_LIST)[number];
 
 /**
  * Starts above this are left out: a process started in the background (by a push, a background
@@ -30,8 +30,6 @@ const START_COLUMNS = {
   warm: { ms: 'warmStartMs', avg: 'warmStart', count: 'warmStarts' },
 } as const satisfies Record<StartType, Record<string, keyof typeof RESULT_COLUMNS>>;
 
-const STARTS = Object.keys(START_TYPES) as StartType[];
-
 /**
  * The duration of a start of `type`, or null for any other document. A duration can be mapped as a
  * `long` in one backing index and a `float` in another, so it's read as a double.
@@ -40,7 +38,7 @@ const startDurationOf = (type: StartType) => {
   const duration = esql.exp`TO_DOUBLE(${mobileColumn('appStartDuration')})`;
   return esql.exp`${resultColumn(START_COLUMNS[type].ms)} = CASE(
     ${mobileColumn('eventName')} == ${APP_START_EVENT}
-      AND ${mobileColumn('startType')} == ${START_TYPES[type]}
+      AND ${mobileColumn('startType')} == ${type}
       AND ${duration} >= 0
       AND ${duration} <= ${MAX_APP_START_MS},
     ${duration},
@@ -53,11 +51,11 @@ const startDurationOf = (type: StartType) => {
  * so `appStartStats` can sit in the same `STATS` as the other KPIs.
  */
 export const withAppStartDurations = (query: ComposerQuery): ComposerQuery =>
-  query.pipe`EVAL ${STARTS.map(startDurationOf)}`;
+  query.pipe`EVAL ${START_TYPE_LIST.map(startDurationOf)}`;
 
 /** The average and count of cold and warm starts, over `withAppStartDurations`. */
 export const appStartStats = (): ESQLSingleAstItem[] =>
-  STARTS.flatMap((type) => {
+  START_TYPE_LIST.flatMap((type) => {
     const { ms, avg, count } = START_COLUMNS[type];
     return [
       esql.exp`${resultColumn(avg)} = AVG(${resultColumn(ms)})`,
@@ -70,11 +68,15 @@ const withAppStartEvents = (query: ComposerQuery): ComposerQuery =>
   query.pipe`WHERE ${mobileColumn('eventName')} == ${APP_START_EVENT}`;
 
 /** The cold and warm starts per time bucket, in the request's `time_zone`. */
-export const withAppStartSeries = (query: ComposerQuery, interval: HistogramInterval) =>
-  withAppStartDurations(withAppStartEvents(query)).pipe`STATS ${appStartStats()}
-    BY ${resultColumn('bucket')} = TBUCKET(${toEsqlDuration(interval)})`.pipe`SORT ${resultColumn(
-    'bucket'
-  )} ASC`.pipe`LIMIT ${MAX_SERIES_ROWS}`;
+export const withAppStartSeries = (
+  query: ComposerQuery,
+  interval: HistogramInterval
+): ComposerQuery => {
+  const bucket = resultColumn('bucket');
+  return withAppStartDurations(withAppStartEvents(query))
+    .pipe`STATS ${appStartStats()} BY ${bucket} = TBUCKET(${toEsqlDuration(interval)})`
+    .pipe`SORT ${bucket} ASC`.pipe`LIMIT ${MAX_SERIES_ROWS}`;
+};
 
 /**
  * The columns of `appStartStats`. Optional: ES|QL drops a column that is null in every row, and an

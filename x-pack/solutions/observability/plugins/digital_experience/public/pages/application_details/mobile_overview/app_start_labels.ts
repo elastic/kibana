@@ -60,14 +60,28 @@ export const NO_APP_STARTS_DESCRIPTION = i18n.translate(
   }
 );
 
-/** How the average is calculated, and the starts it's based on, or that there were none. */
-export const appStartTooltip = (type: StartType, count: number): string =>
-  count > 0
-    ? i18n.translate('xpack.digitalExperience.mobile.appStart.tooltip', {
-        defaultMessage: '{description} Based on {starts}.',
-        values: {
-          description: APP_START_DESCRIPTIONS[type],
-          starts: appStartCountLabel(type, count),
-        },
-      })
-    : `${APP_START_DESCRIPTIONS[type]} ${NO_APP_STARTS_DESCRIPTION}`;
+/**
+ * How the average is calculated, and the starts it's based on, or that there were none. With
+ * `previousCount`, while comparing, the starts of the previous period too, so a change based on a
+ * few starts reads as such.
+ */
+export const appStartTooltip = (type: StartType, count: number, previousCount?: number): string => {
+  const description = APP_START_DESCRIPTIONS[type];
+  if (count === 0) {
+    return i18n.translate('xpack.digitalExperience.mobile.appStart.tooltipNoStarts', {
+      defaultMessage: '{description} {noStarts}',
+      values: { description, noStarts: NO_APP_STARTS_DESCRIPTION },
+    });
+  }
+  const starts = appStartCountLabel(type, count);
+  if (previousCount === undefined) {
+    return i18n.translate('xpack.digitalExperience.mobile.appStart.tooltip', {
+      defaultMessage: '{description} Based on {starts}.',
+      values: { description, starts },
+    });
+  }
+  return i18n.translate('xpack.digitalExperience.mobile.appStart.tooltipWithPrevious', {
+    defaultMessage: '{description} Based on {starts}, and {previousStarts} in the previous period.',
+    values: { description, starts, previousStarts: appStartCountLabel(type, previousCount) },
+  });
+};
