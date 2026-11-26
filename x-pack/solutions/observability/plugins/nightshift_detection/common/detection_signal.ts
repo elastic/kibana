@@ -14,7 +14,7 @@ import { DETECTION_SIGNAL_SOURCE } from './constants';
  * keyword, and Lucene rejects the whole document when a term is over 32,766 bytes. At most 3 UTF-8
  * bytes per UTF-16 unit keeps 10,000 units under that.
  */
-const MAX_TEXT_LENGTH = 10_000;
+export const MAX_TEXT_LENGTH = 10_000;
 /**
  * Deepest nesting inside `details`. `flattened` rejects a document nested deeper than 20 levels
  * from `data`, and `details` itself is one of them.
