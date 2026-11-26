@@ -100,4 +100,17 @@ describe('ConnectorUsageCollector', () => {
       expect.stringContaining("Request body bytes couldn't be calculated, Error: ")
     );
   });
+
+  test('it exposes the connector type it was created for', () => {
+    expect(
+      new ConnectorUsageCollector({
+        logger,
+        connectorId: 'test-connector-id',
+        connectorTypeId: '.webhook',
+      }).getConnectorTypeId()
+    ).toBe('.webhook');
+    expect(
+      new ConnectorUsageCollector({ logger, connectorId: 'test-connector-id' }).getConnectorTypeId()
+    ).toBeUndefined();
+  });
 });

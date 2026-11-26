@@ -8,7 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
+import { recordConnectorRedirect } from './connector_metrics';
 import { getBeforeRedirectFn } from './before_redirect';
+
+jest.mock('./connector_metrics');
 
 const responseDetails = { headers: {}, statusCode: 302 };
 
@@ -48,6 +51,7 @@ describe('getBeforeRedirectFn', () => {
   let beforeRedirect: ReturnType<typeof getBeforeRedirectFn>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     configurationUtilities = actionsConfigMock.create();
     beforeRedirect = getBeforeRedirectFn(configurationUtilities, logger);
@@ -124,5 +128,36 @@ describe('getBeforeRedirectFn', () => {
     expect(message).toContain('Api-Key');
     expect(message).toContain('evil.example.org');
     expect(message).not.toContain('confidential-value');
+  });
+
+  test('records each redirect with the connector type and whether headers were removed', () => {
+    const hook = getBeforeRedirectFn(configurationUtilities, logger, '.webhook');
+
+    redirect(hook, 'https://api.example.com/a', 'https://api.example.com/b');
+    redirect(hook, 'https://api.example.com/a', 'https://evil.example.org/a');
+
+    expect(recordConnectorRedirect).toHaveBeenNthCalledWith(1, {
+      connectorType: '.webhook',
+      statusCode: 302,
+      crossOrigin: false,
+      headersRemoved: false,
+    });
+    expect(recordConnectorRedirect).toHaveBeenNthCalledWith(2, {
+      connectorType: '.webhook',
+      statusCode: 302,
+      crossOrigin: true,
+      headersRemoved: true,
+    });
+  });
+
+  test('does not record a redirect to a host that is not allowed', () => {
+    configurationUtilities.ensureHostnameAllowed.mockImplementationOnce(() => {
+      throw new Error('not allowed');
+    });
+
+    expect(() =>
+      redirect(beforeRedirect, 'https://api.example.com/a', 'https://evil.example.org/b')
+    ).toThrow('not allowed');
+    expect(recordConnectorRedirect).not.toHaveBeenCalled();
   });
 });

@@ -106,7 +106,11 @@ export const request = async <T = unknown>({
       proxy: false,
       maxContentLength,
       timeout: Math.max(settingsTimeout, timeout ?? 0),
-      beforeRedirect: getBeforeRedirectFn(configurationUtilities, logger),
+      beforeRedirect: getBeforeRedirectFn(
+        configurationUtilities,
+        logger,
+        connectorUsageCollector?.getConnectorTypeId()
+      ),
     });
 
     if (connectorUsageCollector) {

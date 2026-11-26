@@ -449,6 +449,7 @@ export class ActionExecutor {
         const connectorUsageCollector = new ConnectorUsageCollector({
           logger,
           connectorId: actionId,
+          connectorTypeId: actionTypeId,
         });
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {

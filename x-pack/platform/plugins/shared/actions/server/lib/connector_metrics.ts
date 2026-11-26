@@ -44,6 +44,16 @@ export const connectorAuthCounter = meter.createCounter('kibana.actions.connecto
   valueType: ValueType.INT,
 });
 
+export const connectorRedirectCounter = meter.createCounter(
+  'kibana.actions.connector.redirect.count',
+  {
+    description:
+      'Redirects followed by connector requests, by connector type, whether the redirect left the original origin and whether headers were removed.',
+    unit: '{redirect}',
+    valueType: ValueType.INT,
+  }
+);
+
 export type ConnectorCreateErrorType = 'conflict' | 'invalid' | 'unauthorized' | 'other';
 export type ConnectorExecuteErrorType =
   | 'rate_limited'
@@ -232,5 +242,26 @@ export const recordConnectorAuth = ({
     ...(connectorType ? { 'connector.type': connectorType } : {}),
     success: errorType === undefined,
     ...(errorType ? { 'error.type': errorType } : {}),
+  });
+};
+
+export interface RecordConnectorRedirectOpts {
+  connectorType?: string;
+  statusCode: number;
+  crossOrigin: boolean;
+  headersRemoved: boolean;
+}
+
+export const recordConnectorRedirect = ({
+  connectorType,
+  statusCode,
+  crossOrigin,
+  headersRemoved,
+}: RecordConnectorRedirectOpts): void => {
+  connectorRedirectCounter.add(1, {
+    'connector.type': connectorType ?? UNKNOWN_LABEL,
+    'http.response.status_code': statusCode,
+    'redirect.cross_origin': crossOrigin,
+    'redirect.headers_removed': headersRemoved,
   });
 };

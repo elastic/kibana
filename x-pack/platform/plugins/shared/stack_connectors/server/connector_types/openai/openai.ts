@@ -167,6 +167,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       fetch: createRedirectSafeFetch({
         configurationUtilities: this.configurationUtilities,
         logger: this.logger,
+        connectorType: this.connector.type,
       }) as unknown as Fetch,
     });
   }

@@ -9,6 +9,7 @@ import nodeFetch, { Headers } from 'node-fetch';
 import type { RequestInfo, RequestInit, Response } from 'node-fetch';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
+import { recordConnectorRedirect } from './connector_metrics';
 import { getCustomAgents } from './get_custom_agents';
 import { isSameOriginRedirect, removeCrossOriginUnsafeHeaders } from './redirect_headers';
 
@@ -20,6 +21,8 @@ export type NodeFetch = (url: RequestInfo, init?: RequestInit) => Promise<Respon
 interface CreateRedirectSafeFetchOpts {
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
+  /** Connector type reported in the redirect metric. */
+  connectorType?: string;
   fetch?: NodeFetch;
 }
 
@@ -56,6 +59,7 @@ const toHeaderRecord = (headers: RequestInit['headers']): Record<string, string>
 export const createRedirectSafeFetch = ({
   configurationUtilities,
   logger,
+  connectorType,
   fetch = nodeFetch,
 }: CreateRedirectSafeFetchOpts): NodeFetch => {
   const follow = async (
@@ -100,15 +104,22 @@ export const createRedirectSafeFetch = ({
       next.agent = nextUrl.startsWith('https:') ? httpsAgent : httpAgent;
     }
 
-    if (!isSameOriginRedirect(url, nextUrl)) {
-      const removed = removeCrossOriginUnsafeHeaders(headers);
-      if (removed.length > 0) {
-        logger.debug(
-          `Removed headers [${removed.join(
-            ', '
-          )}] from a connector request redirected to another origin (${new URL(nextUrl).hostname})`
-        );
-      }
+    const crossOrigin = !isSameOriginRedirect(url, nextUrl);
+    const removed = crossOrigin ? removeCrossOriginUnsafeHeaders(headers) : [];
+
+    recordConnectorRedirect({
+      connectorType,
+      statusCode: response.status,
+      crossOrigin,
+      headersRemoved: removed.length > 0,
+    });
+
+    if (removed.length > 0) {
+      logger.debug(
+        `Removed headers [${removed.join(
+          ', '
+        )}] from a connector request redirected to another origin (${new URL(nextUrl).hostname})`
+      );
     }
 
     return follow(nextUrl, next, redirectCount + 1);

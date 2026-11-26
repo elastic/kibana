@@ -305,7 +305,7 @@ export const getAxiosInstanceWithAuth = ({
         maxContentLength: maxContentLengthOverride ?? maxContentLength,
         // should we allow a way for a connector type to specify a timeout override?
         timeout: settingsTimeout,
-        beforeRedirect: getBeforeRedirectFn(configurationUtilities, logger),
+        beforeRedirect: getBeforeRedirectFn(configurationUtilities, logger, connectorTypeId),
         signal,
       });
       const configuredMaxContentLength = maxContentLengthOverride ?? maxContentLength;

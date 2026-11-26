@@ -12,6 +12,7 @@ import {
   connectorCreateCounter,
   connectorExecuteCounter,
   connectorExecuteDuration,
+  connectorRedirectCounter,
   getConnectorAuthInitiateErrorType,
   getConnectorAuthType,
   getConnectorCreateErrorType,
@@ -19,6 +20,7 @@ import {
   recordConnectorAuth,
   recordConnectorCreate,
   recordConnectorExecute,
+  recordConnectorRedirect,
 } from './connector_metrics';
 
 describe('connector metrics', () => {
@@ -27,6 +29,7 @@ describe('connector metrics', () => {
     jest.spyOn(connectorExecuteCounter, 'add').mockImplementation(() => {});
     jest.spyOn(connectorExecuteDuration, 'record').mockImplementation(() => {});
     jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
+    jest.spyOn(connectorRedirectCounter, 'add').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -213,6 +216,35 @@ describe('connector metrics', () => {
         'connector.type': '.google_drive',
         success: false,
         'error.type': 'authorization_failed',
+      });
+    });
+  });
+
+  describe('recordConnectorRedirect', () => {
+    it('records a cross-origin redirect that removed headers', () => {
+      recordConnectorRedirect({
+        connectorType: '.webhook',
+        statusCode: 307,
+        crossOrigin: true,
+        headersRemoved: true,
+      });
+
+      expect(connectorRedirectCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': '.webhook',
+        'http.response.status_code': 307,
+        'redirect.cross_origin': true,
+        'redirect.headers_removed': true,
+      });
+    });
+
+    it('reports an unknown connector type when it is not known', () => {
+      recordConnectorRedirect({ statusCode: 301, crossOrigin: false, headersRemoved: false });
+
+      expect(connectorRedirectCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'unknown',
+        'http.response.status_code': 301,
+        'redirect.cross_origin': false,
+        'redirect.headers_removed': false,
       });
     });
   });

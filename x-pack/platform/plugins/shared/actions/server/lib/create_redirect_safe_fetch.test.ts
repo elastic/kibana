@@ -14,9 +14,11 @@ import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
+import { recordConnectorRedirect } from './connector_metrics';
 import { createRedirectSafeFetch } from './create_redirect_safe_fetch';
 
 jest.mock('./get_custom_agents');
+jest.mock('./connector_metrics');
 
 const redirectTo = (location: string, status = 302): Response =>
   new Response('', { status, headers: { location } });
@@ -51,6 +53,7 @@ describe('createRedirectSafeFetch', () => {
   const sentInit = (call: number): RequestInit => fetch.mock.calls[call][1];
 
   beforeEach(() => {
+    jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     configurationUtilities = actionsConfigMock.create();
     fetch = jest.fn();
@@ -205,5 +208,33 @@ describe('createRedirectSafeFetch', () => {
     expect(message).toContain('api-key');
     expect(message).toContain('evil.example.org');
     expect(message).not.toContain('confidential-value');
+  });
+
+  test('records each redirect with the connector type and whether headers were removed', async () => {
+    fetch
+      .mockResolvedValueOnce(redirectTo('/v2', 308))
+      .mockResolvedValueOnce(redirectTo('https://evil.example.org/capture', 307))
+      .mockResolvedValueOnce(new Response('ok', { status: 200 }));
+    const safeFetch = createRedirectSafeFetch({
+      configurationUtilities,
+      logger,
+      connectorType: '.gen-ai',
+      fetch,
+    });
+
+    await safeFetch('https://api.example.com/v1', { headers: requestHeaders });
+
+    expect(recordConnectorRedirect).toHaveBeenNthCalledWith(1, {
+      connectorType: '.gen-ai',
+      statusCode: 308,
+      crossOrigin: false,
+      headersRemoved: false,
+    });
+    expect(recordConnectorRedirect).toHaveBeenNthCalledWith(2, {
+      connectorType: '.gen-ai',
+      statusCode: 307,
+      crossOrigin: true,
+      headersRemoved: true,
+    });
   });
 });

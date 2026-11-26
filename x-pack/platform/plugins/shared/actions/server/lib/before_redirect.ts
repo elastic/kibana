@@ -8,12 +8,17 @@
 import type { AxiosRequestConfig } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
+import { recordConnectorRedirect } from './connector_metrics';
 import { isSameOriginRedirect, removeCrossOriginUnsafeHeaders } from './redirect_headers';
 
 interface RedirectOptions {
   hostname?: unknown;
   href?: unknown;
   headers?: Record<string, unknown>;
+}
+
+interface RedirectResponseDetails {
+  statusCode?: number;
 }
 
 interface RedirectRequestDetails {
@@ -26,11 +31,12 @@ interface RedirectRequestDetails {
  */
 export const getBeforeRedirectFn = (
   configurationUtilities: ActionsConfigurationUtilities,
-  logger: Logger
+  logger: Logger,
+  connectorType?: string
 ): NonNullable<AxiosRequestConfig['beforeRedirect']> => {
   return (
     options: RedirectOptions,
-    _responseDetails?: unknown,
+    responseDetails?: RedirectResponseDetails,
     requestDetails?: RedirectRequestDetails
   ) => {
     const { hostname, href, headers } = options;
@@ -44,11 +50,16 @@ export const getBeforeRedirectFn = (
 
     configurationUtilities.ensureHostnameAllowed(hostname);
 
-    if (headers == null || isSameOriginRedirect(requestDetails?.url, href)) {
-      return;
-    }
+    const crossOrigin = !isSameOriginRedirect(requestDetails?.url, href);
+    const removed = crossOrigin && headers != null ? removeCrossOriginUnsafeHeaders(headers) : [];
 
-    const removed = removeCrossOriginUnsafeHeaders(headers);
+    recordConnectorRedirect({
+      connectorType,
+      statusCode: responseDetails?.statusCode ?? 0,
+      crossOrigin,
+      headersRemoved: removed.length > 0,
+    });
+
     if (removed.length > 0) {
       logger.debug(
         `Removed headers [${removed.join(
