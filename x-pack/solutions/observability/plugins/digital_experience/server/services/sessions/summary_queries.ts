@@ -24,26 +24,39 @@ import {
 import {
   BROWSER_SDK_LANGUAGE,
   CLICK_EVENTS,
+  EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
+  EVENT_RAGE_CLICK,
   EVENT_WEB_VITAL,
+  FRUSTRATION_EVENTS,
   OTEL_SPAN_NAME,
   PAGE_VIEW_EVENTS,
   SPAN_KIND_CLIENT,
   SPAN_STATUS_ERROR,
 } from '../../../common/otel_data';
-import { SESSIONS_JOURNEY_URL_CANDIDATES, SESSIONS_SOURCE_INDICES } from '../../../common/sessions';
+import {
+  SESSIONS_FRUSTRATION_URL_CANDIDATES,
+  SESSIONS_FRUSTRATION_VALUES,
+  SESSIONS_JOURNEY_URL_CANDIDATES,
+  SESSIONS_SOURCE_INDICES,
+} from '../../../common/sessions';
 import {
   SESSION_ATTRIBUTE_FIELDS,
   type SessionAttribute,
 } from '../../../common/session_attribute_fields';
 import {
+  NULLIFY_UNMAPPED_FIELDS,
+  SOURCE_CSS_SELECTOR_FIELD,
+  SOURCE_LOAD_EVENT_END_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
   SOURCE_WEB_VITAL_NAME_FIELD,
   SOURCE_WEB_VITAL_VALUE_FIELD,
-} from '../../lib/otel/source_fields';
+} from '../../../common/otel_source_fields';
+import { cleanedValue } from '../../lib/esql';
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 
@@ -65,11 +78,10 @@ export interface SummaryQuery {
   params: estypes.EsqlNamedValue[];
 }
 
-// OTel attributes that some index doesn't map read as null instead of failing the query.
-const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
 const SOURCES = SESSIONS_SOURCE_INDICES.join(', ');
 
-const texts = (values: readonly string[]): string => values.map(escapeStringValue).join(', ');
+export const texts = (values: readonly string[]): string =>
+  values.map(escapeStringValue).join(', ');
 
 /**
  * Attributes read from the same event. Each group takes its latest event that has any of its
@@ -79,15 +91,29 @@ export const SESSION_ATTRIBUTE_GROUPS = {
   environment: ['environment'],
   user: ['user'],
   user_agent: ['browser', 'browserVersion', 'os', 'device'],
+  // Own group: an event with only this flag would otherwise blank the browser and OS.
+  mobile: ['mobile'],
   geo: ['countryIso', 'region', 'city'],
+  app: ['appVersion'],
 } as const satisfies Record<string, readonly SessionAttribute[]>;
 
-/** The browser SDK events with a session and an application, from `?from` up to `?to`. */
-const browserSessionEvents = (from: string, to: string): string => `FROM ${SOURCES}
+/** The `FROM` and `WHERE` of a platform's events, from `?from` up to `?to`. */
+export type SessionEvents = (from: string, to: string) => string;
+
+/** The events that `condition` keeps, with a session and an application. */
+export const sessionEventsOf =
+  (condition: string): SessionEvents =>
+  (from, to) =>
+    `FROM ${SOURCES}
 | WHERE @timestamp >= ?${from} AND @timestamp < ?${to}
-  AND ${TELEMETRY_SDK_LANGUAGE} == ${escapeStringValue(BROWSER_SDK_LANGUAGE)}
+  AND ${condition}
   AND ${SOURCE_SESSION_ID_FIELD} IS NOT NULL AND ${SOURCE_SESSION_ID_FIELD} != ""
   AND ${SOURCE_SERVICE_NAME_FIELD} IS NOT NULL AND ${SOURCE_SERVICE_NAME_FIELD} != ""`;
+
+/** The browser SDK events with a session and an application. */
+export const browserSessionEvents = sessionEventsOf(
+  `${TELEMETRY_SDK_LANGUAGE} == ${escapeStringValue(BROWSER_SDK_LANGUAGE)}`
+);
 
 const windowParams = ({ changedFrom, changedTo }: ChangedWindow): estypes.EsqlNamedValue[] => [
   { changed_from: changedFrom },
@@ -95,9 +121,12 @@ const windowParams = ({ changedFrom, changedTo }: ChangedWindow): estypes.EsqlNa
 ];
 
 /** How many sessions have an event in the window, to size the hash ranges. */
-export const changedSessionsCountQuery = (window: ChangedWindow): SummaryQuery => ({
+export const changedSessionsCountQuery = (
+  window: ChangedWindow,
+  events: SessionEvents
+): SummaryQuery => ({
   query: `${NULLIFY_UNMAPPED_FIELDS}
-${browserSessionEvents('changed_from', 'changed_to')}
+${events('changed_from', 'changed_to')}
 | STATS sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})`,
   params: windowParams(window),
 });
@@ -131,6 +160,7 @@ export const bucketDigitsOf = (maxRows: number): number => {
 export const changedSessionIdsQuery = (
   window: ChangedWindow,
   range: HashRange,
+  events: SessionEvents,
   maxRows: number = ESQL_MAX_ROWS
 ): SummaryQuery => {
   const conditions = [
@@ -140,7 +170,7 @@ export const changedSessionIdsQuery = (
   const digits = bucketDigitsOf(maxRows);
   return {
     query: `${NULLIFY_UNMAPPED_FIELDS}
-${browserSessionEvents('changed_from', 'changed_to')}
+${events('changed_from', 'changed_to')}
 | STATS BY ${SESSION_ID} = ${SOURCE_SESSION_ID_FIELD}
 | EVAL ${SESSION_HASH} = HASH("sha256", ${SESSION_ID})${
       conditions.length > 0 ? `\n| WHERE ${conditions.join(' AND ')}` : ''
@@ -157,52 +187,62 @@ ${browserSessionEvents('changed_from', 'changed_to')}
   };
 };
 
-/** Strings as the summaries keep them: trimmed, and empty or `null` as missing. */
-const cleaned = (field: string): string =>
-  `CASE(TRIM(TO_STRING(${field})) IN ("", "null"), null, TRIM(TO_STRING(${field})))`;
-
 /** The column of an attribute in the summary query's rows, e.g. `attribute_browser_version`. */
-export const attributeColumn = (attribute: SessionAttribute): string =>
-  `attribute_${snakeCase(attribute)}`;
+export const attributeColumn = (attribute: string): string => `attribute_${snakeCase(attribute)}`;
 const seenColumn = (group: string): string => `seen_${group}`;
 /** The column of a source field's value on the latest event of its group, e.g. `raw_attributes_user_id`. */
-const RAW_PREFIX = 'raw_';
+export const RAW_PREFIX = 'raw_';
 const rawColumn = (field: string): string => `${RAW_PREFIX}${field.replace(/\./g, '_')}`;
-const groupFields = (attributes: readonly SessionAttribute[]): string[] => [
-  ...new Set(attributes.flatMap((attribute) => SESSION_ATTRIBUTE_FIELDS[attribute])),
-];
-
-// A group's timestamp only on the events that carry any of its fields, which LAST() then picks
-// from: it skips rows without a timestamp, and keeps a null value of the latest one.
-const SEEN_EVALS = Object.entries(SESSION_ATTRIBUTE_GROUPS).map(
-  ([group, attributes]) =>
-    `${seenColumn(group)} = CASE(${groupFields(attributes)
-      .map((field) => `${field} IS NOT NULL`)
-      .join(' OR ')}, @timestamp, null)`
-);
 
 /** A column of the summary and the aggregation that computes it. */
-type Stat = readonly [column: string, aggregation: string];
+export type Stat = readonly [column: string, aggregation: string];
+
+/** Candidate source fields per attribute, in priority order. */
+type AttributeFields = Readonly<Record<string, readonly string[]>>;
 
 /**
- * Each source field of a group as it is on the group's latest event. The fields are cleaned into
- * attributes only once per session, after the last stage: cleaning every event's fields took
- * about 40% of the query.
+ * What reads each attribute from its group's latest event by `rank`: the `seenEvals` that time
+ * each group, the `stats` that keep its fields as they are on that event, and the `evals` that
+ * clean them into attributes, the first of its fields with a value.
  */
-const ATTRIBUTE_STATS: Stat[] = Object.entries(SESSION_ATTRIBUTE_GROUPS).flatMap(
-  ([group, attributes]) =>
-    groupFields(attributes).map(
-      (field): Stat => [rawColumn(field), `LAST(TO_STRING(${field}), ${seenColumn(group)})`]
-    )
-);
+export const attributeQueryParts = <TFields extends AttributeFields>(
+  fields: TFields,
+  groups: Readonly<Record<string, ReadonlyArray<keyof TFields & string>>>,
+  rank: string = '@timestamp'
+): { seenEvals: string[]; stats: Stat[]; evals: string[] } => {
+  const groupFields = (attributes: ReadonlyArray<keyof TFields & string>): string[] => [
+    ...new Set(attributes.flatMap((attribute) => fields[attribute])),
+  ];
+  return {
+    // A group's timestamp only on the events that carry any of its fields, which LAST() then
+    // picks from: it skips rows without a timestamp, and keeps a null value of the latest one.
+    seenEvals: Object.entries(groups).map(
+      ([group, attributes]) =>
+        `${seenColumn(group)} = CASE(${groupFields(attributes)
+          .map((field) => `${field} IS NOT NULL`)
+          .join(' OR ')}, ${rank}, null)`
+    ),
+    // The fields are cleaned into attributes only once per session, after the last stage:
+    // cleaning every event's fields took about 40% of the query.
+    stats: Object.entries(groups).flatMap(([group, attributes]) =>
+      groupFields(attributes).map(
+        (field): Stat => [rawColumn(field), `LAST(TO_STRING(${field}), ${seenColumn(group)})`]
+      )
+    ),
+    evals: Object.entries(fields).map(
+      ([attribute, candidates]) =>
+        `${attributeColumn(attribute)} = COALESCE(${candidates
+          .map((field) => cleanedValue(rawColumn(field)))
+          .join(', ')})`
+    ),
+  };
+};
 
-/** Each attribute from its group's latest event: the first of its fields with a value. */
-const ATTRIBUTE_EVALS = Object.entries(SESSION_ATTRIBUTE_FIELDS).map(
-  ([attribute, fields]) =>
-    `${attributeColumn(attribute as SessionAttribute)} = COALESCE(${fields
-      .map((field) => cleaned(rawColumn(field)))
-      .join(', ')})`
-);
+const {
+  seenEvals: SEEN_EVALS,
+  stats: ATTRIBUTE_STATS,
+  evals: ATTRIBUTE_EVALS,
+} = attributeQueryParts(SESSION_ATTRIBUTE_FIELDS, SESSION_ATTRIBUTE_GROUPS);
 
 /**
  * The thresholds as `float` fields store them: EDOT Browser's `browser.web_vital.value` is a float,
@@ -225,6 +265,26 @@ const vitalStatsOf = (vital: CoreWebVital): Stat[] => {
   ];
 };
 
+/** The `is_http_request` and `no_response` columns that `HTTP_REQUEST_STATS` count. */
+export const HTTP_REQUEST_EVALS = `is_http_request = COALESCE(${KIND} == ${escapeStringValue(
+  SPAN_KIND_CLIENT
+)}, false) AND ${HTTP_REQUEST_METHOD} IS NOT NULL,
+       no_response = COALESCE(${STATUS_CODE} == ${escapeStringValue(SPAN_STATUS_ERROR)}, false)`;
+
+/**
+ * The requests with a known outcome, and the failed ones, as the applications list counts them.
+ * A filter already counts null as false: a `COALESCE` of the status made the mobile query 3x
+ * slower, as it filters every column of the page for each event without a status.
+ */
+export const HTTP_REQUEST_CONDITIONS = {
+  http_request_count: `is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} IS NOT NULL OR no_response)`,
+  http_failed_request_count: `is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} >= 400 OR no_response)`,
+};
+
+export const HTTP_REQUEST_STATS: Stat[] = Object.entries(HTTP_REQUEST_CONDITIONS).map(
+  ([column, condition]): Stat => [column, `COUNT(*) WHERE ${condition}`]
+);
+
 const SESSION_STATS: Stat[] = [
   ['start_time', 'MIN(@timestamp)'],
   ['end_time', 'MAX(@timestamp)'],
@@ -233,29 +293,32 @@ const SESSION_STATS: Stat[] = [
   ['page_load_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_NAVIGATION_TIMING)}`],
   ['click_count', 'COUNT(*) WHERE is_click'],
   ['js_error_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_EXCEPTION)}`],
-  [
-    'http_request_count',
-    `COUNT(*) WHERE is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} IS NOT NULL OR no_response)`,
-  ],
-  [
-    'http_failed_request_count',
-    `COUNT(*) WHERE is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response)`,
-  ],
+  ['rage_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_RAGE_CLICK)}`],
+  ['dead_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_DEAD_CLICK)}`],
+  ['error_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_ERROR_CLICK)}`],
+  ['frustration_count', 'COUNT(*) WHERE is_frustration'],
+  ...HTTP_REQUEST_STATS,
   ...ATTRIBUTE_STATS,
 ];
 
+const FRUSTRATION_FILTER = `${OTEL_EVENT_NAME} IN (${texts(FRUSTRATION_EVENTS)})`;
+
 const VITAL_STATS: Stat[] = CORE_WEB_VITALS.flatMap(vitalStatsOf);
 
-// A session without a web vital has no row in the vitals branch.
-const VITAL_COUNT_EVALS = VITAL_STATS.flatMap(([column, aggregation]) =>
+const LOAD_TIME_STATS: Stat[] = [
+  ['load_time_p75', 'PERCENTILE(load_time, 75)'],
+  ['load_time_samples', 'COUNT(load_time)'],
+];
+
+// A session without a web vital or a timed page load has no row in that branch.
+const BRANCH_COUNT_EVALS = [...VITAL_STATS, ...LOAD_TIME_STATS].flatMap(([column, aggregation]) =>
   aggregation.startsWith('COUNT(') ? [`${column} = COALESCE(${column}, 0)`] : []
 );
 
 // Only one branch has each of these columns, so its row is the only non-null value.
-const MERGED_STATS: Stat[] = [...SESSION_STATS, ...VITAL_STATS].map(([column]) => [
-  column,
-  `MAX(${column})`,
-]);
+const MERGED_STATS: Stat[] = [...SESSION_STATS, ...VITAL_STATS, ...LOAD_TIME_STATS].map(
+  ([column]) => [column, `MAX(${column})`]
+);
 
 // The branch filters are on the source fields: the COALESCE of `event` and `span` keeps Lucene
 // from applying them.
@@ -267,35 +330,56 @@ const WEB_VITAL_FILTER = `(${OTEL_EVENT_NAME} == ${escapeStringValue(
 )} OR ${OTEL_SPAN_NAME} == ${escapeStringValue(
   EVENT_WEB_VITAL
 )}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL`;
+// Page loads without a load event are counted but have no load time, as in the Overview.
+const LOAD_TIME_FILTER = `${OTEL_EVENT_NAME} == ${escapeStringValue(
+  EVENT_NAVIGATION_TIMING
+)} AND ${SOURCE_LOAD_EVENT_END_FIELD} IS NOT NULL`;
 
-const renderStats = (stats: readonly Stat[], indent: string): string =>
+export const renderStats = (stats: readonly Stat[], indent: string): string =>
   stats.map(([column, aggregation]) => `${column} = ${aggregation}`).join(`,\n${indent}`);
+
+/** The sessions' events a summary query reads: from up to the longest session before the window. */
+export interface RebuildWindow {
+  changedTo: string;
+  rebuildFrom: string;
+}
+
+/** The query that rebuilds the summaries of `sessionIds`, one row per session. */
+export type SummaryQueryOf = (
+  window: RebuildWindow,
+  sessionIds: readonly string[],
+  maxRows?: number
+) => SummaryQuery;
 
 /**
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
- * times, latest attributes and web vitals, and its journey. One branch aggregates per session, one
- * the first and last view of each page and one the web vitals, which the last stage merges per
- * session. Counts what the applications list counts, with the same event names and request
+ * times, latest attributes, web vitals and load time, and its journey. One branch aggregates per
+ * session, one the first and last view of each page, one the web vitals and one the load time,
+ * which the last stage merges per session. Counts what the applications list counts, with the same event names and request
  * outcomes. Design: "Summary query" in the plugin README; measurements: `query_performance.md`.
  */
-export const sessionSummaryQuery = (
-  { changedTo, rebuildFrom }: { changedTo: string; rebuildFrom: string },
-  sessionIds: readonly string[],
-  maxRows: number = ESQL_MAX_ROWS
-): SummaryQuery => ({
+export const sessionSummaryQuery: SummaryQueryOf = (
+  { changedTo, rebuildFrom },
+  sessionIds,
+  maxRows = ESQL_MAX_ROWS
+) => ({
   query: `${NULLIFY_UNMAPPED_FIELDS}
 ${browserSessionEvents('rebuild_from', 'changed_to')}
   AND ${SOURCE_SESSION_ID_FIELD} IN (${texts(sessionIds)})
 | EVAL event = COALESCE(${OTEL_EVENT_NAME}, ""), span = COALESCE(${OTEL_SPAN_NAME}, "")
 | EVAL is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}) OR span IN (${texts(PAGE_VIEW_EVENTS)}),
        is_click = event IN (${texts(CLICK_EVENTS)}) OR span IN (${texts(CLICK_EVENTS)}),
-       is_http_request = COALESCE(${KIND} == ${escapeStringValue(
-    SPAN_KIND_CLIENT
-  )}, false) AND ${HTTP_REQUEST_METHOD} IS NOT NULL,
-       no_response = COALESCE(${STATUS_CODE} == ${escapeStringValue(SPAN_STATUS_ERROR)}, false),
+       is_frustration = event IN (${texts(FRUSTRATION_EVENTS)}),
+       ${HTTP_REQUEST_EVALS},
        ${SEEN_EVALS.join(',\n       ')}
 | FORK (STATS ${renderStats(SESSION_STATS, '              ')}
           BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
+       (WHERE ${FRUSTRATION_FILTER} AND ${SOURCE_CSS_SELECTOR_FIELD} IS NOT NULL
+        | STATS target_signals = COUNT(*)
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, target = ${SOURCE_CSS_SELECTOR_FIELD})
+       (WHERE ${FRUSTRATION_FILTER} AND ${SOURCE_URL_FIELD} IS NOT NULL
+        | STATS url_signals = COUNT(*)
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, frustration_url = ${SOURCE_URL_FIELD})
        (WHERE ${PAGE_VIEW_FILTER}
         | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, page_url = ${SOURCE_URL_FIELD})
@@ -304,12 +388,18 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
         | EVAL ${VITAL_EVALS.join(', ')}
         | STATS ${renderStats(VITAL_STATS, '                ')}
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
+       (WHERE ${LOAD_TIME_FILTER}
+        | EVAL load_time = TO_DOUBLE(${SOURCE_LOAD_EVENT_END_FIELD})
+        | STATS ${renderStats(LOAD_TIME_STATS, '                ')}
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
 | STATS ${renderStats(MERGED_STATS, '        ')},
+        frustration_targets = TOP(target_signals, ${SESSIONS_FRUSTRATION_VALUES}, "desc", target) WHERE target IS NOT NULL,
+        frustration_urls = TOP(url_signals, ${SESSIONS_FRUSTRATION_URL_CANDIDATES}, "desc", frustration_url) WHERE frustration_url IS NOT NULL,
         pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}
-| EVAL ${VITAL_COUNT_EVALS.join(', ')}
+| EVAL ${BRANCH_COUNT_EVALS.join(', ')}
 | DROP ${RAW_PREFIX}*
 | LIMIT ${maxRows}`,
   params: [{ rebuild_from: rebuildFrom }, { changed_to: changedTo }],

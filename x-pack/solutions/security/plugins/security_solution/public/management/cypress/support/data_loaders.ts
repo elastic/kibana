@@ -16,11 +16,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 // This is a Cypress module and only used by Cypress, so disabling "should" be safe
 // eslint-disable-next-line import/no-nodejs-modules
 import { mkdir } from 'node:fs/promises';
-import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
-import {
-  deleteIndexedEndpointHeartbeats,
-  indexEndpointHeartbeats,
-} from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
@@ -229,20 +224,6 @@ export const dataLoaders = (
         log.warning(`Failed to delete indexed endpoint hosts and alerts: ${error.message}`, error);
         return null;
       });
-    },
-
-    indexEndpointHeartbeats: async (options: { count?: number; unbilledCount?: number }) => {
-      const { esClient, log } = await setupStackServicesUsingCypressConfig(config);
-      return (await indexEndpointHeartbeats(esClient, log, options.count, options.unbilledCount))
-        .data;
-    },
-
-    deleteIndexedEndpointHeartbeats: async (
-      data: IndexedEndpointHeartbeats['data']
-    ): Promise<null> => {
-      const { esClient } = await stackServicesPromise;
-      await deleteIndexedEndpointHeartbeats(esClient, data);
-      return null;
     },
 
     indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {

@@ -173,7 +173,7 @@ Use these utilities from `src/platform/packages/shared/kbn-connector-specs/src/l
 
 The vendor API contract test needs `vendor_api/` artifacts or an exemption for every connector. An
 MCP-native connector calls MCP tools, not operations of an OpenAPI spec, so add it to
-`vendor_api_exemptions.json` at the package root, in the PR that adds the connector:
+`src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/vendor_api_exemptions.json`, in the PR that adds the connector:
 
 ```json
 ".my_connector": "Calls the vendor's hosted MCP server, which has no OpenAPI spec to record against"

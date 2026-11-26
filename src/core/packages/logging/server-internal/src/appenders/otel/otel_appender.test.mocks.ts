@@ -59,15 +59,13 @@ jest.mock('@opentelemetry/exporter-logs-otlp-proto', () => ({
   OTLPLogExporter: mockOTLPLogExporter,
 }));
 
-jest.mock('@elastic/opentelemetry-node/sdk', () => ({
-  resources: {
-    detectResources: mockDetectResources,
-    resourceFromAttributes: mockResourceFromAttributes,
-    envDetector: 'envDetector',
-    hostDetector: 'hostDetector',
-    osDetector: 'osDetector',
-    processDetector: 'processDetector',
-  },
+jest.mock('@opentelemetry/resources', () => ({
+  detectResources: mockDetectResources,
+  resourceFromAttributes: mockResourceFromAttributes,
+  envDetector: 'envDetector',
+  hostDetector: 'hostDetector',
+  osDetector: 'osDetector',
+  processDetector: 'processDetector',
 }));
 
 jest.mock('@opentelemetry/api', () => {

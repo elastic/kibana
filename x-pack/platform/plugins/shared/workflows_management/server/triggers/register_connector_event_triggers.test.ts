@@ -7,13 +7,10 @@
 
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
-import {
-  registerConnectorEventTriggers,
-  toConnectorEventTriggerSchema,
-} from './register_connector_event_triggers';
+import { registerConnectorEventTriggers } from './register_connector_event_triggers';
 
 const createOutboundSpec = (): ConnectorSpec => ({
   metadata: {
@@ -119,7 +116,7 @@ describe('registerConnectorEventTriggers', () => {
       ([definition]: [ServerTriggerDefinition]) => definition.id
     );
     expect(registered).toContain('inboundWebhook.received');
-    expect(registered).not.toContain(HITL_SLACK_ACTION_EVENT_ID);
+    expect(registered).not.toContain(slack2HitlAction.name);
     expect(registered).toHaveLength(
       Object.values(connectorsSpecs).reduce((count, spec) => {
         if (!connectorSpecHasEvents(spec) || spec.events === undefined) {
@@ -128,41 +125,10 @@ describe('registerConnectorEventTriggers', () => {
         return (
           count +
           Object.values(spec.events.definitions).filter(
-            (eventDefinition) => eventDefinition.eventId !== HITL_SLACK_ACTION_EVENT_ID
+            (eventDefinition) => eventDefinition.eventId !== slack2HitlAction.name
           ).length
         );
       }, 0)
     );
-  });
-});
-
-describe('toConnectorEventTriggerSchema', () => {
-  const schema = toConnectorEventTriggerSchema(z.object({ body: z.unknown() }));
-
-  it('accepts the bridge-enriched payload', () => {
-    expect(
-      schema.safeParse({
-        body: { eventType: 'order.created' },
-        connectorId: 'sales-ingress',
-        connectorTypeId: '.inboundWebhook',
-        spaceId: 'default',
-        correlationKey: 'corr-1',
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts a payload without the optional correlationKey', () => {
-    expect(
-      schema.safeParse({
-        body: {},
-        connectorId: 'sales-ingress',
-        connectorTypeId: '.inboundWebhook',
-        spaceId: 'default',
-      }).success
-    ).toBe(true);
-  });
-
-  it('rejects a payload missing connector instance fields', () => {
-    expect(schema.safeParse({ body: {} }).success).toBe(false);
   });
 });

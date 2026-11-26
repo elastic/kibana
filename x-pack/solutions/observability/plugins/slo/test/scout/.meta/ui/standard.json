@@ -1,5 +1,5 @@
 {
-  "sha1": "027c1f71ed44cee95115610776ca7671abbb7887",
+  "sha1": "27a917e1137b3857d98a6109725edc69a568d5c1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
-        "line": 28,
-        "column": 46
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
-        "line": 30,
-        "column": 71
+        "line": 22,
+        "column": 59
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
-        "line": 34,
-        "column": 59
+        "line": 25,
+        "column": 7
       }
     },
     {

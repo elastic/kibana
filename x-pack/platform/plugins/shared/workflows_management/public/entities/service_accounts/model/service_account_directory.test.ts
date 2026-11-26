@@ -40,6 +40,32 @@ describe('service account directory', () => {
     expect(http.get).toHaveBeenCalledTimes(1);
   });
 
+  it('looks up an existing account as found', async () => {
+    const account = { id: 'a', name: 'Runner', enabled: true, assumable: true };
+    http.get.mockResolvedValue(account);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    expect(await directory.lookup('a')).toEqual({ status: 'found', account });
+  });
+
+  it.each([
+    [404, 'not_found'],
+    [403, 'unknown'],
+    [500, 'unknown'],
+  ])('looks up an account that fails with HTTP %s as %s', async (status, expected) => {
+    http.get.mockRejectedValue(
+      createHttpFetchError('Failed', 'Error', undefined, { status } as Response)
+    );
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    expect(await directory.lookup('a')).toEqual({ status: expected });
+  });
+
+  it('looks up nothing with the feature disabled', async () => {
+    isEnabled.mockReturnValue(false);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    expect(await directory.lookup('a')).toEqual({ status: 'unknown' });
+    expect(http.get).not.toHaveBeenCalled();
+  });
+
   it('does not query or expose cached values with the feature disabled', async () => {
     http.get.mockResolvedValue({ id: 'a', name: 'Cached' });
     const directory = createServiceAccountDirectory(http, queryClient, isEnabled);

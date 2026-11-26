@@ -65,6 +65,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
                         Description
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -101,6 +102,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
                         </span>
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortUp"
                       />
@@ -136,6 +138,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
                         </span>
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -253,6 +256,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
                     5
                   </span>
                   <span
+                    aria-hidden="true"
                     color="inherit"
                     data-euiicon-type="chevronSingleDown"
                   />
@@ -352,6 +356,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
           class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
         >
           <span
+            aria-hidden="true"
             class="emotion-euiCheckbox__icon-check"
             data-euiicon-type="empty"
             role="presentation"

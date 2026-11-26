@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/**/*.json",
     "scripts/**/*",
     "test/scout_agent_builder/**/*"
   ],
@@ -22,6 +23,7 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/react-query",
+    "@kbn/charts-theme",
     "@kbn/scout",
     "@kbn/logging",
     "@kbn/config-schema",

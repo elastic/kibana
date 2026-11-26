@@ -27,5 +27,7 @@ export const useServiceAccount = (id: string) => {
   const { http, security } = useKibana().services;
   const enabled = security.serviceAccounts.isEnabled();
   const result = useQuery({ ...serviceAccountQueryOptions(http, id), enabled: enabled && !!id });
-  return enabled ? result.data : null;
+  if (!enabled) return null;
+  if (!result.data) return undefined;
+  return result.data.status === 'found' ? result.data.account : null;
 };

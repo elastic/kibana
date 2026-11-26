@@ -7,13 +7,14 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { AvailabilityUnavailableReason } from '../availability/availability_service';
+import type { AvailabilityUnavailableReason } from '../../../common/tick';
 import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { InMemorySignalStore } from '../../test_utils/in_memory_signal_store';
 import { InMemorySavedObjectsRepository } from '../../test_utils/in_memory_saved_objects_repository';
 import { createTestStrategy, TEST_STRATEGY_ID } from '../../test_utils/test_strategy';
+import type { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { EngineRunner, RUN_BUDGET_MS } from './run_engine';
 import type { SpaceRunLock } from './space_run_lock';
 
@@ -67,7 +68,10 @@ function createRunner({
     signals,
     { list: async () => [] },
     elasticsearchServiceMock.createElasticsearchClient(),
-    loggingSystemMock.createLogger()
+    { listQueries: async () => [], listFeatures: async () => [] },
+    { listManaged: async () => [], readRows: async () => [] } as unknown as ManagedRuleReader,
+    loggingSystemMock.createLogger(),
+    undefined
   );
 
   return { runner, state, signals };
@@ -139,6 +143,28 @@ describe('EngineRunner', () => {
 
     expect(result).toMatchObject({
       strategies: [{ id: TEST_STRATEGY_ID, signals: 1, error: expect.any(String) }],
+    });
+    expect(
+      await state.readGeneratorStates({ spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
+    ).toEqual(new Map());
+  });
+
+  it('keeps the generator state when the run ends while its signals are being stored', async () => {
+    const signals = new InMemorySignalStore();
+    const write = signals.write.bind(signals);
+    const controller = new AbortController();
+    // The run ends mid-write, as when the budget runs out and another node can take the space.
+    jest.spyOn(signals, 'write').mockImplementationOnce(async (batch) => {
+      const outcome = await write(batch);
+      controller.abort('the run ended');
+      return outcome;
+    });
+    const { runner, state } = createRunner({ signals });
+
+    const result = await runner.run({ now: NOW, abortSignal: controller.signal });
+
+    expect(result).toMatchObject({
+      strategies: [{ id: TEST_STRATEGY_ID, error: expect.stringContaining('run ended') }],
     });
     expect(
       await state.readGeneratorStates({ spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
