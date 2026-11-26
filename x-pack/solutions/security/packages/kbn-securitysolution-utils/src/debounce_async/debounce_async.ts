@@ -30,10 +30,11 @@ export function debounceAsync<Args extends unknown[], Result>(
     }
 
     timeoutId = setTimeout(async () => {
-      resolve(await fn(...args));
+      const resolveInvocation = resolve;
       promise = new Promise((_resolve) => {
         resolve = _resolve;
       });
+      resolveInvocation(await fn(...args));
     }, intervalMs);
 
     return promise;

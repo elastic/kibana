@@ -36,6 +36,31 @@ describe('debounceAsync', () => {
     expect(await Promise.all(promises)).toEqual(['second', 'second']);
   });
 
+  it('resolves a call made during an in-flight invocation with its own invocation result', async () => {
+    let resolveFirst: (value: string) => void = () => {};
+    const fn = jest
+      .fn()
+      .mockReturnValueOnce(
+        new Promise<string>((resolve) => {
+          resolveFirst = resolve;
+        })
+      )
+      .mockResolvedValueOnce('second');
+
+    const debounced = debounceAsync(fn, 200);
+
+    const firstPromise = debounced();
+    jest.runOnlyPendingTimers();
+
+    const secondPromise = debounced();
+    jest.runOnlyPendingTimers();
+
+    resolveFirst('first');
+
+    expect(await firstPromise).toEqual('first');
+    expect(await secondPromise).toEqual('second');
+  });
+
   it('debounces the function', async () => {
     const fn = jest.fn().mockResolvedValueOnce('first');
 
