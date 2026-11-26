@@ -53,6 +53,16 @@ actions:
       externalDocs:
         description: Kibana role management
         url: https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/defining-roles
+  - target: '$.tags[?(@.name=="advanced settings")]'
+    description: Add displayName and description
+    update:
+      x-displayName: "Advanced settings"
+      description: |
+        Retrieve, update, and reset Kibana advanced settings, including settings that apply to a single space and settings that apply globally across all spaces.
+        Only user-provided values are returned; settings left at their default value are omitted.
+      externalDocs:
+        description: Advanced settings documentation
+        url: https://www.elastic.co/docs/reference/kibana/advanced-settings
   - target: '$.tags[?(@.name=="saved objects")]'
     description: Change displayName and description
     update:

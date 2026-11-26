@@ -1,0 +1,25 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        setManySettingsRequest:
+          summary: Change several settings, and reset one to its default with null
+          value:
+            changes:
+              defaultRoute: /app/dashboards
+              theme:darkMode: enabled
+              timepicker:quickRanges: null
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          setManySettingsResponse:
+            summary: Settings after the changes
+            value:
+              settings:
+                defaultRoute:
+                  userValue: /app/dashboards
+                theme:darkMode:
+                  userValue: enabled

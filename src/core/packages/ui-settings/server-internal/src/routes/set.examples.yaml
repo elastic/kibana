@@ -1,0 +1,20 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        setSettingRequest:
+          summary: Change the default landing page
+          value:
+            value: /app/dashboards
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          setSettingResponse:
+            summary: Settings after the change
+            value:
+              settings:
+                defaultRoute:
+                  userValue: /app/dashboards
