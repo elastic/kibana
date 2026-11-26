@@ -16,7 +16,7 @@ import {
   ALERTS_UI_READ,
 } from '@kbn/security-solution-features/constants';
 
-import { APP_UI_ID, SECURITY_FEATURE_ID } from '../common/constants';
+import { APP_UI_ID, ATTACK_DISCOVERY_FEATURE_ID, SECURITY_FEATURE_ID } from '../common/constants';
 import { SecurityPageName } from './app/types';
 import { appLinks, getFilteredLinks } from './app/links';
 import { manageOldSiemRoutes } from './helpers';
@@ -52,6 +52,7 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
       ? {
           [SECURITY_FEATURE_ID]: { show: true },
           [ALERTS_FEATURE_ID]: { [ALERTS_UI_READ]: true, [ALERTS_UI_DETECTIONS]: true },
+          [ATTACK_DISCOVERY_FEATURE_ID]: { 'attack-discovery': true },
         }
       : {}),
   };
@@ -135,6 +136,29 @@ describe('Security Solution plugin', () => {
 
       expect(registeredDeepLinks).toHaveLength(0);
       expect(manageOldSiemRoutes).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deepLinks', () => {
+    it('registers the alerts and attacks alignment links while the filtered links are still pending', async () => {
+      (getFilteredLinks as jest.Mock).mockReturnValue(new Promise(() => {}));
+      const { license$, registeredDeepLinks } = startPlugin();
+      await jest.advanceTimersByTimeAsync(1000);
+      const registeredBeforeLicense = registeredDeepLinks.length;
+
+      license$.next(licensingMock.createLicense({ license: { type: 'enterprise' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(getFilteredLinks).toHaveBeenCalledTimes(1);
+      expect(registeredDeepLinks.length).toBeGreaterThan(registeredBeforeLicense);
+      const deepLinks = registeredDeepLinks[registeredDeepLinks.length - 1];
+      const deepLinkIds = deepLinks.map(({ id }) => id);
+      expect(deepLinkIds).toContain(SecurityPageName.alertDetections);
+      expect(deepLinkIds).not.toContain(SecurityPageName.alerts);
+      const attackDiscoveryDeepLink = deepLinks.find(
+        ({ id }) => id === SecurityPageName.attackDiscovery
+      );
+      expect(attackDiscoveryDeepLink?.visibleIn).toEqual([]);
     });
   });
 });
