@@ -167,15 +167,18 @@ const decodeNumericCursor = (cursor: string): number | undefined =>
     ? Number(cursor) - NUMERIC_CURSOR_BASE
     : undefined;
 
-// A last-item cursor is a number only where the item before its position holds one.
+// A last-item cursor is a number where the item before its position holds one, else a string.
 const decodeLastItemCursor = (
   cursor: string,
   { collection, path }: { collection: readonly unknown[]; path: string }
 ): number | undefined => {
-  const position = decodeNumericCursor(cursor);
-  return position !== undefined && typeof get(collection[position - 1], path) === 'number'
-    ? position
-    : decodeCursor(cursor);
+  const numeric = decodeNumericCursor(cursor);
+  const position = numeric ?? decodeCursor(cursor);
+  if (position === undefined) {
+    return undefined;
+  }
+  const holdsNumber = typeof get(collection[position - 1], path) === 'number';
+  return holdsNumber === (numeric !== undefined) ? position : undefined;
 };
 
 // Cursors are compared as strings, whether the vendor sends them as strings or numbers.

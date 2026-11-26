@@ -668,6 +668,19 @@ describe('withPagination', () => {
       expect(second).toEqual({ status: 200, body: { channels: [{ id: expect.anything() }] } });
     });
 
+    it('answers 400 for a string cursor where it issues a number', async () => {
+      const { fetch } = createRecordedMock([
+        {
+          operation: { method: 'GET', path: '/sparse' },
+          request: { query: { limit: '3' } },
+          response: { status: 200, body: { channels: [{ id: 5 }, { id: 4 }, { id: 3 }] } },
+        },
+      ]);
+      const cursor = Buffer.from('contract-mock:2').toString('base64url');
+
+      expect((await getJson(fetch, `/sparse?limit=2&since=${cursor}`)).status).toBe(400);
+    });
+
     it('reads a numeric cursor from a JSON body', async () => {
       const { fetch } = createMock(3);
       const search = async (body: object) => {
