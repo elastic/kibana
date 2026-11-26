@@ -42,6 +42,8 @@ export const IPV6_VALUE_PATTERN = ':';
 export interface ObservableTypePath {
   readonly path: string;
   readonly enabled: boolean;
+  /** Values of this field that extraction skips, compared exactly. */
+  readonly excludedValues?: string[];
 }
 
 export interface DefaultObservableType {
