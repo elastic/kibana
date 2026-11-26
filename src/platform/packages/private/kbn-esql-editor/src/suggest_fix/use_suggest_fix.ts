@@ -17,6 +17,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { GENERATING_HINT_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
+import { runWithPublishHold } from '../comment_to_esql/query_publish_gate';
 import type { QueryPublishGateRef } from '../comment_to_esql/query_publish_gate';
 import { useReplaceReview } from '../comment_to_esql/use_replace_review';
 
@@ -179,7 +180,6 @@ export const useSuggestFix = ({
       const controller = new AbortController();
       abortControllerRef.current = controller;
       const startTime = Date.now();
-      let holdingPreview = false;
 
       try {
         const result = await http.post<{ content: string }>(SUGGEST_FIX_ROUTE, {
@@ -216,48 +216,42 @@ export const useSuggestFix = ({
           return;
         }
 
-        // Insert only the changed fix lines after the last changed original line.
         // Hold publishing until accept/reject so the preview is not saved as the query.
-        queryPublishGate?.current.hold();
-        holdingPreview = true;
-        const insertMaxCol = model.getLineMaxColumn(lastChangedOriginalLine);
-        editor.executeEdits('esql-suggest-fix', [
-          {
-            range: new monaco.Range(
-              lastChangedOriginalLine,
-              insertMaxCol,
-              lastChangedOriginalLine,
-              insertMaxCol
-            ),
-            text: '\n' + changedFixedLines.join('\n'),
-            forceMoveMarkers: true,
-          },
-        ]);
-        onAfterInsert?.();
+        runWithPublishHold(queryPublishGate, () => {
+          const insertMaxCol = model.getLineMaxColumn(lastChangedOriginalLine);
+          editor.executeEdits('esql-suggest-fix', [
+            {
+              range: new monaco.Range(
+                lastChangedOriginalLine,
+                insertMaxCol,
+                lastChangedOriginalLine,
+                insertMaxCol
+              ),
+              text: '\n' + changedFixedLines.join('\n'),
+              forceMoveMarkers: true,
+            },
+          ]);
+          onAfterInsert?.();
 
-        const generatedLineStart = lastChangedOriginalLine + 1;
-        const generatedLineEnd = lastChangedOriginalLine + changedFixedLines.length;
+          const generatedLineStart = lastChangedOriginalLine + 1;
+          const generatedLineEnd = lastChangedOriginalLine + changedFixedLines.length;
 
-        trackFixResult(
-          queryString.length,
-          startTime,
-          true,
-          errorCode,
-          generatedLineEnd - generatedLineStart + 1
-        );
+          trackFixResult(
+            queryString.length,
+            startTime,
+            true,
+            errorCode,
+            generatedLineEnd - generatedLineStart + 1
+          );
 
-        showReview({
-          firstChangedOriginalLine,
-          lastChangedOriginalLine,
-          generatedLineStart,
-          generatedLineEnd,
+          showReview({
+            firstChangedOriginalLine,
+            lastChangedOriginalLine,
+            generatedLineStart,
+            generatedLineEnd,
+          });
         });
-        holdingPreview = false;
       } catch (error) {
-        if (holdingPreview) {
-          holdingPreview = false;
-          queryPublishGate?.current.release();
-        }
         if (controller.signal.aborted) return;
         trackFixResult(queryString.length, startTime, false, errorCode);
         const message =

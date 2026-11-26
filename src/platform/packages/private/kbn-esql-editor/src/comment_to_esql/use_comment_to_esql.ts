@@ -18,6 +18,7 @@ import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/te
 import { ReviewActionsWidget } from './review_actions_widget';
 import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
+import { runWithPublishHold } from './query_publish_gate';
 import type { QueryPublishGateRef } from './query_publish_gate';
 import {
   findTargetComment,
@@ -423,14 +424,7 @@ export const useCommentToEsql = ({
       const currentCommentLine = anchorRanges[0]?.startLineNumber;
       if (!currentCommentLine || !isModelStillValid(liveModel, currentCommentLine)) return;
 
-      queryPublishGate?.current.hold();
-      let releasedPreview = false;
-      const releasePreview = () => {
-        if (releasedPreview) return;
-        releasedPreview = true;
-        queryPublishGate?.current.release();
-      };
-      try {
+      runWithPublishHold(queryPublishGate, () => {
         const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
           editor,
           liveModel,
@@ -447,8 +441,7 @@ export const useCommentToEsql = ({
         if (autoAcceptCallbackRef?.current) {
           const cb = autoAcceptCallbackRef.current;
           autoAcceptCallbackRef.current = undefined;
-          // The auto-accept edit should publish; the preview insert above should not.
-          releasePreview();
+          queryPublishGate?.current.release();
           const currentEditor = editorRef.current;
           if (currentEditor && liveModel) {
             currentEditor.executeEdits('nl-to-esql-auto-accept', [
@@ -468,10 +461,7 @@ export const useCommentToEsql = ({
           generatedLineEnd,
           replacedLineNumber,
         });
-      } catch (error) {
-        releasePreview();
-        throw error;
-      }
+      });
     } finally {
       clearGeneratingDecoration();
     }

@@ -14,6 +14,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { VisorNlResultHandler } from '../types';
+import { runWithPublishHold } from './query_publish_gate';
 import type { QueryPublishGateRef } from './query_publish_gate';
 import { useReplaceReview } from './use_replace_review';
 import type { ReviewState } from './use_replace_review';
@@ -141,62 +142,39 @@ export const useVisorNlToEsql = ({
       const plan = getVisorNlInsertPlan(model.getValue().split('\n'), generatedContent.split('\n'));
       if (!plan) return;
 
-      let holdingPreview = false;
-      try {
+      const insertAndReview = () => {
         if (plan.insert) {
-          // Keep the inserted lines out of the saved query until the user accepts.
-          queryPublishGate.current.hold();
-          holdingPreview = true;
-
           const { lastChangedOriginalLine } = plan.review;
-          if (plan.insert.isLastLine) {
-            const lineContent = model.getLineContent(lastChangedOriginalLine);
-            editor.executeEdits('nl-to-esql-visor', [
-              {
-                range: new monaco.Range(
-                  lastChangedOriginalLine,
-                  lineContent.length + 1,
-                  lastChangedOriginalLine,
-                  lineContent.length + 1
-                ),
-                text: plan.insert.text,
-                forceMoveMarkers: true,
-              },
-            ]);
-          } else {
-            editor.executeEdits('nl-to-esql-visor', [
-              {
-                range: new monaco.Range(
-                  lastChangedOriginalLine + 1,
-                  1,
-                  lastChangedOriginalLine + 1,
-                  1
-                ),
-                text: plan.insert.text,
-                forceMoveMarkers: true,
-              },
-            ]);
-          }
+          const insertAtLineEnd = plan.insert.isLastLine;
+          const insertLine = insertAtLineEnd
+            ? lastChangedOriginalLine
+            : lastChangedOriginalLine + 1;
+          const insertColumn = insertAtLineEnd ? model.getLineContent(insertLine).length + 1 : 1;
+          editor.executeEdits('nl-to-esql-visor', [
+            {
+              range: new monaco.Range(insertLine, insertColumn, insertLine, insertColumn),
+              text: plan.insert.text,
+              forceMoveMarkers: true,
+            },
+          ]);
         }
 
         const { generatedLineStart, generatedLineEnd } = plan.review;
         const blockLines: string[] = [];
-        if (generatedLineEnd >= generatedLineStart) {
-          for (let line = generatedLineStart; line <= generatedLineEnd; line++) {
-            blockLines.push(model.getLineContent(line));
-          }
+        for (let line = generatedLineStart; line <= generatedLineEnd; line++) {
+          blockLines.push(model.getLineContent(line));
         }
         generatedBlockRef.current = blockLines.join('\n');
         untouchedPreviewRef.current = model.getValue();
 
         onAfterInsert?.();
         showReview(plan.review);
-        holdingPreview = false;
-      } catch (error) {
-        if (holdingPreview) {
-          queryPublishGate.current.release();
-        }
-        throw error;
+      };
+
+      if (plan.insert) {
+        runWithPublishHold(queryPublishGate, insertAndReview);
+      } else {
+        insertAndReview();
       }
     },
     [editorRef, editorModel, reject, showReview, onAfterInsert, queryPublishGate]

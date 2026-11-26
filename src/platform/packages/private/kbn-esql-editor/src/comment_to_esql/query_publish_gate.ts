@@ -19,3 +19,16 @@ export interface QueryPublishGate {
 }
 
 export type QueryPublishGateRef = MutableRefObject<QueryPublishGate>;
+
+export const runWithPublishHold = <T>(
+  gate: QueryPublishGateRef | undefined,
+  insertPreview: () => T
+): T => {
+  gate?.current.hold();
+  try {
+    return insertPreview();
+  } catch (error) {
+    gate?.current.release();
+    throw error;
+  }
+};

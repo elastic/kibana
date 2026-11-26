@@ -257,6 +257,14 @@ const ESQLEditorInternal = function ESQLEditor({
   const variablesService = esqlService?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? DEFAULT_HISTOGRAM_BAR_TARGET;
   const [code, setCode] = useState<string>(fixedQuery ?? '');
+  const endPreview = useCallback(
+    (resultingQuery: string) => {
+      publishedQueryRef.current = resultingQuery;
+      setPreviewValue(undefined);
+      setCode(resultingQuery);
+    },
+    [setPreviewValue]
+  );
 
   // To make server side errors less "sticky", register the query that last errored
   const [lastErroredCode, setLastErroredCode] = useState<string | undefined>(() =>
@@ -359,13 +367,11 @@ const ESQLEditorInternal = function ESQLEditor({
       // Accept/reject removes the preview. Point the controlled value at the
       // resulting text in the same update, or Monaco restores the previous query.
       if (previewValueRef.current !== undefined) {
-        publishedQueryRef.current = value;
-        setPreviewValue(undefined);
-        setCode(value);
+        endPreview(value);
       }
       onQueryUpdate(value);
     },
-    [onQueryUpdate, setPreviewValue]
+    [onQueryUpdate, setPreviewValue, endPreview]
   );
 
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
@@ -430,10 +436,8 @@ const ESQLEditorInternal = function ESQLEditor({
       pendingReviewRef.current.discard();
     }
 
-    publishedQueryRef.current = fixedQuery;
-    setPreviewValue(undefined);
-    setCode(fixedQuery);
-  }, [fixedQuery, setPreviewValue]);
+    endPreview(fixedQuery);
+  }, [fixedQuery, endPreview]);
 
   // If variables are passed to the editor, sync them with the variables service.
   // This ensures that the latest variables are always available for suggestions.
