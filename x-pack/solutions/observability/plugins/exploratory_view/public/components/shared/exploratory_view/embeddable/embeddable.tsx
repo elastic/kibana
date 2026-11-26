@@ -137,6 +137,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     reportType,
     setAddToCaseOpen,
     title: attributesJSON?.title,
+    lens,
   });
 
   if (!attributesJSON) {

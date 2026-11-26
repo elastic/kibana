@@ -8,12 +8,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createExploratoryViewRoutePath } from '../configurations/utils';
 import { createExploratoryViewUrl } from '../configurations/exploratory_view_url';
 import type { ReportViewType } from '../types';
 import type { AllSeries } from '../hooks/use_series_storage';
-import type { ObservabilityAppServices } from '../../../../application/types';
 
 const saveLabel = i18n.translate('xpack.exploratoryView.expView.save', {
   defaultMessage: 'Save visualization',
@@ -27,6 +27,7 @@ export function useActions({
   reportType,
   setAddToCaseOpen,
   title,
+  lens,
 }: {
   withActions?: boolean | ActionTypes[];
   reportType: ReportViewType;
@@ -34,11 +35,9 @@ export function useActions({
   setAddToCaseOpen: (val: boolean) => void;
   /** Title of the chart, which the embedded chart hides */
   title?: string;
+  /** The Lens service of the embeddable, which the Kibana context of the host app may not have */
+  lens: LensPublicStart;
 }) {
-  const kServices = useKibana<ObservabilityAppServices>().services;
-
-  const { lens } = kServices;
-
   const [defaultActions, setDefaultActions] = useState(['explore', 'save', 'addToCase']);
 
   useEffect(() => {
