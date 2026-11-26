@@ -19,7 +19,7 @@ import type {
   LensEmbeddableOutput,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { apiPublishesEsql } from '@kbn/presentation-publishing';
@@ -60,6 +60,7 @@ export interface UnifiedHistogramChartActionContext {
   isEsql: boolean;
   /** The Lens attributes without their embedded ES|QL result tables. */
   attributes: TypedLensByValueInput['attributes'];
+  query: Query | AggregateQuery;
   relativeTimeRange: TimeRange;
 }
 
@@ -365,6 +366,7 @@ export function UnifiedHistogramChart({
       ...getAdditionalActions({
         isEsql,
         attributes: removeTablesFromLensAttributes(visContext.attributes).attributes,
+        query,
         relativeTimeRange,
       })
     );

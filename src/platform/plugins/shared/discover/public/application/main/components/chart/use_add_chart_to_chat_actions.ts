@@ -27,8 +27,7 @@ export const useAddChartToChatActions = (): UnifiedHistogramChartProps['getAddit
   const { agentBuilder } = useDiscoverServices();
 
   return useCallback<NonNullable<UnifiedHistogramChartProps['getAdditionalActions']>>(
-    ({ isEsql, attributes, relativeTimeRange }) => {
-      const { query } = attributes.state;
+    ({ isEsql, attributes, query, relativeTimeRange }) => {
       if (!agentBuilder || !isEsql || !isOfAggregateQueryType(query)) {
         return [];
       }
