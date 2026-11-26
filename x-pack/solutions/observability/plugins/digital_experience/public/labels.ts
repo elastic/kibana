@@ -98,6 +98,21 @@ export const SESSIONS_LABEL = i18n.translate('xpack.digitalExperience.sessions.l
   defaultMessage: 'Sessions',
 });
 
+export const USERS_LABEL = i18n.translate('xpack.digitalExperience.users.label', {
+  defaultMessage: 'Users',
+});
+
+export const EVENTS_LABEL = i18n.translate('xpack.digitalExperience.events.label', {
+  defaultMessage: 'Events',
+});
+
+/** The badge of a crash group only the newest release had, e.g. "New in 4.2.0". */
+export const newInReleaseLabel = (release: string): string =>
+  i18n.translate('xpack.digitalExperience.mobile.crashes.newInRelease', {
+    defaultMessage: 'New in {release}',
+    values: { release },
+  });
+
 export const SOURCE_LABELS: Record<ApplicationSource, string> = {
   otel: i18n.translate('xpack.digitalExperience.applications.source.otel', {
     defaultMessage: 'EDOT Browser',
@@ -139,6 +154,9 @@ export const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   sessions: SESSIONS_LABEL,
   reports: i18n.translate('xpack.digitalExperience.application.tabs.reports', {
     defaultMessage: 'Reports',
+  }),
+  crashes: i18n.translate('xpack.digitalExperience.application.tabs.crashes', {
+    defaultMessage: 'Crashes',
   }),
 };
 
