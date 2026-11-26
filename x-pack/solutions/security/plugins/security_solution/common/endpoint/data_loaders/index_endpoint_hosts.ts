@@ -54,6 +54,7 @@ import {
 } from './index_fleet_endpoint_policy';
 import {
   METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
   metadataCurrentIndexPattern,
   POLICY_RESPONSE_INDEX,
 } from '../constants';
@@ -167,145 +168,153 @@ export const indexEndpointHostDocs = usageTracker.track(
 
     const bulkOperations: BulkRequest['operations'] = [];
 
-    for (let j = 0; j < numDocs; j++) {
-      generator.updateHostData();
-      generator.updateHostPolicyData({ excludeInitialPolicy: true });
+    try {
+      for (let j = 0; j < numDocs; j++) {
+        generator.updateHostData();
+        generator.updateHostPolicyData({ excludeInitialPolicy: true });
 
-      hostMetadata = generator.generateHostMetadata(
-        timestamp - timeBetweenDocs * (numDocs - j - 1),
-        EndpointDocGenerator.createDataStreamFromIndex(metadataIndex)
-      );
-      let agentId = hostMetadata.agent.id;
+        hostMetadata = generator.generateHostMetadata(
+          timestamp - timeBetweenDocs * (numDocs - j - 1),
+          EndpointDocGenerator.createDataStreamFromIndex(metadataIndex)
+        );
+        let agentId = hostMetadata.agent.id;
 
-      if (enrollFleet) {
-        const { id: appliedPolicyId, name: appliedPolicyName } =
-          hostMetadata.Endpoint.policy.applied;
-        const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuidv4()}`;
+        if (enrollFleet) {
+          const { id: appliedPolicyId, name: appliedPolicyName } =
+            hostMetadata.Endpoint.policy.applied;
+          const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuidv4()}`;
 
-        // If we don't yet have a "real" policy record, then create it now in ingest (package config)
-        if (!realPolicies[appliedPolicyId]) {
-          const createdPolicies = await indexFleetEndpointPolicy(
-            kbnClient,
-            uniqueAppliedPolicyName,
-            epmEndpointPackage.version
-          );
+          // If we don't yet have a "real" policy record, then create it now in ingest (package config)
+          if (!realPolicies[appliedPolicyId]) {
+            const createdPolicies = await indexFleetEndpointPolicy(
+              kbnClient,
+              uniqueAppliedPolicyName,
+              epmEndpointPackage.version
+            );
 
-          mergeAndAppendArrays(response, createdPolicies);
+            mergeAndAppendArrays(response, createdPolicies);
 
-          // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
-          realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
-        }
+            // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
+            realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
+          }
 
-        // If we did not yet enroll an agent for this Host, do it now that we have good policy id
-        if (!wasAgentEnrolled) {
-          wasAgentEnrolled = true;
+          // If we did not yet enroll an agent for this Host, do it now that we have good policy id
+          if (!wasAgentEnrolled) {
+            wasAgentEnrolled = true;
 
-          const agentOperations: BuildFleetAgentBulkCreateOperationsResponse = {
-            agents: [],
-            fleetAgentsIndex: '',
-            operations: [],
-          };
+            const agentOperations: BuildFleetAgentBulkCreateOperationsResponse = {
+              agents: [],
+              fleetAgentsIndex: '',
+              operations: [],
+            };
 
-          realPolicies[appliedPolicyId].policy_ids.forEach((policyId) => {
-            const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
-              endpoints: [hostMetadata],
-              agentPolicyId: policyId,
-              spaceId: activeSpaceId,
-              kibanaVersion,
+            realPolicies[appliedPolicyId].policy_ids.forEach((policyId) => {
+              const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
+                endpoints: [hostMetadata],
+                agentPolicyId: policyId,
+                spaceId: activeSpaceId,
+                kibanaVersion,
+              });
+
+              agentOperations.agents = [...agentOperations.agents, ...agents];
+              agentOperations.fleetAgentsIndex = fleetAgentsIndex;
+              agentOperations.operations = [...agentOperations.operations, ...operations];
             });
 
-            agentOperations.agents = [...agentOperations.agents, ...agents];
-            agentOperations.fleetAgentsIndex = fleetAgentsIndex;
-            agentOperations.operations = [...agentOperations.operations, ...operations];
-          });
+            bulkOperations.push(...agentOperations.operations);
+            agentId = agentOperations.agents[0]?.agent?.id ?? agentId;
 
-          bulkOperations.push(...agentOperations.operations);
-          agentId = agentOperations.agents[0]?.agent?.id ?? agentId;
+            mergeAndAppendArrays(response, {
+              agents: agentOperations.agents,
+              fleetAgentsIndex: agentOperations.fleetAgentsIndex,
+            });
+          }
 
-          mergeAndAppendArrays(response, {
-            agents: agentOperations.agents,
-            fleetAgentsIndex: agentOperations.fleetAgentsIndex,
-          });
-        }
-
-        // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
-        hostMetadata = {
-          ...hostMetadata,
-          agent: {
-            ...hostMetadata.agent,
-            id: agentId,
-          },
-          elastic: {
-            ...hostMetadata.elastic,
+          // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
+          hostMetadata = {
+            ...hostMetadata,
             agent: {
-              ...hostMetadata.elastic.agent,
+              ...hostMetadata.agent,
               id: agentId,
             },
-          },
-          Endpoint: {
-            ...hostMetadata.Endpoint,
-            policy: {
-              ...hostMetadata.Endpoint.policy,
-              applied: {
-                ...hostMetadata.Endpoint.policy.applied,
-                id: realPolicies[appliedPolicyId].id,
+            elastic: {
+              ...hostMetadata.elastic,
+              agent: {
+                ...hostMetadata.elastic.agent,
+                id: agentId,
               },
             },
-          },
-        };
+            Endpoint: {
+              ...hostMetadata.Endpoint,
+              policy: {
+                ...hostMetadata.Endpoint.policy,
+                applied: {
+                  ...hostMetadata.Endpoint.policy.applied,
+                  id: realPolicies[appliedPolicyId].id,
+                },
+              },
+            },
+          };
 
-        // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-        if (withResponseActions) {
-          // `count` logic matches that of `indexEndpointAndFleetActionsForHost()`. Unclear why the number of
-          // actions to create will be 5 more than the amount requested if that amount was grater than 1
-          const count =
-            numResponseActions === 1
-              ? numResponseActions
-              : generator.randomN(5) + numResponseActions;
+          // Create some fleet endpoint actions and .logs-endpoint actions for this Host
+          if (withResponseActions) {
+            // `count` logic matches that of `indexEndpointAndFleetActionsForHost()`. Unclear why the number of
+            // actions to create will be 5 more than the amount requested if that amount was grater than 1
+            const count =
+              numResponseActions === 1
+                ? numResponseActions
+                : generator.randomN(5) + numResponseActions;
 
-          const { operations, ...indexFleetActions } = buildIEndpointAndFleetActionsBulkOperations({
-            endpoints: [hostMetadata],
-            count,
-            alertIds,
-            responseState,
-          });
+            const { operations, ...indexFleetActions } =
+              buildIEndpointAndFleetActionsBulkOperations({
+                endpoints: [hostMetadata],
+                count,
+                alertIds,
+                responseState,
+              });
 
-          bulkOperations.push(...operations);
-          mergeAndAppendArrays(response, indexFleetActions);
+            bulkOperations.push(...operations);
+            mergeAndAppendArrays(response, indexFleetActions);
+          }
         }
+
+        bulkOperations.push({ create: { _index: metadataIndex } }, hostMetadata);
+
+        const hostPolicyResponse = generator.generatePolicyResponse({
+          ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
+          policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
+        });
+
+        bulkOperations.push({ create: { _index: policyResponseIndex } }, hostPolicyResponse);
+
+        // Clone the hostMetadata and policyResponse document to ensure that no shared state
+        // (as a result of using the generator) is returned across docs.
+        response.hosts.push(cloneDeep(hostMetadata));
+        response.policyResponses.push(cloneDeep(hostPolicyResponse));
       }
 
-      bulkOperations.push({ create: { _index: metadataIndex } }, hostMetadata);
+      const bulkResponse = await client
+        .bulk(
+          { operations: bulkOperations, refresh: 'wait_for' },
+          { headers: { 'X-elastic-product-origin': 'fleet' } }
+        )
+        .catch(wrapErrorAndRejectPromise);
 
-      const hostPolicyResponse = generator.generatePolicyResponse({
-        ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
-        policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
-      });
-
-      bulkOperations.push({ create: { _index: policyResponseIndex } }, hostPolicyResponse);
-
-      // Clone the hostMetadata and policyResponse document to ensure that no shared state
-      // (as a result of using the generator) is returned across docs.
-      response.hosts.push(cloneDeep(hostMetadata));
-      response.policyResponses.push(cloneDeep(hostPolicyResponse));
-    }
-
-    const bulkResponse = await client
-      .bulk(
-        { operations: bulkOperations, refresh: 'wait_for' },
-        { headers: { 'X-elastic-product-origin': 'fleet' } }
-      )
-      .catch(wrapErrorAndRejectPromise);
-
-    if (bulkResponse.errors) {
-      throw new EndpointError(
-        `indexEndpointHostDocs(): ES Bulk action failed\n\n${JSON.stringify(
-          bulkResponse,
-          null,
-          2
-        )}`,
-        bulkResponse
-      );
+      if (bulkResponse.errors) {
+        throw new EndpointError(
+          `indexEndpointHostDocs(): ES Bulk action failed\n\n${JSON.stringify(
+            bulkResponse,
+            null,
+            2
+          )}`,
+          bulkResponse
+        );
+      }
+    } catch (error) {
+      // `response` already lists every policy and doc id queued for this host, so roll
+      // them back here: callers never receive `response` when this function throws.
+      await deleteIndexedEndpointHosts(client, kbnClient, response).catch(() => undefined);
+      throw error;
     }
 
     return response;
@@ -356,18 +365,20 @@ export const deleteIndexedEndpointHosts = async (
     return response;
   }
 
-  if (indexedData.hosts.length) {
-    const query = {
-      bool: {
-        filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
-      },
-    };
+  const hostsQuery = {
+    bool: {
+      filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
+    },
+  };
 
+  if (indexedData.hosts.length) {
     response.hosts = await esClient
       .deleteByQuery({
         index: indexedData.metadataIndex,
         wait_for_completion: true,
-        query,
+        // The rollback in `indexEndpointHostDocs` can run before the bulk created this data stream.
+        ignore_unavailable: true,
+        query: hostsQuery,
       })
       .catch(wrapErrorAndRejectPromise);
 
@@ -376,7 +387,7 @@ export const deleteIndexedEndpointHosts = async (
       .deleteByQuery({
         index: metadataCurrentIndexPattern,
         wait_for_completion: true,
-        query,
+        query: hostsQuery,
       })
       .catch(wrapErrorAndRejectPromise);
   }
@@ -386,6 +397,7 @@ export const deleteIndexedEndpointHosts = async (
       .deleteByQuery({
         index: indexedData.policyResponseIndex,
         wait_for_completion: true,
+        ignore_unavailable: true,
         query: {
           bool: {
             filter: [
@@ -404,6 +416,21 @@ export const deleteIndexedEndpointHosts = async (
   }
 
   mergeAndAppendArrays(response, await deleteIndexedFleetAgents(esClient, indexedData));
+
+  // The united transform does not prune its destination when source docs are deleted.
+  // Delete after the Fleet agents so the transform has no active agent to re-materialize.
+  if (indexedData.hosts.length) {
+    await esClient
+      .deleteByQuery({
+        index: METADATA_UNITED_INDEX,
+        wait_for_completion: true,
+        ignore_unavailable: true,
+        conflicts: 'proceed',
+        query: hostsQuery,
+      })
+      .catch(wrapErrorAndRejectPromise);
+  }
+
   mergeAndAppendArrays(response, await deleteIndexedEndpointAndFleetActions(esClient, indexedData));
   mergeAndAppendArrays(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
 
@@ -506,41 +533,131 @@ export const indexEndpointHostForPolicy = async ({
 
   await stopMetadataTransforms(esClient, integrationPolicy.package?.version ?? '');
 
-  // Create the Fleet agent
-  const indexedFleetAgent = await indexFleetAgentForHost(
-    esClient,
-    hostMetadataDoc,
-    agentPolicyId ?? integrationPolicy.policy_ids[0],
-    kibanaVersion,
-    undefined,
-    agentPolicy.space_ids
-  );
-
-  mergeAndAppendArrays(response, indexedFleetAgent);
-
-  logger.info(`New fleet agent indexed [${indexedFleetAgent.agents[0]?.agent?.id}]`);
-  logger.verbose(JSON.stringify(indexedFleetAgent.agents, null, 2));
-
-  await esClient
-    .index({
+  const hostDocId = uuidv4();
+  // Rollback may only remove what this call created: an agent id that already has metadata keeps its
+  // history. A missing data stream (fresh stack) means there is none; any other failed read is
+  // inconclusive, so it is treated like existing metadata (the safe side).
+  const existingMetadata = await esClient
+    .count({
       index: METADATA_DATASTREAM,
-      id: uuidv4(),
-      body: hostMetadataDoc,
-      op_type: 'create',
-      refresh: 'wait_for',
+      query: { term: { 'agent.id': hostMetadataDoc.agent.id } },
     })
-    .catch(catchHttpErrorFormatAndThrow);
+    .catch((error) => (isNotFoundError(error) ? { count: 0 } : undefined));
+  const hadMetadata = existingMetadata === undefined || existingMetadata.count > 0;
 
-  response.hosts.push(hostMetadataDoc);
-  response.metadataIndex = METADATA_DATASTREAM;
+  try {
+    // Create the Fleet agent
+    const indexedFleetAgent = await indexFleetAgentForHost(
+      esClient,
+      hostMetadataDoc,
+      agentPolicyId ?? integrationPolicy.policy_ids[0],
+      kibanaVersion,
+      undefined,
+      agentPolicy.space_ids
+    );
 
-  logger.info(`New endpoint host metadata doc indexed with agent id [${hostMetadataDoc.agent.id}]`);
+    mergeAndAppendArrays(response, indexedFleetAgent);
 
-  await startMetadataTransforms(
-    esClient,
-    [hostMetadataDoc.agent.id],
-    integrationPolicy.package?.version ?? ''
-  );
+    logger.info(`New fleet agent indexed [${indexedFleetAgent.agents[0]?.agent?.id}]`);
+    logger.verbose(JSON.stringify(indexedFleetAgent.agents, null, 2));
 
-  return response;
+    await esClient
+      .index({
+        index: METADATA_DATASTREAM,
+        id: hostDocId,
+        body: hostMetadataDoc,
+        op_type: 'create',
+        refresh: 'wait_for',
+      })
+      .catch(catchHttpErrorFormatAndThrow);
+
+    response.hosts.push(hostMetadataDoc);
+    response.metadataIndex = METADATA_DATASTREAM;
+
+    logger.info(
+      `New endpoint host metadata doc indexed with agent id [${hostMetadataDoc.agent.id}]`
+    );
+
+    await startMetadataTransforms(
+      esClient,
+      [hostMetadataDoc.agent.id],
+      integrationPolicy.package?.version ?? ''
+    );
+
+    return response;
+  } catch (error) {
+    // The Fleet agent and host metadata are indexed before the transforms start. A throw after that
+    // point never returns `response`, so the caller has no cleanup handles: roll back what this call wrote.
+    await rollbackIndexedHost(esClient, response, hostDocId, hadMetadata);
+    throw error;
+  }
+};
+
+const isNotFoundError = (error: unknown): boolean => {
+  const { statusCode, body } =
+    (error as { meta?: { statusCode?: number; body?: { error?: { type?: string } } } })?.meta ?? {};
+  return statusCode === 404 || body?.error?.type === 'index_not_found_exception';
+};
+
+/** Best effort: the Fleet agent is cleaned up even if the metadata cleanup fails; the caller rethrows the original error. */
+const rollbackIndexedHost = async (
+  esClient: Client,
+  indexed: IndexedHostsResponse,
+  hostDocId: string,
+  hadMetadata: boolean
+): Promise<void> => {
+  const agentIds = indexed.hosts.map((host) => host.agent.id);
+
+  const removeHostMetadata = async () => {
+    // The source goes first and is refreshed: the transforms read it, so a destination cleanup that
+    // ran alongside could be undone by a transform republishing the host afterwards.
+    // A source stream that is already gone is already clean: carry on to the destinations.
+    await esClient
+      .deleteByQuery({
+        index: METADATA_DATASTREAM,
+        wait_for_completion: true,
+        refresh: true,
+        query: { ids: { values: [hostDocId] } },
+      })
+      .catch((error) => {
+        if (!isNotFoundError(error)) {
+          throw error;
+        }
+      });
+
+    if (hadMetadata) {
+      return;
+    }
+
+    // The transforms may have copied the new host into their destinations before the failure. The
+    // two destinations keep the agent id under different fields.
+    await Promise.allSettled([
+      esClient.deleteByQuery({
+        index: metadataCurrentIndexPattern,
+        ignore_unavailable: true,
+        wait_for_completion: true,
+        query: { terms: { 'agent.id': agentIds } },
+      }),
+      esClient.deleteByQuery({
+        index: METADATA_UNITED_INDEX,
+        ignore_unavailable: true,
+        wait_for_completion: true,
+        // A united doc can hold the Fleet agent without endpoint metadata yet, so match its root id too.
+        query: {
+          bool: {
+            should: [
+              { terms: { 'united.endpoint.agent.id': agentIds } },
+              { terms: { 'agent.id': agentIds } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      }),
+    ]);
+  };
+
+  await Promise.allSettled([
+    indexed.hosts.length > 0 ? removeHostMetadata() : undefined,
+    indexed.agents.length > 0 ? deleteIndexedFleetAgents(esClient, indexed) : undefined,
+  ]);
 };

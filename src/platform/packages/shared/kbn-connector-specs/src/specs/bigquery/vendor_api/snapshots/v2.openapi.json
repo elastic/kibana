@@ -869,18 +869,35 @@
           },
           {
             "in": "query",
-            "name": "$.xgafv",
+            "name": "access_token",
             "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           },
           {
             "in": "query",
             "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -894,28 +911,6 @@
           },
           {
             "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "access_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -923,9 +918,21 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
+            "name": "$.xgafv",
             "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
             }
           },
           {
@@ -943,28 +950,7 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "all",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "pageToken",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -983,6 +969,20 @@
               "format": "uint32",
               "type": "integer"
             }
+          },
+          {
+            "in": "query",
+            "name": "all",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -999,8 +999,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/bigquery",
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/bigquery"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/cloud-platform.read-only"
             ]
           }
@@ -1021,18 +1029,35 @@
           },
           {
             "in": "query",
-            "name": "$.xgafv",
+            "name": "access_token",
             "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           },
           {
             "in": "query",
             "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -1046,28 +1071,6 @@
           },
           {
             "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "access_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -1075,9 +1078,21 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
+            "name": "$.xgafv",
             "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
             }
           },
           {
@@ -1095,14 +1110,7 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -1131,8 +1139,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/bigquery",
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/bigquery"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/cloud-platform.read-only"
             ]
           }
@@ -1161,18 +1177,35 @@
           },
           {
             "in": "query",
-            "name": "$.xgafv",
+            "name": "access_token",
             "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           },
           {
             "in": "query",
             "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -1186,28 +1219,6 @@
           },
           {
             "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "access_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -1215,9 +1226,21 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
+            "name": "$.xgafv",
             "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
             }
           },
           {
@@ -1235,24 +1258,9 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "uploadType",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "timeoutMs",
-            "schema": {
-              "format": "uint32",
-              "type": "integer"
             }
           },
           {
@@ -1265,23 +1273,17 @@
           },
           {
             "in": "query",
-            "name": "pageToken",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "location",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "formatOptions.useInt64Timestamp",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeoutMs",
+            "schema": {
+              "format": "uint32",
+              "type": "integer"
             }
           },
           {
@@ -1299,10 +1301,24 @@
           },
           {
             "in": "query",
+            "name": "location",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "maxResults",
             "schema": {
               "format": "uint32",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1320,8 +1336,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/bigquery",
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/bigquery"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/cloud-platform.read-only"
             ]
           }

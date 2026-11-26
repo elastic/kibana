@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import {
-  MAX_ID_LENGTH,
-  NEEDS_AGENT_REASONS,
-  PROBE_STATUSES,
-  baselineObservationSchema,
-} from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, NEEDS_AGENT_REASONS } from '@kbn/significant-events-schema';
 import { lazySchema, z } from '@kbn/zod/v4';
 
 /** Why a detection reached the agent, with the events its rule is already a member of. */
 const batchClassifierSchema = lazySchema(() =>
   z.object({
     reason: z.enum(NEEDS_AGENT_REASONS),
-    probe_status: z.enum(PROBE_STATUSES).optional(),
-    /** Whether the re-run stored query returned rows; with `live_events`, the direction of a change. */
-    probe_has_rows: z.boolean().optional(),
-    baseline: baselineObservationSchema.optional(),
+    /** Whether the rule recorded a breach in its last runs; with `live_events`, the direction of a change. */
+    rule_breached: z.boolean().optional(),
     live_events: z
       .array(
         z.object({
