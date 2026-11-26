@@ -23,6 +23,8 @@ const packageInfoRoute = /\/api\/fleet\/epm\/packages\/aws(\/[^/?]+)?(\?.*)?$/;
 const awsConsole = /console\.aws\.amazon\.com/;
 const callbackAvailabilityRoute = '**/internal/fleet/iac_provisioner/callback_availability';
 const renderTemplateRoute = '**/internal/fleet/iac_provisioner/render_template';
+const renderedTemplateUrl =
+  'https://rendered-templates.example.com/identity-federation.yml?sig=test';
 const staticTemplate =
   'https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml';
 // What newer package versions declare as the option's `iac_template_url`: a console quick-create
@@ -141,9 +143,15 @@ test.describe(
       const renderRequests: Array<{ integrations?: unknown }> = [];
       await page.route(renderTemplateRoute, async (route) => {
         renderRequests.push(route.request().postDataJSON());
-        // Answer with an error: the shared form then falls back to the static template, which is
-        // enough to see that Launch asked the provisioner to render for the enabled inputs.
-        await route.fulfill({ status: 500, json: { message: 'render unavailable in this test' } });
+        await route.fulfill({
+          json: {
+            render: true,
+            templateSha: 'sha256:test-template',
+            artifactUrl: renderedTemplateUrl,
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+            blueprint: { id: 'aws-federated-identity', version: '1.0.0' },
+          },
+        });
       });
       await openAgentlessGuardDuty(page);
       await selectIdentityFederation(page);
@@ -163,7 +171,9 @@ test.describe(
       await page.getByTestId(launchButton).click();
       const popup = await popupPromise;
       await popup.waitForURL(awsConsole);
-      expect(popup.url()).toContain('templateURL=');
+      expect(new URL(popup.url()).hash.split('?')[1]).toContain(
+        `templateURL=${encodeURIComponent(renderedTemplateUrl)}`
+      );
       await expect.poll(() => renderRequests.length).toBeGreaterThan(0);
       expect(renderRequests[0].integrations).toStrictEqual([
         { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
