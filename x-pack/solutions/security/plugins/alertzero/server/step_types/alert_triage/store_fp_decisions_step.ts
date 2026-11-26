@@ -108,16 +108,17 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
               )
             : { closedAsOther: [], closedWithoutVerdict: [] };
         const blockingIds = new Set(closedAsOther);
-        // Alerts closed as another reason are left out of the grouping by `blockingIds`, so the
-        // evidence filter only has the ones closed with no reason left to take out.
+        // Alerts closed with a verdict are left out of the grouping by `blockingIds`, so the
+        // evidence filter only has the ones closed with no reason or a neutral one left to take out.
         const noEvidenceIds = new Set(closedWithoutVerdict);
         const conflictedKeys = groupByStrictKey({
           alerts: entries.filter(({ id }) => blockingIds.has(id)),
           spaceId,
         }).groups.map(({ hash }) => hash);
         // Every key the proposal has is counted, whatever its evidence: an approval whose alerts
-        // were all closed with no reason has keys, and reports them below the minimum, not as
-        // having none. The evidence filter only decides how many alerts a key has for the minimum.
+        // were all closed with no reason or a neutral one has keys, and reports them below the
+        // minimum, not as having none. The evidence filter only decides how many alerts a key has
+        // for the minimum.
         const grouped = groupByStrictKey({
           alerts: entries.filter(({ id }) => !blockingIds.has(id)),
           spaceId,
