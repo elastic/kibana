@@ -47,6 +47,8 @@ import type { Rule } from '../../../rule_management/logic';
 import { useRule } from '../../../rule_management/logic/use_rule';
 import { RULE_TYPE_LABELS } from '../../../rule_sets/components/translations';
 import * as i18n from '../../../rule_sets/search/translations';
+import { useRuleSearchStatus } from '../../../rule_sets/search/use_rule_search_status';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 
 /** The open rule, by id, so that a link opens the same flyout. */
 const URL_PARAM = 'ruleFlyout';
@@ -207,6 +209,10 @@ const RuleFlyoutActions = ({
   onDone: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const searchStatus = useRuleSearchStatus();
+  const {
+    actions: { setFilterOptions },
+  } = useRulesTableContext();
   const items = actions.map((action, index) => {
     const enabled = action.enabled ? action.enabled(rule) : true;
     const label = typeof action.description === 'string' ? action.description : String(index);
@@ -227,6 +233,24 @@ const RuleFlyoutActions = ({
   });
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+      {searchStatus === 'ready' && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="sparkles"
+            onClick={() => {
+              setFilterOptions({
+                similarTo: { id: rule.id, name: rule.name },
+                filter: '',
+                members: undefined,
+              });
+              onDone();
+            }}
+            data-test-subj="ruleFlyoutFindSimilar"
+          >
+            {i18n.FIND_SIMILAR}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiPopover
           aria-label={i18n.MORE_ACTIONS}

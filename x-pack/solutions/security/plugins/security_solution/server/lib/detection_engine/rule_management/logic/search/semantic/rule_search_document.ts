@@ -9,7 +9,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RuleParams } from '../../../../rule_schema';
 
 /** The format of the rule card; a new value re-embeds every rule on the next sync. */
-export const RULE_CARD_VERSION = '3';
+export const RULE_CARD_VERSION = '4';
 
 export interface RuleSearchDocument {
   card_version: string;
@@ -28,6 +28,7 @@ export interface RuleSearchDocument {
   setup: string;
   card: string;
   rule_card: string;
+  explain_card: string;
 }
 
 export const ruleSearchDocumentId = (spaceId: string, soId: string) => `${spaceId}:${soId}`;
@@ -111,5 +112,6 @@ export const buildRuleSearchDocument = (
     setup: params.setup ?? '',
     card,
     rule_card: fullCard,
+    explain_card: card,
   };
 };

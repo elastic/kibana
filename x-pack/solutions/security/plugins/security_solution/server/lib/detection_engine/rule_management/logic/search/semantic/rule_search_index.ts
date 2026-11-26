@@ -23,7 +23,7 @@ export const RULE_SEARCH_EMBEDDING_ID = '.jina-embeddings-v5-text-small';
 export const RULE_SEARCH_RERANK_ID = '.jina-reranker-v3.5';
 
 /** A new value rebuilds the index: analyzers and field types cannot change in place. */
-const MAPPING_VERSION = '2';
+const MAPPING_VERSION = '3';
 
 const MAPPINGS: MappingTypeMapping = {
   dynamic: 'strict',
@@ -49,6 +49,14 @@ const MAPPINGS: MappingTypeMapping = {
     // short; the vector gets the whole rule.
     card: { type: 'text', index: false },
     rule_card: { type: 'semantic_text', inference_id: RULE_SEARCH_EMBEDDING_ID },
+    // "Why it matched" only: the short card in sentences, so that the highlight is the sentence
+    // of the description, MITRE or index patterns that is closest to the text, not a paragraph of
+    // the investigation guide.
+    explain_card: {
+      type: 'semantic_text',
+      inference_id: RULE_SEARCH_EMBEDDING_ID,
+      chunking_settings: { strategy: 'sentence', max_chunk_size: 25, sentence_overlap: 0 },
+    },
   },
 };
 

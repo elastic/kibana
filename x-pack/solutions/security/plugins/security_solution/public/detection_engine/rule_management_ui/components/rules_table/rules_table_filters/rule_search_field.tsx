@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import type { EuiFieldSearchProps } from '@elastic/eui';
-import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 
 const SearchBarWrapper = styled(EuiFlexItem)`
@@ -21,11 +21,15 @@ const SearchBarWrapper = styled(EuiFlexItem)`
   }
 `;
 
+const SUGGESTIONS_SELECTOR = '[data-rule-search-suggestions]';
+
 interface RuleSearchFieldProps {
   initialValue?: string;
   onSearch: (value: string) => void;
   placeholder?: string;
   prepend?: EuiFieldSearchProps['prepend'];
+  /** Shown under the empty box while it has the focus. */
+  suggestions?: ReactNode;
 }
 
 export function RuleSearchField({
@@ -33,7 +37,9 @@ export function RuleSearchField({
   onSearch,
   placeholder,
   prepend,
+  suggestions,
 }: RuleSearchFieldProps): JSX.Element {
+  const [isFocused, setIsFocused] = useState(false);
   const [searchText, setSearchText] = useState(initialValue);
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value),
@@ -42,21 +48,47 @@ export function RuleSearchField({
 
   useEffect(() => {
     setSearchText(initialValue);
+    setIsFocused(false);
   }, [initialValue]);
+
+  const field = (
+    <EuiFieldSearch
+      aria-label={i18n.SEARCH_RULES}
+      fullWidth
+      incremental={false}
+      placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}
+      value={searchText}
+      onChange={handleChange}
+      onSearch={onSearch}
+      onFocus={() => setIsFocused(true)}
+      onClick={() => setIsFocused(true)}
+      onBlur={(event) => {
+        // A click on a suggestion moves the focus into the suggestions: keep them open for it.
+        if (!(event.relatedTarget as HTMLElement | null)?.closest(SUGGESTIONS_SELECTOR)) {
+          setIsFocused(false);
+        }
+      }}
+      prepend={prepend}
+      data-test-subj="ruleSearchField"
+    />
+  );
 
   return (
     <SearchBarWrapper grow>
-      <EuiFieldSearch
-        aria-label={i18n.SEARCH_RULES}
-        fullWidth
-        incremental={false}
-        placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}
-        value={searchText}
-        onChange={handleChange}
-        onSearch={onSearch}
-        prepend={prepend}
-        data-test-subj="ruleSearchField"
-      />
+      {suggestions ? (
+        <EuiInputPopover
+          fullWidth
+          input={field}
+          isOpen={isFocused && !searchText}
+          closePopover={() => setIsFocused(false)}
+          disableFocusTrap
+          panelPaddingSize="s"
+        >
+          <div data-rule-search-suggestions>{suggestions}</div>
+        </EuiInputPopover>
+      ) : (
+        field
+      )}
     </SearchBarWrapper>
   );
 }

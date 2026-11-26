@@ -131,14 +131,21 @@ export const searchRelevantRuleIds = async ({
       _source: ['so_id', 'name'],
       retriever,
       highlight: {
-        fields: { rule_card: { type: 'semantic', number_of_fragments: 1, order: 'score' } },
+        fields: {
+          explain_card: {
+            type: 'semantic',
+            number_of_fragments: 1,
+            order: 'score',
+            highlight_query: { semantic: { field: 'explain_card', query: term } },
+          },
+        },
       },
     },
     { requestTimeout: SEARCH_TIMEOUT_MS }
   );
   const ranked = result.hits.hits.flatMap((hit) => {
     if (!hit._source) return [];
-    const chunk = hit.highlight?.rule_card?.[0];
+    const chunk = hit.highlight?.explain_card?.[0];
     return [
       {
         soId: hit._source.so_id,

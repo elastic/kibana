@@ -46,14 +46,17 @@ export const isRuleSetChanged = (filterOptions: FilterOptions, set: SavedSet | u
 export interface RuleQueryParams {
   rule_scope?: RuleScope;
   filter_params?: RuleSetConditions;
-  search?: { term: string; mode: 'semantic' | 'legacy' };
+  search?: { term: string; mode: 'semantic' | 'legacy'; similar_to?: string };
 }
 
 /**
  * The search box asks for `semantic` unless the user picked Keyword; the server runs the keyword
  * search when search by meaning is not ready in the space, and says which mode ran and why.
  */
-const searchParam = ({ filter, searchMode }: FilterOptions) => {
+const searchParam = ({ filter, searchMode, similarTo }: FilterOptions) => {
+  if (similarTo) {
+    return { search: { term: '', mode: 'semantic' as const, similar_to: similarTo.id } };
+  }
   const term = filter.trim();
   return term
     ? {

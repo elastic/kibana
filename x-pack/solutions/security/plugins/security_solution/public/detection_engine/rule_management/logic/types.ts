@@ -112,6 +112,8 @@ export interface FilterOptions {
   filter: string;
   /** AI search on or off (`keyword`); unset means on when it is ready in the space. */
   searchMode?: RuleSearchBoxMode;
+  /** Search by meaning for the rules closest to this rule, instead of the search text. */
+  similarTo?: { id: string; name: string };
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];

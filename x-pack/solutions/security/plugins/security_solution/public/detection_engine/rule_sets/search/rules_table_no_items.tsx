@@ -32,7 +32,8 @@ export const RulesTableNoItems = () => {
     actions: { setFilterOptions },
   } = useRulesTableContext();
   const text = filterOptions.filter.trim();
-  const afterAiSearch = searchMode === 'semantic' && text !== '';
+  const { similarTo } = filterOptions;
+  const afterAiSearch = searchMode === 'semantic' && text !== '' && !similarTo;
   const keywordParams = ruleQueryParams({ ...filterOptions, searchMode: 'keyword' });
   const { data: keywordTotal } = useQuery(
     ['ruleSearchKeywordTotal', keywordParams],
@@ -48,6 +49,9 @@ export const RulesTableNoItems = () => {
     { enabled: afterAiSearch, refetchOnWindowFocus: false }
   );
 
+  if (similarTo && searchMode === 'semantic') {
+    return <EuiEmptyPrompt titleSize="xs" title={<h3>{i18n.NO_SIMILAR(similarTo.name)}</h3>} />;
+  }
   if (!afterAiSearch) {
     return (
       <EuiEmptyPrompt

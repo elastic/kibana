@@ -30,7 +30,8 @@ export const SearchModeLine = () => {
   } = useRulesTableContext();
   const status = useRuleSearchStatus();
   const text = filterOptions.filter.trim();
-  if (!text || !searchMode || isFetching) {
+  const { similarTo } = filterOptions;
+  if ((!text && !similarTo) || !searchMode || isFetching) {
     return null;
   }
   const failed =
@@ -66,12 +67,27 @@ export const SearchModeLine = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {searchMode === 'semantic'
+            {similarTo
+              ? i18n.SIMILAR_RESULTS(pagination.total, similarTo.name)
+              : searchMode === 'semantic'
               ? i18n.AI_RESULTS(pagination.total)
               : i18n.KEYWORD_RESULTS(pagination.total, text)}
           </EuiText>
         </EuiFlexItem>
-        {searchMode === 'semantic' && (
+        {similarTo && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              flush="both"
+              iconType="cross"
+              onClick={() => setFilterOptions({ similarTo: undefined })}
+              data-test-subj="ruleSearchClearSimilar"
+            >
+              {i18n.CLEAR_SIMILAR}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {searchMode === 'semantic' && !similarTo && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"

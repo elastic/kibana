@@ -24,6 +24,10 @@ import {
   useRuleSearchStatus,
 } from '../../../../rule_sets/search/use_rule_search_status';
 import { AI_PLACEHOLDER } from '../../../../rule_sets/search/translations';
+import {
+  SearchSuggestions,
+  useRecentAiSearches,
+} from '../../../../rule_sets/search/search_suggestions';
 import type { RuleSearchBoxMode } from '../../../../rule_management/logic/types';
 
 const FilterWrapper = styled(EuiFlexGroup)`
@@ -46,20 +50,22 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
   } = useRulesTableContext();
   const { gapFillStatuses } = filterOptions;
 
-  const handleOnSearch = useCallback(
-    (filterString: string) => {
-      startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-      setFilterOptions({ filter: filterString.trim(), members: undefined });
-    },
-    [setFilterOptions, startTransaction]
-  );
-
   const searchStatus = useRuleSearchStatus();
   const boxMode = searchBoxMode(searchStatus, filterOptions.searchMode);
+  const { recent, remember } = useRecentAiSearches();
+  const handleOnSearch = useCallback(
+    (filterString: string) => {
+      const text = filterString.trim();
+      startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+      if (text && boxMode === 'ai') remember(text);
+      setFilterOptions({ filter: text, members: undefined, similarTo: undefined });
+    },
+    [boxMode, remember, setFilterOptions, startTransaction]
+  );
   const handleSearchModeChange = useCallback(
     (searchMode: RuleSearchBoxMode) => {
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-      setFilterOptions({ searchMode });
+      setFilterOptions({ searchMode, similarTo: undefined });
     },
     [setFilterOptions, startTransaction]
   );
@@ -82,6 +88,11 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
         initialValue={filterOptions.filter}
         onSearch={handleOnSearch}
         placeholder={boxMode === 'ai' ? AI_PLACEHOLDER : undefined}
+        suggestions={
+          boxMode === 'ai' ? (
+            <SearchSuggestions recent={recent} onPick={handleOnSearch} />
+          ) : undefined
+        }
         prepend={
           searchStatus === 'unavailable' ? undefined : (
             <AiSearchToggle

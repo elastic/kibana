@@ -34,6 +34,7 @@ import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
 import { resolveRuleScopeMembership } from '../../../logic/search/rule_scope';
 import { fetchDisjunctiveFacetCounts } from '../../../logic/search/facet_counts';
 import { resolveSemanticSearch } from '../../../logic/search/semantic';
+import { buildRuleSearchDocument } from '../../../logic/search/semantic/rule_search_document';
 import { isRuleSearchWorkflowEnabled } from '../../../../../../workflows/rule_search_workflow/status';
 import type { StartPlugins } from '../../../../../../plugin_contract';
 import {
@@ -141,7 +142,25 @@ export const searchRulesRoute = (
           // Semantic search: the relevant rules (best first) come from the rule search index.
           // With facets, a rule set or a KQL filter, only the rules they keep are ranked: ranking
           // the whole space first would push most rules of a small subset out of the top.
-          const wantsSemantic = search?.mode === 'semantic' && Boolean(search.term.trim());
+          // "Similar to a rule": its short rule card is the text, and the rule itself is left out.
+          const similarTo = search?.mode === 'semantic' ? search.similar_to : undefined;
+          const similarRule = similarTo
+            ? (
+                await findRules({
+                  rulesClient,
+                  filter: undefined,
+                  sortField: undefined,
+                  sortOrder: undefined,
+                  page: 1,
+                  perPage: 1,
+                  ruleIds: [similarTo],
+                })
+              ).data[0]
+            : undefined;
+          const semanticTerm = similarRule
+            ? buildRuleSearchDocument(ctx.securitySolution.getSpaceId(), similarRule).card
+            : search?.term.trim() ?? '';
+          const wantsSemantic = search?.mode === 'semantic' && Boolean(semanticTerm);
           const baseKql = buildGranularRulesKql({ filter, search: undefined });
           const subset =
             wantsSemantic && (baseKql || ruleSetFilter)
@@ -159,7 +178,7 @@ export const searchRulesRoute = (
           // Larger subsets than one page are ranked in the whole space and filtered after.
           const candidateIds =
             subset && subset.total <= MAX_RESULTS_WINDOW
-              ? subset.data.map((rule) => rule.id)
+              ? subset.data.map((rule) => rule.id).filter((id) => id !== similarTo)
               : undefined;
           const semantic =
             wantsSemantic && search
@@ -174,17 +193,24 @@ export const searchRulesRoute = (
                       )[1].workflowsExtensions,
                       spaceId
                     ),
-                  term: search.term.trim(),
+                  term: semanticTerm,
                   candidateIds,
                   logger,
                 })
               : undefined;
-          const relevantIds = semantic?.mode === 'semantic' ? semantic.ruleIds : undefined;
+          const relevantIds =
+            semantic?.mode === 'semantic'
+              ? semantic.ruleIds.filter((id) => id !== similarTo)
+              : undefined;
           const searchMode = search ? semantic?.mode ?? 'legacy' : undefined;
           const modeFields = {
             ...(searchMode ? { search_mode: searchMode } : {}),
             ...(semantic?.mode === 'legacy' ? { search_fallback_reason: semantic.reason } : {}),
           };
+          // Without search by meaning there is no "similar": the keyword search has no text.
+          if (similarTo && !relevantIds) {
+            return response.ok({ body: { page, perPage, total: 0, data: [], ...modeFields } });
+          }
 
           const combinedKql = buildGranularRulesKql({
             filter,
