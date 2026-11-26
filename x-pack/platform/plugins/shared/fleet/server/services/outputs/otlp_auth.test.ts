@@ -397,6 +397,16 @@ describe('OTLP output authentication', () => {
         );
       });
 
+      it('accepts an empty signal endpoint, the signal is sent to the endpoint', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { ...exporter, logs_endpoint: '', traces_endpoint: null },
+          })
+        ).not.toThrow();
+      });
+
       it('rejects skipping the verification of the server certificate', () => {
         expect(() =>
           validateOtlpAuth({

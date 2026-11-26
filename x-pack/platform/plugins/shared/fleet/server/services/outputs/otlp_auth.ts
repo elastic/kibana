@@ -189,10 +189,11 @@ function validateOtlpAzureAuth(
   }
 
   // the token is a bearer token: it is only sent to an endpoint that proves its identity. The
-  // error names the setting, not its value: a URL can carry credentials.
+  // error names the setting, not its value: a URL can carry credentials. An empty signal endpoint
+  // is not used, the collector sends that signal to the endpoint.
   const insecureEndpointField = OTLP_HTTP_ENDPOINT_FIELDS.find((field) => {
     const endpoint = exporter[field as keyof typeof exporter];
-    return typeof endpoint === 'string' && !/^https:\/\//i.test(endpoint);
+    return typeof endpoint === 'string' && endpoint !== '' && !/^https:\/\//i.test(endpoint);
   });
   if (insecureEndpointField) {
     throw new OutputInvalidError(
