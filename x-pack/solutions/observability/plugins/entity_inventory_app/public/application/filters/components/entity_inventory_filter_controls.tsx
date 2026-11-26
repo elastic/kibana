@@ -39,6 +39,7 @@ interface EntityInventoryFilterControlsProps {
   error?: Error;
   pageCategory?: string;
   timeRange: TimeRange;
+  refreshToken?: number;
   selection: FilterControlsSelection;
   onSelectionChange: (selection: FilterControlsSelection) => void;
 }
@@ -72,6 +73,7 @@ export function EntityInventoryFilterControls({
   error,
   pageCategory,
   timeRange,
+  refreshToken,
   selection: currentSelection,
   onSelectionChange,
 }: EntityInventoryFilterControlsProps) {
@@ -193,6 +195,7 @@ export function EntityInventoryFilterControls({
                 types={typeIds}
                 filters={omit(selection.attributes, name)}
                 timeRange={timeRange}
+                refreshToken={refreshToken}
                 selected={selection.attributes[name] ?? []}
                 onChange={(values) => updateAttribute(name, values)}
               />

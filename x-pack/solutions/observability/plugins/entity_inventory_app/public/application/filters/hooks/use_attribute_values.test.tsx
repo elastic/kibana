@@ -107,6 +107,16 @@ describe('useAttributeValues', () => {
     expect(mockGetFilterValues).toHaveBeenCalledTimes(1);
   });
 
+  it('loads the values again for the same params when the refresh token changes', async () => {
+    mockGetFilterValues.mockResolvedValue(response(['linux']));
+    const { result, rerender } = render({ ...params, refreshToken: 0 });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    rerender({ ...params, refreshToken: 1 });
+
+    await waitFor(() => expect(mockGetFilterValues).toHaveBeenCalledTimes(2));
+  });
+
   it('does not load the values again when only the selection changes', async () => {
     mockGetFilterValues.mockResolvedValue(response(['linux', 'windows']));
     const { result, rerender } = render();

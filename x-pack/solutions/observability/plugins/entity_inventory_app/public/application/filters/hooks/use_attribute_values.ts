@@ -17,6 +17,7 @@ export interface AttributeValuesParams {
   filters: Record<string, string[]>;
   selected: string[];
   timeRange: TimeRange;
+  refreshToken?: number;
 }
 
 type AttributeValuesState = Pick<AttributeValuesResponse, 'values' | 'invalidSelections'> & {

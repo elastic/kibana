@@ -18,6 +18,7 @@ interface AttributeFilterProps {
   types: string[];
   filters: Record<string, string[]>;
   timeRange: TimeRange;
+  refreshToken?: number;
   selected: string[];
   onChange: (selected: string[]) => void;
 }
@@ -28,6 +29,7 @@ export function AttributeFilter({
   types,
   filters,
   timeRange,
+  refreshToken,
   selected,
   onChange,
 }: AttributeFilterProps) {
@@ -37,6 +39,7 @@ export function AttributeFilter({
     filters,
     selected,
     timeRange,
+    refreshToken,
   });
 
   return (
