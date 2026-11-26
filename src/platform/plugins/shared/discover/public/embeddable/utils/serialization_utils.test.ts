@@ -408,6 +408,20 @@ describe('Serialization utils', () => {
 
       expect(deserializedState.grid).toEqual(grid);
     });
+
+    test('by reference - a tab with a deleted Data View does not prevent opening another tab', async () => {
+      mockSessionResponse([
+        mockTab('tab-1', 'Tab 1', { columns: ['message'] }),
+        { ...mockTab('tab-2', 'Tab 2'), serializedSearchSource: { index: 'deleted-data-view' } },
+      ]);
+
+      const deserializedState = await deserializeState({
+        serializedState: { ref_id: 'savedSearch', selected_tab_id: 'tab-1', overrides: {} },
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(deserializedState.columns).toEqual(['message']);
+    });
   });
 
   describe('serialize state', () => {
