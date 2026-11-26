@@ -133,13 +133,6 @@
                   "properties": {
                     "name": {
                       "type": "keyword"
-                    },
-                    "status": {
-                      "properties": {
-                        "restarts": {
-                          "type": "long"
-                        }
-                      }
                     }
                   }
                 }

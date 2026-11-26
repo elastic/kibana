@@ -6,10 +6,10 @@ Central place for Entities management and logs extraction.
 
 Each entity type has a Task Manager task that reads source logs with ES|QL and upserts entities into `.entities.v2.latest.{namespace}`.
 
-| Task type | Runs for | Default cadence |
-|---|---|---|
-| `entity_store:v2:extract_entity_task:{type}` | every type | user and host `1m`, service `10m`, generic `30m` |
-| `entity_store:v2:extract_entity_non_priority_task:user` | user; scheduled always, does work only with the dual-process flag on | same as user, `1m` |
+| Task type                                               | Runs for                                                             | Default cadence                                  |
+| ------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------ |
+| `entity_store:v2:extract_entity_task:{type}`            | every type                                                           | user and host `1m`, service `10m`, generic `30m` |
+| `entity_store:v2:extract_entity_non_priority_task:user` | user; scheduled always, does work only with the dual-process flag on | same as user, `1m`                               |
 
 ### Dual-process extraction
 
@@ -117,11 +117,11 @@ interface RegisterEntityMaintainerConfig {
 - **interval** - Cron-like interval at which the task runs (e.g. `5m`, `1h`).
 - **initialState** - Initial state object for the maintainer, used on the first run before any `setup` or `run` has executed.
 - **run** - Required. Called on every run (including the first). Must return the current state it manages.
-- **setup** - Optional. If provided, it runs once before the first `run`. Useful for one-time initialization. 
+- **setup** - Optional. If provided, it runs once before the first `run`. Useful for one-time initialization.
 
 ### Scheduling and namespaces
 
-The framework schedules all registered maintainers when the Entity Store is installed for a given space. 
+The framework schedules all registered maintainers when the Entity Store is installed for a given space.
 The framework is **namespace aware**: each Kibana space gets its own task instance per maintainer (e.g. one task per `id` per namespace). Registration is global, scheduling is per namespace at install time.
 
 ### Run and setup behavior
@@ -215,7 +215,7 @@ dynamic: {
 },
 ```
 
-- Sources: 1 to 16. A source is one index pattern (no commas or whitespace, at most 256 characters); several patterns are several sources. The same pattern may appear on several sources with different filters.- `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
+- Sources: 1 to 16. A source is one index pattern (no commas or whitespace, at most 256 characters); several patterns are several sources. The same pattern may appear on several sources with different filters.
 - `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
 - Attributes: at most 32 per source. `name` is a field path such as `host.arch` or `os.type`, under the same rule as `field` but at most 64 characters, so a column can carry the OpenTelemetry semantic convention name while each source reads its own field. It is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
 - Metrics: at most 32 per source (how many metrics that source declares). Same `name` / `field` rules as attributes. Required `agg` is one of `avg`, `min`, `max`, `sum`, `count`, `count_distinct`, `last`, `sum_rate`, `max_rate`, `avg_rate`, `min_rate`, `sum_increase`, `sum_delta`. `sum_increase` (counters) and `sum_delta` (non-counter numerics) are the absolute change of the field over the queried time range, summed across series. Optional `filter` (same opaque ES|QL boolean length rule as the source filter), `scale` / `offset` (finite; not on `count` / `count_distinct`; `offset` not on `*_rate`, `sum_increase` or `sum_delta`, which have a true zero), and `unit` (`percent` | `ratio` | `bytes` | `ms` | `s` | `count`). There is no per-metric `label` and no `index_mode` / engine key: the inventory generator chooses classic vs TSDB ES|QL after probing. Empty `metrics: []` is allowed and means no metrics.

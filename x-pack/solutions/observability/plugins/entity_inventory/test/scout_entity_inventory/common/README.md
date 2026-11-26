@@ -26,14 +26,17 @@ No index maps `k8s.deployment.uid`, although every OpenTelemetry document carrie
   `kubernetes.labels.app`) and `metricset.name: state_deployment`. Supplies
   `k8s.deployment.available` via `last` of `kubernetes.deployment.replicas.available`.
 - `metrics-kubernetes.state_container-default` (data stream): Elastic Agent container state
-  (`kubernetes.namespace`, `kubernetes.deployment.name`,
-  `kubernetes.container.status.restarts`) and `metricset.name: state_container`. The definition
+  (`kubernetes.namespace`, `kubernetes.deployment.name`, `kubernetes.container.name`) and
+  `metricset.name: state_container`, with no restarts. The definition
   has a single source for the Elastic Agent integration, with index pattern `metrics-kubernetes.*`.
   It matches this stream and `state_deployment`, and its filter keeps only documents whose
   `metricset.name` is `state_deployment` or `state_container`. It declares restarts as
   `sum_increase` (`SUM(INCREASE)`, the field is a counter), which only `TS` can compute, so the
   `FROM` plan lists it in `unsupportedMetrics[]` and restarts are `null` on rows only `FROM` reads.
-  Restarts is a plain `long` here, as in the integration's non-time-series indices.
+  `kubernetes.container.status.restarts` is mapped only in `metrics-kubernetes.state_container_ts-tsds`,
+  as a counter. ES|QL resolves a field's type across every index the pattern matches before
+  `_index_mode` excludes any, so a plain `long` here too would make every query of the Agent source
+  fail with a type conflict in windows that reach both indices.
 - `metrics-k8sclusterreceiver.otel-default` (data stream): OpenTelemetry names (`k8s.cluster.name`,
   `k8s.namespace.name`, `k8s.deployment.name`, `k8s.deployment.available`,
   `k8s.deployment.desired`, `k8s.container.restarts`). Restarts use `sum_delta` (`SUM(DELTA)`, the

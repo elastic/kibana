@@ -34,7 +34,12 @@ No body and no parameters. It returns one entry per registered definition that h
         { "name": "k8s.deployment.uid", "kind": "attribute" },
         { "name": "k8s.deployment.available", "kind": "metric", "agg": "last", "unit": "count" },
         { "name": "k8s.deployment.desired", "kind": "metric", "agg": "last", "unit": "count" },
-        { "name": "k8s.container.restarts", "kind": "metric", "agg": "sum_increase", "unit": "count" },
+        {
+          "name": "k8s.container.restarts",
+          "kind": "metric",
+          "agg": "sum_increase",
+          "unit": "count"
+        },
         { "name": "last_seen", "kind": "last_seen", "label": "Last seen" }
       ],
       "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
@@ -58,25 +63,25 @@ Returns one row per entity of `type` seen in the window, merged across the type'
 
 Body, strict (an unknown key such as `documentFilter` is a 400):
 
-| key | | |
-| --- | --- | --- |
+| key          |          |                                                                                  |
+| ------------ | -------- | -------------------------------------------------------------------------------- |
 | `from`, `to` | required | ISO 8601 instants with `Z` or a numeric offset; `from` must be earlier than `to` |
-| `limit` | optional | integer 1–9,999, default 9,999 |
+| `limit`      | optional | integer 1–9,999, default 9,999                                                   |
 
 Response:
 
-| key | |
-| --- | --- |
-| `columns` | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, the metrics in the order the definition declares them, `last_seen`. A metric column carries its `agg` and, when declared, its `unit`. Metric order never follows plan order: a source's filtered metrics run in their own plans, after its unfiltered ones. The same names and kinds the `types` route returns for the type, without its labels. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
-| `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
-| `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
-| `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |
-| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, `rowCount`, `isPartial`, and Elasticsearch's execution metadata: `took`, `documentsFound`, `valuesLoaded`, `rowsEmitted`, `cpuNanos`, `driverNanos`, `bytesRead`, `shards`. A failed query has null metadata and `rowCount` 0; why it failed is in `errors`. |
-| `probes` | One entry per distinct source pattern: `indexPattern`, `esql`, `params`, `outcome` (`time_series`, `no_time_series` or `failed`), `isPartial` and the same execution metadata as `queries`; a probe that threw has null metadata. |
-| `timings` | Server phases in fractional milliseconds: `definitionMs`, `planningMs` (probes and query generation), `probesMs` (part of `planningMs`), `queriesMs`, `processingMs` and `totalMs`, their sum. |
-| `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
-| `unavailableColumns` | `{ column, indexPattern, field }`, one per attribute or metric column whose field no index behind that source's pattern maps; its value is null. A metric the plan's engine cannot compute is in `unsupportedMetrics` only, even when another column reads the same unmapped field. |
-| `unsupportedMetrics` | `{ indexPattern, engine, column, field, agg }` for a metric the plan engine cannot compute (e.g. a rate under `FROM`); omitted from that plan's STATS. The app lists these in the section-header warning tip with `errors`. |
+| key                  |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `columns`            | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, the metrics in the order the definition declares them, `last_seen`. A metric column carries its `agg` and, when declared, its `unit`. Metric order never follows plan order: a source's filtered metrics run in their own plans, after its unfiltered ones. The same names and kinds the `types` route returns for the type, without its labels. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
+| `rows`               | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `provenance`         | For each returned row's `entity.id`, the index pattern that supplied each attribute value.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `truncated`          | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`.                                                                                                                                                                                                                                                                              |
+| `queries`            | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, `rowCount`, `isPartial`, and Elasticsearch's execution metadata: `took`, `documentsFound`, `valuesLoaded`, `rowsEmitted`, `cpuNanos`, `driverNanos`, `bytesRead`, `shards`. A failed query has null metadata and `rowCount` 0; why it failed is in `errors`.                                                                                                                                                                                  |
+| `probes`             | One entry per distinct source pattern: `indexPattern`, `esql`, `params`, `outcome` (`time_series`, `no_time_series` or `failed`), `isPartial` and the same execution metadata as `queries`; a probe that threw has null metadata.                                                                                                                                                                                                                                                                                                                        |
+| `timings`            | Server phases in fractional milliseconds: `definitionMs`, `planningMs` (probes and query generation), `probesMs` (part of `planningMs`), `queriesMs`, `processingMs` and `totalMs`, their sum.                                                                                                                                                                                                                                                                                                                                                           |
+| `errors`             | `{ indexPattern, status, reason }` per source problem; never a stack.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `unavailableColumns` | `{ column, indexPattern, field }`, one per attribute or metric column whose field no index behind that source's pattern maps; its value is null. A metric the plan's engine cannot compute is in `unsupportedMetrics` only, even when another column reads the same unmapped field.                                                                                                                                                                                                                                                                      |
+| `unsupportedMetrics` | `{ indexPattern, engine, column, field, agg }` for a metric the plan engine cannot compute (e.g. a rate under `FROM`); omitted from that plan's STATS. The app lists these in the section-header warning tip with `errors`.                                                                                                                                                                                                                                                                                                                              |
 
 Anything about one source degrades the result and is reported in `errors`; it never fails the request:
 
@@ -85,16 +90,27 @@ Anything about one source degrades the result and is reported in `errors`; it ne
 - A plan whose response is partial (`is_partial`, some shards or clusters did not answer): its rows are kept and it is reported in `errors`.
 - A plan that reads nothing usable, because no readable index behind its pattern maps `@timestamp` or its identity fields are unmapped: the plan is dropped and reported in `errors`. A user who can read none of the source indices gets `rows: []`, every plan in `errors` and `truncated: false`.
 
+A metric column of a row is null when no source produced a value for that entity. A null is not an error and does not set `errors`. The response tells the reasons apart:
+
+| reason                                                                                                                                                                                                                                              | where it shows                                                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| No index behind the source's pattern maps the metric's field.                                                                                                                                                                                       | `unavailableColumns`                                                                                              |
+| The metric's `agg` is `sum_rate`, `max_rate`, `avg_rate`, `min_rate`, `sum_increase` or `sum_delta`, and no time-series index exists behind the source's pattern. These aggregations run only under `TS`, and the source has only a `FROM` plan.    | `unsupportedMetrics` with `engine` `FROM`, and `probes` with `outcome` `no_time_series`; not `unavailableColumns` |
+| The same six aggregations have a `TS` plan, but the entity has fewer than two samples of one series in the window. They compute a rate or a change between samples of the same series, so a series with a single sample in the window adds nothing. | Nowhere: the `TS` plan ran and returned the row                                                                   |
+| The entity has no document with a value for the field in the window (`LAST` and the other aggregations skip null values).                                                                                                                           | Nowhere                                                                                                           |
+
+The last two rows leave no trace in the response, so a null there is only explained by the window: widening it, or a collection interval shorter than the window, changes it.
+
 Errors that fail the request:
 
-| request | status |
-| --- | --- |
-| The type has no entity definition, or has no `dynamic` block | 404 |
-| `type` is not a valid type name | 400 |
-| `from` or `to` is missing or not an ISO 8601 instant, or `from >= to` | 400 |
-| `limit` is not an integer in 1–9,999 | 400 |
-| An unknown body key | 400 |
-| The definition cannot be turned into queries | 400 |
+| request                                                               | status |
+| --------------------------------------------------------------------- | ------ |
+| The type has no entity definition, or has no `dynamic` block          | 404    |
+| `type` is not a valid type name                                       | 400    |
+| `from` or `to` is missing or not an ISO 8601 instant, or `from >= to` | 400    |
+| `limit` is not an integer in 1–9,999                                  | 400    |
+| An unknown body key                                                   | 400    |
+| The definition cannot be turned into queries                          | 400    |
 
 The route does not cap the window length: it checks only that `from` and `to` are instants and that `from` is earlier than `to`. The limit lives in the UI, which clamps its picker to `ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS` (3 days, `entity_inventory_app/public/application/constants.ts`). A direct caller is therefore unbounded — `{"from":"1970-01-01T00:00:00Z","to":"2200-01-01T00:00:00Z"}` is a valid request — which is acceptable while the route is internal and both plugins are off by default.
 
@@ -106,11 +122,11 @@ Body: the same as `_list` (`from`, `to`, `limit`, strict).
 
 Response:
 
-| key | |
-| --- | --- |
-| `probes` | One entry per distinct source pattern, in source order: `indexPattern`, `request`, and `hasTimeSeries`, whether the probe found a readable time-series index (null when the probe failed). |
-| `queries` | One entry per plan query `_list` would send, in plan order: `indexPattern`, `engine` (`TS` or `FROM`) and `request`. A source whose probe failed has none, as in `_list`. |
-| `errors` | `{ indexPattern, status, reason }` per source whose probe failed. |
+| key       |                                                                                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `probes`  | One entry per distinct source pattern, in source order: `indexPattern`, `request`, and `hasTimeSeries`, whether the probe found a readable time-series index (null when the probe failed). |
+| `queries` | One entry per plan query `_list` would send, in plan order: `indexPattern`, `engine` (`TS` or `FROM`) and `request`. A source whose probe failed has none, as in `_list`.                  |
+| `errors`  | `{ indexPattern, status, reason }` per source whose probe failed.                                                                                                                          |
 
 Each `request` is the body to send to Elasticsearch's `POST /_query` unchanged: `query`, `params` (the named parameters, never interpolated) and `include_execution_metadata: true`. A probe that fails is reported in `errors` and never fails the request. The request errors and their statuses are those of `_list`.
 
@@ -120,35 +136,35 @@ Returns the distinct values a dropdown can offer for one attribute, merged acros
 
 Body, strict (an unknown key such as `documentFilter` is a 400):
 
-| key | | |
-| --- | --- | --- |
-| `attribute` | required | The column to list: an attribute or identity field, 1 to 512 characters, that at least one type in `types` lists in its `suggestedFilters` |
-| `types` | required | 1 to 32 type ids. A type that does not suggest the attribute is left out |
-| `filters` | optional | The other dropdowns' selections: column name to the values selected, as the response shows them (value labels applied). At most 16 columns and 100 values each. A source reads each column from the field it declares for it, and a label is matched against every raw value that reads as it |
-| `selected` | optional | The values currently selected in this dropdown, at most 100 |
-| `from`, `to` | required | As in `_list` |
-| `limit` | optional | integer 1–9,999, default 9,999 |
+| key          |          |                                                                                                                                                                                                                                                                                               |
+| ------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `attribute`  | required | The column to list: an attribute or identity field, 1 to 512 characters, that at least one type in `types` lists in its `suggestedFilters`                                                                                                                                                    |
+| `types`      | required | 1 to 32 type ids. A type that does not suggest the attribute is left out                                                                                                                                                                                                                      |
+| `filters`    | optional | The other dropdowns' selections: column name to the values selected, as the response shows them (value labels applied). At most 16 columns and 100 values each. A source reads each column from the field it declares for it, and a label is matched against every raw value that reads as it |
+| `selected`   | optional | The values currently selected in this dropdown, at most 100                                                                                                                                                                                                                                   |
+| `from`, `to` | required | As in `_list`                                                                                                                                                                                                                                                                                 |
+| `limit`      | optional | integer 1–9,999, default 9,999                                                                                                                                                                                                                                                                |
 
 Response:
 
-| key | |
-| --- | --- |
-| `values` | The distinct values, sorted, with value labels applied, at most `limit`. A value that is empty or longer than 256 characters is not offered, because the route could not take it back as a selection |
-| `invalidSelections` | The `selected` values that are not in `values`: no longer offered, or cut by `limit` (then `truncated` is true). Every selected value is in one of the two lists |
-| `truncated` | True only when `limit` left values out |
-| `errors` | `{ indexPattern, status, reason }` per source problem, as in `_list`; never a stack. A source whose probe or query failed does not fail the request |
+| key                 |                                                                                                                                                                                                      |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `values`            | The distinct values, sorted, with value labels applied, at most `limit`. A value that is empty or longer than 256 characters is not offered, because the route could not take it back as a selection |
+| `invalidSelections` | The `selected` values that are not in `values`: no longer offered, or cut by `limit` (then `truncated` is true). Every selected value is in one of the two lists                                     |
+| `truncated`         | True only when `limit` left values out                                                                                                                                                               |
+| `errors`            | `{ indexPattern, status, reason }` per source problem, as in `_list`; never a stack. A source whose probe or query failed does not fail the request                                                  |
 
 How it runs: one values query per source plan that can contribute, run concurrently. A source that declares no field for the attribute is neither probed nor queried. The value labels, the selections and the length filter are part of the query, and the values go in as named parameters, never as text. The values come from the documents of the window, not from entities, so a value that only a hidden duplicate of an entity carries is still offered.
 
 Errors that fail the request:
 
-| request | status |
-| --- | --- |
-| No type in `types` suggests `attribute` | 400 |
-| A type has no entity definition, or has no `dynamic` block | 404 |
-| A body key is missing or invalid, `from >= to`, or `limit` is not an integer in 1–9,999 | 400 |
-| An unknown body key | 400 |
-| The definition cannot be turned into queries | 400 |
+| request                                                                                 | status |
+| --------------------------------------------------------------------------------------- | ------ |
+| No type in `types` suggests `attribute`                                                 | 400    |
+| A type has no entity definition, or has no `dynamic` block                              | 404    |
+| A body key is missing or invalid, `from >= to`, or `limit` is not an integer in 1–9,999 | 400    |
+| An unknown body key                                                                     | 400    |
+| The definition cannot be turned into queries                                            | 400    |
 
 ### Access control (interim)
 
@@ -169,8 +185,8 @@ names of every definition the store holds, its own and the built-ins.
 
 Registered today:
 
-| type | identified by | sources |
-| --- | --- | --- |
+| type             | identified by                                                                                                                                                                      | sources                                                                                                                                                                                                                                   |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `k8s.deployment` | `<namespace>/<name>` (`kubernetes.namespace`, `kubernetes.deployment.name`; the ECS<->OTel alias layer resolves them on the OTel stream), cluster as the `k8s.cluster.name` column | `metrics-kubernetes.*` filtered to `state_deployment` and `state_container` (available/desired `last`, restarts `sum_increase`, a counter), `metrics-k8sclusterreceiver.otel-*` (available/desired `last`, restarts `sum_delta`, a gauge) |
 
 The same namespace and name in two clusters is one `k8s.deployment` entity today.
@@ -182,23 +198,23 @@ registers them.
 
 `server/inventory/generator/` turns a definition that carries a `dynamic` block into ES|QL. It is a pure function of the definition, the request and the probe result for each source's pattern: no Elasticsearch calls, so the same inputs always give the same text, and the tests are snapshots. The design and the reasons behind each rule are in the Observability design doc "Entity inventory query generation" (`docs/infra-inventory/design/` in `elastic/observability-dev`); this section is the map.
 
-| module | does |
-| --- | --- |
-| `dynamic.ts` | Returns the `dynamic` block or throws `InventoryDefinitionError`. |
-| `esql_syntax.ts` | Backticks identifiers; checks an index pattern's character set and that it parses after `FROM`. |
-| `filters.ts` | Canonicalises an author's filter: parses it as one boolean expression without parameters and re-prints it from its syntax tree, checking the re-print parses back to itself. |
-| `parse_guard.ts` | Parses generated text before it is returned; a failure is a generator bug. |
-| `identity.ts` | The `BY` keys, the identity-presence predicate, the `entity.id` evaluation, the identity compositions as field lists, and a raw column for each `BY` key the evaluation overwrites. The predicate and the evaluation come from the entity store's id compiler verbatim. |
-| `source_plans.ts` | Query plans from the sources and their probe results: a `FROM` plan per source, and a `TS` plan before it when the probe found a time-series index, validated once. A later phase also splits a source by metric filter. |
-| `columns.ts` | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), metrics in the order the definition declares them (one column per name across sources), `last_seen`. `types`, `_list` and `_plan` all derive their columns here. |
-| `list_query.ts` | One list query per plan. |
-| `probe_query.ts` | The probe deciding whether a source gets a `TS` plan. |
-| `attribute_filters.ts` | The other dropdowns' selections as one ES\|QL predicate per plan: each column read from the field the plan's source declares, each label matched against every raw value that reads as it, values as named parameters. A plan that cannot match the selections gets none. |
-| `attribute_values_query.ts` | One values query per plan: the distinct values of an attribute among the documents of the type in the window that pass the selections, with value labels applied before the sort and the limit, and empty or over-long values dropped. |
+| module                      | does                                                                                                                                                                                                                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dynamic.ts`                | Returns the `dynamic` block or throws `InventoryDefinitionError`.                                                                                                                                                                                                            |
+| `esql_syntax.ts`            | Backticks identifiers; checks an index pattern's character set and that it parses after `FROM`.                                                                                                                                                                              |
+| `filters.ts`                | Canonicalises an author's filter: parses it as one boolean expression without parameters and re-prints it from its syntax tree, checking the re-print parses back to itself.                                                                                                 |
+| `parse_guard.ts`            | Parses generated text before it is returned; a failure is a generator bug.                                                                                                                                                                                                   |
+| `identity.ts`               | The `BY` keys, the identity-presence predicate, the `entity.id` evaluation, the identity compositions as field lists, and a raw column for each `BY` key the evaluation overwrites. The predicate and the evaluation come from the entity store's id compiler verbatim.      |
+| `source_plans.ts`           | Query plans from the sources and their probe results: a `FROM` plan per source, and a `TS` plan before it when the probe found a time-series index, validated once. A later phase also splits a source by metric filter.                                                     |
+| `columns.ts`                | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), metrics in the order the definition declares them (one column per name across sources), `last_seen`. `types`, `_list` and `_plan` all derive their columns here. |
+| `list_query.ts`             | One list query per plan.                                                                                                                                                                                                                                                     |
+| `probe_query.ts`            | The probe deciding whether a source gets a `TS` plan.                                                                                                                                                                                                                        |
+| `attribute_filters.ts`      | The other dropdowns' selections as one ES\|QL predicate per plan: each column read from the field the plan's source declares, each label matched against every raw value that reads as it, values as named parameters. A plan that cannot match the selections gets none.    |
+| `attribute_values_query.ts` | One values query per plan: the distinct values of an attribute among the documents of the type in the window that pass the selections, with value labels applied before the sort and the limit, and empty or over-long values dropped.                                       |
 
 Attributes only for now; metrics, detail and the document filter are later phases.
 
-**Planning.** `planSources(definition, probes)` takes one `SourceProbe` per source, in source order: `{ hasTimeSeries }`, whether a readable time-series index exists behind its pattern. Every source gives a `FROM` plan; one with `hasTimeSeries` also gives a `TS` plan, listed first. Plans are numbered in the resulting order, carry `sourceIndex` and the pattern as the author wrote it, and the 32-plan budget counts them after the split. No concrete index name reaches a query: `dynamic` source `indexPattern` is rejected at registration when it names a backing or concrete index (`.ds-…-00000N`, hidden names, generation suffixes without `*`). Use the data stream or a pattern such as `metrics-kubernetes.state_container-*`.
+**Planning.** `planSources(definition, probes)` takes one `SourceProbe` per source, in source order: `{ hasTimeSeries }`, whether a readable time-series index exists behind its pattern. Every source gives a `FROM` plan; one with `hasTimeSeries` also gives a `TS` plan, listed first. Plans are numbered in the resulting order, carry `sourceIndex` and the pattern as the author wrote it, and the 32-plan budget counts them after the split. The pattern reaches the query exactly as written, the schema only requires a non-empty string within the length limit, with no whitespace or commas (one pattern per source).
 
 **List query**, one per plan:
 
@@ -241,16 +257,16 @@ The executor reads the type of the `@timestamp` column to decide whether the sou
 
 `server/inventory/executor/` runs the generated queries with the request-scoped Elasticsearch client.
 
-| module | does |
-| --- | --- |
-| `source_probe.ts` | Runs the probe once per distinct pattern and reads whether a time-series index exists behind it. |
-| `esql_results_to_rows.ts` | Turns the ES\|QL `columns` and `values` arrays into rows keyed by column name. |
-| `esql_client.ts` | Runs one generated query with its named parameters and `include_execution_metadata`, returning rows as objects keyed by column name (multi-values stay arrays) with `took`, documents found, values loaded and the row count. `drop_null_columns` stays off so every plan returns the same columns. |
-| `errors/source_error.ts` | Flattens a failed query to `{ indexPattern, status, reason }`; never a stack or the raw body. |
-| `value_labels.ts` | Maps an attribute's raw values to its `valueLabels` per plan, before the merge; an unmapped value passes through stringified. |
-| `merge.ts` | One row per `entity.id` across plans: attributes from the row with the newest `last_seen`, identity fields and `entity.id` first non-null, `last_seen` newest, a null never replacing a value; `provenance` names the source pattern behind each attribute value. |
-| `plan_result.ts` | Reads from a plan's column types whether it is usable and which of its attribute and metric columns no index maps, one entry per column. |
-| `output.ts` | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, sets each plan's `LIMIT` one above the request, derives `truncated` from plan cuts and the limit (there is no count query), and fills every row with every column. |
+| module                    | does                                                                                                                                                                                                                                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source_probe.ts`         | Runs the probe once per distinct pattern and reads whether a time-series index exists behind it.                                                                                                                                                                                                    |
+| `esql_results_to_rows.ts` | Turns the ES\|QL `columns` and `values` arrays into rows keyed by column name.                                                                                                                                                                                                                      |
+| `esql_client.ts`          | Runs one generated query with its named parameters and `include_execution_metadata`, returning rows as objects keyed by column name (multi-values stay arrays) with `took`, documents found, values loaded and the row count. `drop_null_columns` stays off so every plan returns the same columns. |
+| `errors/source_error.ts`  | Flattens a failed query to `{ indexPattern, status, reason }`; never a stack or the raw body.                                                                                                                                                                                                       |
+| `value_labels.ts`         | Maps an attribute's raw values to its `valueLabels` per plan, before the merge; an unmapped value passes through stringified.                                                                                                                                                                       |
+| `merge.ts`                | One row per `entity.id` across plans: attributes from the row with the newest `last_seen`, identity fields and `entity.id` first non-null, `last_seen` newest, a null never replacing a value; `provenance` names the source pattern behind each attribute value.                                   |
+| `plan_result.ts`          | Reads from a plan's column types whether it is usable and which of its attribute and metric columns no index maps, one entry per column.                                                                                                                                                            |
+| `output.ts`               | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, sets each plan's `LIMIT` one above the request, derives `truncated` from plan cuts and the limit (there is no count query), and fills every row with every column.                                       |
 
 No metadata API is called and no concrete index is named: the executor learns everything from ES\|QL results.
 

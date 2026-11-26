@@ -385,10 +385,7 @@
           "name": "cart-api"
         },
         "container": {
-          "name": "app",
-          "status": {
-            "restarts": 4
-          }
+          "name": "app"
         }
       }
     }
@@ -416,10 +413,7 @@
           "name": "cart-api"
         },
         "container": {
-          "name": "app",
-          "status": {
-            "restarts": 5
-          }
+          "name": "app"
         }
       }
     }
@@ -447,10 +441,7 @@
           "name": "payments"
         },
         "container": {
-          "name": "app",
-          "status": {
-            "restarts": 1
-          }
+          "name": "app"
         }
       }
     }
@@ -478,10 +469,7 @@
           "name": "payments"
         },
         "container": {
-          "name": "app",
-          "status": {
-            "restarts": 1
-          }
+          "name": "app"
         }
       }
     }
@@ -509,10 +497,7 @@
           "name": "ingress"
         },
         "container": {
-          "name": "app",
-          "status": {
-            "restarts": 0
-          }
+          "name": "app"
         }
       }
     }
@@ -540,10 +525,7 @@
           "name": "ingress"
         },
         "container": {
-          "name": "app",
-          "status": {
-            "restarts": 0
-          }
+          "name": "app"
         }
       }
     }
