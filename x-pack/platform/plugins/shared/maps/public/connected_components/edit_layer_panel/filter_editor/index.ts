@@ -12,6 +12,7 @@ import type { Query } from '@kbn/es-query';
 import { FilterEditor } from './filter_editor';
 import { getEditState, getSelectedLayer } from '../../../selectors/map_selectors';
 import { setLayerQuery, updateSourceProp } from '../../../actions';
+import type { SourcePropName } from '../../../classes/sources/source';
 import type { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
@@ -27,7 +28,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setLayerQuery: (layerId: string, query: Query) => {
       dispatch(setLayerQuery(layerId, query));
     },
-    updateSourceProp: (id: string, propName: string, value: unknown) =>
+    updateSourceProp: (id: string, propName: SourcePropName, value: unknown) =>
       dispatch(updateSourceProp(id, propName, value)),
   };
 }

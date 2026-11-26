@@ -3951,6 +3951,48 @@ describe('generateOtelcolConfig', () => {
       });
     });
 
+    describe('sending queue batching', () => {
+      const getOtlpSendingQueue = (sendingQueue: unknown) =>
+        (
+          generateOtelcolConfig({
+            inputs: [otelInput1],
+            dataOutput: {
+              ...baseOtlpOutput,
+              otlp_exporter: {
+                ...(baseOtlpOutput as any).otlp_exporter,
+                sending_queue: sendingQueue,
+              },
+            } as Output,
+          }).exporters?.[`otlp/${otlpOutputId}`] as Record<string, any>
+        ).sending_queue;
+
+      it('leaves out a null batch, so the exporter does not batch', () => {
+        const sendingQueue = getOtlpSendingQueue({ sizer: 'requests', batch: null });
+
+        expect(sendingQueue).toEqual({ sizer: 'requests' });
+        expect(sendingQueue).not.toHaveProperty('batch');
+      });
+
+      it('keeps an empty batch, which enables batching with the defaults', () => {
+        expect(getOtlpSendingQueue({ sizer: 'requests', batch: {} })).toEqual({
+          sizer: 'requests',
+          batch: {},
+        });
+      });
+
+      it('leaves out a null sending queue', () => {
+        const result = generateOtelcolConfig({
+          inputs: [otelInput1],
+          dataOutput: {
+            ...baseOtlpOutput,
+            otlp_exporter: { ...(baseOtlpOutput as any).otlp_exporter, sending_queue: null },
+          } as Output,
+        });
+
+        expect(result.exporters?.[`otlp/${otlpOutputId}`]).toEqual({ endpoint: otlpEndpoint });
+      });
+    });
+
     it('does not generate a beatsauth extension', () => {
       const result = generateOtelcolConfig({ inputs: [otelInput1], dataOutput: baseOtlpOutput });
 
