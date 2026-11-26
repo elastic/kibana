@@ -15,7 +15,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const uuidString = (desc: string) =>
-  z.string().max(36).regex(UUID_RE, 'Must be a valid UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)').describe(desc);
+  z
+    .string()
+    .max(36)
+    .regex(UUID_RE, 'Must be a valid UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)')
+    .describe(desc);
 
 /**
  * Alert lifecycle action values exposed to Agent Builder agents.
@@ -33,6 +37,21 @@ const ALERT_ACTIONS = [
 ] as const;
 
 const ALERT_SEVERITY = ['high', 'medium', 'low'] as const;
+const ALERT_PRODUCT = [
+  'cswitch',
+  'emailGateway',
+  'encryption',
+  'endpoint',
+  'firewall',
+  'mobile',
+  'other',
+  'phishThreat',
+  'secureWebservice',
+  'server',
+  'webGateway',
+  'wireless',
+  'ztna',
+] as const;
 const ENDPOINT_HEALTH = ['bad', 'good', 'suspicious', 'unknown'] as const;
 const DETECTION_TYPE = ['process', 'threat', 'vulnerability'] as const;
 const DETECTION_CATEGORY = [
@@ -58,15 +77,13 @@ export const ListAlertsInputSchema = lazySchema(() =>
       .optional()
       .describe('Filter by severity: high, medium, low.'),
     product: z
-      .array(z.string().max(100))
-      .max(10)
+      .array(z.enum(ALERT_PRODUCT))
+      .max(13)
       .optional()
-      .describe('Filter by Sophos product name (e.g. endpoint, server).'),
-    category: z
-      .array(z.string().max(100))
-      .max(20)
-      .optional()
-      .describe('Filter by alert category.'),
+      .describe(
+        'Filter by Sophos product: cswitch, emailGateway, encryption, endpoint, firewall, mobile, other, phishThreat, secureWebservice, server, webGateway, wireless, ztna.'
+      ),
+    category: z.array(z.string().max(100)).max(20).optional().describe('Filter by alert category.'),
     from: z
       .string()
       .max(50)
@@ -103,7 +120,9 @@ export type GetAlertInput = z.infer<typeof GetAlertInputSchema>;
 export const ActOnAlertInputSchema = lazySchema(() =>
   z.object({
     alertId: uuidString('The UUID of the alert to act on.'),
-    action: z.enum(ALERT_ACTIONS).describe('The lifecycle action to apply. Check allowedActions from getAlert first.'),
+    action: z
+      .enum(ALERT_ACTIONS)
+      .describe('The lifecycle action to apply. Check allowedActions from getAlert first.'),
     message: z
       .string()
       .max(1000)
@@ -115,7 +134,11 @@ export type ActOnAlertInput = z.infer<typeof ActOnAlertInputSchema>;
 
 export const ActOnAlertsBulkInputSchema = lazySchema(() =>
   z.object({
-    ids: z.array(uuidString('Alert UUID.')).min(1).max(100).describe('Array of alert UUIDs to act on (1–100).'),
+    ids: z
+      .array(uuidString('Alert UUID.'))
+      .min(1)
+      .max(100)
+      .describe('Array of alert UUIDs to act on (1–100).'),
     action: z.enum(ALERT_ACTIONS).describe('The lifecycle action to apply to all alerts.'),
     message: z
       .string()
@@ -145,11 +168,7 @@ export const ListEndpointsInputSchema = lazySchema(() =>
       .boolean()
       .optional()
       .describe('Filter by tamper protection state (true or false).'),
-    hostnameContains: z
-      .string()
-      .max(100)
-      .optional()
-      .describe('Substring match on hostname.'),
+    hostnameContains: z.string().max(100).optional().describe('Substring match on hostname.'),
     pageFromKey: z
       .string()
       .max(512)
@@ -175,7 +194,11 @@ export type GetEndpointInput = z.infer<typeof GetEndpointInputSchema>;
 
 export const IsolateEndpointInputSchema = lazySchema(() =>
   z.object({
-    ids: z.array(uuidString('Endpoint UUID.')).min(1).max(500).describe('Endpoint UUIDs to isolate (1–500).'),
+    ids: z
+      .array(uuidString('Endpoint UUID.'))
+      .min(1)
+      .max(500)
+      .describe('Endpoint UUIDs to isolate (1–500).'),
     comment: z
       .string()
       .max(400)
@@ -187,7 +210,11 @@ export type IsolateEndpointInput = z.infer<typeof IsolateEndpointInputSchema>;
 
 export const DeisolateEndpointInputSchema = lazySchema(() =>
   z.object({
-    ids: z.array(uuidString('Endpoint UUID.')).min(1).max(500).describe('Endpoint UUIDs to de-isolate (1–500).'),
+    ids: z
+      .array(uuidString('Endpoint UUID.'))
+      .min(1)
+      .max(500)
+      .describe('Endpoint UUIDs to de-isolate (1–500).'),
     comment: z
       .string()
       .max(400)
@@ -199,7 +226,11 @@ export type DeisolateEndpointInput = z.infer<typeof DeisolateEndpointInputSchema
 
 export const ScanEndpointInputSchema = lazySchema(() =>
   z.object({
-    ids: z.array(uuidString('Endpoint UUID.')).min(1).max(500).describe('Endpoint UUIDs to scan (1–500).'),
+    ids: z
+      .array(uuidString('Endpoint UUID.'))
+      .min(1)
+      .max(500)
+      .describe('Endpoint UUIDs to scan (1–500).'),
   })
 );
 export type ScanEndpointInput = z.infer<typeof ScanEndpointInputSchema>;
@@ -270,7 +301,9 @@ export const AddAllowedItemInputSchema = lazySchema(() =>
       .describe('The type of item to allow: path, sha256, certificateSigner, or posixPath.'),
     properties: z
       .record(z.string().max(256), z.string().max(2048))
-      .describe('Properties matching the type, e.g. { path: "C:\\\\example" } or { sha256: "abc..." }.'),
+      .describe(
+        'Properties matching the type, e.g. { path: "C:\\\\example" } or { sha256: "abc..." }.'
+      ),
     comment: z
       .string()
       .min(1)

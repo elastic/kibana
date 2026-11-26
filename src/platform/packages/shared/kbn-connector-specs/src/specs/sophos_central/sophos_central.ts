@@ -144,7 +144,9 @@ async function request<T = unknown>(
     // (severity=high,medium), not repeated keys or bracketed keys.
     const flatParams: Record<string, string | number | boolean> = {};
     for (const [key, value] of Object.entries(options.params)) {
-      flatParams[key] = Array.isArray(value) ? value.join(',') : (value as string | number | boolean);
+      flatParams[key] = Array.isArray(value)
+        ? value.join(',')
+        : (value as string | number | boolean);
     }
     config.params = flatParams;
   }
@@ -164,7 +166,10 @@ async function request<T = unknown>(
  * This helper checks for that pattern and throws so the caller sees the failure.
  */
 function checkBatchErrors(
-  data: { items?: unknown[]; errors?: Array<{ id?: string; errorCode?: string; errorMessage?: string }> },
+  data: {
+    items?: unknown[];
+    errors?: Array<{ id?: string; errorCode?: string; errorMessage?: string }>;
+  },
   fallback: string
 ): void {
   const errors = data?.errors;
@@ -183,8 +188,7 @@ function throwApiError(err: unknown, fallback: string): never {
   const response = axiosErr?.response;
   if (response) {
     const { status, headers, data: body } = response;
-    const detail =
-      body?.error && body?.message ? `${body.error}: ${body.message}` : body?.message;
+    const detail = body?.error && body?.message ? `${body.error}: ${body.message}` : body?.message;
     const msg = detail ? `${detail} (HTTP ${status})` : `${fallback} (HTTP ${status})`;
     const wrapped = new Error(msg);
     // Preserve structured fields for callers that inspect the error
@@ -206,7 +210,7 @@ export const SophosCentral: ConnectorSpec = {
   metadata: {
     id: '.sophos_central',
     displayName: 'Sophos Central',
-    description: i18n.translate('core.kibanaConnectorSpecs.sophosCentral.metadata.description', {
+    description: i18n.translate('connectorSpecs.sophosCentral.metadata.description', {
       defaultMessage:
         'Manage Sophos Central alerts, isolate and scan endpoints, maintain IOC block and allow lists, and query XDR detections',
     }),
@@ -228,17 +232,14 @@ export const SophosCentral: ConnectorSpec = {
             tokenUrl: { hidden: true },
             scope: { hidden: true },
             clientId: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sophosCentral.auth.clientIdHelpText',
-                {
-                  defaultMessage:
-                    'Sophos Central API client ID. Create in Sophos Central under ' +
-                    'My Products > General Settings > API Credentials > Add Credential. ' +
-                    'The credential needs alerts:read, alerts:action, endpoint-state:read, ' +
-                    'endpoint-state:update, and detections.queries.detections:create scopes. ' +
-                    'Only tenant-level credentials are supported.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.sophosCentral.auth.clientIdHelpText', {
+                defaultMessage:
+                  'Sophos Central API client ID. Create in Sophos Central under ' +
+                  'My Products > General Settings > API Credentials > Add Credential. ' +
+                  'The credential needs alerts:read, alerts:action, endpoint-state:read, ' +
+                  'endpoint-state:update, and detections.queries.detections:create scopes. ' +
+                  'Only tenant-level credentials are supported.',
+              }),
             },
           },
         },
@@ -271,12 +272,10 @@ export const SophosCentral: ConnectorSpec = {
     '3. Call `actOnAlert` with an action from `allowedActions` (e.g. `acknowledge` or `clearThreat`) to close the alert.',
     '',
     '### Endpoint containment',
-    '1. Call `getEndpoint` to confirm the endpoint\'s isolation state and health status.',
+    "1. Call `getEndpoint` to confirm the endpoint's isolation state and health status.",
     '2. Call `isolateEndpoint` with the endpoint IDs to block network access.',
     '3. Call `scanEndpoint` to trigger an on-demand malware scan. The scan runs asynchronously.',
-    '4. To restore connectivity, hand off to an analyst. ' +
-      '`deisolateEndpoint` is not available to agents — it must be called by an analyst ' +
-      'directly via the Kibana connector execution API after confirming the threat is remediated.',
+    '4. To restore connectivity, hand off to an analyst — `deisolateEndpoint` is not available to agents.',
     '',
     '### IOC management',
     '- Call `addBlockedItem` with a SHA-256 hash to add a file to the tenant-wide block list.',
@@ -418,8 +417,8 @@ export const SophosCentral: ConnectorSpec = {
             const msg = detail
               ? `${detail}${statusText}`
               : err instanceof Error
-                ? err.message
-                : 'Unknown error';
+              ? err.message
+              : 'Unknown error';
             results.push({ alertId, status: 'failed', error: msg });
             failureCount++;
           }
@@ -607,11 +606,9 @@ export const SophosCentral: ConnectorSpec = {
               },
             }
           );
-          // Strip password and previousPasswords — Sophos returns the current recovery
-          // password (and may return password history) on both read and update. These must
-          // never be forwarded to Kibana API callers.
-          const { password: _pw, previousPasswords: _prev, ...safe } = data ?? {};
-          return safe;
+          // Return only the enabled flag — the response contains password
+          // and previousPasswords which must not be exposed to callers.
+          return { enabled: data.enabled };
         } catch (err) {
           throwApiError(err, `Failed to update tamper protection for endpoint ${input.endpointId}`);
         }
@@ -771,13 +768,7 @@ export const SophosCentral: ConnectorSpec = {
           }
 
           // Step 2: poll until terminal state
-          const TERMINAL = new Set([
-            'succeeded',
-            'canceled',
-            'failed',
-            'notAvailable',
-            'timedOut',
-          ]);
+          const TERMINAL = new Set(['succeeded', 'canceled', 'failed', 'notAvailable', 'timedOut']);
           const pollTimeoutMs = 90_000;
           const pollIntervalMs = 5_000;
           // Minimum remaining budget required to attempt a poll request.

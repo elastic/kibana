@@ -253,15 +253,15 @@ describe('input schemas', () => {
     });
 
     it('accepts valid healthStatus enum values', () => {
-      expect(
-        ListEndpointsInputSchema.safeParse({ healthStatus: ['bad', 'good'] }).success
-      ).toBe(true);
+      expect(ListEndpointsInputSchema.safeParse({ healthStatus: ['bad', 'good'] }).success).toBe(
+        true
+      );
     });
 
     it('rejects invalid healthStatus enum value', () => {
-      expect(
-        ListEndpointsInputSchema.safeParse({ healthStatus: ['critical'] }).success
-      ).toBe(false);
+      expect(ListEndpointsInputSchema.safeParse({ healthStatus: ['critical'] }).success).toBe(
+        false
+      );
     });
 
     it('rejects pageSize above 100', () => {
@@ -359,9 +359,9 @@ describe('input schemas', () => {
     });
 
     it('rejects a non-64-char string', () => {
-      expect(
-        AddBlockedItemInputSchema.safeParse({ sha256: 'abc', comment: 'test' }).success
-      ).toBe(false);
+      expect(AddBlockedItemInputSchema.safeParse({ sha256: 'abc', comment: 'test' }).success).toBe(
+        false
+      );
     });
 
     it('rejects non-hex characters', () => {
@@ -886,7 +886,11 @@ describe('scanEndpoint', () => {
 
 describe('getTamperProtection', () => {
   it('calls GET /endpoint/v1/endpoints/:endpointId/tamper-protection', async () => {
-    const tamperData = { enabled: true, password: 'secret123', previousPasswords: ['old1', 'old2'] };
+    const tamperData = {
+      enabled: true,
+      password: 'secret123',
+      previousPasswords: ['old1', 'old2'],
+    };
     const client = makeClient();
     stubWhoami(client);
     client.request.mockResolvedValue({ data: tamperData });
