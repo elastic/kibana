@@ -43,7 +43,7 @@ describe('ByCommandTab', () => {
     expect(window.getComputedStyle(screen.getByText(/WHERE name ==/)).whiteSpace).toBe('pre-wrap');
   });
 
-  describe('the steps that belong to no command', () => {
+  describe('the time that could not be matched to a command', () => {
     const renderWith = (unattributedOperators: string[]) =>
       render(
         <EuiProvider>
@@ -64,7 +64,7 @@ describe('ByCommandTab', () => {
       renderWith(['LuceneSource', 'Project']);
 
       expect(screen.getByTestId('esqlQueryProfileUnattributed')).toHaveTextContent(
-        '71% of the operator time is in steps that belong to no command: LuceneSource, Project.'
+        '71% of the operator time could not be matched to a command. Operators with unmatched time: LuceneSource, Project.'
       );
     });
 
@@ -72,7 +72,7 @@ describe('ByCommandTab', () => {
       renderWith(['A', 'B', 'C', 'D', 'E']);
 
       expect(screen.getByTestId('esqlQueryProfileUnattributed')).toHaveTextContent(
-        '71% of the operator time is in steps that belong to no command: A, B, C, and 2 more.'
+        '71% of the operator time could not be matched to a command. Operators with unmatched time: A, B, C, and 2 more.'
       );
     });
 
@@ -80,7 +80,7 @@ describe('ByCommandTab', () => {
       renderWith([]);
 
       expect(screen.getByTestId('esqlQueryProfileUnattributed')).toHaveTextContent(
-        '71% of the operator time is in steps that belong to no command.'
+        '71% of the operator time could not be matched to a command.'
       );
     });
   });

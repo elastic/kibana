@@ -19,10 +19,10 @@ import { splitQueryCommands } from './query_commands';
 import { formatShare } from '../shared/profile_format';
 import { heatLevel } from '../shared/profile_heat';
 
-/** Time in steps that belong to no command is only mentioned when it is at least this share. */
+/** Time that could not be matched to a command is only mentioned when it is at least this share. */
 const MIN_UNATTRIBUTED_SHARE = 0.01;
 
-/** How many of the operators that belong to no command are named. */
+/** How many of the operators with time that could not be matched to a command are named. */
 const MAX_NAMED_OPERATORS = 3;
 
 /** The share of the operator time that belongs to each command of the query. */
@@ -159,7 +159,7 @@ export const ByCommandTab = ({ heat }: { heat: QueryHeat }) => (
           <p>
             <FormattedMessage
               id="data.inspector.queryProfile.unattributedDescription"
-              defaultMessage="{share} of the operator time is in steps that belong to no command{hasOperators, select, yes {: {operators}} other {}}{hiddenCount, plural, =0 {} other {, and # more}}."
+              defaultMessage="{share} of the operator time could not be matched to a command{hasOperators, select, yes {. Operators with unmatched time: {operators}} other {}}{hiddenCount, plural, =0 {} other {, and # more}}."
               values={{
                 share: formatShare(heat.unattributedShare),
                 hasOperators: heat.unattributedOperators.length > 0 ? 'yes' : 'no',

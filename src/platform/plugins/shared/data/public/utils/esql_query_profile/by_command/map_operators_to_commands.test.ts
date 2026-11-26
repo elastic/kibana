@@ -124,7 +124,7 @@ describe('mapOperatorsToCommands', () => {
     ]);
     expect(heat.commands[2].operators).toEqual(['ValuesSourceReader', 'HashAggregation']);
     expect(heat.unattributedShare).toBeCloseTo(0.1);
-    // The operators that belong to no command are named, the slowest first.
+    // The operators with time that was not matched to a command are named, the slowest first.
     expect(heat.unattributedOperators).toEqual(['Output']);
   });
 
@@ -193,7 +193,7 @@ describe('mapOperatorsToCommands', () => {
     expect(heat.unattributedShare).toBe(1);
   });
 
-  it('names no operator that reports no time among those that belong to no command', () => {
+  it('names no operator that reports no time among those that were not matched to a command', () => {
     const heat = heatOf('FROM logs', [
       { operator: 'LuceneSourceOperator', node: { id: '1', text: 'FROM logs' }, nanos: 10 },
       { operator: 'OutputOperator', node: { id: '2' } },
@@ -372,8 +372,30 @@ describe('mapOperatorsToCommands with subqueries', () => {
     expect(
       nestedHeat.commands.map(({ command, subquery, share }) => [command.text, subquery, share])
     ).toEqual([
-      ['FROM logs', 1, 0],
-      ['LIMIT 5', 1, 1],
+      ['FROM logs', 0, 0],
+      ['LIMIT 5', 0, 1],
+    ]);
+  });
+
+  it('numbers a subquery inside another before it, so the numbers read from the top', () => {
+    const query =
+      'FROM (FROM (FROM logs | WHERE a > 1 | LIMIT 5) | STATS c = COUNT(*) BY a) | SORT c DESC';
+    const orderHeat = heatOf(query, [
+      { operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 5' }, nanos: 10 },
+      {
+        operator: 'HashAggregationOperator',
+        node: { id: '2', text: 'STATS c = COUNT(*) BY a' },
+        nanos: 20,
+      },
+      { operator: 'TopNOperator', node: { id: '3', text: 'SORT c DESC' }, nanos: 30 },
+    ]);
+
+    expect(orderHeat.commands.map(({ command, subquery }) => [command.name, subquery])).toEqual([
+      ['FROM', 0],
+      ['WHERE', 0],
+      ['LIMIT', 0],
+      ['STATS', 1],
+      ['SORT', undefined],
     ]);
   });
 });

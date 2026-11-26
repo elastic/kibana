@@ -31,7 +31,10 @@ export interface QueryHeat {
   commands: CommandHeat[];
   /** Share of the operator time that no command explains, such as the final output. From 0 to 1. */
   unattributedShare: number;
-  /** Short names of the operators that took time and belong to no command, slowest first. */
+  /**
+   * Short names of the operators that took time that could not be matched to a command, slowest
+   * first. An operator can also be on a command, as each instance of it is matched on its own.
+   */
   unattributedOperators: string[];
   /** True when the query has subqueries, so the commands belong to different queries. */
   hasSubqueries: boolean;
@@ -83,16 +86,22 @@ const offsetOf = (
 
 /**
  * The commands of a query, with the commands of the subqueries of each command listed just before
- * the command that holds them. Subqueries are counted across the whole query, in the order they
- * are written.
+ * the command that holds them. Subqueries are numbered in the order they are listed, so a subquery
+ * inside another comes first, and the numbers read from the top as the work runs.
  */
 const listEntries = (commands: QueryCommand[]): Entry[] => {
   let nextSubquery = 0;
-  const list = (inCommands: QueryCommand[], subquery?: number): Entry[] =>
-    inCommands.flatMap((command): Entry[] => {
-      const inner = (command.branches ?? []).flatMap((branch) => list(branch, nextSubquery++));
-      return [...inner, { command, subquery }];
-    });
+  const list = (inCommands: QueryCommand[]): Entry[] =>
+    inCommands.flatMap((command): Entry[] => [
+      ...(command.branches ?? []).flatMap(listBranch),
+      { command },
+    ]);
+  // The subqueries inside a branch are listed, and so numbered, before the branch itself.
+  const listBranch = (branch: QueryCommand[]): Entry[] => {
+    const entries = list(branch);
+    const subquery = nextSubquery++;
+    return entries.map((entry) => (entry.subquery === undefined ? { ...entry, subquery } : entry));
+  };
   return list(commands);
 };
 
