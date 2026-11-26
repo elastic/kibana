@@ -123,7 +123,8 @@ export type GenAiDetailsTableProps = Pick<
 /**
  * Resolves each canonical detail attribute to the single field name it is
  * actually stored under on this hit, picking the first present shape in
- * priority order (mirrors `rawValue()` in `get_genai_fields.ts`). A document
+ * priority order (like `rawValue()` in `get_genai_fields.ts`, which does not try
+ * the `numeric_labels.*` shape, so the table can show rows it does not). A document
  * can carry a value under more than one shape at once (e.g. a derived bare
  * `gen_ai.*` field alongside the mapped `attributes.gen_ai.*` one) — without
  * this de-duplication every present shape would render as its own row.
