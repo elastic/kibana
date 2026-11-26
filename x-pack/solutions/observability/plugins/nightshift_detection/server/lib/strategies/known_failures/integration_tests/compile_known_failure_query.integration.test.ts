@@ -27,7 +27,13 @@ type Level = typeof BASE | typeof HIGH | number;
  */
 const SCENARIOS: Record<string, (minutesAgo: number) => Level> = {
   quiet: () => 0,
-  spike: (minutesAgo) => (minutesAgo === 3 ? 80 : BASE),
+  // A minute with only non-matching lines just before the spike, so the evidence shows a true 0.
+  spike: (minutesAgo) => {
+    if (minutesAgo === 4) {
+      return 0;
+    }
+    return minutesAgo === 3 ? 80 : BASE;
+  },
   // A spike inside the hour the normal level is measured over, as an incident an hour ago leaves.
   spike_in_baseline: (minutesAgo) => (minutesAgo === 40 ? 48 : BASE),
   step_up: (minutesAgo) => (minutesAgo <= 20 ? HIGH : BASE),
@@ -208,10 +214,11 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
     const { columns, values } = await esClient.esql.query({ query });
 
     expect(columns.map(({ name }) => name)).toEqual(['matches', 'period']);
+    // The empty minute as 0, not left out; 3 is the base level's wobble two minutes ago.
     expect(values).toEqual([
-      [expect.any(Number), new Date(spikeMinute - MINUTE_MS).toISOString()],
+      [0, new Date(spikeMinute - MINUTE_MS).toISOString()],
       [80, new Date(spikeMinute).toISOString()],
-      [expect.any(Number), new Date(spikeMinute + MINUTE_MS).toISOString()],
+      [3, new Date(spikeMinute + MINUTE_MS).toISOString()],
     ]);
   });
 
