@@ -10,7 +10,11 @@
 import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
 import type { ESQLCommandSummary, ESQLCommandSummaryContext } from '@kbn/esql-language';
-import { createQuerySummaryContext, getSummaryPerCommand } from './get_query_summary';
+import {
+  createQuerySummaryContext,
+  getQuerySummaryFromCommands,
+  getSummaryPerCommand,
+} from './get_query_summary';
 import { parseEsqlCached } from './parse_esql_cached';
 
 interface CommandWithSummary {
@@ -91,14 +95,16 @@ function resolveOneField(
   let current = fieldName;
   // Walk backwards so the most recent rename wins when a column is renamed more than once.
   for (let i = commandSummaries.length - 1; i >= 0; i--) {
-    const { summary } = commandSummaries[i];
+    const { cmd, summary } = commandSummaries[i];
     const pairMap = renameNewToOldByCommandIndex[i];
-    // A field introduced after DROP cannot trace back through that DROP to the source.
-    if (droppedColumnNamesByIndex[i]?.has(current)) {
-      return undefined;
-    }
-    // A command that creates this name without aliasing a field starts a new lineage.
-    if (summary.newColumns.has(current) && !pairMap?.has(current)) {
+    // FROM and FORK summarize whole pipelines, including columns later dropped or replaced.
+    // Only a direct column definition here can invalidate this rename.
+    if (
+      cmd.name !== 'from' &&
+      cmd.name !== 'fork' &&
+      summary.newColumns.has(current) &&
+      !pairMap?.has(current)
+    ) {
       return undefined;
     }
     if (!pairMap?.size) {
@@ -196,23 +202,10 @@ export function buildRenameSourceFieldMapFromCommands(
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
   const { root } = parseEsqlCached(query);
-  const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => {
-    const resolution = buildContext(commands, source, context);
-    const newColumns = new Set<string>();
-    const lastJoinIndex = commands.findLastIndex(({ name }) => name === 'join');
-    for (const [index, { summary }] of resolution.commandSummaries.entries()) {
-      summary.newColumns.forEach((name) => newColumns.add(name));
-      for (const name of resolution.droppedColumnNamesByIndex[index] ?? []) {
-        // A later join can reintroduce this name from the lookup index without listing it in its summary.
-        if (index < lastJoinIndex) {
-          newColumns.add(name);
-        } else {
-          newColumns.delete(name);
-        }
-      }
-    }
-    // Keep identity mappings in nested summaries to distinguish source fields from computed columns.
-    return { newColumns, renamedColumnsPairs: new Set(renameMapFromContext(resolution)) };
-  });
+  // Keep identity mappings in nested summaries to distinguish source fields from computed columns.
+  const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => ({
+    ...getQuerySummaryFromCommands(commands, source, context),
+    renamedColumnsPairs: new Set(renameMapFromContext(buildContext(commands, source, context))),
+  }));
   return buildRenameSourceFieldMapFromCommands(root.commands, query, summaryContext);
 }

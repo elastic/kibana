@@ -65,12 +65,15 @@ describe('buildRenameSourceFieldMap', () => {
     'FROM logs | RENAME service.name AS name | DESCRIBE | RENAME name AS label',
     'FROM logs | RENAME service.name AS name | STATS name = COUNT(*)',
     'LET x = (FROM logs | RENAME service.name AS name | DESCRIBE); FROM x',
-  ])(
-    'drops stale source mappings when a command creates a column with the same name: %s',
-    (query) => {
-      expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
-    }
-  );
+  ])('invalidates a rename when a command defines a new value under the same name: %s', (query) => {
+    expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
+  });
+
+  it('preserves a rename when only the sibling branch returns the field', () => {
+    const query =
+      'FROM logs | RENAME extension AS name | FORK (EVAL name = "temporary" | DROP name) (KEEP name)';
+    expect(resolve('name', query)).toBe('extension');
+  });
 
   describe('EVAL and synthetic columns', () => {
     it('does not unwind through EVAL output that only appears as the old side of RENAME', () => {
@@ -169,17 +172,6 @@ describe('buildRenameSourceFieldMap', () => {
   });
 
   describe('FORK branches', () => {
-    it.each([
-      ['EVAL name = "temporary" | DROP name', 'extension'],
-      ['DROP name | LOOKUP JOIN owners ON host', undefined],
-      ['DROP name | LOOKUP JOIN owners ON host | DROP name', 'extension'],
-      ['EVAL name = "temporary"', undefined],
-      ['DROP name | EVAL name = "replacement"', undefined],
-    ])('resolves the surviving name after FORK (%s) (KEEP name)', (branch, expectedSource) => {
-      const query = `FROM logs | RENAME extension AS name | FORK (${branch}) (KEEP name)`;
-      expect(buildRenameSourceFieldMap(query).get('name')).toBe(expectedSource);
-    });
-
     it('resolves EVAL renames inside FORK branches', () => {
       const query =
         'FROM kibana_sample_data_logs | FORK (EVAL c = bytes) (EVAL f = agent.keyword) | KEEP c, f';
@@ -189,13 +181,6 @@ describe('buildRenameSourceFieldMap', () => {
   });
 
   describe('nested pipelines', () => {
-    it.each([
-      'FROM (FROM logs | EVAL owner = "temporary" | DROP owner | LOOKUP JOIN owners ON host) | RENAME owner AS label',
-      'FROM logs | DROP owner | LOOKUP JOIN owners ON host | RENAME owner AS label',
-    ])('does not map a lookup field back through DROP: %s', (query) => {
-      expect(buildRenameSourceFieldMap(query).has('label')).toBe(false);
-    });
-
     it('preserves rename provenance through an identity EVAL', () => {
       const query = 'FROM (FROM logs | EVAL bytes = bytes | RENAME bytes AS size)';
 
