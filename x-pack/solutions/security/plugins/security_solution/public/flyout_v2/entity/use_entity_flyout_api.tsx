@@ -20,6 +20,7 @@ import {
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import {
+  AI_AGENT_TITLE,
   ALERTS_INSIGHTS_TITLE,
   ANOMALY_INSIGHTS_TITLE,
   ENTITY_GRAPH_VIEW_TITLE,
@@ -42,6 +43,7 @@ import type { HostProps } from './host/main';
 import type { UserProps } from './user/main';
 import type { ServiceProps } from './service/main';
 import type { GenericEntityProps } from './generic/main';
+import type { AiAgentProps } from './ai_agent/main';
 import type { VulnerabilityInsightsProps } from './host/tools/vulnerability_insights';
 import type { EntraInsightsProps } from './user/tools/entra_insights';
 import type { OktaInsightsProps } from './user/tools/okta_insights';
@@ -60,6 +62,8 @@ import {
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { AI_AGENT_ENGINE_TYPE } from '../../entity_analytics/components/ai_agents/constants';
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -69,6 +73,16 @@ const Service = lazy(() => import('./service/main').then((m) => ({ default: m.Se
 const GenericEntity = lazy(() =>
   import('./generic/main').then((m) => ({ default: m.GenericEntity }))
 );
+const AiAgent = lazy(() => import('./ai_agent/main').then((m) => ({ default: m.AiAgent })));
+
+/** AI agent flyouts are a proof of concept, routed only with `entityAnalyticsAiAgentsPoc` on. */
+const isAiAgentFlyoutEnabled = (): boolean => {
+  try {
+    return ExperimentalFeaturesService.get().entityAnalyticsAiAgentsPoc;
+  } catch {
+    return false;
+  }
+};
 const VulnerabilityInsights = lazy(() =>
   import('./host/tools/vulnerability_insights').then((m) => ({ default: m.VulnerabilityInsights }))
 );
@@ -117,6 +131,7 @@ export type OpenHostFlyoutParams = HostProps & WithTitle;
 export type OpenUserFlyoutParams = UserProps & WithTitle;
 export type OpenServiceFlyoutParams = ServiceProps & WithTitle;
 export type OpenGenericEntityFlyoutParams = GenericEntityProps & WithTitle;
+export type OpenAiAgentFlyoutParams = AiAgentProps & WithTitle;
 
 export interface OpenEntityDetailsParams extends WithTitle {
   /** Entity Store engine type (`host` | `user` | `service` | other → generic). */
@@ -180,6 +195,10 @@ export interface EntityFlyoutApi {
   openGenericEntityFlyout: (params: OpenGenericEntityFlyoutParams) => EntityFlyoutHandle;
   /** Opens the generic entity details flyout as a child of the currently open flyout. */
   openGenericEntityFlyoutAsChild: (params: OpenGenericEntityFlyoutParams) => void;
+  /** Opens the AI agent flyout (proof of concept) as a new, top-level flyout. Not URL-synced. */
+  openAiAgentFlyout: (params: OpenAiAgentFlyoutParams) => EntityFlyoutHandle;
+  /** Opens the AI agent flyout (proof of concept) as a child of the currently open flyout. */
+  openAiAgentFlyoutAsChild: (params: OpenAiAgentFlyoutParams) => void;
   /**
    * Opens the matching entity details flyout (host/user/service/generic, by `engineType`) as a
    * new, top-level flyout. Use when navigating to an entity from a table or list.
@@ -487,6 +506,41 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
     [open, mainProperties, readRootDescriptor, writeOnOpen, buildOnClose]
   );
 
+  // The AI agent flyout is a proof of concept with no URL descriptor, so a reload doesn't restore it.
+  const openAiAgentFlyout = useCallback(
+    ({ title, origin, ...props }: OpenAiAgentFlyoutParams): EntityFlyoutHandle => {
+      const ref = open(
+        <AiAgent {...props} />,
+        mainProperties(undefined, title ?? formatFlyoutTitle(AI_AGENT_TITLE, props.entityName)),
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.GENERIC,
+          session: sessionMode,
+          origin,
+        }
+      );
+      return { close: () => ref.close(), onClose: ref.onClose };
+    },
+    [open, mainProperties, sessionMode]
+  );
+  const openAiAgentFlyoutAsChild = useCallback(
+    ({ title, origin, ...props }: OpenAiAgentFlyoutParams) => {
+      const childTitle = title ?? formatFlyoutTitle(AI_AGENT_TITLE, props.entityName);
+      open(
+        <AiAgent {...props} />,
+        mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)),
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.GENERIC,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
+    },
+    [open, mainProperties]
+  );
+
   const openEntityFlyout = useCallback(
     ({
       engineType,
@@ -498,6 +552,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       origin,
       mode,
     }: OpenEntityDetailsParams) => {
+      if (engineType === AI_AGENT_ENGINE_TYPE && isAiAgentFlyoutEnabled()) {
+        openAiAgentFlyout({ entityId, entityName, scopeId, title, origin });
+        return;
+      }
       let children: ReactNode;
       let descriptor: FlyoutDescriptor;
       switch (engineType) {
@@ -584,7 +642,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         }
       );
     },
-    [open, mainProperties, sessionMode, writeOnOpen, buildOnClose]
+    [open, mainProperties, sessionMode, writeOnOpen, buildOnClose, openAiAgentFlyout]
   );
 
   const openEntityDetailsAsChild = useCallback(
@@ -598,6 +656,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       origin,
       mode,
     }: OpenEntityDetailsParams) => {
+      if (engineType === AI_AGENT_ENGINE_TYPE && isAiAgentFlyoutEnabled()) {
+        openAiAgentFlyoutAsChild({ entityId, entityName, scopeId, title, origin });
+        return;
+      }
       let children: ReactNode;
       let descriptor: FlyoutDescriptor;
       switch (engineType) {
@@ -690,7 +752,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, mainProperties, readRootDescriptor, writeOnOpen, buildOnClose]
+    [open, mainProperties, readRootDescriptor, writeOnOpen, buildOnClose, openAiAgentFlyoutAsChild]
   );
 
   // Entity tool flyouts.
@@ -972,6 +1034,8 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       openServiceFlyoutAsChild,
       openGenericEntityFlyout,
       openGenericEntityFlyoutAsChild,
+      openAiAgentFlyout,
+      openAiAgentFlyoutAsChild,
       openEntityFlyout,
       openEntityDetailsAsChild,
       openEntityRiskInputs,
@@ -994,6 +1058,8 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       openServiceFlyoutAsChild,
       openGenericEntityFlyout,
       openGenericEntityFlyoutAsChild,
+      openAiAgentFlyout,
+      openAiAgentFlyoutAsChild,
       openEntityFlyout,
       openEntityDetailsAsChild,
       openEntityRiskInputs,

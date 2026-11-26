@@ -64,6 +64,10 @@ export const SERVICE_TITLE = i18n.translate('xpack.securitySolution.flyoutV2.tit
   defaultMessage: 'Service',
 });
 
+export const AI_AGENT_TITLE = i18n.translate('xpack.securitySolution.flyoutV2.titles.aiAgent', {
+  defaultMessage: 'AI agent',
+});
+
 export const GENERIC_ENTITY_TITLE = i18n.translate(
   'xpack.securitySolution.flyoutV2.titles.genericEntity',
   { defaultMessage: 'Entity' }
