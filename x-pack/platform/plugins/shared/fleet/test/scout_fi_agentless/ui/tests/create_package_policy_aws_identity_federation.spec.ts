@@ -19,6 +19,11 @@ import {
 const credentialSelector = 'varGroupSelector-credential_type';
 const launchButton = 'awsIdentityFederationSetup-launchCloudFormation';
 const saveButton = 'createPackagePolicySaveButton';
+// The fi_agentless server pre-installs this `aws` version (kbn-scout fi_agentless shared config);
+// the suite installs a newer one for the WII static template and puts this one back afterwards.
+const SHARED_AWS_PACKAGE_VERSION = '8.1.0';
+const callbackAvailabilityRoute = '**/internal/fleet/iac_provisioner/callback_availability';
+const renderTemplateRoute = '**/internal/fleet/iac_provisioner/render_template';
 const staticTemplate =
   'https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml';
 
@@ -56,6 +61,10 @@ test.describe(
           [ENABLE_IAC_PROVISIONER_FLAG]: null,
         },
       });
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.fleet.integration.installPackage('aws', SHARED_AWS_PACKAGE_VERSION);
     });
 
     test('hides the option when the release flag is off', async ({ apiServices, page }) => {
@@ -109,6 +118,13 @@ test.describe(
           [ENABLE_IAC_PROVISIONER_FLAG]: true,
         },
       });
+      const renderRequests: Array<{ integrations?: unknown }> = [];
+      await page.route(renderTemplateRoute, async (route) => {
+        renderRequests.push(route.request().postDataJSON());
+        // Answer with an error: the shared form then falls back to the static template, which is
+        // enough to see that Launch asked the provisioner to render for the enabled inputs.
+        await route.fulfill({ status: 500, json: { message: 'render unavailable in this test' } });
+      });
       await openAgentlessGuardDuty(page);
       await selectIdentityFederation(page);
 
@@ -116,6 +132,12 @@ test.describe(
       await expect(page.getByRole('tab', { name: 'Existing Identity' })).toBeVisible();
       await expect(page.getByTestId(launchButton)).toBeVisible();
       await expect(page.getByTestId(saveButton)).toBeDisabled();
+
+      await page.getByTestId(launchButton).click();
+      await expect.poll(() => renderRequests.length).toBeGreaterThan(0);
+      expect(renderRequests[0].integrations).toStrictEqual([
+        { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
+      ]);
 
       await page.getByTestId(credentialSelector).selectOption('direct_access_key');
       await page.getByTestId('passwordInput-access-key-id').fill('EXAMPLEACCESSKEY1234');
@@ -136,12 +158,21 @@ test.describe(
           [ENABLE_IAC_PROVISIONER_FLAG]: true,
         },
       });
+      // The availability answer depends on the scheme of the server's public URL, which differs
+      // between local and CI servers, so the route is answered here.
+      const reason = 'Kibana has no public URL: server.publicBaseUrl is not set.';
+      await page.route(callbackAvailabilityRoute, (route) =>
+        route.fulfill({ json: { available: false, reason } })
+      );
       await openAgentlessGuardDuty(page);
       await selectIdentityFederation(page);
 
       await expect(
         page.getByTestId('awsIdentityFederationSetup-callbackUnavailable')
       ).toBeVisible();
+      await expect(
+        page.getByTestId('awsIdentityFederationSetup-callbackUnavailableReason')
+      ).toContainText(reason);
       await expect(
         page.getByTestId('awsIdentityFederationSetup-manualEntryToggle')
       ).toHaveAttribute('aria-expanded', 'true');

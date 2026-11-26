@@ -75,6 +75,9 @@ test.describe(
 
       await page.gotoApp('integrations/detail/aws/add-integration/guardduty');
       await ensureAgentlessSelected(page);
+      // Required GuardDuty fields first, so only the Identity Federation guard can disable Save.
+      await page.getByRole('textbox', { name: 'Detector ID' }).fill('12abc34d567e8fa901bc2d34');
+      await page.getByRole('textbox', { name: 'AWS Region' }).fill('us-east-1');
       await page.getByTestId(CREDENTIAL_TYPE_SELECTOR).selectOption(IDENTITY_FEDERATION);
 
       await expect(
