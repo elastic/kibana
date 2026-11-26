@@ -44,14 +44,23 @@ export const test = baseTest.extend<ProxyFixtures>({
         socket.destroy();
       })
     );
+    const siteUrls = {
+      http: `http://${SITE_HOST}:${site.port}/`,
+      https: `https://${SITE_HOST}:${secureSite.port}/`,
+    };
+    // Only requests for the site count, so other traffic can't pass for a visit.
     const proxy = await listen(
       http
-        .createServer((_request, response) => {
-          reached.http.add('proxy');
+        .createServer((request, response) => {
+          if (request.url === siteUrls.http) {
+            reached.http.add('proxy');
+          }
           response.end();
         })
-        .on('connect', (_request, socket) => {
-          reached.https.add('proxy');
+        .on('connect', (request, socket) => {
+          if (request.url === new URL(siteUrls.https).host) {
+            reached.https.add('proxy');
+          }
           socket.end('HTTP/1.1 403 Forbidden\r\n\r\n');
         })
     );
@@ -67,13 +76,7 @@ export const test = baseTest.extend<ProxyFixtures>({
       no_proxy: 'localhost,127.0.0.1',
     });
 
-    await use({
-      siteUrls: {
-        http: `http://${SITE_HOST}:${site.port}/`,
-        https: `https://${SITE_HOST}:${secureSite.port}/`,
-      },
-      reached,
-    });
+    await use({ siteUrls, reached });
 
     restoreEnv();
     site.close();
