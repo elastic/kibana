@@ -11,14 +11,14 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { CoverageAtBase } from './test/vendor_api/exemptions';
-import { findLostCoverage, vendorApiExemptionsSchema } from './test/vendor_api/exemptions';
-import type { FoundConnector } from './test/vendor_api/find_connector';
-import { listConnectors } from './test/vendor_api/find_connector';
-import { updateVendorApi } from './test/vendor_api/record/update_vendor_api';
+import type { CoverageAtBase } from './exemptions';
+import { findLostCoverage, vendorApiExemptionsSchema } from './exemptions';
+import type { FoundConnector } from './find_connector';
+import { listConnectors } from './find_connector';
+import { updateVendorApi } from './record/update_vendor_api';
 
-const SPECS_DIR = path.join(__dirname, 'specs');
-const EXEMPTIONS = path.join(__dirname, 'test', 'vendor_api', 'vendor_api_exemptions.json');
+const SPECS_DIR = path.join(__dirname, '..', '..', 'specs');
+const EXEMPTIONS = path.join(__dirname, 'vendor_api_exemptions.json');
 const SCRIPT = 'node scripts/connector_vendor_api';
 const RECORDING_TIMEOUT = 120_000;
 

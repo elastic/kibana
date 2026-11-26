@@ -787,7 +787,7 @@ Other handler errors, auth types that can't be used against the contract mock, a
 
 ### Contract test
 
-`src/connector_spec_vendor_api_contract.test.ts` runs in the package's Jest config, offline. It fails when:
+`src/test/vendor_api/connector_spec_vendor_api_contract.test.ts` runs in the package's Jest config, offline. It fails when:
 
 - a connector has both a `vendor_api/manifest.json` and an exemption, or an exemption names no connector;
 - coverage shrinks since the merge base (`GITHUB_PR_MERGE_BASE` in CI, otherwise the merge base with `upstream/main` or `origin/main`): a connector that had a `vendor_api/manifest.json` there no longer has one, or a new connector has neither a `vendor_api/manifest.json` nor an exemption. Without a merge base, this check is skipped;

@@ -20,7 +20,7 @@ Start with the deterministic checks and report every failure for the connector u
 
 ```bash
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
-node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts
+node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/connector_spec_vendor_api_contract.test.ts
 ```
 
 They cover the docs page location, the availability statement and workflow claims on the docs page,
