@@ -16,6 +16,7 @@ import { duration as momentDuration } from 'moment';
 import getPort from 'get-port';
 
 import { request } from '../lib/axios_utils';
+import { createRedirectSafeFetch } from '../lib/create_redirect_safe_fetch';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -403,6 +404,48 @@ describe('axios connections', () => {
         expect(data.headers.authorization).toBe('Bearer confidential');
         expect(data.headers['x-api-key']).toBe('confidential');
         expect(data.headers['x-routing-key']).toBe('confidential');
+      });
+
+      test('the fetch for non-axios SDKs drops credential headers on a cross-origin redirect', async () => {
+        const targetUrl = await listen(echoRequest);
+        const redirectUrl = await listen((req, res) => {
+          res.writeHead(307, { Location: `${targetUrl}/landing` });
+          res.end();
+        });
+
+        const fetch = createRedirectSafeFetch({
+          configurationUtilities: getACUfromConfig(),
+          logger,
+        });
+        const response = await fetch(redirectUrl, {
+          method: 'POST',
+          body: '{"hello":"world"}',
+          headers,
+        });
+        const data = await response.json();
+
+        expect(data.path).toBe('/landing');
+        expect(data.headers['content-type']).toBe('application/json');
+        expect(data.body).toBe('{"hello":"world"}');
+        expect(data.headers).not.toHaveProperty('authorization');
+        expect(data.headers).not.toHaveProperty('x-api-key');
+        expect(data.headers).not.toHaveProperty('x-routing-key');
+      });
+
+      test('the fetch for non-axios SDKs rejects a redirect to a host that is not allowed', async () => {
+        const redirectUrl = await listen((req, res) => {
+          res.writeHead(302, { Location: 'http://127.0.0.1:1/capture' });
+          res.end();
+        });
+
+        const fetch = createRedirectSafeFetch({
+          configurationUtilities: getACUfromConfig({ allowedHosts: ['localhost'] }),
+          logger,
+        });
+
+        await expect(fetch(redirectUrl, { headers })).rejects.toThrow(
+          'is not added to the Kibana config xpack.actions.allowedHosts'
+        );
       });
     });
   });

@@ -10,6 +10,7 @@ import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
+import type { Fetch } from 'openai/core';
 import { PassThrough } from 'stream';
 import type { Agent as HttpsAgent } from 'https';
 import type { Agent as HttpAgent, IncomingMessage } from 'http';
@@ -23,6 +24,7 @@ import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
+import { createRedirectSafeFetch } from '@kbn/actions-plugin/server/lib/create_redirect_safe_fetch';
 import {
   DEFAULT_MODEL,
   DEFAULT_TIMEOUT_MS,
@@ -160,6 +162,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       defaultHeaders,
       httpAgent,
       defaultQuery,
+      // node-fetch's own redirect handling skips allowedHosts and forwards headers like api-key.
+      // The SDK types its fetch with web fetch types, but in Node it calls node-fetch, which this wraps.
+      fetch: createRedirectSafeFetch({
+        configurationUtilities: this.configurationUtilities,
+        logger: this.logger,
+      }) as unknown as Fetch,
     });
   }
 

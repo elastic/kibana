@@ -8,24 +8,7 @@
 import type { AxiosRequestConfig } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-
-/**
- * Headers that are kept when a redirect leaves the original origin. Everything else is dropped,
- * because connectors send credentials in many differently named headers (Api-Key, X-Routing-Key,
- * user-defined secret headers, ...) and a denylist cannot name them all.
- */
-const CROSS_ORIGIN_SAFE_HEADERS: ReadonlySet<string> = new Set([
-  'accept',
-  'accept-encoding',
-  'accept-language',
-  'cache-control',
-  'content-encoding',
-  'content-language',
-  'content-length',
-  'content-type',
-  'pragma',
-  'user-agent',
-]);
+import { isSameOriginRedirect, removeCrossOriginUnsafeHeaders } from './redirect_headers';
 
 interface RedirectOptions {
   hostname?: unknown;
@@ -36,37 +19,6 @@ interface RedirectOptions {
 interface RedirectRequestDetails {
   url?: string;
 }
-
-const isUpgradeToHttps = (from: URL, to: URL): boolean =>
-  from.protocol === 'http:' &&
-  to.protocol === 'https:' &&
-  from.hostname === to.hostname &&
-  from.port === '' &&
-  to.port === '';
-
-const isSameOrigin = (fromUrl: string | undefined, toUrl: unknown): boolean => {
-  if (typeof fromUrl !== 'string' || typeof toUrl !== 'string') {
-    return false;
-  }
-  try {
-    const from = new URL(fromUrl);
-    const to = new URL(toUrl);
-    return from.origin === to.origin || isUpgradeToHttps(from, to);
-  } catch {
-    // An unparsable URL is treated as cross-origin, which drops the headers.
-    return false;
-  }
-};
-
-const stripUnsafeHeaders = (headers: Record<string, unknown>): string[] => {
-  const removed = Object.keys(headers).filter(
-    (name) => !CROSS_ORIGIN_SAFE_HEADERS.has(name.toLowerCase())
-  );
-  for (const name of removed) {
-    delete headers[name];
-  }
-  return removed;
-};
 
 /**
  * Returns the follow-redirects hook used by connector HTTP requests: it rejects redirects to hosts
@@ -92,11 +44,11 @@ export const getBeforeRedirectFn = (
 
     configurationUtilities.ensureHostnameAllowed(hostname);
 
-    if (headers == null || isSameOrigin(requestDetails?.url, href)) {
+    if (headers == null || isSameOriginRedirect(requestDetails?.url, href)) {
       return;
     }
 
-    const removed = stripUnsafeHeaders(headers);
+    const removed = removeCrossOriginUnsafeHeaders(headers);
     if (removed.length > 0) {
       logger.debug(
         `Removed headers [${removed.join(

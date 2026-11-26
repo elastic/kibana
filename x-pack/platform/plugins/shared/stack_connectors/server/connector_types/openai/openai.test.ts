@@ -6,6 +6,7 @@
  */
 
 import type { AxiosError } from 'axios';
+import OpenAI from 'openai';
 import { OpenAIConnector } from './openai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
@@ -615,6 +616,25 @@ describe('OpenAIConnector', () => {
     });
 
     describe('invokeAsyncIterator', () => {
+      it('gives the OpenAI client a fetch that checks redirects', () => {
+        jest.mocked(OpenAI).mockClear();
+        new OpenAIConnector({
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: '1', type: CONNECTOR_ID },
+          config: {
+            apiUrl: 'https://api.openai.com/v1/chat/completions',
+            apiProvider: OpenAiProviderType.OpenAi,
+          },
+          secrets: { apiKey: '123' },
+          logger,
+          services: actionsMock.createServices(),
+        });
+
+        expect(OpenAI).toHaveBeenCalledWith(
+          expect.objectContaining({ fetch: expect.any(Function) })
+        );
+      });
+
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector);
         expect(mockRequest).toHaveBeenCalledTimes(0);
