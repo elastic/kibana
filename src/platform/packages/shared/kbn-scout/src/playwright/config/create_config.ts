@@ -15,6 +15,7 @@ import {
 } from '@kbn/scout-reporting';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
+import { getBrowserEnvWithoutProxy } from '../utils/browser_env';
 
 const DEFAULT_CI_RETRIES = 1;
 
@@ -103,6 +104,12 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       ])
     : scoutDefaultProjects;
 
+  // Chromium strips credentials embedded in HTTP(S)_PROXY, so it cannot use
+  // Citadel's per-job authenticated proxy URL. Keep only the browser direct;
+  // the Playwright runner and the rest of the job remain proxied.
+  // The headless shell ignores --no-proxy-server, so hide the proxy variables from it.
+  const browserEnv = getBrowserEnvWithoutProxy();
+
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
     metadata: options.metadata,
@@ -140,6 +147,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
+      ...(browserEnv ? { launchOptions: { env: browserEnv } } : {}),
     },
 
     // Timeout for each test, includes test, hooks and fixtures
