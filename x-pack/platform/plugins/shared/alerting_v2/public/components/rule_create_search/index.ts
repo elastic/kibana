@@ -17,3 +17,5 @@ export {
   RULE_CREATE_SEARCH_SECTION_IDS,
   RULE_CREATE_SEARCH_SECTION_TITLES,
 } from './constants';
+export type { RuleCreateSearchProps } from './rule_create_search';
+export { RuleCreateSearch } from './rule_create_search';
