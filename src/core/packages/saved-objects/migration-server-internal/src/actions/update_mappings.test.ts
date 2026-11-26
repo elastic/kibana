@@ -15,11 +15,11 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 import { updateMappings } from './update_mappings';
 import { DEFAULT_TIMEOUT } from './constants';
 
-jest.mock('./catch_retryable_es_client_errors');
+vi.mock('./catch_retryable_es_client_errors');
 
 describe('updateMappings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createErrorClient = (response: Partial<TransportResult<Record<string, any>>>) => {

@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getUsageCollection = () => ({
+import type { Mock } from 'vitest';
+
+export const getUsageCollection = (): { domainId: string; incrementCounter: Mock } => ({
   domainId: 'abc123',
-  incrementCounter: jest.fn(),
+  incrementCounter: vi.fn(),
 });

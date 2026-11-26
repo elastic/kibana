@@ -4,6 +4,7 @@
     "outDir": "target/types",
     "types": [
       "vitest/globals",
+      "jest",
       "node"
     ]
   },
@@ -24,9 +25,9 @@
     "@kbn/utility-types",
     "@kbn/security-hardening",
     "@kbn/telemetry",
-    "@kbn/vitest",
   ],
   "exclude": [
     "target/**/*",
+    "vitest.config.ts"
   ]
 }

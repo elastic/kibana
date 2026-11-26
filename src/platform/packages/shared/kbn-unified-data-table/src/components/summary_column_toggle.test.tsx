@@ -14,7 +14,7 @@ import { SummaryColumnToggle } from './summary_column_toggle';
 
 describe('SummaryColumnToggle', () => {
   it('calls onChange with the next checked value when enabled', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <SummaryColumnToggle
         checked={false}
@@ -30,7 +30,7 @@ describe('SummaryColumnToggle', () => {
   });
 
   it('does not call onChange when disabled', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <SummaryColumnToggle
         checked={true}

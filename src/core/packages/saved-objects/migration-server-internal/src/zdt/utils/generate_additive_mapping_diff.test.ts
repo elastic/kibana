@@ -21,7 +21,7 @@ import { createType } from '../test_helpers';
 describe('generateAdditiveMappingDiff', () => {
   const deletedTypes = ['deletedType'];
 
-  const stubMigration = jest.fn();
+  const stubMigration = vi.fn();
   const stubModelVersion: SavedObjectsModelVersion = {
     changes: [{ type: 'mappings_addition', addedMappings: {} }],
   };
@@ -140,7 +140,7 @@ describe('generateAdditiveMappingDiff', () => {
         deletedTypes,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot generate model version difference: conflict between versions"`
+      `[Error: Cannot generate model version difference: conflict between versions]`
     );
   });
 
@@ -156,7 +156,7 @@ describe('generateAdditiveMappingDiff', () => {
         deletedTypes,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot generate additive mapping diff: mappingVersions not present on index meta"`
+      `[Error: Cannot generate additive mapping diff: mappingVersions not present on index meta]`
     );
   });
 
@@ -170,7 +170,7 @@ describe('generateAdditiveMappingDiff', () => {
         deletedTypes: [],
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot generate additive mapping diff: meta not present on index"`
+      `[Error: Cannot generate additive mapping diff: meta not present on index]`
     );
   });
 

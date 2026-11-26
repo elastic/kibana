@@ -22,7 +22,7 @@ import type { FieldStatsResponse } from '../../types';
 import type { FieldStatsWithKbnQuery } from './field_stats';
 import FieldStats from './field_stats';
 
-jest.mock('../../services/field_stats');
+vi.mock('../../services/field_stats');
 
 const mockedServices = {
   data: dataPluginMock.createStartContract(),
@@ -32,7 +32,7 @@ const mockedServices = {
   uiSettings: coreMock.createStart().uiSettings,
 };
 
-const mockedLoadFieldStats = jest.mocked(loadFieldStats);
+const mockedLoadFieldStats = vi.mocked(loadFieldStats);
 
 describe('UnifiedFieldList FieldStats', () => {
   let defaultProps: FieldStatsWithKbnQuery;
@@ -113,8 +113,8 @@ describe('UnifiedFieldList FieldStats', () => {
           isMapped: true,
         },
       ],
-      getFormatterForField: jest.fn(() => ({
-        convertToText: jest.fn((s: unknown) => JSON.stringify(s)),
+      getFormatterForField: vi.fn(() => ({
+        convertToText: vi.fn((s: unknown) => JSON.stringify(s)),
       })),
     } as unknown as DataView;
 

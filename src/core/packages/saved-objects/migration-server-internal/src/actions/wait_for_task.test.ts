@@ -15,7 +15,7 @@ import { waitForTask } from './wait_for_task';
 
 describe('waitForTask', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls tasks API get() with the correct parameters', async () => {
@@ -104,7 +104,7 @@ describe('waitForTask', () => {
         timeout: '60s',
       });
 
-      expect(task()).rejects.toEqual(error);
+      await expect(task()).rejects.toEqual(error);
     });
   });
 });

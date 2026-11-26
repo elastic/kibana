@@ -19,7 +19,7 @@ const renderToggle = () =>
       <SortDirectionToggle
         direction={METRICS_SORT_DIRECTION.asc}
         isDisabled={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
       />
     </IntlProvider>
   );

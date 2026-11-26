@@ -143,7 +143,7 @@ describe('getActionsColumn', () => {
 
       it('should return the header cell render function', () => {
         // Given
-        const actionsHeaderSpy = jest.spyOn(actionsHeader, 'ActionsHeader');
+        const actionsHeaderSpy = vi.spyOn(actionsHeader, 'ActionsHeader');
 
         // When
         const result = getActionsColumn({
@@ -175,7 +175,7 @@ describe('getActionsColumn', () => {
         render(
           <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
             {result?.rowCellRender({
-              setCellProps: jest.fn(),
+              setCellProps: vi.fn(),
               rowIndex: 0,
               colIndex: 0,
               columnId: 'actions',
@@ -200,19 +200,19 @@ describe('getActionsColumn', () => {
         {
           id: 'a',
           render: (Control) => (
-            <Control data-test-subj="a" label="a" iconType="empty" onClick={jest.fn()} />
+            <Control data-test-subj="a" label="a" iconType="empty" onClick={vi.fn()} />
           ),
         },
         {
           id: 'b',
           render: (Control) => (
-            <Control data-test-subj="b" label="b" iconType="empty" onClick={jest.fn()} />
+            <Control data-test-subj="b" label="b" iconType="empty" onClick={vi.fn()} />
           ),
         },
         {
           id: 'c',
           render: (Control) => (
-            <Control data-test-subj="c" label="c" iconType="empty" onClick={jest.fn()} />
+            <Control data-test-subj="c" label="c" iconType="empty" onClick={vi.fn()} />
           ),
         },
       ];
@@ -226,7 +226,7 @@ describe('getActionsColumn', () => {
       render(
         <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
           {result?.rowCellRender({
-            setCellProps: jest.fn(),
+            setCellProps: vi.fn(),
             rowIndex: 0,
             colIndex: 0,
             columnId: 'actions',
@@ -251,25 +251,25 @@ describe('getActionsColumn', () => {
       {
         id: 'row-control-column-1',
         render: (Control) => (
-          <Control iconType="empty" label="Row control column 1" onClick={jest.fn()} />
+          <Control iconType="empty" label="Row control column 1" onClick={vi.fn()} />
         ),
       },
       {
         id: 'row-control-column-2',
         render: (Control) => (
-          <Control iconType="empty" label="Row control column 2" onClick={jest.fn()} />
+          <Control iconType="empty" label="Row control column 2" onClick={vi.fn()} />
         ),
       },
       {
         id: 'row-control-column-3',
         render: (Control) => (
-          <Control iconType="empty" label="Row control column 3" onClick={jest.fn()} />
+          <Control iconType="empty" label="Row control column 3" onClick={vi.fn()} />
         ),
       },
       {
         id: 'row-control-column-4',
         render: (Control) => (
-          <Control iconType="empty" label="Row control column 4" onClick={jest.fn()} />
+          <Control iconType="empty" label="Row control column 4" onClick={vi.fn()} />
         ),
       },
     ];
@@ -287,7 +287,7 @@ describe('getActionsColumn', () => {
       render(
         <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
           {result?.rowCellRender({
-            setCellProps: jest.fn(),
+            setCellProps: vi.fn(),
             rowIndex: 0,
             colIndex: 0,
             columnId: 'actions',

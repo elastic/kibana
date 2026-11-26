@@ -100,7 +100,7 @@ describe('createInitialState', () => {
     };
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
@@ -216,7 +216,7 @@ describe('createInitialState', () => {
   });
 
   it('returns state with the correct `excludeFromUpgradeFilterHooks`', () => {
-    const fooExcludeOnUpgradeHook = jest.fn();
+    const fooExcludeOnUpgradeHook = vi.fn();
     typeRegistry.registerType({
       name: 'baz',
       namespaceType: 'single',
@@ -230,7 +230,7 @@ describe('createInitialState', () => {
   });
 
   it('returns state with an outdatedDocumentsQuery', () => {
-    jest.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
+    vi.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
 
     expect(
       createInitialState({

@@ -30,8 +30,8 @@ const setup = (props: Partial<FieldListFiltersProps<DataViewField>> = {}) => {
     'data-test-subj': DATA_TEST_SUBJ,
     docLinks,
     nameFilter: '',
-    onChangeNameFilter: jest.fn(),
-    onChangeFieldTypes: jest.fn(),
+    onChangeNameFilter: vi.fn(),
+    onChangeFieldTypes: vi.fn(),
     ...props,
   };
 
@@ -55,8 +55,8 @@ describe('<FieldListFilters />', () => {
     const finalProps: FieldListFiltersProps<DataViewField> = {
       docLinks,
       nameFilter: '',
-      onChangeNameFilter: jest.fn(),
-      onChangeFieldTypes: jest.fn(),
+      onChangeNameFilter: vi.fn(),
+      onChangeFieldTypes: vi.fn(),
     };
 
     render(
@@ -85,7 +85,7 @@ describe('<FieldListFilters />', () => {
       'data-test-subj': DATA_TEST_SUBJ,
       docLinks,
       nameFilter: '',
-      onChangeNameFilter: jest.fn(),
+      onChangeNameFilter: vi.fn(),
       onChangeFieldTypes: undefined,
       selectedFieldTypes: [],
       allFields: dataView.fields,
@@ -116,19 +116,19 @@ describe('<FieldListFilters />', () => {
   });
 
   it('calls onChangeNameFilter when search input changes', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const { props } = setup({ nameFilter: '' });
 
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'host' } });
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(props.onChangeNameFilter).toHaveBeenCalledWith('host');
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('calls onChangeFieldTypes when field type filter changes', async () => {

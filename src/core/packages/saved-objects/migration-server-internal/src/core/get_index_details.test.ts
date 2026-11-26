@@ -24,15 +24,17 @@ describe('getIndexDetails', () => {
     expect(client.indices.getAlias).toHaveBeenCalledWith({ index: '.kibana' });
   });
 
-  it('throws an error if any of the calls fails miserably', () => {
+  it('throws an error if any of the calls fails miserably', async () => {
     const client = elasticsearchClientMock.createInternalClient(
       Promise.reject('Something went really wrong!')
     );
 
-    expect(getIndexDetails(client, '.kibana')).rejects.toEqual('Something went really wrong!');
+    await expect(getIndexDetails(client, '.kibana')).rejects.toEqual(
+      'Something went really wrong!'
+    );
   });
 
-  it('throws a 404 error if the index is missing', () => {
+  it('throws a 404 error if the index is missing', async () => {
     const client = elasticsearchClientMock.createInternalClient();
     // simulate an ElasticsearchClientError
     client.indices.getMapping.mockRejectedValueOnce({
@@ -45,7 +47,7 @@ describe('getIndexDetails', () => {
     });
     client.indices.getAlias.mockResolvedValueOnce({ '.kibana_9.1.0_001': { aliases: {} } });
 
-    expect(getIndexDetails(client, '.kibana')).rejects.toEqual(
+    await expect(getIndexDetails(client, '.kibana')).rejects.toEqual(
       expect.objectContaining({ meta: { statusCode: 404 } })
     );
   });

@@ -34,7 +34,7 @@ describe('NumberList utils', () => {
       max: 10,
       minInclusive: true,
       maxInclusive: true,
-      within: jest.fn(() => true),
+      within: vi.fn(() => true),
     };
     invalidEntry = {
       value: expect.any(Number),
@@ -161,7 +161,7 @@ describe('NumberList utils', () => {
     });
 
     test('should return invalid', () => {
-      range.within = jest.fn(() => false);
+      range.within = vi.fn(() => false);
       expect(validateValue(11, range)).toEqual({ isInvalid: true, error: expect.any(String) });
     });
   });

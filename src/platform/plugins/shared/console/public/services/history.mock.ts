@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { History } from './history';
 
 export class HistoryMock extends History {
-  addToHistory = jest.fn();
-  change = jest.fn();
-  clearHistory = jest.fn();
-  deleteLegacySavedEditorState = jest.fn();
-  getHistory = jest.fn();
-  getHistoryKeys = jest.fn();
-  getLegacySavedEditorState = jest.fn();
-  updateCurrentState = jest.fn();
+  addToHistory: Mock = vi.fn();
+  change: Mock = vi.fn();
+  clearHistory: Mock = vi.fn();
+  deleteLegacySavedEditorState: Mock = vi.fn();
+  getHistory: Mock = vi.fn();
+  getHistoryKeys: Mock = vi.fn();
+  getLegacySavedEditorState: Mock = vi.fn();
+  updateCurrentState: Mock = vi.fn();
 }

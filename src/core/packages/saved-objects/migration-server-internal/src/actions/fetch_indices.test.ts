@@ -13,17 +13,24 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { fetchIndices } from './fetch_indices';
 
 // Create a mock powered by the actual implementation
-jest.mock('./catch_retryable_es_client_errors', () => ({
-  catchRetryableEsClientErrors: jest
-    .fn()
-    .mockImplementation(
-      jest.requireActual('./catch_retryable_es_client_errors').catchRetryableEsClientErrors
-    ),
-}));
+vi.mock('./catch_retryable_es_client_errors', async () => {
+  const mockedModule = {
+    catchRetryableEsClientErrors: vi
+      .fn()
+      .mockImplementation(
+        (
+          await vi.importActual<typeof import('./catch_retryable_es_client_errors')>(
+            './catch_retryable_es_client_errors'
+          )
+        ).catchRetryableEsClientErrors
+      ),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 describe('fetchIndices', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
@@ -58,7 +65,7 @@ describe('fetchIndices', () => {
     );
     const task = fetchIndices({ client, indices: ['my_index'] });
 
-    expect(task()).rejects.toMatchInlineSnapshot(
+    await expect(task()).rejects.toMatchInlineSnapshot(
       `[ResponseError: {"ok":false,"message":"Unknown resource."}]`
     );
   });

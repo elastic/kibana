@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
+import type { Mocked } from 'vitest';
 import {
   pointInTimeFinderMock,
   mockGetBulkOperationError,
@@ -65,8 +66,8 @@ describe('#bulkDelete', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let serializer: Mocked<SavedObjectsSerializer>;
+  let securityExtension: Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -76,8 +77,8 @@ describe('#bulkDelete', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
     securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 

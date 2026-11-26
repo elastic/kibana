@@ -17,35 +17,46 @@ import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_tim
 import type { CompareDocumentsProps } from './compare_documents';
 import CompareDocuments from './compare_documents';
 import { useComparisonFields } from './hooks/use_comparison_fields';
+import type * as UseComparisonFieldsModule from './hooks/use_comparison_fields';
+import type * as RestorableStateModule from '../../restorable_state';
 
 let mockLocalStorage: Record<string, string> = {};
 
-jest.mock('../../restorable_state', () => {
-  const real = jest.requireActual('../../restorable_state');
-  return {
-    useRestorableLocalStorage: jest.fn((key: string, storageKey, value: unknown) => {
-      mockLocalStorage[storageKey] = JSON.stringify(value);
-      return real.useRestorableLocalStorage(key, storageKey, value);
-    }),
+vi.mock('../../restorable_state', async () => {
+  const real = await vi.importActual<typeof RestorableStateModule>('../../restorable_state');
+  const mockedModule = {
+    useRestorableLocalStorage: vi.fn<typeof real.useRestorableLocalStorage>(
+      (key, storageKey, value) => {
+        mockLocalStorage[storageKey] = JSON.stringify(value);
+        return real.useRestorableLocalStorage(key, storageKey, value);
+      }
+    ),
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 let mockDataGridProps: EuiDataGridProps | undefined;
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiDataGrid: jest.fn((props) => {
-    mockDataGridProps = props;
-    return <></>;
-  }),
-}));
-
-jest.mock('./hooks/use_comparison_fields', () => {
-  const originalModule = jest.requireActual('./hooks/use_comparison_fields');
-  return {
-    ...originalModule,
-    useComparisonFields: jest.fn(originalModule.useComparisonFields),
+vi.mock('@elastic/eui', async () => {
+  const mockedModule = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiDataGrid: vi.fn(function (props) {
+      mockDataGridProps = props;
+      return <></>;
+    }),
   };
+  return { ...mockedModule, default: mockedModule };
+});
+
+vi.mock('./hooks/use_comparison_fields', async () => {
+  const originalModule = await vi.importActual<typeof UseComparisonFieldsModule>(
+    './hooks/use_comparison_fields'
+  );
+  const mockedModule = {
+    ...originalModule,
+    useComparisonFields: vi.fn(originalModule.useComparisonFields),
+  };
+  return { ...mockedModule, default: mockedModule };
 });
 
 const docs = generateEsHits(dataViewWithTimefieldMock, 5).map((hit) =>
@@ -58,7 +69,7 @@ const createDocMap = (currentDocs = docs) =>
 const renderCompareDocuments = ({
   forceShowAllFields = false,
 }: { forceShowAllFields?: boolean } = {}) => {
-  const replaceSelectedDocs = jest.fn();
+  const replaceSelectedDocs = vi.fn();
   const getCompareDocuments = (props?: Partial<CompareDocumentsProps>) => (
     <CompareDocuments
       id="test"
@@ -75,7 +86,7 @@ const renderCompareDocuments = ({
       fieldFormats={{} as any}
       docMap={createDocMap()}
       replaceSelectedDocs={replaceSelectedDocs}
-      setIsCompareActive={jest.fn()}
+      setIsCompareActive={vi.fn()}
       {...props}
     />
   );

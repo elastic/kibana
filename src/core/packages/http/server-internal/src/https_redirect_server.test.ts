@@ -9,9 +9,12 @@
 
 import * as net from 'node:net';
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
+vi.mock('fs', () => {
+  const mockedModule = {
+    readFileSync: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 import Chance from 'chance';
 import { Server } from 'http';
@@ -94,7 +97,7 @@ test('throws if [redirectHttpFromPort] is not specified', async () => {
 });
 
 test('throws if [redirectHttpFromPort] is in use', async () => {
-  const mockListen = jest.spyOn(Server.prototype, 'listen').mockImplementation(() => {
+  const mockListen = vi.spyOn(Server.prototype, 'listen').mockImplementation(() => {
     // eslint-disable-next-line no-throw-literal
     throw { code: 'EADDRINUSE' };
   });

@@ -12,11 +12,11 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { closePit } from './close_pit';
 
-jest.mock('./catch_retryable_es_client_errors');
+vi.mock('./catch_retryable_es_client_errors');
 
 describe('closePit', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Create a mock client that rejects all methods with a 503 status code
@@ -27,11 +27,11 @@ describe('closePit', () => {
       body: { error: { type: 'es_type', reason: 'es_reason' } },
     })
   );
-  const client = elasticsearchClientMock.createInternalClient(
-    elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
-  );
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
     const task = closePit({ client, pitId: 'pitId' });
     try {
       await task();

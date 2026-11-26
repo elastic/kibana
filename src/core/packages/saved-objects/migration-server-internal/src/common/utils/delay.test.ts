@@ -13,15 +13,15 @@ const nextTick = () => new Promise<void>((resolve) => resolve());
 
 describe('createDelayFn', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('adds a delay effect to the provided function', async () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     const wrapped = createDelayFn({ retryDelay: 2000, retryCount: 0 })(handler);
 
@@ -29,12 +29,12 @@ describe('createDelayFn', () => {
 
     expect(handler).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
     await nextTick();
 
     expect(handler).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(1500);
+    vi.advanceTimersByTime(1500);
     await nextTick();
 
     expect(handler).toHaveBeenCalledTimes(1);

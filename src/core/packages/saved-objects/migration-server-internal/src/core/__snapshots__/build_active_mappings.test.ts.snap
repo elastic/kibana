@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildActiveMappings combines all mappings and includes core mappings 1`] = `
+exports[`buildActiveMappings > combines all mappings and includes core mappings 1`] = `
 Object {
   "dynamic": "strict",
   "properties": Object {
@@ -69,7 +69,7 @@ Object {
 }
 `;
 
-exports[`buildActiveMappings handles the \`dynamic\` property of types 1`] = `
+exports[`buildActiveMappings > handles the \`dynamic\` property of types 1`] = `
 Object {
   "dynamic": "strict",
   "properties": Object {

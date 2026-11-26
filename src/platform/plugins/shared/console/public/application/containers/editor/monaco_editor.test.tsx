@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, MockedFunction } from 'vitest';
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,32 +23,32 @@ import {
 import { useSetInputEditor } from '../../hooks';
 import { initialValue } from '../../stores/editor';
 
-const mockAppendRequestToEditor = jest.fn();
-const mockDestroyResizeChecker = jest.fn();
-const mockEditorDispatch = jest.fn();
-const mockImportRequestsToEditor = jest.fn();
-const mockRegisterKeyboardCommands = jest.fn();
-const mockRequestDispatch = jest.fn();
-const mockSetInputEditor = jest.fn();
-const mockSetupResizeChecker = jest.fn();
-const mockUnregisterKeyboardCommands = jest.fn();
+const mockAppendRequestToEditor = vi.fn();
+const mockDestroyResizeChecker = vi.fn();
+const mockEditorDispatch = vi.fn();
+const mockImportRequestsToEditor = vi.fn();
+const mockRegisterKeyboardCommands = vi.fn();
+const mockRequestDispatch = vi.fn();
+const mockSetInputEditor = vi.fn();
+const mockSetupResizeChecker = vi.fn();
+const mockUnregisterKeyboardCommands = vi.fn();
 
 interface MockCodeEditorProps {
   editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
-const mockCodeEditor = jest.fn((_props: MockCodeEditorProps) => null);
+const mockCodeEditor = vi.fn((_props: MockCodeEditorProps) => null);
 
 const mockActionsProvider = {
   appendRequestToEditor: mockAppendRequestToEditor,
-  autoIndent: jest.fn(),
-  getDocumentationLink: jest.fn(),
-  getRequests: jest.fn(),
+  autoIndent: vi.fn(),
+  getDocumentationLink: vi.fn(),
+  getRequests: vi.fn(),
   importRequestsToEditor: mockImportRequestsToEditor,
-  isKbnRequestSelected: jest.fn(),
-  moveToNextRequestEdge: jest.fn(),
-  moveToPreviousRequestEdge: jest.fn(),
-  sendRequests: jest.fn(),
+  isKbnRequestSelected: vi.fn(),
+  moveToNextRequestEdge: vi.fn(),
+  moveToPreviousRequestEdge: vi.fn(),
+  sendRequests: vi.fn(),
 };
 
 const mockServicesContext = {
@@ -55,7 +56,7 @@ const mockServicesContext = {
     application: {},
     autocompleteInfo: {
       entitiesRefreshGeneration$: new BehaviorSubject(0),
-      getEntitiesRefreshGeneration: jest.fn(),
+      getEntitiesRefreshGeneration: vi.fn(),
     },
     data: {},
     http: {},
@@ -76,72 +77,98 @@ const mockServicesContext = {
   docLinkVersion: 'NA',
 };
 
-jest.mock('@kbn/code-editor/code_editor', () => ({
-  CodeEditor: (props: MockCodeEditorProps) => mockCodeEditor(props),
-}));
+vi.mock('@kbn/code-editor/code_editor', () => {
+  const mockedModule = {
+    CodeEditor: (props: MockCodeEditorProps) => mockCodeEditor(props),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('@kbn/monaco', () => ({
-  CONSOLE_LANG_ID: 'console',
-  CONSOLE_THEME_ID: 'console',
-  ConsoleLang: {
-    getSuggestionProvider: jest.fn(),
-  },
-}));
+vi.mock('@kbn/monaco', () => {
+  const mockedModule = {
+    CONSOLE_LANG_ID: 'console',
+    CONSOLE_THEME_ID: 'console',
+    ConsoleLang: {
+      getSuggestionProvider: vi.fn(),
+    },
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('./monaco_editor_actions_provider', () => ({
-  MonacoEditorActionsProvider: jest.fn(() => mockActionsProvider),
-}));
+vi.mock('./monaco_editor_actions_provider', () => {
+  const mockedModule = {
+    MonacoEditorActionsProvider: vi.fn(function () {
+      return mockActionsProvider;
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('./hooks', () => ({
-  useConsoleEsqlCallbacks: jest.fn(() => ({})),
-  useKeyboardCommandsUtils: jest.fn(() => ({
-    registerKeyboardCommands: mockRegisterKeyboardCommands,
-    unregisterKeyboardCommands: mockUnregisterKeyboardCommands,
-  })),
-  useResizeCheckerUtils: jest.fn(() => ({
-    destroyResizeChecker: mockDestroyResizeChecker,
-    setupResizeChecker: mockSetupResizeChecker,
-  })),
-  useSetInitialValue: jest.fn(),
-  useSetupAutocompletePolling: jest.fn(),
-  useSetupAutosave: jest.fn(),
-}));
+vi.mock('./hooks', () => {
+  const mockedModule = {
+    useConsoleEsqlCallbacks: vi.fn(() => ({})),
+    useKeyboardCommandsUtils: vi.fn(() => ({
+      registerKeyboardCommands: mockRegisterKeyboardCommands,
+      unregisterKeyboardCommands: mockUnregisterKeyboardCommands,
+    })),
+    useResizeCheckerUtils: vi.fn(() => ({
+      destroyResizeChecker: mockDestroyResizeChecker,
+      setupResizeChecker: mockSetupResizeChecker,
+    })),
+    useSetInitialValue: vi.fn(),
+    useSetupAutocompletePolling: vi.fn(),
+    useSetupAutosave: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('../../contexts', () => ({
-  useEditorActionContext: jest.fn(),
-  useEditorReadContext: jest.fn(),
-  useRequestActionContext: jest.fn(),
-  useServicesContext: jest.fn(),
-}));
+vi.mock('../../contexts', () => {
+  const mockedModule = {
+    useEditorActionContext: vi.fn(),
+    useEditorReadContext: vi.fn(),
+    useRequestActionContext: vi.fn(),
+    useServicesContext: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('../../hooks', () => ({
-  useSetInputEditor: jest.fn(),
-}));
+vi.mock('../../hooks', () => {
+  const mockedModule = {
+    useSetInputEditor: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('./components', () => ({
-  ContextMenu: () => null,
-}));
+vi.mock('./components', () => {
+  const mockedModule = {
+    ContextMenu: () => null,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('./styles', () => ({
-  useActionStyles: () => ({ actions: '' }),
-  useHighlightedLinesClassName: () => 'highlightedLines',
-}));
+vi.mock('./styles', () => {
+  const mockedModule = {
+    useActionStyles: () => ({ actions: '' }),
+    useHighlightedLinesClassName: () => 'highlightedLines',
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-const mockUseEditorActionContext = useEditorActionContext as jest.MockedFunction<
+const mockUseEditorActionContext = useEditorActionContext as MockedFunction<
   typeof useEditorActionContext
 >;
-const mockUseEditorReadContext = useEditorReadContext as jest.MockedFunction<
+const mockUseEditorReadContext = useEditorReadContext as MockedFunction<
   typeof useEditorReadContext
 >;
-const mockUseRequestActionContext = useRequestActionContext as jest.MockedFunction<
+const mockUseRequestActionContext = useRequestActionContext as MockedFunction<
   typeof useRequestActionContext
 >;
-const mockUseServicesContext = useServicesContext as jest.Mock;
-const mockUseSetInputEditor = useSetInputEditor as jest.MockedFunction<typeof useSetInputEditor>;
+const mockUseServicesContext = useServicesContext as Mock;
+const mockUseSetInputEditor = useSetInputEditor as MockedFunction<typeof useSetInputEditor>;
 
 describe('MonacoEditor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const requestToRestore = { request: 'GET /_search' };
 
@@ -159,7 +186,7 @@ describe('MonacoEditor', () => {
   it('keeps a request pending until the editor mounts and then appends it once', async () => {
     const { rerender } = render(
       <I18nProvider>
-        <MonacoEditor localStorageValue="GET /" value="GET /" setValue={jest.fn()} />
+        <MonacoEditor localStorageValue="GET /" value="GET /" setValue={vi.fn()} />
       </I18nProvider>
     );
 
@@ -187,7 +214,7 @@ describe('MonacoEditor', () => {
 
     rerender(
       <I18nProvider>
-        <MonacoEditor localStorageValue="GET /" value="GET /" setValue={jest.fn()} />
+        <MonacoEditor localStorageValue="GET /" value="GET /" setValue={vi.fn()} />
       </I18nProvider>
     );
 

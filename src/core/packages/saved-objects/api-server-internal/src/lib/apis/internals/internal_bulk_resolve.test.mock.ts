@@ -7,32 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, MockedFunction } from 'vitest';
 import type { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type * as InternalUtils from '../utils/internal_utils';
 
-export const mockGetSavedObjectFromSource = jest.fn() as jest.MockedFunction<
+export const mockGetSavedObjectFromSource: Mock = vi.fn() as MockedFunction<
   (typeof InternalUtils)['getSavedObjectFromSource']
 >;
-export const mockRawDocExistsInNamespace = jest.fn() as jest.MockedFunction<
+export const mockRawDocExistsInNamespace: Mock = vi.fn() as MockedFunction<
   (typeof InternalUtils)['rawDocExistsInNamespace']
 >;
 
-jest.mock('../utils/internal_utils', () => {
-  const actual = jest.requireActual('../utils/internal_utils');
-  return {
+vi.mock('../utils/internal_utils', async () => {
+  const actual = await vi.importActual('../utils/internal_utils');
+  const mockedModule = {
     ...actual,
     getSavedObjectFromSource: mockGetSavedObjectFromSource,
     rawDocExistsInNamespace: mockRawDocExistsInNamespace,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-export const mockIsNotFoundFromUnsupportedServer = jest.fn() as jest.MockedFunction<
+export const mockIsNotFoundFromUnsupportedServer: Mock = vi.fn() as MockedFunction<
   typeof isNotFoundFromUnsupportedServer
 >;
-jest.mock('@kbn/core-elasticsearch-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-elasticsearch-server-internal');
-  return {
+vi.mock('@kbn/core-elasticsearch-server-internal', async () => {
+  const actual = await vi.importActual('@kbn/core-elasticsearch-server-internal');
+  const mockedModule = {
     ...actual,
     isNotFoundFromUnsupportedServer: mockIsNotFoundFromUnsupportedServer,
   };
+  return { ...mockedModule, default: mockedModule };
 });

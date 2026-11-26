@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
+import type { Mocked } from 'vitest';
 import {
   pointInTimeFinderMock,
   mockGetCurrentTime,
@@ -51,8 +52,8 @@ describe('#delete', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let serializer: Mocked<SavedObjectsSerializer>;
+  let securityExtension: Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -62,8 +63,8 @@ describe('#delete', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
     logger = loggerMock.create();
 
@@ -278,14 +279,18 @@ describe('#delete', () => {
         options?: SavedObjectsDeleteOptions
       ) => {
         await expect(repository.delete(type, id, options)).rejects.toThrow(
-          createGenericNotFoundErrorPayload(type, id)
+          expect.objectContaining({ message: createGenericNotFoundErrorPayload(type, id).message })
         );
       };
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.delete(type, id, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createBadRequestErrorPayload('"options.namespace" cannot be "*"').message,
+          })
+        );
       });
 
       it(`throws when type is invalid`, async () => {

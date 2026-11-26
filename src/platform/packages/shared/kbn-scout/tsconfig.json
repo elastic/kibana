@@ -2,10 +2,17 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": [
+      "vitest/globals",
+      "jest",
+      "node"
+    ]
   },
   "include": ["**/*.ts"],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*",
+    "vitest.config.ts"
+  ],
   "kbn_references": [
     "@kbn/tooling-log",
     "@kbn/dev-cli-runner",

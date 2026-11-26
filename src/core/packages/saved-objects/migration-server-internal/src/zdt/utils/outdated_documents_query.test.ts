@@ -15,7 +15,7 @@ const dummyModelVersion: SavedObjectsModelVersion = {
   changes: [],
 };
 
-const dummyMigration = jest.fn();
+const dummyMigration = vi.fn();
 
 describe('getOutdatedDocumentsQuery', () => {
   it('generates the correct query for types using model versions', () => {

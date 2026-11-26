@@ -20,7 +20,7 @@ import type { UseSearchActionProps } from './use_search_action';
 const defaultProps: UseSearchActionProps = {
   value: '',
   isFullscreen: false,
-  onSearchTermChange: jest.fn(),
+  onSearchTermChange: vi.fn(),
 };
 
 /**
@@ -47,7 +47,7 @@ const Harness = (props: UseSearchActionProps) => {
 
 describe('useSearchAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a search button descriptor and no input while collapsed', () => {
@@ -99,15 +99,15 @@ describe('useSearchAction', () => {
 
   describe('with fake timers', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('notifies of the search term after the debounce elapses', () => {
-      const onSearchTermChange = jest.fn();
+      const onSearchTermChange = vi.fn();
       render(<Harness {...defaultProps} onSearchTermChange={onSearchTermChange} />);
 
       act(() => {
@@ -123,7 +123,7 @@ describe('useSearchAction', () => {
       expect(onSearchTermChange).not.toHaveBeenCalledWith('cpu');
 
       act(() => {
-        jest.advanceTimersByTime(DEBOUNCE_TIME);
+        vi.advanceTimersByTime(DEBOUNCE_TIME);
       });
 
       expect(onSearchTermChange).toHaveBeenCalledWith('cpu');
@@ -131,7 +131,7 @@ describe('useSearchAction', () => {
   });
 
   it('collapses and clears the search on Escape, immediately notifying the parent', () => {
-    const onSearchTermChange = jest.fn();
+    const onSearchTermChange = vi.fn();
     render(<Harness {...defaultProps} onSearchTermChange={onSearchTermChange} />);
 
     act(() => {

@@ -23,15 +23,15 @@ import { ByteSizeValue } from '@kbn/config-schema';
 
 describe('migrationsStateActionMachine', () => {
   beforeAll(() => {
-    jest
-      .spyOn(global.Date, 'now')
-      .mockImplementation(() => new Date('2021-04-12T16:00:00.000Z').valueOf());
+    vi.spyOn(global.Date, 'now').mockImplementation(() =>
+      new Date('2021-04-12T16:00:00.000Z').valueOf()
+    );
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const abort = jest.fn();
+  const abort = vi.fn();
   const mockLogger = loggingSystemMock.create();
   const typeRegistry = typeRegistryMock.create();
   typeRegistry.getLegacyTypes.mockReturnValue([
@@ -78,7 +78,7 @@ describe('migrationsStateActionMachine', () => {
     logger: mockLogger.get(),
   });
 
-  const next = jest.fn((s: State) => {
+  const next = vi.fn((s: State) => {
     if (s.controlState === 'DONE' || s.controlState === 'FATAL') {
       return null;
     } else {

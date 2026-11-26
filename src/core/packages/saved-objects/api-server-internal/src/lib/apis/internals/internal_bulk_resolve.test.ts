@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, Mocked } from 'vitest';
 import {
   mockGetSavedObjectFromSource,
   mockRawDocExistsInNamespace,
@@ -57,7 +58,7 @@ beforeEach(() => {
 
 describe('internalBulkResolve', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let incrementCounterInternal: jest.Mock<any, any>;
+  let incrementCounterInternal: Mock<(...args: any) => any>;
   let serializer: SavedObjectsSerializer;
   let apiContext: ApiExecutionContextMock;
 
@@ -86,7 +87,7 @@ describe('internalBulkResolve', () => {
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsBaseOptions = {}
   ): InternalBulkResolveParams {
-    incrementCounterInternal = jest.fn().mockRejectedValue(new Error('increment error')); // mock error to implicitly test that it is caught and swallowed
+    incrementCounterInternal = vi.fn().mockRejectedValue(new Error('increment error')); // mock error to implicitly test that it is caught and swallowed
     return {
       incrementCounterInternal,
       objects,
@@ -402,7 +403,7 @@ describe('internalBulkResolve', () => {
       { type: OBJ_TYPE, id: '13' },
       { type: OBJ_TYPE, id: '14' },
     ];
-    let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+    let mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>;
     let params: InternalBulkResolveParams;
 
     const expectedObjects = [

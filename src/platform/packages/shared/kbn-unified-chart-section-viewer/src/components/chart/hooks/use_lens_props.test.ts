@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, MockedClass } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLensProps } from './use_lens_props';
@@ -24,13 +25,16 @@ import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mock
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
-jest.mock('@kbn/lens-embeddable-utils');
-const mockReportError = jest.fn();
-jest.mock('./use_report_chart_section_error', () => ({
-  useReportChartSectionError: jest.fn(() => mockReportError),
-}));
+vi.mock('@kbn/lens-embeddable-utils');
+const mockReportError = vi.fn();
+vi.mock('./use_report_chart_section_error', () => {
+  const mockedModule = {
+    useReportChartSectionError: vi.fn(() => mockReportError),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
+const LensConfigBuilderMock = LensConfigBuilder as MockedClass<typeof LensConfigBuilder>;
 const servicesMock: Partial<UnifiedHistogramServices> = {
   dataViews: dataViewPluginMocks.createStartContract(),
 };
@@ -68,19 +72,21 @@ describe('useLensProps', () => {
   };
 
   const createIntersectionObserverMock = () => {
-    const mockObserve = jest.fn();
-    const mockDisconnect = jest.fn();
-    const mockUnobserve = jest.fn();
+    const mockObserve = vi.fn();
+    const mockDisconnect = vi.fn();
+    const mockUnobserve = vi.fn();
 
-    const MockIntersectionObserver = jest.fn().mockImplementation(() => ({
-      observe: mockObserve,
-      disconnect: mockDisconnect,
-      unobserve: mockUnobserve,
-      root: null,
-      rootMargin: '0px',
-      thresholds: [0],
-      takeRecords: jest.fn(() => []),
-    }));
+    const MockIntersectionObserver = vi.fn().mockImplementation(function () {
+      return {
+        observe: mockObserve,
+        disconnect: mockDisconnect,
+        unobserve: mockUnobserve,
+        root: null,
+        rootMargin: '0px',
+        thresholds: [0],
+        takeRecords: vi.fn(() => []),
+      };
+    });
 
     return {
       MockIntersectionObserver,
@@ -91,7 +97,7 @@ describe('useLensProps', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     discoverFetch$ = getFetch$Mock();
 
@@ -119,16 +125,18 @@ describe('useLensProps', () => {
   });
 
   it('disconnects the intersection observer when the chart unmounts', () => {
-    const disconnect = jest.fn();
-    window.IntersectionObserver = jest.fn().mockImplementation(() => ({
-      observe: jest.fn(),
-      disconnect,
-      unobserve: jest.fn(),
-      takeRecords: jest.fn(() => []),
-      root: null,
-      rootMargin: '0px',
-      thresholds: [0],
-    })) as unknown as typeof IntersectionObserver;
+    const disconnect = vi.fn();
+    window.IntersectionObserver = vi.fn().mockImplementation(function () {
+      return {
+        observe: vi.fn(),
+        disconnect,
+        unobserve: vi.fn(),
+        takeRecords: vi.fn(() => []),
+        root: null,
+        rootMargin: '0px',
+        thresholds: [0],
+      };
+    }) as unknown as typeof IntersectionObserver;
 
     const chartRef = {
       current: document.createElement('div'),
@@ -568,7 +576,7 @@ describe('useLensProps', () => {
         expect(result.current).toBeDefined();
       });
 
-      expect((LensConfigBuilder.prototype.build as jest.Mock).mock.calls.length).toBeGreaterThan(1);
+      expect((LensConfigBuilder.prototype.build as Mock).mock.calls.length).toBeGreaterThan(1);
     });
 
     it('clears a latched builder error after a successful rebuild', async () => {

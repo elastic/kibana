@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockHttpServer = jest.fn();
+import type { Mock } from 'vitest';
+export const mockHttpServer: Mock = vi.fn();
 
-jest.mock('./http_server', () => {
-  const realHttpServer = jest.requireActual('./http_server');
+vi.mock('./http_server', async () => {
+  const realHttpServer = await vi.importActual('./http_server');
 
-  return {
+  const mockedModule = {
     ...realHttpServer,
     HttpServer: mockHttpServer,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-jest.mock('./register_lifecycle_handlers', () => ({
-  registerCoreHandlers: jest.fn(),
-}));
+vi.mock('./register_lifecycle_handlers', () => {
+  const mockedModule = {
+    registerCoreHandlers: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});

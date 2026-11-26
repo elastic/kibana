@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/jest',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-es-query'],
-};
+import { defineConfig, mergeConfig } from 'vitest/config';
+import preset from '@kbn/vitest/jsdom_preset';
+
+export default mergeConfig(preset, defineConfig({ test: { root: import.meta.dirname } }));

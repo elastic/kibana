@@ -32,7 +32,7 @@ describe('Console Proxy Route', () => {
   });
 
   afterEach(async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('query string', () => {

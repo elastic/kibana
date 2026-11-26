@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, Mocked } from 'vitest';
 import type { IEncryptionHelper } from '../lib/apis/helpers/encryption';
 
-export type IEncryptionHelperMock = jest.Mocked<IEncryptionHelper>;
+export type IEncryptionHelperMock = Mocked<IEncryptionHelper>;
 
 export const createEncryptionHelperMock = (): IEncryptionHelperMock => {
   const mock: IEncryptionHelperMock = {
-    optionallyEncryptAttributes: jest.fn(),
-    optionallyDecryptAndRedactSingleResult: jest.fn(),
-    optionallyDecryptAndRedactBulkResult: jest.fn(),
+    optionallyEncryptAttributes: vi.fn() as Mock,
+    optionallyDecryptAndRedactSingleResult: vi.fn() as Mock,
+    optionallyDecryptAndRedactBulkResult: vi.fn() as Mock,
   };
 
   return mock;

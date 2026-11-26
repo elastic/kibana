@@ -21,7 +21,7 @@ describe('UnifiedFieldList <FieldPopover />', () => {
     const { container } = renderWithKibanaRenderContext(
       <FieldPopover
         isOpen
-        closePopover={jest.fn()}
+        closePopover={vi.fn()}
         button={<EuiButton title="test" />}
         renderHeader={() => <EuiText>{'header'}</EuiText>}
       />
@@ -37,7 +37,7 @@ describe('UnifiedFieldList <FieldPopover />', () => {
     renderWithKibanaRenderContext(
       <FieldPopover
         isOpen
-        closePopover={jest.fn()}
+        closePopover={vi.fn()}
         button={<EuiButton title="test" />}
         renderHeader={() => <EuiText>{'header'}</EuiText>}
         renderContent={() => <EuiText>{'content'}</EuiText>}
@@ -52,7 +52,7 @@ describe('UnifiedFieldList <FieldPopover />', () => {
     renderWithKibanaRenderContext(
       <FieldPopover
         isOpen={false}
-        closePopover={jest.fn()}
+        closePopover={vi.fn()}
         button={<EuiButton title="test" />}
         renderHeader={() => <EuiText>{'header'}</EuiText>}
         renderContent={() => <EuiText>{'content'}</EuiText>}
@@ -64,8 +64,8 @@ describe('UnifiedFieldList <FieldPopover />', () => {
   });
 
   it('should render correctly with popover header and content', async () => {
-    const mockClose = jest.fn();
-    const mockEdit = jest.fn();
+    const mockClose = vi.fn();
+    const mockEdit = vi.fn();
     const fieldName = 'extension';
 
     renderWithKibanaRenderContext(

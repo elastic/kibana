@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, MockedFunction } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { MetricsExperienceGridContentProps } from './metrics_experience_grid_content';
@@ -24,40 +25,49 @@ import * as metricsExperienceStateProvider from './context/metrics_experience_st
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 
-jest.mock('./context/metrics_experience_state_provider');
-jest.mock('./hooks');
-jest.mock('../../chart', () => ({
-  Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
-}));
+vi.mock('./context/metrics_experience_state_provider');
+vi.mock('./hooks');
+vi.mock('../../chart', () => {
+  const mockedModule = {
+    Chart: vi.fn(function () {
+      return <div data-test-subj="metric-chart" />;
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('./metrics_grid', () => ({
-  MetricsGrid: jest.fn((props: { metricItems: any[] }) =>
-    props.metricItems.length === 0 ? (
-      <div data-test-subj="metricsExperienceNoData" />
-    ) : (
-      <div data-test-subj="unifiedMetricsExperienceGrid" />
-    )
-  ),
-}));
+vi.mock('./metrics_grid', () => {
+  const mockedModule = {
+    MetricsGrid: vi.fn(function (props: { metricItems: any[] }) {
+      return props.metricItems.length === 0 ? (
+        <div data-test-subj="metricsExperienceNoData" />
+      ) : (
+        <div data-test-subj="unifiedMetricsExperienceGrid" />
+      );
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 /**
  * Mock EuiDelayRender to render immediately in tests.
  */
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  return {
+vi.mock('@elastic/eui', async () => {
+  const actual = await vi.importActual('@elastic/eui');
+  const mockedModule = {
     ...actual,
     EuiDelayRender: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 const useMetricsExperienceStateMock =
-  metricsExperienceStateProvider.useMetricsExperienceState as jest.MockedFunction<
+  metricsExperienceStateProvider.useMetricsExperienceState as MockedFunction<
     typeof metricsExperienceStateProvider.useMetricsExperienceState
   >;
 
-const usePaginationMock = hooks.usePagination as jest.MockedFunction<typeof hooks.usePagination>;
-const useFetchHistogramBoundsMock = hooks.useFetchHistogramBounds as jest.MockedFunction<
+const usePaginationMock = hooks.usePagination as MockedFunction<typeof hooks.usePagination>;
+const useFetchHistogramBoundsMock = hooks.useFetchHistogramBounds as MockedFunction<
   typeof hooks.useFetchHistogramBounds
 >;
 
@@ -88,7 +98,7 @@ describe('MetricsExperienceGridContent', () => {
   let defaultProps: MetricsExperienceGridContentProps;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     fetchParams = getFetchParamsMock({
       filters: [],
@@ -106,11 +116,11 @@ describe('MetricsExperienceGridContent', () => {
       services: {} as any,
       discoverFetch$: fetch$,
       fetchParams,
-      onBrushEnd: jest.fn(),
-      onFilter: jest.fn(),
+      onBrushEnd: vi.fn(),
+      onFilter: vi.fn(),
       actions: {
-        openInNewTab: jest.fn(),
-        updateESQLQuery: jest.fn(),
+        openInNewTab: vi.fn(),
+        updateESQLQuery: vi.fn(),
       },
       histogramCss: { name: '', styles: '' },
       isTabSelected: true,
@@ -120,22 +130,22 @@ describe('MetricsExperienceGridContent', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
+      onDimensionsChange: vi.fn(),
+      onPageChange: vi.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onSearchTermChange: jest.fn(),
-      onToggleFullscreen: jest.fn(),
-      onExitFullscreen: jest.fn(),
+      onSearchTermChange: vi.fn(),
+      onToggleFullscreen: vi.fn(),
+      onExitFullscreen: vi.fn(),
       flyoutState: undefined,
-      onFlyoutStateChange: jest.fn(),
-      onFlyoutSelectedTabChange: jest.fn(),
+      onFlyoutStateChange: vi.fn(),
+      onFlyoutSelectedTabChange: vi.fn(),
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
-      onMetricsSortChange: jest.fn(),
+      onMetricsSortChange: vi.fn(),
       profileId: 'test-profile-id',
       gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
       recentlyExploredMetrics: [],
-      onGridSettingsChange: jest.fn(),
+      onGridSettingsChange: vi.fn(),
     });
 
     usePaginationMock.mockReturnValue({
@@ -191,22 +201,22 @@ describe('MetricsExperienceGridContent', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
+      onDimensionsChange: vi.fn(),
+      onPageChange: vi.fn(),
       isFullscreen: false,
       searchTerm: 'cpu',
-      onSearchTermChange: jest.fn(),
-      onToggleFullscreen: jest.fn(),
-      onExitFullscreen: jest.fn(),
+      onSearchTermChange: vi.fn(),
+      onToggleFullscreen: vi.fn(),
+      onExitFullscreen: vi.fn(),
       flyoutState: undefined,
-      onFlyoutStateChange: jest.fn(),
-      onFlyoutSelectedTabChange: jest.fn(),
+      onFlyoutStateChange: vi.fn(),
+      onFlyoutSelectedTabChange: vi.fn(),
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
-      onMetricsSortChange: jest.fn(),
+      onMetricsSortChange: vi.fn(),
       profileId: 'test-profile-id',
       gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
       recentlyExploredMetrics: [],
-      onGridSettingsChange: jest.fn(),
+      onGridSettingsChange: vi.fn(),
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));
@@ -246,20 +256,20 @@ describe('MetricsExperienceGridContent', () => {
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
   });
 
-  it('passes activeDimensions prop to MetricsGrid', () => {
-    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+  it('passes activeDimensions prop to MetricsGrid', async () => {
+    const { MetricsGrid } = await vi.importMock('./metrics_grid');
 
     render(<MetricsExperienceGridContent {...defaultProps} activeDimensions={[dimensions[0]]} />, {
       wrapper: IntlProvider,
     });
 
-    const lastCall = (MetricsGrid as jest.Mock).mock.calls[
-      (MetricsGrid as jest.Mock).mock.calls.length - 1
+    const lastCall = (MetricsGrid as Mock).mock.calls[
+      (MetricsGrid as Mock).mock.calls.length - 1
     ][0];
     expect(lastCall.dimensions).toEqual([dimensions[0]]);
   });
 
-  it('fetches histogram bounds for the visible page from the loaded fetch params', () => {
+  it('fetches histogram bounds for the visible page from the loaded fetch params', async () => {
     const loadedFetchParams = {
       ...fetchParams,
       query: { esql: 'TS test-metrics-histograms | WHERE host.name == "a"' },
@@ -285,7 +295,7 @@ describe('MetricsExperienceGridContent', () => {
       })
     );
 
-    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    const { MetricsGrid } = await vi.importMock('./metrics_grid');
     expect(MetricsGrid).toHaveBeenLastCalledWith(
       expect.objectContaining({
         histogramBounds: expect.any(Map),
@@ -324,7 +334,7 @@ describe('MetricsExperienceGridContent', () => {
     );
   });
 
-  it('passes only the metadata fields that the WHERE uses to the grid and the histogram bounds fetch', () => {
+  it('passes only the metadata fields that the WHERE uses to the grid and the histogram bounds fetch', async () => {
     const loadedFetchParams = {
       ...fetchParams,
       query: {
@@ -345,7 +355,7 @@ describe('MetricsExperienceGridContent', () => {
       expect.objectContaining({ metadataFields: ['_ignored'] })
     );
 
-    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    const { MetricsGrid } = await vi.importMock('./metrics_grid');
     expect(MetricsGrid).toHaveBeenLastCalledWith(
       expect.objectContaining({ metadataFields: ['_ignored'] }),
       expect.anything()

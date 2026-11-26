@@ -43,7 +43,7 @@ describe('Index Pattern Fetcher - server', () => {
   };
   const patternList = ['a', 'b', 'c'];
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
     indexPatterns = new IndexPatternsFetcher(esClient, {
@@ -105,7 +105,7 @@ describe('Index Pattern Fetcher - server', () => {
     describe('without negated index patterns', () => {
       test('returns the valid matched index patterns', async () => {
         indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-        indexPatterns.getFieldsForWildcard = jest
+        indexPatterns.getFieldsForWildcard = vi
           .fn()
           .mockResolvedValueOnce({ indices: ['index1'] })
           .mockResolvedValue({ indices: [] });
@@ -117,7 +117,7 @@ describe('Index Pattern Fetcher - server', () => {
 
       test('returns the valid matched indices', async () => {
         indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-        indexPatterns.getFieldsForWildcard = jest
+        indexPatterns.getFieldsForWildcard = vi
           .fn()
           .mockResolvedValueOnce({ indices: ['index1'] })
           .mockResolvedValue({ indices: [] });
@@ -129,7 +129,7 @@ describe('Index Pattern Fetcher - server', () => {
 
       test('returns the valid matched indices per index pattern', async () => {
         indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-        indexPatterns.getFieldsForWildcard = jest
+        indexPatterns.getFieldsForWildcard = vi
           .fn()
           .mockResolvedValueOnce({ indices: ['index1'] })
           .mockResolvedValue({ indices: ['index2'] });
@@ -146,7 +146,7 @@ describe('Index Pattern Fetcher - server', () => {
     describe('with negated index patterns', () => {
       test('returns the valid matched index patterns', async () => {
         indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-        const mockFn = jest.fn().mockResolvedValue({ indices: ['index1'] });
+        const mockFn = vi.fn().mockResolvedValue({ indices: ['index1'] });
         indexPatterns.getFieldsForWildcard = mockFn;
 
         const result = await indexPatterns.getIndexPatternMatches([
@@ -161,7 +161,7 @@ describe('Index Pattern Fetcher - server', () => {
 
       test('returns the valid matched indices', async () => {
         indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-        const mockFn = jest.fn().mockResolvedValue({ indices: ['index1'] });
+        const mockFn = vi.fn().mockResolvedValue({ indices: ['index1'] });
         indexPatterns.getFieldsForWildcard = mockFn;
 
         const result = await indexPatterns.getIndexPatternMatches([
@@ -176,7 +176,7 @@ describe('Index Pattern Fetcher - server', () => {
 
       test('returns the valid matched indices per index pattern', async () => {
         indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-        const mockFn = jest
+        const mockFn = vi
           .fn()
           .mockResolvedValueOnce({ indices: ['index1'] })
           .mockResolvedValue({ indices: ['index2'] });
@@ -197,7 +197,7 @@ describe('Index Pattern Fetcher - server', () => {
 
       test('queries each positive pattern with all negated patterns for field caps', async () => {
         indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-        const mockFn = jest.fn().mockResolvedValue({ indices: ['length'] });
+        const mockFn = vi.fn().mockResolvedValue({ indices: ['length'] });
         indexPatterns.getFieldsForWildcard = mockFn;
 
         await indexPatterns.getIndexPatternMatches([
@@ -222,7 +222,7 @@ describe('Index Pattern Fetcher - server', () => {
 
     test('handles an error', async () => {
       indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
-      indexPatterns.getFieldsForWildcard = jest
+      indexPatterns.getFieldsForWildcard = vi
         .fn()
         .mockRejectedValueOnce(new DataViewMissingIndices('Catch me if you can!'))
         .mockResolvedValue({ indices: ['index1'] });

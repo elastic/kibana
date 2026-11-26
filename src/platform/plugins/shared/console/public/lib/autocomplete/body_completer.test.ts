@@ -99,7 +99,7 @@ describe('ScopeResolver fallback rules', () => {
 
     const globalOpen = new ConstantComponent('{');
     const globalTerm = new ConstantComponent('global_term', globalOpen);
-    const globalGetTerms = jest.spyOn(globalTerm, 'getTerms');
+    const globalGetTerms = vi.spyOn(globalTerm, 'getTerms');
     const context: TestContext = {
       endpointComponentResolver: () => [linkedObject],
       globalComponentResolver: (term) => (term === 'query' ? [globalOpen] : null),

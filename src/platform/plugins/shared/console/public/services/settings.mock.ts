@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { Settings } from './settings';
 
 export class SettingsMock extends Settings {
-  getAutocomplete = jest.fn();
-  getFontSize = jest.fn();
-  getPolling = jest.fn();
-  getTripleQuotes = jest.fn();
-  getWrapMode = jest.fn();
-  setAutocomplete = jest.fn();
-  setFontSize = jest.fn();
-  setPolling = jest.fn();
-  setTripleQuotes = jest.fn();
-  setWrapMode = jest.fn();
-  toJSON = jest.fn();
-  updateSettings = jest.fn();
+  getAutocomplete: Mock = vi.fn();
+  getFontSize: Mock = vi.fn();
+  getPolling: Mock = vi.fn();
+  getTripleQuotes: Mock = vi.fn();
+  getWrapMode: Mock = vi.fn();
+  setAutocomplete: Mock = vi.fn();
+  setFontSize: Mock = vi.fn();
+  setPolling: Mock = vi.fn();
+  setTripleQuotes: Mock = vi.fn();
+  setWrapMode: Mock = vi.fn();
+  toJSON: Mock = vi.fn();
+  updateSettings: Mock = vi.fn();
 }

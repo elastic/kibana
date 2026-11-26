@@ -63,7 +63,7 @@ describe('useGridNavigation', () => {
       result.current.handleFocusCell(1, 3);
     });
 
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     act(() => {
       result.current.handleKeyDown({
         key: keys.ARROW_DOWN,

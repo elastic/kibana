@@ -20,7 +20,7 @@ describe('isRecord', () => {
     [true, false],
     [[], false],
     [[1, 2], false],
-  ])('returns %s for %p', (input, expected) => {
+  ])('returns %s for %o', (input, expected) => {
     expect(isRecord(input)).toBe(expected);
   });
 });

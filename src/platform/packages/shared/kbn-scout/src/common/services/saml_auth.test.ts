@@ -7,18 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { SamlSessionManager } from '@kbn/test-saml-auth';
 import type { ScoutTestConfig } from '../../types';
 import type { ScoutLogger } from './logger';
 import { createSamlSessionManager } from './saml_auth';
 
-jest.mock('@kbn/test-saml-auth', () => ({
-  SamlSessionManager: jest.fn(),
-}));
+vi.mock('@kbn/test-saml-auth', () => {
+  const mockedModule = {
+    SamlSessionManager: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-const SamlSessionManagerMock = SamlSessionManager as unknown as jest.Mock;
+const SamlSessionManagerMock = SamlSessionManager as unknown as Mock;
 
-const log = { serviceLoaded: jest.fn() } as unknown as ScoutLogger;
+const log = { serviceLoaded: vi.fn() } as unknown as ScoutLogger;
 
 const echConfig: ScoutTestConfig = {
   serverless: false,
@@ -37,7 +41,7 @@ const echConfig: ScoutTestConfig = {
 
 describe('createSamlSessionManager', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`routes the worker's custom role through the custom SAML provider`, () => {

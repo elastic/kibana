@@ -13,7 +13,7 @@ import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../common/constan
 import type { MetricsSort } from '../../../types';
 
 const renderSortSelector = (sort: MetricsSort) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const { result } = renderHook(() => useSortSelector({ sort, onChange }));
   return { result, onChange };
 };

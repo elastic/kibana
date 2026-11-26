@@ -14,7 +14,7 @@ describe('_fields_for_wildcard', () => {
     it('should throw if receiving a string of comma-separated values', () => {
       const value = '_source,_id';
       expect(() => parseFields(value, 'metaFields')).toThrowErrorMatchingInlineSnapshot(
-        `"metaFields should be an array of strings, a JSON-stringified array of strings, or a single string"`
+        `[Error: metaFields should be an array of strings, a JSON-stringified array of strings, or a single string]`
       );
     });
 

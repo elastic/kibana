@@ -7,27 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import path from 'path';
 import { Config } from '../config';
 import { readConfigFile } from './read_config_file';
 
-jest.mock('path', () => ({
-  resolve: jest.fn(),
-}));
+vi.mock('path', () => {
+  const mockedModule = {
+    resolve: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('../config', () => ({
-  Config: jest.fn(),
-}));
+vi.mock('../config', () => {
+  const mockedModule = {
+    Config: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 describe('readConfigFile', () => {
   const configPath = '/mock/config/path';
   const resolvedPath = '/resolved/config/path';
-  const mockPathResolve = path.resolve as jest.Mock;
-  const mockConfigConstructor = Config as jest.Mock;
+  const mockPathResolve = path.resolve as Mock;
+  const mockConfigConstructor = Config as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.resetModules();
+    vi.clearAllMocks();
+    vi.resetModules();
   });
 
   it(`should load and return a valid 'Config' instance when the config file exports 'servers'`, async () => {
@@ -35,49 +42,45 @@ describe('readConfigFile', () => {
 
     mockPathResolve.mockReturnValueOnce(resolvedPath);
 
-    jest.isolateModules(async () => {
-      jest.mock(resolvedPath, () => mockConfigModule, { virtual: true });
-      mockConfigConstructor.mockImplementation((servers) => ({ servers }));
-
-      const result = await readConfigFile(configPath);
-
-      expect(path.resolve).toHaveBeenCalledWith(configPath);
-      expect(result).toEqual({ servers: mockConfigModule.servers });
+    vi.doMock(resolvedPath, () => mockConfigModule);
+    mockConfigConstructor.mockImplementation(function (servers) {
+      return { servers };
     });
+
+    const result = await readConfigFile(configPath);
+
+    expect(path.resolve).toHaveBeenCalledWith(configPath);
+    expect(result).toEqual({ servers: mockConfigModule.servers });
   });
 
   it(`should throw an error if the config file does not export 'servers'`, async () => {
-    const mockConfigModule = { otherProperty: 'value' };
+    // Vitest mocks throw on reads of exports the factory did not return, so declare it as missing.
+    const mockConfigModule = { otherProperty: 'value', servers: undefined };
 
     mockPathResolve.mockReturnValueOnce(resolvedPath);
 
-    jest.isolateModules(async () => {
-      jest.mock(resolvedPath, () => mockConfigModule, { virtual: true });
+    vi.doMock(resolvedPath, () => mockConfigModule);
 
-      await expect(readConfigFile(configPath)).rejects.toThrow(
-        `No 'servers' found in the config file at path: ${resolvedPath}`
-      );
-      expect(path.resolve).toHaveBeenCalledWith(configPath);
-    });
+    await expect(readConfigFile(configPath)).rejects.toThrow(
+      `No 'servers' found in the config file at path: ${resolvedPath}`
+    );
+    expect(path.resolve).toHaveBeenCalledWith(configPath);
   });
 
   it('should throw an error if the config file cannot be loaded', async () => {
     mockPathResolve.mockReturnValueOnce(resolvedPath);
 
-    jest.isolateModules(async () => {
-      const message = 'Module not found';
-      jest.mock(
-        resolvedPath,
-        () => {
-          throw new Error(message);
-        },
-        { virtual: true }
-      );
+    const message = 'Module not found';
+    // Vitest wraps errors thrown by a mock factory, so fail when the config module is read instead.
+    vi.doMock(resolvedPath, () => ({
+      get servers(): never {
+        throw new Error(message);
+      },
+    }));
 
-      await expect(readConfigFile(configPath)).rejects.toThrow(
-        `Failed to load config from ${configPath}: ${message}`
-      );
-      expect(path.resolve).toHaveBeenCalledWith(configPath);
-    });
+    await expect(readConfigFile(configPath)).rejects.toThrow(
+      `Failed to load config from ${configPath}: ${message}`
+    );
+    expect(path.resolve).toHaveBeenCalledWith(configPath);
   });
 });

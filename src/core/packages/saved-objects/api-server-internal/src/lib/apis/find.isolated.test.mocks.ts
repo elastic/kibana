@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const isSupportedEsServerMock = jest.fn();
+import type { Mock } from 'vitest';
+export const isSupportedEsServerMock: Mock = vi.fn();
 
-jest.doMock('@kbn/core-elasticsearch-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-elasticsearch-server-internal');
-  return {
+vi.doMock('@kbn/core-elasticsearch-server-internal', async () => {
+  const actual = await vi.importActual('@kbn/core-elasticsearch-server-internal');
+  const mockedModule = {
     ...actual,
     isSupportedEsServer: isSupportedEsServerMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });

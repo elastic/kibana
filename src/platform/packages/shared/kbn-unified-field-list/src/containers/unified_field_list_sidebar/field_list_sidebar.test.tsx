@@ -31,8 +31,8 @@ const existingFieldsReader: ExistenceApi.ExistingFieldsReader = {
 
 // DataTransfer is not implemented in jsdom
 const dataTransfer = {
-  setData: jest.fn(),
-  getData: jest.fn(),
+  setData: vi.fn(),
+  getData: vi.fn(),
 };
 
 const getSelectedFieldNames = () =>
@@ -69,18 +69,18 @@ const dropOnto = (fieldName: string) => {
 
 describe('UnifiedFieldListSidebar', () => {
   beforeEach(() => {
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockReturnValue(existingFieldsReader);
+    vi.spyOn(ExistenceApi, 'useExistingFieldsReader').mockReturnValue(existingFieldsReader);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const getProps = (
     overrides: Partial<UnifiedFieldListSidebarProps> = {}
   ): UnifiedFieldListSidebarProps => {
     const services = getServicesMock();
-    services.dataViews.get = jest.fn().mockResolvedValue(dataView);
+    services.dataViews.get = vi.fn().mockResolvedValue(dataView);
 
     return {
       stateService: createStateService({ options: { originatingApp: 'test' } }),
@@ -92,9 +92,9 @@ describe('UnifiedFieldListSidebar', () => {
       isProcessing: false,
       isAffectedByGlobalFilter: false,
       buttonAddFieldVariant: 'primary',
-      onAddFieldToWorkspace: jest.fn(),
-      onRemoveFieldFromWorkspace: jest.fn(),
-      onMoveFieldInWorkspace: jest.fn(),
+      onAddFieldToWorkspace: vi.fn(),
+      onRemoveFieldFromWorkspace: vi.fn(),
+      onMoveFieldInWorkspace: vi.fn(),
       onEditField: undefined,
       onDeleteField: undefined,
       ...overrides,

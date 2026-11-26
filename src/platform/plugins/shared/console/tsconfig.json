@@ -2,6 +2,18 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "types": [
+      "node",
+      "vitest/globals",
+      "jest",
+      "flot",
+      "@emotion/jest",
+      "@testing-library/jest-dom/vitest",
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-common-types",
+      "@kbn/ambient-storybook-types"
+    ],
   },
   "include": [
     "common/**/*",
@@ -61,9 +73,10 @@
     "@kbn/core-chrome-layout-constants",
     "@kbn/ui-callout",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",
+    "vitest.config.ts"
   ]
 }

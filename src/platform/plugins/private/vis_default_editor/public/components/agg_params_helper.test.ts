@@ -22,8 +22,8 @@ import type { EditorConfig } from './utils';
 import type { EditorVisState } from './sidebar/state/reducers';
 import { groupAndSortBy } from '../utils';
 
-jest.mock('../utils', () => ({
-  groupAndSortBy: jest.fn(() => ['indexedFields']),
+vi.mock('../utils', () => ({
+  groupAndSortBy: vi.fn(() => ['indexedFields']),
 }));
 
 describe('DefaultEditorAggParams helpers', () => {
@@ -104,7 +104,7 @@ describe('DefaultEditorAggParams helpers', () => {
               name: 'field',
               type: 'field',
               filterFieldTypes,
-              getAvailableFields: jest.fn((aggConfig: IAggConfig) =>
+              getAvailableFields: vi.fn((aggConfig: IAggConfig) =>
                 aggConfig
                   .getIndexPattern()
                   .fields.filter(({ type }) => filterFieldTypes.includes(type))
@@ -116,12 +116,12 @@ describe('DefaultEditorAggParams helpers', () => {
           ],
         },
         schema: 'metric',
-        getIndexPattern: jest.fn(() => ({
+        getIndexPattern: vi.fn(() => ({
           fields: [
             { name: '@timestamp', type: 'date' },
             { name: 'geo_desc', type: 'string' },
           ],
-          getAggregationRestrictions: jest.fn(),
+          getAggregationRestrictions: vi.fn(),
         })),
         params: {
           orderBy: 'orderBy',

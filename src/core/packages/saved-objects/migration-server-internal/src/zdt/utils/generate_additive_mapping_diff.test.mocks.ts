@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getBaseMappingsMock = jest.fn();
+import type { Mock } from 'vitest';
+export const getBaseMappingsMock: Mock = vi.fn();
 
-jest.doMock('../../core/build_active_mappings', () => {
-  const actual = jest.requireActual('../../core/build_active_mappings');
-  return {
+vi.doMock('../../core/build_active_mappings', async () => {
+  const actual = await vi.importActual('../../core/build_active_mappings');
+  const mockedModule = {
     ...actual,
     getBaseMappings: getBaseMappingsMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-export const getUpdatedRootFieldsMock = jest.fn();
+export const getUpdatedRootFieldsMock: Mock = vi.fn();
 
-jest.doMock('../../core/compare_mappings', () => {
-  const actual = jest.requireActual('../../core/compare_mappings');
-  return {
+vi.doMock('../../core/compare_mappings', async () => {
+  const actual = await vi.importActual('../../core/compare_mappings');
+  const mockedModule = {
     ...actual,
     getUpdatedRootFields: getUpdatedRootFieldsMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });

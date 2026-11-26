@@ -10,9 +10,12 @@
 import { getStateColumnActions } from './columns';
 import { popularizeField } from '../../utils/popularize_field';
 
-jest.mock('../../utils/popularize_field', () => ({
-  popularizeField: jest.fn(),
-}));
+vi.mock('../../utils/popularize_field', () => {
+  const mockedModule = {
+    popularizeField: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { Capabilities } from '@kbn/core/types';
 import { dataViewsMock } from '../../../__mocks__/data_views';
@@ -42,7 +45,7 @@ function getStateColumnAction(
 
 describe('Test column actions', () => {
   test('getStateColumnActions with empty state', () => {
-    const setAppState = jest.fn();
+    const setAppState = vi.fn();
     const actions = getStateColumnAction({}, setAppState);
 
     actions.onAddColumn('_score');
@@ -52,7 +55,7 @@ describe('Test column actions', () => {
   });
 
   test('getStateColumnActions with columns and sort in state', () => {
-    const setAppState = jest.fn();
+    const setAppState = vi.fn();
     const actions = getStateColumnAction(
       { columns: ['first', 'second'], sort: [['first', 'desc']] },
       setAppState
@@ -95,7 +98,7 @@ describe('Test column actions', () => {
   });
 
   it('should pass settings to setAppState', () => {
-    const setAppState = jest.fn();
+    const setAppState = vi.fn();
     const settings: UnifiedDataTableSettings = { columns: { first: { width: 100 } } };
     const actions = getStateColumnAction({ columns: ['first'], settings }, setAppState);
     actions.onAddColumn('second');
@@ -113,7 +116,7 @@ describe('Test column actions', () => {
   });
 
   it('should clean up settings to remove non-existing columns', () => {
-    const setAppState = jest.fn();
+    const setAppState = vi.fn();
     const actions = getStateColumnAction(
       {
         columns: ['first', 'second', 'third'],
@@ -136,7 +139,7 @@ describe('Test column actions', () => {
   });
 
   it('should reset the last column to auto width if only absolute width columns remain', () => {
-    const setAppState = jest.fn();
+    const setAppState = vi.fn();
     let actions = getStateColumnAction(
       {
         columns: ['first', 'second', 'third'],
@@ -166,7 +169,7 @@ describe('Test column actions', () => {
   });
 
   it('should not reset the last column to auto width if there are remaining auto width columns', () => {
-    const setAppState = jest.fn();
+    const setAppState = vi.fn();
     const actions = getStateColumnAction(
       { columns: ['first', 'second', 'third'], settings: { columns: { third: { width: 100 } } } },
       setAppState
@@ -187,7 +190,7 @@ describe('Test column actions', () => {
 
   describe('onRemoveColumns', () => {
     it('does not update state when passed an empty array', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction(
         { columns: ['first'], sort: [['first', 'desc']] },
         setAppState
@@ -198,7 +201,7 @@ describe('Test column actions', () => {
     });
 
     it('removes sort entries for every removed column and ignores duplicates', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction(
         {
           columns: ['first', 'second', 'third'],
@@ -221,7 +224,7 @@ describe('Test column actions', () => {
     });
 
     it('adjusts settings when removing multiple columns leaves only fixed-width columns', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction(
         {
           columns: ['first', 'second', 'third'],
@@ -242,14 +245,14 @@ describe('Test column actions', () => {
     });
 
     it('does not popularize field removal', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction({ columns: ['first', 'second'] }, setAppState);
-      jest.mocked(popularizeField).mockClear();
+      vi.mocked(popularizeField).mockClear();
 
       actions.onAddColumn('third');
       expect(popularizeField).toHaveBeenCalledTimes(1);
 
-      jest.mocked(popularizeField).mockClear();
+      vi.mocked(popularizeField).mockClear();
       actions.onRemoveColumn('first');
       actions.onRemoveColumns(['first', 'second']);
       expect(popularizeField).not.toHaveBeenCalled();
@@ -258,7 +261,7 @@ describe('Test column actions', () => {
 
   describe('Summary column coexistence', () => {
     it('keeps _source when adding another column', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction({ columns: ['message', '_source'] }, setAppState);
 
       actions.onAddColumn('extension');
@@ -271,7 +274,7 @@ describe('Test column actions', () => {
     });
 
     it('keeps sole _source when the last field column is removed', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction({ columns: ['message', '_source'] }, setAppState);
 
       actions.onRemoveColumn('message');
@@ -285,7 +288,7 @@ describe('Test column actions', () => {
     });
 
     it('restores field columns alongside pinned _source when adding after summary-only', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction({ columns: ['_source'] }, setAppState);
 
       actions.onAddColumn('message');
@@ -298,7 +301,7 @@ describe('Test column actions', () => {
     });
 
     it('does not add _source when leaving classic empty summary-only', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction({ columns: [] }, setAppState);
 
       actions.onAddColumn('message');
@@ -311,7 +314,7 @@ describe('Test column actions', () => {
     });
 
     it('keeps sole _source through onSetColumns and resets its width to auto', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const actions = getStateColumnAction(
         {
           columns: ['message', '_source'],
@@ -334,7 +337,7 @@ describe('Test column actions', () => {
 
   describe('Display-only time column', () => {
     it('preserves its width when reordering columns', () => {
-      const setAppState = jest.fn();
+      const setAppState = vi.fn();
       const settings: UnifiedDataTableSettings = {
         columns: {
           '@timestamp': { width: 212 },

@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/security-hardening'
   - '@kbn/telemetry'
-  - '@kbn/vitest'
 tags:
   - shared-server
   - package
@@ -42,4 +41,5 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+    - '!vitest.config.ts'
 tasks: {}

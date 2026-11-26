@@ -21,9 +21,9 @@ describe('SizeParamEditor', () => {
     defaultProps = {
       ...aggParamCommonPropsMock,
       value: '',
-      setValue: jest.fn(),
-      setValidity: jest.fn(),
-      setTouched: jest.fn(),
+      setValue: vi.fn(),
+      setValidity: vi.fn(),
+      setTouched: vi.fn(),
     };
   });
 

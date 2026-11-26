@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { of } from 'rxjs';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -19,7 +20,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 export function createServicesMock() {
   const expressionsPlugin = expressionsPluginMock.createStartContract();
 
-  expressionsPlugin.run = jest.fn(() =>
+  expressionsPlugin.run = vi.fn(() =>
     of({
       partial: false,
       result: {
@@ -30,6 +31,8 @@ export function createServicesMock() {
 
   const corePluginMock = coreMock.createStart();
 
+  // Merged into coreMock's Jest-typed uiSettings, so these keep Jest's mock types (the `jest`
+  // global maps to `vi` under Vitest).
   const uiSettingsMock: Partial<typeof corePluginMock.uiSettings> = {
     get: jest.fn(),
     isDefault: jest.fn((key: string) => {
@@ -54,12 +57,12 @@ export function createServicesMock() {
       location: {
         search: '',
       },
-      listen: jest.fn(),
+      listen: vi.fn() as Mock,
     }),
     fieldFormats: fieldFormatsMock,
-    filterManager: jest.fn(),
+    filterManager: vi.fn() as Mock,
     inspector: {
-      open: jest.fn(),
+      open: vi.fn() as Mock,
     },
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings: uiSettingsMock as IUiSettingsClient,
@@ -67,45 +70,45 @@ export function createServicesMock() {
       basePath: '/',
     },
     dataViewEditor: {
-      openEditor: jest.fn(),
+      openEditor: vi.fn() as Mock,
       userPermissions: {
-        editDataView: jest.fn(() => true),
+        editDataView: vi.fn(() => true),
       },
     },
     dataViewFieldEditor: {
-      openEditor: jest.fn(),
+      openEditor: vi.fn(),
       userPermissions: {
-        editIndexPattern: jest.fn(() => true),
+        editIndexPattern: vi.fn(() => true),
       },
     } as unknown as DataViewFieldEditorStart,
     theme,
     storage: {
-      clear: jest.fn(),
-      get: jest.fn(),
-      set: jest.fn(),
-      remove: jest.fn(),
+      clear: vi.fn() as Mock,
+      get: vi.fn() as Mock,
+      set: vi.fn() as Mock,
+      remove: vi.fn() as Mock,
     },
     toastNotifications: {
-      addInfo: jest.fn(),
-      addWarning: jest.fn(),
-      addDanger: jest.fn(),
-      addSuccess: jest.fn(),
+      addInfo: vi.fn(),
+      addWarning: vi.fn(),
+      addDanger: vi.fn(),
+      addSuccess: vi.fn(),
     } as unknown as ToastsStart,
     expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
-        getTagIdsFromReferences: jest.fn().mockResolvedValue([]),
-        updateTagsReferences: jest.fn(),
+        getTagIdsFromReferences: vi.fn().mockResolvedValue([]) as Mock,
+        updateTagsReferences: vi.fn() as Mock,
       },
     },
-    dataViews: jest.fn(),
+    dataViews: vi.fn() as Mock,
     locator: {
-      useUrl: jest.fn(() => ''),
-      navigate: jest.fn(),
-      getUrl: jest.fn(() => Promise.resolve('')),
+      useUrl: vi.fn(() => ''),
+      navigate: vi.fn() as Mock,
+      getUrl: vi.fn(() => Promise.resolve('')),
     },
-    contextLocator: { getRedirectUrl: jest.fn(() => '') },
-    singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
+    contextLocator: { getRedirectUrl: vi.fn(() => '') },
+    singleDocLocator: { getRedirectUrl: vi.fn(() => '') },
     data: dataPlugin,
   };
 }

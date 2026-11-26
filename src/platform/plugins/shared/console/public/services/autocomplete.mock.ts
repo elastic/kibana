@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { AutocompleteInfo } from './autocomplete';
 
 export class AutocompleteInfoMock extends AutocompleteInfo {
-  setup = jest.fn();
-  getEntityProvider = jest.fn();
-  retrieve = jest.fn();
-  clearSubscriptions = jest.fn();
-  clear = jest.fn();
+  setup: Mock = vi.fn();
+  getEntityProvider: Mock = vi.fn();
+  retrieve: Mock = vi.fn();
+  clearSubscriptions: Mock = vi.fn();
+  clear: Mock = vi.fn();
 }

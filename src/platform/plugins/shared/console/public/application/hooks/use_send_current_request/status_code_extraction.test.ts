@@ -7,27 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import type { HttpSetup } from '@kbn/core/public';
+// Imported statically: the module graph takes several seconds to load, which a dynamic import
+// inside the test would count against the test timeout.
+import { sendRequest } from './send_request';
 
-jest.unmock('./send_request');
+vi.unmock('./send_request');
 
 describe('Status Code Extraction in sendRequest', () => {
-  let mockHttp: jest.Mocked<HttpSetup>;
+  let mockHttp: Mocked<HttpSetup>;
 
   beforeEach(() => {
     mockHttp = {
-      post: jest.fn(),
+      post: vi.fn(),
     } as any;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('extractStatusCodeAndText function behavior', () => {
     it('should use proxy headers when available for ES requests', async () => {
-      const { sendRequest } = await import('./send_request');
-
       const mockResponse = {
         response: {
           status: 200, // Actual HTTP status
@@ -53,8 +55,6 @@ describe('Status Code Extraction in sendRequest', () => {
     });
 
     it('should fall back to actual response status when proxy headers are missing', async () => {
-      const { sendRequest } = await import('./send_request');
-
       const mockResponse = {
         response: {
           status: 400,
@@ -81,8 +81,6 @@ describe('Status Code Extraction in sendRequest', () => {
     });
 
     it('should handle empty proxy header as missing header', async () => {
-      const { sendRequest } = await import('./send_request');
-
       const mockResponse = {
         response: {
           status: 400,
@@ -111,8 +109,6 @@ describe('Status Code Extraction in sendRequest', () => {
     // The core HTTP client parses application/ndjson responses as Blob objects.
     // Console must read the Blob text rather than JSON.stringify-ing it (which yields "{}").
     it('should display ndjson blob body as plain text', async () => {
-      const { sendRequest } = await import('./send_request');
-
       const ndjsonText = '{"type":"dashboard","id":"abc"}\n{"type":"index-pattern","id":"def"}\n';
       const mockResponse = {
         response: {
@@ -142,8 +138,6 @@ describe('Status Code Extraction in sendRequest', () => {
     });
 
     it('should display ndjson blob error body as plain text', async () => {
-      const { sendRequest } = await import('./send_request');
-
       const ndjsonError = '{"error":"not_found","id":"missing"}\n';
 
       const fetchError = {

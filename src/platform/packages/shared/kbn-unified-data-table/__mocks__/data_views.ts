@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from './data_view_complex';
@@ -30,17 +31,17 @@ export function createDataViewsMock() {
         return Promise.reject(`DataView ${id} not found`);
       }
     },
-    getDefaultDataView: jest.fn(() => dataViewMock),
-    updateSavedObject: jest.fn(),
-    getIdsWithTitle: jest.fn(() => {
+    getDefaultDataView: vi.fn(() => dataViewMock),
+    updateSavedObject: vi.fn(),
+    getIdsWithTitle: vi.fn(() => {
       return Promise.resolve(dataViewMockList);
     }),
-    createFilter: jest.fn(),
-    create: jest.fn(),
-    clearInstanceCache: jest.fn(),
-    getFieldsForIndexPattern: jest.fn((dataView) => dataView.fields),
-    refreshFields: jest.fn(),
-  } as unknown as jest.Mocked<DataViewsContract>;
+    createFilter: vi.fn(),
+    create: vi.fn(),
+    clearInstanceCache: vi.fn(),
+    getFieldsForIndexPattern: vi.fn((dataView) => dataView.fields),
+    refreshFields: vi.fn(),
+  } as unknown as Mocked<DataViewsContract>;
 }
 
 export const dataViewsMock = createDataViewsMock();

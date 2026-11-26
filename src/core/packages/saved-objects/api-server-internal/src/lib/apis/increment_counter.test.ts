@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
+import type { Mocked } from 'vitest';
 import {
   pointInTimeFinderMock,
   mockGetCurrentTime,
@@ -56,7 +57,7 @@ describe('#incrementCounter', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let serializer: Mocked<SavedObjectsSerializer>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -77,8 +78,8 @@ describe('#incrementCounter', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
@@ -298,7 +299,7 @@ describe('#incrementCounter', () => {
         field: Array<string | SavedObjectsIncrementCounterField>
       ) => {
         await expect(repository.incrementCounter(type, id, field)).rejects.toThrow(
-          createUnsupportedTypeErrorPayload(type)
+          expect.objectContaining({ message: createUnsupportedTypeErrorPayload(type).message })
         );
       };
 
@@ -307,7 +308,11 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(type, id, counterFields, {
             namespace: ALL_NAMESPACES_STRING,
           })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createBadRequestErrorPayload('"options.namespace" cannot be "*"').message,
+          })
+        );
       });
 
       it(`throws when type is not a string`, async () => {
@@ -327,7 +332,9 @@ describe('#incrementCounter', () => {
 
       it(`throws when id is empty`, async () => {
         await expect(repository.incrementCounter(type, '', counterFields)).rejects.toThrow(
-          createBadRequestErrorPayload('id cannot be empty')
+          expect.objectContaining({
+            message: createBadRequestErrorPayload('id cannot be empty').message,
+          })
         );
         expect(client.update).not.toHaveBeenCalled();
       });
@@ -374,7 +381,11 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(MULTI_NAMESPACE_ISOLATED_TYPE, id, counterFields, {
             namespace,
           })
-        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id).message,
+          })
+        );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.update).not.toHaveBeenCalled();
@@ -393,7 +404,11 @@ describe('#incrementCounter', () => {
           repository.incrementCounter(MULTI_NAMESPACE_ISOLATED_TYPE, id, counterFields, {
             namespace,
           })
-        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id).message,
+          })
+        );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.update).not.toHaveBeenCalled();

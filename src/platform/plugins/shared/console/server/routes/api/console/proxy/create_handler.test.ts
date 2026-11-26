@@ -82,7 +82,7 @@ describe('Console Proxy Route - Crete Handler', () => {
 
   describe('query logging', () => {
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('uses the Console query logger context for Elasticsearch requests', async () => {
@@ -243,7 +243,7 @@ describe('Console Proxy Route - Crete Handler', () => {
 
   describe('host validation', () => {
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('rejects requests to hosts not in the configured allowlist', async () => {
@@ -374,7 +374,7 @@ describe('Console Proxy Route - Crete Handler', () => {
       const handler = createHandler(getProxyRouteHandlerDeps({}));
       const { core, transportRequest } = getRequestHandlerContext('');
       const transportResponse = createTransportResponseStub('');
-      const resumeSpy = jest.spyOn(transportResponse.body, 'resume');
+      const resumeSpy = vi.spyOn(transportResponse.body, 'resume');
       transportRequest.mockResolvedValue(transportResponse);
 
       const response = await handler(
@@ -410,7 +410,7 @@ describe('Console Proxy Route - Crete Handler', () => {
 
   describe('Elasticsearch request timeout (issue #284095)', () => {
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     const restoreRequest = {
@@ -573,7 +573,7 @@ describe('Console Proxy Route - Crete Handler', () => {
 
   describe('elasticsearch.hosts path prefix (issue #179436)', () => {
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('keeps a path prefix configured on elasticsearch.hosts for proxied requests', async () => {

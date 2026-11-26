@@ -2,6 +2,20 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    // Tests run on Vitest; public/mocks.ts, server/mocks.ts and data_view.stub.ts are still
+    // consumed by packages on Jest, so both sets of globals are needed until those migrate.
+    "types": [
+      "node",
+      "vitest/globals",
+      "jest",
+      "flot",
+      "@emotion/jest",
+      "@testing-library/jest-dom/vitest",
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-common-types",
+      "@kbn/ambient-storybook-types"
+    ]
   },
   "include": [
     "common/**/*",
@@ -47,5 +61,6 @@
   ],
   "exclude": [
     "target/**/*",
+    "vitest.config.ts"
   ]
 }

@@ -46,10 +46,11 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - src/hash_to_version_map.json
     - '!target/**/*'
+    - '!vitest.config.ts'
 tasks: {}

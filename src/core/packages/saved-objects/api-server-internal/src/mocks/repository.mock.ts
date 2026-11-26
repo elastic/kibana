@@ -7,38 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, Mocked } from 'vitest';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 
 // mock duplicated from `@kbn/core/saved-objects-api-server-mocks` to avoid cyclic dependencies
 
 const createRepositoryMock = () => {
-  const mock: jest.Mocked<ISavedObjectsRepository> = {
-    checkConflicts: jest.fn(),
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    bulkUpdate: jest.fn(),
-    bulkDelete: jest.fn(),
-    delete: jest.fn(),
-    bulkGet: jest.fn(),
-    find: jest.fn(),
-    search: jest.fn(),
-    esql: jest.fn(),
-    get: jest.fn(),
-    closePointInTime: jest.fn(),
-    createPointInTimeFinder: jest.fn(),
-    openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
-    bulkResolve: jest.fn(),
-    resolve: jest.fn(),
-    update: jest.fn(),
-    deleteByNamespace: jest.fn(),
-    incrementCounter: jest.fn(),
-    removeReferencesTo: jest.fn(),
-    collectMultiNamespaceReferences: jest.fn(),
-    updateObjectsSpaces: jest.fn(),
-    getCurrentNamespace: jest.fn(),
-    asScopedToNamespace: jest.fn().mockImplementation(createRepositoryMock),
-    changeOwnership: jest.fn(),
-    changeAccessMode: jest.fn(),
+  const mock: Mocked<ISavedObjectsRepository> = {
+    checkConflicts: vi.fn(),
+    create: vi.fn() as Mock,
+    bulkCreate: vi.fn() as Mock,
+    bulkUpdate: vi.fn(),
+    bulkDelete: vi.fn(),
+    delete: vi.fn(),
+    bulkGet: vi.fn() as Mock,
+    find: vi.fn() as Mock,
+    search: vi.fn() as Mock,
+    esql: vi.fn(),
+    get: vi.fn() as Mock,
+    closePointInTime: vi.fn(),
+    createPointInTimeFinder: vi.fn() as Mock,
+    openPointInTimeForType: vi.fn().mockResolvedValue({ id: 'some_pit_id' }),
+    bulkResolve: vi.fn() as Mock,
+    resolve: vi.fn() as Mock,
+    update: vi.fn(),
+    deleteByNamespace: vi.fn(),
+    incrementCounter: vi.fn() as Mock,
+    removeReferencesTo: vi.fn(),
+    collectMultiNamespaceReferences: vi.fn(),
+    updateObjectsSpaces: vi.fn(),
+    getCurrentNamespace: vi.fn(),
+    asScopedToNamespace: vi.fn().mockImplementation(createRepositoryMock),
+    changeOwnership: vi.fn(),
+    changeAccessMode: vi.fn(),
   };
 
   return mock;

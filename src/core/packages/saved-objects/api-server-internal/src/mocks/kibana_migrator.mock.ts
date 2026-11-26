@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import { createDocumentMigratorMock } from './migrator.mock';
@@ -34,14 +35,14 @@ const createMigratorMock = (
     types: SavedObjectsType[];
   } = { types: defaultSavedObjectTypes }
 ) => {
-  const mockMigrator: jest.Mocked<IKibanaMigrator> = {
+  const mockMigrator: Mocked<IKibanaMigrator> = {
     kibanaVersion: '8.0.0-testing',
-    runMigrations: jest.fn(),
-    getActiveMappings: jest.fn(),
-    migrateDocument: jest.fn(),
-    prepareMigrations: jest.fn(),
-    getStatus$: jest.fn(),
-    getDocumentMigrator: jest.fn().mockReturnValue(createDocumentMigratorMock()),
+    runMigrations: vi.fn(),
+    getActiveMappings: vi.fn(),
+    migrateDocument: vi.fn(),
+    prepareMigrations: vi.fn(),
+    getStatus$: vi.fn(),
+    getDocumentMigrator: vi.fn().mockReturnValue(createDocumentMigratorMock()),
   };
 
   // mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));

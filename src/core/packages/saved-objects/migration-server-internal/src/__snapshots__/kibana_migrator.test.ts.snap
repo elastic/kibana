@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`KibanaMigrator getActiveMappings returns full index mappings w/ core properties 1`] = `
+exports[`KibanaMigrator > getActiveMappings > returns full index mappings w/ core properties 1`] = `
 Object {
   "dynamic": "strict",
   "properties": Object {

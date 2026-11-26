@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, Mocked } from 'vitest';
 import {
   pointInTimeFinderMock,
   mockGetCurrentTime,
@@ -74,8 +75,8 @@ describe('SavedObjectsRepository Security Extension', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let serializer: Mocked<SavedObjectsSerializer>;
+  let mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -109,8 +110,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
@@ -362,7 +363,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate as Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await repository.create(type, attributes, {
@@ -424,7 +425,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate as Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await repository.create(type, attributes, { namespace });
@@ -1286,7 +1287,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as Mock, 'unauthorized');
 
       await expect(
         bulkCreateSuccess(client, repository, [obj1, obj2], { namespace })
@@ -1296,7 +1297,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as Mock, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1310,7 +1311,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1324,7 +1325,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls authorizeCreate with correct parameters`, async () => {
-      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [obj1, obj2], {
         namespace,
@@ -1369,7 +1370,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
@@ -1414,7 +1415,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
@@ -1448,7 +1449,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];

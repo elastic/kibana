@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockInstance } from 'vitest';
 import { omit } from 'lodash';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -391,7 +392,7 @@ describe('#rawDocExistsInNamespaces', () => {
 describe('#normalizeNamespace', () => {
   it('throws an error for * (All namespaces string)', () => {
     expect(() => normalizeNamespace(ALL_NAMESPACES_STRING)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+      `[Error: "options.namespace" cannot be "*": Bad Request]`
     );
   });
 
@@ -409,10 +410,12 @@ describe('#normalizeNamespace', () => {
 });
 
 describe('#getCurrentTime', () => {
-  let dateNowSpy: jest.SpyInstance<number, []>;
+  let dateNowSpy: MockInstance<(...args: []) => number>;
 
-  beforeAll(() => (dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => 1631307600000)));
-  afterAll(() => dateNowSpy.mockRestore());
+  beforeAll(() => (dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => 1631307600000)));
+  afterAll(() => {
+    dateNowSpy.mockRestore();
+  });
 
   it('returns the current time', () => {
     expect(getCurrentTime()).toEqual('2021-09-10T21:00:00.000Z');

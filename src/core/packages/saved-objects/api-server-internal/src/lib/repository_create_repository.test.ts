@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from './repository';
+import type * as RepositoryModule from './repository';
 import { kibanaMigratorMock } from '../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-jest.mock('./repository');
+vi.mock('./repository');
 
-const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');
+const { SavedObjectsRepository: originalRepository } = await vi.importActual<
+  typeof RepositoryModule
+>('./repository');
 
 describe('SavedObjectsRepository#createRepository', () => {
   let logger: MockedLogger;
-  const callAdminCluster = jest.fn();
+  const callAdminCluster = elasticsearchClientMock.createElasticsearchClient();
 
   const typeRegistry = new SavedObjectTypeRegistry();
   typeRegistry.registerType({
@@ -59,8 +64,9 @@ describe('SavedObjectsRepository#createRepository', () => {
   });
 
   const migrator = kibanaMigratorMock.create({ types: typeRegistry.getAllTypes() });
-  const RepositoryConstructor =
-    SavedObjectsRepository as unknown as jest.Mock<SavedObjectsRepository>;
+  const RepositoryConstructor = SavedObjectsRepository as unknown as Mock<
+    (...args: any[]) => SavedObjectsRepository
+  >;
 
   beforeEach(() => {
     logger = loggerMock.create();

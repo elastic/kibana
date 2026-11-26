@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, Mocked } from 'vitest';
 import type {
   ISavedObjectsEncryptionExtension,
   ISavedObjectsSecurityExtension,
@@ -15,39 +16,39 @@ import type {
 import type { Either } from '@kbn/core-saved-objects-api-server';
 import type { Payload } from '@hapi/boom';
 
-const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> => ({
-  isEncryptableType: jest.fn(),
-  decryptOrStripResponseAttributes: jest.fn(),
-  encryptAttributes: jest.fn(),
-  shouldEnforceRandomId: jest.fn(),
-  getEncryptedAttributes: jest.fn(),
+const createEncryptionExtension = (): Mocked<ISavedObjectsEncryptionExtension> => ({
+  isEncryptableType: vi.fn(),
+  decryptOrStripResponseAttributes: vi.fn() as Mock,
+  encryptAttributes: vi.fn() as Mock,
+  shouldEnforceRandomId: vi.fn(),
+  getEncryptedAttributes: vi.fn(),
 });
 
-const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> => ({
-  authorizeCreate: jest.fn(),
-  authorizeBulkCreate: jest.fn(),
-  authorizeUpdate: jest.fn(),
-  authorizeBulkUpdate: jest.fn(),
-  authorizeDelete: jest.fn(),
-  authorizeBulkDelete: jest.fn(),
-  authorizeGet: jest.fn(),
-  authorizeBulkGet: jest.fn(),
-  authorizeCheckConflicts: jest.fn(),
-  authorizeRemoveReferences: jest.fn(),
-  authorizeOpenPointInTime: jest.fn(),
-  auditClosePointInTime: jest.fn(),
-  authorizeFind: jest.fn(),
-  getFindRedactTypeMap: jest.fn(),
-  authorizeAndRedactMultiNamespaceReferences: jest.fn(),
-  authorizeAndRedactInternalBulkResolve: jest.fn(),
-  redactNamespaces: jest.fn(),
-  authorizeUpdateSpaces: jest.fn(),
-  authorizeDisableLegacyUrlAliases: jest.fn(),
-  auditObjectsForSpaceDeletion: jest.fn(),
-  getCurrentUser: jest.fn(),
-  includeSavedObjectNames: jest.fn(),
-  authorizeChangeAccessControl: jest.fn(),
-  filterInaccessibleObjectsForBulkAction: jest
+const createSecurityExtension = (): Mocked<ISavedObjectsSecurityExtension> => ({
+  authorizeCreate: vi.fn(),
+  authorizeBulkCreate: vi.fn(),
+  authorizeUpdate: vi.fn(),
+  authorizeBulkUpdate: vi.fn(),
+  authorizeDelete: vi.fn(),
+  authorizeBulkDelete: vi.fn(),
+  authorizeGet: vi.fn(),
+  authorizeBulkGet: vi.fn(),
+  authorizeCheckConflicts: vi.fn(),
+  authorizeRemoveReferences: vi.fn(),
+  authorizeOpenPointInTime: vi.fn(),
+  auditClosePointInTime: vi.fn(),
+  authorizeFind: vi.fn(),
+  getFindRedactTypeMap: vi.fn(),
+  authorizeAndRedactMultiNamespaceReferences: vi.fn(),
+  authorizeAndRedactInternalBulkResolve: vi.fn() as Mock,
+  redactNamespaces: vi.fn() as Mock,
+  authorizeUpdateSpaces: vi.fn(),
+  authorizeDisableLegacyUrlAliases: vi.fn(),
+  auditObjectsForSpaceDeletion: vi.fn(),
+  getCurrentUser: vi.fn(),
+  includeSavedObjectNames: vi.fn(),
+  authorizeChangeAccessControl: vi.fn(),
+  filterInaccessibleObjectsForBulkAction: vi
     .fn()
     .mockImplementation(
       (
@@ -61,10 +62,10 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
     ),
 });
 
-const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({
-  getCurrentNamespace: jest.fn(),
-  getSearchableNamespaces: jest.fn(),
-  asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
+const createSpacesExtension = (): Mocked<ISavedObjectsSpacesExtension> => ({
+  getCurrentNamespace: vi.fn(),
+  getSearchableNamespaces: vi.fn(),
+  asScopedToNamespace: vi.fn().mockImplementation(createSpacesExtension),
 });
 
 const create = () => ({

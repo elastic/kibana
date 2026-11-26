@@ -53,10 +53,11 @@ tags:
   - dev
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
   - scout-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+    - '!vitest.config.ts'
 tasks: {}

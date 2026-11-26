@@ -7,22 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../utils/execute_esql_query', () => ({
-  executeEsqlQuery: jest.fn(),
-}));
-jest.mock('../../../../hooks', () => ({
-  useFeatureFlag: jest.fn(() => true),
-}));
-const mockReportError = jest.fn();
-jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
-  useReportChartSectionError: jest.fn(() => mockReportError),
-}));
-const mockTrackEsqlQueryFailure = jest.fn();
-jest.mock('../../../../context/ebt_telemetry_context', () => ({
-  useTelemetry: () => ({
-    trackEsqlQueryFailure: mockTrackEsqlQueryFailure,
-  }),
-}));
+import type { MockedFunction } from 'vitest';
+vi.mock('../utils/execute_esql_query', () => {
+  const mockedModule = {
+    executeEsqlQuery: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('../../../../hooks', () => {
+  const mockedModule = {
+    useFeatureFlag: vi.fn(() => true),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
+const mockReportError = vi.fn();
+vi.mock('../../../chart/hooks/use_report_chart_section_error', () => {
+  const mockedModule = {
+    useReportChartSectionError: vi.fn(() => mockReportError),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
+const mockTrackEsqlQueryFailure = vi.fn();
+vi.mock('../../../../context/ebt_telemetry_context', () => {
+  const mockedModule = {
+    useTelemetry: () => ({
+      trackEsqlQueryFailure: mockTrackEsqlQueryFailure,
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -34,8 +47,8 @@ import { executeEsqlQuery, type ExecuteEsqlResult } from '../utils/execute_esql_
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 import { useFetchHistogramBounds } from './use_fetch_histogram_bounds';
 
-const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
-const mockUseFeatureFlag = useFeatureFlag as jest.MockedFunction<typeof useFeatureFlag>;
+const mockExecuteEsqlQuery = executeEsqlQuery as MockedFunction<typeof executeEsqlQuery>;
+const mockUseFeatureFlag = useFeatureFlag as MockedFunction<typeof useFeatureFlag>;
 
 type BoundsRow = Record<string, number | string | null>;
 
@@ -88,7 +101,7 @@ const gauge = createMetric({
 });
 
 const services = {
-  data: { search: { search: jest.fn() } },
+  data: { search: { search: vi.fn() } },
   uiSettings: {},
 } as unknown as ChartSectionProps['services'];
 
@@ -125,7 +138,7 @@ const getQueriedSources = () =>
 
 describe('useFetchHistogramBounds', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseFeatureFlag.mockReturnValue(true);
     mockExecuteEsqlQuery.mockImplementation(() => resolved([{ min_value: 1, max_value: 5 }]));
   });

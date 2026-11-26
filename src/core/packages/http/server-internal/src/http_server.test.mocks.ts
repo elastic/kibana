@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const setTlsConfigMock = jest.fn();
+import type { Mock } from 'vitest';
+import type * as ServerHttpToolsModule from '@kbn/server-http-tools';
+export const setTlsConfigMock: Mock = vi.fn();
 
-jest.doMock('@kbn/server-http-tools', () => {
-  const actual = jest.requireActual('@kbn/server-http-tools');
-  return {
+vi.doMock('@kbn/server-http-tools', async () => {
+  const actual = await vi.importActual<typeof ServerHttpToolsModule>('@kbn/server-http-tools');
+  const mockedModule = {
     ...actual,
     setTlsConfig: setTlsConfigMock,
-    createServer: jest.fn(actual.createServer),
+    createServer: vi.fn(actual.createServer),
   };
+  return { ...mockedModule, default: mockedModule };
 });

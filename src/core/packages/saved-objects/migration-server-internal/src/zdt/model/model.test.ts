@@ -24,7 +24,7 @@ describe('model', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const baseState: BaseState = {

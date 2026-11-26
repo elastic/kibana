@@ -16,7 +16,7 @@ describe('CdnConfig', () => {
     ['http://foo.bar', 'foo.bar'],
     ['https://cdn.elastic.co:9999', 'cdn.elastic.co:9999'],
     ['https://cdn.elastic.co:9999/with-a-path', 'cdn.elastic.co:9999'],
-  ])('host as expected for %p', (url, expected) => {
+  ])('host as expected for %o', (url, expected) => {
     expect(CdnConfig.from({ url }).host).toEqual(expected);
   });
 
@@ -26,11 +26,11 @@ describe('CdnConfig', () => {
     ['http://foo.bar', 'http://foo.bar'],
     ['https://cdn.elastic.co:9999', 'https://cdn.elastic.co:9999'],
     ['https://cdn.elastic.co:9999/with-a-path', 'https://cdn.elastic.co:9999/with-a-path'],
-  ])('base HREF as expected for %p', (url, expected) => {
+  ])('base HREF as expected for %o', (url, expected) => {
     expect(CdnConfig.from({ url }).baseHref).toEqual(expected);
   });
 
-  it.each([['foo'], ['#!']])('throws for invalid URLs (%p)', (url) => {
+  it.each([['foo'], ['#!']])('throws for invalid URLs (%o)', (url) => {
     expect(() => CdnConfig.from({ url })).toThrow(/Invalid URL/);
   });
 

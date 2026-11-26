@@ -7,29 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getCoreTransformsMock = jest.fn();
-export const getReferenceTransformsMock = jest.fn();
-export const getConversionTransformsMock = jest.fn();
+import type { Mock } from 'vitest';
+export const getCoreTransformsMock: Mock = vi.fn();
+export const getReferenceTransformsMock: Mock = vi.fn();
+export const getConversionTransformsMock: Mock = vi.fn();
 
-jest.doMock('./internal_transforms', () => ({
-  getCoreTransforms: getCoreTransformsMock,
-  getReferenceTransforms: getReferenceTransformsMock,
-  getConversionTransforms: getConversionTransformsMock,
-}));
+vi.doMock('./internal_transforms', () => {
+  const mockedModule = {
+    getCoreTransforms: getCoreTransformsMock,
+    getReferenceTransforms: getReferenceTransformsMock,
+    getConversionTransforms: getConversionTransformsMock,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-export const getModelVersionTransformsMock = jest.fn();
-export const getModelVersionSchemasMock = jest.fn();
+export const getModelVersionTransformsMock: Mock = vi.fn();
+export const getModelVersionSchemasMock: Mock = vi.fn();
 
-jest.doMock('./model_version', () => ({
-  getModelVersionTransforms: getModelVersionTransformsMock,
-  getModelVersionSchemas: getModelVersionSchemasMock,
-}));
+vi.doMock('./model_version', () => {
+  const mockedModule = {
+    getModelVersionTransforms: getModelVersionTransformsMock,
+    getModelVersionSchemas: getModelVersionSchemasMock,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-export const validateTypeMigrationsMock = jest.fn();
+export const validateTypeMigrationsMock: Mock = vi.fn();
 
-jest.doMock('./validate_migrations', () => ({
-  validateTypeMigrations: validateTypeMigrationsMock,
-}));
+vi.doMock('./validate_migrations', () => {
+  const mockedModule = {
+    validateTypeMigrations: validateTypeMigrationsMock,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 export const resetAllMocks = () => {
   getCoreTransformsMock.mockReset().mockReturnValue([]);

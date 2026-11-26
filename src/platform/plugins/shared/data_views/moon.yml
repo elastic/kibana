@@ -53,7 +53,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
   - scout-tests
 fileGroups:
   src:
@@ -65,4 +65,5 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
+    - '!vitest.config.ts'
 tasks: {}

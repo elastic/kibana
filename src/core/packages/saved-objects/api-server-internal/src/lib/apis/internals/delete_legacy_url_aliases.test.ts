@@ -27,7 +27,7 @@ describe('deleteLegacyUrlAliases', () => {
       mappings: { properties: {} }, // doesn't matter, only used as an argument to getSearchDsl which is mocked
       registry: typeRegistryMock.create(), // doesn't matter, only used as an argument to getSearchDsl which is mocked
       client: elasticsearchClientMock.createElasticsearchClient(),
-      getIndexForType: jest.fn(), // doesn't matter
+      getIndexForType: vi.fn(), // doesn't matter
       ...setupParams,
     };
   }

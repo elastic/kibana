@@ -52,10 +52,10 @@ const getField = (fieldName: string): DataViewField => {
 };
 
 describe('Default cell actions ', () => {
-  const execCommandMock = (global.document.execCommand = jest.fn());
+  const execCommandMock = (global.document.execCommand = vi.fn());
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const extensionField = getField('extension');
@@ -88,7 +88,7 @@ describe('Default cell actions ', () => {
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
       'table',
-      jest.fn()
+      vi.fn()
     );
 
     expect(cellActions).toHaveLength(3);
@@ -118,7 +118,7 @@ describe('Default cell actions ', () => {
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
       'table',
-      jest.fn()
+      vi.fn()
     );
 
     renderWithI18n(
@@ -255,8 +255,8 @@ describe('Default cell actions ', () => {
 
   describe('ReverseCategorizeBtn', () => {
     it('passes the Discover openInNewTab callback in the trigger context', async () => {
-      const executeTriggerActions = jest.fn();
-      const onOpenInNewTab = jest.fn();
+      const executeTriggerActions = vi.fn();
+      const onOpenInNewTab = vi.fn();
       const textField = {
         name: 'message',
         esTypes: ['text'],
@@ -309,7 +309,7 @@ describe('Default cell actions ', () => {
 
   describe('ReverseCategorizeBtn on the summary column', () => {
     const renderSummaryBtn = (messageEsTypes: string[]) => {
-      const executeTriggerActions = jest.fn();
+      const executeTriggerActions = vi.fn();
       const summaryMessageField = { name: 'message', esTypes: messageEsTypes };
 
       renderWithI18n(

@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const checkVersionCompatibilityMock = jest.fn();
-export const getOutdatedDocumentsQueryMock = jest.fn();
-export const createDocumentTransformFnMock = jest.fn();
+import type { Mock } from 'vitest';
+export const checkVersionCompatibilityMock: Mock = vi.fn();
+export const getOutdatedDocumentsQueryMock: Mock = vi.fn();
+export const createDocumentTransformFnMock: Mock = vi.fn();
 
-jest.doMock('../../utils', () => {
-  const realModule = jest.requireActual('../../utils');
-  return {
+vi.doMock('../../utils', async () => {
+  const realModule = await vi.importActual('../../utils');
+  const mockedModule = {
     ...realModule,
     checkVersionCompatibility: checkVersionCompatibilityMock,
     getOutdatedDocumentsQuery: getOutdatedDocumentsQueryMock,
     createDocumentTransformFn: createDocumentTransformFnMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });

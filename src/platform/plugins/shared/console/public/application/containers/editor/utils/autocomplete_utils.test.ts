@@ -11,28 +11,33 @@
  * Mock the function "populateContext" that accesses the autocomplete definitions
  */
 import type { monaco } from '@kbn/monaco';
+import type { getTopLevelUrlCompleteComponents } from '../../../../lib/kb';
 
-const mockPopulateContext = jest.fn();
+const mockPopulateContext = vi.fn();
 
-jest.mock('../../../../lib/autocomplete/engine', () => {
-  return {
+vi.mock('../../../../lib/autocomplete/engine', () => {
+  const mockedModule = {
     populateContext: (...args: any) => {
       mockPopulateContext(args);
     },
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-const mockGetTopLevelUrlCompleteComponents = jest.fn();
+const mockGetTopLevelUrlCompleteComponents = vi.fn();
 
-jest.mock('../../../../lib/kb', () => {
-  const actual = jest.requireActual('../../../../lib/kb');
-  return {
+vi.mock('../../../../lib/kb', async () => {
+  const actual = await vi.importActual<{
+    getTopLevelUrlCompleteComponents: typeof getTopLevelUrlCompleteComponents;
+  }>('../../../../lib/kb');
+  const mockedModule = {
     ...actual,
     getTopLevelUrlCompleteComponents: (method: string) => {
       mockGetTopLevelUrlCompleteComponents(method);
       return actual.getTopLevelUrlCompleteComponents(method);
     },
   };
+  return { ...mockedModule, default: mockedModule };
 });
 import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
 import {
@@ -245,7 +250,7 @@ describe('autocomplete_utils', () => {
     });
 
     describe('WHEN only a trailing comma follows the cursor', () => {
-      it.each([',', '",', ' , '])('SHOULD allow template insertion for %p', (suffix) => {
+      it.each([',', '",', ' , '])('SHOULD allow template insertion for %o', (suffix) => {
         expect(shouldInsertAutocompleteTemplate(suffix)).toBe(true);
       });
     });
@@ -419,7 +424,7 @@ describe('autocomplete_utils', () => {
     it('parses the request from its start column when a block comment prefixes the line', () => {
       const line = '/* note */ GET ind';
       const mockModel = {
-        getValueInRange: jest.fn(({ startColumn, endColumn }: any) =>
+        getValueInRange: vi.fn(({ startColumn, endColumn }: any) =>
           line.slice(startColumn - 1, endColumn - 1)
         ),
         getWordUntilPosition: () => ({ startColumn: 16 }),
@@ -457,7 +462,7 @@ describe('autocomplete_utils', () => {
       // Line content: "        index.mode"
       const mockModel = {
         getLineContent: () => 'PUT my-index',
-        getValueInRange: jest.fn((range: any) => {
+        getValueInRange: vi.fn((range: any) => {
           // Body content before position
           if (range.startLineNumber === 2) {
             return '{\n    "settings": {\n        index.mode';
@@ -500,7 +505,7 @@ describe('autocomplete_utils', () => {
 
       const mockModel = {
         getLineContent: () => '/* note */ PUT my-index',
-        getValueInRange: jest.fn((range: any) => {
+        getValueInRange: vi.fn((range: any) => {
           if (range.startLineNumber === 2) {
             return '{\n    "settings": {\n        index.mode';
           }
@@ -538,7 +543,7 @@ describe('autocomplete_utils', () => {
       // Simulate typing "index.mode" with quotes in the body
       const mockModel = {
         getLineContent: () => 'PUT my-index',
-        getValueInRange: jest.fn((range: any) => {
+        getValueInRange: vi.fn((range: any) => {
           if (range.startLineNumber === 2) {
             return '{\n    "settings": {\n        "index.mode';
           }
@@ -576,7 +581,7 @@ describe('autocomplete_utils', () => {
 
       const mockModel = {
         getLineContent: () => 'PUT my-index',
-        getValueInRange: jest.fn((range: monaco.IRange) => {
+        getValueInRange: vi.fn((range: monaco.IRange) => {
           if (range.startLineNumber === 2) {
             return '{\n    "settings": {\n        "icmp.ty';
           }
@@ -609,7 +614,7 @@ describe('autocomplete_utils', () => {
       ) =>
         ({
           getLineContent: (lineNumber: number) => editorLines[lineNumber - 1],
-          getValueInRange: jest.fn(
+          getValueInRange: vi.fn(
             ({ startLineNumber, startColumn, endLineNumber, endColumn }: monaco.IRange) => {
               if (startLineNumber === endLineNumber) {
                 return editorLines[startLineNumber - 1].slice(startColumn - 1, endColumn - 1);
@@ -1112,7 +1117,7 @@ describe('autocomplete_utils', () => {
       } as monaco.Position;
       const mockModel = {
         getLineContent: (lineNumber: number) => lines[lineNumber - 1],
-        getValueInRange: jest.fn(
+        getValueInRange: vi.fn(
           ({ startLineNumber, startColumn, endLineNumber, endColumn }: monaco.IRange) => {
             if (startLineNumber === endLineNumber) {
               return lines[startLineNumber - 1].slice(startColumn - 1, endColumn - 1);
@@ -1156,7 +1161,7 @@ describe('autocomplete_utils', () => {
 
       const mockModel = {
         getLineContent: () => 'PUT my-index',
-        getValueInRange: jest.fn((range: monaco.IRange) => {
+        getValueInRange: vi.fn((range: monaco.IRange) => {
           if (range.startLineNumber === 2) {
             return '{\n    "settings": {\n        "icmp.ty';
           }
@@ -1212,7 +1217,7 @@ describe('autocomplete_utils', () => {
       } as monaco.Position;
       const mockModel = {
         getLineContent: () => 'PUT my-index',
-        getValueInRange: jest.fn((range: monaco.IRange) => {
+        getValueInRange: vi.fn((range: monaco.IRange) => {
           if (range.startLineNumber === 2) {
             return `{\n    "settings": {\n${lineContentBeforePosition}`;
           }
@@ -1244,7 +1249,7 @@ describe('autocomplete_utils', () => {
 
       const mockModel = {
         getLineContent: () => 'PUT my-index',
-        getValueInRange: jest.fn((range: monaco.IRange) => {
+        getValueInRange: vi.fn((range: monaco.IRange) => {
           if (range.startLineNumber === 2) {
             return '{\n    "settings": {\n        "enabled": ';
           }
@@ -1282,7 +1287,7 @@ describe('autocomplete_utils', () => {
 
       const mockModel = {
         getLineContent: () => 'POST not_a_real_endpoint',
-        getValueInRange: jest.fn((range: any) => {
+        getValueInRange: vi.fn((range: any) => {
           if (range.startLineNumber === 2) {
             return '{\n  "query": "';
           }
@@ -1320,7 +1325,7 @@ describe('autocomplete_utils', () => {
 
       const mockModel = {
         getLineContent: () => 'PUT /test',
-        getValueInRange: jest.fn((range: any) => {
+        getValueInRange: vi.fn((range: any) => {
           if (range.startLineNumber === 2) {
             return '{\n  "mappings": {\n    "properties": {\n      "integer_field": "';
           }
@@ -1358,7 +1363,7 @@ describe('autocomplete_utils', () => {
 
       const mockModel = {
         getLineContent: () => 'PUT /test_index',
-        getValueInRange: jest.fn((range: any) => {
+        getValueInRange: vi.fn((range: any) => {
           if (range.startLineNumber === 2) {
             return '{\n  "mappings": {\n    "properties": {\n      "integer_field": ';
           }
@@ -1395,7 +1400,7 @@ describe('autocomplete_utils', () => {
 
       const mockModel = {
         getLineContent: () => 'POST _ingest/pipeline/_simulate',
-        getValueInRange: jest.fn((range: monaco.IRange) => {
+        getValueInRange: vi.fn((range: monaco.IRange) => {
           if (range.startLineNumber === 2) {
             return '{\n  "pipeline": {\n    "processors": [\n      ';
           }
@@ -1447,7 +1452,7 @@ describe('autocomplete_utils', () => {
 
           const mockModel = {
             getLineContent: () => 'POST _ingest/pipeline/_simulate',
-            getValueInRange: jest.fn((range: monaco.IRange) => {
+            getValueInRange: vi.fn((range: monaco.IRange) => {
               if (range.startLineNumber === 2) {
                 return '{\n  "pipeline": {\n    "processors": [\n      {"';
               }
@@ -1492,7 +1497,7 @@ describe('autocomplete_utils', () => {
         } as monaco.Position;
         const mockModel = {
           getLineContent: () => 'GET _search',
-          getValueInRange: jest.fn((range: monaco.IRange) => {
+          getValueInRange: vi.fn((range: monaco.IRange) => {
             if (range.startLineNumber === 2) {
               return `{
   "fields": [

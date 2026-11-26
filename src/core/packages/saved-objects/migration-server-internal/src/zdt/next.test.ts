@@ -35,7 +35,7 @@ describe('actions', () => {
   let actionMap: ActionMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     context = createContextMock();
     actionMap = nextActionMap(context);

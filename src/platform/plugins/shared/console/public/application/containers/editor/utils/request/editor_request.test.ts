@@ -11,12 +11,15 @@ import type { monaco, ParsedRequest } from '@kbn/monaco';
 import { createInsideConsoleStringChecker } from '@kbn/monaco/src/languages/definitions/console/utils';
 import { getRequestEndLineNumber, getRequestFromEditor } from './editor_request';
 
-jest.mock('@kbn/monaco/src/languages/definitions/console/utils', () => {
-  const actual = jest.requireActual('@kbn/monaco/src/languages/definitions/console/utils');
-  return {
+vi.mock('@kbn/monaco/src/languages/definitions/console/utils', async () => {
+  const actual = await vi.importActual<{
+    createInsideConsoleStringChecker: typeof createInsideConsoleStringChecker;
+  }>('@kbn/monaco/src/languages/definitions/console/utils');
+  const mockedModule = {
     ...actual,
-    createInsideConsoleStringChecker: jest.fn(actual.createInsideConsoleStringChecker),
+    createInsideConsoleStringChecker: vi.fn(actual.createInsideConsoleStringChecker),
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 describe('editor_request', () => {
@@ -213,7 +216,7 @@ describe('editor_request', () => {
         ...getMockModel(content),
         getPositionAt: () => ({ lineNumber: 1 }),
       } as unknown as monaco.editor.ITextModel;
-      jest.mocked(createInsideConsoleStringChecker).mockClear();
+      vi.mocked(createInsideConsoleStringChecker).mockClear();
 
       const result = getRequestEndLineNumber({
         parsedRequest,

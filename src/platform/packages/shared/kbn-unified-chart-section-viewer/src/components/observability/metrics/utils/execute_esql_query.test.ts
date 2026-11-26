@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
 import type { RangeFilter } from '@kbn/es-query';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
@@ -20,25 +21,34 @@ import { EsqlResponseError } from '../../../../common/errors/esql_response_error
 import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+  const mockedModule = {
+    getESQLResults: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('@kbn/es-query', () => ({
-  buildEsQuery: jest.fn(() => ({ query: { bool: {} } })),
-}));
+vi.mock('@kbn/es-query', () => {
+  const mockedModule = {
+    buildEsQuery: vi.fn(() => ({ query: { bool: {} } })),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('@kbn/data-plugin/public', () => ({
-  getTime: jest.fn(),
-  getEsQueryConfig: jest.fn(() => ({ allowLeadingWildcards: true, queryStringOptions: {} })),
-}));
+vi.mock('@kbn/data-plugin/public', () => {
+  const mockedModule = {
+    getTime: vi.fn(),
+    getEsQueryConfig: vi.fn(() => ({ allowLeadingWildcards: true, queryStringOptions: {} })),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
-const mockBuildEsQuery = buildEsQuery as jest.MockedFunction<typeof buildEsQuery>;
-const mockGetTime = getTime as jest.MockedFunction<typeof getTime>;
+const mockGetESQLResults = getESQLResults as MockedFunction<typeof getESQLResults>;
+const mockBuildEsQuery = buildEsQuery as MockedFunction<typeof buildEsQuery>;
+const mockGetTime = getTime as MockedFunction<typeof getTime>;
 
 describe('executeEsqlQuery', () => {
-  const mockSearch = jest.fn();
+  const mockSearch = vi.fn();
   const mockUiSettings = {} as Parameters<typeof executeEsqlQuery>[0]['uiSettings'];
   const mockResponse = {
     columns: [
@@ -53,7 +63,7 @@ describe('executeEsqlQuery', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetESQLResults.mockResolvedValue({
       response: mockResponse,
       params: { query: '' },

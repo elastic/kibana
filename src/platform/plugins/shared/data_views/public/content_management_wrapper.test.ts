@@ -18,7 +18,7 @@ describe('ContentMagementWrapper', () => {
     const mockedSavedObject = {
       version: 'abc',
     };
-    cmClient.get = jest
+    cmClient.get = vi
       .fn()
       .mockResolvedValue({ meta: { outcome: 'exactMatch' }, item: mockedSavedObject });
     const service = new ContentMagementWrapper(cmClient);
@@ -30,7 +30,7 @@ describe('ContentMagementWrapper', () => {
     const mockedSavedObject = {
       version: 'def',
     };
-    cmClient.get = jest
+    cmClient.get = vi
       .fn()
       .mockResolvedValue({ meta: { outcome: 'aliasMatch' }, item: mockedSavedObject });
     const service = new ContentMagementWrapper(cmClient);
@@ -43,7 +43,7 @@ describe('ContentMagementWrapper', () => {
       version: 'ghi',
     };
 
-    cmClient.get = jest
+    cmClient.get = vi
       .fn()
       .mockResolvedValue({ meta: { outcome: 'conflict' }, item: mockedSavedObject });
     const service = new ContentMagementWrapper(cmClient);

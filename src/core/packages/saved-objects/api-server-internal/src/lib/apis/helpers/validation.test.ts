@@ -51,7 +51,7 @@ describe('Saved Objects type validation helper', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('validation helper', () => {
@@ -87,11 +87,12 @@ describe('Saved Objects type validation helper', () => {
         registry: typeRegistry,
         kibanaVersion: defaultVersion,
       });
-      const validationError = new Error(
-        "[attributes.count]: Additional properties are not allowed ('count' was unexpected): Bad Request"
-      );
+      const validationMessage =
+        "[attributes.count]: Additional properties are not allowed ('count' was unexpected): Bad Request";
       const data = createMockObject(typeC, { attributes: { foo: 'hi', count: 1 } });
-      expect(() => helper.validateObjectForCreate(typeC, data)).toThrow(validationError);
+      expect(() => helper.validateObjectForCreate(typeC, data)).toThrow(
+        expect.objectContaining({ message: validationMessage })
+      );
     });
   });
 

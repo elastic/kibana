@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
+import type { Mocked } from 'vitest';
 import { mockGetCurrentTime, mockPreflightCheckForCreate } from '../repository.test.mock';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -61,8 +62,8 @@ describe('#update', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let serializer: Mocked<SavedObjectsSerializer>;
+  let securityExtension: Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const updateSchema = schema.object(
@@ -94,8 +95,8 @@ describe('#update', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
     securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
@@ -522,7 +523,7 @@ describe('#update', () => {
         await expect(
           repository.update(type, id, attributes, { retryOnConflict: 3 })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Saved object [index-pattern/logstash-*] conflict"`
+          `[Error: Saved object [index-pattern/logstash-*] conflict]`
         );
 
         expect(client.get).toHaveBeenCalledTimes(4);
@@ -541,7 +542,7 @@ describe('#update', () => {
             version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Saved object [index-pattern/logstash-*] conflict"`
+          `[Error: Saved object [index-pattern/logstash-*] conflict]`
         );
 
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -624,13 +625,19 @@ describe('#update', () => {
       const expectNotFoundError = async (type: string, id: string) => {
         await expect(
           repository.update(type, id, {}, { migrationVersionCompatibility: 'raw' })
-        ).rejects.toThrow(createGenericNotFoundErrorPayload(type, id));
+        ).rejects.toThrow(
+          expect.objectContaining({ message: createGenericNotFoundErrorPayload(type, id).message })
+        );
       };
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.update(type, id, attributes, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createBadRequestErrorPayload('"options.namespace" cannot be "*"').message,
+          })
+        );
       });
 
       it(`throws when type is invalid`, async () => {
@@ -645,7 +652,9 @@ describe('#update', () => {
 
       it(`throws when id is empty`, async () => {
         await expect(repository.update(type, '', attributes)).rejects.toThrow(
-          createBadRequestErrorPayload('id cannot be empty')
+          expect.objectContaining({
+            message: createBadRequestErrorPayload('id cannot be empty').message,
+          })
         );
         expect(client.index).not.toHaveBeenCalled();
       });
@@ -705,7 +714,11 @@ describe('#update', () => {
               },
             }
           )
-        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id).message,
+          })
+        );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.index).not.toHaveBeenCalled();
@@ -754,7 +767,7 @@ describe('#update', () => {
         await expect(
           repository.update(UPDATE_SCHEMA_TYPE, id, { count: 'lots' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"[attributes.count]: expected value of type [number] but got [string]: Bad Request"`
+          `[Error: [attributes.count]: expected value of type [number] but got [string]: Bad Request]`
         );
         expect(client.index).not.toHaveBeenCalled();
       });
@@ -764,7 +777,7 @@ describe('#update', () => {
         await expect(
           repository.update(UPDATE_SCHEMA_TYPE, id, { count: 5 }, { mergeAttributes: false })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"[attributes.title]: expected value of type [string] but got [undefined]: Bad Request"`
+          `[Error: [attributes.title]: expected value of type [string] but got [undefined]: Bad Request]`
         );
         expect(client.index).not.toHaveBeenCalled();
       });

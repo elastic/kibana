@@ -17,23 +17,27 @@ import { ExternalServicesProvider } from '../../../context/external_services';
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
 import { GridSettingsFlyout } from './grid_settings_flyout';
 
-jest.mock('@kbn/discover-utils', () => {
-  const metrics = jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
+vi.mock('@kbn/discover-utils', async () => {
+  const metrics = await vi.importActual('@kbn/discover-utils/src/data_types/metrics');
 
-  return {
+  const mockedModule = {
     METRICS_GRID_HISTOGRAM_PERCENTILES: metrics.METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SIMPLE_AGGREGATIONS: metrics.METRICS_GRID_SIMPLE_AGGREGATIONS,
     isHistogramVisualization: metrics.isHistogramVisualization,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-const mockTrackAggregationConfigChanged = jest.fn();
+const mockTrackAggregationConfigChanged = vi.fn();
 
-jest.mock('../../../context/ebt_telemetry_context', () => ({
-  useTelemetry: () => ({
-    trackAggregationConfigChanged: mockTrackAggregationConfigChanged,
-  }),
-}));
+vi.mock('../../../context/ebt_telemetry_context', () => {
+  const mockedModule = {
+    useTelemetry: () => ({
+      trackAggregationConfigChanged: mockTrackAggregationConfigChanged,
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
@@ -68,15 +72,15 @@ const renderFlyout = (
 
 describe('GridSettingsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders counters and histograms in accordions that are open by default', () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
+        onGridSettingsChange={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -100,8 +104,8 @@ describe('GridSettingsFlyout', () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
+        onGridSettingsChange={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -113,8 +117,8 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('does not call onGridSettingsChange until "Apply and close" is clicked, then closes', async () => {
-    const onGridSettingsChange = jest.fn();
-    const onClose = jest.fn();
+    const onGridSettingsChange = vi.fn();
+    const onClose = vi.fn();
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -140,12 +144,12 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('reports each changed metric type when multiple settings are applied', async () => {
-    const onGridSettingsChange = jest.fn();
+    const onGridSettingsChange = vi.fn();
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
         onGridSettingsChange={onGridSettingsChange}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -173,12 +177,12 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('stores Distribution on its own choice and keeps the percentile', async () => {
-    const onGridSettingsChange = jest.fn();
+    const onGridSettingsChange = vi.fn();
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={{ ...defaultSettings, histogramVisualization: 'lnsXY' }}
         onGridSettingsChange={onGridSettingsChange}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -197,12 +201,12 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('changes the percentile fallback without turning Distribution off', async () => {
-    const onGridSettingsChange = jest.fn();
+    const onGridSettingsChange = vi.fn();
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
         onGridSettingsChange={onGridSettingsChange}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -220,8 +224,8 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('discards the draft and does not call onGridSettingsChange when Cancel is clicked', async () => {
-    const onGridSettingsChange = jest.fn();
-    const onClose = jest.fn();
+    const onGridSettingsChange = vi.fn();
+    const onClose = vi.fn();
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -243,8 +247,8 @@ describe('GridSettingsFlyout', () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
+        onGridSettingsChange={vi.fn()}
+        onClose={vi.fn()}
       />,
       { isHeatmapsEnabled: false }
     );
@@ -270,8 +274,8 @@ describe('GridSettingsFlyout', () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={{ ...defaultSettings, histogramPercentile: 'p90' }}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
+        onGridSettingsChange={vi.fn()}
+        onClose={vi.fn()}
       />,
       { isHeatmapsEnabled: false }
     );
@@ -290,8 +294,8 @@ describe('GridSettingsFlyout', () => {
           histogramVisualization: 'lnsXY',
           dimensions: ['host.name'],
         }}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
+        onGridSettingsChange={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -299,8 +303,8 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('discards the draft and does not call onGridSettingsChange when the flyout close button is clicked', async () => {
-    const onGridSettingsChange = jest.fn();
-    const onClose = jest.fn();
+    const onGridSettingsChange = vi.fn();
+    const onClose = vi.fn();
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}

@@ -63,7 +63,7 @@ const appMappings: IndexMapping = {
 
 describe('checkTargetTypesMappings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when index mappings are missing required properties', () => {

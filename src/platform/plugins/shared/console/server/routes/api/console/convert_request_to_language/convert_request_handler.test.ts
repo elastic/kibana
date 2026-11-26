@@ -18,18 +18,21 @@ import type { RouteDependencies } from '../../..';
 
 import { registerConvertRequestRoute } from '.';
 
-jest.mock('@elastic/request-converter', () => ({
-  convertRequests: (request: string, language: string, options: any) => {
-    return Promise.resolve({
-      converted: true,
-      meta: {
-        request,
-        language,
-        options,
-      },
-    });
-  },
-}));
+vi.mock('@elastic/request-converter', () => {
+  const mockedModule = {
+    convertRequests: (request: string, language: string, options: any) => {
+      return Promise.resolve({
+        converted: true,
+        meta: {
+          request,
+          language,
+          options,
+        },
+      });
+    },
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 describe('Console convert request to language route', () => {
   let mockRouter: MockRouter;
@@ -45,7 +48,7 @@ describe('Console convert request to language route', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('GET /api/console/convert_request_to_language', () => {

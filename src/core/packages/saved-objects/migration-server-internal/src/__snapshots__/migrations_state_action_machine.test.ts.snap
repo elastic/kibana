@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`migrationsStateActionMachine logs state transitions, messages in state.logs and action responses when reaching DONE 1`] = `
+exports[`migrationsStateActionMachine > logs state transitions, messages in state.logs and action responses when reaching DONE 1`] = `
 Object {
   "debug": Array [
     Array [
@@ -434,7 +434,7 @@ Object {
 }
 `;
 
-exports[`migrationsStateActionMachine logs state transitions, messages in state.logs and action responses when reaching FATAL 1`] = `
+exports[`migrationsStateActionMachine > logs state transitions, messages in state.logs and action responses when reaching FATAL 1`] = `
 Object {
   "debug": Array [
     Array [

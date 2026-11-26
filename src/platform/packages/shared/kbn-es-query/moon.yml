@@ -28,10 +28,11 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.js'
     - '!target/**/*'
+    - '!vitest.config.ts'
 tasks: {}

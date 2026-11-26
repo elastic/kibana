@@ -7,25 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, MockedFunction } from 'vitest';
 import type { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import type * as InternalUtils from '../utils/internal_utils';
 
-export const mockFindLegacyUrlAliases = jest.fn() as jest.MockedFunction<
+export const mockFindLegacyUrlAliases: Mock = vi.fn() as MockedFunction<
   typeof findLegacyUrlAliases
 >;
 
-jest.mock('./find_legacy_url_aliases', () => {
-  return { findLegacyUrlAliases: mockFindLegacyUrlAliases };
+vi.mock('./find_legacy_url_aliases', () => {
+  const mockedModule = { findLegacyUrlAliases: mockFindLegacyUrlAliases };
+  return { ...mockedModule, default: mockedModule };
 });
 
-export const mockRawDocExistsInNamespaces = jest.fn() as jest.MockedFunction<
+export const mockRawDocExistsInNamespaces: Mock = vi.fn() as MockedFunction<
   (typeof InternalUtils)['rawDocExistsInNamespaces']
 >;
 
-jest.mock('../utils/internal_utils', () => {
-  const actual = jest.requireActual('../utils/internal_utils');
-  return {
+vi.mock('../utils/internal_utils', async () => {
+  const actual = await vi.importActual('../utils/internal_utils');
+  const mockedModule = {
     ...actual,
     rawDocExistsInNamespaces: mockRawDocExistsInNamespaces,
   };
+  return { ...mockedModule, default: mockedModule };
 });

@@ -22,7 +22,7 @@ describe('checkForUnknownDocs', () => {
   const knownTypes = ['foo', 'bar'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
@@ -37,8 +37,8 @@ describe('checkForUnknownDocs', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -81,8 +81,8 @@ describe('checkForUnknownDocs', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -118,8 +118,8 @@ describe('checkForUnknownDocs', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );

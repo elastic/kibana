@@ -25,7 +25,7 @@ describe('executeEsql', () => {
   const frozenExclusion = { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue(esqlResponse);
   });
@@ -136,15 +136,15 @@ describe('executeEsql', () => {
     const requestOptions = () => esClient.esql.query.mock.calls[0][1];
 
     const abortDeadline = async () => {
-      await jest.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(5000);
     };
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('sends exactly the standard transport options when no deadline is set', async () => {

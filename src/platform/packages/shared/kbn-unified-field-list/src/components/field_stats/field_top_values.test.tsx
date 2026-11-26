@@ -59,7 +59,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
   });
 
   it('should render correctly with filter actions', async () => {
-    const mockAddFilter = jest.fn();
+    const mockAddFilter = vi.fn();
 
     renderWithI18n(<FieldTopValues {...defaultProps} onAddFilter={mockAddFilter} />);
 
@@ -76,8 +76,8 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
   });
 
   it('should filter on Other with the displayed top values when onAddOtherFilter is provided', async () => {
-    const mockAddFilter = jest.fn();
-    const mockAddOtherFilter = jest.fn();
+    const mockAddFilter = vi.fn();
+    const mockAddOtherFilter = vi.fn();
 
     renderWithI18n(
       <FieldTopValues
@@ -102,8 +102,8 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
       <FieldTopValues
         {...defaultProps}
         field={dataViewMock.getFieldByName('scripted')!}
-        onAddFilter={jest.fn()}
-        onAddOtherFilter={jest.fn()}
+        onAddFilter={vi.fn()}
+        onAddOtherFilter={vi.fn()}
       />
     );
 

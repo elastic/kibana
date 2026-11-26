@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "vitest/globals",
       "jest",
       "node"
     ]
@@ -12,7 +13,8 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "vitest.config.ts"
   ],
   "kbn_references": [
     "@kbn/core-chrome-browser"

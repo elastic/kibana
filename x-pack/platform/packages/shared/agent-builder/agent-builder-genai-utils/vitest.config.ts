@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/jest/jest_node',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils'],
-};
+import { defineConfig, mergeConfig } from 'vitest/config';
+import preset from '@kbn/vitest/node_preset';
+
+export default mergeConfig(preset, defineConfig({ test: { root: import.meta.dirname } }));

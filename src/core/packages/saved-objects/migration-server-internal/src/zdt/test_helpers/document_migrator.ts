@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
 
-export const createDocumentMigrator = (): jest.Mocked<IDocumentMigrator> => {
+export const createDocumentMigrator = (): Mocked<IDocumentMigrator> => {
   return {
-    migrate: jest.fn().mockImplementation((doc: unknown) => doc),
-    migrateAndConvert: jest.fn().mockImplementation((doc: unknown) => [doc]),
-    isDowngradeRequired: jest.fn().mockReturnValue(false),
+    migrate: vi.fn().mockImplementation((doc: unknown) => doc),
+    migrateAndConvert: vi.fn().mockImplementation((doc: unknown) => [doc]),
+    isDowngradeRequired: vi.fn().mockReturnValue(false),
   };
 };

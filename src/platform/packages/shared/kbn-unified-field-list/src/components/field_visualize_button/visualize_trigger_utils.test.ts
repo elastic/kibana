@@ -23,9 +23,9 @@ const field = {
   visualizable: true,
 } as DataViewField;
 
-const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
-  () => Promise.resolve([])
-);
+const mockGetActions = vi.fn<
+  (triggerId: string, context: { fieldName: string }) => Promise<Array<Action<object>>>
+>(() => Promise.resolve([]));
 
 const uiActions = {
   getTriggerCompatibleActions: mockGetActions,

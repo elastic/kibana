@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "vitest/globals",
       "jest",
       "node"
     ]
@@ -15,5 +16,6 @@
   ],
   "exclude": [
     "target/**/*",
+    "vitest.config.ts",
   ]
 }

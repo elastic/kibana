@@ -23,25 +23,28 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UnifiedFieldListItem } from './field_list_item';
 
-jest.mock('../../services/field_stats', () => ({
-  loadFieldStats: jest.fn().mockResolvedValue({
-    totalDocuments: 1624,
-    sampledDocuments: 1624,
-    sampledValues: 3248,
-    topValues: {
-      buckets: [
-        {
-          count: 2042,
-          key: 'osx',
-        },
-        {
-          count: 1206,
-          key: 'winx',
-        },
-      ],
-    },
-  }),
-}));
+vi.mock('../../services/field_stats', () => {
+  const mockedModule = {
+    loadFieldStats: vi.fn().mockResolvedValue({
+      totalDocuments: 1624,
+      sampledDocuments: 1624,
+      sampledValues: 3248,
+      topValues: {
+        buckets: [
+          {
+            count: 2042,
+            key: 'osx',
+          },
+          {
+            count: 1206,
+            key: 'winx',
+          },
+        ],
+      },
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 const renderComponent = async ({
   canFilter = true,
@@ -83,16 +86,16 @@ const renderComponent = async ({
     isEmpty: false,
     isSelected: selected,
     itemIndex: 0,
-    onAddFieldToWorkspace: jest.fn(),
-    onEditField: jest.fn(),
-    onRemoveFieldFromWorkspace: jest.fn(),
+    onAddFieldToWorkspace: vi.fn(),
+    onEditField: vi.fn(),
+    onRemoveFieldFromWorkspace: vi.fn(),
     searchMode: 'documents',
     services: getServicesMock(),
     size: 'xs',
     stateService,
     workspaceSelectedFieldNames: [],
-    ...(canFilter && { onAddFilter: jest.fn() }),
-    ...(isBreakdownSupported && { onAddBreakdownField: jest.fn() }),
+    ...(canFilter && { onAddFilter: vi.fn() }),
+    ...(isBreakdownSupported && { onAddBreakdownField: vi.fn() }),
   };
 
   const user = userEvent.setup();
@@ -108,8 +111,8 @@ const renderComponent = async ({
 
 // DataTransfer is not implemented in jsdom
 const dataTransfer = {
-  setData: jest.fn(),
-  getData: jest.fn(),
+  setData: vi.fn(),
+  getData: vi.fn(),
 };
 
 const createKeywordField = (name: string) =>
@@ -127,7 +130,7 @@ const renderReorderableItems = () => {
     items: fields.map((field) => ({ id: field.name })),
     itemGap: 2,
     label: 'Selected fields',
-    onReorder: jest.fn(),
+    onReorder: vi.fn(),
   };
 
   const dataView = stubDataView;
@@ -149,10 +152,10 @@ const renderReorderableItems = () => {
                   isEmpty={false}
                   isSelected
                   itemIndex={itemIndex}
-                  onAddFieldToWorkspace={jest.fn()}
-                  onAddFilter={jest.fn()}
-                  onEditField={jest.fn()}
-                  onRemoveFieldFromWorkspace={jest.fn()}
+                  onAddFieldToWorkspace={vi.fn()}
+                  onAddFilter={vi.fn()}
+                  onEditField={vi.fn()}
+                  onRemoveFieldFromWorkspace={vi.fn()}
                   searchMode="documents"
                   services={getServicesMock()}
                   size="xs"

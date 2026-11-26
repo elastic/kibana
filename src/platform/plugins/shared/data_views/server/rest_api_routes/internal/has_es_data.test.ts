@@ -25,7 +25,7 @@ describe('has_es_data route', () => {
   it('should return hasEsData: true if there are matching local indices', async () => {
     const mockESClient = {
       indices: {
-        resolveCluster: jest.fn().mockResolvedValue({
+        resolveCluster: vi.fn().mockResolvedValue({
           local: { matching_indices: true },
         }),
       },
@@ -37,9 +37,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    jest
-      .spyOn(mockResponse, 'ok')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'ok').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);
@@ -59,7 +59,7 @@ describe('has_es_data route', () => {
   it('should return hasEsData: true if there are no matching local indices but matching remote indices', async () => {
     const mockESClient = {
       indices: {
-        resolveCluster: jest
+        resolveCluster: vi
           .fn()
           .mockImplementation(({ name }) =>
             name === patterns
@@ -77,9 +77,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    jest
-      .spyOn(mockResponse, 'ok')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'ok').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
@@ -109,7 +109,7 @@ describe('has_es_data route', () => {
   it('should return hasEsData: false if there are no matching local or remote indices', async () => {
     const mockESClient = {
       indices: {
-        resolveCluster: jest.fn().mockResolvedValue({
+        resolveCluster: vi.fn().mockResolvedValue({
           local: { matching_indices: false },
           remote: { matching_indices: false },
         }),
@@ -122,9 +122,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    jest
-      .spyOn(mockResponse, 'ok')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'ok').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
@@ -154,7 +154,7 @@ describe('has_es_data route', () => {
   it('should return a 504 response and log a warning if the local data request times out', async () => {
     const mockESClient = {
       indices: {
-        resolveCluster: jest.fn().mockRejectedValue({ name: 'TimeoutError' }),
+        resolveCluster: vi.fn().mockRejectedValue({ name: 'TimeoutError' }),
       },
     };
     const mockContext = {
@@ -164,9 +164,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    jest
-      .spyOn(mockResponse, 'customError')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'customError').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);
@@ -203,7 +203,7 @@ describe('has_es_data route', () => {
   it('should return a 504 response and log a warning if the remote data request times out', async () => {
     const mockESClient = {
       indices: {
-        resolveCluster: jest.fn().mockImplementation(({ name }) => {
+        resolveCluster: vi.fn().mockImplementation(({ name }) => {
           if (name === patterns) {
             return { local: { matching_indices: false } };
           }
@@ -224,9 +224,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    jest
-      .spyOn(mockResponse, 'customError')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'customError').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
@@ -274,7 +274,7 @@ describe('has_es_data route', () => {
     const someError = new Error('Some error');
     const mockESClient = {
       indices: {
-        resolveCluster: jest.fn().mockRejectedValue(someError),
+        resolveCluster: vi.fn().mockRejectedValue(someError),
       },
     };
     const mockContext = {
@@ -284,9 +284,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    jest
-      .spyOn(mockResponse, 'customError')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'customError').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);

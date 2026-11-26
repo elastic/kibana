@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const retryCallClusterMock = jest.fn((fn) => fn());
-jest.doMock('@kbn/core-elasticsearch-server-internal', () => ({
-  retryCallCluster: retryCallClusterMock,
-}));
+import type { Mock } from 'vitest';
+export const retryCallClusterMock: Mock = vi.fn((fn) => fn());
+vi.doMock('@kbn/core-elasticsearch-server-internal', () => {
+  const mockedModule = {
+    retryCallCluster: retryCallClusterMock,
+  };
+  return { ...mockedModule, default: mockedModule };
+});

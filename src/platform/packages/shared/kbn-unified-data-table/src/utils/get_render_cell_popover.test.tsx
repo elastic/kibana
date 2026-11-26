@@ -12,7 +12,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { getCustomCellPopoverRenderer } from './get_render_cell_popover';
 
-const setCellPopoverPropsMocks = jest.fn();
+const setCellPopoverPropsMocks = vi.fn();
 
 const DefaultCellPopover = () => <div>{'DefaultCellPopover'}</div>;
 
@@ -35,7 +35,7 @@ const renderTestComponent = (overrideProps = {}) => {
 
 describe('getCustomCellPopoverRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render DefaultCellPopover', () => {

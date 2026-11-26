@@ -84,7 +84,7 @@ describe('buildTemplateTolerantJsonSchema - runtime parity (liquid alternatives)
     '',
   ];
 
-  it.each(matrix)('weaver leaf-acceptance matches runtime suppression for %p', (value) => {
+  it.each(matrix)('weaver leaf-acceptance matches runtime suppression for %o', (value) => {
     expect(leafAccepts(patterns, value)).toBe(runtimeAccepts(value));
   });
 

@@ -8,20 +8,17 @@
  */
 
 import { cloneDeep, omit } from 'lodash';
-import sinon from 'sinon';
 
-import * as shouldReadFieldFromDocValuesNS from './should_read_field_from_doc_values';
+import { vi } from 'vitest';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 
 import { getKbnFieldType } from '@kbn/field-types';
 import { readFieldCapsResponse } from './field_caps_response';
 import esResponse from './__fixtures__/es_field_caps_response.json';
 
-describe('index_patterns/field_capabilities/field_caps_response', () => {
-  let sandbox;
-  beforeEach(() => (sandbox = sinon.createSandbox()));
-  afterEach(() => sandbox.restore());
+vi.mock('./should_read_field_from_doc_values', { spy: true });
 
+describe('index_patterns/field_capabilities/field_caps_response', () => {
   describe('readFieldCapsResponse()', () => {
     describe('conflicts', () => {
       it('returns a field for each in response, no filtering', () => {
@@ -63,11 +60,13 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
       );
 
       it('calls shouldReadFieldFromDocValues() for each non-conflict field', () => {
-        sandbox.spy(shouldReadFieldFromDocValuesNS, 'shouldReadFieldFromDocValues');
+        shouldReadFieldFromDocValues.mockClear();
         const fields = readFieldCapsResponse(esResponse);
         const conflictCount = fields.filter((f) => f.type === 'conflict').length;
         // +2 is for the object and nested fields which get filtered out of the final return value from readFieldCapsResponse
-        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 2);
+        expect(shouldReadFieldFromDocValues).toHaveBeenCalledTimes(
+          fields.length - conflictCount + 2
+        );
       });
 
       it('converts es types to kibana types', () => {

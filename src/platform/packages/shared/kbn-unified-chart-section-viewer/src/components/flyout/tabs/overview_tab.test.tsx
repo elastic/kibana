@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { ParsedMetricItem } from '../../../types';
@@ -20,27 +21,31 @@ import {
   type MetricSourceKind,
 } from '../hooks/use_metric_source_kind';
 
-jest.mock('../../../common/utils', () => ({
-  getUnitLabel: jest.fn(({ unit }) => {
-    const unitLabels: Record<string, string | undefined> = {
-      ms: 'Milliseconds',
-      bytes: 'Bytes',
-      percent: 'Percent',
-      count: undefined,
-    };
-    return unit ? unitLabels[unit] || unit : undefined;
-  }),
-}));
-
-jest.mock('../hooks/use_metric_source_kind', () => {
-  const actual = jest.requireActual('../hooks/use_metric_source_kind');
-  return {
-    ...actual,
-    useMetricSourceKind: jest.fn(),
+vi.mock('../../../common/utils', () => {
+  const mockedModule = {
+    getUnitLabel: vi.fn(({ unit }) => {
+      const unitLabels: Record<string, string | undefined> = {
+        ms: 'Milliseconds',
+        bytes: 'Bytes',
+        percent: 'Percent',
+        count: undefined,
+      };
+      return unit ? unitLabels[unit] || unit : undefined;
+    }),
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-const mockedUseMetricSourceKind = useMetricSourceKind as jest.Mock;
+vi.mock('../hooks/use_metric_source_kind', async () => {
+  const actual = await vi.importActual('../hooks/use_metric_source_kind');
+  const mockedModule = {
+    ...actual,
+    useMetricSourceKind: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
+
+const mockedUseMetricSourceKind = useMetricSourceKind as Mock;
 const mockSourceKind = (kind: MetricSourceKind) => {
   mockedUseMetricSourceKind.mockReturnValue({ kind });
 };
@@ -57,7 +62,7 @@ describe('Metric Flyout Overview Tab', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
   });
 
@@ -180,7 +185,7 @@ describe('Metric Flyout Overview Tab', () => {
   });
 
   describe('source rendering policy', () => {
-    const buildExternalServices = (renderFlyoutStreamFieldByStreamName?: jest.Mock) => {
+    const buildExternalServices = (renderFlyoutStreamFieldByStreamName?: Mock) => {
       const features = renderFlyoutStreamFieldByStreamName
         ? { id: 'streams', renderFlyoutStreamFieldByStreamName }
         : undefined;
@@ -188,7 +193,7 @@ describe('Metric Flyout Overview Tab', () => {
         discoverShared: {
           features: {
             registry: {
-              getById: jest.fn().mockReturnValue(features),
+              getById: vi.fn().mockReturnValue(features),
             },
           },
         } as unknown as DiscoverSharedPublicStart,
@@ -197,7 +202,7 @@ describe('Metric Flyout Overview Tab', () => {
 
     const renderTab = (
       metricItem: ParsedMetricItem,
-      renderFlyoutStreamFieldByStreamName?: jest.Mock,
+      renderFlyoutStreamFieldByStreamName?: Mock,
       withProvider: boolean = true
     ) => {
       if (!withProvider) {
@@ -212,7 +217,7 @@ describe('Metric Flyout Overview Tab', () => {
     };
 
     const linkRenderer = () =>
-      jest
+      vi
         .fn()
         .mockImplementation(({ streamName }: { streamName: string }) => (
           <div data-test-subj="streamFieldSectionRendered">{streamName}</div>

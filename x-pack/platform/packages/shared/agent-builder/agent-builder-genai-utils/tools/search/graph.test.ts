@@ -16,43 +16,43 @@ import {
   relevanceSearchToolName,
 } from './inner_tools';
 
-jest.mock('../index_explorer', () => ({
-  ...jest.requireActual('../index_explorer'),
-  gatherResourceDescriptors: jest.fn(),
+vi.mock('../index_explorer', async () => ({
+  ...(await vi.importActual('../index_explorer')),
+  gatherResourceDescriptors: vi.fn(),
 }));
 
-jest.mock('../nl_search', () => ({
-  naturalLanguageSearch: jest.fn(),
+vi.mock('../nl_search', () => ({
+  naturalLanguageSearch: vi.fn(),
 }));
 
-jest.mock('../relevance_search', () => ({
-  relevanceSearch: jest.fn(),
+vi.mock('../relevance_search', () => ({
+  relevanceSearch: vi.fn(),
 }));
 
 import { gatherResourceDescriptors } from '../index_explorer';
 import { naturalLanguageSearch } from '../nl_search';
 import { relevanceSearch } from '../relevance_search';
 
-const mockGatherResourceDescriptors = jest.mocked(gatherResourceDescriptors);
-const mockNaturalLanguageSearch = jest.mocked(naturalLanguageSearch);
-const mockRelevanceSearch = jest.mocked(relevanceSearch);
+const mockGatherResourceDescriptors = vi.mocked(gatherResourceDescriptors);
+const mockNaturalLanguageSearch = vi.mocked(naturalLanguageSearch);
+const mockRelevanceSearch = vi.mocked(relevanceSearch);
 
 const createModelProvider = (index: string, toolName = naturalLanguageSearchToolName) => {
   const args =
     toolName === relevanceSearchToolName
       ? { term: 'sample records', index }
       : { query: 'sample records', index };
-  const invoke = jest.fn().mockResolvedValue(
+  const invoke = vi.fn().mockResolvedValue(
     new AIMessage({
       content: '',
       tool_calls: [{ id: 'call-1', name: toolName, args }],
     })
   );
   const chatModel = {
-    bindTools: jest.fn(() => ({ withConfig: jest.fn(() => ({ invoke })) })),
+    bindTools: vi.fn(() => ({ withConfig: vi.fn(() => ({ invoke })) })),
   };
   return {
-    getDefaultModel: jest.fn().mockResolvedValue({ chatModel }),
+    getDefaultModel: vi.fn().mockResolvedValue({ chatModel }),
   } as unknown as ModelProvider;
 };
 
@@ -61,7 +61,7 @@ const runGraph = async (modelProvider: ModelProvider) => {
     modelProvider,
     esClient: {} as ElasticsearchClient,
     logger: loggerMock.create(),
-    events: { reportProgress: jest.fn() } as unknown as ToolEventEmitter,
+    events: { reportProgress: vi.fn() } as unknown as ToolEventEmitter,
   });
   return graph.invoke({
     nlQuery: 'sample records',
@@ -73,7 +73,7 @@ const runGraph = async (modelProvider: ModelProvider) => {
 
 describe('createSearchToolGraph', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGatherResourceDescriptors.mockResolvedValue([
       { type: 'index', name: 'devteam-metrics-2026' },
     ] as Awaited<ReturnType<typeof gatherResourceDescriptors>>);

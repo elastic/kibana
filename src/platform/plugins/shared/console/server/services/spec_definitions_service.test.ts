@@ -7,22 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
+import type * as Fs from 'fs';
+import { globSync, readFileSync } from 'fs';
 import { SpecDefinitionsService } from '.';
 import type { EndpointDefinition, EndpointsAvailability } from '../../common/types';
 
-const mockReadFileSync = jest.spyOn(fs, 'readFileSync');
-const mockGlobbySync = jest.spyOn(fs, 'globSync');
-const mockJsLoadersGetter = jest.fn();
-
-jest.mock('../lib', () => {
-  return {
-    ...jest.requireActual('../lib'),
-    get jsSpecLoaders() {
-      return mockJsLoadersGetter();
-    },
+// The service uses named `fs` imports, which `vi.spyOn(fs, ...)` cannot replace in ESM.
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof Fs>();
+  const mockedModule = {
+    ...actual,
+    readFileSync: vi.fn(actual.readFileSync),
+    globSync: vi.fn(actual.globSync),
   };
+  return { ...mockedModule, default: mockedModule };
 });
+
+const mockReadFileSync = vi.mocked(readFileSync);
+const mockGlobbySync = vi.mocked(globSync);
+const { mockJsLoadersGetter } = vi.hoisted(() => ({ mockJsLoadersGetter: vi.fn() }));
+
+vi.mock('../lib', async () => ({
+  ...(await vi.importActual('../lib')),
+  get jsSpecLoaders() {
+    return mockJsLoadersGetter();
+  },
+}));
 
 const getMockEndpoint = ({
   endpointName,
@@ -53,10 +63,10 @@ const getMockEndpoint = ({
 
 describe('SpecDefinitionsService', () => {
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date(1577836800000));
+    vi.useFakeTimers().setSystemTime(new Date(1577836800000));
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   beforeEach(() => {
     // mock the function that lists files in the definitions folders
@@ -67,7 +77,7 @@ describe('SpecDefinitionsService', () => {
     mockJsLoadersGetter.mockImplementation(() => []);
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('initializes with empty definitions when folders and global rules are empty', () => {

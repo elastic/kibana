@@ -14,16 +14,19 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { adoptToHapiAuthFormat } from './auth';
 import { SELF_CALL_AUTH_CHALLENGE_HEADER, SELF_CALL_HEADER } from '../self_client_observer';
 
-jest.mock('@kbn/core-http-router-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-http-router-server-internal');
-  return {
+vi.mock('@kbn/core-http-router-server-internal', async () => {
+  const actual = await vi.importActual('@kbn/core-http-router-server-internal');
+  const mockedModule = {
     ...actual,
     // Return the response verbatim instead of serializing it through hapi, so the assertions can
     // look at the headers the lifecycle decided on.
-    HapiResponseAdapter: jest.fn().mockImplementation(() => ({
-      handle: (response: IKibanaResponse) => response,
-    })),
+    HapiResponseAdapter: vi.fn().mockImplementation(function () {
+      return {
+        handle: (response: IKibanaResponse) => response,
+      };
+    }),
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 const createHapiRequest = ({
@@ -42,7 +45,7 @@ const invoke = async (
 ): Promise<IKibanaResponse | 'continue' | 'authenticated'> => {
   const responseToolkit = {
     continue: 'continue',
-    authenticated: jest.fn().mockReturnValue('authenticated'),
+    authenticated: vi.fn().mockReturnValue('authenticated'),
   } as unknown as ResponseToolkit;
 
   return (await adoptToHapiAuthFormat(handler, loggingSystemMock.createLogger())(

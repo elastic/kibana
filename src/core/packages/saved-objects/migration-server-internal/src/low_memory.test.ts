@@ -26,7 +26,7 @@ describe('isMemoryConstrained', () => {
   });
 
   it('defaults to the V8 heap size limit of the current process', () => {
-    const spy = jest
+    const spy = vi
       .spyOn(v8, 'getHeapStatistics')
       .mockReturnValue({ heap_size_limit: 512 * 1024 * 1024 } as v8.HeapInfo);
 

@@ -31,7 +31,7 @@ const createTool = (
     experimental: false,
     tags: [],
     getSchema: () => z.object({}),
-    execute: jest.fn(),
+    execute: vi.fn(),
     ...parts,
   };
 };
@@ -109,7 +109,7 @@ describe('toolToLangchain', () => {
     const tool = createTool('toolA', {
       description: 'desc',
       getSchema: () => z.object({ hello: z.string() }),
-      execute: jest
+      execute: vi
         .fn()
         .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
     });
@@ -131,7 +131,7 @@ describe('toolToLangchain', () => {
     const tool = createTool('toolA', {
       description: 'desc',
       getSchema: () => z.object({ hello: z.string() }),
-      execute: jest
+      execute: vi
         .fn()
         .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
     });
@@ -153,12 +153,12 @@ describe('toolToLangchain', () => {
     const tool = createTool('toolA', {
       description: 'desc',
       getSchema: () => z.object({ hello: z.string() }),
-      execute: jest
+      execute: vi
         .fn()
         .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
     });
 
-    const buildContent = jest.fn().mockReturnValue('custom-content');
+    const buildContent = vi.fn().mockReturnValue('custom-content');
 
     const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
     const results = await langchainTool.invoke({ hello: 'world' });
@@ -173,13 +173,13 @@ describe('toolToLangchain', () => {
 
   it('stamps emitted events with the tool id and call id', async () => {
     const tool = createTool('toolA', {
-      execute: jest.fn().mockImplementation(async ({ onEvent }) => {
+      execute: vi.fn().mockImplementation(async ({ onEvent }) => {
         onEvent({ type: ChatEventType.toolUi, data: { custom_event: 'ev', data: { a: 1 } } });
         onEvent({ type: ChatEventType.toolProgress, data: { message: 'hi' } });
         return { results: [] };
       }),
     });
-    const sendEvent = jest.fn();
+    const sendEvent = vi.fn();
 
     const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, sendEvent });
     await langchainTool.invoke({});
@@ -196,7 +196,7 @@ describe('toolToLangchain', () => {
 
   it('attributes a dynamic tool event to the inner tool, on the same call', async () => {
     const tool = createTool('execute_dynamic_tool', {
-      execute: jest.fn().mockImplementation(async ({ onEvent }) => {
+      execute: vi.fn().mockImplementation(async ({ onEvent }) => {
         onEvent(
           toDynamicToolEvent('inner.tool', {
             type: ChatEventType.toolUi,
@@ -212,7 +212,7 @@ describe('toolToLangchain', () => {
         return { results: [] };
       }),
     });
-    const sendEvent = jest.fn();
+    const sendEvent = vi.fn();
 
     const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, sendEvent });
     await langchainTool.invoke({});
@@ -230,9 +230,9 @@ describe('toolToLangchain', () => {
   it('passes the inner tool id of a dynamic tool return to buildContent', async () => {
     const results = [{ type: ToolResultType.other, data: 'foo' }];
     const tool = createTool('execute_dynamic_tool', {
-      execute: jest.fn().mockResolvedValue({ results, dynamicToolId: 'inner.tool' }),
+      execute: vi.fn().mockResolvedValue({ results, dynamicToolId: 'inner.tool' }),
     });
-    const buildContent = jest.fn().mockReturnValue('content');
+    const buildContent = vi.fn().mockReturnValue('content');
 
     const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
     await langchainTool.invoke({});
@@ -247,9 +247,9 @@ describe('toolToLangchain', () => {
 
   it('passes no dynamic tool id for a plain return', async () => {
     const tool = createTool('toolA', {
-      execute: jest.fn().mockResolvedValue({ results: [] }),
+      execute: vi.fn().mockResolvedValue({ results: [] }),
     });
-    const buildContent = jest.fn().mockReturnValue('content');
+    const buildContent = vi.fn().mockReturnValue('content');
 
     const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
     await langchainTool.invoke({});

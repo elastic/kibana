@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockGetConvertedObjectId = jest.fn().mockReturnValue('uuidv5');
+import type { Mock } from 'vitest';
+export const mockGetConvertedObjectId: Mock = vi.fn().mockReturnValue('uuidv5');
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
-  return {
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = await vi.importActual<typeof import('@kbn/core-saved-objects-utils-server')>(
+    '@kbn/core-saved-objects-utils-server'
+  );
+  const mockedModule = {
     ...actual,
     SavedObjectsUtils: {
       ...actual.SavedObjectsUtils,
       getConvertedObjectId: mockGetConvertedObjectId,
     },
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-export const validateTypeMigrationsMock = jest.fn();
+export const validateTypeMigrationsMock: Mock = vi.fn();
 
-jest.doMock('./validate_migrations', () => {
-  const actual = jest.requireActual('./validate_migrations');
-  return {
+vi.doMock('./validate_migrations', async () => {
+  const actual = await vi.importActual('./validate_migrations');
+  const mockedModule = {
     ...actual,
     validateTypeMigrations: validateTypeMigrationsMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });

@@ -48,9 +48,10 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - public/**/*
     - '!target/**/*'
+    - '!vitest.config.ts'
 tasks: {}

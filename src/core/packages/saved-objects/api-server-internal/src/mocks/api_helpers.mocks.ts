@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, Mocked } from 'vitest';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
@@ -19,13 +20,13 @@ import type {
   UserHelper,
 } from '../lib/apis/helpers';
 
-export type MigrationHelperMock = jest.Mocked<PublicMethodsOf<MigrationHelper>>;
+export type MigrationHelperMock = Mocked<PublicMethodsOf<MigrationHelper>>;
 
 const createMigrationHelperMock = (): MigrationHelperMock => {
   const mock: MigrationHelperMock = {
-    migrateInputDocument: jest.fn(),
-    migrateStorageDocument: jest.fn(),
-    migrateAndDecryptStorageDocument: jest.fn(),
+    migrateInputDocument: vi.fn(),
+    migrateStorageDocument: vi.fn(),
+    migrateAndDecryptStorageDocument: vi.fn() as Mock,
   };
 
   mock.migrateInputDocument.mockImplementation((doc) => doc);
@@ -37,15 +38,15 @@ const createMigrationHelperMock = (): MigrationHelperMock => {
   return mock;
 };
 
-export type CommonHelperMock = jest.Mocked<PublicMethodsOf<CommonHelper>>;
+export type CommonHelperMock = Mocked<PublicMethodsOf<CommonHelper>>;
 
 const createCommonHelperMock = (): CommonHelperMock => {
   const mock: CommonHelperMock = {
-    createPointInTimeFinder: jest.fn(),
-    getIndexForType: jest.fn(),
-    getIndicesForTypes: jest.fn(),
-    getCurrentNamespace: jest.fn(),
-    getValidId: jest.fn(),
+    createPointInTimeFinder: vi.fn() as Mock,
+    getIndexForType: vi.fn(),
+    getIndicesForTypes: vi.fn(),
+    getCurrentNamespace: vi.fn(),
+    getValidId: vi.fn(),
   };
 
   mock.getIndexForType.mockReturnValue('.kibana_mock');
@@ -56,62 +57,62 @@ const createCommonHelperMock = (): CommonHelperMock => {
   return mock;
 };
 
-export type EncryptionHelperMock = jest.Mocked<PublicMethodsOf<EncryptionHelper>>;
+export type EncryptionHelperMock = Mocked<PublicMethodsOf<EncryptionHelper>>;
 
 const createEncryptionHelperMock = (): EncryptionHelperMock => {
   const mock: EncryptionHelperMock = {
-    optionallyEncryptAttributes: jest.fn(),
-    optionallyDecryptAndRedactSingleResult: jest.fn(),
-    optionallyDecryptAndRedactBulkResult: jest.fn(),
+    optionallyEncryptAttributes: vi.fn() as Mock,
+    optionallyDecryptAndRedactSingleResult: vi.fn() as Mock,
+    optionallyDecryptAndRedactBulkResult: vi.fn() as Mock,
   };
 
   return mock;
 };
 
-export type ValidationHelperMock = jest.Mocked<PublicMethodsOf<ValidationHelper>>;
+export type ValidationHelperMock = Mocked<PublicMethodsOf<ValidationHelper>>;
 
 const createValidationHelperMock = (): ValidationHelperMock => {
   const mock: ValidationHelperMock = {
-    validateInitialNamespaces: jest.fn(),
-    validateObjectNamespaces: jest.fn(),
-    validateObjectForCreate: jest.fn(),
-    validateObjectForUpdate: jest.fn(),
-    validateOriginId: jest.fn(),
+    validateInitialNamespaces: vi.fn(),
+    validateObjectNamespaces: vi.fn(),
+    validateObjectForCreate: vi.fn(),
+    validateObjectForUpdate: vi.fn(),
+    validateOriginId: vi.fn(),
   };
 
   return mock;
 };
 
-export type SerializerHelperMock = jest.Mocked<PublicMethodsOf<SerializerHelper>>;
+export type SerializerHelperMock = Mocked<PublicMethodsOf<SerializerHelper>>;
 
 const createSerializerHelperMock = (): SerializerHelperMock => {
   const mock: SerializerHelperMock = {
-    rawToSavedObject: jest.fn(),
+    rawToSavedObject: vi.fn() as Mock,
   };
 
   return mock;
 };
 
-export type PreflightCheckHelperMock = jest.Mocked<PublicMethodsOf<PreflightCheckHelper>>;
+export type PreflightCheckHelperMock = Mocked<PublicMethodsOf<PreflightCheckHelper>>;
 
 const createPreflightCheckHelperMock = (): PreflightCheckHelperMock => {
   const mock: PreflightCheckHelperMock = {
-    preflightCheckForCreate: jest.fn(),
-    preflightCheckForBulkDelete: jest.fn(),
-    preflightCheckNamespaces: jest.fn(),
-    preflightCheckForUpsertAliasConflict: jest.fn(),
-    preflightGetDocForUpdate: jest.fn(),
-    preflightCheckNamespacesForUpdate: jest.fn(),
+    preflightCheckForCreate: vi.fn(),
+    preflightCheckForBulkDelete: vi.fn(),
+    preflightCheckNamespaces: vi.fn(),
+    preflightCheckForUpsertAliasConflict: vi.fn(),
+    preflightGetDocForUpdate: vi.fn(),
+    preflightCheckNamespacesForUpdate: vi.fn(),
   };
 
   return mock;
 };
 
-export type UserHelperMock = jest.Mocked<PublicMethodsOf<UserHelper>>;
+export type UserHelperMock = Mocked<PublicMethodsOf<UserHelper>>;
 
 const createUserHelperMock = (): UserHelperMock => {
   const mock: UserHelperMock = {
-    getCurrentUserProfileUid: jest.fn(),
+    getCurrentUserProfileUid: vi.fn(),
   };
 
   return mock;

@@ -24,17 +24,17 @@ describe('TopAggregateParamEditor', () => {
     options = [
       {
         text: 'Min',
-        isCompatible: jest.fn((aggr: IAggConfig) => aggr.params.field.type === 'number'),
+        isCompatible: vi.fn((aggr: IAggConfig) => aggr.params.field.type === 'number'),
         value: 'min',
       },
       {
         text: 'Max',
-        isCompatible: jest.fn((aggr: IAggConfig) => aggr.params.field.type === 'number'),
+        isCompatible: vi.fn((aggr: IAggConfig) => aggr.params.field.type === 'number'),
         value: 'max',
       },
       {
         text: 'Average',
-        isCompatible: jest.fn((aggr: IAggConfig) => aggr.params.field.type === 'string'),
+        isCompatible: vi.fn((aggr: IAggConfig) => aggr.params.field.type === 'string'),
         value: 'average',
       },
     ];
@@ -55,15 +55,15 @@ describe('TopAggregateParamEditor', () => {
           type: 'number',
         },
       },
-      getAggParams: jest.fn(() => [{ name: 'aggregate', options }]),
+      getAggParams: vi.fn(() => [{ name: 'aggregate', options }]),
     } as any as IAggConfig;
     defaultProps = {
       ...aggParamCommonPropsMock,
       agg,
       aggParam,
-      setValue: jest.fn(),
-      setValidity: jest.fn(),
-      setTouched: jest.fn(),
+      setValue: vi.fn(),
+      setValidity: vi.fn(),
+      setTouched: vi.fn(),
     };
   });
 

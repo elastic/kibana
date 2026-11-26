@@ -9,12 +9,13 @@
 
 import { getUnitLabel } from './get_unit_label';
 
-jest.mock('@kbn/i18n', () => {
-  return {
+vi.mock('@kbn/i18n', () => {
+  const mockedModule = {
     i18n: {
       translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
     },
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 describe('getUnitLabel', () => {

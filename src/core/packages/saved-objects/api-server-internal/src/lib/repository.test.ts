@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import {
   pointInTimeFinderMock,
   mockGetCurrentTime,
@@ -41,8 +42,8 @@ describe('SavedObjectsRepository', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
 
     repository = SavedObjectsRepository.createRepository(
@@ -64,7 +65,7 @@ describe('SavedObjectsRepository', () => {
 
     it('throws if `*` namespace argument is provided', async () => {
       expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
-        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+        `[Error: "options.namespace" cannot be "*": Bad Request]`
       );
     });
 
@@ -97,7 +98,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('with spacesExtension', () => {
-    let spacesExtension: jest.Mocked<ISavedObjectsSpacesExtension>;
+    let spacesExtension: Mocked<ISavedObjectsSpacesExtension>;
 
     beforeEach(() => {
       spacesExtension = savedObjectsExtensionsMock.createSpacesExtension();

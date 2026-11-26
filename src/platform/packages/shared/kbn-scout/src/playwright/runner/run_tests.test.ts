@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   getPlaywrightProject,
@@ -18,18 +19,27 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { execFilePromise, withKibanaSwcRegister } from '../utils';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
-jest.mock('@kbn/dev-proc-runner', () => ({ withProcRunner: jest.fn() }));
-jest.mock('@kbn/ci-stats-reporter', () => ({ getTimeReporter: jest.fn() }));
+vi.mock('@kbn/dev-proc-runner', () => {
+  const mockedModule = { withProcRunner: vi.fn() };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('@kbn/ci-stats-reporter', () => {
+  const mockedModule = { getTimeReporter: vi.fn() };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('../utils', () => ({
-  execFilePromise: jest.fn(),
-  withKibanaSwcRegister: jest.fn((env = {}) => ({
-    ...env,
-    NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/swc-register/install']
-      .filter(Boolean)
-      .join(' '),
-  })),
-}));
+vi.mock('../utils', () => {
+  const mockedModule = {
+    execFilePromise: vi.fn(),
+    withKibanaSwcRegister: vi.fn((env = {}) => ({
+      ...env,
+      NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/swc-register/install']
+        .filter(Boolean)
+        .join(' '),
+    })),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 describe('getPlaywrightProject', () => {
   it('returns "local" for testTarget with location "local"', () => {
@@ -57,18 +67,18 @@ describe('getPlaywrightProject', () => {
 
 describe('hasTestsInPlaywrightConfig', () => {
   let mockLog: ToolingLog;
-  const execFilePromiseMock = execFilePromise as jest.Mock;
+  const execFilePromiseMock = execFilePromise as Mock;
 
   beforeEach(() => {
     mockLog = {
-      info: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as ToolingLog;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.resetAllMocks();
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   it(`should log the last line of stdout when tests are found and return '0'`, async () => {
@@ -155,16 +165,16 @@ describe('hasTestsInPlaywrightConfig', () => {
 });
 
 describe('runPlaywrightTestCheck', () => {
-  const run = jest.fn();
+  const run = vi.fn();
 
   beforeEach(() => {
-    (withProcRunner as jest.Mock).mockImplementation(async (_log, fn) => fn({ run }));
-    (getTimeReporter as jest.Mock).mockReturnValue(jest.fn());
-    (withKibanaSwcRegister as jest.Mock).mockImplementation((env) => env);
+    (withProcRunner as Mock).mockImplementation(async (_log, fn) => fn({ run }));
+    (getTimeReporter as Mock).mockReturnValue(vi.fn());
+    (withKibanaSwcRegister as Mock).mockImplementation((env) => env);
   });
 
   it('lists the tests of a config with the Scout reporter disabled', async () => {
-    const log = { info: jest.fn() } as unknown as ToolingLog;
+    const log = { info: vi.fn() } as unknown as ToolingLog;
 
     await runPlaywrightTestCheck(log);
 

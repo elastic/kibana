@@ -12,11 +12,11 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { updateAliases } from './update_aliases';
 
-jest.mock('./catch_retryable_es_client_errors');
+vi.mock('./catch_retryable_es_client_errors');
 
 describe('updateAliases', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Create a mock client that rejects all methods with a 503 status code
@@ -27,15 +27,12 @@ describe('updateAliases', () => {
       body: { error: { type: 'es_type', reason: 'es_reason' } },
     })
   );
-  const client = elasticsearchClientMock.createInternalClient(
-    elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
-  );
 
   const nonRetryableError = new Error('crash');
-  const clientWithNonRetryableError = elasticsearchClientMock.createInternalClient(
-    elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
-  );
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
     const task = updateAliases({ client, aliasActions: [] });
     try {
       await task();
@@ -46,7 +43,10 @@ describe('updateAliases', () => {
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
   });
   it('re-throws non retry-able errors', async () => {
-    const task = updateAliases({ client: clientWithNonRetryableError, aliasActions: [] });
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
+    );
+    const task = updateAliases({ client, aliasActions: [] });
     await task();
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
   });

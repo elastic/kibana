@@ -92,7 +92,7 @@ const renderColumns = ({
   if (wrapperWidth) {
     Object.defineProperty(wrapper, 'offsetWidth', { value: wrapperWidth });
   }
-  const replaceSelectedDocs = jest.fn();
+  const replaceSelectedDocs = vi.fn();
   const {
     result: { current: columns },
   } = renderHook(() =>

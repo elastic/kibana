@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { Storage } from './storage';
 
 export class StorageMock extends Storage {
-  delete = jest.fn();
-  decode = jest.fn();
-  decodeKey = jest.fn();
-  encodeKey = jest.fn();
-  encode = jest.fn();
-  has = jest.fn();
-  keys = jest.fn();
-  get = jest.fn();
-  set = jest.fn();
+  delete: Mock = vi.fn();
+  decode: Mock = vi.fn();
+  decodeKey: Mock = vi.fn();
+  encodeKey: Mock = vi.fn();
+  encode: Mock = vi.fn();
+  has: Mock = vi.fn();
+  keys: Mock = vi.fn();
+  get: Mock = vi.fn();
+  set: Mock = vi.fn();
 }

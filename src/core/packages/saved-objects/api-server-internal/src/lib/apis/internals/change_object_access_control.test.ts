@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
 import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 
@@ -30,25 +31,28 @@ import {
 } from '../utils';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
-jest.mock('../utils', () => ({
-  getBulkOperationError: jest.fn(),
-  getExpectedVersionProperties: jest.fn(),
-  rawDocExistsInNamespace: jest.fn(),
-  isLeft: jest.requireActual('../utils').isLeft,
-  isRight: jest.requireActual('../utils').isRight,
-  left: jest.requireActual('../utils').left,
-  right: jest.requireActual('../utils').right,
-}));
+vi.mock('../utils', async () => {
+  const mockedModule = {
+    getBulkOperationError: vi.fn(),
+    getExpectedVersionProperties: vi.fn(),
+    rawDocExistsInNamespace: vi.fn(),
+    isLeft: (await vi.importActual('../utils')).isLeft,
+    isRight: (await vi.importActual('../utils')).isRight,
+    left: (await vi.importActual('../utils')).left,
+    right: (await vi.importActual('../utils')).right,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-const mockRawDocExistsInNamespace = rawDocExistsInNamespace as jest.MockedFunction<
+const mockRawDocExistsInNamespace = rawDocExistsInNamespace as MockedFunction<
   typeof rawDocExistsInNamespace
 >;
 
-const mockGetExpectedVersionProperties = getExpectedVersionProperties as jest.MockedFunction<
+const mockGetExpectedVersionProperties = getExpectedVersionProperties as MockedFunction<
   typeof getExpectedVersionProperties
 >;
 
-const mockGetBulkOperationErrorFromUtils = getBulkOperationError as jest.MockedFunction<
+const mockGetBulkOperationErrorFromUtils = getBulkOperationError as MockedFunction<
   typeof getBulkOperationError
 >;
 

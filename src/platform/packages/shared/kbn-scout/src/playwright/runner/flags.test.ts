@@ -7,22 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
 import { FlagsReader } from '@kbn/dev-cli-runner';
 import { ScoutTestTarget } from '@kbn/scout-info';
 import * as testFilesUtils from '../../common/utils';
 import * as configValidator from './config_validator';
 import { parseTestFlags } from './flags';
 
-const validatePlaywrightConfigMock = jest.spyOn(configValidator, 'validatePlaywrightConfig');
+const validatePlaywrightConfigMock = vi.spyOn(configValidator, 'validatePlaywrightConfig');
 
 // Mock the entire module to avoid spy redefinition issues
-jest.mock('../../common/utils', () => ({
-  ...jest.requireActual('../../common/utils'),
-  validateAndProcessTestFiles: jest.fn(),
-}));
+vi.mock('../../common/utils', async () => {
+  const mockedModule = {
+    ...(await vi.importActual('../../common/utils')),
+    validateAndProcessTestFiles: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 const validateAndProcessTestFilesMock =
-  testFilesUtils.validateAndProcessTestFiles as jest.MockedFunction<
+  testFilesUtils.validateAndProcessTestFiles as MockedFunction<
     typeof testFilesUtils.validateAndProcessTestFiles
   >;
 
@@ -30,7 +34,7 @@ describe('parseTestFlags', () => {
   const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     validatePlaywrightConfigMock.mockResolvedValue();
     delete process.env.SCOUT_TARGET_ATTRIBUTES;
   });
@@ -332,7 +336,7 @@ describe('parseTestFlags', () => {
 
   describe('testFiles flag', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       validatePlaywrightConfigMock.mockResolvedValue();
     });
 

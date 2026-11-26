@@ -13,16 +13,16 @@ import { mount, shallow } from 'enzyme';
 import type { IAggConfig } from '@kbn/data-plugin/public';
 import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
 
-jest.mock('./utils', () => ({
-  useAvailableOptions: jest.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
+vi.mock('./utils', () => ({
+  useAvailableOptions: vi.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
     ...filteredMetrics.map(({ id, type }: { id: string; type: { name: string } }) => ({
       text: type.name,
       value: id,
     })),
     ...defaultOptions,
   ]),
-  useFallbackMetric: jest.fn(),
-  useValidation: jest.fn(),
+  useFallbackMetric: vi.fn(),
+  useValidation: vi.fn(),
 }));
 
 import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
@@ -68,8 +68,8 @@ describe('MetricAggParamEditor', () => {
     defaultProps = {
       agg,
       showValidation: false,
-      setValue: jest.fn(),
-      setValidity: jest.fn(),
+      setValue: vi.fn(),
+      setValidity: vi.fn(),
     };
   });
 

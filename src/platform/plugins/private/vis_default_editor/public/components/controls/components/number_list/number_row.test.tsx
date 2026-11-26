@@ -28,11 +28,11 @@ describe('NumberRow', () => {
         max: 10,
         minInclusive: true,
         maxInclusive: true,
-        within: jest.fn(() => true),
+        within: vi.fn(() => true),
       },
-      onChange: jest.fn(),
-      onBlur: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onBlur: vi.fn(),
+      onDelete: vi.fn(),
     };
   });
 

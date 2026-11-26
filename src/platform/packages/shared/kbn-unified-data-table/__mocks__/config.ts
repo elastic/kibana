@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import type { Config } from '@kbn/config';
 
-export type ConfigMock = jest.Mocked<Config>;
+export type ConfigMock = Mocked<Config>;
 
 const createConfigMock = (): ConfigMock => ({
-  has: jest.fn(),
-  get: jest.fn(),
-  set: jest.fn(),
-  getFlattenedPaths: jest.fn(),
-  toRaw: jest.fn(),
+  has: vi.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  getFlattenedPaths: vi.fn(),
+  toRaw: vi.fn(),
 });
 
 export const configMock = {

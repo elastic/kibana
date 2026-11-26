@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, MockedFunction } from 'vitest';
 import type { collectMultiNamespaceReferences } from './apis/internals/collect_multi_namespace_references';
 import type { internalBulkResolve } from './apis/internals/internal_bulk_resolve';
 import type * as InternalUtils from './apis/utils/internal_utils';
@@ -14,62 +15,82 @@ import type { preflightCheckForCreate } from './apis/internals/preflight_check_f
 import type { updateObjectsSpaces } from './apis/internals/update_objects_spaces';
 import type { deleteLegacyUrlAliases } from './apis/internals/delete_legacy_url_aliases';
 
-export const mockCollectMultiNamespaceReferences = jest.fn() as jest.MockedFunction<
+export const mockCollectMultiNamespaceReferences: Mock = vi.fn() as MockedFunction<
   typeof collectMultiNamespaceReferences
 >;
 
-jest.mock('./apis/internals/collect_multi_namespace_references', () => ({
-  collectMultiNamespaceReferences: mockCollectMultiNamespaceReferences,
-}));
+vi.mock('./apis/internals/collect_multi_namespace_references', () => {
+  const mockedModule = {
+    collectMultiNamespaceReferences: mockCollectMultiNamespaceReferences,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-export const mockInternalBulkResolve = jest.fn() as jest.MockedFunction<typeof internalBulkResolve>;
+export const mockInternalBulkResolve: Mock = vi.fn() as MockedFunction<typeof internalBulkResolve>;
 
-jest.mock('./apis/internals/internal_bulk_resolve', () => ({
-  ...jest.requireActual('./apis/internals/internal_bulk_resolve'),
-  internalBulkResolve: mockInternalBulkResolve,
-}));
+vi.mock('./apis/internals/internal_bulk_resolve', async () => {
+  const mockedModule = {
+    ...(await vi.importActual('./apis/internals/internal_bulk_resolve')),
+    internalBulkResolve: mockInternalBulkResolve,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
+export const mockGetBulkOperationError: Mock = vi.fn() as MockedFunction<
   (typeof InternalUtils)['getBulkOperationError']
 >;
-export const mockGetCurrentTime = jest.fn() as jest.MockedFunction<
+export const mockGetCurrentTime: Mock = vi.fn() as MockedFunction<
   (typeof InternalUtils)['getCurrentTime']
 >;
 
-jest.mock('./apis/utils/internal_utils', () => {
-  const actual = jest.requireActual('./apis/utils/internal_utils');
-  return {
+vi.mock('./apis/utils/internal_utils', async () => {
+  const actual = await vi.importActual('./apis/utils/internal_utils');
+  const mockedModule = {
     ...actual,
     getBulkOperationError: mockGetBulkOperationError,
     getCurrentTime: mockGetCurrentTime,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-export const mockPreflightCheckForCreate = jest.fn() as jest.MockedFunction<
+export const mockPreflightCheckForCreate = vi.fn() as MockedFunction<
   typeof preflightCheckForCreate
 >;
 
-jest.mock('./apis/internals/preflight_check_for_create', () => ({
-  preflightCheckForCreate: mockPreflightCheckForCreate,
-}));
+vi.mock('./apis/internals/preflight_check_for_create', () => {
+  const mockedModule = {
+    preflightCheckForCreate: mockPreflightCheckForCreate,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-export const mockUpdateObjectsSpaces = jest.fn() as jest.MockedFunction<typeof updateObjectsSpaces>;
+export const mockUpdateObjectsSpaces: Mock = vi.fn() as MockedFunction<typeof updateObjectsSpaces>;
 
-jest.mock('./apis/internals/update_objects_spaces', () => ({
-  updateObjectsSpaces: mockUpdateObjectsSpaces,
-}));
+vi.mock('./apis/internals/update_objects_spaces', () => {
+  const mockedModule = {
+    updateObjectsSpaces: mockUpdateObjectsSpaces,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-export const pointInTimeFinderMock = jest.fn();
-jest.doMock('./point_in_time_finder', () => ({
-  PointInTimeFinder: pointInTimeFinderMock,
-}));
+export const pointInTimeFinderMock: Mock = vi.fn();
+vi.doMock('./point_in_time_finder', () => {
+  const mockedModule = {
+    PointInTimeFinder: pointInTimeFinderMock,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-export const mockDeleteLegacyUrlAliases = jest.fn() as jest.MockedFunction<
-  typeof deleteLegacyUrlAliases
->;
-jest.mock('./apis/internals/delete_legacy_url_aliases', () => ({
-  deleteLegacyUrlAliases: mockDeleteLegacyUrlAliases,
-}));
+export const mockDeleteLegacyUrlAliases = vi.fn() as MockedFunction<typeof deleteLegacyUrlAliases>;
+vi.mock('./apis/internals/delete_legacy_url_aliases', () => {
+  const mockedModule = {
+    deleteLegacyUrlAliases: mockDeleteLegacyUrlAliases,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-export const mockGetSearchDsl = jest.fn();
-jest.mock('./search/search_dsl', () => ({ getSearchDsl: mockGetSearchDsl }));
+export const mockGetSearchDsl: Mock = vi.fn();
+vi.mock('./search/search_dsl', () => {
+  const mockedModule = { getSearchDsl: mockGetSearchDsl };
+  return { ...mockedModule, default: mockedModule };
+});

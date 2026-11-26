@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { LoDashStatic } from 'lodash';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -28,13 +29,14 @@ interface WrapperProps {
 
 const DESCRIPTION_ID = 'fieldListGrouped__ariaDescription';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', async () => {
+  const { default: original } = await vi.importActual<{ default: LoDashStatic }>('lodash');
 
-  return {
+  const mockedModule = {
     ...original,
     debounce: (fn: unknown) => fn,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
@@ -63,7 +65,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       scrollToTopResetCounter: 0,
       fieldsExistInIndex: true,
       screenReaderDescriptionId: 'testId',
-      renderFieldItem: jest.fn(({ field, itemIndex, groupIndex }) => (
+      renderFieldItem: vi.fn(({ field, itemIndex, groupIndex }) => (
         <EuiText
           data-test-subj="testFieldItem"
           data-name={`${field.name}-${groupIndex}-${itemIndex}`}
@@ -211,7 +213,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
-        onDeselectSelectedFields: jest.fn(),
+        onDeselectSelectedFields: vi.fn(),
       },
       hookParams: {
         dataViewId: null,
@@ -238,7 +240,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
 
   it('calls onDeselectSelectedFields when the selected fields button is pressed', async () => {
     const user = userEvent.setup();
-    const onDeselectSelectedFields = jest.fn();
+    const onDeselectSelectedFields = vi.fn();
 
     await mountGroupedList({
       listProps: {
@@ -355,7 +357,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       },
     };
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     try {
       render(<FieldListGrouped {...defaultProps} fieldGroups={fieldGroups} />);
@@ -382,10 +384,10 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       fireEvent.click(screen.getByRole('button', { name: /meta fields/i }));
       expect(within(metaFields).getAllByTestId('testFieldItem')).toHaveLength(3);
 
-      act(() => jest.advanceTimersByTime(100));
+      act(() => vi.advanceTimersByTime(100));
       expect(within(metaFields).getAllByTestId('testFieldItem')).toHaveLength(3);
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 

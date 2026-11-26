@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/jest',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/plugins/private/vis_default_editor'],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_default_editor',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/platform/plugins/private/vis_default_editor/public/**/*.{ts,tsx}',
-  ],
-};
+import { defineConfig, mergeConfig } from 'vitest/config';
+import preset from '@kbn/vitest/jsdom_preset';
+
+export default mergeConfig(preset, defineConfig({ test: { root: import.meta.dirname } }));

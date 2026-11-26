@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import Fs from 'fs';
 import Path from 'path';
 import { findPackageForPath, getPackages } from '@kbn/repo-packages';
@@ -35,25 +36,31 @@ import {
   runAudit,
 } from './audit';
 
-jest.mock('@kbn/repo-packages', () => ({
-  findPackageForPath: jest.fn(),
-  getPackages: jest.fn(() => []),
-}));
+vi.mock('@kbn/repo-packages', () => {
+  const mockedModule = {
+    findPackageForPath: vi.fn(),
+    getPackages: vi.fn(() => []),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 // The config set check imports real server configs; the fixture repo has none,
 // so the report gets an empty section here and the pure parts are tested below.
-jest.mock('./audit_config_sets', () => ({
-  ...jest.requireActual('./audit_config_sets'),
-  auditConfigSets: jest.fn(async () => ({
-    sets: [],
-    failed: [],
-    sameAsDefault: [],
-    runtimeOnly: [],
-    identical: [],
-    subsets: [],
-    runtimeKeys: [],
-  })),
-}));
+vi.mock('./audit_config_sets', async () => {
+  const mockedModule = {
+    ...(await vi.importActual('./audit_config_sets')),
+    auditConfigSets: vi.fn(async () => ({
+      sets: [],
+      failed: [],
+      sameAsDefault: [],
+      runtimeOnly: [],
+      identical: [],
+      subsets: [],
+      runtimeKeys: [],
+    })),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 const emptyConfigSets = {
   sets: [],
@@ -201,7 +208,7 @@ describe('findScoutTestFiles', () => {
 
 describe('censusPageObjectConsumers', () => {
   beforeEach(() => {
-    (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
+    (findPackageForPath as Mock).mockImplementation((_repoRoot: string, file: string) => {
       if (file.includes('fake_plugin_a')) return { id: 'fake-plugin-a' };
       if (file.includes('fake_plugin_b')) return { id: 'fake-plugin-b' };
       if (file.includes('kbn-scout-fake')) return { id: '@kbn/scout-fake' };
@@ -222,7 +229,7 @@ describe('censusPageObjectConsumers', () => {
 
 describe('findDuplicateClassNames', () => {
   beforeEach(() => {
-    (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
+    (findPackageForPath as Mock).mockImplementation((_repoRoot: string, file: string) => {
       if (file.includes('fake_plugin_a')) return { id: 'fake-plugin-a' };
       if (file.includes('fake_plugin_b')) return { id: 'fake-plugin-b' };
       if (file.includes('kbn-scout-fake')) return { id: '@kbn/scout-fake' };
@@ -339,7 +346,7 @@ describe('formatAuditReportForSlack', () => {
 
 describe('runAudit', () => {
   beforeEach(() => {
-    (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
+    (findPackageForPath as Mock).mockImplementation((_repoRoot: string, file: string) => {
       if (file.includes('fake_plugin_a')) return { id: 'fake-plugin-a' };
       if (file.includes('fake_plugin_b')) return { id: 'fake-plugin-b' };
       if (file.includes('kbn-scout-fake')) return { id: '@kbn/scout-fake' };
@@ -425,7 +432,7 @@ describe('config set audit, pure parts', () => {
   });
 
   it('reads runtime keys from plugin dynamicConfig declarations, prefixed by the plugin config path', () => {
-    (getPackages as jest.Mock).mockReturnValueOnce([
+    (getPackages as Mock).mockReturnValueOnce([
       {
         id: '@kbn/fake-dyn-plugin',
         directory: Path.join(FIXTURES_DIR, 'fake_dyn_plugin'),

@@ -13,7 +13,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { deleteByQuery } from './delete_by_query';
 
-jest.mock('./catch_retryable_es_client_errors');
+vi.mock('./catch_retryable_es_client_errors');
 
 describe('deleteByQuery', () => {
   const deleteQuery = {
@@ -27,7 +27,7 @@ describe('deleteByQuery', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {

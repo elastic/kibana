@@ -17,7 +17,7 @@ import {
 describe('createUnifiedChartSectionViewerTelemetry', () => {
   it('reports metric aggregation configuration changes', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as unknown as AnalyticsServiceStart;
     const telemetry = createUnifiedChartSectionViewerTelemetry(analytics);
 
@@ -39,7 +39,7 @@ describe('createUnifiedChartSectionViewerTelemetry', () => {
 
   it('reports ES|QL query failures', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as unknown as AnalyticsServiceStart;
     const telemetry = createUnifiedChartSectionViewerTelemetry(analytics);
 

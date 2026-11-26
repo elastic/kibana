@@ -13,11 +13,11 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { createIndex } from './create_index';
 
-jest.mock('./catch_retryable_es_client_errors');
+vi.mock('./catch_retryable_es_client_errors');
 
 describe('createIndex', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Create a mock client that rejects all methods with a 503 status code
@@ -28,16 +28,17 @@ describe('createIndex', () => {
       body: { error: { type: 'es_type', reason: 'es_reason' } },
     })
   );
-  const client = elasticsearchClientMock.createInternalClient(
-    elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
-  );
+  // A rejected promise created at collection time is reported as an unhandled rejection
+  // before a test awaits it, so each test creates its own client.
+  const createClient = () =>
+    elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
 
   const nonRetryableError = new Error('crash');
-  const clientWithNonRetryableError = elasticsearchClientMock.createInternalClient(
-    elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
-  );
 
   it('calls client.indices.create with the correct parameter for default ES', async () => {
+    const client = createClient();
     const statefulCapabilities = elasticsearchServiceMock.createCapabilities({ serverless: false });
     const task = createIndex({
       client,
@@ -77,6 +78,7 @@ describe('createIndex', () => {
   });
 
   it('calls client.indices.create with the correct parameter for serverless ES', async () => {
+    const client = createClient();
     const statelessCapabilities = elasticsearchServiceMock.createCapabilities({ serverless: true });
     const task = createIndex({
       client,
@@ -113,7 +115,7 @@ describe('createIndex', () => {
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
     const task = createIndex({
-      client,
+      client: createClient(),
       indexName: 'new_index',
       mappings: { properties: {} },
       esCapabilities: elasticsearchServiceMock.createCapabilities(),
@@ -129,7 +131,9 @@ describe('createIndex', () => {
 
   it('re-throws non retry-able errors', async () => {
     const task = createIndex({
-      client: clientWithNonRetryableError,
+      client: elasticsearchClientMock.createInternalClient(
+        elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
+      ),
       indexName: 'my_index',
       mappings: { properties: {} },
       esCapabilities: elasticsearchServiceMock.createCapabilities(),

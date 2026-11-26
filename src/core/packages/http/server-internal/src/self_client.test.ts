@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, Mocked, MockedFunction } from 'vitest';
 import { NEVER } from 'rxjs';
 import type {
   AuthHeaders,
@@ -62,7 +63,7 @@ const createClient = ({
   authRequestHeaders: suppliedAuthRequestHeaders,
   hostname = '0.0.0.0',
   target = 'auto',
-  getHttpConfig = jest.fn().mockReturnValue({
+  getHttpConfig = vi.fn().mockReturnValue({
     ssl: { enabled: false, requestCert: false },
     selfHttp: { ssl: { verificationMode: 'full' } },
   } as HttpConfig),
@@ -76,7 +77,7 @@ const createClient = ({
   authHeaders?: AuthHeaders;
   authRequestHeaders?: IAuthHeadersStorage;
   target?: 'auto' | 'local';
-  getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
+  getHttpConfig?: MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
   hostname?: string;
   getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
@@ -87,9 +88,9 @@ const createClient = ({
   const authRequestHeaders =
     suppliedAuthRequestHeaders ??
     ({
-      get: jest.fn().mockReturnValue(authHeaders),
-      set: jest.fn(),
-    } as jest.Mocked<IAuthHeadersStorage>);
+      get: vi.fn().mockReturnValue(authHeaders),
+      set: vi.fn(),
+    } as Mocked<IAuthHeadersStorage>);
   const log = loggingSystemMock.createLogger();
 
   const self = createInternalHttpSelfClient({
@@ -97,11 +98,11 @@ const createClient = ({
     basePath: {
       publicBaseUrl: publicBaseUrl ?? undefined,
       serverBasePath: '/base',
-      get: jest.fn(),
-      prepend: jest.fn(),
-      remove: jest.fn(),
+      get: vi.fn(),
+      prepend: vi.fn(),
+      remove: vi.fn(),
     },
-    getServerInfo: jest.fn().mockReturnValue({
+    getServerInfo: vi.fn().mockReturnValue({
       name: 'kibana',
       hostname,
       port: 5601,
@@ -136,20 +137,20 @@ const unauthorizedResponse = ({ marked = true }: { marked?: boolean } = {}) =>
   });
 
 const mockFetchResponses = (...responses: Response[]) => {
-  const fetchMock = global.fetch as jest.Mock;
+  const fetchMock = global.fetch as Mock;
   fetchMock.mockReset();
   responses.forEach((response) => fetchMock.mockResolvedValueOnce(response));
   fetchMock.mockResolvedValue(okResponse());
 };
 
 /** The `Request` handed to `fetch` on the nth attempt (0 = first attempt). */
-const sentRequest = (attempt = 0) => (global.fetch as jest.Mock).mock.calls[attempt][0] as Request;
+const sentRequest = (attempt = 0) => (global.fetch as Mock).mock.calls[attempt][0] as Request;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('InternalHttpSelfScopedClient', () => {
   beforeEach(() => {
-    global.fetch = jest.fn().mockImplementation(() =>
+    global.fetch = vi.fn().mockImplementation(() =>
       Promise.resolve(
         new Response(JSON.stringify({ ok: true }), {
           headers: { 'content-type': 'application/json' },
@@ -160,7 +161,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('supports buffered raw bodies and rejects streams', async () => {
@@ -169,7 +170,7 @@ describe('InternalHttpSelfScopedClient', () => {
       method: 'POST',
       rawBody: new URLSearchParams({ value: 'one' }),
     });
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.headers.get('content-type')).toContain('application/x-www-form-urlencoded');
     await expect(
       self.asScoped(createRequest()).fetch('/api/upload', {
@@ -182,7 +183,7 @@ describe('InternalHttpSelfScopedClient', () => {
   it('uses the local listener when a call explicitly targets local', async () => {
     const { self } = createClient({ publicBaseUrl: 'https://public.example.com/base' });
     await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
   });
 
@@ -190,7 +191,7 @@ describe('InternalHttpSelfScopedClient', () => {
     const { self } = createClient();
     await self.asScoped(createRequest()).fetch('/api/status', { headersTimeout: 60_000 });
 
-    const fetchInit = (global.fetch as jest.Mock).mock.calls[0][1];
+    const fetchInit = (global.fetch as Mock).mock.calls[0][1];
     expect(fetchInit.dispatcher).toBeDefined();
     await self.close();
   });
@@ -223,13 +224,13 @@ describe('InternalHttpSelfScopedClient', () => {
       publicBaseUrl: 'https://public.example.com/base',
     });
     await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://[::1]:5601/base/s/my-space/api/status');
   });
 
   it('calls publicBaseUrl with request base path, query, auth headers, and self markers', async () => {
     const { authRequestHeaders, self } = createClient();
-    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+    const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
 
     const result = await self.asScoped(createRequest()).fetch('/api/status', {
       query: { foo: 'bar', multi: ['one', 'two'] },
@@ -238,7 +239,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(result).toEqual({ ok: true });
     expect(authRequestHeaders.get).toHaveBeenCalled();
 
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe(
       'https://kibana.example.com/base/s/my-space/api/status?foo=bar&multi=one&multi=two'
     );
@@ -280,7 +281,7 @@ describe('InternalHttpSelfScopedClient', () => {
     });
     const [[message]] = (log.debug as jest.Mock).mock.calls;
     expect(message()).toBe('Kibana scoped self HTTP call attempted');
-    const serializedLog = JSON.stringify((log.debug as jest.Mock).mock.calls);
+    const serializedLog = JSON.stringify(log.debug.mock.calls);
     expect(serializedLog).not.toContain('private-source-id');
     expect(serializedLog).not.toContain('private-target');
     expect(serializedLog).not.toContain('private-query-value');
@@ -304,7 +305,7 @@ describe('InternalHttpSelfScopedClient', () => {
         self_http_retry: 'false',
       },
     });
-    const serializedLog = JSON.stringify((log.debug as jest.Mock).mock.calls);
+    const serializedLog = JSON.stringify(log.debug.mock.calls);
     expect(serializedLog).not.toContain('private-target');
     expect(serializedLog).not.toContain('fake-request');
   });
@@ -314,7 +315,7 @@ describe('InternalHttpSelfScopedClient', () => {
     const tlsCause = Object.assign(new Error("Hostname/IP does not match certificate's altnames"), {
       code: 'ERR_TLS_CERT_ALTNAME_INVALID',
     });
-    (global.fetch as jest.Mock).mockRejectedValueOnce(
+    (global.fetch as Mock).mockRejectedValueOnce(
       Object.assign(new Error('fetch failed'), { cause: tlsCause })
     );
 
@@ -349,12 +350,12 @@ describe('InternalHttpSelfScopedClient', () => {
         },
       })
     );
-    expect(JSON.stringify((log.error as jest.Mock).mock.calls)).not.toContain('my-space');
+    expect(JSON.stringify(log.error.mock.calls)).not.toContain('my-space');
   });
 
   it('logs a non-success response with status and omits the path and query', async () => {
     const { log, self } = createClient();
-    (global.fetch as jest.Mock).mockResolvedValueOnce(
+    (global.fetch as Mock).mockResolvedValueOnce(
       new Response(JSON.stringify({ message: 'nope' }), {
         status: 502,
         headers: { 'content-type': 'application/json' },
@@ -377,7 +378,7 @@ describe('InternalHttpSelfScopedClient', () => {
         }),
       })
     );
-    const serializedLog = JSON.stringify((log.warn as jest.Mock).mock.calls);
+    const serializedLog = JSON.stringify(log.warn.mock.calls);
     expect(serializedLog).not.toContain('secret-query');
     expect(serializedLog).not.toContain('raw-id');
     expect(serializedLog).not.toContain('nope');
@@ -385,7 +386,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('does not log outbound client-error statuses', async () => {
     const { log, self } = createClient();
-    (global.fetch as jest.Mock).mockResolvedValueOnce(
+    (global.fetch as Mock).mockResolvedValueOnce(
       new Response(JSON.stringify({ message: 'missing' }), {
         status: 404,
         headers: { 'content-type': 'application/json' },
@@ -401,7 +402,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('warns on a raw 5xx response without throwing', async () => {
     const { log, self } = createClient();
-    (global.fetch as jest.Mock).mockResolvedValueOnce(
+    (global.fetch as Mock).mockResolvedValueOnce(
       new Response(JSON.stringify({ message: 'nope' }), {
         status: 502,
         headers: { 'content-type': 'application/json' },
@@ -426,7 +427,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('does not treat a name-colliding error as a self-fetch error', async () => {
     const { log, self } = createClient();
-    (global.fetch as jest.Mock).mockRejectedValueOnce(
+    (global.fetch as Mock).mockRejectedValueOnce(
       Object.assign(new Error('boom'), { name: 'HttpSelfFetchError' })
     );
 
@@ -442,7 +443,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('keeps the HTTP status when the error body cannot be parsed', async () => {
     const { log, self } = createClient();
-    (global.fetch as jest.Mock).mockResolvedValueOnce(
+    (global.fetch as Mock).mockResolvedValueOnce(
       new Response('{not-json', {
         status: 502,
         headers: { 'content-type': 'application/json' },
@@ -470,7 +471,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createRequest({ basePath: '' })).fetch('/api/status');
 
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/api/status');
   });
 
@@ -479,7 +480,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createRequest()).fetch('/api/status');
 
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
   });
 
@@ -514,11 +515,11 @@ describe('InternalHttpSelfScopedClient', () => {
     const scoped = self.asScoped(createRequest());
 
     await scoped.fetch('/api/status');
-    let request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    let request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.headers.has(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe(false);
 
     await scoped.fetch('/internal/search', { access: 'internal' });
-    request = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    request = (global.fetch as Mock).mock.calls[1][0] as Request;
     expect(request.headers.get(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe('Kibana');
   });
 
@@ -534,7 +535,7 @@ describe('InternalHttpSelfScopedClient', () => {
   it('allows optional client authentication and public calls through a required-client-auth proxy', async () => {
     const optionalClientAuth = createClient({
       publicBaseUrl: null,
-      getHttpConfig: jest.fn().mockReturnValue({
+      getHttpConfig: vi.fn().mockReturnValue({
         ssl: { enabled: true, requestCert: true, rejectUnauthorized: false },
         selfHttp: { ssl: { verificationMode: 'full' } },
       } as HttpConfig),
@@ -542,20 +543,20 @@ describe('InternalHttpSelfScopedClient', () => {
     });
 
     await optionalClientAuth.self.asScoped(createFakeRequest()).fetch('/api/status');
-    expect((global.fetch as jest.Mock).mock.calls[0][0]).toHaveProperty(
+    expect((global.fetch as Mock).mock.calls[0][0]).toHaveProperty(
       'url',
       'https://localhost:5601/base/api/status'
     );
 
     const requiredClientAuth = createClient({
-      getHttpConfig: jest.fn().mockReturnValue({
+      getHttpConfig: vi.fn().mockReturnValue({
         ssl: { enabled: true, requestCert: true, rejectUnauthorized: true },
         selfHttp: { ssl: { verificationMode: 'full' } },
       } as HttpConfig),
     });
 
     await requiredClientAuth.self.asScoped(createFakeRequest()).fetch('/api/status');
-    expect((global.fetch as jest.Mock).mock.calls[1][0]).toHaveProperty(
+    expect((global.fetch as Mock).mock.calls[1][0]).toHaveProperty(
       'url',
       'https://kibana.example.com/base/api/status'
     );
@@ -563,7 +564,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('rejects local self calls when client authentication becomes required after reload', async () => {
     let clientAuthenticationRequired = false;
-    const getHttpConfig = jest.fn(
+    const getHttpConfig = vi.fn(
       () =>
         ({
           ssl: {
@@ -596,7 +597,7 @@ describe('InternalHttpSelfScopedClient', () => {
   });
 
   it('errors on a 3xx response when maxRedirects is 0', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce(
+    (global.fetch as Mock).mockResolvedValueOnce(
       new Response(null, { status: 302, headers: { location: '/api/next' } })
     );
     const { log, self } = createClient();
@@ -614,7 +615,7 @@ describe('InternalHttpSelfScopedClient', () => {
   });
 
   it('follows a same-origin redirect when maxRedirects allows it', async () => {
-    (global.fetch as jest.Mock)
+    (global.fetch as Mock)
       .mockResolvedValueOnce(
         new Response(null, { status: 302, headers: { location: '/api/next' } })
       )
@@ -625,7 +626,7 @@ describe('InternalHttpSelfScopedClient', () => {
         })
       );
     const { self } = createClient({
-      getHttpConfig: jest.fn().mockReturnValue({
+      getHttpConfig: vi.fn().mockReturnValue({
         ssl: { enabled: false, requestCert: false },
         selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
       } as HttpConfig),
@@ -635,7 +636,7 @@ describe('InternalHttpSelfScopedClient', () => {
       ok: true,
     });
     expect(global.fetch).toHaveBeenCalledTimes(2);
-    const secondRequest = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    const secondRequest = (global.fetch as Mock).mock.calls[1][0] as Request;
     expect(secondRequest.method).toBe('GET');
     expect(new URL(secondRequest.url).pathname).toBe('/api/next');
   });
@@ -645,10 +646,10 @@ describe('InternalHttpSelfScopedClient', () => {
       status: 302,
       headers: { location: 'http://[' },
     });
-    const cancel = jest.spyOn(response.body!, 'cancel');
-    (global.fetch as jest.Mock).mockResolvedValueOnce(response);
+    const cancel = vi.spyOn(response.body!, 'cancel');
+    (global.fetch as Mock).mockResolvedValueOnce(response);
     const { self } = createClient({
-      getHttpConfig: jest.fn().mockReturnValue({
+      getHttpConfig: vi.fn().mockReturnValue({
         ssl: { enabled: false, requestCert: false },
         selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
       } as HttpConfig),
@@ -664,14 +665,14 @@ describe('InternalHttpSelfScopedClient', () => {
   });
 
   it('refuses a cross-origin redirect even when maxRedirects allows hops', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce(
+    (global.fetch as Mock).mockResolvedValueOnce(
       new Response(null, {
         status: 302,
         headers: { location: 'https://evil.example/steal' },
       })
     );
     const { self } = createClient({
-      getHttpConfig: jest.fn().mockReturnValue({
+      getHttpConfig: vi.fn().mockReturnValue({
         ssl: { enabled: false, requestCert: false },
         selfHttp: { maxRedirects: 5, ssl: { verificationMode: 'full' } },
       } as HttpConfig),
@@ -684,7 +685,7 @@ describe('InternalHttpSelfScopedClient', () => {
   });
 
   it('converts POST plus 302 into a GET follow-up without a body', async () => {
-    (global.fetch as jest.Mock)
+    (global.fetch as Mock)
       .mockResolvedValueOnce(
         new Response(null, { status: 302, headers: { location: '/api/next' } })
       )
@@ -695,7 +696,7 @@ describe('InternalHttpSelfScopedClient', () => {
         })
       );
     const { self } = createClient({
-      getHttpConfig: jest.fn().mockReturnValue({
+      getHttpConfig: vi.fn().mockReturnValue({
         ssl: { enabled: false, requestCert: false },
         selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
       } as HttpConfig),
@@ -706,13 +707,13 @@ describe('InternalHttpSelfScopedClient', () => {
       body: { hello: 'world' },
     });
 
-    const secondRequest = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    const secondRequest = (global.fetch as Mock).mock.calls[1][0] as Request;
     expect(secondRequest.method).toBe('GET');
     expect(secondRequest.headers.get('content-type')).toBeNull();
   });
 
   it('returns the last-hop request when asResponse follows a redirect', async () => {
-    (global.fetch as jest.Mock)
+    (global.fetch as Mock)
       .mockResolvedValueOnce(
         new Response(null, { status: 302, headers: { location: '/api/next' } })
       )
@@ -723,7 +724,7 @@ describe('InternalHttpSelfScopedClient', () => {
         })
       );
     const { self } = createClient({
-      getHttpConfig: jest.fn().mockReturnValue({
+      getHttpConfig: vi.fn().mockReturnValue({
         ssl: { enabled: false, requestCert: false },
         selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
       } as HttpConfig),
@@ -741,7 +742,7 @@ describe('InternalHttpSelfScopedClient', () => {
   });
 
   it('preserves PUT on a 302 follow-up', async () => {
-    (global.fetch as jest.Mock)
+    (global.fetch as Mock)
       .mockResolvedValueOnce(
         new Response(null, { status: 302, headers: { location: '/api/next' } })
       )
@@ -752,7 +753,7 @@ describe('InternalHttpSelfScopedClient', () => {
         })
       );
     const { self } = createClient({
-      getHttpConfig: jest.fn().mockReturnValue({
+      getHttpConfig: vi.fn().mockReturnValue({
         ssl: { enabled: false, requestCert: false },
         selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
       } as HttpConfig),
@@ -763,13 +764,13 @@ describe('InternalHttpSelfScopedClient', () => {
       body: { hello: 'world' },
     });
 
-    const secondRequest = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    const secondRequest = (global.fetch as Mock).mock.calls[1][0] as Request;
     expect(secondRequest.method).toBe('PUT');
   });
 
   it('uses and reloads verified custom TLS trust for local and public HTTPS targets', async () => {
     let localCertificate = 'local server certificate';
-    const localConfig = jest.fn(
+    const localConfig = vi.fn(
       () =>
         ({
           ssl: { enabled: true, requestCert: false, certificate: localCertificate },
@@ -784,22 +785,22 @@ describe('InternalHttpSelfScopedClient', () => {
 
     const localScoped = local.self.asScoped(createFakeRequest());
     await localScoped.fetch('/api/status');
-    const firstLocalDispatcher = (global.fetch as jest.Mock).mock.calls[0][1].dispatcher;
+    const firstLocalDispatcher = (global.fetch as Mock).mock.calls[0][1].dispatcher;
     expect(firstLocalDispatcher).toBeDefined();
 
     localCertificate = 'reloaded local server certificate';
     await localScoped.fetch('/api/status');
-    expect((global.fetch as jest.Mock).mock.calls[1][1].dispatcher).not.toBe(firstLocalDispatcher);
+    expect((global.fetch as Mock).mock.calls[1][1].dispatcher).not.toBe(firstLocalDispatcher);
     await local.self.close();
 
-    const publicConfig = jest.fn().mockReturnValue({
+    const publicConfig = vi.fn().mockReturnValue({
       ssl: { enabled: true, requestCert: false },
       selfHttp: { ssl: { verificationMode: 'full', certificateAuthorities: ['public CA'] } },
     } as HttpConfig);
     const publicTarget = createClient({ getHttpConfig: publicConfig });
 
     await publicTarget.self.asScoped(createFakeRequest()).fetch('/api/status');
-    expect((global.fetch as jest.Mock).mock.calls[2][1].dispatcher).toBeDefined();
+    expect((global.fetch as Mock).mock.calls[2][1].dispatcher).toBeDefined();
     await publicTarget.self.close();
   });
 
@@ -825,7 +826,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(request).fetch('/api/status');
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.get('authorization')).toBe('ApiKey fake-request-api-key');
     expect(outboundRequest.headers.get('cookie')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBeNull();
@@ -839,7 +840,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(request).fetch('/api/status', { forwardRequestHeaders: true });
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.has('authorization')).toBe(false);
   });
 
@@ -851,7 +852,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(request).fetch('/api/status');
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.get('authorization')).toBe('ApiKey essu_credential_123');
   });
 
@@ -860,7 +861,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createFakeRequest()).fetch('/api/status');
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.url).toBe('https://kibana.example.com/base/api/status');
   });
 
@@ -869,7 +870,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createFakeRequest({}, 'marketing')).fetch('/api/status');
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.url).toBe('https://kibana.example.com/base/s/marketing/api/status');
   });
 
@@ -880,7 +881,7 @@ describe('InternalHttpSelfScopedClient', () => {
       .asScoped(createFakeRequest({}, 'marketing'))
       .fetch('/base/api/status', { prependBasePath: false });
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.url).toBe('https://kibana.example.com/base/api/status');
   });
 
@@ -903,7 +904,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(request).fetch('/api/status', { forwardRequestHeaders: true });
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.get('accept')).toBe('application/json');
     expect(outboundRequest.headers.get('origin')).toBe('https://origin.example');
     expect(outboundRequest.headers.get('referer')).toBe('https://origin.example/app/home');
@@ -919,42 +920,42 @@ describe('InternalHttpSelfScopedClient', () => {
 
   describe('UIAM attestation getter', () => {
     it('sets the attestation header from the string the getter returns', async () => {
-      const getter = jest.fn().mockReturnValue('sig-123');
+      const getter = vi.fn().mockReturnValue('sig-123');
       const { self } = createClient({ getUiamAttestationGetter: () => getter });
       const request = createRequest();
 
       await self.asScoped(request).fetch('/api/status');
 
-      const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
       expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBe('sig-123');
       expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
       expect(getter).toHaveBeenCalledWith(request, 'test-auth-token');
     });
 
     it('leaves headers unchanged when the getter returns nothing', async () => {
-      const getter = jest.fn().mockReturnValue(undefined);
+      const getter = vi.fn().mockReturnValue(undefined);
       const { self } = createClient({ getUiamAttestationGetter: () => getter });
 
       await self.asScoped(createRequest()).fetch('/api/status');
 
       expect(getter).toHaveBeenCalledTimes(1);
-      const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
       expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
       expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
       expect(outboundRequest.headers.get('authorization')).toBe('test-auth-token');
     });
 
     it('does not set the attestation header when no getter is available', async () => {
-      const getUiamAttestationGetter = jest.fn().mockReturnValue(undefined);
+      const getUiamAttestationGetter = vi.fn().mockReturnValue(undefined);
       const withGetter = createClient({ getUiamAttestationGetter });
       await withGetter.self.asScoped(createRequest()).fetch('/api/status');
       expect(getUiamAttestationGetter).toHaveBeenCalledTimes(1);
-      const requestWithGetter = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      const requestWithGetter = (global.fetch as Mock).mock.calls[0][0] as Request;
       expect(requestWithGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
 
       const withoutGetter = createClient();
       await withoutGetter.self.asScoped(createRequest()).fetch('/api/status');
-      const requestWithoutGetter = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+      const requestWithoutGetter = (global.fetch as Mock).mock.calls[1][0] as Request;
       expect(requestWithoutGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
     });
   });
@@ -1056,7 +1057,7 @@ describe('InternalHttpSelfScopedClient', () => {
         },
         getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
         getUiamAttestationGetter: () => () => 'attestation',
-        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+        unauthorizedErrorHandler: vi.fn(async (options, toolkit) =>
           toolkit.retry({ authHeaders: { authorization: 'Bearer essu_refreshed' } })
         ),
       });
@@ -1078,7 +1079,7 @@ describe('InternalHttpSelfScopedClient', () => {
     describe('together with the attestation getter', () => {
       const createWiredClient = (
         clientAuthentication: string | string[],
-        getAttestation: SelfClientUiamAttestationGetter = jest.fn().mockReturnValue('attestation')
+        getAttestation: SelfClientUiamAttestationGetter = vi.fn().mockReturnValue('attestation')
       ) => {
         const { self } = createClient({
           authHeaders: {
@@ -1145,10 +1146,7 @@ describe('InternalHttpSelfScopedClient', () => {
       });
 
       it('does not attest when the getter declines the credential', async () => {
-        const { self } = createWiredClient(
-          'kibana-own-secret',
-          jest.fn().mockReturnValue(undefined)
-        );
+        const { self } = createWiredClient('kibana-own-secret', vi.fn().mockReturnValue(undefined));
 
         await self.asScoped(createRequest()).fetch('/api/status');
 
@@ -1160,7 +1158,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   describe('401 retry', () => {
     const retryHandler = (authHeaders: Record<string, string>): HttpSelfUnauthorizedErrorHandler =>
-      jest.fn(async (options, toolkit) => toolkit.retry({ authHeaders }));
+      vi.fn(async (options, toolkit) => toolkit.retry({ authHeaders }));
 
     // Stands in for the Security-provided getter, binding the attestation to whichever credential
     // the client is about to send so a retry can be told apart from the first attempt.
@@ -1190,7 +1188,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     it('re-resolves the dispatcher for the credential-refresh retry', async () => {
       mockFetchResponses(unauthorizedResponse(), okResponse());
-      const getSpy = jest.spyOn(SelfHttpDispatcherProvider.prototype, 'get');
+      const getSpy = vi.spyOn(SelfHttpDispatcherProvider.prototype, 'get');
       const { self } = createClient({
         unauthorizedErrorHandler: retryHandler({ authorization: 'Bearer essu_refreshed' }),
       });
@@ -1227,7 +1225,7 @@ describe('InternalHttpSelfScopedClient', () => {
       mockFetchResponses(unauthorizedResponse(), okResponse());
       const { log, self } = createClient({
         getUiamAttestationGetter: () => attestationGetter,
-        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+        unauthorizedErrorHandler: vi.fn(async (options, toolkit) =>
           toolkit.retry({
             authHeaders: {
               authorization: 'Bearer essu_refreshed',
@@ -1307,7 +1305,7 @@ describe('InternalHttpSelfScopedClient', () => {
     it('surfaces the original 401 when the handler does not handle it', async () => {
       mockFetchResponses(unauthorizedResponse());
       const { self } = createClient({
-        unauthorizedErrorHandler: jest.fn(async (options, toolkit) => toolkit.notHandled()),
+        unauthorizedErrorHandler: vi.fn(async (options, toolkit) => toolkit.notHandled()),
       });
 
       await expect(
@@ -1335,7 +1333,7 @@ describe('InternalHttpSelfScopedClient', () => {
     it('warns and does not replay when the handler throws', async () => {
       mockFetchResponses(unauthorizedResponse());
       const { log, self } = createClient({
-        unauthorizedErrorHandler: jest.fn(async () => {
+        unauthorizedErrorHandler: vi.fn(async () => {
           throw new Error('mint exploded');
         }),
       });
@@ -1403,7 +1401,7 @@ describe('InternalHttpSelfScopedClient', () => {
     });
 
     it('cancels the discarded 401 body and returns the replayed raw response', async () => {
-      const cancel = jest.fn().mockResolvedValue(undefined);
+      const cancel = vi.fn().mockResolvedValue(undefined);
       const firstResponse = unauthorizedResponse();
       Object.defineProperty(firstResponse, 'body', { value: { cancel } });
       mockFetchResponses(firstResponse, okResponse());
@@ -1456,13 +1454,13 @@ describe('InternalHttpSelfScopedClient', () => {
       });
 
       it('stops waiting on the refresh when the caller aborts', async () => {
-        const cancel = jest.fn().mockResolvedValue(undefined);
+        const cancel = vi.fn().mockResolvedValue(undefined);
         const firstResponse = unauthorizedResponse();
         Object.defineProperty(firstResponse, 'body', { value: { cancel } });
         mockFetchResponses(firstResponse, okResponse());
         const neverSettles = new Promise<never>(() => {});
         const { self } = createClient({
-          unauthorizedErrorHandler: jest.fn(() => neverSettles),
+          unauthorizedErrorHandler: vi.fn(() => neverSettles),
         });
         const controller = new AbortController();
 
@@ -1477,11 +1475,11 @@ describe('InternalHttpSelfScopedClient', () => {
       });
 
       it('stops waiting on the refresh when the call times out', async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         try {
           mockFetchResponses(unauthorizedResponse(), okResponse());
           const { self } = createClient({
-            unauthorizedErrorHandler: jest.fn(() => new Promise<never>(() => {})),
+            unauthorizedErrorHandler: vi.fn(() => new Promise<never>(() => {})),
           });
           const startedAt = Date.now();
 
@@ -1490,13 +1488,13 @@ describe('InternalHttpSelfScopedClient', () => {
             .fetch('/api/status', { timeout: 1_000 });
           const assertion = expect(pending).rejects.toThrow();
 
-          await jest.advanceTimersByTimeAsync(1_000);
+          await vi.advanceTimersByTimeAsync(1_000);
           await assertion;
           // The whole call, both attempts included, stayed inside the caller's budget.
           expect(Date.now()).toBeLessThanOrEqual(1_000 + startedAt);
           expect(global.fetch).toHaveBeenCalledTimes(1);
         } finally {
-          jest.useRealTimers();
+          vi.useRealTimers();
         }
       });
 
@@ -1508,7 +1506,7 @@ describe('InternalHttpSelfScopedClient', () => {
           releaseMint = resolve;
         });
         const { self } = createClient({
-          unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+          unauthorizedErrorHandler: vi.fn(async (options, toolkit) =>
             toolkit.retry({ authHeaders: await mint })
           ),
         });
@@ -1536,7 +1534,7 @@ describe('InternalHttpSelfScopedClient', () => {
           settle = resolve;
         });
         const { self } = createClient({
-          unauthorizedErrorHandler: jest.fn(async (options, toolkit) => {
+          unauthorizedErrorHandler: vi.fn(async (options, toolkit) => {
             await late;
             return toolkit.retry({ authHeaders: { authorization: 'Bearer essu_refreshed' } });
           }),
@@ -1561,7 +1559,7 @@ describe('InternalHttpSelfScopedClient', () => {
         const late = new Promise<never>((_resolve, reject) => {
           fail = reject;
         });
-        const { log, self } = createClient({ unauthorizedErrorHandler: jest.fn(() => late) });
+        const { log, self } = createClient({ unauthorizedErrorHandler: vi.fn(() => late) });
         const controller = new AbortController();
 
         const pending = self
@@ -1581,13 +1579,9 @@ describe('InternalHttpSelfScopedClient', () => {
 
   describe('credential refresher', () => {
     const replacing = (authHeaders: Record<string, string>) =>
-      jest.fn<ReturnType<HttpSelfCredentialRefresher>, Parameters<HttpSelfCredentialRefresher>>(
-        (options, toolkit) => toolkit.replace({ authHeaders })
-      );
+      vi.fn<HttpSelfCredentialRefresher>((options, toolkit) => toolkit.replace({ authHeaders }));
     const notHandling = () =>
-      jest.fn<ReturnType<HttpSelfCredentialRefresher>, Parameters<HttpSelfCredentialRefresher>>(
-        (options, toolkit) => toolkit.notHandled()
-      );
+      vi.fn<HttpSelfCredentialRefresher>((options, toolkit) => toolkit.notHandled());
 
     const attestationGetter = (_request: KibanaRequest, outboundAuthorization: string | null) =>
       outboundAuthorization
@@ -1640,7 +1634,7 @@ describe('InternalHttpSelfScopedClient', () => {
       mockFetchResponses(okResponse());
       const request = createFakeRequest({ authorization: 'Bearer essu_before' });
       const { self } = createClient({
-        credentialRefresher: jest.fn((options, toolkit) => {
+        credentialRefresher: vi.fn((options, toolkit) => {
           // Stands in for a registry that replaces the shared header while the refresher waits.
           (options.request.headers as Record<string, string>).authorization = 'Bearer essu_after';
           return toolkit.notHandled();
@@ -1656,7 +1650,7 @@ describe('InternalHttpSelfScopedClient', () => {
       mockFetchResponses(okResponse());
       const request = createFakeRequest({ authorization: 'Bearer essu_released' });
       const { self } = createClient({
-        credentialRefresher: jest.fn((options, toolkit) => {
+        credentialRefresher: vi.fn((options, toolkit) => {
           delete (options.request.headers as Record<string, string>).authorization;
           return toolkit.notHandled();
         }),
@@ -1685,7 +1679,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     it('builds the outbound request once, after the refresher', async () => {
       mockFetchResponses(okResponse());
-      const getAttestation = jest.fn(attestationGetter);
+      const getAttestation = vi.fn(attestationGetter);
       const { self } = createClient({
         credentialRefresher: notHandling(),
         getUiamAttestationGetter: () => getAttestation,
@@ -1738,7 +1732,7 @@ describe('InternalHttpSelfScopedClient', () => {
         code: 'CREDENTIAL_REFUSED',
       });
       const { self } = createClient({
-        credentialRefresher: jest.fn((options, toolkit) => toolkit.reject({ error: refusal })),
+        credentialRefresher: vi.fn((options, toolkit) => toolkit.reject({ error: refusal })),
       });
 
       const error = await self
@@ -1756,7 +1750,7 @@ describe('InternalHttpSelfScopedClient', () => {
     it('treats a refresher that throws as broken and sends the call unchanged', async () => {
       mockFetchResponses(okResponse());
       const { log, self } = createClient({
-        credentialRefresher: jest.fn(async () => {
+        credentialRefresher: vi.fn(async () => {
           throw new Error('mint exploded');
         }),
       });
@@ -1777,7 +1771,7 @@ describe('InternalHttpSelfScopedClient', () => {
       mockFetchResponses(unauthorizedResponse(), okResponse());
       const { self } = createClient({
         credentialRefresher: replacing({ authorization: 'Bearer essu_refreshed' }),
-        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+        unauthorizedErrorHandler: vi.fn(async (options, toolkit) =>
           toolkit.retry({ authHeaders: { authorization: 'Bearer essu_reminted' } })
         ),
       });
@@ -1795,7 +1789,7 @@ describe('InternalHttpSelfScopedClient', () => {
       mockFetchResponses(unauthorizedResponse(), okResponse());
       const { self } = createClient({
         credentialRefresher: replacing({ authorization: 'Bearer essu_refreshed' }),
-        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+        unauthorizedErrorHandler: vi.fn(async (options, toolkit) =>
           toolkit.retry({ authHeaders: { authorization: 'Bearer essu_refreshed' } })
         ),
       });
@@ -1812,7 +1806,7 @@ describe('InternalHttpSelfScopedClient', () => {
     it('stops waiting on the refresher when the caller aborts', async () => {
       mockFetchResponses(okResponse());
       const { self } = createClient({
-        credentialRefresher: jest.fn(() => new Promise<never>(() => {})),
+        credentialRefresher: vi.fn(() => new Promise<never>(() => {})),
       });
       const controller = new AbortController();
 

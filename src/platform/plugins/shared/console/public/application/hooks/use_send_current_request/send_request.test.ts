@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import type { ContextValue } from '../../contexts';
 
-jest.mock('./send_request', () => ({ sendRequest: jest.fn(() => Promise.resolve()) }));
+vi.mock('./send_request', () => {
+  const mockedModule = { sendRequest: vi.fn(() => Promise.resolve()) };
+  return { ...mockedModule, default: mockedModule };
+});
 
 import { sendRequest } from './send_request';
 import { serviceContextMock } from '../../contexts/services_context.mock';
 
-const mockedSendRequest = sendRequest as jest.Mock;
+const mockedSendRequest = sendRequest as Mock;
 
 describe('sendRequest', () => {
   let mockContextValue: ContextValue;
@@ -24,7 +28,7 @@ describe('sendRequest', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should send request', async () => {

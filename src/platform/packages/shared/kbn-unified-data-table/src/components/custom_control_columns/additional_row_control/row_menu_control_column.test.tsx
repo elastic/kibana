@@ -22,10 +22,10 @@ describe('getRowMenuControlColumn', () => {
   };
 
   it('should render the component', async () => {
-    const mockClick = jest.fn();
+    const mockClick = vi.fn();
     const props = {
       id: 'test_row_menu_control',
-      render: jest.fn((Control, rowProps) => (
+      render: vi.fn((Control, rowProps) => (
         <Control
           label={`test-${rowProps.rowIndex}`}
           tooltipContent={`test-${rowProps.rowIndex}`}
@@ -45,7 +45,7 @@ describe('getRowMenuControlColumn', () => {
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowMenuControlColumn
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
           columnId={props.id}
           colIndex={0}
           isDetails={false}

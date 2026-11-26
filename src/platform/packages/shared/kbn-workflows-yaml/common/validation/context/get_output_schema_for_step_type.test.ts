@@ -19,7 +19,7 @@ describe('getOutputSchemaForStepType', () => {
   let registry: WorkflowContextRegistry;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConnectorsMap = new Map();
     mockStepOutput = undefined;
     registry = createMockWorkflowContextRegistry({
@@ -321,7 +321,7 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepOutput = {
         outputSchema: { def: { type: 'unknown' } } as any,
-        getDynamicOutputSchema: jest.fn().mockReturnValue(mockDynamicSchema),
+        getDynamicOutputSchema: vi.fn().mockReturnValue(mockDynamicSchema),
       };
 
       const mockNode = {
@@ -359,7 +359,7 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepOutput = {
         outputSchema: mockStaticSchema,
-        getDynamicOutputSchema: jest.fn().mockImplementation(() => {
+        getDynamicOutputSchema: vi.fn().mockImplementation(() => {
           throw new Error('Dynamic schema generation failed');
         }),
       };

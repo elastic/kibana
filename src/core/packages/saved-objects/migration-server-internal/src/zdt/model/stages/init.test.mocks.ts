@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getCurrentIndexMock = jest.fn();
-export const checkVersionCompatibilityMock = jest.fn();
-export const buildIndexMappingsMock = jest.fn();
-export const generateAdditiveMappingDiffMock = jest.fn();
-export const getAliasActionsMock = jest.fn();
-export const checkIndexCurrentAlgorithmMock = jest.fn();
+import type { Mock } from 'vitest';
+export const getCurrentIndexMock: Mock = vi.fn();
+export const checkVersionCompatibilityMock: Mock = vi.fn();
+export const buildIndexMappingsMock: Mock = vi.fn();
+export const generateAdditiveMappingDiffMock: Mock = vi.fn();
+export const getAliasActionsMock: Mock = vi.fn();
+export const checkIndexCurrentAlgorithmMock: Mock = vi.fn();
 
-export const getCreationAliasesMock = jest.fn();
+export const getCreationAliasesMock: Mock = vi.fn();
 
-jest.doMock('../../utils', () => {
-  const realModule = jest.requireActual('../../utils');
-  return {
+vi.doMock('../../utils', async () => {
+  const realModule = await vi.importActual('../../utils');
+  const mockedModule = {
     ...realModule,
     getCurrentIndex: getCurrentIndexMock,
     checkVersionCompatibility: checkVersionCompatibilityMock,
@@ -28,14 +29,16 @@ jest.doMock('../../utils', () => {
     checkIndexCurrentAlgorithm: checkIndexCurrentAlgorithmMock,
     getCreationAliases: getCreationAliasesMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-export const getAliasesMock = jest.fn();
+export const getAliasesMock: Mock = vi.fn();
 
-jest.doMock('../../../model/helpers', () => {
-  const realModule = jest.requireActual('../../../model/helpers');
-  return {
+vi.doMock('../../../model/helpers', async () => {
+  const realModule = await vi.importActual('../../../model/helpers');
+  const mockedModule = {
     ...realModule,
     getAliases: getAliasesMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });

@@ -27,7 +27,7 @@ describe('PalettePicker', function () {
         type: 'palette',
         name: 'kibana_palette',
       },
-      setPalette: jest.fn(),
+      setPalette: vi.fn(),
     };
   });
 

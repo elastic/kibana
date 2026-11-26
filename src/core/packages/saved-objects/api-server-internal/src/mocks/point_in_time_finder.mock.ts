@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, Mocked } from 'vitest';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsClientContract,
@@ -22,11 +23,11 @@ const createPointInTimeFinderMock = ({
   savedObjectsMock,
 }: {
   logger?: MockedLogger;
-  savedObjectsMock: jest.Mocked<
+  savedObjectsMock: Mocked<
     ISavedObjectsRepository | SavedObjectsClientContract | SavedObjectsPointInTimeFinderClient
   >;
-}): jest.Mock => {
-  const mock = jest.fn();
+}): Mock => {
+  const mock = vi.fn();
 
   // To simplify testing, we use the actual implementation here, but pass through the
   // mocked dependencies. This allows users to set their own `mockResolvedValue` on
@@ -37,8 +38,8 @@ const createPointInTimeFinderMock = ({
       client: savedObjectsMock,
     });
 
-    jest.spyOn(finder, 'find');
-    jest.spyOn(finder, 'close');
+    vi.spyOn(finder, 'find');
+    vi.spyOn(finder, 'close');
 
     return finder;
   });
@@ -46,11 +47,11 @@ const createPointInTimeFinderMock = ({
   return mock;
 };
 
-const createPointInTimeFinderClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
+const createPointInTimeFinderClientMock = (): Mocked<SavedObjectsPointInTimeFinderClient> => {
   return {
-    find: jest.fn(),
-    openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
-    closePointInTime: jest.fn(),
+    find: vi.fn() as Mock,
+    openPointInTimeForType: vi.fn().mockResolvedValue({ id: 'some_pit_id' }),
+    closePointInTime: vi.fn(),
   };
 };
 

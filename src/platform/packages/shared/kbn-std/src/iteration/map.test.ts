@@ -11,21 +11,24 @@ import * as Rx from 'rxjs';
 import { mapTo } from 'rxjs';
 
 import { asyncMap, asyncMapWithLimit } from './map';
+import { mapWithLimit$ } from './observable';
 import { list } from './test_helpers';
 
-jest.mock('./observable');
-const mapWithLimit$: jest.Mock = jest.requireMock('./observable').mapWithLimit$;
-mapWithLimit$.mockImplementation(jest.requireActual('./observable').mapWithLimit$);
+vi.mock('./observable');
+const { mapWithLimit$: actualMapWithLimit$ } = await vi.importActual<{
+  mapWithLimit$: typeof mapWithLimit$;
+}>('./observable');
+vi.mocked(mapWithLimit$).mockImplementation(actualMapWithLimit$);
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('asyncMapWithLimit', () => {
   it('calls mapWithLimit$ and resolves with properly sorted results', async () => {
     const iter = list(10);
     const limit = 5;
-    const fn = jest.fn((n) => (n % 2 ? Rx.timer(n) : Rx.timer(n * 4)).pipe(mapTo(n)));
+    const fn = vi.fn((n) => (n % 2 ? Rx.timer(n) : Rx.timer(n * 4)).pipe(mapTo(n)));
     const result = await asyncMapWithLimit(iter, limit, fn);
 
     expect(result).toMatchInlineSnapshot(`
@@ -51,7 +54,7 @@ describe('asyncMapWithLimit', () => {
     [list(0), []] as const,
     [list(1), ['foo']] as const,
     [list(2), ['foo', 'foo']] as const,
-  ])('resolves when iterator is %p', async (input, output) => {
+  ])('resolves when iterator is %o', async (input, output) => {
     await expect(asyncMapWithLimit(input, 100, async () => 'foo')).resolves.toEqual(output);
   });
 });
@@ -59,7 +62,7 @@ describe('asyncMapWithLimit', () => {
 describe('asyncMap', () => {
   it('calls mapWithLimit$ without limit and resolves with undefined when it completes', async () => {
     const iter = list(10);
-    const fn = jest.fn((n) => (n % 2 ? Rx.timer(n) : Rx.timer(n * 4)).pipe(mapTo(n)));
+    const fn = vi.fn((n) => (n % 2 ? Rx.timer(n) : Rx.timer(n * 4)).pipe(mapTo(n)));
     const result = await asyncMap(iter, fn);
 
     expect(result).toMatchInlineSnapshot(`

@@ -23,7 +23,7 @@ const createDeprecationsContext = (
 } => {
   const savedObjectsClient = savedObjectsClientMock.create();
   savedObjectsClient.createPointInTimeFinder.mockReturnValue({
-    close: jest.fn(),
+    close: vi.fn(),
     find: async function* find() {
       yield { saved_objects: savedObjects } as SavedObjectsFindResponse;
     },

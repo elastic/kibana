@@ -32,7 +32,7 @@ const commonProps = {
 
 describe('UnifiedFieldList <FieldItemButton />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders properly', async () => {
@@ -45,7 +45,7 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
   });
 
   it('should call onClick when clicked', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     await act(async () => {
       renderWithKibanaRenderContext(<FieldItemButton {...commonProps} onClick={onClick} />);
     });
@@ -57,7 +57,7 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
   });
 
   it('should render with add to workspace button when onAddFieldToWorkspace is provided', async () => {
-    const onAddFieldToWorkspace = jest.fn();
+    const onAddFieldToWorkspace = vi.fn();
 
     await act(async () =>
       renderWithKibanaRenderContext(
@@ -73,7 +73,7 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
   });
 
   it('should render with remove from workspace button when onRemoveFieldFromWorkspace is provided and isSelected is true', async () => {
-    const onRemoveFieldFromWorkspace = jest.fn();
+    const onRemoveFieldFromWorkspace = vi.fn();
 
     await act(async () =>
       renderWithKibanaRenderContext(

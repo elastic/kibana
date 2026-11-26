@@ -19,8 +19,8 @@ describe('ExtendedBoundsParamEditor', () => {
 
   beforeEach(() => {
     defaultProps = {
-      setValue: jest.fn(),
-      setValidity: jest.fn(),
+      setValue: vi.fn(),
+      setValidity: vi.fn(),
     };
   });
 

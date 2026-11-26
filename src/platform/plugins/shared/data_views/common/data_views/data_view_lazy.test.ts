@@ -68,7 +68,7 @@ function create(id: string, spec?: DataViewSpec) {
     shortDotsEnable: false,
     metaFields: [],
     apiClient: {
-      getFieldsForWildcard: jest
+      getFieldsForWildcard: vi
         .fn()
         .mockImplementation(() => Promise.resolve({ fields: fieldCapsResponse })),
     } as any,
@@ -599,7 +599,7 @@ describe('DataViewLazy', () => {
         shortDotsEnable: false,
         metaFields: [],
         apiClient: {
-          getFieldsForWildcard: jest
+          getFieldsForWildcard: vi
             .fn()
             .mockImplementation(() => Promise.resolve({ fields: fieldCapsResponse })),
         } as any,

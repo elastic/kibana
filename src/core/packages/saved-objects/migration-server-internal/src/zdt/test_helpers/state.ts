@@ -29,7 +29,7 @@ export const createPostDocInitState = (): PostDocInitState => ({
   excludeOnUpgradeQuery: { bool: {} },
   excludeFromUpgradeFilterHooks: {},
   outdatedDocumentsQuery: { bool: {} },
-  transformRawDocs: jest.fn(),
+  transformRawDocs: vi.fn(),
 });
 
 export const createOutdatedDocumentSearchState = (): OutdatedDocumentsSearchState => ({

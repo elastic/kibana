@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
+import type { Mocked } from 'vitest';
 import {
   pointInTimeFinderMock,
   mockGetCurrentTime,
@@ -60,8 +61,8 @@ describe('#create', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let serializer: Mocked<SavedObjectsSerializer>;
+  let securityExtension: Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
 
@@ -83,8 +84,8 @@ describe('#create', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
     securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
@@ -285,9 +286,11 @@ describe('#create', () => {
             await expect(
               repository.create(objType, attributes, { originId: 'some-originId' })
             ).rejects.toThrow(
-              createBadRequestErrorPayload(
-                '"originId" can only be set for multi-namespace object types'
-              )
+              expect.objectContaining({
+                message: createBadRequestErrorPayload(
+                  '"originId" can only be set for multi-namespace object types'
+                ).message,
+              })
             );
           });
         }
@@ -597,7 +600,11 @@ describe('#create', () => {
             initialNamespaces: [namespace],
           })
         ).rejects.toThrow(
-          createBadRequestErrorPayload('"initialNamespaces" cannot be used on space-agnostic types')
+          expect.objectContaining({
+            message: createBadRequestErrorPayload(
+              '"initialNamespaces" cannot be used on space-agnostic types'
+            ).message,
+          })
         );
       });
 
@@ -605,7 +612,11 @@ describe('#create', () => {
         await expect(
           repository.create(MULTI_NAMESPACE_TYPE, attributes, { initialNamespaces: [] })
         ).rejects.toThrow(
-          createBadRequestErrorPayload('"initialNamespaces" must be a non-empty array of strings')
+          expect.objectContaining({
+            message: createBadRequestErrorPayload(
+              '"initialNamespaces" must be a non-empty array of strings'
+            ).message,
+          })
         );
       });
 
@@ -614,9 +625,11 @@ describe('#create', () => {
           await expect(
             repository.create(objType, attributes, { initialNamespaces })
           ).rejects.toThrow(
-            createBadRequestErrorPayload(
-              '"initialNamespaces" can only specify a single space when used with space-isolated types'
-            )
+            expect.objectContaining({
+              message: createBadRequestErrorPayload(
+                '"initialNamespaces" can only specify a single space when used with space-isolated types'
+              ).message,
+            })
           );
         };
         await doTest('dashboard', ['spacex', 'spacey']);
@@ -628,19 +641,27 @@ describe('#create', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.create(type, attributes, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createBadRequestErrorPayload('"options.namespace" cannot be "*"').message,
+          })
+        );
       });
 
       it(`throws when type is invalid`, async () => {
         await expect(repository.create('unknownType', attributes)).rejects.toThrow(
-          createUnsupportedTypeErrorPayload('unknownType')
+          expect.objectContaining({
+            message: createUnsupportedTypeErrorPayload('unknownType').message,
+          })
         );
         expect(client.create).not.toHaveBeenCalled();
       });
 
       it(`throws when type is hidden`, async () => {
         await expect(repository.create(HIDDEN_TYPE, attributes)).rejects.toThrow(
-          createUnsupportedTypeErrorPayload(HIDDEN_TYPE)
+          expect.objectContaining({
+            message: createUnsupportedTypeErrorPayload(HIDDEN_TYPE).message,
+          })
         );
         expect(client.create).not.toHaveBeenCalled();
       });
@@ -649,7 +670,7 @@ describe('#create', () => {
         await expect(
           repository.create('dashboard', { title: 123 })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"[attributes.title]: expected value of type [string] but got [number]: Bad Request"`
+          `[Error: [attributes.title]: expected value of type [string] but got [number]: Bad Request]`
         );
         expect(client.create).not.toHaveBeenCalled();
       });
@@ -664,7 +685,11 @@ describe('#create', () => {
             overwrite: true,
             namespace,
           })
-        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id).message,
+          })
+        );
         expect(mockPreflightCheckForCreate).toHaveBeenCalled();
       });
 
@@ -866,9 +891,11 @@ describe('#create', () => {
             },
           })
         ).rejects.toThrow(
-          createBadRequestErrorPayload(
-            `Cannot create a saved object of type multiNamespaceType with an access mode because the type does not support access control`
-          )
+          expect.objectContaining({
+            message: createBadRequestErrorPayload(
+              `Cannot create a saved object of type multiNamespaceType with an access mode because the type does not support access control`
+            ).message,
+          })
         );
         expect(client.create).not.toHaveBeenCalled();
       });
@@ -919,9 +946,11 @@ describe('#create', () => {
             },
           })
         ).rejects.toThrow(
-          createBadRequestErrorPayload(
-            `Cannot create a saved object of type accessControlType with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
-          )
+          expect.objectContaining({
+            message: createBadRequestErrorPayload(
+              `Cannot create a saved object of type accessControlType with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
+            ).message,
+          })
         );
         expect(client.create).not.toHaveBeenCalled();
       });

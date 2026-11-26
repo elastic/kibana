@@ -39,7 +39,7 @@ const runtimeField = {
   type: 'string',
 };
 
-fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter());
+fieldFormatsMock.getInstance = vi.fn().mockImplementation(() => new MockFieldFormatter());
 
 // helper function to create index patterns
 function create(id: string, spec?: DataViewSpec) {

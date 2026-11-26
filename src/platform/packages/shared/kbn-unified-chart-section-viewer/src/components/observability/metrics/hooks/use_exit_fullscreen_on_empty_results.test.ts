@@ -14,7 +14,7 @@ import {
 } from './use_exit_fullscreen_on_empty_results';
 
 describe('useExitFullscreenOnEmptyResults', () => {
-  const onExitFullscreen = jest.fn();
+  const onExitFullscreen = vi.fn();
 
   const defaultParams: UseExitFullscreenOnEmptyResultsParams = {
     isFullscreen: true,
@@ -31,7 +31,7 @@ describe('useExitFullscreenOnEmptyResults', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('exits fullscreen when a settled fetch returns no metrics', () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
 import buffer from 'buffer';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
@@ -32,28 +33,31 @@ const SOME_MIGRATION_RESULT: MigrationResult = {
   status: 'migrated',
 };
 
-jest.mock('./migrations_state_action_machine', () => {
-  const actual = jest.requireActual('./migrations_state_action_machine');
-  return {
+vi.mock('./migrations_state_action_machine', async () => {
+  const actual = await vi.importActual('./migrations_state_action_machine');
+  const mockedModule = {
     ...actual,
-    migrationStateActionMachine: jest.fn(() => Promise.resolve(SOME_MIGRATION_RESULT)),
+    migrationStateActionMachine: vi.fn(() => Promise.resolve(SOME_MIGRATION_RESULT)),
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-jest.mock('./initial_state', () => {
-  const actual = jest.requireActual('./initial_state');
-  return {
+vi.mock('./initial_state', async () => {
+  const actual = await vi.importActual<typeof import('./initial_state')>('./initial_state');
+  const mockedModule = {
     ...actual,
-    createInitialState: jest.fn(actual.createInitialState),
+    createInitialState: vi.fn(actual.createInitialState),
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-jest.mock('./next', () => {
-  const actual = jest.requireActual('./next');
-  return {
+vi.mock('./next', async () => {
+  const actual = await vi.importActual<typeof import('./next')>('./next');
+  const mockedModule = {
     ...actual,
-    next: jest.fn(actual.next),
+    next: vi.fn(actual.next),
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 describe('runResilientMigrator', () => {
@@ -86,11 +90,11 @@ describe('runResilientMigrator', () => {
     });
 
     // store the created initial state
-    initialState = (createInitialState as jest.MockedFunction<typeof createInitialState>).mock
-      .results[0].value;
+    initialState = (createInitialState as MockedFunction<typeof createInitialState>).mock.results[0]
+      .value;
 
     // store the generated "next" function
-    nextFunc = (next as jest.MockedFunction<typeof next>).mock.results[0].value;
+    nextFunc = (next as MockedFunction<typeof next>).mock.results[0].value;
   });
 
   it('calls migrationStateMachine with the right params', () => {
@@ -112,7 +116,7 @@ describe('runResilientMigrator', () => {
 const mockOptions = (): RunResilientMigratorParams => {
   const logger = loggingSystemMock.create().get();
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
-  (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
+  (mockedClient as any).child = vi.fn().mockImplementation(() => mockedClient);
 
   return {
     client: mockedClient,
@@ -133,7 +137,7 @@ const mockOptions = (): RunResilientMigratorParams => {
       },
     },
     logger,
-    transformRawDocs: jest.fn(),
+    transformRawDocs: vi.fn(),
     migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
     coreMigrationVersionPerType: {},
     indexPrefix: '.my_index',

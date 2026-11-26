@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
+import type { Mocked } from 'vitest';
 import {
   pointInTimeFinderMock,
   mockGetBulkOperationError,
@@ -72,8 +73,8 @@ describe('#bulkUpdate', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let serializer: Mocked<SavedObjectsSerializer>;
+  let securityExtension: Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const updateSchema = schema.object(
@@ -111,8 +112,8 @@ describe('#bulkUpdate', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
     securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
@@ -428,7 +429,7 @@ describe('#bulkUpdate', () => {
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
         expect(res.saved_objects[0].namespaces).toEqual([namespace]);
 
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
         res = await bulkUpdateSuccess(client, repository, registry, [
           { ...obj1, namespace },
@@ -444,7 +445,7 @@ describe('#bulkUpdate', () => {
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
         expect(res.saved_objects[0].namespaces).toEqual(['default']);
 
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
         res = await bulkUpdateSuccess(
           client,
@@ -481,7 +482,7 @@ describe('#bulkUpdate', () => {
         await bulkUpdateSuccess(client, repository, registry, [_obj2], { namespace });
         expectClientCallArgsAction([_obj2], { method: 'index', getId });
 
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
         await bulkUpdateSuccess(client, repository, registry, [{ ..._obj1, namespace }]);
         expectClientCallArgsAction([_obj1], { method: 'index', getId });
@@ -578,7 +579,11 @@ describe('#bulkUpdate', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.bulkUpdate([obj], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: createBadRequestErrorPayload('"options.namespace" cannot be "*"').message,
+          })
+        );
       });
 
       it(`returns error when type is invalid`, async () => {

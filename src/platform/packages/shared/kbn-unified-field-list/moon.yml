@@ -57,7 +57,7 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - '*.ts'
@@ -65,4 +65,5 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*.ts
     - '!target/**/*'
+    - '!vitest.config.ts'
 tasks: {}

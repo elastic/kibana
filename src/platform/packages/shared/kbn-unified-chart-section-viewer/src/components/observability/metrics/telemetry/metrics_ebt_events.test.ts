@@ -14,7 +14,7 @@ import { registerMetricsEbtEvents } from './metrics_ebt_events';
 describe('registerMetricsEbtEvents', () => {
   const registerEvents = () => {
     const analytics = {
-      registerEventType: jest.fn(),
+      registerEventType: vi.fn(),
     } as unknown as AnalyticsServiceSetup;
 
     registerMetricsEbtEvents(analytics);

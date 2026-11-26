@@ -15,19 +15,19 @@ import type { NumberListProps } from './number_list';
 import { NumberList } from './number_list';
 import { NumberRow } from './number_row';
 
-jest.mock('./number_row', () => ({
+vi.mock('./number_row', () => ({
   NumberRow: () => 'NumberRow',
 }));
 
-jest.mock('@elastic/eui', () => ({
-  htmlIdGenerator: jest.fn(() => {
+vi.mock('@elastic/eui', async () => ({
+  htmlIdGenerator: vi.fn(() => {
     let counter = 1;
     return () => `12${counter++}`;
   }),
-  EuiSpacer: jest.requireActual('@elastic/eui').EuiSpacer,
-  EuiFlexItem: jest.requireActual('@elastic/eui').EuiFlexItem,
-  EuiButtonEmpty: jest.requireActual('@elastic/eui').EuiButtonEmpty,
-  EuiFormErrorText: jest.requireActual('@elastic/eui').EuiFormErrorText,
+  EuiSpacer: (await vi.importActual('@elastic/eui')).EuiSpacer,
+  EuiFlexItem: (await vi.importActual('@elastic/eui')).EuiFlexItem,
+  EuiButtonEmpty: (await vi.importActual('@elastic/eui')).EuiButtonEmpty,
+  EuiFormErrorText: (await vi.importActual('@elastic/eui')).EuiFormErrorText,
 }));
 
 describe('NumberList', () => {
@@ -40,9 +40,9 @@ describe('NumberList', () => {
       range: '[1, 10]',
       showValidation: false,
       unitName: 'value',
-      onChange: jest.fn(),
-      setTouched: jest.fn(),
-      setValidity: jest.fn(),
+      onChange: vi.fn(),
+      setTouched: vi.fn(),
+      setValidity: vi.fn(),
     };
   });
 

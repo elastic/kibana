@@ -45,10 +45,10 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
-      setFieldCount: jest.fn(),
+      setFieldCount: vi.fn(),
       isPersisted: () => false,
     } as unknown as DataView;
-    const updateSavedObjectMock = jest.fn();
+    const updateSavedObjectMock = vi.fn();
     const dataViewsService = {
       updateSavedObject: updateSavedObjectMock,
     } as unknown as DataViewsContract;
@@ -65,13 +65,13 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
-      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+      setFieldCount: vi.fn().mockImplementation((fieldName, count) => {
         field.count = count;
       }),
       isPersisted: () => true,
     } as unknown as DataView;
     const fieldName = '@timestamp';
-    const updateSavedObjectMock = jest.fn();
+    const updateSavedObjectMock = vi.fn();
     const dataViewsService = {
       updateSavedObject: updateSavedObjectMock,
     } as unknown as DataViewsContract;
@@ -90,13 +90,13 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
-      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+      setFieldCount: vi.fn().mockImplementation((fieldName, count) => {
         field.count = count;
       }),
       isPersisted: () => true,
     } as unknown as DataView;
     const fieldName = '@timestamp';
-    const updateSavedObjectMock = jest.fn();
+    const updateSavedObjectMock = vi.fn();
     const dataViewsService = {
       updateSavedObject: updateSavedObjectMock,
     } as unknown as DataViewsContract;
@@ -115,7 +115,7 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
-      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+      setFieldCount: vi.fn().mockImplementation((fieldName, count) => {
         field.count = count;
       }),
       isPersisted: () => true,
@@ -142,7 +142,7 @@ describe('Popularize field', () => {
     } as unknown as DataView;
     const fieldName = '@timestamp';
     const dataViewsService = {
-      updateSavedObject: jest.fn(),
+      updateSavedObject: vi.fn(),
     } as unknown as DataViewsContract;
     const result = await popularizeField(dataView, fieldName, dataViewsService, {
       dataViews: { save: false },

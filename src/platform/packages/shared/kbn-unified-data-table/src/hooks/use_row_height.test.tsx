@@ -100,7 +100,7 @@ describe('useRowHeightsOptions', () => {
   it('should return onChangeRowHeight and onChangeRowHeightLines when onUpdateRowHeight is provided', () => {
     const {
       hook: { result },
-    } = renderRowHeightHook({ onUpdateRowHeight: jest.fn() });
+    } = renderRowHeightHook({ onUpdateRowHeight: vi.fn() });
     expect(result.current.onChangeRowHeight).toBeDefined();
     expect(result.current.onChangeRowHeightLines).toBeDefined();
   });
@@ -113,7 +113,7 @@ describe('useRowHeightsOptions', () => {
   });
 
   it('should update stored row height and call onUpdateRowHeight when onChangeRowHeight is called', () => {
-    const onUpdateRowHeight = jest.fn();
+    const onUpdateRowHeight = vi.fn();
     const {
       storage,
       hook: { result },
@@ -137,7 +137,7 @@ describe('useRowHeightsOptions', () => {
   });
 
   it('should update stored row height and call onUpdateRowHeight when onChangeRowHeightLines is called', () => {
-    const onUpdateRowHeight = jest.fn();
+    const onUpdateRowHeight = vi.fn();
     const {
       storage,
       hook: { result },
@@ -190,7 +190,7 @@ describe('useRowHeightsOptions', () => {
   });
 
   it('should not update rowHeightState but update lineCountInput when newRowHeightLines is invalid', () => {
-    const onUpdateRowHeight = jest.fn();
+    const onUpdateRowHeight = vi.fn();
     const {
       hook: { result },
     } = renderRowHeightHook({ onUpdateRowHeight });
@@ -202,7 +202,7 @@ describe('useRowHeightsOptions', () => {
   });
 
   it('should set lineCountInput to undefined when newRowHeightLines is 0 and invalid', () => {
-    const onUpdateRowHeight = jest.fn();
+    const onUpdateRowHeight = vi.fn();
     const {
       hook: { result },
     } = renderRowHeightHook({ onUpdateRowHeight });

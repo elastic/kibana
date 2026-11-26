@@ -12,7 +12,7 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { userEvent } from '@testing-library/user-event';
@@ -31,8 +31,8 @@ const setup = (props: Partial<FieldTypeFilterProps<DataViewField>> = {}) => {
     allFields: dataView.fields,
     docLinks,
     'data-test-subj': DATA_TEST_SUBJ,
-    getCustomFieldType: jest.fn((field) => field.type),
-    onChange: jest.fn(),
+    getCustomFieldType: vi.fn((field) => field.type),
+    onChange: vi.fn(),
     ...props,
   };
 
@@ -84,7 +84,7 @@ describe('<FieldTypeFilter />', () => {
     describe('when there are supported fields', () => {
       it('should just include them', async () => {
         // Given
-        const onSupportedFieldFilter = jest.fn((field) => ['number', 'date'].includes(field.type));
+        const onSupportedFieldFilter = vi.fn((field) => ['number', 'date'].includes(field.type));
 
         // When
         const { user } = setup({
@@ -93,10 +93,12 @@ describe('<FieldTypeFilter />', () => {
 
         await user.click(screen.getByTestId(TOGGLE_TEST_SUBJ));
 
-        // Then
-        expect(
-          within(screen.getByTestId(OPTIONS_TEST_SUBJ)).getByLabelText('Date field count: 4')
-        ).toBeVisible();
+        // Then: EuiPopover's panel starts at opacity 0 and fades in after the click
+        await waitFor(() =>
+          expect(
+            within(screen.getByTestId(OPTIONS_TEST_SUBJ)).getByLabelText('Date field count: 4')
+          ).toBeVisible()
+        );
         expect(
           within(screen.getByTestId(OPTIONS_TEST_SUBJ)).getByLabelText('Number field count: 3')
         ).toBeVisible();

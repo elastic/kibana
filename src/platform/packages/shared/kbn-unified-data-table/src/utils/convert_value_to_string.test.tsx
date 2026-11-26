@@ -18,7 +18,7 @@ import { convertValueToString, convertNameToString } from './convert_value_to_st
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 describe('convertValueToString', () => {
-  jest.spyOn(dataTableContextComplexMock.dataView.fields, 'create');
+  vi.spyOn(dataTableContextComplexMock.dataView.fields, 'create');
 
   it('should convert a keyword value to text', () => {
     const result = convertValueToString({
@@ -558,7 +558,7 @@ describe('convertValueToString', () => {
     const getByName = dataTableContextMock.dataView.fields.getByName.bind(
       dataTableContextMock.dataView.fields
     );
-    const getByNameSpy = jest
+    const getByNameSpy = vi
       .spyOn(dataTableContextMock.dataView.fields, 'getByName')
       .mockImplementation((name: string) => (name === '_source' ? undefined : getByName(name)));
 

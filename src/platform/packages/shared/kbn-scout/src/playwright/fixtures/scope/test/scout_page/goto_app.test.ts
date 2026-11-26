@@ -7,23 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import type { Locator, Page } from '@playwright/test';
 import { test as playwrightTest } from '@playwright/test';
 import { navigateToApp } from './goto_app';
 
-jest.mock('@playwright/test', () => ({ test: { info: jest.fn() } }));
+vi.mock('@playwright/test', () => {
+  const mockedModule = { test: { info: vi.fn() } };
+  return { ...mockedModule, default: mockedModule };
+});
 
-const infoMock = playwrightTest.info as unknown as jest.Mock;
+const infoMock = playwrightTest.info as unknown as Mock;
 
 const setProjectTimeouts = (use: { navigationTimeout?: number; actionTimeout?: number }) =>
   infoMock.mockReturnValue({ project: { use } });
 
-const createPage = () => ({ goto: jest.fn().mockResolvedValue(null) } as unknown as Page);
+const createPage = () => ({ goto: vi.fn().mockResolvedValue(null) } as unknown as Page);
 const createLocator = () =>
-  ({ waitFor: jest.fn().mockResolvedValue(undefined) } as unknown as Locator);
+  ({ waitFor: vi.fn().mockResolvedValue(undefined) } as unknown as Locator);
 
 describe('navigateToApp', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('gates on the local navigation budget', async () => {
     setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });

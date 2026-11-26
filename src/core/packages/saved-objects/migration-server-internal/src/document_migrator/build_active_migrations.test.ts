@@ -19,7 +19,7 @@ import {
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectMigrationFn, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { buildActiveMigrations } from './build_active_migrations';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import type { Transform } from './types';
@@ -47,7 +47,7 @@ describe('buildActiveMigrations', () => {
     ...(deferred != null ? { deferred } : {}),
     version,
     transformType: type,
-    transform: jest.fn(),
+    transform: vi.fn(),
   });
 
   const expectTransform = (type: TransformType, version: string, deferred?: boolean): Transform =>
@@ -74,16 +74,16 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
+          '7.12.0': vi.fn<SavedObjectMigrationFn>(),
+          '7.16.0': vi.fn<SavedObjectMigrationFn>(),
         },
       });
 
       addType({
         name: 'bar',
         migrations: () => ({
-          '7.114.0': jest.fn(),
-          '8.3.0': jest.fn(),
+          '7.114.0': vi.fn<SavedObjectMigrationFn>(),
+          '8.3.0': vi.fn<SavedObjectMigrationFn>(),
         }),
       });
 
@@ -114,12 +114,12 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
+          '7.12.0': vi.fn<SavedObjectMigrationFn>(),
+          '7.16.0': vi.fn<SavedObjectMigrationFn>(),
         },
       });
 
-      expect(() => buildMigrations()).toThrowErrorMatchingInlineSnapshot(`"woups"`);
+      expect(() => buildMigrations()).toThrowErrorMatchingInlineSnapshot(`[Error: woups]`);
     });
   });
 
@@ -128,15 +128,15 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
+          '7.12.0': vi.fn<SavedObjectMigrationFn>(),
+          '7.16.0': vi.fn<SavedObjectMigrationFn>(),
           '8.3.0': {
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
           '8.4.0': {
             // @ts-expect-error
             deferred: true,
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
         },
       });
@@ -229,12 +229,12 @@ describe('buildActiveMigrations', () => {
         ({ typeDefinition }: { typeDefinition: SavedObjectsType }) => {
           if (typeDefinition.name === 'foo') {
             return {
-              '7.10.0': jest.fn(),
+              '7.10.0': vi.fn(),
             };
           } else {
             return {
-              '8.3.0': jest.fn(),
-              '8.4.0': jest.fn(),
+              '8.3.0': vi.fn(),
+              '8.4.0': vi.fn(),
             };
           }
         }
@@ -347,16 +347,16 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
+          '7.12.0': vi.fn<SavedObjectMigrationFn>(),
+          '7.16.0': vi.fn<SavedObjectMigrationFn>(),
         },
       });
 
       addType({
         name: 'bar',
         migrations: {
-          '7.17.0': jest.fn(),
-          '8.2.1': jest.fn(),
+          '7.17.0': vi.fn<SavedObjectMigrationFn>(),
+          '8.2.1': vi.fn<SavedObjectMigrationFn>(),
         },
       });
 
@@ -414,9 +414,9 @@ describe('buildActiveMigrations', () => {
       addType({
         name: 'foo',
         migrations: {
-          '7.12.0': jest.fn(),
-          '7.16.0': jest.fn(),
-          '8.3.0': jest.fn(),
+          '7.12.0': vi.fn<SavedObjectMigrationFn>(),
+          '7.16.0': vi.fn<SavedObjectMigrationFn>(),
+          '8.3.0': vi.fn<SavedObjectMigrationFn>(),
         },
       });
       getCoreTransformsMock.mockReturnValue([
@@ -450,13 +450,13 @@ describe('buildActiveMigrations', () => {
           '7.12.0': {
             // @ts-expect-error
             deferred: true,
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
-          '7.16.0': jest.fn(),
+          '7.16.0': vi.fn<SavedObjectMigrationFn>(),
           '8.3.0': {
             // @ts-expect-error
             deferred: true,
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
         },
       });

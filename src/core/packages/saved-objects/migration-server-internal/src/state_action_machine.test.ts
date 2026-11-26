@@ -13,14 +13,14 @@ import * as E from 'fp-ts/Either';
 describe('state action machine', () => {
   const state = { controlState: 'INIT', count: 1 };
 
-  const next = jest.fn((s: typeof state) => {
+  const next = vi.fn((s: typeof state) => {
     if (s.controlState === 'INIT') return () => Promise.resolve(E.right('response'));
     if (s.controlState === 'DONE') return null;
     else throw new Error('Invalid control state');
   });
 
   const countUntilModel = (maxCount: number) =>
-    jest.fn((s: typeof state, res: E.Either<unknown, string>) => {
+    vi.fn((s: typeof state, res: E.Either<unknown, string>) => {
       if (s.count === maxCount) {
         return { controlState: 'DONE', count: s.count };
       } else {
@@ -79,7 +79,7 @@ describe('state action machine', () => {
   test('rejects if an exception is throw from inside an action', async () => {
     await expect(
       stateActionMachine({ ...state, controlState: 'THROW' }, next, countUntilThree)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid control state"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Invalid control state]`);
   });
 
   test('resolve with the final state once all steps are completed', async () => {

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowContextRegistry } from '../registry';
 
-export const getOutputSchemaForStepType = jest.fn(
+export const getOutputSchemaForStepType: Mock = vi.fn(
   (_registry: WorkflowContextRegistry, node: { stepType: string }) => {
     if (node.stepType === 'console') {
       return z.string();

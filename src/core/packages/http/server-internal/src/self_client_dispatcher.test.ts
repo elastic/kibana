@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('undici', () => ({
-  Agent: jest.fn().mockImplementation(() => ({
-    close: jest.fn().mockResolvedValue(undefined),
-    compose: jest.fn().mockImplementation(() => ({ dispatch: jest.fn() })),
-  })),
-  getGlobalDispatcher: jest.fn(() => ({
-    compose: jest.fn().mockImplementation(() => ({ dispatch: jest.fn() })),
-  })),
-}));
+import type { Mock } from 'vitest';
+vi.mock('undici', () => {
+  const mockedModule = {
+    Agent: vi.fn().mockImplementation(function () {
+      return {
+        close: vi.fn().mockResolvedValue(undefined),
+        compose: vi.fn().mockImplementation(() => ({ dispatch: vi.fn() })),
+      };
+    }),
+    getGlobalDispatcher: vi.fn(() => ({
+      compose: vi.fn().mockImplementation(() => ({ dispatch: vi.fn() })),
+    })),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 import { rootCertificates } from 'node:tls';
 import { Agent, getGlobalDispatcher } from 'undici';
@@ -25,8 +31,8 @@ import { SelfHttpDispatcherProvider, withHeadersTimeout } from './self_client_di
 
 type VerificationMode = HttpConfig['selfHttp']['ssl']['verificationMode'];
 
-const AgentMock = Agent as unknown as jest.Mock;
-const getGlobalDispatcherMock = getGlobalDispatcher as jest.Mock;
+const AgentMock = Agent as unknown as Mock;
+const getGlobalDispatcherMock = getGlobalDispatcher as Mock;
 
 const PUBLIC_BASE_URL = 'https://kibana.example.com';
 const HTTPS_URL = new URL('https://kibana.example.com/api/status');
@@ -44,7 +50,7 @@ const createProvider = ({
   target?: 'auto' | 'local';
   publicBaseUrl?: string;
 } = {}) => {
-  const getHttpConfig = jest.fn(
+  const getHttpConfig = vi.fn(
     () =>
       ({
         ssl: { enabled: true, requestCert: false, certificate: serverCertificate },
@@ -258,7 +264,7 @@ describe('SelfHttpDispatcherProvider', () => {
       let certificateAuthorities: string[] | undefined = ['public CA'];
       const provider = new SelfHttpDispatcherProvider({
         basePath: { publicBaseUrl: PUBLIC_BASE_URL } as IBasePath,
-        getHttpConfig: jest.fn(
+        getHttpConfig: vi.fn(
           () =>
             ({
               ssl: { enabled: true, requestCert: false },
@@ -282,7 +288,7 @@ describe('SelfHttpDispatcherProvider', () => {
       let verificationMode: VerificationMode = 'full';
       const provider = new SelfHttpDispatcherProvider({
         basePath: { publicBaseUrl: PUBLIC_BASE_URL } as IBasePath,
-        getHttpConfig: jest.fn(
+        getHttpConfig: vi.fn(
           () =>
             ({
               ssl: { enabled: true, requestCert: false },
@@ -322,8 +328,8 @@ describe('SelfHttpDispatcherProvider', () => {
 
 describe('withHeadersTimeout', () => {
   it('injects the headers timeout into the dispatch options', () => {
-    const dispatch = jest.fn().mockReturnValue(true);
-    const handler = jest.fn();
+    const dispatch = vi.fn().mockReturnValue(true);
+    const handler = vi.fn();
 
     withHeadersTimeout(60_000)(dispatch)(
       { method: 'GET', origin: 'https://kibana.example.com', path: '/' },

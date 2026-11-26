@@ -14,18 +14,19 @@ import { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mapp
 import * as Either from 'fp-ts/Either';
 import type { TaskCompletedWithRetriableError } from './wait_for_task';
 
-jest.mock('./catch_retryable_es_client_errors', () => {
-  const { catchRetryableEsClientErrors: actualImplementation } = jest.requireActual(
-    './catch_retryable_es_client_errors'
-  );
-  return {
-    catchRetryableEsClientErrors: jest.fn(actualImplementation),
+vi.mock('./catch_retryable_es_client_errors', async () => {
+  const { catchRetryableEsClientErrors: actualImplementation } = await vi.importActual<
+    typeof import('./catch_retryable_es_client_errors')
+  >('./catch_retryable_es_client_errors');
+  const mockedModule = {
+    catchRetryableEsClientErrors: vi.fn(actualImplementation),
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 describe('waitForPickupUpdatedMappingsTask', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
@@ -64,7 +65,7 @@ describe('waitForPickupUpdatedMappingsTask', () => {
       taskId: 'my task id',
       timeout: '2m',
     });
-    expect(task()).rejects.toThrow(nonRetryableError);
+    await expect(task()).rejects.toThrow(nonRetryableError);
   });
 
   it('returns task_completed_with_retriable_error when the client returns a search_phase_execution_exception', async () => {

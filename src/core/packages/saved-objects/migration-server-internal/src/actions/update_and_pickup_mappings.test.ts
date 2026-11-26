@@ -14,12 +14,12 @@ import { updateAndPickupMappings } from './update_and_pickup_mappings';
 import { DEFAULT_TIMEOUT } from './constants';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
 
-jest.mock('./catch_retryable_es_client_errors');
-jest.mock('./pickup_updated_mappings');
+vi.mock('./catch_retryable_es_client_errors');
+vi.mock('./pickup_updated_mappings');
 
 describe('updateAndPickupMappings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('putMappingTask', () => {
@@ -31,11 +31,11 @@ describe('updateAndPickupMappings', () => {
         body: { error: { type: 'es_type', reason: 'es_reason' } },
       })
     );
-    const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
-    );
 
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
+      const client = elasticsearchClientMock.createInternalClient(
+        elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+      );
       const task = updateAndPickupMappings({
         client,
         index: 'new_index',
@@ -52,6 +52,9 @@ describe('updateAndPickupMappings', () => {
     });
 
     it('calls the indices.putMapping with the mapping properties as well as the _meta information', async () => {
+      const client = elasticsearchClientMock.createInternalClient(
+        elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+      );
       const task = updateAndPickupMappings({
         client,
         index: 'new_index',

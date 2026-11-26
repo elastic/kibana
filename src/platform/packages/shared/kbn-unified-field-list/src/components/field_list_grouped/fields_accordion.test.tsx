@@ -16,22 +16,27 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiNotificationBadge } from '@elastic/eui';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiNotificationBadge: jest.fn(() => <div>MockBadge</div>),
-}));
-const MockEuiNotificationBadge = jest.mocked(EuiNotificationBadge);
+vi.mock('@elastic/eui', async () => {
+  const mockedModule = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiNotificationBadge: vi.fn(function () {
+      return <div>MockBadge</div>;
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
+const MockEuiNotificationBadge = vi.mocked(EuiNotificationBadge);
 
 beforeEach(() => {
-  MockEuiNotificationBadge.mockImplementation((props) => (
-    <div data-test-subj={props['data-test-subj']} />
-  ));
+  MockEuiNotificationBadge.mockImplementation(function (props) {
+    return <div data-test-subj={props['data-test-subj']} />;
+  });
 });
 
 const setup = (props: Partial<React.ComponentProps<typeof FieldsAccordion>> = {}) => {
   const propsToUse: React.ComponentProps<typeof FieldsAccordion> = {
     initialIsOpen: true,
-    onToggle: jest.fn(),
+    onToggle: vi.fn(),
     groupIndex: 1,
     groupName: FieldsGroupNames.AvailableFields,
     id: 'id',
@@ -152,7 +157,7 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
         label: 'Selected fields',
         fieldsCount: 2,
         paginatedFields: dataView.fields.slice(0, 2),
-        onDeselectSelectedFields: jest.fn(),
+        onDeselectSelectedFields: vi.fn(),
       });
 
       expect(
@@ -200,7 +205,7 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
     });
 
     it('should call onDeselectSelectedFields when clicked', async () => {
-      const onDeselectSelectedFields = jest.fn();
+      const onDeselectSelectedFields = vi.fn();
       const user = userEvent.setup();
 
       setup({

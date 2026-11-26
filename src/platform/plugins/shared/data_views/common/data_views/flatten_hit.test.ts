@@ -15,7 +15,7 @@ import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
 class MockFieldFormatter {}
 
-fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
+fieldFormatsMock.getInstance = vi.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
 // helper function to create index patterns
 function create(id: string) {

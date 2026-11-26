@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { createMemoryHistory } from 'history';
 import {
   coreMock,
@@ -35,7 +36,7 @@ export const serviceContextMock = {
     const http = httpServiceMock.createSetupContract();
     const api = createApi({ http });
     const esHostService = createEsHostService({ api });
-    (storage.keys as jest.Mock).mockImplementation(() => []);
+    (storage.keys as Mock).mockImplementation(() => []);
     return {
       ...coreStart,
       services: {

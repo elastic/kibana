@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
@@ -15,12 +16,24 @@ import { loadRawServerConfig } from '../servers/configs/loader/read_config_file'
 import { getScoutCiExcludedConfigs } from '../tests_discovery/search_configs';
 import { auditConfigSets, findSetsRunInCi, MUST_STAY_SEPARATE } from './audit_config_sets';
 
-jest.mock('@kbn/repo-packages', () => ({ getPackages: () => [] }));
-jest.mock('@kbn/scout-reporting', () => ({ testConfigs: { all: [] as unknown[] } }));
-jest.mock('../tests_discovery/search_configs', () => ({ getScoutCiExcludedConfigs: jest.fn() }));
-jest.mock('../servers/configs/loader/read_config_file', () => ({
-  loadRawServerConfig: jest.fn(),
-}));
+vi.mock('@kbn/repo-packages', () => {
+  const mockedModule = { getPackages: () => [] };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('@kbn/scout-reporting', () => {
+  const mockedModule = { testConfigs: { all: [] as unknown[] } };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('../tests_discovery/search_configs', () => {
+  const mockedModule = { getScoutCiExcludedConfigs: vi.fn() };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('../servers/configs/loader/read_config_file', () => {
+  const mockedModule = {
+    loadRawServerConfig: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 const SETS_DIR = 'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets';
 
@@ -35,14 +48,14 @@ describe('config sets audit', () => {
 
   beforeEach(() => {
     repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'scout-audit-'));
-    (getScoutCiExcludedConfigs as jest.Mock).mockReturnValue([
+    (getScoutCiExcludedConfigs as Mock).mockReturnValue([
       'plugins/b/test/scout_local_only/api/playwright.config.ts',
     ]);
   });
 
   afterEach(() => {
     Fs.rmSync(repoRoot, { recursive: true, force: true });
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const setConfigs = (...configs: Array<{ path: string; configSet: string }>) => {
@@ -72,7 +85,7 @@ describe('config sets audit', () => {
     beforeEach(() => {
       ['default', 'runs', 'local_only', 'no_tests'].forEach((name) => writeSet(repoRoot, name));
       Fs.mkdirSync(Path.join(repoRoot, 'plugins/a/test/scout_runs/api'), { recursive: true });
-      (loadRawServerConfig as jest.Mock).mockResolvedValue({});
+      (loadRawServerConfig as Mock).mockResolvedValue({});
     });
 
     it('only compares sets that CI runs', async () => {

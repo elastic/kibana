@@ -14,19 +14,39 @@ import type { UnifiedMetricsGridProps } from '../../../types';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import TraceMetricsGrid from '.';
 
-jest.mock('./context/trace_metrics_context', () => ({
-  TraceMetricsProvider: jest.fn(({ children }) => <>{children}</>),
-}));
-jest.mock('./latency', () => ({ LatencyChart: () => null }));
-jest.mock('./error_rate', () => ({ ErrorRateChart: () => null }));
-jest.mock('./throughput', () => ({ ThroughputChart: () => null }));
-jest.mock('../../charts_grid', () => ({
-  ChartsGrid: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('@kbn/unified-histogram', () => ({
-  UnifiedBreakdownFieldSelector: () => null,
-  resolveBreakdownField: () => undefined,
-}));
+vi.mock('./context/trace_metrics_context', () => {
+  const mockedModule = {
+    TraceMetricsProvider: vi.fn(function ({ children }) {
+      return <>{children}</>;
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('./latency', () => {
+  const mockedModule = { LatencyChart: () => null };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('./error_rate', () => {
+  const mockedModule = { ErrorRateChart: () => null };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('./throughput', () => {
+  const mockedModule = { ThroughputChart: () => null };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('../../charts_grid', () => {
+  const mockedModule = {
+    ChartsGrid: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
+vi.mock('@kbn/unified-histogram', () => {
+  const mockedModule = {
+    UnifiedBreakdownFieldSelector: () => null,
+    resolveBreakdownField: () => undefined,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 describe('TraceMetricsGrid', () => {
   it('passes the remote cluster prefixes of the ES|QL sources to the charts', async () => {
@@ -44,7 +64,7 @@ describe('TraceMetricsGrid', () => {
       />
     );
 
-    expect(jest.mocked(TraceMetricsProvider).mock.lastCall?.[0].value?.indexes).toBe(
+    expect(vi.mocked(TraceMetricsProvider).mock.lastCall?.[0].value?.indexes).toBe(
       'remote_cluster:apm-*,remote_cluster:traces-apm*,apm-*,traces-apm*'
     );
   });

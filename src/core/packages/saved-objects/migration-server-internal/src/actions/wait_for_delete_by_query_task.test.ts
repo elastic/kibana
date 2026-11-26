@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
 import * as Either from 'fp-ts/Either';
 import * as TaskEither from 'fp-ts/TaskEither';
 import * as Option from 'fp-ts/Option';
@@ -16,9 +17,9 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { waitForDeleteByQueryTask } from './wait_for_delete_by_query_task';
 import { waitForTask } from './wait_for_task';
 
-jest.mock('./wait_for_task');
+vi.mock('./wait_for_task');
 
-const mockWaitForTask = waitForTask as jest.MockedFunction<typeof waitForTask>;
+const mockWaitForTask = waitForTask as MockedFunction<typeof waitForTask>;
 
 describe('waitForDeleteByQueryTask', () => {
   const client = elasticsearchClientMock.createInternalClient(
@@ -26,7 +27,7 @@ describe('waitForDeleteByQueryTask', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls waitForTask() with the appropriate params', async () => {
@@ -168,7 +169,7 @@ describe('waitForDeleteByQueryTask', () => {
         timeout: '60s',
       });
 
-      expect(task()).rejects.toEqual(error);
+      await expect(task()).rejects.toEqual(error);
     });
   });
 

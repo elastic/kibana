@@ -14,7 +14,7 @@ describe('resolveResourceForEsqlWithSamplingStats', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 

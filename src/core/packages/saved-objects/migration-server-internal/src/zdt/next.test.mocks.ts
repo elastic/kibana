@@ -7,25 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const setMetaMappingMigrationCompleteMock = jest.fn();
-export const setMetaDocMigrationCompleteMock = jest.fn();
-export const setMetaDocMigrationStartedMock = jest.fn();
+import type { Mock, MockedFunction } from 'vitest';
+export const setMetaMappingMigrationCompleteMock: Mock = vi.fn();
+export const setMetaDocMigrationCompleteMock: Mock = vi.fn();
+export const setMetaDocMigrationStartedMock: Mock = vi.fn();
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
-  return {
+vi.doMock('./utils', async () => {
+  const actual = await vi.importActual('./utils');
+  const mockedModule = {
     ...actual,
     setMetaDocMigrationStarted: setMetaDocMigrationStartedMock,
     setMetaMappingMigrationComplete: setMetaMappingMigrationCompleteMock,
     setMetaDocMigrationComplete: setMetaDocMigrationCompleteMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
-const realActions = jest.requireActual('./actions');
+const realActions = await vi.importActual('./actions');
 
 export const ActionMocks = Object.keys(realActions).reduce((mocks, key) => {
-  mocks[key] = jest.fn().mockImplementation((state: unknown) => state);
+  mocks[key] = vi.fn().mockImplementation((state: unknown) => state);
   return mocks;
-}, {} as Record<string, jest.MockedFunction<any>>);
+}, {} as Record<string, MockedFunction<any>>);
 
-jest.doMock('./actions', () => ActionMocks);
+vi.doMock('./actions', () => ActionMocks);

@@ -36,10 +36,10 @@ describe('preview has_data_views route', () => {
     };
     const mockESClient = {
       indices: {
-        resolveIndex: jest.fn().mockResolvedValue(mockESClientResolveIndexResponse),
+        resolveIndex: vi.fn().mockResolvedValue(mockESClientResolveIndexResponse),
       },
     };
-    const mockSOClient = { find: jest.fn().mockResolvedValue(mockSOClientFindResponse) };
+    const mockSOClient = { find: vi.fn().mockResolvedValue(mockSOClientFindResponse) };
     const mockContext = {
       core: {
         elasticsearch: { client: { asCurrentUser: mockESClient } },

@@ -21,9 +21,9 @@ import type { UseSelectedDocsState } from '../src/hooks/use_selected_docs';
 const buildTableContext = (dataView: DataView, rows: DataTableRecord[]): DataTableContext => {
   return {
     expanded: undefined,
-    setExpanded: jest.fn(),
-    getRowByIndex: jest.fn((index) => rows[index]),
-    onFilter: jest.fn(),
+    setExpanded: vi.fn(),
+    getRowByIndex: vi.fn((index) => rows[index]),
+    onFilter: vi.fn(),
     dataView,
     selectedDocsState: buildSelectedDocsState([]),
     pageIndex: 0,
@@ -68,12 +68,12 @@ export function buildSelectedDocsState(selectedDocIds: string[]): UseSelectedDoc
     hasSelectedDocs: selectedDocsSet.size > 0,
     selectedDocsCount: selectedDocsSet.size,
     docIdsInSelectionOrder: selectedDocIds,
-    toggleDocSelection: jest.fn(),
-    toggleMultipleDocsSelection: jest.fn(),
-    selectAllDocs: jest.fn(),
-    selectMoreDocs: jest.fn(),
-    deselectSomeDocs: jest.fn(),
-    replaceSelectedDocs: jest.fn(),
-    clearAllSelectedDocs: jest.fn(),
+    toggleDocSelection: vi.fn(),
+    toggleMultipleDocsSelection: vi.fn(),
+    selectAllDocs: vi.fn(),
+    selectMoreDocs: vi.fn(),
+    deselectSomeDocs: vi.fn(),
+    replaceSelectedDocs: vi.fn(),
+    clearAllSelectedDocs: vi.fn(),
   };
 }

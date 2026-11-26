@@ -16,10 +16,10 @@ const SERVICE: Dimension = { name: 'service.name', type: 'keyword' };
 const NAMESPACE: Dimension = { name: 'kubernetes.namespace', type: 'keyword' };
 
 describe('useResetPageOnDimensionsChange', () => {
-  const mockOnPageChange = jest.fn();
+  const mockOnPageChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does NOT call onPageChange on the first render (tab restore path)', async () => {

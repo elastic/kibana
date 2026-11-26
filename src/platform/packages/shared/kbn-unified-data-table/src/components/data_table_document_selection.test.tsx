@@ -98,7 +98,7 @@ describe('document selection', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />,
         contextMock
       );
@@ -120,7 +120,7 @@ describe('document selection', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />,
         contextMock
       );
@@ -142,7 +142,7 @@ describe('document selection', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />,
         contextMock
       );
@@ -163,7 +163,7 @@ describe('document selection', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />,
         contextMock
       );
@@ -187,7 +187,7 @@ describe('document selection', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />,
         contextMock
       );
@@ -209,8 +209,8 @@ describe('document selection', () => {
         pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsCompareActive: jest.fn(),
-        setIsFilterActive: jest.fn(),
+        setIsCompareActive: vi.fn(),
+        setIsFilterActive: vi.fn(),
         toastNotifications: servicesMock.toastNotifications,
       };
       const contextMock = {
@@ -242,20 +242,20 @@ describe('document selection', () => {
             key: 'always',
             label: 'Always',
             'data-test-subj': 'bulkActionAlways',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
           },
           {
             key: 'never',
             label: 'Never',
             'data-test-subj': 'bulkActionNever',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
             isAvailable: () => false,
           },
           {
             key: 'when-two',
             label: 'When two',
             'data-test-subj': 'bulkActionWhenTwo',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
             isAvailable: ({ selectedDocIds }: { selectedDocIds: string[] }) =>
               selectedDocIds.length >= 2,
           },
@@ -267,8 +267,8 @@ describe('document selection', () => {
         pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsCompareActive: jest.fn(),
-        setIsFilterActive: jest.fn(),
+        setIsCompareActive: vi.fn(),
+        setIsFilterActive: vi.fn(),
         toastNotifications: servicesMock.toastNotifications,
       };
       const contextMock = {
@@ -293,7 +293,7 @@ describe('document selection', () => {
             key: 'unsupported',
             label: 'Unsupported',
             'data-test-subj': 'bulkActionUnsupported',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
             getDisabledReason: () => 'Not available for part of the selection',
           },
         ],
@@ -304,8 +304,8 @@ describe('document selection', () => {
         pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsCompareActive: jest.fn(),
-        setIsFilterActive: jest.fn(),
+        setIsCompareActive: vi.fn(),
+        setIsFilterActive: vi.fn(),
         toastNotifications: servicesMock.toastNotifications,
       };
       const contextMock = {
@@ -333,7 +333,7 @@ describe('document selection', () => {
             key: 'myAction',
             label: 'My action',
             'data-test-subj': 'myBulkAction',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
           },
         ],
         enableComparisonMode: false,
@@ -344,8 +344,8 @@ describe('document selection', () => {
         pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsCompareActive: jest.fn(),
-        setIsFilterActive: jest.fn(),
+        setIsCompareActive: vi.fn(),
+        setIsFilterActive: vi.fn(),
         toastNotifications: servicesMock.toastNotifications,
       };
       const contextMock = {
@@ -374,8 +374,8 @@ describe('document selection', () => {
         pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::']),
-        setIsCompareActive: jest.fn(),
-        setIsFilterActive: jest.fn(),
+        setIsCompareActive: vi.fn(),
+        setIsFilterActive: vi.fn(),
         toastNotifications: servicesMock.toastNotifications,
       };
       const contextMock = {
@@ -399,8 +399,8 @@ describe('document selection', () => {
         pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsCompareActive: jest.fn(),
-        setIsFilterActive: jest.fn(),
+        setIsCompareActive: vi.fn(),
+        setIsFilterActive: vi.fn(),
         toastNotifications: servicesMock.toastNotifications,
       };
       const contextMock = {
@@ -430,8 +430,8 @@ describe('document selection', () => {
         pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsCompareActive: jest.fn(),
-        setIsFilterActive: jest.fn(),
+        setIsCompareActive: vi.fn(),
+        setIsFilterActive: vi.fn(),
         toastNotifications: servicesMock.toastNotifications,
       };
       const contextMock = {
@@ -455,8 +455,8 @@ describe('document selection', () => {
         pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(dataTableContextRowsMock.map((row) => row.id)),
-        setIsCompareActive: jest.fn(),
-        setIsFilterActive: jest.fn(),
+        setIsCompareActive: vi.fn(),
+        setIsFilterActive: vi.fn(),
         toastNotifications: servicesMock.toastNotifications,
       };
       const contextMock = {
@@ -481,14 +481,14 @@ describe('document selection', () => {
       pageSize: 2,
       rows: dataTableContextRowsMock,
       selectedDocsState: buildSelectedDocsState([]),
-      setIsCompareActive: jest.fn(),
-      setIsFilterActive: jest.fn(),
+      setIsCompareActive: vi.fn(),
+      setIsFilterActive: vi.fn(),
       toastNotifications: servicesMock.toastNotifications,
     };
 
     const renderCompareBtn = ({
       selectedDocIds = ['1', '2'],
-      setIsCompareActive = jest.fn(),
+      setIsCompareActive = vi.fn(),
     }: Partial<Parameters<typeof DataTableCompareToolbarBtn>[0]> = {}) => {
       renderWithTableContext(
         <DataTableDocumentToolbarBtn
@@ -521,7 +521,7 @@ describe('document selection', () => {
     });
 
     it('should call setIsCompareActive when the button is clicked', async () => {
-      const setIsCompareActive = jest.fn();
+      const setIsCompareActive = vi.fn();
 
       const { getButton } = renderCompareBtn({ setIsCompareActive });
 
@@ -536,7 +536,7 @@ describe('document selection', () => {
 
     it('should disable the button if limit is reached', async () => {
       const selectedDocIds = Array.from({ length: 500 }, (_, i) => i.toString());
-      const setIsCompareActive = jest.fn();
+      const setIsCompareActive = vi.fn();
 
       const { getButton } = renderCompareBtn({ selectedDocIds, setIsCompareActive });
 

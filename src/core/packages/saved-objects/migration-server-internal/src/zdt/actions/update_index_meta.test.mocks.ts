@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const updateMappingsMock = jest.fn();
+import type { Mock } from 'vitest';
+export const updateMappingsMock: Mock = vi.fn();
 
-jest.doMock('../../actions/update_mappings', () => {
-  const actual = jest.requireActual('../../actions/update_mappings');
-  return {
+vi.doMock('../../actions/update_mappings', async () => {
+  const actual = await vi.importActual('../../actions/update_mappings');
+  const mockedModule = {
     ...actual,
     updateMappings: updateMappingsMock,
   };
+  return { ...mockedModule, default: mockedModule };
 });

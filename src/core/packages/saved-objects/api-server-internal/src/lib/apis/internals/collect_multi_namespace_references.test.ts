@@ -90,7 +90,7 @@ describe('collectMultiNamespaceReferences', () => {
       client,
       serializer,
       getIndexForType: (type: string) => `index-for-${type}`,
-      createPointInTimeFinder: jest.fn() as CreatePointInTimeFinderFn,
+      createPointInTimeFinder: vi.fn() as CreatePointInTimeFinderFn,
       securityExtension,
       objects,
       options,

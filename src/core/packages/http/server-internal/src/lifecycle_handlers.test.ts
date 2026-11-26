@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import type {
   KibanaRequest,
   RouteMethod,
@@ -33,13 +34,12 @@ import {
 } from './lifecycle_handlers';
 
 import type { HttpConfig } from './http_config';
-import { loggerMock } from '@kbn/logging-mocks';
-import type { Logger } from '@kbn/logging';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 const createGetAuthState = (user?: Partial<AuthenticatedUser>): GetAuthState => {
-  return jest
+  return vi
     .fn()
     .mockReturnValue(
       user
@@ -48,23 +48,24 @@ const createGetAuthState = (user?: Partial<AuthenticatedUser>): GetAuthState => 
     );
 };
 
-type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
-type PreAuthToolkitMock = jest.Mocked<OnPreAuthToolkit>;
+type ToolkitMock = Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
+type PreAuthToolkitMock = Mocked<OnPreAuthToolkit>;
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 
 const createToolkit = (): ToolkitMock => {
+  const next = vi.fn();
   return {
-    render: jest.fn(),
-    next: jest.fn(),
-    rewriteUrl: jest.fn(),
-    authzResultNext: jest.fn(),
+    render: vi.fn(),
+    next,
+    rewriteUrl: vi.fn(),
+    authzResultNext: vi.fn(),
   };
 };
 
 const createPreAuthToolkit = (): PreAuthToolkitMock => {
   return {
-    next: jest.fn(),
+    next: vi.fn(),
   };
 };
 
@@ -96,7 +97,7 @@ const forgeRequest = ({
 };
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('xsrf post-auth handler', () => {
@@ -348,13 +349,13 @@ describe('xsrf post-auth handler', () => {
         label: 'authenticated status but null state object',
         config: apikeyBearerConfig,
         getAuthState: (): GetAuthState =>
-          jest.fn().mockReturnValue({ status: AuthStatus.authenticated, state: null }),
+          vi.fn().mockReturnValue({ status: AuthStatus.authenticated, state: null }),
       },
       {
         label: 'http_authentication_scheme missing from state',
         config: apikeyBearerConfig,
         getAuthState: (): GetAuthState =>
-          jest.fn().mockReturnValue({
+          vi.fn().mockReturnValue({
             status: AuthStatus.authenticated,
             // Simulates minimal-auth proxy where http_authentication_scheme is not present
             state: { username: 'test' } as any,
@@ -379,7 +380,7 @@ describe('xsrf post-auth handler', () => {
 describe('excludeRoutes pre-auth handler', () => {
   let toolkit: PreAuthToolkitMock;
   let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
-  let logger: jest.Mocked<Logger>;
+  let logger: MockedLogger;
 
   beforeEach(() => {
     toolkit = createPreAuthToolkit();
@@ -480,7 +481,7 @@ describe('versionCheck post-auth handler', () => {
 describe('restrictInternal post-auth handler', () => {
   let toolkit: ToolkitMock;
   let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
-  let logger: jest.Mocked<Logger>;
+  let logger: MockedLogger;
   let config: HttpConfig;
 
   beforeEach(() => {
@@ -804,7 +805,7 @@ describe('deprecation header pre-response handler', () => {
 });
 
 describe('build number mismatch logger on error pre-response handler', () => {
-  let logger: jest.Mocked<Logger>;
+  let logger: MockedLogger;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -835,7 +836,7 @@ describe('build number mismatch logger on error pre-response handler', () => {
     [999] /* and not so common... */,
   ];
   it.each(badStatusCodeTestCases)(
-    'logs for %p responses and newer client builds',
+    'logs for %o responses and newer client builds',
     (responseStatusCode) => {
       const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
       const request = forgeRequest({ buildNr: '124' });
@@ -848,7 +849,7 @@ describe('build number mismatch logger on error pre-response handler', () => {
     }
   );
 
-  it.each(badStatusCodeTestCases)('logs for %p responses and older client builds', (statusCode) => {
+  it.each(badStatusCodeTestCases)('logs for %o responses and older client builds', (statusCode) => {
     const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
     const request = forgeRequest({ buildNr: '122' });
     const response: OnPreResponseInfo = { statusCode };
@@ -859,7 +860,7 @@ describe('build number mismatch logger on error pre-response handler', () => {
     );
   });
 
-  it.each([[200], [201], [301], [302]])('does not log for %p responses', (statusCode) => {
+  it.each([[200], [201], [301], [302]])('does not log for %o responses', (statusCode) => {
     const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
     const request = forgeRequest({ buildNr: '124' });
     const response: OnPreResponseInfo = { statusCode };
@@ -868,7 +869,7 @@ describe('build number mismatch logger on error pre-response handler', () => {
   });
 
   it.each([['foo'], [['yes']], [true], [null], [[]], [undefined]])(
-    'ignores bogus client build numbers like %p',
+    'ignores bogus client build numbers like %o',
     (bogusBuild) => {
       const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
       const request = forgeRequest({ buildNr: bogusBuild as any });

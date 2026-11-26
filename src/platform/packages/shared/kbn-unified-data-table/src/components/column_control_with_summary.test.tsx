@@ -15,7 +15,7 @@ import { ColumnControlWithSummary } from './column_control_with_summary';
 
 describe('ColumnControlWithSummary', () => {
   it('injects the Pin summary toggle above the Columns popover content', async () => {
-    const onChangeShowSummaryColumn = jest.fn();
+    const onChangeShowSummaryColumn = vi.fn();
 
     render(
       <EuiThemeProvider>

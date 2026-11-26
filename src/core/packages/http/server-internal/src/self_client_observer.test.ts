@@ -60,7 +60,7 @@ describe('self-call observer', () => {
 
     expect(invoke(preResponse, request)).toBe(responseToolkit.continue);
     expect(log.debug).toHaveBeenCalledTimes(1);
-    const serializedLog = JSON.stringify((log.debug as jest.Mock).mock.calls);
+    const serializedLog = JSON.stringify(log.debug.mock.calls);
     expect(serializedLog).not.toContain('raw-id');
     expect(serializedLog).not.toContain('filter=raw-value');
   });

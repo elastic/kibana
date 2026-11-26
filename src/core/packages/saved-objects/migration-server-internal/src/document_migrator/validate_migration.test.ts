@@ -8,7 +8,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectMigrationFn,
+  SavedObjectsType,
+  SavedObjectsModelVersion,
+} from '@kbn/core-saved-objects-server';
 import { validateTypeMigrations } from './validate_migrations';
 
 describe('validateTypeMigrations', () => {
@@ -19,7 +23,7 @@ describe('validateTypeMigrations', () => {
     changes: [
       {
         type: 'data_backfill',
-        backfillFn: jest.fn().mockReturnValue({ attributes: {} }),
+        backfillFn: vi.fn().mockReturnValue({ attributes: {} }),
       },
     ],
   };
@@ -49,8 +53,8 @@ describe('validateTypeMigrations', () => {
         convertToMultiNamespaceTypeVersion: '3.1.1',
         namespaceType: 'multiple',
         migrations: {
-          bar: jest.fn(),
-          '1.2.3': jest.fn(),
+          bar: vi.fn<SavedObjectMigrationFn>(),
+          '1.2.3': vi.fn<SavedObjectMigrationFn>(),
         },
         schemas: {
           '1.2.3': schema.object({ bar: schema.string() }),
@@ -104,7 +108,7 @@ describe('validateTypeMigrations', () => {
         migrations: {
           '1.2.3': {
             deferred: false,
-            transform: jest.fn(),
+            transform: vi.fn(),
           },
         },
       });
@@ -117,14 +121,14 @@ describe('validateTypeMigrations', () => {
         const type = createType({
           name: 'foo',
           migrations: {
-            '8.11.0': jest.fn(),
+            '8.11.0': vi.fn<SavedObjectMigrationFn>(),
           },
         });
 
         expect(() =>
           validate({ type, kibanaVersion: '8.11.0' })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Migration for type foo for version 8.11.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
+          `[Error: Migration for type foo for version 8.11.0 registered after globalSwitchToModelVersionAt (8.10.0)]`
         );
       });
 
@@ -139,7 +143,7 @@ describe('validateTypeMigrations', () => {
         expect(() =>
           validate({ type, kibanaVersion: '8.11.0' })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Schema for type foo for version 8.11.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
+          `[Error: Schema for type foo for version 8.11.0 registered after globalSwitchToModelVersionAt (8.10.0)]`
         );
       });
 
@@ -147,14 +151,14 @@ describe('validateTypeMigrations', () => {
         const type = createType({
           name: 'foo',
           migrations: {
-            '8.10.0': jest.fn(),
+            '8.10.0': vi.fn<SavedObjectMigrationFn>(),
           },
         });
 
         expect(() =>
           validate({ type, kibanaVersion: '8.10.0' })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Migration for type foo for version 8.10.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
+          `[Error: Migration for type foo for version 8.10.0 registered after globalSwitchToModelVersionAt (8.10.0)]`
         );
       });
 
@@ -169,7 +173,7 @@ describe('validateTypeMigrations', () => {
         expect(() =>
           validate({ type, kibanaVersion: '8.10.0' })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Schema for type foo for version 8.10.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
+          `[Error: Schema for type foo for version 8.10.0 registered after globalSwitchToModelVersionAt (8.10.0)]`
         );
       });
 
@@ -177,7 +181,7 @@ describe('validateTypeMigrations', () => {
         const type = createType({
           name: 'foo',
           migrations: {
-            '8.7.0': jest.fn(),
+            '8.7.0': vi.fn<SavedObjectMigrationFn>(),
           },
         });
 
@@ -219,7 +223,7 @@ describe('validateTypeMigrations', () => {
       });
 
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
-        `"Model version must be an integer"`
+        `[Error: Model version must be an integer]`
       );
     });
 
@@ -232,7 +236,7 @@ describe('validateTypeMigrations', () => {
       });
 
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: model versioning must start with version 1"`
+        `[Error: Type foo: model versioning must start with version 1]`
       );
     });
 
@@ -247,7 +251,7 @@ describe('validateTypeMigrations', () => {
       });
 
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: gaps between model versions aren't allowed (missing versions: 2,4,5)"`
+        `[Error: Type foo: gaps between model versions aren't allowed (missing versions: 2,4,5)]`
       );
     });
 
@@ -346,7 +350,7 @@ describe('validateTypeMigrations', () => {
       });
 
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: mappings added on model versions not present on the global mappings definition: field2.type"`
+        `[Error: Type foo: mappings added on model versions not present on the global mappings definition: field2.type]`
       );
     });
 
@@ -412,7 +416,7 @@ describe('validateTypeMigrations', () => {
       });
 
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: mappings added on model versions differs from the global mappings definition: field2.type"`
+        `[Error: Type foo: mappings added on model versions differs from the global mappings definition: field2.type]`
       );
     });
 

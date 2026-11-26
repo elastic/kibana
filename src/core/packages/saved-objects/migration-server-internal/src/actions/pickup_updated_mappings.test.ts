@@ -15,7 +15,7 @@ import { pickupUpdatedMappings } from './pickup_updated_mappings';
 
 describe('pickupUpdatedMappings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls both handlers when the promise rejection cannot be retried by either', async () => {
@@ -31,8 +31,8 @@ describe('pickupUpdatedMappings', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -56,8 +56,8 @@ describe('pickupUpdatedMappings', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -96,8 +96,8 @@ describe('pickupUpdatedMappings', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );

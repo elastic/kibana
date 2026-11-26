@@ -28,16 +28,19 @@ const SANDBOX_KIBANA_CONFIG = join(
   'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/kibana.sandbox.yml'
 );
 
-const loadServers = (modulePath: string, env: Record<string, string>): ScoutServerConfig => {
-  let servers: ScoutServerConfig | undefined;
-  jest.isolateModules(() => {
-    Object.assign(process.env, env);
-    ({ servers } = jest.requireActual(modulePath));
-  });
+const loadServers = async (
+  modulePath: string,
+  env: Record<string, string>
+): Promise<ScoutServerConfig> => {
+  vi.resetModules();
+  Object.assign(process.env, env);
+  const { servers } = await vi.importActual<{ servers?: ScoutServerConfig }>(modulePath);
   if (!servers) throw new Error(`${modulePath} failed to load`);
   return servers;
 };
 
+// The first load transforms the whole config module graph, which can exceed the default test
+// timeout on a busy machine; Jest loaded it synchronously, outside its timeout.
 describe.each([
   {
     arch: 'stateful',
@@ -49,166 +52,175 @@ describe.each([
     configPath: './serverless/observability_complete.serverless.config',
     tracingPath: '../evals_tracing/serverless/observability_complete.serverless.config',
   },
-])('evals_nightshift_investigations config set ($arch)', ({ arch, configPath, tracingPath }) => {
-  const originalEnv = process.env;
+])(
+  'evals_nightshift_investigations config set ($arch)',
+  ({ arch, configPath, tracingPath }) => {
+    const originalEnv = process.env;
 
-  beforeEach(() => {
-    process.env = { ...originalEnv };
-    delete process.env.NIGHTSHIFT_DATASETS;
-    delete process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
-    delete process.env.NIGHTSHIFT_DECISION_TREES;
-    delete process.env.NIGHTSHIFT_KNOWLEDGE;
-    for (const key of Object.keys(process.env)) {
-      if (key.startsWith('SANDBOX_')) delete process.env[key];
-    }
-  });
-
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
-  it(`runs on the ${arch} evals_tracing config`, () => {
-    const servers = loadServers(configPath, { SANDBOX_KIBANA_CONFIG });
-    expect(servers.serverless ?? false).toBe(arch === 'serverless');
-    if (arch === 'serverless') {
-      expect(servers.kbnTestServer.serverArgs).toContain('--serverless=oblt');
-    }
-  });
-
-  // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
-  it.each([undefined, 'wiki-optimize', 'trace-only', 'all'])(
-    'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
-    (selection) => {
-      const servers = loadServers(configPath, {
-        SANDBOX_API_KEY: 'key',
-        ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
-      });
-      const tracing = loadServers(tracingPath, {});
-      expect(servers.kbnTestServer.serverArgs).toEqual([
-        ...tracing.kbnTestServer.serverArgs.filter(
-          (arg: string) => !arg.startsWith('--telemetry.tracing.exporters=')
-        ),
-        `--config=${join(__dirname, 'kibana.tracing.yml')}`,
-      ]);
-    }
-  );
-
-  it('enables the investigation engine and loads the sandbox config with SANDBOX_KIBANA_CONFIG', () => {
-    const args = loadServers(configPath, { SANDBOX_KIBANA_CONFIG }).kbnTestServer.serverArgs;
-
-    expect(NIGHTSHIFT_ENABLED_FLAG).toBeTruthy();
-    expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`);
-    expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
-    expect(args).toContain('--xpack.security.serviceAccounts.enabled=true');
-    expect(args).toContain('--xpack.evals.enabled=true');
-    expect(args).toContain('--xpack.evals.mode=full');
-    expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
-      `--config=${join(__dirname, 'kibana.tracing.yml')}`,
-      `--config=${SANDBOX_KIBANA_CONFIG}`,
-    ]);
-    expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
-  });
-
-  it('pauses online evals, so investigations are judged only by the suite', () => {
-    const args = loadServers(configPath, { SANDBOX_KIBANA_CONFIG }).kbnTestServer.serverArgs;
-
-    expect(NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG).toBeTruthy();
-    expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG}=true`);
-  });
-
-  it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', () => {
-    expect(() =>
-      loadServers(configPath, { SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
-    ).toThrow(
-      'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
-    );
-  });
-
-  it('reserves capacity for sixteen investigations and five background tasks', () => {
-    const servers = loadServers(configPath, { SANDBOX_KIBANA_CONFIG });
-    expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
-  });
-
-  it('loads the optional connector set YAML and keeps tracing exporter headers in the environment', () => {
-    const connectorsConfig = join(SANDBOX_KIBANA_CONFIG, '../connector_sets/default.yml');
-    const exporters = JSON.stringify([
-      {
-        http: {
-          url: 'https://traces.example.com',
-          headers: { Authorization: 'ApiKey trace-test-key' },
-        },
-      },
-    ]);
-    const servers = loadServers(configPath, {
-      SANDBOX_KIBANA_CONFIG,
-      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: connectorsConfig,
-      TRACING_EXPORTERS: exporters,
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+      delete process.env.NIGHTSHIFT_DATASETS;
+      delete process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
+      delete process.env.NIGHTSHIFT_DECISION_TREES;
+      delete process.env.NIGHTSHIFT_KNOWLEDGE;
+      for (const key of Object.keys(process.env)) {
+        if (key.startsWith('SANDBOX_')) delete process.env[key];
+      }
     });
-    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${connectorsConfig}`);
-    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
-    expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
-  });
 
-  it('keeps exporter headers out of sandbox-less process arguments', () => {
-    const exporters = JSON.stringify([
-      { http: { url: 'https://traces.example.com', headers: { Authorization: 'tracing-key' } } },
-    ]);
-    const servers = loadServers(configPath, { TRACING_EXPORTERS: exporters });
-    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('tracing-key');
-    expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
-    expect(servers.kbnTestServer.serverArgs).toContain(
-      `--config=${join(__dirname, 'kibana.tracing.yml')}`
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it(`runs on the ${arch} evals_tracing config`, async () => {
+      const servers = await loadServers(configPath, { SANDBOX_KIBANA_CONFIG });
+      expect(servers.serverless ?? false).toBe(arch === 'serverless');
+      if (arch === 'serverless') {
+        expect(servers.kbnTestServer.serverArgs).toContain('--serverless=oblt');
+      }
+    });
+
+    // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
+    it.each([undefined, 'wiki-optimize', 'trace-only', 'all'])(
+      'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
+      async (selection) => {
+        const servers = await loadServers(configPath, {
+          SANDBOX_API_KEY: 'key',
+          ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
+        });
+        const tracing = await loadServers(tracingPath, {});
+        expect(servers.kbnTestServer.serverArgs).toEqual([
+          ...tracing.kbnTestServer.serverArgs.filter(
+            (arg: string) => !arg.startsWith('--telemetry.tracing.exporters=')
+          ),
+          `--config=${join(__dirname, 'kibana.tracing.yml')}`,
+        ]);
+      }
     );
-  });
 
-  const knowledgeArgsFor = (env: Record<string, string> = {}) =>
-    loadServers(configPath, { SANDBOX_KIBANA_CONFIG, ...env }).kbnTestServer.serverArgs.filter(
-      (arg: string) =>
-        /nightshift_investigations\.(wiki|memory|decision_trees|learning)\./.test(arg)
-    );
+    it('enables the investigation engine and loads the sandbox config with SANDBOX_KIBANA_CONFIG', async () => {
+      const args = (await loadServers(configPath, { SANDBOX_KIBANA_CONFIG })).kbnTestServer
+        .serverArgs;
 
-  // Decision trees default on and do not require Wiki, so leaving their flag out would turn them on.
-  it('keeps every knowledge system off without NIGHTSHIFT_KNOWLEDGE', () => {
-    expect(knowledgeArgsFor({ NIGHTSHIFT_DATASETS: 'reinforcement' })).toEqual([
-      '--xpack.nightshift_investigations.wiki.enabled=false',
-      '--xpack.nightshift_investigations.memory.enabled=false',
-      '--xpack.nightshift_investigations.decision_trees.enabled=false',
-    ]);
-  });
+      expect(NIGHTSHIFT_ENABLED_FLAG).toBeTruthy();
+      expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`);
+      expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
+      expect(args).toContain('--xpack.security.serviceAccounts.enabled=true');
+      expect(args).toContain('--xpack.evals.enabled=true');
+      expect(args).toContain('--xpack.evals.mode=full');
+      expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
+        `--config=${join(__dirname, 'kibana.tracing.yml')}`,
+        `--config=${SANDBOX_KIBANA_CONFIG}`,
+      ]);
+      expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
+    });
 
-  it('turns on only the selected knowledge systems and freezes learning', () => {
-    expect(knowledgeArgsFor({ NIGHTSHIFT_KNOWLEDGE: 'memory' })).toEqual([
-      '--xpack.nightshift_investigations.wiki.enabled=false',
-      '--xpack.nightshift_investigations.memory.enabled=true',
-      '--xpack.nightshift_investigations.decision_trees.enabled=false',
-      '--xpack.nightshift_investigations.learning.enabled=false',
-    ]);
-  });
+    it('pauses online evals, so investigations are judged only by the suite', async () => {
+      const args = (await loadServers(configPath, { SANDBOX_KIBANA_CONFIG })).kbnTestServer
+        .serverArgs;
 
-  it('runs decision trees without Wiki', () => {
-    expect(knowledgeArgsFor({ NIGHTSHIFT_KNOWLEDGE: 'decision-trees' })).toEqual([
-      '--xpack.nightshift_investigations.wiki.enabled=false',
-      '--xpack.nightshift_investigations.memory.enabled=false',
-      '--xpack.nightshift_investigations.decision_trees.enabled=true',
-      '--xpack.nightshift_investigations.learning.enabled=false',
-    ]);
-  });
+      expect(NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG).toBeTruthy();
+      expect(args).toContain(
+        `--feature_flags.overrides.${NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG}=true`
+      );
+    });
 
-  // The live reinforcement mode waits on the post-run hook, which learning gates.
-  it('enables decision trees and keeps learning on when the reinforcement hook exported NIGHTSHIFT_DECISION_TREES', () => {
-    expect(knowledgeArgsFor({ NIGHTSHIFT_DECISION_TREES: 'true' })).toEqual([
-      '--xpack.nightshift_investigations.wiki.enabled=false',
-      '--xpack.nightshift_investigations.memory.enabled=false',
-      '--xpack.nightshift_investigations.decision_trees.enabled=true',
-    ]);
-  });
+    it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', async () => {
+      await expect(
+        loadServers(configPath, { SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
+      ).rejects.toThrow(
+        'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
+      );
+    });
 
-  it('fails fast when the connector set YAML is missing', () => {
-    expect(() =>
-      loadServers(configPath, {
+    it('reserves capacity for sixteen investigations and five background tasks', async () => {
+      const servers = await loadServers(configPath, { SANDBOX_KIBANA_CONFIG });
+      expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
+    });
+
+    it('loads the optional connector set YAML and keeps tracing exporter headers in the environment', async () => {
+      const connectorsConfig = join(SANDBOX_KIBANA_CONFIG, '../connector_sets/default.yml');
+      const exporters = JSON.stringify([
+        {
+          http: {
+            url: 'https://traces.example.com',
+            headers: { Authorization: 'ApiKey trace-test-key' },
+          },
+        },
+      ]);
+      const servers = await loadServers(configPath, {
         SANDBOX_KIBANA_CONFIG,
-        NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: '/missing.yml',
-      })
-    ).toThrow('NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG references a missing file');
-  });
-});
+        NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: connectorsConfig,
+        TRACING_EXPORTERS: exporters,
+      });
+      expect(servers.kbnTestServer.serverArgs).toContain(`--config=${connectorsConfig}`);
+      expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
+      expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+    });
+
+    it('keeps exporter headers out of sandbox-less process arguments', async () => {
+      const exporters = JSON.stringify([
+        { http: { url: 'https://traces.example.com', headers: { Authorization: 'tracing-key' } } },
+      ]);
+      const servers = await loadServers(configPath, { TRACING_EXPORTERS: exporters });
+      expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('tracing-key');
+      expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+      expect(servers.kbnTestServer.serverArgs).toContain(
+        `--config=${join(__dirname, 'kibana.tracing.yml')}`
+      );
+    });
+
+    const knowledgeArgsFor = async (env: Record<string, string> = {}) =>
+      (
+        await loadServers(configPath, { SANDBOX_KIBANA_CONFIG, ...env })
+      ).kbnTestServer.serverArgs.filter((arg: string) =>
+        /nightshift_investigations\.(wiki|memory|decision_trees|learning)\./.test(arg)
+      );
+
+    // Decision trees default on and do not require Wiki, so leaving their flag out would turn them on.
+    it('keeps every knowledge system off without NIGHTSHIFT_KNOWLEDGE', async () => {
+      expect(await knowledgeArgsFor({ NIGHTSHIFT_DATASETS: 'reinforcement' })).toEqual([
+        '--xpack.nightshift_investigations.wiki.enabled=false',
+        '--xpack.nightshift_investigations.memory.enabled=false',
+        '--xpack.nightshift_investigations.decision_trees.enabled=false',
+      ]);
+    });
+
+    it('turns on only the selected knowledge systems and freezes learning', async () => {
+      expect(await knowledgeArgsFor({ NIGHTSHIFT_KNOWLEDGE: 'memory' })).toEqual([
+        '--xpack.nightshift_investigations.wiki.enabled=false',
+        '--xpack.nightshift_investigations.memory.enabled=true',
+        '--xpack.nightshift_investigations.decision_trees.enabled=false',
+        '--xpack.nightshift_investigations.learning.enabled=false',
+      ]);
+    });
+
+    it('runs decision trees without Wiki', async () => {
+      expect(await knowledgeArgsFor({ NIGHTSHIFT_KNOWLEDGE: 'decision-trees' })).toEqual([
+        '--xpack.nightshift_investigations.wiki.enabled=false',
+        '--xpack.nightshift_investigations.memory.enabled=false',
+        '--xpack.nightshift_investigations.decision_trees.enabled=true',
+        '--xpack.nightshift_investigations.learning.enabled=false',
+      ]);
+    });
+
+    // The live reinforcement mode waits on the post-run hook, which learning gates.
+    it('enables decision trees and keeps learning on when the reinforcement hook exported NIGHTSHIFT_DECISION_TREES', async () => {
+      expect(await knowledgeArgsFor({ NIGHTSHIFT_DECISION_TREES: 'true' })).toEqual([
+        '--xpack.nightshift_investigations.wiki.enabled=false',
+        '--xpack.nightshift_investigations.memory.enabled=false',
+        '--xpack.nightshift_investigations.decision_trees.enabled=true',
+      ]);
+    });
+
+    it('fails fast when the connector set YAML is missing', async () => {
+      await expect(
+        loadServers(configPath, {
+          SANDBOX_KIBANA_CONFIG,
+          NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: '/missing.yml',
+        })
+      ).rejects.toThrow('NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG references a missing file');
+    });
+  },
+  30_000
+);

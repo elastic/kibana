@@ -10,17 +10,19 @@
 import sinon from 'sinon';
 import { errors as esErrors } from '@elastic/elasticsearch';
 
+import { vi } from 'vitest';
 import { convertEsError } from './errors';
-import * as convertEsErrorNS from './errors';
 
 import { callIndexAliasApi, callFieldCapsApi } from './es_api';
 
+vi.mock('./errors', { spy: true });
+
+beforeEach(() => {
+  convertEsError.mockClear();
+});
+
 describe('server/index_patterns/service/lib/es_api', () => {
   describe('#callIndexAliasApi()', () => {
-    let sandbox;
-    beforeEach(() => (sandbox = sinon.createSandbox()));
-    afterEach(() => sandbox.restore());
-
     it('calls indices.getAlias() via callCluster', async () => {
       const getAlias = sinon.stub();
       const callCluster = {
@@ -83,7 +85,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const esError = new Error('esError');
       const convertedError = new Error('convertedError');
 
-      sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
+      convertEsError.mockImplementationOnce(() => {
+        throw convertedError;
+      });
       const getAlias = sinon.stub(async () => {
         throw esError;
       });
@@ -98,18 +102,14 @@ describe('server/index_patterns/service/lib/es_api', () => {
         throw new Error('expected callIndexAliasApi() to throw');
       } catch (error) {
         expect(error).toBe(convertedError);
-        sinon.assert.calledOnce(convertEsError);
-        expect(convertEsError.args[0][0]).toBe(indices);
-        expect(convertEsError.args[0][1]).toBe(esError);
+        expect(convertEsError).toHaveBeenCalledTimes(1);
+        expect(convertEsError.mock.calls[0][0]).toBe(indices);
+        expect(convertEsError.mock.calls[0][1]).toBe(esError);
       }
     });
   });
 
   describe('#callFieldCapsApi()', () => {
-    let sandbox;
-    beforeEach(() => (sandbox = sinon.createSandbox()));
-    afterEach(() => sandbox.restore());
-
     const createNoSuchRemoteClusterError = (cluster) =>
       new esErrors.ResponseError({
         statusCode: 404,
@@ -190,7 +190,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const esError = new Error('esError');
       const convertedError = new Error('convertedError');
 
-      sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
+      convertEsError.mockImplementationOnce(() => {
+        throw convertedError;
+      });
       const fieldCaps = sinon.spy(async () => {
         throw esError;
       });
@@ -205,9 +207,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
         throw new Error('expected callFieldCapsApi() to throw');
       } catch (error) {
         expect(error).toBe(convertedError);
-        sinon.assert.calledOnce(convertEsError);
-        expect(convertEsError.args[0][0]).toBe(indices);
-        expect(convertEsError.args[0][1]).toBe(esError);
+        expect(convertEsError).toHaveBeenCalledTimes(1);
+        expect(convertEsError.mock.calls[0][0]).toBe(indices);
+        expect(convertEsError.mock.calls[0][1]).toBe(esError);
       }
     });
 

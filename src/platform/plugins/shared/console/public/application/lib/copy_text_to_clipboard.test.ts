@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
 import { copyToClipboard } from '@elastic/eui';
 import { copyTextToClipboard } from './copy_text_to_clipboard';
 
-jest.mock('@elastic/eui', () => ({
-  copyToClipboard: jest.fn(),
-}));
+vi.mock('@elastic/eui', () => {
+  const mockedModule = {
+    copyToClipboard: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-const mockCopyToClipboard = copyToClipboard as jest.MockedFunction<typeof copyToClipboard>;
+const mockCopyToClipboard = copyToClipboard as MockedFunction<typeof copyToClipboard>;
 
 describe('WHEN copying text to the clipboard', () => {
   const originalClipboard = window.navigator.clipboard;
-  const writeText = jest.fn();
+  const writeText = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     Object.defineProperty(window.navigator, 'clipboard', {
       configurable: true,
       value: { writeText },

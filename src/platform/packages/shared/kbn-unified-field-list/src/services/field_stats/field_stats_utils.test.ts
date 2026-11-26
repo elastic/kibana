@@ -212,7 +212,7 @@ describe('fieldStatsUtils', function () {
 
   describe('fetchAndCalculateFieldStats()', () => {
     it('should provide data to render a number summary for some number fields (time series metric counter)', async () => {
-      const searchMock = jest.fn(async () => ({
+      const searchMock = vi.fn(async () => ({
         took: 1,
         timed_out: false,
         _shards: {
@@ -281,7 +281,7 @@ describe('fieldStatsUtils', function () {
     });
 
     it('should provide data for rendering top values and value distribution for a number field', async () => {
-      const searchMock = jest.fn(async ({ aggs }) =>
+      const searchMock = vi.fn(async ({ aggs }) =>
         aggs?.sample?.aggs?.histo
           ? {
               took: 1,
@@ -497,7 +497,7 @@ describe('fieldStatsUtils', function () {
     });
 
     it('should provide data for string top values', async () => {
-      const searchMock = jest.fn(async () => ({
+      const searchMock = vi.fn(async () => ({
         took: 3,
         timed_out: false,
         _shards: {
@@ -601,7 +601,7 @@ describe('fieldStatsUtils', function () {
     });
 
     it('should provide examples for a non-aggregatable field', async () => {
-      const searchMock = jest.fn(async () => ({
+      const searchMock = vi.fn(async () => ({
         took: 2,
         timed_out: false,
         _shards: {

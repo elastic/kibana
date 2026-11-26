@@ -14,7 +14,7 @@ describe('indexPattern expression function', () => {
   let getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
 
   beforeEach(() => {
-    getStartDependencies = jest.fn().mockResolvedValue({
+    getStartDependencies = vi.fn().mockResolvedValue({
       indexPatterns: {
         get: (id: string) => ({
           toSpec: () => ({
@@ -39,7 +39,7 @@ describe('indexPattern expression function', () => {
     await expect(async () => {
       await indexPatternDefinition().fn(null, { id: '1' }, {} as any);
     }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"A KibanaRequest is required to execute this search on the server. Please provide a request object to the expression execution params."`
+      `[Error: A KibanaRequest is required to execute this search on the server. Please provide a request object to the expression execution params.]`
     );
   });
 });

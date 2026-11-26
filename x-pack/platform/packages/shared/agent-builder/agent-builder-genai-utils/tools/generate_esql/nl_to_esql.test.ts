@@ -5,34 +5,35 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 
-jest.mock('@kbn/inference-tracing', () => ({
-  withActiveInferenceSpan: jest.fn((_name: string, _opts: unknown, fn: () => unknown) => fn()),
+vi.mock('@kbn/inference-tracing', () => ({
+  withActiveInferenceSpan: vi.fn((_name: string, _opts: unknown, fn: () => unknown) => fn()),
   ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
 }));
 
-jest.mock('@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base', () => ({
-  EsqlDocumentBase: { load: jest.fn() },
+vi.mock('@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base', () => ({
+  EsqlDocumentBase: { load: vi.fn() },
 }));
 
-jest.mock('@kbn/esql-server-utils', () => ({
-  buildServerESQLCallbacks: jest.fn().mockReturnValue({}),
+vi.mock('@kbn/esql-server-utils', () => ({
+  buildServerESQLCallbacks: vi.fn().mockReturnValue({}),
 }));
 
-jest.mock('./graph', () => ({
-  createNlToEsqlGraph: jest.fn(),
+vi.mock('./graph', () => ({
+  createNlToEsqlGraph: vi.fn(),
   requestDocumentationSchema: {},
 }));
 
-jest.mock('../index_explorer', () => ({
-  indexExplorer: jest.fn(),
+vi.mock('../index_explorer', () => ({
+  indexExplorer: vi.fn(),
 }));
 
-jest.mock('./documentation', () => ({
-  loadDocumentation: jest.fn(),
+vi.mock('./documentation', () => ({
+  loadDocumentation: vi.fn(),
   // EsqlDocEntry is imported by prompts.ts (not nl_to_esql.ts); the mock must export it
   // so that createRequestDocumentationPromptNoResource can call documentation.getDocContent(entry).
   EsqlDocEntry: {
@@ -49,7 +50,7 @@ import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { generateEsql, DEFAULT_EXECUTION_TIMEOUT_MS } from './nl_to_esql';
 
-const mockDocBase = { getDocumentation: jest.fn().mockReturnValue({}) };
+const mockDocBase = { getDocumentation: vi.fn().mockReturnValue({}) };
 const mockGraphOutput = {
   error: undefined,
   answer: 'FROM logs-test | LIMIT 10',
@@ -58,29 +59,29 @@ const mockGraphOutput = {
 };
 
 const createMockModel = () => {
-  const docInvoke = jest.fn().mockResolvedValue({ commands: ['LIMIT'], functions: ['COUNT'] });
+  const docInvoke = vi.fn().mockResolvedValue({ commands: ['LIMIT'], functions: ['COUNT'] });
   const chatModel = {
-    withStructuredOutput: jest.fn(() => ({ invoke: docInvoke })),
-    withConfig: jest.fn(() => ({ invoke: jest.fn() })),
+    withStructuredOutput: vi.fn(() => ({ invoke: docInvoke })),
+    withConfig: vi.fn(() => ({ invoke: vi.fn() })),
   };
   return { model: { chatModel } as unknown as ScopedModel, docInvoke };
 };
 
 describe('generateEsql — doc-prefetch orchestration', () => {
-  let mockGraphInvoke: jest.Mock;
+  let mockGraphInvoke: Mock;
 
   beforeEach(() => {
-    mockGraphInvoke = jest.fn().mockResolvedValue(mockGraphOutput);
-    (EsqlDocumentBase.load as jest.Mock).mockResolvedValue(mockDocBase);
-    (createNlToEsqlGraph as jest.Mock).mockReturnValue({ invoke: mockGraphInvoke });
-    (indexExplorer as jest.Mock).mockResolvedValue({ resources: [{ name: 'logs-test' }] });
-    (loadDocumentation as jest.Mock).mockResolvedValue({
-      getDocContent: jest.fn().mockReturnValue(''),
+    mockGraphInvoke = vi.fn().mockResolvedValue(mockGraphOutput);
+    (EsqlDocumentBase.load as Mock).mockResolvedValue(mockDocBase);
+    (createNlToEsqlGraph as Mock).mockReturnValue({ invoke: mockGraphInvoke });
+    (indexExplorer as Mock).mockResolvedValue({ resources: [{ name: 'logs-test' }] });
+    (loadDocumentation as Mock).mockResolvedValue({
+      getDocContent: vi.fn().mockReturnValue(''),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('pre-fetches doc keywords and passes a RequestDocumentationAction to graph.invoke when no index is provided', async () => {
@@ -90,7 +91,7 @@ describe('generateEsql — doc-prefetch orchestration', () => {
       nlQuery: 'count log lines',
       model,
       esClient: {} as ElasticsearchClient,
-      logger: { debug: jest.fn() } as unknown as Logger,
+      logger: { debug: vi.fn() } as unknown as Logger,
     });
 
     expect(docInvoke).toHaveBeenCalledTimes(1);
@@ -110,7 +111,7 @@ describe('generateEsql — doc-prefetch orchestration', () => {
       index: 'logs-test',
       model,
       esClient: {} as ElasticsearchClient,
-      logger: { debug: jest.fn() } as unknown as Logger,
+      logger: { debug: vi.fn() } as unknown as Logger,
     });
 
     expect(docInvoke).not.toHaveBeenCalled();
@@ -122,7 +123,7 @@ describe('generateEsql — doc-prefetch orchestration', () => {
 
   it('defaults execute to data and forwards schema and none', async () => {
     const { model } = createMockModel();
-    const logger = { debug: jest.fn() } as unknown as Logger;
+    const logger = { debug: vi.fn() } as unknown as Logger;
     const esClient = {} as ElasticsearchClient;
     const base = { nlQuery: 'count log lines', index: 'logs-test', model, esClient, logger };
 
@@ -147,7 +148,7 @@ describe('generateEsql — doc-prefetch orchestration', () => {
 
   it('bounds query execution to 30s by default and forwards an explicit executionTimeoutMs', async () => {
     const { model } = createMockModel();
-    const logger = { debug: jest.fn() } as unknown as Logger;
+    const logger = { debug: vi.fn() } as unknown as Logger;
     const esClient = {} as ElasticsearchClient;
     const base = { nlQuery: 'count log lines', index: 'logs-test', model, esClient, logger };
 

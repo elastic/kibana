@@ -51,7 +51,7 @@ function createClientProvider(
 
 test(`uses default client factory when one isn't set`, () => {
   const returnValue = Symbol();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(returnValue);
+  const defaultClientFactoryMock = vi.fn().mockReturnValue(returnValue);
   const request = httpServerMock.createKibanaRequest();
 
   const clientProvider = createClientProvider({
@@ -69,10 +69,10 @@ test(`uses default client factory when one isn't set`, () => {
 });
 
 test(`uses custom client factory when one is set`, () => {
-  const defaultClientFactoryMock = jest.fn();
+  const defaultClientFactoryMock = vi.fn();
   const request = httpServerMock.createKibanaRequest();
   const returnValue = Symbol();
-  const customClientFactoryMock = jest.fn().mockReturnValue(returnValue);
+  const customClientFactoryMock = vi.fn().mockReturnValue(returnValue);
 
   const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
@@ -91,8 +91,8 @@ test(`uses custom client factory when one is set`, () => {
 });
 
 test(`throws error when more than one scoped saved objects client factory is set`, () => {
-  const defaultClientFactory = jest.fn();
-  const clientFactory = jest.fn();
+  const defaultClientFactory = vi.fn();
+  const clientFactory = vi.fn();
 
   const clientProvider = createClientProvider({
     defaultClientFactory,
@@ -103,14 +103,14 @@ test(`throws error when more than one scoped saved objects client factory is set
   expect(() => {
     clientProvider.setClientFactory(clientFactory);
   }).toThrowErrorMatchingInlineSnapshot(
-    `"custom client factory is already set, unable to replace the current one"`
+    `[Error: custom client factory is already set, unable to replace the current one]`
   );
 });
 
 describe(`allows extensions to be excluded`, () => {
   const defaultClient = Symbol();
   const typeRegistry = typeRegistryMock.create();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
+  const defaultClientFactoryMock = vi.fn().mockReturnValue(defaultClient);
 
   const mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
   const encryptionExtFactory: SavedObjectsEncryptionExtensionFactory = (params: {
@@ -213,7 +213,7 @@ describe(`allows extensions to be excluded`, () => {
 
 test(`allows hidden typed to be included`, () => {
   const defaultClient = Symbol();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
+  const defaultClientFactoryMock = vi.fn().mockReturnValue(defaultClient);
   const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry: typeRegistryMock.create(),

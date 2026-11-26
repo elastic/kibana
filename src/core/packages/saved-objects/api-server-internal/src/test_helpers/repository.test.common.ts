@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockInstance, Mocked } from 'vitest';
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -270,7 +271,7 @@ export const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
 // The only alternative I can see is to use a union of all the parameter interfaces which would
 // be lengthy.
 export const setupAuthorizeFunc = (
-  jestMock: jest.MockInstance<Promise<CheckAuthorizationResult<string>>, any>,
+  jestMock: MockInstance<(...args: any) => Promise<CheckAuthorizationResult<string>>>,
   status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
 ) => {
   jestMock.mockImplementation((): Promise<CheckAuthorizationResult<string>> => {
@@ -280,7 +281,7 @@ export const setupAuthorizeFunc = (
 };
 
 export const setupAuthorizeFind = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>,
   status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
 ) => {
   mockSecurityExt.authorizeFind.mockImplementation(
@@ -291,7 +292,7 @@ export const setupAuthorizeFind = (
 };
 
 export const setupGetFindRedactTypeMap = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+  mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.getFindRedactTypeMap.mockImplementation(
     (params: GetFindRedactTypeMapParams): Promise<AuthorizationTypeMap<string>> => {
@@ -301,7 +302,7 @@ export const setupGetFindRedactTypeMap = (
 };
 
 export const setupAuthorizeAndRedactInternalBulkResolveFailure = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+  mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.authorizeAndRedactInternalBulkResolve.mockImplementation(
     (params: AuthorizeAndRedactInternalBulkResolveParams<unknown>) => {
@@ -311,7 +312,7 @@ export const setupAuthorizeAndRedactInternalBulkResolveFailure = (
 };
 
 export const setupAuthorizeAndRedactInternalBulkResolveSuccess = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+  mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.authorizeAndRedactInternalBulkResolve.mockImplementation(
     (params: AuthorizeAndRedactInternalBulkResolveParams<unknown>) => {
@@ -321,7 +322,7 @@ export const setupAuthorizeAndRedactInternalBulkResolveSuccess = (
 };
 
 export const setupAuthorizeAndRedactMultiNamespaceReferenencesFailure = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+  mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
     (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => {
@@ -331,7 +332,7 @@ export const setupAuthorizeAndRedactMultiNamespaceReferenencesFailure = (
 };
 
 export const setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+  mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
     (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => {
@@ -340,9 +341,7 @@ export const setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess = (
   );
 };
 
-export const setupRedactPassthrough = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-) => {
+export const setupRedactPassthrough = (mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>) => {
   mockSecurityExt.redactNamespaces.mockImplementation(({ savedObject: object }) => {
     return object;
   });
@@ -427,10 +426,10 @@ export const createSpySerializer = (registry: ISavedObjectTypeRegistryInternal) 
     'generateRawLegacyUrlAliasId',
     'trimIdPrefix',
   ] as Array<keyof SavedObjectsSerializer>) {
-    jest.spyOn(serializer, method);
+    vi.spyOn(serializer, method);
   }
 
-  return serializer as jest.Mocked<SavedObjectsSerializer>;
+  return serializer as Mocked<SavedObjectsSerializer>;
 };
 
 export const createDocumentMigrator = (registry: SavedObjectTypeRegistry) => {

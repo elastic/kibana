@@ -14,7 +14,7 @@ describe('hasUserDataView', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
   const soClient = savedObjectsClientMock.create();
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   it('returns false when there are no data views', async () => {
     soClient.find.mockResolvedValue({

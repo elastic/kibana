@@ -19,7 +19,7 @@ describe('PercentageModeOption', () => {
   beforeAll(() => {
     props = {
       percentageMode: true,
-      setValue: jest.fn(),
+      setValue: vi.fn(),
     };
   });
 

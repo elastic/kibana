@@ -11,8 +11,8 @@ import { debounceByKey } from './debounce_by_key';
 
 describe('debounceByKey', () => {
   test('debounce, confirm params', async () => {
-    const fn = jest.fn();
-    const fn2 = jest.fn();
+    const fn = vi.fn();
+    const fn2 = vi.fn();
 
     const debouncedFn = debounceByKey(fn, 1000);
     const debouncedFn2 = debounceByKey(fn2, 1000);

@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "vitest/globals",
       "jest",
       "node"
     ]
@@ -11,7 +12,8 @@
     "**/*.ts",
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "vitest.config.ts"
   ],
   "kbn_references": [
     "@kbn/agent-builder-common",

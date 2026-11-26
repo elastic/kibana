@@ -17,7 +17,7 @@ test(`fails on circular references`, () => {
     ensureNoUnsafeProperties({
       payload: foo,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"circular reference detected"`);
+  ).toThrowErrorMatchingInlineSnapshot(`[Error: circular reference detected]`);
 });
 
 [

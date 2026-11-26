@@ -18,7 +18,7 @@ import { createMockWorkflowContextRegistry } from './registry.mock';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
-jest.mock('./get_output_schema_for_step_type');
+vi.mock('./get_output_schema_for_step_type');
 
 describe('getContextSchemaForPath', () => {
   const definition = {
@@ -635,7 +635,7 @@ describe('getContextSchemaForStep', () => {
 
   it('traverses predecessors once per context without caching them on the graph', () => {
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const getAllPredecessorsSpy = jest.spyOn(graph, 'getAllPredecessors');
+    const getAllPredecessorsSpy = vi.spyOn(graph, 'getAllPredecessors');
 
     getContextSchemaForStep(emptyRegistry, DynamicStepContextSchema, graph, 'step-a');
 
@@ -672,16 +672,14 @@ describe('getContextSchemaForStep', () => {
 
     const mockStepNode = { id: 'step-a' };
     let getStepNodeCallCount = 0;
-    const getStepNodeSpy = jest.spyOn(workflowGraph, 'getStepNode').mockImplementation(() => {
+    const getStepNodeSpy = vi.spyOn(workflowGraph, 'getStepNode').mockImplementation(() => {
       getStepNodeCallCount++;
       if (getStepNodeCallCount <= 2) {
         return mockStepNode as ReturnType<WorkflowGraph['getStepNode']>;
       }
       return undefined;
     });
-    const getAllPredecessorsSpy = jest
-      .spyOn(workflowGraph, 'getAllPredecessors')
-      .mockReturnValue([]);
+    const getAllPredecessorsSpy = vi.spyOn(workflowGraph, 'getAllPredecessors').mockReturnValue([]);
 
     expect(() =>
       getContextSchemaForStep(emptyRegistry, baseSchema, workflowGraph, 'step-a')

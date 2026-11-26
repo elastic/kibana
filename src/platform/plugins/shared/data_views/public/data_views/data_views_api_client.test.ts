@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockInstance } from 'vitest';
 import type { HttpSetup } from '@kbn/core/public';
 import {
   http,
@@ -19,14 +20,14 @@ import { FIELDS_PATH as expectedPath, FIELDS_FOR_WILDCARD_PATH } from '../../com
 import type { GetFieldsOptions } from '../../common';
 
 describe('IndexPatternsApiClient', () => {
-  let fetchSpy: jest.SpyInstance;
-  let postSpy: jest.SpyInstance;
+  let fetchSpy: MockInstance;
+  let postSpy: MockInstance;
   let indexPatternsApiClient: DataViewsApiClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => Promise.resolve({}));
-    postSpy = jest.spyOn(http, 'post').mockImplementation(() => Promise.resolve({}));
+    vi.clearAllMocks();
+    fetchSpy = vi.spyOn(http, 'fetch').mockImplementation(() => Promise.resolve({}));
+    postSpy = vi.spyOn(http, 'post').mockImplementation(() => Promise.resolve({}));
     indexPatternsApiClient = new DataViewsApiClient(http as HttpSetup, () =>
       Promise.resolve(undefined)
     );
@@ -65,7 +66,7 @@ describe('IndexPatternsApiClient', () => {
   });
 
   test('uses global projectRouting when no explicit projectRouting is provided', async function () {
-    const getGlobalProjectRouting = jest.fn().mockReturnValue(projectRoutingMock);
+    const getGlobalProjectRouting = vi.fn().mockReturnValue(projectRoutingMock);
     const clientWithGlobalRouting = new DataViewsApiClient(
       http as HttpSetup,
       () => Promise.resolve(undefined),
@@ -86,7 +87,7 @@ describe('IndexPatternsApiClient', () => {
   test('explicit projectRouting overrides global projectRouting', async function () {
     const globalRouting = 'global-project';
     const explicitRouting = 'explicit-project';
-    const getGlobalProjectRouting = jest.fn().mockReturnValue(globalRouting);
+    const getGlobalProjectRouting = vi.fn().mockReturnValue(globalRouting);
     const clientWithGlobalRouting = new DataViewsApiClient(
       http as HttpSetup,
       () => Promise.resolve(undefined),
@@ -108,7 +109,7 @@ describe('IndexPatternsApiClient', () => {
   });
 
   test('projectRouting: undefined in options does not clobber global projectRouting', async function () {
-    const getGlobalProjectRouting = jest.fn().mockReturnValue(projectRoutingMock);
+    const getGlobalProjectRouting = vi.fn().mockReturnValue(projectRoutingMock);
     const clientWithGlobalRouting = new DataViewsApiClient(
       http as HttpSetup,
       () => Promise.resolve(undefined),
@@ -131,7 +132,7 @@ describe('IndexPatternsApiClient', () => {
   });
 
   test('uses internal path when projectRouting is present', async function () {
-    const getGlobalProjectRouting = jest.fn().mockReturnValue(projectRoutingMock);
+    const getGlobalProjectRouting = vi.fn().mockReturnValue(projectRoutingMock);
     const clientWithGlobalRouting = new DataViewsApiClient(
       http as HttpSetup,
       () => Promise.resolve(undefined),

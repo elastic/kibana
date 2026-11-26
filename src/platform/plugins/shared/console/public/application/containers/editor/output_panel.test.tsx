@@ -7,29 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { Store } from '../../stores/request';
 import { OutputPanel } from './output_panel';
 import { useRequestReadContext } from '../../contexts';
 
-jest.mock('../../contexts', () => ({
-  useRequestReadContext: jest.fn(),
-}));
+vi.mock('../../contexts', () => {
+  const mockedModule = {
+    useRequestReadContext: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('./monaco_editor_output', () => ({
-  MonacoEditorOutput: () => <div data-test-subj="mockMonacoEditorOutput" />,
-}));
+vi.mock('./monaco_editor_output', () => {
+  const mockedModule = {
+    MonacoEditorOutput: () => <div data-test-subj="mockMonacoEditorOutput" />,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('../../components/editor_content_spinner', () => ({
-  EditorContentSpinner: () => <div data-test-subj="mockEditorContentSpinner" />,
-}));
+vi.mock('../../components/editor_content_spinner', () => {
+  const mockedModule = {
+    EditorContentSpinner: () => <div data-test-subj="mockEditorContentSpinner" />,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-jest.mock('../../components/output_panel_empty_state', () => ({
-  OutputPanelEmptyState: () => <div data-test-subj="mockOutputPanelEmptyState" />,
-}));
+vi.mock('../../components/output_panel_empty_state', () => {
+  const mockedModule = {
+    OutputPanelEmptyState: () => <div data-test-subj="mockOutputPanelEmptyState" />,
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
-const mockUseRequestReadContext = useRequestReadContext as jest.MockedFunction<
+const mockUseRequestReadContext = useRequestReadContext as MockedFunction<
   typeof useRequestReadContext
 >;
 
@@ -45,7 +58,7 @@ const createStoreState = (overrides: Partial<Store> = {}): Store => {
 
 describe('OutputPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders output when request data is present', () => {

@@ -15,10 +15,10 @@ import { shutdownServers } from './server_shutdown';
 
 it('attempts Elasticsearch shutdown after process teardown fails', async () => {
   const error = new Error('process stop failed');
-  const shutdownEs = jest.fn().mockResolvedValue(undefined);
+  const shutdownEs = vi.fn().mockResolvedValue(undefined);
 
   await expect(
-    shutdownServers({ teardown: jest.fn().mockRejectedValue(error) }, shutdownEs)
+    shutdownServers({ teardown: vi.fn().mockRejectedValue(error) }, shutdownEs)
   ).rejects.toBe(error);
   expect(shutdownEs).toHaveBeenCalledTimes(1);
 });

@@ -15,7 +15,7 @@ import * as errorHandlers from './catch_retryable_es_client_errors';
 
 describe('readWithPit', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('calls esClient.search with the appropriate params', async () => {
     const client = elasticsearchClientMock.createInternalClient(
@@ -127,8 +127,8 @@ describe('readWithPit', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -172,8 +172,8 @@ describe('readWithPit', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -210,8 +210,8 @@ describe('readWithPit', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );

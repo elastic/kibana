@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "vitest/globals",
       "jest",
       "node",
       "@kbn/ambient-common-types"
@@ -21,5 +22,6 @@
   ],
   "exclude": [
     "target/**/*",
+    "vitest.config.ts"
   ]
 }

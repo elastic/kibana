@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
 import {
   mockGetConvertedObjectId,
   validateTypeMigrationsMock,
@@ -420,7 +421,7 @@ describe('DocumentMigrator', () => {
           coreMigrationVersion: 'not-a-semver',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Document \\"happy\\" has an invalid \\"coreMigrationVersion\\" [not-a-semver]. This must be a semver value."`
+        `[Error: Document "happy" has an invalid "coreMigrationVersion" [not-a-semver]. This must be a semver value.]`
       );
     });
 
@@ -438,7 +439,7 @@ describe('DocumentMigrator', () => {
           coreMigrationVersion: '8.0.2',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Document \\"wet\\" has a \\"coreMigrationVersion\\" which belongs to a more recent version of Kibana [8.0.2]. The current version is [8.0.1]."`
+        `[Error: Document "wet" has a "coreMigrationVersion" which belongs to a more recent version of Kibana [8.0.2]. The current version is [8.0.1].]`
       );
     });
 
@@ -557,7 +558,7 @@ describe('DocumentMigrator', () => {
           coreMigrationVersion: '8.8.0',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Changing a document's type during a migration is not supported."`
+        `[Error: Changing a document's type during a migration is not supported.]`
       );
     });
 
@@ -1368,10 +1369,10 @@ describe('DocumentMigrator', () => {
 
     describe('`typeMigrationVersion` core migration', () => {
       let migrator: DocumentMigrator;
-      let noop: jest.MockedFunction<(doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc>;
+      let noop: MockedFunction<(doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc>;
 
       beforeEach(() => {
-        noop = jest.fn((doc) => doc);
+        noop = vi.fn((doc) => doc);
         migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry({
@@ -1593,17 +1594,17 @@ describe('DocumentMigrator', () => {
       expect(() =>
         migrator.migrate(document, { allowDowngrade: false })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Document \\"smelly\\" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0]."`
+        `[Error: Document "smelly" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0].]`
       );
     });
   });
 
   describe('typeVersionGuesser', () => {
-    const migrationV1 = jest.fn((doc: SavedObjectUnsanitizedDoc) => ({
+    const migrationV1 = vi.fn((doc: SavedObjectUnsanitizedDoc) => ({
       ...doc,
       attributes: { ...(doc.attributes as Record<string, unknown>), v1: true },
     }));
-    const migrationV2 = jest.fn((doc: SavedObjectUnsanitizedDoc) => ({
+    const migrationV2 = vi.fn((doc: SavedObjectUnsanitizedDoc) => ({
       ...doc,
       attributes: { ...(doc.attributes as Record<string, unknown>), v2: true },
     }));
@@ -1679,7 +1680,7 @@ describe('DocumentMigrator', () => {
     });
 
     it('is not called when the document already has a typeMigrationVersion', () => {
-      const typeVersionGuesser = jest.fn(() => '0.0.0');
+      const typeVersionGuesser = vi.fn(() => '0.0.0');
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
@@ -1699,7 +1700,7 @@ describe('DocumentMigrator', () => {
     });
 
     it('receives the original document as argument', () => {
-      const typeVersionGuesser = jest.fn(() => '0.0.0');
+      const typeVersionGuesser = vi.fn(() => '0.0.0');
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({

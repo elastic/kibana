@@ -19,11 +19,14 @@ import {
 } from './json_tree_viewer';
 import { ROOT_ID, getNodeId } from './tree_model';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  copyToClipboard: jest.fn(),
-}));
-const copyToClipboardMock = jest.mocked(copyToClipboard);
+vi.mock('@elastic/eui', async () => {
+  const mockedModule = {
+    ...(await vi.importActual('@elastic/eui')),
+    copyToClipboard: vi.fn(),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
+const copyToClipboardMock = vi.mocked(copyToClipboard);
 
 const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
 const copyTestId = (path: string) => `jsonTreeViewerCopy-${getNodeId(path.split('.'))}`;
@@ -300,7 +303,9 @@ describe('JsonTreeViewer', () => {
   });
 
   describe('copying values and subtrees', () => {
-    beforeEach(() => copyToClipboardMock.mockClear());
+    beforeEach(() => {
+      copyToClipboardMock.mockClear();
+    });
 
     it('copies a collapsed object subtree as pretty-printed JSON', async () => {
       render(<JsonTreeViewer json={{ user: { name: 'Alice', city: 'Berlin' } }} />);
@@ -345,7 +350,9 @@ describe('JsonTreeViewer', () => {
   // A host can pass `formatValue` to render a leaf's value — e.g. wrapping a query's matched terms
   // in `<mark>`. The tree keeps the raw value, so copy and in-table search keep working.
   describe('formatValue', () => {
-    beforeEach(() => copyToClipboardMock.mockClear());
+    beforeEach(() => {
+      copyToClipboardMock.mockClear();
+    });
 
     // Marks a value that contains `term`, so the formatted output is distinguishable from raw text.
     const markMatch =
@@ -435,10 +442,7 @@ describe('JsonTreeViewer', () => {
 
     it('renders the host actions after the copy button on a leaf row', () => {
       render(
-        <JsonTreeViewer
-          json={{ message: 'hello' }}
-          getLeafActions={twoActions(jest.fn(), jest.fn())}
-        />
+        <JsonTreeViewer json={{ message: 'hello' }} getLeafActions={twoActions(vi.fn(), vi.fn())} />
       );
 
       const actions = within(screen.getByTestId(rowTestId('message')));
@@ -456,8 +460,8 @@ describe('JsonTreeViewer', () => {
     });
 
     it('invokes an action onClick when the button is clicked', async () => {
-      const onFilterFor = jest.fn();
-      const onFilterOut = jest.fn();
+      const onFilterFor = vi.fn();
+      const onFilterOut = vi.fn();
       render(
         <JsonTreeViewer
           json={{ message: 'hello' }}
@@ -475,10 +479,7 @@ describe('JsonTreeViewer', () => {
 
     it('moves focus across the copy and action buttons with Right/Left arrows, back to the row at the edges', async () => {
       render(
-        <JsonTreeViewer
-          json={{ message: 'hello' }}
-          getLeafActions={twoActions(jest.fn(), jest.fn())}
-        />
+        <JsonTreeViewer json={{ message: 'hello' }} getLeafActions={twoActions(vi.fn(), vi.fn())} />
       );
 
       const row = screen.getByTestId(rowTestId('message'));
@@ -504,7 +505,9 @@ describe('JsonTreeViewer', () => {
   });
 
   describe('copy all', () => {
-    beforeEach(() => copyToClipboardMock.mockClear());
+    beforeEach(() => {
+      copyToClipboardMock.mockClear();
+    });
 
     it('copies the whole document as pretty-printed JSON', async () => {
       const doc = { user: { name: 'Alice' }, count: 5 };

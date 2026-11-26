@@ -25,8 +25,8 @@ function createMockWorkflowGraph(opts: {
   predecessors?: MockGraphNode[];
 }): WorkflowGraph {
   return {
-    getStepNode: jest.fn().mockReturnValue(opts.stepNode ?? undefined),
-    getAllPredecessors: jest.fn().mockReturnValue(opts.predecessors ?? []),
+    getStepNode: vi.fn().mockReturnValue(opts.stepNode ?? undefined),
+    getAllPredecessors: vi.fn().mockReturnValue(opts.predecessors ?? []),
     // Predecessors are passed in execution order
     topologicalOrder: [...(opts.predecessors ?? []), opts.stepNode]
       .filter((node): node is MockGraphNode => node !== undefined)

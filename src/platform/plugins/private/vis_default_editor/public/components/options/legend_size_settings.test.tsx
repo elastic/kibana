@@ -41,7 +41,7 @@ describe('legend size settings', () => {
   });
 
   it('allows user to select a new option', () => {
-    const onSizeChange = jest.fn();
+    const onSizeChange = vi.fn();
 
     const instance = shallow(
       <LegendSizeSettings

@@ -141,7 +141,7 @@ describe('Data table columns', function () {
 
     describe('cell actions', () => {
       it('should replace cell actions', async () => {
-        const cellAction = jest.fn();
+        const cellAction = vi.fn();
         const actual = getEuiGridColumns({
           documentsDisplayMode: 'table',
           columns: columnsWithTimeCol,
@@ -173,7 +173,7 @@ describe('Data table columns', function () {
       });
 
       it('should append cell actions', async () => {
-        const cellAction = jest.fn();
+        const cellAction = vi.fn();
         const actual = getEuiGridColumns({
           documentsDisplayMode: 'table',
           columns: columnsWithTimeCol,
@@ -517,7 +517,7 @@ describe('Data table columns', function () {
       const getByName = dataViewWithTimefieldMock.fields.getByName.bind(
         dataViewWithTimefieldMock.fields
       );
-      const getByNameSpy = jest
+      const getByNameSpy = vi
         .spyOn(dataViewWithTimefieldMock.fields, 'getByName')
         .mockImplementation((name: string) => (name === '_source' ? undefined : getByName(name)));
 
@@ -554,7 +554,7 @@ describe('Data table columns', function () {
 
   describe('JSON column', () => {
     it('does not apply custom grid column configuration to the _source column in JSON mode', () => {
-      const customizeSourceColumn = jest.fn(({ column }) => ({
+      const customizeSourceColumn = vi.fn(({ column }) => ({
         ...column,
         displayAsText: 'Custom Summary',
         isExpandable: true,

@@ -481,7 +481,7 @@ describe('kuery AST API', () => {
       // @ts-expect-error
       delete noTypeNode.type;
       expect(() => toKqlExpression(noTypeNode)).toThrowErrorMatchingInlineSnapshot(
-        `"Unknown KQL node type: \\"undefined\\""`
+        `[Error: Unknown KQL node type: "undefined"]`
       );
     });
 

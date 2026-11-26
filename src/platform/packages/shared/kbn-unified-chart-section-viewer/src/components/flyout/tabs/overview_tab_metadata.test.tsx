@@ -16,17 +16,20 @@ import { METRIC_TYPE_DESCRIPTIONS } from '../components';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 import { METRIC_SOURCE_KIND } from '../hooks/use_metric_source_kind';
 
-jest.mock('../../../common/utils', () => ({
-  getUnitLabel: jest.fn(({ unit }) => {
-    const unitLabels: Record<string, string | undefined> = {
-      ms: 'Milliseconds',
-      bytes: 'Bytes',
-      percent: 'Percent',
-      count: undefined,
-    };
-    return unit ? unitLabels[unit] || unit : undefined;
-  }),
-}));
+vi.mock('../../../common/utils', () => {
+  const mockedModule = {
+    getUnitLabel: vi.fn(({ unit }) => {
+      const unitLabels: Record<string, string | undefined> = {
+        ms: 'Milliseconds',
+        bytes: 'Bytes',
+        percent: 'Percent',
+        count: undefined,
+      };
+      return unit ? unitLabels[unit] || unit : undefined;
+    }),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 describe('OverviewTabMetadata', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
@@ -40,7 +43,7 @@ describe('OverviewTabMetadata', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('basic rendering', () => {

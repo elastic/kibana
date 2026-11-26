@@ -16,9 +16,9 @@ import { ActionsHeader } from './actions_header';
 type ResizeCb = (dimensions: { width: number; height: number }) => void;
 const resizeCallbacks: ResizeCb[] = [];
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  return {
+vi.mock('@elastic/eui', async () => {
+  const actual = await vi.importActual('@elastic/eui');
+  const mockedModule = {
     ...actual,
     EuiResizeObserver: ({
       onResize,
@@ -31,6 +31,7 @@ jest.mock('@elastic/eui', () => {
       return children(() => {});
     },
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 const setup = (props: React.ComponentProps<typeof ActionsHeader>, headerCellPaddingPx?: number) => {

@@ -39,7 +39,7 @@ export const hashToVersionMapMock = {
 export const savedObjectTypeRegistryMock = createRegistry([
   {
     name: 'testtype',
-    migrations: { '8.2.3': jest.fn().mockImplementation((doc) => doc) },
+    migrations: { '8.2.3': vi.fn().mockImplementation((doc) => doc) },
   },
   {
     name: 'testtype2',

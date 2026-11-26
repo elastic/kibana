@@ -97,8 +97,8 @@ describe('fetchFieldExistence', () => {
   const createMockDataView = (fields: Array<Partial<DataViewField>> = []) => {
     const dataViewFields = [...fields];
     return {
-      getIndexPattern: jest.fn().mockReturnValue('test-pattern'),
-      getFieldByName: jest.fn((name) => {
+      getIndexPattern: vi.fn().mockReturnValue('test-pattern'),
+      getFieldByName: vi.fn((name) => {
         const field = dataViewFields.find((f) => f.name === name);
         return field && { ...field, toSpec: () => field };
       }),
@@ -108,9 +108,9 @@ describe('fetchFieldExistence', () => {
 
   const createMockDataViewsService = (fields: Array<Partial<DataViewField>>) => {
     return {
-      getFieldsForIndexPattern: jest.fn().mockResolvedValue(fields),
+      getFieldsForIndexPattern: vi.fn().mockResolvedValue(fields),
       // like the real refresh: applies the new mapping to the data view, keeping saved field attributes
-      refreshFields: jest.fn(async (dataView: DataView) => {
+      refreshFields: vi.fn(async (dataView: DataView) => {
         const dataViewFields = dataView.fields as unknown as Array<Partial<DataViewField>>;
         fields.forEach((field) => {
           const index = dataViewFields.findIndex(({ name }) => name === field.name);
@@ -125,7 +125,7 @@ describe('fetchFieldExistence', () => {
     } as unknown as DataViewsContract;
   };
 
-  const mockSearch = jest.fn().mockResolvedValue({});
+  const mockSearch = vi.fn().mockResolvedValue({});
 
   it.each([
     {

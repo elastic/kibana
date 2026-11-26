@@ -2,6 +2,18 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "types": [
+      "node",
+      "vitest/globals",
+      "jest",
+      "flot",
+      "@emotion/jest",
+      "@testing-library/jest-dom/vitest",
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-common-types",
+      "@kbn/ambient-storybook-types"
+    ],
   },
   "include": [
     "public/**/*"
@@ -36,5 +48,6 @@
   ],
   "exclude": [
     "target/**/*",
+    "vitest.config.ts"
   ]
 }

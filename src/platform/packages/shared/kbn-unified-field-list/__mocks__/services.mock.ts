@@ -28,13 +28,13 @@ export const getServicesMock = (): UnifiedFieldListSidebarContainerProps['servic
     dataViewFieldEditor: dataViewFieldEditorPluginMock.createStartContract(),
   };
 
-  mockedServices.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+  mockedServices.data.query.timefilter.timefilter.getTime = vi.fn(() => {
     return { from: 'now-15m', to: 'now' };
   });
 
-  mockedServices.data.query.timefilter.timefilter.calculateBounds = jest.fn(calculateBounds);
+  mockedServices.data.query.timefilter.timefilter.calculateBounds = vi.fn(calculateBounds);
 
-  mockedServices.data.query.getState = jest.fn(() => ({
+  mockedServices.data.query.getState = vi.fn(() => ({
     query: { query: '', language: 'lucene' },
     filters: [],
   }));

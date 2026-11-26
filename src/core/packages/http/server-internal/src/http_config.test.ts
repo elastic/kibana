@@ -18,13 +18,14 @@ const invalidHostnames = ['asdf$%^', '0'];
 
 let mockHostname = 'kibana-hostname';
 
-jest.mock('node:os', () => {
-  const original = jest.requireActual('node:os');
+vi.mock('node:os', async () => {
+  const original = await vi.importActual('node:os');
 
-  return {
+  const mockedModule = {
     ...original,
     hostname: () => mockHostname,
   };
+  return { ...mockedModule, default: mockedModule };
 });
 
 beforeEach(() => {
@@ -79,7 +80,7 @@ describe('requestId', () => {
         },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestId.ipAllowlist.0]: value must be a valid ipv4 or ipv6 address"`
+      `[Error: [requestId.ipAllowlist.0]: value must be a valid ipv4 or ipv6 address]`
     );
   });
 
@@ -92,7 +93,7 @@ describe('requestId', () => {
         },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
+      `[Error: [requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist]`
     );
 
     expect(() => {
@@ -103,7 +104,7 @@ describe('requestId', () => {
         },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
+      `[Error: [requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist]`
     );
   });
 });
@@ -185,17 +186,17 @@ describe('publicBaseUrl', () => {
     expect(() =>
       httpSchema.validate({ publicBaseUrl: 'myhost.com' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+      `[Error: [publicBaseUrl]: expected URI with scheme [http|https].]`
     );
     expect(() =>
       httpSchema.validate({ publicBaseUrl: '//myhost.com' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+      `[Error: [publicBaseUrl]: expected URI with scheme [http|https].]`
     );
     expect(() =>
       httpSchema.validate({ publicBaseUrl: 'ftp://myhost.com' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+      `[Error: [publicBaseUrl]: expected URI with scheme [http|https].]`
     );
   });
 
@@ -204,17 +205,17 @@ describe('publicBaseUrl', () => {
     expect(() =>
       httpSchema.validate({ publicBaseUrl: 'http://myhost.com/?a=b' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+      `[Error: [publicBaseUrl] may only contain a protocol, host, port, and pathname]`
     );
     expect(() =>
       httpSchema.validate({ publicBaseUrl: 'http://myhost.com/#a' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+      `[Error: [publicBaseUrl] may only contain a protocol, host, port, and pathname]`
     );
     expect(() =>
       httpSchema.validate({ publicBaseUrl: 'http://user:pass@myhost.com' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+      `[Error: [publicBaseUrl] may only contain a protocol, host, port, and pathname]`
     );
   });
 
@@ -226,7 +227,7 @@ describe('publicBaseUrl', () => {
         publicBaseUrl: 'https://myhost.com/',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[publicBaseUrl] must contain the [basePath]: / !== /foo"`
+      `[Error: [publicBaseUrl] must contain the [basePath]: / !== /foo]`
     );
   });
 
@@ -360,7 +361,7 @@ test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
   expect(() => httpSchema.validate({ uuid: uuidv4() })).not.toThrow();
   expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
-    `"[uuid]: must be a valid uuid"`
+    `[Error: [uuid]: must be a valid uuid]`
   );
 });
 
@@ -387,7 +388,7 @@ test('throws if xsrf.allowlist element does not start with a slash', () => {
     },
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[xsrf.allowlist.1]: must start with a slash"`
+    `[Error: [xsrf.allowlist.1]: must start with a slash]`
   );
 });
 
@@ -453,7 +454,7 @@ test('forbids the "location" custom response header', () => {
     },
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[customResponseHeaders]: The following custom response headers are not allowed to be set: location, Location, lOcAtIoN"`
+    `[Error: [customResponseHeaders]: The following custom response headers are not allowed to be set: location, Location, lOcAtIoN]`
   );
 });
 
@@ -467,7 +468,7 @@ test('forbids the "refresh" custom response header', () => {
     },
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[customResponseHeaders]: The following custom response headers are not allowed to be set: refresh, Refresh, rEfReSh"`
+    `[Error: [customResponseHeaders]: The following custom response headers are not allowed to be set: refresh, Refresh, rEfReSh]`
   );
 });
 
@@ -560,14 +561,14 @@ describe('compression.brotli', () => {
       expect(() =>
         config.schema.validate({ compression: { brotli: { quality: 12 } } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[compression.brotli.quality]: Value must be equal to or lower than [11]."`
+        `[Error: [compression.brotli.quality]: Value must be equal to or lower than [11].]`
       );
     });
     it('does not accepts value inferior to `0`', () => {
       expect(() =>
         config.schema.validate({ compression: { brotli: { quality: -1 } } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[compression.brotli.quality]: Value must be equal to or greater than [0]."`
+        `[Error: [compression.brotli.quality]: Value must be equal to or greater than [0].]`
       );
     });
   });
@@ -583,9 +584,9 @@ describe('cors', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[cors.allowOrigin]: types that failed validation:
+        [Error: [cors.allowOrigin]: types that failed validation:
         - [cors.allowOrigin.0]: array size is [0], but cannot be smaller than [1]
-        - [cors.allowOrigin.1]: array size is [0], but cannot be smaller than [1]"
+        - [cors.allowOrigin.1]: array size is [0], but cannot be smaller than [1]]
       `);
     });
 
@@ -618,9 +619,9 @@ describe('cors', () => {
           config.schema.validate({ cors: { allowOrigin: ['*', 'https://elastic.co'] } }).cors
             .allowOrigin
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[cors.allowOrigin]: types that failed validation:
+        [Error: [cors.allowOrigin]: types that failed validation:
         - [cors.allowOrigin.0.0]: expected URI with scheme [http|https].
-        - [cors.allowOrigin.1.1]: expected value to equal [*]"
+        - [cors.allowOrigin.1.1]: expected value to equal [*]]
       `);
     });
   });
@@ -631,12 +632,12 @@ describe('cors', () => {
           config.schema.validate({ cors: { allowCredentials: true, allowOrigin: ['*'] } }).cors
             .allowOrigin
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+        `[Error: [cors]: Cannot specify wildcard origin "*" with "credentials: true". Please provide a list of allowed origins.]`
       );
       expect(
         () => config.schema.validate({ cors: { allowCredentials: true } }).cors.allowOrigin
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+        `[Error: [cors]: Cannot specify wildcard origin "*" with "credentials: true". Please provide a list of allowed origins.]`
       );
     });
   });
@@ -833,7 +834,7 @@ describe('http2 protocol', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"http2 requires TLS to be enabled. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup"`
+      `[Error: http2 requires TLS to be enabled. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup]`
     );
   });
   it('throws if http2 is enabled but TLS has no suitable versions', () => {
@@ -848,7 +849,7 @@ describe('http2 protocol', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"http2 requires 'ssl.supportedProtocols' to include TLSv1.2 or TLSv1.3. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup"`
+      `[Error: http2 requires 'ssl.supportedProtocols' to include TLSv1.2 or TLSv1.3. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup]`
     );
   });
   it('does not throws if http2 is enabled and TLS is not if http2.allowUnsecure is true', () => {

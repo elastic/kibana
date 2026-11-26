@@ -13,7 +13,7 @@ import { fields } from '../filters/stubs';
 import type { DataViewBase } from './types';
 import type { Query } from '../..';
 
-jest.mock('../kuery/grammar');
+vi.mock('../kuery/grammar');
 
 describe('build query', () => {
   const indexPattern: DataViewBase = {

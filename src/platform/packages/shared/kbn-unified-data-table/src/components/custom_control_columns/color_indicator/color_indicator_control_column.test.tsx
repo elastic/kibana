@@ -16,7 +16,7 @@ import { UnifiedDataTableContext } from '../../../table_context';
 
 describe('ColorIndicatorControlColumn', () => {
   it('should render the component', () => {
-    const getRowIndicator = jest.fn(() => ({ color: 'red', label: 'error' }));
+    const getRowIndicator = vi.fn(() => ({ color: 'red', label: 'error' }));
     const column = getColorIndicatorControlColumn({
       getRowIndicator,
     });
@@ -31,7 +31,7 @@ describe('ColorIndicatorControlColumn', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );

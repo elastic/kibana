@@ -19,7 +19,7 @@ describe('LongLegendOptions', () => {
   beforeAll(() => {
     props = {
       truncateLegend: true,
-      setValue: jest.fn(),
+      setValue: vi.fn(),
     };
   });
 

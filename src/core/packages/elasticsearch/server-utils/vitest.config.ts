@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/jest',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/plugins/shared/data_views'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/data_views',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/platform/plugins/shared/data_views/{common,public,server}/**/*.{ts,tsx}',
-  ],
-};
+import { defineConfig, mergeConfig } from 'vitest/config';
+import preset from '@kbn/vitest/node_preset';
+
+export default mergeConfig(preset, defineConfig({ test: { root: import.meta.dirname } }));

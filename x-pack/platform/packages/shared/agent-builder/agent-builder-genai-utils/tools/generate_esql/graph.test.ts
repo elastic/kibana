@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MockedFunction } from 'vitest';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createNlToEsqlGraph } from './graph';
@@ -12,25 +13,25 @@ import type { EsqlLoadedDocumentation } from './documentation';
 import type { RequestDocumentationAction } from './actions';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 
-jest.mock('../utils/resources', () => ({
-  ...jest.requireActual('../utils/resources'),
-  resolveResourceForEsqlWithSamplingStats: jest.fn(),
+vi.mock('../utils/resources', async () => ({
+  ...(await vi.importActual('../utils/resources')),
+  resolveResourceForEsqlWithSamplingStats: vi.fn(),
 }));
 
-jest.mock('../utils/esql', () => ({
-  ...jest.requireActual('../utils/esql'),
-  validateEsqlQuery: jest.fn().mockResolvedValue(null),
-  executeEsql: jest.fn(),
+vi.mock('../utils/esql', async () => ({
+  ...(await vi.importActual('../utils/esql')),
+  validateEsqlQuery: vi.fn().mockResolvedValue(null),
+  executeEsql: vi.fn(),
 }));
 
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import { executeEsql, EsqlExecutionTimeoutError } from '../utils/esql';
 import { ESQLVariableType } from '@kbn/esql-types';
 
-const mockResolveResource = resolveResourceForEsqlWithSamplingStats as jest.MockedFn<
+const mockResolveResource = resolveResourceForEsqlWithSamplingStats as MockedFunction<
   typeof resolveResourceForEsqlWithSamplingStats
 >;
-const mockedExecuteEsql = jest.mocked(executeEsql);
+const mockedExecuteEsql = vi.mocked(executeEsql);
 
 const ESQL_QUERY = 'FROM logs-test | LIMIT 10';
 const GENERATE_RESPONSE = `\`\`\`esql\n${ESQL_QUERY}\n\`\`\``;
@@ -47,10 +48,10 @@ const createMockModel = (
     | string
     | { content: string; additional_kwargs?: Record<string, unknown> } = GENERATE_RESPONSE
 ) => {
-  const docModelInvoke = jest.fn().mockResolvedValue({ commands: ['LIMIT'], functions: [] });
-  const docRunnable = { withConfig: jest.fn(() => ({ invoke: docModelInvoke })) };
+  const docModelInvoke = vi.fn().mockResolvedValue({ commands: ['LIMIT'], functions: [] });
+  const docRunnable = { withConfig: vi.fn(() => ({ invoke: docModelInvoke })) };
 
-  const generateModelInvoke = jest
+  const generateModelInvoke = vi
     .fn()
     .mockResolvedValue(
       typeof generateResponse === 'string' ? { content: generateResponse } : generateResponse
@@ -58,14 +59,14 @@ const createMockModel = (
   const generateRunnable = { invoke: generateModelInvoke };
 
   const chatModel = {
-    withStructuredOutput: jest.fn(() => docRunnable),
-    withConfig: jest.fn(() => generateRunnable),
+    withStructuredOutput: vi.fn(() => docRunnable),
+    withConfig: vi.fn(() => generateRunnable),
   };
 
   return { chatModel, docModelInvoke, generateModelInvoke };
 };
 
-const createDocBase = () => ({ getDocumentation: jest.fn().mockReturnValue({}) });
+const createDocBase = () => ({ getDocumentation: vi.fn().mockReturnValue({}) });
 
 const buildGraph = (
   chatModel: ReturnType<typeof createMockModel>['chatModel'],
@@ -76,7 +77,7 @@ const buildGraph = (
     esClient: {} as ElasticsearchClient,
     docBase: docBase as any,
     documentation: {
-      getDocContent: jest.fn().mockReturnValue(''),
+      getDocContent: vi.fn().mockReturnValue(''),
     } as unknown as EsqlLoadedDocumentation,
     esqlCallbacks: {} as any,
   });
@@ -96,7 +97,7 @@ describe('createNlToEsqlGraph — requestDocumentation node', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('skips the in-graph LLM call when a precomputed RequestDocumentationAction is already in state.actions', async () => {
@@ -143,7 +144,7 @@ describe('createNlToEsqlGraph — generate_esql node', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('retries an empty completion up to maxRetries and reports that no query was generated', async () => {
@@ -195,7 +196,7 @@ describe('createNlToEsqlGraph — execute_query node', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('none execute does not call executeEsql', async () => {

@@ -15,7 +15,7 @@ import { render, screen } from '@testing-library/react';
 import { RowHeightMode } from './row_height_settings';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 
-jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
+vi.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
 
 const defaultDisplaySettingsProps = {
   headerLineCountInput: 5,
@@ -46,7 +46,7 @@ const replaceNumberInputValue = async (input: HTMLElement, value: string) => {
 describe('UnifiedDataTableAdditionalDisplaySettings', () => {
   describe('sampleSize', () => {
     it('should work correctly', async () => {
-      const onChangeSampleSizeMock = jest.fn();
+      const onChangeSampleSizeMock = vi.fn();
 
       renderDisplaySettings({
         sampleSize: 10,
@@ -68,7 +68,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
 
     it('should not execute the callback for an invalid input', async () => {
       const invalidValue = 600;
-      const onChangeSampleSizeMock = jest.fn();
+      const onChangeSampleSizeMock = vi.fn();
 
       renderDisplaySettings({
         maxAllowedSampleSize: 500,
@@ -88,7 +88,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('should render value changes correctly', async () => {
-      const onChangeSampleSizeMock = jest.fn();
+      const onChangeSampleSizeMock = vi.fn();
 
       const { rerender } = renderDisplaySettings({
         onChangeSampleSize: onChangeSampleSizeMock,
@@ -113,7 +113,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     it('should only render integers when a decimal value is provided', async () => {
       const invalidDecimalValue = 6.11;
       const validIntegerValue = 6;
-      const onChangeSampleSizeMock = jest.fn();
+      const onChangeSampleSizeMock = vi.fn();
 
       renderDisplaySettings({
         maxAllowedSampleSize: 500,
@@ -131,7 +131,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('should not fail if sample size is not step of 10', async () => {
-      const onChangeSampleSizeMock = jest.fn();
+      const onChangeSampleSizeMock = vi.fn();
 
       const customSampleSize = 9995;
       const newSampleSize = 9990;
@@ -157,7 +157,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('should not fail if sample size is less than 10', async () => {
-      const onChangeSampleSizeMock = jest.fn();
+      const onChangeSampleSizeMock = vi.fn();
 
       const customSampleSize = 5;
       const newSampleSize = 10;
@@ -185,8 +185,8 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
   describe('rowHeight', () => {
     it('should render rowHeight if onChangeRowHeight and onChangeRowHeightLines are defined', () => {
       renderDisplaySettings({
-        onChangeRowHeight: jest.fn(),
-        onChangeRowHeightLines: jest.fn(),
+        onChangeRowHeight: vi.fn(),
+        onChangeRowHeightLines: vi.fn(),
       });
 
       expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeVisible();
@@ -203,8 +203,8 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', async () => {
-      const onChangeRowHeight = jest.fn();
-      const onChangeRowHeightLines = jest.fn();
+      const onChangeRowHeight = vi.fn();
+      const onChangeRowHeightLines = vi.fn();
 
       const { rerender } = renderDisplaySettings({
         onChangeRowHeight,
@@ -240,8 +240,8 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
   describe('headerRowHeight', () => {
     it('should render headerRowHeight if onChangeHeaderRowHeight and onChangeHeaderRowHeightLines are defined', () => {
       renderDisplaySettings({
-        onChangeHeaderRowHeight: jest.fn(),
-        onChangeHeaderRowHeightLines: jest.fn(),
+        onChangeHeaderRowHeight: vi.fn(),
+        onChangeHeaderRowHeightLines: vi.fn(),
       });
 
       expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
@@ -256,8 +256,8 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('should call onChangeHeaderRowHeight and onChangeHeaderRowHeightLines when the headerRowHeight changes', async () => {
-      const onChangeHeaderRowHeight = jest.fn();
-      const onChangeHeaderRowHeightLines = jest.fn();
+      const onChangeHeaderRowHeight = vi.fn();
+      const onChangeHeaderRowHeightLines = vi.fn();
 
       const { rerender } = renderDisplaySettings({
         onChangeHeaderRowHeight,
@@ -296,13 +296,13 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}
     ) =>
       renderDisplaySettings({
-        onChangeSampleSize: jest.fn(),
-        onChangeRowHeight: jest.fn(),
-        onChangeRowHeightLines: jest.fn(),
-        onChangeHeaderRowHeight: jest.fn(),
-        onChangeHeaderRowHeightLines: jest.fn(),
-        onChangeDocumentsDisplayMode: jest.fn(),
-        onChangeJsonModeSettings: jest.fn(),
+        onChangeSampleSize: vi.fn(),
+        onChangeRowHeight: vi.fn(),
+        onChangeRowHeightLines: vi.fn(),
+        onChangeHeaderRowHeight: vi.fn(),
+        onChangeHeaderRowHeightLines: vi.fn(),
+        onChangeDocumentsDisplayMode: vi.fn(),
+        onChangeJsonModeSettings: vi.fn(),
         densityControl: <div data-test-subj="mockDensityControl">density</div>,
         ...props,
       });
@@ -335,7 +335,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('should call onChangeDocumentsDisplayMode when the view mode is switched to JSON', async () => {
-      const onChangeDocumentsDisplayMode = jest.fn();
+      const onChangeDocumentsDisplayMode = vi.fn();
 
       renderWithAllControls({ onChangeDocumentsDisplayMode });
 
@@ -385,7 +385,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('should call onChangeJsonModeSettings when a JSON setting is toggled', async () => {
-      const onChangeJsonModeSettings = jest.fn();
+      const onChangeJsonModeSettings = vi.fn();
 
       renderWithAllControls({
         documentsDisplayMode: 'json',
@@ -403,8 +403,8 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     const renderJsonMode = (props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}) =>
       renderDisplaySettings({
         documentsDisplayMode: 'json',
-        onChangeDocumentsDisplayMode: jest.fn(),
-        onChangeJsonModeSettings: jest.fn(),
+        onChangeDocumentsDisplayMode: vi.fn(),
+        onChangeJsonModeSettings: vi.fn(),
         ...props,
       });
 
@@ -428,7 +428,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('clamps values above the maximum before propagating', async () => {
-      const onChangeJsonModeSettings = jest.fn();
+      const onChangeJsonModeSettings = vi.fn();
       renderJsonMode({ jsonModeSettings: {}, onChangeJsonModeSettings });
 
       await replaceNumberInputValue(getLinesShownInput(), '999');
@@ -438,7 +438,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
 
     it('clamps values below the minimum before propagating', async () => {
-      const onChangeJsonModeSettings = jest.fn();
+      const onChangeJsonModeSettings = vi.fn();
       renderJsonMode({ jsonModeSettings: {}, onChangeJsonModeSettings });
 
       await replaceNumberInputValue(getLinesShownInput(), '3');

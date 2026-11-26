@@ -25,7 +25,7 @@ import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source
 
 const mockServices = {
   fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({
+    getDefaultInstance: vi.fn(() => ({
       convertToReact: (value: unknown) => (value ? value : '-'),
     })),
   },
@@ -70,9 +70,9 @@ describe('Unified data table source document cell rendering', () => {
   });
 
   it('passes values through appropriate formatter when `useTopLevelObjectColumns` is true', () => {
-    const mockConvertToReact = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
+    const mockConvertToReact = vi.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
     const mockFieldFormats = {
-      getDefaultInstance: jest.fn(() => ({ convertToReact: mockConvertToReact })),
+      getDefaultInstance: vi.fn(() => ({ convertToReact: mockConvertToReact })),
     };
 
     const row = build({
@@ -104,9 +104,9 @@ describe('Unified data table source document cell rendering', () => {
   });
 
   it('formats only the first `maxEntries` pairs when `useTopLevelObjectColumns` is true', () => {
-    const mockConvertToReact = jest.fn((value: unknown) => `${value}`);
+    const mockConvertToReact = vi.fn((value: unknown) => `${value}`);
     const mockFieldFormats = {
-      getDefaultInstance: jest.fn(() => ({ convertToReact: mockConvertToReact })),
+      getDefaultInstance: vi.fn(() => ({ convertToReact: mockConvertToReact })),
     };
 
     const row = build({

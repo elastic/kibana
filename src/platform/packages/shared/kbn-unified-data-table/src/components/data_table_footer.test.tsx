@@ -80,7 +80,7 @@ describe('UnifiedDataTableFooter', () => {
   });
 
   it('should render a message and the button for the last page', async () => {
-    const mockLoadMore = jest.fn();
+    const mockLoadMore = vi.fn();
 
     renderWithI18n(
       <UnifiedDataTableFooter
@@ -109,7 +109,7 @@ describe('UnifiedDataTableFooter', () => {
   });
 
   it('should render the load more button where pagination mode is set to singlePage and user has reached the bottom of the page', () => {
-    const mockLoadMore = jest.fn();
+    const mockLoadMore = vi.fn();
 
     renderWithI18n(
       <UnifiedDataTableFooter
@@ -132,7 +132,7 @@ describe('UnifiedDataTableFooter', () => {
   });
 
   it('should not render the load more button where pagination mode is set to singlePage and but the user has not reached the bottom of the page', () => {
-    const mockLoadMore = jest.fn();
+    const mockLoadMore = vi.fn();
 
     renderWithI18n(
       <UnifiedDataTableFooter
@@ -154,7 +154,7 @@ describe('UnifiedDataTableFooter', () => {
   });
 
   it('should render a disabled button when loading more', async () => {
-    const mockLoadMore = jest.fn();
+    const mockLoadMore = vi.fn();
 
     renderWithI18n(
       <UnifiedDataTableFooter

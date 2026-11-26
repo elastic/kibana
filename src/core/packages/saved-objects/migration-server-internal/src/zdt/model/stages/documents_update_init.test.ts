@@ -111,7 +111,7 @@ describe('Stage: documentsUpdateInit', () => {
       const state = createState();
       const res: ResponseType<'DOCUMENTS_UPDATE_INIT'> = Either.right('noop' as const);
 
-      const transformRawDocs = jest.fn();
+      const transformRawDocs = vi.fn();
       createDocumentTransformFnMock.mockReturnValue(transformRawDocs);
 
       const outdatedDocumentsQuery = Symbol();
@@ -137,7 +137,7 @@ describe('Stage: documentsUpdateInit', () => {
       const state = createState();
       const res: ResponseType<'DOCUMENTS_UPDATE_INIT'> = Either.right('noop' as const);
 
-      createDocumentTransformFnMock.mockReturnValue(jest.fn());
+      createDocumentTransformFnMock.mockReturnValue(vi.fn());
       getOutdatedDocumentsQueryMock.mockReturnValue(Symbol());
 
       const newState = documentsUpdateInit(
@@ -180,7 +180,7 @@ describe('Stage: documentsUpdateInit', () => {
       const state = createState();
       const res: ResponseType<'DOCUMENTS_UPDATE_INIT'> = Either.right('noop' as const);
 
-      createDocumentTransformFnMock.mockReturnValue(jest.fn());
+      createDocumentTransformFnMock.mockReturnValue(vi.fn());
       getOutdatedDocumentsQueryMock.mockReturnValue(Symbol());
 
       const newState = documentsUpdateInit(
@@ -223,7 +223,7 @@ describe('Stage: documentsUpdateInit', () => {
       const state = createState();
       const res: ResponseType<'DOCUMENTS_UPDATE_INIT'> = Either.right('noop' as const);
 
-      createDocumentTransformFnMock.mockReturnValue(jest.fn());
+      createDocumentTransformFnMock.mockReturnValue(vi.fn());
       getOutdatedDocumentsQueryMock.mockReturnValue(Symbol());
 
       const newState = documentsUpdateInit(
@@ -267,7 +267,7 @@ describe('Stage: documentsUpdateInit', () => {
       const state = createState();
       const res: ResponseType<'DOCUMENTS_UPDATE_INIT'> = Either.right('noop' as const);
 
-      createDocumentTransformFnMock.mockReturnValue(jest.fn());
+      createDocumentTransformFnMock.mockReturnValue(vi.fn());
       getOutdatedDocumentsQueryMock.mockReturnValue(Symbol());
 
       const newState = documentsUpdateInit(

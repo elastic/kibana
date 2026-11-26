@@ -13,8 +13,8 @@ import { useDataGridDensity } from './use_data_grid_density';
 import { DATA_GRID_STYLE_EXPANDED, DataGridDensity } from '../constants';
 
 const localStorageMock = {
-  get: jest.fn(),
-  set: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
 };
 
 describe('useDataGridDensity', () => {
@@ -71,7 +71,7 @@ describe('useDataGridDensity', () => {
   });
 
   it('should call provided onUpdateDataGridDensity with the updated value', () => {
-    const onUpdateDataGridDensity = jest.fn();
+    const onUpdateDataGridDensity = vi.fn();
     const { result } = renderHook(() =>
       useDataGridDensity({
         storage: localStorageMock as unknown as Storage,

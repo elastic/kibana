@@ -26,7 +26,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -49,7 +49,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -67,7 +67,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -94,7 +94,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -118,7 +118,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );

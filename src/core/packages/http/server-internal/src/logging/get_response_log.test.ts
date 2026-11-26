@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -14,9 +15,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { getEcsResponseLog, getSlimInfoResponseLog } from './get_response_log';
 
-jest.mock('./get_payload_size', () => ({
-  getResponsePayloadBytes: jest.fn().mockReturnValue(1234),
-}));
+vi.mock('./get_payload_size', () => {
+  const mockedModule = {
+    getResponsePayloadBytes: vi.fn().mockReturnValue(1234),
+  };
+  return { ...mockedModule, default: mockedModule };
+});
 
 import { getResponsePayloadBytes } from './get_payload_size';
 
@@ -64,7 +68,7 @@ describe('getEcsResponseLog', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('provides correctly formatted message', () => {
@@ -143,7 +147,7 @@ describe('getEcsResponseLog', () => {
   });
 
   test('excludes payload bytes from message if unavailable', () => {
-    (getResponsePayloadBytes as jest.Mock).mockReturnValueOnce(undefined);
+    (getResponsePayloadBytes as Mock).mockReturnValueOnce(undefined);
     const req = createMockHapiRequest();
     const result = getEcsResponseLog(req, logger);
     expect(result.message).toMatchInlineSnapshot(`"GET /path 200"`);
@@ -483,7 +487,7 @@ describe('getEcsResponseLog', () => {
   });
 
   test('formats large payload sizes correctly', () => {
-    (getResponsePayloadBytes as jest.Mock).mockReturnValueOnce(1024 * 1024 * 5); // 5 MB
+    (getResponsePayloadBytes as Mock).mockReturnValueOnce(1024 * 1024 * 5); // 5 MB
     const req = createMockHapiRequest();
     const result = getEcsResponseLog(req, logger);
     expect(result.message).toMatchInlineSnapshot(`"GET /path 200 - 5.0MB"`);
