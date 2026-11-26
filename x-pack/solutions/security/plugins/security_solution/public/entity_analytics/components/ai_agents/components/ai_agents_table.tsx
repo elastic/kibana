@@ -133,7 +133,7 @@ export const AiAgentsTable = memo(
           field: 'alertCount',
           name: COLUMN_ALERTS,
           sortable: true,
-          width: '80px',
+          width: '96px',
           render: (count: number) =>
             alertsUnavailable ? (
               getEmptyTagValue()

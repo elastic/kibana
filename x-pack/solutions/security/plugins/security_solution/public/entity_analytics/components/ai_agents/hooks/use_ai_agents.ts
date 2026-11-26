@@ -23,7 +23,7 @@ import {
   ACTIVITY_LOOKBACK_MARGIN_MS,
   ACTIVITY_MAX_PROCESS_EVENTS,
   AI_AGENTS_QUERY_KEYS,
-  ENDPOINT_PROCESS_INDEX,
+  getEndpointProcessIndex,
 } from '../constants';
 import {
   buildAgentAlertCountsQuery,
@@ -110,6 +110,21 @@ const optionalRecords = async (
   }
 };
 
+/** Reads a namespace's data stream, which may not exist yet. Any other failure still throws. */
+const recordsIfIndexExists = async (
+  search: SearchService,
+  query: string,
+  id: string,
+  signal?: AbortSignal
+): Promise<EsqlRecord[]> => {
+  try {
+    return await esqlRecords(search, query, id, signal);
+  } catch (error) {
+    if (!signal?.aborted && isMissingIndexError(error)) return [];
+    throw error;
+  }
+};
+
 export interface AgentInventory {
   readonly rows: readonly AgentInventoryRow[];
   /** The alerts index couldn't be read, so alert counts show as unknown. */
@@ -179,7 +194,7 @@ export const useAiAgentContext = (entityId: string) => {
           'context',
           signal
         ),
-        optionalRecords(data.search, buildSignedInAsQuery(identity), 'signed_in_as', signal),
+        optionalRecords(data.search, buildSignedInAsQuery(space, identity), 'signed_in_as', signal),
       ]);
       const related = relatedRecords.map(toRelatedEntity).filter(isDefined);
 
@@ -207,10 +222,10 @@ export const useAiAgentContext = (entityId: string) => {
             )
           : Promise.resolve([]),
         emails.length
-          ? optionalRecords(data.search, buildOktaAccountsQuery(emails), 'okta', signal)
+          ? optionalRecords(data.search, buildOktaAccountsQuery(space, emails), 'okta', signal)
           : noRecords,
         emails.length
-          ? optionalRecords(data.search, buildEntraAccountsQuery(emails), 'entra', signal)
+          ? optionalRecords(data.search, buildEntraAccountsQuery(space, emails), 'entra', signal)
           : noRecords,
         emails.length
           ? optionalRecords(data.search, buildHrRecordsQuery(emails), 'hr', signal)
@@ -229,6 +244,7 @@ export const useAiAgentContext = (entityId: string) => {
           idpAccounts,
           hrRecords: hr.records.map(toHrRecord).filter(isDefined),
           signedInAs: firstString(signedInRecords.records[0]?.['process.ai_agent.email']),
+          signedInAt: firstString(signedInRecords.records[0]?.['@timestamp']),
         }),
       };
     },
@@ -260,6 +276,7 @@ type ArgsResponse = IKibanaSearchResponse<estypes.SearchResponse<EsqlRecord>>;
 /** Ordered `process.args` from `_source`. ES|QL returns keyword arrays sorted, which loses the prompt. */
 const fetchOrderedArgs = async (
   search: SearchService,
+  namespace: string,
   documentIds: readonly string[],
   signal?: AbortSignal
 ): Promise<Map<string, string[]>> => {
@@ -268,7 +285,8 @@ const fetchOrderedArgs = async (
     search.search<ArgsRequest, ArgsResponse>(
       {
         params: {
-          index: ENDPOINT_PROCESS_INDEX,
+          index: getEndpointProcessIndex(namespace),
+          ignore_unavailable: true,
           size: documentIds.length,
           query: { ids: { values: [...documentIds] } },
           _source: ['process.entity_id', 'process.args'],
@@ -293,23 +311,40 @@ export interface AgentActivityResult extends AgentActivity {
 /** Agent activity from every source that exists, assembled by `buildAgentActivity`. */
 export const useAiAgentActivity = (agent: AgentRow | AgentIdentity | undefined) => {
   const { data } = useKibana().services;
+  const spaceId = useSpaceId();
   const firstSeen = agent && 'firstSeen' in agent ? agent.firstSeen : undefined;
   const lastSeen = agent && 'lastSeen' in agent ? agent.lastSeen : undefined;
   const accountEmails = agent && 'accountEmails' in agent ? agent.accountEmails : [];
   return useQuery({
-    queryKey: [AI_AGENTS_QUERY_KEYS.activity, agent?.entityId, firstSeen, lastSeen],
-    enabled: !!agent,
+    queryKey: [AI_AGENTS_QUERY_KEYS.activity, spaceId, agent?.entityId, firstSeen, lastSeen],
+    enabled: !!agent && !!spaceId,
     queryFn: async ({ signal }): Promise<AgentActivityResult | undefined> => {
       if (!agent) return undefined;
+      const space = spaceId ?? 'default';
       const from = new Date(
         (firstSeen ? new Date(firstSeen).getTime() : Date.now() - 30 * 86_400_000) -
           ACTIVITY_LOOKBACK_MARGIN_MS
       ).toISOString();
 
       const [ownRecords, descendantRecords, sideEffectRecords] = await Promise.all([
-        esqlRecords(data.search, buildOwnProcessesQuery(agent, from), 'own', signal),
-        esqlRecords(data.search, buildDescendantProcessesQuery(agent, from), 'descendants', signal),
-        optionalRecords(data.search, buildProcessSideEffectsQuery(agent, from), 'effects', signal),
+        recordsIfIndexExists(
+          data.search,
+          buildOwnProcessesQuery(space, agent, from),
+          'own',
+          signal
+        ),
+        recordsIfIndexExists(
+          data.search,
+          buildDescendantProcessesQuery(space, agent, from),
+          'descendants',
+          signal
+        ),
+        optionalRecords(
+          data.search,
+          buildProcessSideEffectsQuery(space, agent, from),
+          'effects',
+          signal
+        ),
       ]);
       const ownEvents = ownRecords.map(toProcessEvent).filter(isDefined);
       const descendantEvents = descendantRecords.map(toProcessEvent).filter(isDefined);
@@ -324,10 +359,10 @@ export const useAiAgentActivity = (agent: AgentRow | AgentIdentity | undefined) 
       let otelQuery: string | undefined;
       if (isClaudeCode(agent.agentName) && sessionIds.length > 0) {
         otelMatch = 'session';
-        otelQuery = buildOtelEventsQuery({ sessionIds });
+        otelQuery = buildOtelEventsQuery(space, { sessionIds });
       } else if (isClaudeCode(agent.agentName) && accountEmails.length > 0) {
         otelMatch = 'account';
-        otelQuery = buildOtelEventsQuery({
+        otelQuery = buildOtelEventsQuery(space, {
           emails: accountEmails,
           from,
           to: new Date(
@@ -345,7 +380,7 @@ export const useAiAgentActivity = (agent: AgentRow | AgentIdentity | undefined) 
         otelQuery
           ? optionalRecords(data.search, otelQuery, 'otel', signal)
           : Promise.resolve({ records: [], failed: false }),
-        fetchOrderedArgs(data.search, rootDocumentIds, signal).catch(
+        fetchOrderedArgs(data.search, space, rootDocumentIds, signal).catch(
           () => new Map<string, string[]>()
         ),
       ]);

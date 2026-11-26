@@ -132,9 +132,9 @@ export const RISK_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.risk',
   { defaultMessage: 'Risk' }
 );
-export const SIGNED_IN_NOW = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.context.signedInNow',
-  { defaultMessage: 'Signed in now' }
+export const LAST_SIGNED_IN = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.context.lastSignedIn',
+  { defaultMessage: 'Last signed in' }
 );
 export const PREVIOUS_ACCOUNT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.previousAccount',
@@ -202,14 +202,6 @@ export const ALERT_SEVERITY = i18n.translate(
 export const ALERT_TIME = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.time',
   { defaultMessage: 'Time' }
-);
-export const ALERT_PROCESS = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.process',
-  { defaultMessage: 'Process' }
-);
-export const ALERT_STATUS = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.status',
-  { defaultMessage: 'Status' }
 );
 
 export const GRAPH_OPEN_FULL = i18n.translate(

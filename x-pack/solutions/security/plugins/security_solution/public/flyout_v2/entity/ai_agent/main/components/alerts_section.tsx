@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,26 +22,35 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noop } from 'lodash/fp';
-import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { getSeverityColor } from '../../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useAiAgentAlerts } from '../../../../../entity_analytics/components/ai_agents/hooks/use_ai_agents';
+import { AGENT_ALERTS_MAX_ROWS } from '../../../../../entity_analytics/components/ai_agents/constants';
 import type { AgentAlert } from '../../../../../entity_analytics/components/ai_agents/types';
+import { GeneratedDataBadge } from './generated_data_badge';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import {
-  ALERT_PROCESS,
   ALERT_RULE,
   ALERT_SEVERITY,
-  ALERT_STATUS,
   ALERT_TIME,
   ALERTS_NONE,
   ALERTS_TITLE,
   ALERTS_UNAVAILABLE,
 } from '../translations';
 
-/** Alerts stamped with the agent ID, including those on its descendants. Each opens the alert flyout. */
+/** Rows shown in the table; the count above it covers every alert read. */
+const ALERTS_TABLE_ROWS = 20;
+
+/** Relative time keeps the column narrow; the tooltip has the full date. */
+const ALWAYS_RELATIVE_HOURS = 24 * 365;
+
+/**
+ * Alerts stamped with the agent ID, including those on its descendants, in every workflow status
+ * (the AI agents page counts open alerts only). Each opens the alert flyout.
+ */
 export const AlertsSection = memo(({ entityId }: { entityId: string }) => {
   const { data, isLoading } = useAiAgentAlerts(entityId);
   const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
@@ -52,38 +62,59 @@ export const AlertsSection = memo(({ entityId }: { entityId: string }) => {
         field: 'ruleName',
         name: ALERT_RULE,
         render: (ruleName: string | undefined, alert: AgentAlert) => (
-          <EuiLink
-            onClick={() =>
-              openDocumentFlyoutFromIndexAsChild({
-                documentId: alert.id,
-                indexName: alert.index,
-                renderCellActions: cellActionRenderer,
-                onAlertUpdated: noop,
-                origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
-                title: ruleName,
-              })
-            }
-          >
-            {ruleName ?? alert.id}
-          </EuiLink>
+          <div>
+            <EuiLink
+              onClick={() =>
+                openDocumentFlyoutFromIndexAsChild({
+                  documentId: alert.id,
+                  indexName: alert.index,
+                  renderCellActions: cellActionRenderer,
+                  onAlertUpdated: noop,
+                  origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
+                  title: ruleName,
+                })
+              }
+            >
+              {ruleName ?? alert.id}
+            </EuiLink>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+              {[alert.processName, alert.status].some(Boolean) && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {[alert.processName, alert.status].filter(Boolean).join(' · ')}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+              {alert.isMock && (
+                <EuiFlexItem grow={false}>
+                  <GeneratedDataBadge />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </div>
         ),
       },
       {
         field: 'severity',
         name: ALERT_SEVERITY,
-        width: '90px',
+        width: '88px',
         render: (severity: string | undefined) =>
           severity ? (
-            <EuiHealth color={getSeverityColor(severity, euiTheme)}>{severity}</EuiHealth>
+            <EuiBadge color={getSeverityColor(severity, euiTheme)}>{severity}</EuiBadge>
           ) : null,
       },
-      { field: 'processName', name: ALERT_PROCESS, width: '110px' },
-      { field: 'status', name: ALERT_STATUS, width: '90px' },
       {
         field: 'timestamp',
         name: ALERT_TIME,
-        width: '150px',
-        render: (timestamp: string) => <PreferenceFormattedDate value={new Date(timestamp)} />,
+        width: '104px',
+        render: (timestamp: string) => (
+          <EuiText size="xs">
+            <FormattedRelativePreferenceDate
+              value={timestamp}
+              relativeThresholdInHrs={ALWAYS_RELATIVE_HOURS}
+            />
+          </EuiText>
+        ),
       },
     ],
     [openDocumentFlyoutFromIndexAsChild, euiTheme]
@@ -118,12 +149,20 @@ export const AlertsSection = memo(({ entityId }: { entityId: string }) => {
         <>
           <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.count"
-                  defaultMessage="{count, plural, one {# alert} other {# alerts}}"
-                  values={{ count: data.alerts.length }}
-                />
+              <EuiText size="xs" data-test-subj={AI_AGENT_TEST_IDS.alertsCount}>
+                {data.alerts.length >= AGENT_ALERTS_MAX_ROWS ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.countCapped"
+                    defaultMessage="{max}+ alerts in any status"
+                    values={{ max: AGENT_ALERTS_MAX_ROWS }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.countAnyStatus"
+                    defaultMessage="{count, plural, one {# alert} other {# alerts}} in any status"
+                    values={{ count: data.alerts.length }}
+                  />
+                )}
               </EuiText>
             </EuiFlexItem>
             {bySeverity.map(([severity, count]) => (
@@ -136,11 +175,21 @@ export const AlertsSection = memo(({ entityId }: { entityId: string }) => {
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <EuiBasicTable<AgentAlert>
-            items={data.alerts.slice(0, 20)}
+            items={data.alerts.slice(0, ALERTS_TABLE_ROWS)}
             columns={columns}
             compressed
+            responsiveBreakpoint={false}
             tableCaption={ALERTS_TITLE}
           />
+          {data.alerts.length > ALERTS_TABLE_ROWS && (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.newestShown"
+                defaultMessage="The newest {shown} are shown."
+                values={{ shown: ALERTS_TABLE_ROWS }}
+              />
+            </EuiText>
+          )}
         </>
       )}
     </div>

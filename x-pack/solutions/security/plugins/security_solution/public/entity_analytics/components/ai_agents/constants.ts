@@ -15,14 +15,30 @@ export const AI_AGENT_ENGINE_TYPE = 'ai_agent';
 
 export const AI_AGENT_ID_PREFIX = 'ai_agent:';
 
-export const ENDPOINT_PROCESS_INDEX = 'logs-endpoint.events.process-*';
-export const ENDPOINT_FILE_INDEX = 'logs-endpoint.events.file-*';
-export const ENDPOINT_NETWORK_INDEX = 'logs-endpoint.events.network-*';
-export const CLAUDE_CODE_OTEL_INDEX = 'logs-claude_code.events*';
-export const OKTA_USER_INDEX = 'logs-entityanalytics_okta.user-*';
-export const ENTRA_USER_INDEX = 'logs-entityanalytics_entra_id.user-*';
-/** The storyline's HR index (lane A generator). A made-up shape: no HR integration was looked at. */
+/**
+ * Source data streams for one namespace. The PoC treats the space ID as the namespace, so a space
+ * reads only its own events, as the Entity Store and alerts reads already do.
+ */
+export const getEndpointProcessIndex = (namespace: string): string =>
+  `logs-endpoint.events.process-${namespace}`;
+export const getEndpointFileIndex = (namespace: string): string =>
+  `logs-endpoint.events.file-${namespace}`;
+export const getEndpointNetworkIndex = (namespace: string): string =>
+  `logs-endpoint.events.network-${namespace}`;
+/** The dataset is `claude_code.events` or `claude_code.events.otel`, depending on the collector. */
+export const getClaudeCodeOtelIndex = (namespace: string): string =>
+  `logs-claude_code.events*-${namespace}`;
+export const getOktaUserIndex = (namespace: string): string =>
+  `logs-entityanalytics_okta.user-${namespace}`;
+export const getEntraUserIndex = (namespace: string): string =>
+  `logs-entityanalytics_entra_id.user-${namespace}`;
+/**
+ * The storyline's HR index (lane A generator). A made-up shape: no HR integration was looked at.
+ * It isn't a data stream and has no namespace, so every space reads it.
+ */
 export const HR_INDEX = 'hr-workday-demo*';
+
+export const POC_MOCK_TAG = 'poc-mock';
 
 /** Agents read at most this many rows on the page. */
 export const AI_AGENTS_MAX_ROWS = 1000;

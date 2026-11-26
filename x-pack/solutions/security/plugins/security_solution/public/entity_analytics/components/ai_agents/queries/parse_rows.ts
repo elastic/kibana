@@ -8,6 +8,7 @@
 import type { AgentAlert, AgentRow, HrRecord, IdpAccount, RelatedEntity } from '../types';
 import {
   firstString,
+  isMockRow,
   parseAgentId,
   parseAgentVersion,
   toBoolean,
@@ -106,6 +107,7 @@ export const toIdpAccount = (row: EsqlRecord): IdpAccount | undefined => {
     enabled: accountEnabled,
     mfaEnabled: toBoolean(row.mfa_enabled),
     fullName: firstString(row.full_name),
+    isMock: isMockRow(row),
   };
 };
 
@@ -116,6 +118,7 @@ export const toHrRecord = (row: EsqlRecord): HrRecord | undefined => {
     email,
     status: firstString(row.employment_status),
     terminationDate: firstString(row.termination_date),
+    isMock: isMockRow(row),
   };
 };
 
@@ -134,6 +137,7 @@ export const toAgentAlert = (row: EsqlRecord): AgentAlert | undefined => {
     riskScore: toNumber(row['kibana.alert.risk_score']),
     processName: firstString(row['process.name']),
     userName: firstString(row['user.name']),
+    isMock: isMockRow(row),
   };
 };
 

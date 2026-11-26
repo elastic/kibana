@@ -6,9 +6,22 @@
  */
 
 import { buildAgentContext } from './build_agent_context';
-import { buildAgentContextQuery, buildAgentInventoryQuery } from './agent_queries';
-import { buildOtelEventsQuery } from './activity_queries';
-import { toAgentRow, toHrRecord, toIdpAccount, toRelatedEntity } from './parse_rows';
+import {
+  buildAgentAlertsQuery,
+  buildAgentContextQuery,
+  buildAgentInventoryQuery,
+  buildEntraAccountsQuery,
+  buildHrRecordsQuery,
+  buildOktaAccountsQuery,
+  buildSignedInAsQuery,
+} from './agent_queries';
+import {
+  buildDescendantProcessesQuery,
+  buildOtelEventsQuery,
+  buildOwnProcessesQuery,
+  buildProcessSideEffectsQuery,
+} from './activity_queries';
+import { toAgentAlert, toAgentRow, toHrRecord, toIdpAccount, toRelatedEntity } from './parse_rows';
 import type { AgentRow, RelatedEntity } from '../types';
 import { getToolShellCommand, parseAgentId, parseAgentVersion } from '../utils';
 
@@ -78,9 +91,12 @@ describe('buildAgentContext', () => {
       identity,
       agent,
       related: [entra, okta, host, localUser, sameHostAgent, sameAccountAgent],
-      idpAccounts: [{ email: 'alex@example.com', provider: 'Okta', deprovisioned: true }],
-      hrRecords: [{ email: 'Alex@Example.com', status: 'Terminated' }],
+      idpAccounts: [
+        { email: 'alex@example.com', provider: 'Okta', deprovisioned: true, isMock: false },
+      ],
+      hrRecords: [{ email: 'Alex@Example.com', status: 'Terminated', isMock: false }],
       signedInAs: 'alex@example.com',
+      signedInAt: '2026-11-26T10:00:00.000Z',
     });
 
     expect(context.host?.entityId).toBe('host:host-1');
@@ -90,6 +106,7 @@ describe('buildAgentContext', () => {
     expect(context.people[0].watchlistIds).toEqual(['departing-employees']);
     expect(context.people[0].idpAccounts[0].deprovisioned).toBe(true);
     expect(context.people[0].hr?.status).toBe('Terminated');
+    expect(context.signedInAt).toBe('2026-11-26T10:00:00.000Z');
     expect(context.otherAgentsOnHost.map((r) => r.entityId)).toEqual([sameHostAgent.entityId]);
     expect(context.otherInstallsOnAccount.map((r) => r.entityId)).toEqual([
       sameAccountAgent.entityId,
@@ -115,6 +132,17 @@ describe('buildAgentContext', () => {
     ]);
     expect(context.host).toBeUndefined();
     expect(context.runsAs).toBeUndefined();
+  });
+
+  it('drops the sign-in time when no account email came with it', () => {
+    const context = buildAgentContext({
+      identity,
+      agent,
+      related: [],
+      idpAccounts: [],
+      signedInAt: '2026-11-26T10:00:00.000Z',
+    });
+    expect(context.signedInAt).toBeUndefined();
   });
 
   it('falls back to the local user ID when owns_inferred is not written', () => {
@@ -166,6 +194,16 @@ describe('row readers', () => {
     ).toMatchObject({ provider: 'Entra ID', deprovisioned: true });
   });
 
+  it('marks IdP, HR and alert rows whose source document is tagged poc-mock', () => {
+    const idp = { 'user.email': 'a@x', 'event.module': 'entityanalytics_okta' };
+    expect(toIdpAccount({ ...idp, tags: 'poc-mock' })?.isMock).toBe(true);
+    expect(toIdpAccount({ ...idp, tags: null })?.isMock).toBe(false);
+    expect(toHrRecord({ 'user.email': 'a@x', tags: ['poc-mock'] })?.isMock).toBe(true);
+    const alert = { _id: '1', _index: '.alerts', '@timestamp': '2026-11-26T10:00:00.000Z' };
+    expect(toAgentAlert({ ...alert, tags: ['other', 'poc-mock'] })?.isMock).toBe(true);
+    expect(toAgentAlert({ ...alert, tags: ['other'] })?.isMock).toBe(false);
+  });
+
   it('reads HR records and MFA from the entity row', () => {
     expect(
       toHrRecord({
@@ -173,7 +211,12 @@ describe('row readers', () => {
         employment_status: 'Terminated',
         termination_date: '2026-12-01',
       })
-    ).toEqual({ email: 'a@x', status: 'Terminated', terminationDate: '2026-12-01' });
+    ).toEqual({
+      email: 'a@x',
+      status: 'Terminated',
+      terminationDate: '2026-12-01',
+      isMock: false,
+    });
     expect(toHrRecord({ employment_status: 'Active' })).toBeUndefined();
     expect(
       toRelatedEntity({
@@ -239,8 +282,42 @@ describe('queries', () => {
   });
 
   it('ties OTel to Defend by session through the ECS field with the Claude fallback', () => {
-    const query = buildOtelEventsQuery({ sessionIds: ['s1'] });
+    const query = buildOtelEventsQuery('gen-demo', { sessionIds: ['s1'] });
     expect(query).toContain('COALESCE(gen_ai.conversation.id, claude_code.events.session.id)');
     expect(query).toContain('claude_code.events.prompt_text');
+  });
+
+  it('reads source data streams in the space namespace only', () => {
+    const from = '2026-11-26T00:00:00.000Z';
+    const sources = (query: string) => query.split('\n').find((line) => line.startsWith('FROM '));
+    expect(sources(buildOwnProcessesQuery('gen-demo', identity, from))).toBe(
+      'FROM logs-endpoint.events.process-gen-demo METADATA _id, _index'
+    );
+    expect(sources(buildDescendantProcessesQuery('gen-demo', identity, from))).toBe(
+      'FROM logs-endpoint.events.process-gen-demo METADATA _id, _index'
+    );
+    expect(sources(buildProcessSideEffectsQuery('gen-demo', identity, from))).toBe(
+      'FROM logs-endpoint.events.file-gen-demo, logs-endpoint.events.network-gen-demo'
+    );
+    expect(sources(buildSignedInAsQuery('gen-demo', identity))).toBe(
+      'FROM logs-endpoint.events.process-gen-demo'
+    );
+    expect(sources(buildOtelEventsQuery('gen-demo', { sessionIds: ['s1'] }))).toBe(
+      'FROM logs-claude_code.events*-gen-demo'
+    );
+    expect(sources(buildOktaAccountsQuery('gen-demo', ['a@x']))).toBe(
+      'FROM logs-entityanalytics_okta.user-gen-demo'
+    );
+    expect(sources(buildEntraAccountsQuery('gen-demo', ['a@x']))).toBe(
+      'FROM logs-entityanalytics_entra_id.user-gen-demo'
+    );
+    expect(sources(buildHrRecordsQuery(['a@x']))).toBe('FROM hr-workday-demo*');
+  });
+
+  it('keeps tags on IdP, HR and alert reads so generated values can be labelled', () => {
+    expect(buildOktaAccountsQuery('gen-demo', ['a@x'])).toContain('tags = LAST(tags, @timestamp)');
+    expect(buildEntraAccountsQuery('gen-demo', ['a@x'])).toContain('tags = LAST(tags, @timestamp)');
+    expect(buildHrRecordsQuery(['a@x'])).toContain('tags = LAST(tags, @timestamp)');
+    expect(buildAgentAlertsQuery('gen-demo', identity.entityId)).toMatch(/KEEP[^|]*\btags\b/);
   });
 });

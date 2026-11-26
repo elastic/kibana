@@ -65,7 +65,7 @@ export const AiAgentHeader = memo(
         <EuiFlexItem grow={false}>
           {agent?.riskLevel ? (
             <span data-test-subj={AI_AGENT_TEST_IDS.riskBadge}>
-              <RiskLevelBadge riskLevel={agent.riskLevel} />
+              <RiskLevelBadge riskLevel={agent.riskLevel} riskScore={agent.riskScore} />
             </span>
           ) : (
             <EuiBadge color="default" data-test-subj={AI_AGENT_TEST_IDS.noScoreBadge}>

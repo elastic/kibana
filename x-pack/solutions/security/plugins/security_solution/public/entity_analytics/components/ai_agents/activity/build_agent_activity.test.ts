@@ -163,7 +163,7 @@ describe('buildAgentActivity', () => {
         proc({ entityId: 'with-session', parentEntityId: 'agent', sessionId: 's1' }),
         proc({ entityId: 'orphan-same-session', parentEntityId: 'gone', sessionId: 's1' }),
         proc({ entityId: 'orphan-same-user', parentEntityId: 'gone' }),
-        proc({ entityId: 'orphan-other-user', parentEntityId: 'gone', userName: 'gleffler' }),
+        proc({ entityId: 'orphan-other-user', parentEntityId: 'gone', userName: 'other-user' }),
       ],
     });
 

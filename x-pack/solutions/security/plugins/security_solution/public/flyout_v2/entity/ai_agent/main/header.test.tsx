@@ -45,18 +45,20 @@ describe('AiAgentHeader', () => {
     expect(screen.getByText('2.1.332')).toBeInTheDocument();
   });
 
-  it('shows the risk level once the agent is scored', () => {
+  it('shows the normalised score and risk level once the agent is scored', () => {
     render(
       <TestProviders>
         <AiAgentHeader
           identity={identity}
-          agent={{ ...agent, riskLevel: 'High', riskScore: 72 }}
+          agent={{ ...agent, riskLevel: 'Moderate', riskScore: 64.7641 }}
           signedInAs="alex@example.com"
           isLoading={false}
         />
       </TestProviders>
     );
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.riskBadge)).toHaveTextContent('Risk: High');
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.riskBadge)).toHaveTextContent(
+      'Risk: 64.76 Moderate'
+    );
     expect(screen.getByText('alex@example.com')).toBeInTheDocument();
   });
 

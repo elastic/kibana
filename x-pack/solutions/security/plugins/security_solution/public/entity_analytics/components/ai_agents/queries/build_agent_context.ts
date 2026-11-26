@@ -24,6 +24,7 @@ export interface BuildAgentContextParams {
   readonly idpAccounts: readonly IdpAccount[];
   readonly hrRecords?: readonly HrRecord[];
   readonly signedInAs?: string;
+  readonly signedInAt?: string;
 }
 
 const isPersonRow = (row: RelatedEntity): boolean =>
@@ -43,6 +44,7 @@ export const buildAgentContext = ({
   idpAccounts,
   hrRecords = [],
   signedInAs,
+  signedInAt,
 }: BuildAgentContextParams): AgentContext => {
   const byId = new Map(related.map((row) => [row.entityId, row]));
   const hostIds = new Set([getHostEntityId(identity), ...(agent?.dependsOnIds ?? [])]);
@@ -115,5 +117,6 @@ export const buildAgentContext = ({
     otherAgentsOnHost: agentRows.filter((row) => row.hostId === identity.hostId),
     otherInstallsOnAccount,
     signedInAs,
+    signedInAt: signedInAs ? signedInAt : undefined,
   };
 };

@@ -6,7 +6,7 @@
  */
 
 import type { AgentIdentity } from '../types';
-import { firstString, toBoolean, toNumber, toStringArray } from '../utils';
+import { firstString, isMockRow, toBoolean, toNumber, toStringArray } from '../utils';
 import type {
   ActivitySection,
   ActivityStep,
@@ -118,7 +118,7 @@ export const toOtelRecord = (row: EsqlRecord): OtelRecord | undefined => {
     model: firstString(row['gen_ai.request.model']),
     inputTokens: toNumber(row['gen_ai.usage.input_tokens']),
     outputTokens: toNumber(row['gen_ai.usage.output_tokens']),
-    isMock: toStringArray(row.tags).includes('poc-mock'),
+    isMock: isMockRow(row),
   };
 };
 

@@ -68,4 +68,14 @@ describe('RiskLevelBadge', () => {
     expect(colors.headerText).toBe(colors.tableText);
     expect(colors.headerText).not.toBe('');
   });
+
+  it('shows the normalised score before the level when given one', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <RiskLevelBadge riskLevel={RiskSeverity.Moderate} riskScore={64.76417541503906} />
+      </TestProviders>
+    );
+
+    expect(getByText('Risk: 64.76 Moderate')).toBeInTheDocument();
+  });
 });

@@ -76,6 +76,8 @@ export interface IdpAccount {
   readonly enabled?: boolean;
   readonly mfaEnabled?: boolean;
   readonly fullName?: string;
+  /** The newest user document was generated (`poc-mock`), not collected. */
+  readonly isMock: boolean;
 }
 
 /** Employment record from the HR index, keyed by `user.email`. */
@@ -83,6 +85,8 @@ export interface HrRecord {
   readonly email: string;
   readonly status?: string;
   readonly terminationDate?: string;
+  /** The newest HR document was generated (`poc-mock`). */
+  readonly isMock: boolean;
 }
 
 /** The person an agent acts for, from one of its accounts. */
@@ -105,6 +109,8 @@ export interface AgentContext {
   readonly otherInstallsOnAccount: readonly RelatedEntity[];
   /** Newest `process.ai_agent.email` on the agent's own events. */
   readonly signedInAs?: string;
+  /** When the event that carried `signedInAs` happened. */
+  readonly signedInAt?: string;
 }
 
 export interface AgentAlert {
@@ -117,4 +123,6 @@ export interface AgentAlert {
   readonly riskScore?: number;
   readonly processName?: string;
   readonly userName?: string;
+  /** The source event was generated (`poc-mock`); detection copies its `tags` onto the alert. */
+  readonly isMock: boolean;
 }

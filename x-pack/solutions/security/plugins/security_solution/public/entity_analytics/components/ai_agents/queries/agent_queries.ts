@@ -18,10 +18,10 @@ import {
   AI_AGENT_ENGINE_TYPE,
   AI_AGENT_ID_PREFIX,
   AI_AGENTS_MAX_ROWS,
-  ENDPOINT_PROCESS_INDEX,
-  ENTRA_USER_INDEX,
+  getEndpointProcessIndex,
+  getEntraUserIndex,
+  getOktaUserIndex,
   HR_INDEX,
-  OKTA_USER_INDEX,
 } from '../constants';
 import type { AgentIdentity } from '../types';
 import { getLocalUserEntityId } from '../utils';
@@ -169,43 +169,47 @@ export const buildEntitiesByIdQuery = (spaceId: string, entityIds: readonly stri
  * Okta account state per email, from the raw user documents (`asset.status`,
  * `user.account.status.*`). MFA has no integration field, so the storyline writes
  * `user.entity.attributes.mfa_enabled`. Each provider is read on its own, because a field mapped in
- * one integration and loaded from `_source` in the other would conflict.
+ * one integration and loaded from `_source` in the other would conflict. `tags` comes from the
+ * same newest document, so a generated value can be labelled.
  */
-export const buildOktaAccountsQuery = (emails: readonly string[]): string =>
+export const buildOktaAccountsQuery = (namespace: string, emails: readonly string[]): string =>
   [
     SET_UNMAPPED_LOAD,
-    `FROM ${OKTA_USER_INDEX}`,
+    `FROM ${getOktaUserIndex(namespace)}`,
     `| WHERE user.email IN (${toList(emails)})`,
     '| STATS status = LAST(asset.status, @timestamp),',
     '    deprovisioned = LAST(user.account.status.deprovisioned, @timestamp),',
     '    suspended = LAST(user.account.status.suspended, @timestamp),',
     '    mfa_enabled = LAST(user.entity.attributes.mfa_enabled, @timestamp),',
-    '    full_name = LAST(user.full_name, @timestamp)',
+    '    full_name = LAST(user.full_name, @timestamp),',
+    '    tags = LAST(tags, @timestamp)',
     '  BY user.email, event.module',
     '| LIMIT 100',
   ].join('\n');
 
 /** Entra ID account state per email: `account_enabled` false reads as deprovisioned. */
-export const buildEntraAccountsQuery = (emails: readonly string[]): string =>
+export const buildEntraAccountsQuery = (namespace: string, emails: readonly string[]): string =>
   [
     SET_UNMAPPED_LOAD,
-    `FROM ${ENTRA_USER_INDEX}`,
+    `FROM ${getEntraUserIndex(namespace)}`,
     `| WHERE user.email IN (${toList(emails)})`,
     '| STATS account_enabled = LAST(entityanalytics_entra_id.user.account_enabled, @timestamp),',
     '    mfa_enabled = LAST(user.entity.attributes.mfa_enabled, @timestamp),',
-    '    full_name = LAST(user.full_name, @timestamp)',
+    '    full_name = LAST(user.full_name, @timestamp),',
+    '    tags = LAST(tags, @timestamp)',
     '  BY user.email, event.module',
     '| LIMIT 100',
   ].join('\n');
 
-/** Employment status per email from the storyline's HR index. */
+/** Employment status per email from the storyline's HR index, which has no namespace. */
 export const buildHrRecordsQuery = (emails: readonly string[]): string =>
   [
     SET_UNMAPPED_LOAD,
     `FROM ${HR_INDEX}`,
     `| WHERE user.email IN (${toList(emails)})`,
     '| STATS employment_status = LAST(employment.status, @timestamp),',
-    '    termination_date = LAST(employment.termination_date, @timestamp)',
+    '    termination_date = LAST(employment.termination_date, @timestamp),',
+    '    tags = LAST(tags, @timestamp)',
     '  BY user.email',
     '| LIMIT 100',
   ].join('\n');
@@ -220,27 +224,32 @@ export const agentOwnEventsFilter = ({ agentName, hostId, userName }: AgentIdent
   ].join(' AND ');
 
 /**
- * The account the install is signed in as now: the newest email on its own events. The row's
- * account set can't say this, because it keeps every email the install has ever used.
+ * The account the install last signed in with: the newest email on its own events, and when that
+ * event happened. The row's account set can't say this, because it keeps every email the install
+ * has ever used.
  */
-export const buildSignedInAsQuery = (identity: AgentIdentity): string =>
+export const buildSignedInAsQuery = (namespace: string, identity: AgentIdentity): string =>
   [
     SET_UNMAPPED_NULLIFY,
-    `FROM ${ENDPOINT_PROCESS_INDEX}`,
+    `FROM ${getEndpointProcessIndex(namespace)}`,
     `| WHERE ${agentOwnEventsFilter(identity)} AND process.ai_agent.email IS NOT NULL`,
     '| SORT @timestamp DESC',
     '| KEEP @timestamp, process.ai_agent.email',
     '| LIMIT 1',
   ].join('\n');
 
-/** Alerts stamped with the agent ID, including alerts on its descendants. */
+/**
+ * Alerts stamped with the agent ID, including alerts on its descendants, in every workflow status.
+ * Detection copies the source event's `tags` onto the alert, so `tags` says whether the alert was
+ * built from a generated document.
+ */
 export const buildAgentAlertsQuery = (spaceId: string, entityId: string): string =>
   [
     SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(spaceId)} METADATA _id, _index`,
     `| WHERE MV_CONTAINS(kibana.alert.entity.id, ${escapeStringValue(entityId)})`,
     '| KEEP @timestamp, _id, _index, kibana.alert.rule.name, kibana.alert.severity,',
-    '    kibana.alert.workflow_status, kibana.alert.risk_score, process.name, user.name',
+    '    kibana.alert.workflow_status, kibana.alert.risk_score, process.name, user.name, tags',
     '| SORT @timestamp DESC',
     `| LIMIT ${AGENT_ALERTS_MAX_ROWS}`,
   ].join('\n');

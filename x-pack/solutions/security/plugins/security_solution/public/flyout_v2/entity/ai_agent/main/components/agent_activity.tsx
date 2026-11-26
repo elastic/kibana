@@ -48,11 +48,8 @@ import {
   isClaudeCode,
 } from '../../../../../entity_analytics/components/ai_agents/utils';
 import { GAP_IDS } from '../../../../../entity_analytics/components/ai_agents/gaps';
-import {
-  MOCK_DATA_BADGE,
-  MOCK_DATA_TOOLTIP,
-} from '../../../../../entity_analytics/components/ai_agents/translations';
 import { GapLink, MissingLayerNote } from './missing_layer_note';
+import { GeneratedDataBadge } from './generated_data_badge';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 const LAUNCH_MODE_LABELS: Readonly<Record<LaunchMode, string>> = {
@@ -101,14 +98,6 @@ const PROMPT_TEXT_NOT_LOGGED = i18n.translate(
 
 /** Shortens a session ID for display; the full value is in the tooltip. */
 const shortId = (id: string): string => (id.length > 12 ? `${id.slice(0, 8)}…` : id);
-
-const MockBadge = () => (
-  <EuiToolTip content={MOCK_DATA_TOOLTIP}>
-    <EuiBadge color="warning" tabIndex={0}>
-      {MOCK_DATA_BADGE}
-    </EuiBadge>
-  </EuiToolTip>
-);
 
 const ProcessStepRow = memo(
   ({
@@ -258,7 +247,7 @@ const StepRow = memo(
             </EuiFlexItem>
             {step.isMock && (
               <EuiFlexItem grow={false}>
-                <MockBadge />
+                <GeneratedDataBadge />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -305,7 +294,7 @@ const StepRow = memo(
             )}
             {step.isMock && (
               <EuiFlexItem grow={false}>
-                <MockBadge />
+                <GeneratedDataBadge />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -325,7 +314,7 @@ const StepRow = memo(
             </EuiFlexItem>
             {step.isMock && (
               <EuiFlexItem grow={false}>
-                <MockBadge />
+                <GeneratedDataBadge />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

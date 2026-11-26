@@ -18,6 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { AssetCriticalityBadge } from '../../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { useGetWatchlists } from '../../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
@@ -33,6 +34,7 @@ import type {
 import { getAgentDisplayName } from '../../../../../entity_analytics/components/ai_agents/utils';
 import { GAP_IDS } from '../../../../../entity_analytics/components/ai_agents/gaps';
 import { GapLink } from './missing_layer_note';
+import { GeneratedDataBadge } from './generated_data_badge';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import {
   ACTS_FOR_NONE,
@@ -45,6 +47,7 @@ import {
   HR_LABEL,
   IDP_STATUS_LABEL,
   IDP_UNKNOWN,
+  LAST_SIGNED_IN,
   MFA_LABEL,
   MFA_OFF,
   MFA_ON,
@@ -58,7 +61,6 @@ import {
   RUNS_AS_NOT_FOUND,
   RUNS_AS_ROOT,
   RUNS_AS_TITLE,
-  SIGNED_IN_NOW,
   SUSPENDED,
   WATCHLISTS_LABEL,
 } from '../translations';
@@ -117,20 +119,68 @@ const idpStatusText = (account: IdpAccount): string => {
   return account.enabled ? ENABLED : IDP_UNKNOWN;
 };
 
+/** Relative time stays short in a badge; the tooltip has the full date. */
+const ALWAYS_RELATIVE_HOURS = 24 * 365;
+
+interface MfaState {
+  readonly enabled?: boolean;
+  /** An IdP document behind the value is tagged `poc-mock`. */
+  readonly isMock: boolean;
+}
+
+/** MFA from the IdP documents and the person's rows; off wins when any source reports off. */
+const getMfaState = ({ idpAccounts, rows }: AgentPerson): MfaState => {
+  const known = [
+    ...idpAccounts.map((account) => account.mfaEnabled),
+    ...rows.map((personRow) => personRow.mfaEnabled),
+  ].filter((value): value is boolean => value !== undefined);
+  return {
+    enabled: known.length === 0 ? undefined : !known.includes(false),
+    isMock: idpAccounts.some((account) => account.mfaEnabled !== undefined && account.isMock),
+  };
+};
+
+const SignedInBadge = ({ isCurrent, signedInAt }: { isCurrent: boolean; signedInAt?: string }) => {
+  if (!isCurrent) return <EuiBadge color="hollow">{PREVIOUS_ACCOUNT}</EuiBadge>;
+  return (
+    <EuiBadge color="primary">
+      {signedInAt ? (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.lastSignedInAt"
+          defaultMessage="Last signed in {time}"
+          values={{
+            time: (
+              <FormattedRelativePreferenceDate
+                value={signedInAt}
+                relativeThresholdInHrs={ALWAYS_RELATIVE_HOURS}
+              />
+            ),
+          }}
+        />
+      ) : (
+        LAST_SIGNED_IN
+      )}
+    </EuiBadge>
+  );
+};
+
 const PersonCard = memo(
   ({
     person,
     isCurrent,
+    signedInAt,
     onOpen,
     watchlistNames,
   }: {
     person: AgentPerson;
     isCurrent: boolean;
+    signedInAt?: string;
     onOpen: OpenEntity;
     watchlistNames: (ids: readonly string[]) => string[];
   }) => {
     const { primary, idpAccounts, email } = person;
     const names = watchlistNames(person.watchlistIds);
+    const mfa = getMfaState(person);
     const isAtRisk =
       idpAccounts.some((account) => account.deprovisioned || account.suspended) ||
       isTerminated(person.hr?.status);
@@ -161,9 +211,7 @@ const PersonCard = memo(
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiBadge color={isCurrent ? 'primary' : 'hollow'}>
-              {isCurrent ? SIGNED_IN_NOW : PREVIOUS_ACCOUNT}
-            </EuiBadge>
+            <SignedInBadge isCurrent={isCurrent} signedInAt={signedInAt} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
@@ -183,62 +231,110 @@ const PersonCard = memo(
                 idpAccounts.length === 0 ? (
                   IDP_UNKNOWN
                 ) : (
-                  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                  <EuiFlexGroup
+                    gutterSize="xs"
+                    wrap
+                    responsive={false}
+                    data-test-subj={AI_AGENT_TEST_IDS.personIdp}
+                  >
                     {idpAccounts.map((account) => (
-                      <EuiFlexItem grow={false} key={account.provider}>
-                        <EuiBadge
-                          color={account.deprovisioned || account.suspended ? 'danger' : 'hollow'}
-                        >
-                          <FormattedMessage
-                            id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.idpAccountStatus"
-                            defaultMessage="{provider}: {status}"
-                            values={{ provider: account.provider, status: idpStatusText(account) }}
-                          />
-                        </EuiBadge>
-                      </EuiFlexItem>
+                      <React.Fragment key={account.provider}>
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge
+                            color={account.deprovisioned || account.suspended ? 'danger' : 'hollow'}
+                          >
+                            <FormattedMessage
+                              id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.idpAccountStatus"
+                              defaultMessage="{provider}: {status}"
+                              values={{
+                                provider: account.provider,
+                                status: idpStatusText(account),
+                              }}
+                            />
+                          </EuiBadge>
+                        </EuiFlexItem>
+                        {account.isMock && (
+                          <EuiFlexItem grow={false}>
+                            <GeneratedDataBadge />
+                          </EuiFlexItem>
+                        )}
+                      </React.Fragment>
                     ))}
                   </EuiFlexGroup>
                 ),
             },
             {
               title: MFA_LABEL,
-              description: (() => {
-                const known = [
-                  ...idpAccounts.map((account) => account.mfaEnabled),
-                  ...person.rows.map((personRow) => personRow.mfaEnabled),
-                ].filter((value): value is boolean => value !== undefined);
-                if (known.length === 0) return IDP_UNKNOWN;
-                const off = known.includes(false);
-                return (
-                  <EuiBadge color={off ? 'danger' : 'success'}>{off ? MFA_OFF : MFA_ON}</EuiBadge>
-                );
-              })(),
+              description: (
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  wrap
+                  responsive={false}
+                  data-test-subj={AI_AGENT_TEST_IDS.personMfa}
+                >
+                  <EuiFlexItem grow={false}>
+                    {mfa.enabled === undefined ? (
+                      <EuiText size="xs">{IDP_UNKNOWN}</EuiText>
+                    ) : (
+                      <EuiBadge color={mfa.enabled ? 'success' : 'danger'}>
+                        {mfa.enabled ? MFA_ON : MFA_OFF}
+                      </EuiBadge>
+                    )}
+                  </EuiFlexItem>
+                  {mfa.isMock && (
+                    <EuiFlexItem grow={false}>
+                      <GeneratedDataBadge />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <GapLink gapId={GAP_IDS.noMfaState} />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
             },
             {
               title: HR_LABEL,
               description: person.hr?.status ? (
-                <EuiBadge color={isTerminated(person.hr.status) ? 'danger' : 'hollow'}>
-                  {person.hr.terminationDate ? (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.hrStatusWithDate"
-                      defaultMessage="{status} on {date}"
-                      values={{
-                        status: person.hr.status,
-                        date: (
-                          <FormattedDate
-                            value={person.hr.terminationDate}
-                            year="numeric"
-                            month="short"
-                            day="numeric"
-                            timeZone="UTC"
-                          />
-                        ),
-                      }}
-                    />
-                  ) : (
-                    person.hr.status
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  wrap
+                  responsive={false}
+                  data-test-subj={AI_AGENT_TEST_IDS.personHr}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={isTerminated(person.hr.status) ? 'danger' : 'hollow'}>
+                      {person.hr.terminationDate ? (
+                        <FormattedMessage
+                          id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.hrStatusWithDate"
+                          defaultMessage="{status} on {date}"
+                          values={{
+                            status: person.hr.status,
+                            date: (
+                              <FormattedDate
+                                value={person.hr.terminationDate}
+                                year="numeric"
+                                month="short"
+                                day="numeric"
+                                timeZone="UTC"
+                              />
+                            ),
+                          }}
+                        />
+                      ) : (
+                        person.hr.status
+                      )}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  {person.hr.isMock && (
+                    <EuiFlexItem grow={false}>
+                      <GeneratedDataBadge />
+                    </EuiFlexItem>
                   )}
-                </EuiBadge>
+                </EuiFlexGroup>
               ) : (
                 IDP_UNKNOWN
               ),
@@ -299,8 +395,16 @@ export interface ContextSectionProps {
 export const ContextSection = memo(({ context, scopeId }: ContextSectionProps) => {
   const { openEntityDetailsAsChild } = useFlyoutApi();
   const watchlistNames = useWatchlistNames();
-  const { agent, host, runsAs, people, otherAgentsOnHost, otherInstallsOnAccount, signedInAs } =
-    context;
+  const {
+    agent,
+    host,
+    runsAs,
+    people,
+    otherAgentsOnHost,
+    otherInstallsOnAccount,
+    signedInAs,
+    signedInAt,
+  } = context;
 
   const onOpen = useCallback(
     (row: RelatedEntity) =>
@@ -340,6 +444,7 @@ export const ContextSection = memo(({ context, scopeId }: ContextSectionProps) =
               <PersonCard
                 person={person}
                 isCurrent={signedInAs ? person.email === signedInAs : sortedPeople.length === 1}
+                signedInAt={person.email === signedInAs ? signedInAt : undefined}
                 onOpen={onOpen}
                 watchlistNames={watchlistNames}
               />

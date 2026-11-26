@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
@@ -82,6 +82,7 @@ const fullContext: AgentContext = {
           status: 'DEPROVISIONED',
           deprovisioned: true,
           mfaEnabled: false,
+          isMock: false,
         },
       ],
       watchlistIds: ['departing-employees'],
@@ -106,6 +107,7 @@ const fullContext: AgentContext = {
     }),
   ],
   signedInAs: 'alex@example.com',
+  signedInAt: '2026-11-26T10:00:00.000Z',
 };
 
 const renderSection = (context: AgentContext) =>
@@ -130,7 +132,75 @@ describe('ContextSection', () => {
     expect(person).toHaveTextContent('Okta: Deprovisioned');
     expect(person).toHaveTextContent('Off');
     expect(person).toHaveTextContent('Departing Employees');
-    expect(person).toHaveTextContent('Signed in now');
+    expect(person).toHaveTextContent('Last signed in');
+    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.mockBadge)).not.toBeInTheDocument();
+  });
+
+  it('labels IdP, MFA and HR values whose source document is tagged poc-mock', () => {
+    renderSection({
+      ...fullContext,
+      people: [
+        {
+          ...fullContext.people[0],
+          idpAccounts: [
+            {
+              email: 'alex@example.com',
+              provider: 'Okta',
+              status: 'ACTIVE',
+              mfaEnabled: true,
+              isMock: false,
+            },
+            {
+              email: 'alex@example.com',
+              provider: 'Entra ID',
+              enabled: true,
+              mfaEnabled: false,
+              isMock: true,
+            },
+          ],
+          hr: { email: 'alex@example.com', status: 'Active', isMock: true },
+        },
+      ],
+    });
+    const idp = screen.getByTestId(AI_AGENT_TEST_IDS.personIdp);
+    expect(idp).toHaveTextContent('Okta: ACTIVEEntra ID: EnabledMock data');
+    expect(within(idp).getAllByTestId(AI_AGENT_TEST_IDS.mockBadge)).toHaveLength(1);
+    const mfa = screen.getByTestId(AI_AGENT_TEST_IDS.personMfa);
+    expect(mfa).toHaveTextContent('Off');
+    expect(within(mfa).getByTestId(AI_AGENT_TEST_IDS.mockBadge)).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId(AI_AGENT_TEST_IDS.personHr)).getByTestId(
+        AI_AGENT_TEST_IDS.mockBadge
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('links MFA to its collection gap, without a mock label when no tagged document is behind it', () => {
+    renderSection(fullContext);
+    const mfa = screen.getByTestId(AI_AGENT_TEST_IDS.personMfa);
+    expect(
+      within(mfa).getByTestId(`${AI_AGENT_TEST_IDS.gapLink}-no_mfa_state`)
+    ).toBeInTheDocument();
+    expect(within(mfa).queryByTestId(AI_AGENT_TEST_IDS.mockBadge)).not.toBeInTheDocument();
+    fireEvent.click(within(mfa).getByTestId(`${AI_AGENT_TEST_IDS.gapLink}-no_mfa_state`));
+    expect(
+      screen.getByText('Okta and Entra ID integrations do not send MFA state')
+    ).toBeInTheDocument();
+  });
+
+  it('marks older accounts as used before, and only the last signed-in account with a time', () => {
+    renderSection({
+      ...fullContext,
+      people: [
+        ...fullContext.people,
+        { email: 'sam@example.com', rows: [], idpAccounts: [], watchlistIds: [] },
+      ],
+    });
+    const [current, previous] = screen.getAllByTestId(AI_AGENT_TEST_IDS.person);
+    expect(current).toHaveTextContent(/Last signed in .+/);
+    expect(previous).toHaveTextContent('sam@example.com');
+    expect(previous).toHaveTextContent('Used before');
+    expect(previous).not.toHaveTextContent('Last signed in');
   });
 
   it('shows the host with criticality and the other agents on it', () => {
@@ -180,7 +250,12 @@ describe('ContextSection', () => {
             }),
           ],
           idpAccounts: [],
-          hr: { email: 'alex@example.com', status: 'Terminated', terminationDate: '2026-12-01' },
+          hr: {
+            email: 'alex@example.com',
+            status: 'Terminated',
+            terminationDate: '2026-12-01',
+            isMock: false,
+          },
           watchlistIds: [],
         },
       ],

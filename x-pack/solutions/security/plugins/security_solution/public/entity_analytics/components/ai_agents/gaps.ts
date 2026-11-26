@@ -15,6 +15,7 @@ export const GAP_IDS = {
   cursorNoSessionId: 'cursor_no_session_id',
   cursorNoPromptSource: 'cursor_no_prompt_source',
   noIdpData: 'no_idp_data',
+  noMfaState: 'no_mfa_state',
   emailAfterSignIn: 'email_after_sign_in',
   noAgentStamp: 'no_agent_stamp',
   noAgentRisk: 'no_agent_risk',
@@ -216,6 +217,30 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
       'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noIdpData.workaround',
       {
         defaultMessage: 'Generated IdP users',
+      }
+    ),
+  },
+  [GAP_IDS.noMfaState]: {
+    id: GAP_IDS.noMfaState,
+    title: i18n.translate('xpack.securitySolution.entityAnalytics.aiAgents.gaps.noMfaState.title', {
+      defaultMessage: 'Okta and Entra ID integrations do not send MFA state',
+    }),
+    blocks: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noMfaState.blocks',
+      {
+        defaultMessage: 'The storyline MFA off',
+      }
+    ),
+    status: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noMfaState.status',
+      {
+        defaultMessage: 'Integration owners',
+      }
+    ),
+    workaround: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noMfaState.workaround',
+      {
+        defaultMessage: 'Mock field in the demo',
       }
     ),
   },

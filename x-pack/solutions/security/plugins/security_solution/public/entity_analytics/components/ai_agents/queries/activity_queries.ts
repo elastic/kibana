@@ -10,10 +10,10 @@ import { SET_UNMAPPED_NULLIFY, toList } from '../../home/entities_grid/queries/e
 import {
   ACTIVITY_MAX_OTEL_EVENTS,
   ACTIVITY_MAX_PROCESS_EVENTS,
-  CLAUDE_CODE_OTEL_INDEX,
-  ENDPOINT_FILE_INDEX,
-  ENDPOINT_NETWORK_INDEX,
-  ENDPOINT_PROCESS_INDEX,
+  getClaudeCodeOtelIndex,
+  getEndpointFileIndex,
+  getEndpointNetworkIndex,
+  getEndpointProcessIndex,
 } from '../constants';
 import type { AgentIdentity } from '../types';
 import { agentOwnEventsFilter } from './agent_queries';
@@ -51,10 +51,14 @@ const PROCESS_START = '(MV_CONTAINS(event.action, "exec") OR MV_CONTAINS(event.a
 const since = (from: string): string => `@timestamp >= ${escapeStringValue(from)}`;
 
 /** Start events of the agent's own processes: the launches and the agent's own re-execs. */
-export const buildOwnProcessesQuery = (identity: AgentIdentity, from: string): string =>
+export const buildOwnProcessesQuery = (
+  namespace: string,
+  identity: AgentIdentity,
+  from: string
+): string =>
   [
     SET_UNMAPPED_NULLIFY,
-    `FROM ${ENDPOINT_PROCESS_INDEX} METADATA _id, _index`,
+    `FROM ${getEndpointProcessIndex(namespace)} METADATA _id, _index`,
     `| WHERE ${agentOwnEventsFilter(identity)} AND ${PROCESS_START} AND ${since(from)}`,
     `| KEEP ${PROCESS_COLUMNS.join(', ')}`,
     '| SORT @timestamp ASC',
@@ -67,12 +71,13 @@ export const buildOwnProcessesQuery = (identity: AgentIdentity, from: string): s
  * each process under a run by its ancestry.
  */
 export const buildDescendantProcessesQuery = (
+  namespace: string,
   { agentName, hostId }: AgentIdentity,
   from: string
 ): string =>
   [
     SET_UNMAPPED_NULLIFY,
-    `FROM ${ENDPOINT_PROCESS_INDEX} METADATA _id, _index`,
+    `FROM ${getEndpointProcessIndex(namespace)} METADATA _id, _index`,
     `| WHERE process.ai_agent.name == ${escapeStringValue(agentName)}`,
     `  AND host.id == ${escapeStringValue(hostId)}`,
     '  AND process.ai_agent.is_descendant == true',
@@ -84,12 +89,13 @@ export const buildDescendantProcessesQuery = (
 
 /** File and network activity per process, attached to the process steps. */
 export const buildProcessSideEffectsQuery = (
+  namespace: string,
   { agentName, hostId }: AgentIdentity,
   from: string
 ): string =>
   [
     SET_UNMAPPED_NULLIFY,
-    `FROM ${ENDPOINT_FILE_INDEX}, ${ENDPOINT_NETWORK_INDEX}`,
+    `FROM ${getEndpointFileIndex(namespace)}, ${getEndpointNetworkIndex(namespace)}`,
     `| WHERE process.ai_agent.name == ${escapeStringValue(agentName)}`,
     `  AND host.id == ${escapeStringValue(hostId)} AND ${since(from)}`,
     '| EVAL is_network = data_stream.dataset == "endpoint.events.network"',
@@ -107,6 +113,7 @@ export const buildProcessSideEffectsQuery = (
  * the install's accounts within its active window.
  */
 export const buildOtelEventsQuery = (
+  namespace: string,
   match:
     | { readonly sessionIds: readonly string[] }
     | { readonly emails: readonly string[]; readonly from: string; readonly to: string }
@@ -119,7 +126,7 @@ export const buildOtelEventsQuery = (
         )} AND @timestamp <= ${escapeStringValue(match.to)}`;
   return [
     SET_UNMAPPED_NULLIFY,
-    `FROM ${CLAUDE_CODE_OTEL_INDEX}`,
+    `FROM ${getClaudeCodeOtelIndex(namespace)}`,
     '| EVAL conversation_id = COALESCE(gen_ai.conversation.id, claude_code.events.session.id)',
     `| WHERE ${where}`,
     '| EVAL prompt = COALESCE(TO_STRING(gen_ai.input.messages), claude_code.events.prompt_text),',

@@ -98,9 +98,9 @@ export const COLUMN_LAST_SEEN = i18n.translate(
   }
 );
 export const COLUMN_ALERTS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiAgents.columns.alerts',
+  'xpack.securitySolution.entityAnalytics.aiAgents.columns.openAlerts',
   {
-    defaultMessage: 'Alerts',
+    defaultMessage: 'Open alerts',
   }
 );
 export const COLUMN_RISK = i18n.translate(

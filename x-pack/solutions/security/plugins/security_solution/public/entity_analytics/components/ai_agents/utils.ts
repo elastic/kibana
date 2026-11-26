@@ -7,7 +7,7 @@
 
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
-import { AI_AGENT_ID_PREFIX } from './constants';
+import { AI_AGENT_ID_PREFIX, POC_MOCK_TAG } from './constants';
 import type { AgentIdentity } from './types';
 
 /** ES|QL and `_source` return a keyword as a string or an array; this reads either as an array. */
@@ -36,6 +36,10 @@ export const toBoolean = (value: unknown): boolean | undefined => {
   if (single === 'false') return false;
   return undefined;
 };
+
+/** The row's `tags` mark it as generated from a published schema rather than collected. */
+export const isMockRow = (row: Record<string, unknown>): boolean =>
+  toStringArray(row.tags).includes(POC_MOCK_TAG);
 
 const RISK_LEVELS: readonly string[] = ['Unknown', 'Low', 'Moderate', 'High', 'Critical'];
 export const toRiskLevel = (value: unknown): RiskSeverity | undefined => {
