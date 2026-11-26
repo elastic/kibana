@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorDrift } from '../detect_drift';
+import type { ConnectorDrift, SpecChange } from '../detect_drift';
 import type { DriftProblem } from '../../drift_problem';
 import { drifted, healthy } from '../drift_fixtures';
 import { renderDriftIssue } from '.';
@@ -561,6 +561,8 @@ describe('renderDriftIssue', () => {
   it('says when actions only fail on credentials, and to check the vendor before the connector', () => {
     const credentials =
       'GET https://api.example.com/items breaks the spec: Request has no credentials for the operation; expected Authorization: Bearer';
+    // The operation the emulator matched the failing request to
+    const latestViolations = [{ source: 'main', operation: 'GET /items' }];
     const withAuthChange = (actions: ConnectorDrift['actions']): ConnectorDrift => ({
       ...drifted,
       sources: {
@@ -584,7 +586,9 @@ describe('renderDriftIssue', () => {
     const { body } = renderDriftIssue(
       withAuthChange(
         drifted.actions?.map((action) =>
-          action.action === 'search' ? { ...action, latestProblems: [credentials] } : action
+          action.action === 'search'
+            ? { ...action, latestProblems: [credentials], latestViolations }
+            : action
         )
       ),
       { owners: [] }
@@ -593,15 +597,204 @@ describe('renderDriftIssue', () => {
       `> \`search\` fails because the latest spec requires credentials it doesn't send.\n>\n> ${advice}`
     );
     expect(body).toContain(
-      "| `search` | `GET /items` | ❌ Fails | The latest spec requires credentials the connector doesn't send: expected `Authorization: Bearer`. Spec change: the endpoint scheme security `basicAuth` was removed from the API. |"
+      "| `search` | `GET /items` | ❌ Fails | The latest spec requires credentials the connector doesn't send: expected `Authorization: Bearer`. For this endpoint, the latest spec no longer accepts `basicAuth`. |"
     );
     expect(body).not.toContain('Update the connector to ensure it will continue working.');
+
+    // What the spec requires instead, when it says so, as Zendesk's did with OAuth.
+    const withOAuth = withAuthChange(
+      drifted.actions?.map((action) =>
+        action.action === 'search'
+          ? { ...action, latestProblems: [credentials], latestViolations }
+          : action
+      )
+    );
+    const withChanges = (...extra: SpecChange[]): ConnectorDrift => ({
+      ...withOAuth,
+      sources: {
+        main: { status: 'changed', changes: [...(withOAuth.sources.main.changes ?? []), ...extra] },
+      },
+    });
+    const security = (id: string, text: string, operation = 'GET /items'): SpecChange => ({
+      kind: 'non-breaking',
+      id,
+      text,
+      operation,
+    });
+    const { body: oauthBody } = renderDriftIssue(
+      withChanges(
+        security(
+          'api-security-added',
+          'the endpoint scheme security `oauth2: [tickets:read]` was added to the API'
+        )
+      ),
+      { owners: [] }
+    );
+    // An added scheme may be one of several the endpoint accepts, so it is told as a change
+    expect(oauthBody).toContain(
+      "| `search` | `GET /items` | ❌ Fails | The latest spec requires credentials the connector doesn't send: expected `Authorization: Bearer`. For this endpoint, the latest spec adds `oauth2` (scope `tickets:read`) and no longer accepts `basicAuth`. |"
+    );
+
+    // A scope removed from a scheme the endpoint still accepts doesn't drop the scheme
+    const { body: scopeBody } = renderDriftIssue(
+      withChanges(
+        security(
+          'api-security-scope-removed',
+          "the security scope `tickets:write` was removed from the endpoint's security scheme `oauth2`"
+        )
+      ),
+      { owners: [] }
+    );
+    expect(scopeBody).toContain(
+      'For this endpoint, the latest spec removes scope `tickets:write` from `oauth2` and no longer accepts `basicAuth`. |'
+    );
+
+    // Scopes that end the same keep their whole URL
+    const { body: scopeUrls } = renderDriftIssue(
+      withChanges(
+        security(
+          'api-security-added',
+          'the endpoint scheme security `oauth2: [https://a.example/auth/read, https://b.example/auth/read]` was added to the API'
+        )
+      ),
+      { owners: [] }
+    );
+    expect(scopeUrls).toContain(
+      'adds `oauth2` (scopes `https://a.example/auth/read` and `https://b.example/auth/read`)'
+    );
+
+    // A scheme removed and added again only changes by the scopes that differ
+    const regroup = (before: string, after: string) =>
+      renderDriftIssue(
+        withChanges(
+          security(
+            'api-security-removed',
+            `the endpoint scheme security \`oauth2: [${before}]\` was removed from the API`
+          ),
+          security(
+            'api-security-added',
+            `the endpoint scheme security \`oauth2: [${after}]\` was added to the API`
+          )
+        ),
+        { owners: [] }
+      ).body;
+    expect(regroup('a, b', 'b, a')).toContain(
+      'For this endpoint, the latest spec no longer accepts `basicAuth`. |'
+    );
+    expect(regroup('a, b', 'a')).toContain(
+      'For this endpoint, the latest spec removes scope `b` from `oauth2` and no longer accepts `basicAuth`. |'
+    );
+    expect(regroup('a', 'a, c')).toContain(
+      'For this endpoint, the latest spec adds scope `c` to `oauth2` and no longer accepts `basicAuth`. |'
+    );
+
+    // An operation that moved is matched by its latest path
+    const { body: movedBody } = renderDriftIssue(
+      {
+        ...withChanges(
+          security(
+            'api-security-added',
+            'the endpoint scheme security `apiKey` was added to the API',
+            'GET /v1/items'
+          )
+        ),
+        actions: withOAuth.actions?.map((action) =>
+          action.action === 'search'
+            ? {
+                ...action,
+                operations: [
+                  {
+                    source: 'main',
+                    operation: 'GET /v1/items',
+                    latest: { status: 'moved', path: '/items', serverPath: '/v1' },
+                  },
+                ],
+              }
+            : action
+        ),
+      },
+      { owners: [] }
+    );
+    expect(movedBody).toContain('For this endpoint, the latest spec adds `apiKey`. |');
+
+    // Only the auth changes of the request that failed count, not those of another it makes
+    const { body: otherBody } = renderDriftIssue(
+      {
+        ...withOAuth,
+        actions: withOAuth.actions?.map((action) =>
+          action.action === 'search'
+            ? {
+                ...action,
+                operations: [
+                  ...action.operations,
+                  { source: 'main', operation: 'GET /profile', latest: { status: 'present' } },
+                ],
+              }
+            : action
+        ),
+        sources: {
+          main: {
+            status: 'changed',
+            changes: [
+              security(
+                'api-security-added',
+                'the endpoint scheme security `apiKey` was added to the API',
+                'GET /profile'
+              ),
+            ],
+          },
+        },
+      },
+      { owners: [] }
+    );
+    expect(otherBody).toContain(
+      "❌ Fails | The latest spec requires credentials the connector doesn't send: expected `Authorization: Bearer`. |"
+    );
+    expect(otherBody).not.toContain('adds `apiKey`');
+
+    // A scheme one failing endpoint drops and another adds is a change to both, not a regrouping
+    const { body: acrossBody } = renderDriftIssue(
+      {
+        ...withChanges(
+          security(
+            'api-security-removed',
+            'the endpoint scheme security `oauth2: [read]` was removed from the API'
+          ),
+          security(
+            'api-security-added',
+            'the endpoint scheme security `oauth2: [read]` was added to the API',
+            'GET /profile'
+          )
+        ),
+        actions: withOAuth.actions?.map((action) =>
+          action.action === 'search'
+            ? {
+                ...action,
+                operations: [
+                  ...action.operations,
+                  { source: 'main', operation: 'GET /profile', latest: { status: 'present' } },
+                ],
+                latestViolations: [
+                  ...latestViolations,
+                  { source: 'main', operation: 'GET /profile' },
+                ],
+              }
+            : action
+        ),
+      },
+      { owners: [] }
+    );
+    expect(acrossBody).toContain(
+      'For the endpoints it calls, the latest spec adds `oauth2` (scope `read`)'
+    );
+    expect(acrossBody).toContain('no longer accepts `oauth2`');
 
     // With another failure, the advice follows the credentials sentence
     const { body: mixed } = renderDriftIssue(
       withAuthChange(
         drifted.actions?.map((action) => ({
           ...action,
+          ...(action.action === 'search' ? { latestViolations } : {}),
           latestProblems:
             action.action === 'search'
               ? [credentials]

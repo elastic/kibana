@@ -14,7 +14,7 @@
  */
 
 import type { ActionDrift, SpecChange } from '../detect_drift';
-import { isRequestChange, isResponseChange } from '../oasdiff_text';
+import { isRequestChange, isResponseChange, scopeName, securityGrantsOf } from '../oasdiff_text';
 import { capitalized, code, listed, plural } from './issue_markdown';
 import { firstProblem, issueLinksOf, problemText } from './problem_text';
 import type { ReviewItem } from './review_item';
@@ -63,6 +63,145 @@ export const ICONS: Record<Rank, string> = {
 export const MOVED_STATUS = 'Moved in the spec, same URL';
 
 const UNMATCHED_PROBLEM = / matches no operation of any source/;
+
+// Each scheme the security changes of one rule add or remove, with the scopes they name.
+const schemesOf = (changes: readonly SpecChange[], rule: string): Map<string, Set<string>> => {
+  const schemes = new Map<string, Set<string>>();
+  for (const { id, text } of changes) {
+    if (id !== rule) continue;
+    for (const { scheme, scope } of securityGrantsOf(id, text) ?? []) {
+      const scopes = schemes.get(scheme) ?? new Set<string>();
+      if (scope !== undefined) scopes.add(scope);
+      schemes.set(scheme, scopes);
+    }
+  }
+  return schemes;
+};
+
+// Names scopes by the end of their URL, unless two of them would then read the same.
+const scopeNamer = (scopes: Iterable<string>): ((scope: string) => string) => {
+  const byName = new Map<string, Set<string>>();
+  for (const scope of scopes) {
+    const name = scopeName(scope);
+    byName.set(name, (byName.get(name) ?? new Set<string>()).add(scope));
+  }
+  return (scope) => {
+    const name = scopeName(scope);
+    return (byName.get(name)?.size ?? 0) > 1 ? scope : name;
+  };
+};
+
+// How the security of an endpoint changed, as schemes and their scopes.
+interface AuthChange {
+  readonly schemesAdded: Map<string, Set<string>>;
+  readonly schemesRemoved: Map<string, Set<string>>;
+  readonly scopesAdded: Map<string, Set<string>>;
+  readonly scopesRemoved: Map<string, Set<string>>;
+}
+
+// The security changes of one endpoint. A scheme it removes and adds again, as oasdiff reports
+// regrouped requirements, keeps the scopes both name: only the difference is a change, so it is
+// netted out with the scope changes. Regrouping is per endpoint, so this never mixes endpoints.
+const authChangeOf = (changes: readonly SpecChange[]): AuthChange => {
+  const added = schemesOf(changes, 'api-security-added');
+  const removed = schemesOf(changes, 'api-security-removed');
+  const regrouped = [...added.keys()].filter((scheme) => removed.has(scheme));
+  const scopesOf = (
+    rule: string,
+    side: Map<string, Set<string>>,
+    others: Map<string, Set<string>>
+  ) => {
+    const scopes = schemesOf(changes, rule);
+    for (const scheme of regrouped) {
+      const other = others.get(scheme) ?? new Set<string>();
+      const net = [...(side.get(scheme) ?? [])].filter((scope) => !other.has(scope));
+      if (net.length > 0) {
+        scopes.set(scheme, new Set([...(scopes.get(scheme) ?? []), ...net]));
+      }
+    }
+    return scopes;
+  };
+  const without = (schemes: Map<string, Set<string>>) =>
+    new Map([...schemes].filter(([scheme]) => !regrouped.includes(scheme)));
+  return {
+    schemesAdded: without(added),
+    schemesRemoved: without(removed),
+    scopesAdded: scopesOf('api-security-scope-added', added, removed),
+    scopesRemoved: scopesOf('api-security-scope-removed', removed, added),
+  };
+};
+
+const mergedSchemes = (all: ReadonlyArray<Map<string, Set<string>>>): Map<string, Set<string>> => {
+  const merged = new Map<string, Set<string>>();
+  for (const schemes of all) {
+    for (const [scheme, scopes] of schemes) {
+      merged.set(scheme, new Set([...(merged.get(scheme) ?? []), ...scopes]));
+    }
+  }
+  return merged;
+};
+
+/**
+ * Why a request the connector doesn't authenticate as the latest spec wants fails: what the
+ * validator expected, then how the spec's security for it changed, endpoint by endpoint. An added
+ * scheme may be one of several the endpoint accepts, so the change is told apart from what is
+ * required.
+ */
+const credentialsDetails = (
+  authChangesByEndpoint: ReadonlyArray<readonly SpecChange[]>,
+  expected: string
+): string => {
+  const requires = `The latest spec requires credentials the connector doesn't send: ${expected}.`;
+  const changes = authChangesByEndpoint.map(authChangeOf);
+  const merged = (key: keyof AuthChange) => mergedSchemes(changes.map((change) => change[key]));
+  const schemesAdded = merged('schemesAdded');
+  const schemesRemoved = merged('schemesRemoved');
+  const scopesAdded = merged('scopesAdded');
+  const scopesRemoved = merged('scopesRemoved');
+  const nameOf = scopeNamer(
+    [schemesAdded, scopesAdded, scopesRemoved].flatMap((schemes) =>
+      [...schemes.values()].flatMap((scopes) => [...scopes])
+    )
+  );
+  const scopesText = (scopes: ReadonlySet<string>): string =>
+    `${scopes.size === 1 ? 'scope' : 'scopes'} ${listed(
+      [...scopes].map((scope) => code(nameOf(scope)))
+    )}`;
+  const what = [
+    ...[...schemesAdded].map(
+      ([scheme, scopes]) =>
+        `adds ${code(scheme)}${scopes.size > 0 ? ` (${scopesText(scopes)})` : ''}`
+    ),
+    ...[...scopesAdded].map(([scheme, scopes]) => `adds ${scopesText(scopes)} to ${code(scheme)}`),
+    ...[...scopesRemoved].map(
+      ([scheme, scopes]) => `removes ${scopesText(scopes)} from ${code(scheme)}`
+    ),
+    ...[...schemesRemoved.keys()].map((scheme) => `no longer accepts ${code(scheme)}`),
+  ];
+  if (what.length === 0) {
+    return requires;
+  }
+  const where = authChangesByEndpoint.length > 1 ? 'the endpoints it calls' : 'this endpoint';
+  return `${requires} For ${where}, the latest spec ${listed(what)}.`;
+};
+
+/**
+ * The operations of an action whose requests broke the latest spec, as the emulator matched them:
+ * by their path in the manifest, or the one they moved to.
+ */
+const violatedOperationsOf = ({
+  operations,
+  latestViolations = [],
+}: ActionDrift): ActionDrift['operations'] =>
+  operations.filter(({ source, operation, latest }) => {
+    const method = operation.slice(0, operation.indexOf(' '));
+    const latestOperation = latest?.status === 'moved' ? `${method} ${latest.path}` : operation;
+    return latestViolations.some(
+      (violation) =>
+        violation.source === source &&
+        (violation.operation === operation || violation.operation === latestOperation)
+    );
+  });
 
 // The one violation a request with credentials the operation doesn't accept has.
 const MISSING_CREDENTIALS =
@@ -122,16 +261,19 @@ export const statusOf = (
       return credentials === undefined ? [] : [credentials];
     });
     if (expected.length === latestProblems.length) {
-      const authChanges = action.operations.flatMap(({ source, operation }) =>
+      // Only the requests that failed: another operation's auth changes say nothing about them.
+      const failing = violatedOperationsOf(action);
+      const authChangesByEndpoint = failing.map(({ source, operation }) =>
         changesOf(source, operation).filter(({ id }) => id.startsWith('api-security-'))
       );
       return {
         rank: 'fails',
         reason: 'credentials',
         outcome: 'fails',
-        details: `The latest spec requires credentials the connector doesn't send: ${problemText(
-          `expected ${listed([...new Set(expected)])}`
-        )}.${authChanges.length > 0 ? ` Spec change: ${authChanges[0].text}.` : ''}`,
+        details: credentialsDetails(
+          authChangesByEndpoint,
+          problemText(`expected ${listed([...new Set(expected)])}`)
+        ),
       };
     }
     const problem = firstProblem(latestProblems);
