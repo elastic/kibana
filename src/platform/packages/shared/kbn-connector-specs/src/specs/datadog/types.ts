@@ -394,9 +394,11 @@ export const SearchLogsInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(1000)
+      .max(5000)
       .optional()
-      .describe('Maximum number of log events to return (1–1000). Defaults to 50.'),
+      .describe(
+        'Maximum number of log events to return (1–5000). Defaults to 50. Large results can exceed the Kibana connector response size limit, so keep it low unless you need more.'
+      ),
     sort: z
       .enum(['timestamp', '-timestamp'])
       .optional()

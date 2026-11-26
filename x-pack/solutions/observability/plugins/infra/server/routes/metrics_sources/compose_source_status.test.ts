@@ -1,0 +1,341 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { errors } from '@elastic/elasticsearch';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { InfraPluginRequestHandlerContext } from '../../types';
+import { NoSuchRemoteClusterError } from '../../lib/sources/errors';
+import { composeSourceStatus } from './compose_source_status';
+
+const metricAlias = 'metrics-*,metricbeat-*';
+
+// Mirrors how Kibana's `%message` pattern conversion renders a logged Error: when a stack is
+// present it renders `error.stack` in place of `error.message`
+// (src/core/packages/logging/common-internal/src/layouts/conversions/message.ts). We cannot import
+// that Core-private conversion from a plugin test, so we replicate its rule here to assert the
+// context survives in the rendered body rather than only in the mocked logger argument.
+const renderMessage = (error: Error): string => error.stack ?? error.message;
+
+describe('composeSourceStatus', () => {
+  const logger = loggerMock.create();
+  const request = httpServerMock.createKibanaRequest();
+  const requestContext = {} as InfraPluginRequestHandlerContext;
+
+  const compose = (hasMetricIndices: jest.Mock) =>
+    composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default',
+      metricAlias,
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('reports available indices', async () => {
+    const hasMetricIndices = jest.fn().mockResolvedValue(true);
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: true,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'available',
+    });
+    expect(hasMetricIndices).toHaveBeenCalledWith(requestContext, metricAlias, request);
+  });
+
+  it('reports missing indices when the probe completes without a match', async () => {
+    await expect(compose(jest.fn().mockResolvedValue(false))).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'missing',
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('reports an unknown status and warns with the source and pattern when the probe times out', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'unknown',
+    });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Metric index status check timed out for source "default" (pattern: metrics-*,metricbeat-*): Request timed out'
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('escapes line breaks in the timeout error message so it cannot forge log lines', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out\nerror forged line'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default',
+      metricAlias,
+    });
+
+    const [message] = logger.warn.mock.calls[0];
+    expect(message).not.toContain('\n');
+    expect(message).toContain('Request timed out\\nerror forged line');
+  });
+
+  it('keeps an unexpected probe failure visible as a structured error with the source context and reports unknown', async () => {
+    const original = new TypeError('cluster unhealthy');
+    original.stack = 'TypeError: cluster unhealthy\n    at probe';
+    const hasMetricIndices = jest.fn().mockRejectedValue(original);
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'unknown',
+    });
+    // An unexpected failure (for example an authorization error) is not a timeout, so it stays at
+    // error level. It is passed as the Error itself (not a string with `{ error }` meta) so the
+    // OTel appender keeps the `exception.type` / `exception.message` / `exception.stacktrace`
+    // attributes, which it reads from the first Error argument.
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggedError = logger.error.mock.calls[0][0] as Error;
+    expect(loggedError).toBeInstanceOf(Error);
+    const expectedMessage =
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy';
+    expect(loggedError.message).toBe(expectedMessage);
+    expect(loggedError.name).toBe('TypeError');
+    // Kibana's `%message` conversion renders `error.stack` (not `error.message`) when a stack is
+    // present, so assert against that rendered body: the header carries the source and pattern
+    // context, and the original frames are preserved after it.
+    expect(renderMessage(loggedError)).toBe(`TypeError: ${expectedMessage}\n    at probe`);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('treats a cancelled probe as unknown without logging it as an error', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.RequestAbortedError('Request aborted'));
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'unknown',
+    });
+    // A client disconnect aborts the probe; that is a cancelled check, not an infrastructure
+    // failure, so it must stay out of the error (and warn) logs.
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps a response-size overrun visible as an error even though it is a RequestAbortedError', async () => {
+    // The ES client also throws RequestAbortedError when elasticsearch.maxResponseSize is
+    // exceeded. The browser is still waiting for a result in that case, so it is a real failure
+    // and must not be downgraded to a debug "cancelled" line.
+    const error = new errors.RequestAbortedError(
+      'The content length (12345) is bigger than the maximum allowed string (10000)'
+    );
+    const hasMetricIndices = jest.fn().mockRejectedValue(error);
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'unknown',
+    });
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggedError = logger.error.mock.calls[0][0] as Error;
+    expect(loggedError).toBeInstanceOf(Error);
+    expect(loggedError.message).toContain('Metric index status check failed for source "default"');
+    expect(loggedError.message).toContain(error.message);
+    expect(logger.debug).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('replaces the whole multiline error header so the diagnostic detail is not printed twice', async () => {
+    // An Elasticsearch `ResponseError` message spans several lines: the error type followed by
+    // `Caused by` / `Root causes` sections. The stack header is `name: message`, so those extra
+    // message lines sit between the header's first line and the stack frames.
+    const original = new Error(
+      'illegal_argument_exception\n\tCaused by:\n\t\tillegal_state_exception: broken'
+    );
+    original.name = 'ResponseError';
+    original.stack = `${original.name}: ${original.message}\n    at probe`;
+    const hasMetricIndices = jest.fn().mockRejectedValue(original);
+
+    await compose(hasMetricIndices);
+
+    const loggedError = logger.error.mock.calls[0][0] as Error;
+    const expectedMessage =
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): illegal_argument_exception\n\tCaused by:\n\t\tillegal_state_exception: broken';
+    // The enriched header carries the full original message once, followed by the original frames
+    // only — the `Caused by` block must not be repeated after the frames.
+    expect(renderMessage(loggedError)).toBe(`ResponseError: ${expectedMessage}\n    at probe`);
+  });
+
+  it('still logs and reports unknown when the error carries a non-string stack', async () => {
+    // Kibana's logging code supports Elasticsearch client errors whose `stack` is not a string.
+    // The failure branch must not throw a TypeError trying to manipulate it, otherwise the catch
+    // block crashes and the GET returns a 500 instead of `metricIndicesStatus: 'unknown'`.
+    const original = new Error('cluster unhealthy');
+    // Cast through unknown because the Error type declares `stack?: string`.
+    (original as unknown as { stack: unknown }).stack = { not: 'a string' };
+    const hasMetricIndices = jest.fn().mockRejectedValue(original);
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'unknown',
+    });
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggedError = logger.error.mock.calls[0][0] as Error;
+    const expectedMessage =
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy';
+    expect(loggedError.message).toBe(expectedMessage);
+    // We can't rewrite a non-string stack's header, so rather than report the wrapper's own frames
+    // (which point at this helper, not where the probe failed) the stack is omitted. The rendered
+    // body then falls back to the enriched message, so the context survives and no misleading
+    // frames are printed.
+    expect(loggedError.stack).toBeUndefined();
+    expect(renderMessage(loggedError)).toBe(expectedMessage);
+  });
+
+  it('escapes line breaks in the request-controlled source id so it cannot forge log lines', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default\nerror forged line',
+      metricAlias,
+    });
+
+    const [message] = logger.warn.mock.calls[0];
+    expect(message).not.toContain('\n');
+    expect(message).toContain('default\\nerror forged line');
+  });
+
+  it('keeps a tab in the source id distinguishable from a space', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'a\tb',
+      metricAlias,
+    });
+
+    const [message] = logger.warn.mock.calls[0];
+    expect(message).toContain('source "a\\tb"');
+  });
+
+  it('distinguishes a real tab in the source id from the two literal characters backslash-t', async () => {
+    // Escaping a real tab to `\t` would collide with a source id that already contains the two
+    // literal characters `\` `t`, letting an operator attribute a failed probe to the wrong
+    // source. The backslash is escaped too, so the two forms render differently.
+    const timeout = () => jest.fn().mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    const logFor = async (sourceId: string) => {
+      jest.clearAllMocks();
+      await composeSourceStatus({
+        logger,
+        sourceStatus: { hasMetricIndices: timeout() },
+        requestContext,
+        request,
+        sourceId,
+        metricAlias,
+      });
+      return logger.warn.mock.calls[0][0] as string;
+    };
+
+    const realTab = await logFor('a\tb');
+    const literalBackslashT = await logFor('a\\tb');
+
+    expect(realTab).toContain('source "a\\tb"');
+    expect(literalBackslashT).toContain('source "a\\\\tb"');
+    expect(realTab).not.toBe(literalBackslashT);
+  });
+
+  it('escapes other control characters (for example backspace) in the request-controlled source id', async () => {
+    // Kibana's plain-text logger passes control characters other than CR/LF straight through, so a
+    // backspace in a request-controlled value could overwrite earlier text in a terminal and make
+    // the source or the log prefix misleading. They must be escaped alongside line breaks.
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default\b\b\b\berror',
+      metricAlias,
+    });
+
+    const [message] = logger.warn.mock.calls[0];
+    // eslint-disable-next-line no-control-regex
+    expect(message).not.toMatch(/[\u0000-\u001f\u007f]/);
+    expect(message).toContain('default\\u0008\\u0008\\u0008\\u0008error');
+  });
+
+  it('escapes line breaks in the request-controlled metric alias so it cannot forge log lines', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.RequestAbortedError('Request aborted'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default',
+      metricAlias: 'metrics-*\nerror forged line',
+    });
+
+    const [message] = logger.debug.mock.calls[0];
+    expect(message).not.toContain('\n');
+    expect(message).toContain('metrics-*\\nerror forged line');
+  });
+
+  it('keeps the error log and reports missing remote clusters, naming the source in the message', async () => {
+    // The default NoSuchRemoteClusterError message is context-free ("The configured remote
+    // cluster is missing or not reachable."), so the operator can't tell which source is
+    // misconfigured. The log must name the source and pattern while staying at error level.
+    const error = new NoSuchRemoteClusterError();
+    const hasMetricIndices = jest.fn().mockRejectedValue(error);
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: false,
+      metricIndicesStatus: 'unknown',
+    });
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggedError = logger.error.mock.calls[0][0] as Error;
+    expect(loggedError).toBeInstanceOf(Error);
+    expect(loggedError.name).toBe('NoSuchRemoteClusterError');
+    expect(loggedError.message).toBe(
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): The configured remote cluster is missing or not reachable.'
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+});

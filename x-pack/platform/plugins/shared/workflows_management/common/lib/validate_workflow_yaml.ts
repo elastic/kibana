@@ -25,6 +25,7 @@ import {
   validateLiquidTemplate,
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import { collectStepExposureDiagnostics } from './collect_step_exposure_diagnostics';
 import { collectVariableDiagnostics } from './collect_variable_diagnostics';
 import { connectorParamsSchemaResolver } from './connector_params_schema_resolver';
 import { collectEsqlDiagnostics } from './esql_validation/collect_esql_diagnostics';
@@ -33,6 +34,15 @@ import { validateTriggers } from './validate_triggers';
 
 export interface ValidateWorkflowYamlOptions {
   triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
+  /**
+   * Whether the workflow is managed. Setting it runs the `step-exposure-validation`
+   * rule group: a `managed_only` step is an error in a workflow that isn't managed.
+   * YAML that was never saved, like an inline run, isn't managed.
+   *
+   * Every server path that saves or runs YAML sets it; their own parameters
+   * require it. Left unset, the rule doesn't run, like the other rule groups here.
+   */
+  isManaged?: boolean;
   /**
    * Registry of registered step, connector and trigger metadata. Passing one
    * runs the `variable-validation` rule group, which resolves every `{{ … }}`
@@ -182,6 +192,10 @@ export async function validateWorkflowYaml(
       }
     } catch {
       // Structure too malformed for step name validation
+    }
+
+    if (options?.isManaged !== undefined) {
+      diagnostics.push(...collectStepExposureDiagnostics(parsedWorkflow, options.isManaged));
     }
 
     if (options?.triggerDefinitions) {
