@@ -389,8 +389,8 @@ const evaluatePullRequest = async ({
     missing.length > 0
       ? api.upsertComment(pr.number, commentId, formatComment(pr.author, missing))
       : commentId
-      ? api.deleteComment(commentId)
-      : Promise.resolve()
+        ? api.deleteComment(commentId)
+        : Promise.resolve()
   );
 };
 

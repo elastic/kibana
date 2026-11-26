@@ -57,7 +57,7 @@ const makeContext = (client: MockClient) =>
     config: makeConfig(),
     log: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
     getClient: jest.fn().mockResolvedValue(client),
-  } as unknown as ActionContext);
+  }) as unknown as ActionContext;
 
 describe('RedisConnector', () => {
   let RedisConnector: ConnectorSpec;

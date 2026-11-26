@@ -9,7 +9,7 @@ import type { ServiceMapNode } from '../../../../common/service_map';
 import { getSwitchedGroup } from './get_switched_group';
 
 const groupNode = (id: string, type: 'serviceGroup' | 'serviceGroupBox', label = id) =>
-  ({ id, type, position: { x: 0, y: 0 }, data: { id, label } } as ServiceMapNode);
+  ({ id, type, position: { x: 0, y: 0 }, data: { id, label } }) as ServiceMapNode;
 
 const serviceNode = (id: string): ServiceMapNode => ({
   id,

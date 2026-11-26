@@ -46,7 +46,7 @@ const failedRun = (workflowId: string, errorMessage: string | undefined): Failed
       status: ExecutionStatus.FAILED,
       error: errorMessage ? { type: 'Error', message: errorMessage } : null,
     },
-  } as FailedAutomationRun);
+  }) as FailedAutomationRun;
 
 const summaries = (entries: WorkflowSummary[]) =>
   new Map(entries.map((summary) => [summary.id, summary]));

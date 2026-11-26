@@ -81,7 +81,7 @@ export const DreamingSetupForm = ({ isSaving, onApply, onDiscard }: DreamingSetu
     <>
       <SettingsRow
         title={startFromLabel}
-        description={isCustom ? customHelpText : selected?.description ?? ''}
+        description={isCustom ? customHelpText : (selected?.description ?? '')}
       >
         <DreamingTemplatePicker
           ariaLabel={startFromLabel}

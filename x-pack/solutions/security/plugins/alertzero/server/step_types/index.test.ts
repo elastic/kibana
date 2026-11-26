@@ -78,7 +78,7 @@ describe('registerStepDefinitions', () => {
           ({
             getProposalsService: () => proposalsService,
             getProposalPrivileges: jest.fn(),
-          } as never)
+          }) as never
       ),
     });
     registerStepDefinitions({

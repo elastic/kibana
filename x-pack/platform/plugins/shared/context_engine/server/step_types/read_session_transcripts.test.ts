@@ -30,11 +30,11 @@ describe('readSessionTranscripts step', () => {
   const run = (stepInput: Record<string, unknown> = input) =>
     getReadSessionTranscriptsStepDefinition(
       {
-        getAiIndexService: () => ({ get } as unknown as AiIndexService),
+        getAiIndexService: () => ({ get }) as unknown as AiIndexService,
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => memoryEnabled,
         checkReadPrivilege: async () => canRead,
-        getSessionMemoryService: async () => ({} as SessionMemoryService),
+        getSessionMemoryService: async () => ({}) as SessionMemoryService,
         getSessionEventsService: async () => sessionEvents,
       },
       { getCurrentDate: () => NOW }

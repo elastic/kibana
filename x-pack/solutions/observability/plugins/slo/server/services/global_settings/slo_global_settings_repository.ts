@@ -22,7 +22,10 @@ export interface SLOGlobalSettingsRepository {
 }
 
 export class DefaultSLOGlobalSettingsRepository implements SLOGlobalSettingsRepository {
-  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
+  constructor(
+    private soClient: SavedObjectsClientContract,
+    private logger: Logger
+  ) {}
 
   /** Returns the stored settings, or none when the saved object is missing or invalid. */
   async get(): Promise<SLOGlobalSettings> {

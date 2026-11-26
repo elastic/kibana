@@ -123,7 +123,7 @@ describe('executeWorkflowTool', () => {
           actions: { api: { get: (a: string) => `api:${a}` } },
           checkPrivilegesWithRequest: () => ({ atSpace }),
         },
-      } as any);
+      }) as any;
     const getAvailabilityWith = (
       isWorkflowsAvailable: boolean,
       securityGetter: Parameters<typeof executeWorkflowTool>[0]['getSecurity']

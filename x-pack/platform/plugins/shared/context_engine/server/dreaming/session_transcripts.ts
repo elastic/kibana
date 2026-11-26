@@ -243,8 +243,8 @@ export const readSessionTranscripts = async ({
     firstLeft !== -1
       ? positions[firstLeft - 1]
       : full
-      ? positions[positions.length - 1]
-      : undefined;
+        ? positions[positions.length - 1]
+        : undefined;
   return {
     memories,
     ...(stoppedAt

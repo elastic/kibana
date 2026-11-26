@@ -15,7 +15,7 @@ const node = (id: string, x: number, y: number, parentId?: string): ServiceMapNo
     position: { x, y },
     data: { id, label: id },
     parentId,
-  } as ServiceMapNode);
+  }) as ServiceMapNode;
 
 describe('getAbsoluteNodePosition', () => {
   const box = node('box', 100, 200);

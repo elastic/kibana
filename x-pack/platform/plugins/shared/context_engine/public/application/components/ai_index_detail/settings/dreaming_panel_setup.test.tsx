@@ -19,16 +19,14 @@ import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices'
 import type { LatestWorkflowExecution } from '../../../hooks/use_latest_workflow_execution';
 import { DreamingPanel } from './dreaming_panel';
 
-const mockUseLatestWorkflowExecution = jest.fn(
-  (): LatestWorkflowExecution => ({
-    executions: [],
-    unavailableWorkflowIds: [],
-    isRunning: false,
-    activeExecutionId: undefined,
-    isError: false,
-    isLoading: false,
-  })
-);
+const mockUseLatestWorkflowExecution = jest.fn((): LatestWorkflowExecution => ({
+  executions: [],
+  unavailableWorkflowIds: [],
+  isRunning: false,
+  activeExecutionId: undefined,
+  isError: false,
+  isLoading: false,
+}));
 jest.mock('../../../hooks/use_latest_workflow_execution', () => ({
   useLatestWorkflowExecution: () => mockUseLatestWorkflowExecution(),
 }));

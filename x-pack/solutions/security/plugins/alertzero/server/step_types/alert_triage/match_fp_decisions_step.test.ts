@@ -228,8 +228,8 @@ const setup = ({
         revokedDuringSweep.includes(id) || (afterWrite && revokedAfterWrite.includes(id))
           ? deleted
           : afterWrite && expiredAfterWrite.includes(id)
-          ? expired
-          : current,
+            ? expired
+            : current,
     };
   });
   const run = () =>

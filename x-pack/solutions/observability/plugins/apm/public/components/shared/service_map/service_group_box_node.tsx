@@ -49,12 +49,14 @@ export const ServiceGroupBoxNode = memo(({ data }: NodeProps<ServiceGroupBoxNode
     border-radius: ${euiTheme.border.radius.medium};
     background: ${euiTheme.colors.backgroundBaseSubdued};
     pointer-events: all;
-    ${isActiveSearchMatch
-      ? `
+    ${
+      isActiveSearchMatch
+        ? `
       outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.textSubdued};
       outline-offset: -${euiTheme.border.width.thick};
     `
-      : ''}
+        : ''
+    }
   `;
 
   const headerStyles = css`

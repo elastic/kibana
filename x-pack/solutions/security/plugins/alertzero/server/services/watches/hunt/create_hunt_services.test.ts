@@ -19,7 +19,7 @@ describe('createHuntServices', () => {
         ({
           getProposalsService: () => proposalsService,
           getProposalPrivileges: () => privileges,
-        } as unknown as ProposalsPluginStart)
+        }) as unknown as ProposalsPluginStart
     );
 
     const services = createHuntServices({

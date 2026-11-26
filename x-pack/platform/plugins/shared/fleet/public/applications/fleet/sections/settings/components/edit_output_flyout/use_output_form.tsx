@@ -126,10 +126,7 @@ import {
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
 export interface OutputFormInputsType
-  extends KafkaOAuth2Inputs,
-    KafkaKerberosInputs,
-    OtlpInputs,
-    OtlpAuthInputs {
+  extends KafkaOAuth2Inputs, KafkaKerberosInputs, OtlpInputs, OtlpAuthInputs {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;

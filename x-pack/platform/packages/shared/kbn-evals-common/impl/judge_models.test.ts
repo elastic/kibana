@@ -11,12 +11,12 @@ import { resolveJudgeModelIds } from './judge_models';
 const llmScore = (modelId: string) =>
   ({
     evaluator: { name: 'judge', kind: 'llm', score: 1, model: { id: modelId } },
-  } as unknown as EvaluationScoreDocument);
+  }) as unknown as EvaluationScoreDocument;
 
 const deterministicScore = () =>
   ({
     evaluator: { name: 'tokens', kind: 'deterministic', score: 100 },
-  } as unknown as EvaluationScoreDocument);
+  }) as unknown as EvaluationScoreDocument;
 
 describe('resolveJudgeModelIds', () => {
   it('returns the distinct LLM judge models, most frequent first', () => {

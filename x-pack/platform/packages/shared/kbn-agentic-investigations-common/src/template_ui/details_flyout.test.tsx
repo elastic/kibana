@@ -29,7 +29,7 @@ const conversation = (overrides: Partial<Conversation> = {}) =>
     created_at: '2026-09-01T10:00:00.000Z',
     metadata: { status: 'open', severity: 'high' },
     ...overrides,
-  } as unknown as Conversation);
+  }) as unknown as Conversation;
 
 const baseOptions: InvestigationDetailsFlyoutOptions = { onOpenChat: jest.fn() };
 

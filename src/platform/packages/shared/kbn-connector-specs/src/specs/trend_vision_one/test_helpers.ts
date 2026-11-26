@@ -24,10 +24,10 @@ export const ctx = {
 
 /** A context whose client carries the configured {{kib}} response timeout (`xpack.actions.responseTimeout`). */
 export const ctxWithConfiguredTimeout = (timeoutMs: number): ActionContext =>
-  ({ ...ctx, client: { request, defaults: { timeout: timeoutMs } } } as unknown as ActionContext);
+  ({ ...ctx, client: { request, defaults: { timeout: timeoutMs } } }) as unknown as ActionContext;
 
 export const ctxWith = (apiUrl: unknown): ActionContext =>
-  ({ ...ctx, config: { apiUrl } } as unknown as ActionContext);
+  ({ ...ctx, config: { apiUrl } }) as unknown as ActionContext;
 
 export const run = (name: string, input: Record<string, unknown>, context = ctx) => {
   const action = TrendVisionOne.actions[name];

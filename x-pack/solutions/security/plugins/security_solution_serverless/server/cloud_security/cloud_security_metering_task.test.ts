@@ -376,7 +376,7 @@ describe('cloudSecurityMetringCallback', () => {
     ({
       productTypes: [{ product_line: 'cloud', product_tier: 'complete' }],
       cloudSecurityMetering,
-    } as unknown as ServerlessSecurityConfig);
+    }) as unknown as ServerlessSecurityConfig;
 
   const getExistenceCheckArgs = (cloudSecuritySolution: CloudSecuritySolutions) => [
     {

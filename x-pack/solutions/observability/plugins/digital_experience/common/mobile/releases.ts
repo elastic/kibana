@@ -73,8 +73,8 @@ export const withReleaseSeries = (
 ): ComposerQuery =>
   withReleaseGroup(query, releases).pipe`STATS ${errorRateStats()}
     BY ${resultColumn('bucket')} = TBUCKET(${toEsqlDuration(interval)}), ${resultColumn(
-    'releaseGroup'
-  )}`.pipe`SORT ${resultColumn('bucket')} ASC`.pipe`LIMIT ${MAX_SERIES_ROWS}`;
+      'releaseGroup'
+    )}`.pipe`SORT ${resultColumn('bucket')} ASC`.pipe`LIMIT ${MAX_SERIES_ROWS}`;
 
 /** Which of `releases` have documents, e.g. before the range. */
 export const withReleasesSeen = (

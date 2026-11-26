@@ -25,8 +25,8 @@ beforeEach(() => {
             .strict(),
         }
       : type === 'markdown' || type === 'lens-dashboard-app'
-      ? { schema: z.object({ content: z.string() }).strict() }
-      : undefined
+        ? { schema: z.object({ content: z.string() }).strict() }
+        : undefined
   );
 });
 

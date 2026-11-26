@@ -79,7 +79,7 @@ const createResponse = (rows: Array<[string, string, number, number]>): ESQLSear
       { name: 'preview_entity_count', type: 'long' },
     ],
     values: rows,
-  } as ESQLSearchResponse);
+  }) as ESQLSearchResponse;
 
 describe('runDefinitionPreviews', () => {
   afterEach(() => {

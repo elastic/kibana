@@ -266,8 +266,8 @@ export const combineDecisions = (
   const state: GateState = decisions.some((decision) => decision.state === 'failure')
     ? 'failure'
     : decisions.some((decision) => decision.state === 'pending')
-    ? 'pending'
-    : 'success';
+      ? 'pending'
+      : 'success';
   const relevant = decisions.filter((decision) => decision.state === state);
 
   const missing = relevant.filter(({ kind }) => kind === 'missing');

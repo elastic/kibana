@@ -18,7 +18,7 @@ interface WorkflowsUploadSubStepsProps {
 
 const END = 3 as const;
 
-type SubStep = 1 /* name */ | 2 /* upload */ | typeof END /* migration created */;
+type SubStep = 1 /* name */ | 2 /* upload */ | typeof END; /* migration created */
 
 export const WorkflowsUploadSubSteps = React.memo(function WorkflowsUploadSubSteps({
   onMigrationCreated,

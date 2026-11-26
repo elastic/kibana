@@ -79,7 +79,7 @@ describe('applyManagedOtlpDefaults', () => {
       protocol: 'grpc',
       endpoint: MANAGED_HOST,
       ...(sendingQueue !== undefined ? { sending_queue: sendingQueue } : {}),
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     mockedAppContextService.getCloud.mockReturnValue({
@@ -247,9 +247,9 @@ describe('getOtlpExporterUpdate', () => {
       protocol: 'grpc',
       endpoint,
       ...(sendingQueue !== undefined ? { sending_queue: sendingQueue } : {}),
-    } as any);
+    }) as any;
   const stored = (endpoint: string, sendingQueue: unknown) =>
-    ({ protocol: 'grpc', endpoint, sending_queue: sendingQueue } as any);
+    ({ protocol: 'grpc', endpoint, sending_queue: sendingQueue }) as any;
 
   beforeEach(() => {
     mockedAppContextService.getCloud.mockReturnValue({

@@ -346,7 +346,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     const found = new Map(docs.map((doc) => [doc.id, doc.input ?? null]));
     for (const id of missing) {
       const live = this.state.getStepIo(id, 'input');
-      result.set(id, live !== undefined ? live : found.get(id) ?? null);
+      result.set(id, live !== undefined ? live : (found.get(id) ?? null));
     }
     return result;
   }

@@ -13,7 +13,7 @@ import type { FilterableSource } from '@kbn/data-source';
 import { getFirstPersistedDataViewId } from './create_data_control_panel_action';
 
 const getSource = (id: string, isPersisted: boolean) =>
-  ({ id, isPersisted: () => isPersisted } as unknown as FilterableSource);
+  ({ id, isPersisted: () => isPersisted }) as unknown as FilterableSource;
 
 const esqlSource = {
   id: 'esql-source',

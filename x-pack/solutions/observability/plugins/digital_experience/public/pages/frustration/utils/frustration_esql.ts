@@ -393,7 +393,7 @@ export const errorClicksQuery = (params: FrustrationQueryParams): string =>
 | STATS signals = COUNT(*),
         sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${NON_EMPTY_SESSION}
     BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, ${escapeStringValue(
-    NO_EXCEPTION_LABEL
-  )}), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}
+      NO_EXCEPTION_LABEL
+    )}), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}
 | SORT signals DESC
 | LIMIT ${ERROR_CLICK_ROWS}`;

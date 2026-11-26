@@ -221,8 +221,8 @@ export const createReplyVsBaselineEvaluator = (deps: JudgeDeps) =>
     extraTurns: output.baseline?.extra_turns,
     missing: output.baseline
       ? `The baseline prompt produced no reply: ${output.baseline.error}`
-      : deps.noBaseline ??
-        'No baseline prompt: NIGHTSHIFT_WRITEUP_BASELINE_PROMPT is unset and this is not a PR build.',
+      : (deps.noBaseline ??
+        'No baseline prompt: NIGHTSHIFT_WRITEUP_BASELINE_PROMPT is unset and this is not a PR build.'),
   }));
 
 export const createWriteupEvaluators = (deps: JudgeDeps): WriteupEvaluator[] => [

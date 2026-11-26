@@ -33,8 +33,8 @@ describe('getDreamingStatusStepDefinition', () => {
       isContextEngineEnabled: async () => contextEngineEnabled,
       isMemoryEnabled: async () => memoryEnabled,
       checkReadPrivilege: async () => canRead,
-      getSessionMemoryService: async () => ({} as SessionMemoryService),
-      getSessionEventsService: async () => ({} as SessionEventsService),
+      getSessionMemoryService: async () => ({}) as SessionMemoryService,
+      getSessionEventsService: async () => ({}) as SessionEventsService,
     }).handler(
       createMockStepContext({
         input: { ai_index_id: 'support', ...(source && { source }) },

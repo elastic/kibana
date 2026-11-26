@@ -24,7 +24,7 @@ const getCapabilities = ({
     [SIEM_MIGRATIONS_FEATURE_ID]: { all: siemMigrations },
     actions: { execute: actionsExecute },
     [WORKFLOWS_MANAGEMENT_FEATURE_ID]: workflows,
-  } as unknown as Capabilities);
+  }) as unknown as Capabilities;
 
 const allWorkflowsPrivileges = {
   [WorkflowsManagementUiActions.read]: true,

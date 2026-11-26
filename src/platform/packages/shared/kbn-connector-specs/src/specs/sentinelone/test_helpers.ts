@@ -63,7 +63,7 @@ export const resetMocksAroundEachTest = () => {
 export type RequestCase = [
   string,
   Record<string, unknown>,
-  { method: string; path: string; params?: object; data?: unknown }
+  { method: string; path: string; params?: object; data?: unknown },
 ];
 
 /** Checks that one action sends exactly the documented request and nothing else. */

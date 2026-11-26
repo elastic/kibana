@@ -326,7 +326,7 @@ describe('createSessionEventsService', () => {
         content: id,
         raw: { type: 'user', id, content: id, ...base },
         ...overrides,
-      } as StoredSessionEvent);
+      }) as StoredSessionEvent;
     const searchResponseOf = (sources: StoredSessionEvent[]) => ({
       took: 1,
       timed_out: false,

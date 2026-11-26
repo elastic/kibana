@@ -118,8 +118,8 @@ export function checkPrivilegesFactory(
         privileges.kibana === undefined
           ? []
           : Array.isArray(privileges.kibana)
-          ? privileges.kibana
-          : [privileges.kibana];
+            ? privileges.kibana
+            : [privileges.kibana];
       // Like the login action, recovery is checked without being requested, so the caller never sees
       // it. Recovery counts only with the login action, so a check that doesn't ask for login can't
       // answer it.

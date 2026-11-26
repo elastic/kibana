@@ -27,7 +27,7 @@ const makeCtx = (config: Record<string, unknown>, secrets: Record<string, unknow
     config,
     secrets,
     log: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
-  } as unknown as ActionContext);
+  }) as unknown as ActionContext;
 const ctx = makeCtx(
   { url: 'https://tenant.sentinelone.net/' },
   { authType: 'api_key_header', token: 'tok' }

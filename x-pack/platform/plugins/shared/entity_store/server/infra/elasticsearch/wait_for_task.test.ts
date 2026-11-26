@@ -186,7 +186,7 @@ describe('pollTaskUntil', () => {
 
 describe('cancelTask', () => {
   const buildClient = (cancel: jest.Mock) =>
-    ({ tasks: { cancel } } as unknown as jest.Mocked<ElasticsearchClient>);
+    ({ tasks: { cancel } }) as unknown as jest.Mocked<ElasticsearchClient>;
 
   it('cancels the task', async () => {
     const cancel = jest.fn().mockResolvedValue({});

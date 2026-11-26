@@ -35,7 +35,7 @@ const statsResponse = (
         },
       ])
     ),
-  } as never);
+  }) as never;
 
 const setup = () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

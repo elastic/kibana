@@ -54,12 +54,12 @@ export const useDreamingSetupDraft = (): DreamingSetupDraft => {
       isCustom
         ? EMPTY_DRAFT
         : selected
-        ? draftOf(selected.dreaming, { entitiesEnabled: false })
-        : undefined,
+          ? draftOf(selected.dreaming, { entitiesEnabled: false })
+          : undefined,
     [isCustom, selected]
   );
   const draft = edited !== undefined && edited.id === selectedId ? edited.draft : proposed;
-  const summary = editedSummary ?? (isCustom ? '' : selected?.summary ?? '');
+  const summary = editedSummary ?? (isCustom ? '' : (selected?.summary ?? ''));
 
   const select = (id: string) => {
     if (id !== selectedId) {

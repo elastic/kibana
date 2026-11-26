@@ -39,7 +39,7 @@ export const getReleaseColors = (
   const colors = new Map<string, string>();
   named.forEach((release) => {
     const rank = rankOf(release);
-    colors.set(release, palette[rank >= 0 ? rank : free.shift() ?? 0]);
+    colors.set(release, palette[rank >= 0 ? rank : (free.shift() ?? 0)]);
   });
   releases
     .filter(({ isOther }) => isOther)

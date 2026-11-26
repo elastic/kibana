@@ -235,7 +235,7 @@ function DeliveryTotals({
               storage.loading ? (
                 <EuiLoadingSpinner size="m" />
               ) : (
-                storageParts?.value ?? UNKNOWN_STAT_VALUE
+                (storageParts?.value ?? UNKNOWN_STAT_VALUE)
               )
             }
             unit={storage.loading ? undefined : storageParts?.unit}

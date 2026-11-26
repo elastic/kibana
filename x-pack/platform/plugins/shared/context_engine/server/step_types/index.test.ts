@@ -43,8 +43,8 @@ describe('registerStepDefinitions', () => {
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => true,
         checkReadPrivilege: async () => true,
-        getSessionMemoryService: async () => ({} as SessionMemoryService),
-        getSessionEventsService: async () => ({} as SessionEventsService),
+        getSessionMemoryService: async () => ({}) as SessionMemoryService,
+        getSessionEventsService: async () => ({}) as SessionEventsService,
       },
     });
 
