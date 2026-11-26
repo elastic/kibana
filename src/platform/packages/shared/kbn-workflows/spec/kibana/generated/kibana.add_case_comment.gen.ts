@@ -51,9 +51,9 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     bodyParams: ['alertId', 'index', 'owner', 'rule', 'type', 'comment'],
   },
   paramsSchema: z.object({
-    ...getShapeAt(add_case_comment_default_space_request, 'body'),
-    ...getShapeAt(add_case_comment_default_space_request, 'path'),
     ...getShapeAt(add_case_comment_default_space_request, 'query'),
+    ...getShapeAt(add_case_comment_default_space_request, 'path'),
+    ...getShapeAt(add_case_comment_default_space_request, 'body'),
     fetcher: FetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),

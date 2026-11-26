@@ -565,7 +565,7 @@ describe('Agent policy API handlers', () => {
     });
 
     describe('main composition path (no revision / no kubernetes)', () => {
-      it('passes redactProxySecrets:true when caller lacks fleet-settings-read', async () => {
+      it('passes redactSecrets:true when caller lacks fleet-settings-read', async () => {
         const fleetContext = (await context.fleet) as any;
         fleetContext.authz.fleet.readSettings = false;
         agentPolicyServiceMock.getFullAgentPolicy.mockResolvedValue(POLICY_WITH_SECRETS as any);
@@ -580,11 +580,11 @@ describe('Agent policy API handlers', () => {
         expect(agentPolicyServiceMock.getFullAgentPolicy).toHaveBeenCalledWith(
           expect.anything(),
           'policy-1',
-          expect.objectContaining({ redactProxySecrets: true })
+          expect.objectContaining({ redactSecrets: true })
         );
       });
 
-      it('passes redactProxySecrets:false when caller has fleet-settings-read', async () => {
+      it('passes redactSecrets:false when caller has fleet-settings-read', async () => {
         const fleetContext = (await context.fleet) as any;
         fleetContext.authz.fleet.readSettings = true;
         agentPolicyServiceMock.getFullAgentPolicy.mockResolvedValue(POLICY_WITH_SECRETS as any);
@@ -599,7 +599,7 @@ describe('Agent policy API handlers', () => {
         expect(agentPolicyServiceMock.getFullAgentPolicy).toHaveBeenCalledWith(
           expect.anything(),
           'policy-1',
-          expect.objectContaining({ redactProxySecrets: false })
+          expect.objectContaining({ redactSecrets: false })
         );
       });
     });
@@ -780,9 +780,9 @@ describe('Agent policy API handlers', () => {
         expect(body.item.outputs.default.ssl).not.toHaveProperty('key');
         expect(body.item.outputs.default.ssl?.certificate).toBe('my-cert');
         expect(body.item.outputs.default.proxy_url).toBe('https://proxy.fr');
-        // fleet proxy_headers are redacted; ssl.key preserved (proxy has no certificate_key in this test)
+        // fleet proxy_headers are redacted; fleet ssl.key is always a secret, so it is redacted too
         expect(body.item.fleet).not.toHaveProperty('proxy_headers');
-        expect(body.item.fleet.ssl?.key).toBe('PRIVATE_KEY');
+        expect(body.item.fleet.ssl).not.toHaveProperty('key');
         // agent.download proxy_headers are redacted; ssl.key preserved (no proxy certificate_key)
         expect(body.item.agent.download).not.toHaveProperty('proxy_headers');
         expect(body.item.agent.download.ssl?.key).toBe('PRIVATE_KEY');
@@ -849,13 +849,81 @@ describe('Agent policy API handlers', () => {
         expect(yaml).not.toContain('Bearer SECRET');
         // proxy_url (non-secret) must remain
         expect(yaml).toContain('https://proxy.fr');
-        // proxy has no certificate_key in this test — fleet/download ssl.key must remain
+        // proxy has no certificate_key in this test — agent.download ssl.key must remain
         expect(yaml).toContain('PRIVATE_KEY');
+      });
+
+      describe('a stored policy with the Fleet Server host agent key', () => {
+        const makeHostKeyDoc = () => ({
+          data: {
+            ...JSON.parse(JSON.stringify(POLICY_WITH_SECRETS)),
+            fleet: {
+              hosts: ['https://fleet:8220'],
+              ssl: {
+                certificate_authorities: ['/etc/ca.crt'],
+                certificate: 'agent-cert',
+                key: 'HOST_AGENT_KEY',
+              },
+            },
+          },
+        });
+
+        it('redacts the key and keeps the CAs when caller lacks fleet-settings-read', async () => {
+          const fleetContext = (await context.fleet) as any;
+          fleetContext.authz.fleet.readSettings = false;
+          agentPolicyServiceMock.getFleetServerPolicy.mockResolvedValue(makeHostKeyDoc() as any);
+
+          const request = httpServerMock.createKibanaRequest({
+            params: { agentPolicyId: 'policy-1' },
+            query: { revision: 2 },
+          });
+
+          await getFullAgentPolicy(context, request, response);
+
+          const body = (response.ok as jest.Mock).mock.calls[0][0].body;
+          expect(body.item.fleet.ssl).toEqual({
+            certificate_authorities: ['/etc/ca.crt'],
+            certificate: 'agent-cert',
+          });
+        });
+
+        it('leaves the key out of the download YAML when caller lacks fleet-settings-read', async () => {
+          const fleetContext = (await context.fleet) as any;
+          fleetContext.authz.fleet.readSettings = false;
+          agentPolicyServiceMock.getFleetServerPolicy.mockResolvedValue(makeHostKeyDoc() as any);
+
+          const request = httpServerMock.createKibanaRequest({
+            params: { agentPolicyId: 'policy-1' },
+            query: { revision: 2 },
+          });
+
+          await downloadFullAgentPolicy(context, request, response);
+
+          const yaml: string = (response.ok as jest.Mock).mock.calls[0][0].body;
+          expect(yaml).not.toContain('HOST_AGENT_KEY');
+          expect(yaml).toContain('/etc/ca.crt');
+        });
+
+        it('keeps the key when caller has fleet-settings-read', async () => {
+          const fleetContext = (await context.fleet) as any;
+          fleetContext.authz.fleet.readSettings = true;
+          agentPolicyServiceMock.getFleetServerPolicy.mockResolvedValue(makeHostKeyDoc() as any);
+
+          const request = httpServerMock.createKibanaRequest({
+            params: { agentPolicyId: 'policy-1' },
+            query: { revision: 2 },
+          });
+
+          await getFullAgentPolicy(context, request, response);
+
+          const body = (response.ok as jest.Mock).mock.calls[0][0].body;
+          expect(body.item.fleet.ssl.key).toBe('HOST_AGENT_KEY');
+        });
       });
     });
 
     describe('?kubernetes=true branch', () => {
-      it('passes redactProxySecrets:true to getFullAgentConfigMap when caller lacks fleet-settings-read', async () => {
+      it('passes redactSecrets:true to getFullAgentConfigMap when caller lacks fleet-settings-read', async () => {
         const fleetContext = (await context.fleet) as any;
         fleetContext.authz.fleet.readSettings = false;
         fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion.mockResolvedValue(
@@ -874,11 +942,11 @@ describe('Agent policy API handlers', () => {
           expect.anything(),
           'policy-1',
           '9.6.0',
-          expect.objectContaining({ redactProxySecrets: true })
+          expect.objectContaining({ redactSecrets: true })
         );
       });
 
-      it('passes redactProxySecrets:false to getFullAgentConfigMap when caller has fleet-settings-read', async () => {
+      it('passes redactSecrets:false to getFullAgentConfigMap when caller has fleet-settings-read', async () => {
         const fleetContext = (await context.fleet) as any;
         fleetContext.authz.fleet.readSettings = true;
         fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion.mockResolvedValue(
@@ -897,7 +965,7 @@ describe('Agent policy API handlers', () => {
           expect.anything(),
           'policy-1',
           '9.6.0',
-          expect.objectContaining({ redactProxySecrets: false })
+          expect.objectContaining({ redactSecrets: false })
         );
       });
     });
