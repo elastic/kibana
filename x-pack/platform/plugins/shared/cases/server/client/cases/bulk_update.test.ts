@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsFindResult } from '@kbn/core/server';
-import type { AttachmentAttributes } from '../../../common/types/domain';
+import type { AttachmentAttributes, Observable } from '../../../common/types/domain';
 import { CustomFieldTypes, CaseStatuses, CaseSeverity } from '../../../common/types/domain';
 import { stringify as yamlStringify } from 'yaml';
 import {
@@ -53,6 +53,103 @@ describe('update', () => {
 
   const casesClientMock = createCasesClientMock();
   casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+  describe('observables', () => {
+    const fieldObservable: Observable = {
+      id: 'field-1',
+      typeKey: 'observable-type-ipv4',
+      value: '10.0.0.1',
+      description: null,
+      createdAt: '2026-11-06T09:30:00.000Z',
+      updatedAt: null,
+    };
+    const typeObservable: Observable = { ...fieldObservable, id: 'type-1', value: '10.0.0.2' };
+    const caseWithObservables: CaseSavedObjectTransformed = {
+      ...mockCases[0],
+      attributes: {
+        ...mockCases[0].attributes,
+        observables: [fieldObservable],
+        total_observables: 1,
+      },
+    };
+    const titleUpdate: CasesPatchRequest = {
+      cases: [
+        {
+          id: caseWithObservables.id,
+          version: caseWithObservables.version ?? '',
+          title: 'New title',
+        },
+      ],
+    };
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [caseWithObservables],
+      });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...caseWithObservables, attributes: { title: 'New title' } }],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [caseWithObservables.id]: 0,
+      });
+      clientArgs.services.observableService.getter.getPreviews.mockResolvedValue(
+        new Map([[caseWithObservables.id, { count: 3, oldest: [typeObservable] }]])
+      );
+    });
+
+    it('lists the field first, then the oldest objects, and counts both stores', async () => {
+      const [updatedCase] = await bulkUpdate(titleUpdate, clientArgs, casesClientMock);
+
+      expect(updatedCase).toMatchObject({
+        title: 'New title',
+        observables: [fieldObservable, typeObservable],
+        total_observables: 4,
+      });
+      expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
+        [caseWithObservables.id],
+        49
+      );
+    });
+
+    it('does not write observables to the case', async () => {
+      await bulkUpdate(titleUpdate, clientArgs, casesClientMock);
+
+      const patchArgs = clientArgs.services.caseService.patchCases.mock.calls[0][0];
+      expect(patchArgs.cases[0].updatedAttributes).not.toHaveProperty('observables');
+      expect(patchArgs.cases[0].updatedAttributes).not.toHaveProperty('total_observables');
+    });
+
+    it('requests the previews alongside the attachment totals', async () => {
+      let totalsResolved = false;
+      let previewsRequestedBeforeTotals = false;
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockImplementation(
+        async () => {
+          await new Promise(setImmediate);
+          totalsResolved = true;
+          return new Map();
+        }
+      );
+      clientArgs.services.observableService.getter.getPreviews.mockImplementation(async () => {
+        previewsRequestedBeforeTotals = !totalsResolved;
+        return new Map();
+      });
+
+      await bulkUpdate(titleUpdate, clientArgs, casesClientMock);
+
+      expect(previewsRequestedBeforeTotals).toBe(true);
+    });
+  });
 
   describe('assignee identity population', () => {
     const clientArgs = createCasesClientMockArgs();

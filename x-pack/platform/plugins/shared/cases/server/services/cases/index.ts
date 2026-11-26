@@ -65,6 +65,8 @@ import {
   transformESModelToCase,
 } from './transform';
 import type { AttachmentService } from '../attachments';
+import type { ObservableService } from '../observables';
+import { getObservablesPreviews, mergeObservablesPreview } from '../../common/observables_preview';
 import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2WriterContract,
@@ -219,6 +221,7 @@ export class CasesService {
   private readonly log: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
+  private readonly observableService: ObservableService;
   /**
    * Cases-as-data v2 writer. Fire-and-forget hook fired post-success on case
    * create / patch / delete. When `xpack.cases.analyticsV2.enabled=false` this
@@ -248,6 +251,7 @@ export class CasesService {
     log,
     unsecuredSavedObjectsClient,
     attachmentService,
+    observableService,
     analyticsV2Writer,
     analyticsV2ActivityWriter,
     analyticsV2AttachmentsWriter,
@@ -255,6 +259,7 @@ export class CasesService {
     log: Logger;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
+    observableService: ObservableService;
     analyticsV2Writer: CasesAnalyticsV2WriterContract;
     analyticsV2ActivityWriter: CasesActivityV2WriterContract;
     analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
@@ -262,6 +267,7 @@ export class CasesService {
     this.log = log;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
+    this.observableService = observableService;
     this.analyticsV2Writer = analyticsV2Writer;
     this.analyticsV2ActivityWriter = analyticsV2ActivityWriter;
     this.analyticsV2AttachmentsWriter = analyticsV2AttachmentsWriter;
@@ -439,9 +445,18 @@ export class CasesService {
       return accMap;
     }, new Map<string, SavedObjectsFindResult<CaseTransformedAttributes>>());
 
-    const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
-      caseIds: Array.from(casesMap.keys()),
-    });
+    const [commentTotals, observablesPreviews] = await Promise.all([
+      this.attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: Array.from(casesMap.keys()),
+      }),
+      getObservablesPreviews(
+        this.observableService,
+        Array.from(casesMap.values(), ({ id, attributes }) => ({
+          id,
+          observables: attributes.observables,
+        }))
+      ),
+    ]);
 
     const casesWithComments = new Map<string, Case>();
     for (const [id, caseInfo] of casesMap.entries()) {
@@ -453,12 +468,15 @@ export class CasesService {
 
       casesWithComments.set(
         id,
-        flattenCaseSavedObject({
-          savedObject: caseInfo,
-          totalComment: userComments,
-          totalAlerts: alerts,
-          totalEvents: events,
-        })
+        mergeObservablesPreview(
+          flattenCaseSavedObject({
+            savedObject: caseInfo,
+            totalComment: userComments,
+            totalAlerts: alerts,
+            totalEvents: events,
+          }),
+          observablesPreviews.get(id)
+        )
       );
     }
 
@@ -563,11 +581,14 @@ export class CasesService {
       return accMap;
     }, new Map<string, Case>());
 
-    // TODO: imported cases do not populate stats when importing
-    // Remove once https://github.com/elastic/kibana/issues/245939 is fixed
-    const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
-      caseIds: Array.from(casesMap.keys()),
-    });
+    const [commentTotals, observablesPreviews] = await Promise.all([
+      // TODO: imported cases do not populate stats when importing
+      // Remove once https://github.com/elastic/kibana/issues/245939 is fixed
+      this.attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: Array.from(casesMap.keys()),
+      }),
+      getObservablesPreviews(this.observableService, Array.from(casesMap.values())),
+    ]);
 
     const casesWithComments = new Map<string, Case>();
     for (const [id, caseInfo] of casesMap.entries()) {
@@ -577,12 +598,18 @@ export class CasesService {
         events: 0,
       };
 
-      casesWithComments.set(id, {
-        ...caseInfo,
-        totalComment: userComments,
-        totalAlerts: alerts,
-        totalEvents: events,
-      });
+      casesWithComments.set(
+        id,
+        mergeObservablesPreview(
+          {
+            ...caseInfo,
+            totalComment: userComments,
+            totalAlerts: alerts,
+            totalEvents: events,
+          },
+          observablesPreviews.get(id)
+        )
+      );
     }
     const total =
       typeof cases.hits.total === 'object'

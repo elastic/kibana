@@ -48,6 +48,7 @@ import {
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
+import { getObservablesPreview, mergeObservablesPreview } from '../../common/observables_preview';
 import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
@@ -151,6 +152,7 @@ export const push = async (
       caseConfigureService,
       userActionService,
       alertsService,
+      observableService,
     },
     actionsClient,
     user,
@@ -255,7 +257,7 @@ export const push = async (
 
     const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
 
-    const [updatedCase, updatedComments] = await Promise.all([
+    const [updatedCase, updatedComments, observablesPreview] = await Promise.all([
       caseService.patchCase({
         originalCase: myCase,
         caseId,
@@ -303,6 +305,11 @@ export const push = async (
         refresh: false,
         requestWithoutType: true,
       }),
+
+      getObservablesPreview(observableService, {
+        id: myCase.id,
+        observables: myCase.attributes.observables,
+      }),
     ]);
 
     if (shouldMarkAsClosed) {
@@ -333,29 +340,32 @@ export const push = async (
     });
 
     /* End of update case with push information */
-    const res = flattenCaseSavedObject({
-      savedObject: {
-        ...myCase,
-        ...updatedCase,
-        attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-        references: myCase.references,
-      },
-      comments: comments.saved_objects.map((origComment) => {
-        const foundComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
-        const updatedComment =
-          foundComment && !isSavedObjectErrorResult(foundComment) ? foundComment : undefined;
-        return {
-          ...origComment,
-          ...updatedComment,
-          attributes: {
-            ...origComment.attributes,
-            ...updatedComment?.attributes,
-          } as AttachmentAttributes,
-          version: updatedComment?.version ?? origComment.version,
-          references: origComment?.references ?? [],
-        };
+    const res = mergeObservablesPreview(
+      flattenCaseSavedObject({
+        savedObject: {
+          ...myCase,
+          ...updatedCase,
+          attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+          references: myCase.references,
+        },
+        comments: comments.saved_objects.map((origComment) => {
+          const foundComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+          const updatedComment =
+            foundComment && !isSavedObjectErrorResult(foundComment) ? foundComment : undefined;
+          return {
+            ...origComment,
+            ...updatedComment,
+            attributes: {
+              ...origComment.attributes,
+              ...updatedComment?.attributes,
+            } as AttachmentAttributes,
+            version: updatedComment?.version ?? origComment.version,
+            references: origComment?.references ?? [],
+          };
+        }),
       }),
-    });
+      observablesPreview
+    );
 
     return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {

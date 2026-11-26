@@ -1591,3 +1591,118 @@ describe('optimistic concurrency on observable writes', () => {
     });
   });
 });
+
+describe('observable write responses', () => {
+  const mockObservableService = mockClientArgs.services.observableService;
+  const typeObservable: Observable = {
+    id: 'type-1',
+    typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+    value: 'host-1',
+    description: null,
+    createdAt: '2026-11-06T09:30:00.000Z',
+    updatedAt: null,
+  };
+
+  const patchedObservables = (): Observable[] =>
+    mockCaseService.patchCase.mock.calls[0][0].updatedAttributes.observables ?? [];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockClientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+    mockCaseService.patchCase.mockImplementation(async ({ originalCase, updatedAttributes }) => ({
+      ...originalCase,
+      attributes: updatedAttributes,
+    }));
+    mockObservableService.getter.getPreviews.mockResolvedValue(
+      new Map([[caseSO.id, { count: 3, oldest: [typeObservable] }]])
+    );
+  });
+
+  afterAll(() => {
+    mockObservableService.getter.getPreviews.mockResolvedValue(new Map());
+  });
+
+  it('addObservable lists the field first, then the oldest objects, and counts both stores', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+    const result = await addObservable(
+      caseSO.id,
+      { observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.9', description: null } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(result.observables.map(({ value }) => value)).toEqual([
+      mockObservable.value,
+      '10.0.0.9',
+      typeObservable.value,
+    ]);
+    expect(result.total_observables).toBe(5);
+    expect(mockObservableService.getter.getPreviews).toHaveBeenCalledWith([caseSO.id], 48);
+    expect(patchedObservables().map(({ value }) => value)).toEqual([
+      mockObservable.value,
+      '10.0.0.9',
+    ]);
+  });
+
+  it('bulkAddObservables lists the field first, then the oldest objects, and counts both stores', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+    const result = await bulkAddObservables(
+      {
+        caseId: caseSO.id,
+        observables: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.9', description: null }],
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(result.observables.map(({ value }) => value)).toEqual([
+      mockObservable.value,
+      '10.0.0.9',
+      typeObservable.value,
+    ]);
+    expect(result.total_observables).toBe(5);
+    expect(patchedObservables().map(({ value }) => value)).toEqual([
+      mockObservable.value,
+      '10.0.0.9',
+    ]);
+  });
+
+  it('updateObservable lists the field first, then the oldest objects, and counts both stores', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+    const result = await updateObservable(
+      caseSO.id,
+      mockObservable.id,
+      { observable: { value: '10.0.0.9', description: 'Updated' } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(result.observables.map(({ id }) => id)).toEqual([mockObservable.id, typeObservable.id]);
+    expect(result.total_observables).toBe(4);
+    expect(patchedObservables().map(({ id }) => id)).toEqual([mockObservable.id]);
+  });
+
+  it('bulkDeleteObservables lists the field first, then the oldest objects, and counts both stores', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseSOWithMultipleObservables);
+
+    const result = await bulkDeleteObservables(
+      { caseId: caseSO.id, observableIds: [mockObservable2.id] },
+      mockClientArgs
+    );
+
+    expect(result.observables.map(({ id }) => id)).toEqual([
+      mockObservable.id,
+      mockObservable3.id,
+      typeObservable.id,
+    ]);
+    expect(result.total_observables).toBe(5);
+    expect(patchedObservables().map(({ id }) => id)).toEqual([
+      mockObservable.id,
+      mockObservable3.id,
+    ]);
+  });
+});

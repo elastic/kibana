@@ -27,6 +27,10 @@ export interface ObservableKey {
 export interface ObservableToCreate extends ObservableKey {
   id: string;
   description: string | null;
+  /**
+   * Stamp the observables of one request one millisecond apart, in request order: previews and
+   * pages sort oldest first and break ties by type key and value, not by request order.
+   */
   createdAt: string;
 }
 

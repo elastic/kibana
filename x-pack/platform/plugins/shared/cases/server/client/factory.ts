@@ -286,13 +286,15 @@ export class CasesClientFactory {
 
   private createCaseService(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    attachmentService: AttachmentService
+    attachmentService: AttachmentService,
+    observableService: ObservableService
   ): CasesService {
     this.validateInitialization();
     return new CasesService({
       log: this.logger,
       unsecuredSavedObjectsClient,
       attachmentService,
+      observableService,
       analyticsV2Writer: this.options.analyticsV2Writer,
       analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
       analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
@@ -354,7 +356,18 @@ export class CasesClientFactory {
           .then(({ fieldDefinitions }) => fieldDefinitions),
     });
 
-    const caseService = this.createCaseService(unsecuredSavedObjectsClient, attachmentService);
+    const observableService = new ObservableService({
+      log: this.logger,
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
+      namespace,
+    });
+
+    const caseService = this.createCaseService(
+      unsecuredSavedObjectsClient,
+      attachmentService,
+      observableService
+    );
 
     const licensingService = new LicensingService(
       this.options.licensingPluginStart.license$,
@@ -399,12 +412,7 @@ export class CasesClientFactory {
       attachmentService,
       licensingService,
       notificationService,
-      observableService: new ObservableService({
-        log: this.logger,
-        unsecuredSavedObjectsClient,
-        savedObjectsSerializer,
-        namespace,
-      }),
+      observableService,
     };
   }
 

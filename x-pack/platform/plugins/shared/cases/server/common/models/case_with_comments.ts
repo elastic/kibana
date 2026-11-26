@@ -48,6 +48,7 @@ import {
   countEventsForID,
 } from '../utils';
 import { decodeOrThrowZod } from '../runtime_types';
+import { getObservablesPreview, mergeObservablesPreview } from '../observables_preview';
 import { extractCommentContent, isUnifiedPayloadCommentAttachment } from '../attachments/comment';
 import type {
   AttachmentAttributesV2,
@@ -736,14 +737,20 @@ export class CaseCommentModel {
 
   public async encodeWithComments(): Promise<Case> {
     try {
-      const comments = await this.params.services.caseService.getAllCaseComments({
-        id: this.caseInfo.id,
-        options: {
-          fields: [],
-          page: 1,
-          perPage: MAX_DOCS_PER_PAGE,
-        },
-      });
+      const [comments, observablesPreview] = await Promise.all([
+        this.params.services.caseService.getAllCaseComments({
+          id: this.caseInfo.id,
+          options: {
+            fields: [],
+            page: 1,
+            perPage: MAX_DOCS_PER_PAGE,
+          },
+        }),
+        getObservablesPreview(this.params.services.observableService, {
+          id: this.caseInfo.id,
+          observables: this.caseInfo.attributes.observables,
+        }),
+      ]);
       const totalAlerts =
         countAlertsForID({
           comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
@@ -754,12 +761,15 @@ export class CaseCommentModel {
           comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
         }) ?? 0;
 
-      const caseResponse = {
-        comments: flattenAttachmentSavedObjects(comments.saved_objects),
-        totalAlerts,
-        totalEvents,
-        ...this.formatForEncoding(comments.total),
-      };
+      const caseResponse = mergeObservablesPreview(
+        {
+          comments: flattenAttachmentSavedObjects(comments.saved_objects),
+          totalAlerts,
+          totalEvents,
+          ...this.formatForEncoding(comments.total),
+        },
+        observablesPreview
+      );
 
       return decodeOrThrowZod(CaseSchema)(caseResponse);
     } catch (error) {

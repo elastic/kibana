@@ -49,6 +49,7 @@ import {
   createAttackUpdateStatusRequest,
   flattenCaseSavedObject,
 } from '../../common/utils';
+import { getObservablesPreviews, mergeObservablesPreview } from '../../common/observables_preview';
 import {
   isAlertAttachmentType,
   isAttackAttachmentType,
@@ -611,6 +612,7 @@ export const bulkUpdate = async (
       attachmentService,
       templatesService,
       fieldDefinitionsService,
+      observableService,
     },
     user,
     logger,
@@ -1027,9 +1029,18 @@ export const bulkUpdate = async (
       syncedAlertCountCountByCaseId,
     });
 
-    const commentsMap = await attachmentService.getter.getCaseAttatchmentStats({
-      caseIds,
-    });
+    const [commentsMap, observablesPreviews] = await Promise.all([
+      attachmentService.getter.getCaseAttatchmentStats({
+        caseIds,
+      }),
+      getObservablesPreviews(
+        observableService,
+        casesToUpdate.map(({ originalCase }) => ({
+          id: originalCase.id,
+          observables: originalCase.attributes.observables,
+        }))
+      ),
+    ]);
 
     const returnUpdatedCase = updatedCases.saved_objects.reduce<CasesPatchResponse>(
       (flattenCases, updatedCase) => {
@@ -1051,12 +1062,15 @@ export const bulkUpdate = async (
 
         const syncedAlertCount = syncedAlertCountCountByCaseId.get(updatedCase.id) ?? 0;
         const updatedCaseWithStats: CaseWithUpdateSummary = {
-          ...flattenCaseSavedObject({
-            savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
-            totalComment,
-            totalAlerts,
-            totalEvents,
-          }),
+          ...mergeObservablesPreview(
+            flattenCaseSavedObject({
+              savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
+              totalComment,
+              totalAlerts,
+              totalEvents,
+            }),
+            observablesPreviews.get(updatedCase.id)
+          ),
           ...(syncedAlertCount > 0 ? { updateSummary: { syncedAlertCount } } : {}),
         };
 

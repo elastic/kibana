@@ -32,6 +32,7 @@ import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
+import { withObservablesPreview } from '../../common/observables_preview';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
   validateChangedObservableLengths,
@@ -271,7 +272,7 @@ export const addObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, observableService },
     authorization,
   } = clientArgs;
 
@@ -318,7 +319,10 @@ export const addObservable = async (
         : Boom.badRequest('Invalid duplicated observables in request.');
     }
 
-    const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
+    const res = await withObservablesPreview(
+      observableService,
+      flattenCaseSavedObject({ savedObject: applied.caseWithPatch })
+    );
 
     // Decode before emitting — if the SO fails CaseSchema validation, we must not fire
     // the trigger for a request the API will report as failed. Matches the precedent
@@ -350,7 +354,7 @@ export const updateObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observableService },
     authorization,
     user,
   } = clientArgs;
@@ -432,14 +436,17 @@ export const updateObservable = async (
       },
     });
 
-    const res = flattenCaseSavedObject({
-      savedObject: {
-        ...latestCase,
-        ...updatedCase,
-        attributes: { ...latestCase.attributes, ...updatedCase?.attributes },
-        references: latestCase.references,
-      },
-    });
+    const res = await withObservablesPreview(
+      observableService,
+      flattenCaseSavedObject({
+        savedObject: {
+          ...latestCase,
+          ...updatedCase,
+          attributes: { ...latestCase.attributes, ...updatedCase?.attributes },
+          references: latestCase.references,
+        },
+      })
+    );
 
     return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
@@ -515,7 +522,7 @@ export const bulkAddObservables = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, observableService },
     authorization,
   } = clientArgs;
 
@@ -560,7 +567,10 @@ export const bulkAddObservables = async (
     if (applied.status === 'skipped') {
       throw Boom.badRequest(`Failed to add observable`);
     }
-    const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
+    const res = await withObservablesPreview(
+      observableService,
+      flattenCaseSavedObject({ savedObject: applied.caseWithPatch })
+    );
     const result = decodeOrThrowZod(CaseSchema)(res);
     return {
       result,
@@ -580,7 +590,7 @@ export const bulkDeleteObservables = async (
   clientArgs: CasesClientArgs
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observableService },
     authorization,
     user,
   } = clientArgs;
@@ -643,14 +653,17 @@ export const bulkDeleteObservables = async (
     },
   });
 
-  const res = flattenCaseSavedObject({
-    savedObject: {
-      ...latestCase,
-      ...updatedCase,
-      attributes: { ...latestCase.attributes, ...updatedCase?.attributes },
-      references: latestCase.references,
-    },
-  });
+  const res = await withObservablesPreview(
+    observableService,
+    flattenCaseSavedObject({
+      savedObject: {
+        ...latestCase,
+        ...updatedCase,
+        attributes: { ...latestCase.attributes, ...updatedCase?.attributes },
+        references: latestCase.references,
+      },
+    })
+  );
 
   const result = decodeOrThrowZod(CaseSchema)(res);
   return result;

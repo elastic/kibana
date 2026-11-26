@@ -49,6 +49,11 @@ import {
   countUserAttachments,
   countEventsForID,
 } from '../../common/utils';
+import {
+  getObservablesPreview,
+  mergeObservablesPreview,
+  withObservablesPreview,
+} from '../../common/observables_preview';
 import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
@@ -419,7 +424,7 @@ export const get = async (
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
-    services: { caseService, attachmentService },
+    services: { caseService, attachmentService, observableService },
     logger,
     authorization,
   } = clientArgs;
@@ -434,40 +439,55 @@ export const get = async (
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
+    const fieldObservables = { id: theCase.id, observables: theCase.attributes.observables };
+
     if (!includeComments) {
-      const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
-        caseIds: [theCase.id],
-      });
-      const flattenedCase = flattenCaseSavedObject({
-        savedObject: theCase,
-        ...(commentStats.has(theCase.id)
-          ? {
-              totalAlerts: commentStats.get(theCase.id)?.alerts,
-              totalComment: commentStats.get(theCase.id)?.userComments,
-              totalEvents: commentStats.get(theCase.id)?.events,
-            }
-          : {}),
-      });
+      const [commentStats, observablesPreview] = await Promise.all([
+        attachmentService.getter.getCaseAttatchmentStats({
+          caseIds: [theCase.id],
+        }),
+        getObservablesPreview(observableService, fieldObservables),
+      ]);
+      const flattenedCase = mergeObservablesPreview(
+        flattenCaseSavedObject({
+          savedObject: theCase,
+          ...(commentStats.has(theCase.id)
+            ? {
+                totalAlerts: commentStats.get(theCase.id)?.alerts,
+                totalComment: commentStats.get(theCase.id)?.userComments,
+                totalEvents: commentStats.get(theCase.id)?.events,
+              }
+            : {}),
+        }),
+        observablesPreview
+      );
       return decodeOrThrowZod(CaseSchema)(
         await enrichCaseWithFieldLabels(flattenedCase, clientArgs)
       );
     }
 
-    const theComments = (await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    })) as SavedObjectsFindResponse<AttachmentAttributes>;
+    const [comments, observablesPreview] = await Promise.all([
+      caseService.getAllCaseComments({
+        id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+      }),
+      getObservablesPreview(observableService, fieldObservables),
+    ]);
+    const theComments = comments as SavedObjectsFindResponse<AttachmentAttributes>;
 
-    const res = flattenCaseSavedObject({
-      savedObject: theCase,
-      comments: theComments.saved_objects,
-      totalComment: countUserAttachments(theComments.saved_objects),
-      totalAlerts: countAlertsForID({ comments: theComments, id }),
-      totalEvents: countEventsForID({ comments: theComments }),
-    });
+    const res = mergeObservablesPreview(
+      flattenCaseSavedObject({
+        savedObject: theCase,
+        comments: theComments.saved_objects,
+        totalComment: countUserAttachments(theComments.saved_objects),
+        totalAlerts: countAlertsForID({ comments: theComments, id }),
+        totalEvents: countEventsForID({ comments: theComments }),
+      }),
+      observablesPreview
+    );
 
     return decodeOrThrowZod(CaseSchema)(await enrichCaseWithFieldLabels(res, clientArgs));
   } catch (error) {
@@ -485,7 +505,7 @@ export const resolve = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, observableService },
     logger,
     authorization,
   } = clientArgs;
@@ -513,28 +533,41 @@ export const resolve = async (
     });
 
     if (!includeComments) {
-      const flattenedCase = flattenCaseSavedObject({ savedObject: resolvedSavedObject });
+      const flattenedCase = await withObservablesPreview(
+        observableService,
+        flattenCaseSavedObject({ savedObject: resolvedSavedObject })
+      );
       return decodeOrThrowZod(CaseResolveResponseSchema)({
         ...resolveData,
         case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
       });
     }
 
-    const theComments = (await caseService.getAllCaseComments({
-      id: resolvedSavedObject.id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    })) as SavedObjectsFindResponse<AttachmentAttributes>;
+    const [comments, observablesPreview] = await Promise.all([
+      caseService.getAllCaseComments({
+        id: resolvedSavedObject.id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+      }),
+      getObservablesPreview(observableService, {
+        id: resolvedSavedObject.id,
+        observables: resolvedSavedObject.attributes.observables,
+      }),
+    ]);
+    const theComments = comments as SavedObjectsFindResponse<AttachmentAttributes>;
 
-    const flattenedCase = flattenCaseSavedObject({
-      savedObject: resolvedSavedObject,
-      comments: theComments.saved_objects,
-      totalComment: theComments.total,
-      totalEvents: countEventsForID({ comments: theComments }),
-      totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
-    });
+    const flattenedCase = mergeObservablesPreview(
+      flattenCaseSavedObject({
+        savedObject: resolvedSavedObject,
+        comments: theComments.saved_objects,
+        totalComment: theComments.total,
+        totalEvents: countEventsForID({ comments: theComments }),
+        totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
+      }),
+      observablesPreview
+    );
 
     const res = {
       ...resolveData,
