@@ -97,5 +97,6 @@ export const withPerformanceRecording = (
             toListDiagnostics
           )
         : client.getEntities(type, request, options),
+    getFilterValues: (body, options) => client.getFilterValues(body, options),
   };
 };

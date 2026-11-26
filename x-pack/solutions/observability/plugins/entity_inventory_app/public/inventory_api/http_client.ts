@@ -11,7 +11,7 @@ import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { EntityInventoryApiClient } from './client';
 
-/** Client over the entity inventory `types` and `_list` routes of the server plugin. */
+/** Client over the entity inventory `types`, `_list` and filter values routes of the server plugin. */
 export const createHttpEntityInventoryApiClient = (http: HttpStart): EntityInventoryApiClient => {
   const { fetch } = createRepositoryClient<EntityInventoryRouteRepository, DefaultClientOptions>({
     http,
@@ -24,5 +24,7 @@ export const createHttpEntityInventoryApiClient = (http: HttpStart): EntityInven
         params: { path: { type }, body: request },
         signal,
       }),
+    getFilterValues: (body, { signal }) =>
+      fetch('POST /internal/entity_inventory/filters/_values', { params: { body }, signal }),
   };
 };

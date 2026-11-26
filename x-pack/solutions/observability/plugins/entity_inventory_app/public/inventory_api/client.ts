@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { GetTypesResponse, ListResponse } from '@kbn/entity-inventory-plugin/common';
+import type {
+  AttributeValuesResponse,
+  GetTypesResponse,
+  ListResponse,
+} from '@kbn/entity-inventory-plugin/common';
 import type { EntityInventoryRouteRepository } from '@kbn/entity-inventory-plugin/server';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-client';
 
@@ -24,4 +28,11 @@ export interface EntityInventoryApiClient {
     >['params']['body'],
     options: EntityInventoryRequestOptions
   ): Promise<ListResponse>;
+  getFilterValues(
+    body: ClientRequestParamsOf<
+      EntityInventoryRouteRepository,
+      'POST /internal/entity_inventory/filters/_values'
+    >['params']['body'],
+    options: EntityInventoryRequestOptions
+  ): Promise<AttributeValuesResponse>;
 }

@@ -35,6 +35,7 @@ const setup = (recording: { enabled: boolean }) => {
   const client: jest.Mocked<EntityInventoryApiClient> = {
     getTypes: jest.fn().mockResolvedValue(TYPES_RESPONSE_FIXTURE),
     getEntities: jest.fn().mockResolvedValue(LIST_RESPONSE),
+    getFilterValues: jest.fn(),
   };
   const recorder = createPerformanceRecorder();
   const instrumented = withPerformanceRecording(client, recorder, () => recording.enabled);

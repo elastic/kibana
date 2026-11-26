@@ -18,6 +18,7 @@ const createClientMock = (
 ) => ({
   getTypes: jest.fn(client.getTypes),
   getEntities: jest.fn(client.getEntities),
+  getFilterValues: jest.fn(client.getFilterValues),
 });
 
 const createWrapper =

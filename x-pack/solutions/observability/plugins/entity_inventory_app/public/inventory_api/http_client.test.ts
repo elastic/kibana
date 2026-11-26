@@ -7,7 +7,11 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { createHttpEntityInventoryApiClient } from './http_client';
-import type { GetTypesResponse, ListResponse } from '@kbn/entity-inventory-plugin/common';
+import type {
+  AttributeValuesResponse,
+  GetTypesResponse,
+  ListResponse,
+} from '@kbn/entity-inventory-plugin/common';
 
 const TYPES_RESPONSE: GetTypesResponse = { types: [] };
 
@@ -66,6 +70,34 @@ describe('createHttpEntityInventoryApiClient', () => {
     expect(http.fetch).toHaveBeenCalledWith(
       '/internal/entity_inventory/entities/k8s.deployment/_list',
       expect.objectContaining({ method: 'POST', signal, body: JSON.stringify({ from, to }) })
+    );
+  });
+
+  it('reads the values of a filter from POST /internal/entity_inventory/filters/_values with the given body and signal', async () => {
+    const { http, client } = setup();
+    const response: AttributeValuesResponse = {
+      values: ['linux'],
+      invalidSelections: [],
+      truncated: false,
+      errors: [],
+    };
+    http.fetch.mockResolvedValue(response);
+    const { signal } = new AbortController();
+    const body = {
+      attribute: 'os.type',
+      types: ['host'],
+      filters: { 'cloud.provider': ['aws'] },
+      selected: [],
+      from: '2026-10-30T10:00:00.000Z',
+      to: '2026-10-30T10:15:00.000Z',
+    };
+
+    await expect(client.getFilterValues(body, { signal })).resolves.toEqual(response);
+
+    expect(http.fetch).toHaveBeenCalledTimes(1);
+    expect(http.fetch).toHaveBeenCalledWith(
+      '/internal/entity_inventory/filters/_values',
+      expect.objectContaining({ method: 'POST', signal, body: JSON.stringify(body) })
     );
   });
 });

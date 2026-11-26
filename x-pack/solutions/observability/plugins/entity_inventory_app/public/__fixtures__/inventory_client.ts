@@ -34,4 +34,8 @@ export const createFixtureEntityInventoryApiClient = (): EntityInventoryApiClien
     }
     return response;
   },
+  getFilterValues: async (_body, { signal }) => {
+    throwIfAborted(signal);
+    return { values: [], invalidSelections: [], truncated: false, errors: [] };
+  },
 });
