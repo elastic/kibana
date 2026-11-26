@@ -211,6 +211,6 @@ export const surfaceDrift = async ({
     dryRun,
     actions,
     refresh: refreshed.map(({ connector }) => connector),
-    refreshPrBody: renderRefreshPr(refreshed),
+    refreshPrBody: renderRefreshPr(refreshed, buildUrl),
   };
 };

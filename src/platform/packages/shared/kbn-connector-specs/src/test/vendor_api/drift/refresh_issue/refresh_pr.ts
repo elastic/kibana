@@ -256,7 +256,7 @@ const showMoreNames = (lists: readonly ListPart[], room: number): void => {
  * per list is too much is a connector named instead of described, which keeps the description
  * under GitHub's limit.
  */
-export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
+export const renderRefreshPr = (drifts: readonly ConnectorDrift[], buildUrl?: string): string => {
   const intro = [
     '## Summary',
     '',
@@ -268,12 +268,17 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
     '> Any connectors that have one or more broken actions due to vendor API updates will have separate Github issues created for them.',
     '',
   ].join('\n');
+  // The drift report the notes point to is attached to the build.
+  const footer = buildUrl
+    ? `The drift report is attached to the [Buildkite build](${buildUrl}).\n`
+    : '';
+  const base = intro.length + footer.length + (footer === '' ? 0 : 1);
 
   const sections = [...drifts].sort((a, b) => byText(a.connector, b.connector)).map(sectionOf);
   const lists = listsOf(sections);
   const textOf = (section: ConnectorSection): string => sectionLines(section).join('\n');
   const lengthOf = (included: readonly ConnectorSection[]): number =>
-    included.reduce((total, section) => total + textOf(section).length + 1, intro.length);
+    included.reduce((total, section) => total + textOf(section).length + 1, base);
 
   let cap = DEFAULT_NAMES_SHOWN;
   for (; cap >= 1; cap--) {
@@ -300,7 +305,7 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
   const fit = (reserved: number) => {
     const fitting: ConnectorSection[] = [];
     const left: string[] = [];
-    let size = intro.length;
+    let size = base;
     for (const section of sections) {
       const added = textOf(section).length + 1;
       if (size + added <= MAX_DESCRIPTION_LENGTH - reserved) {
@@ -325,5 +330,5 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
 
   showMoreNames(listsOf(included), MAX_DESCRIPTION_LENGTH - length - noteLength);
 
-  return [intro, ...included.map(textOf), ...note].join('\n');
+  return [intro, ...included.map(textOf), ...note, ...(footer === '' ? [] : [footer])].join('\n');
 };

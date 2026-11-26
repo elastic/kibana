@@ -247,6 +247,17 @@ describe('renderRefreshPr', () => {
     expect(mixed).not.toContain('GET /a');
   });
 
+  it('links the build the drift report is attached to', () => {
+    const body = renderRefreshPr(
+      [changed('.one', [field('GET /a', 'name')])],
+      'https://buildkite.com/elastic/kibana/builds/1'
+    );
+
+    expect(body).toMatch(
+      /\n\nThe drift report is attached to the \[Buildkite build\]\(https:\/\/buildkite\.com\/elastic\/kibana\/builds\/1\)\.\n$/
+    );
+  });
+
   it('has no table for a spec that changed outside what oasdiff reports', () => {
     const body = renderRefreshPr([
       { ...healthy, connector: '.moved', sources: {}, operationsChanged: true },
