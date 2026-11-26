@@ -372,8 +372,11 @@ export const SophosCentral: ConnectorSpec = {
       scope: 'write',
       description:
         'Apply a single lifecycle action to multiple Sophos Central alerts. ' +
-        'The connector iterates over each alert ID in turn. Partial failures are returned ' +
-        'in the results array alongside successes — a non-zero failureCount does not throw. ' +
+        'The connector iterates over each alert ID in turn and returns the Sophos action ' +
+        'status per alert ("requested", "started", or "completed"). A status of "requested" ' +
+        'or "started" means Sophos accepted the action but has not finished processing it yet — ' +
+        'do not report the alert as remediated until the status is "completed". ' +
+        'Partial failures are returned alongside successes — a non-zero failureCount does not throw. ' +
         'Rate limit: 100 calls/min — keep batches under 50 during peak hours.',
       input: ActOnAlertsBulkInputSchema,
       handler: async (ctx, input: ActOnAlertsBulkInput) => {
@@ -385,15 +388,25 @@ export const SophosCentral: ConnectorSpec = {
 
         for (const alertId of input.ids) {
           try {
-            await request(ctx, 'POST', `/common/v1/alerts/${alertId}/actions`, {
-              tenantId,
-              dataRegion,
-              data: {
-                action: input.action,
-                ...(input.message !== undefined && { message: input.message }),
-              },
-            });
-            results.push({ alertId, status: 'success' });
+            // Capture the Sophos response so its `status` field is forwarded.
+            // Sophos returns HTTP 201 with status "requested" or "started" while the action is
+            // still being processed, and "completed" only once it finishes. Discarding the
+            // response and reporting "success" would cause an agent to announce remediation
+            // before Sophos has finished acting on the alert.
+            const res = await request<{ status?: string }>(
+              ctx,
+              'POST',
+              `/common/v1/alerts/${alertId}/actions`,
+              {
+                tenantId,
+                dataRegion,
+                data: {
+                  action: input.action,
+                  ...(input.message !== undefined && { message: input.message }),
+                },
+              }
+            );
+            results.push({ alertId, status: res?.status ?? 'accepted' });
             successCount++;
           } catch (err) {
             const axiosErr = err as AxiosError<{ error?: string; message?: string }>;

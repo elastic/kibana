@@ -687,7 +687,7 @@ describe('actOnAlertsBulk', () => {
     // whoami is resolved once before the loop
     stubWhoami(client);
     client.request
-      .mockResolvedValueOnce({ data: { result: 'success' } }) // ALERT_ID succeeds
+      .mockResolvedValueOnce({ data: { status: 'completed' } }) // ALERT_ID succeeds, Sophos reports completed
       .mockRejectedValueOnce(
         Object.assign(new Error('Not Found'), { response: { status: 404, data: {} } })
       ); // ALERT_ID_2 fails
@@ -701,7 +701,7 @@ describe('actOnAlertsBulk', () => {
     expect(result.successCount).toBe(1);
     expect(result.failureCount).toBe(1);
     expect(result.results).toHaveLength(2);
-    expect(result.results[0]).toMatchObject({ alertId: ALERT_ID, status: 'success' });
+    expect(result.results[0]).toMatchObject({ alertId: ALERT_ID, status: 'completed' });
     expect(result.results[1]).toMatchObject({ alertId: ALERT_ID_2, status: 'failed' });
   });
 
@@ -718,6 +718,26 @@ describe('actOnAlertsBulk', () => {
 
     expect(result.successCount).toBe(2);
     expect(result.failureCount).toBe(0);
+  });
+
+  it('surfaces the Sophos action status so agents do not report remediation prematurely', async () => {
+    // Sophos returns HTTP 201 with status "requested" or "started" when the action is accepted
+    // but not yet complete. The handler must forward that status rather than substituting
+    // a generic "success" label that would cause the agent to report remediation too early.
+    const client = makeClient();
+    stubWhoami(client);
+    client.request
+      .mockResolvedValueOnce({ data: { status: 'requested' } }) // action queued, not done yet
+      .mockResolvedValueOnce({ data: { status: 'started' } }); // action in progress
+    const ctx = makeCtx(client);
+
+    const result = await SophosCentral.actions.actOnAlertsBulk.handler(ctx as never, {
+      ids: [ALERT_ID, ALERT_ID_2],
+      action: 'clearThreat',
+    });
+
+    expect(result.results[0]).toMatchObject({ alertId: ALERT_ID, status: 'requested' });
+    expect(result.results[1]).toMatchObject({ alertId: ALERT_ID_2, status: 'started' });
   });
 });
 
