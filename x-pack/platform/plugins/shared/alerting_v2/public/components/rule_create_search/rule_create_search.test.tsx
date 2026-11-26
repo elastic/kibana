@@ -66,9 +66,9 @@ describe('RuleCreateSearch', () => {
 
     const universalTitle = await screen.findByText('Universal');
     const classicTitle = screen.getByText('Classic rule types');
-    expect(
-      universalTitle.compareDocumentPosition(classicTitle) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    expect(universalTitle.compareDocumentPosition(classicTitle)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
     expect(screen.getByTestId('ruleCreateSearchItem-universal-threshold')).toBeInTheDocument();
     expect(screen.getByTestId('ruleCreateSearchItem-classic-es-query')).toBeInTheDocument();
   });

@@ -101,10 +101,9 @@ describe('RuleCreateOptionsFlyout', () => {
     );
 
     const searchInput = screen.getByTestId('ruleCreateSearchInput');
-    expect(
-      searchInput.compareDocumentPosition(screen.getByText('ES|QL rule')) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    expect(searchInput.compareDocumentPosition(screen.getByText('ES|QL rule'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 
   it('shows the Create rule title and closes from the header when stacked', () => {

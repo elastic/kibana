@@ -58,11 +58,6 @@ test.describe(
       expect(items).toHaveLength(1);
     });
 
-    test.afterAll(async ({ apiServices }) => {
-      const { errors } = await apiServices.alertingV2.rules.bulkDelete({ ids: [existingRuleId] });
-      expect(errors.filter(({ error }) => error.code !== 'RULE_NOT_FOUND')).toStrictEqual([]);
-    });
-
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await setUnifiedRuleCreationFlag(apiServices, true);
       await browserAuth.loginAsAdmin();
@@ -72,6 +67,11 @@ test.describe(
 
     test.afterEach(async ({ apiServices }) => {
       await setUnifiedRuleCreationFlag(apiServices, false);
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      const { errors } = await apiServices.alertingV2.rules.bulkDelete({ ids: [existingRuleId] });
+      expect(errors.filter(({ error }) => error.code !== 'RULE_NOT_FOUND')).toStrictEqual([]);
     });
 
     test('is not shown while the unified rule creation flag is off', async ({
@@ -106,7 +106,7 @@ test.describe(
 
       // The flyout closes and the conversation opens beside the rules list, not on its own page.
       await expect(pageObjects.rulesList.createOptionsFlyout).toBeHidden();
-      await expect(pageObjects.agentChat.userMessages.first()).toContainText(REQUEST);
+      await expect(pageObjects.agentChat.userMessageContaining(REQUEST)).toBeVisible();
       expect(new URL(page.url()).pathname).not.toContain('/agent_builder/');
     });
 
@@ -124,7 +124,7 @@ test.describe(
       await pageObjects.rulesList.createRuleSearchInput.press('Enter');
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      await expect(pageObjects.agentChat.userMessages.first()).toContainText(REQUEST);
+      await expect(pageObjects.agentChat.userMessageContaining(REQUEST)).toBeVisible();
     });
   }
 );

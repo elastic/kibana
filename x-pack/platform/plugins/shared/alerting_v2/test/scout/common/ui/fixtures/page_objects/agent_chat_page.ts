@@ -19,8 +19,6 @@ export class AgentChatPage {
   /** Callout the Agent Builder error boundary shows when an attachment renderer throws. */
   public readonly renderErrorCallout: Locator;
   public readonly responseMessage: Locator;
-  /** The text of the user's messages in the conversation. */
-  public readonly userMessages: Locator;
   /** The Preview button on the inline attachment card in the agent's response. */
   public readonly previewButton: Locator;
   /** The Unsaved badge in the inline attachment card's header. */
@@ -32,12 +30,16 @@ export class AgentChatPage {
     this.canvas = this.page.locator(`[aria-label="${CANVAS_ARIA_LABEL}"]`);
     this.renderErrorCallout = this.page.getByText(RENDER_ERROR_TITLE);
     this.responseMessage = this.page.testSubj.locator('agentBuilderResponseMessage');
-    this.userMessages = this.page.testSubj.locator('agentBuilderUserMessageContent');
     this.previewButton = this.responseMessage.getByRole('button', { name: 'Preview', exact: true });
     this.inlineUnsavedChangesBadge = this.responseMessage.getByText(UNSAVED_CHANGES_BADGE, {
       exact: true,
     });
     this.canvasUnsavedChangesBadge = this.canvas.getByText(UNSAVED_CHANGES_BADGE, { exact: true });
+  }
+
+  /** The user's message in the conversation that contains `text`. */
+  userMessageContaining(text: string): Locator {
+    return this.page.testSubj.locator('agentBuilderUserMessageContent').filter({ hasText: text });
   }
 
   async goto() {
