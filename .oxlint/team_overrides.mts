@@ -28,7 +28,10 @@ export const teamOverrides: OxlintOverride[] = [
     },
   },
   {
-    files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+    files: [
+      'src/platform/packages/shared/kbn-kibana-utils-browser/**/*.{js,mjs,ts,tsx}',
+      'src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}',
+    ],
     rules: { 'react-hooks/exhaustive-deps': 'off' },
   },
   /**

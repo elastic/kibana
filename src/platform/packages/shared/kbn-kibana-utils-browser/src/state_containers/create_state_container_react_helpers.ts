@@ -58,7 +58,7 @@ export const useContainerSelector = <Container extends StateContainer<any, any>,
       }
     });
     return () => subscription.unsubscribe();
-  }, [state$, selector, comparator]);
+  }, [state$, comparator]);
   return value;
 };
 
