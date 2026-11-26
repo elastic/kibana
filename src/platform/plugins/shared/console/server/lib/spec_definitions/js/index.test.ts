@@ -191,6 +191,27 @@ describe('console query DSL autocomplete globals', () => {
     });
   });
 
+  describe('WHEN loading the put_script endpoint definition', () => {
+    it('SHOULD only suggest the current _scripts/{id} patterns', () => {
+      expect(endpoints.put_script.patterns).toEqual(['_scripts/{id}', '_scripts/{id}/{context}']);
+    });
+
+    it('SHOULD NOT bring back the obsolete lang-based patterns or url components', () => {
+      expect(JSON.stringify(endpoints.put_script.patterns)).not.toContain('{lang}');
+      expect(endpoints.put_script.url_components).toBeUndefined();
+    });
+
+    it('SHOULD keep the generated script body rules', () => {
+      expect(endpoints.put_script.data_autocomplete_rules).toEqual({
+        script: {
+          lang: { __one_of: ['painless', 'expression', 'mustache', 'java'] },
+          options: { '*': '' },
+          source: '',
+        },
+      });
+    });
+  });
+
   describe('WHEN registering the analyze endpoint autocomplete rules', () => {
     it('SHOULD include every analyze request body field', () => {
       expect(Object.keys(getAnalyzeRules()).sort()).toEqual([
