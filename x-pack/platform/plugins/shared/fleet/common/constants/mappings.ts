@@ -398,3 +398,27 @@ export const ENROLLMENT_API_KEY_MAPPINGS = {
     },
   },
 } as const;
+
+// Allowlist for agent sort, filter, and export fields: `AGENT_MAPPINGS` plus the runtime fields
+// added to agent searches and the `.fleet-agents` fields exported by the UI that `AGENT_MAPPINGS`
+// does not declare. Any other field on the index (e.g. API keys) is rejected.
+export const AGENT_QUERYABLE_MAPPINGS = {
+  properties: {
+    ...AGENT_MAPPINGS.properties,
+    audit_unenrolled_reason: {
+      type: 'keyword',
+    },
+    audit_unenrolled_time: {
+      type: 'date',
+    },
+    user_provided_metadata: {
+      type: 'object',
+    },
+    signals: {
+      type: 'keyword',
+    },
+    pipeline_config: {
+      type: 'keyword',
+    },
+  },
+} as const;

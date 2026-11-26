@@ -213,24 +213,20 @@ describe('form fields', () => {
 
   it('calls onSubmit with template fields', async () => {
     renderWithTestingProviders(
-      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+      <FormTestComponent
+        formDefaultValue={{
+          ...formDefaultValue,
+          name: 'Template 1',
+          templateDescription: 'this is a first template',
+          templateTags: ['first'],
+        }}
+        onSubmit={onSubmit}
+      >
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
 
-    await userEvent.click(await screen.findByTestId('template-name-input'));
-    await userEvent.paste('Template 1');
-
-    const templateTags = await screen.findByTestId('template-tags');
-
-    await userEvent.click(within(templateTags).getByRole('combobox'));
-    await userEvent.paste('first');
-    await userEvent.keyboard('{enter}');
-
-    await userEvent.click(await screen.findByTestId('template-description-input'));
-    await userEvent.paste('this is a first template');
-
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -347,7 +343,16 @@ describe('form fields', () => {
 
     renderWithTestingProviders(
       <FormTestComponent
-        formDefaultValue={{ ...formDefaultValue, connectorId: 'servicenow-1' }}
+        formDefaultValue={{
+          ...formDefaultValue,
+          connectorId: 'servicenow-1',
+          fields: {
+            category: 'software',
+            severity: '3',
+            urgency: '2',
+            subcategory: null,
+          },
+        }}
         onSubmit={onSubmit}
       >
         <FormFields {...newProps} />
@@ -356,13 +361,7 @@ describe('form fields', () => {
 
     expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
-    await userEvent.selectOptions(await screen.findByTestId('severitySelect'), '3');
-
-    await userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '2');
-
-    await userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
-
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(

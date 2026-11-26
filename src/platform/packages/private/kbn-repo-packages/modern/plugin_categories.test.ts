@@ -15,21 +15,21 @@ const existingTestPlugin = Package.fromManifest(
   repoRoot,
   Path.resolve(
     repoRoot,
-    'src/platform/test/plugin_functional/plugins/core_plugin_helpmenu/kibana.jsonc'
+    'src/platform/test_plugins/plugin_functional/core_plugin_helpmenu/kibana.jsonc'
   )
 );
 const browserPlugin = Package.fromManifest(
   repoRoot,
   Path.resolve(
     repoRoot,
-    'src/platform/test/plugin_functional/plugins/core_plugin_helpmenu/kibana.jsonc'
+    'src/platform/test_plugins/plugin_functional/core_plugin_helpmenu/kibana.jsonc'
   )
 );
 const serverPlugin = Package.fromManifest(
   repoRoot,
   Path.resolve(
     repoRoot,
-    'x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client/kibana.jsonc'
+    'x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client/kibana.jsonc'
   )
 );
 
@@ -60,3 +60,14 @@ describe.each(['src/platform/test_plugins/', 'x-pack/platform/test_plugins/'])(
     });
   }
 );
+
+const resolverTestPlugin = Package.fromManifest(
+  repoRoot,
+  Path.resolve(repoRoot, 'x-pack/solutions/security/test_plugins/resolver_test/kibana.jsonc')
+);
+
+it('keeps the resolver test plugin out of default discovery', () => {
+  expect(resolverTestPlugin.getPluginCategories().testPlugin).toBe(true);
+  expect(getPluginPackagesFilter()(resolverTestPlugin)).toBe(false);
+  expect(getPluginPackagesFilter({ testPlugins: true })(resolverTestPlugin)).toBe(true);
+});

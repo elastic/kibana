@@ -288,6 +288,7 @@ overrides:
   gaxios>node-fetch: 2.7.0
   glob-stream: 8.0.0
   module-replacements: 2.3.2
+  msgpackr@^1: 2.1.4
   node-jose>uuid: 11.1.1
   nwsapi: 2.2.2
   react-focus-lock: 2.9.5
@@ -468,8 +469,8 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
       '@hapi/hapi':
-        specifier: 21.4.12
-        version: 21.4.12
+        specifier: 21.4.13
+        version: 21.4.13
       '@hapi/hoek':
         specifier: 11.0.7
         version: 11.0.7
@@ -484,13 +485,13 @@ importers:
         version: 16.6.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@kbn/aad-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/aad
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad
       '@kbn/actions-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/actions
       '@kbn/actions-simulators-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators
       '@kbn/actions-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-actions-types
@@ -544,7 +545,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-aiops-utils
       '@kbn/alerting-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts
       '@kbn/alerting-comparators':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-alerting-comparators
@@ -553,7 +554,7 @@ importers:
         version: link:x-pack/examples/alerting_example
       '@kbn/alerting-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/alerts
+        version: link:x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts
       '@kbn/alerting-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/alerting
@@ -574,7 +575,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/kbn-alerts-grouping
       '@kbn/alerts-restricted-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts_restricted
       '@kbn/alerts-ui-shared':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-alerts-ui-shared
@@ -586,10 +587,10 @@ importers:
         version: link:src/platform/packages/private/analytics/utils/analytics_collection_utils
       '@kbn/analytics-ftr-helpers-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/analytics/plugins/analytics_ftr_helpers
+        version: link:src/platform/test_plugins/analytics/analytics_ftr_helpers
       '@kbn/analytics-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/analytics/plugins/analytics_plugin_a
+        version: link:src/platform/test_plugins/analytics/analytics_plugin_a
       '@kbn/apm-config-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-apm-config-loader
@@ -619,13 +620,13 @@ importers:
         version: link:src/platform/packages/shared/kbn-apm-utils
       '@kbn/app-link-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/app_link_test
+        version: link:src/platform/test_plugins/plugin_functional/app_link_test
       '@kbn/application-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/usage_collection/plugins/application_usage_test
+        version: link:x-pack/platform/test_plugins/usage_collection/application_usage_test
       '@kbn/audit-log-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/audit_log
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/audit_log
       '@kbn/avc-banner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-avc-banner
@@ -652,7 +653,7 @@ importers:
         version: link:x-pack/platform/plugins/private/canvas
       '@kbn/cases-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases
       '@kbn/cases-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cases-components
@@ -703,7 +704,7 @@ importers:
         version: link:x-pack/platform/plugins/private/cloud_integrations/cloud_full_story
       '@kbn/cloud-integration-saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cloud_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/cloud_integration/saml_provider
       '@kbn/cloud-links-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/cloud_integrations/cloud_links
@@ -811,7 +812,7 @@ importers:
         version: link:src/core/packages/analytics/server-internal
       '@kbn/core-app-status-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_app_status
+        version: link:src/platform/test_plugins/plugin_functional/core_app_status
       '@kbn/core-application-browser':
         specifier: workspace:*
         version: link:src/core/packages/application/browser
@@ -958,7 +959,7 @@ importers:
         version: link:src/core/packages/feature-flags/server-mocks
       '@kbn/core-history-block-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_history_block
+        version: link:src/platform/test_plugins/plugin_functional/core_history_block
       '@kbn/core-http-browser':
         specifier: workspace:*
         version: link:src/core/packages/http/browser
@@ -973,7 +974,7 @@ importers:
         version: link:src/core/packages/http/context-server-internal
       '@kbn/core-http-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_http
+        version: link:src/platform/test_plugins/plugin_functional/core_http
       '@kbn/core-http-rate-limiter-internal':
         specifier: workspace:*
         version: link:src/core/packages/http/rate-limiter-internal
@@ -1081,43 +1082,43 @@ importers:
         version: link:src/core/packages/overlays/browser-internal
       '@kbn/core-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_a
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_a
       '@kbn/core-plugin-appleave-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_appleave
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_appleave
       '@kbn/core-plugin-b-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_b
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_b
       '@kbn/core-plugin-chromeless-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_chromeless
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_chromeless
       '@kbn/core-plugin-deep-links-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_deep_links
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_deep_links
       '@kbn/core-plugin-deprecations-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_deprecations
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_deprecations
       '@kbn/core-plugin-dynamic-resolving-a':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a
+        version: link:src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a
       '@kbn/core-plugin-dynamic-resolving-b':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b
+        version: link:src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b
       '@kbn/core-plugin-execution-context-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_execution_context
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_execution_context
       '@kbn/core-plugin-helpmenu-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_helpmenu
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_helpmenu
       '@kbn/core-plugin-initializer-context-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context
+        version: link:src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context
       '@kbn/core-plugin-route-timeouts-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts
       '@kbn/core-plugin-static-assets-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_static_assets
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_static_assets
       '@kbn/core-plugins-base-server-internal':
         specifier: workspace:*
         version: link:src/core/packages/plugins/base-server-internal
@@ -1162,7 +1163,7 @@ importers:
         version: link:src/core/packages/pricing/server-internal
       '@kbn/core-provider-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_provider_plugin
+        version: link:src/platform/test_plugins/plugin_functional/core_provider_plugin
       '@kbn/core-rendering-browser':
         specifier: workspace:*
         version: link:src/core/packages/rendering/browser
@@ -1363,7 +1364,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/data_quality
       '@kbn/data-search-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/data_search
+        version: link:src/platform/test_plugins/data_search
       '@kbn/data-service':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-service
@@ -1501,10 +1502,10 @@ importers:
         version: link:x-pack/solutions/security/plugins/elastic_assistant_shared_state
       '@kbn/elasticsearch-client-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin
+        version: link:src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin
       '@kbn/elasticsearch-client-xpack-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client
       '@kbn/embeddable-alerts-table-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/embeddable_alerts_table
@@ -1534,7 +1535,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-entities-schema
       '@kbn/entity-manager-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin
+        version: link:x-pack/platform/test_plugins/entity_manager/fixture_plugin
       '@kbn/entityManager-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/entity_manager
@@ -1558,7 +1559,7 @@ importers:
         version: link:examples/eso_model_version_example
       '@kbn/eso-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
+        version: link:x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
       '@kbn/esql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql
@@ -1588,7 +1589,7 @@ importers:
         version: link:examples/esql_validation_example
       '@kbn/eui-provider-dev-warning':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/eui_provider_dev_warning
+        version: link:src/platform/test_plugins/plugin_functional/eui_provider_dev_warning
       '@kbn/event-annotation-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-event-annotation-common
@@ -1603,7 +1604,7 @@ importers:
         version: link:src/platform/plugins/private/event_annotation
       '@kbn/event-log-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/event_log
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_integration/event_log
       '@kbn/event-log-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/event_log
@@ -1654,16 +1655,16 @@ importers:
         version: link:examples/feature_flags_example
       '@kbn/feature-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test
       '@kbn/features-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/features
       '@kbn/features-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/features_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/features_provider
       '@kbn/fec-alerts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_execution_context/plugins/alerts
+        version: link:x-pack/platform/test_plugins/functional_execution_context/alerts
       '@kbn/field-formats-example-plugin':
         specifier: workspace:*
         version: link:examples/field_formats_example
@@ -1705,7 +1706,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-flot-charts
       '@kbn/foo-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin
+        version: link:x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin
       '@kbn/fs':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-fs
@@ -1714,7 +1715,7 @@ importers:
         version: link:src/platform/plugins/private/ftr_apis
       '@kbn/functional-with-es-ssl-cases-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases
       '@kbn/gen-ai-streaming-response-example-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/gen_ai_streaming_response_example
@@ -1732,7 +1733,7 @@ importers:
         version: link:x-pack/platform/plugins/private/global_search_providers
       '@kbn/global-search-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_functional/plugins/global_search_test
+        version: link:x-pack/platform/test_plugins/plugin_functional/global_search_test
       '@kbn/graph-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/graph
@@ -1768,7 +1769,7 @@ importers:
         version: link:src/platform/packages/private/kbn-hapi-mocks
       '@kbn/hardening-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/hardening
+        version: link:src/platform/test_plugins/plugin_functional/plugins/hardening
       '@kbn/health-gateway-server':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-health-gateway-server
@@ -1795,7 +1796,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-i18n-react
       '@kbn/iframe-embedded-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_embedded/plugins/iframe_embedded
+        version: link:x-pack/platform/test_plugins/functional_embedded/iframe_embedded
       '@kbn/image-embeddable-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/image_embeddable
@@ -1816,7 +1817,7 @@ importers:
         version: link:x-pack/platform/packages/shared/index-management/index_management_shared_types
       '@kbn/index-patterns-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/index_patterns
+        version: link:src/platform/test_plugins/plugin_functional/index_patterns
       '@kbn/inference-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/ai-infra/inference-common
@@ -1861,7 +1862,7 @@ importers:
         version: link:src/platform/plugins/private/interactive_setup
       '@kbn/interactive-setup-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/interactive_setup_api_integration/plugins/test_endpoints
+        version: link:src/platform/test_plugins/interactive_setup_test_endpoints
       '@kbn/intercepts-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/intercepts
@@ -1879,19 +1880,19 @@ importers:
         version: link:x-pack/platform/packages/private/ml/json_schemas
       '@kbn/kbn-health-gateway-status-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/health_gateway/plugins/status
+        version: link:src/platform/test_plugins/health_gateway/status
       '@kbn/kbn-sample-panel-action-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_sample_panel_action
+        version: link:src/platform/test_plugins/plugin_functional/kbn_sample_panel_action
       '@kbn/kbn-top-nav-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_top_nav
+        version: link:src/platform/test_plugins/plugin_functional/kbn_top_nav
       '@kbn/kbn-tp-custom-visualizations-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations
+        version: link:src/platform/test_plugins/kbn_tp_custom_visualizations
       '@kbn/kbn-tp-run-pipeline-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
+        version: link:src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline
       '@kbn/key-value-metadata-table':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-key-value-metadata-table
@@ -1900,7 +1901,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-kibana-api-cli
       '@kbn/kibana-cors-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_cors/plugins/kibana_cors_test
+        version: link:x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test
       '@kbn/kibana-overview-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/kibana_overview
@@ -2026,7 +2027,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-management/settings/utilities
       '@kbn/management-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/management_test_plugin
+        version: link:src/platform/test_plugins/plugin_functional/management_test_plugin
       '@kbn/mapbox-gl':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-mapbox-gl
@@ -2161,7 +2162,7 @@ importers:
         version: link:src/platform/plugins/shared/newsfeed
       '@kbn/newsfeed-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/common/plugins/newsfeed
+        version: link:src/platform/test_plugins/common/newsfeed
       '@kbn/no-data-page-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/no_data_page
@@ -2203,7 +2204,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/alerting-test-data
       '@kbn/observability-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/observability
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability
       '@kbn/observability-get-padded-alert-time-range-util':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util
@@ -2233,10 +2234,10 @@ importers:
         version: link:x-pack/solutions/observability/packages/utils-server
       '@kbn/oidc-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/oidc_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider
       '@kbn/open-telemetry-instrumented-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/common/plugins/otel_metrics
+        version: link:src/platform/test_plugins/otel_metrics
       '@kbn/openapi-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-openapi-common
@@ -2344,7 +2345,7 @@ importers:
         version: link:x-pack/platform/plugins/private/remote_clusters
       '@kbn/rendering-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/rendering_plugin
+        version: link:src/platform/test_plugins/plugin_functional/rendering_plugin
       '@kbn/repo-info':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-repo-info
@@ -2386,7 +2387,7 @@ importers:
         version: link:src/platform/packages/private/kbn-reporting/server
       '@kbn/reporting-test-routes':
         specifier: workspace:*
-        version: link:x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes
+        version: link:x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes
       '@kbn/resizable-layout':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-resizable-layout
@@ -2395,7 +2396,7 @@ importers:
         version: link:examples/resizable_layout_examples
       '@kbn/resolver-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
+        version: link:x-pack/solutions/security/test_plugins/resolver_test
       '@kbn/response-ops-alerts-apis':
         specifier: workspace:*
         version: link:src/platform/packages/shared/response-ops/alerts-apis
@@ -2461,31 +2462,31 @@ importers:
         version: link:src/platform/packages/shared/kbn-safer-lodash-set
       '@kbn/saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider
       '@kbn/sample-task-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin
       '@kbn/sample-task-plugin-update-by-query':
         specifier: workspace:*
-        version: link:x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget
+        version: link:x-pack/platform/test_plugins/response_ops/task_manager/sample_task_plugin_mget
       '@kbn/saved-object-export-transforms-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_object_export_transforms
+        version: link:src/platform/test_plugins/plugin_functional/saved_object_export_transforms
       '@kbn/saved-object-import-warnings-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_object_import_warnings
+        version: link:src/platform/test_plugins/plugin_functional/saved_object_import_warnings
       '@kbn/saved-object-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
+        version: link:x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin
       '@kbn/saved-objects-finder-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/saved_objects_finder
       '@kbn/saved-objects-hidden-from-http-apis-type-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type
+        version: link:src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type
       '@kbn/saved-objects-hidden-type-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_type
+        version: link:src/platform/test_plugins/plugin_functional/saved_objects_hidden_type
       '@kbn/saved-objects-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/saved_objects_management
@@ -2635,7 +2636,7 @@ importers:
         version: link:x-pack/solutions/security/packages/features
       '@kbn/security-solution-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/security_solution
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution
       '@kbn/security-solution-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/navigation
@@ -2656,7 +2657,7 @@ importers:
         version: link:x-pack/solutions/security/packages/upselling
       '@kbn/security-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_functional/plugins/test_endpoints
+        version: link:x-pack/platform/test_plugins/security_functional/plugins/test_endpoints
       '@kbn/security-ui-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/security/ui_components
@@ -2761,7 +2762,7 @@ importers:
         version: link:src/platform/packages/shared/serverless/types
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/session_notifications
+        version: link:src/platform/test_plugins/plugin_functional/session_notifications
       '@kbn/session-view-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/security/plugins/session_view
@@ -2902,7 +2903,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/spaces
       '@kbn/spaces-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin
       '@kbn/spaces-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-spaces-utils
@@ -2923,16 +2924,16 @@ importers:
         version: link:x-pack/platform/plugins/shared/stack_connectors
       '@kbn/stack-management-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/usage_collection/plugins/stack_management_usage_test
+        version: link:x-pack/platform/test_plugins/usage_collection/stack_management_usage_test
       '@kbn/state-containers-examples-plugin':
         specifier: workspace:*
         version: link:examples/state_containers_examples
       '@kbn/status-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/server_integration/plugins/status_plugin_a
+        version: link:src/platform/test_plugins/server_integration/status_plugin_a
       '@kbn/status-plugin-b-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/server_integration/plugins/status_plugin_b
+        version: link:src/platform/test_plugins/server_integration/status_plugin_b
       '@kbn/std':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-std
@@ -2962,10 +2963,10 @@ importers:
         version: link:x-pack/platform/plugins/private/task_manager_dependencies
       '@kbn/task-manager-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/task_manager_fixture
       '@kbn/task-manager-performance-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performance
       '@kbn/task-manager-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/task_manager
@@ -2989,10 +2990,10 @@ importers:
         version: link:src/platform/plugins/shared/telemetry
       '@kbn/telemetry-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/telemetry
+        version: link:src/platform/test_plugins/plugin_functional/telemetry
       '@kbn/test-feature-usage-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage
+        version: link:x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage
       '@kbn/testing-embedded-lens-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/testing_embedded_lens
@@ -3070,7 +3071,7 @@ importers:
         version: link:src/platform/plugins/shared/ui_actions
       '@kbn/ui-settings-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/ui_settings_plugin
+        version: link:src/platform/test_plugins/plugin_functional/ui_settings_plugin
       '@kbn/ui-shared-deps-npm':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ui-shared-deps-npm
@@ -3130,7 +3131,7 @@ importers:
         version: link:src/platform/plugins/shared/usage_collection
       '@kbn/usage-collection-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/usage_collection
+        version: link:src/platform/test_plugins/plugin_functional/usage_collection
       '@kbn/use-tracked-promise':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-use-tracked-promise
@@ -3142,7 +3143,7 @@ importers:
         version: link:examples/user_profile_examples
       '@kbn/user-profiles-consumer-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer
       '@kbn/utility-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-utility-types
@@ -3223,40 +3224,40 @@ importers:
         version: link:src/platform/packages/shared/kbn-zod-helpers
       '@langchain/aws':
         specifier: 1.4.3
-        version: 1.4.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))
+        version: 1.4.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))
       '@langchain/classic':
         specifier: 1.0.40
-        version: 1.0.40(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(@smithy/signature-v4@5.6.12)(cheerio@1.0.0-rc.12)(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(peggy@4.2.0)(ws@8.21.3)
+        version: 1.0.40(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(@smithy/signature-v4@5.6.12)(cheerio@1.0.0-rc.12)(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(peggy@4.2.0)(ws@8.23.0)
       '@langchain/core':
         specifier: 1.2.3
-        version: 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+        version: 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
       '@langchain/google-common':
         specifier: 2.2.0
-        version: 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))
+        version: 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))
       '@langchain/google-genai':
         specifier: 2.2.0
-        version: 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))
+        version: 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))
       '@langchain/google-vertexai':
         specifier: 2.2.0
-        version: 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(supports-color@8.1.1)
+        version: 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(supports-color@8.1.1)
       '@langchain/langgraph':
         specifier: 1.4.8
-        version: 1.4.8(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(zod@3.25.76)
+        version: 1.4.8(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(zod@3.25.76)
       '@langchain/langgraph-checkpoint':
         specifier: 1.1.3
-        version: 1.1.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))
+        version: 1.1.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))
       '@langchain/openai':
         specifier: 1.5.5
-        version: 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(@smithy/signature-v4@5.6.12)(ws@8.21.3)
+        version: 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(@smithy/signature-v4@5.6.12)(ws@8.23.0)
       '@launchdarkly/js-client-sdk':
         specifier: 4.10.4
         version: 4.10.4
       '@launchdarkly/node-server-sdk':
-        specifier: 9.16.0
-        version: 9.16.0(supports-color@8.1.1)
+        specifier: 9.16.4
+        version: 9.16.4(supports-color@8.1.1)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.1.3
-        version: 2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@8.1.1))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
+        specifier: 2.1.7
+        version: 2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@8.1.1))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -3439,10 +3440,10 @@ importers:
         version: 2.0.5
       brok:
         specifier: 6.0.0
-        version: 6.0.0(@hapi/hapi@21.4.12)
+        version: 6.0.0(@hapi/hapi@21.4.13)
       byte-size:
-        specifier: 9.0.1
-        version: 9.0.1
+        specifier: 9.0.2
+        version: 9.0.2
       cacheable-lookup:
         specifier: '6'
         version: 6.1.0
@@ -3642,8 +3643,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       joi:
-        specifier: 18.3.1
-        version: 18.3.1
+        specifier: 18.3.2
+        version: 18.3.2
       joi-to-json:
         specifier: 4.3.2
         version: 4.3.2
@@ -3679,10 +3680,10 @@ importers:
         version: 2.6.0(react-redux@7.2.8(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(react@17.0.2)(redux@4.2.1)(reselect@4.1.8)
       langchain:
         specifier: 1.2.30
-        version: 1.2.30(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(ws@8.21.3)
+        version: 1.2.30(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(ws@8.23.0)
       langsmith:
         specifier: 0.7.1
-        version: 0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+        version: 0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
       load-json-file:
         specifier: 6.2.0
         version: 6.2.0
@@ -3766,7 +3767,7 @@ importers:
         version: 4.3.4
       openai:
         specifier: 4.85.1
-        version: 4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76)
+        version: 4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76)
       openpgp:
         specifier: 5.11.3
         version: 5.11.3
@@ -4199,7 +4200,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-ai-tools-cli
       '@kbn/alerting-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/packages/helpers
+        version: link:x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers
       '@kbn/ambient-common-types':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ambient-common-types
@@ -4214,7 +4215,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-ambient-ui-types
       '@kbn/apm-ftr-e2e':
         specifier: workspace:*
-        version: link:x-pack/solutions/observability/plugins/apm/ftr_e2e
+        version: link:x-pack/solutions/observability/plugins/apm-ftr-e2e
       '@kbn/apm-synthtrace':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-apm-synthtrace
@@ -4454,7 +4455,7 @@ importers:
         version: link:packages/kbn-dependency-usage
       '@kbn/detections-response-ftr-services':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
+        version: link:x-pack/solutions/security/test_helpers/detections-response-ftr-services
       '@kbn/dev':
         specifier: workspace:*
         version: link:src/dev
@@ -4514,7 +4515,7 @@ importers:
         version: link:packages/kbn-find-used-node-modules
       '@kbn/fleet-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/fleet/cypress
+        version: link:x-pack/platform/plugins/shared/fleet-cypress
       '@kbn/ftr-common-functional-services':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ftr-common-functional-services
@@ -4613,7 +4614,7 @@ importers:
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
       '@kbn/osquery-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/osquery/cypress
+        version: link:x-pack/platform/packages/private/osquery-plugin-cypress
       '@kbn/peggy':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-peggy
@@ -4688,7 +4689,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-scout-synthtrace
       '@kbn/security-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/packages/helpers
+        version: link:x-pack/platform/test_plugins/security_api_integration/packages/helpers
       '@kbn/security-solution-test-api-clients':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/test-api-clients
@@ -4790,7 +4791,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-test-subj-selector
       '@kbn/test-suites-security-solution-apis':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_api_integration
+        version: link:x-pack/solutions/security/test_suites/test-suites-security-solution-apis
       '@kbn/test-suites-src':
         specifier: workspace:*
         version: link:src/platform/test
@@ -4811,7 +4812,7 @@ importers:
         version: link:x-pack/solutions/security/test
       '@kbn/test-suites-xpack-security-endpoint':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_endpoint
+        version: link:x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint
       '@kbn/tooling-log':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-tooling-log
@@ -4850,7 +4851,7 @@ importers:
         version: 1.63.0
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.6.3
-        version: 0.6.3(@types/webpack@5.28.5(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.26.1)(webpack-dev-server@5.2.7)(webpack-hot-middleware@2.25.1)(webpack@5.96.1)
+        version: 0.6.3(@types/webpack@5.28.5(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.19.0)(type-fest@4.26.1)(webpack-dev-server@5.2.7)(webpack-hot-middleware@2.25.1)(webpack@5.96.1)
       '@redocly/cli':
         specifier: 2.64.1
         version: 2.64.1
@@ -5224,8 +5225,8 @@ importers:
         specifier: 2.4.28
         version: 2.4.28
       '@types/selenium-webdriver':
-        specifier: 4.35.6
-        version: 4.35.6
+        specifier: 4.35.7
+        version: 4.35.7
       '@types/semver':
         specifier: 7.8.0
         version: 7.8.0
@@ -5371,8 +5372,8 @@ importers:
         specifier: 1.1.13
         version: 1.1.13
       chromedriver:
-        specifier: 154.0.1
-        version: 154.0.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+        specifier: 157.0.1
+        version: 157.0.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       clean-webpack-plugin:
         specifier: 4.0.0
         version: 4.0.0(webpack@5.96.1)
@@ -5515,8 +5516,8 @@ importers:
         specifier: 4.0.6
         version: 4.0.6
       geckodriver:
-        specifier: 6.1.1
-        version: 6.1.1(supports-color@8.1.1)
+        specifier: 8.0.0
+        version: 8.0.0(@wdio/logger@9.18.0)
       globby:
         specifier: 11.1.0
         version: 11.1.0
@@ -5692,8 +5693,8 @@ importers:
         specifier: 6.17.0
         version: 6.17.0
       react-refresh:
-        specifier: 0.18.0
-        version: 0.18.0
+        specifier: 0.19.0
+        version: 0.19.0
       react-test-renderer:
         specifier: 17.0.2
         version: 17.0.2(react@17.0.2)
@@ -5716,14 +5717,14 @@ importers:
         specifier: 10.5.2
         version: 10.5.2(webpack@5.96.1)
       selenium-webdriver:
-        specifier: 4.48.0
-        version: 4.48.0
+        specifier: 4.52.0
+        version: 4.52.0
       sharp:
         specifier: 0.35.5
         version: 0.35.5(@types/node@24.10.13)
       simple-git:
-        specifier: 4.0.2
-        version: 4.0.2(supports-color@8.1.1)
+        specifier: 4.1.0
+        version: 4.1.0(supports-color@8.1.1)
       sinon:
         specifier: 22.1.0
         version: 22.1.0
@@ -7315,95 +7316,95 @@ importers:
 
   src/platform/test: {}
 
-  src/platform/test/analytics/plugins/analytics_ftr_helpers: {}
+  src/platform/test_plugins/analytics/analytics_ftr_helpers: {}
 
-  src/platform/test/analytics/plugins/analytics_plugin_a: {}
+  src/platform/test_plugins/analytics/analytics_plugin_a: {}
 
-  src/platform/test/common/plugins/newsfeed: {}
+  src/platform/test_plugins/common/newsfeed: {}
 
-  src/platform/test/common/plugins/otel_metrics: {}
+  src/platform/test_plugins/data_search: {}
 
-  src/platform/test/health_gateway/plugins/status: {}
+  src/platform/test_plugins/health_gateway/status: {}
 
-  src/platform/test/interactive_setup_api_integration/plugins/test_endpoints: {}
+  src/platform/test_plugins/interactive_setup_test_endpoints: {}
 
-  src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline: {}
+  src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline: {}
 
-  src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context: {}
+  src/platform/test_plugins/kbn_tp_custom_visualizations: {}
 
-  src/platform/test/plugin_functional/plugins/app_link_test: {}
+  src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context: {}
 
-  src/platform/test/plugin_functional/plugins/core_app_status: {}
+  src/platform/test_plugins/otel_metrics: {}
 
-  src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a: {}
+  src/platform/test_plugins/plugin_functional/app_link_test: {}
 
-  src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b: {}
+  src/platform/test_plugins/plugin_functional/core_app_status: {}
 
-  src/platform/test/plugin_functional/plugins/core_history_block: {}
+  src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a: {}
 
-  src/platform/test/plugin_functional/plugins/core_http: {}
+  src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_a: {}
+  src/platform/test_plugins/plugin_functional/core_history_block: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_appleave: {}
+  src/platform/test_plugins/plugin_functional/core_http: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_b: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_a: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_chromeless: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_appleave: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_deep_links: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_b: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_deprecations: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_chromeless: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_execution_context: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_deep_links: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_helpmenu: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_deprecations: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_execution_context: {}
 
-  src/platform/test/plugin_functional/plugins/core_plugin_static_assets: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_helpmenu: {}
 
-  src/platform/test/plugin_functional/plugins/core_provider_plugin: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts: {}
 
-  src/platform/test/plugin_functional/plugins/data_search: {}
+  src/platform/test_plugins/plugin_functional/core_plugin_static_assets: {}
 
-  src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
+  src/platform/test_plugins/plugin_functional/core_provider_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/eui_provider_dev_warning: {}
+  src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/hardening: {}
+  src/platform/test_plugins/plugin_functional/eui_provider_dev_warning: {}
 
-  src/platform/test/plugin_functional/plugins/index_patterns: {}
+  src/platform/test_plugins/plugin_functional/index_patterns: {}
 
-  src/platform/test/plugin_functional/plugins/kbn_sample_panel_action: {}
+  src/platform/test_plugins/plugin_functional/kbn_sample_panel_action: {}
 
-  src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
+  src/platform/test_plugins/plugin_functional/kbn_top_nav: {}
 
-  src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
+  src/platform/test_plugins/plugin_functional/management_test_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/management_test_plugin: {}
+  src/platform/test_plugins/plugin_functional/plugins/hardening: {}
 
-  src/platform/test/plugin_functional/plugins/rendering_plugin: {}
+  src/platform/test_plugins/plugin_functional/rendering_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/saved_object_export_transforms: {}
+  src/platform/test_plugins/plugin_functional/saved_object_export_transforms: {}
 
-  src/platform/test/plugin_functional/plugins/saved_object_import_warnings: {}
+  src/platform/test_plugins/plugin_functional/saved_object_import_warnings: {}
 
-  src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type: {}
+  src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type: {}
 
-  src/platform/test/plugin_functional/plugins/saved_objects_hidden_type: {}
+  src/platform/test_plugins/plugin_functional/saved_objects_hidden_type: {}
 
-  src/platform/test/plugin_functional/plugins/session_notifications: {}
+  src/platform/test_plugins/plugin_functional/session_notifications: {}
 
-  src/platform/test/plugin_functional/plugins/telemetry: {}
+  src/platform/test_plugins/plugin_functional/telemetry: {}
 
-  src/platform/test/plugin_functional/plugins/ui_settings_plugin: {}
+  src/platform/test_plugins/plugin_functional/ui_settings_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/usage_collection: {}
+  src/platform/test_plugins/plugin_functional/usage_collection: {}
 
-  src/platform/test/server_integration/plugins/status_plugin_a: {}
+  src/platform/test_plugins/server_integration/status_plugin_a: {}
 
-  src/platform/test/server_integration/plugins/status_plugin_b: {}
+  src/platform/test_plugins/server_integration/status_plugin_b: {}
 
   src/setup_node_env: {}
 
@@ -7506,6 +7507,8 @@ importers:
   x-pack/platform/packages/private/ml/url_state: {}
 
   x-pack/platform/packages/private/ml/validators: {}
+
+  x-pack/platform/packages/private/osquery-plugin-cypress: {}
 
   x-pack/platform/packages/private/rollup: {}
 
@@ -7627,6 +7630,8 @@ importers:
 
   x-pack/platform/packages/shared/security/plugin_types_server: {}
 
+  x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers: {}
+
   x-pack/platform/plugins/private/banners: {}
 
   x-pack/platform/plugins/private/canvas: {}
@@ -7739,7 +7744,7 @@ importers:
 
   x-pack/platform/plugins/shared/fleet: {}
 
-  x-pack/platform/plugins/shared/fleet/cypress: {}
+  x-pack/platform/plugins/shared/fleet-cypress: {}
 
   x-pack/platform/plugins/shared/global_search: {}
 
@@ -7773,8 +7778,6 @@ importers:
 
   x-pack/platform/plugins/shared/osquery: {}
 
-  x-pack/platform/plugins/shared/osquery/cypress: {}
-
   x-pack/platform/plugins/shared/rule_registry: {}
 
   x-pack/platform/plugins/shared/saved_objects_tagging: {}
@@ -7805,81 +7808,79 @@ importers:
 
   x-pack/platform/test: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/aad: {}
+  x-pack/platform/test_plugins/cloud_integration/saml_provider: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators: {}
+  x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/alerts: {}
+  x-pack/platform/test_plugins/entity_manager/fixture_plugin: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted: {}
+  x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture: {}
+  x-pack/platform/test_plugins/functional_embedded/iframe_embedded: {}
 
-  x-pack/platform/test/alerting_api_integration/packages/helpers: {}
+  x-pack/platform/test_plugins/functional_execution_context/alerts: {}
 
-  x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin: {}
+  x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/cases: {}
+  x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/observability: {}
+  x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/security_solution: {}
+  x-pack/platform/test_plugins/plugin_functional/global_search_test: {}
 
-  x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad: {}
 
-  x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators: {}
 
-  x-pack/platform/test/functional_cors/plugins/kibana_cors_test: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts: {}
 
-  x-pack/platform/test/functional_embedded/plugins/iframe_embedded: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts_restricted: {}
 
-  x-pack/platform/test/functional_execution_context/plugins/alerts: {}
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/task_manager_fixture: {}
 
-  x-pack/platform/test/functional_with_es_ssl/plugins/alerts: {}
+  x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts: {}
 
-  x-pack/platform/test/functional_with_es_ssl/plugins/cases: {}
+  x-pack/platform/test_plugins/response_ops/plugin_api_integration/event_log: {}
 
-  x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
+  x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client: {}
+  x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performance: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/event_log: {}
+  x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test: {}
+  x-pack/platform/test_plugins/response_ops/task_manager/sample_task_plugin_mget: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin: {}
+  x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
 
-  x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance: {}
+  x-pack/platform/test_plugins/security_api_integration/packages/helpers: {}
 
-  x-pack/platform/test/plugin_functional/plugins/global_search_test: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/audit_log: {}
 
-  x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/features_provider: {}
 
-  x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider: {}
 
-  x-pack/platform/test/security_api_integration/packages/helpers: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider: {}
 
-  x-pack/platform/test/security_api_integration/plugins/audit_log: {}
+  x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer: {}
 
-  x-pack/platform/test/security_api_integration/plugins/features_provider: {}
+  x-pack/platform/test_plugins/security_functional/plugins/test_endpoints: {}
 
-  x-pack/platform/test/security_api_integration/plugins/oidc_provider: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 
-  x-pack/platform/test/security_api_integration/plugins/saml_provider: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability: {}
 
-  x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
 
-  x-pack/platform/test/security_functional/plugins/test_endpoints: {}
+  x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
 
-  x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin: {}
 
-  x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget: {}
+  x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin: {}
 
-  x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
+  x-pack/platform/test_plugins/usage_collection/application_usage_test: {}
 
-  x-pack/platform/test/usage_collection/plugins/application_usage_test: {}
-
-  x-pack/platform/test/usage_collection/plugins/stack_management_usage_test: {}
+  x-pack/platform/test_plugins/usage_collection/stack_management_usage_test: {}
 
   x-pack/solutions/observability/packages/alert-details: {}
 
@@ -7911,7 +7912,7 @@ importers:
 
   x-pack/solutions/observability/plugins/apm: {}
 
-  x-pack/solutions/observability/plugins/apm/ftr_e2e: {}
+  x-pack/solutions/observability/plugins/apm-ftr-e2e: {}
 
   x-pack/solutions/observability/plugins/apm_data_access: {}
 
@@ -8045,6 +8046,8 @@ importers:
 
   x-pack/solutions/security/packages/kbn-securitysolution-utils: {}
 
+  x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint: {}
+
   x-pack/solutions/security/packages/navigation: {}
 
   x-pack/solutions/security/packages/security-ai-prompts: {}
@@ -8083,13 +8086,11 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test/plugin_functional/plugins/resolver_test: {}
+  x-pack/solutions/security/test_helpers/detections-response-ftr-services: {}
 
-  x-pack/solutions/security/test/security_solution_api_integration: {}
+  x-pack/solutions/security/test_plugins/resolver_test: {}
 
-  x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
-
-  x-pack/solutions/security/test/security_solution_endpoint: {}
+  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
 
 packages:
 
@@ -9795,8 +9796,8 @@ packages:
     resolution: {integrity: sha512-dvD8+Y/Okc0fh0blqaYCLIrcy0+1LqIhMr7hjk8elLQZ9mkw2hKFB9dFKuRfWf+1nvHpGlW+PwccqkdebynQbg==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/hapi@21.4.12':
-    resolution: {integrity: sha512-TT6ERrp5qv/pN3ubNILjI1/MZfXQMUum2IVWH2hHR23LHj1We5gsI8WFavfaNRax+T8W2qSUkri9l7FA72/Xdw==}
+  '@hapi/hapi@21.4.13':
+    resolution: {integrity: sha512-eupLASu8jIrFvo8yu+xK/C5v2kydqK7v43XIfBtFW4NrJKylud0sEhESoq7oYRe1uxOIiowJAz6mVYmCxC2w1g==}
     engines: {node: '>=14.15.0'}
 
   '@hapi/heavy@8.0.1':
@@ -10444,8 +10445,8 @@ packages:
     peerDependencies:
       '@langchain/core': 1.2.3
 
-  '@launchdarkly/eventsource@0.2.2':
-    resolution: {integrity: sha512-HeM/SWPrgHwdLytYXhRMNvDB7XKWYY3xSFeo9nAZB3Ep8GhDKOC7uefKuAAKjlxRHyvtQpnm/UHgw3EBBRxNnA==}
+  '@launchdarkly/eventsource@0.2.4':
+    resolution: {integrity: sha512-fc5DFkpYwhgVKYK2mE446qcKxGRhnggdAWGTEXwVBehsJGXqpKmkxSyLC0RBbBt8SZn+WxpQLnw2BYu6tMD7Mw==}
 
   '@launchdarkly/js-client-sdk-common@1.32.2':
     resolution: {integrity: sha512-1m5cI3lVbuXmrP74Nz+1+ZUV8qEPGZzvUYpvoynowdweWX5EEuUK3vHtqC9umhSe2Z/Ujxy/vcmPgH3Q+5BHQA==}
@@ -10456,22 +10457,22 @@ packages:
   '@launchdarkly/js-sdk-common@2.27.0':
     resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
 
-  '@launchdarkly/js-sdk-common@2.32.0':
-    resolution: {integrity: sha512-V2sd9W1ocskNtZNx2gmgym+j4YsmsawZE4kwUj631dO9SE6029SLCNY9wl3csS/8/Pe8qTxZv7pvbxh4mIWJqw==}
+  '@launchdarkly/js-sdk-common@2.32.2':
+    resolution: {integrity: sha512-LnJUCx9FZocgSVYN50lpXrxWt2CpxB7SZEd/fHf+im5hf+cGEaxQIylhXYBzN1tmse3n/vkODBgsZJNZ3pAcxA==}
 
-  '@launchdarkly/js-server-sdk-common@2.26.0':
-    resolution: {integrity: sha512-FqvrDgy2/dibITqjXz4mY9y6Jksj2ZQ6IoL98VOd7a5WPI2RW51iH39Ra6jVGENR8Vs1Tv0klCBiC3LwJIm9mQ==}
+  '@launchdarkly/js-server-sdk-common@2.26.4':
+    resolution: {integrity: sha512-DF6G7xVeK7FNEY8+88YF/oQVPwBeQEjyU3tY/SuMdbvehBDsY5Mit8JXWtZUu41SyYX9EjaogTy93TJcynhM/w==}
 
-  '@launchdarkly/node-server-sdk@9.16.0':
-    resolution: {integrity: sha512-djgpihWJy/WqZjEKqTvZq8agi+ed6uBbKo18Z8RYDswuSKobweX4q7NVe1PjB6wjbxmsxGbi/wlsPhnrrZi0GQ==}
+  '@launchdarkly/node-server-sdk@9.16.4':
+    resolution: {integrity: sha512-1bOYuh1pEEVLNiHy1mynJlpzeriUnokFGMYAk+6lpWgahnyG2oHacC3LkMJd9dOJR0Ud5P4swl3DTti51RLOOQ==}
 
-  '@launchdarkly/openfeature-js-server-common@2.2.1':
-    resolution: {integrity: sha512-pdxqJbZi6Q2iKX4NbvQJ5hWGqXt0amr2525AMplvWbgX+v8TLH3DHdCLWQYyeWtjQib4WsYREa706ehVWhxxdg==}
+  '@launchdarkly/openfeature-js-server-common@2.2.3':
+    resolution: {integrity: sha512-3etyrFp+C1OzrpjBnaGzXP2BN/OUAIWjhSVG2sJggdx4cnGwD0PHl9z8Y1YSTyhE7aTh7t4D3VgBP75aJ1KlaQ==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.1.3':
-    resolution: {integrity: sha512-kCxs86pZXZsqErzq0jrrIlxG0ZsC2FufMU59YdXcY3f9XbwksHI97uRcqtoOeRJYK4AA5sJ2oJ2MO7c0+noqsw==}
+  '@launchdarkly/openfeature-node-server@2.1.7':
+    resolution: {integrity: sha512-PtXI3e0XbkJa6/Yhl8g8ktshBMfn4OoieFJTPrTYdiPY/iiPvrNw2tn2GEtobuu8DN/LWgkBA4aE6OUo4kgb1g==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -10689,33 +10690,33 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.2':
-    resolution: {integrity: sha512-9bfjwDxIDWmmOKusUcqdS4Rw+SETlp9Dy39Xui9BEGEk19dDwH0jhipwFzEff/pFg95NKymc6TOTbRKcWeRqyQ==}
+  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.7':
+    resolution: {integrity: sha512-2zPHLn+MuGJ6GP/5jDrwa9Jy0CI+D3Ibpvopf5SFfmc1G9gdofR4uB7YrJAAp4vodn/7iDOciyv8bgkRPLw7cA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.2':
-    resolution: {integrity: sha512-lwriRAHm1Yg4iDf23Oxm9n/t5Zpw1lVnxYU3HnJPTi2lJRkKTrps1KVgvL6m7WvmhYVt/FIsssWay+k45QHeuw==}
+  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.7':
+    resolution: {integrity: sha512-of1miwFfEdgs5nythewsEoocfpbjzUf8PC996YDe3kAyv0ZJiMJs5NXlYhE6IdjxfNEPqUXj/BYBnpD8kRdfeQ==}
     cpu: [x64]
     os: [darwin]
 
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.2':
-    resolution: {integrity: sha512-FU20Bo66/f7He9Fp9sP2zaJ1Q8L9uLPZQDub/WlUip78JlPeMbVL8546HbZfcW9LNciEXc8d+tThSJjSC+tmsg==}
+  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.7':
+    resolution: {integrity: sha512-jcRydYARTW0gX5idJhxV7m3KkRUD7KtZLYFF1ZY18HrPqpGY0TCqPUTJCwka2kVfVOwfKs3ZmlPSmQb4S6xj7w==}
     cpu: [arm64]
     os: [linux]
 
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.2':
-    resolution: {integrity: sha512-MOI9Dlfrpi2Cuc7i5dXdxPbFIgbDBGgKR5F2yWEa6FVEtSWncfVNKW5AKjImAQ6CZlBK9tympdsZJ2xThBiWWA==}
+  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.7':
+    resolution: {integrity: sha512-aDPbiEkFHs3H68705JKxJ15IT41wFdvDhba1pL8ygfdoshboL5dsXtiu76/CqhLWYneE+9hwBE+0abqNOiQ4Bw==}
     cpu: [arm]
     os: [linux]
 
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.2':
-    resolution: {integrity: sha512-gsWNDCklNy7Ajk0vBBf9jEx04RUxuDQfBse918Ww+Qb9HCPoGzS+XJTLe96iN3BVK7grnLiYghP/M4L8VsaHeA==}
+  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.7':
+    resolution: {integrity: sha512-A9xOmARctmUvHrBj5GGzGAigsZFnqE4kld5oprX3PyPbkVALV4jwBc17gPZrhSOvnXQc81hE9K7S2hDUCgialA==}
     cpu: [x64]
     os: [linux]
 
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.2':
-    resolution: {integrity: sha512-O+6Gs8UeDbyFpbSh2CPEz/UOrrdWPTBYNblZK5CxxLisYt4kGX3Sc+czffFonyjiGSq3jWLwJS/CCJc7tBr4sQ==}
+  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.7':
+    resolution: {integrity: sha512-PRBiOqK4mcR0rvm6nybO7pSOYRR2Zza0+43UK2IvbVGelzMqZViiZJmOWGuWOX678QKESO6YrHx36z43nSS6iQ==}
     cpu: [x64]
     os: [win32]
 
@@ -11944,8 +11945,8 @@ packages:
   '@simple-git/args-pathspec@1.0.4':
     resolution: {integrity: sha512-EtMX6XjRWSastG2SdkmSQByPtJ9dx/NIjnHbpQPCYt62j4RmSx5rgLTGpw0YCjF5h191gZOmBfheOT23cRSFdw==}
 
-  '@simple-git/argv-parser@2.0.1':
-    resolution: {integrity: sha512-M++IaVWrN+vYalilOHfwvT2IL3wYZtVEBQpmX6DLSOJLtxbZ+SUeIDE3IiPogzhPACLajwtxfa5rp+ZX1FczzQ==}
+  '@simple-git/argv-parser@3.0.0':
+    resolution: {integrity: sha512-MhLm6/9J7PiVZghJnaJG4tOc+rTotsSINJkjbUqZA7lYmYklOXdk+d0UZ8Pm8WFcMuxafx3oSUIYYYnPY92GTQ==}
 
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -13077,8 +13078,8 @@ packages:
   '@types/seedrandom@2.4.28':
     resolution: {integrity: sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==}
 
-  '@types/selenium-webdriver@4.35.6':
-    resolution: {integrity: sha512-8nfyMRi4VvkY9QrQGyY/zkleAhnjnmE8YtdEeoCrWe3izp1P9vo9f5VTNRYF0up+l+kn+VuZah+je+bLddNV+g==}
+  '@types/selenium-webdriver@4.35.7':
+    resolution: {integrity: sha512-TVduvRhQrIdjPWEC6YJLxwZWegWLD3uDOsqMuWk2U9+TiXw6wAH9RlKEtuHO8kioZkJ5MWGC9pQDY0nXvgi0nA==}
 
   '@types/semver@7.8.0':
     resolution: {integrity: sha512-1mAINjtQCXXeLkJ9ehXkwOcBpqtLxiVtKhpUf83DdRNdQKV0iXZpaHYqRr7nj+wvxuJzoAmAwXI+sCNMv1CzLQ==}
@@ -13586,8 +13587,8 @@ packages:
   '@xyflow/system@0.0.50':
     resolution: {integrity: sha512-HVUZd4LlY88XAaldFh2nwVxDOcdIBxGpQ5txzwfJPf+CAjj2BfYug1fHs2p4yS7YO8H6A3EFJQovBE8YuHkAdg==}
 
-  '@zip.js/zip.js@2.8.11':
-    resolution: {integrity: sha512-0fztsk/0ryJ+2PPr9EyXS5/Co7OK8q3zY/xOoozEWaUsL5x+C0cyZ4YyMuUffOO2Dx/rAdq4JMPqW0VUtm+vzA==}
+  '@zip.js/zip.js@2.25.0':
+    resolution: {integrity: sha512-oNRqUuU1XFu6G5d7Z0jufJ9dS9WteO0xiU/PNxsUrb4itZCsSbn191jpJzU00Gmc6S680X3DPZeF5EV4zAEMAg==}
     engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=18.0.0'}
 
   a-sync-waterfall@1.0.1:
@@ -14391,8 +14392,8 @@ packages:
     resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
     engines: {node: '>=18'}
 
-  byte-size@9.0.1:
-    resolution: {integrity: sha512-YLe9x3rabBrcI0cueCdLS2l5ONUKywcRpTs02B8KP9/Cimhj7o3ZccGrPnRvcbyHMbb7W79/3MUJl7iGgTXKEw==}
+  byte-size@9.0.2:
+    resolution: {integrity: sha512-awINQonvLawPPCIWKIoYwPlUJc2ysiRsYIIJfJoIyWMbqdceKHhhZsT3226exJYoDqpuI6sInkEo1B5Rrjbs+g==}
     engines: {node: '>=12.17'}
     peerDependencies:
       '@75lb/nature': latest
@@ -14597,8 +14598,8 @@ packages:
     resolution: {integrity: sha512-9e/zx1jw7B4CO+c/RXoCsfg/x1AfUBioy4owYH0bJprEYAx5hRFLRhWBqHAG57D0ZM4H7vxbP7bPe0VwhQRYDQ==}
     engines: {node: '>=6.0'}
 
-  chromedriver@154.0.1:
-    resolution: {integrity: sha512-QtK+E8xDBt6+dBOALfbILJX2VoRngV6elAh47uZCGWKVKf7n3DyO/IpBo/x5PafLgpZ0LZKTWQQtB+DYq0ixHA==}
+  chromedriver@157.0.1:
+    resolution: {integrity: sha512-KZWZnk67gV7uB7Ub2QKCml1jqIXZA0h4VotpNH+vCx/N1ZGO9WDQ8X+wBga35SGR/in32lc0Znw3zjm+wndEIQ==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -16430,8 +16431,8 @@ packages:
   fastq@1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}
 
-  faye-websocket@0.11.3:
-    resolution: {integrity: sha512-D2y4bovYpzziGgbHYtGCMjlJM36vAl/y+xUyn1C+FVx8szd1E+86KwVw6XvYSzOP8iMpm1X0I4xJD+QtUb36OA==}
+  faye-websocket@0.11.4:
+    resolution: {integrity: sha512-CzbClwlXAuiRQAlUyfqPgvPoNKTckTPGfwZV4ZdAhVcP2lh9KUxJg2b5GkE7XbjKQ3YJnQ9z6D9ntLAlB+tP8g==}
     engines: {node: '>=0.8.0'}
 
   fb-watchman@2.0.0:
@@ -16726,10 +16727,12 @@ packages:
     resolution: {integrity: sha512-zV/5HKTfCeKWnxG0Dmrw51hEWFGfcF2xiXqcA3+J90WDuP0SvoiSO5ORvcBsifmx/FoIjgQN3oNOGaQ5PhLFkg==}
     engines: {node: '>=18'}
 
-  geckodriver@6.1.1:
-    resolution: {integrity: sha512-/AcCyc9o9o6hUbudaSJM2iOtXbxSLqQPOb4GrPvEN40cjraUeaX/j5kH3mSgwiroyMn7qzx2wM61AQ2XY8j3sA==}
-    engines: {node: '>=20.0.0'}
+  geckodriver@8.0.0:
+    resolution: {integrity: sha512-2jGCA6deI5MAjODxmHljPqvaUccGbeeqMUHXlW4k3FNDp4YDpxSI+P5QG+w5KIsnCeuGEfTTNi2euKqHI1eD6Q==}
+    engines: {node: '>=22.19.0'}
     hasBin: true
+    peerDependencies:
+      '@wdio/logger': ^9.18.0 || ^10.0.0
 
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -16847,8 +16850,8 @@ packages:
     deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
-  glob@13.0.6:
-    resolution: {integrity: sha512-Wjlyrolmm8uDpm/ogGyXZXb1Z+Ca2B8NbJwqBVg0axK9GbBeoS7yGV6vjXnYdGm6X53iehEuxxbyiKp8QmN4Vw==}
+  glob@13.0.7:
+    resolution: {integrity: sha512-wfsFgXQ8A3SEI9XGf7Nl3Y9l7ffSrGh7SUCT7vU/2CzYPep9kjxAn1S40F9OPKxAMGCVl7HtNlJhrCJUeUq83g==}
     engines: {node: 18 || 20 || >=22}
 
   glob@7.2.3:
@@ -18053,8 +18056,8 @@ packages:
   joi@17.13.9:
     resolution: {integrity: sha512-llFCT2rVtfwgBCaIqxtjim+iHqrgss4ONiGSYiiGH9jnjWq90ppSRffqmqKvwpa8W+YfILyQV6XyGcegXX2T4g==}
 
-  joi@18.3.1:
-    resolution: {integrity: sha512-mV9M4Llh4va3NT90p7KBtQhoZqjs8xLX7EWYE4y/GG3yLF6REbIBEHSUb0UX1JXRht2w5tiLSsvmpYc5akiqIw==}
+  joi@18.3.2:
+    resolution: {integrity: sha512-iUivApKYw5GpZmq2Sy6El99j7noo8QSUFZlyQtr3HCkosC/b5wKF6/Y3teiHIlaM8WI38sAT3P+51rB0lhAhJA==}
     engines: {node: '>= 20'}
 
   jora@1.0.0-beta.8:
@@ -18219,8 +18222,8 @@ packages:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
 
-  jszip@3.10.1:
-    resolution: {integrity: sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g==}
+  jszip@3.10.2:
+    resolution: {integrity: sha512-3l+rb15IOWtUhU0H5MFqES/T6Kh7abYwjosBey/vD6hDt8zoEffkSC5Ws5SGtgVw3gBx2NEbhTeSW1+kWkpyTQ==}
 
   just-curry-it@3.1.0:
     resolution: {integrity: sha512-mjzgSOFzlrurlURaHVjnQodyPNvrHrf1TbQP2XU9NSqBtHQPuHZ+Eb6TAJP7ASeJN9h9K0KXoRTs8u6ouHBKvg==}
@@ -19005,12 +19008,8 @@ packages:
     resolution: {integrity: sha512-1/JjbLoGwv87xVsutkX0XJc0M0W4kb40cZl/K41xtTViBOD9JuFPKfyMNTrLJ/ivYAd0aPqu/vduamXO0emTFQ==}
     engines: {node: '>= 0.4'}
 
-  modern-tar@0.7.7:
-    resolution: {integrity: sha512-t9VmxaqrmANnEOBhpSDI6HD192Ge48k8vmWqQQL7hSFEqHEYwZbbsu49+aKLWZeRvFs3j1pMhXOqqF4kPlvjkQ==}
-    engines: {node: '>=18.0.0'}
-
-  modern-tar@0.8.4:
-    resolution: {integrity: sha512-gN54ddmyzEg10orwZ2u4OOv+bjpMWdIl5jIkodK97bMq8QBSL5c0D7YX0lT1Ooz+99S7+PvFbnxzdjgHo1r41g==}
+  modern-tar@0.8.6:
+    resolution: {integrity: sha512-LYSks0tNVqbtez/9OB0YFP6qLRSqkdAxJWOQpVaR67lNTbj2zNLyYpowkRMia5lXLCZKzxwoxkxH2MbbBR2aEg==}
     engines: {node: '>=18.0.0'}
 
   module-definition@6.0.1:
@@ -19095,12 +19094,12 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msgpackr-extract@3.0.2:
-    resolution: {integrity: sha512-SdzXp4kD/Qf8agZ9+iTu6eql0m3kWm1A2y1hkpTeVNENutaB0BwHlSvAIaMxwntmRUAUjon2V4L8Z/njd0Ct8A==}
+  msgpackr-extract@3.0.7:
+    resolution: {integrity: sha512-/dOQboWnkR1cjm88XyH/cGSivECGgyQu3814+bNUAq5wACQC8Ya/CViB9WApvWJ5Hya/JJQQmUeBFOZj8MLjGA==}
     hasBin: true
 
-  msgpackr@1.11.4:
-    resolution: {integrity: sha512-uaff7RG9VIC4jacFW9xzL3jc0iM32DNHe4jYVycBcjUePT/Klnfj7pqtWJt9khvDFizmjN2TlYniYmSS2LIaZg==}
+  msgpackr@2.1.4:
+    resolution: {integrity: sha512-TvP18sX5U3MXoHHSUZen/FagaNTEJObyb8OlnJcNbqN6Ux/oCwYJrHhCOzi31bItyW/Efz1IDnRDKQ23j4ZuvA==}
 
   msw@2.11.6:
     resolution: {integrity: sha512-MCYMykvmiYScyUm7I6y0VCxpNq1rgd5v7kG8ks5dKtvmxRUUPjribX6mUoUNBbM5/3PhUyoelEWiKXGOz84c+w==}
@@ -19217,10 +19216,6 @@ packages:
   node-forge@1.4.3:
     resolution: {integrity: sha512-P6wzfh6t70avmV8FrVEAd/36sOPJQ+hkaJVX1Laap9J/77m7M0eyozDvc8SwnDf4P7MP94gwbAAo0rg3YVXT+g==}
     engines: {node: '>= 6.13.0'}
-
-  node-gyp-build-optional-packages@5.0.7:
-    resolution: {integrity: sha512-YlCCc6Wffkx0kHkmam79GKvDQ6x+QZkMjFGrIMxgFNILFvGSbCp2fCBC55pGTT9gVaz8Na5CLmxt/urtzRv36w==}
-    hasBin: true
 
   node-gyp-build-optional-packages@5.2.2:
     resolution: {integrity: sha512-s+w+rBWnpTMwSFbaE0UXsRlg7hU4FjekKU4eyAih5T8nJuNZT1nNsskXpxmeqSK9UzkBl6UgRlnKc8hz8IEqOw==}
@@ -20456,8 +20451,8 @@ packages:
       redux:
         optional: true
 
-  react-refresh@0.18.0:
-    resolution: {integrity: sha512-QgT5//D3jfjJb6Gsjxv0Slpj23ip+HtOpnNgnb2S5zU3CB26G/IDPGoy4RJB42wzFE46DRsstbW6tKHoKbhAxw==}
+  react-refresh@0.19.0:
+    resolution: {integrity: sha512-5HdstYgoJBbBofjapO5qCPcovECJCBfvjLb+iTcsmqDFVMRdqy0qs7iiInBJTUXmIFc2bjoc5b2HVLp2zRtYhQ==}
     engines: {node: '>=0.10.0'}
 
   react-remove-scroll-bar@2.3.4:
@@ -21209,9 +21204,9 @@ packages:
   select-hose@2.0.0:
     resolution: {integrity: sha512-mEugaLK+YfkijB4fx0e6kImuJdCIt2LxCRcbEYPqRGCs4F2ogyfZU5IAZRdjCP8JPq2AtdNoC/Dux63d9Kiryg==}
 
-  selenium-webdriver@4.48.0:
-    resolution: {integrity: sha512-rKM9uXFRWcF9aThrZQDNQH2/9Et/WvMZbg3/x1rnSYWoXiwJuShYeH0IAli8Cuw+c3lEV0UWPfUz88H+fvW9Hg==}
-    engines: {node: '>= 22.0.0'}
+  selenium-webdriver@4.52.0:
+    resolution: {integrity: sha512-+7AJZ85CUiSK4J8HDEKFAcZ+fIPB2krOWncOq0Stg/Ywc7phb85FkhWRdX/WXZtqOCSzvrF/Q34rWX6zFEnGOw==}
+    engines: {node: ^22.23.4 || ^24.22.1 || >= 26.12.1}
 
   self-signed-cert@1.0.1:
     resolution: {integrity: sha512-86d1jYydqaRdUEyR9tj5nQ0d059RUWB9gdZrzDy2MJaUHii1h9EyzbAepkV1rOLO2AkSkQbXtUrqWRH4FDYWHA==}
@@ -21376,8 +21371,8 @@ packages:
     resolution: {integrity: sha512-0LxHn+P1lF5r2WwVB/za3hLRIsYoLaNq1CXqjbrs3ZvLuvlWnRKrUjEWzV7umZL7hpQ7xULiQMV+0iXdRa5iFg==}
     engines: {node: '>=14.16'}
 
-  simple-git@4.0.2:
-    resolution: {integrity: sha512-l0sIsv9VrPwovKELFDBOj/lhmIcbMvxBk2B+hRhsMM4/VL3gKtuZvYnBNixVo+N/0HnqQx2cBdLvxnAbygHpqA==}
+  simple-git@4.1.0:
+    resolution: {integrity: sha512-FZJESy4Vxahk4eOadmRsWF5TjhCrfpDP563j8jAMbMEi/phIHPDgzN/tDkRIZ2GyQdLKEeXMPXqA8hhWjAdQZA==}
 
   simple-sha256@1.1.0:
     resolution: {integrity: sha512-jMdj+5MR1dRiFbrQ8idmkPv+HCoJEmJVBBwc0vQQz4Gtg3PEkjdpVxUM4BSwK898zhNP/ub3vcP9edw47EHuLQ==}
@@ -22369,6 +22364,10 @@ packages:
     resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
     engines: {node: '>=20.18.1'}
 
+  undici@8.13.1:
+    resolution: {integrity: sha512-Kt7EaPjh0s93lJH/PmW3d5rhkcpUa6fS3jqZ7+YGxNd9L7Xy/i827xe4C2uhhq+pJebM4tQOl5AgHmW11G5Skg==}
+    engines: {node: '>=22.19.0'}
+
   unherit@1.1.0:
     resolution: {integrity: sha512-TqB2ZB44rZ/lUYkoYjo0LKmw+4HIMbUJSiN3iIJO1oHVieA2kbUyMe01rzsCBQ4gqeoAjn9edj9/fc4N8b7trA==}
 
@@ -22932,9 +22931,9 @@ packages:
     resolution: {integrity: sha512-ZL2+3c7kMBdIRCMz6l8jQMHyGVxj+UL+xVk74Ombiciboca8rHa15L86B19E5oh1pL9Ii/uj54gtsIrZGMo6zA==}
     engines: {node: '>=0.8.0'}
 
-  websocket-extensions@0.1.4:
-    resolution: {integrity: sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==}
-    engines: {node: '>=0.8.0'}
+  websocket-extensions@0.2.0:
+    resolution: {integrity: sha512-vQaTTgDDgwlrreIJAprknlnvEtZMMxfLqoxyQYnWO8dgcz2qIzQNysCpwOekz8kqLvzrZ0dcaL9hejZ+2AszCA==}
+    engines: {node: '>=0.10.0'}
 
   wellknown@0.5.0:
     resolution: {integrity: sha512-za5vTLuPF9nmrVOovYQwNEWE/PwJCM+yHMAj4xN1WWUvtq9OElsvKiPL0CR9rO8xhrYqL7NpI7IknqR8r6eYOg==}
@@ -23078,8 +23077,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.21.3:
-    resolution: {integrity: sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==}
+  ws@8.23.0:
+    resolution: {integrity: sha512-wCkmX8QMOrKjgO8HW2WyDbTSGeqkocxgDzS9iR79rEAexty6/2qzilx3Ag8Tqf9ykop3irLKle0MtVn5qjVnoQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -25581,7 +25580,7 @@ snapshots:
       '@hapi/validate': 2.0.1
       '@hapi/wreck': 18.1.3
 
-  '@hapi/hapi@21.4.12':
+  '@hapi/hapi@21.4.13':
     dependencies:
       '@hapi/accept': 6.0.3
       '@hapi/ammo': 6.0.2
@@ -26274,19 +26273,19 @@ snapshots:
 
   '@kwsites/promise-deferred@1.1.1': {}
 
-  '@langchain/aws@1.4.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))':
+  '@langchain/aws@1.4.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))':
     dependencies:
       '@aws-sdk/client-bedrock-agent-runtime': 3.1089.0
       '@aws-sdk/client-bedrock-runtime': 3.1089.0
       '@aws-sdk/client-kendra': 3.1089.0
       '@aws-sdk/credential-provider-node': 3.972.70
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
 
-  '@langchain/classic@1.0.40(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(@smithy/signature-v4@5.6.12)(cheerio@1.0.0-rc.12)(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(peggy@4.2.0)(ws@8.21.3)':
+  '@langchain/classic@1.0.40(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(@smithy/signature-v4@5.6.12)(cheerio@1.0.0-rc.12)(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(peggy@4.2.0)(ws@8.23.0)':
     dependencies:
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
-      '@langchain/openai': 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(@smithy/signature-v4@5.6.12)(ws@8.21.3)
-      '@langchain/textsplitters': 1.0.1(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
+      '@langchain/openai': 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(@smithy/signature-v4@5.6.12)(ws@8.23.0)
+      '@langchain/textsplitters': 1.0.1(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))
       handlebars: 4.7.10
       js-yaml: 5.4.1
       jsonpointer: 5.0.1
@@ -26295,7 +26294,7 @@ snapshots:
       zod: 3.25.76
     optionalDependencies:
       cheerio: 1.0.0-rc.12
-      langsmith: 0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      langsmith: 0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
       peggy: 4.2.0
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -26307,12 +26306,12 @@ snapshots:
       - openai
       - ws
 
-  '@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)':
+  '@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       '@standard-schema/spec': 1.1.0
       js-tiktoken: 1.0.15
-      langsmith: 0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      langsmith: 0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
       mustache: 4.2.0
       p-queue: 6.6.2
       zod: 3.25.76
@@ -26323,39 +26322,39 @@ snapshots:
       - openai
       - ws
 
-  '@langchain/google-common@2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))':
+  '@langchain/google-common@2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))':
     dependencies:
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
 
-  '@langchain/google-gauth@2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(supports-color@8.1.1)':
+  '@langchain/google-gauth@2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(supports-color@8.1.1)':
     dependencies:
-      '@langchain/google-common': 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))
+      '@langchain/google-common': 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))
       google-auth-library: 10.9.1(supports-color@8.1.1)
     transitivePeerDependencies:
       - '@langchain/core'
       - encoding
       - supports-color
 
-  '@langchain/google-genai@2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))':
+  '@langchain/google-genai@2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))':
     dependencies:
       '@google/generative-ai': 0.24.1
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
 
-  '@langchain/google-vertexai@2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(supports-color@8.1.1)':
+  '@langchain/google-vertexai@2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(supports-color@8.1.1)':
     dependencies:
-      '@langchain/google-gauth': 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(supports-color@8.1.1)
+      '@langchain/google-gauth': 2.2.0(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(supports-color@8.1.1)
     transitivePeerDependencies:
       - '@langchain/core'
       - encoding
       - supports-color
 
-  '@langchain/langgraph-checkpoint@1.1.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))':
+  '@langchain/langgraph-checkpoint@1.1.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))':
     dependencies:
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
 
-  '@langchain/langgraph-sdk@1.9.28(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)':
+  '@langchain/langgraph-sdk@1.9.28(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)':
     dependencies:
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
       '@langchain/protocol': 0.0.18
       '@types/json-schema': 7.0.15
       p-queue: 9.1.0
@@ -26364,11 +26363,11 @@ snapshots:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
 
-  '@langchain/langgraph@1.4.8(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(zod@3.25.76)':
+  '@langchain/langgraph@1.4.8(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(zod@3.25.76)':
     dependencies:
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
-      '@langchain/langgraph-checkpoint': 1.1.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))
-      '@langchain/langgraph-sdk': 1.9.28(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
+      '@langchain/langgraph-checkpoint': 1.1.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))
+      '@langchain/langgraph-sdk': 1.9.28(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@langchain/protocol': 0.0.18
       '@standard-schema/spec': 1.1.0
       zod: 3.25.76
@@ -26378,11 +26377,11 @@ snapshots:
       - svelte
       - vue
 
-  '@langchain/openai@1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(@smithy/signature-v4@5.6.12)(ws@8.21.3)':
+  '@langchain/openai@1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(@smithy/signature-v4@5.6.12)(ws@8.23.0)':
     dependencies:
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
       js-tiktoken: 1.0.15
-      openai: 6.49.0(@aws-sdk/credential-provider-node@3.972.70)(@smithy/signature-v4@5.6.12)(ws@8.21.3)(zod@3.25.76)
+      openai: 6.49.0(@aws-sdk/credential-provider-node@3.972.70)(@smithy/signature-v4@5.6.12)(ws@8.23.0)(zod@3.25.76)
       zod: 3.25.76
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -26392,12 +26391,12 @@ snapshots:
 
   '@langchain/protocol@0.0.18': {}
 
-  '@langchain/textsplitters@1.0.1(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))':
+  '@langchain/textsplitters@1.0.1(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))':
     dependencies:
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
       js-tiktoken: 1.0.15
 
-  '@launchdarkly/eventsource@0.2.2': {}
+  '@launchdarkly/eventsource@0.2.4': {}
 
   '@launchdarkly/js-client-sdk-common@1.32.2':
     dependencies:
@@ -26409,30 +26408,30 @@ snapshots:
 
   '@launchdarkly/js-sdk-common@2.27.0': {}
 
-  '@launchdarkly/js-sdk-common@2.32.0': {}
+  '@launchdarkly/js-sdk-common@2.32.2': {}
 
-  '@launchdarkly/js-server-sdk-common@2.26.0':
+  '@launchdarkly/js-server-sdk-common@2.26.4':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.32.0
+      '@launchdarkly/js-sdk-common': 2.32.2
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.16.0(supports-color@8.1.1)':
+  '@launchdarkly/node-server-sdk@9.16.4(supports-color@8.1.1)':
     dependencies:
-      '@launchdarkly/eventsource': 0.2.2
-      '@launchdarkly/js-server-sdk-common': 2.26.0
+      '@launchdarkly/eventsource': 0.2.4
+      '@launchdarkly/js-server-sdk-common': 2.26.4
       https-proxy-agent: 7.0.6(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.2.1(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
+  '@launchdarkly/openfeature-js-server-common@2.2.3(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.32.0
+      '@launchdarkly/js-sdk-common': 2.32.2
       '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
-  '@launchdarkly/openfeature-node-server@2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@8.1.1))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
+  '@launchdarkly/openfeature-node-server@2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@8.1.1))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.16.0(supports-color@8.1.1)
-      '@launchdarkly/openfeature-js-server-common': 2.2.1(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
+      '@launchdarkly/node-server-sdk': 9.16.4(supports-color@8.1.1)
+      '@launchdarkly/openfeature-js-server-common': 2.2.3(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
   '@leichtgewicht/ip-codec@2.0.4': {}
@@ -26682,22 +26681,22 @@ snapshots:
   '@moonrepo/core-windows-x64-msvc@2.4.6':
     optional: true
 
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.2':
+  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.7':
     optional: true
 
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.2':
+  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.7':
     optional: true
 
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.2':
+  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.7':
     optional: true
 
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.2':
+  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.7':
     optional: true
 
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.2':
+  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.7':
     optional: true
 
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.2':
+  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.7':
     optional: true
 
   '@mswjs/http-middleware@0.10.1(msw@2.11.6(@types/node@24.10.13)(typescript@5.9.3))(supports-color@8.1.1)':
@@ -27976,13 +27975,13 @@ snapshots:
     dependencies:
       playwright: 1.63.0
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.6.3(@types/webpack@5.28.5(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.26.1)(webpack-dev-server@5.2.7)(webpack-hot-middleware@2.25.1)(webpack@5.96.1)':
+  '@pmmmwh/react-refresh-webpack-plugin@0.6.3(@types/webpack@5.28.5(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.19.0)(type-fest@4.26.1)(webpack-dev-server@5.2.7)(webpack-hot-middleware@2.25.1)(webpack@5.96.1)':
     dependencies:
       anser: 2.3.2
       core-js-pure: 3.26.0
       error-stack-parser: 2.0.6
       html-entities: 2.5.2
-      react-refresh: 0.18.0
+      react-refresh: 0.19.0
       schema-utils: 4.3.2
       source-map: 0.7.6
       webpack: 5.96.1(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -28043,7 +28042,7 @@ snapshots:
 
   '@puppeteer/browsers@3.2.3(proxy-agent@8.0.3(supports-color@8.1.1))(yauzl@3.2.1)':
     dependencies:
-      modern-tar: 0.8.4
+      modern-tar: 0.8.6
       yargs: 18.0.0
     optionalDependencies:
       proxy-agent: 8.0.3(supports-color@8.1.1)
@@ -28159,7 +28158,7 @@ snapshots:
 
   '@simple-git/args-pathspec@1.0.4': {}
 
-  '@simple-git/argv-parser@2.0.1':
+  '@simple-git/argv-parser@3.0.0':
     dependencies:
       '@simple-git/args-pathspec': 1.0.4
 
@@ -28572,7 +28571,7 @@ snapshots:
       recast: 0.23.19
       semver: 7.8.6
       util: 0.12.5
-      ws: 8.21.3
+      ws: 8.23.0
     optionalDependencies:
       prettier: 2.8.8
     transitivePeerDependencies:
@@ -29232,7 +29231,7 @@ snapshots:
 
   '@types/hapi__cookie@12.0.5':
     dependencies:
-      '@hapi/hapi': 21.4.12
+      '@hapi/hapi': 21.4.13
       '@types/node': 24.10.13
       joi: 17.13.9
 
@@ -29553,7 +29552,7 @@ snapshots:
 
   '@types/seedrandom@2.4.28': {}
 
-  '@types/selenium-webdriver@4.35.6':
+  '@types/selenium-webdriver@4.35.7':
     dependencies:
       '@types/node': 24.10.13
       '@types/ws': 8.5.12
@@ -30149,7 +30148,7 @@ snapshots:
       d3-selection: 3.0.0
       d3-zoom: 3.0.0
 
-  '@zip.js/zip.js@2.8.11': {}
+  '@zip.js/zip.js@2.25.0': {}
 
   a-sync-waterfall@1.0.1: {}
 
@@ -30934,9 +30933,9 @@ snapshots:
     dependencies:
       object.entries: 1.1.6
 
-  brok@6.0.0(@hapi/hapi@21.4.12):
+  brok@6.0.0(@hapi/hapi@21.4.13):
     dependencies:
-      '@hapi/hapi': 21.4.12
+      '@hapi/hapi': 21.4.13
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
 
@@ -31069,7 +31068,7 @@ snapshots:
     dependencies:
       run-applescript: 7.0.0
 
-  byte-size@9.0.1: {}
+  byte-size@9.0.2: {}
 
   bytes@3.1.2: {}
 
@@ -31289,7 +31288,7 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  chromedriver@154.0.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
+  chromedriver@157.0.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.1
@@ -33534,7 +33533,7 @@ snapshots:
     dependencies:
       reusify: 1.0.4
 
-  faye-websocket@0.11.3:
+  faye-websocket@0.11.4:
     dependencies:
       websocket-driver: 0.7.5
 
@@ -33899,16 +33898,13 @@ snapshots:
       - encoding
       - supports-color
 
-  geckodriver@6.1.1(supports-color@8.1.1):
+  geckodriver@8.0.0(@wdio/logger@9.18.0):
     dependencies:
       '@wdio/logger': 9.18.0
-      '@zip.js/zip.js': 2.8.11
+      '@zip.js/zip.js': 2.25.0
       decamelize: 6.0.1
-      http-proxy-agent: 7.0.2(supports-color@8.1.1)
-      https-proxy-agent: 7.0.6(supports-color@8.1.1)
-      modern-tar: 0.7.7
-    transitivePeerDependencies:
-      - supports-color
+      modern-tar: 0.8.6
+      undici: 8.13.1
 
   gensync@1.0.0-beta.2: {}
 
@@ -34037,7 +34033,7 @@ snapshots:
       package-json-from-dist: 1.0.0
       path-scurry: 2.0.2
 
-  glob@13.0.6:
+  glob@13.0.7:
     dependencies:
       minimatch: 10.2.6
       minipass: 7.1.3
@@ -35535,7 +35531,7 @@ snapshots:
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
-  joi@18.3.1:
+  joi@18.3.2:
     dependencies:
       '@hapi/address': 5.1.1
       '@hapi/formula': 3.0.2
@@ -35614,7 +35610,7 @@ snapshots:
       whatwg-encoding: 2.0.0
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
-      ws: 8.21.3
+      ws: 8.23.0
       xml-name-validator: 4.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -35712,7 +35708,7 @@ snapshots:
       object.assign: 4.1.7
       object.values: 1.1.6
 
-  jszip@3.10.1:
+  jszip@3.10.2:
     dependencies:
       lie: 3.3.0
       pako: 1.0.11
@@ -35768,12 +35764,12 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  langchain@1.2.30(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(ws@8.21.3):
+  langchain@1.2.30(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(ws@8.23.0):
     dependencies:
-      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
-      '@langchain/langgraph': 1.4.8(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(zod@3.25.76)
-      '@langchain/langgraph-checkpoint': 1.1.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))
-      langsmith: 0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
+      '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
+      '@langchain/langgraph': 1.4.8(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(zod@3.25.76)
+      '@langchain/langgraph-checkpoint': 1.1.3(@langchain/core@1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0))
+      langsmith: 0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0)
       uuid: 11.1.1
       zod: 3.25.76
     transitivePeerDependencies:
@@ -35787,15 +35783,15 @@ snapshots:
       - vue
       - ws
 
-  langsmith@0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3):
+  langsmith@0.7.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76))(ws@8.23.0):
     dependencies:
       p-queue: 6.6.2
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/exporter-trace-otlp-proto': 0.219.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.12.1(@opentelemetry/api@1.9.0)
-      openai: 4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76)
-      ws: 8.21.3
+      openai: 4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76)
+      ws: 8.23.0
 
   language-subtag-registry@0.3.21: {}
 
@@ -35975,7 +35971,7 @@ snapshots:
 
   lmdb@3.4.4:
     dependencies:
-      msgpackr: 1.11.4
+      msgpackr: 2.1.4
       node-addon-api: 6.1.0
       node-gyp-build-optional-packages: 5.2.2
       ordered-binary: 1.5.3
@@ -36586,7 +36582,7 @@ snapshots:
   mochawesome-merge@5.1.1:
     dependencies:
       fs-extra: 11.3.4
-      glob: 13.0.6
+      glob: 13.0.7
       yargs: 17.7.2
 
   mochawesome-report-generator@6.3.2:
@@ -36629,9 +36625,7 @@ snapshots:
       isarray: 2.0.5
       object-inspect: 1.13.4
 
-  modern-tar@0.7.7: {}
-
-  modern-tar@0.8.4: {}
+  modern-tar@0.8.6: {}
 
   module-definition@6.0.1:
     dependencies:
@@ -36713,21 +36707,21 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msgpackr-extract@3.0.2:
+  msgpackr-extract@3.0.7:
     dependencies:
-      node-gyp-build-optional-packages: 5.0.7
+      node-gyp-build-optional-packages: 5.2.2
     optionalDependencies:
-      '@msgpackr-extract/msgpackr-extract-darwin-arm64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-darwin-x64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-arm': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-arm64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-x64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.2
+      '@msgpackr-extract/msgpackr-extract-darwin-arm64': 3.0.7
+      '@msgpackr-extract/msgpackr-extract-darwin-x64': 3.0.7
+      '@msgpackr-extract/msgpackr-extract-linux-arm': 3.0.7
+      '@msgpackr-extract/msgpackr-extract-linux-arm64': 3.0.7
+      '@msgpackr-extract/msgpackr-extract-linux-x64': 3.0.7
+      '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.7
     optional: true
 
-  msgpackr@1.11.4:
+  msgpackr@2.1.4:
     optionalDependencies:
-      msgpackr-extract: 3.0.2
+      msgpackr-extract: 3.0.7
 
   msw@2.11.6(@types/node@24.10.13)(typescript@5.9.3):
     dependencies:
@@ -36844,9 +36838,6 @@ snapshots:
       whatwg-url: 5.0.0
 
   node-forge@1.4.3: {}
-
-  node-gyp-build-optional-packages@5.0.7:
-    optional: true
 
   node-gyp-build-optional-packages@5.2.2:
     dependencies:
@@ -37122,7 +37113,7 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76):
+  openai@4.85.1(supports-color@8.1.1)(ws@8.23.0)(zod@3.25.76):
     dependencies:
       '@types/node': 24.10.13
       '@types/node-fetch': 2.6.4
@@ -37132,17 +37123,17 @@ snapshots:
       formdata-node: 4.4.1
       node-fetch: 2.7.0
     optionalDependencies:
-      ws: 8.21.3
+      ws: 8.23.0
       zod: 3.25.76
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  openai@6.49.0(@aws-sdk/credential-provider-node@3.972.70)(@smithy/signature-v4@5.6.12)(ws@8.21.3)(zod@3.25.76):
+  openai@6.49.0(@aws-sdk/credential-provider-node@3.972.70)(@smithy/signature-v4@5.6.12)(ws@8.23.0)(zod@3.25.76):
     optionalDependencies:
       '@aws-sdk/credential-provider-node': 3.972.70
       '@smithy/signature-v4': 5.6.12
-      ws: 8.21.3
+      ws: 8.23.0
       zod: 3.25.76
 
   openapi-types@12.1.3: {}
@@ -37866,7 +37857,7 @@ snapshots:
       devtools-protocol: 0.0.1687809
       typed-query-selector: 2.12.2
       webdriver-bidi-protocol: 0.4.3
-      ws: 8.21.3
+      ws: 8.23.0
     transitivePeerDependencies:
       - bufferutil
       - proxy-agent
@@ -38204,7 +38195,7 @@ snapshots:
       react-dom: 17.0.2(react@17.0.2)
       redux: 4.2.1
 
-  react-refresh@0.18.0: {}
+  react-refresh@0.19.0: {}
 
   react-remove-scroll-bar@2.3.4(@types/react@18.2.79)(react@17.0.2):
     dependencies:
@@ -39076,12 +39067,12 @@ snapshots:
 
   select-hose@2.0.0: {}
 
-  selenium-webdriver@4.48.0:
+  selenium-webdriver@4.52.0:
     dependencies:
       '@bazel/runfiles': 6.5.0
-      jszip: 3.10.1
+      jszip: 3.10.2
       tmp: 0.2.7
-      ws: 8.21.3
+      ws: 8.23.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -39305,12 +39296,12 @@ snapshots:
 
   simple-bin-help@1.8.0: {}
 
-  simple-git@4.0.2(supports-color@8.1.1):
+  simple-git@4.1.0(supports-color@8.1.1):
     dependencies:
       '@kwsites/file-exists': 1.1.1(supports-color@8.1.1)
       '@kwsites/promise-deferred': 1.1.1
       '@simple-git/args-pathspec': 1.0.4
-      '@simple-git/argv-parser': 2.0.1
+      '@simple-git/argv-parser': 3.0.0
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
@@ -39381,7 +39372,7 @@ snapshots:
 
   sockjs@0.3.24:
     dependencies:
-      faye-websocket: 0.11.3
+      faye-websocket: 0.11.4
       uuid: 8.3.2
       websocket-driver: 0.7.5
 
@@ -40465,6 +40456,8 @@ snapshots:
 
   undici@7.30.2: {}
 
+  undici@8.13.1: {}
+
   unherit@1.1.0:
     dependencies:
       inherits: 2.0.4
@@ -41087,7 +41080,7 @@ snapshots:
       opener: 1.5.2
       picocolors: 1.1.1
       sirv: 3.0.2
-      ws: 8.21.3
+      ws: 8.23.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -41162,7 +41155,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2(supports-color@8.1.1)
       webpack-dev-middleware: 7.4.6(webpack@5.96.1)
-      ws: 8.21.3
+      ws: 8.23.0
     optionalDependencies:
       webpack: 5.96.1(@swc/core@1.15.40)(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-bundle-analyzer@5.3.2)(webpack-dev-server@5.2.7)(webpack@5.96.1)
@@ -41230,9 +41223,9 @@ snapshots:
     dependencies:
       http-parser-js: 0.5.3
       safe-buffer: 5.2.1
-      websocket-extensions: 0.1.4
+      websocket-extensions: 0.2.0
 
-  websocket-extensions@0.1.4: {}
+  websocket-extensions@0.2.0: {}
 
   wellknown@0.5.0:
     dependencies:
@@ -41405,7 +41398,7 @@ snapshots:
 
   ws@7.5.12: {}
 
-  ws@8.21.3: {}
+  ws@8.23.0: {}
 
   wsl-utils@0.4.0:
     dependencies:

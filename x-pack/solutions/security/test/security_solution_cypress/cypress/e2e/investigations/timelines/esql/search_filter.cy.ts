@@ -39,9 +39,7 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
-// FLAKY: https://github.com/elastic/kibana/issues/253121
-// FLAKY: https://github.com/elastic/kibana/issues/253122
-describe.skip(
+describe(
   'Basic esql search and filter operations',
   {
     tags: ['@ess'],
@@ -79,16 +77,12 @@ describe.skip(
 
     it('should remove the query when the back button is pressed after adding a query', () => {
       addDiscoverEsqlQuery(esqlQuery);
-      cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {
-        const currentQuery = subj.text();
-        const sanitizedQuery = convertEditorNonBreakingSpaceToSpace(currentQuery);
-        expect(sanitizedQuery).to.eq(esqlQuery);
+      cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
+        expect(convertEditorNonBreakingSpaceToSpace($input.text())).to.eq(esqlQuery);
       });
       cy.go('back');
-      cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {
-        const currentQuery = subj.text();
-        const sanitizedQuery = convertEditorNonBreakingSpaceToSpace(currentQuery);
-        expect(sanitizedQuery).to.not.eq(esqlQuery);
+      cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
+        expect(convertEditorNonBreakingSpaceToSpace($input.text())).to.not.eq(esqlQuery);
       });
     });
 

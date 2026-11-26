@@ -20,7 +20,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
-  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_functional/plugins/test_endpoints'
+  );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.API_TEST,

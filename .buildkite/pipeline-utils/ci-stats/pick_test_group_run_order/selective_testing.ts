@@ -8,6 +8,7 @@
  */
 
 import {
+  ALWAYS_RUN_JEST_INTEGRATION_CONFIGS,
   CRITICAL_FILES_JEST_INTEGRATION_TESTS,
   CRITICAL_FILES_JEST_UNIT_TESTS,
   filterFilesByPackages,
@@ -77,13 +78,15 @@ export function filterJestIntegrationConfigsByAffected(
   context: SelectiveTestingContext,
   moonSelection?: MoonTestSelection
 ): string[] {
-  return filterByAffected({
+  const packageSelected = filterByAffected({
     label: 'integration',
     configs: jestIntegrationConfigs,
     criticalFiles: CRITICAL_FILES_JEST_INTEGRATION_TESTS,
     context,
     moonSelection,
   });
+  const selected = new Set([...packageSelected, ...ALWAYS_RUN_JEST_INTEGRATION_CONFIGS]);
+  return jestIntegrationConfigs.filter((config) => selected.has(config));
 }
 
 function filterByAffected(args: {

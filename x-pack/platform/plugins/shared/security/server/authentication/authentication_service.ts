@@ -10,6 +10,7 @@ import type {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
+  IAuthHeadersStorage,
   IClusterClient,
   KibanaRequest,
   Logger,
@@ -28,6 +29,7 @@ import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
+import { isTokenExpiredError } from './is_token_expired_error';
 import { renderUnauthenticatedPage } from './unauthenticated_page';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
@@ -87,6 +89,7 @@ export class AuthenticationService {
   private license!: SecurityLicense;
   private authenticator?: Authenticator;
   private session?: PublicMethodsOf<Session>;
+  private authHeadersStorage?: IAuthHeadersStorage;
 
   constructor(private readonly logger: Logger) {}
 
@@ -110,7 +113,7 @@ export class AuthenticationService {
       (config.authc.sortedProviders.length > 0 &&
         shouldProviderUseLoginForm(config.authc.sortedProviders[0].type));
 
-    http.registerAuth(async (request, response, t) => {
+    this.authHeadersStorage = http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
         this.logger.error(
           `License information could not be obtained from Elasticsearch due to an error: ${
@@ -256,75 +259,38 @@ export class AuthenticationService {
       });
     });
 
-    elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
-      if (!this.authenticator) {
-        this.logger.error('Authentication sub-system is not fully initialized yet.');
-        return toolkit.notHandled();
-      }
-
-      if (!license.isLicenseAvailable() || !license.isEnabled()) {
-        this.logger.error(
-          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}, unavailable reason: ${license.getUnavailableReason()}).`
-        );
-        return toolkit.notHandled();
-      }
-
-      // In theory, this should never happen since Core calls this handler only for `401` ("unauthorized") errors.
-      if (getErrorStatusCode(error) !== 401) {
-        this.logger.error(
-          `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
-            error
-          )}.`
-        );
-        return toolkit.notHandled();
-      }
-
-      this.logger.debug(
-        `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
-      );
-
-      let authenticationResult;
-      const originalHeaders = request.headers;
-      try {
-        // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
-        // headers returned during authentication stage. We should remove these headers before re-authentication to not
-        // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
-        (request.headers as Record<string, unknown>) = Object.fromEntries(
-          Object.entries(originalHeaders).filter(
-            ([headerName]) => headerName.toLowerCase() !== 'authorization'
-          )
-        );
-        authenticationResult = await this.authenticator.reauthenticate(request);
-      } catch (err) {
-        this.logger.error(
-          `Re-authentication failed due to unexpected error: ${getDetailedErrorMessage(err)}.`
-        );
-        throw err;
-      } finally {
-        (request.headers as Record<string, unknown>) = originalHeaders;
-      }
-
-      if (authenticationResult.succeeded()) {
-        if (authenticationResult.authHeaders) {
-          this.logger.debug('Re-authentication succeeded');
-          return toolkit.retry({ authHeaders: authenticationResult.authHeaders });
+    elasticsearch.setUnauthorizedErrorHandler(
+      async ({ error, request, authHeaders: failedAuthHeaders }, toolkit) => {
+        if (!this.authenticator) {
+          this.logger.error('Authentication sub-system is not fully initialized yet.');
+          return toolkit.notHandled();
         }
 
-        this.logger.error(
-          'Re-authentication succeeded, but authentication headers are not available.'
-        );
-      } else if (authenticationResult.failed()) {
-        this.logger.error(
-          `Re-authentication failed due to: ${getDetailedErrorMessage(authenticationResult.error)}`
-        );
-      } else if (authenticationResult.redirected()) {
-        this.logger.error('Re-authentication failed since redirect is required.');
-      } else {
-        this.logger.debug('Re-authentication cannot be handled.');
-      }
+        if (!license.isLicenseAvailable() || !license.isEnabled()) {
+          this.logger.error(
+            `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}, unavailable reason: ${license.getUnavailableReason()}).`
+          );
+          return toolkit.notHandled();
+        }
 
-      return toolkit.notHandled();
-    });
+        if (!isTokenExpiredError(error)) {
+          this.logger.error(
+            `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
+              error
+            )}.`
+          );
+          return toolkit.notHandled();
+        }
+
+        this.logger.debug(
+          `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
+        );
+        const credentials = await this.authenticator.reauthenticate(request, failedAuthHeaders);
+        return credentials
+          ? toolkit.retry({ authHeaders: credentials.authHeaders })
+          : toolkit.notHandled();
+      }
+    );
   }
 
   start({
@@ -341,13 +307,11 @@ export class AuthenticationService {
     isElasticCloudDeployment,
     customLogoutURL,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
-    const apiKeys = new APIKeys({
-      clusterClient,
-      logger: this.logger.get('api-key'),
-      license: this.license,
-      applicationName,
-      kibanaFeatures,
-    });
+    const { authHeadersStorage } = this;
+    if (!authHeadersStorage) {
+      throw new Error('Authentication service must be set up before it is started.');
+    }
+
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).
@@ -373,6 +337,7 @@ export class AuthenticationService {
         accessAgreement: config.accessAgreement,
       },
       getCurrentUser,
+      authHeadersStorage,
       featureUsageService,
       userProfileService,
       getServerBaseURL,
@@ -381,6 +346,15 @@ export class AuthenticationService {
       isElasticCloudDeployment,
       customLogoutURL,
     }));
+
+    const apiKeys = new APIKeys({
+      clusterClient,
+      logger: this.logger.get('api-key'),
+      license: this.license,
+      applicationName,
+      kibanaFeatures,
+      authenticator,
+    });
 
     return {
       apiKeys: {

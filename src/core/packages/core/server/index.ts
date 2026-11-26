@@ -230,6 +230,7 @@ export type {
   IsAuthenticated,
   AuthStatus,
   GetAuthHeaders,
+  IAuthHeadersStorage,
   IContextContainer,
   HttpAuth,
   HttpServerInfo,

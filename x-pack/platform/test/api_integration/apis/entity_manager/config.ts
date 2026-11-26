@@ -22,7 +22,10 @@ export default async function createTestConfig({
 }: FtrConfigProviderContext): Promise<EntityManagerConfig> {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
   const services = baseIntegrationTestsConfig.get('services');
-  const entityManagerFixturePlugin = resolve(__dirname, './fixture_plugin');
+  const entityManagerFixturePlugin = resolve(
+    __dirname,
+    '../../../../test_plugins/entity_manager/fixture_plugin'
+  );
 
   return {
     ...baseIntegrationTestsConfig.getAll(),

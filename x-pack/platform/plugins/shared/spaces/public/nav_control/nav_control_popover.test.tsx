@@ -141,6 +141,27 @@ describe('NavControlPopover', () => {
     });
   });
 
+  it('reports the tour state only after the tour decision resolves', async () => {
+    const showTour$ = new Rx.Subject<boolean>();
+    const wrapper = await setup(mockSpaces, false, mockSpaces[0], { showTour$ });
+    const getTourState = () =>
+      findTestSubject(wrapper, 'spacesNavSelector').getDOMNode().getAttribute('data-tour-state');
+
+    expect(getTourState()).toBeNull();
+
+    act(() => {
+      showTour$.next(false);
+    });
+    wrapper.update();
+    expect(getTourState()).toBe('closed');
+
+    act(() => {
+      showTour$.next(true);
+    });
+    wrapper.update();
+    expect(getTourState()).toBe('open');
+  });
+
   it('clicking the button renders an EuiSelectable menu with the provided spaces', async () => {
     const wrapper = await setup(mockSpaces);
 

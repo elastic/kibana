@@ -18,11 +18,7 @@ import {
   RemoteElasticSearchSchema,
 } from './output';
 
-import {
-  AgentPolicyBaseSchema,
-  AgentPolicyNamespaceSchema,
-  AgentPolicyOverridesRequestSchema,
-} from './agent_policy';
+import { AgentPolicyBaseSchema, AgentPolicyNamespaceSchema } from './agent_policy';
 import {
   PackagePolicyNamespaceSchema,
   SimplifiedPackagePolicyPreconfiguredSchema,
@@ -136,10 +132,11 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
+  // `overrides` keeps the permissive base validation on purpose: this schema validates kibana.yml at
+  // startup, so rejecting the OpenTelemetry collector keys here would stop Kibana from starting
+  // after an upgrade. Those keys are stripped, with a warning, when the full agent policy is built.
   schema.object({
     ...AgentPolicyBaseSchema,
-    // kibana.yml is input like a request: deny the same override keys as the REST API.
-    overrides: AgentPolicyOverridesRequestSchema,
     space_id: schema.maybe(schema.string()),
     namespace: schema.maybe(AgentPolicyNamespaceSchema),
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),

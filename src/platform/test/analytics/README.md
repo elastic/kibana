@@ -18,7 +18,7 @@ const events = await getService('kibana_ebt_ui').getEvents(2, { eventTypes: ['my
 expect(events).to...
 ```
 
-Refer to [`EBTHelpersContract`](./plugins/analytics_ftr_helpers/common/types.ts#:~:text=EBTHelpersContract) for more details about the existing APIs and all the options they accept.
+Refer to [`EBTHelpersContract`](../../test_plugins/analytics/analytics_ftr_helpers/common/types.ts#:~:text=EBTHelpersContract) for more details about the existing APIs and all the options they accept.
 
 ## Usage outside of this test suite
 

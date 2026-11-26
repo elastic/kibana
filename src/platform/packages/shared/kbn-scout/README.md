@@ -367,9 +367,10 @@ The format is `@limit/<selection-method>-<target-attr>`:
 | `only`           | Run the test only if the attribute is present  |
 | `except`         | Run the test only if the attribute is _absent_ |
 
-| Target attribute | Description                             |
-| ---------------- | --------------------------------------- |
-| `fips`           | Kibana is running with FIPS-mode enabled |
+| Target attribute   | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| `fips`             | Kibana is running with FIPS-mode enabled                |
+| `upgradeAssistant` | A stack upgrade environment for Upgrade Assistant tests |
 
 A test without any limit tag is attribute-agnostic and runs in both cases.
 
@@ -424,6 +425,8 @@ export SCOUT_TARGET_ATTRIBUTES=fips
 `--targetAttribute` is repeatable and accepts comma-separated values; it falls back to `SCOUT_TARGET_ATTRIBUTES` when omitted. With no attributes declared, `@limit/only-*` tests are excluded and `@limit/except-*` tests run.
 
 On CI, `.buildkite/scripts/common/env.sh` exports `SCOUT_TARGET_ATTRIBUTES=fips` whenever FIPS mode is enabled for the build (`TEST_ENABLE_FIPS_VERSION` or a `ci:enable-fips-140-*-agent` PR label), and the Scout test-run builder passes `--targetAttribute fips` to the distribution commands.
+
+No CI pipeline declares `upgradeAssistant` yet, so `tags.limit.only.upgradeAssistant` suites don't run on CI. Use it instead of `.skip` for Upgrade Assistant suites that wait on that environment.
 
 Limits are applied the same way test targets are: as a Playwright `--grep-invert` next to the `--grep` that selects the target. `scout run-tests` builds it from the declared attributes; CI lanes, which call the Playwright binary directly, receive the one `create-test-tracks` built for their track. A plain `playwright test` applies neither, so it runs every test regardless of target or limit — which is also what lets committed test config manifests (`**/test/scout/.meta/*.json`) record every test with its raw tags.
 
