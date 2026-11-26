@@ -51,7 +51,7 @@ describe('riskEngineCleanupRoute', () => {
     context = requestContextMock.convertContext(tools.context);
     clients.riskScoreDataClient.tearDown.mockResolvedValue([]);
     (deleteSavedObjects as jest.Mock).mockResolvedValue(undefined);
-    clients.core.elasticsearch.client.asCurrentUser.indices.exists.mockResolvedValue(true);
+    clients.core.elasticsearch.client.asInternalUser.indices.exists.mockResolvedValue(true);
     clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
       privilegeCheck(true)
     );
@@ -122,6 +122,10 @@ describe('riskEngineCleanupRoute', () => {
       { index: '.entity_analytics.risk_score.lookup-default' },
       { ignore: [404] }
     );
+    expect(clients.core.elasticsearch.client.asInternalUser.indices.exists).toHaveBeenCalledWith({
+      index: getEntitiesAlias(ENTITY_LATEST, 'default'),
+    });
+    expect(clients.core.elasticsearch.client.asCurrentUser.indices.exists).not.toHaveBeenCalled();
     expect(clients.core.elasticsearch.client.asInternalUser.indices.delete).not.toHaveBeenCalled();
     expect(clients.core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
     expect(
@@ -197,7 +201,7 @@ describe('riskEngineCleanupRoute', () => {
   });
 
   it('cleans up risk resources when the entity index does not exist', async () => {
-    clients.core.elasticsearch.client.asCurrentUser.indices.exists.mockResolvedValue(false);
+    clients.core.elasticsearch.client.asInternalUser.indices.exists.mockResolvedValue(false);
 
     const response = await server.inject(buildRequest(), context);
 

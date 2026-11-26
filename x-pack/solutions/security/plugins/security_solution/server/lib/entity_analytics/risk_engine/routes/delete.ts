@@ -117,21 +117,12 @@ export const riskEngineCleanupRoute = (
             const alias = `risk-score.risk-score-${namespace}`;
             const entityIndex = getEntitiesAlias(ENTITY_LATEST, namespace);
             const taskId = `${RISK_SCORE_MAINTAINER_ID}:${namespace}`;
-            const entityIndexExists = await currentUserEsClient.indices
-              .exists({ index: entityIndex })
-              .catch((error: unknown) => {
-                const statusCode = (error as { meta?: { statusCode?: number } }).meta?.statusCode;
-                if (statusCode === 403) {
-                  return 'forbidden' as const;
-                }
-                throw error;
-              });
-            if (entityIndexExists === 'forbidden') {
-              return siemResponse.error({
-                statusCode: 403,
-                body: missingEntityIndexPrivilegesError(entityIndex),
-              });
-            }
+            // The caller may have read and write without view_index_metadata. Checking
+            // existence as that user can 403 before Elasticsearch reports a missing index,
+            // which blocks cleanup after Entity Store is uninstalled. This is one alias.
+            const entityIndexExists = await core.elasticsearch.client.asInternalUser.indices.exists(
+              { index: entityIndex }
+            );
             // update_by_query needs read and write. Skip the check when the entity index is gone,
             // so uninstalling Entity Store does not block cleanup of the remaining risk resources.
             if (entityIndexExists) {
