@@ -7,11 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '@elastic/esql';
+import type { ESQLCommandSummaryContext } from '../types';
 import { summary } from './summary';
 
+const getSubquerySummary = jest.fn<
+  ReturnType<ESQLCommandSummaryContext['getSubquerySummary']>,
+  Parameters<ESQLCommandSummaryContext['getSubquerySummary']>
+>();
+const context: ESQLCommandSummaryContext = {
+  namedSubqueries: [],
+  getSubquerySummary,
+};
+
 describe('FROM > summary', () => {
+  beforeEach(() => {
+    getSubquerySummary.mockReset();
+  });
+
   it('returns an empty list if METADATA is not present', () => {
-    const result = summary(synth.cmd`FROM index`, '');
+    const result = summary(synth.cmd`FROM index`, '', context);
     expect(result).toEqual({
       newColumns: new Set([]),
       metadataColumns: new Set([]),
@@ -20,7 +34,7 @@ describe('FROM > summary', () => {
   });
 
   it('returns the metadata columns if METADATA is present', () => {
-    const result = summary(synth.cmd`FROM index METADATA _index, _id`, '');
+    const result = summary(synth.cmd`FROM index METADATA _index, _id`, '', context);
     expect(result).toEqual({
       newColumns: new Set([]),
       metadataColumns: new Set(['_index', '_id']),
@@ -29,7 +43,12 @@ describe('FROM > summary', () => {
   });
 
   it('collects columns from simple subquery', () => {
-    const result = summary(synth.cmd`FROM index1, (FROM index2 | EVAL computed = price * 2)`, '');
+    getSubquerySummary.mockReturnValue({ newColumns: new Set(['computed']) });
+    const result = summary(
+      synth.cmd`FROM index1, (FROM index2 | EVAL computed = price * 2)`,
+      '',
+      context
+    );
     expect(result).toEqual({
       newColumns: new Set(['computed']),
       metadataColumns: new Set([]),
@@ -38,9 +57,13 @@ describe('FROM > summary', () => {
   });
 
   it('collects columns from multiple subqueries', () => {
+    getSubquerySummary
+      .mockReturnValueOnce({ newColumns: new Set(['a']) })
+      .mockReturnValueOnce({ newColumns: new Set(['b']) });
     const result = summary(
       synth.cmd`FROM index1, (FROM index2 | EVAL a = 1), (FROM index3 | EVAL b = 2)`,
-      ''
+      '',
+      context
     );
     expect(result).toEqual({
       newColumns: new Set(['a', 'b']),

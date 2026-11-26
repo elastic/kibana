@@ -11,6 +11,7 @@ import type { FeatureUpsert, StreamQuery } from '@kbn/significant-events-schema'
 import type { knowledgeIndicatorsMappings } from '../data_stream';
 import type { StoredKnowledgeIndicator } from '../data_stream';
 import type { KnowledgeIndicatorType } from '../fields';
+import type { SearchEmbeddingModelResolver } from './search_embedding_model';
 
 export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
 
@@ -34,12 +35,17 @@ interface KIBulkExcludeOperation {
 interface KIBulkRestoreOperation {
   restore: { id: string };
 }
+/** Re-indexes a feature with no `expires_at` (durable) or a fresh TTL (expiring). */
+interface KIBulkDurabilityOperation {
+  durability: { id: string; durable: boolean };
+}
 export type KIBulkOperation =
   | KIBulkIndexFeatureOperation
   | KIBulkIndexQueryOperation
   | KIBulkDeleteOperation
   | KIBulkExcludeOperation
-  | KIBulkRestoreOperation;
+  | KIBulkRestoreOperation
+  | KIBulkDurabilityOperation;
 
 export interface KnowledgeIndicatorClientDeps {
   dataStreamClient: KnowledgeIndicatorDataStreamClient;
@@ -48,6 +54,14 @@ export interface KnowledgeIndicatorClientDeps {
   logger: Logger;
   /** Kibana space every read is filtered by and every write is stamped with. */
   space: string;
+  /**
+   * Called after a write to a source's knowledge indicators commits. Must not throw or block: the
+   * write already happened. A bulk write that fails part-way is not reported, though some of its
+   * revisions may have committed; readers that must converge re-read on a schedule as well.
+   */
+  onWrite?: (sourceId: string) => void;
+  /** Test seam for the `search_embedding` model lookup. */
+  searchEmbeddingModelResolver?: SearchEmbeddingModelResolver;
   /**
    * Serializes final source writes with query invalidation. `allowDisabled` marks writes that only
    * remove knowledge, which a disabled source still accepts. `waitForLease: false` fails at once

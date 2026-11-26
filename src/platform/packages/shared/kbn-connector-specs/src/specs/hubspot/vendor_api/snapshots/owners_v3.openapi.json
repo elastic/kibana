@@ -1,0 +1,306 @@
+{
+  "components": {
+    "responses": {
+      "Error": {
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "CollectionResponsePublicOwnerForwardPaging": {
+        "properties": {
+          "paging": {
+            "$ref": "#/components/schemas/ForwardPaging"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/PublicOwner"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "correlationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "type": "array"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          },
+          "subCategory": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "correlationId",
+          "message"
+        ],
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "in": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "subCategory": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "ForwardPaging": {
+        "properties": {
+          "next": {
+            "$ref": "#/components/schemas/NextPage"
+          }
+        },
+        "type": "object"
+      },
+      "NextPage": {
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "after"
+        ],
+        "type": "object"
+      },
+      "PublicOwner": {
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/PublicTeam"
+            },
+            "type": "array"
+          },
+          "type": {
+            "enum": [
+              "PERSON",
+              "QUEUE"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "userId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "userIdIncludingInactive": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "archived",
+          "createdAt",
+          "id",
+          "type",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "PublicTeam": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "primary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "primary"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://app.hubspot.com/oauth/authorize",
+            "scopes": {
+              "automation": "",
+              "crm.objects.owners.read": ""
+            },
+            "tokenUrl": "https://api.hubapi.com/oauth/v1/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Crm Owners"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/crm/v3/owners": {
+      "get": {
+        "operationId": "get-/crm/v3/owners_/crm/v3/owners",
+        "parameters": [
+          {
+            "explode": true,
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "archived",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "email",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "type": "integer"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponsePublicOwnerForwardPaging"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "automation"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.owners.read"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.hubapi.com"
+    }
+  ]
+}

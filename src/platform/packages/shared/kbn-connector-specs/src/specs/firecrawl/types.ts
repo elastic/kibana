@@ -15,6 +15,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 const URL_MAX_LENGTH = 2048;
 const QUERY_MAX_LENGTH = 2000;
+const SEARCH_QUERY_MAX_LENGTH = 500;
 const UUID_LENGTH = 36;
 
 const MAX_MARKDOWN_LENGTH_DESCRIBE =
@@ -38,10 +39,11 @@ export const ScrapeInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(0)
+      .max(60_000)
       .optional()
       .default(0)
       .describe(
-        'Milliseconds to wait before scraping, to allow JavaScript-rendered content to load. e.g. 2000 to wait 2 seconds. Default 0.'
+        'Milliseconds to wait before scraping, to allow JavaScript-rendered content to load. e.g. 2000 to wait 2 seconds. Default 0; max 60000.'
       ),
     maxMarkdownLength: z
       .number()
@@ -60,7 +62,7 @@ export const SearchInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
-      .max(QUERY_MAX_LENGTH)
+      .max(SEARCH_QUERY_MAX_LENGTH)
       .describe('Search query string. e.g. "elasticsearch query DSL tutorial"'),
     limit: z
       .number()

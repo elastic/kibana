@@ -17,6 +17,7 @@
  * - Raw JSON `__proto__` on PUT is sent as a string body only (avoid client-side prototype hazards).
  * - `originalSource.sourceValue` accepts arbitrary non-empty strings (including “odd” extensions /
  *   path-like names); uploads are not gated on file extension.
+ * - POST .../upload rejects sample content that is clearly not logs (binary data, shebang scripts).
  *
  * Payload size / abuse guards (see OpenAPI + Zod in `common/model/`): e.g. upload `samples` max
  * 1000 lines; create `dataStreams` max 50; approve `categories` required, min 1 / max 50;
@@ -267,6 +268,34 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(response).toHaveStatusCode(200);
+        }
+      }
+    );
+
+    apiTest(
+      'POST .../upload: rejects samples that are clearly not logs (binary content, shebang script)',
+      async ({ apiClient }) => {
+        const cases = [
+          {
+            samples: ['\u0000\u0000JFIF\u0000\u0000\u0000\u0001'],
+            message: /binary data/i,
+          },
+          {
+            samples: ['#!/usr/bin/env python', 'import os'],
+            message: /script/i,
+          },
+        ];
+        for (const { samples, message } of cases) {
+          const response = await apiClient.post(`${dsBasePath}/${VALIDATION_DS_ID}/upload`, {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            body: {
+              samples,
+              originalSource: { sourceType: 'file', sourceValue: 'not-logs.log' },
+            },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(400);
+          expect(scoutApiErrorText(response.body)).toMatch(message);
         }
       }
     );

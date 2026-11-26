@@ -31,6 +31,7 @@ import type {
   ConversationEventTypesService,
   ConversationStateManager,
   PluginsService,
+  ConnectorSkillsService,
   PromptManager,
   SkillsService,
   ToolManager,
@@ -38,7 +39,6 @@ import type {
   ToolStateManager,
   WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
-import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -80,6 +80,7 @@ export type ToolStateManagerMock = jest.Mocked<ToolStateManager>;
 export type SkillServiceStartMock = jest.Mocked<SkillServiceStart>;
 export type PluginsServiceStartMock = jest.Mocked<PluginsServiceStart>;
 export type PluginsServiceMock = jest.Mocked<PluginsService>;
+export type ConnectorSkillsServiceMock = jest.Mocked<ConnectorSkillsService>;
 
 export const createToolProviderMock = (): ToolProviderMock => {
   return {
@@ -239,6 +240,12 @@ export const createPluginsServiceMock = (): PluginsServiceMock => {
   };
 };
 
+export const createConnectorSkillsServiceMock = (): ConnectorSkillsServiceMock => {
+  return {
+    resolveSkillIds: jest.fn().mockResolvedValue([]),
+  };
+};
+
 export const createSkillRegistryMock = (): SkillRegistryMock => {
   return {
     has: jest.fn().mockResolvedValue(false),
@@ -252,7 +259,7 @@ export const createSkillRegistryMock = (): SkillRegistryMock => {
 };
 
 export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock => {
-  return {
+  const mock: AttachmentStateManagerMock = {
     get: jest.fn(),
     getAttachmentRecord: jest.fn(),
     getActive: jest.fn(),
@@ -265,9 +272,8 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     restore: jest.fn(),
     permanentDelete: jest.fn(),
     rename: jest.fn(),
-    getAccessedRefs: jest.fn(),
-    clearAccessTracking: jest.fn(),
     drainChanges: jest.fn().mockReturnValue([]),
+    forToolCall: jest.fn(),
     clearChanges: jest.fn(),
     resolveRefs: jest.fn(),
     evaluateStalenessForActiveAttachments: jest.fn(),
@@ -275,6 +281,8 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     hasChanges: jest.fn(),
     markClean: jest.fn(),
   };
+  mock.forToolCall.mockReturnValue(mock);
+  return mock;
 };
 
 export const createToolPromptManagerMock = (): ToolPromptManagerMock => {
@@ -327,6 +335,7 @@ export interface AgentHandlerContextMock extends AgentHandlerContext {
   attachments: AttachmentsServiceMock;
   skills: SkillsServiceMock;
   plugins: PluginsServiceMock;
+  connectorSkills: ConnectorSkillsServiceMock;
   toolManager: ToolManagerMock;
   conversationEvents: jest.Mocked<ConversationEventTypesService>;
 }
@@ -355,7 +364,6 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
-    todoStateManager: createTodoStateManager(),
     events: {
       emit: jest.fn(),
     },
@@ -370,6 +378,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     bashService: undefined,
     skills: createSkillsServiceMock(),
     plugins: createPluginsServiceMock(),
+    connectorSkills: createConnectorSkillsServiceMock(),
     conversationTemplates: createInMemoryConversationTemplates(),
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
@@ -377,7 +386,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       aiIndices: false,
       sml: false,
       relevantSkills: false,
-      todos: false,
+      backgroundWake: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
@@ -394,10 +403,14 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       list: jest.fn().mockResolvedValue([]),
       create: jest.fn(),
       update: jest.fn(),
+      setServiceAccount: jest.fn(),
       delete: jest.fn().mockResolvedValue(false),
     },
     conversationClient: {
       exists: jest.fn().mockResolvedValue(false),
+      getWithVersion: jest.fn(),
+      peekVersion: jest.fn(),
+      getUser: jest.fn().mockReturnValue({ id: 'user-1', username: 'alice' }),
       patchMetadata: jest.fn().mockResolvedValue({ changedFields: [] }),
     },
     executionMode: AgentExecutionMode.conversation,
@@ -453,7 +466,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       aiIndices: false,
       sml: false,
       relevantSkills: false,
-      todos: false,
+      backgroundWake: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
@@ -500,7 +513,6 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
-    todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     conversationEventsService: createConversationEventTypesServiceMock(),
@@ -516,7 +528,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       aiIndices: false,
       sml: false,
       relevantSkills: false,
-      todos: false,
+      backgroundWake: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,

@@ -152,7 +152,7 @@ export const SessionPreview = ({ disableNavigation, hit }: SessionPreviewProps) 
     >
       <ValueContainer>
         <EuiIcon type="user" aria-hidden={true} />
-        &nbsp;
+        {'\u00a0'}
         <span css={emphasisStyles}>{userName}</span>
       </ValueContainer>
       {processNameFragment}

@@ -15,23 +15,21 @@ import {
   getTableByIdSelector,
 } from '@kbn/securitysolution-data-table';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux-v7';
 import { connect, useDispatch, useSelector } from 'react-redux-v7';
-import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type {
   ColumnHeaderOptions,
   DeprecatedCellValueElementProps,
   DeprecatedRowRenderer,
   Direction,
-  EntityType,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-common';
+import { EntityType } from '@kbn/securitysolution-timeline-search-strategy';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import type { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';
@@ -112,7 +110,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
 }) => {
   const tableId = (dataTableId ?? eventTableId) as TableId;
   const dispatch = useDispatch();
-  const theme: EuiTheme = useContext(ThemeContext);
+  const { euiTheme } = useEuiTheme();
   const tableContext = useMemo(() => ({ tableId }), [tableId]);
   const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
   const selectGlobalQuerySelector = useMemo(() => globalQuerySelector(), []);
@@ -171,10 +169,9 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     );
     return () => {
       dispatch(inputsActions.deleteOneQuery({ id: tableId, inputId: InputsModelId.global }));
-      if (editorActionsRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        editorActionsRef.current.closeEditor();
-      }
+      // The editor may have been opened after mount, so the latest ref value is read on unmount
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      editorActionsRef.current?.closeEditor();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -421,7 +418,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         sort,
         browserFields,
         onSelectPage,
-        theme,
+        theme: euiTheme,
         setEventsLoading,
         setEventsDeleted,
         pageSize: itemsPerPage,
@@ -442,11 +439,39 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     sort,
     browserFields,
     onSelectPage,
-    theme,
+    euiTheme,
     setEventsLoading,
     setEventsDeleted,
     itemsPerPage,
   ]);
+
+  // Sessions collapse hits by entry leader on the server, which the selection search doesn't, so
+  // only an events table can describe its select-all as a query.
+  const runWorkflowSelectionScope = useMemo(
+    () =>
+      entityType === EntityType.EVENTS
+        ? {
+            dataViewId,
+            indexNames: indexNames ?? selectedPatterns,
+            filterQuery,
+            from: start,
+            to: end,
+            runtimeMappings,
+            queryId: `${tableId}-run-workflow-selection`,
+          }
+        : undefined,
+    [
+      entityType,
+      dataViewId,
+      indexNames,
+      selectedPatterns,
+      filterQuery,
+      start,
+      end,
+      runtimeMappings,
+      tableId,
+    ]
+  );
 
   const alertBulkActions = useAlertBulkActions({
     tableId,
@@ -458,6 +483,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     filterQuery,
     bulkActions,
     selectedCount,
+    selectionScope: runWorkflowSelectionScope,
   });
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
@@ -501,9 +527,9 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
               <div
                 css={css`
                   position: absolute;
-                  top: ${theme.eui.euiSizeXS};
-                  z-index: ${theme.eui.euiZLevel1 - 3};
-                  right: ${nonDeletedEvents.length > 0 ? '72px' : theme.eui.euiSizeXS};
+                  top: ${euiTheme.size.xs};
+                  z-index: ${euiTheme.levels.header};
+                  right: ${nonDeletedEvents.length > 0 ? '72px' : euiTheme.size.xs};
                 `}
               >
                 <EuiFlexGroup data-test-subj="events-viewer-updated" gutterSize="m">

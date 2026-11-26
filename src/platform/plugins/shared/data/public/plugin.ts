@@ -26,6 +26,7 @@ import type {
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import { DateRangePickerPresetsService } from './date_range_picker_presets';
+import { ReplayCache } from './replay_cache';
 import {
   setHttp,
   setIndexPatterns,
@@ -34,6 +35,7 @@ import {
   setUiSettings,
   setTheme,
 } from './services';
+import { getEsqlQueryProfileViewDescription } from './utils/esql_query_profile';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import type { NowProviderInternalContract } from './now_provider';
 import { NowProvider } from './now_provider';
@@ -95,6 +97,10 @@ export class DataPublicPlugin
         fieldFormats: startServices().self.fieldFormats,
         isFilterable: startServices().self.datatableUtilities.isFilterable,
       }))
+    );
+
+    inspector.registerView(
+      getEsqlQueryProfileViewDescription(() => ({ search: startServices().self.search }))
     );
 
     fieldFormats.register(
@@ -159,6 +165,12 @@ export class DataPublicPlugin
     });
     setSearchService(search);
 
+    const replayCache = new ReplayCache({
+      hasSession: (sessionId) => search.session.hasSession(sessionId),
+      hasResponseCacheForSession: (sessionId) => search.hasResponseCacheForSession(sessionId),
+      evictResponseCacheForSession: (sessionId) => search.evictResponseCacheForSession(sessionId),
+    });
+
     uiActions.addTriggerActionAsync(ON_SELECT_RANGE, 'ACTION_SELECT_RANGE', async () => {
       const { createSelectRangeActionDefinition } = await import('./actions');
       const rangeSelectAction = createSelectRangeActionDefinition(() => ({
@@ -208,6 +220,7 @@ export class DataPublicPlugin
       dataViews,
       query,
       search,
+      replayCache,
       dateRangePickerPresets,
       nowProvider: this.nowProvider,
     };

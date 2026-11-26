@@ -40,6 +40,20 @@ describe('withAlertZeroEnabled', () => {
     expect(response.notFound).toHaveBeenCalled();
   });
 
+  it('responds 404 without calling the handler in an unsupported space', async () => {
+    const handler = jest.fn();
+    const response = httpServerMock.createResponseFactory();
+
+    await withAlertZeroEnabled(handler)(
+      createRouteContextMock({ settingEnabled: true, isSpaceSupported: false }),
+      httpServerMock.createKibanaRequest(),
+      response
+    );
+
+    expect(handler).not.toHaveBeenCalled();
+    expect(response.notFound).toHaveBeenCalled();
+  });
+
   it('reads the per-space AlertZero setting', async () => {
     const context = createRouteContextMock({ settingEnabled: true });
 

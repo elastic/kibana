@@ -88,6 +88,21 @@ describe('createDashboardAppStateValidator', () => {
       expect(validatePanel({ content: 1 }, 'image')).toEqual([]);
     });
 
+    it.each([LENS_EMBEDDABLE_TYPE, 'markdown', 'custom_content'])(
+      'does not validate %s panels while their type registers no schema',
+      (type) => {
+        mockGetTransforms.mockReturnValue({});
+
+        expect(validatePanel({ content: 1 }, type)).toEqual([]);
+      }
+    );
+
+    it('reports an ML panel without a schema as unavailable in this deployment', () => {
+      expect(validatePanel({ job_ids: ['job-1'] }, 'ml_anomaly_charts')).toEqual([
+        'type: panel type "ml_anomaly_charts" is not available in this deployment, so it cannot be added or edited. Do not retry it; tell the user it is unavailable.',
+      ]);
+    });
+
     it('does not validate vega panels', () => {
       expect(validatePanel({ spec: '{}' }, 'vega')).toEqual([]);
     });

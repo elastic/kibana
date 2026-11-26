@@ -803,6 +803,198 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
+      // A credential an output keeps as a secret must survive an update that does not touch it,
+      // and a plain text value sent for it must be stored as a secret too. Getting either wrong
+      // leaves the output pointing at a secret that no longer exists, and every agent using it
+      // fails with `key file not configured accessing 'logstash.ssl'`.
+      describe('updating an output that keeps a credential as a secret', () => {
+        const expectSecretDeleted = async (id: string) => {
+          // the error is read outside of any `try`, so that a secret that still exists fails the
+          // test, and an error other than a not found does too
+          const error = await getSecretById(id).then(
+            () => undefined,
+            (e) => e
+          );
+          expect(error?.meta?.statusCode).to.be(404);
+        };
+
+        const createLogstashOutputWithSecretKey = async () => {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Logstash Output ${uuidV4()}`,
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: { ssl: { key: 'KEY' } },
+            })
+            .expect(200);
+
+          return { id: res.body.item.id, secretId: res.body.item.secrets.ssl.key.id };
+        };
+
+        it('keeps the ssl key when only the name is updated', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Logstash Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          // the secret is still stored, so the reference the output keeps resolves
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('KEY');
+
+          const { body } = await supertest.get(`/api/fleet/outputs/${id}`).expect(200);
+          expect(body.item.secrets.ssl.key.id).to.equal(secretId);
+          expect(body.item.ssl.certificate).to.equal('CERTIFICATE');
+        });
+
+        it('stores a plain text ssl key as a secret and removes the previous one', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: {
+                certificate: 'NEW_CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+                key: 'PLAIN_KEY',
+              },
+            })
+            .expect(200);
+
+          const newSecretId = updateRes.body.item.secrets.ssl.key.id;
+          expect(newSecretId).not.to.equal(secretId);
+          // the plain text value is not stored next to the secret
+          expect(updateRes.body.item.ssl.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('NEW_CERTIFICATE');
+
+          const secret = await getSecretById(newSecretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('PLAIN_KEY');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the ssl key when ssl is explicitly cleared', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ ssl: null })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes only the ssl key when it is cleared with an explicit null', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: { certificate: 'CERTIFICATE', certificate_authorities: ['CA1', 'CA2'] },
+              secrets: { ssl: { key: null } },
+            })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('CERTIFICATE');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the password of a kafka output when the authentication type changes', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            // the Kafka update payload requires a name
+            .send({ name: `Kafka Output renamed ${uuidV4()}`, auth_type: 'none' })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.password).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
+        it('keeps the password of a kafka output when only the name is updated', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Kafka Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('pass');
+        });
+
+        it('keeps the service token of a remote elasticsearch output when only the name is updated', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Remote Elasticsearch Output ${uuidV4()}`,
+              type: 'remote_elasticsearch',
+              hosts: ['https://remote-es:9200'],
+              secrets: { service_token: 'token' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.service_token.id;
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Remote Elasticsearch Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('token');
+        });
+      });
+
       it('should allow to update kibana_api_key on an existing remote_elasticsearch output', async function () {
         const res = await supertest
           .post(`/api/fleet/outputs`)
@@ -2840,6 +3032,7 @@ export default function (providerContext: FtrProviderContext) {
         auth_type: 'keytab',
         config_path: '/etc/krb5.conf',
         keytab: '/etc/kafka.keytab',
+        username: 'kafka',
         realm: 'EXAMPLE.COM',
       };
       const passwordKerberos = {
@@ -2931,6 +3124,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.item.auth_type).to.eql('kerberos');
         expect(body.item.kerberos).to.eql(keytabKerberos);
+        expect(body.item.kerberos.username).to.eql('kafka');
         expect(body.item.username).to.be(undefined);
         expect(body.item.sasl).to.be(undefined);
         expect(body.item.secrets).to.be(undefined);
@@ -2974,8 +3168,24 @@ export default function (providerContext: FtrProviderContext) {
         expect(fullPolicy.secret_references).to.eql([{ id: secretId }]);
       });
 
+      it('should give the agent the username (the principal) with the keytab authentication', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        const fullPolicy = await getFullAgentPolicy(body.item.id);
+
+        expect(fullPolicy.outputs[body.item.id].kerberos).to.eql({
+          enabled: true,
+          ...keytabKerberos,
+        });
+      });
+
       it('should not accept an output without its required settings', async () => {
         await createOutput(kerberosOutput({ kerberos: undefined }), 400);
+        // the keytab authentication needs the username too: it is the principal in the keytab
+        await createOutput(
+          kerberosOutput({ kerberos: { ...keytabKerberos, username: undefined } }),
+          400
+        );
         await createOutput(kerberosOutput({ kerberos: { ...keytabKerberos, realm: '' } }), 400);
         await createOutput(
           kerberosOutput({ kerberos: { ...keytabKerberos, keytab: undefined } }),
@@ -2990,6 +3200,34 @@ export default function (providerContext: FtrProviderContext) {
           }),
           400
         );
+      });
+
+      it('should not accept an update that replaces the keytab settings without a username', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        // leaving the whole Kerberos block out is allowed, but replacing it with incomplete settings is not
+        const rejected = await updateOutput(
+          body.item.id,
+          {
+            // name is required by the update schema; without it the request would fail for that reason
+            name: body.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'kerberos',
+            kerberos: { ...keytabKerberos, keytab: '/etc/other.keytab', username: undefined },
+          },
+          400
+        );
+        // it fails because of the username, not because of another missing field
+        // the schema names the field with the index of the union member, e.g. `kerberos.1.username`
+        expect(rejected.message).to.match(/kerberos(\.\d+)?\.username/);
+
+        // the previous settings, and the principal, are still stored
+        const { body: stored } = await supertest
+          .get(`/api/fleet/outputs/${body.item.id}`)
+          .expect(200);
+        expect(stored.item.kerberos).to.eql(keytabKerberos);
+        expect(stored.item.kerberos.username).to.eql('kafka');
       });
 
       it('should keep the settings and the secret when an update does not name the auth type', async () => {

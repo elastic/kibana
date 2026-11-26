@@ -45,7 +45,7 @@ export const registerListActionsRoute = ({
           const body: ListActionsResponse = await getActionsService().list(
             getSpaceId(request),
             request,
-            categories
+            { categories }
           );
           return response.ok({ body });
         } catch (error) {

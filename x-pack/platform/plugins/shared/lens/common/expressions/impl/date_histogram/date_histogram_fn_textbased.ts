@@ -6,61 +6,40 @@
  */
 
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { parseInterval, splitStringInterval } from '@kbn/data-plugin/common';
+import type { DateRounding, IanaTimeZone } from '@kbn/es-date-rounding';
+import {
+  ianaTimeZoneOrUtc,
+  nextBucketKey,
+  roundToBucketKey,
+  toDateRounding,
+} from '@kbn/es-date-rounding';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment-timezone';
 import type { DateHistogramTextBasedExpressionFunction } from '../../defs/date_histogram/types';
 
-type Unit = NonNullable<ReturnType<typeof splitStringInterval>>['unit'];
-
-const isFullyContained = (
-  bucketStart: moment.Moment,
-  from: moment.Moment,
-  to: moment.Moment,
-  step: number,
-  unit: Unit
-) => !bucketStart.isBefore(from) && !bucketStart.clone().add(step, unit).isAfter(to);
-
 /**
- * Returns the min and max values for the domain of a date histogram given the time range, the interval and one anchor point.
+ * Keys of the first and last buckets of the time range, rounded like ES|QL `BUCKET`.
+ * With `dropPartials`, the buckets only partly inside the range are excluded.
  */
 const getDomainBounds = (
-  from: moment.Moment,
-  to: moment.Moment,
-  anchor: number,
-  step: number,
-  unit: Unit,
-  timeZone: string,
+  from: number,
+  to: number,
+  rounding: DateRounding,
+  timeZone: IanaTimeZone,
   dropPartials: boolean
 ): { min: number; max: number } | undefined => {
-  if (!step || step <= 0) {
-    return undefined;
+  const firstKey = roundToBucketKey(from, rounding, timeZone);
+  const lastKey = roundToBucketKey(to, rounding, timeZone);
+
+  if (!dropPartials) {
+    return { min: firstKey, max: lastKey };
   }
 
-  const anchorTime = moment.tz(anchor, timeZone);
+  // The bucket containing `to` always extends past it, so the last full bucket is the one before.
+  const min = firstKey < from ? nextBucketKey(firstKey, rounding, timeZone) : firstKey;
+  const max = roundToBucketKey(lastKey - 1, rounding, timeZone);
 
-  const stepsBefore = Math.ceil(anchorTime.diff(from, unit, true) / step);
-  const start = anchorTime.clone().subtract(stepsBefore * step, unit);
-
-  const stepsAfter = Math.floor(to.diff(anchorTime, unit, true) / step);
-  const end = anchorTime.clone().add(stepsAfter * step, unit);
-
-  let min = start.clone();
-  let max = end.clone();
-
-  if (dropPartials) {
-    if (!isFullyContained(min, from, to, step, unit)) {
-      min = start.clone().add(step, unit);
-    }
-    if (!isFullyContained(max, from, to, step, unit)) {
-      max = end.clone().subtract(step, unit);
-    }
-    if (min.valueOf() > max.valueOf()) {
-      return undefined;
-    }
-  }
-
-  return { min: min.valueOf(), max: max.valueOf() };
+  return min <= max ? { min, max } : undefined;
 };
 
 /**
@@ -100,30 +79,21 @@ export const dateHistogramTextBasedFn =
       return input;
     }
 
-    // ES|QL date histograms drop partial buckets by default: undefined is treated as true, an explicit false is respected.
-    const dropPartials = meta.dropPartials ?? true;
-
-    // Bucket boundaries and interval should must the timezone ES|QL BUCKET so calendar intervals are aligned.
-    const timeZone = meta.timeZone || contextTimeZone;
-    const parsedInterval = splitStringInterval(intervalString);
-    const interval = parseInterval(intervalString);
-
-    if (!parsedInterval || !interval) {
+    const rounding = toDateRounding(intervalString);
+    if (!rounding) {
       return input;
     }
 
-    const from = moment.tz(timeRange.from, timeZone);
-    const to = moment.tz(timeRange.to, timeZone);
+    // ES|QL date histograms drop partial buckets by default: undefined is treated as true, an explicit false is respected.
+    const dropPartials = meta.dropPartials ?? true;
 
-    const computedDomain = getDomainBounds(
-      from,
-      to,
-      input.rows[0]?.[column.id] ?? from.valueOf(),
-      parsedInterval.value,
-      parsedInterval.unit,
-      timeZone,
-      dropPartials
-    );
+    // Bucket boundaries must match the timezone ES|QL BUCKET uses so calendar intervals stay aligned.
+    const timeZone = ianaTimeZoneOrUtc(meta.timeZone || contextTimeZone);
+
+    const from = moment.tz(timeRange.from, timeZone).valueOf();
+    const to = moment.tz(timeRange.to, timeZone).valueOf();
+
+    const computedDomain = getDomainBounds(from, to, rounding, timeZone, dropPartials);
 
     const columns = computedDomain
       ? input.columns.map((current) =>
@@ -148,15 +118,12 @@ export const dateHistogramTextBasedFn =
       columns,
       rows: input.rows.filter((row) => {
         const bucketStart = row[column.id];
+        if (typeof bucketStart !== 'string' && typeof bucketStart !== 'number') {
+          return true;
+        }
+        const key = moment.tz(bucketStart, timeZone).valueOf();
         return (
-          (typeof bucketStart !== 'string' && typeof bucketStart !== 'number') ||
-          isFullyContained(
-            moment.tz(bucketStart, timeZone),
-            from,
-            to,
-            parsedInterval.value,
-            parsedInterval.unit
-          )
+          computedDomain !== undefined && key >= computedDomain.min && key <= computedDomain.max
         );
       }),
     };

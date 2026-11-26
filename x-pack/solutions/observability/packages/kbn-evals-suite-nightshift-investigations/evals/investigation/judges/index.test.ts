@@ -23,7 +23,7 @@ jest.mock('@kbn/inference-tracing', () => ({
     callback(),
 }));
 
-const judgeReturning = (args: Record<string, string | number | boolean>) => {
+const judgeReturning = (args: Record<string, string | number | boolean | string[]>) => {
   const prompt = jest.fn().mockResolvedValue({ toolCalls: [{ function: { arguments: args } }] });
   return {
     prompt,

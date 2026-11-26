@@ -1,0 +1,1372 @@
+{
+  "components": {
+    "schemas": {
+      "GoogleCloudRunV2BinaryAuthorization": {
+        "properties": {
+          "breakglassJustification": {
+            "type": "string"
+          },
+          "policy": {
+            "type": "string"
+          },
+          "useDefault": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2BuildConfig": {
+        "properties": {
+          "baseImage": {
+            "type": "string"
+          },
+          "enableAutomaticUpdates": {
+            "type": "boolean"
+          },
+          "environmentVariables": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "functionTarget": {
+            "type": "string"
+          },
+          "imageUri": {
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "serviceAccount": {
+            "type": "string"
+          },
+          "sourceLocation": {
+            "type": "string"
+          },
+          "workerPool": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2BuildInfo": {
+        "properties": {
+          "functionTarget": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "sourceLocation": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2CloudSqlInstance": {
+        "properties": {
+          "instances": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2CloudStorageSource": {
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "generation": {
+            "format": "int64",
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2Condition": {
+        "properties": {
+          "executionReason": {
+            "enum": [
+              "EXECUTION_REASON_UNDEFINED",
+              "JOB_STATUS_SERVICE_POLLING_ERROR",
+              "NON_ZERO_EXIT_CODE",
+              "CANCELLED",
+              "CANCELLING",
+              "DELETED",
+              "DELAYED_START_PENDING",
+              "DELAYED_EXECUTION_EXCEEDING_DURATION_LIMIT"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "instanceReason": {
+            "enum": [
+              "INSTANCE_REASON_UNSPECIFIED",
+              "INSTANCE_DELETED",
+              "INSTANCE_STOPPED",
+              "INSTANCE_STOPPING",
+              "INSTANCE_NON_ZERO_EXIT_CODE"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastTransitionTime": {
+            "format": "google-datetime",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "COMMON_REASON_UNDEFINED",
+              "UNKNOWN",
+              "REVISION_FAILED",
+              "PROGRESS_DEADLINE_EXCEEDED",
+              "CONTAINER_MISSING",
+              "CONTAINER_PERMISSION_DENIED",
+              "CONTAINER_IMAGE_UNAUTHORIZED",
+              "CONTAINER_IMAGE_AUTHORIZATION_CHECK_FAILED",
+              "ENCRYPTION_KEY_PERMISSION_DENIED",
+              "ENCRYPTION_KEY_CHECK_FAILED",
+              "SECRETS_ACCESS_CHECK_FAILED",
+              "WAITING_FOR_OPERATION",
+              "IMMEDIATE_RETRY",
+              "POSTPONED_RETRY",
+              "INTERNAL",
+              "VPC_NETWORK_NOT_FOUND"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "revisionReason": {
+            "enum": [
+              "REVISION_REASON_UNDEFINED",
+              "PENDING",
+              "RESERVE",
+              "RETIRED",
+              "RETIRING",
+              "RECREATING",
+              "HEALTH_CHECK_CONTAINER_ERROR",
+              "CUSTOMIZED_PATH_RESPONSE_PENDING",
+              "MIN_INSTANCES_NOT_PROVISIONED",
+              "ACTIVE_REVISION_LIMIT_REACHED",
+              "NO_DEPLOYMENT",
+              "HEALTH_CHECK_SKIPPED",
+              "MIN_INSTANCES_WARMING"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "SEVERITY_UNSPECIFIED",
+              "ERROR",
+              "WARNING",
+              "INFO"
+            ],
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "STATE_UNSPECIFIED",
+              "CONDITION_PENDING",
+              "CONDITION_RECONCILING",
+              "CONDITION_FAILED",
+              "CONDITION_SUCCEEDED"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2Container": {
+        "properties": {
+          "args": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "baseImageUri": {
+            "type": "string"
+          },
+          "buildInfo": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2BuildInfo"
+          },
+          "command": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dependsOn": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "env": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2EnvVar"
+            },
+            "type": "array"
+          },
+          "image": {
+            "type": "string"
+          },
+          "livenessProbe": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2Probe"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ports": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2ContainerPort"
+            },
+            "type": "array"
+          },
+          "readinessProbe": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2Probe"
+          },
+          "resources": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2ResourceRequirements"
+          },
+          "sandboxLauncher": {
+            "type": "boolean"
+          },
+          "sourceCode": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2SourceCode"
+          },
+          "startupProbe": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2Probe"
+          },
+          "volumeMounts": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2VolumeMount"
+            },
+            "type": "array"
+          },
+          "workingDir": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2ContainerPort": {
+        "properties": {
+          "containerPort": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2EmptyDirVolumeSource": {
+        "properties": {
+          "medium": {
+            "enum": [
+              "MEDIUM_UNSPECIFIED",
+              "MEMORY",
+              "DISK"
+            ],
+            "type": "string"
+          },
+          "sizeLimit": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2EnvVar": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "valueSource": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2EnvVarSource"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2EnvVarSource": {
+        "properties": {
+          "secretKeyRef": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2SecretKeySelector"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2GCSVolumeSource": {
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "mountOptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "readOnly": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2GRPCAction": {
+        "properties": {
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2HTTPGetAction": {
+        "properties": {
+          "httpHeaders": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2HTTPHeader"
+            },
+            "type": "array"
+          },
+          "path": {
+            "type": "string"
+          },
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2HTTPHeader": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2InlinedSource": {
+        "properties": {
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2SourceFile"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2ListServicesResponse": {
+        "properties": {
+          "nextPageToken": {
+            "type": "string"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2Service"
+            },
+            "type": "array"
+          },
+          "unreachable": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2MultiRegionSettings": {
+        "properties": {
+          "multiRegionId": {
+            "type": "string"
+          },
+          "regions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2NFSVolumeSource": {
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "readOnly": {
+            "type": "boolean"
+          },
+          "server": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2NetworkInterface": {
+        "properties": {
+          "network": {
+            "type": "string"
+          },
+          "subnetwork": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2NodeSelector": {
+        "properties": {
+          "accelerator": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2Probe": {
+        "properties": {
+          "failureThreshold": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "grpc": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2GRPCAction"
+          },
+          "httpGet": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2HTTPGetAction"
+          },
+          "initialDelaySeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "tcpSocket": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2TCPSocketAction"
+          },
+          "timeoutSeconds": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2ResourceRequirements": {
+        "properties": {
+          "cpuIdle": {
+            "type": "boolean"
+          },
+          "limits": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "startupCpuBoost": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2RevisionScaling": {
+        "properties": {
+          "concurrencyUtilization": {
+            "format": "float",
+            "type": "number"
+          },
+          "cpuUtilization": {
+            "format": "float",
+            "type": "number"
+          },
+          "maxInstanceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minInstanceCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2RevisionTemplate": {
+        "properties": {
+          "annotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "client": {
+            "type": "string"
+          },
+          "clientVersion": {
+            "type": "string"
+          },
+          "containers": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2Container"
+            },
+            "type": "array"
+          },
+          "encryptionKey": {
+            "type": "string"
+          },
+          "encryptionKeyRevocationAction": {
+            "enum": [
+              "ENCRYPTION_KEY_REVOCATION_ACTION_UNSPECIFIED",
+              "PREVENT_NEW",
+              "SHUTDOWN"
+            ],
+            "type": "string"
+          },
+          "encryptionKeyShutdownDuration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "executionEnvironment": {
+            "enum": [
+              "EXECUTION_ENVIRONMENT_UNSPECIFIED",
+              "EXECUTION_ENVIRONMENT_GEN1",
+              "EXECUTION_ENVIRONMENT_GEN2"
+            ],
+            "type": "string"
+          },
+          "gpuZonalRedundancyDisabled": {
+            "type": "boolean"
+          },
+          "healthCheckDisabled": {
+            "type": "boolean"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "maxInstanceRequestConcurrency": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "nodeSelector": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2NodeSelector"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "scaling": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2RevisionScaling"
+          },
+          "serviceAccount": {
+            "type": "string"
+          },
+          "serviceMesh": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2ServiceMesh"
+          },
+          "sessionAffinity": {
+            "type": "boolean"
+          },
+          "timeout": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "volumes": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2Volume"
+            },
+            "type": "array"
+          },
+          "vpcAccess": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2VpcAccess"
+          },
+          "workloadIdentityConfig": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2WorkloadIdentityConfig"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2SecretKeySelector": {
+        "properties": {
+          "secret": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2SecretVolumeSource": {
+        "properties": {
+          "defaultMode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2VersionToPath"
+            },
+            "type": "array"
+          },
+          "secret": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2Service": {
+        "properties": {
+          "annotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "binaryAuthorization": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2BinaryAuthorization"
+          },
+          "buildConfig": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2BuildConfig"
+          },
+          "client": {
+            "type": "string"
+          },
+          "clientVersion": {
+            "type": "string"
+          },
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2Condition"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "createTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          },
+          "creator": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "customAudiences": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "defaultUriDisabled": {
+            "type": "boolean"
+          },
+          "deleteTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "expireTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          },
+          "functionalType": {
+            "enum": [
+              "FUNCTIONAL_TYPE_UNSPECIFIED",
+              "FUNCTIONAL_TYPE_AGENT",
+              "FUNCTIONAL_TYPE_MCP_SERVER"
+            ],
+            "type": "string"
+          },
+          "generation": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "iapEnabled": {
+            "type": "boolean"
+          },
+          "ingress": {
+            "enum": [
+              "INGRESS_TRAFFIC_UNSPECIFIED",
+              "INGRESS_TRAFFIC_ALL",
+              "INGRESS_TRAFFIC_INTERNAL_ONLY",
+              "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER",
+              "INGRESS_TRAFFIC_NONE"
+            ],
+            "type": "string"
+          },
+          "invokerIamDisabled": {
+            "type": "boolean"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "lastModifier": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "latestCreatedRevision": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "latestReadyRevision": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "launchStage": {
+            "enum": [
+              "LAUNCH_STAGE_UNSPECIFIED",
+              "UNIMPLEMENTED",
+              "PRELAUNCH",
+              "EARLY_ACCESS",
+              "ALPHA",
+              "BETA",
+              "GA",
+              "DEPRECATED"
+            ],
+            "type": "string"
+          },
+          "multiRegionSettings": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2MultiRegionSettings"
+          },
+          "name": {
+            "type": "string"
+          },
+          "observedGeneration": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "reconciling": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "satisfiesPzs": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "scaling": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2ServiceScaling"
+          },
+          "sshEnabled": {
+            "type": "boolean"
+          },
+          "template": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2RevisionTemplate"
+          },
+          "terminalCondition": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2Condition"
+          },
+          "threatDetectionEnabled": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "traffic": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2TrafficTarget"
+            },
+            "type": "array"
+          },
+          "trafficStatuses": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2TrafficTargetStatus"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "uid": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "updateTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          },
+          "uri": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "urls": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2ServiceMesh": {
+        "properties": {
+          "mesh": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2ServiceScaling": {
+        "properties": {
+          "manualInstanceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxInstanceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minInstanceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scalingMode": {
+            "enum": [
+              "SCALING_MODE_UNSPECIFIED",
+              "AUTOMATIC",
+              "MANUAL"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2SourceCode": {
+        "properties": {
+          "cloudStorageSource": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2CloudStorageSource"
+          },
+          "inlinedSource": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2InlinedSource"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2SourceFile": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2TCPSocketAction": {
+        "properties": {
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2TrafficTarget": {
+        "properties": {
+          "percent": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "TRAFFIC_TARGET_ALLOCATION_TYPE_UNSPECIFIED",
+              "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST",
+              "TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2TrafficTargetStatus": {
+        "properties": {
+          "percent": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "TRAFFIC_TARGET_ALLOCATION_TYPE_UNSPECIFIED",
+              "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST",
+              "TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION"
+            ],
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2VersionToPath": {
+        "properties": {
+          "mode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2Volume": {
+        "properties": {
+          "cloudSqlInstance": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2CloudSqlInstance"
+          },
+          "emptyDir": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2EmptyDirVolumeSource"
+          },
+          "gcs": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2GCSVolumeSource"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nfs": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2NFSVolumeSource"
+          },
+          "secret": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2SecretVolumeSource"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2VolumeMount": {
+        "properties": {
+          "mountPath": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "subPath": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2VpcAccess": {
+        "properties": {
+          "connector": {
+            "type": "string"
+          },
+          "egress": {
+            "enum": [
+              "VPC_EGRESS_UNSPECIFIED",
+              "ALL_TRAFFIC",
+              "PRIVATE_RANGES_ONLY"
+            ],
+            "type": "string"
+          },
+          "networkInterfaces": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2NetworkInterface"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2WorkloadIdentityConfig": {
+        "properties": {
+          "identity": {
+            "type": "string"
+          },
+          "identityCertificateEnabled": {
+            "type": "boolean"
+          },
+          "identityType": {
+            "enum": [
+              "IDENTITY_TYPE_UNSPECIFIED",
+              "IDENTITY_TYPE_SERVICE_ACCOUNT",
+              "IDENTITY_TYPE_AGENT_IDENTITY"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.",
+              "https://www.googleapis.com/auth/run": "See, edit, configure, and delete your Google Cloud Run data and see the email address for your Google Account",
+              "https://www.googleapis.com/auth/run.readonly": "See your Google Cloud Run data and the email address of your Google Account"
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Cloud Run Admin API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/v2/projects/{projectsId}/locations/{locationsId}/services": {
+      "get": {
+        "operationId": "run.projects.locations.services.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "showDeleted",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudRunV2ListServicesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/run",
+              "https://www.googleapis.com/auth/run.readonly"
+            ]
+          }
+        ]
+      }
+    },
+    "/v2/projects/{projectsId}/locations/{locationsId}/services/{servicesId}": {
+      "get": {
+        "operationId": "run.projects.locations.services.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "servicesId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudRunV2Service"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/run",
+              "https://www.googleapis.com/auth/run.readonly"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://run.googleapis.com"
+    }
+  ]
+}

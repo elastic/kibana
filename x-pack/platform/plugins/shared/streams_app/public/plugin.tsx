@@ -30,6 +30,7 @@ import type {
   StreamsAppStartDependencies,
 } from './types';
 import type { StreamsAppServices } from './services/types';
+import { createComponentCatalogueClient } from './services/component_catalogue/api_client';
 import {
   createDiscoverFlyoutStreamFieldByStreamNameLink,
   createDiscoverFlyoutStreamFieldLink,
@@ -137,6 +138,9 @@ export class StreamsAppPlugin
             .start({ http: coreStart.http })
             .getClient(),
           telemetryClient: this.telemetry.getClient(),
+          componentCatalogue: createComponentCatalogueClient({
+            streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
+          }),
           version: this.version,
         };
 

@@ -1,0 +1,34 @@
+{
+  "sha1": "ece262d0cb815db86e812e9ad3f2283f21518da5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "92bf6228c0c95d0-c4ca4646ee9141e",
+      "title": "State sync TODO examples syncs state with platform ScopedHistory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/state_containers_examples/test/scout_examples/ui/tests/state_sync.spec.ts",
+        "line": 69,
+        "column": 21
+      }
+    },
+    {
+      "id": "92bf6228c0c95d0-b8e95e8ccaeb0f3",
+      "title": "State sync TODO examples syncs state with hash history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/state_containers_examples/test/scout_examples/ui/tests/state_sync.spec.ts",
+        "line": 69,
+        "column": 21
+      }
+    }
+  ]
+}

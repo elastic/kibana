@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import {
+  CASE_COMMENTS_URL,
+  LEGACY_ALERT_TYPE,
+  LEGACY_EVENT_TYPE,
+} from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseDomainV1 } from '../../../../common/types/domain';
@@ -14,6 +18,11 @@ import type { AttachmentRequestV2 } from '../../../../common/types/api';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { toLegacyCaseResponse, toUnifiedAttachmentRequest } from '../../../common/attachments';
 import { getAttachmentRequestType } from '../utils';
+
+const LEGACY_TRIGGER_ATTACHMENT_TYPES: ReadonlySet<string> = new Set([
+  LEGACY_ALERT_TYPE,
+  LEGACY_EVENT_TYPE,
+]);
 
 export const postCommentRoute = createCasesRoute({
   method: 'post',
@@ -39,9 +48,20 @@ export const postCommentRoute = createCasesRoute({
 
       // 1. v1 request body -> unified payload
       const comment = toUnifiedAttachmentRequest(request.body);
-      // 2. add the unified attachment (returns the case with comments)
-      const updatedCase = await casesClient.attachments.add({ caseId, comment });
-      // 3. unified case -> v1 response
+      // Workflows saved before 9.6 match `alert` and `event` on cases.attachmentsAdded for
+      // attachments added through this route, so keep reporting them instead of the converted
+      // unified types.
+      const { type: requestType } = request.body as AttachmentRequestV2;
+      const triggerAttachmentType = LEGACY_TRIGGER_ATTACHMENT_TYPES.has(requestType)
+        ? requestType
+        : undefined;
+      // 2. add the unified attachment
+      const updatedCase = await casesClient.attachments.addAndGetCase({
+        caseId,
+        comment,
+        triggerAttachmentType,
+      });
+      // 3. case with all attachments -> v1 response
       const res: caseDomainV1.Case = toLegacyCaseResponse(updatedCase);
 
       incrementAttachmentTypeCounters([
