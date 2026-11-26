@@ -14,18 +14,6 @@ import { getKnownFailureFingerprint, getKnownFailureRiseFingerprint } from './to
 import type { OpenKnownFailure } from './unusual_minutes';
 
 const MINUTE_MS = 60_000;
-/**
- * How far back the history read reaches before the window: the newest minutes a run returns start
- * before the window, and before them comes the quiet period of an event that may still be open. Two
- * more minutes because a run is stamped when its row is indexed, which can be a while after its
- * query read `NOW()`.
- */
-const HISTORY_LOOKBACK_MS =
-  (KNOWN_FAILURES_SETTINGS.newest_minutes +
-    KNOWN_FAILURES_SETTINGS.quiet_period_minutes +
-    KNOWN_FAILURES_SETTINGS.end_margin_minutes +
-    2) *
-  MINUTE_MS;
 
 /** What earlier ticks reported for one knowledge indicator. */
 export interface PastReadings {
@@ -60,7 +48,7 @@ export async function readPastReadings({
   }));
   const readings = await history.readHistory({
     series: seriesOf.flatMap(({ unusual, rise }) => [unusual, rise]),
-    from: window.from - HISTORY_LOOKBACK_MS,
+    from: getOldestMinute(measured) - KNOWN_FAILURES_SETTINGS.quiet_period_minutes * MINUTE_MS,
     to: window.to,
     abortSignal,
   });
@@ -76,6 +64,17 @@ export async function readPastReadings({
       )
     ),
   }));
+}
+
+/**
+ * The oldest minute any run returned. The history read starts a quiet period before it, so an event
+ * that minute could still continue is found. Taken from the rows, not the window: a row is stamped
+ * when it is indexed, and a slow query's minutes can start well before the window does.
+ */
+function getOldestMinute(measured: MeasuredKnownFailure[]): number {
+  return Math.min(
+    ...measured.flatMap(({ measurements }) => measurements.map(({ minutes }) => minutes[0].minute))
+  );
 }
 
 /**

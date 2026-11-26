@@ -431,6 +431,29 @@ describe('KnownFailuresGenerator', () => {
     expect(withSameRule.readings).toEqual([expect.objectContaining({ value: minute })]);
   });
 
+  // A row is stamped when it is indexed, so a slow query's minutes can start well before the
+  // window; the event they continue must still be found.
+  it('continues an open event from the oldest minute a run returned, not the window', async () => {
+    const minute = 9;
+    const lastReported = {
+      status: 'breached',
+      rule_id: RULE_ID,
+      bucket_start: WINDOW.from - 21 * MINUTE_MS,
+      details: { check: 'unusual_minute', threshold: 3 },
+    } as unknown as DetectionSignalReading;
+
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({
+        rows: [createRow(-11, [minute, 2, 2, 2, 2, 2, 2])],
+        history: [lastReported],
+      })
+    );
+
+    expect(result.readings).toEqual([
+      expect.objectContaining({ bucket_start: WINDOW.from - 11 * MINUTE_MS, value: minute }),
+    ]);
+  });
+
   // `Number('')` is 0, so an empty count would read as a quiet minute.
   it.each([
     ['without the Known failures columns', { recent_max: 26 }],
