@@ -535,13 +535,14 @@ export const indexEndpointHostForPolicy = async ({
 
   const hostDocId = uuidv4();
   // Rollback may only remove what this call created: an agent id that already has metadata keeps its
-  // history. A failed read is inconclusive, so it is treated like existing metadata (the safe side).
+  // history. A missing data stream (fresh stack) means there is none; any other failed read is
+  // inconclusive, so it is treated like existing metadata (the safe side).
   const existingMetadata = await esClient
     .count({
       index: METADATA_DATASTREAM,
       query: { term: { 'agent.id': hostMetadataDoc.agent.id } },
     })
-    .catch(() => undefined);
+    .catch((error) => (isNotFoundError(error) ? { count: 0 } : undefined));
   const hadMetadata = existingMetadata === undefined || existingMetadata.count > 0;
 
   try {
@@ -592,6 +593,12 @@ export const indexEndpointHostForPolicy = async ({
   }
 };
 
+const isNotFoundError = (error: unknown): boolean => {
+  const { statusCode, body } =
+    (error as { meta?: { statusCode?: number; body?: { error?: { type?: string } } } })?.meta ?? {};
+  return statusCode === 404 || body?.error?.type === 'index_not_found_exception';
+};
+
 /** Best effort: the Fleet agent is cleaned up even if the metadata cleanup fails; the caller rethrows the original error. */
 const rollbackIndexedHost = async (
   esClient: Client,
@@ -604,12 +611,19 @@ const rollbackIndexedHost = async (
   const removeHostMetadata = async () => {
     // The source goes first and is refreshed: the transforms read it, so a destination cleanup that
     // ran alongside could be undone by a transform republishing the host afterwards.
-    await esClient.deleteByQuery({
-      index: METADATA_DATASTREAM,
-      wait_for_completion: true,
-      refresh: true,
-      query: { ids: { values: [hostDocId] } },
-    });
+    // A source stream that is already gone is already clean: carry on to the destinations.
+    await esClient
+      .deleteByQuery({
+        index: METADATA_DATASTREAM,
+        wait_for_completion: true,
+        refresh: true,
+        query: { ids: { values: [hostDocId] } },
+      })
+      .catch((error) => {
+        if (!isNotFoundError(error)) {
+          throw error;
+        }
+      });
 
     if (hadMetadata) {
       return;
@@ -628,7 +642,16 @@ const rollbackIndexedHost = async (
         index: METADATA_UNITED_INDEX,
         ignore_unavailable: true,
         wait_for_completion: true,
-        query: { terms: { 'united.endpoint.agent.id': agentIds } },
+        // A united doc can hold the Fleet agent without endpoint metadata yet, so match its root id too.
+        query: {
+          bool: {
+            should: [
+              { terms: { 'united.endpoint.agent.id': agentIds } },
+              { terms: { 'agent.id': agentIds } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
       }),
     ]);
   };

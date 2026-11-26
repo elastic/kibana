@@ -120,7 +120,15 @@ describe('indexEndpointHostForPolicy', () => {
     );
     expect(deleteQueryFor(METADATA_UNITED_INDEX)).toEqual(
       expect.objectContaining({
-        query: { terms: { 'united.endpoint.agent.id': [indexed.body.agent.id] } },
+        query: {
+          bool: {
+            should: [
+              { terms: { 'united.endpoint.agent.id': [indexed.body.agent.id] } },
+              { terms: { 'agent.id': [indexed.body.agent.id] } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
       })
     );
     expect(deleteIndexedFleetAgentsMock).toHaveBeenCalledWith(
@@ -159,21 +167,59 @@ describe('indexEndpointHostForPolicy', () => {
     expect(deleteQueryFor(METADATA_DATASTREAM)).toBeDefined();
   });
 
-  it('finishes deleting the source document before it cleans the destinations', async () => {
+  it('treats a missing metadata data stream as no existing metadata and cleans the destinations', async () => {
+    esClient.count.mockRejectedValue(
+      Object.assign(new Error('index_not_found_exception'), { meta: { statusCode: 404 } })
+    );
     startMetadataTransformsMock.mockRejectedValue(transformsMissingError);
-    const order: string[] = [];
+
+    await expect(callIndexEndpointHostForPolicy()).rejects.toBe(transformsMissingError);
+
+    expect(deleteQueryFor(metadataCurrentIndexPattern)).toBeDefined();
+    expect(deleteQueryFor(METADATA_UNITED_INDEX)).toBeDefined();
+  });
+
+  it('does not start the destination deletes until the source delete has finished', async () => {
+    startMetadataTransformsMock.mockRejectedValue(transformsMissingError);
+    let releaseSource!: () => void;
+    const sourceDeleted = new Promise<void>((resolve) => {
+      releaseSource = resolve;
+    });
     esClient.deleteByQuery.mockImplementation(async ({ index }: { index: unknown }) => {
-      order.push(`start:${String(index)}`);
-      await new Promise((resolve) => setTimeout(resolve, index === METADATA_DATASTREAM ? 5 : 0));
-      order.push(`end:${String(index)}`);
+      if (index === METADATA_DATASTREAM) {
+        await sourceDeleted;
+      }
+      return {};
+    });
+
+    const call = callIndexEndpointHostForPolicy();
+    const settled = call.catch(() => undefined);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    expect(deleteQueryFor(METADATA_DATASTREAM)).toBeDefined();
+
+    releaseSource();
+    await expect(call).rejects.toBe(transformsMissingError);
+    await settled;
+
+    expect(deleteQueryFor(metadataCurrentIndexPattern)).toBeDefined();
+    expect(deleteQueryFor(METADATA_UNITED_INDEX)).toBeDefined();
+  });
+
+  it('still cleans the destinations when the source data stream is already gone', async () => {
+    startMetadataTransformsMock.mockRejectedValue(transformsMissingError);
+    esClient.deleteByQuery.mockImplementation(async ({ index }: { index: unknown }) => {
+      if (index === METADATA_DATASTREAM) {
+        throw Object.assign(new Error('index_not_found_exception'), { meta: { statusCode: 404 } });
+      }
       return {};
     });
 
     await expect(callIndexEndpointHostForPolicy()).rejects.toBe(transformsMissingError);
 
-    expect(order.indexOf(`end:${METADATA_DATASTREAM}`)).toBeLessThan(
-      order.indexOf(`start:${metadataCurrentIndexPattern}`)
-    );
+    expect(deleteQueryFor(metadataCurrentIndexPattern)).toBeDefined();
+    expect(deleteQueryFor(METADATA_UNITED_INDEX)).toBeDefined();
   });
 
   it('still removes the Fleet agent when deleting the metadata fails', async () => {
