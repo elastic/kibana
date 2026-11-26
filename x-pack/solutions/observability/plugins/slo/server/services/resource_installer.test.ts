@@ -27,12 +27,16 @@ import {
   SUMMARY_INDEX_TEMPLATE_NAME,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { DEFAULT_RETRY_OPTIONS } from '../utils/retry';
 import { DefaultResourceInstaller } from './resource_installer';
 
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
-const createInstaller = (esClient: EsClientMock) =>
-  new DefaultResourceInstaller(esClient, loggerMock.create());
+const createInstaller = (esClient: EsClientMock, signal?: AbortSignal) =>
+  new DefaultResourceInstaller(esClient, loggerMock.create(), {
+    retryOptions: DEFAULT_RETRY_OPTIONS,
+    signal,
+  });
 
 const mockTemplatesUpToDate = (esClient: EsClientMock) => {
   esClient.cluster.getComponentTemplate.mockImplementation((params) => {
@@ -108,11 +112,11 @@ describe('resourceInstaller', () => {
     ]);
     expect(esClient.indices.putMapping).toHaveBeenCalledWith(
       expect.objectContaining({ index: COMPOSITE_SUMMARY_INDEX_NAME }),
-      { signal: undefined }
+      expect.anything()
     );
     expect(esClient.indices.createDataStream).toHaveBeenCalledWith(
       { name: HEALTH_DATA_STREAM_NAME },
-      { signal: undefined }
+      expect.anything()
     );
   });
 
@@ -180,7 +184,7 @@ describe('resourceInstaller', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const { signal } = new AbortController();
 
-    await createInstaller(esClient).install(signal);
+    await createInstaller(esClient, signal).install();
 
     const calls: unknown[][] = [
       ...esClient.cluster.getComponentTemplate.mock.calls,
@@ -197,18 +201,37 @@ describe('resourceInstaller', () => {
     });
   });
 
-  it('names the template that failed when an earlier request was aborted', async () => {
+  it('leaves a cancelled request unwrapped so a concurrent failure is reported', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.cluster.putComponentTemplate.mockImplementation(({ name }) =>
-      name === SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME
-        ? Promise.reject(new EsErrors.RequestAbortedError('Request aborted'))
-        : name === SLI_COMPONENT_TEMPLATE_SETTINGS_NAME
+    const abortController = new AbortController();
+    esClient.cluster.putComponentTemplate.mockImplementation(({ name }) => {
+      if (name === SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME) {
+        // cancelled after the other requests are in flight
+        return new Promise((_, reject) =>
+          setImmediate(() => {
+            abortController.abort();
+            reject(new EsErrors.RequestAbortedError('Request aborted'));
+          })
+        );
+      }
+      return name === SLI_COMPONENT_TEMPLATE_SETTINGS_NAME
         ? Promise.reject(new Error('boom'))
-        : Promise.resolve({ acknowledged: true })
+        : Promise.resolve({ acknowledged: true });
+    });
+
+    await expect(createInstaller(esClient, abortController.signal).install()).rejects.toThrow(
+      `Failed to install SLO resource [${SLI_COMPONENT_TEMPLATE_SETTINGS_NAME}]: boom`
+    );
+  });
+
+  it('names the resource when an abort error is raised without cancellation', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.createDataStream.mockRejectedValue(
+      new EsErrors.RequestAbortedError('Response too large')
     );
 
-    await expect(createInstaller(esClient).install()).rejects.toThrow(
-      `Failed to install SLO resource [${SLI_COMPONENT_TEMPLATE_SETTINGS_NAME}]: boom`
+    await expect(createInstaller(esClient, new AbortController().signal).install()).rejects.toThrow(
+      `Failed to install SLO resource [${HEALTH_DATA_STREAM_NAME}]: Response too large`
     );
   });
 });

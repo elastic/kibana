@@ -13,7 +13,7 @@ import { SLOResourcesNotInstalled } from '../errors';
 import type { RetryOptions } from '../utils/retry';
 import { isAbortError } from '../utils/with_deadline';
 import { DEFAULT_RETRY_OPTIONS, REQUEST_RETRY_OPTIONS } from '../utils/retry';
-import type { ResourceInstaller } from './resource_installer';
+import type { ResourceInstaller, ResourceInstallerOptions } from './resource_installer';
 
 const LOCK_RETRY_INTERVAL_MS = 2_000;
 // Bounds how long a caller waits while another process installs the resources.
@@ -22,9 +22,13 @@ const INSTALL_FAILED_MESSAGE = 'SLO resources are not installed yet, try again l
 const LOCK_WAIT_TIMEOUT_MESSAGE = 'SLO resources are being installed by another process';
 
 interface ResourceInstallStateDependencies {
-  installerFactory: (retryOptions: RetryOptions) => Promise<ResourceInstaller>;
+  installerFactory: (options: ResourceInstallerOptions) => Promise<ResourceInstaller>;
   lockManager: Pick<LockManagerService, 'withLock'>;
   logger: Logger;
+}
+
+interface InstallUnderLockOptions extends ResourceInstallerOptions {
+  onLockAcquired?: () => void;
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -54,15 +58,13 @@ export class ResourceInstallState {
   }
 
   /** Installs once without waiting for the lock; returns false when another process holds it. */
-  public async reconcile(
-    retryOptions: RetryOptions = DEFAULT_RETRY_OPTIONS,
-    signal?: AbortSignal
-  ): Promise<boolean> {
+  public async reconcile(signal?: AbortSignal): Promise<boolean> {
     try {
-      const installed = await this.installUnderLock(retryOptions, signal);
-      if (installed) {
-        this.installed = true;
-      }
+      const installed = await this.installUnderLock({
+        retryOptions: DEFAULT_RETRY_OPTIONS,
+        signal,
+      });
+      this.installed ||= installed;
       return installed;
     } catch (err) {
       // Shared resources may be gone: stop trusting the cached success so API calls re-check.
@@ -95,7 +97,8 @@ export class ResourceInstallState {
         reject(new SLOResourcesNotInstalled(LOCK_WAIT_TIMEOUT_MESSAGE));
       }, Math.max(deadline - performance.now(), 0));
     });
-    const attempt = this.installUnderLock(retryOptions, undefined, {
+    const attempt = this.installUnderLock({
+      retryOptions,
       onLockAcquired: () => {
         clearTimeout(timer);
         // An abandoned attempt that acquires the lock late must not install.
@@ -109,17 +112,17 @@ export class ResourceInstallState {
 
   // Returns false when another process holds the lock. Installing again after that process is done
   // is cheap: up-to-date resources are skipped.
-  private async installUnderLock(
-    retryOptions: RetryOptions,
-    signal?: AbortSignal,
-    { onLockAcquired }: { onLockAcquired?: () => void } = {}
-  ): Promise<boolean> {
+  private async installUnderLock({
+    onLockAcquired,
+    ...installerOptions
+  }: InstallUnderLockOptions): Promise<boolean> {
     const { installerFactory, lockManager } = this.dependencies;
+    const { signal } = installerOptions;
     try {
-      const installer = await installerFactory(retryOptions);
+      const installer = await installerFactory(installerOptions);
       await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () => {
         onLockAcquired?.();
-        return installer.install(signal);
+        return installer.install();
       });
       return true;
     } catch (err) {

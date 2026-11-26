@@ -29,10 +29,17 @@ import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_
 import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { isAbortError } from '../utils/with_deadline';
 import type { RetryOptions } from '../utils/retry';
-import { DEFAULT_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
+import { retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
-  install(signal?: AbortSignal): Promise<void>;
+  install(): Promise<void>;
+}
+
+/** Options for one install run. */
+export interface ResourceInstallerOptions {
+  retryOptions: RetryOptions;
+  // Every ES call is aborted, and stops retrying, once the signal fires.
+  signal?: AbortSignal;
 }
 
 const COMPONENT_TEMPLATES: readonly ClusterPutComponentTemplateRequest[] = [
@@ -58,39 +65,35 @@ const BASE_INDICES: readonly string[] = [
 ];
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  // Set per install() run; every ES call is then aborted, and stops retrying, once the signal fires.
-  private signal?: AbortSignal;
-
   constructor(
-    private esClient: ElasticsearchClient,
-    private logger: Logger,
-    private retryOptions: RetryOptions = DEFAULT_RETRY_OPTIONS
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly options: ResourceInstallerOptions
   ) {}
 
-  // Every Elasticsearch call retries transient errors; the install stops at the first resource that still fails.
-  public async install(signal?: AbortSignal): Promise<void> {
-    this.signal = signal;
+  // Every Elasticsearch call retries transient errors; the install stops at the first stage that still fails.
+  public async install(): Promise<void> {
     this.logger.debug('Installing SLO shared resources');
 
-    // Wait for every component template to settle so no ES call outlives the install lock.
+    // Each stage waits for every call to settle so no ES call outlives the install lock.
     await allSettledOrThrow(
       COMPONENT_TEMPLATES.map((template) =>
         this.installResource(template.name, () => this.createOrUpdateComponentTemplate(template))
       )
     );
-
-    for (const template of INDEX_TEMPLATES) {
-      await this.installResource(template.name, () => this.createOrUpdateIndexTemplate(template));
-    }
-
-    for (const index of BASE_INDICES) {
-      await this.installResource(index, () => this.createIndex(index));
-    }
+    await allSettledOrThrow(
+      INDEX_TEMPLATES.map((template) =>
+        this.installResource(template.name, () => this.createOrUpdateIndexTemplate(template))
+      )
+    );
+    await allSettledOrThrow([
+      ...BASE_INDICES.map((index) => this.installResource(index, () => this.createIndex(index))),
+      this.installResource(HEALTH_DATA_STREAM_NAME, () =>
+        this.createDataStream(HEALTH_DATA_STREAM_NAME)
+      ),
+    ]);
     await this.installResource(`${COMPOSITE_SUMMARY_INDEX_NAME} mappings`, () =>
       this.updateCompositeSummaryMapping()
-    );
-    await this.installResource(HEALTH_DATA_STREAM_NAME, () =>
-      this.createDataStream(HEALTH_DATA_STREAM_NAME)
     );
   }
 
@@ -98,8 +101,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     try {
       await install();
     } catch (err) {
-      // Keep abort errors recognizable so callers can tell a cancelled install from a failed one.
-      if (isAbortError(err)) {
+      // A cancelled install keeps the abort error recognizable; any other failure names the resource.
+      if (this.options.signal?.aborted && isAbortError(err)) {
         throw err;
       }
       throw new Error(`Failed to install SLO resource [${name}]: ${err.message}`);
@@ -166,10 +169,11 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   }
 
   private async execute<T>(esCall: (options: { signal?: AbortSignal }) => Promise<T>): Promise<T> {
-    return await retryTransientEsErrors(() => esCall({ signal: this.signal }), {
+    const { retryOptions, signal } = this.options;
+    return await retryTransientEsErrors(() => esCall({ signal }), {
       logger: this.logger,
-      retryOptions: this.retryOptions,
-      signal: this.signal,
+      retryOptions,
+      signal,
     });
   }
 

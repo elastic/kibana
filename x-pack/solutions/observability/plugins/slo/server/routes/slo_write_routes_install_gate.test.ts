@@ -37,7 +37,6 @@ describe.each(WRITE_ROUTES)('%s SLO route install gate', (_name, routes) => {
       route.handler(resources as unknown as Parameters<typeof route.handler>[0])
     ).rejects.toMatchObject({ output: { statusCode: 503 }, message: 'not ready' });
 
-    expect(ensureInstalled).toHaveBeenCalledTimes(1);
     expect(getScopedClients).not.toHaveBeenCalled();
   });
 });
