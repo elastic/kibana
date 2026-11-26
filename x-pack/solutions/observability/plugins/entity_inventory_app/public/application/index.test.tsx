@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { createMemoryHistory } from 'history';
 import type { History } from 'history';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED } from '../../common/feature_flags';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
@@ -19,10 +21,35 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { EntityInventoryApiClient } from '../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../__fixtures__/inventory_client';
-import { createAppServicesMock, createCoreStartMock, createStartDependenciesMock } from '../mocks';
+import {
+  createAppServicesMock,
+  createCoreStartMock,
+  createPublicConfigMock,
+  createStartDependenciesMock,
+} from '../mocks';
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
+import type { EntityDataGridProps } from './components/entity_table/entity_data_grid';
 import { EntityInventoryShell, renderApp } from '.';
+
+// The shell tests check which tables it shows, when it requests the types and that the column
+// choices outlive a page change, not how a grid renders, which `entity_data_grid.test.tsx` covers.
+// The real grid is slow to mount in jsdom, so the stub shows the choices it was given and lets a
+// test make one.
+jest.mock('./components/entity_table/entity_data_grid', () => ({
+  EntityDataGrid: ({ entityType, preferences, onPreferencesChange }: EntityDataGridProps) => (
+    <div
+      data-test-subj="entityInventoryTable"
+      data-entity-type={entityType.type}
+      data-visible-columns={preferences.visibleColumns?.join(',')}
+    >
+      <button
+        data-test-subj="entityInventoryTableStubChooseColumns"
+        onClick={() => onPreferencesChange({ visibleColumns: ['host.name'] })}
+      />
+    </div>
+  ),
+}));
 
 const PageTemplate = (({ children }: { children: React.ReactNode }) => (
   <div>{children}</div>
@@ -137,33 +164,6 @@ describe('EntityInventoryShell', () => {
     );
   });
 
-  it('keeps the column choices of a type while another page is open', async () => {
-    const { history } = renderShellAt('/hosts');
-    expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-cloud.account.id'));
-    const hideColumn = within(screen.getByTestId('dataGridHeaderCellActionGroup-cloud.account.id'))
-      .getAllByRole('button')
-      .find((button) => button.textContent === 'Hide column');
-    if (!hideColumn) {
-      throw new Error('No hide action');
-    }
-    fireEvent.click(hideColumn);
-    await waitFor(() =>
-      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
-    );
-
-    act(() => history.push('/kubernetes'));
-    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
-      'data-entity-type',
-      'k8s.deployment'
-    );
-    act(() => history.push('/hosts'));
-
-    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
-    expect(screen.getByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
-    expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
-  });
-
   it('requests the entity types once while moving between pages, and renders each page from that response', async () => {
     const fixtureClient = createFixtureEntityInventoryApiClient();
     const getTypes = jest.fn(fixtureClient.getTypes);
@@ -188,6 +188,43 @@ describe('EntityInventoryShell', () => {
       'host'
     );
     expect(getTypes).toHaveBeenCalledTimes(1);
+  });
+
+  it('requests the lists that stay mounted again when the page changes', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getEntities = jest.fn(fixtureClient.getEntities);
+    const hostRequests = () => getEntities.mock.calls.filter(([type]) => type === 'host');
+    const { history } = renderShellAt('/hosts', { ...fixtureClient, getEntities });
+    await waitFor(() => expect(hostRequests()).toHaveLength(1));
+
+    act(() => history.push('/all-resources'));
+
+    await waitFor(() => expect(hostRequests()).toHaveLength(2));
+  });
+
+  it('keeps the column choices of a type while another page is open', async () => {
+    const { history } = renderShellAt('/hosts');
+    expect(await screen.findByTestId('entityInventoryTable')).not.toHaveAttribute(
+      'data-visible-columns'
+    );
+    fireEvent.click(screen.getByTestId('entityInventoryTableStubChooseColumns'));
+    expect(screen.getByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-visible-columns',
+      'host.name'
+    );
+
+    act(() => history.push('/kubernetes'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'k8s.deployment'
+    );
+    expect(screen.getByTestId('entityInventoryTable')).not.toHaveAttribute('data-visible-columns');
+    act(() => history.push('/hosts'));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-visible-columns',
+      'host.name'
+    );
   });
 
   it('requests the entity types once more on a retry after the types request fails, and not again on a page change', async () => {
@@ -248,7 +285,7 @@ describe('renderApp', () => {
 
     let unmount: () => void = () => {};
     act(() => {
-      unmount = renderApp(core, createStartDependenciesMock(), params);
+      unmount = renderApp(core, createStartDependenciesMock(), params, createPublicConfigMock());
     });
 
     expect(core.rendering.addContext).toHaveBeenCalledTimes(1);
@@ -259,5 +296,27 @@ describe('renderApp', () => {
     act(() => unmount());
 
     expect(params.element.childElementCount).toBe(0);
+  });
+
+  it('follows the performance overlay flag while mounted, and stops on unmount', () => {
+    const core = createCoreStartMock();
+    const overlayEnabled$ = new BehaviorSubject(false);
+    core.featureFlags.getBooleanValue$.mockReturnValue(overlayEnabled$);
+    const params = coreMock.createAppMountParameters(APP_BASE_PATH);
+
+    let unmount: () => void = () => {};
+    act(() => {
+      unmount = renderApp(core, createStartDependenciesMock(), params, createPublicConfigMock());
+    });
+
+    expect(core.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+      ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED,
+      false
+    );
+    expect(overlayEnabled$.observed).toBe(true);
+
+    act(() => unmount());
+
+    expect(overlayEnabled$.observed).toBe(false);
   });
 });

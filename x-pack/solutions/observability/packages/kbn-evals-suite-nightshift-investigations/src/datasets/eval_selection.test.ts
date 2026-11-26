@@ -62,6 +62,12 @@ describe('resolveEvalSelection', () => {
     });
   });
 
+  it('leaves the writeup eval to its own suite', () => {
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'writeup' })).toThrow(
+      'Unknown dataset(s) in NIGHTSHIFT_DATASETS: writeup'
+    );
+  });
+
   it('combines evals in one list', () => {
     expect(
       resolveEvalSelection({

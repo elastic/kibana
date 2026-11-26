@@ -6,6 +6,7 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
+import { EMPTY_DESTINATION_FAILED } from '../../../services/unit_stats_client/map_stats_response';
 import type {
   DestinationStatsView,
   SourceStatsView,
@@ -29,7 +30,7 @@ const READY_ENTRY: StatsEntry<DestinationStatsView> = {
   stats: {
     eventsRate: 3700,
     eventsTotal: 3330000,
-    failedRate: 0,
+    failed: EMPTY_DESTINATION_FAILED,
     latencyAverage: 0.012,
     series: { bucketMs: 300000, points: [] },
   },

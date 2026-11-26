@@ -40,7 +40,8 @@
       "maps",
       "fieldFormats",
       "savedSearch",
-      "presentationUtil"
+      "presentationUtil",
+      "visTypeVega"
     ]
   }
 }

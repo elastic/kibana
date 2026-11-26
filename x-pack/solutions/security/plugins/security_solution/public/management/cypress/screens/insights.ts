@@ -39,15 +39,10 @@ export const workflowInsightsSelectors = {
     cy.getByTestSubj('workflowInsightsEmptyResultsCallout').should('not.exist'),
   clickTrustedAppFormSubmissionButton: () =>
     cy.getByTestSubj('trustedAppsListPage-flyout-submitButton').click(),
-  insightsComponentDoesntExist: () =>
-    cy.getByTestSubj('endpointDetailsInsightsWrapper').should('not.exist'),
   validateErrorToastContent: (content: string) =>
     cy
       .getByTestSubj('globalToastList')
       .within(() => cy.getByTestSubj('euiToastBody').contains(content)),
-  connectorSelectorExists: () => {
-    cy.getByTestSubj('connector-selector').should('exist');
-  },
   connectorSelectorDoesNotExist: () => {
     cy.getByTestSubj('connector-selector').should('not.exist');
   },

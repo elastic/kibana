@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { render, screen, within } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryEntityCategory } from '../../types';
+import { createPublicConfigMock } from '../../mocks';
+import { EntityInventoryDateRangeProvider } from '../context/date_range_context';
 import { useEntityInventorySearch } from '../context/search_context';
 import { EntityInventoryPageShell } from './page_shell';
 
@@ -23,8 +27,12 @@ const renderWithServices = (ui: React.ReactElement) => {
   unifiedSearch.ui.SearchBar = () => <div data-test-subj="mockSearchBar" />;
 
   return render(
-    <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch }}>
-      {ui}
+    <KibanaContextProvider
+      services={{ ...coreMock.createStart(), unifiedSearch, config: createPublicConfigMock() }}
+    >
+      <Router history={createMemoryHistory()}>
+        <EntityInventoryDateRangeProvider>{ui}</EntityInventoryDateRangeProvider>
+      </Router>
     </KibanaContextProvider>
   );
 };

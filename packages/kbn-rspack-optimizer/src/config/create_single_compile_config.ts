@@ -52,6 +52,9 @@ import { PluginWatchPlugin } from '../plugins/plugin_watch_plugin';
 export { signalShutdown, resetShutdown };
 export { findTargetEntry };
 
+/** Files in the bundles dir that watch-mode cleaning must not delete. */
+export const WATCH_CLEAN_KEEP = /(^|\/)(stats\.json|[^/]*\.hot-update\.(js|json)(\.map)?)$/;
+
 /**
  * Files that affect the main Kibana RSPack build. Used as the single source of
  * truth for both computeConfigHash (version string) and buildDependencies so they
@@ -169,8 +172,9 @@ export async function createSingleCompileConfig(
     allowlistPluginGroups,
   });
 
-  // Create a SINGLE unified entry that imports ALL plugins
-  // This ensures RSPack can properly deduplicate modules across all plugins
+  // Create a SINGLE unified entry with statically analyzable loaders for ALL plugins.
+  // The browser invokes only the page-selected loaders at runtime, while keeping the
+  // full graph available so RSPack can deduplicate modules across all plugins.
   const wrapperDir = resolveEntryWrappersDir(outputRoot);
   if (!Fs.existsSync(wrapperDir)) {
     Fs.mkdirSync(wrapperDir, { recursive: true });
@@ -179,8 +183,7 @@ export async function createSingleCompileConfig(
   // Collect all plugin entries (core + plugins)
   const pluginEntries = collectPluginEntries(repoRoot, plugins);
 
-  // Create unified entry that imports and registers all plugins
-  // Uses relative paths for cache portability across machines
+  // Create the unified loader entry. Uses relative paths for cache portability.
   const unifiedEntryPath = createUnifiedEntry(wrapperDir, repoRoot, pluginEntries);
 
   const extraTargets = pluginEntries.length - 1 - plugins.length;
@@ -222,7 +225,7 @@ export async function createSingleCompileConfig(
     context: repoRoot,
 
     entry: {
-      // Single entry point that imports all plugins
+      // Single entry point containing the generated plugin loader registry
       // When HMR is enabled, prepend the HMR client for SSE-based update notifications
       kibana: hmr
         ? [Path.resolve(__dirname, '../hmr/hmr_client.js'), unifiedEntryPath]
@@ -239,7 +242,11 @@ export async function createSingleCompileConfig(
       chunkFilename: 'chunks/[name].[contenthash:8].js',
       // Use 'auto' to dynamically resolve publicPath at runtime based on document.currentScript
       publicPath: 'auto',
-      clean: !watch,
+      // Also clean in watch mode: chunk names are content-hashed, so without it every rebuild
+      // leaves its old chunks and source maps behind and target/public/bundles grows unbounded.
+      // Keep what the compilation doesn't emit itself: stats.json is written after the build, and
+      // hot-update files of the previous build are pruned by cleanupStaleHotUpdates in run_build.ts.
+      clean: watch ? { keep: WATCH_CLEAN_KEEP } : true,
       uniqueName: 'kibana-bundle',
       pathinfo: false,
       ...(dist ? {} : { devtoolModuleFilenameTemplate: 'kibana:///[resource-path]' }),
@@ -396,8 +403,7 @@ export async function createSingleCompileConfig(
       // cannot detect (e.g. public/ -> same-plugin common/ -> other-plugin common/).
       ...(dist ? [new CrossPluginTargetValidationPlugin(plugins)] : []),
 
-      // Emit chunk-manifest.json with allChunks (for eager loading via the
-      // bootstrap load() array)
+      // Emit page-selectable preload chunks plus an allChunks compatibility fallback.
       new ChunkPreloadManifestPlugin(),
 
       // Bundle metrics -- collects per-plugin sizes and module counts, emits metrics.json

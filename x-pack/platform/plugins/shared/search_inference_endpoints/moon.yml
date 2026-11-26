@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-test-helpers-model-versions'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

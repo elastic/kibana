@@ -2,6 +2,7 @@
   "type": "plugin",
   "id": "@kbn/files-plugin",
   "owner": [
+    "@elastic/kibana-core",
     "@elastic/appex-sharedux"
   ],
   "group": "platform",

@@ -21,6 +21,7 @@ export {
   EXTERNAL_ALERT_SOURCE,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from './automation_limits';
+export { isSlackChannelId, parseSlackChannelInput } from './slack_channel';
 export { isScheduleOnlyAutomation } from './automation_run';
 export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
 export type { PresetSchedule } from './automation_schedule';
@@ -82,11 +83,6 @@ export interface StartInvestigationRequest {
   instructions?: string;
   /** Optional upper bound for this investigation workflow run, in seconds. */
   timeout_seconds?: number;
-  /**
-   * Nightshift source ids the investigation should scope its queries to. The
-   * investigation workflow resolves them to slug and ES|QL view.
-   */
-  source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
   context?: InvestigationContext | AlertInvestigationContext;

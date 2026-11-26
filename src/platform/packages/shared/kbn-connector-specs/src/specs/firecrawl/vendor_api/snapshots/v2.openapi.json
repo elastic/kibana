@@ -332,15 +332,16 @@
                       ]
                     },
                     "language": {
-                      "nullable": true,
-                      "oneOf": [
+                      "anyOf": [
                         {
+                          "nullable": true,
                           "type": "string"
                         },
                         {
                           "items": {
                             "type": "string"
                           },
+                          "nullable": true,
                           "type": "array"
                         }
                       ]
@@ -576,7 +577,8 @@
                 "$ref": "#/components/schemas/AlexandriaCall"
               }
             ],
-            "nullable": true
+            "nullable": true,
+            "type": "object"
           },
           "total": {
             "minimum": 0,
@@ -660,7 +662,9 @@
       },
       "Formats": {
         "default": [
-          "markdown"
+          {
+            "type": "markdown"
+          }
         ],
         "items": {
           "oneOf": [
@@ -771,6 +775,41 @@
             },
             {
               "properties": {
+                "selectors": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "attribute": {
+                        "type": "string"
+                      },
+                      "selector": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "selector",
+                      "attribute"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "type": {
+                  "enum": [
+                    "attributes"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "selectors"
+              ],
+              "title": "Attributes",
+              "type": "object"
+            },
+            {
+              "properties": {
                 "fullPage": {
                   "default": false,
                   "type": "boolean"
@@ -810,6 +849,7 @@
               "properties": {
                 "checkPromptInjection": {
                   "default": false,
+                  "deprecated": true,
                   "type": "boolean"
                 },
                 "prompt": {
@@ -1316,6 +1356,10 @@
             "default": true,
             "type": "boolean"
           },
+          "checkPromptInjection": {
+            "default": false,
+            "type": "boolean"
+          },
           "excludeTags": {
             "items": {
               "type": "string"
@@ -1375,10 +1419,19 @@
           },
           "parsers": {
             "default": [
-              "pdf"
+              "pdf",
+              "image"
             ],
             "items": {
               "oneOf": [
+                {
+                  "enum": [
+                    "pdf",
+                    "image"
+                  ],
+                  "title": "Parser name",
+                  "type": "string"
+                },
                 {
                   "additionalProperties": false,
                   "properties": {
@@ -1418,6 +1471,23 @@
                   "required": [
                     "type"
                   ],
+                  "title": "PDF",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "enum": [
+                        "image"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "title": "Image",
                   "type": "object"
                 }
               ]
@@ -1466,7 +1536,7 @@
             "type": "boolean"
           },
           "skipTlsVerification": {
-            "default": true,
+            "default": false,
             "type": "boolean"
           },
           "storeInCache": {
@@ -1484,6 +1554,7 @@
           },
           "waitFor": {
             "default": 0,
+            "maximum": 60000,
             "type": "integer"
           }
         },
@@ -1541,6 +1612,26 @@
               "answer": {
                 "nullable": true,
                 "type": "string"
+              },
+              "attributes": {
+                "items": {
+                  "properties": {
+                    "attribute": {
+                      "type": "string"
+                    },
+                    "selector": {
+                      "type": "string"
+                    },
+                    "values": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
               },
               "audio": {
                 "nullable": true,
@@ -2116,15 +2207,16 @@
                     ]
                   },
                   "language": {
-                    "nullable": true,
-                    "oneOf": [
+                    "anyOf": [
                       {
+                        "nullable": true,
                         "type": "string"
                       },
                       {
                         "items": {
                           "type": "string"
                         },
+                        "nullable": true,
                         "type": "array"
                       }
                     ]
@@ -2137,6 +2229,39 @@
                       "type": "string"
                     },
                     "type": "array"
+                  },
+                  "provider": {
+                    "properties": {
+                      "creditsCost": {
+                        "type": "integer"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "steps": {
+                        "items": {
+                          "properties": {
+                            "creditsCost": {
+                              "type": "integer"
+                            },
+                            "provider": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "enum": [
+                                "matched",
+                                "not_found",
+                                "error"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
                   },
                   "sourceURL": {
                     "format": "uri",
@@ -2547,6 +2672,29 @@
               }
             }
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
           "402": {
             "content": {
               "application/json": {
@@ -2582,6 +2730,12 @@
                   "properties": {
                     "error": {
                       "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
                     }
                   },
                   "type": "object"
@@ -2771,6 +2925,29 @@
               }
             }
           },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
           "429": {
             "content": {
               "application/json": {
@@ -2790,8 +2967,17 @@
               "application/json": {
                 "schema": {
                   "properties": {
+                    "code": {
+                      "type": "string"
+                    },
                     "error": {
                       "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
                     }
                   },
                   "type": "object"
@@ -2859,6 +3045,14 @@
                       "domainTools": {
                         "default": false,
                         "type": "boolean"
+                      },
+                      "toolDetail": {
+                        "enum": [
+                          "compact",
+                          "summary",
+                          "full"
+                        ],
+                        "type": "string"
                       }
                     },
                     "type": "object"
@@ -2900,6 +3094,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -2923,6 +3120,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -2944,6 +3144,9 @@
                       "type": "string"
                     },
                     "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
                       "type": "string"
                     },
                     "requiresAction": {
@@ -2996,6 +3199,32 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -3017,6 +3246,9 @@
                       "type": "string"
                     },
                     "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
                       "type": "string"
                     },
                     "success": {
@@ -3053,6 +3285,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -3074,6 +3309,9 @@
                       "type": "string"
                     },
                     "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
                       "type": "string"
                     },
                     "success": {
@@ -3102,71 +3340,89 @@
               "schema": {
                 "properties": {
                   "categories": {
-                    "items": {
-                      "oneOf": [
-                        {
-                          "properties": {
-                            "type": {
-                              "enum": [
-                                "developer"
-                              ],
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "type"
+                    "oneOf": [
+                      {
+                        "items": {
+                          "enum": [
+                            "developer",
+                            "gov",
+                            "research",
+                            "pdf"
                           ],
-                          "title": "Developer",
-                          "type": "object"
+                          "type": "string"
                         },
-                        {
-                          "properties": {
-                            "type": {
-                              "enum": [
-                                "gov"
+                        "title": "Category names",
+                        "type": "array"
+                      },
+                      {
+                        "items": {
+                          "oneOf": [
+                            {
+                              "properties": {
+                                "type": {
+                                  "enum": [
+                                    "developer"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
                               ],
-                              "type": "string"
+                              "title": "Developer",
+                              "type": "object"
+                            },
+                            {
+                              "properties": {
+                                "type": {
+                                  "enum": [
+                                    "gov"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "title": "Gov",
+                              "type": "object"
+                            },
+                            {
+                              "properties": {
+                                "type": {
+                                  "enum": [
+                                    "research"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "title": "Research",
+                              "type": "object"
+                            },
+                            {
+                              "properties": {
+                                "type": {
+                                  "enum": [
+                                    "pdf"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "title": "PDF",
+                              "type": "object"
                             }
-                          },
-                          "required": [
-                            "type"
-                          ],
-                          "title": "Gov",
-                          "type": "object"
+                          ]
                         },
-                        {
-                          "properties": {
-                            "type": {
-                              "enum": [
-                                "research"
-                              ],
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "type"
-                          ],
-                          "title": "Research",
-                          "type": "object"
-                        },
-                        {
-                          "properties": {
-                            "type": {
-                              "enum": [
-                                "pdf"
-                              ],
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "type"
-                          ],
-                          "title": "PDF",
-                          "type": "object"
-                        }
-                      ]
-                    },
-                    "type": "array"
+                        "title": "Category objects",
+                        "type": "array"
+                      }
+                    ]
                   },
                   "country": {
                     "default": "US",
@@ -3233,7 +3489,9 @@
                   },
                   "sources": {
                     "default": [
-                      "web"
+                      {
+                        "type": "web"
+                      }
                     ],
                     "items": {
                       "oneOf": [
@@ -3570,6 +3828,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "jobId": {
+                      "type": "string"
+                    },
                     "success": {
                       "type": "boolean"
                     }
@@ -3588,6 +3849,9 @@
                       "type": "string"
                     },
                     "error": {
+                      "type": "string"
+                    },
+                    "jobId": {
                       "type": "string"
                     },
                     "success": {

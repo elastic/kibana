@@ -25,6 +25,7 @@ export type {
   Attribution,
   StoredEMSVectorTileLayer,
   StoredHeatmapLayer,
+  StoredLayer,
   StoredLayerGroup,
   StoredRasterLayer,
   StoredVectorLayer,
@@ -55,6 +56,7 @@ export type {
   TiledSingleLayerVectorSourceDescriptor,
   JoinSourceDescriptor,
   SourceDescriptor,
+  DiscriminatedSourceDescriptor,
 
   //
   // Style types

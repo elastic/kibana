@@ -42,6 +42,12 @@ describe('retry filter', () => {
       expect(isRecoverable(error)).toBe(true);
     });
 
+    it('returns true for timeout errors', () => {
+      const error = new Error('Request timed out');
+      error.name = 'TimeoutError';
+      expect(isRecoverable(error)).toBe(true);
+    });
+
     it('returns false for other kind of inference errors', () => {
       const error = createInferenceInternalError();
       expect(isRecoverable(error)).toBe(false);

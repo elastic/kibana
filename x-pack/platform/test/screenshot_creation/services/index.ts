@@ -8,9 +8,13 @@
 import { services as kibanaFunctionalServices } from '../../functional/services';
 
 import { CommonScreenshotsProvider } from './common_screenshots';
+import { MlDocsTransformProvider } from './ml_docs_transform';
+import { TransformAlertingProvider } from './transform_alerting';
 
 export const services = {
   ...kibanaFunctionalServices,
 
   commonScreenshots: CommonScreenshotsProvider,
+  mlDocsTransform: MlDocsTransformProvider,
+  transformAlerting: TransformAlertingProvider,
 };

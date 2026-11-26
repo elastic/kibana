@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { of } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import {
   ALERT_EPISODE_ACTION_TYPE,
@@ -176,6 +177,73 @@ describe('AlertEpisodeDetailsFlyout', () => {
     );
   });
 
+  describe('add to chat', () => {
+    const createAgentBuilder = (activeConversation: { id?: string } | null) =>
+      ({
+        openChat: jest.fn(),
+        addAttachment: jest.fn(),
+        events: { ui: { activeConversation$: of(activeConversation) } },
+      } as unknown as NonNullable<typeof mockServices.agentBuilder>);
+
+    it('does not offer add to chat when Agent Builder is not provided', () => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
+
+      render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+      expect(
+        screen.queryByTestId('alertingV2EpisodeFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not offer add to chat until the episode is loaded', () => {
+      const agentBuilder = createAgentBuilder(null);
+
+      render(
+        <AlertEpisodeDetailsFlyout {...baseProps} services={{ ...mockServices, agentBuilder }} />,
+        { wrapper: Wrapper }
+      );
+
+      expect(
+        screen.queryByTestId('alertingV2EpisodeFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens a new conversation with the alert when the chat is not bound', () => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
+      const agentBuilder = createAgentBuilder(null);
+
+      render(
+        <AlertEpisodeDetailsFlyout {...baseProps} services={{ ...mockServices, agentBuilder }} />,
+        { wrapper: Wrapper }
+      );
+      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutAddToChatButton'));
+
+      expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
+      expect(agentBuilder.openChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newConversation: true,
+          attachments: [expect.objectContaining({ id: 'alert:ep-1', origin: 'ep-1' })],
+        })
+      );
+    });
+
+    it('attaches the alert to the bound conversation when the chat is open', () => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
+      const agentBuilder = createAgentBuilder({ id: 'conversation-1' });
+
+      render(
+        <AlertEpisodeDetailsFlyout {...baseProps} services={{ ...mockServices, agentBuilder }} />,
+        { wrapper: Wrapper }
+      );
+      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutAddToChatButton'));
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'alert:ep-1', origin: 'ep-1' })
+      );
+    });
+  });
+
   it('hosts an action that renders its own menu entry and lets it close the menu', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
     const renderMenuItem = jest.fn(({ closeMenu }) => (
@@ -245,11 +313,9 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabMetadata')).not.toBeInTheDocument();
   });
 
-  it('calls onClose when the footer close button is clicked', () => {
-    const onClose = jest.fn();
-    render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
-    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutCloseButton'));
-    expect(onClose).toHaveBeenCalled();
+  it('does not render a close button in the footer', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+    expect(screen.queryByTestId('alertingV2EpisodeFlyoutCloseButton')).not.toBeInTheDocument();
   });
 
   it('calls onClose when the header close icon is clicked', () => {

@@ -24,6 +24,12 @@ export const getPluginStatus$ = (
             summary: 'Error fetching license',
           };
         }
+        if (!license.isAvailable) {
+          return {
+            level: ServiceStatusLevels.unavailable,
+            summary: 'License information unavailable',
+          };
+        }
         return {
           level: ServiceStatusLevels.available,
           summary: 'License fetched',

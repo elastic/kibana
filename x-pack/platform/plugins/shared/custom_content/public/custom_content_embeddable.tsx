@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
@@ -63,14 +64,17 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
   CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
+  toEsqlQueryState,
 } from '@kbn/custom-content-common';
 import {
   CustomContentComponent,
   type CustomContentRendererServices,
 } from '@kbn/custom-content-renderer';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { EsqlSource } from '@kbn/data-source';
+import type { FilterableSource } from '@kbn/data-source';
+import { getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
+import { compact, uniqBy } from 'lodash';
 import { getServices } from './services';
 import { readContextQueries } from '../common/panel_context_queries';
 import { getTelemetry } from './telemetry';
@@ -85,6 +89,31 @@ import {
 } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import type { CustomContentEmbeddableState } from '../server';
+
+// One source per dataset, whose identity is the whole dataset (index pattern, project routing and time
+// field), not just the index. Two queries on one index can resolve different time fields, and the one
+// that has a time field is what makes the dashboard offer its time picker.
+const resolveEsqlSources = async (
+  queries: readonly string[],
+  http: HttpStart,
+  projectRouting: string | undefined
+): Promise<FilterableSource[]> => {
+  const sources = await Promise.all(
+    queries.map(async (query) => {
+      // One query that cannot be resolved must not hide the sources of the others, or end the
+      // subscription.
+      try {
+        // A query without a source command (e.g. `ROW`) reads no dataset, so there is nothing to publish.
+        if (!getSourceCommandQueryFromESQLQuery(query)) return undefined;
+        const source = await EsqlSource.forDataset({ query, http, projectRouting });
+        return await source.toFilterableSource(http);
+      } catch {
+        return undefined;
+      }
+    })
+  );
+  return uniqBy(compact(sources), 'id');
+};
 
 const isToolCallForPanel = (event: BrowserChatEvent, panelId: string): boolean => {
   if (!isToolCallEvent(event)) return false;
@@ -113,7 +142,7 @@ const panelMeasureCss = css({
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
   HasEditCapabilities &
-  PublishesDataSources<DataView> &
+  PublishesDataSources &
   PublishesDataLoading &
   PublishesEsql &
   PublishesWritableTimeRange &
@@ -125,7 +154,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const { core, search, dataViews, agentBuilder } = getServices();
+    const { core, search, agentBuilder } = getServices();
     const rendererServices: CustomContentRendererServices = {
       http: core.http,
       uiSettings: core.uiSettings,
@@ -153,8 +182,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     // The other queries extend the first, so a panel with no first query, or an empty one, has none.
     const keepIfMainQuery = (queries: readonly string[]): string[] =>
       queries[0] ? [...queries] : [];
-    // The panel's queries, the first of which is `rows` in its template. Only a hand-edited panel has
-    // more than one, and the editor changes only the first.
+    // The panel's queries, the first of which is `rows` in its template.
     const esqlQueries$ = new BehaviorSubject<string[]>(
       keepIfMainQuery(initialState.esql_query ?? [])
     );
@@ -167,8 +195,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         current.length === next.length && current.every((query, index) => query === next[index]);
       if (!isSame) esqlQueries$.next(next);
     };
-    const replaceMainQuery = (queries: readonly string[], mainQuery: string | undefined) =>
-      mainQuery ? [mainQuery, ...queries.slice(1)] : [];
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
@@ -201,7 +227,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           ? parentApi.timeRange$.getValue() ?? undefined
           : undefined)
     );
-    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -209,7 +235,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
-      esql_query: esqlQueries$.getValue().length ? [...esqlQueries$.getValue()] : undefined,
+      esql_query: toEsqlQueryState(esqlQueries$.getValue()),
       template: template$.getValue(),
     });
 
@@ -220,13 +246,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     ) => {
       template$.next(data.panel_template);
       setEsqlQueries(readContextQueries(data));
-    };
-
-    const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
-      if ('esqlQuery' in update) {
-        setEsqlQueries(replaceMainQuery(esqlQueries$.getValue(), update.esqlQuery));
-      }
-      if ('template' in update) template$.next(update.template);
     };
 
     const stateApi = initializeStateApi<CustomContentEmbeddableState>({
@@ -291,12 +310,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               './components/edit_custom_content_flyout'
             );
 
-            const handleSave = (
-              newEsqlQuery: string | undefined,
-              newTemplate: string | undefined
-            ) => {
+            const handleSave = (newEsqlQueries: string[], newTemplate: string | undefined) => {
               hasSaved = true;
-              applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
+              setEsqlQueries(newEsqlQueries);
+              template$.next(newTemplate);
               closeFlyout();
             };
 
@@ -306,7 +323,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
             const handleGenerateWithChatFromFlyout = (
               draftTemplate: string,
-              draftEsqlQuery: string | undefined
+              newEsqlQueries: string[]
             ) => {
               if (!agentBuilder) return;
               hasSaved = true;
@@ -317,8 +334,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
-                    // The editor does not change the other queries yet, so the chat gets the panel's own.
-                    esqlQueries: replaceMainQuery(esqlQueries$.getValue(), draftEsqlQuery),
+                    esqlQueries: newEsqlQueries,
                     embeddableId: uuid,
                     panelTitle: titleManager.api.title$.getValue() ?? undefined,
                     panelHeight: measurePanelHeight(),
@@ -404,49 +420,18 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
     // Important for unified search support: KQL bar and filter builder suggestions, and whether the
     // dashboard offers its time picker. Every query counts, since every query is fetched with the
-    // dashboard's time range, so a data view is published for each one.
-    const dataViewsSubscription = combineLatest([esqlQueries$, projectRouting$])
+    // dashboard's time range, so a source is published for each one.
+    const dataSourcesSubscription = combineLatest([esqlQueries$, projectRouting$])
       .pipe(
         map(([queries, routingValue]) => ({ queries, routingValue })),
         distinctUntilChanged(
           (a, b) => a.routingValue === b.routingValue && a.queries === b.queries
         ),
-        switchMap(({ queries, routingValue }) => {
-          if (queries.length === 0) return of(undefined);
-          return from(
-            Promise.all(
-              queries.map(async (query) => {
-                // One query that cannot be resolved must not hide the data views of the others, or
-                // end the subscription.
-                try {
-                  return await getESQLAdHocDataview({
-                    dataViewsService: dataViews,
-                    query,
-                    http: core.http,
-                    projectRouting: routingValue,
-                  });
-                } catch {
-                  return undefined;
-                }
-              })
-            )
-          );
-        })
+        switchMap(({ queries, routingValue }) =>
+          queries.length === 0 ? of([]) : from(resolveEsqlSources(queries, core.http, routingValue))
+        )
       )
-      .subscribe((resolved) => {
-        // Queries that resolve to the same data view publish it once. The identity is the whole
-        // ad-hoc data view (index pattern, project routing and time field), not just the index:
-        // two queries on one index can resolve different time fields, and the one that has a time
-        // field is what makes the dashboard offer its time picker.
-        const byIdentity = new Map<string, DataView>();
-        (resolved ?? []).forEach((dataView) => {
-          if (!dataView) return;
-          const identity =
-            dataView.id ?? `${dataView.getIndexPattern()}|${dataView.timeFieldName ?? ''}`;
-          if (!byIdentity.has(identity)) byIdentity.set(identity, dataView);
-        });
-        dataSources$.next(byIdentity.size ? Array.from(byIdentity.values()) : undefined);
-      });
+      .subscribe((sources) => dataSources$.next(sources.length ? sources : undefined));
 
     const fetchSubscription = fetch$(api).subscribe((ctx) => {
       isApproximate$.next(ctx.isApproximate);
@@ -497,7 +482,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         useEffect(() => {
           return () => {
             esqlUsageSubscription.unsubscribe();
-            dataViewsSubscription.unsubscribe();
+            dataSourcesSubscription.unsubscribe();
             fetchSubscription.unsubscribe();
           };
         }, []);
