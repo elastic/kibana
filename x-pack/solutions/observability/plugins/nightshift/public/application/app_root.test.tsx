@@ -6,6 +6,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { of } from 'rxjs';
@@ -20,11 +21,22 @@ jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('./nightshift_page', () => ({
-  NightshiftPage: () => <div data-test-subj="nightshiftPageStub" />,
+  NightshiftPage: () => {
+    // Exposes the services Nightshift hooks read, so the tests can assert on them.
+    capturedServices = useKibana<Pick<CoreStart, 'notifications'>>().services;
+    return <div data-test-subj="nightshiftPageStub" />;
+  },
 }));
+
+let capturedServices: Pick<CoreStart, 'notifications'> | undefined;
 
 const renderAppRoot = (spaceId?: string) => {
   const coreStart = coreMock.createStart();
+  coreStart.notifications.toasts.addSuccess.mockReturnValue({ id: 'success' });
+  coreStart.notifications.toasts.addError.mockReturnValue({ id: 'error' });
+  coreStart.uiSettings.get.mockImplementation((key: string) =>
+    key === 'notifications:lifetime:error' ? 300000 : 5000
+  );
   const pluginsStart = {
     ...(spaceId
       ? {
@@ -35,7 +47,7 @@ const renderAppRoot = (spaceId?: string) => {
       : {}),
   } as NightshiftStartDependencies;
 
-  return render(
+  const result = render(
     <I18nProvider>
       <AppRoot
         appMountParameters={{ history: createMemoryHistory() } as unknown as AppMountParameters}
@@ -46,9 +58,15 @@ const renderAppRoot = (spaceId?: string) => {
       />
     </I18nProvider>
   );
+
+  return { ...result, coreStart };
 };
 
 describe('AppRoot', () => {
+  beforeEach(() => {
+    capturedServices = undefined;
+  });
+
   it('renders Nightshift in the default space', async () => {
     renderAppRoot('default');
 
@@ -68,5 +86,35 @@ describe('AppRoot', () => {
     renderAppRoot();
 
     expect(await screen.findByTestId('nightshiftPageStub')).toBeInTheDocument();
+  });
+
+  describe('toasts', () => {
+    it('gives Nightshift capped toasts and keeps the rest of the notifications service', async () => {
+      const { coreStart } = renderAppRoot('default');
+      await screen.findByTestId('nightshiftPageStub');
+
+      const { notifications } = capturedServices ?? {};
+      expect(notifications?.toasts).not.toBe(coreStart.notifications.toasts);
+      expect(notifications?.screenReader).toBe(coreStart.notifications.screenReader);
+
+      notifications?.toasts.addSuccess('saved');
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith('saved', {
+        toastLifeTimeMs: 4000,
+      });
+    });
+
+    it('removes its toasts when Nightshift unmounts', async () => {
+      const { coreStart, unmount } = renderAppRoot('default');
+      await screen.findByTestId('nightshiftPageStub');
+      const toast = capturedServices?.notifications.toasts.addError(new Error('boom'), {
+        title: 'Failed',
+      });
+      expect(toast).toEqual({ id: 'error' });
+      expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
+
+      unmount();
+
+      expect(coreStart.notifications.toasts.remove).toHaveBeenCalledWith(toast);
+    });
   });
 });

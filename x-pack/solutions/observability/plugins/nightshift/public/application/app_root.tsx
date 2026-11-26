@@ -15,9 +15,10 @@ import { css } from '@emotion/react';
 import { isNightshiftSupportedSpace } from '@kbn/nightshift-shared';
 import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { FocusedSignificantEventService } from '../chat/focused_significant_event_service';
 import { NightshiftPage } from './nightshift_page';
+import { createNightshiftToasts } from './nightshift_toasts';
 import type { NightshiftStartDependencies } from '../types';
 import { UnsupportedSpacePrompt } from './unsupported_space_prompt';
 
@@ -49,17 +50,26 @@ export function AppRoot({
   const isUnsupportedSpace =
     activeSpace !== undefined && !isNightshiftSupportedSpace(activeSpace.id);
 
+  // Core's toasts stay on screen long enough to cover Nightshift's bottom-right action buttons, so
+  // every Nightshift hook gets a short-lived wrapper and its toasts go away with the app.
+  const toasts = useMemo(
+    () => createNightshiftToasts(coreStart.notifications.toasts, coreStart.uiSettings),
+    [coreStart.notifications.toasts, coreStart.uiSettings]
+  );
+  useEffect(() => toasts.dismissAll, [toasts]);
+
   // Flat shape so `useKibana().services` destructures the same way it did while
   // this app lived inside the observability plugin.
   const services = useMemo(
     () => ({
       ...coreStart,
+      notifications: { ...coreStart.notifications, toasts },
       ...pluginsStart,
       isServerless,
       appParams: { history },
       focusedSignificantEventService,
     }),
-    [coreStart, history, pluginsStart, isServerless, focusedSignificantEventService]
+    [coreStart, toasts, history, pluginsStart, isServerless, focusedSignificantEventService]
   );
 
   return (
