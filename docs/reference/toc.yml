@@ -128,6 +128,7 @@ toc:
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
           - file: connectors-kibana/kubernetes-action-type.md
+          - file: connectors-kibana/microsoft-defender-for-endpoint-action-type.md
           - file: connectors-kibana/microsoft-sql-server-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/monday-com-action-type.md
@@ -160,6 +161,7 @@ toc:
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/threatq-action-type.md
           - file: connectors-kibana/trello-action-type.md
+          - file: connectors-kibana/trend-vision-one-action-type.md
           - file: connectors-kibana/unifi-action-type.md
           - file: connectors-kibana/urlscan-io-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
