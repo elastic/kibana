@@ -45,8 +45,14 @@ import {
 
 const ACCESS_CONTROL_TEST_PREFIX = 'conversation-access-control-test';
 
-const isRoundCompletePayload = (payload: ChatCallbackResponse): boolean =>
-  'event' in payload && isRoundCompleteEvent(payload.event);
+/** Whether a callback payload ends the round; throws on a terminal failure payload. */
+const isRoundCompletePayload = (payload: ChatCallbackResponse): boolean => {
+  if (!('event' in payload)) {
+    throw new Error(`Callback execution failed: ${JSON.stringify(payload)}`);
+  }
+
+  return isRoundCompleteEvent(payload.event);
+};
 
 function mockAgent(id: string, accessMode: AgentAccessControlMode) {
   return {
