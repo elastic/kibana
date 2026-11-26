@@ -14,6 +14,9 @@ import { getConnectorSpecRoute } from './get_spec';
 import type { ActionsConfigurationUtilities } from '../../../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 import { actionsClientMock } from '../../../mocks';
+import { getConnectorSpecQuerySchemaV1 } from '../../../../common/routes/connector/apis/get_spec';
+import { CONNECTOR_SPEC_VERSION_MAX_LENGTH } from '../../../../common';
+import type { Type } from '@kbn/config-schema';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -28,6 +31,7 @@ const createActionsConfigUtilsMock = (
   overrides: Partial<{
     pfxEnabled: boolean;
     earsEnabled: boolean;
+    catalogEnabled: boolean;
   }> = {}
 ): ActionsConfigurationUtilities =>
   ({
@@ -35,6 +39,7 @@ const createActionsConfigUtilsMock = (
       ssl: { pfx: { enabled: overrides.pfxEnabled ?? true } },
     })),
     isEarsEnabled: jest.fn(() => overrides.earsEnabled ?? false),
+    isCatalogEnabled: jest.fn(() => overrides.catalogEnabled ?? false),
   } as unknown as ActionsConfigurationUtilities);
 
 describe('getConnectorSpecRoute', () => {
@@ -72,10 +77,11 @@ describe('getConnectorSpecRoute', () => {
   it('returns 200 with body from actionsClient.getConnectorSpec', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const actionsConfigUtils = createActionsConfigUtilsMock();
+    const actionsConfigUtils = createActionsConfigUtilsMock({ catalogEnabled: true });
     const actionsClient = actionsClientMock.create();
     const clientResult = {
       metadata: {
+        specVersion: '1.3',
         id: 'test-connector',
         displayName: 'Test Connector',
         description: 'A test connector',
@@ -95,6 +101,7 @@ describe('getConnectorSpecRoute', () => {
     };
     const responseBody = {
       metadata: {
+        spec_version: '1.3',
         id: 'test-connector',
         display_name: 'Test Connector',
         description: 'A test connector',
@@ -114,7 +121,7 @@ describe('getConnectorSpecRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      { params: { id: 'test-connector' } },
+      { params: { id: 'test-connector' }, query: { spec_version: '1.3' } },
       ['ok', 'notFound']
     );
 
@@ -124,6 +131,7 @@ describe('getConnectorSpecRoute', () => {
     expect(res.ok).toHaveBeenCalled();
     expect(actionsClient.getConnectorSpec).toHaveBeenCalledWith({
       id: 'test-connector',
+      specVersion: '1.3',
       configurationUtilities: actionsConfigUtils,
     });
   });
@@ -152,7 +160,7 @@ describe('getConnectorSpecRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      { params: { id: 'test-connector' } },
+      { params: { id: 'test-connector' }, query: {} },
       ['ok', 'notFound']
     );
 
@@ -189,7 +197,7 @@ describe('getConnectorSpecRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      { params: { id: 'test-connector' } },
+      { params: { id: 'test-connector' }, query: {} },
       ['ok', 'notFound']
     );
 
@@ -215,7 +223,7 @@ describe('getConnectorSpecRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      { params: { id: 'unknown-connector' } },
+      { params: { id: 'unknown-connector' }, query: {} },
       ['ok', 'customError']
     );
 
@@ -251,7 +259,7 @@ describe('getConnectorSpecRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      { params: { id: 'test-connector' } },
+      { params: { id: 'test-connector' }, query: {} },
       ['ok']
     );
 
@@ -295,7 +303,7 @@ describe('getConnectorSpecRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      { params: { id: 'test-connector' } },
+      { params: { id: 'test-connector' }, query: {} },
       ['ok']
     );
 
@@ -304,7 +312,75 @@ describe('getConnectorSpecRoute', () => {
     );
   });
 
-  it('validates request params schema', async () => {
+  it('rejects the spec_version query when catalog is not enabled', () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getConnectorSpecRoute(
+      router,
+      licenseState,
+      createActionsConfigUtilsMock({ catalogEnabled: false })
+    );
+
+    const [config] = router.get.mock.calls[0];
+    const validateConfig = config.validate as { request?: { query?: Type<unknown> } };
+
+    expect(config.validate).toBeDefined();
+    expect(validateConfig.request?.query).toBeDefined();
+    expect(() => validateConfig.request?.query!.validate({ spec_version: '1.0' })).toThrow(
+      "[spec_version]: Additional properties are not allowed ('spec_version' was unexpected)"
+    );
+  });
+
+  it('accepts the spec_version query when catalog is enabled', () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getConnectorSpecRoute(
+      router,
+      licenseState,
+      createActionsConfigUtilsMock({ catalogEnabled: true })
+    );
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.validate).toBeDefined();
+    const validateConfig = config.validate as { request?: { query?: Type<unknown> } };
+    expect(validateConfig.request?.query).toBeDefined();
+    expect(validateConfig.request?.query!.validate({ spec_version: '1.0' })).toEqual({
+      spec_version: '1.0',
+    });
+  });
+
+  it('rejects an oversized spec_version query', () => {
+    expect(() =>
+      getConnectorSpecQuerySchemaV1(true).validate({
+        spec_version: '1'.repeat(CONNECTOR_SPEC_VERSION_MAX_LENGTH + 1),
+      })
+    ).toThrow('maximum length');
+  });
+
+  it('propagates an invalid version as a bad request', async () => {
+    const router = httpServiceMock.createRouter();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockRejectedValue(Boom.badRequest('Invalid spec_version'));
+    getConnectorSpecRoute(
+      router,
+      licenseStateMock.create(),
+      createActionsConfigUtilsMock({ catalogEnabled: true })
+    );
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { params: { id: 'test-connector' }, query: { spec_version: 'invalid' } },
+      ['ok']
+    );
+
+    await expect(handler(context, req, res)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(res.ok).not.toHaveBeenCalled();
+  });
+
+  it('validates request params and query schema', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -313,8 +389,9 @@ describe('getConnectorSpecRoute', () => {
     const [config] = router.get.mock.calls[0];
 
     expect(config.validate).toBeDefined();
-    const validateConfig = config.validate as { request?: { params?: unknown } };
+    const validateConfig = config.validate as { request?: { params?: unknown; query?: unknown } };
     expect(validateConfig.request?.params).toBeDefined();
+    expect(validateConfig.request?.query).toBeDefined();
   });
 
   it('has proper response schema validation', async () => {
@@ -327,6 +404,7 @@ describe('getConnectorSpecRoute', () => {
 
     const validateConfig = config.validate as { response?: Record<number, unknown> };
     expect(validateConfig.response?.[200]).toBeDefined();
+    expect(validateConfig.response?.[400]).toBeDefined();
     expect(validateConfig.response?.[404]).toBeDefined();
     expect(validateConfig.response?.[500]).toBeDefined();
   });

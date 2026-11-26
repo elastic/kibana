@@ -79,6 +79,7 @@ export interface ConnectorMetadata {
     | 'agentBuilder'
     | 'contextEngine'
   >;
+  specVersion?: string;
 }
 
 // ============================================================================

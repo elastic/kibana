@@ -16,6 +16,7 @@ import type { ActionsConfigurationUtilities } from '../../../../actions_config';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { actionTypeRegistryMock } from '../../../../action_type_registry.mock';
 import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
+import { getConnectorType } from '../../../../fixtures';
 
 const authorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
@@ -120,6 +121,7 @@ const configurationUtilities = {
   getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
   isEarsEnabled: () => false,
   isEarsExperimentalEnabled: () => false,
+  isCatalogEnabled: () => false,
 } as unknown as ActionsConfigurationUtilities;
 
 function createContext(): ActionsClientContext {
@@ -130,11 +132,182 @@ describe('getConnectorSpecAsJsonSchema', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
+    actionTypeRegistry.get.mockImplementation((id: string) =>
+      getConnectorType({ id, spec: specsById[id] })
+    );
     actionTypeRegistry.getSpec.mockImplementation((id: string) => specsById[id]);
     actionTypeRegistry.list.mockReturnValue([
       ...Object.values(specsById).map(listRow),
       serverLogRow,
     ]);
+  });
+
+  describe('spec versions', () => {
+    const catalogConfigurationUtilities = {
+      ...configurationUtilities,
+      isCatalogEnabled: () => true,
+    };
+    const firstSpec: ConnectorSpec = {
+      ...catalogOnly,
+      schema: z4.object({ endpoint: z4.string() }),
+      auth: { types: ['api_key_header'] },
+    };
+    const secondSpec: ConnectorSpec = {
+      ...catalogOnly,
+      metadata: { ...catalogOnly.metadata, displayName: 'Second version' },
+      schema: z4.object({ region: z4.string() }),
+      auth: { types: ['basic'] },
+      actions: {},
+      test: { enabled: false, handler: jest.fn() },
+    };
+
+    beforeEach(() => {
+      actionTypeRegistry.get.mockReturnValue(
+        getConnectorType({
+          id: catalogOnly.metadata.id,
+          spec: catalogOnly,
+          specs: new Map([
+            ['2.0', secondSpec],
+            ['1.9', secondSpec],
+            ['1.10', firstSpec],
+            ['1.3', firstSpec],
+          ]),
+        })
+      );
+    });
+
+    it.each([
+      [undefined, '1.10', firstSpec, 'endpoint', 'api_key_header'],
+      ['1', '1.10', firstSpec, 'endpoint', 'api_key_header'],
+      ['1.3', '1.3', firstSpec, 'endpoint', 'api_key_header'],
+      ['1.9', '1.9', secondSpec, 'region', 'basic'],
+      ['2', '2.0', secondSpec, 'region', 'basic'],
+    ] as const)(
+      'serves the schema and exact version for selector %s',
+      async (specVersion, expectedVersion, spec, field, authType) => {
+        const result = await getConnectorSpecAsJsonSchema({
+          context: createContext(),
+          id: catalogOnly.metadata.id,
+          specVersion,
+          configurationUtilities: catalogConfigurationUtilities,
+        });
+
+        expect(result.metadata.specVersion).toBe(expectedVersion);
+        expect(result.schema).toEqual(
+          expect.objectContaining({
+            properties: expect.objectContaining({
+              config: expect.objectContaining({
+                properties: expect.objectContaining({ [field]: { type: 'string' } }),
+              }),
+            }),
+          })
+        );
+        expect(result.authTypeIds).toEqual([authType]);
+        expect(result.metadata).toEqual({ ...spec.metadata, specVersion: expectedVersion });
+        expect(result.isTestable).toBe(spec.test.enabled);
+        expect(result.actions.map(({ name }) => name)).toEqual(Object.keys(spec.actions));
+      }
+    );
+
+    it.each(['', 'latest', '1.3.0', '01', '3', '1.2'])(
+      'rejects invalid or unavailable version %j without falling back',
+      async (specVersion) => {
+        await expect(
+          getConnectorSpecAsJsonSchema({
+            context: createContext(),
+            id: catalogOnly.metadata.id,
+            specVersion,
+            configurationUtilities: catalogConfigurationUtilities,
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      }
+    );
+
+    it('serves the legacy spec without a version when the catalog is disabled', async () => {
+      actionTypeRegistry.get.mockReturnValue(
+        getConnectorType({
+          id: catalogOnly.metadata.id,
+          spec: catalogOnly,
+          specs: new Map([['2.0', firstSpec]]),
+        })
+      );
+      const result = await getConnectorSpecAsJsonSchema({
+        context: createContext(),
+        id: catalogOnly.metadata.id,
+        configurationUtilities,
+      });
+
+      expect(result.metadata.specVersion).toBeUndefined();
+    });
+
+    it('omits the served version for an unversioned connector', async () => {
+      const result = await getConnectorSpecAsJsonSchema({
+        context: createContext(),
+        id: catalogOnly.metadata.id,
+        configurationUtilities,
+      });
+      expect(result.metadata.specVersion).toBeUndefined();
+    });
+
+    describe.each([
+      { name: 'no versioned specs', specs: undefined },
+      { name: 'an empty versioned specs map', specs: new Map<string, ConnectorSpec>() },
+    ])('when the catalog is enabled but the type has $name', ({ specs }) => {
+      beforeEach(() => {
+        actionTypeRegistry.get.mockReturnValue(
+          getConnectorType({ id: catalogOnly.metadata.id, spec: catalogOnly, specs })
+        );
+      });
+
+      it.each([undefined, '1'])(
+        'falls back to the unversioned spec for selector %s',
+        async (specVersion) => {
+          const result = await getConnectorSpecAsJsonSchema({
+            context: createContext(),
+            id: catalogOnly.metadata.id,
+            specVersion,
+            configurationUtilities: catalogConfigurationUtilities,
+          });
+
+          expect(result.metadata).toEqual({ ...catalogOnly.metadata, specVersion: undefined });
+        }
+      );
+
+      it.each(['', 'latest', '01', '1.x', '2.2.0'])(
+        'rejects invalid version %j instead of serving the unversioned spec',
+        async (specVersion) => {
+          await expect(
+            getConnectorSpecAsJsonSchema({
+              context: createContext(),
+              id: catalogOnly.metadata.id,
+              specVersion,
+              configurationUtilities: catalogConfigurationUtilities,
+            })
+          ).rejects.toMatchObject({ output: { statusCode: 400 } });
+        }
+      );
+
+      it.each(['2', '9.9', '1.3'])(
+        'rejects unavailable version %j instead of serving the unversioned spec',
+        async (specVersion) => {
+          await expect(
+            getConnectorSpecAsJsonSchema({
+              context: createContext(),
+              id: catalogOnly.metadata.id,
+              specVersion,
+              configurationUtilities: catalogConfigurationUtilities,
+            })
+          ).rejects.toMatchObject({
+            output: {
+              statusCode: 400,
+              payload: expect.objectContaining({
+                message: `Unknown spec_version "${specVersion}" for connector type "${catalogOnly.metadata.id}".`,
+              }),
+            },
+          });
+        }
+      );
+    });
   });
 
   describe('authorization', () => {
@@ -327,6 +500,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
       getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
       isEarsEnabled: () => true,
       isEarsExperimentalEnabled: () => false,
+      isCatalogEnabled: () => false,
     } as unknown as ActionsConfigurationUtilities;
 
     const result = await getConnectorSpecAsJsonSchema({
@@ -353,6 +527,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
       getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
       isEarsEnabled: () => true,
       isEarsExperimentalEnabled: () => false,
+      isCatalogEnabled: () => false,
     } as unknown as ActionsConfigurationUtilities;
 
     const result = await getConnectorSpecAsJsonSchema({
@@ -379,6 +554,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
       getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
       isEarsEnabled: () => true,
       isEarsExperimentalEnabled: () => true,
+      isCatalogEnabled: () => false,
     } as unknown as ActionsConfigurationUtilities;
 
     const result = await getConnectorSpecAsJsonSchema({

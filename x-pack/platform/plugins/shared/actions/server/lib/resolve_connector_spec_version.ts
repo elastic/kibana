@@ -7,16 +7,28 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { CONNECTOR_SPEC_VERSION_MAX_LENGTH } from '../../common';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ActionType } from '../types';
 import { generateConfigSchema } from './single_file_connectors/generate_config_schema';
 import { generateSecretsSchema } from './single_file_connectors/generate_secrets_schema';
 
+/** Major version selector used when a request does not specify one. */
+export const DEFAULT_CONNECTOR_SPEC_VERSION = '1';
+
 const isValidVersionSegment = (part?: string): boolean => {
   const value = Number(part);
   return Number.isSafeInteger(value) && value >= 0 && String(value) === part;
 };
+
+export const createUnknownSpecVersionError = (version: string, actionTypeId: string): Boom.Boom =>
+  Boom.badRequest(
+    i18n.translate('xpack.actions.serverSideErrors.unknownSpecVersionErrorMessage', {
+      defaultMessage: 'Unknown spec_version "{version}" for connector type "{actionTypeId}".',
+      values: { version, actionTypeId },
+    })
+  );
 
 export const parseSpecVersion = (value: string): { major: number; minor?: number } | undefined => {
   if (value.length > CONNECTOR_SPEC_VERSION_MAX_LENGTH) return undefined;
@@ -41,7 +53,11 @@ export const resolveConnectorSpecVersion = ({
   actionType: ActionType;
   specVersion?: string;
   configurationUtilities: ActionsConfigurationUtilities;
-}): { resolvedSpecVersion: string | undefined; actionTypeForValidation: ActionType } => {
+}): {
+  resolvedSpecVersion: string | undefined;
+  actionTypeForValidation: ActionType;
+  selectedSpec?: ConnectorSpec;
+} => {
   const { id: actionTypeId } = actionType;
   const { specs } = actionType;
 
@@ -50,7 +66,7 @@ export const resolveConnectorSpecVersion = ({
   }
 
   let resolvedSpecVersion: string | undefined;
-  const requestedVersion = specVersion ?? '1';
+  const requestedVersion = specVersion ?? DEFAULT_CONNECTOR_SPEC_VERSION;
   const { major, minor } = parseSpecVersion(requestedVersion) ?? {};
 
   if (major === undefined) {
@@ -81,12 +97,7 @@ export const resolveConnectorSpecVersion = ({
 
   const selectedSpec = resolvedSpecVersion ? specs?.get(resolvedSpecVersion) : undefined;
   if (!selectedSpec) {
-    throw Boom.badRequest(
-      i18n.translate('xpack.actions.serverSideErrors.unknownSpecVersionErrorMessage', {
-        defaultMessage: 'Unknown spec_version "{version}" for connector type "{actionTypeId}".',
-        values: { version: requestedVersion, actionTypeId },
-      })
-    );
+    throw createUnknownSpecVersionError(requestedVersion, actionTypeId);
   }
 
   const actionTypeForValidation = {
@@ -98,5 +109,5 @@ export const resolveConnectorSpecVersion = ({
     },
   };
 
-  return { resolvedSpecVersion, actionTypeForValidation };
+  return { resolvedSpecVersion, actionTypeForValidation, selectedSpec };
 };
