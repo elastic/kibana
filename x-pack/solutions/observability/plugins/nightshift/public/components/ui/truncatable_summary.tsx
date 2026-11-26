@@ -14,6 +14,10 @@ import { nightshiftOpacityTransition } from '../../common/transition';
 
 const DEFAULT_MAX_SUMMARY_LENGTH = 300;
 
+/** A time tag is complete once it ends with `/>`, or with `>` followed by `</time>`. */
+const isTimeTagComplete = (tail: string): boolean =>
+  /^<time[^>]*\/>/.test(tail) || /^<time[^>]*>[^<]*<\/time>/.test(tail);
+
 const truncateSummary = (characters: readonly string[], maxLength: number): string => {
   if (characters.length <= maxLength) {
     return characters.join('');
@@ -24,6 +28,12 @@ const truncateSummary = (characters: readonly string[], maxLength: number): stri
   if (backtickCount % 2 !== 0) {
     const lastBacktick = truncated.lastIndexOf('`');
     truncated = truncated.slice(0, lastBacktick);
+  }
+
+  // Never leave half a `<time ...>` tag: drop back to before the one the cut falls inside.
+  const lastTimeTagStart = [...truncated.matchAll(/<time(?=[\s/>]|$)|<tim?$|<t$/g)].pop()?.index;
+  if (lastTimeTagStart !== undefined && !isTimeTagComplete(truncated.slice(lastTimeTagStart))) {
+    truncated = truncated.slice(0, lastTimeTagStart);
   }
 
   return `${truncated}...`;
