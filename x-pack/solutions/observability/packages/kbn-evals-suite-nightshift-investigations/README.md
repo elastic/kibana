@@ -466,8 +466,9 @@ workflow.
 
 The sandbox reaches only its connectors' hosts and the space's sandbox egress rules (Nightshift
 settings, `PUT /internal/nightshift/sandbox_allowlist`). Space setup adds `GET,POST` prefix rules
-for the three repositories below, which connector probes and the other evals run with. Investigation
-datasets replace them, next to their custom context, with the rules the dataset needs
+for the three repositories below (#304625). They also open those repositories' issue and pull
+request pages, and connector probes and the other evals run with them. Investigation datasets
+replace them, next to their custom context, with the rules the dataset needs
 ([`sandbox_allowlist.ts`](evals/investigation/sandbox_allowlist.ts)): git smart HTTP to the
 repositories that context points at, `elastic/kibana` and `elastic/elasticsearch` for Customer-0
 and recovery cases and `open-telemetry/opentelemetry-demo` for ORCA. Only `git clone` and
@@ -1023,7 +1024,8 @@ one custom context snippet (`ORCA_CUSTOM_CONTEXT` in
 the commit the paper's environment is built on. The paper's agents find that checkout at
 `/app/opentelemetry-demo`; ours clone it in the sandbox, as the customer0 space points at Elastic's
 repositories. The space's [sandbox egress rules](#sandbox-egress) allow that clone. ORCA runs before
-this change had no source code: every clone was refused. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+12 November 2026 had no source code: every clone was refused until #304625 allowed the repository.
+The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
 as a benchmark result again only after its windows end at detection time.
 
