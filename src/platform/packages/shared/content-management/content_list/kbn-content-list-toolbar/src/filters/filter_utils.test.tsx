@@ -135,7 +135,7 @@ describe('filter utilities', () => {
     it('renders the modifier key help text', () => {
       render(<ModifierKeyTip />);
 
-      expect(screen.getByText(/\+ click exclude/)).toBeInTheDocument();
+      expect(screen.getByText(/\+ click to exclude/)).toBeInTheDocument();
     });
 
     it('renders the filter count badge with active styling', () => {

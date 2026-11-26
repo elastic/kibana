@@ -201,7 +201,7 @@ export const TagFilterPanel: FC<{}> = ({}) => {
                   {i18n.translate(
                     'contentManagement.tableList.tagFilterPanel.modifierKeyHelpText',
                     {
-                      defaultMessage: '{modifierKeyPrefix} + click exclude',
+                      defaultMessage: '{modifierKeyPrefix} + click to exclude',
                       values: {
                         modifierKeyPrefix,
                       },

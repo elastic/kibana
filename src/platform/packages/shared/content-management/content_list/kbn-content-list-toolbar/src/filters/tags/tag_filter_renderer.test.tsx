@@ -126,7 +126,7 @@ describe('TagFilterRenderer', () => {
     fireEvent.click(screen.getByText('Tags'));
 
     await waitFor(() => {
-      expect(screen.getByText(/\+ click exclude/)).toBeInTheDocument();
+      expect(screen.getByText(/\+ click to exclude/)).toBeInTheDocument();
     });
   });
 
