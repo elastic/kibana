@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
@@ -26,6 +27,7 @@ import type { DetectionEngineEnableBody } from '../../common/service_account';
 import type { TickResult } from '../../common/tick';
 import type { ActionOutcome, ActionResult } from './result_card';
 import { ResultCard } from './result_card';
+import type { GetSignalsHref } from './signals_in_discover';
 
 /** One thing the inspector can do; `run` returns the response tagged with the view that shows it. */
 interface EngineAction {
@@ -127,10 +129,12 @@ function toErrorResponse(error: unknown): unknown {
 interface InspectorPageProps {
   http: HttpStart;
   isServerless: boolean;
+  /** Links to the space's signals in Discover; absent when Discover can't be linked to. */
+  getSignalsHref?: GetSignalsHref;
 }
 
 /** The engine inspector: calls the engine's routes in the current space and shows what they return. */
-export function InspectorPage({ http, isServerless }: InspectorPageProps) {
+export function InspectorPage({ http, isServerless, getSignalsHref }: InspectorPageProps) {
   const engineActions = getEngineActions({ isServerless });
   const [runningActionId, setRunningActionId] = useState<string | null>(null);
   const [results, setResults] = useState<ActionResult[]>([]);
@@ -162,7 +166,23 @@ export function InspectorPage({ http, isServerless }: InspectorPageProps) {
 
   return (
     <EuiPageTemplate data-test-subj="nightshiftDetectionInspector" restrictWidth={false}>
-      <EuiPageTemplate.Header pageTitle="Detection engine inspector" />
+      <EuiPageTemplate.Header
+        pageTitle="Detection engine inspector"
+        rightSideItems={
+          getSignalsHref
+            ? [
+                <EuiButtonEmpty
+                  key="signals"
+                  iconType="discoverApp"
+                  href={getSignalsHref({ from: 'now-24h', to: 'now' })}
+                  data-test-subj="nightshiftDetectionInspectorSignalsLink"
+                >
+                  Signals of the last 24 hours in Discover
+                </EuiButtonEmpty>,
+              ]
+            : undefined
+        }
+      />
       <EuiPageTemplate.Section>
         <KbnInfoCallout
           size="s"
@@ -191,7 +211,7 @@ export function InspectorPage({ http, isServerless }: InspectorPageProps) {
         ) : (
           results.map((result) => (
             <React.Fragment key={result.key}>
-              <ResultCard result={result} />
+              <ResultCard result={result} getSignalsHref={getSignalsHref} />
               <EuiSpacer size="m" />
             </React.Fragment>
           ))

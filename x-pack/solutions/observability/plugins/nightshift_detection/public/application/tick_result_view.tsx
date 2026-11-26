@@ -10,6 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -66,10 +67,12 @@ const STRATEGY_COLUMNS: Array<EuiBasicTableColumn<StrategyRunResult>> = [
 
 interface TickResultViewProps {
   result: TickResult;
+  /** This tick's signals in Discover, when it wrote any and Discover can be linked to. */
+  signalsHref?: string;
 }
 
 /** One tick: its status and run id, then what each due strategy covered and wrote. */
-export function TickResultView({ result }: TickResultViewProps) {
+export function TickResultView({ result, signalsHref }: TickResultViewProps) {
   return (
     <div data-test-subj="nightshiftDetectionInspectorTick">
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -86,6 +89,18 @@ export function TickResultView({ result }: TickResultViewProps) {
             run {result.run_id}
           </EuiText>
         </EuiFlexItem>
+        {signalsHref && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <EuiLink
+                href={signalsHref}
+                data-test-subj="nightshiftDetectionInspectorTickSignalsLink"
+              >
+                Signals of this tick in Discover
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       {result.strategies.length === 0 ? (
