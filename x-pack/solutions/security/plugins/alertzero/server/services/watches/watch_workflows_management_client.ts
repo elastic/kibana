@@ -248,14 +248,12 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
   ): Promise<WorkflowStepExecutionDto | undefined> {
     // Never a search: the engine writes step documents with refresh:false, so a search can miss
     // the step of an execution that a search of the executions index already shows as finished.
-    const steps = (
-      await this.management.getStepExecutionsByStepId(
-        { executionId: workflowExecutionId, stepId },
-        spaceId,
-        request
-      )
-    ).filter((step) => step.workflowId === workflowId);
-    return steps.find(({ output }) => output != null) ?? steps[0];
+    const step = await this.management.getStepExecutionByStepId(
+      { executionId: workflowExecutionId, stepId },
+      spaceId,
+      request
+    );
+    return step?.workflowId === workflowId ? step : undefined;
   }
 
   cancelAllActiveWorkflowExecutions(

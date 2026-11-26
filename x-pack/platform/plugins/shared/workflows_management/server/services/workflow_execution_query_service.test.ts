@@ -825,7 +825,7 @@ describe('WorkflowExecutionQueryService', () => {
     });
   });
 
-  describe('getStepExecutionsByStepId', () => {
+  describe('getStepExecutionByStepId', () => {
     const step = (id: string, stepId: string, startedAt: string, extra = {}) =>
       ({
         id,
@@ -835,129 +835,213 @@ describe('WorkflowExecutionQueryService', () => {
         spaceId: 'default',
         ...extra,
       } as EsWorkflowStepExecution);
+    const projection = {
+      sourceIncludes: ['id', 'stepId', 'startedAt', 'workflowRunId', 'spaceId'],
+    };
 
     it('picks the candidates from projected metadata and reads only those in full, never by search', async () => {
       mockStepDataClient.getByIds
         .mockResolvedValueOnce(
           createMockGetExecutionsByIdsResponse([
-            { id: 'se-1', stepId: 'gate' },
-            { id: 'se-2', stepId: 'other' },
-            { id: 'se-3', stepId: 'gate' },
-          ] as EsWorkflowStepExecution[])
+            step('se-1', 'gate', '2026-01-01T00:00:01.000Z'),
+            step('se-2', 'other', '2026-01-01T00:00:02.000Z'),
+            step('se-3', 'gate', '2026-01-01T00:00:03.000Z'),
+          ])
         )
         .mockResolvedValueOnce(
           createMockGetExecutionsByIdsResponse([
             step('se-1', 'gate', '2026-01-01T00:00:01.000Z', { output: { a: 1 } }),
-            step('se-3', 'gate', '2026-01-01T00:00:03.000Z', { output: null }),
+            step('se-3', 'gate', '2026-01-01T00:00:03.000Z', { output: { a: 3 } }),
           ])
         );
 
-      const result = await service.getStepExecutionsByStepId(
+      const result = await service.getStepExecutionByStepId(
         { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-1', 'se-2', 'se-3'] },
         'default'
       );
 
-      expect(result.map(({ id }) => id)).toEqual(['se-3', 'se-1']);
-      expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(1, ['se-1', 'se-2', 'se-3'], {
-        sourceIncludes: ['id', 'stepId'],
-      });
-      expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(2, ['se-1', 'se-3'], undefined);
+      expect(result?.id).toBe('se-3');
+      expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(
+        1,
+        ['se-1', 'se-2', 'se-3'],
+        projection
+      );
+      expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(2, ['se-3', 'se-1']);
       expect(mockEsClient.search).not.toHaveBeenCalled();
     });
 
-    it('reads nothing in full when no document has the step id', async () => {
-      mockStepDataClient.getByIds.mockResolvedValueOnce(
-        createMockGetExecutionsByIdsResponse([
-          { id: 'se-2', stepId: 'other' },
-        ] as EsWorkflowStepExecution[])
-      );
-
-      await expect(
-        service.getStepExecutionsByStepId(
-          { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-2'] },
-          'default'
-        )
-      ).resolves.toEqual([]);
-      expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
-    });
-
-    it('drops documents of another execution or space', async () => {
+    it('skips a newer document of the shared step id whose output is null', async () => {
       mockStepDataClient.getByIds
         .mockResolvedValueOnce(
           createMockGetExecutionsByIdsResponse([
-            { id: 'se-1', stepId: 'gate' },
-            { id: 'se-2', stepId: 'gate' },
-          ] as EsWorkflowStepExecution[])
+            step('se-1', 'gate', '2026-01-01T00:00:01.000Z'),
+            step('se-2', 'gate', '2026-01-01T00:00:02.000Z'),
+          ])
         )
         .mockResolvedValueOnce(
           createMockGetExecutionsByIdsResponse([
-            step('se-1', 'gate', 's', { workflowRunId: 'other-exec' }),
-            step('se-2', 'gate', 's', { spaceId: 'other-space' }),
+            step('se-1', 'gate', '2026-01-01T00:00:01.000Z', { output: { a: 1 } }),
+            step('se-2', 'gate', '2026-01-01T00:00:02.000Z', { output: null }),
           ])
         );
 
       await expect(
-        service.getStepExecutionsByStepId(
+        service.getStepExecutionByStepId(
           { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-1', 'se-2'] },
           'default'
         )
-      ).resolves.toEqual([]);
+      ).resolves.toMatchObject({ id: 'se-1', output: { a: 1 } });
     });
 
-    it('reads the ids of a long run in batches of 1000', async () => {
-      const stepExecutionIds = Array.from({ length: 2500 }, (_, i) => `se-${i}`);
+    it('returns the newest document when none has an output', async () => {
       mockStepDataClient.getByIds.mockImplementation(async (ids) =>
         createMockGetExecutionsByIdsResponse(
-          ids.map((id) => step(id, 'gate', id === 'se-2499' ? 'z' : 'a'))
+          ids.map((id) => step(id, 'gate', id === 'se-2' ? 'b' : 'a'))
         )
       );
 
-      const result = await service.getStepExecutionsByStepId(
+      await expect(
+        service.getStepExecutionByStepId(
+          { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-1', 'se-2'] },
+          'default'
+        )
+      ).resolves.toMatchObject({ id: 'se-2' });
+    });
+
+    it('reads nothing in full when no document has the step id', async () => {
+      mockStepDataClient.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([step('se-2', 'other', 's')])
+      );
+
+      await expect(
+        service.getStepExecutionByStepId(
+          { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-2'] },
+          'default'
+        )
+      ).resolves.toBeNull();
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops documents of another execution or space', async () => {
+      mockStepDataClient.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([
+          step('se-1', 'gate', 's', { workflowRunId: 'other-exec' }),
+          step('se-2', 'gate', 's', { spaceId: 'other-space' }),
+        ])
+      );
+
+      await expect(
+        service.getStepExecutionByStepId(
+          { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-1', 'se-2'] },
+          'default'
+        )
+      ).resolves.toBeNull();
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads a long run in batches of 1000, newest first, and stops at the first output', async () => {
+      const stepExecutionIds = Array.from({ length: 2500 }, (_, i) => `se-${i}`);
+      const startedAt = (id: string) => String(Number(id.slice(3))).padStart(4, '0');
+      mockStepDataClient.getByIds.mockImplementation(async (ids, options) =>
+        createMockGetExecutionsByIdsResponse(
+          ids.map((id) =>
+            step(id, 'gate', startedAt(id), options || id !== 'se-1200' ? {} : { output: { a: 1 } })
+          )
+        )
+      );
+
+      const result = await service.getStepExecutionByStepId(
         { executionId: 'exec-1', stepId: 'gate', stepExecutionIds },
         'default'
       );
 
-      expect(result).toHaveLength(2500);
-      expect(result[0].id).toBe('se-2499');
-      expect(mockStepDataClient.getByIds.mock.calls.map(([ids]) => ids.length)).toEqual([
-        1000, 1000, 500, 1000, 1000, 500,
-      ]);
+      expect(result?.id).toBe('se-1200');
+      const reads = mockStepDataClient.getByIds.mock.calls.map(([ids]) => ids);
+      expect(reads.map((ids) => ids.length)).toEqual([1000, 1000, 500, 1000, 1000]);
+      expect(reads[3][0]).toBe('se-2499');
+      expect(reads[4][0]).toBe('se-1499');
     });
 
-    it('searches the step of a run that predates stepExecutionIds', async () => {
-      const older = step('se-1', 'gate', 's');
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [{ _source: older, sort: ['s', 'se-1'] }] },
-      } as any);
-
-      await expect(
-        service.getStepExecutionsByStepId({ executionId: 'exec-1', stepId: 'gate' }, 'default')
-      ).resolves.toEqual([older]);
-      expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
-      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-      expect(JSON.stringify(mockEsClient.search.mock.calls[0][0])).toContain('"gate"');
-    });
-
-    it('pages the search of an older run past the first 1000 hits', async () => {
-      const page = (from: number, length: number) =>
+    describe('a run that predates stepExecutionIds', () => {
+      const sort = [{ startedAt: { order: 'desc' } }, { id: { order: 'asc' } }];
+      const response = (hits: Array<{ _source: EsWorkflowStepExecution; sort: string[] }>) =>
+        ({
+          timed_out: false,
+          _shards: { total: 1, successful: 1, failed: 0 },
+          hits: { hits },
+        } as any);
+      const page = (from: number, length: number, extra = {}) =>
         Array.from({ length }, (_, i) => ({
-          _source: step(`se-${from + i}`, 'gate', 's'),
+          _source: step(`se-${from + i}`, 'gate', 's', extra),
           sort: ['s', `se-${from + i}`],
         }));
-      mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: page(0, 1000) } } as any)
-        .mockResolvedValueOnce({ hits: { hits: page(1000, 3) } } as any);
 
-      const result = await service.getStepExecutionsByStepId(
-        { executionId: 'exec-1', stepId: 'gate' },
-        'default'
-      );
+      it('searches the step, rejecting partial results', async () => {
+        const older = step('se-1', 'gate', 's', { output: { a: 1 } });
+        mockEsClient.search.mockResolvedValue(response([{ _source: older, sort: ['s', 'se-1'] }]));
 
-      expect(result).toHaveLength(1003);
-      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
-      expect(mockEsClient.search.mock.calls[0][0]).not.toHaveProperty('search_after');
-      expect(mockEsClient.search.mock.calls[1][0]).toMatchObject({
-        search_after: ['s', 'se-999'],
+        await expect(
+          service.getStepExecutionByStepId({ executionId: 'exec-1', stepId: 'gate' }, 'default')
+        ).resolves.toEqual(older);
+        expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+        expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+        expect(mockEsClient.search.mock.calls[0][0]).toMatchObject({
+          sort,
+          allow_partial_search_results: false,
+        });
+        expect(JSON.stringify(mockEsClient.search.mock.calls[0][0])).toContain('"gate"');
+      });
+
+      it('pages past the first 1000 hits until a page holds an output', async () => {
+        mockEsClient.search
+          .mockResolvedValueOnce(response(page(0, 1000)))
+          .mockResolvedValueOnce(response(page(1000, 3, { output: { a: 1 } })));
+
+        await expect(
+          service.getStepExecutionByStepId({ executionId: 'exec-1', stepId: 'gate' }, 'default')
+        ).resolves.toMatchObject({ id: 'se-1000' });
+        expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+        expect(mockEsClient.search.mock.calls[0][0]).toMatchObject({ sort });
+        expect(mockEsClient.search.mock.calls[0][0]).not.toHaveProperty('search_after');
+        expect(mockEsClient.search.mock.calls[1][0]).toMatchObject({
+          sort,
+          search_after: ['s', 'se-999'],
+        });
+      });
+
+      it('stops at the first page that holds an output', async () => {
+        mockEsClient.search.mockResolvedValueOnce(response(page(0, 1000, { output: { a: 1 } })));
+
+        await expect(
+          service.getStepExecutionByStepId({ executionId: 'exec-1', stepId: 'gate' }, 'default')
+        ).resolves.toMatchObject({ id: 'se-0' });
+        expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      });
+
+      it('returns the newest document when no page holds an output', async () => {
+        mockEsClient.search
+          .mockResolvedValueOnce(response(page(0, 1000)))
+          .mockResolvedValueOnce(response(page(1000, 3)));
+
+        await expect(
+          service.getStepExecutionByStepId({ executionId: 'exec-1', stepId: 'gate' }, 'default')
+        ).resolves.toMatchObject({ id: 'se-0' });
+        expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      });
+
+      it.each([
+        { timed_out: true, failed: 0 },
+        { timed_out: false, failed: 1 },
+      ])('rejects an incomplete page: %j', async ({ timed_out, failed }) => {
+        mockEsClient.search.mockResolvedValueOnce(response(page(0, 1000))).mockResolvedValueOnce({
+          ...response(page(1000, 3, { output: { a: 1 } })),
+          timed_out,
+          _shards: { total: 1, successful: 1 - failed, failed },
+        });
+
+        await expect(
+          service.getStepExecutionByStepId({ executionId: 'exec-1', stepId: 'gate' }, 'default')
+        ).rejects.toThrow('Incomplete search');
       });
     });
   });
