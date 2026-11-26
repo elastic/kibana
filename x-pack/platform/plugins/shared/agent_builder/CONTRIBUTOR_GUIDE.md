@@ -1382,7 +1382,7 @@ agentBuilder.setChatConfig({
 - **They replace the other lists:** The starters of the solution and the default list are not shown, and they do not fill the cards you leave out. Pass none, or an empty list, to show those lists.
 - **They show only for the default Elastic AI agent.** Pass its `agentId` if you open the chat yourself.
 - **Limits:** Up to 3, with labels of up to 30 characters. The `prompt` is optional. Pass already-translated labels and prompts, since they are sent as the message. Blank and repeated labels are dropped.
-- **Lifecycle:** Call `clearChatConfig()` when your page goes away. `openChat(options)` replaces the whole config instead of merging it (unless it only has a `conversationId`), so pass the starters again there.
+- **Lifecycle:** Call `clearChatConfig()` when your page goes away. `openChat(options)` replaces the whole config instead of merging it, so pass the starters again there.
 
 `EmbeddableConversation` accepts the same `conversationStarters` prop.
 

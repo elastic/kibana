@@ -26,9 +26,9 @@ describe('DEFAULT_CONVERSATION_STARTERS', () => {
     expect(new Set(labels).size).toBe(labels.length);
   });
 
-  it('has no blank prompts', () => {
+  it('has a prompt for every starter', () => {
     DEFAULT_CONVERSATION_STARTERS.forEach(({ prompt }) => {
-      expect(prompt?.trim() ?? 'ok').not.toBe('');
+      expect(prompt?.trim()).toBeTruthy();
     });
   });
 });

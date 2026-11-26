@@ -7,8 +7,7 @@
 
 /**
  * A conversation starter: a card on the new conversation empty state that sends its prompt, or its
- * label when it has none, as the message when clicked. It is an object so that more fields can be
- * added later without breaking the API.
+ * label when it has none, as the message when clicked.
  */
 export interface ConversationStarter {
   /**

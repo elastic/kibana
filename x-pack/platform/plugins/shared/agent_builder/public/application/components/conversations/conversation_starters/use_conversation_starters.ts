@@ -21,11 +21,8 @@ import { getSolutionConversationStarters } from './solution_conversation_starter
 const NO_STARTERS: ResolvedConversationStarters = { starters: [], source: 'default' };
 
 /**
- * The starters to show, and how to send one: those the app passed in its chat config, or else those
- * of the solution of the space, or else the default list. They are shown for the default Elastic AI
- * agent only. The lists of the solution and the default one also wait for the solution to be known.
- * A click sends the prompt of the starter, or its label when it has none, as the message, which
- * creates the conversation and moves the user to it.
+ * The starters to show for the default Elastic AI agent, and how to send one. A click sends the
+ * prompt of the starter, or its label when it has none.
  */
 export const useConversationStarters = ({
   solution,
