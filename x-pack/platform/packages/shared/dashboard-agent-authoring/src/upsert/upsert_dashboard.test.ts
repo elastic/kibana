@@ -309,6 +309,42 @@ describe('executeDashboardUpsert', () => {
 
       expect(result.dashboardData).toEqual({ ...dashboardWithSettings, title: 'Renamed' });
     });
+
+    it.each([
+      [
+        'turns tooltip sync off with cursor sync',
+        { sync_cursor: true, sync_tooltips: true },
+        { sync_cursor: false },
+        { sync_cursor: false, sync_tooltips: false },
+      ],
+      [
+        'keeps tooltip sync off while cursor sync stays off',
+        { sync_cursor: false },
+        { sync_tooltips: true },
+        { sync_cursor: false, sync_tooltips: false },
+      ],
+      [
+        'turns off tooltip sync stored without cursor sync on any options change',
+        { sync_cursor: false, sync_tooltips: true },
+        { hide_panel_titles: true },
+        { sync_cursor: false, sync_tooltips: false, hide_panel_titles: true },
+      ],
+      [
+        'turns tooltip sync on while cursor sync is on by default',
+        {},
+        { sync_tooltips: true },
+        { sync_tooltips: true },
+      ],
+    ])('%s', async (_, storedOptions, requestedOptions, expectedOptions) => {
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Title', panels: [], options: storedOptions },
+        upsert: { options: requestedOptions },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual(expectedOptions);
+    });
   });
 
   it('starts from an empty dashboard when no dashboard data is given', async () => {

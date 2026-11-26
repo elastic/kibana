@@ -25,6 +25,15 @@ import type { DashboardMetadata, NewSection, PlannedRemovals, UpsertPlan } from 
 import type { ResolvedChanges, ResolvedPanel } from './resolve';
 import type { UpsertSectionItem } from './schema';
 
+// Tooltip sync works only with cursor sync, as the dashboard settings flyout enforces.
+const mergeOptions = (
+  currentOptions: DashboardAttachmentData['options'],
+  requestedOptions: NonNullable<DashboardMetadata['options']>
+): DashboardAttachmentData['options'] => {
+  const options = { ...currentOptions, ...requestedOptions };
+  return options.sync_cursor === false ? { ...options, sync_tooltips: false } : options;
+};
+
 const applyMetadata = (
   dashboardData: DashboardAttachmentData,
   { title, description, time_range: timeRange, options }: DashboardMetadata
@@ -34,7 +43,7 @@ const applyMetadata = (
   ...(description !== undefined ? { description } : {}),
   ...(timeRange !== undefined ? { time_range: timeRange } : {}),
   ...(options !== undefined && Object.keys(options).length > 0
-    ? { options: { ...dashboardData.options, ...options } }
+    ? { options: mergeOptions(dashboardData.options, options) }
     : {}),
 });
 
