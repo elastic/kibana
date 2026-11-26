@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import execa from 'execa';
+import { execa, execaSync, parseCommandString } from 'execa';
 import fs, { existsSync } from 'fs';
 import Fsp from 'fs/promises';
 import pRetry from 'p-retry';
@@ -1375,11 +1375,12 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
       : []),
   ];
   try {
-    const { stdout } = execa.commandSync(
+    const [file, ...args] = parseCommandString(
       `docker ps --filter status=running ${imagesToKillContainersFor
         .map((image) => `--filter ancestor=${image}`)
         .join(' ')} --quiet`
     );
+    const { stdout } = execaSync(file, args);
     // Filter empty strings
     const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
 
@@ -1387,7 +1388,7 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
       log.info('Killing running serverless containers.');
 
       try {
-        execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+        execaSync('docker', ['kill', ...runningNodes]);
       } catch {
         log.debug('Some containers had already stopped before kill completed.');
       }
@@ -1728,7 +1729,7 @@ async function runDockerContainerInSnapshotMode(
 
   process.on('SIGINT', () => {
     try {
-      execa.commandSync(`docker kill ${containerName}`);
+      execaSync('docker', ['kill', containerName]);
     } catch {
       // container may already be stopped
     }

@@ -15,7 +15,7 @@ import {
 } from './extract_image_info';
 
 jest.mock('execa');
-const execa = jest.requireMock('execa');
+const execa = jest.requireMock('execa').execa;
 
 describe('extractImageInfo', () => {
   beforeEach(() => {

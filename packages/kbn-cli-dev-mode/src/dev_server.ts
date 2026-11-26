@@ -169,9 +169,11 @@ export class DevServer {
           })
         );
 
+        const { nodeChildProcess } = proc;
+
         // observable which emits exit states and is the switch which
         // ends all other merged observables
-        const exit$ = Rx.fromEvent<[number]>(proc, 'exit').pipe(
+        const exit$ = Rx.fromEvent<[number]>(nodeChildProcess, 'exit').pipe(
           tap(([code]) => {
             this.ready$.next(false);
 
@@ -189,7 +191,7 @@ export class DevServer {
         );
 
         // throw errors if spawn fails
-        const error$ = Rx.fromEvent<Error>(proc, 'error').pipe(
+        const error$ = Rx.fromEvent<Error>(nodeChildProcess, 'error').pipe(
           map((error) => {
             throw error;
           }),
@@ -197,7 +199,7 @@ export class DevServer {
         );
 
         // handles messages received from the child process
-        const msg$ = Rx.fromEvent<[any]>(proc, 'message').pipe(
+        const msg$ = Rx.fromEvent<[any]>(nodeChildProcess, 'message').pipe(
           tap(([received]) => {
             if (!Array.isArray(received)) {
               return;

@@ -12,7 +12,7 @@ import Path from 'path';
 import { pipeline } from 'stream/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import execa from 'execa';
+import { execa, type Subprocess } from 'execa';
 import { GCS_BUCKET_URI } from '../constants';
 import { createArchiveExtractor, getTarCreateArgs, resolveTarEnvironment } from './utils';
 import { AbstractFileSystem } from './abstract_file_system';
@@ -123,7 +123,7 @@ export class GcsFileSystem extends AbstractFileSystem {
   }
 }
 
-async function pipeAndWait(source: execa.ExecaChildProcess, destination: execa.ExecaChildProcess) {
+async function pipeAndWait(source: Subprocess, destination: Subprocess) {
   if (!source.stdout || !destination.stdin) {
     killChild(source);
     killChild(destination);
@@ -143,10 +143,10 @@ async function pipeAndWait(source: execa.ExecaChildProcess, destination: execa.E
   }
 }
 
-function killChild(child: execa.ExecaChildProcess) {
+function killChild(child: Subprocess) {
   child.stdin?.destroy();
   child.stdout?.destroy();
-  if (child.killed || child.exitCode !== null) {
+  if (child.nodeChildProcess.killed || child.nodeChildProcess.exitCode !== null) {
     return;
   }
 

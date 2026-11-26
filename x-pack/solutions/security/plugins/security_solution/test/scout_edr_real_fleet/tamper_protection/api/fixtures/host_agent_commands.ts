@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type execa from 'execa';
+import type { ExecaError } from 'execa';
 import type { ScoutLogger } from '@kbn/scout-security';
 import type { HostVmExecResponse } from '../../../../../scripts/endpoint/common/types';
 import { getHostVmClient } from '../../../../../scripts/endpoint/common/vm_services';
@@ -24,7 +24,7 @@ export interface HostCommandResult {
 
 export type ElasticInstallState = 'present' | 'absent';
 
-const isExecaError = (error: unknown): error is execa.ExecaError =>
+const isExecaError = (error: unknown): error is ExecaError<{}> =>
   error instanceof Error && 'isCanceled' in error && 'command' in error;
 
 /**
@@ -36,11 +36,11 @@ const toCommandExitResult = (error: unknown): HostVmExecResponse => {
     throw error;
   }
 
-  const { exitCode, timedOut, isCanceled, killed, signal, stdout, stderr } = error;
+  const { exitCode, timedOut, isCanceled, isTerminated, signal, stdout, stderr } = error;
   if (
     timedOut ||
     isCanceled ||
-    killed ||
+    isTerminated ||
     signal !== undefined ||
     typeof exitCode !== 'number' ||
     exitCode === SSH_ERROR_EXIT_CODE

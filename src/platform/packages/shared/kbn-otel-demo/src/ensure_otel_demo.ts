@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
 import Path from 'path';
 import chalk from 'chalk';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -42,6 +42,10 @@ import {
 } from './demo_registry';
 
 const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 /** Where the Elasticsearch exporter writes logs that carry no explicit index. */
 const DEFAULT_LOGS_DATA_STREAM = 'logs-generic.otel-default';
 
@@ -51,12 +55,12 @@ const DEFAULT_LOGS_DATA_STREAM = 'logs-generic.otel-default';
 async function down(log: ToolingLog, namespace: string, demoName: string) {
   log.info(`Stopping ${demoName}...`);
   await deleteNamespace(namespace);
-  await execa
-    .command(`kubectl delete clusterrole otel-collector-${namespace} --ignore-not-found`)
-    .catch(() => {});
-  await execa
-    .command(`kubectl delete clusterrolebinding otel-collector-${namespace} --ignore-not-found`)
-    .catch(() => {});
+  await runCommand(
+    `kubectl delete clusterrole otel-collector-${namespace} --ignore-not-found`
+  ).catch(() => {});
+  await runCommand(
+    `kubectl delete clusterrolebinding otel-collector-${namespace} --ignore-not-found`
+  ).catch(() => {});
 }
 
 /**
@@ -339,7 +343,7 @@ export async function deployDemo({
 
   // Apply the manifests
   log.info('Deploying to Kubernetes...');
-  await execa.command(`kubectl apply -f ${manifestsFilePath}`, {
+  await runCommand(`kubectl apply -f ${manifestsFilePath}`, {
     stdio: 'inherit',
   });
 
@@ -425,7 +429,7 @@ export async function streamDemoLogs({
 }): Promise<void> {
   log.info('Streaming pod logs (Ctrl+C to stop)...');
   try {
-    await execa.command(
+    await runCommand(
       `kubectl logs -f -n ${namespace} -l app=otel-collector --max-log-requests=10`,
       {
         stdio: 'inherit',
@@ -571,7 +575,7 @@ export async function patchScenarios({
 
   // Check if namespace exists
   try {
-    await execa.command(`kubectl get namespace ${namespace}`);
+    await runCommand(`kubectl get namespace ${namespace}`);
   } catch {
     throw new Error(
       `Namespace ${namespace} not found. Run 'node scripts/otel_demo.js --demo ${demoType}' first to deploy.`
@@ -588,7 +592,7 @@ export async function patchScenarios({
 
       log.debug(`Resetting ${service}: ${envArgs}`);
       try {
-        await execa.command(`kubectl set env deployment/${service} -n ${namespace} ${envArgs}`, {
+        await runCommand(`kubectl set env deployment/${service} -n ${namespace} ${envArgs}`, {
           stdio: 'pipe',
         });
         log.info(`  ${chalk.green('✔')} Reset ${service}`);
@@ -761,7 +765,7 @@ export async function patchScenarios({
 
     log.debug(`Patching ${service}: ${envArgs}`);
     try {
-      await execa.command(`kubectl set env deployment/${service} -n ${namespace} ${envArgs}`, {
+      await runCommand(`kubectl set env deployment/${service} -n ${namespace} ${envArgs}`, {
         stdio: 'pipe',
       });
       log.info(`  ${chalk.green('✔')} Patched ${service}`);

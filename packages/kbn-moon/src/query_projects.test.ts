@@ -23,10 +23,7 @@ jest.mock('@kbn/dev-utils', () => ({
   resolveNearestMergeBase: jest.fn(),
 }));
 
-jest.mock('execa', () => ({
-  __esModule: true,
-  default: mockExeca,
-}));
+jest.mock('execa', () => ({ execa: mockExeca }));
 
 const createMoonProjectsOutput = (projects: Array<{ id: string; sourceRoot: string }>) =>
   JSON.stringify({

@@ -13,7 +13,7 @@ import Os from 'os';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import execa from 'execa';
+import { execaSync } from 'execa';
 
 // The parent only hands out chunks, so every core gets a worker.
 const workerCount = Os.availableParallelism();
@@ -32,8 +32,10 @@ run(
     const bail = !!flags.bail;
     const workerOptions = { fix: !!flags.fix, cache: !!flags.cache };
 
-    const files = execa
-      .sync('git', ['ls-files', ...flags._], { cwd: REPO_ROOT, encoding: 'utf8' })
+    const files = execaSync('git', ['ls-files', ...flags._], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+    })
       .stdout.trim()
       .split('\n')
       .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));

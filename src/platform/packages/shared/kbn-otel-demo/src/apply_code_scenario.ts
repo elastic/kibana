@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
-import execa from 'execa';
+import { execa } from 'execa';
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';

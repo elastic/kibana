@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import del from 'del';
-import execa from 'execa';
+import { execa } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { globby } from 'globby';

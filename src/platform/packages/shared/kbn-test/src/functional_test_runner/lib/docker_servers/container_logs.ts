@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -21,6 +21,8 @@ export function observeContainerLogs(name: string, containerId: string, log: Too
   log.debug(`[docker:${name}] streaming logs from container [id=${containerId}]`);
   const logsProc = execa('docker', ['logs', '--follow', containerId], {
     stdio: ['ignore', 'pipe', 'pipe'],
+    // only the output is observed; the result is never awaited
+    reject: false,
   });
 
   const logLine$ = new Rx.Subject<string>();

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import * as Rx from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -37,7 +37,7 @@ export function observeContainerRunning(name: string, containerId: string, log: 
         }
       })
       .catch((error) => {
-        if (error?.killed) {
+        if (error?.isTerminated) {
           // ignore errors thrown because the process was killed
           subscriber.complete();
           return;

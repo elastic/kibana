@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 const DEFAULT_VAULT_ADDR = 'https://secrets.elastic.co:8200';
 

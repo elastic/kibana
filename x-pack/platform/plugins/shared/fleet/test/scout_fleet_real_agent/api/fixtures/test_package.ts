@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
@@ -59,14 +59,15 @@ export const uploadTestPackage = async (
     const { stdout: archive } = await execa(
       'tar',
       ['-czf', '-', '-C', workDir, `${uploadName}-${packageVersion}`],
-      { encoding: null }
+      { encoding: 'buffer' }
     );
 
     await kbnClient.request({
       method: 'POST',
       path: '/api/fleet/epm/packages',
       headers: { ...API_VERSION_HEADER, 'content-type': 'application/gzip' },
-      body: archive,
+      // execa returns a Uint8Array for binary output; send it as a Buffer.
+      body: Buffer.from(archive),
     });
   } finally {
     await fs.rm(workDir, { recursive: true, force: true });

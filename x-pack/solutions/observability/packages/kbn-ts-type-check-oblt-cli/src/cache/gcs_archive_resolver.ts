@@ -8,7 +8,7 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { TsProject } from '@kbn/ts-projects';
-import execa from 'execa';
+import { execa } from 'execa';
 import { MAX_COMMITS_TO_CHECK, CACHE_INVALIDATION_FILES } from './constants';
 import type { GcsFileSystem } from './file_system/gcs_file_system';
 import {

@@ -11,7 +11,7 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import chalk from 'chalk';
 import * as path from 'path';
-import execa from 'execa';
+import { execa, type ExecaError, type Subprocess } from 'execa';
 import type { Readable } from 'stream';
 import { combineLatest, fromEvent, first } from 'rxjs';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
@@ -109,7 +109,7 @@ export class Cluster {
   private log: ToolingLog;
   private ssl: boolean;
   private stopCalled: boolean;
-  private process: execa.ExecaChildProcess | null;
+  private process: Subprocess | null;
   private outcome: Promise<void> | null;
   private serverlessNodes: string[];
   private dockerContainerName: string | null;
@@ -584,15 +584,25 @@ export class Cluster {
         });
     }
 
-    // observe the exit code of the process and reflect in `this.outcome` promises
-    const exitCode: Promise<number> = new Promise((resolve) => this.process?.once('exit', resolve));
+    // observe the exit code of the process and reflect in `this.outcome` promises. The subprocess
+    // promise also settles when ES never spawned, where no `exit` event is emitted.
+    const exitCode: Promise<number | null> = this.process.then(
+      ({ exitCode: code }) => code ?? null,
+      (error: ExecaError) => {
+        // stop() and kill() end ES with a signal on purpose; failing to spawn has no exit code
+        if (error.exitCode === undefined && !error.isTerminated) {
+          throw error;
+        }
+        return error.exitCode ?? null;
+      }
+    );
     this.outcome = exitCode.then((code) => {
       if (this.stopCalled) {
         return;
       }
 
       // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
-      if (code > 0 && !(code === 143 || code === 130)) {
+      if (code !== null && code > 0 && !(code === 143 || code === 130)) {
         reportTime(startTime, 'abort', {
           success: true,
           error: code,

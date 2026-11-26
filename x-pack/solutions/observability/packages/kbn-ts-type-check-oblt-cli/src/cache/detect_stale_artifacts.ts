@@ -7,7 +7,7 @@
 
 import Path from 'path';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 export interface Project {

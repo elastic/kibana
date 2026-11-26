@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import Path from 'path';
 import { chmod, readFile, writeFile } from 'fs/promises';
-import execa from 'execa';
+import { execa, type Options } from 'execa';
 import { resolveEvalSuites, type EvalSuiteDefinition } from '../../src/cli/suites';
 import { runScoutHook } from '../../src/cli/scout_hook';
 import {
@@ -77,7 +77,7 @@ describe('uploadConfigToVault', () => {
     const [command, args, options] = mockedExeca.mock.calls[0] as unknown as [
       string,
       string[],
-      execa.Options
+      Options
     ];
     expect(command).toBe('vault');
     expect(args).toEqual(['kv', 'put', 'kv/ci-shared/kbn-evals/golden', 'config=-']);
@@ -139,11 +139,7 @@ describe('retrieveConfigFromVault', () => {
 
     await retrieveConfigFromVault(resolveVaultTarget('ci-prod'), 3);
 
-    const [, args, options] = mockedExeca.mock.calls[0] as unknown as [
-      string,
-      string[],
-      execa.Options
-    ];
+    const [, args, options] = mockedExeca.mock.calls[0] as unknown as [string, string[], Options];
     expect(args).toEqual([
       'kv',
       'get',

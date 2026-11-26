@@ -7,10 +7,10 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
-import execa from 'execa';
 import { mapValues } from 'lodash';
 import Os from 'os';
 import Path from 'path';
+import { runCommand } from '../util/run_command';
 import { assertDockerAvailable } from '../util/assert_docker_available';
 import { createDirIfNotExists, writeFile } from '../util/file_utils';
 import { untilContainerReady } from '../util/until_container_ready';
@@ -25,9 +25,7 @@ const PHOENIX_LOGGING_LEVEL = 'info';
 const PHOENIX_DB_LOGGING_LEVEL = 'info';
 
 async function down(dockerComposeFilePath: string, cleanup: boolean = true) {
-  await execa
-    .command(`docker compose -f ${dockerComposeFilePath} down`, { cleanup })
-    .catch(() => {});
+  await runCommand(`docker compose -f ${dockerComposeFilePath} down`, { cleanup }).catch(() => {});
 }
 
 export async function ensurePhoenix({ log, signal }: { log: ToolingLog; signal: AbortSignal }) {
@@ -114,7 +112,7 @@ export async function ensurePhoenix({ log, signal }: { log: ToolingLog; signal: 
       log.error(error);
     });
 
-  await execa.command(`docker compose -f ${dockerComposeFilePath} up`, {
+  await runCommand(`docker compose -f ${dockerComposeFilePath} up`, {
     stdio: 'inherit',
     cleanup: true,
     env,

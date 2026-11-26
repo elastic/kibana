@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 /**
  * Return the current ref for the git worktree at `dir`. If HEAD is attached to a

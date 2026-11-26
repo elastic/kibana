@@ -94,7 +94,7 @@ export const getMoonExecutablePath = async () => {
     return moonExecutablePath;
   }
 
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const { stdout } = await execa('pnpm', ['exec', 'which', 'moon'], {
     cwd: REPO_ROOT,
     stdin: 'ignore',
@@ -198,7 +198,7 @@ export const getAffectedMoonProjectsFromChangedFiles = async ({
   changedFilesJson: string;
   downstream?: MoonDownstreamMode;
 }): Promise<MoonProject[]> => {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const moonExec = await getMoonExecutablePath();
 
   const projectArgs = ['query', 'projects', '--affected'];
@@ -236,7 +236,7 @@ export const getAffectedMoonJestTargets = async ({
   downstream?: MoonDownstreamMode;
   workspaceRoot?: string;
 }): Promise<string[]> => {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const moonExec = await getMoonExecutablePath();
   const args = ['query', 'tasks', '--tags', '^jest-unit-tests$', '--affected'];
   if (downstream !== 'none') args.push('--downstream', downstream);

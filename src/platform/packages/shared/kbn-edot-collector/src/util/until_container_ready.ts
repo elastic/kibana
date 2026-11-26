@@ -8,8 +8,12 @@
  */
 
 import { backOff } from 'exponential-backoff';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 
 export async function untilContainerReady({
   containerName,
@@ -26,19 +30,19 @@ export async function untilContainerReady({
 }) {
   async function isContainerReady() {
     log.debug(`Checking container is ready`);
-    const { stdout: globalScopeContainerName } = await execa.command(
+    const { stdout: globalScopeContainerName } = await runCommand(
       `docker compose -f ${dockerComposeFilePath} ps -q ${containerName}`
     );
 
     const [field, value] = condition;
 
-    const { stdout } = await execa
-      .command(`docker inspect --format='{{${field}}}' ${globalScopeContainerName}`)
-      .catch((error) => {
-        const errorMsg = error.stderr?.split('\n')[0] || error.message;
-        log.debug(`Error retrieving container status: ${errorMsg}`);
-        throw error;
-      });
+    const { stdout } = await runCommand(
+      `docker inspect --format='{{${field}}}' ${globalScopeContainerName}`
+    ).catch((error) => {
+      const errorMsg = error.stderr?.split('\n')[0] || error.message;
+      log.debug(`Error retrieving container status: ${errorMsg}`);
+      throw error;
+    });
 
     log.debug(`Container status: ${stdout}`);
 

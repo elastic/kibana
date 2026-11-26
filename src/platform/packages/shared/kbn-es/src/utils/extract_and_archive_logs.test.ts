@@ -16,22 +16,16 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { extractAndArchiveLogs } from './extract_and_archive_logs';
 
 jest.mock('execa');
-const execa = jest.requireMock('execa');
+const { execa } = jest.requireMock('execa');
 
 jest.mock('fs/promises', () => ({
   mkdir: jest.fn(),
-  open: jest.fn(),
 }));
 const Fsp = jest.requireMock('fs/promises');
 
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
-
-/** Stand-in for the descriptor the archived log file is opened with. */
-const FD = 42;
-
-let close: jest.Mock;
 
 /** Reads the container name back out of an anchored `name=^<name>$` filter argument. */
 const parseNameFilter = (filter: string) => filter.replace(/^name=\^/, '').replace(/\$$/, '');
@@ -52,9 +46,7 @@ beforeEach(() => {
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
 
-  close = jest.fn().mockResolvedValue(undefined);
   Fsp.mkdir.mockResolvedValue(undefined);
-  Fsp.open.mockResolvedValue({ fd: FD, close });
 });
 
 describe('extractAndArchiveLogs', () => {
@@ -66,14 +58,13 @@ describe('extractAndArchiveLogs', () => {
     ).resolves.toEqual(['es01-abc123.log']);
 
     expect(Fsp.mkdir).toHaveBeenCalledWith('/out', { recursive: true });
-    expect(Fsp.open).toHaveBeenCalledWith(join('/out', 'es01-abc123.log'), 'w');
-    expect(close).toHaveBeenCalledTimes(1);
 
-    // Handing the descriptor to the child is what keeps execa's 100MB `maxBuffer` out of the
-    // picture. Buffering the output again would fail this assertion.
+    // Writing to the file is what keeps execa's 100MB `maxBuffer` out of the picture. Buffering
+    // the output again would fail this assertion.
+    const logPath = join('/out', 'es01-abc123.log');
     expect(execa).toHaveBeenCalledWith('docker', ['logs', 'es01'], {
-      stdout: FD,
-      stderr: FD,
+      stdout: { file: logPath },
+      stderr: { file: logPath },
       buffer: false,
     });
   });
@@ -132,9 +123,6 @@ describe('extractAndArchiveLogs', () => {
       extractAndArchiveLogs({ log, nodeNames: ['uiam', 'es01'], outputFolder: '/out' })
     ).resolves.toEqual(['es01-es01-id.log']);
 
-    // The descriptor is released even when the child fails.
-    expect(close).toHaveBeenCalledTimes(2);
-
     const messages = logWriter.messages.join('\n');
     expect(messages).toContain('Failed to archive logs for Docker node uiam');
     expect(messages).toContain('Command failed with ENOBUFS');
@@ -158,7 +146,7 @@ describe('extractAndArchiveLogs', () => {
       extractAndArchiveLogs({ log, nodeNames: ['es01'], outputFolder: '/out' })
     ).resolves.toEqual([]);
 
-    expect(Fsp.open).not.toHaveBeenCalled();
+    expect(execa).not.toHaveBeenCalledWith('docker', ['logs', 'es01'], expect.anything());
   });
 
   test('returns an empty list when the nodes cannot be listed', async () => {
@@ -179,7 +167,7 @@ describe('extractAndArchiveLogs', () => {
     ).resolves.toEqual([]);
 
     expect(logWriter.messages.join('\n')).toContain('Failed to create the log output folder');
-    expect(Fsp.open).not.toHaveBeenCalled();
+    expect(execa).not.toHaveBeenCalledWith('docker', ['logs', 'es01'], expect.anything());
   });
 
   test('falls back to the .es folder in the repo root', async () => {
@@ -209,9 +197,8 @@ describe('extractAndArchiveLogs (end to end)', () => {
   const realFsp = jest.requireActual<typeof import('fs/promises')>('fs/promises');
 
   test('archives both Docker output streams', async () => {
-    execa.mockImplementation(jest.requireActual('execa'));
+    execa.mockImplementation(jest.requireActual('execa').execa);
     Fsp.mkdir.mockImplementation(realFsp.mkdir);
-    Fsp.open.mockImplementation(realFsp.open);
 
     const outputFolder = await realFsp.mkdtemp(join(tmpdir(), 'kbn-es-logs-'));
     const originalPath = process.env.PATH;

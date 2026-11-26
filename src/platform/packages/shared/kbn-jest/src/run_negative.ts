@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import Table from 'cli-table3';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';

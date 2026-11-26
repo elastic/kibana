@@ -13,7 +13,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 import { lintFiles } from './lint_files';
 
-jest.mock('execa', () => jest.fn());
+jest.mock('execa', () => ({ execa: jest.fn() }));
 jest.mock('./constants', () => ({
   LINT_LOG_PREFIX: '[oxlint]',
   OXLINT_CONFIG_PATH: 'oxlint.config.mjs',
@@ -22,7 +22,7 @@ jest.mock('./constants', () => ({
 }));
 jest.mock('fs/promises', () => ({ ...jest.requireActual('fs/promises'), readFile: jest.fn() }));
 
-const mockExeca = jest.requireMock('execa') as jest.Mock;
+const mockExeca = jest.requireMock('execa').execa as jest.Mock;
 const mockReadFile = jest.requireMock('fs/promises').readFile as jest.Mock;
 
 interface FakeRun {

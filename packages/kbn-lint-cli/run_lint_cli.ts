@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import Pw from '@parcel/watcher';
-import execa from 'execa';
+import { execa } from 'execa';
 import ignore from 'ignore';
 import type { CleanupTask } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';

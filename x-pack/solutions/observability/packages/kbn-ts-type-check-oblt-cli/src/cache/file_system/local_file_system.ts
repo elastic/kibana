@@ -7,7 +7,7 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import execa from 'execa';
+import { execa } from 'execa';
 import Fs from 'fs';
 import Path from 'path';
 import { getTarCreateArgs, getTarPlatformOptions, resolveTarEnvironment } from './utils';

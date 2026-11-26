@@ -193,7 +193,7 @@ const runLintTsProjects = async (
   affectedSourceRoots: string[],
   fix: boolean
 ): Promise<{ passed: boolean; output: string }> => {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const args = ['scripts/lint_ts_projects'];
   if (fix) args.push('--fix');
   args.push(...affectedSourceRoots);
@@ -210,7 +210,7 @@ const runLintTsProjects = async (
 };
 
 const runMoonRegeneration = async (fix: boolean): Promise<{ passed: boolean; output: string }> => {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   // --update writes regenerated configs; --check fails on drift without writing.
   const result = await execa(
     process.execPath,
@@ -225,7 +225,7 @@ const runMoonRegeneration = async (fix: boolean): Promise<{ passed: boolean; out
 };
 
 const runServerImportGraphCheck = async (): Promise<{ passed: boolean; output: string }> => {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const result = await execa(process.execPath, ['scripts/check_server_import_graph'], {
     cwd: REPO_ROOT,
     reject: false,
@@ -240,7 +240,7 @@ const runServerImportGraphCheck = async (): Promise<{ passed: boolean; output: s
 const runJestTestsDirectly = async (
   testFiles: string[]
 ): Promise<{ testCount: number; passed: boolean; output: string }> => {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const absolutePaths = testFiles.map((f) => Path.resolve(REPO_ROOT, f));
 
   const result = await execa(

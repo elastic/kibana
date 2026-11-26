@@ -11,7 +11,7 @@ import { spawnSync } from 'child_process';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import execa from 'execa';
+import { execa } from 'execa';
 
 import {
   resolveRestoreStrategy,

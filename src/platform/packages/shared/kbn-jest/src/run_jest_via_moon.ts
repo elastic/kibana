@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import Os from 'os';
 import Path from 'path';
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 import {
   getAffectedMoonJestTargets,

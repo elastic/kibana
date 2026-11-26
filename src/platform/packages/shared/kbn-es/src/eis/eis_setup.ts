@@ -25,7 +25,7 @@
 import http from 'http';
 import https from 'https';
 import { spawn } from 'child_process';
-import execa from 'execa';
+import { execa } from 'execa';
 import chalk from 'chalk';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';

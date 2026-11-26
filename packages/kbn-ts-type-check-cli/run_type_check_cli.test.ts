@@ -98,8 +98,7 @@ jest.mock('./src/archive/utils', () => ({
 jest.mock('execa', () => {
   const mockExecaFn = jest.fn();
   return {
-    __esModule: true,
-    default: mockExecaFn,
+    execa: mockExecaFn,
     __mock: { mockExecaFn },
   };
 });

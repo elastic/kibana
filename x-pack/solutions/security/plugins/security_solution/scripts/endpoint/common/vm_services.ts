@@ -6,11 +6,12 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import type { ExecaError, Options } from 'execa';
 import chalk from 'chalk';
 import path from 'path';
 import { userInfo } from 'os';
 import { unlink as deleteFile, statfs } from 'fs/promises';
+import { runCommand } from './run_command';
 import { dump } from './utils';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
@@ -29,14 +30,14 @@ const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promi
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await execa.command('vagrant destroy -f', {
+      await runCommand('vagrant destroy -f', {
         env: { VAGRANT_CWD: vagrantCwd },
         stdio: ['inherit', 'pipe', 'pipe'],
         timeout: 30_000,
       });
       return;
     } catch (error) {
-      const execError = error as execa.ExecaError;
+      const execError = error as ExecaError;
       log.warning(
         `vagrant destroy failed (attempt ${attempt}/${maxAttempts}): ${
           execError.stderr || execError.message
@@ -93,7 +94,7 @@ const createMultipassVm = async ({
 }: CreateMultipassVmOptions): Promise<HostVm> => {
   log.info(`Creating VM [${name}] using multipass`);
 
-  const createResponse = await execa.command(
+  const createResponse = await runCommand(
     `multipass launch --name ${name} --disk ${disk} --cpus ${cpus} --memory ${memory}${
       image ? ` ${image}` : ''
     }`
@@ -117,17 +118,15 @@ export const createMultipassHostVmClient = (
     command: string,
     options?: { silent?: boolean; timeoutMs?: number }
   ): Promise<HostVmExecResponse> => {
-    const execResponse = await execa
-      .command(`multipass exec ${name} -- ${command}`, {
-        maxBuffer: MAX_BUFFER,
-        ...(options?.timeoutMs ? { timeout: options.timeoutMs } : {}),
-      })
-      .catch((e) => {
-        if (!options?.silent) {
-          log.error(dump(e));
-        }
-        throw e;
-      });
+    const execResponse = await runCommand(`multipass exec ${name} -- ${command}`, {
+      maxBuffer: MAX_BUFFER,
+      ...(options?.timeoutMs ? { timeout: options.timeoutMs } : {}),
+    }).catch((e) => {
+      if (!options?.silent) {
+        log.error(dump(e));
+      }
+      throw e;
+    });
 
     log.verbose(
       `exec response from host [${name}] for command [${command}]:\n${dump(execResponse)}`
@@ -136,12 +135,12 @@ export const createMultipassHostVmClient = (
     return {
       stdout: execResponse.stdout,
       stderr: execResponse.stderr,
-      exitCode: execResponse.exitCode,
+      exitCode: execResponse.exitCode ?? 1,
     };
   };
 
   const destroy = async (): Promise<void> => {
-    const destroyResponse = await execa.command(`multipass delete -p ${name}`);
+    const destroyResponse = await runCommand(`multipass delete -p ${name}`);
     log.verbose(`VM [${name}] was destroyed successfully`, destroyResponse);
   };
 
@@ -155,12 +154,12 @@ export const createMultipassHostVmClient = (
   };
 
   const unmount = async (hostVmDir: string) => {
-    const response = await execa.command(`multipass unmount ${name}:${hostVmDir}`);
+    const response = await runCommand(`multipass unmount ${name}:${hostVmDir}`);
     log.verbose(`multipass unmount response:\n`, response);
   };
 
   const mount = async (localDir: string, hostVmDir: string) => {
-    const response = await execa.command(`multipass mount ${localDir} ${name}:${hostVmDir}`);
+    const response = await runCommand(`multipass mount ${localDir} ${name}:${hostVmDir}`);
     log.verbose(`multipass mount response:\n`, response);
 
     return {
@@ -170,17 +169,17 @@ export const createMultipassHostVmClient = (
   };
 
   const start = async () => {
-    const response = await execa.command(`multipass start ${name}`);
+    const response = await runCommand(`multipass start ${name}`);
     log.verbose(`multipass start response:\n`, response);
   };
 
   const stop = async () => {
-    const response = await execa.command(`multipass stop ${name}`);
+    const response = await runCommand(`multipass stop ${name}`);
     log.verbose(`multipass stop response:\n`, response);
   };
 
   const upload: HostVm['upload'] = async (localFilePath, destFilePath) => {
-    const response = await execa.command(
+    const response = await runCommand(
       `multipass transfer ${localFilePath} ${name}:${destFilePath}`
     );
     log.verbose(`Uploaded file to VM [${name}]:`, response);
@@ -195,9 +194,7 @@ export const createMultipassHostVmClient = (
 
   const download: HostVm['download'] = async (vmFilePath: string, localFilePath: string) => {
     const localFileAbsolutePath = path.resolve(localFilePath);
-    const response = await execa.command(
-      `multipass transfer ${name}:${vmFilePath} ${localFilePath}`
-    );
+    const response = await runCommand(`multipass transfer ${name}:${vmFilePath} ${localFilePath}`);
     log.verbose(`Downloaded file from VM [${name}]:`, response);
 
     return {
@@ -266,7 +263,7 @@ ${chalk.red('NOTE:')} ${chalk.bold(
 const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
   const isVboxKernelLoaded = async (): Promise<boolean> => {
     try {
-      const result = await execa.command('VBoxManage --version', {
+      const result = await runCommand('VBoxManage --version', {
         stdio: 'pipe',
         all: true,
       });
@@ -293,7 +290,7 @@ const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
       'sudo /sbin/rcvboxdrv setup',
     ]) {
       try {
-        await execa.command(cmd, { stdio: 'pipe' });
+        await runCommand(cmd, { stdio: 'pipe' });
         if (await isVboxKernelLoaded()) {
           log.info(`VirtualBox kernel module loaded via: ${cmd}`);
           return true;
@@ -308,7 +305,7 @@ const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
   const upgradeToVbox71 = async (): Promise<boolean> => {
     log.info('Upgrading to VirtualBox 7.1 (supports newer kernels)...');
     try {
-      await execa.command('sudo apt-get install -y --no-install-recommends virtualbox-7.1', {
+      await runCommand('sudo apt-get install -y --no-install-recommends virtualbox-7.1', {
         stdio: 'pipe',
       });
       return (await tryLoadModules()) && (await isVboxKernelLoaded());
@@ -340,7 +337,7 @@ const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
     'dkms status 2>/dev/null || echo "dkms not available"',
   ]) {
     try {
-      const { stdout } = await execa.command(diagCmd, { stdio: 'pipe', shell: true });
+      const { stdout } = await runCommand(diagCmd, { stdio: 'pipe', shell: true });
       diagnostics.push(`${diagCmd}: ${stdout.trim()}`);
     } catch {
       diagnostics.push(`${diagCmd}: (failed)`);
@@ -432,7 +429,7 @@ const createVagrantVm = async ({
       await destroyVagrantMachine(VAGRANT_CWD, log);
 
       const vagrantUpResponse = (
-        await execa.command('vagrant up', {
+        await runCommand('vagrant up', {
           env: vagrantEnv,
           stdio: ['inherit', 'pipe', 'pipe'],
         })
@@ -441,7 +438,7 @@ const createVagrantVm = async ({
       log.debug('Vagrant up command response: ', vagrantUpResponse);
       break;
     } catch (e) {
-      const execError = e as execa.ExecaError;
+      const execError = e as ExecaError;
       log.error(
         `vagrant up failed (attempt ${attempt}/${MAX_ATTEMPTS}):\nSTDOUT: ${execError.stdout}\nSTDERR: ${execError.stderr}`
       );
@@ -469,13 +466,13 @@ export const createVagrantHostVmClient = (
   log: ToolingLog = createToolingLogger()
 ): HostVm => {
   const VAGRANT_CWD = path.dirname(vagrantFile);
-  const execaOptions: execa.Options = {
+  const execaOptions = {
     env: {
       VAGRANT_CWD,
     },
     stdio: ['inherit', 'pipe', 'pipe'],
     maxBuffer: MAX_BUFFER,
-  };
+  } satisfies Options;
 
   log.debug(`Creating Vagrant VM client for [${name}] with vagrantfile [${vagrantFile}]`);
 
@@ -483,7 +480,7 @@ export const createVagrantHostVmClient = (
     command: string,
     options?: { silent?: boolean; timeoutMs?: number }
   ): Promise<HostVmExecResponse> => {
-    const subprocess = execa.command(`vagrant ssh -- ${command}`, {
+    const subprocess = runCommand(`vagrant ssh -- ${command}`, {
       ...execaOptions,
       ...(options?.timeoutMs ? { timeout: options.timeoutMs } : {}),
     });
@@ -521,14 +518,14 @@ export const createVagrantHostVmClient = (
     return {
       stdout: execResponse.stdout,
       stderr: execResponse.stderr,
-      exitCode: execResponse.exitCode,
+      exitCode: execResponse.exitCode ?? 1,
     };
   };
 
   const destroy = async (): Promise<void> => {
     // Bounded so a slow halt rejects for the caller to handle instead of hanging past the
     // 60s `taskTimeout` of the Cypress teardown tasks that destroy endpoint hosts.
-    const destroyResponse = await execa.command(`vagrant destroy -f`, {
+    const destroyResponse = await runCommand(`vagrant destroy -f`, {
       ...execaOptions,
       timeout: 30_000,
     });
@@ -554,17 +551,17 @@ export const createVagrantHostVmClient = (
   };
 
   const start = async () => {
-    const response = await execa.command(`vagrant up`, execaOptions);
+    const response = await runCommand(`vagrant up`, execaOptions);
     log.verbose('vagrant up response:\n', response);
   };
 
   const stop = async () => {
-    const response = await execa.command(`vagrant suspend`, execaOptions);
+    const response = await runCommand(`vagrant suspend`, execaOptions);
     log.verbose('vagrant suspend response:\n', response);
   };
 
   const upload: HostVm['upload'] = async (localFilePath, destFilePath) => {
-    const response = await execa.command(
+    const response = await runCommand(
       `vagrant upload ${localFilePath} ${destFilePath}`,
       execaOptions
     );
@@ -590,7 +587,7 @@ export const createVagrantHostVmClient = (
     });
 
     // Now move the file from the local vagrant directory to the desired location
-    await execa.command(`mv ${VAGRANT_CWD}/${path.basename(vmFilePath)} ${localFileAbsolutePath}`);
+    await runCommand(`mv ${VAGRANT_CWD}/${path.basename(vmFilePath)} ${localFileAbsolutePath}`);
 
     return {
       filePath: localFileAbsolutePath,
@@ -656,7 +653,7 @@ export const findVm = async (
   log.verbose(`Finding [${type}] VMs with name [${name}]`);
 
   if (type === 'multipass') {
-    const list = JSON.parse((await execa.command(`multipass list --format json`)).stdout) as {
+    const list = JSON.parse((await runCommand(`multipass list --format json`)).stdout) as {
       list: Array<{
         ipv4: string[];
         name: string;

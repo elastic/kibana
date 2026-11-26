@@ -6,10 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 
 export async function openProfileInSpeedScope(log: ToolingLog, profile: string) {
-  await execa.command(`npx speedscope ${profile}`);
+  await runCommand(`npx speedscope ${profile}`);
   log.info(`Opened profile in speedscope: ${profile}`);
 }

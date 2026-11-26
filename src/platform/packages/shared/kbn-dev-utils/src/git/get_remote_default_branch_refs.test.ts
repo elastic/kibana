@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 import { getRemoteDefaultBranchRefs } from './get_remote_default_branch_refs';
 

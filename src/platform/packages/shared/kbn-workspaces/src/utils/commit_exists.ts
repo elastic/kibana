@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 export async function commitExists(cwd: string, sha: string): Promise<boolean> {
   return await execa('git', ['cat-file', '-e', `${sha}^{commit}`], { cwd })

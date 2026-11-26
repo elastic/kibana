@@ -9,7 +9,7 @@ import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import execa from 'execa';
+import { execa } from 'execa';
 import { GCS_BUCKET_NAME, GCS_BUCKET_PATH, GCS_BUCKET_URI, COMMITS_PATH } from '../constants';
 import { createDownloadProgressBar, formatBytes } from '../download_progress';
 import { createArchiveExtractor, getTarCreateArgs, resolveTarEnvironment } from './utils';

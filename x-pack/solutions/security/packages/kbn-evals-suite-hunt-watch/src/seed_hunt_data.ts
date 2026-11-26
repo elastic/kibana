@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import execa from 'execa';
+import { execa } from 'execa';
 import { v5 as uuidv5 } from 'uuid';
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';

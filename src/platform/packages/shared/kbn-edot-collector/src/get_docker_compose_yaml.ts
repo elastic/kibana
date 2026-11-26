@@ -12,10 +12,14 @@ import semver from 'semver';
 import { kibanaPackageJson, REPO_ROOT } from '@kbn/repo-info';
 import Fs from 'fs';
 import Path from 'path';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const COLLECTOR_IMAGE = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 
 interface VersionEntry {
   version: string;
@@ -26,7 +30,7 @@ interface VersionEntry {
 async function checkDockerImageExists(version: string, log: ToolingLog): Promise<boolean> {
   try {
     log.debug(`Checking if image exists: ${COLLECTOR_IMAGE}:${version}`);
-    await execa.command(`docker manifest inspect ${COLLECTOR_IMAGE}:${version}`, {
+    await runCommand(`docker manifest inspect ${COLLECTOR_IMAGE}:${version}`, {
       stdio: 'ignore',
       timeout: 10000,
     });

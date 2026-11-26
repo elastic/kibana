@@ -10,7 +10,7 @@
 import { mkdtemp, mkdir, writeFile, rm, rename, symlink, readdir } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import execa from 'execa';
+import { execa } from 'execa';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Build } from '../../lib/build';
 import { getMockConfig } from '../../lib/__mocks__/get_config';

@@ -9,7 +9,7 @@ import Path from 'path';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import { setTimeout as sleep } from 'timers/promises';
-import execa from 'execa';
+import { execa } from 'execa';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';

@@ -59,7 +59,7 @@ const ensureNoResolve = async (promise: Promise<unknown>) => {
 };
 
 jest.mock('execa');
-const execaMock = jest.requireMock('execa');
+const execaMock = jest.requireMock('execa').execa;
 
 const mockEsBin = (
   {
@@ -72,8 +72,8 @@ const mockEsBin = (
     ssl?: boolean;
   } = { start: false, ssl: false }
 ) => {
-  execaMock.mockImplementationOnce((args: string[], options: {}) =>
-    jest.requireActual('execa')(
+  execaMock.mockImplementationOnce((_file: string, args: string[], options: { cwd?: string }) =>
+    jest.requireActual('execa').execa(
       process.execPath,
       [
         '--require=@kbn/swc-register/install',
@@ -84,7 +84,8 @@ const mockEsBin = (
           ssl: ssl || args.includes('xpack.security.http.ssl.enabled=true'),
         }),
       ],
-      options
+      // the tests pass fake install paths, which execa rejects as `cwd`
+      { ...options, cwd: undefined }
     )
   );
 };
@@ -361,6 +362,19 @@ describe('#start(installPath)', () => {
 
     await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
       'ES exited with code 1'
+    );
+  });
+
+  test('rejects when bin/elasticsearch cannot be spawned', async () => {
+    execaMock.mockImplementationOnce((_file: string, args: string[], options: {}) =>
+      jest.requireActual('execa').execa('kbn-es-missing-elasticsearch-bin', args, {
+        ...options,
+        cwd: undefined,
+      })
+    );
+
+    await expect(new Cluster({ log }).start(installPath, esClusterExecOptions)).rejects.toThrow(
+      'ENOENT'
     );
   });
 

@@ -9,12 +9,11 @@
 
 import { PassThrough } from 'stream';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import execa from 'execa';
+import { execa, type Subprocess } from 'execa';
 import { GcsFileSystem } from './gcs_file_system';
 
 jest.mock('execa', () => ({
-  __esModule: true,
-  default: jest.fn(),
+  execa: jest.fn(),
 }));
 
 const mockExeca = execa as unknown as jest.Mock;
@@ -35,14 +34,13 @@ const createLog = (): SomeDevLog =>
 
 const asChild = (promise: Promise<unknown>) => {
   const kill = jest.fn();
-  const child = promise as unknown as execa.ExecaChildProcess & { kill: jest.Mock };
+  const child = promise as unknown as Subprocess & { kill: jest.Mock };
   Object.assign(child, {
     stdout: new PassThrough(),
     stdin: new PassThrough(),
     stderr: new PassThrough(),
     kill,
-    exitCode: null,
-    killed: false,
+    nodeChildProcess: { exitCode: null, killed: false },
   });
   return child;
 };

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import execa from 'execa';
-import type { Overwrite } from 'utility-types';
+import { execa, type Options } from 'execa';
 import type { ChildProcess } from 'child_process';
 import { spawn } from 'child_process';
 import { runProfiler } from './run_profiler';
@@ -16,32 +15,17 @@ import { getProcessId } from './get_process_id';
 
 const INSPECTOR_PORT = '9229';
 
-// Use the real execa, but spy on `command` to observe calls in tests
+// Use the real execa, but spy on execa to observe calls in tests.
 jest.mock('execa', () => {
-  const actual: typeof execa = jest.requireActual('execa');
+  const actual = jest.requireActual<typeof import('execa')>('execa');
+  const execaMock = jest.fn((file: string, args: string[] = [], options?: Options) => {
+    if (file === 'npx' && args.includes('speedscope')) {
+      return Promise.resolve();
+    }
+    return actual.execa(file, args, options);
+  });
 
-  const mocked = {
-    ...actual,
-  } as ExecaMock;
-
-  const boundCommand = mocked.command.bind(mocked);
-
-  const module = {
-    ...mocked,
-    __esModule: true,
-    default: actual,
-  };
-
-  module.command = module.default.command = jest
-    .fn()
-    .mockImplementation((...args: Parameters<ExecaMock['command']>) => {
-      if (args[0].includes('speedscope')) {
-        return Promise.resolve();
-      }
-      return boundCommand(...args);
-    });
-
-  return module;
+  return { ...actual, execa: execaMock };
 });
 
 jest.mock('fs', () => ({
@@ -54,13 +38,7 @@ jest.mock('fs', () => ({
 
 // Create a properly typed mock instance of fs/promises
 const mockFs = jest.mocked(fs);
-
-type ExecaMock = Overwrite<
-  typeof execa,
-  { command: jest.MockedFunction<(typeof execa)['command']> }
->;
-
-const mockedExeca = execa as unknown as ExecaMock;
+const mockedExeca = execa as jest.MockedFunction<typeof execa>;
 
 interface FakeProcess {
   pid?: number;
@@ -146,7 +124,7 @@ descr('@kbn/profiler-cli real-process tests', () => {
   }
 
   beforeEach(() => {
-    mockedExeca.command.mockClear();
+    mockedExeca.mockClear();
   });
 
   afterEach(async () => {
@@ -174,7 +152,7 @@ descr('@kbn/profiler-cli real-process tests', () => {
     const pid = await getProcessId({ ports: [Number(INSPECTOR_PORT)], grep: false });
 
     if (pid) {
-      await execa.command(`kill -9 ${pid}`);
+      await execa('kill', ['-9', `${pid}`]);
     }
 
     processes.length = 0;

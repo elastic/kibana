@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import { maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import type { EsClient, ScoutLogger } from '@kbn/scout';
 

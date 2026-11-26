@@ -11,4 +11,6 @@ module.exports = {
   preset: '@kbn/jest',
   rootDir: '../..',
   roots: ['<rootDir>/src/dev'],
+  // Execa requires Node's EventTarget-compatible AbortSignal.
+  testEnvironment: 'node',
 };

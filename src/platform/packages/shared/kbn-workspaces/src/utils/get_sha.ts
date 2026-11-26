@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 export async function getSha(cwd: string, ref: string): Promise<string> {
   const { stdout: shaStdout } = await execa('git', ['rev-parse', ref], { cwd });

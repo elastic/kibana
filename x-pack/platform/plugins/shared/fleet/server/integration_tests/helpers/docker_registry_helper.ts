@@ -9,7 +9,7 @@ import type { ChildProcess } from 'child_process';
 
 import * as Rx from 'rxjs';
 import { filter, take, map, tap } from 'rxjs';
-import execa from 'execa';
+import { execa } from 'execa';
 
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -86,9 +86,11 @@ export function useDockerRegistry() {
       DOCKER_IMAGE,
     ];
 
-    dockerProcess = execa('docker', args, {
+    const dockerCommand = execa('docker', args, {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
+    void dockerCommand.catch(() => {});
+    dockerProcess = dockerCommand.nodeChildProcess;
 
     let isExited = dockerProcess.exitCode !== null;
     dockerProcess.once('exit', () => {

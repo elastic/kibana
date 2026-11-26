@@ -6,7 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa } from 'execa';
 import { createInterface } from 'readline';
 import type { Observable } from 'rxjs';
 import { Subject, lastValueFrom } from 'rxjs';
@@ -35,6 +35,8 @@ export async function runInspectableProcess({
     env: { NODE_OPTIONS: extendNodeOptions(process.env.NODE_OPTIONS, inspectorPort) },
     stdout: 'inherit',
     stderr: 'pipe',
+    // the result is never awaited and aborting kills the process
+    reject: false,
   });
 
   const open$ = new Subject<void>();

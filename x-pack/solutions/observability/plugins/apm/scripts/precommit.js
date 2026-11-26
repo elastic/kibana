@@ -8,7 +8,7 @@
 /* eslint-disable no-console*/
 /* eslint-disable @kbn/compat/import-no-extraneous-dependencies*/
 
-const execa = require('execa');
+const { execa } = require('execa');
 const { Listr } = require('listr2');
 const { resolve } = require('path');
 

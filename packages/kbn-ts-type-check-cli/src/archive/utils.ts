@@ -10,7 +10,7 @@ import Fs from 'fs';
 import { createHash } from 'crypto';
 import { pipeline } from 'stream/promises';
 import Path from 'path';
-import execa from 'execa';
+import { execa } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { globby } from 'globby';

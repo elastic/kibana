@@ -8,7 +8,11 @@
  */
 
 import type { ExecaError } from 'execa';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 
 class DockerUnavailableError extends Error {
   constructor(cause: ExecaError) {
@@ -17,7 +21,7 @@ class DockerUnavailableError extends Error {
 }
 
 export async function assertDockerAvailable(): Promise<void> {
-  await execa.command(`docker info`).catch((error: ExecaError) => {
+  await runCommand(`docker info`).catch((error: ExecaError) => {
     throw new DockerUnavailableError(error);
   });
 }

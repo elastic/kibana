@@ -110,6 +110,27 @@ if (!Object.hasOwn(global, 'MessagePort')) {
   global.MessagePort = {};
 }
 
+// Execa calls events.setMaxListeners() on signals from the global AbortController, which is JSDOM's
+// here and fails Node's EventTarget check. Listener limits don't apply to JSDOM targets, so skip them.
+// `events` is the worker's shared Node.js module, so patch it once instead of per test file.
+const Events = require('events');
+const kJsdomSafeSetMaxListeners = Symbol.for('kbn.jest.jsdomSafeSetMaxListeners');
+if (!Events.setMaxListeners[kJsdomSafeSetMaxListeners]) {
+  const { setMaxListeners } = Events;
+  const jsdomSafeSetMaxListeners = (n, ...eventTargets) => {
+    try {
+      return setMaxListeners(n, ...eventTargets);
+    } catch (error) {
+      if (error?.code === 'ERR_INVALID_ARG_TYPE' && error.message.includes('"eventTargets"')) {
+        return;
+      }
+      throw error;
+    }
+  };
+  jsdomSafeSetMaxListeners[kJsdomSafeSetMaxListeners] = true;
+  Events.setMaxListeners = jsdomSafeSetMaxListeners;
+}
+
 // Required from ts decorators support in tests
 import 'reflect-metadata/lite';
 

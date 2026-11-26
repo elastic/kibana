@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type execa from 'execa';
+import type { ExecaError } from 'execa';
 import { readRolesDescriptorsFromResource, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import type {
@@ -43,7 +43,7 @@ export const runCommandOnHost = async (
 ): Promise<HostVmExecResponse> =>
   getHostVmClient(hostname)
     .exec(command, { silent: true, timeoutMs: HOST_COMMAND_TIMEOUT_MS })
-    .catch((error: execa.ExecaError) => ({
+    .catch((error: ExecaError<{}>) => ({
       stdout: error.stdout ?? '',
       stderr: error.stderr || error.message,
       exitCode: error.exitCode ?? 1,

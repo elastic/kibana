@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import execa from 'execa';
+import { execa } from 'execa';
 import type { RuleType } from '@kbn/alerting-plugin/server';
 import {
   alertFieldMap,

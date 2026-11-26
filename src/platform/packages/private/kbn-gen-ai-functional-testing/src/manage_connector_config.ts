@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import Path from 'path';
 import { writeFile, readFile } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';

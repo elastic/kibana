@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import Fsp from 'fs/promises';
 import { join } from 'path';
 
@@ -26,19 +26,14 @@ const describeError = (error: Error & { shortMessage?: string }): string =>
  * Streams `docker logs <name>` straight into `targetPath` without buffering the output.
  */
 export async function writeContainerLogsToFile(name: string, targetPath: string): Promise<void> {
-  const fileHandle = await Fsp.open(targetPath, 'w');
-  try {
-    // Hand the child the file descriptor directly: execa only applies `maxBuffer` (100MB by
-    // default) to stdio it has to buffer, and a UIAM container in DEBUG mode emits well over that.
-    // The descriptor is duplicated into the child, so closing it here once the child exits is safe.
-    await execa('docker', ['logs', name], {
-      stdout: fileHandle.fd,
-      stderr: fileHandle.fd,
-      buffer: false,
-    });
-  } finally {
-    await fileHandle.close();
-  }
+  // execa only applies `maxBuffer` (100MB by default) to stdio it has to buffer, and a UIAM
+  // container in DEBUG mode emits well over that, so write both streams to the file instead.
+  // execa opens a file shared by stdout and stderr once.
+  await execa('docker', ['logs', name], {
+    stdout: { file: targetPath },
+    stderr: { file: targetPath },
+    buffer: false,
+  });
 }
 
 /**

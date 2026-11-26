@@ -9,7 +9,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import execa from 'execa';
+import { execa } from 'execa';
 import { asyncForEachWithLimit } from '@kbn/std';
 import { ARTIFACTS_STATE_FILE, CACHE_INVALIDATION_FILES } from './constants';
 

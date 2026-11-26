@@ -10,7 +10,7 @@
 import { readFile } from 'fs/promises';
 import { relative, resolve } from 'path';
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';

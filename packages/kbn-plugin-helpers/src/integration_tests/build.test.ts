@@ -12,7 +12,7 @@ import Fs from 'fs';
 import Zlib from 'zlib';
 import { loadJsonFile } from '@kbn/utils';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import AdmZip from 'adm-zip';
 import del from 'del';

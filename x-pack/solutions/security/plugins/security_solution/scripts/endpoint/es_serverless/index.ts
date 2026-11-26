@@ -7,7 +7,7 @@
 
 import { run, type RunContext } from '@kbn/dev-cli-runner';
 import { cyan, gray } from 'chalk';
-import execa from 'execa';
+import { execaNode } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { join } from 'path';
 import { ColumnLayoutFormatter } from '../common/screen/column_layout_formatter';
@@ -56,7 +56,7 @@ ${
 
       cliContext.log.info(gray(`node ${exeScript} ${callingArgs.join(' ')}`));
 
-      await execa.node(exeScript, callingArgs, {
+      await execaNode(exeScript, callingArgs, {
         stderr: 'inherit',
         stdout: 'inherit',
       });

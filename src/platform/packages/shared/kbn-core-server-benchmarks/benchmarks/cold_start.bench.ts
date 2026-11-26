@@ -8,7 +8,7 @@
  */
 import type { BenchmarkRunnable } from '@kbn/bench';
 import getPort from 'get-port';
-import type { ExecaChildProcess } from 'execa';
+import type { Subprocess } from 'execa';
 import { startEs, startKibana, stopGracefully } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -17,8 +17,8 @@ export default async (): Promise<BenchmarkRunnable> => {
 
   const kbnPort = await getPort({ port: 5701 });
 
-  let esProc: ExecaChildProcess | undefined;
-  let kbnProc: ExecaChildProcess | undefined;
+  let esProc: Subprocess | undefined;
+  let kbnProc: Subprocess | undefined;
 
   return {
     async beforeAll({ workspace, buildDir }) {

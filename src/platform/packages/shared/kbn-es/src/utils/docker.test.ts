@@ -62,8 +62,12 @@ process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
 // Pin the published loopback addresses, which otherwise follow the host's IPv6 support.
 jest.mock('./has_ipv6_loopback', () => ({ hasIpv6Loopback: () => true }));
 
-jest.mock('execa');
-const execa = jest.requireMock('execa');
+jest.mock('execa', () => ({
+  execa: jest.fn(),
+  execaSync: jest.fn(),
+  parseCommandString: (command: string) => command.split(' '),
+}));
+const { execa, execaSync } = jest.requireMock('execa');
 execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
 jest.mock('./read_string_secrets', () => ({
@@ -1202,14 +1206,14 @@ describe('runServerlessCluster()', () => {
       [baseEsPath]: {},
     });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
-    execa.commandSync.mockImplementation(() => ({ stdout: 'es01\nes02\n' }));
+    execaSync.mockImplementation(() => ({ stdout: 'es01\nes02\n' }));
     runUiamContainerMock.mockRejectedValue(new Error('uiam-cosmosdb failed to start'));
 
     await expect(
       runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true })
     ).rejects.toThrow('uiam-cosmosdb failed to start');
 
-    expect(execa.commandSync.mock.calls[1][0]).toEqual('docker kill es01 es02');
+    expect(execaSync.mock.calls[1]).toEqual(['docker', ['kill', 'es01', 'es02']]);
   });
 });
 
@@ -1250,47 +1254,61 @@ describe('teardownServerlessClusterSync()', () => {
 
   test('should kill running serverless nodes', () => {
     const nodes = ['es01', 'es02', 'es03'];
-    execa.commandSync.mockImplementation(() => ({
+    execaSync.mockImplementation(() => ({
       stdout: nodes.join('\n'),
     }));
 
     teardownServerlessClusterSync(log, defaultOptions);
 
-    expect(execa.commandSync.mock.calls).toHaveLength(2);
-    expect(execa.commandSync.mock.calls[0][0]).toEqual(
-      `docker ps --filter status=running --filter ancestor=${ES_SERVERLESS_DEFAULT_IMAGE} --quiet`
-    );
-    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
+    expect(execaSync.mock.calls).toHaveLength(2);
+    expect(execaSync).toHaveBeenNthCalledWith(1, 'docker', [
+      'ps',
+      '--filter',
+      'status=running',
+      '--filter',
+      `ancestor=${ES_SERVERLESS_DEFAULT_IMAGE}`,
+      '--quiet',
+    ]);
+    expect(execaSync).toHaveBeenNthCalledWith(2, 'docker', ['kill', ...nodes]);
   });
 
   test('should kill running serverless nodes and UIAM containers when in UIAM mode', () => {
     const containers = ['es01', 'es02', 'es03', 'uiam-cosmosdb', 'uiam'];
-    execa.commandSync.mockImplementation(() => ({
+    execaSync.mockImplementation(() => ({
       stdout: containers.join('\n'),
     }));
 
     teardownServerlessClusterSync(log, { ...defaultOptions, uiam: true });
 
-    expect(execa.commandSync.mock.calls).toHaveLength(2);
-    expect(execa.commandSync.mock.calls[0][0]).toEqual(
-      `docker ps --filter status=running --filter ancestor=${ES_SERVERLESS_DEFAULT_IMAGE} --filter ancestor=${dockerUiam.COSMOS_DB_EMULATOR_DEFAULT_IMAGE} --filter ancestor=${dockerUiam.UIAM_DEFAULT_IMAGE} --quiet`
-    );
-    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${containers.join(' ')}`);
+    expect(execaSync.mock.calls).toHaveLength(2);
+    expect(execaSync).toHaveBeenNthCalledWith(1, 'docker', [
+      'ps',
+      '--filter',
+      'status=running',
+      '--filter',
+      `ancestor=${ES_SERVERLESS_DEFAULT_IMAGE}`,
+      '--filter',
+      `ancestor=${dockerUiam.COSMOS_DB_EMULATOR_DEFAULT_IMAGE}`,
+      '--filter',
+      `ancestor=${dockerUiam.UIAM_DEFAULT_IMAGE}`,
+      '--quiet',
+    ]);
+    expect(execaSync).toHaveBeenNthCalledWith(2, 'docker', ['kill', ...containers]);
   });
 
   test('should not kill if no serverless nodes', () => {
-    execa.commandSync.mockImplementation(() => ({
+    execaSync.mockImplementation(() => ({
       stdout: '\n',
     }));
 
     teardownServerlessClusterSync(log, defaultOptions);
 
-    expect(execa.commandSync.mock.calls).toHaveLength(1);
+    expect(execaSync.mock.calls).toHaveLength(1);
   });
 
   test('should remove the operator secrets directory', () => {
     const rmSync = jest.spyOn(Fs, 'rmSync').mockImplementation(() => {});
-    execa.commandSync.mockImplementation(() => ({ stdout: '' }));
+    execaSync.mockImplementation(() => ({ stdout: '' }));
 
     teardownServerlessClusterSync(log, defaultOptions);
 
@@ -1303,7 +1321,7 @@ describe('teardownServerlessClusterSync()', () => {
 
   test('should remove the operator secrets directory even when Docker is unavailable', () => {
     const rmSync = jest.spyOn(Fs, 'rmSync').mockImplementation(() => {});
-    execa.commandSync.mockImplementation(() => {
+    execaSync.mockImplementation(() => {
       throw new Error('Cannot connect to the Docker daemon');
     });
 
