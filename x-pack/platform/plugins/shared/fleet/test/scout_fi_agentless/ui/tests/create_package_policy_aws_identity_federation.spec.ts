@@ -19,13 +19,17 @@ import {
 const credentialSelector = 'varGroupSelector-credential_type';
 const launchButton = 'awsIdentityFederationSetup-launchCloudFormation';
 const saveButton = 'createPackagePolicySaveButton';
-// The fi_agentless server pre-installs this `aws` version (kbn-scout fi_agentless shared config);
-// the suite installs a newer one for the WII static template and puts this one back afterwards.
-const SHARED_AWS_PACKAGE_VERSION = '8.1.0';
+const packageInfoRoute = /\/api\/fleet\/epm\/packages\/aws(\/[^/?]+)?(\?.*)?$/;
+const awsConsole = /console\.aws\.amazon\.com/;
 const callbackAvailabilityRoute = '**/internal/fleet/iac_provisioner/callback_availability';
 const renderTemplateRoute = '**/internal/fleet/iac_provisioner/render_template';
 const staticTemplate =
   'https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml';
+// What newer package versions declare as the option's `iac_template_url`: a console quick-create
+// link that carries the template.
+const staticQuickCreateUrl = `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+  staticTemplate
+)}`;
 
 async function openAgentlessGuardDuty(page: ScoutPage) {
   await page.gotoApp('integrations/detail/aws/add-integration/guardduty');
@@ -36,6 +40,29 @@ async function openAgentlessGuardDuty(page: ScoutPage) {
   }
 }
 
+/**
+ * Gives the Identity Federation option of the installed `aws` package the static template URL of
+ * newer package versions, for this page only, so the shared server install is left untouched.
+ */
+async function mockStaticTemplateOnIdentityFederationOption(page: ScoutPage) {
+  await page.route(packageInfoRoute, async (route) => {
+    if (route.request().method() !== 'GET') {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    const body = await response.json();
+    for (const group of body.item?.var_groups ?? []) {
+      for (const option of group.options ?? []) {
+        if (option.name === 'identity_federation') {
+          option.iac_template_url = staticQuickCreateUrl;
+        }
+      }
+    }
+    await route.fulfill({ response, json: body });
+  });
+}
+
 async function selectIdentityFederation(page: ScoutPage) {
   await page.getByTestId(credentialSelector).selectOption('identity_federation');
 }
@@ -44,10 +71,6 @@ test.describe(
   'AWS Identity Federation on the create package policy page',
   { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.fleet.integration.installPackage('aws', '8.17.0');
-    });
-
     test.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsAdmin();
       await mockPackagePoliciesEmpty(page);
@@ -61,10 +84,6 @@ test.describe(
           [ENABLE_IAC_PROVISIONER_FLAG]: null,
         },
       });
-    });
-
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.fleet.integration.installPackage('aws', SHARED_AWS_PACKAGE_VERSION);
     });
 
     test('hides the option when the release flag is off', async ({ apiServices, page }) => {
@@ -91,6 +110,7 @@ test.describe(
           [ENABLE_IAC_PROVISIONER_FLAG]: false,
         },
       });
+      await mockStaticTemplateOnIdentityFederationOption(page);
       await openAgentlessGuardDuty(page);
       await selectIdentityFederation(page);
 
@@ -133,7 +153,17 @@ test.describe(
       await expect(page.getByTestId(launchButton)).toBeVisible();
       await expect(page.getByTestId(saveButton)).toBeDisabled();
 
+      // Launch opens the AWS console in a new tab: answer that navigation here, never reach AWS.
+      await page
+        .context()
+        .route(awsConsole, (route) =>
+          route.fulfill({ contentType: 'text/html', body: '<html><body>AWS console</body></html>' })
+        );
+      const popupPromise = page.waitForEvent('popup');
       await page.getByTestId(launchButton).click();
+      const popup = await popupPromise;
+      await popup.waitForURL(awsConsole);
+      expect(popup.url()).toContain('templateURL=');
       await expect.poll(() => renderRequests.length).toBeGreaterThan(0);
       expect(renderRequests[0].integrations).toStrictEqual([
         { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
