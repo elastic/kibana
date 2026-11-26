@@ -9,8 +9,6 @@
  * This is a big file used for documenting/introspecting APIs. Always load it lazily!
  */
 
-import type { DeepPartial } from '@kbn/utility-types';
-
 import type {
   LensCreateRequestBody,
   LensCreateResponseBody,
@@ -25,240 +23,6 @@ const lensCreateDescription = [
   '',
   'ES|QL visualizations cannot be created through this endpoint.',
 ].join('\n');
-
-const createCurlCodeSample = ({
-  lang = 'cURL',
-  label,
-  method,
-  path,
-  body,
-}: {
-  lang?: string;
-  label: string;
-  method: 'POST' | 'PUT';
-  path: string;
-  body: object;
-}) => ({
-  lang,
-  label,
-  source:
-    [
-      `curl -X ${method} "\${KIBANA_URL}${path}" \\`,
-      `  -H "Authorization: ApiKey \${API_KEY}" \\`,
-      `  -H "kbn-xsrf: true" \\`,
-      `  -H "Content-Type: application/json" \\`,
-      `  -d '${JSON.stringify(body, null, 2)}'`,
-    ].join('\n') + '\n',
-});
-
-const createConsoleCodeSample = ({
-  lang = 'Console',
-  label,
-  method,
-  path,
-  body,
-}: {
-  lang?: string;
-  label: string;
-  method: 'POST' | 'PUT';
-  path: string;
-  body: object;
-}) => ({
-  lang,
-  label,
-  source: [`${method} kbn:${path}`, JSON.stringify(body, null, 2)].join('\n') + '\n',
-});
-
-const lensCreateMetricVisualizationBody = {
-  type: 'metric',
-  title: 'Total requests',
-  data_source: {
-    type: 'data_view_spec',
-    index_pattern: 'kibana_sample_data_logs',
-    time_field: 'timestamp',
-  },
-  metrics: [
-    {
-      type: 'primary',
-      operation: 'count',
-    },
-  ],
-} satisfies DeepPartial<LensCreateRequestBody>;
-
-const lensCreateAnXYLineChartBody = {
-  type: 'xy',
-  title: 'Log entries over time',
-  layers: [
-    {
-      type: 'line',
-      data_source: {
-        type: 'data_view_spec',
-        index_pattern: 'kibana_sample_data_logs',
-        time_field: 'timestamp',
-      },
-      x: {
-        operation: 'date_histogram',
-        field: 'timestamp',
-      },
-      y: [
-        {
-          operation: 'count',
-        },
-      ],
-    },
-  ],
-} satisfies DeepPartial<LensCreateRequestBody>;
-
-const lensCreatePieDonutChartBody = {
-  type: 'pie',
-  title: 'Requests by response code',
-  data_source: {
-    type: 'data_view_spec',
-    index_pattern: 'kibana_sample_data_logs',
-    time_field: 'timestamp',
-  },
-  metrics: [
-    {
-      operation: 'count',
-    },
-  ],
-  group_by: [
-    {
-      operation: 'terms',
-      fields: ['response.keyword'],
-      limit: 5,
-    },
-  ],
-  styling: {
-    donut_hole: 'm',
-  },
-} satisfies DeepPartial<LensCreateRequestBody>;
-
-const lensCreateDataTableBody = {
-  type: 'data_table',
-  title: 'Top response codes',
-  data_source: {
-    type: 'data_view_spec',
-    index_pattern: 'kibana_sample_data_logs',
-    time_field: 'timestamp',
-  },
-  metrics: [
-    {
-      operation: 'count',
-    },
-  ],
-  rows: [
-    {
-      operation: 'terms',
-      fields: ['response.keyword'],
-      limit: 5,
-    },
-  ],
-} satisfies DeepPartial<LensCreateRequestBody>;
-
-const lensCreateVisualizationUsingALibraryDataViewBody = {
-  type: 'metric',
-  title: 'Total requests (library data view)',
-  data_source: {
-    type: 'data_view_reference',
-    ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-  },
-  metrics: [
-    {
-      type: 'primary',
-      operation: 'count',
-    },
-  ],
-} satisfies DeepPartial<LensCreateRequestBody>;
-
-const lensUpdateVisualizationBody = {
-  type: 'metric',
-  title: 'Total requests (updated)',
-  data_source: {
-    type: 'data_view_spec',
-    index_pattern: 'kibana_sample_data_logs',
-    time_field: 'timestamp',
-  },
-  metrics: [
-    {
-      type: 'primary',
-      operation: 'count',
-    },
-  ],
-} satisfies DeepPartial<LensUpdateRequestBody>;
-
-const lensCreateCodeSamples = [
-  createCurlCodeSample({
-    lang: 'cURL_metric',
-    label: 'Create a metric visualization - cURL',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreateMetricVisualizationBody,
-  }),
-  createConsoleCodeSample({
-    lang: 'Console_metric',
-    label: 'Create a metric visualization - Console',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreateMetricVisualizationBody,
-  }),
-  createCurlCodeSample({
-    lang: 'cURL_xy',
-    label: 'Create an XY line chart - cURL',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreateAnXYLineChartBody,
-  }),
-  createConsoleCodeSample({
-    lang: 'Console_xy',
-    label: 'Create an XY line chart - Console',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreateAnXYLineChartBody,
-  }),
-  createCurlCodeSample({
-    lang: 'cURL_pie',
-    label: 'Create a pie/donut chart - cURL',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreatePieDonutChartBody,
-  }),
-  createConsoleCodeSample({
-    lang: 'Console_pie',
-    label: 'Create a pie/donut chart - Console',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreatePieDonutChartBody,
-  }),
-  createCurlCodeSample({
-    lang: 'cURL_table',
-    label: 'Create a data table - cURL',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreateDataTableBody,
-  }),
-  createConsoleCodeSample({
-    lang: 'Console_table',
-    label: 'Create a data table - Console',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreateDataTableBody,
-  }),
-  createCurlCodeSample({
-    lang: 'cURL_library',
-    label: 'Create a visualization using a library data view - cURL',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreateVisualizationUsingALibraryDataViewBody,
-  }),
-  createConsoleCodeSample({
-    lang: 'Console_library',
-    label: 'Create a visualization using a library data view - Console',
-    method: 'POST',
-    path: '/api/visualizations',
-    body: lensCreateVisualizationUsingALibraryDataViewBody,
-  }),
-];
 
 const lensSearchCodeSamples = [
   {
@@ -288,21 +52,6 @@ const lensReadCodeSamples = [
     label: 'Get a visualization - Console',
     source: 'GET kbn:/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d\n',
   },
-];
-
-const lensUpdateCodeSamples = [
-  createCurlCodeSample({
-    label: 'Update a visualization - cURL',
-    method: 'PUT',
-    path: '/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d',
-    body: lensUpdateVisualizationBody,
-  }),
-  createConsoleCodeSample({
-    label: 'Update a visualization - Console',
-    method: 'PUT',
-    path: '/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d',
-    body: lensUpdateVisualizationBody,
-  }),
 ];
 
 const lensDeleteCodeSamples = [
@@ -1104,7 +853,6 @@ const lensUpsertResponseExamples = {
 
 export const createLensVisualizationOASOperationObject = {
   description: lensCreateDescription,
-  'x-codeSamples': lensCreateCodeSamples,
   requestBody: {
     content: {
       'application/json': {
@@ -1150,7 +898,6 @@ export const readLensVisualizationOASOperationObject = {
 };
 
 export const updateLensVisualizationOASOperationObject = {
-  'x-codeSamples': lensUpdateCodeSamples,
   requestBody: {
     content: {
       'application/json': {

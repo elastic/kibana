@@ -11,6 +11,7 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
       class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
     >
       <span
+        aria-hidden="true"
         color="subdued"
         data-euiicon-type="logoSecurity"
       />
@@ -100,6 +101,7 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
       class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
     >
       <span
+        aria-hidden="true"
         color="subdued"
         data-euiicon-type="logoSecurity"
       />

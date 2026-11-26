@@ -7,7 +7,8 @@
 
 import type { TemplateBody, TemplatesCatalog } from '@kbn/workflows-library';
 
-import { LibraryCache } from './library_cache';
+import { LibraryFetchError } from './errors';
+import { LibraryCache, type LibraryFailureListener } from './library_cache';
 
 const TTL_MS = 60_000;
 
@@ -129,5 +130,135 @@ describe('LibraryCache', () => {
     const health = cache.getHealth();
     expect(health.lastRefreshAt).toBe('2026-06-01T12:00:00.000Z');
     expect(health.lastError?.at).toBe('2026-06-01T12:00:00.000Z');
+  });
+
+  describe('failure listener', () => {
+    const fetchError = () => new LibraryFetchError('upstream down', 'timeout', 'https://x');
+    const withSlugs = (...slugs: string[]): TemplatesCatalog => ({
+      ...catalogA,
+      templates: slugs.map((slug) => ({ ...catalogA.templates[0], slug })),
+    });
+    /** A cache whose catalog lists `alpha` and `beta`. */
+    const buildCache = (onFailure: LibraryFailureListener) => {
+      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+      cache.setCatalog(withSlugs('alpha', 'beta'));
+      return cache;
+    };
+
+    it('hears only the first catalog failure until a refresh succeeds again', () => {
+      const onFailure = jest.fn();
+      const cache = new LibraryCache(TTL_MS, 'bundle', onFailure);
+
+      cache.markRefreshFailure(fetchError());
+      cache.markRefreshFailure(fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(1);
+      expect(onFailure).toHaveBeenCalledWith({ operation: 'catalog', reason: 'timeout' });
+
+      cache.markRefreshSuccess();
+      cache.markRefreshFailure(fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(2);
+    });
+
+    it('hears only the first failure of a template until it loads again', () => {
+      const onFailure = jest.fn();
+      const cache = buildCache(onFailure);
+
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(1);
+      expect(onFailure).toHaveBeenCalledWith({
+        operation: 'template',
+        reason: 'timeout',
+        templateSlug: 'alpha',
+      });
+
+      cache.markTemplateLoadSuccess('alpha');
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(2);
+    });
+
+    it('tracks each template separately, so another template loading does not re-report a broken one', () => {
+      const onFailure = jest.fn();
+      const cache = buildCache(onFailure);
+
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadSuccess('beta');
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadFailure('beta', fetchError());
+
+      expect(onFailure.mock.calls.map(([failure]) => failure.templateSlug)).toEqual([
+        'alpha',
+        'beta',
+      ]);
+    });
+
+    it('stops tracking a failing template once a new catalog no longer lists it', () => {
+      const onFailure = jest.fn();
+      const cache = buildCache(onFailure);
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadFailure('beta', fetchError());
+
+      // `alpha` is dropped from the catalog and later comes back; `beta` stays listed.
+      cache.setCatalog(withSlugs('beta'));
+      cache.setCatalog(withSlugs('alpha', 'beta'));
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadFailure('beta', fetchError());
+
+      expect(onFailure.mock.calls.map(([failure]) => failure.templateSlug)).toEqual([
+        'alpha',
+        'beta',
+        'alpha',
+      ]);
+    });
+
+    it('ignores a failed load that started before a refresh removed the template', () => {
+      const onFailure = jest.fn();
+      const cache = buildCache(onFailure);
+      cache.markTemplateLoadFailure('alpha', fetchError());
+
+      // A refresh drops `alpha` while a load of it is in flight, and that load then fails.
+      cache.setCatalog(withSlugs('beta'));
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(1);
+
+      // Once listed again, its next failure is the first since it came back.
+      cache.setCatalog(withSlugs('alpha', 'beta'));
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(2);
+    });
+
+    it('tracks the catalog and template bodies separately', () => {
+      const onFailure = jest.fn();
+      const cache = buildCache(onFailure);
+
+      cache.markRefreshFailure(fetchError());
+      cache.markTemplateLoadFailure('alpha', fetchError());
+
+      expect(onFailure.mock.calls.map(([failure]) => failure.operation)).toEqual([
+        'catalog',
+        'template',
+      ]);
+    });
+
+    it('reports an error that is not a fetch error as unknown', () => {
+      const onFailure = jest.fn();
+      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+
+      cache.markRefreshFailure(new Error('bug'));
+
+      expect(onFailure).toHaveBeenCalledWith(expect.objectContaining({ reason: 'unknown' }));
+    });
+
+    it('still records the failure when the listener throws', () => {
+      const cache = buildCache(() => {
+        throw new Error('listener bug');
+      });
+
+      expect(() => cache.markRefreshFailure(fetchError())).not.toThrow();
+      expect(() => cache.markTemplateLoadFailure('alpha', fetchError())).not.toThrow();
+      expect(cache.getHealth().lastError).toEqual(
+        expect.objectContaining({ message: 'upstream down' })
+      );
+    });
   });
 });

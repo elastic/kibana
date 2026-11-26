@@ -31,10 +31,6 @@ export const addExceptionEntryFieldValueOfItemX = (
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
-export const selectCurrentEntryField = (index = 0) => {
-  cy.get(FIELD_INPUT).eq(index).type(`{downarrow}{enter}`);
-};
-
 export const addExceptionEntryFieldValue = (field: string, index = 0) => {
   cy.get(FIELD_INPUT).eq(index).type(`{selectall}${field}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();

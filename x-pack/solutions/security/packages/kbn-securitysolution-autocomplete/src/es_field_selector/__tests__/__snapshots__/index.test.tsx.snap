@@ -46,6 +46,7 @@ exports[`FieldComponent should allow user to clear values if isClearable is true
               type="button"
             >
               <span
+                aria-hidden="true"
                 class="euiFormControlLayoutClearButton__icon emotion-euiFormControlLayoutClearButton__icon-m"
                 data-euiicon-type="cross"
               />
