@@ -195,6 +195,18 @@ describe('sandbox credentials', () => {
     expect(await getHeaders(config, testSecrets)).toEqual(expected);
   });
 
+  test.each([
+    [
+      'the host of the configured URL',
+      { url: 'https://API.example.com:8443/v1/items' },
+      ['api.example.com'],
+    ],
+    ['no hosts without a URL', {}, []],
+    ['no hosts for an invalid URL', { url: 'not a url' }, []],
+  ])('getSandboxHosts: %s', (_name, config, expected) => {
+    expect(connectorType.getSandboxHosts?.({ config })).toEqual(expected);
+  });
+
   test('isSandboxCapable: true when secretQueryParams is set', () => {
     expect(
       connectorType.isSandboxCapable?.({
@@ -514,6 +526,29 @@ describe('config validation', () => {
         → at headers"
     `);
   });
+
+  test('config validation passes when tokenType is a single auth scheme', () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'http://mylisteningserver:9200/endpoint',
+      tokenType: 'Bearer',
+    };
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
+  });
+
+  test.each(['Bearer token', ' Bearer', 'Bearer:'])(
+    'config validation fails when tokenType is %p',
+    (tokenType) => {
+      const config = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver:9200/endpoint',
+        tokenType,
+      };
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrow(/at tokenType/);
+    }
+  );
 
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
     const config: ConnectorTypeConfigType = {

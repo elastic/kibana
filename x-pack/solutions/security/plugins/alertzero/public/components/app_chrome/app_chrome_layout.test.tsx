@@ -8,18 +8,34 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, type MemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { EuiProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
+import { AppStatus, type CoreStart } from '@kbn/core/public';
 import { AppChromeLayout } from './app_chrome_layout';
+import { useAppHeadingDocLink } from './app_heading_doc_link';
+import { useAppHeadingTitle } from './app_heading_title';
+
+const OVERVIEW_DOC_LINK = 'https://www.elastic.co/docs/alertzero';
+const SET_UP_DOC_LINK = 'https://www.elastic.co/docs/alertzero/set-up';
+
+const setBreadcrumbs = jest.fn();
 
 const coreStartStub = {
-  docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },
+  docLinks: {
+    links: {
+      securitySolution: { alertZero: { overview: OVERVIEW_DOC_LINK, setUp: SET_UP_DOC_LINK } },
+    },
+  },
+  application: {
+    getUrlForApp: (appId: string) => `/app/${appId}`,
+    applications$: of(new Map([['securitySolutionUI', { status: AppStatus.accessible }]])),
+  },
+  chrome: { setBreadcrumbs },
 } as unknown as CoreStart;
 
 const makeChromeWithFeedback = (openFeedback?: () => void) => {
@@ -75,11 +91,11 @@ describe('AppChromeLayout header menu', () => {
     expect(openFeedback).toHaveBeenCalledTimes(1);
   });
 
-  it('links Documentation to the Security solution guide', async () => {
+  it('links Documentation to the AlertZero overview when no page picks a link', async () => {
     await renderLayout(makeChromeWithFeedback(jest.fn()));
 
     const link = (await screen.findByText('Documentation')).closest('a');
-    expect(link?.getAttribute('href')).toBe('https://www.elastic.co/guide');
+    expect(link?.getAttribute('href')).toBe(OVERVIEW_DOC_LINK);
   });
 
   it('shows no Feedback entry when no feedback handler is registered', async () => {
@@ -122,5 +138,134 @@ describe('AppChromeLayout overflow', () => {
     unmount();
     renderAt('/watches');
     expect(screen.queryByTestId('appHeaderTitle')).not.toBeInTheDocument();
+  });
+});
+
+describe('AppChromeLayout breadcrumbs', () => {
+  beforeEach(() => {
+    setBreadcrumbs.mockClear();
+  });
+
+  const renderAt = (pathname: string, services: CoreStart = coreStartStub) =>
+    render(
+      <KibanaContextProvider services={services}>
+        <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
+          <EuiProvider>
+            <Router history={createMemoryHistory({ initialEntries: [pathname] })}>
+              <AppChromeLayout>content</AppChromeLayout>
+            </Router>
+          </EuiProvider>
+        </MockChromeContextProvider>
+      </KibanaContextProvider>
+    );
+
+  it.each([
+    ['absent', new Map()],
+    ['inaccessible', new Map([['securitySolutionUI', { status: AppStatus.inaccessible }]])],
+  ])('should not link the Security breadcrumb when the Security app is %s', (_, applications) => {
+    renderAt('/', {
+      ...coreStartStub,
+      application: { ...coreStartStub.application, applications$: of(applications) },
+    });
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([{ text: 'Security' }, { text: 'AlertZero' }]);
+  });
+
+  it('should set Security > AlertZero when on the landing page', () => {
+    renderAt('/');
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([
+      { text: 'Security', href: '/app/securitySolutionUI' },
+      { text: 'AlertZero' },
+    ]);
+  });
+
+  it.each([
+    ['/escalations', 'Escalations'],
+    ['/watches/system-security-watch-floor', 'Watches'],
+  ])('should link back to AlertZero when on %s', (path, sectionTitle) => {
+    renderAt(path);
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([
+      { text: 'Security', href: '/app/securitySolutionUI' },
+      { text: 'AlertZero', href: '/app/alertzero' },
+      { text: sectionTitle },
+    ]);
+  });
+});
+
+describe('AppChromeLayout heading title', () => {
+  const PageWithTitle: React.FC<{ title: string }> = ({ title }) => {
+    useAppHeadingTitle(title);
+    return null;
+  };
+
+  const layoutAt = (history: MemoryHistory, children: React.ReactNode) => (
+    <KibanaContextProvider services={coreStartStub}>
+      <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
+        <EuiProvider>
+          <Router history={history}>
+            <AppChromeLayout>{children}</AppChromeLayout>
+          </Router>
+        </EuiProvider>
+      </MockChromeContextProvider>
+    </KibanaContextProvider>
+  );
+
+  it.each([
+    ['/', 'AlertZero'],
+    ['/escalations', 'Escalations'],
+  ])('titles %s with the route title by default', (path, title) => {
+    render(layoutAt(createMemoryHistory({ initialEntries: [path] }), null));
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(title);
+  });
+
+  it('shows the title a page sets, and restores the route title when that page unmounts', () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const { rerender } = render(layoutAt(history, <PageWithTitle title="Proposed actions" />));
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Proposed actions');
+
+    rerender(layoutAt(history, null));
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('AlertZero');
+  });
+});
+
+describe('AppChromeLayout documentation link', () => {
+  const PageWithDocLink: React.FC = () => {
+    useAppHeadingDocLink('setUp');
+    return null;
+  };
+
+  const layoutWith = (children: React.ReactNode) => (
+    <KibanaContextProvider services={coreStartStub}>
+      <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
+        <EuiProvider>
+          <Router history={createMemoryHistory({ initialEntries: ['/'] })}>
+            <AppChromeLayout>{children}</AppChromeLayout>
+          </Router>
+        </EuiProvider>
+      </MockChromeContextProvider>
+    </KibanaContextProvider>
+  );
+
+  const openOverflow = async () => {
+    const overflow = await waitFor(() => {
+      const el = (document.querySelector('[data-euiicon-type="ellipsis"]') as HTMLElement)?.closest(
+        'button'
+      );
+      expect(el).toBeTruthy();
+      return el as HTMLElement;
+    });
+    fireEvent.click(overflow);
+  };
+
+  it('links Documentation to the page a page picks, and falls back when it unmounts', async () => {
+    const { rerender } = render(layoutWith(<PageWithDocLink />));
+    await openOverflow();
+    expect((await screen.findByText('Documentation')).closest('a')?.getAttribute('href')).toBe(
+      SET_UP_DOC_LINK
+    );
+
+    rerender(layoutWith(null));
+    expect((await screen.findByText('Documentation')).closest('a')?.getAttribute('href')).toBe(
+      OVERVIEW_DOC_LINK
+    );
   });
 });

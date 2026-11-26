@@ -8,7 +8,12 @@
  */
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-import type { IKibanaResponse, RouteAccess, RouteSecurity } from '@kbn/core-http-server';
+import type {
+  IKibanaResponse,
+  RouteAccess,
+  RouteSecurity,
+  RouteValidatorFullConfigResponse,
+} from '@kbn/core-http-server';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -152,6 +157,7 @@ export type CreateServerRouteFactory<
     handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
     params?: TRouteParamsRT;
     security: RouteSecurity;
+    responses?: RouteValidatorFullConfigResponse;
   } & Required<
     {
       options?: (TRouteCreateOptions extends DefaultRouteCreateOptions ? TRouteCreateOptions : {}) &
@@ -182,6 +188,8 @@ export type ServerRoute<
   endpoint: TEndpoint;
   handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
   security: RouteSecurity;
+  /** Response schemas per status code, used for OAS generation and dev-mode response validation. */
+  responses?: RouteValidatorFullConfigResponse;
 } & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {}) &
   (TRouteCreateOptions extends DefaultRouteCreateOptions ? { options: TRouteCreateOptions } : {});
 

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { ConversationRound } from '@kbn/agent-builder-common';
-import type {
-  AttachmentVersionRef,
-  VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
@@ -26,7 +22,11 @@ beforeAll(async () => {
 
 type ToSurfaceComposition = NonNullable<AttachmentTypeDefinition['toSurfaceComposition']>;
 
-const context = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-1' };
+const context = {
+  request: httpServerMock.createKibanaRequest(),
+  spaceId: 'space-1',
+  agentId: 'agent-1',
+};
 
 /** An attachment with two versions, whose data names the version, so tests can see which one rendered. */
 const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
@@ -50,23 +50,15 @@ const echoAttachment: ToSurfaceComposition = ({ id, data }) => ({
 
 interface ComposeOptions {
   attachments?: VersionedAttachment[];
-  attachmentRefs?: AttachmentVersionRef[];
   toSurfaceComposition?: ToSurfaceComposition;
 }
 
 const compose = (
   message: string,
-  {
-    attachments = [createAttachment()],
-    attachmentRefs,
-    toSurfaceComposition = echoAttachment,
-  }: ComposeOptions = {}
+  { attachments = [createAttachment()], toSurfaceComposition = echoAttachment }: ComposeOptions = {}
 ) =>
   buildComposition({
-    round: {
-      input: { message: 'hello', attachment_refs: attachmentRefs },
-      response: { message },
-    } as ConversationRound,
+    message,
     attachments,
     attachmentsService: {
       getTypeDefinition: (type: string) => (type === 'text' ? { toSurfaceComposition } : undefined),
@@ -101,7 +93,7 @@ describe('buildComposition', () => {
     ]);
   });
 
-  it('shows the title and subtitle of the attachment composition as a heading', async () => {
+  it('shows the title and subtitle of the attachment composition as a header and context', async () => {
     const toSurfaceComposition: ToSurfaceComposition = () => ({
       type: 'view',
       title: 'Note',
@@ -109,22 +101,21 @@ describe('buildComposition', () => {
       body: [{ type: 'markdown', text: 'Content' }],
     });
 
-    expect(await build('<render_attachment id="a1" />', { toSurfaceComposition })).toEqual([
-      '**Note**\n_v1_',
-      'Content',
-    ]);
+    expect((await compose('<render_attachment id="a1" />', { toSurfaceComposition })).body).toEqual(
+      [
+        { type: 'header', text: 'Note', level: 2 },
+        { type: 'context', items: [{ text: 'v1' }] },
+        { type: 'markdown', text: 'Content' },
+      ]
+    );
+  });
+
+  it('leaves out the heading when the composition has neither title nor subtitle', async () => {
+    expect(await build('<render_attachment id="a1" />')).toEqual(['[a1 v2]']);
   });
 
   it('uses the latest version of tags without a version', async () => {
     expect(await build('<render_attachment id="a1" />')).toEqual(['[a1 v2]']);
-  });
-
-  it('uses the latest version even when the round sent an older one', async () => {
-    expect(
-      await build('<render_attachment id="a1" />', {
-        attachmentRefs: [{ attachment_id: 'a1', version: 1 }],
-      })
-    ).toEqual(['[a1 v2]']);
   });
 
   it('ignores versions that are not positive integers', async () => {
@@ -228,6 +219,32 @@ describe('buildComposition', () => {
       expect(
         await build('Here: <render_attachment id="a1" /> Done', { toSurfaceComposition })
       ).toEqual(['Here:', 'Done']);
+    }
+  });
+
+  it('leaves out attachments whose heading is too long for its header or context', async () => {
+    const longTitle: ToSurfaceComposition = () => ({
+      type: 'view',
+      title: 't'.repeat(201),
+      body: [{ type: 'markdown', text: 'Content' }],
+    });
+
+    const longSubtitle: ToSurfaceComposition = () => ({
+      type: 'view',
+      subtitle: 's'.repeat(501),
+      body: [{ type: 'markdown', text: 'Content' }],
+    });
+
+    for (const toSurfaceComposition of [longTitle, longSubtitle]) {
+      const composition = await compose('Here: <render_attachment id="a1" /> Done', {
+        toSurfaceComposition,
+      });
+
+      expect(composition.body).toEqual([
+        { type: 'markdown', text: 'Here:' },
+        { type: 'markdown', text: 'Done' },
+      ]);
+      expect(runtime.validate(composition).valid).toBe(true);
     }
   });
 

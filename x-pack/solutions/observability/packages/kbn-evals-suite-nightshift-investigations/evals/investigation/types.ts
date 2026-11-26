@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { telemetryTargetNameSchema } from '@kbn/nightshift-investigations-plugin/common';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type {
@@ -17,12 +16,7 @@ import type {
 
 export const investigationExampleSchema = lazySchema(() =>
   z.object({
-    input: z
-      .object({
-        question: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
-        telemetry_target: telemetryTargetNameSchema.optional(),
-      })
-      .catchall(z.json()),
+    input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
     output: z.record(z.string(), z.json()).optional(),
     metadata: z.object({ case_id: z.string().trim().min(1).max(500) }).catchall(z.json()),
   })
@@ -44,6 +38,17 @@ export interface TrajectoryStep {
   tool_id: string;
   params: Record<string, unknown>;
   result: string;
+}
+
+/** Model usage and wall-clock time summed over every round of the investigation's conversation. */
+export interface InvestigationUsage {
+  /** Total input tokens, including the cached ones. */
+  input_tokens: number;
+  /** Input tokens served from the provider's cache, a subset of `input_tokens`. */
+  cached_input_tokens: number;
+  output_tokens: number;
+  llm_calls: number;
+  latency_ms: number;
 }
 
 /**
@@ -77,4 +82,16 @@ export interface InvestigationTaskOutput {
   execution_error?: string;
   decision_trees_accessed?: AccessedDecisionTree[];
   tool_call_trajectory?: TrajectoryStep[];
+  /** Counted before `tool_call_trajectory` is bounded, so it can exceed that list's length. */
+  tool_call_count?: number;
+  usage?: InvestigationUsage;
+  /**
+   * ORCA only: the four-section `report.md` the model under test wrote from the finished
+   * investigation, which ORCA's graders read. Empty when it concluded that no incident occurred.
+   */
+  orca_report_md?: string;
+  /** ORCA only: `orca_report_md` was cut at its length bound. */
+  orca_report_truncated?: boolean;
+  /** ORCA only: why `orca_report_md` could not be written. */
+  orca_report_error?: string;
 }

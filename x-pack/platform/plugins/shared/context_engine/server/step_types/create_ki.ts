@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { createKiStepCommonDefinition } from '../../common/step_types/create_ki';
@@ -19,7 +20,14 @@ import {
   resolveOrCreateAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
-import { putKiRevision } from '../ai_indices/ki_revision';
+import {
+  findKiRevision,
+  isKiDeleted,
+  putKiRevision,
+  rewrittenKiTimestamp,
+} from '../ai_indices/ki_revision';
+import { assertSameUserId } from '../ai_indices/ki_write';
+import { toStepError } from './to_step_error';
 import type { VerifyKi } from './verify_ki';
 
 export const getCreateKiStepDefinition = ({
@@ -62,20 +70,44 @@ export const getCreateKiStepDefinition = ({
           const esClient = context.contextManager.getScopedEsClient();
 
           const id = kiId ?? uuidv4();
+          const existing = kiId
+            ? await findKiRevision({
+                esClient,
+                aiIndexId,
+                dest,
+                kiId,
+                includeSource: true,
+                abortSignal: context.abortSignal,
+              })
+            : undefined;
+          if (existing) {
+            try {
+              assertSameUserId(aiIndexId, id, existing.source, ki);
+            } catch (error) {
+              throw toStepError(error, 'Failed to create knowledge indicator');
+            }
+          }
+          const userId = ki.user_id ?? existing?.source.user_id;
           const now = new Date().toISOString();
           const writer = kiWriterFromContext(context.contextManager.getContext());
+          // A rerun keeps when and by whom the KI was created. A deleted KI starts over.
+          const current = existing && !isKiDeleted(existing.source) ? existing.source : undefined;
           await putKiRevision({
             esClient,
             aiIndexId,
             dest,
             kiId: id,
             document: {
-              '@timestamp': now,
-              ...ki,
+              '@timestamp': rewrittenKiTimestamp(dest, current, now),
+              ...omit(ki, 'user_id'),
+              ...(userId !== undefined ? { user_id: userId } : {}),
               id,
               updated_at: now,
               governance: {
-                provenance: { created_by: writer, updated_by: writer },
+                provenance: {
+                  created_by: current?.governance?.provenance?.created_by ?? writer,
+                  updated_by: writer,
+                },
                 ...(verificationFailed && { lifecycle: { status: 'verification_failed' } }),
               },
             },

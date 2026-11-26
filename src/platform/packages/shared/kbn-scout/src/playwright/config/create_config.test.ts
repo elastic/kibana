@@ -42,6 +42,7 @@ describe('createPlaywrightConfig', () => {
   const originalBuildkiteRetryCount = process.env.BUILDKITE_RETRY_COUNT;
   const originalUseCitadelProxy = process.env.USE_CITADEL_PROXY;
   const originalIpv6Only = process.env.KIBANA_TEST_IPV6_ONLY;
+  const originalHttpsProxy = process.env.HTTPS_PROXY;
 
   const restoreEnvVar = (name: string, value: string | undefined) => {
     if (value === undefined) {
@@ -60,6 +61,7 @@ describe('createPlaywrightConfig', () => {
     // Set on CI builds that opt in to the Citadel proxy, including this test's own job.
     delete process.env.USE_CITADEL_PROXY;
     delete process.env.KIBANA_TEST_IPV6_ONLY;
+    delete process.env.HTTPS_PROXY;
   });
 
   afterAll(() => {
@@ -68,6 +70,7 @@ describe('createPlaywrightConfig', () => {
     restoreEnvVar('BUILDKITE_RETRY_COUNT', originalBuildkiteRetryCount);
     restoreEnvVar('USE_CITADEL_PROXY', originalUseCitadelProxy);
     restoreEnvVar('KIBANA_TEST_IPV6_ONLY', originalIpv6Only);
+    restoreEnvVar('HTTPS_PROXY', originalHttpsProxy);
   });
 
   it('should return a valid default Playwright configuration', () => {
@@ -174,6 +177,17 @@ describe('createPlaywrightConfig', () => {
     expect(ech).toHaveProperty('timeout', 90_000);
     // local falls back to the global 60 s default (no per-project override)
     expect(local).not.toHaveProperty('timeout');
+  });
+
+  it('cloud projects raise the navigation timeout above the global default', () => {
+    const config = createPlaywrightConfig({ testDir: './my_tests' });
+    const byName = (name: string) => config.projects!.find((p) => p.name === name)!.use;
+
+    // Every test gets a fresh browser context, so a cloud navigation is a cold, remote
+    // Kibana bootstrap and cannot reliably settle within the global 20 s cap.
+    expect(byName('ech')).toHaveProperty('navigationTimeout', 45_000);
+    expect(byName('mki')).toHaveProperty('navigationTimeout', 45_000);
+    expect(byName('local')).not.toHaveProperty('navigationTimeout');
   });
 
   it('should add global.setup.ts and global.teardown.ts projects when runGlobalSetup is true', () => {
@@ -307,16 +321,20 @@ describe('createPlaywrightConfig', () => {
     });
   });
 
-  describe('chromium launch args', () => {
+  describe('chromium launch options', () => {
     it('sets no launch options by default', () => {
       const config = createPlaywrightConfig({ testDir: './my_tests' });
       expect(config.use).not.toHaveProperty('launchOptions');
     });
 
-    it('keeps the browser off the proxy when USE_CITADEL_PROXY is true', () => {
+    it('hides the proxy variables from the browser when USE_CITADEL_PROXY is true', () => {
       process.env.USE_CITADEL_PROXY = 'true';
+      process.env.HTTPS_PROXY = 'http://job:token@proxy.test:3128';
       const config = createPlaywrightConfig({ testDir: './my_tests' });
-      expect(config.use?.launchOptions).toEqual({ args: ['--no-proxy-server'] });
+      const { launchOptions } = config.use ?? {};
+      expect(launchOptions).not.toHaveProperty('args');
+      expect(launchOptions?.env).not.toHaveProperty('HTTPS_PROXY');
+      expect(launchOptions?.env).toHaveProperty('USE_CITADEL_PROXY', 'true');
     });
 
     it('ignores USE_CITADEL_PROXY values other than true', () => {
@@ -325,13 +343,13 @@ describe('createPlaywrightConfig', () => {
       expect(config.use).not.toHaveProperty('launchOptions');
     });
 
-    it('combines the IPv6-only and Citadel args', () => {
+    it('combines the IPv6-only arg with the Citadel environment', () => {
       process.env.KIBANA_TEST_IPV6_ONLY = 'true';
       process.env.USE_CITADEL_PROXY = 'true';
       const config = createPlaywrightConfig({ testDir: './my_tests' });
-      expect(config.use?.launchOptions).toEqual({
-        args: ['--host-resolver-rules=MAP localhost [::1]', '--no-proxy-server'],
-      });
+      const { launchOptions } = config.use ?? {};
+      expect(launchOptions?.args).toEqual(['--host-resolver-rules=MAP localhost [::1]']);
+      expect(launchOptions?.env).toHaveProperty('USE_CITADEL_PROXY', 'true');
     });
   });
 

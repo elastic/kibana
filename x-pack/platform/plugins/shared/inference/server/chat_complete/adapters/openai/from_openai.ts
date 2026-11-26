@@ -12,7 +12,11 @@ import type {
 } from '@kbn/inference-common';
 import { ChatCompletionEventType } from '@kbn/inference-common';
 import { CONTENT_FILTER_REFUSAL } from '../../utils/content_filter_refusal';
-import type { OpenAIChatCompletionChunkDelta, OpenAIChatCompletionMessage } from './types';
+import type {
+  OpenAIChatCompletionChunkDelta,
+  OpenAIChatCompletionMessage,
+  OpenAICompletionUsage,
+} from './types';
 
 export { CONTENT_FILTER_REFUSAL };
 
@@ -48,7 +52,7 @@ export function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompleti
 }
 
 export function tokenCountFromOpenAI(
-  completionUsage: OpenAI.CompletionUsage,
+  completionUsage: OpenAICompletionUsage,
   model?: string
 ): ChatCompletionTokenCountEvent {
   const thinking = completionUsage.completion_tokens_details?.reasoning_tokens;
@@ -59,6 +63,7 @@ export function tokenCountFromOpenAI(
       prompt: completionUsage.prompt_tokens,
       total: completionUsage.total_tokens,
       cached: completionUsage.prompt_tokens_details?.cached_tokens,
+      cacheWrite: completionUsage.prompt_tokens_details?.cache_write_tokens,
       thinking,
     },
     ...(model ? { model } : {}),

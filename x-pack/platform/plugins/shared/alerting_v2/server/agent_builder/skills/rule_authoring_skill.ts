@@ -13,8 +13,13 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import type { AttachRuleToolDeps } from '../tools/attach_rule';
+import { attachRuleTool } from '../tools/attach_rule';
+import type { LinkRuleAndActionPolicyToolDeps } from '../tools/link_rule_and_action_policy';
+import { linkRuleAndActionPolicyTool } from '../tools/link_rule_and_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
+import { generateRuleDiscoveryGuidance } from './rule_discovery_guidance';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
@@ -25,7 +30,9 @@ import {
   generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
-type RuleAuthoringSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
+type RuleAuthoringSkillDeps = ManageRuleToolDeps &
+  AttachRuleToolDeps &
+  LinkRuleAndActionPolicyToolDeps & { availability: AvailabilityConfig };
 
 export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
   defineSkillType({
@@ -85,12 +92,12 @@ Do **not** use this skill for:
 
 ## Rule Discovery
 
-When a user asks about existing rules:
-- Search with \`platform.core.sml_search\`, using keywords from the user's request.
-- For a broad listing, use \`keywords: ["*"]\`.
-- Summarize matches in plain language: name, kind, schedule, and query snippet.
+When a user asks about existing rules, read them with the Kibana API tools:
+${generateRuleDiscoveryGuidance()}
 - Do **not** attach rules by default when only listing or comparing.
-- To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
+- To inspect or edit a saved rule, attach it with ${
+      ALERTING_TOOL_IDS.attachRule
+    } using the rule \`id\`.
 - After attaching, use the returned \`attachment_id\` for subsequent ${
       ALERTING_TOOL_IDS.manageRule
     } calls.
@@ -170,6 +177,11 @@ After composing or modifying a rule, always render it inline for user review:
 where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${
       ALERTING_TOOL_IDS.manageRule
     } tool result.
+If you then call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\`, render the rule again with the \`ruleAttachment.version\` from the link tool result instead: the version from ${
+      ALERTING_TOOL_IDS.manageRule
+    } does not include the routing tag, and saving it would persist the rule untagged.
 
 ---
 
@@ -203,6 +215,12 @@ When the user wants alerts to recover only when a condition is met, to never rec
 When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), use \`set_no_data\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
-When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps)],
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md). To make an existing action policy attachment notify on this rule, call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\`; never set \`routing_tags\` by hand for that.`,
+    getInlineTools: () => [
+      manageRuleTool(deps),
+      attachRuleTool(deps),
+      linkRuleAndActionPolicyTool(deps),
+    ],
   });

@@ -19,6 +19,9 @@ import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import apm from 'elastic-apm-node';
+import semverMajor from 'semver/functions/major';
+import semverPrerelease from 'semver/functions/prerelease';
+import semverValid from 'semver/functions/valid';
 
 import {
   AgentlessAgentCreateOverProvisionedError,
@@ -56,6 +59,7 @@ import {
 } from '../../../common/services/output_helpers';
 
 import { appContextService } from '../app_context';
+import { packagePolicyService } from '../package_policy';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
@@ -80,6 +84,26 @@ interface AgentlessAgentErrorHandlingMessages {
       message: string;
     };
   };
+}
+
+/** The integration package sent to agentless-api as `policy_details.package`. */
+interface AgentlessPolicyDetailsPackage {
+  name: string;
+  version: string;
+  policy_template?: string;
+  release?: string;
+}
+
+/**
+ * The release of a package version, or undefined when the version is not valid semver.
+ * Mirrors the rule Fleet applies when a package manifest has no `release`
+ * (see `epm/archive/parse.ts`).
+ */
+function getReleaseFromPackageVersion(version: string): 'beta' | 'ga' | undefined {
+  if (!semverValid(version)) {
+    return undefined;
+  }
+  return semverPrerelease(version) || semverMajor(version) < 1 ? 'beta' : 'ga';
 }
 
 export interface AgentlessAgentService {
@@ -199,7 +223,11 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       soClient,
       agentlessAgentPolicy.id
     );
-    const policyDetails = await this.getPolicyDetails(soClient, fullPolicy);
+    const policyDetails = await this.getPolicyDetails(
+      soClient,
+      fullPolicy,
+      agentlessAgentPolicy.id
+    );
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
@@ -222,6 +250,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
       requestConfig.data.is_elastic_staff_owned = cloudSetup?.isElasticStaffOwned ?? false;
+      Object.assign(requestConfig.data, this.getCloudDeploymentIds());
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -338,6 +367,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       method: 'PUT',
       data: {
         stack_version: kibanaVersion,
+        ...this.getCloudDeploymentIds(),
       },
       ...this.getHeaders(tlsConfig, traceId),
     };
@@ -478,11 +508,77 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
 
   private async getPolicyDetails(
     soClient: SavedObjectsClientContract,
-    fullPolicy: FullAgentPolicy | null
+    fullPolicy: FullAgentPolicy | null,
+    agentPolicyId: string
   ) {
+    const pkg = await this.getIntegrationPackage(soClient, agentPolicyId);
     return {
       output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
+      // OTel integrations have their `otelcol` inputs moved out of `inputs` in the full agent
+      // policy, so agentless-api cannot derive the package from `inputs[].meta.package`.
+      // Send it explicitly so the deployment still gets its integration labels.
+      ...(pkg ? { package: pkg } : {}),
     };
+  }
+
+  /**
+   * The Elastic Cloud deployment ID and the Elasticsearch cluster ID of this deployment.
+   * Returns an empty object on Serverless or when Cloud does not expose the IDs.
+   */
+  private getCloudDeploymentIds(): { deployment_id?: string; elasticsearch_cluster_id?: string } {
+    const cloudSetup = appContextService.getCloud();
+    if (!cloudSetup?.isCloudEnabled || cloudSetup.isServerlessEnabled) {
+      return {};
+    }
+    return {
+      ...(cloudSetup.deploymentId ? { deployment_id: cloudSetup.deploymentId } : {}),
+      ...(cloudSetup.elasticsearchClusterId
+        ? { elasticsearch_cluster_id: cloudSetup.elasticsearchClusterId }
+        : {}),
+    };
+  }
+
+  /**
+   * The (single) non-system integration package of an agentless policy, if any, with the same
+   * fields a non-OTel policy carries in `inputs[].meta.package`.
+   */
+  private async getIntegrationPackage(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ): Promise<AgentlessPolicyDetailsPackage | undefined> {
+    try {
+      const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
+        soClient,
+        agentPolicyId
+      );
+      const packagePolicy = packagePolicies?.find(
+        (pp) => pp.package?.name && pp.package.name !== 'system'
+      );
+      if (!packagePolicy?.package) {
+        return undefined;
+      }
+      const pkg = packagePolicy.package;
+
+      // agentless-api labels a deployment from its first integration input only, so use the
+      // policy template of the first enabled input here as well.
+      const policyTemplate = packagePolicy.inputs?.find((input) => input.enabled)?.policy_template;
+      const release = getReleaseFromPackageVersion(pkg.version);
+
+      return {
+        name: pkg.name,
+        version: pkg.version,
+        ...(policyTemplate ? { policy_template: policyTemplate } : {}),
+        ...(release ? { release } : {}),
+      };
+    } catch (error) {
+      // Labelling is best effort: never fail the deployment because of it.
+      appContextService
+        .getLogger()
+        .warn(
+          `[Agentless API] Could not resolve integration package for ${agentPolicyId}: ${error}`
+        );
+      return undefined;
+    }
   }
 
   private getAgentlessTags(agentlessAgentPolicy: AgentPolicy) {

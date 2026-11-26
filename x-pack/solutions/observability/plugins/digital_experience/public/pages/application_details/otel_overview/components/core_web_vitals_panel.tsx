@@ -74,6 +74,7 @@ export function CoreWebVitalsPanel({
   const coreVitals = useMemo(
     () =>
       getCoreVitalsComponent({
+        headingLevel: 'h2',
         loading: isLoading,
         // No data while loading, so another selection's vitals are never shown as this one's.
         data: isLoading ? null : toUxMetrics(webVitals),

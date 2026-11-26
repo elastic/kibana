@@ -69,10 +69,55 @@ describe('getTermsConversionFailure', () => {
     );
   });
 
-  it('returns terms_other_bucket_not_supported when other bucket is enabled', () => {
+  it('returns terms_other_bucket_not_supported when other bucket is enabled and not supported', () => {
     expect(getTermsConversionFailure(createTermsColumn({ otherBucket: true }), context())).toBe(
       'terms_other_bucket_not_supported'
     );
+  });
+
+  it('allows other bucket when supportsOtherBucket is true', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: true }),
+        context({ supportsOtherBucket: true })
+      )
+    ).toBeUndefined();
+  });
+
+  it('returns terms_other_bucket_not_supported when Other also includes missing values', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: true, missingBucket: true }),
+        context({ supportsOtherBucket: true })
+      )
+    ).toBe('terms_other_bucket_not_supported');
+  });
+
+  it('returns terms_other_bucket_same_field_not_supported when both Top values use the same field', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: true }),
+        context({ termsBucketCount: 2, supportsOtherBucket: true, hasDuplicateTermsField: true })
+      )
+    ).toBe('terms_other_bucket_same_field_not_supported');
+  });
+
+  it('allows two Top values on the same field when Other is off', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: false }),
+        context({ termsBucketCount: 2, hasDuplicateTermsField: true })
+      )
+    ).toBeUndefined();
+  });
+
+  it('prefers the positional other bucket reason over the same field reason', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: true }),
+        context({ termsBucketCount: 2, hasDuplicateTermsField: true })
+      )
+    ).toBe('terms_other_bucket_not_supported');
   });
 
   it('prefers unsupported nesting over other bucket when both apply', () => {
@@ -118,7 +163,7 @@ describe('getTermsConversionFailure', () => {
     ).toBe('terms_date_histogram_not_supported');
   });
 
-  it('returns other bucket before accuracy mode when nesting is supported', () => {
+  it('returns other bucket before accuracy mode when Other is not supported on this column', () => {
     expect(
       getTermsConversionFailure(
         createTermsColumn({
@@ -128,6 +173,18 @@ describe('getTermsConversionFailure', () => {
         context()
       )
     ).toBe('terms_other_bucket_not_supported');
+  });
+
+  it('returns accuracy mode when Other is supported on this column', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({
+          accuracyMode: true,
+          otherBucket: true,
+        }),
+        context({ supportsOtherBucket: true })
+      )
+    ).toBe('terms_accuracy_mode_not_supported');
   });
 
   it('allows orderBy column and alphabetical', () => {

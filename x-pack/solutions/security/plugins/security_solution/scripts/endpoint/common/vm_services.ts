@@ -24,11 +24,12 @@ const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
 // Defaults suit the creation path, where this clears a stale or absent VM before `vagrant up` --
 // a fast no-op kept under the 10 minute enrolledEndpoint fixture. Destroying a live VM is much
-// slower, so that caller raises the budget.
+// slower, so that caller raises the budget. Creation cleanup is best effort; teardown sets `rethrow`
+// so a VM that could not be destroyed is reported to its caller.
 const destroyVagrantMachine = async (
   vagrantCwd: string,
   log: ToolingLog,
-  { attemptTimeoutMs = 30_000, maxAttempts = 3 } = {}
+  { attemptTimeoutMs = 30_000, maxAttempts = 3, rethrow = false } = {}
 ): Promise<void> => {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -47,6 +48,9 @@ const destroyVagrantMachine = async (
       );
 
       if (attempt === maxAttempts) {
+        if (rethrow) {
+          throw error;
+        }
         return;
       }
 
@@ -529,8 +533,13 @@ export const createVagrantHostVmClient = (
   };
 
   const destroy = async (): Promise<void> => {
-    // A live VM teardown has been observed to outlast 60s, so give each attempt double that.
-    await destroyVagrantMachine(VAGRANT_CWD, log, { attemptTimeoutMs: 120_000, maxAttempts: 2 });
+    // A live VM teardown has been observed to outlast 60s, so give each attempt double that. When every
+    // attempt fails the rejection is kept: callers use it to know the VM may still exist.
+    await destroyVagrantMachine(VAGRANT_CWD, log, {
+      attemptTimeoutMs: 120_000,
+      maxAttempts: 2,
+      rethrow: true,
+    });
 
     log.debug(`VM [${name}] was destroyed`);
   };

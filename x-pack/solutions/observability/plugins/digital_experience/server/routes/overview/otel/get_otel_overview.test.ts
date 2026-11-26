@@ -20,19 +20,37 @@ const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
 
 const ALL_GOOD = { good: 1, needsImprovement: 0, poor: 0 };
 
+const NO_FILTER_VALUES = {
+  browser: [],
+  os: [],
+  device: [],
+  country: [],
+  appVersion: [],
+  pageUrl: [],
+  pageContains: [],
+};
+
+const filterValues = (...values: Array<[key: string, count: number]>) => ({
+  values: { buckets: values.map(([key, count]) => ({ key, doc_count: count })) },
+});
+
 const terms = (...keys: string[]) => ({ buckets: keys.map((key) => ({ key })) });
 
-const trendBucket = (timestamp: number, pageLoads: number, loadTimeP75Ms: number | null) => ({
+const trendBucket = (
+  timestamp: number,
+  pageLoads: number,
+  loadTimePercentileMs: number | null
+) => ({
   key: timestamp,
   doc_count: pageLoads,
-  loadTime: { values: loadTimeP75Ms === null ? [] : [{ key: 75, value: loadTimeP75Ms }] },
+  loadTime: {
+    values: loadTimePercentileMs === null ? [] : [{ key: 75, value: loadTimePercentileMs }],
+  },
 });
 
 const logsAggregations = ({
   pageLoads = 0,
-  loadTimeP75Ms = null as number | null,
-  loadTimeSamples = 0,
-  jsErrors = 0,
+  loadTimePercentileMs = null as number | null,
   trend = [] as ReturnType<typeof trendBucket>[],
   environments = [] as string[],
   environmentNames = [] as string[],
@@ -45,11 +63,11 @@ const logsAggregations = ({
   inEnvironment: {
     pageLoads: {
       doc_count: pageLoads,
-      loadTime: { values: loadTimeP75Ms === null ? [] : [{ key: 75, value: loadTimeP75Ms }] },
-      loadTimeSamples: { value: loadTimeSamples },
+      loadTime: {
+        values: loadTimePercentileMs === null ? [] : [{ key: 75, value: loadTimePercentileMs }],
+      },
       trend: { buckets: trend },
     },
-    jsErrors: { doc_count: jsErrors },
     lcp: vital(null, 0),
     inp: vital(null, 0),
     cls: vital(null, 0),
@@ -59,28 +77,25 @@ const logsAggregations = ({
   },
 });
 
-const spansAggregations = (requests = 0, failed = 0) => ({
-  inEnvironment: { requests: { doc_count: requests }, failed: { doc_count: failed } },
-});
-
-const setup = ({ logs, spans }: { logs?: unknown; spans?: unknown }) => {
+const setup = ({ logs }: { logs?: unknown }) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  esClient.search.mockImplementation((async ({ index }: { index: string }) => ({
-    aggregations: index.startsWith('logs') ? logs : spans,
-  })) as never);
+  esClient.search.mockImplementation((async () => ({ aggregations: logs })) as never);
   return esClient;
 };
 
-const PARAMS = { serviceName: 'shop', start: 10, end: 20 };
+const PARAMS = {
+  serviceName: 'shop',
+  start: 10,
+  end: 20,
+  histogram: { interval: { value: 1, unit: 's' as const }, timeZone: 'UTC' },
+};
 
 describe('getOtelOverview', () => {
-  it('maps the logs and spans of the application to its Overview', async () => {
+  it('maps the logs of the application to its Overview', async () => {
     const esClient = setup({
       logs: logsAggregations({
         pageLoads: 12,
-        loadTimeP75Ms: 2412.5,
-        loadTimeSamples: 12,
-        jsErrors: 3,
+        loadTimePercentileMs: 2412.5,
         environments: ['production'],
         vitals: {
           lcp: vital(2412.5, 10),
@@ -90,16 +105,14 @@ describe('getOtelOverview', () => {
           ttfb: vital(950.75, 10, 4),
         },
       }),
-      spans: spansAggregations(8, 2),
     });
 
     await expect(getOtelOverview({ esClient, ...PARAMS })).resolves.toEqual({
       overview: {
         serviceName: 'shop',
+        percentile: 75,
         pageLoads: { count: 12 },
-        loadTime: { p75Ms: 2412.5, sampleCount: 12 },
-        jsErrors: { count: 3 },
-        httpRequests: { count: 8, failedCount: 2, failedRatio: 0.25 },
+        loadTime: { percentileMs: 2412.5 },
         webVitals: {
           lcp: { p75Ms: 2412.5, sampleCount: 10, ratings: ALL_GOOD },
           inp: { p75Ms: 180.25, sampleCount: 4, ratings: ALL_GOOD },
@@ -112,21 +125,23 @@ describe('getOtelOverview', () => {
           },
         },
         trend: [],
+        trendHistogram: { interval: { value: 1, unit: 's' }, start: 10, end: 20 },
       },
       environments: ['production'],
+      filters: NO_FILTER_VALUES,
     });
   });
 
   it('counts page loads without a load event but leaves them out of the percentile', async () => {
     const esClient = setup({
-      logs: logsAggregations({ pageLoads: 5, loadTimeP75Ms: 1800.5, loadTimeSamples: 3 }),
-      spans: spansAggregations(),
+      logs: logsAggregations({ pageLoads: 5, loadTimePercentileMs: 1800.5 }),
     });
 
     const { overview } = await getOtelOverview({ esClient, ...PARAMS });
 
     expect(overview.pageLoads.count).toBe(5);
-    expect(overview.loadTime).toEqual({ p75Ms: 1800.5, sampleCount: 3 });
+    expect(overview.pageLoads).toEqual({ count: 5 });
+    expect(overview.loadTime).toEqual({ percentileMs: 1800.5 });
   });
 
   it('returns every bucket of the trend, with no duration where nothing was timed', async () => {
@@ -135,15 +150,14 @@ describe('getOtelOverview', () => {
         pageLoads: 3,
         trend: [trendBucket(1000, 2, 1500.5), trendBucket(2000, 0, null), trendBucket(3000, 1, 0)],
       }),
-      spans: spansAggregations(),
     });
 
     const { overview } = await getOtelOverview({ esClient, ...PARAMS });
 
     expect(overview.trend).toEqual([
-      { timestamp: 1000, pageLoads: 2, loadTimeP75Ms: 1500.5 },
-      { timestamp: 2000, pageLoads: 0, loadTimeP75Ms: null },
-      { timestamp: 3000, pageLoads: 1, loadTimeP75Ms: 0 },
+      { timestamp: 1000, pageLoads: 2, loadTimePercentileMs: 1500.5 },
+      { timestamp: 2000, pageLoads: 0, loadTimePercentileMs: null },
+      { timestamp: 3000, pageLoads: 1, loadTimePercentileMs: 0 },
     ]);
     // The counts of the trend sum to the page loads KPI.
     expect(overview.trend.reduce((total, { pageLoads }) => total + pageLoads, 0)).toBe(
@@ -151,24 +165,15 @@ describe('getOtelOverview', () => {
     );
   });
 
-  it('has no failed ratio without requests with a known outcome', async () => {
-    const esClient = setup({ logs: logsAggregations(), spans: spansAggregations(0, 0) });
-
-    const { overview } = await getOtelOverview({ esClient, ...PARAMS });
-
-    expect(overview.httpRequests).toEqual({ count: 0, failedCount: 0, failedRatio: null });
-  });
-
   it('returns empty data, not measured zeros, when the indices hold nothing', async () => {
-    const esClient = setup({ logs: undefined, spans: undefined });
+    const esClient = setup({ logs: undefined });
 
     await expect(getOtelOverview({ esClient, ...PARAMS })).resolves.toEqual({
       overview: {
         serviceName: 'shop',
+        percentile: 75,
         pageLoads: { count: 0 },
-        loadTime: { p75Ms: null, sampleCount: 0 },
-        jsErrors: { count: 0 },
-        httpRequests: { count: 0, failedCount: 0, failedRatio: null },
+        loadTime: { percentileMs: null },
         webVitals: {
           lcp: NO_VITAL,
           inp: NO_VITAL,
@@ -177,9 +182,55 @@ describe('getOtelOverview', () => {
           ttfb: NO_VITAL,
         },
         trend: [],
+        trendHistogram: { interval: { value: 1, unit: 's' }, start: 10, end: 20 },
       },
       environments: [],
+      filters: NO_FILTER_VALUES,
     });
+  });
+
+  it('lists the values of every filter with their page loads', async () => {
+    const esClient = setup({
+      logs: {
+        ...logsAggregations(),
+        browserOptions: filterValues(['Chrome', 7], ['Firefox', 2]),
+        osOptions: filterValues(['macOS', 9]),
+        countryOptions: filterValues(['DE', 4]),
+        appVersionOptions: filterValues(['1.3.0', 6], ['1.2.0', 3]),
+        pageUrlOptions: filterValues(['https://shop.example.com/cart', 3]),
+      },
+    });
+
+    const { filters } = await getOtelOverview({ esClient, ...PARAMS });
+
+    expect(filters).toEqual({
+      browser: [
+        { key: 'Chrome', count: 7 },
+        { key: 'Firefox', count: 2 },
+      ],
+      os: [{ key: 'macOS', count: 9 }],
+      device: [],
+      country: [{ key: 'DE', count: 4 }],
+      appVersion: [
+        { key: '1.3.0', count: 6 },
+        { key: '1.2.0', count: 3 },
+      ],
+      pageUrl: [{ key: 'https://shop.example.com/cart', count: 3 }],
+      pageContains: [],
+    });
+  });
+
+  it('leaves out the values the routes would not accept back as a filter', async () => {
+    const esClient = setup({
+      logs: {
+        ...logsAggregations(),
+        browserOptions: filterValues(['x'.repeat(257), 5], ['Chrome', 2]),
+      },
+    });
+
+    const { filters } = await getOtelOverview({ esClient, ...PARAMS });
+
+    expect(filters.browser).toEqual([{ key: 'Chrome', count: 2 }]);
   });
 
   it('lists the environments of the application, "Not defined" first, whatever the selected one', async () => {
@@ -189,7 +240,6 @@ describe('getOtelOverview', () => {
         environmentNames: ['staging', 'production'],
         notDefined: 2,
       }),
-      spans: spansAggregations(),
     });
 
     const { environments } = await getOtelOverview({
@@ -201,18 +251,40 @@ describe('getOtelOverview', () => {
     expect(environments).toEqual(['ENVIRONMENT_NOT_DEFINED', 'production', 'staging']);
   });
 
-  it('searches the OTel logs and traces of the one application, passing the abort signal', async () => {
-    const esClient = setup({ logs: logsAggregations(), spans: spansAggregations() });
+  it('searches the OTel logs of the one application, passing the abort signal', async () => {
+    const esClient = setup({ logs: logsAggregations() });
     const signal = new AbortController().signal;
 
     await getOtelOverview({ esClient, ...PARAMS, signal });
 
-    expect(esClient.search).toHaveBeenCalledTimes(2);
+    // The HTTP requests are the KPI route's: the traces aren't searched here.
+    expect(esClient.search).toHaveBeenCalledTimes(1);
     const indices = esClient.search.mock.calls.map(([request]) => request?.index);
-    expect(indices).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+    expect(indices).toEqual(['logs-*.otel-*']);
     esClient.search.mock.calls.forEach(([request, options]) => {
       expect(request?.query?.bool?.filter).toContainEqual({ term: { 'service.name': 'shop' } });
       expect(options).toEqual({ signal });
+    });
+  });
+
+  it('reports the requested percentile and takes it in the logs search', async () => {
+    const esClient = setup({ logs: logsAggregations() });
+
+    const { overview } = await getOtelOverview({ esClient, ...PARAMS, percentile: 95 });
+
+    expect(overview.percentile).toBe(95);
+    const [logsRequest] = esClient.search.mock.calls[0];
+    expect(JSON.stringify(logsRequest?.aggs)).toContain('"percents":[95]');
+  });
+
+  it('narrows the search with the KQL query', async () => {
+    const esClient = setup({ logs: logsAggregations() });
+    const kuery = { match: { 'user_agent.name': 'Chrome' } };
+
+    await getOtelOverview({ esClient, ...PARAMS, kuery });
+
+    esClient.search.mock.calls.forEach(([request]) => {
+      expect(request?.query?.bool?.filter).toContainEqual(kuery);
     });
   });
 

@@ -10,17 +10,31 @@ import type {
   EffectiveFailureStore,
 } from '@kbn/streams-schema';
 
+export type ResolvedDestinationIndexHealth = 'green' | 'yellow' | 'red';
+
+/** What the destination wrote to an index in the time range, as its metrics report it. */
+interface ResolvedDestinationIndexWrites {
+  name: string;
+  /** Documents the destination wrote that stayed in the index, so not those in its failure store. */
+  documents: number;
+  /** `documents` per second over the time range. */
+  ingestion_rate: number;
+}
+
 /** Lifecycle and privileges are only reported for data streams; regular indices are listed without them. */
-export type ResolvedDestinationIndex =
-  | {
-      name: string;
-      is_data_stream: true;
-      lifecycle: ClassicIngestStreamEffectiveLifecycle;
-      /** True when enabled, or when the data stream lookup failed and it is unknown. */
-      failure_store_enabled: boolean;
-      privileges: { read_failure_store: boolean };
-    }
-  | { name: string; is_data_stream: false };
+export type ResolvedDestinationIndex = ResolvedDestinationIndexWrites &
+  (
+    | {
+        is_data_stream: true;
+        lifecycle: ClassicIngestStreamEffectiveLifecycle;
+        /** True when enabled, or when the data stream lookup failed and it is unknown. */
+        failure_store_enabled: boolean;
+        /** Undefined when the data stream lookup failed. */
+        health?: ResolvedDestinationIndexHealth;
+        privileges: { read_failure_store: boolean };
+      }
+    | { is_data_stream: false }
+  );
 
 export interface ResolveUnitIndicesResponse {
   destinations: Record<string, { indices: ResolvedDestinationIndex[] }>;

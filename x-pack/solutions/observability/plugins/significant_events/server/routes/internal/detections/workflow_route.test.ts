@@ -6,6 +6,10 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+} from '@kbn/workflows-extensions/server';
 import { internalDetectionsWorkflowRoutes } from './workflow_route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -29,23 +33,27 @@ const makeLink = (sourceId: string, ruleId: string): QueryLink =>
     query: { id: `${ruleId}-query`, severity_score: 90 },
   } as QueryLink);
 
-const setup = () => {
+const setup = ({
+  links = [makeLink('enabled-source', 'rule-1'), makeLink('disabled-source', 'rule-2')],
+}: { links?: QueryLink[] } = {}) => {
   const runChangePointScan = jest.fn().mockResolvedValue({ took: 1, by_rule: { buckets: [] } });
   const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
   const handlerParams = {
     params: { body: { lookback: 'now-1440m', bucketInterval: '60m' } },
-    request: {},
+    request: {
+      spaceId: 'default',
+      isInternalApiRequest: true,
+      headers: {
+        [EVENT_CHAIN_DEPTH_HEADER]: '0',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'detection-run-1',
+      },
+    },
     getScopedClients: jest.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },
       licensing: {},
       sourcesClient: { list },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-        getRuleBackedQueryLinks: jest
-          .fn()
-          .mockResolvedValue([
-            makeLink('enabled-source', 'rule-1'),
-            makeLink('disabled-source', 'rule-2'),
-          ]),
+        getRuleBackedQueryLinks: jest.fn().mockResolvedValue(links),
       }),
       getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({
         alertsReader: { runChangePointScan, index: '.rule-events' },
@@ -68,5 +76,34 @@ describe('change point scan route', () => {
     expect(list).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
     const scannedRuleIds = runChangePointScan.mock.calls.flatMap(([, { ruleIds }]) => ruleIds);
     expect(scannedRuleIds).toEqual(['rule-1']);
+    expect(handlerParams.telemetry.trackSignificantEventsDetectionScan).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'detection-run-1' }),
+      expect.anything()
+    );
+  });
+
+  it('tags each rule with the lookback its own analysis profile scanned', async () => {
+    const { handlerParams, runChangePointScan } = setup({
+      links: [
+        makeLink('enabled-source', 'critical-rule'),
+        {
+          ...makeLink('enabled-source', 'default-rule'),
+          query: { id: 'default-rule-query', severity_score: 0 },
+        } as QueryLink,
+      ],
+    });
+    runChangePointScan.mockImplementation(async (_client, { ruleIds }) => ({
+      took: 1,
+      by_rule: { buckets: ruleIds.map((ruleId: string) => ({ key: ruleId })) },
+    }));
+
+    const { aggregations } = await scanRoute.handler(handlerParams);
+
+    expect(aggregations.by_rule.buckets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: 'critical-rule', lookback_minutes: 1440 }),
+        expect.objectContaining({ key: 'default-rule', lookback_minutes: 125 }),
+      ])
+    );
   });
 });

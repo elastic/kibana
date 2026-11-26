@@ -12,11 +12,11 @@
     "server": true,
     "requiredPlugins": [
       "data",
-      "timelines",
       "ruleRegistry"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -19,6 +19,7 @@
     "__mocks__/**/*"
   ],
   "kbn_references": [
+    "@kbn/ols",
     "@kbn/app-header",
     "@kbn/cloud-plugin",
     "@kbn/cps",
@@ -26,6 +27,7 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/es-query",
     "@kbn/features-plugin",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
@@ -58,6 +60,7 @@
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-test-helpers-model-versions",
     "@kbn/utility-types-jest",
     "@kbn/es-errors",
     "@kbn/logging",
@@ -82,7 +85,6 @@
     "@kbn/code-editor-mock",
     "@kbn/core-security-browser",
     "@kbn/core-security-server",
-    "@kbn/core-http-router-server-internal",
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
     "@kbn/core-i18n-browser-mocks",

@@ -14,9 +14,9 @@ import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
 import { buildDiscoverParams } from '../../common/discover_helpers';
-import { FlyoutSectionTitle } from '../../common/flyout_section_title';
+import { FlyoutSectionTitle } from '../../components/ui/flyout_section_title';
 import { formatTimelineTime } from '../../common/format_timestamp';
-import { TruncatableSummary } from '../../common/truncatable_summary';
+import { TruncatableSummary } from '../../components/ui/truncatable_summary';
 import { SeverityBadge } from '../../components/ui/severity_badge';
 
 const DESCRIPTION_TITLE = i18n.translate(

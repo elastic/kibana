@@ -9,11 +9,13 @@
     "server": true,
     "browser": true,
     "optionalPlugins": [
+      "cloud",
       "cps",
       "fieldsMetadata",
       "usageCollection",
       "licensing",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "inference"
     ],
     "requiredPlugins": [
       "data",
@@ -23,8 +25,7 @@
       "share",
       "fileUpload",
       "fieldFormats",
-      "kql",
-      "inference"
+      "kql"
     ],
     "requiredBundles": [
       "kibanaReact",

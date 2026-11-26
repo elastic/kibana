@@ -233,7 +233,7 @@ const RequiredFieldsList = ({
           {(foldedRowsCount > 0 || isExpanded) && (
             <EuiButtonEmpty
               size="xs"
-              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
               onClick={toggleExpanded}
               data-test-subj="toggleRequiredFieldsFoldButton"
             >

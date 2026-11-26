@@ -8,11 +8,12 @@
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
+import type { ConnectionFilter } from './apply_service_map_visibility';
 import {
   applyServiceMapVisibility,
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
 } from './apply_service_map_visibility';
-import { mkEdge } from './test_helpers';
+import { mkEdge, mkIntraGroupEdge } from './test_helpers';
 
 const mkService = (
   id: string,
@@ -104,6 +105,160 @@ describe('applyServiceMapVisibility', () => {
     );
     expect(outNodes.every((n) => !n.hidden)).toBe(true);
     expect(outEdges.every((e) => !e.hidden)).toBe(true);
+  });
+
+  it('shows closed service groups with default filters even when only linked to a dependency', () => {
+    const nodes: ServiceMapNode[] = [
+      {
+        id: 'namePrefix:opbeans',
+        type: 'serviceGroup',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'namePrefix:opbeans',
+          label: 'opbeans',
+          isService: false,
+          isServiceGroup: true,
+          groupKind: 'attribute',
+          memberServiceIds: ['opbeans-go', 'opbeans-node'],
+          memberCount: 2,
+        },
+      },
+      {
+        id: 'postgresql',
+        type: 'dependency',
+        position: { x: 0, y: 0 },
+        data: { id: 'postgresql', label: 'postgresql', isService: false },
+      },
+    ];
+    const edges: ServiceMapEdge[] = [mkEdge('e1', 'namePrefix:opbeans', 'postgresql')];
+    const { nodes: outNodes } = applyServiceMapVisibility(
+      nodes,
+      edges,
+      DEFAULT_SERVICE_MAP_VIEW_FILTERS
+    );
+    const byId = Object.fromEntries(outNodes.map((n) => [n.id, n.hidden]));
+    expect(byId['namePrefix:opbeans']).toBe(false);
+    expect(byId.postgresql).toBe(false);
+  });
+
+  describe('open groups', () => {
+    const box: ServiceMapNode = {
+      id: 'namePrefix:opbeans',
+      type: 'serviceGroupBox',
+      position: { x: 0, y: 0 },
+      data: {
+        id: 'namePrefix:opbeans',
+        label: 'opbeans',
+        isService: false,
+        isServiceGroupBox: true,
+        groupKind: 'attribute',
+        memberServiceIds: ['opbeans-go', 'opbeans-node'],
+        memberCount: 2,
+      },
+    };
+    const member = (id: string, overrides: Parameters<typeof mkService>[1] = {}) => ({
+      ...mkService(id, overrides),
+      parentId: box.id,
+    });
+
+    it('shows the box and its members with default filters, with no edge on the box', () => {
+      const nodes = [box, member('opbeans-go'), member('opbeans-node')];
+
+      const { nodes: outNodes } = applyServiceMapVisibility(
+        nodes,
+        [mkEdge('e1', 'opbeans-go', 'opbeans-node')],
+        DEFAULT_SERVICE_MAP_VIEW_FILTERS
+      );
+
+      expect(outNodes.map((n) => n.hidden)).toEqual([false, false, false]);
+    });
+
+    it('keeps the box while one member matches the filters, and hides the others', () => {
+      const nodes = [
+        box,
+        member('opbeans-go', { alertsCount: 1 }),
+        member('opbeans-node', { alertsCount: 0 }),
+      ];
+
+      const { nodes: outNodes } = applyServiceMapVisibility(nodes, [], {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        alertStatusFilter: [ALERT_STATUS_ACTIVE],
+      });
+
+      const byId = Object.fromEntries(outNodes.map((n) => [n.id, n.hidden]));
+      expect(byId[box.id]).toBe(false);
+      expect(byId['opbeans-go']).toBe(false);
+      expect(byId['opbeans-node']).toBe(true);
+    });
+
+    describe('with connection filters', () => {
+      const filterBy = (connectionFilter: ConnectionFilter[]) => ({
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter,
+      });
+      const hiddenById = (outNodes: ServiceMapNode[]) =>
+        Object.fromEntries(outNodes.map((n) => [n.id, n.hidden]));
+
+      it('keeps a group with calls only between its members under the Orphaned filter', () => {
+        // Closed, it has no edge and is orphaned: opening it must not make it vanish.
+        const nodes = [box, member('opbeans-go'), member('opbeans-node')];
+
+        const { nodes: outNodes } = applyServiceMapVisibility(
+          nodes,
+          [mkIntraGroupEdge('e1', 'opbeans-go', 'opbeans-node')],
+          filterBy(['orphaned'])
+        );
+
+        expect(outNodes.map((n) => n.hidden)).toEqual([false, false, false]);
+      });
+
+      it('hides a group with calls only between its members under the Connected filter', () => {
+        const nodes = [box, member('opbeans-go'), member('opbeans-node')];
+
+        const { nodes: outNodes } = applyServiceMapVisibility(
+          nodes,
+          [mkIntraGroupEdge('e1', 'opbeans-go', 'opbeans-node')],
+          filterBy(['connected'])
+        );
+
+        expect(outNodes.every((n) => n.hidden)).toBe(true);
+      });
+
+      it('keeps the box and the member with a call out of the group under the Connected filter', () => {
+        const nodes = [box, member('opbeans-go'), member('opbeans-node'), mkService('frontend')];
+
+        const { nodes: outNodes } = applyServiceMapVisibility(
+          nodes,
+          [
+            mkIntraGroupEdge('e1', 'opbeans-go', 'opbeans-node'),
+            mkEdge('e2', 'frontend', 'opbeans-go'),
+          ],
+          filterBy(['connected'])
+        );
+
+        expect(hiddenById(outNodes)).toEqual({
+          [box.id]: false,
+          'opbeans-go': false,
+          'opbeans-node': true,
+          frontend: false,
+        });
+      });
+    });
+
+    it('hides the box when none of its members match the filters', () => {
+      const nodes = [
+        box,
+        member('opbeans-go', { alertsCount: 0 }),
+        member('opbeans-node', { alertsCount: 0 }),
+      ];
+
+      const { nodes: outNodes } = applyServiceMapVisibility(nodes, [], {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        alertStatusFilter: [ALERT_STATUS_ACTIVE],
+      });
+
+      expect(outNodes.every((n) => n.hidden)).toBe(true);
+    });
   });
 
   it('treats sloStatus noSLOs like noData for SLO filter', () => {

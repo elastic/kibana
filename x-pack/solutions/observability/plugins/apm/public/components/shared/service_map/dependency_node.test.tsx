@@ -10,7 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { DependencyNode } from './dependency_node';
 import type { DependencyNodeData } from '../../../../common/service_map';
+import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
+
+let mockColorMode: 'LIGHT' | 'DARK' = 'LIGHT';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -18,7 +21,7 @@ jest.mock('@elastic/eui', () => {
     ...original,
     useEuiTheme: () => ({
       euiTheme: MOCK_EUI_THEME_FOR_USE_THEME,
-      colorMode: 'LIGHT',
+      colorMode: mockColorMode,
     }),
   };
 });
@@ -69,6 +72,23 @@ function renderDependencyNode(
 }
 
 describe('DependencyNode', () => {
+  beforeEach(() => {
+    mockColorMode = 'LIGHT';
+    jest.mocked(getSpanIcon).mockClear();
+  });
+
+  it('requests the light span icon in light mode', () => {
+    renderDependencyNode();
+    expect(getSpanIcon).toHaveBeenCalledWith('db', 'postgresql', false);
+  });
+
+  it('requests the dark span icon in dark mode', () => {
+    mockColorMode = 'DARK';
+    renderDependencyNode();
+    expect(getSpanIcon).toHaveBeenCalledWith('db', 'postgresql', true);
+    expect(getSpanIcon).not.toHaveBeenCalledWith('db', 'postgresql', false);
+  });
+
   it('renders dependency label', () => {
     renderDependencyNode();
     expect(screen.getByText('postgresql:5432')).toBeInTheDocument();

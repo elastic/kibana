@@ -192,6 +192,23 @@ describe('new panel placement strategies', () => {
       expect(newLayout.panels).toEqual(expectedPanels); // other panels don't move with this strategy
     });
 
+    it('does not overlap a panel that only blocks the middle rows of an open space', () => {
+      const panels = {
+        '1': { grid: { x: 0, y: 0, w: 24, h: 2 }, type: 'lens' },
+        // blocks rows 2-3 of columns 24-35, while rows 0-1 and 4-5 there are empty
+        '2': { grid: { x: 0, y: 2, w: 36, h: 2 }, type: 'lens' },
+        '3': { grid: { x: 0, y: 4, w: 24, h: 3 }, type: 'lens' },
+      };
+      const newLayout = runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
+        currentLayout: { panels, sections: {}, pinnedPanels: {} },
+        newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 12, h: 6 } },
+      });
+      expect(newLayout.panels.newPanel).toEqual({
+        type: 'panelType',
+        grid: { x: 36, y: 0, w: 12, h: 6 },
+      });
+    });
+
     it('ignores panels in other sections', () => {
       const mockedLayout = getMockLayoutWithSections();
       const panels = {
@@ -233,6 +250,7 @@ describe('new panel placement strategies', () => {
             y: 12, // maxY is 12 for section1; maxY of 100 in section 0 is ignored
             w: 6,
             h: 6,
+            sectionId: 'section1',
           },
         },
       };

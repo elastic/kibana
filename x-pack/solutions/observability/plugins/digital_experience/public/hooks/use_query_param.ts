@@ -6,18 +6,36 @@
  */
 
 import { useCallback } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { omit } from 'lodash';
-import qs from 'query-string';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import type { DigitalExperienceRoutes } from '../routes';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
+import { useUpdateUrlQuery } from './use_update_url_query';
 
-/** List filters kept in the URL; the time range has its own hook, `useTimeRange`. */
-type QueryParam = 'environment' | 'sourceFilter';
+/**
+ * Filters kept in the URL, each with the route that declares it: the list's, and the mobile page's
+ * OS, release and Compare toggle. The time range has its own hook, `useTimeRange`.
+ */
+const QUERY_PARAM_ROUTES = {
+  environment: '/',
+  sourceFilter: '/',
+  platformFilter: '/',
+  applicationType: '/',
+  osName: '/{serviceName}',
+  release: '/{serviceName}',
+  compare: '/{serviceName}',
+} as const;
 
-/** Their values as the route validates them, e.g. an application source for `sourceFilter`. */
-type ListQueryParams = TypeOf<DigitalExperienceRoutes, '/'>['query'];
+type QueryParam = keyof typeof QUERY_PARAM_ROUTES;
+
+type ListQuery = TypeOf<DigitalExperienceRoutes, '/'>['query'];
+type ApplicationQuery = TypeOf<DigitalExperienceRoutes, '/{serviceName}'>['query'];
+
+/** Their values as the routes validate them, e.g. an application source for `sourceFilter`. */
+type QueryParams = Pick<
+  ListQuery,
+  'environment' | 'sourceFilter' | 'platformFilter' | 'applicationType'
+> &
+  Pick<ApplicationQuery, 'osName' | 'release' | 'compare'>;
 
 export interface QueryParamState<TValue> {
   /** The param's value, `undefined` when unset. */
@@ -26,22 +44,16 @@ export interface QueryParamState<TValue> {
   setValue: (value: TValue | undefined) => void;
 }
 
-/** One list filter in the URL: its value and a setter that changes only that param. */
+/** One filter in the URL: its value and a setter that changes only that param. */
 export const useQueryParam = <TKey extends QueryParam>(
   key: TKey
-): QueryParamState<ListQueryParams[TKey]> => {
-  const { query } = useDigitalExperienceParams('/');
-  const history = useHistory();
-  const location = useLocation();
+): QueryParamState<QueryParams[TKey]> => {
+  const query: Partial<QueryParams> = useDigitalExperienceParams(QUERY_PARAM_ROUTES[key]).query;
+  const updateUrlQuery = useUpdateUrlQuery();
 
   const setValue = useCallback(
-    (value: ListQueryParams[TKey] | undefined) => {
-      const rest = omit(qs.parse(location.search), key);
-      // Sorted like the typed router's links, so a breadcrumb to this page matches the URL exactly.
-      const search = qs.stringify(value ? { ...rest, [key]: value } : rest);
-      history.push({ ...location, search });
-    },
-    [history, location, key]
+    (value: QueryParams[TKey] | undefined) => updateUrlQuery({ [key]: value }),
+    [updateUrlQuery, key]
   );
 
   // An empty param, e.g. `?environment=`, counts as unset.

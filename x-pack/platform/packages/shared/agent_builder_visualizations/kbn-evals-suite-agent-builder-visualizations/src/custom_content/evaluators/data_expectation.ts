@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { describeMissingPanel } from '../custom_content_output';
+import { describeMissingPanel, getQueries } from '../custom_content_output';
 import type { CustomContentEvaluator } from '../types';
 
 export const CUSTOM_CONTENT_DATA_EVALUATOR_NAME = 'Custom Content Data';
 
-/** A static panel has no query, and a data panel has one. */
+/** A static panel has no query, a data panel has one, and the panel is where the example expects it. */
 export const createDataExpectationEvaluator = (): CustomContentEvaluator => ({
   name: CUSTOM_CONTENT_DATA_EVALUATOR_NAME,
   kind: 'CODE',
@@ -25,7 +25,16 @@ export const createDataExpectationEvaluator = (): CustomContentEvaluator => ({
       };
     }
 
-    const hasQuery = Boolean(panel.esql);
+    if (expected?.storedIn && output.storedIn !== expected.storedIn) {
+      return {
+        score: 0,
+        label: 'wrong-storage',
+        explanation: `The panel should be stored in a ${expected.storedIn}, but it is stored in: ${output.storedIn}.`,
+      };
+    }
+
+    const queries = getQueries(panel);
+    const hasQuery = queries.length > 0;
     const expectsQuery = expected?.data === 'query';
     if (hasQuery === expectsQuery) {
       return {
@@ -42,8 +51,8 @@ export const createDataExpectationEvaluator = (): CustomContentEvaluator => ({
       label: expectsQuery ? 'missing-query' : 'unexpected-query',
       explanation: expectsQuery
         ? 'The panel should show live data but has no query.'
-        : `A static panel should have no query, but it has: ${panel.esql}`,
-      metadata: { esql: panel.esql },
+        : `A static panel should have no query, but it has: ${queries.join(' ; ')}`,
+      metadata: { esql: panel.esql, queries, followUpToolArgs: output.followUpToolArgs },
     };
   },
 });

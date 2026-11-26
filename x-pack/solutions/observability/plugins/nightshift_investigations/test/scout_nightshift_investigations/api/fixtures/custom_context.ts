@@ -6,11 +6,14 @@
  */
 
 import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout-oblt';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { COMMON_HEADERS } from './constants';
 
 const CUSTOM_CONTEXT_PATH = 'internal/nightshift/custom_context';
 
-const spacePath = (spaceId: string): string => `s/${spaceId}/${CUSTOM_CONTEXT_PATH}`;
+/** The default space is served without a `/s/<id>` prefix, which is the URL a browser uses. */
+const spacePath = (spaceId: string): string =>
+  spaceId === DEFAULT_SPACE_ID ? CUSTOM_CONTEXT_PATH : `s/${spaceId}/${CUSTOM_CONTEXT_PATH}`;
 
 export const getCustomContext = (
   apiClient: ApiClientFixture,

@@ -42,6 +42,10 @@ export const groupById = (rows: EsqlRow[], idColumn: string): Record<string, Esq
   return groups;
 };
 
+/** The value when it is a string, null for anything else. */
+export const stringOrNull = (value: EsqlValue | undefined): string | null =>
+  typeof value === 'string' ? value : null;
+
 /** The value when it is a number, null for anything else. */
 export const numberOrNull = (value: EsqlValue | undefined): number | null =>
   typeof value === 'number' ? value : null;

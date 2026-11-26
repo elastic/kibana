@@ -31,6 +31,30 @@ const listResponse = (properties: Record<string, unknown>) => ({
   },
 });
 
+// Items numbered in sequence, whose number selects the next page.
+const sequencedResponse = {
+  '200': {
+    description: 'ok',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            channels: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['id'],
+                properties: { id: { type: 'integer', format: 'int32', example: 7 } },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 const query = (...names: string[]) =>
   names.map((name) => ({
     name,
@@ -98,6 +122,111 @@ const spec = {
     '/alerts': {
       get: { responses: listResponse({ nextLink: { type: 'string', format: 'uri' } }) },
     },
+    '/nested-search': {
+      post: {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  filter: { type: 'string' },
+                  page: {
+                    type: 'object',
+                    properties: { cursor: { type: 'string' }, limit: { type: 'integer' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: listResponse({ next_cursor: { type: 'string' } }),
+      },
+    },
+    '/hits': {
+      get: {
+        parameters: [
+          { name: 'search_after', in: 'query', schema: { type: 'string' } },
+          { name: 'size', in: 'query', schema: { type: 'integer', maximum: 100 } },
+        ],
+        responses: listResponse({
+          channels: {
+            type: 'array',
+            items: {
+              ...channel,
+              properties: { ...channel.properties, sort: { type: 'array', items: {} } },
+            },
+          },
+        }),
+      },
+    },
+    '/charges': {
+      get: {
+        parameters: query('starting_after_cursor', 'limit'),
+        responses: listResponse({}),
+      },
+    },
+    '/since': {
+      get: {
+        parameters: [
+          { name: 'since', in: 'query', schema: { type: 'integer', format: 'int32' } },
+          ...query('limit'),
+        ],
+        responses: sequencedResponse,
+      },
+    },
+    '/sparse': {
+      get: {
+        parameters: [{ name: 'since', in: 'query', schema: {} }, ...query('limit')],
+        responses: listResponse({ channels: { type: 'array', items: { type: 'object' } } }),
+      },
+    },
+    '/since-search': {
+      post: {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: { since: { type: 'integer' }, limit: { type: 'integer' } },
+              },
+            },
+          },
+        },
+        responses: sequencedResponse,
+      },
+    },
+    '/bare-hits': {
+      get: {
+        parameters: query('starting_after_cursor', 'limit'),
+        responses: {
+          '200': {
+            description: 'ok',
+            content: { 'application/json': { schema: { type: 'array', items: channel } } },
+          },
+        },
+      },
+    },
+    '/flagged-hits': {
+      get: {
+        parameters: query('starting_after_cursor', 'limit'),
+        responses: listResponse({ has_more: { type: 'boolean' } }),
+      },
+    },
+    '/users/{id}/items': {
+      get: {
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+          ...query('cursor', 'limit'),
+        ],
+        responses: listResponse({
+          response_metadata: {
+            type: 'object',
+            properties: { next_cursor: { type: 'string' } },
+          },
+        }),
+      },
+    },
     '/monitors': {
       get: {
         parameters: query('page', 'page_size'),
@@ -115,6 +244,24 @@ const spec = {
 };
 
 const pagination: PaginatedOperation[] = [
+  {
+    operation: { method: 'POST', path: '/nested-search' },
+    pagination: {
+      style: 'cursor',
+      request: { in: 'body', cursorParam: 'page.cursor', sizeParam: 'page.limit' },
+      response: { itemsPath: 'channels', nextPath: 'next_cursor' },
+      end: 'missing',
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/users/{id}/items' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'cursor', sizeParam: 'limit' },
+      response: { itemsPath: 'channels', nextPath: 'response_metadata.next_cursor' },
+      end: 'empty_string',
+    },
+  },
   {
     operation: { method: 'GET', path: '/conversations.list' },
     pagination: {
@@ -180,6 +327,69 @@ const pagination: PaginatedOperation[] = [
     pagination: {
       style: 'next_url',
       response: { itemsPath: 'channels', nextPath: 'nextLink' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/hits' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'search_after', sizeParam: 'size' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'sort' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/charges' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'starting_after_cursor', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/since' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'since', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/sparse' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'since', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'POST', path: '/since-search' },
+    pagination: {
+      style: 'cursor',
+      request: { in: 'body', cursorParam: 'since', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/bare-hits' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'starting_after_cursor', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: '', nextPath: 'id' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/flagged-hits' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'starting_after_cursor', sizeParam: 'limit' },
+      response: { in: 'last_item', itemsPath: 'channels', nextPath: 'id', hasMorePath: 'has_more' },
       defaultSize: 2,
     },
   },
@@ -331,6 +541,199 @@ describe('withPagination', () => {
     expect(bad.status).toBe(400);
   });
 
+  describe('with the cursor in the last item', () => {
+    const hit = (id: string, time: number) => ({ id, sort: [time, id] });
+    const hitsPage = (
+      cursor: string | undefined,
+      hits: Array<ReturnType<typeof hit>>
+    ): RecordedExchange => ({
+      operation: { method: 'GET', path: '/hits' },
+      request: { query: cursor ? { search_after: cursor, size: '2' } : { size: '2' } },
+      response: { status: 200, body: { channels: hits } },
+    });
+
+    it('pages by the value the last item holds, until a page is empty', async () => {
+      const { fetch, calls } = createMock(3);
+      const lastSort = ({ channels }: { channels: Array<{ sort: string[] }> }) =>
+        channels[channels.length - 1].sort.join(',');
+
+      const first = await getJson(fetch, '/hits?size=2');
+      const second = await getJson(fetch, `/hits?size=2&search_after=${lastSort(first.body)}`);
+      const past = await getJson(fetch, `/hits?size=2&search_after=${lastSort(second.body)}`);
+
+      expect([ids(first.body), ids(second.body), ids(past.body)]).toEqual([
+        ['C1-1', 'C1-2'],
+        ['C1-3'],
+        [],
+      ]);
+      expect(calls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
+    });
+
+    it('replays a recorded array cursor as recorded, and reads it joined with commas', async () => {
+      const { fetch } = createRecordedMock([
+        hitsPage(undefined, [hit('a', 3), hit('b', 2)]),
+        hitsPage('2,b', [hit('c', 1)]),
+      ]);
+
+      const first = await getJson(fetch, '/hits?size=2');
+      const second = await getJson(fetch, '/hits?size=2&search_after=2,b');
+
+      expect(first.body.channels).toEqual([hit('a', 3), hit('b', 2)]);
+      expect(second.body.channels).toEqual([hit('c', 1)]);
+    });
+
+    it.each(['/hits?search_after=2000000001', '/conversations.list?cursor=2000000001'])(
+      'answers 400 for a number where the cursor is a string: %s',
+      async (path) => {
+        expect((await getJson(createMock(3).fetch, path)).status).toBe(400);
+      }
+    );
+
+    it('hands out the cursor of the page it serves, whatever the page size', async () => {
+      const { fetch } = createRecordedMock([hitsPage(undefined, [hit('a', 3), hit('b', 2)])]);
+
+      const first = await getJson(fetch, '/hits?size=1');
+      const cursor = first.body.channels[0].sort.join(',');
+      const second = await getJson(fetch, `/hits?size=1&search_after=${cursor}`);
+
+      expect([ids(first.body), ids(second.body)]).toEqual([['a'], ['b']]);
+    });
+
+    it('keeps a string cursor a string', async () => {
+      const { fetch } = createMock(3);
+
+      const first = await getJson(fetch, '/charges?limit=2');
+      const cursor = first.body.channels[1].id;
+      const second = await getJson(fetch, `/charges?limit=2&starting_after_cursor=${cursor}`);
+
+      expect(cursor).not.toBe('C1-2');
+      expect(typeof cursor).toBe('string');
+      expect(second.body.channels).toHaveLength(1);
+    });
+
+    it('writes a numeric cursor over a number, so the item still matches its schema', async () => {
+      const { fetch, calls } = createMock(3);
+
+      const first = await getJson(fetch, '/since?limit=2');
+      const cursor = first.body.channels[1].id;
+      const second = await getJson(fetch, `/since?limit=2&since=${cursor}`);
+
+      expect(typeof cursor).toBe('number');
+      expect(second.body.channels).toHaveLength(1);
+      expect(calls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
+    });
+
+    it('maps recorded numeric cursors to their position', async () => {
+      const since = { method: 'GET', path: '/since' };
+      const { fetch } = createRecordedMock([
+        {
+          operation: since,
+          request: { query: { limit: '2' } },
+          response: { status: 200, body: { channels: [{ id: 5 }, { id: 4 }] } },
+        },
+        {
+          operation: since,
+          request: { query: { limit: '2', since: '4' } },
+          response: { status: 200, body: { channels: [{ id: 3 }] } },
+        },
+      ]);
+
+      const first = await getJson(fetch, '/since?limit=2');
+      const second = await getJson(fetch, '/since?limit=2&since=4');
+
+      expect([first.body.channels, second.body.channels]).toEqual([
+        [{ id: 5 }, { id: 4 }],
+        [{ id: 3 }],
+      ]);
+    });
+
+    it.each([
+      ['the first item omits the field', [{ name: 'a' }, { id: 4 }, { id: 3 }], 'number'],
+      ['only the first item holds a number', [{ id: 5 }, { name: 'b' }, { id: 3 }], 'string'],
+    ])('follows the cursor it issued when %s', async (_, channels, type) => {
+      const { fetch } = createRecordedMock([
+        {
+          operation: { method: 'GET', path: '/sparse' },
+          request: { query: { limit: '3' } },
+          response: { status: 200, body: { channels } },
+        },
+      ]);
+
+      // A smaller page than recorded, so its cursor is the mock's own.
+      const first = await getJson(fetch, '/sparse?limit=2');
+      const cursor = first.body.channels[1].id;
+      const second = await getJson(fetch, `/sparse?limit=2&since=${cursor}`);
+
+      expect(typeof cursor).toBe(type);
+      expect(second).toEqual({ status: 200, body: { channels: [{ id: expect.anything() }] } });
+    });
+
+    it('answers 400 for a string cursor where it issues a number', async () => {
+      const { fetch } = createRecordedMock([
+        {
+          operation: { method: 'GET', path: '/sparse' },
+          request: { query: { limit: '3' } },
+          response: { status: 200, body: { channels: [{ id: 5 }, { id: 4 }, { id: 3 }] } },
+        },
+      ]);
+      const cursor = Buffer.from('contract-mock:2').toString('base64url');
+
+      expect((await getJson(fetch, `/sparse?limit=2&since=${cursor}`)).status).toBe(400);
+    });
+
+    it('reads a numeric cursor from a JSON body', async () => {
+      const { fetch } = createMock(3);
+      const search = async (body: object) => {
+        const response = await fetch('https://api.example.com/since-search', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        return response.json();
+      };
+
+      const first = await search({});
+      const second = await search({ since: first.channels[1].id });
+
+      expect(second.channels).toHaveLength(1);
+    });
+
+    it('pages a body that is the collection itself', async () => {
+      const { fetch } = createMock(3);
+
+      const first = await getJson(fetch, '/bare-hits');
+      const second = await getJson(fetch, `/bare-hits?starting_after_cursor=${first.body[1].id}`);
+
+      expect(second.body).toHaveLength(1);
+    });
+
+    it('pages past the recorded items it is padded to', async () => {
+      const { fetch } = createRecordedMock([hitsPage(undefined, [hit('a', 3), hit('b', 2)])], 3);
+
+      const first = await getJson(fetch, '/hits?size=2');
+      const second = await getJson(
+        fetch,
+        `/hits?size=2&search_after=${first.body.channels[1].sort}`
+      );
+
+      expect(ids(second.body)).toHaveLength(1);
+    });
+
+    it('reports whether more pages follow', async () => {
+      const { fetch } = createMock(3);
+
+      const first = await getJson(fetch, '/flagged-hits');
+      const cursor = first.body.channels[1].id;
+      const second = await getJson(fetch, `/flagged-hits?starting_after_cursor=${cursor}`);
+
+      expect([first.body.has_more, second.body.has_more]).toEqual([true, false]);
+    });
+
+    it('answers 400 for cursors the mock did not issue', async () => {
+      expect((await getJson(createMock(3).fetch, '/hits?search_after=made-up')).status).toBe(400);
+    });
+  });
+
   it('follows Link headers until there is no next page', async () => {
     const { fetch } = createMock(5);
     const pages: string[][] = [];
@@ -446,7 +849,88 @@ describe('withPagination', () => {
       expect([ids(first.body), ids(body)]).toEqual([['U1'], ['U2']]);
     });
 
-    it('ignores recordings for operations with a fixture', async () => {
+    const userPage = (
+      id: string,
+      cursor: string | undefined,
+      names: string[],
+      next: string
+    ): RecordedExchange => ({
+      operation: { method: 'GET', path: '/users/{id}/items' },
+      request: { pathParameters: { id }, query: cursor ? { cursor } : {} },
+      response: {
+        status: 200,
+        body: { channels: toChannels(...names), response_metadata: { next_cursor: next } },
+      },
+    });
+
+    it('pages only the recordings of the same path parameters', async () => {
+      const { fetch } = createRecordedMock([
+        userPage('1', undefined, ['A1'], 'one-next'),
+        userPage('1', 'one-next', ['A2'], ''),
+        userPage('2', undefined, ['B1'], 'two-next'),
+        userPage('2', 'two-next', ['B2'], ''),
+      ]);
+
+      const first = await getJson(fetch, '/users/2/items?limit=1');
+      const second = await getJson(fetch, '/users/2/items?limit=1&cursor=two-next');
+      const otherUser = await getJson(fetch, '/users/1/items?limit=5');
+
+      expect(ids(first.body)).toEqual(['B1']);
+      expect(first.body.response_metadata.next_cursor).toBe('two-next');
+      expect(ids(second.body)).toEqual(['B2']);
+      expect(ids(otherUser.body)).toEqual(['A1', 'A2']);
+    });
+
+    it('gives a request no recording matches the first collection', async () => {
+      const { fetch } = createRecordedMock([
+        userPage('1', undefined, ['A1'], ''),
+        userPage('2', undefined, ['B1'], ''),
+      ]);
+
+      const { body } = await getJson(fetch, '/users/3/items');
+
+      expect(ids(body)).toEqual(['A1']);
+    });
+
+    it('keeps pages together when only later ones send the object holding a nested cursor', async () => {
+      const nestedPage = (
+        body: Record<string, unknown>,
+        names: string[],
+        next?: string
+      ): RecordedExchange => ({
+        operation: { method: 'POST', path: '/nested-search' },
+        request: { body },
+        response: {
+          status: 200,
+          body: { channels: toChannels(...names), ...(next ? { next_cursor: next } : {}) },
+        },
+      });
+      const { fetch } = createRecordedMock([
+        nestedPage({ filter: 'open' }, ['A'], 'second'),
+        nestedPage({ filter: 'open', page: { cursor: 'second' } }, ['B']),
+        nestedPage({ filter: 'closed' }, ['C']),
+      ]);
+      const search = async (body: Record<string, unknown>) => {
+        const response = await fetch('https://api.example.com/nested-search', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        return response.json();
+      };
+
+      const first = await search({ filter: 'open', page: { limit: 1 } });
+      const second = await search({
+        filter: 'open',
+        page: { limit: 1, cursor: first.next_cursor },
+      });
+      const other = await search({ filter: 'closed' });
+
+      expect(first.next_cursor).toBe('second');
+      expect([ids(first), ids(second), ids(other)]).toEqual([['A'], ['B'], ['C']]);
+    });
+
+    it('serves a fixture as written instead of the recordings', async () => {
       const { fetch } = createEmulatorFetch({
         specs: [spec],
         pagination,
@@ -454,14 +938,61 @@ describe('withPagination', () => {
         fixtures: [
           {
             operation: { method: 'GET', path: '/conversations.list' },
-            response: { status: 200, body: { channels: toChannels('F') } },
+            response: {
+              status: 200,
+              body: { channels: toChannels('F', 'G'), response_metadata: { next_cursor: 'mine' } },
+            },
           },
         ],
       });
 
-      const { body } = await getJson(fetch, '/conversations.list?limit=10');
+      const { body } = await getJson(fetch, '/conversations.list?limit=1');
 
-      expect(ids(body)).toEqual(['F-1', 'F-2', 'F-3']);
+      expect(ids(body)).toEqual(['F', 'G']);
+      expect(body.response_metadata.next_cursor).toBe('mine');
+    });
+
+    it('serves a matching when fixture as written, and pages the requests it does not match', async () => {
+      const { fetch } = createEmulatorFetch({
+        specs: [spec],
+        pagination,
+        recordings: [{ exchanges: recordedPages }],
+        fixtures: [
+          {
+            operation: { method: 'GET', path: '/conversations.list' },
+            when: { query: { limit: '7' } },
+            response: { status: 200, body: { channels: [] } },
+          },
+        ],
+      });
+
+      const matched = await getJson(fetch, '/conversations.list?limit=7');
+      const other = await getJson(fetch, '/conversations.list?limit=2');
+
+      expect(ids(matched.body)).toEqual([]);
+      expect(ids(other.body)).toEqual(['CA', 'CB']);
+    });
+
+    it('serves runtime fixtures as written, and pages again once they are cleared', async () => {
+      const mock = createEmulatorFetch({
+        specs: [spec],
+        pagination,
+        recordings: [{ exchanges: recordedPages }],
+      });
+      const operation = { method: 'GET', path: '/conversations.list' };
+
+      mock.runtimeFixtures.set([{ operation, response: { status: 200, body: { channels: [] } } }]);
+      const empty = await getJson(mock.fetch, '/conversations.list?limit=2');
+      mock.runtimeFixtures.set([
+        { operation, response: { status: 200, body: { channels: toChannels('X', 'Y') } } },
+      ]);
+      const written = await getJson(mock.fetch, '/conversations.list?limit=1');
+      mock.runtimeFixtures.clear();
+      const paged = await getJson(mock.fetch, '/conversations.list?limit=2');
+
+      expect(ids(empty.body)).toEqual([]);
+      expect(ids(written.body)).toEqual(['X', 'Y']);
+      expect(ids(paged.body)).toEqual(['CA', 'CB']);
     });
   });
 });

@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-http-browser'
   - '@kbn/react-query'
+  - '@kbn/charts-theme'
   - '@kbn/scout'
   - '@kbn/logging'
   - '@kbn/config-schema'
@@ -42,9 +43,7 @@ dependsOn:
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/shared-ux-page-solution-nav'
   - '@kbn/app-header'
-  - '@kbn/app-menu'
   - '@kbn/core-chrome-browser'
-  - '@kbn/core-chrome-browser-context'
   - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
   - '@kbn/esql'
@@ -86,20 +85,27 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/esql-utils'
   - '@kbn/ebt-click'
+  - '@kbn/std'
   - '@kbn/usage-collection-plugin'
   - '@kbn/unsaved-changes-prompt'
+  - '@kbn/cloud-plugin'
+  - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/router-utils'
+  - '@kbn/test'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
   - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - server/**/*.json
     - scripts/**/*
     - test/scout_agent_builder/**/*
     - '!target/**/*'

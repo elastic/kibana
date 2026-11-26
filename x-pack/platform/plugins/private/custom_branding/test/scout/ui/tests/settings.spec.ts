@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
@@ -14,7 +15,7 @@ const CUSTOM_BRANDING_KEYS = [
   'xpackCustomBranding:customizedLogo',
 ] as const;
 
-test.describe('custom branding', { tag: '@local-stateful-classic' }, () => {
+test.describe('custom branding', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.customBrandingSettings.navigateToGlobalSettings();

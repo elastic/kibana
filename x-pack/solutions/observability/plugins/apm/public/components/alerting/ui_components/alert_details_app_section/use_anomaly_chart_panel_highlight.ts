@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/react';
 import { useMemo } from 'react';
-import { useSeverityColor } from '@kbn/ml-anomaly-utils';
+import { useSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 
 export function useAnomalyChartPanelHighlight(anomalyScore?: number) {
   const borderColor = useSeverityColor(anomalyScore ?? 0);

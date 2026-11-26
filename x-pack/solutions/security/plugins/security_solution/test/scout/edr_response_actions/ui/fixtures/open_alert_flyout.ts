@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { APP_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
 import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 
-/** Open one alert's flyout, filtered to its rule, with the charts panel collapsed. */
-export const openAlertFlyoutForRule = async (
+const openAlertsTableForRule = async (
   page: ScoutPage,
-  pageObjects: Pick<SecurityPageObjects, 'alertsTablePage' | 'documentFlyout'>,
+  { alertsTablePage }: Pick<SecurityPageObjects, 'alertsTablePage'>,
   ruleName: string
 ): Promise<void> => {
   const quotedRuleName = ruleName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -22,7 +22,6 @@ export const openAlertFlyoutForRule = async (
     },
   });
 
-  const { alertsTablePage, documentFlyout } = pageObjects;
   const chartsToggle = page.testSubj
     .locator('alerts-charts-panel')
     .getByTestId('query-toggle-header')
@@ -39,6 +38,39 @@ export const openAlertFlyoutForRule = async (
     .and(page.locator('[aria-expanded="false"]'))
     .waitFor({ state: 'visible', timeout: 60_000 });
   await alertsTablePage.waitForRuleAlert(ruleName);
+};
+
+/** Open one alert's flyout, filtered to its rule, with the charts panel collapsed. */
+export const openAlertFlyoutForRule = async (
+  page: ScoutPage,
+  pageObjects: Pick<SecurityPageObjects, 'alertsTablePage' | 'documentFlyout'>,
+  ruleName: string
+): Promise<void> => {
+  const { alertsTablePage, documentFlyout } = pageObjects;
+  await openAlertsTableForRule(page, pageObjects, ruleName);
   await alertsTablePage.expandAlertDetailsFlyout(ruleName);
+  await documentFlyout.waitForAlertFlyout();
+};
+
+/** Send the rule's alert to Timeline from its alerts table row, then open its flyout there. */
+export const openAlertFlyoutFromTimeline = async (
+  page: ScoutPage,
+  pageObjects: Pick<SecurityPageObjects, 'alertsTablePage' | 'documentFlyout' | 'timelinePage'>,
+  ruleName: string
+): Promise<void> => {
+  const { alertsTablePage, documentFlyout, timelinePage } = pageObjects;
+  await openAlertsTableForRule(page, pageObjects, ruleName);
+  await alertsTablePage.alertsTable
+    .getByRole('row')
+    .filter({ has: page.testSubj.locator('ruleName').filter({ hasText: ruleName }) })
+    .getByTestId('send-alert-to-timeline-button')
+    .click();
+  await timelinePage.panel.waitFor({ state: 'visible' });
+  // Investigate in timeline filters on this alert's id, so Timeline has a single row.
+  // Its first query can take as long as an app load.
+  await page.testSubj
+    .locator('timeline-container')
+    .getByTestId('docTableExpandToggleColumn')
+    .click({ timeout: APP_LOAD_TIMEOUT_MS });
   await documentFlyout.waitForAlertFlyout();
 };
