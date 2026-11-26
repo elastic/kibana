@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, type Ref } from 'react';
+import React, { useMemo } from 'react';
 import type { EuiButtonGroupOptionProps, IconType, EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiButtonIcon, EuiToolTip, htmlIdGenerator } from '@elastic/eui';
 
@@ -45,8 +45,6 @@ export interface IconButton {
   'aria-expanded'?: boolean;
   /** A11y for button */
   'aria-controls'?: string;
-  /** Ref to the underlying button element */
-  buttonRef?: Ref<HTMLButtonElement>;
 }
 
 /**

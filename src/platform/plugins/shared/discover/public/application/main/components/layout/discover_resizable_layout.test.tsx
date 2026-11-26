@@ -255,4 +255,32 @@ describe('DiscoverResizableLayout', () => {
 
     expect(lastResizableLayoutProps?.direction).toBe(ResizableLayoutDirection.Vertical);
   });
+
+  it('should keep focus in the main panel when the sidebar is hidden and shown again', () => {
+    const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: () => {},
+    });
+    const renderLayout = (isSidebarHidden: boolean) => (
+      <DiscoverResizableLayout
+        isSidebarHidden={isSidebarHidden}
+        mainPanel={<button type="button">Toggle field list</button>}
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={sidebarToggleState$}
+      />
+    );
+    const { rerender } = render(renderLayout(false));
+    const toggleButton = screen.getByRole('button', { name: 'Toggle field list' });
+    toggleButton.focus();
+
+    rerender(renderLayout(true));
+
+    expect(lastResizableLayoutProps?.mode).toBe(ResizableLayoutMode.Single);
+    expect(toggleButton).toHaveFocus();
+
+    rerender(renderLayout(false));
+
+    expect(lastResizableLayoutProps?.mode).toBe(ResizableLayoutMode.Resizable);
+    expect(toggleButton).toHaveFocus();
+  });
 });

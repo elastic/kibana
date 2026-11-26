@@ -210,23 +210,4 @@ describe('Panels toggle component', () => {
       expect(toolkit.getCurrentTab().appState.hideTable).toBe(true);
     });
   });
-
-  it('should keep focus on the sidebar toggle button after toggling the sidebar', async () => {
-    const user = userEvent.setup();
-    await renderComponent({
-      hideChart: false,
-      hideTable: false,
-      hideSidebar: false,
-      omitChartButton: false,
-      omitTableButton: false,
-    });
-
-    await user.click(screen.getByTestId('dscHideSidebarButton'));
-
-    await waitFor(() => expect(screen.getByTestId('dscShowSidebarButton')).toHaveFocus());
-
-    await user.click(screen.getByTestId('dscShowSidebarButton'));
-
-    await waitFor(() => expect(screen.getByTestId('dscHideSidebarButton')).toHaveFocus());
-  });
 });
