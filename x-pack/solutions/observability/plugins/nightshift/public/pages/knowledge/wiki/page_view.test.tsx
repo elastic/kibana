@@ -15,9 +15,11 @@ import type { WikiPage } from './types';
 
 jest.mock('./use_wiki');
 
+let succeedArchive: () => void;
 const mockArchive = jest.fn(
-  (_variables: { id: string; version: string }, options?: { onSuccess?: () => void }) =>
-    options?.onSuccess?.()
+  (_variables: { id: string; version: string }, options?: { onSuccess?: () => void }) => {
+    succeedArchive = () => options?.onSuccess?.();
+  }
 );
 const mockOnArchived = jest.fn();
 const wikiPage: WikiPage = {
@@ -70,6 +72,10 @@ describe('WikiPageView archive confirmation', () => {
       { id: wikiPage.id, version: 'v1' },
       expect.any(Object)
     );
+    expect(mockOnArchived).not.toHaveBeenCalled();
+
+    succeedArchive();
+
     expect(mockOnArchived).toHaveBeenCalledTimes(1);
   });
 });

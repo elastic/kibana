@@ -154,16 +154,20 @@ export function KnowledgeIndicatorDetailsFlyout({
   const isDeleting = isKIDeleting || isDemoting;
   const isMutating = isActionMutating || isDeleting;
 
-  const isRule = knowledgeIndicator.kind === 'query' && knowledgeIndicator.rule.backed;
+  const ruleQueryId =
+    knowledgeIndicator.kind === 'query' && knowledgeIndicator.rule.backed
+      ? knowledgeIndicator.query.id
+      : undefined;
+  const isRule = ruleQueryId !== undefined;
 
   const handleDeleteConfirm = useCallback(async () => {
     setShowDeleteModal(false);
-    if (knowledgeIndicator.kind === 'query' && knowledgeIndicator.rule.backed) {
-      await demoteRules([knowledgeIndicator.query.id]);
+    if (ruleQueryId !== undefined) {
+      await demoteRules([ruleQueryId]);
     } else {
       await deleteKnowledgeIndicatorsInBulk([knowledgeIndicator]);
     }
-  }, [knowledgeIndicator, demoteRules, deleteKnowledgeIndicatorsInBulk]);
+  }, [knowledgeIndicator, ruleQueryId, demoteRules, deleteKnowledgeIndicatorsInBulk]);
 
   const openInDiscoverActionItems = useMemo(() => {
     if (!openFeatureInDiscover) {
