@@ -158,22 +158,22 @@ test.describe(
       const bodyLinkTests = [
         {
           linkText: 'Contact customer engineering',
-          expectedUrlPattern: /contact\/ce-help/,
+          expectedHref: 'https://www.elastic.co/contact/ce-help',
         },
         {
           linkText: 'Elastic Training',
-          expectedUrlPattern: /training/,
+          expectedHref: 'https://www.elastic.co/training',
         },
         {
           linkText: 'View documentation',
-          expectedUrlPattern: /solutions\/search\/get-started/,
+          expectedHref: 'https://www.elastic.co/docs/solutions/search/get-started',
         },
       ];
 
-      for (const { linkText, expectedUrlPattern } of bodyLinkTests) {
+      for (const { linkText, expectedHref } of bodyLinkTests) {
         const link = await pageObjects.homepage.getBodyLinkByText(linkText);
         await expect(link).toBeVisible();
-        await expect(link).toHaveAttribute('href', expectedUrlPattern);
+        await expect(link).toHaveAttribute('href', expectedHref);
       }
     });
   }
