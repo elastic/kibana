@@ -41,7 +41,7 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 | [0003](0003_name_addressing_and_shared_traversal.md) | Name addressing and shared step-child traversal | Superseded by ADR-0007 |
 | [0004](0004_fallback_diamond_and_continue.md) | Fallback lane shape and `continue` separation | Accepted |
 | [0005](0005_undo_delegates_to_monaco.md) | Undo delegates to Monaco | Accepted |
-| [0006](0006_graph_mutations_reuse_snippet_path.md) | Graph mutations reuse the snippet insertion path | Accepted |
+| [0006](0006_graph_mutations_reuse_snippet_path.md) | Graph mutations reuse the snippet insertion path | Superseded by ADR-0015 |
 | [0007](0007_structural_child_slots.md) | Structural child slots and per-slot enumerator | Accepted |
 | [0008](0008_post_dagre_lane_order.md) | Post-dagre fork and trigger lane order | Superseded by ADR-0011 |
 | [0009](0009_alignment_ignored_edges.md) | `alignmentIgnoredEdges`: excluding failure edges from cross-axis alignment | Accepted |
@@ -50,3 +50,4 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 | [0012](0012_reserved_side_lanes.md) | Reserved side lanes | Accepted (pipeline and post-dagre passes superseded by ADR-0013) |
 | [0013](0013_structure_driven_cross_axis_packing.md) | Structure-driven cross-axis packing | Accepted |
 | [0014](0014_one_lazy_boundary_per_heavy_surface.md) | One lazy boundary per heavy surface | Accepted |
+| [0015](0015_graph_mutations_are_yaml_document_functions.md) | Graph mutations are pure functions over the YAML Document | Accepted |

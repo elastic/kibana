@@ -1,6 +1,7 @@
 # `graph_layout/` — Workflow logical-graph construction
 
-This directory builds the **logical graph** used by the read-only visualisation editor.
+This directory builds the **logical graph** used by the workflow graph editor (authoring when
+`workflows:experimentalFeatures` is on, a read-only view otherwise).
 It is framework-free (no React, no Redux) and accepts a raw `WorkflowYaml` definition as input.
 
 See [`CONTEXT.md`](../CONTEXT.md) for domain terminology (logical graph, node refs, bypass lane
