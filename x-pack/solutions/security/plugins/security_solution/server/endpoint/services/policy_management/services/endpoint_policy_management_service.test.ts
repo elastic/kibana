@@ -276,9 +276,7 @@ describe('createEndpointPolicyManagementService', () => {
       );
 
       await expect(deps.service.previewApplyPolicyChange(rawParams)).resolves.toBe(previewValue);
-      await expect(
-        deps.service.applyPolicyChange(rawParams, { callSource: 'agent' })
-      ).resolves.toBe(applyValue);
+      await expect(deps.service.applyPolicyChange(rawParams)).resolves.toBe(applyValue);
 
       const expectedDeps = {
         endpointAppContextService: deps.endpointAppContextService,
@@ -286,9 +284,7 @@ describe('createEndpointPolicyManagementService', () => {
         spaceId: SPACE_ID,
       };
       expect(mockedPreviewApplyPolicyChange).toHaveBeenCalledWith(expectedDeps, rawParams);
-      expect(mockedApplyPolicyChange).toHaveBeenCalledWith(expectedDeps, rawParams, {
-        callSource: 'agent',
-      });
+      expect(mockedApplyPolicyChange).toHaveBeenCalledWith(expectedDeps, rawParams);
     });
   });
 });

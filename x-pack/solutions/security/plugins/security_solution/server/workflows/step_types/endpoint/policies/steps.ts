@@ -23,6 +23,7 @@ import {
 } from '../../../../endpoint/services/policy_management/presentation/present_get_policy';
 import { presentComparePolicies } from '../../../../endpoint/services/policy_management/presentation/present_compare_policies';
 import { presentAssessPolicyChange } from '../../../../endpoint/services/policy_management/presentation/present_assess_policy_change';
+import { presentApplyPolicyChangeResult } from '../../../../endpoint/services/policy_management/presentation/present_apply_policy_change_result';
 import { presentPolicyRolloutStatus } from '../../../../endpoint/services/policy_management/presentation/present_get_policy_rollout_status';
 import { presentPolicyError } from '../../../../endpoint/services/policy_management/presentation/present_policy_error';
 import {
@@ -33,6 +34,7 @@ import {
   compareEndpointPoliciesStepCommonDefinition,
   getEndpointPolicyRolloutStatusStepCommonDefinition,
   assessEndpointPolicyChangeStepCommonDefinition,
+  applyEndpointPolicyChangeStepCommonDefinition,
 } from '../../../../../common/workflows/step_types/endpoint/policies/steps';
 import { resolveSpaceId } from '../../get_alert_entities_step/resolve_space_id';
 import { presentFieldReference } from './present_field_reference';
@@ -46,10 +48,11 @@ const requirePolicyStepEnvelope = <Output extends object>(output: Output): { out
   return envelope;
 };
 
-const createPolicyReadStep = <Input extends z.ZodObject, Output extends z.ZodObject>(
+const createPolicyStep = <Input extends z.ZodObject, Output extends z.ZodObject>(
   definition: CommonStepDefinition<Input, Output>,
   endpointAppContextService: EndpointAppContextService,
-  run: (input: z.infer<Input>, service: EndpointPolicyManagementService) => Promise<object>
+  run: (input: z.infer<Input>, service: EndpointPolicyManagementService) => Promise<object>,
+  cancellationPolicy: 'abort_after_service' | 'settle_service' = 'abort_after_service'
 ) =>
   createServerStepDefinition({
     ...definition,
@@ -66,12 +69,17 @@ const createPolicyReadStep = <Input extends z.ZodObject, Output extends z.ZodObj
         request: context.contextManager.getFakeRequest(),
         spaceId,
       });
+      if (cancellationPolicy === 'settle_service') {
+        context.abortSignal.throwIfAborted();
+      }
       let response: object;
       try {
         const result = await run(input, service);
         response = { status: 'success', ...result };
       } catch (error) {
-        context.abortSignal.throwIfAborted();
+        if (cancellationPolicy === 'abort_after_service') {
+          context.abortSignal.throwIfAborted();
+        }
         const presented = presentPolicyError(
           error,
           endpointAppContextService.createLogger('policy_workflow_steps'),
@@ -79,7 +87,9 @@ const createPolicyReadStep = <Input extends z.ZodObject, Output extends z.ZodObj
         );
         response = presentPolicyStepError(presented);
       }
-      context.abortSignal.throwIfAborted();
+      if (cancellationPolicy === 'abort_after_service') {
+        context.abortSignal.throwIfAborted();
+      }
       return requirePolicyStepEnvelope(definition.outputSchema.parse(response));
     },
   });
@@ -87,22 +97,22 @@ const createPolicyReadStep = <Input extends z.ZodObject, Output extends z.ZodObj
 export const createGetEndpointPolicyFieldReferenceStepDefinition = (
   service: EndpointAppContextService
 ) =>
-  createPolicyReadStep(
+  createPolicyStep(
     getEndpointPolicyFieldReferenceStepCommonDefinition,
     service,
     async ({ selector }, pm) => presentFieldReference(await pm.getPolicyFieldReference(selector))
   );
 export const createListEndpointPoliciesStepDefinition = (service: EndpointAppContextService) =>
-  createPolicyReadStep(listEndpointPoliciesStepCommonDefinition, service, async (input, pm) => ({
+  createPolicyStep(listEndpointPoliciesStepCommonDefinition, service, async (input, pm) => ({
     result: presentListPolicies(await pm.listPolicies(input)),
   }));
 export const createGetEndpointPolicyStepDefinition = (service: EndpointAppContextService) =>
-  createPolicyReadStep(getEndpointPolicyStepCommonDefinition, service, async (input, pm) => {
+  createPolicyStep(getEndpointPolicyStepCommonDefinition, service, async (input, pm) => {
     const { policy, normalizedConfig, normalizedHash } = await pm.getPolicy(input);
     return { result: presentGetPolicy(policy, normalizedConfig, normalizedHash) };
   });
 export const createGetEndpointPolicyBaselineStepDefinition = (service: EndpointAppContextService) =>
-  createPolicyReadStep(
+  createPolicyStep(
     getEndpointPolicyBaselineStepCommonDefinition,
     service,
     async ({ preset }, pm) => ({
@@ -110,7 +120,7 @@ export const createGetEndpointPolicyBaselineStepDefinition = (service: EndpointA
     })
   );
 export const createCompareEndpointPoliciesStepDefinition = (service: EndpointAppContextService) =>
-  createPolicyReadStep(
+  createPolicyStep(
     compareEndpointPoliciesStepCommonDefinition,
     service,
     async ({ from, to }, pm) => {
@@ -121,7 +131,7 @@ export const createCompareEndpointPoliciesStepDefinition = (service: EndpointApp
 export const createGetEndpointPolicyRolloutStatusStepDefinition = (
   service: EndpointAppContextService
 ) =>
-  createPolicyReadStep(
+  createPolicyStep(
     getEndpointPolicyRolloutStatusStepCommonDefinition,
     service,
     async (input, pm) => ({
@@ -131,8 +141,16 @@ export const createGetEndpointPolicyRolloutStatusStepDefinition = (
 export const createAssessEndpointPolicyChangeStepDefinition = (
   service: EndpointAppContextService
 ) =>
-  createPolicyReadStep(
-    assessEndpointPolicyChangeStepCommonDefinition,
+  createPolicyStep(assessEndpointPolicyChangeStepCommonDefinition, service, async (input, pm) => ({
+    result: presentAssessPolicyChange(await pm.assessPolicyChange(input)),
+  }));
+
+export const createApplyEndpointPolicyChangeStepDefinition = (service: EndpointAppContextService) =>
+  createPolicyStep(
+    applyEndpointPolicyChangeStepCommonDefinition,
     service,
-    async (input, pm) => ({ result: presentAssessPolicyChange(await pm.assessPolicyChange(input)) })
+    async (input, pm) => ({
+      result: presentApplyPolicyChangeResult(await pm.applyPolicyChange(input)),
+    }),
+    'settle_service'
   );

@@ -306,7 +306,7 @@ describe('createApplyPolicyChangeTool', () => {
         const params = applyParams();
         const result = await getStandardResult(tool, params, ctx);
 
-        expect(service.applyPolicyChange).toHaveBeenCalledWith(params, { callSource: 'agent' });
+        expect(service.applyPolicyChange).toHaveBeenCalledWith(params);
         expect(result.type).toBe(ToolResultType.other);
         expect(result.data).toEqual(presentApplyPolicyChangeResult(applyResult));
       });

@@ -22,11 +22,7 @@ import type { PolicyRef } from '../domain/input_schemas';
 import { diffPolicyConfig } from '../domain/diff_policy_config';
 import type { AssessPolicyChangeDto } from './assess_change';
 import { assessChange } from './assess_change';
-import type {
-  ApplyPolicyCallSource,
-  ApplyPolicyChangePreview,
-  ApplyPolicyChangeResult,
-} from './apply_policy_change';
+import type { ApplyPolicyChangePreview, ApplyPolicyChangeResult } from './apply_policy_change';
 import {
   applyPolicyChange as applyPolicyChangeService,
   previewApplyPolicyChange as previewApplyPolicyChangeService,
@@ -92,10 +88,7 @@ export interface EndpointPolicyManagementService {
   getPolicyRolloutStatus(reference: Readonly<{ idOrName: string }>): Promise<PolicyRolloutStatus>;
   getPolicyFieldReference(rawParams: unknown): Promise<FieldReferenceResult>;
   previewApplyPolicyChange(rawParams: unknown): Promise<ApplyPolicyChangePreview>;
-  applyPolicyChange(
-    rawParams: unknown,
-    input: Readonly<{ callSource: ApplyPolicyCallSource }>
-  ): Promise<ApplyPolicyChangeResult>;
+  applyPolicyChange(rawParams: unknown): Promise<ApplyPolicyChangeResult>;
 }
 
 const attachUsage = async (
@@ -225,7 +218,7 @@ export const createEndpointPolicyManagementService = ({
     previewApplyPolicyChange: (rawParams) =>
       previewApplyPolicyChangeService({ endpointAppContextService, request, spaceId }, rawParams),
 
-    applyPolicyChange: (rawParams, input) =>
-      applyPolicyChangeService({ endpointAppContextService, request, spaceId }, rawParams, input),
+    applyPolicyChange: (rawParams) =>
+      applyPolicyChangeService({ endpointAppContextService, request, spaceId }, rawParams),
   };
 };

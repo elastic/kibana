@@ -23,6 +23,7 @@ import {
   compareEndpointPoliciesStepCommonDefinition,
   getEndpointPolicyRolloutStatusStepCommonDefinition,
   assessEndpointPolicyChangeStepCommonDefinition,
+  applyEndpointPolicyChangeStepCommonDefinition,
 } from '../../../../common/workflows/step_types/endpoint/policies/steps';
 
 export const findEndpointArtifactsPublicStepDefinition = createPublicStepDefinition({
@@ -73,4 +74,7 @@ export const getEndpointPolicyRolloutStatusPublicStepDefinition = createPublicSt
 });
 export const assessEndpointPolicyChangePublicStepDefinition = createPublicStepDefinition({
   ...assessEndpointPolicyChangeStepCommonDefinition,
+});
+export const applyEndpointPolicyChangePublicStepDefinition = createPublicStepDefinition({
+  ...applyEndpointPolicyChangeStepCommonDefinition,
 });

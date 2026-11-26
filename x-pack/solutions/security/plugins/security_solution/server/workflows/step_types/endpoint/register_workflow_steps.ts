@@ -28,6 +28,7 @@ import {
   createCompareEndpointPoliciesStepDefinition,
   createGetEndpointPolicyRolloutStatusStepDefinition,
   createAssessEndpointPolicyChangeStepDefinition,
+  createApplyEndpointPolicyChangeStepDefinition,
 } from './policies/steps';
 
 export interface RegisterEndpointWorkflowStepsDeps {
@@ -74,6 +75,9 @@ export const registerEndpointWorkflowSteps = (
     );
     workflowsExtensions.registerStepDefinition(
       createAssessEndpointPolicyChangeStepDefinition(deps.endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createApplyEndpointPolicyChangeStepDefinition(deps.endpointAppContextService)
     );
   }
   if (automaticTroubleshootingUniversalSkill) {

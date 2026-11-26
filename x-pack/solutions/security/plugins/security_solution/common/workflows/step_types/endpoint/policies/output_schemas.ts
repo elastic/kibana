@@ -597,6 +597,42 @@ export const assessPolicyChangeOutputSchema = lazySchema(() =>
     )
 );
 
+export const applyPolicyChangeOutputSchema = lazySchema(() => {
+  const identity = policyIdentityOutputSchema
+    .pick({
+      id: true,
+      name: true,
+      revision: true,
+      version: true,
+      id_string_truncated: true,
+      name_string_truncated: true,
+      version_string_truncated: true,
+    })
+    .required({ revision: true, version: true });
+  return z.object({
+    before: identity.describe('Policy identity before the write attempt.'),
+    after: identity.describe('Policy identity returned by Fleet, not host rollout evidence.'),
+    requestedChanges: z
+      .array(changeFact.omit({ registry: true }))
+      .describe('Submitted proposal facts, not proof of saved state.'),
+    sideEffects: assessPolicyChangeOutputSchema.shape.sideEffects,
+    residual: assessPolicyChangeOutputSchema.shape.normalizedDiff.describe(
+      'Proposal-to-returned-policy differences, not rollout verification.'
+    ),
+    enrollment: assessPolicyChangeOutputSchema.shape.blastRadius.describe(
+      'Enrolled agents observed before the write, not after it; buckets overlap and must not be summed.'
+    ),
+    side_effects_value_truncated: flag,
+    side_effects_value_total: count.optional().describe('Side-effect row count before trimming.'),
+    requested_changes_value_truncated: flag,
+    requested_changes_value_total: count
+      .optional()
+      .describe('Requested change row count before trimming.'),
+    residual_value_truncated: flag,
+    residual_value_total: count.optional().describe('Residual row count before trimming.'),
+  });
+});
+
 const policyStepErrorShape = {
   error: lazySchema(() =>
     z

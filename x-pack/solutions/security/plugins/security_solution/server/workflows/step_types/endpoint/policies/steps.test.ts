@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
@@ -33,6 +36,7 @@ import {
   createGetEndpointPolicyFieldReferenceStepDefinition,
   createCompareEndpointPoliciesStepDefinition,
   createAssessEndpointPolicyChangeStepDefinition,
+  createApplyEndpointPolicyChangeStepDefinition,
 } from './steps';
 
 const createContext = <Input extends z.ZodType>(
@@ -204,6 +208,208 @@ it('preserves unverified-write observations through the step error presenter', (
     before,
     observation: 'available',
     observed,
+  });
+});
+
+describe('policy apply execution boundary', () => {
+  const input = {
+    idOrName: 'policy-1',
+    expectedVersion: 'version-1',
+    changes: [{ op: 'set_field' as const, path: 'windows.malware.mode', value: 'detect' }],
+  };
+
+  const createApplyFixture = () => {
+    const app = createMockEndpointAppContextService();
+    const request = httpServerMock.createKibanaRequest();
+    const user = securityServiceMock.createMockAuthenticatedUser({ username: 'workflow-analyst' });
+    const security = securityServiceMock.createStart();
+    app.security = security;
+    jest
+      .spyOn(app.getLicenseService(), 'getLicenseInformation')
+      .mockReturnValue(licenseMock.createLicense({ license: { type: 'enterprise' } }));
+    const getCurrentUser = jest.spyOn(security.authc, 'getCurrentUser').mockReturnValue(user);
+    app.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canReadPolicyManagement: true,
+        canWritePolicyManagement: true,
+        canReadSecuritySolution: true,
+      })
+    );
+    const fleet = app.getInternalFleetServices();
+    app.getInternalFleetServices.mockClear();
+    const generator = new FleetPackagePolicyGenerator('policy-apply-step');
+    const policy = generator.generateEndpointPackagePolicy({
+      id: input.idOrName,
+      name: 'N'.repeat(10_000),
+      version: input.expectedVersion,
+      policy_ids: ['agent-policy-1'],
+    });
+    const stored = policy.inputs[0]?.config?.policy?.value;
+    if (!stored) throw new Error('expected endpoint policy configuration');
+    stored.windows.malware.mode = ProtectionModes.prevent;
+    const returned = structuredClone(policy);
+    returned.version = 'version-2';
+    returned.revision = policy.revision + 1;
+    jest.spyOn(fleet.packagePolicy, 'get').mockResolvedValue(policy);
+    const update = jest.spyOn(fleet.packagePolicy, 'update').mockResolvedValue(returned);
+    const ensureSpace = jest.spyOn(fleet, 'ensureInCurrentSpace').mockResolvedValue(undefined);
+    jest.spyOn(fleet.agent, 'getAgentStatusForAgentPolicy').mockResolvedValue({
+      online: 3,
+      error: 0,
+      inactive: 0,
+      offline: 0,
+      updating: 0,
+      unenrolled: 0,
+      all: 3,
+      active: 3,
+      other: 0,
+      events: 0,
+    });
+    const scopedClient = jest.spyOn(app.savedObjects, 'createRequestScopedSoClient');
+    const controller = new AbortController();
+    const step = createApplyEndpointPolicyChangeStepDefinition(app);
+    const context = {
+      ...createContext<typeof step.inputSchema>(input, request),
+      abortSignal: controller.signal,
+    };
+    return {
+      app,
+      request,
+      user,
+      getCurrentUser,
+      update,
+      ensureSpace,
+      scopedClient,
+      controller,
+      context,
+      policy,
+      returned,
+      step,
+    };
+  };
+
+  it('passes the workflow principal and execution space to one write and preserves the bounded projection', async () => {
+    const {
+      app,
+      request,
+      user,
+      getCurrentUser,
+      update,
+      ensureSpace,
+      scopedClient,
+      context,
+      step,
+      policy,
+    } = createApplyFixture();
+    const { output } = await step.handler(context);
+
+    expect(output).toEqual({ status: 'success', result: expect.any(Object) });
+    expect(app.getEndpointAuthz).toHaveBeenCalledWith(request);
+    expect(getCurrentUser).toHaveBeenCalledWith(request);
+    expect(app.getInternalFleetServices).toHaveBeenCalledWith('marketing');
+    expect(scopedClient).toHaveBeenCalledWith({ request, readonly: false });
+    expect(ensureSpace).toHaveBeenCalledWith({ integrationPolicyIds: [input.idOrName] });
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith(
+      scopedClient.mock.results[0].value,
+      app.getInternalEsClient(),
+      input.idOrName,
+      expect.objectContaining({ version: input.expectedVersion }),
+      { user }
+    );
+    expect(output).toMatchObject({
+      status: 'success',
+      result: {
+        before: {
+          id: input.idOrName,
+          revision: policy.revision,
+          version: input.expectedVersion,
+          name_string_truncated: true,
+        },
+        after: {
+          id: input.idOrName,
+          revision: policy.revision + 1,
+          version: 'version-2',
+          name_string_truncated: true,
+        },
+        requestedChanges: [
+          expect.objectContaining({
+            path: 'windows.malware.mode',
+            from: 'prevent',
+            to: 'detect',
+            origin: { operationIndex: 0, op: 'set_field' },
+            eligibility: { eligible: true },
+          }),
+        ],
+        sideEffects: expect.any(Array),
+        residual: expect.arrayContaining([
+          expect.objectContaining({ path: 'windows.malware.mode', from: 'detect', to: 'prevent' }),
+        ]),
+        enrollment: {
+          population: 'enrolled_agents',
+          source: 'fleet_status_aggregation',
+          status: { all: 3 },
+        },
+      },
+    });
+    expect(step.outputSchema.parse(output)).toEqual(output);
+    expect(estimateTokens(JSON.stringify({ output }))).toBeLessThanOrEqual(16_000);
+    expect(output?.result?.requestedChanges[0]).not.toHaveProperty('registry');
+    expect(output?.result).not.toHaveProperty('user');
+    expect(output?.result).not.toHaveProperty('access');
+    expect(output?.result).not.toHaveProperty('assessment');
+    expect(output?.result).not.toHaveProperty('proposedConfig');
+    expect(output?.result?.after).not.toHaveProperty('inputs');
+    expect(output?.result?.after).not.toHaveProperty('updatedBy');
+  });
+
+  it.each(['usable', 'throw', 'unusable'] as const)(
+    'awaits a pending Fleet update after abort and presents its %s outcome',
+    async (outcome) => {
+      const { update, controller, context, step, policy, returned } = createApplyFixture();
+      const pending = Promise.withResolvers<PackagePolicy>();
+      const started = Promise.withResolvers<void>();
+      update.mockImplementationOnce(() => {
+        started.resolve();
+        return pending.promise;
+      });
+      const result = step.handler(context);
+      await started.promise;
+      controller.abort();
+      if (outcome === 'throw') {
+        pending.reject(new Error('update outcome unknown'));
+      } else {
+        pending.resolve(outcome === 'usable' ? returned : { ...returned, package: undefined });
+      }
+      const { output } = await result;
+      expect(update).toHaveBeenCalledTimes(1);
+      if (outcome === 'usable') {
+        expect(output).toMatchObject({
+          status: 'success',
+          result: { after: { version: 'version-2' } },
+        });
+      } else {
+        expect(output).toMatchObject({
+          status: 'error',
+          error: 'write_unverified',
+          before: { id: input.idOrName, version: input.expectedVersion },
+          observation: 'available',
+          observed: { id: policy.id, version: policy.version },
+        });
+        expect(output?.result).toBeUndefined();
+      }
+    }
+  );
+
+  it('makes no update when aborted before the service call', async () => {
+    const { app, update, controller, context, step } = createApplyFixture();
+    jest.mocked(context.contextManager.callKibanaApi).mockImplementationOnce(async () => {
+      controller.abort();
+      return { body: { id: 'marketing' } } as never;
+    });
+    await expect(step.handler(context)).rejects.toMatchObject({ name: 'AbortError' });
+    expect(app.getEndpointAuthz).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
   });
 });
 
