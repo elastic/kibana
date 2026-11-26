@@ -6637,8 +6637,8 @@ importers:
         specifier: 17.0.1
         version: 17.0.1
       ejs:
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 7.0.2
+        version: 7.0.2
       elasticsearch-8.x:
         specifier: npm:@elastic/elasticsearch@8.19.2
         version: '@elastic/elasticsearch@8.19.2(supports-color@10.2.2)'
@@ -17878,8 +17878,8 @@ packages:
     engines: {node: '>=0.12.18'}
     hasBin: true
 
-  ejs@7.0.1:
-    resolution: {integrity: sha512-TrAb1fY4jNY6aQrNjMJsoWQxGUK47A38JxuUvnt75vDcAA9Ln7ur6FHo+irVa5Bwd3w9rdUT3xLSl5MRgHIugg==}
+  ejs@7.0.2:
+    resolution: {integrity: sha512-LcDSEP6Oclb9sTiSyG0MpG0RuKvLDRxCOOt+2sIk+kdk1rMkFU8SRnT0qaNt5zvU0LOV1YXXOvIoZL/sKwabvw==}
     engines: {node: '>=0.12.18'}
     hasBin: true
 
@@ -34282,7 +34282,7 @@ snapshots:
 
   ejs@6.0.1: {}
 
-  ejs@7.0.1: {}
+  ejs@7.0.2: {}
 
   elastic-apm-node@4.18.0(supports-color@10.2.2):
     dependencies:
