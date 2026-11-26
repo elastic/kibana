@@ -28,22 +28,20 @@ export const useApplyUnpublishedChanges = (): {
   const dashboardInternalApi = useDashboardInternalApi();
 
   const [
-    hasUnpublishedFilters,
     publishedTimeslice,
     unpublishedTimeslice,
     publishedEsqlVariables,
     unpublishedEsqlVariables,
   ] = useBatchedPublishingSubjects(
-    dashboardApi.hasUnpublishedFilters$,
     dashboardApi.publishedTimeslice$,
     dashboardApi.unpublishedTimeslice$,
     dashboardInternalApi.publishedEsqlVariables$,
     dashboardInternalApi.unpublishedEsqlVariables$
   );
+  const hasUnpublishedFilters = useObservable(dashboardApi.hasUnpublishedFilters$, false);
 
-  // Filters are only staged once every child is done loading, while publishing reads the live "awaiting
-  // required filters" state. Applying mid-load could pair an older batch of filters with a newer awaiting
-  // state and open the grid without the required filter, so nothing can be applied until loading settles.
+  // The children's filters and their "awaiting required filters" state are only staged once every child is
+  // done loading, so what is staged mid-load is already out of date: nothing can be applied until loading settles.
   const childFiltersLoading = useObservable(dashboardApi.childFiltersLoading$, true);
 
   const hasUnpublishedTimeslice = useMemo(

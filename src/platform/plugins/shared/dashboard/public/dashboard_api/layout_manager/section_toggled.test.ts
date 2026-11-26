@@ -41,7 +41,7 @@ const section = {
 };
 
 describe('layout manager: sectionToggled$', () => {
-  test('emits when a section is collapsed or expanded, but not when one is added', () => {
+  test('emits the toggled section when one is collapsed or expanded, but not when one is added', () => {
     const layoutManager = initializeLayoutManager(
       viewModeManagerMock,
       [section],
@@ -67,6 +67,7 @@ describe('layout manager: sectionToggled$', () => {
       },
     });
     expect(onToggled).toHaveBeenCalledTimes(1);
+    expect(onToggled).toHaveBeenLastCalledWith(['section1']);
 
     layout$.next({
       ...layout$.value,
@@ -76,6 +77,7 @@ describe('layout manager: sectionToggled$', () => {
       },
     });
     expect(onToggled).toHaveBeenCalledTimes(2);
+    expect(onToggled).toHaveBeenLastCalledWith(['section1']);
   });
 
   test('does not emit for layout changes that leave the collapsed sections alone', () => {

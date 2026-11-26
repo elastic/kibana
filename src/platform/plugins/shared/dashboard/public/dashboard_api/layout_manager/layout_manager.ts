@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { getSafe } from '@kbn/std';
-import { cloneDeep, omit, pick } from 'lodash';
+import { cloneDeep, omit, pick, xor } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -19,6 +19,7 @@ import {
   map,
   merge,
   of,
+  pairwise,
   skip,
   tap,
   type Observable,
@@ -149,14 +150,14 @@ export function initializeLayoutManager(
   );
 
   /**
-   * Emits when a section is collapsed or expanded, which only changes which panels are rendered. Sections
-   * that are added expanded do not emit.
+   * Emits the ids of the sections that were just collapsed or expanded, which only changes which panels are
+   * rendered. Sections that are added expanded do not emit.
    */
-  const sectionToggled$ = layout$.pipe(
+  const sectionToggled$: Observable<string[]> = layout$.pipe(
     map(({ sections }) => Object.keys(sections).filter(isSectionCollapsed)),
     distinctUntilChanged<string[]>(deepEqual),
-    skip(1),
-    map(() => undefined)
+    pairwise(),
+    map(([previousCollapsed, collapsed]) => xor(previousCollapsed, collapsed))
   );
 
   let lastSavedLayout = initialLayout;

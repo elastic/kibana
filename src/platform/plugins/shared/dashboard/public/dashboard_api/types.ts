@@ -266,8 +266,7 @@ export type DashboardApi = CanExpandPanels &
     setState: (state: DashboardState, options?: DashboardSetStateOptions) => Promise<void>;
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
-    unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
-    hasUnpublishedFilters$: PublishingSubject<boolean>;
+    hasUnpublishedFilters$: Observable<boolean>;
     childFiltersLoading$: Observable<boolean>;
     publishFilters: () => void;
 

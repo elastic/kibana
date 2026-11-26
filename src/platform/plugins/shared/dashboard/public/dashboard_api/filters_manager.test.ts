@@ -8,8 +8,16 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { pick } from 'lodash';
-import { BehaviorSubject, Subject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
+import { pick, xor } from 'lodash';
+import {
+  BehaviorSubject,
+  Subject,
+  combineLatest,
+  distinctUntilChanged,
+  firstValueFrom,
+  map,
+  pairwise,
+} from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
 
@@ -83,14 +91,14 @@ const buildSetup = (
       renderedChildren$: combineLatest([children$, renderedIds$]).pipe(
         map(([children, ids]) => pick(children, ids))
       ),
-      // like the real layout manager, emits when a section is collapsed or expanded
+      // like the real layout manager, emits the ids of the sections that were collapsed or expanded
       sectionToggled$: layout$.pipe(
         map(({ sections }) =>
           Object.keys(sections).filter((id) => (sections as Record<string, any>)[id].collapsed)
         ),
         distinctUntilChanged<string[]>(deepEqual),
-        skip(1),
-        map(() => undefined)
+        pairwise(),
+        map(([previousCollapsed, collapsed]) => xor(previousCollapsed, collapsed))
       ),
     },
   } as unknown as ReturnType<typeof initializeLayoutManager>;
@@ -246,6 +254,32 @@ describe('filters manager: awaiting required filters', () => {
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
   });
 
+  test('stages the awaiting state together with the filters, once the children are done loading', async () => {
+    const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(['control1'], {
+      autoApplyFilters: false,
+    });
+    const control = buildControl('control1', { filters: [region] });
+    setChildren([control]);
+    await flush();
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
+
+    // the required selection is cleared, but the control is still computing its filters
+    control.filtersLoading$.next(true);
+    control.awaitingRequiredFilters$.next(true);
+    await flush();
+    // publishing mid-load must not pair the new awaiting state with the filters from before
+    filtersManager.api.publishFilters();
+    expect(awaitingRequiredFilters$.value).toBe(false);
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
+
+    control.appliedFilters$.next(undefined);
+    control.filtersLoading$.next(false);
+    await flush();
+    filtersManager.api.publishFilters();
+    expect(awaitingRequiredFilters$.value).toBe(true);
+    expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+  });
+
   test("a reset publishes the controls' new filters and awaiting state once they have reported", async () => {
     const { filtersManager, awaitingRequiredFilters$, forcePublish$, setChildren } = buildSetup(
       ['control1'],
@@ -294,9 +328,9 @@ describe('filters manager: awaiting required filters', () => {
     // a later user selection must wait for the user to apply it
     control.appliedFilters$.next([region]);
     await flush();
-    expect(filtersManager.api.unpublishedChildFilters$.value).toEqual([region]);
+    expect(filtersManager.internalApi.unpublishedFilters$.value.childFilters).toEqual([region]);
     expect(filtersManager.api.publishedChildFilters$.value).not.toEqual([region]);
-    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+    expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
   });
 
   test('flags an unpublished change when the awaiting state changes but the filters do not', async () => {
@@ -312,18 +346,18 @@ describe('filters manager: awaiting required filters', () => {
     filtersManager.api.publishFilters();
     await flush();
     expect(awaitingRequiredFilters$.value).toBe(true);
-    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+    expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
 
     // the control is no longer required (setRequired(false)); no filters changed
     awaiting$.next(false);
     await flush();
     expect(awaitingRequiredFilters$.value).toBe(true);
-    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+    expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
 
     filtersManager.api.publishFilters();
     await flush();
     expect(awaitingRequiredFilters$.value).toBe(false);
-    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+    expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
 
     // unpinning or deleting an awaiting control behaves the same way
     awaiting$.next(true);
@@ -333,7 +367,7 @@ describe('filters manager: awaiting required filters', () => {
     expect(awaitingRequiredFilters$.value).toBe(true);
     layout$.next({ ...layout$.value, pinnedPanels: {} });
     await flush();
-    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+    expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
   });
 
   test('keeps waiting for publish when a control derives awaiting from its own appliedFilters$', async () => {
@@ -391,7 +425,7 @@ describe('filters manager: awaiting required filters', () => {
       control1.awaitingRequiredFilters$.next(false);
       control1.filtersLoading$.next(false);
       await flush();
-      expect(filtersManager.api.unpublishedChildFilters$.value).toEqual([region]);
+      expect(filtersManager.internalApi.unpublishedFilters$.value.childFilters).toEqual([region]);
       expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
       expect(awaitingRequiredFilters$.value).toBe(true);
     });
@@ -572,12 +606,12 @@ describe('filters manager: awaiting required filters', () => {
       setCollapsed(true);
       await flush();
       expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
-      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
 
       setCollapsed(false);
       await flush();
       expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
-      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
     });
 
     test('a control that first mounts when its section is expanded publishes its saved filters', async () => {
@@ -591,10 +625,10 @@ describe('filters manager: awaiting required filters', () => {
       setChildren([buildControl('pinned'), buildGridControl()]);
       await flush();
       expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
-      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
     });
 
-    test('publishes other pending changes too, like a reset does', async () => {
+    test('leaves unrelated pending changes pending, unlike a reset', async () => {
       const { filtersManager, setChildren, setCollapsed } = await setup();
       const pinned = buildControl('pinned');
       setChildren([pinned, buildGridControl()]);
@@ -604,12 +638,118 @@ describe('filters manager: awaiting required filters', () => {
       pinned.appliedFilters$.next([pendingFilter]);
       await flush();
       expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
-      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
+
+      // collapsing only removes the section's filter; the pinned change still needs an Apply
+      setCollapsed(true);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
+
+      // expanding only adds the section's filter back
+      setCollapsed(false);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
+
+      filtersManager.api.publishFilters();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([pendingFilter, gridFilter]);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
+    });
+
+    test('a toggle does not hide the dashboard after a required selection is cleared', async () => {
+      const { filtersManager, awaitingRequiredFilters$, setChildren, setCollapsed } = await setup();
+      const required = buildControl('pinned', { filters: [pendingFilter] });
+      setChildren([required, buildGridControl()]);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([pendingFilter, gridFilter]);
+
+      // the viewer clears the required control but does not apply it
+      required.appliedFilters$.next(undefined);
+      required.awaitingRequiredFilters$.next(true);
+      await flush();
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
+      expect(awaitingRequiredFilters$.value).toBe(false);
 
       setCollapsed(true);
       await flush();
       expect(filtersManager.api.publishedChildFilters$.value).toEqual([pendingFilter]);
-      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
+      expect(awaitingRequiredFilters$.value).toBe(false);
+
+      setCollapsed(false);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([pendingFilter, gridFilter]);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
+      expect(awaitingRequiredFilters$.value).toBe(false);
+
+      // only the Apply hides the grid
+      filtersManager.api.publishFilters();
+      expect(awaitingRequiredFilters$.value).toBe(true);
+    });
+
+    test('a toggle does not stage a change when it reorders the published filters', async () => {
+      const { filtersManager, layout$, setChildren, setVisibleChildren } = await setup();
+      const otherFilter = { meta: { key: 'other', group: 's2' } } as Filter;
+      const setSection1Collapsed = (collapsed: boolean) => {
+        layout$.next({
+          ...layout$.value,
+          sections: { s1: { collapsed }, s2: { collapsed: false } },
+          panels: { grid: { grid: { sectionId: 's1' } }, other: { grid: { sectionId: 's2' } } },
+        } as unknown as typeof layout$.value);
+        setVisibleChildren(collapsed ? ['other'] : ['grid', 'other']);
+      };
+      setSection1Collapsed(false);
+      // the first section's control comes first in the children's order
+      setChildren([
+        buildControl('pinned'),
+        buildGridControl(),
+        buildControl('other', { filters: [otherFilter] }),
+      ]);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter, otherFilter]);
+
+      setSection1Collapsed(true);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([otherFilter]);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
+
+      // the section's filter is appended, which is the same set of filters in a different order
+      setSection1Collapsed(false);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([otherFilter, gridFilter]);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
+    });
+
+    test('only the toggled section is affected when there are several', async () => {
+      const { filtersManager, layout$, setChildren, setVisibleChildren } = await setup();
+      const otherFilter = { meta: { key: 'other', group: 's2' } } as Filter;
+      const other = buildControl('other', { filters: [otherFilter] });
+      layout$.next({
+        ...layout$.value,
+        sections: { s1: { collapsed: false }, s2: { collapsed: false } },
+        panels: { grid: { grid: { sectionId: 's1' } }, other: { grid: { sectionId: 's2' } } },
+      } as unknown as typeof layout$.value);
+      setVisibleChildren(['grid', 'other']);
+      setChildren([buildControl('pinned'), buildGridControl(), other]);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter, otherFilter]);
+
+      // the viewer changes the control in the other section but does not apply it
+      other.appliedFilters$.next([
+        { ...otherFilter, meta: { ...otherFilter.meta, key: 'changed' } },
+      ]);
+      await flush();
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
+
+      layout$.next({
+        ...layout$.value,
+        sections: { s1: { collapsed: true }, s2: { collapsed: false } },
+      } as unknown as typeof layout$.value);
+      setVisibleChildren(['other']);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([otherFilter]);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
     });
 
     test('does not force publish the other managers sharing the reset subject', async () => {
@@ -633,7 +773,7 @@ describe('filters manager: awaiting required filters', () => {
       setVisibleChildren([]);
       await flush();
       expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
-      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+      expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(true);
     });
   });
 
@@ -668,7 +808,7 @@ describe('filters manager: awaiting required filters', () => {
 
     expect(filtersManager.api.awaitingRequiredFilters$.value).toBe(true);
     expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
-    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+    expect(await firstValueFrom(filtersManager.api.hasUnpublishedFilters$)).toBe(false);
   });
 
   test('ignores filtersLoading$ of children that are not rendered, so the restored required selection can publish', async () => {
@@ -693,7 +833,9 @@ describe('filters manager: awaiting required filters', () => {
     await flush();
 
     expect(loadingStates.at(-1)).toBe(false);
-    expect(filtersManager.api.unpublishedChildFilters$.value).toEqual([requiredFilter]);
+    expect(filtersManager.internalApi.unpublishedFilters$.value.childFilters).toEqual([
+      requiredFilter,
+    ]);
     expect(filtersManager.api.filters$.value).toEqual([requiredFilter]);
 
     // once the child is rendered again, its loading state counts
@@ -714,7 +856,9 @@ describe('filters manager: awaiting required filters', () => {
     await flush();
 
     const unpublished: Array<Filter[] | undefined> = [];
-    filtersManager.api.unpublishedChildFilters$.subscribe((filters) => unpublished.push(filters));
+    filtersManager.internalApi.unpublishedFilters$.subscribe(({ childFilters }) =>
+      unpublished.push(childFilters)
+    );
     await flush();
     const unpublishedCount = unpublished.length;
 
@@ -759,7 +903,10 @@ describe('filters manager: awaiting required filters', () => {
     setChildren([requiredChild, gridChild]);
     await flush();
 
-    expect(filtersManager.api.unpublishedChildFilters$.value).toEqual([region, saved]);
+    expect(filtersManager.internalApi.unpublishedFilters$.value.childFilters).toEqual([
+      region,
+      saved,
+    ]);
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([region, saved]);
   });
 
