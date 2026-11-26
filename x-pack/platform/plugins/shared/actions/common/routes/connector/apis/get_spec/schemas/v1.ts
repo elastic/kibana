@@ -19,17 +19,14 @@ export const getConnectorSpecParamsSchema = schema.object({
   }),
 });
 
-export const getConnectorSpecQuerySchema = (includeSpecVersionField: boolean) =>
-  schema.object({
-    ...(includeSpecVersionField && {
-      spec_version: schema.maybe(
-        schema.version({
-          maxLength: CONNECTOR_SPEC_VERSION_MAX_LENGTH,
-          meta: {
-            description:
-              'The connector schema version, as a major (for example, "1") or exact major.minor (for example, "1.3").',
-          },
-        })
-      ),
-    }),
-  });
+export const getConnectorSpecQuerySchema = schema.object({
+  spec_version: schema.maybe(
+    schema.version({
+      maxLength: CONNECTOR_SPEC_VERSION_MAX_LENGTH,
+      meta: {
+        description:
+          'The connector schema version, as a major (for example, "1") or exact major.minor (for example, "1.3").',
+      },
+    })
+  ),
+});

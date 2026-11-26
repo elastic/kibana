@@ -51,12 +51,17 @@ export const getConnectorSpecRoute = (
       validate: {
         request: {
           params: getConnectorSpecParamsSchemaV1,
-          query: getConnectorSpecQuerySchemaV1(configurationUtilities.isCatalogEnabled()),
+          ...(configurationUtilities.isCatalogEnabled() && {
+            query: getConnectorSpecQuerySchemaV1,
+          }),
         },
         response: {
           200: {
             description: 'Connector specification returned successfully.',
-            body: () => getConnectorSpecResponseBodySchemaV1,
+            body: () =>
+              getConnectorSpecResponseBodySchemaV1({
+                includeSpecVersionField: configurationUtilities.isCatalogEnabled(),
+              }),
           },
           400: {
             description: 'Invalid or unknown connector spec version.',
