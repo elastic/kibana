@@ -423,9 +423,15 @@ steps:
         breakdown on the retrieved alerts and say the counts cover only them.
 
         After investigating, return one structured tuning proposal using the schema.
-        Choose exactly one change_type in this order of preference:
+        Choose exactly one change_type. Pick the type the evidence supports; there
+        is no default and no type is preferred over another. Read the entity and
+        field breakdown of the retrieved alerts first, then match it to the
+        criteria below. If two types both fit, choose the one that removes the
+        false positives with the smallest loss of detections.
 
-        exception  — The rule logic is correct but fires on a known-good entity.
+        exception  — Evidence: the false positives concentrate on one or a few
+          known-good entities (for example one host, user or process path) and the
+          rule logic is correct for every other entity.
           Use the entity breakdown to identify the tightest conditions.
           Populate exception_entries; each entry is one field condition the step
           will AND together. Supported operators and required fields:
@@ -438,8 +444,11 @@ steps:
           excluded from indicator match". Do not repeat the rule name. Use 80 characters
           or less.
 
-        query  — The query is too broad and FPs share a pattern not worth
-          excepting individually. The rule stays a "{{ steps.fetch_rule.output.type }}" rule.
+        query  — Evidence: the false positives share a pattern across many
+          entities, a field-level condition (a process argument, a path, a
+          parent process, a command-line substring) that the rule matches too
+          broadly. No single entity explains them, and excepting entities one by
+          one would not cover them. The rule stays a "{{ steps.fetch_rule.output.type }}" rule.
           Populate proposed_query with the full narrowed query in this rule's language,
           "{{ steps.fetch_rule.output.language }}". In KQL a quoted value is a phrase
           and a * inside quotes is a literal asterisk, so every substring match must
@@ -450,13 +459,15 @@ steps:
           *\deploy-share\packages\corp-agent-signed.msi*. Keep exact field values
           (process.name, user.name) quoted; only wildcard matches go unquoted.
 
-        risk_score  — The rule has real detection value but the alerts are
-          low-priority noise. Populate proposed_risk_score (0–100) and
+        risk_score  — Evidence: the matched behavior is genuine and no
+          entity or field condition separates the benign alerts from the real
+          ones, but the alerts are low-priority noise. Populate proposed_risk_score (0–100) and
           proposed_severity (low / medium / high / critical).
 
-        threshold  — The rule fires too broadly because the threshold count is
-          too low, capturing events that a higher minimum count would filter out.
-          Only valid for rule type "threshold". Always populate all three fields:
+        threshold  — Evidence: the volume is the problem. The false positives
+          sit at event counts below a higher minimum, and the true detections
+          sit above it (compare the counts in the alerts with the current
+          threshold). Only valid for rule type "threshold". Always populate all three fields:
           proposed_threshold_value (integer, minimum 1),
           proposed_threshold_field (array of field names — use the rule's current
           threshold.field if not changing it), and proposed_threshold_cardinality
@@ -464,15 +475,18 @@ steps:
           threshold.cardinality, or [] if it has none). Do not use this for query
           changes; if the threshold logic is structurally wrong, use manual instead.
 
-        schedule  — The rule sweeps too wide a lookback window or runs too
-          frequently, generating FPs that tighter timing would prevent.
+        schedule  — Evidence: the false positives come from timing, such as the
+          same event alerting in overlapping runs or a lookback window wider than
+          the interval needs, and tighter timing would prevent them.
           Always populate both proposed_interval (e.g. "10m") and proposed_from
           (e.g. "now-11m") using the same date-math format the rule currently
           uses, even if only one setting needs to change. The patch replaces
           both atomically, so both must be explicitly proposed. Ensure
           proposed_from overlaps with proposed_interval to avoid gaps.
 
-        manual  — None of the above is safe to apply automatically. Use summary
+        manual  — Evidence: no pattern in the alerts supports any type above, or
+          the only fix that fits is unsafe to apply automatically (for example the
+          rule logic is structurally wrong). Use summary
           to describe: (a) the false-positive pattern you found, (b) which automated
           paths you considered (exception / query / risk_score / threshold / schedule)
           and why each is unsafe or inapplicable for this rule, and (c) a concrete
