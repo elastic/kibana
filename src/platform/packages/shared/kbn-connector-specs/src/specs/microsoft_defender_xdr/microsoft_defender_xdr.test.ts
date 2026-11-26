@@ -29,12 +29,8 @@ const isAuthTypeDef = (t: string | AuthTypeDef): t is AuthTypeDef => typeof t ==
 
 const makeClient = (getData: (url: string) => unknown = () => ({ value: [] })) => ({
   get: jest.fn(async (url: string) => ({ data: getData(url) })),
-  post: jest.fn(async (_url: string, _body?: unknown, _opts?: unknown) => ({
-    data: { schema: [], results: [] },
-  })),
-  patch: jest.fn(async (_url: string, _body?: unknown, _opts?: unknown) => ({
-    data: { id: '1', status: 'resolved' },
-  })),
+  post: jest.fn().mockResolvedValue({ data: { schema: [], results: [] } }),
+  patch: jest.fn().mockResolvedValue({ data: { id: '1', status: 'resolved' } }),
   put: jest.fn(),
   delete: jest.fn(async () => ({ data: {} })),
   request: jest.fn(),
