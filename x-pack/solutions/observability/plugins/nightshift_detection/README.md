@@ -24,7 +24,7 @@ Enterprise license.
 
 Server code is grouped by what it does, so a new feature adds a folder instead of growing a shared one:
 
-- `server/lib/<domain>/`: the logic. `engine/` runs a tick, `strategies/` holds what a tick runs, `signals/` and `state/` store what it finds and where it stopped, `service_account/` binds a space to its account, `workflows/` installs the managed workflows.
+- `server/lib/<domain>/`: the logic. `engine/` runs a tick, `strategies/` holds what a tick runs, `signals/` and `state/` store what it finds and where it stopped, `service_account/` binds a space to its account, `workflows/` installs the managed workflows, `judge_case/` builds what the judge reads from a signal's evidence.
 - `server/routes/<feature>/`: one folder of routes per feature, built on `BaseEngineRoute`.
 - `server/setup/bind_<feature>.ts`: the DI bindings of one feature, loaded from `server/index.ts`.
 
