@@ -66,6 +66,26 @@ const toSeries = (
   }),
 });
 
+const topNames = (totals: Array<{ serviceName: string; bytes: number }>): string[] =>
+  orderBy(totals, ['bytes', 'serviceName'], ['desc', 'asc'])
+    .slice(0, TOP_APPLICATIONS)
+    .map(({ serviceName }) => serviceName);
+
+/**
+ * The applications the chart names: each source's top ones and the top ones of all sources, by
+ * name, so whichever sources the chart shows, its top ones are among them with all their bytes.
+ */
+const chartedApplications = (bySource: ApplicationIngest[][]): Set<string> => {
+  const combined = new Map<string, number>();
+  for (const { serviceName, bytes } of bySource.flat()) {
+    combined.set(serviceName, (combined.get(serviceName) ?? 0) + bytes);
+  }
+  return new Set([
+    ...bySource.flatMap(topNames),
+    ...topNames([...combined].map(([serviceName, bytes]) => ({ serviceName, bytes }))),
+  ]);
+};
+
 /**
  * Each bucket's ingest of the source's applications other than its top ones, which are the
  * bucket's `applications`; from unrounded estimates, so it is 0, not a few bytes, without others.
@@ -121,7 +141,7 @@ export const getApplicationsIngest = async ({
     return [{ source, counts: result.value }];
   });
 
-  const { sizes, missingPrivileges } = await getIndexSizes(
+  const { sizes, missingPrivileges, skippedRemoteIndices } = await getIndexSizes(
     counted.flatMap(({ counts }) =>
       counts.flatMap(({ indices }) => indices.map(({ index }) => index))
     )
@@ -145,18 +165,21 @@ export const getApplicationsIngest = async ({
     }),
   }));
 
+  const charted = chartedApplications(
+    estimated.filter(({ source }) => source.getOverTime).map(({ applications }) => applications)
+  );
   const other: Record<ApplicationSource, IngestPoint[]> = { otel: [], classic: [] };
   const series = await Promise.all(
     estimated.map(async ({ source, applications }): Promise<IngestSeries[]> => {
-      if (!source.getOverTime || applications.length === 0) {
+      const names = applications
+        .map(({ serviceName }) => serviceName)
+        .filter((serviceName) => charted.has(serviceName));
+      if (!source.getOverTime || names.length === 0) {
         return [];
       }
-      const top = orderBy(applications, ['bytes', 'serviceName'], ['desc', 'asc'])
-        .slice(0, TOP_APPLICATIONS)
-        .map(({ serviceName }) => serviceName);
       try {
-        const buckets = await source.getOverTime(top);
-        const sourceSeries = top.map((serviceName) =>
+        const buckets = await source.getOverTime(names);
+        const sourceSeries = names.map((serviceName) =>
           toSeries(serviceName, source.source, buckets, averages)
         );
         other[source.source] = toOther(buckets, averages);
@@ -172,6 +195,7 @@ export const getApplicationsIngest = async ({
     applications: estimated.flatMap(({ applications }) => applications),
     overTime: { histogram, series: series.flat(), other },
     missingPrivileges,
+    skippedRemoteIndices,
     hasFailures,
   };
 };

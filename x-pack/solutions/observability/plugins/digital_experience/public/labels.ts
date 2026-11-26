@@ -43,6 +43,11 @@ export const INGEST_MISSING_PRIVILEGES_LABEL = i18n.translate(
   }
 );
 
+/** Why some estimates may be low: remote clusters' sizes can't be read. */
+export const INGEST_REMOTE_LABEL = i18n.translate('xpack.digitalExperience.ingest.remote', {
+  defaultMessage: 'Data in remote clusters is not counted, so some estimates may be low.',
+});
+
 /** Why some applications have no ingest estimate: a search failed. */
 export const INGEST_FAILED_LABEL = i18n.translate('xpack.digitalExperience.ingest.failed', {
   defaultMessage: 'Some applications have no estimate: their data could not be read.',

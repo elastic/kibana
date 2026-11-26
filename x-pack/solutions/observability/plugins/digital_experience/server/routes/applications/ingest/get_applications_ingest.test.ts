@@ -32,6 +32,7 @@ const getIndexSizes = jest.fn(async (indices: Iterable<string>) => ({
     })
   ),
   missingPrivileges: false,
+  skippedRemoteIndices: false,
 }));
 
 const otelSource = (overrides: Partial<IngestSource> = {}): IngestSource => ({
@@ -144,9 +145,38 @@ describe('getApplicationsIngest', () => {
       }),
     ]);
 
+    // app-2 to app-11, in the counts' order.
     expect(getOverTime).toHaveBeenCalledWith(
-      Array.from({ length: TOP_APPLICATIONS }, (_, rank) => `app-${TOP_APPLICATIONS + 1 - rank}`)
+      Array.from({ length: TOP_APPLICATIONS }, (_, rank) => `app-${rank + 2}`)
     );
+  });
+
+  it('names an application whose bytes of both sources make it a top one, in both sources', async () => {
+    // Each source's top 10 are its own apps, but `both`, 11th in each, has the most of all.
+    const sourceApps = (prefix: string) =>
+      Array.from({ length: TOP_APPLICATIONS }, (_, rank) => ({
+        serviceName: `${prefix}-${rank}`,
+        indices: [{ index: LOGS, docs: 10 }],
+      }));
+    const both = { serviceName: 'both', indices: [{ index: LOGS, docs: 9 }] };
+    const otelOverTime = jest.fn(async (_serviceNames: string[]): Promise<OverTimeBucket[]> => []);
+    const classicOverTime = jest.fn(
+      async (_serviceNames: string[]): Promise<OverTimeBucket[]> => []
+    );
+    await run([
+      otelSource({
+        getCounts: async () => [...sourceApps('otel'), both],
+        getOverTime: otelOverTime,
+      }),
+      otelSource({
+        source: 'classic',
+        getCounts: async () => [...sourceApps('classic'), both],
+        getOverTime: classicOverTime,
+      }),
+    ]);
+
+    expect(otelOverTime.mock.calls[0][0]).toContain('both');
+    expect(classicOverTime.mock.calls[0][0]).toContain('both');
   });
 
   it('has no other ingest, not a rounding error, when the top applications are all of it', async () => {
@@ -154,6 +184,7 @@ describe('getApplicationsIngest', () => {
     getIndexSizes.mockResolvedValueOnce({
       sizes: new Map([[LOGS, { bytes: 1, docs: 3 }]]),
       missingPrivileges: false,
+      skippedRemoteIndices: false,
     });
     const counts = ['a', 'b', 'c'].map((serviceName) => ({
       serviceName,
@@ -198,10 +229,15 @@ describe('getApplicationsIngest', () => {
   });
 
   it('has no estimate for documents whose sizes the user may not read', async () => {
-    getIndexSizes.mockResolvedValueOnce({ sizes: new Map(), missingPrivileges: true });
-    const { applications, missingPrivileges } = await run([otelSource()]);
+    getIndexSizes.mockResolvedValueOnce({
+      sizes: new Map(),
+      missingPrivileges: true,
+      skippedRemoteIndices: true,
+    });
+    const { applications, missingPrivileges, skippedRemoteIndices } = await run([otelSource()]);
 
     expect(applications).toEqual([]);
     expect(missingPrivileges).toBe(true);
+    expect(skippedRemoteIndices).toBe(true);
   });
 });

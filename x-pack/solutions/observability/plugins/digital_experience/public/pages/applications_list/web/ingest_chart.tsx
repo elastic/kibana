@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { sortBy } from 'lodash';
+import { sortBy, sortedUniqBy } from 'lodash';
 import {
   Axis,
   BarSeries,
@@ -78,9 +78,9 @@ export function IngestChart({
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
   const hasData = points.some(({ bytes }) => bytes > 0);
-  // The points come per series; the domain reads the buckets in order.
+  // The points come per series; the domain reads each bucket once, in order.
   const xDomain = getTimeChartXDomain({
-    points: sortBy(points, 'timestamp'),
+    points: sortedUniqBy(sortBy(points, 'timestamp'), 'timestamp'),
     histogram,
     timeZone,
     hasBars: true,

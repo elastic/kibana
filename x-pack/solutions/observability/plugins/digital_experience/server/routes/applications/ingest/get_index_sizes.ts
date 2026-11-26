@@ -19,27 +19,47 @@ interface MeteringStatsResponse {
 
 export interface IndexSizes {
   sizes: Map<string, IndexSize>;
-  /** Whether some sizes are missing because the user can't monitor their indices. */
+  /**
+   * Whether some local indices have no size: the user can't monitor them (or, rarely, they were
+   * deleted since the search).
+   */
   missingPrivileges: boolean;
+  /** Whether some indices were remote, which neither stats API reads, so they have no size. */
+  skippedRemoteIndices: boolean;
 }
 
 /** One request's sizes, by index. */
 type SizesRequest = (indices: string[]) => Promise<Array<[string, IndexSize]>>;
 
+/**
+ * Each name as a wildcard, which Elasticsearch resolves to the matching indices the user may
+ * monitor, so one index they can't, or one deleted since the search, leaves out only itself
+ * instead of failing the whole request. Backing indices are hidden, hence `hidden`.
+ */
 const statsSizes =
   (esClient: ElasticsearchClient, signal: AbortSignal): SizesRequest =>
   async (indices) => {
     const response = await esClient.indices.stats(
       {
-        index: indices,
+        index: indices.map((index) => `${index}*`),
+        expand_wildcards: ['open', 'hidden'],
         metric: ['docs', 'store'],
-        filter_path: ['indices.*.primaries.docs.count', 'indices.*.primaries.store.size_in_bytes'],
+        filter_path: [
+          'indices.*.primaries.docs.count',
+          'indices.*.primaries.store.size_in_bytes',
+          'indices.*.primaries.store.total_data_set_size_in_bytes',
+        ],
       },
       { signal }
     );
     return Object.entries(response.indices ?? {}).map(([index, { primaries }]) => [
       index,
-      { bytes: primaries?.store?.size_in_bytes ?? 0, docs: primaries?.docs?.count ?? 0 },
+      {
+        // The data set size counts a searchable snapshot's data, which the local size doesn't.
+        bytes:
+          primaries?.store?.total_data_set_size_in_bytes ?? primaries?.store?.size_in_bytes ?? 0,
+        docs: primaries?.docs?.count ?? 0,
+      },
     ]);
   };
 
@@ -57,9 +77,6 @@ const meteringSizes =
 
 const isForbidden = (error: unknown) => isResponseError(error) && error.statusCode === 403;
 
-// A backing index deleted since the search, e.g. by its lifecycle, fails its request.
-const isNotFound = (error: unknown) => isResponseError(error) && error.statusCode === 404;
-
 /**
  * The stored size and document count of each index's primaries: from `_metering/stats` on
  * serverless, which only the Kibana system user may call on the user's behalf, and from the index
@@ -68,35 +85,32 @@ const isNotFound = (error: unknown) => isResponseError(error) && error.statusCod
  */
 export const getIndexSizes = async ({
   esClient,
-  meteringClient,
+  getMeteringClient,
   isServerless,
   indices,
   signal,
 }: {
   /** The current user's client, for the index stats. */
   esClient: ElasticsearchClient;
-  /** The client for `_metering/stats`: the internal user, with the user's credentials. */
-  meteringClient: ElasticsearchClient;
+  /** The client for `_metering/stats`, only read on serverless. */
+  getMeteringClient: () => ElasticsearchClient;
   isServerless: boolean;
   indices: Iterable<string>;
   signal: AbortSignal;
 }): Promise<IndexSizes> => {
-  const local = [...new Set(indices)].filter((index) => !index.includes(':'));
+  const unique = [...new Set(indices)];
+  const local = unique.filter((index) => !index.includes(':'));
   const request = isServerless
-    ? meteringSizes(meteringClient, signal)
+    ? meteringSizes(getMeteringClient(), signal)
     : statsSizes(esClient, signal);
 
-  let missingPrivileges = false;
   const responses = await Promise.all(
     chunk(local, INDICES_PER_REQUEST).map(async (names) => {
       try {
         return await request(names);
       } catch (error) {
+        // Serverless names its indices explicitly, so one it can't read fails the request.
         if (isForbidden(error)) {
-          missingPrivileges = true;
-          return [];
-        }
-        if (isNotFound(error)) {
           return [];
         }
         throw error;
@@ -104,5 +118,12 @@ export const getIndexSizes = async ({
     })
   );
 
-  return { sizes: new Map(responses.flat()), missingPrivileges };
+  // A wildcard can match more than the index it was made from; keep only the requested ones.
+  const requested = new Set(local);
+  const sizes = new Map(responses.flat().filter(([index]) => requested.has(index)));
+  return {
+    sizes,
+    missingPrivileges: local.some((index) => !sizes.has(index)),
+    skippedRemoteIndices: local.length < unique.length,
+  };
 };

@@ -35,7 +35,8 @@ export interface IngestSeries {
 
 /**
  * The web applications' estimated ingest over the time range, in the buckets of the Applications
- * list's chart: each source's 10 applications with the most ingest, and the rest of the source.
+ * list's chart: per source, the series of the applications that may be among the 10 with the most
+ * ingest (each source's 10, and the 10 of both sources by name), and the rest of the source.
  */
 export interface IngestOverTime {
   histogram: HistogramBuckets;
@@ -45,7 +46,7 @@ export interface IngestOverTime {
 }
 
 export interface ApplicationsIngestResponse {
-  /** Every application with an estimate, web and mobile. */
+  /** Every application of the requested type with an estimate. */
   applications: ApplicationIngest[];
   overTime: IngestOverTime;
   /**
@@ -53,6 +54,8 @@ export interface ApplicationsIngestResponse {
    * is unknown and their applications have no or a partial estimate.
    */
   missingPrivileges: boolean;
+  /** Whether some documents are in remote clusters, whose sizes can't be read, so aren't counted. */
+  skippedRemoteIndices: boolean;
   /** Whether a search failed, so some applications have no estimate. */
   hasFailures: boolean;
 }

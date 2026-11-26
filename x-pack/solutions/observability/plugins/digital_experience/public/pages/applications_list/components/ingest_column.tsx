@@ -47,7 +47,8 @@ export const ingestColumn = <T extends IngestRow>({
   ...metricColumnPreset<T>(),
   name: INGEST_LABEL,
   nameTooltip: { content: <IngestTooltip notes={notes} /> },
-  sortable: (row: T) => ingestOf(lookup, row) ?? -1,
+  // `undefined` sorts last in both directions, and keeps the list order among the rows without one.
+  sortable: (row: T) => ingestOf(lookup, row),
   render: (row: T) => {
     const bytes = ingestOf(lookup, row);
     if (bytes !== undefined) {

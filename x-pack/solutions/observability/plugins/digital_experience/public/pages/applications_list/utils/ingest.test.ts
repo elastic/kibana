@@ -31,6 +31,7 @@ describe('ingest lookup', () => {
     ],
     overTime: { histogram, series: [], other: { otel: [], classic: [] } },
     missingPrivileges: false,
+    skippedRemoteIndices: false,
     hasFailures: false,
   });
 

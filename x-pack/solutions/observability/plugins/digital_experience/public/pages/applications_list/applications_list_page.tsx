@@ -54,6 +54,7 @@ import {
   APPLICATIONS_LABEL,
   INGEST_FAILED_LABEL,
   INGEST_MISSING_PRIVILEGES_LABEL,
+  INGEST_REMOTE_LABEL,
 } from '../../labels';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { toTimeRangeQuery } from '../../utils/time_range_query';
@@ -282,36 +283,6 @@ export function ApplicationsListPage() {
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
-  // Apart from the list, which shows its rows without waiting: ingest counts every document of the
-  // time range.
-  const {
-    value: ingestResponse,
-    loading: ingestLoading,
-    error: ingestError,
-    refresh: refreshIngest,
-  } = useAbortableAsync(
-    async ({ signal }) => {
-      return apiClient.fetch('GET /internal/digital_experience/applications/ingest', {
-        signal,
-        params: { query: toTimeRangeQuery(timeRange, environment, timeZone) },
-      });
-    },
-    [apiClient, timeRange, environment, timeZone],
-    { unsetValueOnError: true }
-  );
-  const isIngestLoading = ingestLoading || (!ingestResponse && !ingestError);
-  const ingestState = useMemo<IngestColumnState>(
-    () => ({
-      lookup: ingestResponse ? toIngestLookup(ingestResponse) : undefined,
-      isLoading: isIngestLoading,
-      notes: [
-        ...(ingestResponse?.missingPrivileges ? [INGEST_MISSING_PRIVILEGES_LABEL] : []),
-        ...(ingestError || ingestResponse?.hasFailures ? [INGEST_FAILED_LABEL] : []),
-      ],
-    }),
-    [ingestResponse, isIngestLoading, ingestError]
-  );
-
   const hasWebApplications = response?.applications.some(isWebApplication) ?? false;
   const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
   const unavailableSources = response?.unavailableSources ?? [];
@@ -322,6 +293,46 @@ export function ApplicationsListPage() {
       : APPLICATION_TYPE.web;
   const selectedType = applicationType ?? typeWithData;
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
+
+  // Apart from the list, which shows its rows without waiting, and for the shown tab only: ingest
+  // counts every document of the time range. Each value keeps what it was fetched for, so the rows
+  // never show the estimates of another range, environment or tab while the next ones load.
+  const ingestKey = JSON.stringify([timeRange, environment, timeZone, selectedType]);
+  const {
+    value: ingestValue,
+    loading: ingestLoading,
+    error: ingestError,
+    refresh: refreshIngest,
+  } = useAbortableAsync(
+    async ({ signal }) => ({
+      key: ingestKey,
+      response: await apiClient.fetch('GET /internal/digital_experience/applications/ingest', {
+        signal,
+        params: {
+          query: {
+            ...toTimeRangeQuery(timeRange, environment, timeZone),
+            applicationType: selectedType,
+          },
+        },
+      }),
+    }),
+    [apiClient, ingestKey, timeRange, environment, timeZone, selectedType],
+    { unsetValueOnError: true }
+  );
+  const ingestResponse = ingestValue?.key === ingestKey ? ingestValue.response : undefined;
+  const isIngestLoading = ingestLoading || (!ingestResponse && !ingestError);
+  const ingestState = useMemo<IngestColumnState>(
+    () => ({
+      lookup: ingestResponse ? toIngestLookup(ingestResponse) : undefined,
+      isLoading: isIngestLoading,
+      notes: [
+        ...(ingestResponse?.missingPrivileges ? [INGEST_MISSING_PRIVILEGES_LABEL] : []),
+        ...(ingestResponse?.skippedRemoteIndices ? [INGEST_REMOTE_LABEL] : []),
+        ...(ingestError || ingestResponse?.hasFailures ? [INGEST_FAILED_LABEL] : []),
+      ],
+    }),
+    [ingestResponse, isIngestLoading, ingestError]
+  );
 
   // Sessions are web only, so the Mobile tab the URL picks requests no status; the one the list
   // opens by itself does, to fetch again once sessions are built
@@ -421,7 +432,8 @@ export function ApplicationsListPage() {
   );
   const ingestSummary = useMemo<IngestSummary>(
     () => ({
-      bytes: totalIngest(ingestState.lookup, summarizedApplications),
+      // The Web tab's: mobile applications are EDOT data too, but have their own tab.
+      bytes: totalIngest(ingestState.lookup, summarizedApplications.filter(isWebApplication)),
       isLoading: ingestState.isLoading,
       notes: ingestState.notes,
     }),

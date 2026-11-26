@@ -88,6 +88,7 @@ const respondWithIngest = (
       other: { otel: [], classic: [] },
     },
     missingPrivileges: false,
+    skippedRemoteIndices: false,
     hasFailures: false,
     ...overrides,
   });
@@ -959,6 +960,7 @@ describe('ApplicationsListPage', () => {
             other: { otel: [], classic: [] },
           },
           missingPrivileges: false,
+          skippedRemoteIndices: false,
           hasFailures: false,
         })
       );
@@ -969,7 +971,7 @@ describe('ApplicationsListPage', () => {
       ).toEqual(['5 MB', '1 KB']);
     });
 
-    it('asks for the ingest with the list time range and environment', async () => {
+    it("asks for the ingest of the tab's applications, with the list time range and environment", async () => {
       mockEnvironment('production');
       respondWith([app()]);
       renderPage();
@@ -978,7 +980,7 @@ describe('ApplicationsListPage', () => {
       expect(mockIngestFetch).toHaveBeenCalledWith(INGEST_ENDPOINT, {
         signal: expect.any(AbortSignal),
         params: {
-          query: expect.objectContaining({ environment: 'production' }),
+          query: expect.objectContaining({ environment: 'production', applicationType: 'web' }),
         },
       });
     });
@@ -992,6 +994,38 @@ describe('ApplicationsListPage', () => {
       await waitFor(() =>
         expect(screen.getByTestId('digitalExperienceSummary-ingest')).toHaveTextContent('2 KB')
       );
+    });
+
+    it("leaves the mobile applications out of the Web tab's total", async () => {
+      respondWith([app({ serviceName: 'shop', source: 'otel' }), mobileApp('shop-mobile')]);
+      respondWithIngest([
+        webIngest('shop', 2048, 'otel'),
+        {
+          serviceName: 'shop-mobile',
+          applicationType: 'mobile',
+          source: 'otel',
+          bytes: 1024 * 1024,
+        },
+      ]);
+      renderPage();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('digitalExperienceSummary-ingest')).toHaveTextContent('2 KB')
+      );
+    });
+
+    it('shows no estimates of the previous environment while the next ones load', async () => {
+      respondWith([app({ serviceName: 'shop' })]);
+      respondWithIngest([webIngest('shop', 2048)]);
+      const { rerender } = renderPage();
+      await screen.findByTestId('digitalExperienceApplicationIngest');
+
+      mockEnvironment('production');
+      mockIngestFetch.mockReturnValue(new Promise(() => {}));
+      rerender(<ApplicationsListPage />);
+
+      await screen.findByTestId('digitalExperienceApplicationIngestLoading');
+      expect(screen.queryByTestId('digitalExperienceApplicationIngest')).toBeNull();
     });
 
     it('shows a dash for a row without an estimate, and says why', async () => {
@@ -1037,6 +1071,15 @@ describe('ApplicationsListPage', () => {
             .map((link) => link.textContent)
         ).toEqual(['many-bytes', 'few-bytes'])
       );
+      // Only the mobile ones: the web searches count documents the tab doesn't show.
+      expect(mockIngestFetch).toHaveBeenCalledWith(INGEST_ENDPOINT, {
+        signal: expect.any(AbortSignal),
+        params: { query: expect.objectContaining({ applicationType: 'mobile' }) },
+      });
+      expect(mockIngestFetch).not.toHaveBeenCalledWith(INGEST_ENDPOINT, {
+        signal: expect.any(AbortSignal),
+        params: { query: expect.objectContaining({ applicationType: 'web' }) },
+      });
     });
   });
 

@@ -7,6 +7,8 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { APPLICATION_TYPE } from '../../../../common/application_source';
+import { APPLICATION_TYPES } from '../../../../common/types/applications';
 import type { ApplicationsIngestResponse } from '../../../../common/types/applications_ingest';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../../common/feature';
 import { createDigitalExperienceTracedEsClient } from '../../../lib/create_digital_experience_traced_es_client';
@@ -25,8 +27,9 @@ import { classicSource, mobileSource, otelWebSource } from './ingest_sources';
 export const APPLICATIONS_INGEST_ENDPOINT = 'GET /internal/digital_experience/applications/ingest';
 
 /**
- * The estimated ingest of the Applications list's applications. Apart from the list, which shows
- * its rows without waiting for it, as it counts every document of the time range.
+ * The estimated ingest of the Applications list's web or mobile applications, those of the tab
+ * shown. Apart from the list, which shows its rows without waiting for it, as it counts every
+ * document of the time range.
  */
 export const applicationsIngestRouteRepository = createDigitalExperienceServerRoute({
   endpoint: APPLICATIONS_INGEST_ENDPOINT,
@@ -37,7 +40,11 @@ export const applicationsIngestRouteRepository = createDigitalExperienceServerRo
   params: lazySchema(() =>
     z.object({
       query: z
-        .object({ ...timeRangeShape(), ...timeZoneShape() })
+        .object({
+          ...timeRangeShape(),
+          ...timeZoneShape(),
+          applicationType: z.enum(APPLICATION_TYPES),
+        })
         .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
     })
   ),
@@ -50,7 +57,7 @@ export const applicationsIngestRouteRepository = createDigitalExperienceServerRo
     isUxEnabled,
     logger,
   }): Promise<ApplicationsIngestResponse> => {
-    const { environment, timeZone } = params.query;
+    const { environment, timeZone, applicationType } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
     const interval = getHistogramInterval(start, end);
@@ -71,21 +78,23 @@ export const applicationsIngestRouteRepository = createDigitalExperienceServerRo
 
     // Classic RUM as the list shows it: stateful only, with the ux and APM data access plugins.
     const { apmDataAccess } = plugins;
-    const apmIndices =
-      isServerless || !isUxEnabled || !apmDataAccess
-        ? undefined
-        : await apmDataAccess.getApmIndices(savedObjects.client);
+    const webSources = [
+      otelWebSource(searchParams),
+      ...(!isServerless && isUxEnabled && apmDataAccess
+        ? [classicSource(() => apmDataAccess.getApmIndices(savedObjects.client), searchParams)]
+        : []),
+    ];
 
     return getApplicationsIngest({
-      sources: [
-        otelWebSource(searchParams),
-        ...(apmIndices ? [classicSource(apmIndices, searchParams)] : []),
-        mobileSource(searchParams),
-      ],
+      // Only the tab's: each source counts every document of the time range.
+      sources:
+        applicationType === APPLICATION_TYPE.mobile ? [mobileSource(searchParams)] : webSources,
       getIndexSizes: (indices) =>
         getIndexSizes({
           esClient: elasticsearch.client.asCurrentUser,
-          meteringClient: elasticsearch.client.asSecondaryAuthUser,
+          // A getter: it throws for a request without credentials, e.g. without security, and
+          // only serverless reads it.
+          getMeteringClient: () => elasticsearch.client.asSecondaryAuthUser,
           isServerless,
           indices,
           signal,

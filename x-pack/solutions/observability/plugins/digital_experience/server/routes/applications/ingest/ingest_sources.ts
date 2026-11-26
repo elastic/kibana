@@ -42,49 +42,59 @@ export interface IngestSearchParams {
 
 const OTEL_PATTERNS = new Set([OTEL_LOGS_INDEX, OTEL_TRACES_INDEX]);
 
-/** A source whose documents are found with the query DSL, so its buckets match the list's. */
+/**
+ * A source whose documents are found with the query DSL, so its buckets match the list's. Its
+ * documents are resolved once, inside the source, so a failure to resolve them fails only it.
+ */
 const webSource = (
   source: IngestSource['source'],
-  documents: IngestDocuments,
+  resolveDocuments: () => Promise<IngestDocuments>,
   { tracedEsClient, start, end, histogram }: IngestSearchParams
-): IngestSource => ({
-  source,
-  applicationType: APPLICATION_TYPE.web,
-  getCounts: async () => {
-    const response = await tracedEsClient.search(
-      `get_digital_experience_${source}_ingest`,
-      countsSearch({ documents, start, end })
-    );
-    const aggregations = response.aggregations as unknown as CountsAggregations | undefined;
-    return toApplicationCounts(aggregations?.applications);
-  },
-  getOverTime: async (serviceNames) => {
-    const response = await tracedEsClient.search(
-      `get_digital_experience_${source}_ingest_over_time`,
-      overTimeSearch({ documents, start, end, histogram, serviceNames })
-    );
-    const aggregations = response.aggregations as unknown as OverTimeAggregations | undefined;
-    return (aggregations?.overTime.buckets ?? []).map(
-      ({ key, indices, top }): OverTimeBucket => ({
-        timestamp: key,
-        indices: toIndexCounts(indices),
-        applications: toApplicationCounts(top.applications),
-      })
-    );
-  },
-});
+): IngestSource => {
+  let documentsPromise: Promise<IngestDocuments> | undefined;
+  const getDocuments = () => {
+    documentsPromise ??= resolveDocuments();
+    return documentsPromise;
+  };
+  return {
+    source,
+    applicationType: APPLICATION_TYPE.web,
+    getCounts: async () => {
+      const response = await tracedEsClient.search(
+        `get_digital_experience_${source}_ingest`,
+        countsSearch({ documents: await getDocuments(), start, end })
+      );
+      const aggregations = response.aggregations as unknown as CountsAggregations | undefined;
+      return toApplicationCounts(aggregations?.applications);
+    },
+    getOverTime: async (serviceNames) => {
+      const response = await tracedEsClient.search(
+        `get_digital_experience_${source}_ingest_over_time`,
+        overTimeSearch({ documents: await getDocuments(), start, end, histogram, serviceNames })
+      );
+      const aggregations = response.aggregations as unknown as OverTimeAggregations | undefined;
+      return (aggregations?.overTime.buckets ?? []).map(
+        ({ key, indices, top }): OverTimeBucket => ({
+          timestamp: key,
+          indices: toIndexCounts(indices),
+          applications: toApplicationCounts(top.applications),
+        })
+      );
+    },
+  };
+};
 
 /** EDOT Browser documents: the OTel indices also hold backend services' data. */
 export const otelWebSource = (params: IngestSearchParams): IngestSource =>
   webSource(
     APPLICATION_SOURCE.otel,
-    {
+    async () => ({
       index: [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
       filter: [
         ...termQuery(TELEMETRY_SDK_LANGUAGE, BROWSER_SDK_LANGUAGE),
         environmentFilter(ENVIRONMENT_FIELDS, params.environment),
       ],
-    },
+    }),
     params
   );
 
@@ -93,24 +103,27 @@ export const otelWebSource = (params: IngestSearchParams): IngestSource =>
  * which hold no Classic RUM data.
  */
 export const classicSource = (
-  { transaction, error, span, metric }: ApmIndices,
+  getApmIndices: () => Promise<ApmIndices>,
   params: IngestSearchParams
 ): IngestSource =>
   webSource(
     APPLICATION_SOURCE.classic,
-    {
-      index: [
-        ...new Set(
-          [transaction, error, span, metric]
-            .flatMap((patterns) => patterns.split(','))
-            .map((pattern) => pattern.trim())
-            .filter((pattern) => pattern && !OTEL_PATTERNS.has(pattern))
-        ),
-      ],
-      filter: [
-        ...termsQuery(AGENT_NAME, CLASSIC_RUM_AGENT_NAMES),
-        environmentFilter([SERVICE_ENVIRONMENT], params.environment),
-      ],
+    async () => {
+      const { transaction, error, span, metric } = await getApmIndices();
+      return {
+        index: [
+          ...new Set(
+            [transaction, error, span, metric]
+              .flatMap((patterns) => patterns.split(','))
+              .map((pattern) => pattern.trim())
+              .filter((pattern) => pattern && !OTEL_PATTERNS.has(pattern))
+          ),
+        ],
+        filter: [
+          ...termsQuery(AGENT_NAME, CLASSIC_RUM_AGENT_NAMES),
+          environmentFilter([SERVICE_ENVIRONMENT], params.environment),
+        ],
+      };
     },
     params
   );
