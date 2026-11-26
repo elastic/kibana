@@ -55,13 +55,33 @@ const CATALOG: Readonly<Record<RuleCreateSearchSectionId, readonly RuleCreateSea
     createItem('esql', 'Write ES|QL query', 'Write your own ES|QL query', 'code'),
   ],
   'universal.templates': [
-    createItem('high-cpu', 'High CPU utilization', 'Alert when host or container CPU stays above a threshold.'),
-    createItem('error-rate', 'High error rate', 'Alert when the share of error logs exceeds a threshold.'),
+    createItem(
+      'high-cpu',
+      'High CPU utilization',
+      'Alert when host or container CPU stays above a threshold.'
+    ),
+    createItem(
+      'error-rate',
+      'High error rate',
+      'Alert when the share of error logs exceeds a threshold.'
+    ),
   ],
   classic: [
-    createItem('custom-threshold', 'Custom threshold', 'Alert when any Observability data type reaches or exceeds a given value.'),
-    createItem('degraded-docs', 'Degraded docs', 'Alert when degraded docs percentage exceeds a threshold.'),
-    createItem('es-query', 'Elasticsearch query', 'Alert when matches are found during the latest query run.'),
+    createItem(
+      'custom-threshold',
+      'Custom threshold',
+      'Alert when any Observability data type reaches or exceeds a given value.'
+    ),
+    createItem(
+      'degraded-docs',
+      'Degraded docs',
+      'Alert when degraded docs percentage exceeds a threshold.'
+    ),
+    createItem(
+      'es-query',
+      'Elasticsearch query',
+      'Alert when matches are found during the latest query run.'
+    ),
   ],
 };
 

@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import type { RuleCreateSearchSectionId } from './types';
 
 /** Sections in the order they are rendered in the dropdown. */
-export const RULE_CREATE_SEARCH_SECTION_IDS = ['universal', 'universal.templates', 'classic'] as const;
+export const RULE_CREATE_SEARCH_SECTION_IDS = [
+  'universal',
+  'universal.templates',
+  'classic',
+] as const;
 
 export const MAX_RESULTS_PER_SECTION = 10;
 
@@ -19,9 +23,12 @@ export const RULE_CREATE_SEARCH_SECTION_TITLES: Readonly<
   universal: i18n.translate('xpack.alertingV2.ruleCreateSearch.section.universalTitle', {
     defaultMessage: 'Universal',
   }),
-  'universal.templates': i18n.translate('xpack.alertingV2.ruleCreateSearch.section.templatesTitle', {
-    defaultMessage: 'From templates',
-  }),
+  'universal.templates': i18n.translate(
+    'xpack.alertingV2.ruleCreateSearch.section.templatesTitle',
+    {
+      defaultMessage: 'From templates',
+    }
+  ),
   classic: i18n.translate('xpack.alertingV2.ruleCreateSearch.section.classicTitle', {
     defaultMessage: 'Classic rule types',
   }),

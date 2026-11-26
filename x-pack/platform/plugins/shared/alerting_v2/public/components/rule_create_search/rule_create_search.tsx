@@ -205,51 +205,51 @@ export const RuleCreateSearch = ({
             </EuiScreenReaderOnly>
           ) : null}
           <EuiInputPopover
-          input={search ?? <></>}
-          isOpen={isOpen}
-          closePopover={() => setIsDismissed(true)}
-          fullWidth={true}
-          disableFocusTrap={true}
-          panelPaddingSize="s"
-          data-test-subj="ruleCreateSearchDropdown"
-        >
-          <div
-            css={css`
-              ${scrollBarStyles}
-              max-height: 400px;
-              overflow-y: auto;
-            `}
+            input={search ?? <></>}
+            isOpen={isOpen}
+            closePopover={() => setIsDismissed(true)}
+            fullWidth={true}
+            disableFocusTrap={true}
+            panelPaddingSize="s"
+            data-test-subj="ruleCreateSearchDropdown"
           >
-            {list}
-          </div>
-          {onSendToAgent ? (
-            <>
-              <EuiHorizontalRule margin="s" />
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                gutterSize="s"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {AGENT_FOOTER_TEXT}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <AiButtonEmpty
-                    iconType="productAgent"
-                    size="s"
-                    onClick={sendToAgent}
-                    data-test-subj="ruleCreateSearchSendToAgent"
-                  >
-                    {SEND_TO_AGENT_LABEL}
-                  </AiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ) : null}
-        </EuiInputPopover>
+            <div
+              css={css`
+                ${scrollBarStyles}
+                max-height: 400px;
+                overflow-y: auto;
+              `}
+            >
+              {list}
+            </div>
+            {onSendToAgent ? (
+              <>
+                <EuiHorizontalRule margin="s" />
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      {AGENT_FOOTER_TEXT}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <AiButtonEmpty
+                      iconType="productAgent"
+                      size="s"
+                      onClick={sendToAgent}
+                      data-test-subj="ruleCreateSearchSendToAgent"
+                    >
+                      {SEND_TO_AGENT_LABEL}
+                    </AiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            ) : null}
+          </EuiInputPopover>
         </>
       )}
     </EuiSelectable>
