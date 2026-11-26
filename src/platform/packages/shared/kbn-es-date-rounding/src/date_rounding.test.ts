@@ -156,6 +156,19 @@ describe('calendar intervals', () => {
     });
   });
 
+  it('follows ES when a rollback one minute after midnight repeats the previous date', () => {
+    // America/St_Johns, 2009-11-01: at 00:01 NDT clocks go back to 23:01 NST on 2009-10-31.
+    // ES gives the first midnight to November 1 and the repeated hour to October 31, so keys go back.
+    const stJohns = ianaTimeZone('America/St_Johns');
+    const day: DateRounding = { kind: 'calendar', unit: 'day', amount: 1 };
+    const keyAt = (timestamp: string) =>
+      new Date(roundToBucketKey(Date.parse(timestamp), day, stJohns)).toISOString();
+
+    expect(keyAt('2009-11-01T02:30:30.000Z')).toBe('2009-11-01T02:30:00.000Z');
+    expect(keyAt('2009-11-01T03:00:00.000Z')).toBe('2009-10-31T02:30:00.000Z');
+    expect(keyAt('2009-11-01T03:30:00.000Z')).toBe('2009-11-01T02:30:00.000Z');
+  });
+
   it('rounds 7 days like a week, to ISO weeks starting on Monday', () => {
     expectBucket('7d', utc, '2026-01-07T10:00:00.000Z', {
       key: '2026-01-05T00:00:00.000Z',

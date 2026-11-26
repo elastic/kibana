@@ -81,6 +81,14 @@ const CASES: readonly BucketKeysCase[] = [
     '2026-03-09T12:00:00Z'
   ),
   {
+    name: 'St. Johns rollback one minute after midnight',
+    zone: 'America/St_Johns',
+    from: '2009-10-30T20:00:00Z',
+    to: '2009-11-02T12:00:00Z',
+    stepMs: 10 * MINUTE_MS,
+    spans: [span(1, 'day')],
+  },
+  {
     name: 'Santiago skipped midnight',
     zone: 'America/Santiago',
     from: '2024-09-07T00:00:00Z',
