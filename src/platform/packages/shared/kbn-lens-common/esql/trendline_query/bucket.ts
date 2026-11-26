@@ -21,7 +21,7 @@ import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
 /**
  * Builds the BUCKET expression used for trendline time bucketing.
  *
- * `n` defaults to `histogram:barTarget` (100), the same target Lens form-based
+ * `n` defaults to the `histogram:barTarget` default, the same target Lens form-based
  * `auto` date_histogram uses when converting to ES|QL.
  *
  * Uses `esql.col()` to properly escape field names that contain special
