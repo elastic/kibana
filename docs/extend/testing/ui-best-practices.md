@@ -94,7 +94,7 @@ await page.testSubj.waitForSelector('mainContent', { state: 'visible' });
 
 By default, `page.gotoApp()` resolves on the browser `load` event, which waits for Kibana's whole bundle graph to download under Scout's 20s `navigationTimeout`. That event doesn't mean the app is usable, and on a cold Cloud deployment it can time out before your own readiness check runs.
 
-After `load`, the default `gotoApp()` also waits for Kibana's "Loading Elastic" screen to go away, which happens once every plugin has started. This keeps plugin startup out of your first 10s action or assertion. It does not wait for your app to render, and it is skipped when you pass your own `waitUntil`.
+After `load`, the default `gotoApp()` also waits for Kibana's "Loading Elastic" screen to go away, which happens once every plugin has started. This keeps plugin startup out of your first 10s action or assertion. It does not wait for your app to render, and it is skipped when you pass your own `waitUntil`. When that wait takes longer than the `actionTimeout`, the test gets a `slow-kibana-boot` annotation instead of failing, so slow boots stay visible in the report.
 
 When a page object knows which element proves the app has rendered, pass it as `readyWhen`. Navigation then resolves as soon as the document starts loading (`commit`), and that element becomes the single readiness gate, with one budget (`readyTimeout`, defaulting to the running project's `navigationTimeout` + `actionTimeout`: 30s locally, 55s on the Cloud projects) covering bundle download, plugin start and first render.
 

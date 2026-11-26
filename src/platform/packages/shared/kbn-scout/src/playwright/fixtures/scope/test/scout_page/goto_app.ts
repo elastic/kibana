@@ -29,6 +29,25 @@ const resolveAppReadyTimeout = (): number => {
   );
 };
 
+export const SLOW_KIBANA_BOOT_ANNOTATION = 'slow-kibana-boot';
+
+/**
+ * Records a Kibana boot that outlasted the action timeout. The test keeps running, but the
+ * annotation reaches the Playwright report and the Scout reporting events, so slow boots stay
+ * visible and countable now that they no longer fail the first action.
+ */
+const reportSlowKibanaBoot = (url: string, bootMs: number): void => {
+  const testInfo = test.info();
+  const slowBootMs = testInfo.project.use.actionTimeout ?? FALLBACK_ACTION_TIMEOUT_MS;
+  if (bootMs <= slowBootMs) {
+    return;
+  }
+  testInfo.annotations.push({
+    type: SLOW_KIBANA_BOOT_ANNOTATION,
+    description: `Kibana took ${Math.round(bootMs)}ms to boot after the load event of ${url}`,
+  });
+};
+
 export type GotoAppOptions = PathOptions &
   NonNullable<Parameters<Page['goto']>[1]> & {
     /**
@@ -65,10 +84,12 @@ export const navigateToApp = async (
     if (gotoOptions.waitUntil === undefined) {
       // The `load` event fires before Kibana is usable. Without this gate plugin setup and start
       // are charged to the caller's first 10s action or assertion.
+      const bootStart = performance.now();
       await page.locator(KIBANA_LOADING_SCREEN_SELECTOR).waitFor({
         state: 'hidden',
         timeout: readyTimeout ?? resolveAppReadyTimeout(),
       });
+      reportSlowKibanaBoot(url, performance.now() - bootStart);
     }
     return response;
   }

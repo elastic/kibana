@@ -9,14 +9,20 @@
 
 import type { Locator, Page } from '@playwright/test';
 import { test as playwrightTest } from '@playwright/test';
-import { navigateToApp } from './goto_app';
+import { navigateToApp, SLOW_KIBANA_BOOT_ANNOTATION } from './goto_app';
 
 jest.mock('@playwright/test', () => ({ test: { info: jest.fn() } }));
 
 const infoMock = playwrightTest.info as unknown as jest.Mock;
 
-const setProjectTimeouts = (use: { navigationTimeout?: number; actionTimeout?: number }) =>
-  infoMock.mockReturnValue({ project: { use } });
+const setProjectTimeouts = (use: { navigationTimeout?: number; actionTimeout?: number }) => {
+  const annotations: Array<{ type: string; description?: string }> = [];
+  infoMock.mockReturnValue({ project: { use }, annotations });
+  return annotations;
+};
+
+const mockBootDuration = (bootMs: number) =>
+  jest.spyOn(performance, 'now').mockReturnValueOnce(1_000).mockReturnValueOnce(1_000 + bootMs);
 
 const createPage = () => {
   const loadingScreen = createLocator();
@@ -31,6 +37,7 @@ const createLocator = () =>
 
 describe('navigateToApp', () => {
   beforeEach(() => jest.clearAllMocks());
+  afterEach(() => jest.restoreAllMocks());
 
   it('gates on the local navigation budget', async () => {
     setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
@@ -110,5 +117,28 @@ describe('navigateToApp', () => {
     expect(page.goto).toHaveBeenCalledWith('/app/console', { waitUntil: 'domcontentloaded' });
     expect(loadingScreen.waitFor).not.toHaveBeenCalled();
     expect(infoMock).not.toHaveBeenCalled();
+  });
+
+  it('annotates the test when Kibana boots slower than the action timeout', async () => {
+    const annotations = setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    mockBootDuration(12_400);
+
+    await navigateToApp(createPage().page, () => '/app/console');
+
+    expect(annotations).toEqual([
+      {
+        type: SLOW_KIBANA_BOOT_ANNOTATION,
+        description: 'Kibana took 12400ms to boot after the load event of /app/console',
+      },
+    ]);
+  });
+
+  it('does not annotate the test when Kibana boots within the action timeout', async () => {
+    const annotations = setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    mockBootDuration(3_000);
+
+    await navigateToApp(createPage().page, () => '/app/console');
+
+    expect(annotations).toEqual([]);
   });
 });
