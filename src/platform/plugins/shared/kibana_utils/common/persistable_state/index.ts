@@ -20,7 +20,4 @@ export type {
   PersistableStateService,
   VersionedState,
 } from '@kbn/kibana-utils-common';
-export {
-  mergeMigrationFunctionMaps,
-  migrateToLatest,
-} from '@kbn/kibana-utils-common';
+export { mergeMigrationFunctionMaps, migrateToLatest } from '@kbn/kibana-utils-common';

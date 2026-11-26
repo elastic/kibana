@@ -35,7 +35,4 @@ export type {
   TransitionDescription,
   UnboxState,
 } from '@kbn/kibana-utils-common';
-export {
-  createStateContainer,
-  defaultFreeze,
-} from '@kbn/kibana-utils-common';
+export { createStateContainer, defaultFreeze } from '@kbn/kibana-utils-common';

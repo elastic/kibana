@@ -10,8 +10,4 @@
 /**
  * @deprecated Import from `@kbn/kibana-utils-common`.
  */
-export {
-  fieldWildcardFilter,
-  fieldWildcardMatcher,
-  makeRegEx,
-} from '@kbn/kibana-utils-common';
+export { fieldWildcardFilter, fieldWildcardMatcher, makeRegEx } from '@kbn/kibana-utils-common';
