@@ -112,13 +112,13 @@ export function createGetIndexInfoTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (params, { esClient, modelProvider }) => {
+    handler: async (params, { esClient, modelProvider, request }) => {
       try {
         let result;
 
         switch (params.operation) {
           case 'get-index-patterns':
-            result = await getIndexPatternsHandler({ core, plugins, esClient, logger });
+            result = await getIndexPatternsHandler({ core, plugins, request, esClient, logger });
             break;
 
           case 'list-fields':

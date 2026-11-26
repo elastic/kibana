@@ -31,6 +31,25 @@ export interface OTLPExportConfig {
 /**
  * Allowed configurations for OTLP tracing exporters
  */
+/**
+ * Configuration for browser (EDOT Browser) tracing. Values are sent to the browser,
+ * so do not put secrets in `headers`.
+ */
+export interface BrowserTracingConfig {
+  /**
+   * Whether the EDOT Browser SDK is started in the Kibana frontend.
+   */
+  enabled: boolean;
+  /**
+   * OTLP/HTTP endpoint the browser exports to. Must allow CORS from Kibana's origin.
+   */
+  url?: string;
+  /**
+   * Optional headers sent with each OTLP request.
+   */
+  headers?: Record<string, string>;
+}
+
 export type TracingExporterConfig =
   | InferenceTracingExportConfig
   | { grpc: OTLPExportConfig }
@@ -54,4 +73,8 @@ export interface TracingConfig {
    * OTLP exporters for tracing data
    */
   exporters: TracingExporterConfig | TracingExporterConfig[];
+  /**
+   * Browser tracing config. See {@link BrowserTracingConfig}.
+   */
+  browser?: BrowserTracingConfig;
 }

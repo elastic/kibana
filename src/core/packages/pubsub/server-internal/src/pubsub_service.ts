@@ -293,7 +293,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
 
     if (id.length > PUBSUB_MAX_ID_LENGTH) {
       throw new Error(
-        `Pubsub event id is ${id.length} characters, which exceeds the ${PUBSUB_MAX_ID_LENGTH} character limit.`
+        `Pubsub event id is ${id.length} UTF-16 code units, which exceeds the ${PUBSUB_MAX_ID_LENGTH} UTF-16 code unit limit.`
       );
     }
   }

@@ -7,7 +7,7 @@
   "description": "Nightshift detection engine: runs detection strategies per space and stores detection signals",
   "plugin": {
     "id": "nightshiftDetection",
-    "browser": false,
+    "browser": true,
     "server": true,
     "configPath": ["xpack", "nightshiftDetection"],
     "requiredPlugins": [
@@ -19,7 +19,7 @@
       "workflowsExtensions",
       "workflowsManagement"
     ],
-    "optionalPlugins": ["cloud"],
+    "optionalPlugins": ["cloud", "cps"],
     "requiredBundles": []
   }
 }

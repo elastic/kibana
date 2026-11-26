@@ -6,6 +6,7 @@
  */
 
 import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
+import { getConnectorEventTopicName, type ConnectorEventTopicName } from '@kbn/connector-topics';
 import { defineTopic, type PubSubEvent, type Topic } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -44,10 +45,14 @@ interface InboundWebhookBusData {
   correlationKey: string;
 }
 
-type InboundWebhookReceivedTopic = Topic<InboundWebhookBusData, 'inboundWebhook.received'>;
+type InboundWebhookReceivedTopic = Topic<
+  InboundWebhookBusData,
+  ConnectorEventTopicName<'inboundWebhook.received'>
+>;
 
-const inboundWebhookReceivedTopic =
-  defineTopic<InboundWebhookReceivedTopic>('inboundWebhook.received');
+const inboundWebhookReceivedTopic = defineTopic<InboundWebhookReceivedTopic>(
+  getConnectorEventTopicName('inboundWebhook.received')
+);
 
 const waitForPublished = async (
   events: Array<PubSubEvent<InboundWebhookBusData>>,
@@ -85,13 +90,15 @@ describe('Inbound events HTTP API', () => {
           },
         },
       },
-      (coreSetup) => {
-        coreSetup.pubsub.subscribe('actions-integration-test', inboundWebhookReceivedTopic, {
-          consumer: 'inbound-webhook',
-          handler: (event) => {
-            publishedWebhooks.push(event);
-          },
-        });
+      {
+        beforeStart: (coreSetup) => {
+          coreSetup.pubsub.subscribe('actions-integration-test', inboundWebhookReceivedTopic, {
+            consumer: 'inbound-webhook',
+            handler: (event) => {
+              publishedWebhooks.push(event);
+            },
+          });
+        },
       }
     );
     esServer = setupResult.esServer;
@@ -268,7 +275,7 @@ describe('Inbound events HTTP API', () => {
     await postHub(created.id, ingestToken, { marker }).expect(202, { ok: true });
 
     const published = await waitForPublished(publishedWebhooks, marker);
-    expect(published.topic).toBe('inboundWebhook.received');
+    expect(published.topic).toBe(getConnectorEventTopicName('inboundWebhook.received'));
     expect(published.data).toEqual({
       body: { marker },
       connectorId: created.id,

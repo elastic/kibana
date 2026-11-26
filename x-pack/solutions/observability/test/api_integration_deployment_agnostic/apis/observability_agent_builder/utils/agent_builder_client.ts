@@ -33,12 +33,15 @@ export function createAgentBuilderApiClient(supertest: SupertestWithRoleScopeTyp
     async executeTool<ResultType extends Omit<ToolResult, 'tool_result_id'>>({
       id,
       params,
+      spaceId,
     }: {
       id: string;
       params: Record<string, any>;
+      spaceId?: string;
     }): Promise<ResultType[]> {
+      const spacePrefix = spaceId ? `/s/${spaceId}` : '';
       const res = await supertest
-        .post('/api/agent_builder/tools/_execute')
+        .post(`${spacePrefix}/api/agent_builder/tools/_execute`)
         .set('kbn-xsrf', 'true')
         .send({ tool_id: id, tool_params: params });
       return res.body.results;

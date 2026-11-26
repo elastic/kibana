@@ -11,6 +11,7 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,8 +30,15 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useConnectorsByType,
@@ -193,9 +201,32 @@ function ConnectorTypeRow({
   const { euiTheme } = useEuiTheme();
   const plateShadow = useEuiShadow('xs');
   const accordionId = useGeneratedHtmlId({ prefix: 'nightshiftConnectorType' });
+  const isMobile = useIsMobile();
   const hasConnectors = connectors.length > 0;
 
-  const createButton = (
+  const createEbtProps = getEbtProps({
+    action: NIGHTSHIFT_EBT_ACTIONS.OPEN_ADD_SANDBOX_CONNECTOR,
+    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+    detail: actionType.id,
+  });
+  const createButton = isMobile ? (
+    <EuiToolTip
+      position="top"
+      content={createDisabledReason ?? createLabel}
+      disableScreenReaderOutput={createDisabledReason === undefined}
+    >
+      <EuiButtonIcon
+        display="base"
+        color="text"
+        iconType="plus"
+        isDisabled={createDisabledReason !== undefined}
+        onClick={onCreate}
+        aria-label={`${createLabel}: ${item.name}`}
+        data-test-subj={`${actionType.id}-create`}
+        {...createEbtProps}
+      />
+    </EuiToolTip>
+  ) : (
     <EuiButton
       size="s"
       color="text"
@@ -204,10 +235,19 @@ function ConnectorTypeRow({
       onClick={onCreate}
       aria-label={`${createLabel}: ${item.name}`}
       data-test-subj={`${actionType.id}-create`}
+      {...createEbtProps}
     >
       {createLabel}
     </EuiButton>
   );
+  const createAction =
+    createDisabledReason === undefined || isMobile ? (
+      createButton
+    ) : (
+      <EuiToolTip position="top" content={createDisabledReason}>
+        {createButton}
+      </EuiToolTip>
+    );
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj={`${actionType.id}-row`}>
@@ -249,15 +289,7 @@ function ConnectorTypeRow({
           </EuiFlexGroup>
         }
         buttonProps={{ 'data-test-subj': `${actionType.id}-toggle` }}
-        extraAction={
-          createDisabledReason === undefined ? (
-            createButton
-          ) : (
-            <EuiToolTip position="top" content={createDisabledReason}>
-              {createButton}
-            </EuiToolTip>
-          )
-        }
+        extraAction={createAction}
       >
         {hasConnectors && (
           <>
@@ -286,6 +318,11 @@ function ConnectorTypeRow({
                       { defaultMessage: 'Disable {name}', values: { name: connector.name } }
                     )}
                     data-test-subj={`nightshiftConnectorEnabled-${connector.id}`}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                      detail: NIGHTSHIFT_EBT_DETAILS.DISABLE,
+                    })}
                   >
                     {i18n.translate('xpack.nightshift.addConnectorFlyout.enabledLabel', {
                       defaultMessage: 'Enabled',
@@ -302,6 +339,11 @@ function ConnectorTypeRow({
                       values: { name: connector.name },
                     })}
                     data-test-subj={`nightshiftConnectorEnable-${connector.id}`}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                      detail: NIGHTSHIFT_EBT_DETAILS.ENABLE,
+                    })}
                   >
                     {i18n.translate('xpack.nightshift.addConnectorFlyout.enableLabel', {
                       defaultMessage: 'Enable',
@@ -336,6 +378,18 @@ function ConnectorTypeRow({
           </>
         )}
       </EuiAccordion>
+      {isMobile && createDisabledReason !== undefined && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj={`${actionType.id}-createDisabledReason`}
+          >
+            {createDisabledReason}
+          </EuiText>
+        </>
+      )}
     </EuiPanel>
   );
 }

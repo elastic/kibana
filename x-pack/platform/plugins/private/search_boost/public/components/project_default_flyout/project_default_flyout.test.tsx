@@ -21,8 +21,7 @@ import { ProjectDefaultFlyout } from './project_default_flyout';
 
 const GIB = 1024 ** 3;
 
-const matches = (...names: string[]): BoostRuleMatch[] =>
-  names.map((name) => ({ name, isHidden: false }));
+const matches = (...names: string[]): BoostRuleMatch[] => names.map((name) => ({ name }));
 
 const indicesProfile = (name: string, isBuiltin = true): IndicesBoostProfile => ({
   name,

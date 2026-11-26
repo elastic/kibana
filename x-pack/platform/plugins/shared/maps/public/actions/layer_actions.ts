@@ -61,7 +61,7 @@ import type {
 } from '../../common/descriptor_types';
 import type { ILayer } from '../classes/layers/layer';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
-import type { OnSourceChangeArgs } from '../classes/sources/source';
+import type { OnSourceChangeArgs, SourcePropName } from '../classes/sources/source';
 import { isESVectorTileSource } from '../classes/sources/es_source';
 import type { LAYER_TYPE } from '../../common/constants';
 import { DRAW_MODE, LAYER_STYLE_TYPE, SCALING_TYPES, STYLE_TYPE } from '../../common/constants';
@@ -440,7 +440,7 @@ function updateMetricsProp(layerId: string, value: unknown) {
 
 function updateSourcePropWithoutSync(
   layerId: string,
-  propName: string,
+  propName: SourcePropName,
   value: unknown,
   newLayerType?: LAYER_TYPE
 ) {
@@ -501,7 +501,7 @@ function updateSourcePropWithoutSync(
 
 export function updateSourceProp(
   layerId: string,
-  propName: string,
+  propName: SourcePropName,
   value: unknown,
   newLayerType?: LAYER_TYPE
 ) {
