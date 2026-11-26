@@ -91,6 +91,20 @@ describe('SourceActionsColumn', () => {
     });
   });
 
+  it('starts onboarding after the click finishes so the click tracker still sees the run tag', async () => {
+    // A real click flushes React before the window click listener runs. Starting the run
+    // inside the handler swaps the Run button for Stop, and the click is tracked as stop.
+    // jsdom cannot reproduce that ordering, so the test pins the deferral.
+    const { props } = renderActions();
+
+    fireEvent.click(screen.getByTestId('significantEventsAppSourcesTableOnboardButton'));
+
+    expect(props.onOnboard).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(props.onOnboard).toHaveBeenCalledWith(SOURCE.id);
+    });
+  });
+
   it('keeps stop disabled after a successful cancel until the run leaves in progress', async () => {
     const onStopOnboarding = jest.fn().mockResolvedValue(undefined);
     const { rerender, props } = renderActions({
