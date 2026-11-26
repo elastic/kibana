@@ -312,7 +312,7 @@ describe('getConnectorSpecRoute', () => {
     );
   });
 
-  it('rejects the spec_version query when catalog is not enabled', () => {
+  it('omits the query schema when catalog is not enabled', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     getConnectorSpecRoute(
@@ -325,10 +325,7 @@ describe('getConnectorSpecRoute', () => {
     const validateConfig = config.validate as { request?: { query?: Type<unknown> } };
 
     expect(config.validate).toBeDefined();
-    expect(validateConfig.request?.query).toBeDefined();
-    expect(() => validateConfig.request?.query!.validate({ spec_version: '1.0' })).toThrow(
-      "[spec_version]: Additional properties are not allowed ('spec_version' was unexpected)"
-    );
+    expect(validateConfig.request?.query).toBeUndefined();
   });
 
   it('accepts the spec_version query when catalog is enabled', () => {
@@ -352,7 +349,7 @@ describe('getConnectorSpecRoute', () => {
 
   it('rejects an oversized spec_version query', () => {
     expect(() =>
-      getConnectorSpecQuerySchemaV1(true).validate({
+      getConnectorSpecQuerySchemaV1.validate({
         spec_version: '1'.repeat(CONNECTOR_SPEC_VERSION_MAX_LENGTH + 1),
       })
     ).toThrow('maximum length');
@@ -384,7 +381,11 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
+    getConnectorSpecRoute(
+      router,
+      licenseState,
+      createActionsConfigUtilsMock({ catalogEnabled: true })
+    );
 
     const [config] = router.get.mock.calls[0];
 

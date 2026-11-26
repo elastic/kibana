@@ -107,7 +107,9 @@ describe('transformGetConnectorSpecResponse', () => {
 
   it('validates against the live getConnectorSpecResponseBodySchemaV1', () => {
     expect(() =>
-      getConnectorSpecResponseBodySchemaV1.validate(transformGetConnectorSpecResponse(result))
+      getConnectorSpecResponseBodySchemaV1({ includeSpecVersionField: true }).validate(
+        transformGetConnectorSpecResponse(result)
+      )
     ).not.toThrow();
   });
 });
