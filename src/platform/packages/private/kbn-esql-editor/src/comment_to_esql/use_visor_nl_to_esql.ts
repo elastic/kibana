@@ -14,6 +14,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { VisorNlResultHandler } from '../types';
+import type { QueryPublishGateRef } from './query_publish_gate';
 import { useReplaceReview } from './use_replace_review';
 import type { ReviewState } from './use_replace_review';
 import { getVisorNlInsertPlan } from './visor_nl_insert';
@@ -24,7 +25,23 @@ interface UseVisorNlToEsqlParams {
   onSubmit: (query: string) => void;
   onAfterInsert?: () => void;
   telemetryService?: ESQLEditorTelemetryService;
+  queryPublishGate: QueryPublishGateRef;
 }
+
+const generatedBlockStillPresent = (
+  model: monaco.editor.ITextModel,
+  state: ReviewState,
+  block: string
+): boolean => {
+  if (!block || state.generatedLineEnd < state.generatedLineStart) return false;
+  if (model.getLineCount() < state.generatedLineEnd) return false;
+
+  const lines: string[] = [];
+  for (let line = state.generatedLineStart; line <= state.generatedLineEnd; line++) {
+    lines.push(model.getLineContent(line));
+  }
+  return lines.join('\n') === block;
+};
 
 export const useVisorNlToEsql = ({
   editorRef,
@@ -32,34 +49,46 @@ export const useVisorNlToEsql = ({
   onSubmit,
   onAfterInsert,
   telemetryService,
+  queryPublishGate,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
-  const generatedContentRef = useRef<string>('');
   const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
   const isSupersedingRef = useRef(false);
+  const isDismissingEditRef = useRef(false);
+  const untouchedPreviewRef = useRef<string | null>(null);
+  const generatedBlockRef = useRef('');
+
+  const clearPreviewSnapshot = useCallback(() => {
+    untouchedPreviewRef.current = null;
+    generatedBlockRef.current = '';
+  }, []);
 
   const onAfterAccept = useCallback(
-    ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
+    ({ generatedLineStart, generatedLineEnd }: ReviewState, acceptedQuery: string) => {
+      clearPreviewSnapshot();
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.ACCEPT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
-      onSubmit(generatedContentRef.current);
+      // Submit the editor text after the original lines are removed, including
+      // any edits the user made to the generated lines.
+      onSubmit(acceptedQuery);
       reviewRef.current?.onAccept();
     },
-    [onSubmit, telemetryService]
+    [clearPreviewSnapshot, onSubmit, telemetryService]
   );
 
   const onAfterReject = useCallback(
     ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
-      if (isSupersedingRef.current) return;
+      clearPreviewSnapshot();
+      if (isSupersedingRef.current || isDismissingEditRef.current) return;
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
       reviewRef.current?.onReject?.();
     },
-    [telemetryService]
+    [clearPreviewSnapshot, telemetryService]
   );
 
   const rejectAction = useMemo(
@@ -75,8 +104,9 @@ export const useVisorNlToEsql = ({
   const {
     showReview,
     reject,
-    accept: acceptReview,
-    cleanup: discardReview,
+    accept: acceptReplacement,
+    cleanup: discardReviewUi,
+    getReviewState,
   } = useReplaceReview({
     editorRef,
     editorModel,
@@ -84,9 +114,15 @@ export const useVisorNlToEsql = ({
     contextKeyId: 'esqlVisorReviewActive',
     rejectAction,
     editSourceId: 'nl-to-esql-visor',
+    queryPublishGate,
     onAfterAccept,
     onAfterReject,
   });
+
+  const discardReview = useCallback(() => {
+    clearPreviewSnapshot();
+    discardReviewUi();
+  }, [clearPreviewSnapshot, discardReviewUi]);
 
   const showVisorReview = useCallback<VisorNlResultHandler>(
     (generatedContent, review) => {
@@ -100,50 +136,90 @@ export const useVisorNlToEsql = ({
       reject();
       isSupersedingRef.current = false;
 
-      generatedContentRef.current = generatedContent;
       reviewRef.current = review;
 
       const plan = getVisorNlInsertPlan(model.getValue().split('\n'), generatedContent.split('\n'));
       if (!plan) return;
 
-      if (plan.insert) {
-        const { lastChangedOriginalLine } = plan.review;
-        if (plan.insert.isLastLine) {
-          const lineContent = model.getLineContent(lastChangedOriginalLine);
-          editor.executeEdits('nl-to-esql-visor', [
-            {
-              range: new monaco.Range(
-                lastChangedOriginalLine,
-                lineContent.length + 1,
-                lastChangedOriginalLine,
-                lineContent.length + 1
-              ),
-              text: plan.insert.text,
-              forceMoveMarkers: true,
-            },
-          ]);
-        } else {
-          editor.executeEdits('nl-to-esql-visor', [
-            {
-              range: new monaco.Range(
-                lastChangedOriginalLine + 1,
-                1,
-                lastChangedOriginalLine + 1,
-                1
-              ),
-              text: plan.insert.text,
-              forceMoveMarkers: true,
-            },
-          ]);
+      let holdingPreview = false;
+      try {
+        if (plan.insert) {
+          // Keep the inserted lines out of the saved query until the user accepts.
+          queryPublishGate.current.hold();
+          holdingPreview = true;
+
+          const { lastChangedOriginalLine } = plan.review;
+          if (plan.insert.isLastLine) {
+            const lineContent = model.getLineContent(lastChangedOriginalLine);
+            editor.executeEdits('nl-to-esql-visor', [
+              {
+                range: new monaco.Range(
+                  lastChangedOriginalLine,
+                  lineContent.length + 1,
+                  lastChangedOriginalLine,
+                  lineContent.length + 1
+                ),
+                text: plan.insert.text,
+                forceMoveMarkers: true,
+              },
+            ]);
+          } else {
+            editor.executeEdits('nl-to-esql-visor', [
+              {
+                range: new monaco.Range(
+                  lastChangedOriginalLine + 1,
+                  1,
+                  lastChangedOriginalLine + 1,
+                  1
+                ),
+                text: plan.insert.text,
+                forceMoveMarkers: true,
+              },
+            ]);
+          }
         }
+
+        const { generatedLineStart, generatedLineEnd } = plan.review;
+        const blockLines: string[] = [];
+        if (generatedLineEnd >= generatedLineStart) {
+          for (let line = generatedLineStart; line <= generatedLineEnd; line++) {
+            blockLines.push(model.getLineContent(line));
+          }
+        }
+        generatedBlockRef.current = blockLines.join('\n');
+        untouchedPreviewRef.current = model.getValue();
+
+        onAfterInsert?.();
+        showReview(plan.review);
+        holdingPreview = false;
+      } catch (error) {
+        if (holdingPreview) {
+          queryPublishGate.current.release();
+        }
+        throw error;
       }
-
-      onAfterInsert?.();
-
-      showReview(plan.review);
     },
-    [editorRef, editorModel, reject, showReview, onAfterInsert]
+    [editorRef, editorModel, reject, showReview, onAfterInsert, queryPublishGate]
   );
+
+  // Run accepts an untouched preview. Once the user has edited the buffer, drop the
+  // suggestion instead of restoring the text that was generated.
+  const acceptReview = useCallback(() => {
+    const model = editorModel.current;
+    const snapshot = untouchedPreviewRef.current;
+    if (model && snapshot != null && model.getValue() !== snapshot) {
+      const state = getReviewState();
+      if (state && generatedBlockStillPresent(model, state, generatedBlockRef.current)) {
+        isDismissingEditRef.current = true;
+        reject();
+        isDismissingEditRef.current = false;
+      } else {
+        discardReview();
+      }
+      return false;
+    }
+    return acceptReplacement();
+  }, [editorModel, getReviewState, reject, discardReview, acceptReplacement]);
 
   return { showVisorReview, acceptReview, discardReview };
 };

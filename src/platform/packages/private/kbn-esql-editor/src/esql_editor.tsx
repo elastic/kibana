@@ -37,6 +37,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -48,6 +49,7 @@ import { QuerySource } from '@kbn/esql-types';
 import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
 import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
+import type { QueryPublishGate } from './comment_to_esql/query_publish_gate';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
 import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
@@ -231,6 +233,26 @@ const ESQLEditorInternal = function ESQLEditor({
     [esqlVariables, query.esql]
   );
 
+  // True while a generated preview is inserted in the model and must not be saved.
+  const reviewHoldRef = useRef(false);
+  // Last query published to the parent, or applied from the parent. Used to tell
+  // a parent echo apart from a tab switch that should drop the preview.
+  const publishedQueryRef = useRef(fixedQuery);
+  const previewValueRef = useRef<string | undefined>(undefined);
+  const [previewValue, setPreviewValueState] = useState<string | undefined>(undefined);
+  const setPreviewValue = useCallback((value: string | undefined) => {
+    previewValueRef.current = value;
+    setPreviewValueState(value);
+  }, []);
+  const queryPublishGate = useRef<QueryPublishGate>({
+    hold: () => {
+      reviewHoldRef.current = true;
+    },
+    release: () => {
+      reviewHoldRef.current = false;
+    },
+  });
+
   const esqlService = kibana.services?.esql;
   const variablesService = esqlService?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? DEFAULT_HISTOGRAM_BAR_TARGET;
@@ -328,6 +350,24 @@ const ESQLEditorInternal = function ESQLEditor({
     [onTextLangQueryChange]
   );
 
+  const onEditorModelChange = useCallback(
+    (value: string) => {
+      if (reviewHoldRef.current) {
+        setPreviewValue(value);
+        return;
+      }
+      // Accept/reject removes the preview. Point the controlled value at the
+      // resulting text in the same update, or Monaco restores the previous query.
+      if (previewValueRef.current !== undefined) {
+        publishedQueryRef.current = value;
+        setPreviewValue(undefined);
+        setCode(value);
+      }
+      onQueryUpdate(value);
+    },
+    [onQueryUpdate, setPreviewValue]
+  );
+
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
     telemetryService,
     sessionIdRef,
@@ -378,13 +418,22 @@ const ESQLEditorInternal = function ESQLEditor({
     reportInputLatency();
   }, [code, reportInputLatency]);
 
-  useEffect(() => {
-    if (editorRef.current) {
-      if (code !== fixedQuery) {
-        setCode(fixedQuery);
-      }
+  useLayoutEffect(() => {
+    if (fixedQuery === publishedQueryRef.current) {
+      return;
     }
-  }, [code, fixedQuery]);
+
+    if (reviewHoldRef.current) {
+      // The committed query was replaced, for example by switching tabs, while a
+      // preview was inserted. Drop the preview without writing it into the new query.
+      reviewHoldRef.current = false;
+      pendingReviewRef.current.discard();
+    }
+
+    publishedQueryRef.current = fixedQuery;
+    setPreviewValue(undefined);
+    setCode(fixedQuery);
+  }, [fixedQuery, setPreviewValue]);
 
   // If variables are passed to the editor, sync them with the variables service.
   // This ensures that the latest variables are always available for suggestions.
@@ -661,6 +710,7 @@ const ESQLEditorInternal = function ESQLEditor({
     clearGhostHintRef,
     telemetryService,
     onAfterInsert: expandToFitContent,
+    queryPublishGate,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -724,6 +774,7 @@ const ESQLEditorInternal = function ESQLEditor({
     onSubmit: runAcceptedQuery,
     telemetryService,
     onAfterInsert: expandToFitContent,
+    queryPublishGate,
   });
 
   const focusEditor = useCallback(() => editorRef.current?.focus(), []);
@@ -743,6 +794,7 @@ const ESQLEditorInternal = function ESQLEditor({
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
     telemetryService,
+    queryPublishGate,
   });
 
   // The first review that reports it was pending wins; accepting submits the query itself.
@@ -865,7 +917,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   languageId={ESQL_LANG_ID}
                   chromeOverrides={esqlEditorChromeOverrides}
                   scopedCss={editorScopedStyles}
-                  value={code}
+                  value={previewValue ?? code}
                   placeholder={placeholder}
                   options={codeEditorOptions}
                   width="100%"
@@ -875,7 +927,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   inlineCompletionsProvider={inlineCompletionsProvider}
                   documentHighlightProvider={documentHighlightProvider}
                   codeActions={codeActionsProvider}
-                  onChange={onQueryUpdate}
+                  onChange={onEditorModelChange}
                   editorDidMount={async (editor) => {
                     // Track editor init time once per mount
                     reportInitLatency();

@@ -19,7 +19,7 @@ import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { ESQLEditor } from './esql_editor';
+import { ESQLEditor, type ESQLEditorApi } from './esql_editor';
 import { VALIDATION_DEBOUNCE_MS } from './hooks/use_query_validation';
 import type { ESQLEditorProps } from './types';
 
@@ -36,7 +36,7 @@ jest.mock('@kbn/code-editor', () => ({
       aliases: ['ESQL', 'esql'],
       mimetypes: ['application/esql'],
     })),
-    validate: async () => mockValidate(),
+    validate: async (_model: unknown, code?: string) => mockValidate(code),
   },
 }));
 
@@ -486,5 +486,65 @@ describe('ESQLEditor', () => {
     await waitFor(() => {
       expect(screen.getByText('Client warning example')).toBeInTheDocument();
     });
+  });
+
+  it('does not publish a pending natural language preview, and drops it when the query changes', async () => {
+    const onTextLangQueryChange = jest.fn();
+    const onTextLangQuerySubmit = jest.fn();
+    const onVisorNlResultReady = jest.fn();
+    const editorRef = React.createRef<ESQLEditorApi>();
+    const renderEditor = (query: ESQLEditorProps['query']) => (
+      <KibanaContextProvider services={services}>
+        <ESQLEditor
+          ref={editorRef}
+          {...props}
+          query={query}
+          editorIsInline={true}
+          onTextLangQueryChange={onTextLangQueryChange}
+          onTextLangQuerySubmit={onTextLangQuerySubmit}
+          onVisorNlResultReady={onVisorNlResultReady}
+        />
+      </KibanaContextProvider>
+    );
+    const view = renderWithI18n(renderEditor(props.query));
+
+    await waitFor(() => {
+      expect(onVisorNlResultReady).toHaveBeenCalled();
+    });
+
+    onTextLangQueryChange.mockClear();
+    mockValidate.mockClear();
+
+    const showVisorReview = onVisorNlResultReady.mock.calls.at(-1)?.[0] as (
+      generated: string,
+      review: { onAccept: () => void }
+    ) => void;
+
+    act(() => {
+      showVisorReview('FROM metrics-*\n| LIMIT 100', { onAccept: jest.fn() });
+    });
+
+    expect(onTextLangQueryChange).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, VALIDATION_DEBOUNCE_MS + 20));
+    });
+
+    const validatedQueries = mockValidate.mock.calls.map((call) => call[0]);
+    expect(validatedQueries.some((query) => String(query).includes('metrics'))).toBe(false);
+
+    await act(async () => {
+      view.rerender(renderEditor({ esql: 'FROM traces-*' }));
+    });
+
+    expect(onTextLangQueryChange).not.toHaveBeenCalled();
+    expect(editorRef.current?.acceptPendingReview()).toBe(false);
+
+    await userEvent.click(screen.getByTestId('ESQLEditor-run-query-button'));
+
+    expect(onTextLangQuerySubmit).toHaveBeenCalledWith(
+      { esql: 'FROM traces-*' },
+      expect.any(AbortController)
+    );
   });
 });

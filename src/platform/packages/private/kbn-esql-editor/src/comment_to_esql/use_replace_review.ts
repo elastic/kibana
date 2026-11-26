@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ReviewActionsWidget } from './review_actions_widget';
+import type { QueryPublishGateRef } from './query_publish_gate';
 import { CODE_ADDED_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
 export interface ReviewState {
@@ -28,6 +29,8 @@ interface UseReplaceReviewParams {
   contextKeyId: string;
   rejectAction: { id: string; label: string };
   editSourceId: string;
+  /** Released when the review ends so the following accept/reject edit can publish. */
+  queryPublishGate?: QueryPublishGateRef;
   onAfterAccept?: (state: ReviewState, acceptedQuery: string) => void;
   onAfterReject?: (state: ReviewState) => void;
 }
@@ -51,6 +54,7 @@ export const useReplaceReview = ({
   contextKeyId,
   rejectAction,
   editSourceId,
+  queryPublishGate,
   onAfterAccept,
   onAfterReject,
 }: UseReplaceReviewParams) => {
@@ -61,6 +65,9 @@ export const useReplaceReview = ({
   const reviewStateRef = useRef<ReviewState | null>(null);
 
   const cleanup = useCallback(() => {
+    // Release before any follow-up edit so accept/reject still publish.
+    queryPublishGate?.current.release();
+
     decorationsRef.current?.clear();
     decorationsRef.current = undefined;
 
@@ -72,7 +79,7 @@ export const useReplaceReview = ({
 
     contextKeyRef.current?.set(false);
     reviewStateRef.current = null;
-  }, []);
+  }, [queryPublishGate]);
 
   useEffect(() => cleanup, [cleanup]);
 
@@ -191,5 +198,7 @@ export const useReplaceReview = ({
     [editorRef, euiTheme, contextKeyId, rejectAction, accept, reject]
   );
 
-  return { showReview, cleanup, reject, accept };
+  const getReviewState = useCallback(() => reviewStateRef.current, []);
+
+  return { showReview, cleanup, reject, accept, getReviewState };
 };

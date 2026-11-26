@@ -135,6 +135,27 @@ describe('useQueryActions', () => {
       expect(params.telemetryService.trackQuerySubmitted).not.toHaveBeenCalled();
     });
 
+    it('submits the editor value when a pending review declines to accept', () => {
+      const params = defaultParams();
+      params.editorRef = createMockEditorRef('FROM traces-*');
+      params.pendingReviewRef.current.accept.mockReturnValue(false);
+      const { result } = renderHook(() => useQueryActions(params));
+
+      act(() => {
+        result.current.onQuerySubmit(QuerySource.MANUAL);
+      });
+
+      expect(params.pendingReviewRef.current.accept).toHaveBeenCalledTimes(1);
+      expect(params.onTextLangQuerySubmit).toHaveBeenCalledWith(
+        { esql: 'FROM traces-*' },
+        expect.any(AbortController)
+      );
+      expect(params.telemetryService.trackQuerySubmitted).toHaveBeenCalledWith({
+        source: QuerySource.MANUAL,
+        query: 'FROM traces-*',
+      });
+    });
+
     it('does not consult the pending AI review for other query sources', () => {
       const params = defaultParams();
       params.pendingReviewRef.current.accept.mockReturnValue(true);

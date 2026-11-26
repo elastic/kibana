@@ -18,6 +18,7 @@ import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/te
 import { ReviewActionsWidget } from './review_actions_widget';
 import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
+import type { QueryPublishGateRef } from './query_publish_gate';
 import {
   findTargetComment,
   insertGeneratedCode,
@@ -52,6 +53,7 @@ interface UseCommentToEsqlParams {
   // When set, generation auto-accepts: removes the comment line, keeps generated code, and calls this callback with the final query instead of showing the review UI.
   autoAcceptCallbackRef?: MutableRefObject<((finalQuery: string) => void) | undefined>;
   onAfterInsert?: () => void;
+  queryPublishGate?: QueryPublishGateRef;
 }
 
 export const useCommentToEsql = ({
@@ -65,6 +67,7 @@ export const useCommentToEsql = ({
   telemetryService,
   autoAcceptCallbackRef,
   onAfterInsert,
+  queryPublishGate,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
@@ -123,6 +126,8 @@ export const useCommentToEsql = ({
   );
 
   const cleanup = useCallback(() => {
+    queryPublishGate?.current.release();
+
     decorationsRef.current?.clear();
     decorationsRef.current = undefined;
 
@@ -139,7 +144,7 @@ export const useCommentToEsql = ({
     clearCommentAnchor();
     clearGeneratingDecoration();
     abortInFlight();
-  }, [clearCommentAnchor, clearGeneratingDecoration, abortInFlight]);
+  }, [clearCommentAnchor, clearGeneratingDecoration, abortInFlight, queryPublishGate]);
 
   // Keeps the generated code and runs the query; false if no review is pending
   // (an in-flight generation is left alone in that case).
@@ -418,41 +423,55 @@ export const useCommentToEsql = ({
       const currentCommentLine = anchorRanges[0]?.startLineNumber;
       if (!currentCommentLine || !isModelStillValid(liveModel, currentCommentLine)) return;
 
-      const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
-        editor,
-        liveModel,
-        currentCommentLine,
-        result.content
-      );
-      onAfterInsert?.();
+      queryPublishGate?.current.hold();
+      let releasedPreview = false;
+      const releasePreview = () => {
+        if (releasedPreview) return;
+        releasedPreview = true;
+        queryPublishGate?.current.release();
+      };
+      try {
+        const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
+          editor,
+          liveModel,
+          currentCommentLine,
+          result.content
+        );
+        onAfterInsert?.();
 
-      const replacedLineNumber =
-        result.replacesNext && generatedLineEnd + 1 <= liveModel.getLineCount()
-          ? generatedLineEnd + 1
-          : null;
+        const replacedLineNumber =
+          result.replacesNext && generatedLineEnd + 1 <= liveModel.getLineCount()
+            ? generatedLineEnd + 1
+            : null;
 
-      if (autoAcceptCallbackRef?.current) {
-        const cb = autoAcceptCallbackRef.current;
-        autoAcceptCallbackRef.current = undefined;
-        const currentEditor = editorRef.current;
-        if (currentEditor && liveModel) {
-          currentEditor.executeEdits('nl-to-esql-auto-accept', [
-            {
-              range: new monaco.Range(currentCommentLine, 1, generatedLineStart, 1),
-              text: null,
-            },
-          ]);
-          cb(liveModel.getValue());
+        if (autoAcceptCallbackRef?.current) {
+          const cb = autoAcceptCallbackRef.current;
+          autoAcceptCallbackRef.current = undefined;
+          // The auto-accept edit should publish; the preview insert above should not.
+          releasePreview();
+          const currentEditor = editorRef.current;
+          if (currentEditor && liveModel) {
+            currentEditor.executeEdits('nl-to-esql-auto-accept', [
+              {
+                range: new monaco.Range(currentCommentLine, 1, generatedLineStart, 1),
+                text: null,
+              },
+            ]);
+            cb(liveModel.getValue());
+          }
+          return;
         }
-        return;
-      }
 
-      showReview({
-        commentLineNumber: currentCommentLine,
-        generatedLineStart,
-        generatedLineEnd,
-        replacedLineNumber,
-      });
+        showReview({
+          commentLineNumber: currentCommentLine,
+          generatedLineStart,
+          generatedLineEnd,
+          replacedLineNumber,
+        });
+      } catch (error) {
+        releasePreview();
+        throw error;
+      }
     } finally {
       clearGeneratingDecoration();
     }
@@ -470,6 +489,7 @@ export const useCommentToEsql = ({
     onAfterInsert,
     showReview,
     clearGeneratingDecoration,
+    queryPublishGate,
   ]);
 
   return {

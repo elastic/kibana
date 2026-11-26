@@ -17,6 +17,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { GENERATING_HINT_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
+import type { QueryPublishGateRef } from '../comment_to_esql/query_publish_gate';
 import { useReplaceReview } from '../comment_to_esql/use_replace_review';
 
 type SuggestFixHandler = (
@@ -71,6 +72,7 @@ interface UseSuggestFixParams {
   onSubmit: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
   onAfterInsert?: () => void;
+  queryPublishGate?: QueryPublishGateRef;
 }
 
 export const useSuggestFix = ({
@@ -82,6 +84,7 @@ export const useSuggestFix = ({
   onSubmit,
   telemetryService,
   onAfterInsert,
+  queryPublishGate,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
 
@@ -136,6 +139,7 @@ export const useSuggestFix = ({
       }),
     },
     editSourceId: 'esql-suggest-fix',
+    queryPublishGate,
     onAfterAccept: (state, acceptedQuery) => {
       trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
       onSubmit(acceptedQuery);
@@ -175,6 +179,7 @@ export const useSuggestFix = ({
       const controller = new AbortController();
       abortControllerRef.current = controller;
       const startTime = Date.now();
+      let holdingPreview = false;
 
       try {
         const result = await http.post<{ content: string }>(SUGGEST_FIX_ROUTE, {
@@ -211,7 +216,10 @@ export const useSuggestFix = ({
           return;
         }
 
-        // Insert only the changed fix lines after the last changed original line
+        // Insert only the changed fix lines after the last changed original line.
+        // Hold publishing until accept/reject so the preview is not saved as the query.
+        queryPublishGate?.current.hold();
+        holdingPreview = true;
         const insertMaxCol = model.getLineMaxColumn(lastChangedOriginalLine);
         editor.executeEdits('esql-suggest-fix', [
           {
@@ -244,7 +252,12 @@ export const useSuggestFix = ({
           generatedLineStart,
           generatedLineEnd,
         });
+        holdingPreview = false;
       } catch (error) {
+        if (holdingPreview) {
+          holdingPreview = false;
+          queryPublishGate?.current.release();
+        }
         if (controller.signal.aborted) return;
         trackFixResult(queryString.length, startTime, false, errorCode);
         const message =
@@ -270,6 +283,7 @@ export const useSuggestFix = ({
       showReview,
       notifications.toasts,
       clearGeneratingDecoration,
+      queryPublishGate,
     ]
   );
 
