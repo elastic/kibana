@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const replaceNewLinesWithSpace = (str: string) => str.replace(/\n/g, ' ');
@@ -78,15 +79,27 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       );
       await addVisualizationButton.click();
 
-      await this.findAndSaveVisualization(visName);
+      await this.findAndSaveVisualization(visName, addCommentElement);
 
       await testSubjects.existOrFail('cases-app', { timeout: 10 * 1000 });
 
       await this.submitComment();
     },
 
-    async findAndSaveVisualization(visName: string) {
+    async findAndSaveVisualization(visName: string, editorContainer?: WebElementWrapper) {
+      const countLensBlocks = async () => {
+        const editors = editorContainer
+          ? await editorContainer.findAllByCssSelector('textarea.euiMarkdownEditorTextArea')
+          : await find.allByCssSelector('textarea.euiMarkdownEditorTextArea');
+        let count = 0;
+        for (const editor of editors) {
+          count += ((await editor.getAttribute('value')) ?? '').split('!{lens').length - 1;
+        }
+        return count;
+      };
+
       await testSubjects.existOrFail('savedObjectsFinderTable', { timeout: 10 * 1000 });
+      const lensBlocksBefore = await countLensBlocks();
 
       // select visualization
       await testSubjects.setValue('savedObjectFinderSearchInput', visName, {
@@ -97,15 +110,10 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
       // choosing a saved object inserts the lens block into the editor and closes the modal
       await testSubjects.missingOrFail('savedObjectsFinderTable');
-      await retry.waitFor('lens block to be inserted into the markdown editor', async () => {
-        const editors = await find.allByCssSelector('textarea.euiMarkdownEditorTextArea');
-        for (const editor of editors) {
-          if ((await editor.getAttribute('value'))?.includes('!{lens')) {
-            return true;
-          }
-        }
-        return false;
-      });
+      await retry.waitFor(
+        'lens block to be inserted into the markdown editor',
+        async () => (await countLensBlocks()) > lensBlocksBefore
+      );
     },
 
     async openVisualizationButtonTooltip() {

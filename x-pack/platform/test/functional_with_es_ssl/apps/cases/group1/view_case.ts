@@ -516,7 +516,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await addVisualizationButton.click();
 
-        await cases.singleCase.findAndSaveVisualization(LENS_BASIC_XY_VIS_TITLE);
+        await cases.singleCase.findAndSaveVisualization(
+          LENS_BASIC_XY_VIS_TITLE,
+          editableDescription
+        );
 
         await header.waitUntilLoadingHasFinished();
 
@@ -557,7 +560,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await addVisualizationButton.click();
 
-        await cases.singleCase.findAndSaveVisualization(LENS_BASIC_XY_VIS_TITLE);
+        await cases.singleCase.findAndSaveVisualization(LENS_BASIC_XY_VIS_TITLE, editComment);
 
         await header.waitUntilLoadingHasFinished();
 
@@ -573,18 +576,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds lens visualization in new comment', async () => {
-        // The case is shared, so earlier comments may already hold a chart
-        const chartSelector =
-          '[data-test-subj="comment-comment-comment"] [data-test-subj="xyVisChart"]';
-        const chartsBefore = (await find.allByCssSelector(chartSelector)).length;
-
         await cases.singleCase.addVisualizationToNewComment(LENS_BASIC_XY_VIS_TITLE);
 
         await header.waitUntilLoadingHasFinished();
 
-        await retry.waitFor('one more lens chart in user comments', async () => {
-          return (await find.allByCssSelector(chartSelector)).length === chartsBefore + 1;
-        });
+        // Activity lists oldest first, so the new comment is the last user comment.
+        // xyVisChart also wraps the no-results placeholder; .echChart renders only with data.
+        const userComments = await find.allByCssSelector(
+          '[data-test-subj="comment-comment-comment"]'
+        );
+        const newComment = userComments[userComments.length - 1];
+        await newComment.findByCssSelector('[data-test-subj="xyVisChart"] .echChart');
       });
     });
 
