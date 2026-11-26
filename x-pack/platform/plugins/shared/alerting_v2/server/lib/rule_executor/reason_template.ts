@@ -6,8 +6,10 @@
  */
 
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { MAX_REASON_TEMPLATE_LENGTH } from '@kbn/alerting-v2-schemas';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 
 type QueryRow = Record<string, unknown>;
 type LiquidEngine = ReturnType<typeof createWorkflowLiquidEngine>;
@@ -91,7 +93,9 @@ const setNested = (
 
 /**
  * Builds the `data` namespace from a flat ES|QL row. Every column stays reachable by its flat name
- * (`data["host.name"]`), and dotted columns are also nested so `data.host.name` works.
+ * (`data["host.name"]`), and dotted columns are also nested so `data.host.name` works. When one
+ * dotted column is the prefix of another (`service.name` and `service.name.raw`), the shorter one
+ * is nested and the longer one is only reachable by its flat name, whatever the column order.
  */
 export const buildDataContext = (row: QueryRow): Record<string, unknown> => {
   const data: Record<string, unknown> = {};
@@ -103,11 +107,17 @@ export const buildDataContext = (row: QueryRow): Record<string, unknown> => {
     }
   }
 
-  for (const [key, value] of Object.entries(row)) {
-    const path = key.split('.');
-    if (path.length > 1 && !path.some((segment) => segment === '' || UNSAFE_KEYS.has(segment))) {
-      setNested(data, created, path, value);
-    }
+  const nestable = Object.entries(row)
+    .map(([key, value]) => ({ path: key.split('.'), value }))
+    .filter(
+      ({ path }) =>
+        path.length > 1 && !path.some((segment) => segment === '' || UNSAFE_KEYS.has(segment))
+    )
+    // Shorter paths first, so a column is never hidden behind an object made for a longer one
+    .sort((a, b) => a.path.length - b.path.length);
+
+  for (const { path, value } of nestable) {
+    setNested(data, created, path, value);
   }
 
   return data;
@@ -198,4 +208,26 @@ export const createReasonRenderer = ({
       }
     },
   };
+};
+
+/**
+ * Sets the rendered reason on each event, rendering against the row stored in its `data`. Rendering
+ * is synchronous, so it yields to the event loop between rows: the time limits bound the total
+ * time spent rendering, and yielding bounds how long Kibana is blocked at once.
+ */
+export const applyReasons = async (
+  events: AlertEventDocument[],
+  renderer: ReasonRenderer
+): Promise<void> => {
+  if (renderer === NO_REASON) {
+    return;
+  }
+
+  for (const event of events) {
+    await yieldToEventLoop();
+    const reason = renderer.render(event.data);
+    if (reason !== undefined) {
+      event.reason = reason;
+    }
+  }
 };

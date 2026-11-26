@@ -6,7 +6,19 @@
  */
 
 import { MAX_REASON_TEMPLATE_LENGTH } from '@kbn/alerting-v2-schemas';
-import { buildDataContext, createReasonRenderer, type ReasonTemplateRule } from './reason_template';
+import { yieldToEventLoop } from '@kbn/workflows/server';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
+import {
+  applyReasons,
+  buildDataContext,
+  createReasonRenderer,
+  type ReasonRenderer,
+  type ReasonTemplateRule,
+} from './reason_template';
+
+jest.mock('@kbn/workflows/server', () => ({
+  yieldToEventLoop: jest.fn(() => Promise.resolve()),
+}));
 
 const rule: ReasonTemplateRule = {
   id: 'rule-1',
@@ -226,6 +238,21 @@ describe('buildDataContext', () => {
     });
   });
 
+  it('nests the shorter column whatever the column order, keeping the longer one by its flat name', () => {
+    const expected = {
+      'service.name': 'api',
+      'service.name.raw': 'API-01',
+      service: { name: 'api' },
+    };
+
+    expect(buildDataContext({ 'service.name': 'api', 'service.name.raw': 'API-01' })).toEqual(
+      expected
+    );
+    expect(buildDataContext({ 'service.name.raw': 'API-01', 'service.name': 'api' })).toEqual(
+      expected
+    );
+  });
+
   it('does not nest columns with empty path segments or unsafe keys, but keeps them by flat name', () => {
     const data = buildDataContext({ 'a..b': 1, '.a': 2, '__proto__.x': 3 });
 
@@ -257,5 +284,74 @@ describe('buildDataContext', () => {
       'obj.other': 2,
     });
     expect(nested).toEqual({ inner: 1 });
+  });
+});
+
+describe('applyReasons', () => {
+  const createEvent = (data: Record<string, unknown>) => ({ data } as AlertEventDocument);
+  const renderer = (renderRow: ReasonRenderer['render']): ReasonRenderer => ({
+    render: renderRow,
+  });
+
+  beforeEach(() => {
+    jest.mocked(yieldToEventLoop).mockClear();
+  });
+
+  it('sets the rendered reason on each event, rendering every row on its own', async () => {
+    const renderRow = jest.fn(
+      (row: Record<string, unknown>) => `CPU on ${String(row['host.name'])}`
+    );
+    const events = [createEvent({ 'host.name': 'host-a' }), createEvent({ 'host.name': 'host-b' })];
+
+    await applyReasons(events, renderer(renderRow));
+
+    expect(events.map((event) => event.reason)).toEqual(['CPU on host-a', 'CPU on host-b']);
+    expect(renderRow).toHaveBeenNthCalledWith(1, { 'host.name': 'host-a' });
+  });
+
+  it('does not change the stored data of the event', async () => {
+    const events = [createEvent({ 'host.name': 'host-a', cpu: 94 })];
+
+    await applyReasons(
+      events,
+      renderer(() => 'CPU high')
+    );
+
+    expect(events[0].data).toEqual({ 'host.name': 'host-a', cpu: 94 });
+  });
+
+  it('leaves events without a reason when the renderer returns undefined', async () => {
+    const events = [createEvent({ cpu: 1 })];
+
+    await applyReasons(
+      events,
+      renderer(() => undefined)
+    );
+
+    expect(events[0]).not.toHaveProperty('reason');
+  });
+
+  it('yields to the event loop before rendering each event', async () => {
+    const calls: string[] = [];
+    jest.mocked(yieldToEventLoop).mockImplementation(async () => {
+      calls.push('yield');
+    });
+    const renderRow = jest.fn(() => {
+      calls.push('render');
+      return 'reason';
+    });
+
+    await applyReasons([createEvent({}), createEvent({})], renderer(renderRow));
+
+    expect(calls).toEqual(['yield', 'render', 'yield', 'render']);
+  });
+
+  it('neither yields nor renders when the rule has no reason template', async () => {
+    const events = [createEvent({ cpu: 1 })];
+
+    await applyReasons(events, createReasonRenderer({ template: undefined, rule }));
+
+    expect(yieldToEventLoop).not.toHaveBeenCalled();
+    expect(events[0]).not.toHaveProperty('reason');
   });
 });

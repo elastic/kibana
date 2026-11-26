@@ -111,13 +111,18 @@ export const byEnvironment = <
   inEnvironment: { filter: inEnvironmentFilter(environment, filters), aggs },
 });
 
-/** One vital's samples (the filter's doc count) and stats, matching `cls` and `CLS` alike. */
+/** The web vital events of one vital, by its name, matching `cls` and `CLS` alike. */
+export const webVitalNameFilter = (vital: CoreWebVital) => ({
+  term: { [WEB_VITAL_NAME]: { value: vital, case_insensitive: true } },
+});
+
+/** One vital's samples (the filter's doc count) and stats. */
 export const webVital = (vital: CoreWebVital) => ({
   filter: {
     bool: {
       filter: [
         ...termQuery(OTEL_EVENT_NAME, EVENT_WEB_VITAL),
-        { term: { [WEB_VITAL_NAME]: { value: vital, case_insensitive: true } } },
+        webVitalNameFilter(vital),
         { exists: { field: WEB_VITAL_VALUE } },
       ],
     },

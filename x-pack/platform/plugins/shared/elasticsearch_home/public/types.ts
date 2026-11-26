@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import type { Observable } from 'rxjs';
 import type { IconType } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
+import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -84,8 +84,21 @@ export interface ElasticsearchHomePageProps {
   solutionNav?: KibanaPageTemplateProps['solutionNav'];
 }
 
+export interface ElasticsearchHomeAppProps extends ElasticsearchHomePageProps {
+  /**
+   * Receives the breadcrumbs for the current route, below the host's app root, so the host can
+   * prepend its own root, e.g. `searchNavigation.breadcrumbs.setSearchBreadCrumbs`.
+   */
+  setBreadcrumbs?: (breadcrumbs: ChromeBreadcrumb[]) => void;
+}
+
 export interface ElasticsearchHomePublicStart {
   HomePage: FC<ElasticsearchHomePageProps>;
+  /**
+   * The home page and its onboarding wizards, routed under the host's app root. Render it inside the
+   * host's `Router`.
+   */
+  HomeApp: FC<ElasticsearchHomeAppProps>;
   /**
    * Emits whether integrated onboarding is enabled, following flag changes. For code outside React,
    * such as an `AppUpdater`.

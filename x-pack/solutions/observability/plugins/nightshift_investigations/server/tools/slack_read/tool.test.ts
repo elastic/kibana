@@ -103,6 +103,31 @@ describe('platform.nightshift.slack_read', () => {
     });
   });
 
+  it('returns a not_readable read with the Relay message and the other Slack connectors', async () => {
+    const { run, execute } = setup(['team-slack']);
+    execute.mockResolvedValue({
+      status: 'ok',
+      data: {
+        ok: false,
+        reason: 'not_readable',
+        channel: 'C1',
+        message: 'private channels cannot be read',
+      },
+    });
+
+    const result = await run({ subAction: 'getConversationHistory', params: { channel: 'C1' } });
+
+    expect(result.type).toBe('other');
+    expect(result.data).toEqual({
+      ok: false,
+      reason: 'not_readable',
+      channel: 'C1',
+      message: 'private channels cannot be read',
+      connectorId: 'elastic-apps-slack',
+      otherSlackConnectorIds: ['team-slack'],
+    });
+  });
+
   it('keeps other agents to their assigned connectors, without the Elastic Slack app', async () => {
     const { run, execute } = setup(['team-slack'], { agentId: 'custom-agent' });
 

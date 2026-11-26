@@ -95,7 +95,8 @@ export interface GetFeatureActionsArgs {
   onClose: () => void;
 }
 
-export interface IVectorSource extends ISource {
+export interface IVectorSource<TSourceDescriptor = Record<string, unknown>>
+  extends ISource<TSourceDescriptor> {
   isMvt(): boolean;
   getTooltipProperties(
     properties: GeoJsonProperties,

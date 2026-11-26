@@ -26,6 +26,7 @@ import {
 } from './common';
 import {
   ID_MAX_LENGTH,
+  MAX_BUILDER_TYPE_LENGTH,
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
   MAX_REASON_TEMPLATE_LENGTH,
@@ -103,7 +104,11 @@ const metadataDescriptionSchema = lazySchema(() =>
 const metadataTagsSchema = lazySchema(() => tagsSchema.min(1));
 const metadataRoutingTagsSchema = lazySchema(() => tagsSchema.min(1));
 const metadataBuilderSchema = lazySchema(() =>
-  z.object({ type: z.string().max(64).trim().min(1).describe('Rule builder type.') }).strict()
+  z
+    .object({
+      type: z.string().max(MAX_BUILDER_TYPE_LENGTH).trim().min(1).describe('Rule builder type.'),
+    })
+    .strict()
 );
 
 export const metadataSchema = lazySchema(() =>
@@ -708,7 +713,7 @@ const artifactsSchema = lazySchema(() =>
 
 /** Create rule API schema */
 
-const REASON_DESCRIPTION = `Alert reason configuration. Only allowed when kind is "alert". \`template\` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Maximum ${MAX_REASON_TEMPLATE_LENGTH} characters. Whitespace is preserved; empty or whitespace-only templates are rejected.`;
+const REASON_DESCRIPTION = `Alert reason configuration. Only allowed when kind is "alert". \`template\` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected.`;
 
 const reasonSchema = lazySchema(() =>
   z

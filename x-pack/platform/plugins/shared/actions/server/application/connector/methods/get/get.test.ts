@@ -662,6 +662,49 @@ describe('get()', () => {
       expect(result.authMode).toBe('shared');
     });
 
+    test('returns the pinned specVersion', async () => {
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Test Connector',
+          actionTypeId: '.abuseipdb',
+          config: {},
+          isMissingSecrets: false,
+          specVersion: '1.3',
+        },
+        references: [],
+      });
+
+      const result = await get({
+        context: mockContext,
+        id: '1',
+      });
+
+      expect(result.specVersion).toBe('1.3');
+    });
+
+    test('omits specVersion when the connector has no pinned version', async () => {
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Test Connector',
+          actionTypeId: '.abuseipdb',
+          config: {},
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
+
+      const result = await get({
+        context: mockContext,
+        id: '1',
+      });
+
+      expect(result).not.toHaveProperty('specVersion');
+    });
+
     test('sets isMissingSecrets correctly', async () => {
       getConnectorSoMock.mockResolvedValueOnce({
         id: '1',

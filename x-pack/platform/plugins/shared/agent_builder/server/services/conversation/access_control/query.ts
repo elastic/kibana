@@ -20,7 +20,7 @@ const buildPublicConversationFilter = () => {
  * username only when it did not (legacy conversations, and ones created by callers without a
  * profile). Mirrors `isConversationOwner`.
  */
-const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
+export const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
   const shouldClauses: Array<Record<string, unknown>> = [];
 
   if (user.id !== undefined) {

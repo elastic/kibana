@@ -27,6 +27,8 @@
  *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id` on EDOT Browser data
+ * - withPageRoute (boolean, default: true): write the page route as `attributes.url.template` on
+ *   EDOT Browser logs (see `digital_experience_browser`)
  * - includeRawAttribution (boolean, default: false): write web vital attribution JSON bodies
  * - environments (boolean, default: false): spread the EDOT Browser apps over several
  *   environments. The classic RUM app then runs in `production`.
