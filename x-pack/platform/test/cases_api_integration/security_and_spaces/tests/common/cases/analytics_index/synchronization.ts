@@ -43,8 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  // Failing: See https://github.com/elastic/kibana/issues/227734
-  describe.skip('analytics indexes synchronization task', () => {
+  describe('analytics indexes synchronization task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -63,8 +62,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(esClient);
     });
 
-    // This test passes locally but fails in the flaky test runner.
-    // Increasing the timeout did not work.
     it('should sync the cases index', async () => {
       await createConfiguration(
         supertest,
@@ -100,7 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      await runCAISynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest, retry);
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
@@ -187,7 +184,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runCAISynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest, retry, 'space1');
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
@@ -218,7 +215,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
 
-      await runCAISynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest, retry);
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
@@ -278,7 +275,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      await runCAISynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest, retry);
 
       let activityArray: any[] = [];
       await retry.try(async () => {
