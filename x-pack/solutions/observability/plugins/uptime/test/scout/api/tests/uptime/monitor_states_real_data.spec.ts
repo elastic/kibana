@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { MonitorSummariesResult } from '../../fixtures/helpers/runtime_types';
@@ -45,7 +46,7 @@ const checkMonitorStatesResponse = ({
   expect(nextPagePagination).toStrictEqual(nextPagination);
 };
 
-apiTest.describe('monitor states endpoint', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('monitor states endpoint', { tag: tags.local.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
 
   const from = '2019-09-11T03:30:04.380Z';

@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ScoutPrivateLocation } from '../../../common/services/synthetics_private_location_api_service';
 import {
@@ -48,7 +49,11 @@ const MONITOR_COUNT = 8;
  * needed. A spec that wants the switch off should flip it at runtime with
  * `setRebalancePrivateLocationShardsEnabled`.
  */
-apiTest.describe('ScalablePrivateLocationRebalance', { tag: ['@local-stateful-classic'] }, () => {
+// Stateful-only: `indexFakeFleetAgent` (common/fixtures/fleet.ts) writes fake agents into
+// `.fleet-agents` as a native ES user it creates with `security.putUser`, with
+// `allow_restricted_indices`. Serverless Elasticsearch has no native realm users, so that
+// helper can't run there.
+apiTest.describe('ScalablePrivateLocationRebalance', { tag: tags.local.stateful.classic }, () => {
   let editorHeaders: Record<string, string>;
   let adminHeaders: Record<string, string>;
   let privateLocation: ScoutPrivateLocation;

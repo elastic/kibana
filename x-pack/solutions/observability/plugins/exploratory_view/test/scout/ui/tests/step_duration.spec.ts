@@ -13,6 +13,9 @@ import moment from 'moment';
 import { createExploratoryViewUrl } from '../../../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
 import { test } from '../fixtures';
 
+// Stateful only: the series uses the `uptime` data type, which the legacy Uptime plugin provides,
+// and that plugin is disabled on serverless (`xpack.legacy_uptime.enabled: false` in
+// config/serverless.oblt.yml), so the chart has no data there.
 test.describe('Step Duration series', { tag: tags.stateful.classic }, () => {
   test('builds series with step duration metric', async ({ pageObjects, page, browserAuth }) => {
     await test.step('Go to Exploratory view', async () => {

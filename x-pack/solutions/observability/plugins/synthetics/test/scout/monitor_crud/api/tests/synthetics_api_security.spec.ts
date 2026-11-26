@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-oblt';
 import {
@@ -106,82 +107,91 @@ const request = (
   }
 };
 
-apiTest.describe('SyntheticsAPISecurity', { tag: ['@local-stateful-classic'] }, () => {
-  let spaceId: string;
-  let noAccessHeaders: Record<string, string>;
-  let readHeaders: Record<string, string>;
+apiTest.describe(
+  'SyntheticsAPISecurity',
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
+  () => {
+    let spaceId: string;
+    let noAccessHeaders: Record<string, string>;
+    let readHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    spaceId = `test-space-${uuidv4()}`;
-    await kbnClient.spaces.create({ id: spaceId, name: `test-space-name ${uuidv4()}` });
+    apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
+      spaceId = `test-space-${uuidv4()}`;
+      await kbnClient.spaces.create({ id: spaceId, name: `test-space-name ${uuidv4()}` });
 
-    const noAccessRole: KibanaRole = {
-      elasticsearch: { cluster: [] },
-      kibana: [{ base: [], feature: { slo: ['all'] }, spaces: ['*'] }],
-    };
-    const readRole: KibanaRole = {
-      elasticsearch: { cluster: [] },
-      kibana: [{ base: [], feature: { uptime: ['read'], slo: ['all'] }, spaces: ['*'] }],
-    };
+      const noAccessRole: KibanaRole = {
+        elasticsearch: { cluster: [] },
+        kibana: [{ base: [], feature: { slo: ['all'] }, spaces: ['*'] }],
+      };
+      const readRole: KibanaRole = {
+        elasticsearch: { cluster: [] },
+        kibana: [{ base: [], feature: { uptime: ['read'], slo: ['all'] }, spaces: ['*'] }],
+      };
 
-    const { apiKeyHeader: noAccessKey } = await requestAuth.getApiKeyForCustomRole(noAccessRole);
-    noAccessHeaders = mergeSyntheticsApiHeaders(noAccessKey);
-    const { apiKeyHeader: readKey } = await requestAuth.getApiKeyForCustomRole(readRole);
-    readHeaders = mergeSyntheticsApiHeaders(readKey);
-  });
+      const { apiKeyHeader: noAccessKey } = await requestAuth.getApiKeyForCustomRole(noAccessRole);
+      noAccessHeaders = mergeSyntheticsApiHeaders(noAccessKey);
+      const { apiKeyHeader: readKey } = await requestAuth.getApiKeyForCustomRole(readRole);
+      readHeaders = mergeSyntheticsApiHeaders(readKey);
+    });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
-    if (spaceId) {
-      await kbnClient.spaces.delete(spaceId).catch(() => {});
-    }
-  });
+    apiTest.afterAll(async ({ kbnClient }) => {
+      if (spaceId) {
+        await kbnClient.spaces.delete(spaceId).catch(() => {});
+      }
+    });
 
-  const verifyForbiddenMessage = (
-    body: { message?: string },
-    route: SweepRoute,
-    readUser: boolean
-  ) => {
-    const message = body?.message ?? '';
-    // Index-privilege failures surface a different message that the FTR
-    // original also skips.
-    if (message.includes('MissingIndicesPrivileges:')) {
-      return;
-    }
-    expect(decodeURIComponent(message)).toBe(
-      `API [${route.method} ${
-        route.path
-      }] is unauthorized for user, this action is granted by the Kibana privileges ${expectedBodyTag(
-        route,
-        readUser
-      )}`
-    );
-  };
-
-  apiTest('throws permissions errors for un-auth user', async ({ apiClient }) => {
-    for (const route of allRoutes) {
-      const res = await request(
-        apiClient,
-        route.method,
-        `s/${spaceId}${route.path}`,
-        noAccessHeaders
+    const verifyForbiddenMessage = (
+      body: { message?: string },
+      route: SweepRoute,
+      readUser: boolean
+    ) => {
+      const message = body?.message ?? '';
+      // Index-privilege failures surface a different message that the FTR
+      // original also skips.
+      if (message.includes('MissingIndicesPrivileges:')) {
+        return;
+      }
+      expect(decodeURIComponent(message)).toBe(
+        `API [${route.method} ${
+          route.path
+        }] is unauthorized for user, this action is granted by the Kibana privileges ${expectedBodyTag(
+          route,
+          readUser
+        )}`
       );
-      expect(res.statusCode).toBe(403);
-      verifyForbiddenMessage(res.body as { message?: string }, route, false);
-    }
-  });
+    };
 
-  apiTest('throws permissions errors for read user', async ({ apiClient }) => {
-    for (const route of allRoutes) {
-      // Skip pure read routes, but keep OR-set routes (e.g. run-test) — a read user
-      // still lacks every OR member and should be rejected.
-      if (!route.writeAccess && !route.anyRequiredPrivileges?.length) {
-        continue;
+    apiTest('throws permissions errors for un-auth user', async ({ apiClient }) => {
+      for (const route of allRoutes) {
+        const res = await request(
+          apiClient,
+          route.method,
+          `s/${spaceId}${route.path}`,
+          noAccessHeaders
+        );
+        expect(res.statusCode).toBe(403);
+        verifyForbiddenMessage(res.body as { message?: string }, route, false);
       }
-      const res = await request(apiClient, route.method, `s/${spaceId}${route.path}`, readHeaders);
-      expect([200, 403, 500, 400, 404]).toContain(res.statusCode);
-      if (res.statusCode === 403) {
-        verifyForbiddenMessage(res.body as { message?: string }, route, true);
+    });
+
+    apiTest('throws permissions errors for read user', async ({ apiClient }) => {
+      for (const route of allRoutes) {
+        // Skip pure read routes, but keep OR-set routes (e.g. run-test) — a read user
+        // still lacks every OR member and should be rejected.
+        if (!route.writeAccess && !route.anyRequiredPrivileges?.length) {
+          continue;
+        }
+        const res = await request(
+          apiClient,
+          route.method,
+          `s/${spaceId}${route.path}`,
+          readHeaders
+        );
+        expect([200, 403, 500, 400, 404]).toContain(res.statusCode);
+        if (res.statusCode === 403) {
+          verifyForbiddenMessage(res.body as { message?: string }, route, true);
+        }
       }
-    }
-  });
-});
+    });
+  }
+);

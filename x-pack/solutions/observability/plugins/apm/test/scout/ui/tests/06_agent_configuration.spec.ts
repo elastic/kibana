@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
+// Agent configuration is not available on serverless, so this test only runs on stateful.
 test.describe('Agent Configuration', { tag: [...tags.stateful.classic] }, () => {
   test('Viewer should not be able to modify settings', async ({
     pageObjects: { agentConfigurationsPage },

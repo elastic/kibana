@@ -13,6 +13,10 @@ import { test, testData } from '../../fixtures';
 
 const getQueryParam = (page: ScoutPage, name: string) => new URL(page.url()).searchParams.get(name);
 
+// Stateful only: Universal Profiling is not supported on serverless (its setup, status and
+// storage explorer routes are not registered there). Serverless will get profiling through
+// OTel profiling data instead, which needs its own tests. See
+// https://github.com/elastic/kibana/issues/297749
 test.describe('Add data page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_OTEL_TEST_DATES;
 

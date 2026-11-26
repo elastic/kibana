@@ -6,6 +6,7 @@
  */
 
 import { isRight } from 'fp-ts/Either';
+import { tags } from '@kbn/scout-oblt';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
@@ -16,7 +17,7 @@ import { CertType } from '../../fixtures/helpers/runtime_types';
 import { apiTest, testData } from '../../fixtures';
 import { makeChecksWithStatus } from '../../fixtures/helpers/make_checks';
 
-apiTest.describe('certs api', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('certs api', { tag: tags.local.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {

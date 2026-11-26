@@ -9,6 +9,10 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
+// Stateful only: Universal Profiling is not supported on serverless (its setup, status and
+// storage explorer routes are not registered there). Serverless will get profiling through
+// OTel profiling data instead, which needs its own tests. See
+// https://github.com/elastic/kibana/issues/297749
 test.describe('Differential Functions page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
   const comparisonRangeFrom = '2023-04-18T00:01:00.000Z';

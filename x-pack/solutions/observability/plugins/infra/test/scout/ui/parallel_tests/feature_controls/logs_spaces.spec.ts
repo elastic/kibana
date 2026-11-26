@@ -13,6 +13,8 @@ import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 const SPACE_ALL_ENABLED = 'logs_spaces_all_enabled';
 const SPACE_LOGS_DISABLED = 'logs_spaces_logs_disabled';
 
+// Stateful-only: creates spaces with `disabledFeatures`, and serverless sets
+// `xpack.spaces.allowFeatureVisibility: false` (config/serverless.yml).
 test.describe('Logs feature controls - spaces', { tag: tags.stateful.classic }, () => {
   const SPACE_IDS = [SPACE_ALL_ENABLED, SPACE_LOGS_DISABLED];
 

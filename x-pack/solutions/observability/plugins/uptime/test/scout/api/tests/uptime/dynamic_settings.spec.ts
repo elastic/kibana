@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { KbnClient, RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
-apiTest.describe('dynamic settings', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('dynamic settings', { tag: tags.local.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {

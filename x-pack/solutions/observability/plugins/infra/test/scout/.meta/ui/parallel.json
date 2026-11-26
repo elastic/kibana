@@ -1,5 +1,5 @@
 {
-  "sha1": "862d5442cd839680b21009e1b0182a1da7f2ba50",
+  "sha1": "3d3ea2414e78f6ccc5a6fdf13046bcd822789c15",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
-        "line": 46,
-        "column": 5
+        "line": 47,
+        "column": 23
       }
     },
     {
@@ -158,8 +158,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
-        "line": 60,
-        "column": 13
+        "line": 61,
+        "column": 11
       }
     },
     {
@@ -172,8 +172,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
-        "line": 69,
-        "column": 11
+        "line": 70,
+        "column": 9
       }
     },
     {
@@ -228,8 +228,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_spaces.spec.ts",
-        "line": 31,
-        "column": 26
+        "line": 33,
+        "column": 8
       }
     },
     {
@@ -242,8 +242,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_spaces.spec.ts",
-        "line": 36,
-        "column": 41
+        "line": 38,
+        "column": 20
       }
     },
     {
@@ -1134,8 +1134,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 37,
-        "column": 5
+        "line": 40,
+        "column": 65
       }
     },
     {
@@ -1148,8 +1148,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 41,
-        "column": 23
+        "line": 44,
+        "column": 79
       }
     },
     {
@@ -1162,8 +1162,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 48,
-        "column": 11
+        "line": 51,
+        "column": 26
       }
     },
     {
@@ -1176,8 +1176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 58,
-        "column": 11
+        "line": 61,
+        "column": 97
       }
     },
     {
@@ -1190,8 +1190,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 69,
-        "column": 11
+        "line": 72,
+        "column": 13
       }
     },
     {
@@ -1204,8 +1204,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 82,
-        "column": 53
+        "line": 86,
+        "column": 37
       }
     },
     {
@@ -1218,8 +1218,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 98,
-        "column": 5
+        "line": 101,
+        "column": 13
       }
     },
     {

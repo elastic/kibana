@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { globalTeardownHook } from '@kbn/scout-oblt';
+import { globalTeardownHook, tags } from '@kbn/scout-oblt';
 import { DISCOVER_KBN_ARCHIVES } from '../fixtures/setup';
 
 globalTeardownHook(
   'Unload Discover telemetry data',
-  { tag: ['@local-serverless-observability_complete'] },
+  { tag: tags.local.serverless.observability.complete },
   async ({ kbnClient }) => {
     for (const archive of DISCOVER_KBN_ARCHIVES) {
       await kbnClient.importExport.unload(archive);

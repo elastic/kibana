@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('UptimeOverview', { tag: '@local-stateful-classic' }, () => {
+test.describe('UptimeOverview', { tag: tags.local.stateful.classic }, () => {
   test('navigates to overview and clicks monitor', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsViewer();
 
     await test.step('configure heartbeat indices', async () => {
-      await pageObjects.uptimeOverview.goto({ dateRangeStart: '2018-01-01', dateRangeEnd: 'now' });
+      await pageObjects.uptimeOverview.goto({
+        dateRangeStart: '2018-01-01',
+        dateRangeEnd: 'now',
+      });
       await pageObjects.uptimeOverview.clickSettingsLink();
       await pageObjects.uptimeSettings.waitForLoadingToFinish();
       await expect(pageObjects.uptimeOverview.getHeartbeatIndicesInput()).toHaveValue(
@@ -22,7 +26,10 @@ test.describe('UptimeOverview', { tag: '@local-stateful-classic' }, () => {
     });
 
     await test.step('navigate to overview and click monitor', async () => {
-      await pageObjects.uptimeOverview.goto({ dateRangeStart: '2018-01-01', dateRangeEnd: 'now' });
+      await pageObjects.uptimeOverview.goto({
+        dateRangeStart: '2018-01-01',
+        dateRangeEnd: 'now',
+      });
       await pageObjects.uptimeOverview.waitForMonitorTable();
       await pageObjects.uptimeOverview.clickMonitorLink('0001-up');
       await expect(pageObjects.uptimeOverview.getPingListTable()).toBeVisible();

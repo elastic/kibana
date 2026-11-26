@@ -9,6 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
+// Fleet renders the generic managed-policy page on serverless without the Synthetics-specific
+// callout and edit link exercised by this suite.
 test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => {
   const NEW_LOCATION_LABEL = 'Updated Test Location';
   const FLEET_POLICY_NAME = 'Test fleet policy';

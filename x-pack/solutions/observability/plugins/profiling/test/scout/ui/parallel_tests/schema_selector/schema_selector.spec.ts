@@ -14,6 +14,10 @@ import { test, testData } from '../../fixtures';
 const getSchemaQueryParam = (page: ScoutPage) => new URL(page.url()).searchParams.get('schema');
 const getPathname = (page: ScoutPage) => new URL(page.url()).pathname;
 
+// Stateful only: Universal Profiling is not supported on serverless (its setup, status and
+// storage explorer routes are not registered there). Serverless will get profiling through
+// OTel profiling data instead, which needs its own tests. See
+// https://github.com/elastic/kibana/issues/297749
 test.describe('Profiling schema selector', { tag: tags.stateful.classic }, () => {
   // Universal Profiling (ECS) and OTel test data do not overlap in time
   const ecsDates = testData.PROFILING_TEST_DATES;

@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { makeUpSummary } from '@kbn/observability-synthetics-test-data';
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { getOverviewConfigKey } from '../../../../../common/lib/overview_config_key';
@@ -94,7 +95,7 @@ const pageBucketKeys = (body: OverviewStatusBody) => [
 apiTest.describe(
   'getOverviewStatus',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;

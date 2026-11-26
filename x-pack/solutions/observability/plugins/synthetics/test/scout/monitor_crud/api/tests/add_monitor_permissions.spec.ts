@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import {
@@ -24,25 +25,25 @@ import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 import { browserMonitorFixture } from '../../../common/fixtures/data/browser_monitor';
 
 /** Elasticsearch privileges of the synthetics service writer (`getServiceApiKeyPrivileges(false)`). */
-const SYNTHETICS_SERVICE_ES_PRIVILEGES = {
-  cluster: ['monitor', 'read_pipeline', 'read_ilm'],
+const getSyntheticsServiceEsPrivileges = (isServerless: boolean) => ({
+  cluster: isServerless ? ['monitor', 'read_pipeline'] : ['monitor', 'read_pipeline', 'read_ilm'],
   indices: [
     {
       names: ['synthetics-*'],
       privileges: ['view_index_metadata', 'create_doc', 'auto_configure', 'read'],
     },
   ],
-};
+});
 
-const UPTIME_ALL_ROLE: KibanaRole = {
-  elasticsearch: SYNTHETICS_SERVICE_ES_PRIVILEGES,
+const getUptimeAllRole = (isServerless: boolean): KibanaRole => ({
+  elasticsearch: getSyntheticsServiceEsPrivileges(isServerless),
   kibana: [{ base: [], feature: { uptime: ['all'] }, spaces: ['*'] }],
-};
+});
 
-const UPTIME_READ_ROLE: KibanaRole = {
-  elasticsearch: SYNTHETICS_SERVICE_ES_PRIVILEGES,
+const getUptimeReadRole = (isServerless: boolean): KibanaRole => ({
+  elasticsearch: getSyntheticsServiceEsPrivileges(isServerless),
   kibana: [{ base: [], feature: { uptime: ['read'] }, spaces: ['*'] }],
-};
+});
 
 /**
  * Ported from FTR `apis/synthetics/add_monitor.ts` (`AddNewMonitorsUI`).
@@ -54,25 +55,29 @@ const UPTIME_READ_ROLE: KibanaRole = {
  * The FTR suite minted Kibana API keys with `kibana_role_descriptors` and
  * created bespoke ES users + basic auth. Scout resolves the equivalent scoped
  * credentials with `requestAuth.getApiKey` / `getApiKeyForCustomRole`. The
- * suite is `@local-stateful-classic` only: it depends on api-key/role auth and
+ * suite is local-only (stateful + serverless): it depends on api-key/role auth and
  * public service locations that the FTR original tagged `skipCloud`.
  */
 apiTest.describe(
   'AddNewMonitorsUI permissions and warnings',
-  { tag: ['@local-stateful-classic'] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let editorHeaders: Record<string, string>;
     let uptimeAllHeaders: Record<string, string>;
     let uptimeReadHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, samlAuth, apiClient, kbnClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, samlAuth, apiClient, kbnClient, config }) => {
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
 
       const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
       editorHeaders = mergeSyntheticsApiHeaders(editorKey, { Accept: 'application/json' });
-      const { apiKeyHeader: allKey } = await requestAuth.getApiKeyForCustomRole(UPTIME_ALL_ROLE);
+      const { apiKeyHeader: allKey } = await requestAuth.getApiKeyForCustomRole(
+        getUptimeAllRole(config.serverless)
+      );
       uptimeAllHeaders = mergeSyntheticsApiHeaders(allKey, { Accept: 'application/json' });
-      const { apiKeyHeader: readKey } = await requestAuth.getApiKeyForCustomRole(UPTIME_READ_ROLE);
+      const { apiKeyHeader: readKey } = await requestAuth.getApiKeyForCustomRole(
+        getUptimeReadRole(config.serverless)
+      );
       uptimeReadHeaders = mergeSyntheticsApiHeaders(readKey, { Accept: 'application/json' });
 
       // Enabling synthetics creates a nested service api key, which fails under

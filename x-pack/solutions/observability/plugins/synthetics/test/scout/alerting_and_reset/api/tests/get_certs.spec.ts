@@ -7,6 +7,7 @@
 
 import { makeUpSummary } from '@kbn/observability-synthetics-test-data';
 import { v4 as uuidv4 } from 'uuid';
+import { tags } from '@kbn/scout-oblt';
 import type { ApiClientFixture, EsClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders, SYNTHETICS_API_URLS } from '../../../common/fixtures';
@@ -71,7 +72,7 @@ const certData = (res: { body: unknown }): CertResultBody =>
 apiTest.describe(
   'getCertificates',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;
@@ -85,7 +86,7 @@ apiTest.describe(
         sha256,
         tlsNotAfter,
         id = monitorId,
-        tags = [TEST_TAG],
+        tags: docTags = [TEST_TAG],
       }: {
         commonName: string;
         sha256: string;
@@ -103,7 +104,7 @@ apiTest.describe(
         timestamp: new Date(now).toISOString(),
         tlsNotAfter,
       }) as Record<string, any>;
-      document.tags = tags;
+      document.tags = docTags;
       document.tls.server.x509.subject.common_name = commonName;
       document.tls.server.x509.subject.distinguished_name = `CN=${commonName}`;
       document.tls.server.hash.sha256 = sha256;

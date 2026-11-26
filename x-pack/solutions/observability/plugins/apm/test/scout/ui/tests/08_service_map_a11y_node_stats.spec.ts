@@ -19,6 +19,7 @@
  * local `apiServices` does, so this suite is intentionally local-only for now.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { enableServiceMapGrouping, removeServiceMapGroupingOverride } from '../../shared';
 import { test, testData } from '../fixtures';
@@ -36,7 +37,9 @@ const IDLE_NODE_OPACITY = 0.5;
 test.describe(
   'Service map - accessibility with node stats',
   // Local servers only: the flag can only be overridden there (see `enableServiceMapGrouping`)
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  {
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
+  },
   () => {
     test.beforeAll(async ({ apiServices, apmSynthtraceEsClient }) => {
       await enableServiceMapGrouping(apiServices);

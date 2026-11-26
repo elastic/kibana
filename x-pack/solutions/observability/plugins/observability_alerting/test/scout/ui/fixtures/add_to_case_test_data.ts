@@ -82,7 +82,7 @@ export const createAddToCaseRule = async ({
     consumer: 'logs',
     enabled: true,
     tags: [],
-    schedule: { interval: '10s' },
+    schedule: { interval: '1m' },
     actions: [],
     params: {
       criteria: [

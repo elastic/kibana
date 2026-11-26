@@ -173,6 +173,35 @@ export const tags = {
   performance: [SCOUT_PERFORMANCE_PLAYWRIGHT_TAG],
 
   /**
+   * Same shape as the stateful / serverless sets above, but selecting **local** test targets
+   * only (`@local-*`): the tests never run against Elastic Cloud (ECH / MKI).
+   *
+   * Use it for suites that can't run on Cloud, e.g. because they rely on Kibana server args.
+   */
+  local: {
+    stateful: {
+      classic: getPlaywrightTagsFor('stateful', 'classic', 'local'),
+    },
+    serverless: {
+      search: getPlaywrightTagsFor('serverless', 'search', 'local'),
+      observability: {
+        complete: getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
+        logs_essentials: getPlaywrightTagsFor(
+          'serverless',
+          'observability_logs_essentials',
+          'local'
+        ),
+      },
+      security: {
+        complete: getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
+        essentials: getPlaywrightTagsFor('serverless', 'security_essentials', 'local'),
+        ease: getPlaywrightTagsFor('serverless', 'security_ease', 'local'),
+      },
+      vectordb: getPlaywrightTagsFor('serverless', 'vectordb', 'local'),
+    },
+  },
+
+  /**
    * Limits narrowing the test targets a test runs on, based on target attributes.
    * They complement — never replace — the deployment tags above: a test still needs
    * at least one deployment tag to be discovered at all.

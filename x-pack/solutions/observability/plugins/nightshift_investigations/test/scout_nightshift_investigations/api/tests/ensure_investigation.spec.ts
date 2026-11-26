@@ -9,11 +9,9 @@ import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
 import { apiTest, INVESTIGATIONS_WRITE_ROLE, ensureInvestigation, uniqueId } from '../fixtures';
 
-// Ensuring an investigation needs the agentic investigations plugin, which is not enabled on
-// serverless yet, so only the authorization check runs there.
 apiTest.describe(
   'POST /internal/nightshift/investigations/{id}/_ensure',
-  { tag: tags.stateful.classic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
 

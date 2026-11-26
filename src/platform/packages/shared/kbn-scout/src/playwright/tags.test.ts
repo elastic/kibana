@@ -121,6 +121,20 @@ describe('tags', () => {
     });
   });
 
+  describe('local', () => {
+    it('selects local targets only', () => {
+      expect(tags.local.stateful.classic).toStrictEqual(['@local-stateful-classic']);
+      expect(tags.local.serverless.observability.complete).toStrictEqual([
+        '@local-serverless-observability_complete',
+      ]);
+    });
+
+    it('is the local subset of the matching top-level set', () => {
+      expect(tags.stateful.classic).toEqual(expect.arrayContaining(tags.local.stateful.classic));
+      expect(tags.serverless.search).toEqual(expect.arrayContaining(tags.local.serverless.search));
+    });
+  });
+
   describe('performance', () => {
     it('contains perf tag', () => {
       expect(tags.performance).toEqual(['@perf']);

@@ -8,6 +8,10 @@
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { testData } from '../fixtures';
 
+// Stateful only: the specs read the legacy Uptime and the UX (RUM) data, and both plugins are
+// disabled on serverless (`xpack.legacy_uptime.enabled` and `xpack.ux.enabled` are `false` in
+// config/serverless.oblt.yml). The RUM archives also set `index.lifecycle.name`, which serverless
+// Elasticsearch rejects.
 globalSetupHook(
   'Ingest Exploratory View test data',
   { tag: tags.stateful.classic },
