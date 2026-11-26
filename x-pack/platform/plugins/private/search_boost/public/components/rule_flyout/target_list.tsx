@@ -38,6 +38,7 @@ import {
   TARGET_LIST_PROMPTS,
   UNFILTERED_LIST_REASON,
   getExactMatchesCount,
+  getOutrankedByLabel,
   getPartialMatchesCount,
 } from './translations';
 
@@ -111,7 +112,10 @@ const ListOptionSwitch = ({
   );
   return disabledReason ? (
     <EuiToolTip content={disabledReason} anchorProps={{ 'data-test-subj': `${dataTestSubj}Tip` }}>
-      {toggle}
+      {/* The switch is disabled, so this wrapper takes focus to show the tooltip. */}
+      <div tabIndex={0} data-test-subj={`${dataTestSubj}Trigger`}>
+        {toggle}
+      </div>
     </EuiToolTip>
   ) : (
     toggle
@@ -165,9 +169,9 @@ const TargetLabel = ({ target }: { target: MatchedTarget }) => {
               type="sortAscending"
               size="s"
               color={euiTheme.colors.textDisabled}
-              aria-hidden={true}
+              aria-label={getOutrankedByLabel(outrankedByRuleName)}
             />{' '}
-            {outrankedByRuleName}
+            <span aria-hidden={true}>{outrankedByRuleName}</span>
           </EuiText>
         </EuiFlexItem>
       ) : null}
@@ -200,6 +204,7 @@ export const TargetList = ({ type, pattern, targets, isDisabled, onSelect }: Tar
             size="xs"
             color="subdued"
             id={titleId}
+            aria-live="polite"
             data-test-subj="searchBoostRuleTargetsTitle"
           >
             {getTitle(type, pattern, targets)}
@@ -258,9 +263,15 @@ export const TargetList = ({ type, pattern, targets, isDisabled, onSelect }: Tar
                     )
                   }
                   isDisabled={isDisabled || Boolean(outrankedByRuleName)}
+                  hasAriaDisabled={!isDisabled && Boolean(outrankedByRuleName)}
                   showToolTip={Boolean(outrankedByRuleName)}
                   toolTipText={
                     outrankedByRuleName ? getOutrankedTooltip(outrankedByRuleName) : undefined
+                  }
+                  toolTipProps={
+                    outrankedByRuleName
+                      ? { anchorProps: { 'data-test-subj': `searchBoostRuleTargetTip-${name}` } }
+                      : undefined
                   }
                   onClick={() => onSelect(name)}
                   data-test-subj={`searchBoostRuleTarget-${name}`}

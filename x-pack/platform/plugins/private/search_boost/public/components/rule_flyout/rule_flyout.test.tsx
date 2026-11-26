@@ -292,11 +292,42 @@ describe('RuleFlyout', () => {
         '1 partial match'
       );
       expect(getTargetNames()).toEqual(['catalog-2026-fall']);
-      expect(screen.getByTestId('searchBoostRuleTarget-catalog-2026-fall')).toBeDisabled();
+      const target = screen.getByTestId('searchBoostRuleTarget-catalog-2026-fall');
+      expect(target).toHaveAttribute('aria-disabled', 'true');
+      expect(target).toHaveAccessibleName(/^Partial match .* Outranked by storefront-catalogs$/);
       expect(screen.getByTestId('searchBoostRuleTargetOutrankedBy')).toHaveTextContent(
         'storefront-catalogs'
       );
       expect(screen.queryByTestId('searchBoostAppliesToFooter')).not.toBeInTheDocument();
+    });
+
+    it('announces an outranked target and shows its priority hint on hover and focus without selecting it', async () => {
+      renderFlyout();
+
+      await selectProfile('storefront-search');
+      const target = screen.getByTestId('searchBoostRuleTarget-catalog-2026-fall');
+
+      expect(target).toHaveAccessibleName('catalog-2026-fall Outranked by storefront-catalogs');
+
+      await userEvent.hover(screen.getByTestId('searchBoostRuleTargetTip-catalog-2026-fall'));
+      expect(
+        await screen.findByText(
+          '"storefront-catalogs" ranks higher, so it applies instead. To outrank it, increase this rule\'s priority.'
+        )
+      ).toBeInTheDocument();
+      await userEvent.unhover(screen.getByTestId('searchBoostRuleTargetTip-catalog-2026-fall'));
+
+      act(() => target.focus());
+
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(
+        '"storefront-catalogs" ranks higher, so it applies instead. To outrank it, increase this rule\'s priority.'
+      );
+      expect(target).toHaveAttribute('aria-describedby', tooltip.id);
+
+      // `aria-disabled` keeps the row focusable, so check that Enter doesn't fill the pattern field with it.
+      await userEvent.keyboard('{Enter}');
+      expect(screen.getByTestId('searchBoostRuleFlyoutIndexPattern')).toHaveValue('');
     });
 
     it('says when nothing matches', async () => {
@@ -338,6 +369,9 @@ describe('RuleFlyout', () => {
       await selectProfile('storefront-search');
       await typePattern('archive-*');
       await userEvent.click(screen.getByTestId('searchBoostRuleTargetsOptions'));
+      expect(
+        screen.queryByTestId('searchBoostRuleTargetsShowUnmatchedTrigger')
+      ).not.toBeInTheDocument();
       await userEvent.click(screen.getByTestId('searchBoostRuleTargetsShowUnmatched'));
 
       expect(getTargetNames()).toEqual([
@@ -361,6 +395,22 @@ describe('RuleFlyout', () => {
       expect(
         await screen.findByText("The list isn't filtered until you enter a pattern or name.")
       ).toBeInTheDocument();
+    });
+
+    it('shows why "Show unmatched" is off to keyboard users too', async () => {
+      renderFlyout();
+
+      await selectProfile('storefront-search');
+      await userEvent.click(screen.getByTestId('searchBoostRuleTargetsOptions'));
+      const trigger = screen.getByTestId('searchBoostRuleTargetsShowUnmatchedTrigger');
+
+      act(() => trigger.focus());
+
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(
+        "The list isn't filtered until you enter a pattern or name."
+      );
+      expect(trigger).toHaveAttribute('aria-describedby', tooltip.id);
     });
 
     it.each([

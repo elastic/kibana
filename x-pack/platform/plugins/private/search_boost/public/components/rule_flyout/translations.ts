@@ -159,6 +159,12 @@ export const MATCH_LABELS = {
   }),
 } as const;
 
+export const getOutrankedByLabel = (ruleName: string): string =>
+  i18n.translate('xpack.searchBoost.ruleFlyout.outrankedByAriaLabel', {
+    defaultMessage: 'Outranked by {ruleName}',
+    values: { ruleName },
+  });
+
 export const LIST_OPTIONS_LABEL = i18n.translate('xpack.searchBoost.ruleFlyout.listOptions', {
   defaultMessage: 'List options',
 });
