@@ -349,6 +349,7 @@ apiTest.describe('Index templates API', { tag: tags.deploymentAgnostic }, () => 
       expect(response).toHaveStatusCode(200);
 
       const updated = await getTemplate(apiClient, TEMPLATE_NAME);
+      expect(updated.body.version).toBe(2);
       expect(updated.body.template.data_stream_options).toStrictEqual(dataStreamOptions);
     }
   );
