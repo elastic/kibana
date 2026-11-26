@@ -59,7 +59,10 @@ const createDashboardApi = ({
     isManaged: managed,
     savedObjectId$: new BehaviorSubject<string | undefined>(unsaved ? undefined : 'dash-1'),
     getSerializedState: () => ({ attributes: { title: 'Test', panels } }),
-    timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+    timeRange$: new BehaviorSubject({
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+    }),
   } as unknown as DashboardApi);
 
 interface EmbeddableOptions {
@@ -110,7 +113,7 @@ const expectedPointer = (dashboardAttachmentId: string, label = 'CPU usage') => 
     label,
     panel_type: LENS_EMBEDDABLE_TYPE,
     editable: true,
-    time_range: { from: 'now-15m', to: 'now' },
+    time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
     request_id: expect.any(String),
   },
 });

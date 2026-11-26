@@ -220,7 +220,12 @@ export const registerDashboardAppIntegration = ({
       return undefined;
     }
     try {
-      return await applyAttachment({ attachment, api, dashboardLocator, toasts });
+      const outcome = await applyAttachment({ attachment, api, dashboardLocator, toasts });
+      // the new dashboard, e.g. an editable copy of a managed one, takes the attachment's next updates
+      if (outcome === 'opened-new-dashboard') {
+        stagedDashboards.remove(attachment.id);
+      }
+      return outcome;
     } catch (error) {
       toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
       return undefined;
