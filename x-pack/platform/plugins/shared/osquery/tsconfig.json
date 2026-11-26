@@ -109,6 +109,7 @@
     "@kbn/cps",
     "@kbn/core-chrome-browser-mocks",
     "@kbn/app-menu",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/core-application-browser"
   ]
 }
