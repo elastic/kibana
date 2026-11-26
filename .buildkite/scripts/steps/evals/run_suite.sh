@@ -29,6 +29,17 @@ if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
   export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
 fi
 
+# A Buildkite retry reuses the build-scoped TEST_RUN_ID (set above or inherited from the
+# fanout), so a retried pin-enabled step would export its scores under the same execution
+# ID as the failed attempt's partial export and pin the union of both attempts. Salting
+# the seed per job gives every attempt its own execution: the pin and the comparisons
+# read the full execution ID back from this job's metadata, so nothing needs the unsalted
+# form. Only the executing per-connector step salts (EVAL_PROJECT), and only once.
+if [[ "${EVAL_PIN_BASELINE:-}" == "1" && -n "${EVAL_PROJECT:-}" && -n "${TEST_RUN_ID:-}" &&
+  -n "${BUILDKITE_JOB_ID:-}" && "${TEST_RUN_ID}" != *"-job-"* ]]; then
+  export TEST_RUN_ID="${TEST_RUN_ID}-job-${BUILDKITE_JOB_ID}"
+fi
+
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
 
@@ -754,6 +765,12 @@ pin_baseline() {
   # baseline run finishing green with the active baseline unchanged would go unnoticed.
   if [[ -n "${EVAL_GREP:-}" || -n "${EVAL_GREP_INVERT:-}" ]]; then
     echo "EVAL_PIN_BASELINE=1 with EVAL_GREP/EVAL_GREP_INVERT would pin a filtered run as the suite baseline; refusing."
+    return 1
+  fi
+  # Spec-file filtering restricts the run the same way grep does; sharded suites set it
+  # too, but they are refused on EVAL_SHARD_ID below, so this covers unsharded use.
+  if [[ -n "${EVAL_SPEC_FILES:-}" ]]; then
+    echo "EVAL_PIN_BASELINE=1 with EVAL_SPEC_FILES would pin a subset of the suite as the baseline; refusing."
     return 1
   fi
   if [[ -z "${EVAL_PROJECT:-}" ]]; then
