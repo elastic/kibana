@@ -11,19 +11,36 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiText, EuiToolTip } from '@elastic/eui';
+
+import { OptionsListStrings } from '../options_list_strings';
 
 export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentCount: number }) => {
   return (
-    <EuiText
-      size="xs"
-      aria-hidden={true}
-      className="eui-textNumber"
-      data-test-subj="optionsList-document-count-badge"
-      css={styles.documentCountBadge}
-    >
-      {`${documentCount.toLocaleString()}`}
-    </EuiText>
+    <>
+      <EuiToolTip
+        content={OptionsListStrings.popover.getDocumentCountTooltip(documentCount)}
+        position={'right'}
+      >
+        <EuiText
+          // Not tabbable: the badge is `aria-hidden` and sits inside a `role="option"`; the count is announced by the screen reader text below
+          tabIndex={-1}
+          size="xs"
+          aria-hidden={true}
+          className="eui-textNumber"
+          data-test-subj="optionsList-document-count-badge"
+          css={styles.documentCountBadge}
+        >
+          {`${documentCount.toLocaleString()}`}
+        </EuiText>
+      </EuiToolTip>
+      <EuiScreenReaderOnly>
+        <div>
+          {'" "'} {/* Adds a pause for the screen reader */}
+          {OptionsListStrings.popover.getDocumentCountScreenReaderText(documentCount)}
+        </div>
+      </EuiScreenReaderOnly>
+    </>
   );
 };
 

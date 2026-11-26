@@ -206,21 +206,34 @@ describe('Options list popover', () => {
   });
 
   describe('document count', () => {
-    test('describes the option with a document count tooltip without making the badge focusable', async () => {
+    const mountWithDocumentCount = () => {
       const contextMock = getOptionsListContextMock();
       contextMock.componentApi.setAvailableOptions([{ value: 'woof', docCount: 1234 }]);
       const popover = mountComponent(contextMock);
-
       const option = popover.getByTestId('optionsList-control-selection-woof');
       const badge = within(option).getByTestId('optionsList-document-count-badge');
+      return { popover, option, badge };
+    };
+
+    test('keeps the hidden badge out of the tab order and announces the count to screen readers', () => {
+      const { option, badge } = mountWithDocumentCount();
+
       expect(badge).toHaveTextContent('1,234');
       expect(badge).toHaveAttribute('aria-hidden', 'true');
-      expect(badge).not.toHaveAttribute('tabindex');
+      expect(badge.tabIndex).toBe(-1);
+      expect(option).toHaveTextContent('Appears in 1,234 documents');
+    });
+
+    test('shows the document count tooltip on the badge, not on the whole option', async () => {
+      const { popover, option, badge } = mountWithDocumentCount();
+
+      // an option-level tooltip would describe the option itself
+      expect(option).not.toHaveAttribute('aria-describedby');
 
       await userEvent.hover(badge);
       const tooltip = await popover.findByRole('tooltip');
       expect(tooltip).toHaveTextContent('This value appears in 1,234 documents');
-      expect(option).toHaveAttribute('aria-describedby', expect.stringContaining(tooltip.id));
+      expect(badge).toHaveAttribute('aria-describedby', tooltip.id);
     });
   });
 
