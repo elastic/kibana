@@ -15,12 +15,11 @@ import type {
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
-import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import {
   getPrivilegedUserWatchlistSavedObjectId,
+  PRIVILEGED_USER_MODIFIER,
   PRIVILEGED_USER_WATCHLIST_NAME,
 } from '../../../../../common/entity_analytics/watchlists/constants';
-import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
 import type { WatchlistConfigClient } from '../management/watchlist_config';
 import { WatchlistConfigClient as WatchlistConfigClientClass } from '../management/watchlist_config';
 import {
@@ -28,6 +27,7 @@ import {
   watchlistEntitySourceTypeName,
   getLastFullSyncMarkersIndex,
 } from '../entity_sources/infra';
+import { getStreamPatternFor } from '../entity_sources/infra/constants';
 import { watchlistConfigTypeName } from '../management/saved_object/watchlist_config_type';
 import type { StartPlugins } from '../../../../plugin';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
