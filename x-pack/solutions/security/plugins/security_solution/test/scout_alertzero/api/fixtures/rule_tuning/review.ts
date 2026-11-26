@@ -10,7 +10,7 @@ import {
   type ApproveProposalRequest,
   type DismissProposalRequest,
 } from '@kbn/proposals-common';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
+import type { ExecutionStatus, WorkflowExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { pollFor, spaceUrl } from '../helpers';
 import { waitForExecution } from '../workflow_runs';
@@ -210,32 +210,38 @@ export const driveReview = async ({
   return waitForExecution(apiClient, headers, executionId, stepTimeoutMs, spaceId);
 };
 
-/** Cancels the execution, and succeeds when it already ended. */
 const cancelExecution = async ({
   apiClient,
   headers,
   spaceId,
   executionId,
 }: RuleTuningSpaceArgs & { executionId: string }): Promise<void> => {
-  await apiClient.post(spaceUrl(`api/workflows/executions/${executionId}/cancel`, spaceId), {
-    headers,
-  });
+  const response = await apiClient.post(
+    spaceUrl(`api/workflows/executions/${executionId}/cancel`, spaceId),
+    { headers, responseType: 'json' }
+  );
+  expectStatus(`Cancel review ${executionId}`, response);
 };
 
-/** Cancels the reviews of the space, and succeeds when there are none. */
+/**
+ * Cancels the reviews of the space that are still running. A failure to list or to cancel is an
+ * error, because a review parked at its gate would stay active after its space is deleted.
+ */
 export const cancelReviews = async ({
   apiClient,
   headers,
   spaceId,
 }: RuleTuningSpaceArgs): Promise<void> => {
-  const response = await apiClient.get<{ results?: Array<{ id: string }> }>(
-    spaceUrl(`api/workflows/workflow/${RULE_TUNING_REVIEW_WORKFLOW_ID}/executions`, spaceId),
-    { headers, responseType: 'json' }
-  );
-  if (response.statusCode !== 200) {
-    return;
-  }
-  for (const { id } of response.body.results ?? []) {
-    await cancelExecution({ apiClient, headers, spaceId, executionId: id });
+  const response = await apiClient.get<{
+    results?: Array<{ id: string; status: ExecutionStatus }>;
+  }>(spaceUrl(`api/workflows/workflow/${RULE_TUNING_REVIEW_WORKFLOW_ID}/executions`, spaceId), {
+    headers,
+    responseType: 'json',
+  });
+  expectStatus('List the review executions', response);
+  for (const { id, status } of response.body.results ?? []) {
+    if (!isTerminalStatus(status)) {
+      await cancelExecution({ apiClient, headers, spaceId, executionId: id });
+    }
   }
 };

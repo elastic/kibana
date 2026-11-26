@@ -18,8 +18,8 @@ import {
   DISMISSED_TAG,
   driveReview,
   enableAlertZeroInSpace,
-  FP_ALERT_COUNT,
   FP_PROCESS_NAME,
+  getPlaywrightTagsFor,
   pinModelToProxy,
   readBacktest,
   readRule,
@@ -28,7 +28,6 @@ import {
   seedRuleWithFalsePositives,
   setRuleTuningWorker,
   startScriptedModel,
-  tags,
   TP_EVENT_COUNT,
   waitForAlertTag,
   type BacktestOutcome,
@@ -121,296 +120,308 @@ interface CaseResult {
  * Each test has its own space: the worker reviews every rule of its space with enough false
  * positives, so a space with one rule gets exactly one review.
  */
-apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.classic] }, () => {
-  let adminHeaders: Record<string, string>;
-  let llmProxy: LlmProxy | undefined;
+apiTest.describe(
+  'Rule Tuning review - end to end',
+  // Local only: the scripted model listens on the loopback of the test runner, which a Kibana on
+  // Elastic Cloud cannot reach.
+  { tag: [...getPlaywrightTagsFor('stateful', 'classic', 'local')] },
+  () => {
+    let adminHeaders: Record<string, string>;
+    let llmProxy: LlmProxy | undefined;
 
-  /** The proxy `beforeAll` started. A failed `beforeAll` fails the tests before this runs. */
-  const startedProxy = (): LlmProxy => {
-    if (!llmProxy) {
-      throw new Error('The LLM proxy did not start');
-    }
-    return llmProxy;
-  };
+    /** The proxy `beforeAll` started. A failed `beforeAll` fails the tests before this runs. */
+    const startedProxy = (): LlmProxy => {
+      if (!llmProxy) {
+        throw new Error('The LLM proxy did not start');
+      }
+      return llmProxy;
+    };
 
-  /**
-   * Sets up a space with one rule, runs the worker in it, decides the review's proposals in
-   * order, and hands the outcome to `check`. Removes everything it created, whatever `check`
-   * does.
-   *
-   * In manual mode the first decision answers the entry gate, which the analyst sees before
-   * any diagnosis, and the second answers the tuning proposal.
-   */
-  const runReviewCase = async (
-    { apiClient, apiServices, esClient, log }: CaseFixtures,
-    {
-      name,
-      autonomy,
-      proposal,
-      decisions,
-    }: {
-      name: string;
-      autonomy: 'manual' | 'assisted';
-      proposal: TuningProposal;
-      decisions: Array<'approve' | 'dismiss'>;
-    },
-    check: (result: CaseResult) => Promise<void>
-  ): Promise<void> => {
-    const spaceId = `scout-tuning-e2e-${RUN}-${name}`;
-    const space = { apiClient, headers: adminHeaders, spaceId };
-    let model: ScriptedModel | undefined;
-    let serviceAccountId: string | undefined;
-    let eventsIndex: string | undefined;
-
-    try {
-      await apiServices.spaces.create({ id: spaceId, name: spaceId });
-      await enableAlertZeroInSpace(space);
-
-      const proxy = startedProxy();
-      await pinModelToProxy({ ...space, proxyPort: proxy.getPort() });
-      serviceAccountId = await createWorkerServiceAccount(space);
-      const rule = await seedRuleWithFalsePositives({
-        ...space,
-        esClient,
-        name: `${spaceId}-rule`,
-        query: OVERBROAD_QUERY,
-      });
-      ({ eventsIndex } = rule);
-      model = startScriptedModel({ proxy, log, structuredAnswer: proposal });
-
-      // Enabling the worker starts its first run, which finds the seeded rule.
-      await setRuleTuningWorker({
-        ...space,
-        enabled: true,
-        settings: { serviceAccountId, autonomy },
-      });
-      const review = await driveReview({
-        ...space,
+    /**
+     * Sets up a space with one rule, runs the worker in it, decides the review's proposals in
+     * order, and hands the outcome to `check`. Removes everything it created, whatever `check`
+     * does.
+     *
+     * In manual mode the first decision answers the entry gate, which the analyst sees before
+     * any diagnosis, and the second answers the tuning proposal.
+     */
+    const runReviewCase = async (
+      { apiClient, apiServices, esClient, log }: CaseFixtures,
+      {
+        name,
+        autonomy,
+        proposal,
         decisions,
-        stepTimeoutMs: STEP_TIMEOUT_MS,
-      });
+      }: {
+        name: string;
+        autonomy: 'manual' | 'assisted';
+        proposal: TuningProposal;
+        decisions: Array<'approve' | 'dismiss'>;
+      },
+      check: (result: CaseResult) => Promise<void>
+    ): Promise<void> => {
+      const spaceId = `scout-tuning-e2e-${RUN}-${name}`;
+      const space = { apiClient, headers: adminHeaders, spaceId };
+      // Named before seeding, so cleanup finds the rule and its events even when seeding fails.
+      const ruleName = `${spaceId}-rule`;
+      let model: ScriptedModel | undefined;
+      let serviceAccountId: string | undefined;
 
-      // Checked before the review status: a model call the scripted model could not answer
-      // fails the review, and these messages say what to change.
-      expect(
-        model.unansweredToolCalls,
-        'The review forced tool calls the scripted model has no reply for. Add a reply to FIXED_TOOL_ARGS in fixtures/scripted_model.ts.'
-      ).toStrictEqual([]);
-      expect(
-        model.unmatchedRequestCount(),
-        'Model calls arrived while every scripted model interceptor was busy. Raise CONCURRENT_REQUESTS in fixtures/scripted_model.ts.'
-      ).toBe(0);
-      expect(review.status, JSON.stringify(review.error)).toBe(ExecutionStatus.COMPLETED);
-      // A dismissed entry gate ends the review before the agent is asked for a proposal.
-      const diagnosed = autonomy === 'assisted' || decisions[0] === 'approve';
-      expect(model.answeredToolCalls.includes('structured_answer')).toBe(diagnosed);
-      const ruleAfter = await readRule({ ...space, id: rule.id });
-      // An approved change is saved as one new rule version. A dismissed proposal never saves.
-      const approved = decisions[decisions.length - 1] === 'approve';
-      expect(ruleAfter.revision).toBe(rule.revision + (approved ? 1 : 0));
-      await check({ review, model, rule, ruleAfter, space });
-    } finally {
-      model?.stop();
-      await cleanUpReviewCase({
-        ...space,
-        apiServices,
-        esClient,
-        serviceAccountId,
-        eventsIndex,
-      });
-    }
-  };
+      try {
+        await apiServices.spaces.create({ id: spaceId, name: spaceId });
+        await enableAlertZeroInSpace(space);
 
-  apiTest.beforeAll(async ({ samlAuth, log }) => {
-    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    adminHeaders = { ...cookieHeader, 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
-    llmProxy = await createLlmProxy(log);
-  });
+        const proxy = startedProxy();
+        await pinModelToProxy({ ...space, proxyPort: proxy.getPort() });
+        serviceAccountId = await createWorkerServiceAccount(space);
+        const rule = await seedRuleWithFalsePositives({
+          ...space,
+          esClient,
+          name: ruleName,
+          query: OVERBROAD_QUERY,
+        });
+        model = startScriptedModel({ proxy, log, structuredAnswer: proposal });
 
-  apiTest.afterAll(() => {
-    llmProxy?.close();
-  });
+        // Enabling the worker starts its first run, which finds the seeded rule.
+        await setRuleTuningWorker({
+          ...space,
+          enabled: true,
+          settings: { serviceAccountId, autonomy },
+        });
+        const review = await driveReview({
+          ...space,
+          decisions,
+          stepTimeoutMs: STEP_TIMEOUT_MS,
+        });
 
-  apiTest(
-    'assisted: approving a query proposal narrows the rule query and tags the alerts applied',
-    async ({ apiClient, apiServices, esClient, log }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      await runReviewCase(
-        { apiClient, apiServices, esClient, log },
-        {
-          name: 'assisted-query-approve',
-          autonomy: 'assisted',
-          proposal: QUERY_PROPOSAL,
-          decisions: ['approve'],
-        },
-        async ({ review, rule, ruleAfter, space }) => {
-          expect(readBacktest(review)).toMatchObject(EXPECTED_BACKTEST_COUNTS);
-          expect(ruleAfter.query).toBe(NARROWED_QUERY);
-          const alertTags = await waitForAlertTag(
-            esClient,
-            space.spaceId,
-            rule.ruleId,
-            APPLIED_TAG
-          );
-          expect(alertTags).toHaveLength(FP_ALERT_COUNT);
-        }
-      );
-    }
-  );
+        // Checked before the review status: a model call the scripted model could not answer
+        // fails the review, and these messages say what to change.
+        expect(
+          model.unansweredToolCalls,
+          'The review forced tool calls the scripted model has no reply for. Add a reply to FIXED_TOOL_ARGS in fixtures/scripted_model.ts.'
+        ).toStrictEqual([]);
+        expect(
+          model.unmatchedRequestCount(),
+          'Model calls arrived while every scripted model interceptor was busy. Raise CONCURRENT_REQUESTS in fixtures/scripted_model.ts.'
+        ).toBe(0);
+        expect(review.status, JSON.stringify(review.error)).toBe(ExecutionStatus.COMPLETED);
+        // A dismissed entry gate ends the review before the agent is asked for a proposal.
+        const diagnosed = autonomy === 'assisted' || decisions[0] === 'approve';
+        expect(model.answeredToolCalls.includes('structured_answer')).toBe(diagnosed);
+        const ruleAfter = await readRule({ ...space, id: rule.id });
+        // An approved change is saved as one new rule version. A dismissed proposal never saves.
+        const approved = decisions[decisions.length - 1] === 'approve';
+        expect(ruleAfter.revision).toBe(rule.revision + (approved ? 1 : 0));
+        await check({ review, model, rule, ruleAfter, space });
+      } finally {
+        model?.stop();
+        await cleanUpReviewCase({
+          ...space,
+          apiServices,
+          esClient,
+          ruleName,
+          serviceAccountId,
+        });
+      }
+    };
 
-  apiTest(
-    'assisted: approving an exception proposal adds the exception to the rule and tags the alerts applied',
-    async ({ apiClient, apiServices, esClient, log }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      await runReviewCase(
-        { apiClient, apiServices, esClient, log },
-        {
-          name: 'assisted-exception-approve',
-          autonomy: 'assisted',
-          proposal: EXCEPTION_PROPOSAL,
-          decisions: ['approve'],
-        },
-        async ({ review, rule, ruleAfter, space }) => {
-          expect(readBacktest(review)).toMatchObject(EXPECTED_BACKTEST_COUNTS);
-          expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
-          const items = await readRuleExceptionItems({ ...space, rule: ruleAfter });
-          expect(items).toHaveLength(1);
-          expect(items[0].name).toBe(EXCEPTION_PROPOSAL.exception_name);
-          // The list stores an entry in its own terms (`included`, `match`), not the agent's `is`.
-          expect(items[0].entries).toStrictEqual([
-            expect.objectContaining({ field: EXCEPTION_ENTRY.field, value: EXCEPTION_ENTRY.value }),
-          ]);
-          await waitForAlertTag(esClient, space.spaceId, rule.ruleId, APPLIED_TAG);
-        }
-      );
-    }
-  );
+    apiTest.beforeAll(async ({ samlAuth, log }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      adminHeaders = { ...cookieHeader, 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
+      llmProxy = await createLlmProxy(log);
+    });
 
-  apiTest(
-    'assisted: approving a risk score proposal lowers the risk score and severity and tags the alerts applied',
-    async ({ apiClient, apiServices, esClient, log }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      await runReviewCase(
-        { apiClient, apiServices, esClient, log },
-        {
-          name: 'assisted-risk-approve',
-          autonomy: 'assisted',
-          proposal: RISK_SCORE_PROPOSAL,
-          decisions: ['approve'],
-        },
-        async ({ review, rule, ruleAfter, space }) => {
-          // A risk score change alerts on the same events, so the review does not backtest it,
-          // and the outcome step reports neither run.
-          expect(readBacktest(review)).toMatchObject({
-            current_succeeded: false,
-            proposed_succeeded: false,
-          });
-          expect(ruleAfter.risk_score).toBe(RISK_SCORE_PROPOSAL.proposed_risk_score);
-          expect(ruleAfter.severity).toBe(RISK_SCORE_PROPOSAL.proposed_severity);
-          expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
-          await waitForAlertTag(esClient, space.spaceId, rule.ruleId, APPLIED_TAG);
-        }
-      );
-    }
-  );
+    apiTest.afterAll(() => {
+      llmProxy?.close();
+    });
 
-  apiTest(
-    'assisted: dismissing a proposal leaves the rule unchanged and tags the alerts dismissed',
-    async ({ apiClient, apiServices, esClient, log }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      await runReviewCase(
-        { apiClient, apiServices, esClient, log },
-        {
-          name: 'assisted-query-dismiss',
-          autonomy: 'assisted',
-          proposal: QUERY_PROPOSAL,
-          decisions: ['dismiss'],
-        },
-        async ({ rule, ruleAfter, space }) => {
-          expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
-          expect(ruleAfter.risk_score).toBe(FIXTURE_RISK_SCORE);
-          expect(await readRuleExceptionItems({ ...space, rule: ruleAfter })).toStrictEqual([]);
-          const alertTags = await waitForAlertTag(
-            esClient,
-            space.spaceId,
-            rule.ruleId,
-            DISMISSED_TAG
-          );
-          expect(alertTags.some((alertTagList) => alertTagList.includes(APPLIED_TAG))).toBe(false);
-        }
-      );
-    }
-  );
+    apiTest(
+      'assisted: approving a query proposal narrows the rule query and tags the alerts applied',
+      async ({ apiClient, apiServices, esClient, log }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        await runReviewCase(
+          { apiClient, apiServices, esClient, log },
+          {
+            name: 'assisted-query-approve',
+            autonomy: 'assisted',
+            proposal: QUERY_PROPOSAL,
+            decisions: ['approve'],
+          },
+          async ({ review, rule, ruleAfter, space }) => {
+            expect(readBacktest(review)).toMatchObject(EXPECTED_BACKTEST_COUNTS);
+            expect(ruleAfter.query).toBe(NARROWED_QUERY);
+            await waitForAlertTag(esClient, space.spaceId, rule.ruleId, APPLIED_TAG);
+          }
+        );
+      }
+    );
 
-  apiTest(
-    'manual: dismissing the entry gate ends the review before diagnosis and tags the alerts dismissed',
-    async ({ apiClient, apiServices, esClient, log }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      await runReviewCase(
-        { apiClient, apiServices, esClient, log },
-        {
-          name: 'manual-entry-dismiss',
-          autonomy: 'manual',
-          proposal: QUERY_PROPOSAL,
-          decisions: ['dismiss'],
-        },
-        async ({ rule, ruleAfter, space }) => {
-          expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
-          const alertTags = await waitForAlertTag(
-            esClient,
-            space.spaceId,
-            rule.ruleId,
-            DISMISSED_TAG
-          );
-          expect(alertTags.some((alertTagList) => alertTagList.includes(APPLIED_TAG))).toBe(false);
-        }
-      );
-    }
-  );
+    apiTest(
+      'assisted: approving an exception proposal adds the exception to the rule and tags the alerts applied',
+      async ({ apiClient, apiServices, esClient, log }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        await runReviewCase(
+          { apiClient, apiServices, esClient, log },
+          {
+            name: 'assisted-exception-approve',
+            autonomy: 'assisted',
+            proposal: EXCEPTION_PROPOSAL,
+            decisions: ['approve'],
+          },
+          async ({ review, rule, ruleAfter, space }) => {
+            expect(readBacktest(review)).toMatchObject(EXPECTED_BACKTEST_COUNTS);
+            expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
+            const items = await readRuleExceptionItems({ ...space, rule: ruleAfter });
+            expect(items).toHaveLength(1);
+            expect(items[0].name).toBe(EXCEPTION_PROPOSAL.exception_name);
+            // The list stores an entry in its own terms, not the agent's `is`. A negated entry would
+            // suppress the wrong events.
+            expect(items[0].entries).toStrictEqual([
+              expect.objectContaining({
+                field: EXCEPTION_ENTRY.field,
+                operator: 'included',
+                type: 'match',
+                value: EXCEPTION_ENTRY.value,
+              }),
+            ]);
+            await waitForAlertTag(esClient, space.spaceId, rule.ruleId, APPLIED_TAG);
+          }
+        );
+      }
+    );
 
-  apiTest(
-    'manual: approving the entry gate and then the query proposal narrows the rule query and tags the alerts applied',
-    async ({ apiClient, apiServices, esClient, log }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      await runReviewCase(
-        { apiClient, apiServices, esClient, log },
-        {
-          name: 'manual-query-approve',
-          autonomy: 'manual',
-          proposal: QUERY_PROPOSAL,
-          decisions: ['approve', 'approve'],
-        },
-        async ({ rule, ruleAfter, space }) => {
-          expect(ruleAfter.query).toBe(NARROWED_QUERY);
-          await waitForAlertTag(esClient, space.spaceId, rule.ruleId, APPLIED_TAG);
-        }
-      );
-    }
-  );
+    apiTest(
+      'assisted: approving a risk score proposal lowers the risk score and severity and tags the alerts applied',
+      async ({ apiClient, apiServices, esClient, log }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        await runReviewCase(
+          { apiClient, apiServices, esClient, log },
+          {
+            name: 'assisted-risk-approve',
+            autonomy: 'assisted',
+            proposal: RISK_SCORE_PROPOSAL,
+            decisions: ['approve'],
+          },
+          async ({ review, rule, ruleAfter, space }) => {
+            // A risk score change alerts on the same events, so the review does not backtest it,
+            // and the outcome step reports neither run.
+            expect(readBacktest(review)).toMatchObject({
+              current_succeeded: false,
+              proposed_succeeded: false,
+            });
+            expect(ruleAfter.risk_score).toBe(RISK_SCORE_PROPOSAL.proposed_risk_score);
+            expect(ruleAfter.severity).toBe(RISK_SCORE_PROPOSAL.proposed_severity);
+            expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
+            await waitForAlertTag(esClient, space.spaceId, rule.ruleId, APPLIED_TAG);
+          }
+        );
+      }
+    );
 
-  apiTest(
-    'manual: approving the entry gate and dismissing the proposal leaves the rule unchanged and tags the alerts dismissed',
-    async ({ apiClient, apiServices, esClient, log }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      await runReviewCase(
-        { apiClient, apiServices, esClient, log },
-        {
-          name: 'manual-query-dismiss',
-          autonomy: 'manual',
-          proposal: QUERY_PROPOSAL,
-          decisions: ['approve', 'dismiss'],
-        },
-        async ({ rule, ruleAfter, space }) => {
-          expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
-          const alertTags = await waitForAlertTag(
-            esClient,
-            space.spaceId,
-            rule.ruleId,
-            DISMISSED_TAG
-          );
-          expect(alertTags.some((alertTagList) => alertTagList.includes(APPLIED_TAG))).toBe(false);
-        }
-      );
-    }
-  );
-});
+    apiTest(
+      'assisted: dismissing a proposal leaves the rule unchanged and tags the alerts dismissed',
+      async ({ apiClient, apiServices, esClient, log }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        await runReviewCase(
+          { apiClient, apiServices, esClient, log },
+          {
+            name: 'assisted-query-dismiss',
+            autonomy: 'assisted',
+            proposal: QUERY_PROPOSAL,
+            decisions: ['dismiss'],
+          },
+          async ({ rule, ruleAfter, space }) => {
+            expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
+            expect(ruleAfter.risk_score).toBe(FIXTURE_RISK_SCORE);
+            expect(await readRuleExceptionItems({ ...space, rule: ruleAfter })).toStrictEqual([]);
+            const alertTags = await waitForAlertTag(
+              esClient,
+              space.spaceId,
+              rule.ruleId,
+              DISMISSED_TAG
+            );
+            expect(alertTags.some((alertTagList) => alertTagList.includes(APPLIED_TAG))).toBe(
+              false
+            );
+          }
+        );
+      }
+    );
+
+    apiTest(
+      'manual: dismissing the entry gate ends the review before diagnosis and tags the alerts dismissed',
+      async ({ apiClient, apiServices, esClient, log }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        await runReviewCase(
+          { apiClient, apiServices, esClient, log },
+          {
+            name: 'manual-entry-dismiss',
+            autonomy: 'manual',
+            proposal: QUERY_PROPOSAL,
+            decisions: ['dismiss'],
+          },
+          async ({ rule, ruleAfter, space }) => {
+            expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
+            const alertTags = await waitForAlertTag(
+              esClient,
+              space.spaceId,
+              rule.ruleId,
+              DISMISSED_TAG
+            );
+            expect(alertTags.some((alertTagList) => alertTagList.includes(APPLIED_TAG))).toBe(
+              false
+            );
+          }
+        );
+      }
+    );
+
+    apiTest(
+      'manual: approving the entry gate and then the query proposal narrows the rule query and tags the alerts applied',
+      async ({ apiClient, apiServices, esClient, log }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        await runReviewCase(
+          { apiClient, apiServices, esClient, log },
+          {
+            name: 'manual-query-approve',
+            autonomy: 'manual',
+            proposal: QUERY_PROPOSAL,
+            decisions: ['approve', 'approve'],
+          },
+          async ({ rule, ruleAfter, space }) => {
+            expect(ruleAfter.query).toBe(NARROWED_QUERY);
+            await waitForAlertTag(esClient, space.spaceId, rule.ruleId, APPLIED_TAG);
+          }
+        );
+      }
+    );
+
+    apiTest(
+      'manual: approving the entry gate and dismissing the proposal leaves the rule unchanged and tags the alerts dismissed',
+      async ({ apiClient, apiServices, esClient, log }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        await runReviewCase(
+          { apiClient, apiServices, esClient, log },
+          {
+            name: 'manual-query-dismiss',
+            autonomy: 'manual',
+            proposal: QUERY_PROPOSAL,
+            decisions: ['approve', 'dismiss'],
+          },
+          async ({ rule, ruleAfter, space }) => {
+            expect(ruleAfter.query).toBe(OVERBROAD_QUERY);
+            const alertTags = await waitForAlertTag(
+              esClient,
+              space.spaceId,
+              rule.ruleId,
+              DISMISSED_TAG
+            );
+            expect(alertTags.some((alertTagList) => alertTagList.includes(APPLIED_TAG))).toBe(
+              false
+            );
+          }
+        );
+      }
+    );
+  }
+);

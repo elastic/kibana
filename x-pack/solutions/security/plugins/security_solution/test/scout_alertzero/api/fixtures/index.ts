@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { apiTest, tags } from '@kbn/scout-security';
+export { apiTest, getPlaywrightTagsFor, tags } from '@kbn/scout-security';
 export {
   ALERTZERO_READ_NO_SECURITY_ROLE,
   ALERTZERO_READ_ONLY_ROLE,

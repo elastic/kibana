@@ -14,6 +14,8 @@ import { findStepOutput } from '../workflow_runs';
 export const RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-review';
 export const APPLIED_TAG = 'detection-watch:tuning-applied';
 export const DISMISSED_TAG = 'detection-watch:tuning-dismissed';
+/** Written on every alert that reached a decision, next to the tag of the outcome. */
+export const REVIEWED_TAG = 'detection-watch:tuning-reviewed';
 
 export const INTERNAL_V1_HEADERS = {
   'kbn-xsrf': 'true',

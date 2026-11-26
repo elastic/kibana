@@ -14,7 +14,12 @@ import {
 } from '@kbn/security-solution-test-api-clients/scout';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { pollFor } from '../helpers';
-import { expectStatus, findStepOutputObject, type RuleTuningSpaceArgs } from './common';
+import {
+  expectStatus,
+  findStepOutputObject,
+  REVIEWED_TAG,
+  type RuleTuningSpaceArgs,
+} from './common';
 import { FP_ALERT_COUNT } from './seed';
 
 /** What the review's backtest counted, from its `record_preview_outcome` step. */
@@ -120,7 +125,11 @@ export const readAlertTags = async ({
   return response.hits.hits.map(({ _source }) => _source?.['kibana.alert.workflow_tags'] ?? []);
 };
 
-/** Waits until every alert of the rule carries `tag`, and returns the tags of each alert. */
+/**
+ * Waits until every seeded alert of the rule carries `tag` and the reviewed tag, and returns the
+ * tags of each alert. The sweep skips alerts by the reviewed tag, so a case that lacks it can
+ * start the same review again.
+ */
 export const waitForAlertTag = (
   esClient: EsClient,
   spaceId: string,
@@ -128,10 +137,11 @@ export const waitForAlertTag = (
   tag: string
 ): Promise<string[][]> =>
   pollFor(
-    `every alert to carry ${tag}`,
+    `all ${FP_ALERT_COUNT} alerts to carry ${tag} and ${REVIEWED_TAG}`,
     async () => {
       const found = await readAlertTags({ esClient, spaceId, ruleId });
-      return found.length > 0 && found.every((alertTags) => alertTags.includes(tag))
+      return found.length === FP_ALERT_COUNT &&
+        found.every((alertTags) => alertTags.includes(tag) && alertTags.includes(REVIEWED_TAG))
         ? found
         : undefined;
     },

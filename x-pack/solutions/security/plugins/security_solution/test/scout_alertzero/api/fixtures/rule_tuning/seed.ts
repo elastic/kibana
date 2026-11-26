@@ -38,6 +38,16 @@ export interface SeededRule {
   eventsIndex: string;
 }
 
+/** The rule id of the rule seeded under `name`. Known before seeding, so cleanup can use it. */
+export const reviewRuleId = (name: string): string => `${name}-rule`;
+
+/**
+ * The data stream with the source events of the rule seeded under `name`. It matches the
+ * `logs-*-*` template, so ES creates a data stream with ECS mappings, and the worker's role can
+ * read `logs-*`.
+ */
+export const reviewEventsIndex = (name: string): string => `logs-${name}-events`;
+
 /** Creates a query rule with closed false positives and the source events behind them. */
 export const seedRuleWithFalsePositives = async ({
   apiClient,
@@ -51,10 +61,8 @@ export const seedRuleWithFalsePositives = async ({
   name: string;
   query: string;
 }): Promise<SeededRule> => {
-  const ruleId = `${name}-rule`;
-  // Matches the `logs-*-*` template, so ES creates a data stream with ECS mappings, and the
-  // worker's role can read `logs-*`.
-  const eventsIndex = `logs-${name}-events`;
+  const ruleId = reviewRuleId(name);
+  const eventsIndex = reviewEventsIndex(name);
   const created = await createDetectionsApi(apiClient).createRule(
     {
       body: {

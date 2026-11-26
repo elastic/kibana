@@ -79,19 +79,22 @@ export const pollFor = async <T>(
   }
 };
 
-/** Deletes the alerts index that a deleted space leaves behind. */
+/**
+ * Deletes the alerts index and the preview alerts index that a deleted space leaves behind. A
+ * rule preview, like a backtest, writes to the second one.
+ */
 export const deleteSpaceAlertsIndex = async (
   esClient: EsClient,
   spaceId: string
 ): Promise<void> => {
   // Resolved by name, because wildcard deletes are refused by default.
-  const backing = Object.keys(
-    await esClient.indices.get({
-      index: `.alerts-security.alerts-${spaceId}`,
-      ignore_unavailable: true,
-    })
-  );
-  if (backing.length > 0) await esClient.indices.delete({ index: backing });
+  for (const index of [
+    `.alerts-security.alerts-${spaceId}`,
+    `.preview.alerts-security.alerts-${spaceId}`,
+  ]) {
+    const backing = Object.keys(await esClient.indices.get({ index, ignore_unavailable: true }));
+    if (backing.length > 0) await esClient.indices.delete({ index: backing });
+  }
 };
 
 /**

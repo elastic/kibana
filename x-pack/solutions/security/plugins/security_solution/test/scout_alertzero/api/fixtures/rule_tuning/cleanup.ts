@@ -6,26 +6,32 @@
  */
 
 import type { ApiServicesFixture, EsClient } from '@kbn/scout-security';
+import { createDetectionsApi } from '@kbn/security-solution-test-api-clients/scout';
 import { deleteSpaceAlertsIndex, runCleanupSteps } from '../helpers';
-import type { RuleTuningSpaceArgs } from './common';
+import { expectStatus, type RuleTuningSpaceArgs } from './common';
 import { cancelReviews } from './review';
+import { reviewEventsIndex, reviewRuleId } from './seed';
 import { deleteServiceAccount, setRuleTuningWorker } from './setup';
 
-/** Removes what a review case created, running every step even when an earlier one fails. */
+/**
+ * Removes what a review case created, running every step even when an earlier one fails. It
+ * works from the names the case chose before seeding, so a failed seed still gets cleaned up.
+ */
 export const cleanUpReviewCase = ({
   apiClient,
   apiServices,
   esClient,
   headers,
   spaceId,
+  ruleName,
   serviceAccountId,
-  eventsIndex,
 }: RuleTuningSpaceArgs & {
   apiServices: ApiServicesFixture;
   esClient: EsClient;
-  /** Set once the case created them. */
+  /** The name the rule is seeded under. */
+  ruleName: string;
+  /** Set once the case created it. */
   serviceAccountId?: string;
-  eventsIndex?: string;
 }): Promise<void> => {
   const space = { apiClient, headers, spaceId };
   return runCleanupSteps([
@@ -33,6 +39,17 @@ export const cleanUpReviewCase = ({
     {
       name: 'disable the rule tuning worker',
       run: () => setRuleTuningWorker({ ...space, enabled: false }),
+    },
+    {
+      // Deleting the space removes the rule's saved object, but not its scheduled task or API key.
+      name: 'delete the seeded rule',
+      run: async () => {
+        const response = await createDetectionsApi(apiClient).deleteRule(
+          { query: { rule_id: reviewRuleId(ruleName) } },
+          { headers, kibanaSpace: spaceId }
+        );
+        expectStatus('Delete the seeded rule', response, [200, 404]);
+      },
     },
     {
       name: 'delete the worker service account',
@@ -44,15 +61,16 @@ export const cleanUpReviewCase = ({
     },
     { name: `delete space ${spaceId}`, run: () => apiServices.spaces.delete(spaceId) },
     {
-      name: 'delete the space alerts index',
+      name: 'delete the space alerts indices',
       run: () => deleteSpaceAlertsIndex(esClient, spaceId),
     },
     {
       name: 'delete the source events',
       run: async () => {
-        if (eventsIndex) {
-          await esClient.indices.deleteDataStream({ name: eventsIndex }, { ignore: [404] });
-        }
+        await esClient.indices.deleteDataStream(
+          { name: reviewEventsIndex(ruleName) },
+          { ignore: [404] }
+        );
       },
     },
   ]);
