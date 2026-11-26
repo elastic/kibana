@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
@@ -276,7 +277,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should still mark agents as inactive with more agent policies with inactivity timeout than the previous limit', async function () {
       // Policy ids used to be written in the status script source, which Elasticsearch limits to 64KB
-      // (~1,600 policies). They are now script params so there is no limit on the number of policies.
+      // (about 1,600 policies with UUID ids). They are now script params so there is no limit on the
+      // number of policies. The ids are UUIDs: 1,700 of them are past that limit when inlined in the
+      // source (about 68KB), shorter ids would not be.
       this.timeout(15 * 60 * 1000);
 
       // agent4 and agent5 are on a policy with a 1 minute inactivity timeout and are already inactive,
@@ -306,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(inactiveBefore).to.contain('agent4');
       expect(inactiveBefore).to.contain('agent5');
 
-      const policyIds = new Array(1700).fill(0).map((_, i) => `policy-inactivity-timeout-${i}`);
+      const policyIds = new Array(1700).fill(0).map(() => uuidv4());
       // every policy that a create request was sent for, including the ones whose request failed or
       // did not finish before an error: the policy may still have been created
       const attemptedPolicyIds: string[] = [];

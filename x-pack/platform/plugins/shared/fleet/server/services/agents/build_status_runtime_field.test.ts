@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+
 import type { InactivityTimeouts } from './build_status_runtime_field';
 import { _buildStatusRuntimeField } from './build_status_runtime_field';
 
@@ -111,16 +113,19 @@ describe('buildStatusRuntimeField', () => {
   });
 
   it('should keep the source constant with more agent policies than the old limit', () => {
-    // 750 was the previous limit, 2000 is past the 64KB script size limit when inlined in the source
-    const policyIds = new Array(2000).fill(0).map((_, i) => `a-long-agent-policy-id-${i}`);
+    // 750 was the previous limit. 2000 policies with UUID ids are past the 64KB script size limit
+    // when inlined in the source, as the ids used to be.
+    const policyIds = new Array(2000).fill(0).map(() => uuidv4());
     const inactivityTimeouts: InactivityTimeouts = [{ inactivityTimeout: 300, policyIds }];
+    const inlinedPolicyIdsSize = policyIds.map((id) => `'${id}'`).join(',').length;
+    expect(inlinedPolicyIdsSize).toBeGreaterThan(ES_MAX_SCRIPT_SIZE_IN_BYTES);
 
     const { source, params } = _buildStatusRuntimeField({ inactivityTimeouts }).status.script;
 
     expect(source).toBe(_buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script.source);
     expect(source.length).toBeLessThan(ES_MAX_SCRIPT_SIZE_IN_BYTES / 10);
     expect(Object.keys(params.inactivityCutoffs)).toHaveLength(2000);
-    expect(params.inactivityCutoffs['a-long-agent-policy-id-1999']).toBe(now - 300_000);
+    expect(params.inactivityCutoffs[policyIds[1999]]).toBe(now - 300_000);
   });
 
   it('should emit inactive from the cutoff of the base policy id, with a policy_id fallback', () => {
