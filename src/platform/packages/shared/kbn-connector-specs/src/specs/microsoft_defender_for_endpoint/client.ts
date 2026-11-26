@@ -404,6 +404,14 @@ const describeStatus = (status: number, body: MdeErrorBody | undefined, fallback
   return `HTTP ${status}${code ? ` ${code}` : ''}: ${message}`;
 };
 
+/** Added when a request that is not safe to repeat fails with an unknown outcome. */
+const MAYBE_APPLIED_NOTE =
+  'Defender may have applied the request before failing, and the connector does not retry it: check getActions (machine actions) or listIndicators (indicators) before repeating it.';
+
+/** Whether repeating the request is safe: GET always is; other methods only when marked. */
+const isIdempotent = (options: MdeRequestOptions): boolean =>
+  options.idempotent ?? options.method.toUpperCase() === 'GET';
+
 /** Turns an Axios error into a message that says what failed and what to do about it. */
 export const formatMdeError = (error: unknown, options: MdeRequestOptions): MdeApiError => {
   if (!isAxiosError(error) || !error.response) {
@@ -417,7 +425,14 @@ export const formatMdeError = (error: unknown, options: MdeRequestOptions): MdeA
     const tooLarge = /maxContentLength/.test(reason)
       ? `. The response is larger than the Kibana response size limit (xpack.actions.maxResponseContentLength): ${sizeHint}`
       : '';
-    return new MdeApiError(`Microsoft Defender for Endpoint request failed: ${reason}${tooLarge}`);
+    const message = `Microsoft Defender for Endpoint request failed: ${reason}${tooLarge}`;
+    // A request that was sent but got no answer (a timeout or a network error) has an unknown
+    // outcome too.
+    return new MdeApiError(
+      isAxiosError(error) && !isIdempotent(options)
+        ? `${message}${message.endsWith('.') ? '' : '.'} ${MAYBE_APPLIED_NOTE}`
+        : message
+    );
   }
   const { status, data } = error.response;
   const body = (typeof data === 'object' && data !== null ? data : undefined) as
@@ -460,6 +475,11 @@ export const formatMdeError = (error: unknown, options: MdeRequestOptions): MdeA
     const wait = retryAfter === undefined ? '' : ` Retry after ${Math.ceil(retryAfter / 1000)} s.`;
     return fail(`${prefix}. The tenant's API rate limit was reached.${wait}`);
   }
+  // The connector never retries these, but the status makes Agent Builder suggest one retry, so
+  // the message says to check first.
+  if (status >= 500 && !isIdempotent(options)) {
+    return fail(`${prefix}. ${MAYBE_APPLIED_NOTE}`);
+  }
   return fail(`${prefix}.`);
 };
 
@@ -481,7 +501,7 @@ export const mdeRequest = async <T>(ctx: ActionContext, options: MdeRequestOptio
   assertCloudConsistency(ctx);
   assertSecureUrls(ctx);
   const url = `${getApiUrl(ctx)}${options.path}`;
-  const idempotent = options.idempotent ?? options.method.toUpperCase() === 'GET';
+  const idempotent = isIdempotent(options);
   let waitedMs = 0;
 
   for (let attempt = 1; ; attempt++) {

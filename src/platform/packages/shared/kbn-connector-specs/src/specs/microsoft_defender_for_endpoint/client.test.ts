@@ -378,6 +378,73 @@ describe('Microsoft Defender for Endpoint client', () => {
       expect(request).toHaveBeenCalledTimes(1);
     });
 
+    it('says to check before repeating a non-idempotent request that failed with a 5xx', async () => {
+      const { ctx, request } = createContext();
+      request.mockRejectedValue(httpError(503));
+
+      const error = (await mdeRequest(ctx, {
+        method: 'POST',
+        path: '/machines/abc/isolate',
+        permission: 'Machine.Isolate',
+        idempotent: false,
+      }).catch((e: unknown) => e)) as MdeApiError;
+
+      expect(error.message).toMatch(
+        /HTTP 503.*Defender may have applied the request before failing, and the connector does not retry it: check getActions \(machine actions\) or listIndicators \(indicators\) before repeating it\.$/
+      );
+      // The status stays available for diagnostics.
+      expect(error.response?.status).toBe(503);
+    });
+
+    it('does not add the check-first note to a GET 5xx or a 4xx', async () => {
+      const { ctx, request } = createContext();
+      request.mockRejectedValue(httpError(503));
+      const getError = (await mdeRequest(ctx, {
+        method: 'GET',
+        path: '/machines',
+        permission: 'Machine.Read.All',
+      }).catch((e: unknown) => e)) as Error;
+      expect(getError.message).not.toMatch(/may have applied/);
+
+      request.mockReset();
+      request.mockRejectedValue(httpError(400));
+      const postError = (await mdeRequest(ctx, {
+        method: 'POST',
+        path: '/machines/abc/isolate',
+        permission: 'Machine.Isolate',
+        idempotent: false,
+      }).catch((e: unknown) => e)) as Error;
+      expect(postError.message).not.toMatch(/may have applied/);
+    });
+
+    it('says to check before repeating a non-idempotent request that got no answer', async () => {
+      const { ctx, request } = createContext();
+      const timeout = Object.assign(new Error('timeout of 60000ms exceeded'), {
+        isAxiosError: true,
+        code: 'ECONNABORTED',
+      });
+      request.mockRejectedValue(timeout);
+
+      const postError = (await mdeRequest(ctx, {
+        method: 'POST',
+        path: '/machines/abc/isolate',
+        permission: 'Machine.Isolate',
+        idempotent: false,
+      }).catch((e: unknown) => e)) as Error;
+      expect(postError.message).toBe(
+        'Microsoft Defender for Endpoint request failed: timeout of 60000ms exceeded. Defender may have applied the request before failing, and the connector does not retry it: check getActions (machine actions) or listIndicators (indicators) before repeating it.'
+      );
+
+      const getError = (await mdeRequest(ctx, {
+        method: 'GET',
+        path: '/machines',
+        permission: 'Machine.Read.All',
+      }).catch((e: unknown) => e)) as Error;
+      expect(getError.message).toBe(
+        'Microsoft Defender for Endpoint request failed: timeout of 60000ms exceeded'
+      );
+    });
+
     it.each([400, 401, 403, 404])('never retries a %s', async (status) => {
       const { ctx, request } = createContext();
       request.mockRejectedValue(httpError(status));
