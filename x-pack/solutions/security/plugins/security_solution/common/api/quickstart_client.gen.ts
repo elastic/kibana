@@ -3206,7 +3206,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Run a script on a host. Currently supported only for some agent types.
+   * Run a script on a host.
    */
   async runScriptAction(props: RunScriptActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);

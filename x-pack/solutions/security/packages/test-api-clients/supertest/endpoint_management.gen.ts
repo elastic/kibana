@@ -331,7 +331,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * Run a script on a host. Currently supported only for some agent types.
+   * Run a script on a host.
    */
   runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
     return supertest
