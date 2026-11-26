@@ -86,7 +86,21 @@ As an alternative to a client secret, authenticate with an X.509 certificate. Up
 
 ## Connector actions [microsoft-defender-xdr-connector-actions]
 
-The following actions are available for the Microsoft Defender XDR connector. Actions marked _(API only)_ are not available as agent tools and can only be invoked through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+The following actions are available for the Microsoft Defender XDR connector. Actions marked _(API only)_ are not available as agent tools and must be invoked directly via the Kibana [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API. For API-only actions, set `params.subAction` to the action name and place the action's input parameters under `params.subActionParams`. For example, to call `updateIncident`:
+
+```json
+{
+  "params": {
+    "subAction": "updateIncident",
+    "subActionParams": {
+      "incidentId": "42",
+      "status": "resolved",
+      "classification": "truePositive",
+      "determination": "malware"
+    }
+  }
+}
+```
 
 ### Actions summary table [microsoft-defender-xdr-actions-table]
 

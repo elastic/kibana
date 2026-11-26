@@ -217,22 +217,21 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
     '### Typical usage patterns',
     '- **Triage new threats**: call `listIncidents` with `filter: "status eq \'active\'"` ' +
       'and `includeAlerts: true` to see all active incidents with their alerts.',
-    '- **Assign an incident**: call `updateIncident` with the incident ID and `assignedTo` set to an analyst UPN.',
+    '- **Get incident details with alerts**: call `getIncident` with `includeAlerts: true` to retrieve the incident and its full alert and evidence payload.',
     '- **Add an audit note to an incident**: call `addIncidentComment` with the incident ID and a comment describing findings or escalation steps.',
     '- **Add an audit note to an alert**: call `addAlertComment` with the alert ID and a triage note.',
-    '- **Triage an alert independently**: call `updateAlert` with `status: "inProgress"` before the incident is fully classified.',
-    '- **Resolve an alert**: call `updateAlert` with `status: "resolved"`, `classification`, and `determination`.',
     '- **Hunt for threats**: call `runHuntingQuery` with a KQL query such as ' +
       '`DeviceEvents | where ActionType == "ProcessCreated" | limit 10`.',
     '- **Audit detection rules**: call `listDetectionRules` to see what custom detections are active.',
-    '- **Enrich a suspicious host**: call `getThreatIntelHostReputation` to get a score and classification, ' +
-      'then `getThreatIntelHost` for full threat actor and malware associations.',
+    '- **Enrich a suspicious host**: call `getThreatIntelHostReputation` to get a risk score and classification, ' +
+      'then `getThreatIntelHost` for the host record (first-seen and last-seen dates).',
     '- **Pivot on infrastructure**: call `getPassiveDnsRecords` to find what IPs a domain resolved to via historical DNS.',
     '- **Look up domain registration**: call `getWhoisRecord` to identify the registrant and registration date.',
     '- **Report on security posture**: call `listSecureScores` to retrieve the latest Microsoft Secure Score snapshot.',
     '',
     '### Notes',
-    '- Incidents aggregate related alerts. Use `getIncident` with `$expand=alerts` to see alerts grouped by incident.',
+    '- `updateIncident` and `updateAlert` are API-only and cannot be called by agents. To record analyst actions, use `addIncidentComment` or `addAlertComment`.',
+    '- Incidents aggregate related alerts. Use `getIncident` with `includeAlerts: true` to retrieve alerts and evidence. Omit `includeAlerts` when you only need incident status or assignee.',
     '- Advanced hunting covers up to 30 days of data; queries respect your Defender XDR retention settings.',
     "- OData `$filter` expressions use single quotes for string values: `severity eq 'high'`.",
     '- Detection rule listing and reading require the `CustomDetection.Read.All` Graph permission. Rule creation, update, and deletion are not yet exposed as agent tools.',
