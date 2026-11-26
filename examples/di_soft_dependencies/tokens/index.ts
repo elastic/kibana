@@ -20,6 +20,16 @@ export const LookupAGreeter = createExtensionPoint<Greeter>('diSoftDepsLookupA.G
 /** The greeter contributed by `diSoftDepsLookupB`. */
 export const LookupBGreeter = createExtensionPoint<Greeter>('diSoftDepsLookupB.Greeter');
 
+/** A greeter built for the current request, so it can greet the caller. */
+export interface RequestGreeter {
+  greet(): string;
+}
+
+/** The request-scoped greeter contributed by `diSoftDepsLookupB` on the server. */
+export const LookupBRequestGreeter = createExtensionPoint<RequestGreeter>(
+  'diSoftDepsLookupB.RequestGreeter'
+);
+
 /** An entry any plugin, the registry owner included, contributes to a registry. */
 export interface RegistryEntry {
   id: string;

@@ -29,6 +29,23 @@ getStatus() {
 }
 ```
 
+On the server, `lookup_b` also contributes `LookupBRequestGreeter`, which injects the current `Request` and greets the caller named in the `x-di-soft-deps-name` header.
+Bind such a contribution with `.inRequestScope()`, because a singleton contribution keeps the values of the first request:
+
+```ts
+extensions
+  .contribute(LookupBRequestGreeter)
+  .toResolvedValue(
+    (request) => ({ greet: () => `hello ${request.headers['x-di-soft-deps-name'] ?? 'anonymous'} from diSoftDepsLookupB server` }),
+    [Request]
+  )
+  .inRequestScope();
+```
+
+The `lookup_a` route reads it in its `requestGreeting` field without passing the request.
+The route is request-scoped, and so must be every consumer of a request-aware contribution: a singleton consumer keeps the values of the first request.
+Outside a request, such as in an `OnExtensionsReady` hook, the contribution throws.
+
 ## Registry: `registry_a` and `registry_b`
 
 Each plugin owns a registry that it fills once every plugin has started, and contributes one entry to the other plugin's registry.
@@ -71,6 +88,10 @@ Its browser half writes `{ id, fromLookupB }` to `window.__diSoftDeps.diSoftDeps
 | `OnExtensionsReady` hook (the `onReady` field) | the greeting, or `diSoftDepsLookupB is disabled` |
 | `initialize()` | the greeting, or `diSoftDepsLookupB is disabled` |
 | request handler | the greeting, or `diSoftDepsLookupB is disabled` |
+| request handler, `LookupBRequestGreeter` (the `requestGreeting` field) | throws, or `diSoftDepsLookupB is disabled` |
+
+A classic route handler runs outside a DI request scope, so a contribution that injects `Request` throws there.
+Read such a contribution from a DI route or another request-scoped service instead.
 
 ## Find the hidden edges
 
@@ -100,6 +121,12 @@ Read the server status of each plugin:
 curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsLookupA
 curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsRegistryA
 curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsClassicConsumer
+```
+
+Name the caller to see the request-scoped greeting change per request:
+
+```sh
+curl -u elastic:changeme -H 'x-di-soft-deps-name: alice' http://localhost:5601/api/di_soft_deps/diSoftDepsLookupA
 ```
 
 In the browser, every plugin writes its status to `window.__diSoftDeps[pluginId]` in an `OnExtensionsReady` hook, once every plugin has started.

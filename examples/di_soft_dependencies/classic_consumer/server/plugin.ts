@@ -8,8 +8,12 @@
  */
 
 import type { CoreSetup, Plugin } from '@kbn/core/server';
-import { ExtensionService, OnExtensionsReady } from '@kbn/core-di';
-import { LookupBGreeter } from '@kbn/di-soft-dependencies-example-tokens';
+import { type ExtensionPoint, ExtensionService, OnExtensionsReady } from '@kbn/core-di';
+import {
+  type Greeter,
+  LookupBGreeter,
+  LookupBRequestGreeter,
+} from '@kbn/di-soft-dependencies-example-tokens';
 import { LOOKUP_B_DISABLED, PLUGIN_ID } from '../common';
 
 /** The greeting, `LOOKUP_B_DISABLED`, or `'throws'`, per point in the plugin lifecycle. */
@@ -20,11 +24,12 @@ export interface ClassicConsumerStatus {
   onReady: string;
   initialize: string;
   request: string;
+  requestGreeting: string;
 }
 
 export class ClassicConsumerPlugin implements Plugin {
   private extensionService?: ExtensionService;
-  private readonly status: Omit<ClassicConsumerStatus, 'request'> = {
+  private readonly status: Omit<ClassicConsumerStatus, 'request' | 'requestGreeting'> = {
     id: PLUGIN_ID,
     setup: 'not run',
     start: 'not run',
@@ -54,7 +59,11 @@ export class ClassicConsumerPlugin implements Plugin {
         },
       },
       async (_context, _request, response) => {
-        const body: ClassicConsumerStatus = { ...this.status, request: this.greetFromLookupB() };
+        const body: ClassicConsumerStatus = {
+          ...this.status,
+          request: this.greetFromLookupB(),
+          requestGreeting: this.greetFromLookupB(LookupBRequestGreeter),
+        };
         return response.ok({ body });
       }
     );
@@ -69,9 +78,10 @@ export class ClassicConsumerPlugin implements Plugin {
   }
 
   // ExtensionService.get throws until every plugin has started, so setup and start record 'throws'.
-  private greetFromLookupB(): string {
+  // A classic route handler runs outside a DI request scope, so the request greeter throws there too.
+  private greetFromLookupB(point: ExtensionPoint<Greeter> = LookupBGreeter): string {
     try {
-      return this.extensionService?.get(LookupBGreeter)?.greet() ?? LOOKUP_B_DISABLED;
+      return this.extensionService?.get(point)?.greet() ?? LOOKUP_B_DISABLED;
     } catch {
       return 'throws';
     }

@@ -9,8 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { KibanaContainerModule } from '@kbn/core-di';
-import { CoreStart, Route } from '@kbn/core-di-server';
-import { LookupBGreeter } from '@kbn/di-soft-dependencies-example-tokens';
+import { CoreStart, Request, Route } from '@kbn/core-di-server';
+import { LookupBGreeter, LookupBRequestGreeter } from '@kbn/di-soft-dependencies-example-tokens';
 import { LookupStatusService, PLUGIN_ID } from '../common';
 import { StatusRoute } from './route';
 
@@ -25,6 +25,16 @@ const pluginModule = new KibanaContainerModule(({ bind, extensions }) => {
       (http) => ({ greet: () => `hello from ${PLUGIN_ID} server` }),
       [CoreStart('http')]
     );
+  extensions
+    .contribute(LookupBRequestGreeter)
+    .toResolvedValue(
+      (request) => ({
+        greet: () =>
+          `hello ${request.headers['x-di-soft-deps-name'] ?? 'anonymous'} from ${PLUGIN_ID} server`,
+      }),
+      [Request]
+    )
+    .inRequestScope();
   bind(LookupStatusService).toSelf().inRequestScope();
   bind(Route).toConstantValue(StatusRoute);
 });

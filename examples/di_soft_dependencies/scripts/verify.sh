@@ -54,6 +54,9 @@ done
     for id in "${PLUGINS[@]}"; do
       echo "$id: $(curl -s -m 10 -u elastic:changeme -H 'x-elastic-internal-origin: verify' "http://localhost:$PORT/api/di_soft_deps/$id")"
     done
+    for name in alice bob; do
+      echo "request-scoped $name: $(curl -s -m 10 -u elastic:changeme -H 'x-elastic-internal-origin: verify' -H "x-di-soft-deps-name: $name" "http://localhost:$PORT/api/di_soft_deps/diSoftDepsLookupA")"
+    done
     echo "--- browser"
     node "$HERE/browser_check.js" $PORT $EXPECTED
   fi

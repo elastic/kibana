@@ -8,8 +8,10 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { ExtensionService } from '@kbn/core-di';
 import { Response } from '@kbn/core-di-server';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import { LookupBRequestGreeter } from '@kbn/di-soft-dependencies-example-tokens';
 import { LookupStatusService, PLUGIN_ID } from '../common';
 
 @injectable()
@@ -29,10 +31,14 @@ export class StatusRoute {
 
   constructor(
     @inject(LookupStatusService) private readonly status: LookupStatusService,
+    @inject(ExtensionService) private readonly extensionService: ExtensionService,
     @inject(Response) private readonly response: KibanaResponseFactory
   ) {}
 
   handle() {
-    return this.response.ok({ body: this.status.getStatus() });
+    const requestGreeting =
+      this.extensionService.get(LookupBRequestGreeter)?.greet() ?? 'diSoftDepsLookupB is disabled';
+
+    return this.response.ok({ body: { ...this.status.getStatus(), requestGreeting } });
   }
 }
