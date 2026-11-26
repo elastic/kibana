@@ -132,6 +132,7 @@ let mockSettingsData: WizardContent['settings'];
 let mockMappingsData: WizardContent['mappings'];
 let mockAliasesData: WizardContent['aliases'];
 let mockIsEditing: boolean | undefined;
+let mockUseRealReviewStep = false;
 
 jest.mock('./steps', () => ({
   StepLogisticsContainer: (props: { isEditing?: boolean; isLegacy?: boolean }) => (
@@ -142,7 +143,13 @@ jest.mock('./steps', () => ({
     />
   ),
   StepComponentContainer: () => <MockStepComponents componentsData={mockComponentsData} />,
-  StepReviewContainer: () => <MockStepReview />,
+  StepReviewContainer: (props: Record<string, unknown>) => {
+    if (mockUseRealReviewStep) {
+      const { StepReviewContainer: RealStepReviewContainer } = jest.requireActual('./steps');
+      return <RealStepReviewContainer {...props} />;
+    }
+    return <MockStepReview />;
+  },
 }));
 
 jest.mock('../shared', () => ({
@@ -196,6 +203,7 @@ describe('TemplateForm wizard integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsEditing = undefined;
+    mockUseRealReviewStep = false;
   });
 
   describe('WHEN creating a new template', () => {
@@ -536,6 +544,64 @@ describe('TemplateForm wizard integration', () => {
       });
       // Top-level lifecycle should be removed
       expect(Object.prototype.hasOwnProperty.call(savedTemplate, 'lifecycle')).toBe(false);
+    });
+  });
+
+  describe('WHEN the source template has data stream options', () => {
+    const dataStreamOptions = { failure_store: { enabled: true } };
+    const sourceTemplate: TemplateDeserialized = {
+      name: 'ds_template',
+      indexPatterns: ['logs-*'],
+      indexMode: 'standard',
+      allowAutoCreate: 'NO_OVERWRITE',
+      dataStream: {},
+      template: { data_stream_options: dataStreamOptions },
+      composedOf: [],
+      _kbnMeta: { type: 'default', hasDatastream: true, isLegacy: false },
+    };
+
+    const goToReviewRequestTab = async (logistics: WizardContent['logistics']) => {
+      mockIsEditing = true;
+      mockUseRealReviewStep = true;
+      mockLogisticsData = logistics;
+      mockComponentsData = [];
+      mockSettingsData = undefined;
+      mockMappingsData = undefined;
+      mockAliasesData = undefined;
+
+      renderTemplateForm({ isEditing: true, defaultValue: sourceTemplate });
+
+      for (const step of [
+        'mockStepLogistics',
+        'mockStepComponents',
+        'mockStepSettings',
+        'mockStepMappings',
+        'mockStepAliases',
+      ]) {
+        await screen.findByTestId(step);
+        clickNextButton();
+      }
+
+      fireEvent.click(await screen.findByText('Request'));
+      return screen.getByTestId('requestTab');
+    };
+
+    it('SHOULD show them in the Request tab while Data stream is on', async () => {
+      const requestTab = await goToReviewRequestTab({ ...sourceTemplate, template: undefined });
+
+      expect(requestTab).toHaveTextContent('data_stream_options');
+      expect(requestTab).toHaveTextContent('failure_store');
+    });
+
+    it('SHOULD omit them from the Request tab once Data stream is turned off', async () => {
+      const { dataStream: _dataStream, ...logisticsWithoutDataStream } = sourceTemplate;
+
+      const requestTab = await goToReviewRequestTab({
+        ...logisticsWithoutDataStream,
+        template: undefined,
+      });
+
+      expect(requestTab).not.toHaveTextContent('data_stream_options');
     });
   });
 });
