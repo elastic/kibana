@@ -7,11 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { WEB_CRAWL_MAX_INDEX_NAME_LENGTH } from '../../common/constants';
-import { getSiteKey } from './links';
 
 const WEB_CRAWL_META_KEY = 'web_crawl';
-const INDEX_NAME_PREFIX = 'web-crawl-';
 
 /** Marks an index as created by a crawl, so a crawl never writes into an index it does not own. */
 export interface WebCrawlIndexMeta {
@@ -44,15 +41,6 @@ const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
   crawled_at: { type: 'date' },
   ...URL_FIELD_PROPERTIES,
 };
-
-export const getCrawlIndexName = (url: string): string =>
-  `${INDEX_NAME_PREFIX}${getSiteKey(url)
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '-')}`.slice(0, WEB_CRAWL_MAX_INDEX_NAME_LENGTH);
-
-/** Whether a crawl may be pointed at an index of this name. Stricter than Elasticsearch, on purpose. */
-export const isValidCrawlIndexName = (indexName: string): boolean =>
-  indexName.length <= WEB_CRAWL_MAX_INDEX_NAME_LENGTH && /^[a-z0-9][a-z0-9._-]*$/.test(indexName);
 
 export const readCrawlIndexState = async (
   esClient: ElasticsearchClient,
