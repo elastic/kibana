@@ -8,10 +8,14 @@
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger, SavedObject, SavedObjectsRawDoc } from '@kbn/core/server';
-import { CASE_OBSERVABLE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_OBSERVABLE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_OBSERVABLES_PER_CASE,
+} from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
 import type { ObservablePersistedAttributes } from '../../common/types/observable';
-import type { ObservableKey, ObservableSortField } from './types';
+import type { CaseWithFieldObservables, ObservableKey, ObservableSortField } from './types';
 
 /** Throws one error listing every per-object failure other than `toleratedStatusCode`. */
 export const throwOnErrors = (
@@ -141,6 +145,17 @@ export interface PreviewAggregations {
     };
   };
 }
+
+/**
+ * How many of their oldest objects the cases need to fill their responses to 50 observables after
+ * the ones in their fields: the most room any case has left, so at most 50, which stays under the
+ * index's `max_inner_result_window` (100 by default).
+ */
+export const getPreviewSize = (cases: CaseWithFieldObservables[]): number =>
+  cases.reduce(
+    (size, { observables }) => Math.max(size, MAX_OBSERVABLES_PER_CASE - observables.length),
+    0
+  );
 
 /**
  * Buckets the objects by case, counting each case's objects and, unless `previewSize` is 0, keeping

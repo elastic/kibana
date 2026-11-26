@@ -8,11 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObject, SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
-import {
-  CASE_OBSERVABLE_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  MAX_OBSERVABLES_PER_CASE,
-} from '../../../../common/constants';
+import { CASE_OBSERVABLE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../../common/constants';
 import type { Observable } from '../../../../common/types/domain';
 import type { ObservablePersistedAttributes } from '../../../common/types/observable';
 import type {
@@ -29,6 +25,7 @@ import {
   buildPreviewAggregations,
   buildSort,
   caseObservablesQuery,
+  getPreviewSize,
   getTotal,
   keysQuery,
   logged,
@@ -185,11 +182,7 @@ export class ObservableGetter {
       return previews;
     }
 
-    // At most 50, which stays under the index's `max_inner_result_window` (100 by default).
-    const previewSize = cases.reduce(
-      (size, { observables }) => Math.max(size, MAX_OBSERVABLES_PER_CASE - observables.length),
-      0
-    );
+    const previewSize = getPreviewSize(cases);
 
     const search = logged(
       this.context.log,
