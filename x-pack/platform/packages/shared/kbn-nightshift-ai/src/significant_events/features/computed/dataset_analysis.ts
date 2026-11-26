@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import { describeDataset, formatDocumentAnalysis, getMappingConflicts } from '@kbn/ai-tools';
 import { DATASET_ANALYSIS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import type { ComputedFeatureGenerator } from './types';
@@ -23,46 +24,51 @@ Each field key is \`name (types)\`. When a field is mapped as multiple incompati
     const samplingSource = target.samplingSource;
     const targetSources = target.sources;
 
-    const [analysis, mappingConflicts] = await Promise.all([
-      describeDataset({
-        esClient,
-        index: samplingSource,
-        start,
-        end,
-        signal,
-      }),
-      // Best-effort: a probe failure must not drop the whole analysis.
-      getMappingConflicts({
-        esClient,
-        index: targetSources,
-        signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]),
-      }).catch((error) => {
-        logger.debug(
-          () =>
-            `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-        );
-        return [];
-      }),
-    ]);
+    const deadline = timeoutSignal(15_000);
+    try {
+      const [analysis, mappingConflicts] = await Promise.all([
+        describeDataset({
+          esClient,
+          index: samplingSource,
+          start,
+          end,
+          signal,
+        }),
+        // Best-effort: a probe failure must not drop the whole analysis.
+        getMappingConflicts({
+          esClient,
+          index: targetSources,
+          signal: AbortSignal.any([signal, deadline]),
+        }).catch((error) => {
+          logger.debug(
+            () =>
+              `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+          );
+          return [];
+        }),
+      ]);
 
-    const conflicts = Object.fromEntries(
-      mappingConflicts.map(({ field, types, suggestedCast }) => [
-        field,
-        { types, ...(suggestedCast ? { suggestedCast } : {}) },
-      ])
-    );
+      const conflicts = Object.fromEntries(
+        mappingConflicts.map(({ field, types, suggestedCast }) => [
+          field,
+          { types, ...(suggestedCast ? { suggestedCast } : {}) },
+        ])
+      );
 
-    const formattedAnalysis = formatDocumentAnalysis(analysis, {
-      dropEmpty: true,
-      dropUnmapped: false,
-      limit: 150,
-      conflicts,
-    });
+      const formattedAnalysis = formatDocumentAnalysis(analysis, {
+        dropEmpty: true,
+        dropUnmapped: false,
+        limit: 150,
+        conflicts,
+      });
 
-    return {
-      analysis: formattedAnalysis,
-    };
+      return {
+        analysis: formattedAnalysis,
+      };
+    } finally {
+      deadline.dispose();
+    }
   },
 };

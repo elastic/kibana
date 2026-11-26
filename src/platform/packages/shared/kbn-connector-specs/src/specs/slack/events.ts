@@ -7,175 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  SLACK_EVENT_EMAIL_MAX,
+  SLACK_EVENT_ID_MAX,
+  SLACK_EVENT_NAME_MAX,
+  SLACK_EVENT_TEXT_MAX,
+  SLACK_RESPONSE_URL_MAX,
+  slack2AppMention,
+  slack2ChannelCreated,
+  slack2FilePublic,
+  slack2FileShared,
+  slack2HitlAction,
+  slack2MemberJoinedChannel,
+  slack2Message,
+  slack2ReactionAdded,
+  slack2SlashCommand,
+  slack2TeamJoin,
+} from '@kbn/connector-topics';
 import { i18n } from '@kbn/i18n';
-import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  ConnectorIngressContext,
-  ConnectorSpecEvents,
-  HandleEventsResult,
+import {
+  toConnectorSpecEvent,
+  type ConnectorIngressContext,
+  type ConnectorSpecEvents,
+  type HandleEventsResult,
 } from '../../connector_spec_events';
 import { MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH } from '../../handle_events_result';
 import {
-  SLACK_APP_MENTION_EVENT_ID,
   SLACK_APP_MENTION_EVENT_KEY,
-  SLACK_CHANNEL_CREATED_EVENT_ID,
   SLACK_CHANNEL_CREATED_EVENT_KEY,
-  SLACK_FILE_PUBLIC_EVENT_ID,
   SLACK_FILE_PUBLIC_EVENT_KEY,
-  SLACK_FILE_SHARED_EVENT_ID,
   SLACK_FILE_SHARED_EVENT_KEY,
-  SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID,
+  SLACK_HITL_ACTION_APPROVE,
+  SLACK_HITL_ACTION_EVENT_KEY,
+  SLACK_HITL_ACTION_REJECT,
+  SLACK_HITL_ACTION_SUBMIT,
   SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY,
-  SLACK_MESSAGE_EVENT_ID,
   SLACK_MESSAGE_EVENT_KEY,
-  SLACK_REACTION_ADDED_EVENT_ID,
   SLACK_REACTION_ADDED_EVENT_KEY,
-  SLACK_TEAM_JOIN_EVENT_ID,
+  SLACK_SLASH_COMMAND_EVENT_KEY,
   SLACK_TEAM_JOIN_EVENT_KEY,
 } from './constants';
 import { readSlackMessageText } from './message_text';
 
-const SLACK_EVENT_ID_MAX = 128;
-const SLACK_EVENT_NAME_MAX = 256;
-const SLACK_EVENT_TEXT_MAX = 40_000;
-const SLACK_EVENT_EMAIL_MAX = 320;
 const SLACK_URL_VERIFICATION_CHALLENGE_MAX = 1024;
-
-const slackId = (description: string) =>
-  z.string().min(1).max(SLACK_EVENT_ID_MAX).describe(description);
-
-const optionalSlackId = (description: string) => slackId(description).optional();
-
-const SlackMessageEventSchema = lazySchema(() =>
-  z.object({
-    workspace: optionalSlackId('Slack workspace (team) id.'),
-    channel: slackId('Channel where the message was posted.'),
-    messageId: slackId('Message timestamp, which Slack uses as the message id.'),
-    threadId: optionalSlackId('Thread timestamp when the message is in a thread.'),
-    sender: optionalSlackId('User id of the sender, when Slack includes one.'),
-    text: z
-      .string()
-      .max(SLACK_EVENT_TEXT_MAX)
-      .optional()
-      .describe(
-        'Message text, when Slack includes it. Text from the message blocks and attachments that the message text does not already contain follows it, one line each.'
-      ),
-    subtype: optionalSlackId('Slack message subtype, such as bot_message, when present.'),
-    botId: optionalSlackId('Bot id when the message was sent by a bot.'),
-    appId: optionalSlackId('Id of the Slack app that sent the message, when Slack includes it.'),
-    botName: z
-      .string()
-      .min(1)
-      .max(SLACK_EVENT_NAME_MAX)
-      .optional()
-      .describe(
-        'Display name of the bot or app that sent the message, when Slack includes it. The sender can set it, so use appId to identify the app.'
-      ),
-    externalConversationId: optionalSlackId(
-      "The Relay's opaque key for the message's thread, when the Relay forwarded the event. A mention of the app in that thread carries the same key."
-    ),
-  })
-);
-
-const SlackAppMentionEventSchema = lazySchema(() =>
-  z.object({
-    workspace: optionalSlackId('Slack workspace (team) id.'),
-    channel: slackId('Channel where the app was mentioned.'),
-    messageId: slackId('Message timestamp of the mention.'),
-    threadId: optionalSlackId('Thread timestamp when the mention is in a thread.'),
-    sender: optionalSlackId('User id of the person who mentioned the app.'),
-    text: z.string().max(SLACK_EVENT_TEXT_MAX).optional().describe('Text of the mention.'),
-  })
-);
-
-const SlackReactionAddedEventSchema = lazySchema(() =>
-  z.object({
-    channel: optionalSlackId('Channel of the message that received the reaction.'),
-    messageId: optionalSlackId('Timestamp of the message that received the reaction.'),
-    fileId: optionalSlackId('Id of the file that received the reaction.'),
-    fileCommentId: optionalSlackId('Id of the file comment that received the reaction.'),
-    itemType: z
-      .string()
-      .min(1)
-      .max(SLACK_EVENT_NAME_MAX)
-      .optional()
-      .describe('Slack item type, such as message, file, or file_comment.'),
-    user: slackId('User id of the person who added the reaction.'),
-    reaction: z
-      .string()
-      .min(1)
-      .max(SLACK_EVENT_NAME_MAX)
-      .describe('Reaction name, without colons.'),
-  })
-);
-
-const SlackFileSharedEventSchema = lazySchema(() =>
-  z.object({
-    fileId: slackId('Id of the shared file.'),
-    user: optionalSlackId('User id of the person who shared the file.'),
-    channel: optionalSlackId('Channel the file was shared in, when Slack includes one.'),
-  })
-);
-
-const SlackFilePublicEventSchema = lazySchema(() =>
-  z.object({
-    fileId: slackId('Id of the file that was made public.'),
-    userId: optionalSlackId(
-      'User id of the person who made the file public, when Slack includes it.'
-    ),
-  })
-);
-
-const SlackChannelCreatedEventSchema = lazySchema(() =>
-  z.object({
-    channelId: slackId('Id of the created public channel.'),
-    name: z
-      .string()
-      .min(1)
-      .max(SLACK_EVENT_NAME_MAX)
-      .optional()
-      .describe('Name of the created channel.'),
-    creator: optionalSlackId('User id of the person who created the channel.'),
-  })
-);
-
-const SlackTeamJoinEventSchema = lazySchema(() =>
-  z.object({
-    userId: slackId('User id of the person who joined the workspace.'),
-    name: z.string().min(1).max(SLACK_EVENT_NAME_MAX).optional().describe('Slack username.'),
-    realName: z
-      .string()
-      .min(1)
-      .max(SLACK_EVENT_NAME_MAX)
-      .optional()
-      .describe('Profile real name, when Slack includes it.'),
-    displayName: z
-      .string()
-      .min(1)
-      .max(SLACK_EVENT_NAME_MAX)
-      .optional()
-      .describe('Profile display name, when Slack includes it.'),
-    email: z
-      .string()
-      .min(1)
-      .max(SLACK_EVENT_EMAIL_MAX)
-      .optional()
-      .describe('Profile email, when Slack includes it.'),
-  })
-);
-
-const SlackMemberJoinedChannelEventSchema = lazySchema(() =>
-  z.object({
-    userId: slackId('User id of the person who joined the channel.'),
-    channelId: slackId('Id of the channel that was joined.'),
-    inviter: optionalSlackId('User id of the person who invited them, when Slack includes one.'),
-  })
-);
 
 interface ParsedSlackEvent {
   readonly eventId: string;
-  readonly payload: Record<string, string>;
+  readonly payload: Record<string, unknown>;
 }
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
@@ -264,7 +143,7 @@ const parseMessage = (
     sources.map(read).find((value) => value !== undefined);
 
   return {
-    eventId: SLACK_MESSAGE_EVENT_ID,
+    eventId: slack2Message.name,
     payload: omitUndefined({
       workspace,
       channel,
@@ -292,7 +171,7 @@ const parseAppMention = (
   }
 
   return {
-    eventId: SLACK_APP_MENTION_EVENT_ID,
+    eventId: slack2AppMention.name,
     payload: omitUndefined({
       workspace,
       channel,
@@ -313,7 +192,7 @@ const parseReactionAdded = (event: Record<string, unknown>): ParsedSlackEvent | 
 
   const item = nestedRecord(event, 'item');
   return {
-    eventId: SLACK_REACTION_ADDED_EVENT_ID,
+    eventId: slack2ReactionAdded.name,
     payload: omitUndefined({
       channel: item ? readId(item.channel) : undefined,
       messageId: item ? readId(item.ts) : undefined,
@@ -338,7 +217,7 @@ const parseFileShared = (event: Record<string, unknown>): ParsedSlackEvent | und
   }
 
   return {
-    eventId: SLACK_FILE_SHARED_EVENT_ID,
+    eventId: slack2FileShared.name,
     payload: omitUndefined({
       fileId,
       user: readId(event.user_id),
@@ -354,7 +233,7 @@ const parseFilePublic = (event: Record<string, unknown>): ParsedSlackEvent | und
   }
 
   return {
-    eventId: SLACK_FILE_PUBLIC_EVENT_ID,
+    eventId: slack2FilePublic.name,
     payload: omitUndefined({
       fileId,
       userId: readId(event.user_id),
@@ -370,7 +249,7 @@ const parseChannelCreated = (event: Record<string, unknown>): ParsedSlackEvent |
   }
 
   return {
-    eventId: SLACK_CHANNEL_CREATED_EVENT_ID,
+    eventId: slack2ChannelCreated.name,
     payload: omitUndefined({
       channelId,
       name: channel ? readName(channel.name) : undefined,
@@ -386,7 +265,7 @@ const parseTeamJoin = (event: Record<string, unknown>): ParsedSlackEvent | undef
     if (userId === undefined) {
       return undefined;
     }
-    return { eventId: SLACK_TEAM_JOIN_EVENT_ID, payload: { userId } };
+    return { eventId: slack2TeamJoin.name, payload: { userId } };
   }
   if (!isPlainObject(user)) {
     return undefined;
@@ -399,7 +278,7 @@ const parseTeamJoin = (event: Record<string, unknown>): ParsedSlackEvent | undef
 
   const profile = nestedRecord(user, 'profile');
   return {
-    eventId: SLACK_TEAM_JOIN_EVENT_ID,
+    eventId: slack2TeamJoin.name,
     payload: omitUndefined({
       userId,
       name: readName(user.name),
@@ -418,7 +297,7 @@ const parseMemberJoinedChannel = (event: Record<string, unknown>): ParsedSlackEv
   }
 
   return {
-    eventId: SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID,
+    eventId: slack2MemberJoinedChannel.name,
     payload: omitUndefined({
       userId,
       channelId,
@@ -478,6 +357,49 @@ const parseSlackCallback = (
   };
 };
 
+const readResponseUrl = (value: unknown): string | undefined => {
+  const url = readBoundedString(value, SLACK_RESPONSE_URL_MAX);
+  if (url === undefined || !url.startsWith('https://')) {
+    return undefined;
+  }
+  return url;
+};
+
+/**
+ * Slack slash commands arrive as flat form fields (`command`, `team_id`, …),
+ * not as an Events API `event_callback`.
+ */
+const parseSlashCommand = (
+  rawBody: Record<string, unknown>
+): (ParsedSlackEvent & { correlationKey: string }) | undefined => {
+  const command = readName(rawBody.command);
+  if (command === undefined || !command.startsWith('/') || command.length < 2) {
+    return undefined;
+  }
+  const workspace = readId(rawBody.team_id);
+  const channel = readId(rawBody.channel_id);
+  const user = readId(rawBody.user_id);
+  if (workspace === undefined || channel === undefined || user === undefined) {
+    return undefined;
+  }
+  const triggerId = readBoundedString(rawBody.trigger_id, MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH);
+  return {
+    eventId: slack2SlashCommand.name,
+    correlationKey: triggerId ?? uuidv4(),
+    payload: omitUndefined({
+      workspace,
+      channel,
+      channelName: readName(rawBody.channel_name),
+      user,
+      userName: readName(rawBody.user_name),
+      command,
+      text: readText(rawBody.text),
+      responseUrl: readResponseUrl(rawBody.response_url),
+      apiAppId: readId(rawBody.api_app_id),
+    }),
+  };
+};
+
 /**
  * Slack Request URL check: `{ type: "url_verification", challenge }`.
  */
@@ -493,6 +415,199 @@ const getUrlVerificationChallenge = (rawBody: Record<string, unknown>): string |
     return undefined;
   }
   return challenge;
+};
+
+const HITL_CORRELATION_VALUE_MAX = 2000;
+
+const decodeHitlCorrelation = (
+  value: string
+):
+  | {
+      executionId: string;
+      stepId: string;
+      token: string;
+      spaceId: string;
+      kind: 'approval' | 'input';
+    }
+  | undefined => {
+  if (value.length === 0 || value.length > HITL_CORRELATION_VALUE_MAX) {
+    return undefined;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+  if (!isPlainObject(parsed) || parsed.v !== 1) {
+    return undefined;
+  }
+  const executionId = readId(parsed.e);
+  const stepId = readId(parsed.s);
+  const token = readBoundedString(parsed.t, 128);
+  const spaceId = readBoundedString(parsed.p, SLACK_EVENT_ID_MAX);
+  if (!executionId || !stepId || !token || !spaceId) {
+    return undefined;
+  }
+  if (parsed.k !== 'a' && parsed.k !== 'i') {
+    return undefined;
+  }
+  return {
+    executionId,
+    stepId,
+    token,
+    spaceId,
+    kind: parsed.k === 'a' ? 'approval' : 'input',
+  };
+};
+
+const mapSlackStateValuesToInputJson = (stateValues: unknown): string | undefined => {
+  if (!isPlainObject(stateValues)) {
+    return undefined;
+  }
+  const input: Record<string, string | number | boolean | string[]> = {};
+  for (const block of Object.values(stateValues)) {
+    if (!isPlainObject(block)) {
+      continue;
+    }
+    for (const [actionId, rawField] of Object.entries(block)) {
+      if (!isPlainObject(rawField)) {
+        continue;
+      }
+      const type = typeof rawField.type === 'string' ? rawField.type : undefined;
+      if (type === 'plain_text_input' || type === 'email_text_input' || type === 'url_text_input') {
+        if (typeof rawField.value === 'string') {
+          input[actionId] = rawField.value;
+        }
+        continue;
+      }
+      if (type === 'number_input' && typeof rawField.value === 'string' && rawField.value.length) {
+        const asNumber = Number(rawField.value);
+        input[actionId] = Number.isFinite(asNumber) ? asNumber : rawField.value;
+        continue;
+      }
+      if (type === 'multi_static_select' && Array.isArray(rawField.selected_options)) {
+        const values = rawField.selected_options.flatMap((option) => {
+          if (!isPlainObject(option) || typeof option.value !== 'string') {
+            return [];
+          }
+          return [option.value];
+        });
+        if (values.length > 0) {
+          input[actionId] = values;
+        }
+        continue;
+      }
+      if (type === 'static_select' || type === 'radio_buttons') {
+        const selected = isPlainObject(rawField.selected_option)
+          ? rawField.selected_option
+          : undefined;
+        if (selected && typeof selected.value === 'string') {
+          if (
+            type === 'radio_buttons' &&
+            (selected.value === 'true' || selected.value === 'false')
+          ) {
+            input[actionId] = selected.value === 'true';
+          } else {
+            input[actionId] = selected.value;
+          }
+        }
+      }
+    }
+  }
+  return JSON.stringify(input);
+};
+
+/**
+ * Interactivity payloads are often form-urlencoded as `{ payload: "<json>" }`.
+ */
+const resolveInteractivityEnvelope = (
+  rawBody: Record<string, unknown>
+): Record<string, unknown> | undefined => {
+  if (typeof rawBody.payload === 'string') {
+    try {
+      const parsed = JSON.parse(rawBody.payload);
+      return isPlainObject(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  if (rawBody.type === 'block_actions') {
+    return rawBody;
+  }
+  return undefined;
+};
+
+const parseHitlBlockActions = (
+  envelope: Record<string, unknown>
+): (ParsedSlackEvent & { correlationKey: string }) | undefined => {
+  if (envelope.type !== 'block_actions' || !Array.isArray(envelope.actions)) {
+    return undefined;
+  }
+  const action = envelope.actions[0];
+  if (!isPlainObject(action) || typeof action.action_id !== 'string') {
+    return undefined;
+  }
+  const { action_id: actionId } = action;
+  if (
+    actionId !== SLACK_HITL_ACTION_APPROVE &&
+    actionId !== SLACK_HITL_ACTION_REJECT &&
+    actionId !== SLACK_HITL_ACTION_SUBMIT
+  ) {
+    return undefined;
+  }
+  if (typeof action.value !== 'string') {
+    return undefined;
+  }
+  const correlation = decodeHitlCorrelation(action.value);
+  if (!correlation) {
+    return undefined;
+  }
+
+  const responseUrl = readBoundedString(envelope.response_url, SLACK_RESPONSE_URL_MAX);
+  const user = isPlainObject(envelope.user) ? envelope.user : undefined;
+  const slackUserId = user ? readId(user.id) : undefined;
+  const responseFields = {
+    ...(responseUrl ? { responseUrl } : {}),
+    ...(slackUserId ? { slackUserId } : {}),
+  };
+
+  if (actionId === SLACK_HITL_ACTION_APPROVE || actionId === SLACK_HITL_ACTION_REJECT) {
+    if (correlation.kind !== 'approval') {
+      return undefined;
+    }
+    return {
+      eventId: slack2HitlAction.name,
+      correlationKey: uuidv4(),
+      payload: {
+        executionId: correlation.executionId,
+        stepId: correlation.stepId,
+        token: correlation.token,
+        spaceId: correlation.spaceId,
+        kind: 'approval',
+        approved: actionId === SLACK_HITL_ACTION_APPROVE,
+        ...responseFields,
+      },
+    };
+  }
+
+  if (correlation.kind !== 'input') {
+    return undefined;
+  }
+  const state = isPlainObject(envelope.state) ? envelope.state.values : undefined;
+  return {
+    eventId: slack2HitlAction.name,
+    correlationKey: uuidv4(),
+    payload: {
+      executionId: correlation.executionId,
+      stepId: correlation.stepId,
+      token: correlation.token,
+      spaceId: correlation.spaceId,
+      kind: 'input',
+      inputJson: mapSlackStateValuesToInputJson(state) ?? '{}',
+      ...responseFields,
+    },
+  };
 };
 
 const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
@@ -511,8 +626,43 @@ const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEv
     };
   }
 
+  const interactivityEnvelope = resolveInteractivityEnvelope(ctx.rawBody);
+  if (interactivityEnvelope) {
+    const hitl = parseHitlBlockActions(interactivityEnvelope);
+    if (hitl) {
+      return {
+        type: 'emit',
+        events: [
+          {
+            eventId: hitl.eventId,
+            correlationKey: hitl.correlationKey,
+            payload: hitl.payload,
+          },
+        ],
+        // Slack interactivity expects HTTP 200. The ingest route otherwise answers 202.
+        httpResponse: { status: 200 },
+      };
+    }
+    // Non-HITL interactivity is ignored (no workflow start).
+    return { type: 'emit', events: [] };
+  }
+
   const parsed = parseSlackCallback(ctx.rawBody);
-  if (parsed === undefined) {
+  if (parsed !== undefined) {
+    return {
+      type: 'emit',
+      events: [
+        {
+          eventId: parsed.eventId,
+          correlationKey: parsed.correlationKey,
+          payload: parsed.payload,
+        },
+      ],
+    };
+  }
+
+  const slashCommand = parseSlashCommand(ctx.rawBody);
+  if (slashCommand === undefined) {
     return { type: 'emit', events: [] };
   }
 
@@ -520,18 +670,18 @@ const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEv
     type: 'emit',
     events: [
       {
-        eventId: parsed.eventId,
-        correlationKey: parsed.correlationKey,
-        payload: parsed.payload,
+        eventId: slashCommand.eventId,
+        correlationKey: slashCommand.correlationKey,
+        payload: slashCommand.payload,
       },
     ],
+    httpResponse: { status: 200 },
   };
 };
 
 export const slackEvents: ConnectorSpecEvents = {
   definitions: {
-    [SLACK_MESSAGE_EVENT_KEY]: {
-      eventId: SLACK_MESSAGE_EVENT_ID,
+    [SLACK_MESSAGE_EVENT_KEY]: toConnectorSpecEvent(slack2Message, {
       title: i18n.translate('connectorSpecs.slack.events.message.title', {
         defaultMessage: 'Message posted',
       }),
@@ -539,78 +689,81 @@ export const slackEvents: ConnectorSpecEvents = {
         defaultMessage:
           'A message was posted in Slack. Subtype and bot or app identity are included when Slack sends them.',
       }),
-      eventSchema: SlackMessageEventSchema,
-    },
-    [SLACK_APP_MENTION_EVENT_KEY]: {
-      eventId: SLACK_APP_MENTION_EVENT_ID,
+    }),
+    [SLACK_APP_MENTION_EVENT_KEY]: toConnectorSpecEvent(slack2AppMention, {
       title: i18n.translate('connectorSpecs.slack.events.appMention.title', {
         defaultMessage: 'App mentioned',
       }),
       description: i18n.translate('connectorSpecs.slack.events.appMention.description', {
         defaultMessage: 'The Slack app was mentioned in a channel.',
       }),
-      eventSchema: SlackAppMentionEventSchema,
-    },
-    [SLACK_REACTION_ADDED_EVENT_KEY]: {
-      eventId: SLACK_REACTION_ADDED_EVENT_ID,
+    }),
+    [SLACK_REACTION_ADDED_EVENT_KEY]: toConnectorSpecEvent(slack2ReactionAdded, {
       title: i18n.translate('connectorSpecs.slack.events.reactionAdded.title', {
         defaultMessage: 'Reaction added',
       }),
       description: i18n.translate('connectorSpecs.slack.events.reactionAdded.description', {
         defaultMessage: 'A reaction was added to a Slack message.',
       }),
-      eventSchema: SlackReactionAddedEventSchema,
-    },
-    [SLACK_FILE_SHARED_EVENT_KEY]: {
-      eventId: SLACK_FILE_SHARED_EVENT_ID,
+    }),
+    [SLACK_FILE_SHARED_EVENT_KEY]: toConnectorSpecEvent(slack2FileShared, {
       title: i18n.translate('connectorSpecs.slack.events.fileShared.title', {
         defaultMessage: 'File shared',
       }),
       description: i18n.translate('connectorSpecs.slack.events.fileShared.description', {
         defaultMessage: 'A file was shared in Slack.',
       }),
-      eventSchema: SlackFileSharedEventSchema,
-    },
-    [SLACK_FILE_PUBLIC_EVENT_KEY]: {
-      eventId: SLACK_FILE_PUBLIC_EVENT_ID,
+    }),
+    [SLACK_FILE_PUBLIC_EVENT_KEY]: toConnectorSpecEvent(slack2FilePublic, {
       title: i18n.translate('connectorSpecs.slack.events.filePublic.title', {
         defaultMessage: 'File made public',
       }),
       description: i18n.translate('connectorSpecs.slack.events.filePublic.description', {
         defaultMessage: 'A Slack file was made public.',
       }),
-      eventSchema: SlackFilePublicEventSchema,
-    },
-    [SLACK_CHANNEL_CREATED_EVENT_KEY]: {
-      eventId: SLACK_CHANNEL_CREATED_EVENT_ID,
+    }),
+    [SLACK_CHANNEL_CREATED_EVENT_KEY]: toConnectorSpecEvent(slack2ChannelCreated, {
       title: i18n.translate('connectorSpecs.slack.events.channelCreated.title', {
         defaultMessage: 'Public channel created',
       }),
       description: i18n.translate('connectorSpecs.slack.events.channelCreated.description', {
         defaultMessage: 'A public Slack channel was created.',
       }),
-      eventSchema: SlackChannelCreatedEventSchema,
-    },
-    [SLACK_TEAM_JOIN_EVENT_KEY]: {
-      eventId: SLACK_TEAM_JOIN_EVENT_ID,
+    }),
+    [SLACK_TEAM_JOIN_EVENT_KEY]: toConnectorSpecEvent(slack2TeamJoin, {
       title: i18n.translate('connectorSpecs.slack.events.teamJoin.title', {
         defaultMessage: 'User joined workspace',
       }),
       description: i18n.translate('connectorSpecs.slack.events.teamJoin.description', {
         defaultMessage: 'A user joined the Slack workspace.',
       }),
-      eventSchema: SlackTeamJoinEventSchema,
-    },
-    [SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY]: {
-      eventId: SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID,
+    }),
+    [SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY]: toConnectorSpecEvent(slack2MemberJoinedChannel, {
       title: i18n.translate('connectorSpecs.slack.events.memberJoinedChannel.title', {
         defaultMessage: 'User joined channel',
       }),
       description: i18n.translate('connectorSpecs.slack.events.memberJoinedChannel.description', {
         defaultMessage: 'A user joined a Slack channel.',
       }),
-      eventSchema: SlackMemberJoinedChannelEventSchema,
-    },
+    }),
+    [SLACK_SLASH_COMMAND_EVENT_KEY]: toConnectorSpecEvent(slack2SlashCommand, {
+      title: i18n.translate('connectorSpecs.slack.events.slashCommand.title', {
+        defaultMessage: 'Slash command',
+      }),
+      description: i18n.translate('connectorSpecs.slack.events.slashCommand.description', {
+        defaultMessage:
+          'A Slack slash command was invoked. Reply by posting a message to the response URL.',
+      }),
+    }),
+    [SLACK_HITL_ACTION_EVENT_KEY]: toConnectorSpecEvent(slack2HitlAction, {
+      title: i18n.translate('connectorSpecs.slack.events.hitlAction.title', {
+        defaultMessage: 'Workflow HITL action',
+      }),
+      description: i18n.translate('connectorSpecs.slack.events.hitlAction.description', {
+        defaultMessage:
+          'A human-in-the-loop Approve, Decline, or Submit control was used in Slack. Resumes a paused workflow; not intended as a workflow start trigger.',
+      }),
+    }),
   },
   handleEvents: handleSlackEvents,
 };

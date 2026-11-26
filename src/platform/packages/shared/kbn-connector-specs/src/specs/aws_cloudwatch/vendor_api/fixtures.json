@@ -1,0 +1,117 @@
+{
+  "filterLogEvents": {
+    "input": {
+      "logGroupName": "/aws/lambda/checkout",
+      "startTime": "2026-10-01T00:00:00Z",
+      "endTime": "2026-10-01T01:00:00Z"
+    },
+    "queries": [
+      {
+        "source": "logs",
+        "method": "POST",
+        "path": "/FilterLogEvents"
+      }
+    ]
+  },
+  "getAlarmHistory": {
+    "input": {
+      "startDate": "2026-10-01T00:00:00Z",
+      "endDate": "2026-10-01T01:00:00Z"
+    },
+    "queries": [
+      {
+        "source": "metrics",
+        "method": "POST",
+        "path": "/DescribeAlarmHistory"
+      }
+    ]
+  },
+  "getLogsQueryResults": {
+    "queries": [
+      {
+        "source": "logs",
+        "method": "POST",
+        "path": "/GetQueryResults"
+      }
+    ]
+  },
+  "getMetricData": {
+    "input": {
+      "metricDataQueries": [
+        {
+          "id": "errors",
+          "expression": "SUM(METRICS())"
+        }
+      ],
+      "startTime": "2026-10-01T00:00:00Z",
+      "endTime": "2026-10-01T01:00:00Z"
+    },
+    "queries": [
+      {
+        "source": "metrics",
+        "method": "POST",
+        "path": "/GetMetricData"
+      }
+    ]
+  },
+  "getMetricWidgetImage": {
+    "queries": [
+      {
+        "source": "metrics",
+        "method": "POST",
+        "path": "/GetMetricWidgetImage"
+      }
+    ]
+  },
+  "listAlarms": {
+    "queries": [
+      {
+        "source": "metrics",
+        "method": "POST",
+        "path": "/DescribeAlarms"
+      }
+    ]
+  },
+  "listLogAnomalies": {
+    "queries": [
+      {
+        "source": "logs",
+        "method": "POST",
+        "path": "/ListAnomalies"
+      }
+    ]
+  },
+  "listLogGroups": {
+    "queries": [
+      {
+        "source": "logs",
+        "method": "POST",
+        "path": "/DescribeLogGroups"
+      }
+    ]
+  },
+  "listMetrics": {
+    "queries": [
+      {
+        "source": "metrics",
+        "method": "POST",
+        "path": "/ListMetrics"
+      }
+    ]
+  },
+  "putMetricAlarm": {
+    "input": {
+      "metricName": "CPUUtilization",
+      "namespace": "AWS/EC2",
+      "statistic": "Average",
+      "period": 60
+    }
+  },
+  "startLogsQuery": {
+    "input": {
+      "logGroupName": "/aws/lambda/checkout",
+      "startTime": "2026-10-01T00:00:00Z",
+      "endTime": "2026-10-01T01:00:00Z"
+    }
+  }
+}

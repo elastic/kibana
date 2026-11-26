@@ -118,6 +118,41 @@ describe('useLensProps', () => {
     discoverFetch$.complete();
   });
 
+  it('disconnects the intersection observer when the chart unmounts', () => {
+    const disconnect = jest.fn();
+    window.IntersectionObserver = jest.fn().mockImplementation(() => ({
+      observe: jest.fn(),
+      disconnect,
+      unobserve: jest.fn(),
+      takeRecords: jest.fn(() => []),
+      root: null,
+      rootMargin: '0px',
+      thresholds: [0],
+    })) as unknown as typeof IntersectionObserver;
+
+    const chartRef = {
+      current: document.createElement('div'),
+    } as React.MutableRefObject<HTMLDivElement | null>;
+
+    const { unmount } = renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        lensConfig: defaultXyConfig,
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        profileId: 'testProfileId',
+      })
+    );
+
+    expect(disconnect).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(disconnect).toHaveBeenCalledTimes(1);
+  });
+
   it('returns undefined initially before Lens attributes are built', async () => {
     const chartRef = createMockChartRef();
 
@@ -429,7 +464,12 @@ describe('useLensProps', () => {
   it('builds a heatmap with the same config builder as XY charts', async () => {
     const chartRef = createMockChartRef();
     const query = 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(100)';
-    const heatmapConfig = buildHistogramHeatmapConfig({ query, title: 'latency' });
+    const heatmapConfig = buildHistogramHeatmapConfig({
+      query,
+      title: 'latency',
+      seriesColor: '#1BA9F5',
+      backgroundColor: '#FFFFFF',
+    });
 
     const { result } = renderHook(() =>
       useLensProps({

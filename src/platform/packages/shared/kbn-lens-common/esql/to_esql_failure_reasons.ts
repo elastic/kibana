@@ -26,6 +26,7 @@ export type EsqlConversionFailureReason =
   | 'terms_accuracy_mode_not_supported'
   | 'terms_include_exclude_not_supported'
   | 'terms_other_bucket_not_supported'
+  | 'terms_other_bucket_same_field_not_supported'
   | 'terms_order_by_not_supported'
   | 'terms_custom_order_by_not_supported'
   | 'terms_rank_metric_not_supported'
@@ -112,7 +113,14 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketTooltip',
     {
       defaultMessage:
-        'Grouping remaining values as "Other" will be supported in an upcoming update.',
+        'Grouping remaining values as "Other" is only supported on the first Top values dimension, directly above at most one other bucket.',
+    }
+  ),
+  terms_other_bucket_same_field_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketSameFieldTooltip',
+    {
+      defaultMessage:
+        'Grouping remaining values as "Other" is not supported when both Top values dimensions use the same field.',
     }
   ),
   terms_order_by_not_supported: i18n.translate(

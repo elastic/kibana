@@ -8,7 +8,7 @@
 import type { DashboardAgentTaskOutput, DashboardDatasetExample } from '../types';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../extract_dashboard';
 import { control, dashboard } from '../test_helpers';
-import { dashboardControlSourcingEvaluator } from './control_sourcing';
+import { dashboardControlSourcingEvaluator, getControlReplyCriteria } from './control_sourcing';
 
 const MAPPED = [
   'response',
@@ -56,25 +56,42 @@ const call = (attempts: Attempt[], failedFields: string[] = []): Record<string, 
   ],
 });
 
-const evaluateSourcing = (
-  gold: NonNullable<DashboardDatasetExample['output']>['controls'],
-  {
-    steps,
-    stored,
-    message = 'Here is your dashboard.',
-  }: { steps: Array<Record<string, unknown>>; stored: string[]; message?: string }
-) =>
+type ControlsGold = NonNullable<DashboardDatasetExample['output']>['controls'];
+
+interface Run {
+  steps: Array<Record<string, unknown>>;
+  stored: string[];
+  message?: string;
+  timeSlider?: boolean;
+}
+
+const runOutput = ({
+  steps,
+  stored,
+  message = 'Here is your dashboard.',
+  timeSlider = false,
+}: Run): DashboardAgentTaskOutput => ({
+  errors: [],
+  messages: [{ message }],
+  steps,
+  dashboard: dashboard([], {
+    pinned_panels: [
+      ...stored.map((field) => control(field)),
+      ...(timeSlider ? [{ type: 'time_slider_control', id: 'time_slider', config: {} }] : []),
+    ],
+  }),
+});
+
+const evaluateSourcing = (gold: ControlsGold, run: Run) =>
   dashboardControlSourcingEvaluator.evaluate({
     input: { question: 'q' },
     expected: { controls: gold },
     metadata: undefined,
-    output: {
-      errors: [],
-      messages: [{ message }],
-      steps,
-      dashboard: dashboard([], { pinned_panels: stored.map((field) => control(field)) }),
-    } satisfies DashboardAgentTaskOutput,
+    output: runOutput(run),
   });
+
+const replyCriteria = (gold: ControlsGold, run: Run): string[] =>
+  getControlReplyCriteria({ controls: gold }, runOutput(run));
 
 const failedAssertions = (result: Awaited<ReturnType<typeof evaluateSourcing>>): string[] =>
   ((result.metadata?.checks ?? []) as Array<{ assertion: string; passed: boolean }>)
@@ -97,6 +114,17 @@ describe('dashboard control sourcing evaluator', () => {
       output: { errors: [], messages: [] },
     });
     expect(missing.score).toBe(0);
+  });
+
+  it('scores 0 when a seeded dashboard was never written', async () => {
+    const seed = runOutput({ steps: [], stored: ['geo.dest'], timeSlider: true });
+    const result = await dashboardControlSourcingEvaluator.evaluate({
+      input: { question: 'q' },
+      expected: { controls: { requested: true, mappedFields: MAPPED, mustInclude: ['geo.dest'] } },
+      metadata: undefined,
+      output: { ...seed, before: seed.dashboard },
+    });
+    expect(result.score).toBe(0);
   });
 
   it('passes an unrequested run whose own controls are on mapped fields', async () => {
@@ -165,18 +193,38 @@ describe('dashboard control sourcing evaluator', () => {
     expect(failedAssertions(result)).toEqual(['mustInclude.geo.src']);
   });
 
-  describe('dropped requested controls', () => {
-    it('wants the dropped field named in plain words and no raw error text', async () => {
-      const dropped = {
-        steps: [call([{ field: 'status_code', userRequested: true }], ['status_code'])],
-        stored: [],
-      };
-      const silent = await evaluateSourcing({ requested: true, mappedFields: MAPPED }, dropped);
-      expect(failedAssertions(silent)).toEqual([
-        'attemptedControlsMapped',
-        'droppedFiltersAcknowledged',
-      ]);
+  it('fails a control the prompt removed and a time slider it should have dropped', async () => {
+    const gold = {
+      requested: true,
+      mappedFields: MAPPED,
+      mustExclude: ['machine.os', 'bytes'],
+      timeSlider: false,
+    };
+    const steps = [call([{ field: 'geo.src', userRequested: true }])];
+    const kept = await evaluateSourcing(gold, {
+      steps,
+      stored: ['geo.src', 'machine.os.keyword'],
+      timeSlider: true,
+    });
+    expect(failedAssertions(kept)).toEqual(['mustExclude.machine.os', 'timeSlider']);
+    const removed = await evaluateSourcing(gold, { steps, stored: ['geo.src'] });
+    expect(removed.score).toBe(1);
+  });
 
+  it('wants exactly one time slider when the gold keeps it', async () => {
+    const gold = { requested: true, mappedFields: MAPPED, timeSlider: true };
+    const steps = [call([{ field: 'geo.src', userRequested: true }])];
+    const result = await evaluateSourcing(gold, { steps, stored: ['geo.src'] });
+    expect(failedAssertions(result)).toEqual(['timeSlider']);
+  });
+
+  describe('dropped requested controls', () => {
+    const dropped = {
+      steps: [call([{ field: 'status_code', userRequested: true }], ['status_code'])],
+      stored: [],
+    };
+
+    it('fails a reply that repeats the raw control error', async () => {
       const raw = await evaluateSourcing(
         { requested: true, mappedFields: MAPPED },
         {
@@ -184,27 +232,17 @@ describe('dashboard control sourcing evaluator', () => {
           message: 'Controls failed: Field "status_code" on index "logs" is not mapped.',
         }
       );
-      expect(failedAssertions(raw)).toContain('replyWithoutRawErrors');
-
-      const vague = await evaluateSourcing(
-        { requested: true, mappedFields: MAPPED },
-        { ...dropped, message: "Some of the filters couldn't be added." }
-      );
-      expect(failedAssertions(vague)).toContain('droppedFiltersAcknowledged');
-
-      const plain = await evaluateSourcing(
-        { requested: true, mappedFields: MAPPED },
-        {
-          ...dropped,
-          message:
-            "I couldn't add the status code filter because that field is not available in the data.",
-        }
-      );
-      expect(failedAssertions(plain)).toEqual(['attemptedControlsMapped']);
+      expect(failedAssertions(raw)).toEqual(['attemptedControlsMapped', 'replyWithoutRawErrors']);
     });
 
-    it('needs no mention when a later call replaced the failed control with a mapped one', async () => {
-      const result = await evaluateSourcing(
+    it('asks the reply judge to check the dropped field is named', () => {
+      expect(replyCriteria({ requested: true, mappedFields: MAPPED }, dropped)).toEqual([
+        expect.stringContaining('Controls on these fields failed: status_code'),
+      ]);
+    });
+
+    it('needs no mention when a later call replaced the failed control with a mapped one', () => {
+      const criteria = replyCriteria(
         { requested: true, mappedFields: MAPPED, mustInclude: ['machine.os'] },
         {
           steps: [
@@ -214,11 +252,11 @@ describe('dashboard control sourcing evaluator', () => {
           stored: ['machine.os.keyword'],
         }
       );
-      expect(failedAssertions(result)).toEqual(['attemptedControlsMapped']);
+      expect(criteria).toEqual([]);
     });
 
-    it('does not let requested controls that succeeded alongside the failure stand in for it', async () => {
-      const result = await evaluateSourcing(
+    it('does not let requested controls that succeeded alongside the failure stand in for it', () => {
+      const criteria = replyCriteria(
         { requested: true, mappedFields: MAPPED },
         {
           steps: [
@@ -233,10 +271,7 @@ describe('dashboard control sourcing evaluator', () => {
           stored: ['response.keyword'],
         }
       );
-      expect(failedAssertions(result)).toEqual([
-        'attemptedControlsMapped',
-        'droppedFiltersAcknowledged',
-      ]);
+      expect(criteria).toHaveLength(1);
     });
   });
 
@@ -245,51 +280,31 @@ describe('dashboard control sourcing evaluator', () => {
       requested: true,
       mappedFields: MAPPED,
       requestedFilters: [
-        { name: 'HTTP method', terms: ['method'], substitutes: [] },
-        { name: 'status code', terms: ['status'], substitutes: ['response'] },
-        { name: 'HTTP version', terms: ['version'], substitutes: [] },
+        { name: 'HTTP method', substitutes: [] },
+        { name: 'status code', substitutes: ['response'] },
+        { name: 'HTTP version', substitutes: [] },
       ],
     };
-    const steps = [call([{ field: 'response', userRequested: true }])];
+    const run = {
+      steps: [call([{ field: 'response', userRequested: true }])],
+      stored: ['response.keyword'],
+    };
 
-    it('accepts a reply that names the dropped columns by their field names', async () => {
-      const result = await evaluateSourcing(gold, {
-        steps,
-        stored: ['response.keyword'],
-        message:
-          'Since your query uses `DISSECT` to extract `http_method` and `http_version` as computed columns (not mapped index fields), those two cannot back native Kibana controls.',
-      });
-      expect(failedAssertions(result)).toEqual([]);
-    });
-
-    it('accepts a reply that says the filters are breakdowns but not controls', async () => {
-      const result = await evaluateSourcing(gold, {
-        steps,
-        stored: ['response.keyword'],
-        message:
-          'HTTP method and version are available as visual breakdowns, but not controls because they are derived at query time from the raw message rather than stored as mapped fields.',
-      });
-      expect(failedAssertions(result)).toEqual([]);
-    });
-
-    it('fails a requested filter the reply names only as a chart breakdown', async () => {
-      const result = await evaluateSourcing(gold, {
-        steps,
-        stored: ['response.keyword'],
-        message: 'The HTTP method and HTTP version breakdowns are pie charts.',
-      });
-      expect(failedAssertions(result)).toEqual([
-        'requestedFilter.HTTP method',
-        'requestedFilter.HTTP version',
+    it('asks the reply judge about each requested filter with no stand-in control', () => {
+      expect(replyCriteria(gold, run)).toEqual([
+        expect.stringContaining('the HTTP method filter'),
+        expect.stringContaining('the HTTP version filter'),
       ]);
     });
 
-    it('accepts a stored control on a mapped stand-in without a mention', async () => {
-      const result = await evaluateSourcing(
-        { ...gold, requestedFilters: [gold.requestedFilters[1]] },
-        { steps, stored: ['response.keyword'] }
+    it('needs no mention of a filter a stored control stands in for', () => {
+      expect(replyCriteria({ ...gold, requestedFilters: [gold.requestedFilters[1]] }, run)).toEqual(
+        []
       );
-      expect(failedAssertions(result)).toEqual([]);
+    });
+
+    it('asks nothing when the prompt did not request controls', () => {
+      expect(replyCriteria({ ...gold, requested: false }, run)).toEqual([]);
     });
   });
 });

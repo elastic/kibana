@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { NightshiftSettingsLocatorParams } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
   type InvestigationLocatorParams,
@@ -24,6 +26,12 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
+import {
+  getReachedInvestigationLimit,
+  getStartFailureMessage,
+  isTooManyRequestsError,
+} from '../utils/investigation_start_failure';
+import { DailyLimitReachedText } from '../components/daily_limit_reached_text';
 
 export const VIEWED_INVESTIGATIONS_STORAGE_KEY = 'xpack.observability.viewedInvestigationIds';
 export const MAX_VIEWED_INVESTIGATIONS = 200;
@@ -43,6 +51,14 @@ const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
  * until the list shows it, for at most this long.
  */
 const PENDING_START_TIMEOUT_MS = 2 * 60_000;
+
+/** How long a failure toast waits for the daily limits before showing the server's reason alone. */
+export const QUOTAS_LOOKUP_TIMEOUT_MS = 3_000;
+
+type AlertInvestigationStart =
+  | { status: 'starting'; alertId: string }
+  | { status: 'started'; alertId: string; id: string; at: number }
+  | null;
 
 const getAlertInvestigationsQuery = (alertId: string) => ({
   subject_type: 'alert',
@@ -92,12 +108,17 @@ export const useInvestigateAlert = ({
   const investigationLocator = services?.share?.url?.locators?.get<InvestigationLocatorParams>(
     NIGHTSHIFT_INVESTIGATION_LOCATOR_ID
   );
+  const settingsLocator = services?.share?.url?.locators?.get<NightshiftSettingsLocatorParams>(
+    NIGHTSHIFT_SETTINGS_LOCATOR_ID
+  );
   const http = services?.http;
   const basePath = http?.basePath?.get?.() ?? '';
   const statusQueryKey = ['alertInvestigations', basePath, alertId] as const;
   const queryClient = useQueryClient();
   const { data: availability } = useInvestigationAvailability();
-  const [pendingStart, setPendingStart] = useState<{ id: string; at: number } | undefined>();
+  const [start, setStart] = useState<AlertInvestigationStart>(null);
+  const pendingStart =
+    start?.alertId === alertId && start?.status === 'started' ? start : undefined;
   const canInvestigate = Boolean(enabled && alertId && investigationsClient && http);
   const isAwaitingStartIn = (data: ListInvestigationsResponse | undefined): boolean =>
     pendingStart !== undefined &&
@@ -124,16 +145,17 @@ export const useInvestigateAlert = ({
     []
   );
   const viewedInvestigationIdsRef = useLatest(viewedInvestigationIds);
-  const [isStarting, setIsStarting] = useState(false);
+  const isStarting = start?.alertId === alertId && start?.status === 'starting';
   const latestInvestigation = pickAlertInvestigation(investigations?.results);
-  const hasOngoingInvestigation =
-    latestInvestigation?.in_progress === true || isAwaitingStartIn(investigations);
+  const isAwaitingStart = isAwaitingStartIn(investigations);
+  const hasOngoingInvestigation = latestInvestigation?.in_progress === true || isAwaitingStart;
   const isInvestigating = isStarting || hasOngoingInvestigation;
   // In the vocabulary of the run statuses this replaced: an investigation nothing works on reads as
   // completed.
-  const viewedInvestigationState = latestInvestigation?.in_progress ? 'running' : 'completed';
+  const viewedInvestigationState = hasOngoingInvestigation ? 'running' : 'completed';
   const showInvestigateAction = availability?.available === true;
-  const investigationId = alertId && latestInvestigation ? latestInvestigation.id : '';
+  const listedInvestigationId = alertId && isStatusLoaded ? latestInvestigation?.id : undefined;
+  const investigationId = isAwaitingStart ? pendingStart?.id : listedInvestigationId;
   const viewInvestigationUrl = useMemo(
     () => (investigationId ? investigationLocator?.getRedirectUrl({ investigationId }) : undefined),
     [investigationId, investigationLocator]
@@ -188,9 +210,11 @@ export const useInvestigateAlert = ({
   }
 
   const handleInvestigate = async () => {
-    if (!alertId || !investigationsClient || isInvestigating) return;
+    if (!alertId || !investigationsClient || isInvestigating) {
+      return;
+    }
 
-    setIsStarting(true);
+    setStart({ status: 'starting', alertId });
     try {
       // An open investigation that already holds the alert is continued, not duplicated.
       const { investigation_id: startedId } = await investigationsClient.fetch(
@@ -200,7 +224,11 @@ export const useInvestigateAlert = ({
           params: { body: { subject: { type: 'alert', ids: [alertId] } } },
         }
       );
-      setPendingStart({ id: startedId, at: Date.now() });
+      setStart((current) =>
+        current?.alertId === alertId
+          ? { status: 'started', alertId, id: startedId, at: Date.now() }
+          : current
+      );
       const startedInvestigationUrl = investigationLocator?.getRedirectUrl({
         investigationId: startedId,
       });
@@ -239,14 +267,54 @@ export const useInvestigateAlert = ({
       await queryClient.invalidateQueries(statusQueryKey);
       onInvestigate?.();
     } catch (error) {
+      setStart((current) => (current?.alertId === alertId ? null : current));
       services?.notifications?.toasts?.addDanger({
         title: i18n.translate('xpack.observability.alerts.investigationFailed', {
           defaultMessage: 'Failed to start investigation',
         }),
-        text: error instanceof Error ? error.message : String(error),
+        text: await getStartFailureText(error),
       });
+    }
+  };
+
+  /** The failure's reason; for a reached daily limit, also when it resets and how to raise it. */
+  const getStartFailureText = async (error: unknown) => {
+    const message = getStartFailureMessage(error);
+    if (!isTooManyRequestsError(error) || !investigationsClient || !services?.rendering) {
+      return message;
+    }
+    // The toast waits for the limits, so a slow lookup must not hold it back for long.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), QUOTAS_LOOKUP_TIMEOUT_MS);
+    try {
+      const quotas = await investigationsClient.fetch(
+        'GET /internal/nightshift/investigation_quotas',
+        { signal: controller.signal }
+      );
+      const reachedLimit = getReachedInvestigationLimit(quotas);
+      // A 429 without a reached limit came from elsewhere, such as Kibana's rate limiter.
+      if (!reachedLimit) {
+        return message;
+      }
+      const { window: quotaWindow, canManage } = quotas;
+      const changeLimitsUrl = canManage
+        ? settingsLocator?.getRedirectUrl({ tab: 'investigations' })
+        : undefined;
+      return toMountPoint(
+        <DailyLimitReachedText
+          message={message}
+          resetsAt={quotaWindow.resetsAt}
+          blockedUntilChanged={reachedLimit.blockedUntilChanged}
+          canManage={canManage}
+          changeLimitsUrl={changeLimitsUrl}
+        />,
+        services.rendering
+      );
+    } catch {
+      // Without the limits the server's message still says which limit was reached.
+      return message;
     } finally {
-      setIsStarting(false);
+      clearTimeout(timeout);
     }
   };
 
@@ -254,8 +322,10 @@ export const useInvestigateAlert = ({
     showInvestigateAction,
     showInvestigateButton,
     showViewInvestigation,
+    hasInvestigation: latestInvestigation !== undefined || isAwaitingStart,
     handleInvestigate,
     isInvestigating,
+    isStarting,
     investigateActionLabel,
     investigateEbtProps: getEbtProps({
       action: EBT_CLICK_ACTIONS.START_INVESTIGATION,
@@ -267,7 +337,7 @@ export const useInvestigateAlert = ({
     viewInvestigationEbtProps: getEbtProps({
       action: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
       element: ebtElement,
-      detail: latestInvestigation ? viewedInvestigationState : undefined,
+      detail: investigationId ? viewedInvestigationState : undefined,
     }),
     markInvestigationViewed,
   };

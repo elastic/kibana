@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSubjectTitle } from './subject_title';
+import { getSubjectDisplayType, getSubjectTitle } from './subject_title';
 
 describe('getSubjectTitle', () => {
   it('names an alert after its rule, else its summary, else its id', () => {
@@ -29,5 +29,23 @@ describe('getSubjectTitle', () => {
     );
     expect(getSubjectTitle({ type: 'manual', id: 'q' })).toBe('Question');
     expect(getSubjectTitle({ type: 'significant_event', id: 'e' })).toBe('Significant event');
+  });
+});
+
+describe('getSubjectDisplayType', () => {
+  it('presents an alert from significant events as a significant event', () => {
+    expect(
+      getSubjectDisplayType({ type: 'alert', snapshot: { source: 'elastic.significant_events' } })
+    ).toBe('significant_event');
+  });
+
+  it('keeps the stored type for every other subject', () => {
+    expect(getSubjectDisplayType({ type: 'alert', snapshot: { source: 'universal' } })).toBe(
+      'alert'
+    );
+    expect(getSubjectDisplayType({ type: 'alert' })).toBe('alert');
+    expect(
+      getSubjectDisplayType({ type: 'manual', snapshot: { source: 'elastic.significant_events' } })
+    ).toBe('manual');
   });
 });

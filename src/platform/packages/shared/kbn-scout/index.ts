@@ -68,6 +68,7 @@ export {
 export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
+  GotoAppOptions,
   ScoutPage,
   PageObjects,
   ScoutTestFixtures,
@@ -117,6 +118,7 @@ export type { Locator, CDPSession } from 'playwright/test';
 // Locator helpers used by plugin page objects
 export { resolveSelector } from './src/playwright/utils';
 export type { SelectorInput } from './src/playwright/utils';
+export { findImportedSavedObjectId } from './src/playwright/utils';
 
 // Config-set constants — exported so test files can import instead of redeclaring.
 export { AUDIT_LOG_PATH } from './src/servers/configs/config_sets/security_audit/shared';
@@ -126,3 +128,5 @@ export {
   OTEL_TEST_PROJECT_ID,
 } from './src/servers/configs/config_sets/security_audit_otel/shared';
 export { KIBANA_TLS_ORIGIN } from './src/servers/configs/config_sets/shared/tls_origin';
+
+export { getAgentBuilderSmokeEisModels } from './src/servers/configs/config_sets/agent_builder_smoke/eis_models';

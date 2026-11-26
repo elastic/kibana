@@ -30,8 +30,14 @@ import type { HuntModelTierId } from '@kbn/alertzero-common';
  *    extraction decides which behaviors get a query at all, and ES|QL generation runs here
  *    too: up to `MAX_GENERATED_BEHAVIORS` rounds per report, which is what the hunt paid
  *    before the tiers were split.
+ *  - `cyber`: the connector saved on Cyber domain models, when that row is not empty.
+ *    Dataset matching, recommendations, and technique extraction prefer it. ES|QL
+ *    generation prefers it only when the connector accepts messages; a template-required
+ *    endpoint stays off that path because `generateEsql` writes its own prompts.
  */
-export type HuntModels = Partial<Record<HuntModelTierId, ScopedModel>>;
+export interface HuntModels extends Partial<Record<HuntModelTierId, ScopedModel>> {
+  cyber?: ScopedModel;
+}
 
 /** A tier a hunt consumer can ask for. */
 export type HuntModelTier = HuntModelTierId;
@@ -49,8 +55,8 @@ export interface HuntBehaviorModels {
 
 /**
  * Shared service handles the hunt pipeline (Tier 1, Tier 2, correlation and,
- * eventually, investigation write-back) needs from sibling plugins. Assembled
- * once in AlertZeroPlugin#start and threaded through every hunt route/service
+ * eventually, investigation write-back) needs from sibling plugins. Built from the
+ * Worker context by `createHuntServices` and threaded through every hunt route/service
  * so none of them import agentBuilder/inference directly.
  */
 export interface HuntServices {
@@ -80,5 +86,5 @@ export interface HuntServices {
    * in which case Tier 2 sees an empty catalog, returns early before extraction, and reports a
    * report-level `catalog_unavailable`.
    */
-  mitreDataClient?: MitreAttackDataClient;
+  readonly mitreDataClient?: MitreAttackDataClient;
 }

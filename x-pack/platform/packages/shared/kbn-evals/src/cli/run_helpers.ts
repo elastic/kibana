@@ -30,6 +30,11 @@ import {
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
+  PROFILE_FLAG_NAMES,
+  readEvaluationsKbnProfile,
+  readTracingProfile,
+  resolveDefaultJudgeConnectorId,
+  warnOnDeprecatedProfileFlags,
 } from './profiles';
 import { runScoutHook } from './scout_hook';
 import { resolveScoutTarget, type ScoutTarget } from './scout_target';
@@ -72,6 +77,42 @@ export const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) 
   );
 };
 
+/** Interactive profile choice (local / golden cluster / custom), used when `--profile` is omitted. */
+export const promptForProfile = async (repoRoot: string, log: ToolingLog): Promise<string> => {
+  type InfraChoice = 'local' | 'golden-cluster' | 'custom';
+  const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
+    type: 'list',
+    name: 'choice',
+    message: 'How do you want to run evals and export results and traces?',
+    choices: [
+      { name: 'Local (localhost ES/Kibana)', value: 'local' },
+      {
+        name: 'Golden cluster (uses Vault -- no config file needed)',
+        value: 'golden-cluster',
+      },
+      { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
+    ],
+  });
+
+  if (choice === 'local') {
+    await ensureLocalConfig(repoRoot, log);
+    return 'local';
+  }
+  if (choice === 'golden-cluster') {
+    await ensureVaultAuth(log);
+    return 'dev-vault';
+  }
+  const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
+    type: 'input',
+    name: 'customProfile',
+    message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
+    default: '',
+  });
+  const resolvedProfile = customProfile.trim() || 'default';
+  await runConfigInit(repoRoot, log, { profile: resolvedProfile });
+  return resolvedProfile;
+};
+
 export const ensureEvalInit = async (
   repoRoot: string,
   log: ToolingLog,
@@ -86,39 +127,7 @@ export const ensureEvalInit = async (
           '--profile is required in non-interactive mode (e.g. --profile dev-vault, --profile local).'
         );
       }
-
-      type InfraChoice = 'local' | 'golden-cluster' | 'custom';
-      const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
-        type: 'list',
-        name: 'choice',
-        message: 'How do you want to run evals and export results and traces?',
-        choices: [
-          { name: 'Local (localhost ES/Kibana)', value: 'local' },
-          {
-            name: 'Golden cluster (uses Vault -- no config file needed)',
-            value: 'golden-cluster',
-          },
-          { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
-        ],
-      });
-
-      if (choice === 'local') {
-        await ensureLocalConfig(repoRoot, log);
-        profile = 'local';
-      } else if (choice === 'golden-cluster') {
-        await ensureVaultAuth(log);
-        profile = 'dev-vault';
-      } else {
-        const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
-          type: 'input',
-          name: 'customProfile',
-          message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
-          default: '',
-        });
-        const resolvedProfile = customProfile.trim() || 'default';
-        await runConfigInit(repoRoot, log, { profile: resolvedProfile });
-        profile = resolvedProfile;
-      }
+      profile = await promptForProfile(repoRoot, log);
     } else if (isDevVaultProfile(profile)) {
       await ensureVaultAuth(log);
     } else if (profile === 'local') {
@@ -222,8 +231,8 @@ export const readConcurrencyFlag = (flagsReader: FlagsReader): string | undefine
 };
 
 export interface ResolvedProfileEnv {
-  datasetsProfile?: string;
-  exportProfile?: string;
+  evaluationsKbnProfile?: string;
+  tracingProfile?: string;
   profileEnvOverrides: Record<string, string>;
   /** Output of the suite's `scoutHook`, for both Scout and the Playwright run. */
   suiteScoutEnv: Record<string, string>;
@@ -235,32 +244,34 @@ export interface ResolveProfileEnvOverridesOptions {
   flagsReader: FlagsReader;
   profile?: string;
   suite?: EvalSuiteDefinition;
+  /** The arguments `flagsReader` was parsed from, used to spot deprecated flags. Defaults to the CLI's. */
+  argv?: readonly string[];
 }
 
 /**
- * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
- * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
+ * The config a `scoutHook` reads: the evaluations-kbn profile only. Suite secrets are credentials, like
+ * `evaluationsKbn`, so an auto-selected tracing profile (e.g. `config.local.json`) must not replace them.
  * With `dev-vault`, a suite that declares a `vaultSecret` reads that secret instead of the general
  * config; file profiles keep passing the profile JSON, which holds any suite blocks itself. In CI,
  * `run_suite.sh` has already run the hook and forwards its input, so the CLI doesn't reread Vault.
  */
 export const loadScoutHookConfig = (
   repoRoot: string,
-  datasetsProfile: string | undefined,
+  evaluationsKbnProfile: string | undefined,
   suite: Pick<EvalSuiteDefinition, 'vaultSecret'> | undefined
 ): object => {
   const ciHookConfig = process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
-  if (!datasetsProfile && ciHookConfig) {
+  if (!evaluationsKbnProfile && ciHookConfig) {
     try {
       return validateSuiteVaultConfig(JSON.parse(Buffer.from(ciHookConfig, 'base64').toString()));
     } catch {
       throw new Error('CI scout-hook config must encode a JSON object');
     }
   }
-  if (suite?.vaultSecret && isDevVaultProfile(datasetsProfile)) {
+  if (suite?.vaultSecret && isDevVaultProfile(evaluationsKbnProfile)) {
     return readSuiteSecretFromDevVault(suite.vaultSecret) ?? {};
   }
-  return loadVaultConfig(repoRoot, datasetsProfile) ?? {};
+  return loadVaultConfig(repoRoot, evaluationsKbnProfile) ?? {};
 };
 
 export const resolveProfileEnvOverrides = async ({
@@ -269,19 +280,21 @@ export const resolveProfileEnvOverrides = async ({
   flagsReader,
   profile,
   suite,
+  argv = process.argv.slice(2),
 }: ResolveProfileEnvOverridesOptions): Promise<ResolvedProfileEnv> => {
-  const datasetsProfile = flagsReader.string('datasets-profile') ?? profile;
-  const exportProfile =
-    flagsReader.string('export-profile') ?? profile ?? defaultExportProfile(repoRoot);
+  warnOnDeprecatedProfileFlags(flagsReader, log, argv);
+  const evaluationsKbnProfile = readEvaluationsKbnProfile(flagsReader) ?? profile;
+  const tracingProfile =
+    readTracingProfile(flagsReader) ?? profile ?? defaultExportProfile(repoRoot);
 
   const profileEnvOverrides: Record<string, string> = {
-    ...envFromDatasetsProfile(repoRoot, datasetsProfile),
-    ...envFromExportProfile(repoRoot, exportProfile, {
-      defaultTracingExporters: exportProfile === 'local',
+    ...envFromDatasetsProfile(repoRoot, evaluationsKbnProfile),
+    ...envFromExportProfile(repoRoot, tracingProfile, {
+      defaultTracingExporters: tracingProfile === 'local',
     }),
   };
 
-  if (!profile && isExportProfileImplicitLocal(flagsReader, exportProfile)) {
+  if (!profile && isExportProfileImplicitLocal(flagsReader, tracingProfile)) {
     const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
 
     const tracingReachable = tracingEsUrl
@@ -290,8 +303,8 @@ export const resolveProfileEnvOverrides = async ({
 
     if (!tracingReachable) {
       log.warning(
-        `Export profile "local" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
-          'Continuing without external trace queries. To require export, pass --export-profile local.'
+        `Tracing profile "local" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+          'Continuing without external trace queries. To require export, pass --tracing-profile local.'
       );
       delete profileEnvOverrides.TRACING_ES_URL;
       delete profileEnvOverrides.TRACING_ES_API_KEY;
@@ -299,29 +312,49 @@ export const resolveProfileEnvOverrides = async ({
   }
 
   const suiteScoutEnv = suite?.scoutHook
-    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile, suite))
+    ? runScoutHook(
+        repoRoot,
+        suite.scoutHook,
+        loadScoutHookConfig(repoRoot, evaluationsKbnProfile, suite)
+      )
     : {};
 
-  return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
+  return { evaluationsKbnProfile, tracingProfile, profileEnvOverrides, suiteScoutEnv };
 };
 
+/**
+ * Judge connector: `--judge` flag, then `EVAL_CONNECTOR_ID`, then the profile's
+ * `evaluationConnectorId` (pre-selected in the picker on a TTY; used as-is otherwise).
+ */
 export const resolveEvaluationConnectorId = async (
   repoRoot: string,
   log: ToolingLog,
-  flagsReader: FlagsReader
+  flagsReader: FlagsReader,
+  suite?: EvalSuiteDefinition,
+  profile?: string
 ): Promise<string> => {
   const evaluationConnectorId =
-    flagsReader.string('evaluation-connector-id') ?? process.env.EVAL_CONNECTOR_ID;
+    flagsReader.string('evaluation-connector-id') ??
+    (process.env.EVAL_CONNECTOR_ID || undefined) ??
+    suite?.defaultJudge;
 
   if (evaluationConnectorId) {
     return evaluationConnectorId;
   }
 
+  const defaultConnectorId = resolveDefaultJudgeConnectorId(repoRoot, profile);
+
   if (isTTY()) {
-    return promptForConnector(repoRoot, log);
+    return promptForConnector(repoRoot, log, undefined, defaultConnectorId);
   }
 
-  throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
+  if (!defaultConnectorId) {
+    throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
+  }
+
+  // Not validated here: the Playwright config resolves the id once connectors are loaded.
+  log.info(`Using default judge: ${defaultConnectorId}`);
+  return defaultConnectorId;
 };
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
@@ -331,8 +364,8 @@ export interface EvalRunContext {
   projects: string[];
   profileEnvOverrides: Record<string, string>;
   suiteScoutEnv: Record<string, string>;
-  datasetsProfile?: string;
-  exportProfile?: string;
+  evaluationsKbnProfile?: string;
+  tracingProfile?: string;
   requiresEisCcm: boolean;
 }
 
@@ -351,7 +384,13 @@ export const resolveEvalRunContext = async ({
   profile,
   suite,
 }: ResolveEvalRunContextOptions): Promise<EvalRunContext> => {
-  const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
+  const evaluationConnectorId = await resolveEvaluationConnectorId(
+    repoRoot,
+    log,
+    flagsReader,
+    suite,
+    profile
+  );
 
   let projects: string[] = [];
   const projectFlag = flagsReader.string('project');
@@ -381,7 +420,7 @@ export const resolveEvalRunContext = async ({
     }
   }
 
-  const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
+  const { evaluationsKbnProfile, tracingProfile, profileEnvOverrides, suiteScoutEnv } =
     await resolveProfileEnvOverrides({
       repoRoot,
       log,
@@ -395,8 +434,8 @@ export const resolveEvalRunContext = async ({
     projects,
     profileEnvOverrides,
     suiteScoutEnv,
-    datasetsProfile,
-    exportProfile,
+    evaluationsKbnProfile,
+    tracingProfile,
     requiresEisCcm,
   };
 };
@@ -501,13 +540,13 @@ export const buildEvalRunArgs = ({
   if (profile) {
     runArgs.push('--profile', profile);
   }
-  const passedDatasetsProfile = flagsReader.string('datasets-profile');
-  const passedExportProfile = flagsReader.string('export-profile');
-  if (passedDatasetsProfile) {
-    runArgs.push('--datasets-profile', passedDatasetsProfile);
+  const passedEvaluationsKbnProfile = readEvaluationsKbnProfile(flagsReader);
+  const passedTracingProfile = readTracingProfile(flagsReader);
+  if (passedEvaluationsKbnProfile) {
+    runArgs.push('--evaluations-kbn-profile', passedEvaluationsKbnProfile);
   }
-  if (passedExportProfile) {
-    runArgs.push('--export-profile', passedExportProfile);
+  if (passedTracingProfile) {
+    runArgs.push('--tracing-profile', passedTracingProfile);
   }
 
   const grep = flagsReader.string('grep');
@@ -565,8 +604,7 @@ export const evalRunFlags: FlagOptions = {
     'space-ids',
     'grep',
     'profile',
-    'datasets-profile',
-    'export-profile',
+    ...PROFILE_FLAG_NAMES,
     'evaluations-kbn-url',
     'evaluations-kbn-api-key',
     'scout-arch',

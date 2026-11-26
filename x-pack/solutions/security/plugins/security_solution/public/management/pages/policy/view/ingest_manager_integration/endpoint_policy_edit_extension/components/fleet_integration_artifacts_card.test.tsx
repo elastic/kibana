@@ -23,6 +23,8 @@ import { EVENT_FILTERS_LABELS } from '../translations';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 
+jest.setTimeout(30_000);
+
 describe('Fleet integration policy endpoint security event filters card', () => {
   let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;

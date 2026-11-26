@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type {
   SignificantEventsMaintenanceDeletedCounts,
   SignificantEventsMaintenanceSummary,
@@ -20,10 +20,7 @@ import {
 } from '../../../common/maintenance/state_machine';
 import type { SignificantEventsServer } from '../../types';
 import type { PausedFeatureSettings } from './feature_settings';
-import {
-  LEGACY_DEFAULT_SPACE_WORKFLOW_IDS,
-  type MaintenanceWorkflowTarget,
-} from './managed_workflow_targets';
+import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -199,23 +196,11 @@ const normalizePausedSettings = (
       }
     : undefined;
 
-/**
- * Brand SO-loaded workflow targets once at the SO → domain boundary. Targets
- * recorded for the pre-per-space continuous onboarding documents of the default
- * space are dropped: those documents are deleted at startup and would only
- * produce "not found" failures. The legacy sync document is kept, since startup
- * only removes it once its per-space replacement is enabled.
- *
- * TODO: drop the legacy filter with the legacy default-space cleanup.
- * https://github.com/elastic/kibana/issues/294271
- */
+/** Brands SO-loaded workflow targets once at the SO → domain boundary. */
 const brandDisabledWorkflows = (
   spaceId: SpaceId,
   workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
-): MaintenanceWorkflowTarget[] =>
-  brandOwnTargets(spaceId, workflows).filter(
-    ({ id }) => !(spaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
-  );
+): MaintenanceWorkflowTarget[] => brandOwnTargets(spaceId, workflows);
 
 /** Reads and writes the maintenance saved object of each space. */
 export interface IMaintenanceStateStore {

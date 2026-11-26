@@ -27,6 +27,7 @@ import type {
 import { ConfigKey } from '../../common/runtime_types';
 import { MonitorConfigRepository } from '../services/monitor_config_repository';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { FailedPolicyUpdate } from '../synthetics_service/private_location/synthetics_private_location';
 import type { SyntheticsServerSetup } from '../types';
 import {
   formatHeartbeatRequest,
@@ -65,6 +66,18 @@ export const formatFailedCreates = (failedCreatesBySpace: FailedCreatesBySpace[]
   `[DeployPrivateLocationMonitors] Failed to create policies during sync for spaces: [${failedCreatesBySpace
     .map(({ spaceId, count }) => `${spaceId} (${count})`)
     .join(', ')}]`;
+
+// Unlike failed creates, nothing else logs failed updates on the background sync paths.
+const formatFailedUpdates = (spaceId: string, failedUpdates: FailedPolicyUpdate[]) =>
+  `[DeployPrivateLocationMonitors] Failed to update ${
+    failedUpdates.length
+  } policies during sync for space ${spaceId}: ${JSON.stringify(
+    failedUpdates.map(({ packagePolicy, config, error }) => ({
+      policyId: packagePolicy?.id,
+      monitorId: config?.id,
+      error: error?.message ?? error,
+    }))
+  )}`;
 
 export class DeployPrivateLocationMonitors {
   constructor(
@@ -346,6 +359,10 @@ export class DeployPrivateLocationMonitors {
 
         if (result?.failedCreates && result.failedCreates.length > 0) {
           failedCreatesBySpace.push({ spaceId, count: result.failedCreates.length });
+        }
+
+        if (result?.failedUpdates && result.failedUpdates.length > 0) {
+          this.serverSetup.logger.error(formatFailedUpdates(spaceId, result.failedUpdates));
         }
       } else {
         this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);

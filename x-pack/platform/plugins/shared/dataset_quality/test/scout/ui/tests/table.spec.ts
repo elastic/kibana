@@ -10,11 +10,11 @@ import { expect } from '@kbn/scout/ui';
 
 import { test, testData } from '../fixtures';
 import {
-  DEFAULT_NAMESPACE,
   PACKAGES,
-  PRODUCTION_NAMESPACE,
+  buildDataStreamName,
   cleanUpAll,
   datasetNames,
+  deleteDataStreamIfExists,
   ensurePackageInstalled,
   getInitialTestLogs,
   getLogsForDataset,
@@ -26,12 +26,24 @@ const TO = '2024-01-01T12:00:00.000Z';
 const ACTIVE_TO = new Date().toISOString();
 const APACHE_ACCESS_DATASET = 'apache.access';
 const APACHE_ACCESS_DISPLAY_NAME = 'Apache access logs';
+/**
+ * Namespaces only this file writes to. The page is opened filtered to them, because the list
+ * shows every `logs-*-*` data stream on the cluster and other suites sharing the Scout stack
+ * leave theirs behind (`logs-generic.otel-default`, for one).
+ */
+const NAMESPACE = 'dqtablemain';
+const APACHE_NAMESPACE = 'dqtableprod';
 
 test.describe(
   'Dataset quality table',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let uninstallApache: () => Promise<void>;
+
+    const ownedDataStreams = [
+      ...datasetNames.map((dataset) => buildDataStreamName({ dataset, namespace: NAMESPACE })),
+      buildDataStreamName({ dataset: APACHE_ACCESS_DATASET, namespace: APACHE_NAMESPACE }),
+    ];
 
     // Read-only data, so it is seeded once for the whole file. Failure-store
     // scenarios live in failure_store.spec.ts, which owns that cluster state.
@@ -43,30 +55,40 @@ test.describe(
       );
 
       await indexLogs(logsSynthtraceEsClient, [
-        getInitialTestLogs({ to: TO, count: 4 }),
+        getInitialTestLogs({ to: TO, count: 4, namespace: NAMESPACE }),
         // Only malformed docs, so this data set reports 100% degraded and is active.
         getLogsForDataset({
           to: ACTIVE_TO,
           count: 1,
           dataset: datasetNames[2],
           isMalformed: true,
+          namespace: NAMESPACE,
         }),
         getLogsForDataset({
           to: TO,
           count: 10,
           dataset: APACHE_ACCESS_DATASET,
-          namespace: PRODUCTION_NAMESPACE,
+          namespace: APACHE_NAMESPACE,
         }),
       ]);
     });
 
+    // Admin: the size and last activity columns need the `monitor` index privilege, which neither
+    // `viewer` nor `editor` has.
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({
+        filters: { namespaces: [NAMESPACE, APACHE_NAMESPACE] },
+      });
     });
 
-    test.afterAll(async ({ logsSynthtraceEsClient }) => {
-      await cleanUpAll([() => logsSynthtraceEsClient.clean(), () => uninstallApache()]);
+    test.afterAll(async ({ esClient, log }) => {
+      await cleanUpAll([
+        ...ownedDataStreams.map(
+          (dataStream) => () => deleteDataStreamIfExists(esClient, dataStream, log)
+        ),
+        () => uninstallApache(),
+      ]);
     });
 
     test('sorts by data set name and shows the namespace', async ({ pageObjects }) => {
@@ -78,12 +100,7 @@ test.describe(
 
       expect(
         await pageObjects.datasetQuality.getColumnValues(testData.TABLE_COLUMNS.namespace)
-      ).toStrictEqual([
-        DEFAULT_NAMESPACE,
-        DEFAULT_NAMESPACE,
-        DEFAULT_NAMESPACE,
-        PRODUCTION_NAMESPACE,
-      ]);
+      ).toStrictEqual([NAMESPACE, NAMESPACE, NAMESPACE, APACHE_NAMESPACE]);
     });
 
     test('shows last activity only for data sets with recent data', async ({ pageObjects }) => {

@@ -161,6 +161,57 @@ describe('upgradeManagedPackagePolicies', () => {
     ]);
   });
 
+  it('should skip policies blocked by their agents versions without recording an error', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const soClient = savedObjectsClientMock.create();
+    const makePackagePolicy = (id: string) => ({
+      id,
+      inputs: {},
+      package: { name: 'managed-package', title: 'Managed Package', version: '0.0.1' },
+    });
+
+    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+      (async function* () {
+        yield [makePackagePolicy('pp-1'), makePackagePolicy('pp-blocked')];
+      })()
+    );
+    (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockImplementation(
+      async (_so, id: string) =>
+        id === 'pp-blocked'
+          ? {
+              diff: [],
+              hasErrors: false,
+              agent_version_block: {
+                package_name: 'managed-package',
+                package_version: '1.0.0',
+                version_condition: '^9.4.0',
+                blocked_count: 2,
+                observed_versions: ['9.3.1'],
+              },
+            }
+          : { diff: [], hasErrors: false }
+    );
+    (packagePolicyService.bulkUpgrade as jest.Mock).mockImplementation(
+      async (_so, _es, ids: string[]) => ids.map((id) => ({ id, success: true }))
+    );
+    (getInstallation as jest.Mock).mockResolvedValueOnce({
+      id: 'test-installation',
+      version: '1.0.0',
+      keep_policies_up_to_date: true,
+    });
+
+    const results = await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
+
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      ['pp-1'],
+      expect.anything(),
+      '1.0.0'
+    );
+    expect(results).toEqual([expect.objectContaining({ packagePolicyId: 'pp-1', errors: [] })]);
+  });
+
   it('should record an error for every policy in the batch when the bulk upgrade throws', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();

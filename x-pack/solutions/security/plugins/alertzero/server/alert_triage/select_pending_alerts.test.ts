@@ -23,6 +23,7 @@ describe('selectPendingAlerts', () => {
     expect(select([makeAlert({ status: 'closed' })])).toEqual({
       pending: [],
       claimed: [],
+      settledClaimed: [],
     });
   });
 
@@ -33,18 +34,32 @@ describe('selectPendingAlerts', () => {
     'az:triage_failed',
     'ai-triage.version.1',
   ])('skips an alert that already carries %s', (tag) => {
-    expect(select([makeAlert({ tags: [tag] })])).toEqual({ pending: [], claimed: [] });
+    expect(select([makeAlert({ tags: [tag] })])).toEqual({
+      pending: [],
+      claimed: [],
+      settledClaimed: [],
+    });
   });
 
   it('leaves alerts older than the look-back alone instead of selecting or tagging them', () => {
     const old = makeAlert({ timestamp: NOW - 25 * HOUR_MS });
 
-    expect(select([old])).toEqual({ pending: [], claimed: [] });
+    expect(select([old])).toEqual({ pending: [], claimed: [], settledClaimed: [] });
   });
 
   it('returns claimed alerts separately whatever their age', () => {
     const claimed = makeAlert({ timestamp: NOW - 30 * HOUR_MS, tags: ['az:triage_pending'] });
 
-    expect(select([claimed])).toEqual({ pending: [], claimed: [claimed] });
+    expect(select([claimed])).toEqual({ pending: [], claimed: [claimed], settledClaimed: [] });
+  });
+
+  it('returns a verdicted alert that still carries the claim separately, so its claim can be released', () => {
+    const verdicted = makeAlert({ tags: ['az:true_positive', 'az:triage_pending'] });
+
+    expect(select([verdicted])).toEqual({
+      pending: [],
+      claimed: [],
+      settledClaimed: [verdicted],
+    });
   });
 });

@@ -39,7 +39,7 @@ const POLICY_BASE_ID_FIELD = 'policy_base_id';
  * with `search.allow_expensive_queries: false`.
  *
  * Mixed-version rollout note: an agent enrolled by a downlevel fleet-server after the last Kibana
- * startup backfill will have a versioned `policy_id` (e.g. `policy1#9.4`) but no `policy_base_id`
+ * setup backfill will have a versioned `policy_id` (e.g. `policy1#9.4`) but no `policy_base_id`
  * field. To still match such agents, pass the known `variantPolicyIds` (full ids, e.g.
  * `policy1#9.4`): agents with one of those exact `policy_id`s and no `policy_base_id` are matched
  * too. Exact terms only, so this stays compatible with `search.allow_expensive_queries: false`.
@@ -91,6 +91,48 @@ export async function getVariantPolicyIdsForParent(
 }
 
 /**
+ * Same as {@link getVariantPolicyIdsForParent} for several parents, with a single query: the full
+ * variant policy ids (e.g. `"<parentId>#9.4"`) present in `.fleet-policies`, by parent.
+ */
+export async function getVariantPolicyIdsForParents(
+  esClient: ElasticsearchClient,
+  parentPolicyIds: string[]
+): Promise<Map<string, string[]>> {
+  const byParent = new Map<string, string[]>();
+  if (parentPolicyIds.length === 0) {
+    return byParent;
+  }
+  const response = await esClient.search<
+    unknown,
+    { variant_policy_ids: { buckets: Array<{ key: string }> } }
+  >({
+    index: AGENT_POLICY_INDEX,
+    ignore_unavailable: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [{ terms: { [POLICY_BASE_ID_FIELD]: parentPolicyIds } }],
+        must_not: [{ terms: { policy_id: parentPolicyIds } }],
+      },
+    },
+    aggs: {
+      variant_policy_ids: {
+        terms: {
+          field: 'policy_id',
+          size: parentPolicyIds.length * MAX_VARIANT_POLICY_IDS_PER_PARENT,
+        },
+      },
+    },
+  });
+  for (const { key: policyId } of response.aggregations?.variant_policy_ids?.buckets ?? []) {
+    const { baseId, version } = splitVersionSuffixFromPolicyId(policyId);
+    if (version === null) continue;
+    byParent.set(baseId, [...(byParent.get(baseId) ?? []), policyId]);
+  }
+  return byParent;
+}
+
+/**
  * Same as {@link buildVariantAgentsKuery}, with the variant ids looked up from `.fleet-policies`
  * and merged with `extraVariantPolicyIds` (e.g. ids only known from agents whose variant document
  * is already gone).
@@ -110,7 +152,7 @@ export async function getVariantAgentsKuery(
 /**
  * Returns the versioned policy ids (e.g. `"<parentId>#9.4"`) referenced by agents that have no
  * `policy_base_id`, grouped by parent (base) policy id. These agents were enrolled by a downlevel
- * fleet-server after the last startup backfill and cannot be located via `policy_base_id`; the
+ * fleet-server after the last setup backfill and cannot be located via `policy_base_id`; the
  * variant `.fleet-policies` document they reference may also already be gone.
  */
 export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
@@ -123,7 +165,7 @@ export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
   // Page through every distinct `policy_id` of agents lacking `policy_base_id` with a composite
   // aggregation, so discovery is not capped to the top-N buckets. Versioned ids are picked out
   // client-side (no `include` regex / wildcard query), keeping this compatible with
-  // `search.allow_expensive_queries: false`. After the startup backfill the set is tiny.
+  // `search.allow_expensive_queries: false`. After the setup backfill the set is tiny.
   do {
     signal?.throwIfAborted();
     const response: SearchResponse<
@@ -332,7 +374,7 @@ export async function deleteVersionSpecificFleetServerPolicies(
     // Match only the variant documents: `policy_base_id` is the base id for both the base and its
     // variants, so exclude the base document by `must_not policy_id: parentPolicyId`. Term-based
     // (no `prefix`), so it works with `search.allow_expensive_queries: false`. Every `.fleet-policies`
-    // document carries `policy_base_id` (written on deploy and backfilled at startup).
+    // document carries `policy_base_id` (written on deploy and backfilled by the Fleet setup task).
     query: {
       bool: {
         filter: [{ term: { [POLICY_BASE_ID_FIELD]: parentPolicyId } }],

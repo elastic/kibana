@@ -21,6 +21,8 @@ import {
   SCAN_TOOL_ID,
 } from '.';
 
+const experimentalFeatures = { automaticTroubleshootingUniversalSkill: false };
+
 function assertStandardReturn(result: unknown) {
   const r = result as ToolHandlerReturn;
   if (!isToolHandlerStandardReturn(r)) {
@@ -53,7 +55,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
   describe('FR-020: endpoint-not-found returns distinguishable shape', () => {
     it('isolate_host returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const isolateTool = inlineTools?.find((tool) => tool.id === ISOLATE_TOOL_ID);
 
@@ -71,7 +76,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
 
     it('unisolate_host returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const unisolateTool = inlineTools?.find((tool) => tool.id === UNISOLATE_TOOL_ID);
 
@@ -89,7 +97,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
 
     it('get_endpoint_status returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
@@ -113,7 +124,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
   describe('FR-021: not-found returns distinguishable shape in get_endpoint_status', () => {
     it('get_endpoint_status returns found: false with reason "endpoint_not_found" when agent exists but metadata service returns empty', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
@@ -163,7 +177,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
 
     it('get_endpoint_status returns found: true when all lookups succeed', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
@@ -238,7 +255,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     ];
 
     it('all host-lookup tools return ToolResultType.other for "endpoint not found" (not error)', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const hostLookupTools = (inlineTools ?? []).filter((t) =>
         HOST_LOOKUP_TOOL_IDS.includes(t.id)
@@ -269,7 +289,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
 
     it('list_endpoints reports an empty list rather than a not-found shape when nothing is enrolled', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const listTool = (inlineTools ?? []).find((t) => t.id === LIST_ENDPOINTS_TOOL_ID);
       expect(listTool).toBeDefined();

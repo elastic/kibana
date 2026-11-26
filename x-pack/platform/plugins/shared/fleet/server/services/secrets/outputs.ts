@@ -18,7 +18,9 @@ import {
   extractAndWriteSOSecrets,
   extractAndUpdateSOSecrets,
   isSecretStorageEnabledForFeature,
+  withClearedSecretReferences,
 } from './common';
+import type { DeletedSOSecret } from './common';
 
 export async function isOutputSecretStorageEnabled(
   esClient: ElasticsearchClient,
@@ -59,7 +61,7 @@ export async function extractAndUpdateOutputSecrets(opts: {
 }): Promise<{
   outputUpdate: Partial<Output>;
   secretReferences: SecretReference[];
-  secretsToDelete: SecretReference[];
+  secretsToDelete: DeletedSOSecret[];
 }> {
   const { oldOutput, outputUpdate, esClient, secretHashes } = opts;
   const outputType = outputUpdate.type || oldOutput.type;
@@ -74,7 +76,9 @@ export async function extractAndUpdateOutputSecrets(opts: {
     secretHashes: outputUpdate.is_preconfigured ? secretHashes : undefined,
   });
   return {
-    outputUpdate: secretRes.updatedSoObject,
+    // a deleted secret has its reference removed too, or the output would point at a secret that
+    // no longer exists and every agent using it would fail to start
+    outputUpdate: withClearedSecretReferences(secretRes.updatedSoObject, secretRes.secretsToDelete),
     secretReferences: secretRes.secretReferences,
     secretsToDelete: secretRes.secretsToDelete,
   };
@@ -148,6 +152,9 @@ export function getOutputSecretReferences(output: Output): SecretReference[] {
   }
 
   if (isOtlpOutput(output)) {
+    if (typeof output.secrets?.auth?.credential === 'object') {
+      outputSecretPaths.push({ id: output.secrets.auth.credential.id });
+    }
     if (typeof output.secrets?.otlp_exporter?.tls?.key_pem === 'object') {
       outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.key_pem.id });
     }
@@ -182,6 +189,12 @@ function getOutputSecretPaths(
   }
 
   if (isOtlpOutput(typed)) {
+    if (typed.secrets?.auth?.credential) {
+      outputSecretPaths.push({
+        path: 'secrets.auth.credential',
+        value: typed.secrets.auth.credential,
+      });
+    }
     if (typed.secrets?.otlp_exporter?.tls?.key_pem) {
       outputSecretPaths.push({
         path: 'secrets.otlp_exporter.tls.key_pem',

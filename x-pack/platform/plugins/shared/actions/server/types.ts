@@ -68,6 +68,7 @@ export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
   getSkippedPreconfiguredConnectorIds: () => Set<string>;
+  isCatalogFeatureFlagEnabled: () => boolean;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
@@ -243,6 +244,7 @@ export interface ActionTypeCoreFields<
    * Spec this type was generated from; only set for spec-backed types
    */
   spec?: ConnectorSpec;
+  specs?: Map<string, ConnectorSpec>; // <specVersion, full spec>
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
@@ -290,6 +292,11 @@ export interface ActionTypeCoreFields<
     configurationUtilities: ActionsConfigurationUtilities;
     logger: Logger;
   }) => Record<string, string> | Promise<Record<string, string>>;
+  /**
+   * Hosts a sandbox command may send this connector's auth headers to. Spec-backed types derive
+   * them from spec.sandbox; stack connectors implement it from their own config.
+   */
+  getSandboxHosts?: (args: { config: Record<string, unknown> }) => readonly string[];
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
@@ -345,6 +352,7 @@ export type ClassicActionType<
 };
 
 export interface RawAction extends Record<string, unknown> {
+  specVersion?: string;
   actionTypeId: string;
   name: string;
   isMissingSecrets: boolean;

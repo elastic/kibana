@@ -35,6 +35,7 @@ const alertTriage: Worker = {
   state: 'ok',
   settingsRevision: 1,
   workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}-default`,
+  workflowOutdated: false,
   blockingReasons: [],
   settings: {
     workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,

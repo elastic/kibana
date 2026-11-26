@@ -10,6 +10,7 @@ export { DASHBOARD_ATTACHMENT_TYPE } from './constants';
 export {
   panelGridSchema,
   sectionGridSchema,
+  optionsSchema,
   timeRangeSchema,
   dashboardAttachmentDataSchema,
   isSection,
@@ -24,6 +25,11 @@ export type {
 } from './types';
 
 export { dashboardStateToAttachmentData, attachmentDataToDashboardState } from './converters';
+
+export {
+  getComparableAttachmentState,
+  getComparableDashboardState,
+} from './compare_dashboard_data';
 
 export { DEFAULT_TIME_RANGE, EMPTY_DASHBOARD_STATE } from './dashboard_state_helpers';
 

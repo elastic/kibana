@@ -73,12 +73,14 @@ dependsOn:
   - '@kbn/date-range-picker-presets-common'
   - '@kbn/zod'
   - '@kbn/licensing-plugin'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

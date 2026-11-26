@@ -19,7 +19,7 @@ export type {
   ListWorkflowsResponse,
   WorkflowListItem,
 } from './tools';
-export type { AgentsServiceStartContract } from './agents';
+export type { AgentsServiceStartContract, AgentWithPermissions } from './agents';
 export type {
   AttachmentUIDefinition,
   AttachmentServiceStartContract,
@@ -45,6 +45,8 @@ export type {
   ConversationTemplateUIDefinition,
   ConversationTemplateBriefCardRenderProps,
   ConversationTemplateDetailsFlyoutRenderProps,
+  ConversationTemplateDetailsFlyoutDescriptor,
+  ConversationTemplateDetailsFlyoutModule,
   ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
 } from './templates';

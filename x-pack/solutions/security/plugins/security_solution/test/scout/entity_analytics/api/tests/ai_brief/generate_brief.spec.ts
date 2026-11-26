@@ -184,7 +184,7 @@ apiTest.describe(
       expect(template).toContain('No comparison');
       // An unavailable count has nothing to say, so it gets no tile.
       expect(template).not.toContain('<div class="count-label">Entities with anomalies');
-      expect(template).toContain('Not checked, because the data couldn&#39;t be read');
+      expect(template).toContain('Entities with anomalies (data couldn&#39;t be loaded)');
       expect(template).toContain(`Start with ${SEEDED_USER_ID}.`);
 
       const submitRequests = getSubmitBriefRequests(llmProxy);
@@ -219,7 +219,7 @@ apiTest.describe(
         expect(template).toContain('Nothing in this view is flagged');
         // The summary states it, so the brief has no Priorities section repeating it.
         expect(template).not.toContain('No entity in this view has enough evidence to prioritize');
-        expect(template).not.toContain('<h2>Priorities</h2>');
+        expect(template).not.toContain('<h2>Entities to investigate first</h2>');
       }
     );
 

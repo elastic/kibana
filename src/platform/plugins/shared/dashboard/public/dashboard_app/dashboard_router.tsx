@@ -133,7 +133,7 @@ export async function mountApp({
     return (
       <DashboardListingPage
         initialFilter={filter}
-        title={title}
+        redirectTitle={title}
         kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
         redirectTo={redirect}
       />
