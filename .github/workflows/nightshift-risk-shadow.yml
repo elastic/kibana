@@ -46,9 +46,10 @@ jobs:
           fetch-depth: 1
 
       # Explicit token-policy: bound_claims.workflow_ref uses @* in catalog-info.
+      # SHA-pinned: pull_request_target + Vault OIDC must not float on @v1.
       - name: Create ephemeral GitHub token
         id: create-token
-        uses: elastic/oblt-actions/github/create-token@v1
+        uses: elastic/oblt-actions/github/create-token@37d142a1daa0cac6eaa7bb622a6dfaf1124eea0e # v1.44.0
         with:
           token-policy: token-policy-fa51d6a337cc
 
