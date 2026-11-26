@@ -8,18 +8,18 @@
 import React from 'react';
 import { useEntityInventorySearch } from '../../context/search_context';
 import { EntityInventoryFilterControls } from './entity_inventory_filter_controls';
-import { useEntityInventoryTypes } from '../../hooks/use_entity_inventory_types';
+import { useEntityTypes } from '../../context/entity_types_context';
 
 export function EntityInventoryPageFilterControls() {
   const { entityCategory, dateRange, filterControls, setFilterControls } =
     useEntityInventorySearch();
-  const { types, isLoading, error } = useEntityInventoryTypes();
+  const { data: types, loading, error } = useEntityTypes();
   const pageCategory = entityCategory === 'all' ? undefined : entityCategory;
 
   return (
     <EntityInventoryFilterControls
       typeDefinitions={types}
-      isLoading={isLoading}
+      isLoading={loading}
       error={error}
       pageCategory={pageCategory}
       timeRange={dateRange}

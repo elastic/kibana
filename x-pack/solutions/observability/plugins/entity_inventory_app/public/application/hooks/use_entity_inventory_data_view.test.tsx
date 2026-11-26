@@ -13,35 +13,26 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
+import { inventoryType } from '../__fixtures__/types';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { createPublicConfigMock } from '../../mocks';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
 import { useEntityInventoryDataView } from './use_entity_inventory_data_view';
 
-const definition = (
-  type: string,
-  category: string,
-  indexPatterns: string[]
-): EntityInventoryTypeDefinition => ({
-  type,
-  name: type,
-  category,
-  sources: indexPatterns.map((indexPattern) => ({ indexPattern })),
-  attributes: [],
-  suggestedFilters: [],
-});
+const definition = (type: string, indexPatterns: string[]): InventoryType =>
+  inventoryType({ type, sources: indexPatterns.map((indexPattern) => ({ indexPattern })) });
 
 const TYPES = [
-  definition('one', 'hosts', ['logs-b-*', 'logs-a-*']),
-  definition('two', 'hosts', ['logs-a-*']),
-  definition('three', 'kubernetes', ['logs-c-*']),
+  definition('host.one', ['logs-b-*', 'logs-a-*']),
+  definition('host.two', ['logs-a-*']),
+  definition('k8s.three', ['logs-c-*']),
 ];
 
-let mockTypes: EntityInventoryTypeDefinition[] = TYPES;
+let mockTypes: InventoryType[] = TYPES;
 
-jest.mock('./use_entity_inventory_types', () => ({
-  useEntityInventoryTypes: () => ({ types: mockTypes, isLoading: false }),
+jest.mock('../context/entity_types_context', () => ({
+  useEntityTypes: () => ({ data: mockTypes, loading: false }),
 }));
 
 const dataViewOf = (title: string) => ({
@@ -116,7 +107,11 @@ describe('useEntityInventoryDataView', () => {
     await waitFor(() => expect(dataViews.create).toHaveBeenCalledWith(dataViewOf('logs-c-*')));
 
     act(() =>
-      result.current.search.setFilterControls({ category: 'hosts', type: 'two', attributes: {} })
+      result.current.search.setFilterControls({
+        category: 'hosts',
+        type: 'host.two',
+        attributes: {},
+      })
     );
     await waitFor(() => expect(dataViews.create).toHaveBeenCalledWith(dataViewOf('logs-a-*')));
   });

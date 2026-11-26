@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
-import { typesFixture as types } from '../../__fixtures__/types';
+import { attributeColumn, inventoryType, typesFixture as types } from '../../__fixtures__/types';
 import { getCategories, getFilterControls, getTypesInScope } from './get_filter_controls';
 import type { FilterOption } from './get_filter_controls';
 
@@ -21,12 +20,11 @@ describe('getCategories', () => {
   });
 
   it('treats a type without a category as its own category', () => {
-    expect(
-      getCategories([
-        ...types,
-        { type: 'service', name: 'Service', sources: [], attributes: [], suggestedFilters: [] },
-      ])
-    ).toEqual(['hosts', 'kubernetes', 'service']);
+    expect(getCategories([...types, inventoryType({ type: 'service', name: 'Service' })])).toEqual([
+      'hosts',
+      'kubernetes',
+      'service',
+    ]);
   });
 });
 
@@ -156,15 +154,14 @@ describe('getFilterControls', () => {
   });
 
   it('shows the suggested filters of a type without a category when it is selected as a category', () => {
-    const withService: EntityInventoryTypeDefinition[] = [
+    const withService = [
       ...types,
-      {
+      inventoryType({
         type: 'service',
         name: 'Service',
-        sources: [],
-        attributes: [{ name: 'service.environment' }],
+        columns: [attributeColumn('service.environment')],
         suggestedFilters: ['service.environment'],
-      },
+      }),
     ];
 
     const controls = getFilterControls({ types: withService, selectedCategory: 'service' });
@@ -175,45 +172,41 @@ describe('getFilterControls', () => {
   });
 
   it('shows the filters of every type even when the types share none', () => {
-    const unrelated: EntityInventoryTypeDefinition[] = [
-      {
-        type: 'a',
+    const unrelated = [
+      inventoryType({
+        type: 'k8s.a',
         name: 'A',
-        category: 'group',
-        sources: [],
-        attributes: [{ name: 'a.name' }],
+        columns: [attributeColumn('a.name')],
         suggestedFilters: ['a.name'],
-      },
-      {
-        type: 'b',
+      }),
+      inventoryType({
+        type: 'k8s.b',
         name: 'B',
-        category: 'group',
-        sources: [],
-        attributes: [{ name: 'b.name' }],
+        columns: [attributeColumn('b.name')],
         suggestedFilters: ['b.name'],
-      },
+      }),
     ];
 
-    const controls = getFilterControls({ types: unrelated, selectedCategory: 'group' });
+    const controls = getFilterControls({ types: unrelated, selectedCategory: 'kubernetes' });
 
-    expect(names(controls.categories)).toEqual(['group']);
-    expect(names(controls.types)).toEqual(['a', 'b']);
+    expect(names(controls.categories)).toEqual(['kubernetes']);
+    expect(names(controls.types)).toEqual(['k8s.a', 'k8s.b']);
     expect(names(controls.attributes)).toEqual(['a.name', 'b.name']);
   });
 
   it('labels each attribute with its definition label, or its name when it has none', () => {
-    const labelled: EntityInventoryTypeDefinition[] = [
-      {
-        type: 'a',
+    const labelled = [
+      inventoryType({
+        type: 'k8s.a',
         name: 'A',
-        category: 'group',
-        sources: [],
-        attributes: [{ name: 'a.name', label: 'A name' }, { name: 'b.name' }],
+        columns: [attributeColumn('a.name', 'A name'), attributeColumn('b.name')],
         suggestedFilters: ['a.name', 'b.name'],
-      },
+      }),
     ];
 
-    expect(getFilterControls({ types: labelled, selectedCategory: 'group' }).attributes).toEqual([
+    expect(
+      getFilterControls({ types: labelled, selectedCategory: 'kubernetes' }).attributes
+    ).toEqual([
       { name: 'a.name', label: 'A name' },
       { name: 'b.name', label: 'b.name' },
     ]);

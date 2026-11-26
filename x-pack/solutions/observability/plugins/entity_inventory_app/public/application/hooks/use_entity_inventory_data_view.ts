@@ -12,7 +12,7 @@ import { useAbortableAsync } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntityInventorySearch } from '../context/search_context';
 import { getTypesInScope } from '../filters/utils/get_filter_controls';
-import { useEntityInventoryTypes } from './use_entity_inventory_types';
+import { useEntityTypes } from '../context/entity_types_context';
 
 const DATA_VIEW_ID_PREFIX = 'entity-inventory:';
 
@@ -21,7 +21,7 @@ export const useEntityInventoryDataView = (): { dataView: DataView | undefined }
     services: { dataViews },
   } = useKibana();
   const { entityCategory, filterControls } = useEntityInventorySearch();
-  const { types } = useEntityInventoryTypes();
+  const { data: types } = useEntityTypes();
 
   const indexPattern = useMemo(() => {
     const pageCategory = entityCategory === 'all' ? undefined : entityCategory;

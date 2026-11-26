@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { getAttributeNamesInScope, getCategories, getTypesOfCategory } from './get_filter_controls';
 
 export interface FilterControlsSelection {
@@ -27,7 +27,7 @@ export const normalizeSelection = ({
   pageCategory,
   selection,
 }: {
-  types: EntityInventoryTypeDefinition[];
+  types: InventoryType[];
   pageCategory?: string;
   selection: FilterControlsSelection;
 }): FilterControlsSelection => {

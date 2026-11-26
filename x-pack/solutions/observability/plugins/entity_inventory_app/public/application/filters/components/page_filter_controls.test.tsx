@@ -19,8 +19,8 @@ import { useEntityInventoryDataView } from '../../hooks/use_entity_inventory_dat
 import { typesFixture as mockTypes } from '../../__fixtures__/types';
 import { EntityInventoryPageFilterControls } from './page_filter_controls';
 
-jest.mock('../../hooks/use_entity_inventory_types', () => ({
-  useEntityInventoryTypes: () => ({ types: mockTypes }),
+jest.mock('../../context/entity_types_context', () => ({
+  useEntityTypes: () => ({ data: mockTypes, loading: false }),
 }));
 jest.mock('../hooks/use_attribute_values', () => ({
   useAttributeValues: () => ({ values: ['one', 'two'], invalidSelections: [], isLoading: false }),

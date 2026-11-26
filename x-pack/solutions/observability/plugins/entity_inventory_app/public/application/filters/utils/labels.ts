@@ -6,14 +6,10 @@
  */
 
 import { upperFirst } from 'lodash';
-import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 
 export const getCategoryLabel = (category: string): string => upperFirst(category);
 
-export const getAttributeLabel = (
-  types: EntityInventoryTypeDefinition[],
-  attribute: string
-): string =>
-  types
-    .flatMap(({ attributes }) => attributes)
-    .find(({ name, label }) => name === attribute && label)?.label ?? attribute;
+export const getAttributeLabel = (types: InventoryType[], attribute: string): string =>
+  types.flatMap(({ columns }) => columns).find(({ name, label }) => name === attribute && label)
+    ?.label ?? attribute;
