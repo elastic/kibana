@@ -6,22 +6,18 @@
  */
 
 import { createHash } from 'crypto';
+import type { ConnectorEventHubFields } from '@kbn/connector-topics';
 import { PUBSUB_MAX_ID_LENGTH, type Logger, type PubSubStart, type Topic } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 
-/** Spoke payload plus the hub fields. Extra spoke fields stay on the published object. */
-export interface ConnectorEventPublishData {
-  readonly connectorId: string;
-  readonly connectorTypeId: string;
-  readonly spaceId: string;
-  readonly correlationKey?: string;
-  readonly [key: string]: unknown;
-}
+/** Spoke payload plus the hub fields from {@link ConnectorEventHubFields}. */
+export type ConnectorEventPublishData<TSpoke extends object = object> = ConnectorEventHubFields &
+  TSpoke;
 
 interface ConnectorEventPublisher {
   pubsub: Pick<PubSubStart, 'publish'>;
   logger: Logger;
-  topics: ReadonlyMap<string, Topic<unknown>>;
+  topics: ReadonlyMap<string, Topic<ConnectorEventHubFields>>;
 }
 
 /** Held for the publisher added when inbound events are published. */
@@ -55,9 +51,9 @@ export const setConnectorEventPublisher = (
 };
 
 /** Publishes one connector event. A missing publisher, token, or rejected publish does not throw. */
-export const publishConnectorEvent = async (
+export const publishConnectorEvent = async <TSpoke extends object>(
   eventId: string,
-  data: ConnectorEventPublishData
+  data: ConnectorEventPublishData<TSpoke>
 ): Promise<void> => {
   const publisher = activePublisher.current;
   if (!publisher) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConnectorEventHubFields } from '@kbn/connector-topics';
 import { defineTopic, type Topic } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -14,8 +15,10 @@ jest.mock('uuid', () => ({
   v4: () => 'generated-id',
 }));
 
+type SlackMessagePublishData = ConnectorEventHubFields & { channel: string };
+
 const slackMessageTopic =
-  defineTopic<Topic<{ channel: string }, 'slack2.message'>>('slack2.message');
+  defineTopic<Topic<SlackMessagePublishData, 'slack2.message'>>('slack2.message');
 
 const message = {
   channel: 'C123',
@@ -34,6 +37,13 @@ describe('publishConnectorEvent', () => {
 
   afterEach(() => {
     setConnectorEventPublisher(undefined);
+  });
+
+  it('requires the hub fields from connectorEventSchema', async () => {
+    // @ts-expect-error connectorId, connectorTypeId, and spaceId are required
+    const published = publishConnectorEvent('slack2.message', { channel: 'C123' });
+
+    await expect(published).resolves.toBeUndefined();
   });
 
   it('does nothing when no publisher is installed', async () => {

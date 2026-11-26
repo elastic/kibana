@@ -23,6 +23,7 @@ import {
   isExternalUiamCredential,
 } from '@kbn/core-security-server';
 import { z } from '@kbn/zod/v4';
+import type { ConnectorEventHubFields } from '@kbn/connector-topics';
 import {
   buildEventId,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
@@ -808,7 +809,10 @@ describe('ingestInboundEvent', () => {
         pubsub,
         logger,
         topics: new Map(
-          eventIds.map((eventId) => [eventId, defineTopic<Topic<unknown, string>>(eventId)])
+          eventIds.map((eventId) => [
+            eventId,
+            defineTopic<Topic<ConnectorEventHubFields, string>>(eventId),
+          ])
         ),
       });
       return pubsub;
