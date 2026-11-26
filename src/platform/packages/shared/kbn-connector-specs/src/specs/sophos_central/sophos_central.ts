@@ -274,7 +274,7 @@ export const SophosCentral: ConnectorSpec = {
     '1. Call `getEndpoint` to confirm the endpoint\'s isolation state and health status.',
     '2. Call `isolateEndpoint` with the endpoint IDs to block network access.',
     '3. Call `scanEndpoint` to trigger an on-demand malware scan. The scan runs asynchronously.',
-    '4. Call `deisolateEndpoint` only after an analyst confirms the threat is remediated.',
+    '4. Call `deisolateEndpoint` only after an analyst confirms the threat is remediated — this action is API-only and requires explicit analyst approval.',
     '',
     '### IOC management',
     '- Call `addBlockedItem` with a SHA-256 hash to add a file to the tenant-wide block list.',
@@ -491,12 +491,13 @@ export const SophosCentral: ConnectorSpec = {
     },
 
     deisolateEndpoint: {
-      isTool: true,
+      isTool: false,
       scope: 'write',
       description:
         'Remove one or more Sophos Central endpoints from network isolation, restoring ' +
         'their normal network connectivity. Accepts 1 to 500 endpoint UUIDs. If an endpoint ' +
-        'is already not isolated the call succeeds silently (idempotent).',
+        'is already not isolated the call succeeds silently (idempotent). ' +
+        'Requires analyst confirmation before use.',
       input: DeisolateEndpointInputSchema,
       handler: async (ctx, input: DeisolateEndpointInput) => {
         let result;
@@ -578,7 +579,7 @@ export const SophosCentral: ConnectorSpec = {
       input: UpdateTamperProtectionInputSchema,
       handler: async (ctx, input: UpdateTamperProtectionInput) => {
         try {
-          return await request(
+          const data = await request<Record<string, unknown>>(
             ctx,
             'POST',
             `/endpoint/v1/endpoints/${input.endpointId}/tamper-protection`,
@@ -591,6 +592,11 @@ export const SophosCentral: ConnectorSpec = {
               },
             }
           );
+          // Strip password and previousPasswords — Sophos returns the current recovery
+          // password (and may return password history) on both read and update. These must
+          // never be forwarded to Kibana API callers.
+          const { password: _pw, previousPasswords: _prev, ...safe } = data ?? {};
+          return safe;
         } catch (err) {
           throwApiError(err, `Failed to update tamper protection for endpoint ${input.endpointId}`);
         }
@@ -611,7 +617,7 @@ export const SophosCentral: ConnectorSpec = {
       input: ListBlockedItemsInputSchema,
       handler: async (ctx, input: ListBlockedItemsInput) => {
         try {
-          const params: Record<string, unknown> = {};
+          const params: Record<string, unknown> = { pageTotal: true };
           if (input.page) params.page = input.page;
           if (input.pageSize) params.pageSize = input.pageSize;
           return await request(ctx, 'GET', '/endpoint/v1/settings/blocked-items', { params });

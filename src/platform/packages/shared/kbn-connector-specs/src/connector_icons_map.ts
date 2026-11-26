@@ -461,6 +461,10 @@ export const ConnectorIconsMap: Map<
       () =>
         import(
           /* webpackChunkName: "connectorIconsophoscentral" */ './specs/sophos_central/icon'
+        )
+    ),
+  ],
+  [
     '.microsoft_sql_server',
     lazy(
       () =>

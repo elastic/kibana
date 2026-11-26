@@ -35,7 +35,16 @@ const ALERT_ACTIONS = [
 const ALERT_SEVERITY = ['high', 'medium', 'low'] as const;
 const ENDPOINT_HEALTH = ['bad', 'good', 'suspicious', 'unknown'] as const;
 const DETECTION_TYPE = ['process', 'threat', 'vulnerability'] as const;
-const DETECTION_CATEGORY = ['cloud', 'endpoint', 'firewall', 'network', 'email'] as const;
+const DETECTION_CATEGORY = [
+  'cloud',
+  'compound',
+  'email',
+  'endpoint',
+  'firewall',
+  'iam',
+  'backupAndRecovery',
+  'network',
+] as const;
 
 // ---------------------------------------------------------------------------
 // Alert schemas
@@ -301,9 +310,11 @@ export const ListDetectionsInputSchema = lazySchema(() =>
       .describe('Filter by detection type: process, threat, or vulnerability.'),
     category: z
       .array(z.enum(DETECTION_CATEGORY))
-      .max(5)
+      .max(8)
       .optional()
-      .describe('Filter by category: cloud, endpoint, firewall, network, email.'),
+      .describe(
+        'Filter by category: cloud, compound, email, endpoint, firewall, iam, backupAndRecovery, network.'
+      ),
     from: z
       .string()
       .max(50)
