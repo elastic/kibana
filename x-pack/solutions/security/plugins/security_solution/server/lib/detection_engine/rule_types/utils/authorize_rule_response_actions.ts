@@ -90,7 +90,7 @@ const authorizeResponseActions = async <TParams extends RuleParams>({
   try {
     await validateRuleResponseActions({
       endpointService: endpointAppContextService,
-      endpointAuthz: await endpointAppContextService.getEndpointAuthz(request),
+      endpointAuthz: await endpointAppContextService.getEndpointAuthz(request, { cache: true }),
       spaceId: endpointAppContextService.getActiveSpaceId(request),
       rulePayload: { response_actions: responseActions },
       // `validateRuleResponseActions` only reads `existingRule.params.responseActions`,

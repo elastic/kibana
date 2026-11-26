@@ -92,7 +92,9 @@ describe('createSecurityRuleParamsAuthorizer', () => {
         })
       ).resolves.toBeUndefined();
 
-      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request);
+      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request, {
+        cache: true,
+      });
     });
 
     it('throws a 403 Boom error when the user lacks privileges for the added response action', async () => {
@@ -120,7 +122,9 @@ describe('createSecurityRuleParamsAuthorizer', () => {
         })
       ).resolves.toBeUndefined();
 
-      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request);
+      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request, {
+        cache: true,
+      });
     });
 
     it('does not re-authorize a response action that is unchanged from the previous params', async () => {
@@ -140,7 +144,9 @@ describe('createSecurityRuleParamsAuthorizer', () => {
         })
       ).resolves.toBeUndefined();
 
-      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request);
+      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request, {
+        cache: true,
+      });
     });
 
     it('uses the request-scoped osquery authz checker for osquery response actions', async () => {
