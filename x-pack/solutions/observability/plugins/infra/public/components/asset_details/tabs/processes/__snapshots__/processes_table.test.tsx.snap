@@ -90,6 +90,7 @@ Object {
                         Time
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -124,6 +125,7 @@ Object {
                         CPU
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -157,6 +159,7 @@ Object {
                         Mem.
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -190,6 +193,7 @@ Object {
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
+                        aria-hidden="true"
                         color="inherit"
                         data-euiicon-type="chevronSingleRight"
                       />
@@ -375,6 +379,7 @@ Object {
                       Time
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -409,6 +414,7 @@ Object {
                       CPU
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon"
                       data-euiicon-type="sortDown"
                     />
@@ -442,6 +448,7 @@ Object {
                       Mem.
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -475,6 +482,7 @@ Object {
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
+                      aria-hidden="true"
                       color="inherit"
                       data-euiicon-type="chevronSingleRight"
                     />

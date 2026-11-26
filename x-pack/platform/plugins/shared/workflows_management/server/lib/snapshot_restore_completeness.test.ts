@@ -44,7 +44,12 @@ describe('snapshot restore completeness', () => {
     .replace('message: "version-one"', 'message: "version-two"');
 
   const makeSourceDocument = async (yaml: string): Promise<WorkflowProperties> => {
-    const applied = await applyYamlUpdate({ workflowYaml: yaml, zodSchema, triggerDefinitions });
+    const applied = await applyYamlUpdate({
+      isManaged: false,
+      workflowYaml: yaml,
+      zodSchema,
+      triggerDefinitions,
+    });
     if (!applied.updatedDataPatch.valid || applied.validationErrors.length > 0) {
       throw new Error(`Test fixture YAML is invalid: ${applied.validationErrors.join(', ')}`);
     }
@@ -71,7 +76,7 @@ describe('snapshot restore completeness', () => {
   const snapshotYamlFromDocument = (document: WorkflowProperties): string => document.yaml;
 
   const restoreFromSnapshotYaml = (yaml: string) =>
-    applyYamlUpdate({ workflowYaml: yaml, zodSchema, triggerDefinitions });
+    applyYamlUpdate({ isManaged: false, workflowYaml: yaml, zodSchema, triggerDefinitions });
 
   const stepMessage = (definition: WorkflowYaml | null | undefined): string | undefined => {
     const step = definition?.steps?.[0];

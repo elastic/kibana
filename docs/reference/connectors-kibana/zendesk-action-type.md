@@ -15,7 +15,7 @@ You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Overview
 
-The Zendesk connector uses Zendesk's REST API with Basic authentication (email and API token). You configure your Zendesk subdomain and credentials when creating the connector.
+The Zendesk connector uses Zendesk's REST API with OAuth. You can authorize through the OAuth authorization code flow or paste an OAuth access token. You configure your Zendesk subdomain and credentials when creating the connector.
 
 ## Create connectors in {{kib}} [define-zendesk-ui]
 
@@ -27,7 +27,7 @@ Subdomain
 :   Your Zendesk subdomain (for example, `your-company` for `https://your-company.zendesk.com`).
 
 Authentication
-:   Basic authentication. Use your Zendesk account **email** and **API token** (from **Admin Center** > **Apps and integrations** > **APIs** > **Zendesk API**). For API token authentication, the username must be in the form `your_email@example.com/token` and the password is your API token.
+:   Choose **OAuth Authorization Code** or **OAuth access token**. Refer to [Get API credentials](#zendesk-api-credentials) for setup. Email and API token (Basic authentication) is no longer supported because the Zendesk API reference no longer accepts it for the endpoints the connector calls. Connectors that used it need to be recreated with one of these options.
 
 ## Available actions [zendesk-available-actions]
 
@@ -44,11 +44,26 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [zendesk-api-credentials]
 
-1. Log in to your [Zendesk](https://www.zendesk.com/) account.
-2. Go to **Admin Center** > **Apps and integrations** > **APIs** > **Zendesk API**.
-3. Turn on **Token access** and create a new API token.
-4. Verify that API access is turned on under **Apps and integrations** > **APIs** > **API Configuration**.
-5. Copy the token and store it securely.
-6. When configuring the connector, in the **Username** field enter `your_email@example.com/token`. In the **Password** field, enter the API token.
+Both options use an OAuth client registered in your Zendesk account. Zendesk shows the client secret only once, so store it securely.
 
-When creating or activating a Zendesk data source through a script or API (including the "create new" flow with a single credential string), use the format `your_email@example.com/token:your_api_token`. Kibana parses this as Basic authentication credentials (username before the colon, password after) and creates the connector with the correct authentication type. Provide the `subdomain` in the connector configuration (for example, when creating the connector in the UI, or through the API with `config: { subdomain: 'your-company' }`).
+### OAuth Authorization Code (recommended) [zendesk-oauth-credentials]
+
+Use this method to authorize the connector with your Zendesk account through the OAuth authorization code flow. {{kib}} requests the `read` and `tickets:read` scopes.
+
+1. Log in to your [Zendesk](https://www.zendesk.com/) account as an admin.
+2. Go to **Admin Center** > **Apps and integrations** > **APIs** > **OAuth Clients** and add an OAuth client.
+3. Set **Client kind** to **Confidential**, and set the redirect URL to `https://<your-kibana-host>/api/actions/connector/_oauth_callback`.
+4. Save the client, then copy the **Unique identifier** (the client ID) and the **Secret**.
+5. In {{kib}}, create a Zendesk connector, enter your subdomain, and select **OAuth Authorization Code** as the authentication method. Enter:
+   - **Authorization URL**: `https://<subdomain>.zendesk.com/oauth/authorizations/new`
+   - **Token URL**: `https://<subdomain>.zendesk.com/oauth/tokens`
+   - **Client ID** and **Client Secret** from step 4.
+6. Authorize with your Zendesk account to complete the OAuth flow.
+
+Refer to the [Zendesk OAuth documentation](https://developer.zendesk.com/api-reference/ticketing/oauth/grant_type_tokens/) for details.
+
+### OAuth access token [zendesk-bearer-credentials]
+
+Use this method if you already have a Zendesk OAuth access token, for example for quick testing or automated setup. The token needs the `read` scope. Create an OAuth client as described above (the redirect URL is not used), generate an access token for it, and paste the token into the **OAuth access token** field. An access token is not refreshed, so you need to replace it when it expires or is revoked.
+
+When creating a Zendesk data source through a script or API, create the connector with `config: { subdomain: 'your-company' }` and the `bearer` authentication type with your access token as the `token` secret.

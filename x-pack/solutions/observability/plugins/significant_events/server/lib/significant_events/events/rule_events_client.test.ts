@@ -1684,6 +1684,98 @@ describe('RuleEventsClient', () => {
     });
   });
 
+  describe('findLatestBreachedSignals', () => {
+    const latestResponse = (rows: Array<[string, string]>): ESQLSearchResponse =>
+      ({
+        columns: [
+          { name: 'latest', type: 'date' },
+          { name: 'rule.id', type: 'keyword' },
+        ],
+        values: rows.map(([ruleId, latest]) => [latest, ruleId]),
+      } as unknown as ESQLSearchResponse);
+
+    it('returns an empty map without querying when no rules are requested', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      const latest = await client.findLatestBreachedSignals({
+        ruleUuids: [],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      expect(latest.size).toBe(0);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('rejects partial results, so a failed shard cannot read as rules with no breach', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A'],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      expect(query).toHaveBeenCalledWith(expect.objectContaining({ allow_partial_results: false }));
+    });
+
+    it('asks for the newest breached signal of each requested rule since the bound', async () => {
+      const { client, query } = createClient(async () => latestResponse([]));
+
+      await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A', 'rule-B'],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      const { query: q, params } = query.mock.calls[0][0] as {
+        query: string;
+        params: unknown[];
+      };
+      expect(q).toContain('space_id == "default"');
+      expect(q).toContain('type == "signal"');
+      expect(q).toContain('status == "breached"');
+      expect(q).toContain('`rule.id` IN ("rule-A", "rule-B")');
+      expect(q).toContain('@timestamp >= TO_DATETIME(?from)');
+      expect(q).toContain('STATS latest = MAX(@timestamp) BY `rule.id`');
+      expect(params).toEqual([{ from: '2026-10-01T00:00:00.000Z' }]);
+    });
+
+    it('maps each rule to the time of its newest breach, as milliseconds', async () => {
+      const { client } = createClient(async () =>
+        latestResponse([['rule-A', '2026-10-19T11:58:00.000Z']])
+      );
+
+      const latest = await client.findLatestBreachedSignals({
+        ruleUuids: ['rule-A', 'rule-B'],
+        from: '2026-10-19T11:50:00.000Z',
+      });
+
+      expect(latest).toEqual(new Map([['rule-A', Date.parse('2026-10-19T11:58:00.000Z')]]));
+    });
+
+    it('fails when a breach row has an invalid timestamp', async () => {
+      const { client } = createClient(async () => latestResponse([['rule-A', 'not a time']]));
+
+      await expect(
+        client.findLatestBreachedSignals({
+          ruleUuids: ['rule-A'],
+          from: '2026-10-01T00:00:00.000Z',
+        })
+      ).rejects.toThrow('invalid breach row');
+    });
+
+    it('fails when the breach index is missing', async () => {
+      const { client } = createClient(async () => {
+        throw new Error('verification_exception: Unknown index [.rule-events]');
+      });
+
+      await expect(
+        client.findLatestBreachedSignals({
+          ruleUuids: ['rule-A'],
+          from: '2026-10-01T00:00:00.000Z',
+        })
+      ).rejects.toThrow('Unknown index');
+    });
+  });
+
   describe('findLiveMemberships', () => {
     const detectionSignal = ({
       ruleUuid,

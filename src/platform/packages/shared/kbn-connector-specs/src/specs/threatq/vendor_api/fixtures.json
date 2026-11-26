@@ -1,0 +1,15 @@
+{
+  "addAttribute": { "input": { "objectType": "indicators" } },
+  "addTags": { "input": { "objectType": "events" } },
+  "createObject": { "input": { "objectType": "adversaries" } },
+  "getObject": { "input": { "objectType": "indicators" } },
+  "getRelatedObjects": { "input": { "objectType": "indicators", "relatedType": "events" } },
+  "linkObjects": { "input": { "objectType": "indicators", "relatedType": "events" } },
+  "searchIndicators": {
+    "queries": [{ "method": "POST", "path": "/indicators/query" }]
+  },
+  "searchObjects": {
+    "input": { "objectType": "reports" },
+    "queries": [{ "method": "POST", "path": "/{object}/query" }]
+  }
+}

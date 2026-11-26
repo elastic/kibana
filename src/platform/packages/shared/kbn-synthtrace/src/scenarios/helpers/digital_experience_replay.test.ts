@@ -32,6 +32,7 @@ const generate = (
     environment: 'test',
     from,
     withSessionId: true,
+    withPageRoute: true,
     includeRawAttribution: false,
     environments: false,
     edgeCases: false,
@@ -283,7 +284,7 @@ describe('digital experience session replay', () => {
         // Taken from the output of the scenario before `sessionLength` was added, with the browser
         // dataset's index names, and before users and frustration signals, which don't change
         // anything else. Updated for app versions, diurnal traffic, incidents and the clicks
-        // retried after a failure, which do.
+        // retried after a failure, and the page routes and the pages they come with, which do.
         const docs = generate(
           {
             replaySize: 'light',
@@ -301,10 +302,10 @@ describe('digital experience session replay', () => {
           last: Math.max(...times),
           sha: createHash('sha256').update(JSON.stringify(docs)).digest('hex'),
         }).toEqual({
-          count: 7085,
+          count: 7082,
           first: 1792152000161,
           last: 1792152597374,
-          sha: '926897f888373ae002838bfbf3691adf170933ca5e0b0f9fcd933c470c641a32',
+          sha: '7cae6b3a1bc8784a2c08983872c25f747abb9968c3c6feff4d8d349a629696d6',
         });
       });
 
