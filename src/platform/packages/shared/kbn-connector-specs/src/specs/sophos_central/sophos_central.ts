@@ -374,7 +374,8 @@ export const SophosCentral: ConnectorSpec = {
         'The connector iterates over each alert ID in turn and returns, per alert, ' +
         'the lifecycle status ("requested", "started", or "completed") and the optional outcome ' +
         'result (e.g. "success", "notNeeded", "alreadyDone") from Sophos. ' +
-        'result is absent for pending actions (status "requested" or "started"). ' +
+        'result is optional and may be absent on any row — use status, not the presence of result, ' +
+        'to identify pending actions. ' +
         'A failed request produces status "failed" with an error string instead of a result. ' +
         'acceptedCount is the number of HTTP 2xx responses; it does not mean every alert was remediated. ' +
         'status "completed" with result "success" means Sophos carried out the requested action — ' +
