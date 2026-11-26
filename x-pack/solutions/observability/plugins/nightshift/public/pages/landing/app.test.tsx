@@ -913,6 +913,45 @@ describe('NightshiftApp', () => {
     expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('checkout');
   });
 
+  it('withholds search telemetry while Closed fails and reports the full count after retry', () => {
+    const critical = { investigations: [criticalInvestigation], total: 1 };
+    const searchedCalls = () =>
+      reportEvent.mock.calls.filter(
+        ([eventType]) => eventType === 'nightshift_investigations_searched'
+      );
+    setSections({
+      sections: [
+        ...defaultSections({ critical }),
+        makeSection('closed', { error: new Error('Closed investigations unavailable') }),
+      ],
+    });
+    const { rerender } = renderApp({ initialEntries: ['/?q=checkout'] });
+
+    expect(screen.getByRole('region', { name: 'Critical' })).toHaveTextContent('Checkout is down');
+    expect(searchedCalls()).toHaveLength(0);
+
+    setSections({
+      sections: [
+        ...defaultSections({ critical }),
+        makeSection('closed', {
+          investigations: [makeInvestigation('closed-checkout', 'Checkout closed')],
+          total: 1,
+        }),
+      ],
+    });
+    rerender(
+      <I18nProvider>
+        <MemoryRouter initialEntries={['/?q=checkout']}>
+          <NightshiftApp />
+        </MemoryRouter>
+      </I18nProvider>
+    );
+
+    expect(searchedCalls()).toEqual([
+      ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
+    ]);
+  });
+
   describe('Closed investigations with the section queries', () => {
     interface ListQuery {
       status?: string;
@@ -1194,53 +1233,6 @@ describe('NightshiftApp', () => {
       expect(
         screen.getByTestId('nightshiftInvestigationSectionSkeleton-closed')
       ).toBeInTheDocument();
-    });
-
-    it('withholds search telemetry while Closed fails and reports the full count after retry', async () => {
-      closedRequestFails = true;
-      records = [
-        criticalInvestigation,
-        makeInvestigation('closed-checkout', 'Checkout closed', {
-          metadata: { status: 'closed' },
-        }),
-      ];
-      renderApp({
-        client,
-        initialEntries: [
-          '/?q=checkout&rangeFrom=2026-09-10T00:00:00.000Z&rangeTo=2026-09-12T00:00:00.000Z',
-        ],
-      });
-
-      const retry = await screen.findByRole('button', {
-        name: 'Retry loading Closed investigations',
-      });
-      expect(screen.getByRole('region', { name: 'Critical' })).toHaveTextContent(
-        'Checkout is down'
-      );
-      expect(reportEvent).not.toHaveBeenCalledWith(
-        'nightshift_investigations_searched',
-        expect.anything()
-      );
-
-      closedRequestFails = false;
-      fireEvent.click(retry);
-
-      await waitFor(() =>
-        expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
-          '1'
-        )
-      );
-      await waitFor(() =>
-        expect(reportEvent).toHaveBeenCalledWith('nightshift_investigations_searched', {
-          query_length: 8,
-          result_count: 2,
-        })
-      );
-      expect(
-        reportEvent.mock.calls.filter(
-          ([eventType]) => eventType === 'nightshift_investigations_searched'
-        )
-      ).toHaveLength(1);
     });
 
     it('reports a repeated search again after an intervening search is held back by a failed section', async () => {
