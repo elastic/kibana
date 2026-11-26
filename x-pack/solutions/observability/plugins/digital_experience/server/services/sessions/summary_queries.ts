@@ -47,6 +47,7 @@ import {
   type SessionAttribute,
 } from '../../../common/session_attribute_fields';
 import {
+  NULLIFY_UNMAPPED_FIELDS,
   SOURCE_CSS_SELECTOR_FIELD,
   SOURCE_LOAD_EVENT_END_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
@@ -55,6 +56,7 @@ import {
   SOURCE_WEB_VITAL_NAME_FIELD,
   SOURCE_WEB_VITAL_VALUE_FIELD,
 } from '../../../common/otel_source_fields';
+import { cleanedValue } from '../../lib/esql';
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 
@@ -76,8 +78,6 @@ export interface SummaryQuery {
   params: estypes.EsqlNamedValue[];
 }
 
-// OTel attributes that some index doesn't map read as null instead of failing the query.
-export const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
 const SOURCES = SESSIONS_SOURCE_INDICES.join(', ');
 
 export const texts = (values: readonly string[]): string =>
@@ -187,10 +187,6 @@ ${events('changed_from', 'changed_to')}
   };
 };
 
-/** Strings as the summaries keep them: trimmed, and empty or `null` as missing. */
-const cleaned = (field: string): string =>
-  `CASE(TRIM(TO_STRING(${field})) IN ("", "null"), null, TRIM(TO_STRING(${field})))`;
-
 /** The column of an attribute in the summary query's rows, e.g. `attribute_browser_version`. */
 export const attributeColumn = (attribute: string): string => `attribute_${snakeCase(attribute)}`;
 const seenColumn = (group: string): string => `seen_${group}`;
@@ -236,7 +232,7 @@ export const attributeQueryParts = <TFields extends AttributeFields>(
     evals: Object.entries(fields).map(
       ([attribute, candidates]) =>
         `${attributeColumn(attribute)} = COALESCE(${candidates
-          .map((field) => cleaned(rawColumn(field)))
+          .map((field) => cleanedValue(rawColumn(field)))
           .join(', ')})`
     ),
   };

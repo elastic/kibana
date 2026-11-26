@@ -16,6 +16,10 @@
  *   node scripts/profile_logs_extraction.js \
  *     --cluster both --entity user,host,generic,service \
  *     --from "now-1d" --to "now" --run-id baseline
+ *
+ * Add --cursor <untyped id> to profile a later entity page instead of page 1. The value is the last
+ * `entity.EngineMetadata.UntypedId` of the previous page (for example `host-123`), not the stored
+ * `entity.id` (`host:host-123`), which would apply the wrong cutoff.
  */
 
 require('@kbn/setup-node-env');
@@ -66,8 +70,19 @@ function parseArgs() {
   const indexPatterns = indexPatternsArg.split(',').map((s) => s.trim());
   // Skip re-querying ES when profile.json already exists for a run; just regenerate analysis.md
   const reuseProfile = argv.includes('--reuse-profile');
+  // Profile a later entity page: the query is built as if the previous page ended at this id.
+  // The value is the previous page's last `entity.EngineMetadata.UntypedId`, not `entity.id`.
+  // Without it the query is page 1, which has no cursor.
+  const cursor = get('--cursor', undefined);
+  const cursorRequested = argv.some((a) => a === '--cursor' || a.startsWith('--cursor='));
+  if (cursorRequested && (!cursor || cursor.startsWith('--'))) {
+    throw new Error(
+      '--cursor needs a value: the last entity.EngineMetadata.UntypedId of the previous page'
+    );
+  }
 
   return {
+    cursor,
     clusters,
     entities,
     runId,
@@ -377,9 +392,11 @@ async function main() {
     toDate,
     indexPatterns,
     reuseProfile,
+    cursor,
   } = parseArgs();
 
   console.log(`\nRun ID     : ${runId}`);
+  console.log(`Cursor     : ${cursor ?? 'none (page 1)'}`);
   console.log(`Clusters   : ${clusters.join(', ')}`);
   console.log(`Entities   : ${entities.join(', ')}`);
   console.log(`Date range : ${fromDate} → ${toDate}`);
@@ -412,6 +429,7 @@ async function main() {
         docsLimit,
         fromDateISO,
         toDateISO,
+        pagination: cursor ? { idCursor: cursor } : undefined,
       });
 
       // Output paths

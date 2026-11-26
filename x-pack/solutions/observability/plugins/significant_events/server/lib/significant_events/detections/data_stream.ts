@@ -23,6 +23,10 @@ export const detectionsMappings = {
     p_value: { type: 'double' as const },
     severity_score: mappings.integer(),
     processed_by: mappings.keyword(),
+    // The type a scan marker's scan observed. Mapped so the Detection workflow's write gate can
+    // find typed markers with `exists`; kept apart from change_point_type, which makes a document
+    // a detection to discovery.
+    observed_change_point_type: mappings.keyword(),
     // Mapped so an event's skipped detections can be found by the event they rest on.
     skip: mappings.object({ properties: { event_id: mappings.keyword() } }),
   },
@@ -46,7 +50,7 @@ export const detectionsDataStream: DataStreamDefinition<
   StoredDetection
 > = {
   name: DETECTIONS_DATA_STREAM,
-  version: 9,
+  version: 10,
   hidden: true,
   template: {
     priority: 500,
