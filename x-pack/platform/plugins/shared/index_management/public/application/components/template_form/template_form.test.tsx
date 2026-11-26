@@ -589,19 +589,22 @@ describe('TemplateForm wizard integration', () => {
     };
 
     it('SHOULD show them in the Request tab while Data stream is on', async () => {
-      const requestBody = await goToReviewRequestTab({ ...sourceTemplate, template: undefined });
+      const { template: _template, ...logistics } = sourceTemplate;
+
+      const requestBody = await goToReviewRequestTab(logistics);
 
       expect(requestBody).toHaveProperty('data_stream');
       expect(requestBody.template.data_stream_options).toEqual(dataStreamOptions);
     });
 
     it('SHOULD omit them from the Request tab once Data stream is turned off', async () => {
-      const { dataStream: _dataStream, ...logisticsWithoutDataStream } = sourceTemplate;
+      const {
+        dataStream: _dataStream,
+        template: _template,
+        ...logisticsWithoutDataStream
+      } = sourceTemplate;
 
-      const requestBody = await goToReviewRequestTab({
-        ...logisticsWithoutDataStream,
-        template: undefined,
-      });
+      const requestBody = await goToReviewRequestTab(logisticsWithoutDataStream);
 
       // The request no longer declares a data stream, so ES would reject any data stream options.
       expect(requestBody).not.toHaveProperty('data_stream');
