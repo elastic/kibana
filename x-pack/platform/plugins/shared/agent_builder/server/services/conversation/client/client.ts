@@ -1300,9 +1300,11 @@ class ConversationClientImpl implements ConversationClient {
     };
 
     try {
+      // TEMPORARY local workaround, not part of this PR. Skips the up-to-5s refresh wait.
+      // The real fix belongs in https://github.com/elastic/kibana/pull/307788.
       await this.appendEvents(
         { id: parentId, events: [threadCreated] },
-        { source, access: 'converse' }
+        { source, access: 'converse', refresh: false }
       );
     } catch (error) {
       this.logger.warn(`Failed to record thread ${threadId} on conversation ${parentId}: ${error}`);

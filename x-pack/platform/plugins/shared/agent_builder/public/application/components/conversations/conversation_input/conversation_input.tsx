@@ -56,6 +56,9 @@ import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
 import { useImageUpload } from './use_image_upload';
+import { useSlashCommands } from './slash_commands/use_slash_commands';
+import { parseSlashCommand } from './slash_commands/parse_slash_command';
+import type { ParsedSlashCommand } from './slash_commands/parse_slash_command';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -212,6 +215,13 @@ const imagePasteWhileRunningMessage = i18n.translate(
   }
 );
 
+const imageInSlashCommandMessage = i18n.translate(
+  'xpack.agentBuilder.conversationInput.slashCommand.imageNotSent',
+  {
+    defaultMessage: "Images can't be sent with a command. Remove the image and try again.",
+  }
+);
+
 const disabledPlaceholder = (agentId?: string) =>
   i18n.translate('xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder', {
     defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
@@ -355,6 +365,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
   const { sendSteer, steerIfBusy, isUnansweredSteer, isSending: isSendingSteer } = useSendSteer();
+  const slashCommands = useSlashCommands();
+  const [isRunningSlashCommand, setIsRunningSlashCommand] = useState(false);
   const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt;
   // Never mode posts to the team instead of steering, attachments included.
   const willSteer = canSteer && triggerMode !== ChatTriggerMode.Never;
@@ -390,7 +402,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     isBoundAgentForbidden ||
     isAwaitingPrompt ||
     isCreatingConversation ||
-    isSendingUserMessage;
+    isSendingUserMessage ||
+    isRunningSlashCommand;
   const isMessageTooLong = overLimitCharacterCount > 0;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
@@ -399,6 +412,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     isSendingSteer ||
     isSendingUserMessage ||
     isCreatingConversation ||
+    isRunningSlashCommand ||
     !agentExists ||
     isBoundAgentForbidden ||
     isAgentModelLoading ||
@@ -513,6 +527,37 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     [messageEditorController]
   );
 
+  // A command is not a message: it is neither sent nor steered, and the text is kept when refused.
+  const runSlashCommand = (
+    { command, args }: ParsedSlashCommand,
+    content: string,
+    restoreUnsent: (unsent: string) => void
+  ) => {
+    if (command.unavailableReason) {
+      addErrorToast(command.unavailableReason);
+      return;
+    }
+    if (messageEditorController.getPlaceholderNames().length > 0) {
+      addErrorToast(imageInSlashCommandMessage);
+      return;
+    }
+    lastEditorContentRef.current = '';
+    clearDraft();
+    messageEditorController.clear();
+    setIsRunningSlashCommand(true);
+    command
+      .run(args)
+      .catch((commandError: unknown) => {
+        restoreUnsent(content);
+        addErrorToast({ title: formatAgentBuilderErrorMessage(commandError) });
+      })
+      .finally(() => {
+        if (mountedRef.current) {
+          setIsRunningSlashCommand(false);
+        }
+      });
+  };
+
   const handleSubmit = () => {
     if (isSubmitDisabled) {
       return;
@@ -536,23 +581,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       saveDraftDebounceRef.current = null;
     }
 
-    // Never mode bypasses steering.
-    if (triggerMode === ChatTriggerMode.Never) {
-      sendUserMessage(content)
-        .then(() => {
-          lastEditorContentRef.current = '';
-          clearDraft();
-          messageEditorController.clear();
-          markSent();
-          onSubmit?.();
-        })
-        .catch((sendError: unknown) => {
-          lastEditorContentRef.current = content;
-          addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
-        });
-      return;
-    }
-
     const sentFrom = shownRef.current;
     // Preserve newer drafts on failure.
     const restoreUnsent = (unsent: string) => {
@@ -573,6 +601,30 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       lastEditorContentRef.current = unsent;
       messageEditorControllerRef.current?.setContent(unsent);
     };
+
+    const slashCommand = parseSlashCommand(content, slashCommands);
+    if (slashCommand) {
+      runSlashCommand(slashCommand, content, restoreUnsent);
+      return;
+    }
+
+    // Never mode bypasses steering.
+    if (triggerMode === ChatTriggerMode.Never) {
+      sendUserMessage(content)
+        .then(() => {
+          lastEditorContentRef.current = '';
+          clearDraft();
+          messageEditorController.clear();
+          markSent();
+          onSubmit?.();
+        })
+        .catch((sendError: unknown) => {
+          lastEditorContentRef.current = content;
+          addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
+        });
+      return;
+    }
+
     // Both steer paths carry bounded text only; an image would travel as a bare reference.
     const steerRefusal =
       content.length > STEER_MESSAGE_MAX_LENGTH
@@ -675,7 +727,12 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          isSubmitting={isCreatingConversation || isSendingUserMessage || isSendingSteer}
+          isSubmitting={
+            isCreatingConversation ||
+            isSendingUserMessage ||
+            isSendingSteer ||
+            isRunningSlashCommand
+          }
           showSubmitWhileRunning={canSteer}
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}

@@ -6,9 +6,22 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { useSlashCommands } from '../../../../slash_commands/use_slash_commands';
+import type { SlashCommand } from '../../../../slash_commands/types';
 import { Skills } from './skills';
+
+jest.mock('../../../../slash_commands/use_slash_commands', () => ({
+  useSlashCommands: jest.fn(),
+}));
+
+const threadCommand: SlashCommand = {
+  name: 'thread',
+  description: 'Start new sub-conversation',
+  iconType: 'comment',
+  run: jest.fn(),
+};
 
 const mockSkills = [
   { id: 'skill-1', name: 'Summarize', description: 'Summarize text' },
@@ -34,6 +47,10 @@ const renderWithProvider = (ui: React.ReactElement) => {
 };
 
 describe('Skills', () => {
+  beforeEach(() => {
+    jest.mocked(useSlashCommands).mockReturnValue([]);
+  });
+
   it('renders all skills when query is empty', () => {
     renderWithProvider(<Skills query="" onSelect={jest.fn()} />);
 
@@ -158,6 +175,91 @@ describe('Skills', () => {
       );
 
       expect(onContentChange).toHaveBeenCalledWith(true, 'nosuchskill');
+
+      useAgentSkillsMock.useAgentSkills = originalImpl;
+    });
+  });
+
+  describe('slash commands', () => {
+    const getOptionLabels = () =>
+      screen.getAllByRole('option').map((option) => option.textContent ?? '');
+
+    beforeEach(() => {
+      jest.mocked(useSlashCommands).mockReturnValue([threadCommand]);
+    });
+
+    it('lists commands before skills, with their description and icons', () => {
+      const { container } = renderWithProvider(<Skills query="" onSelect={jest.fn()} />);
+
+      const labels = getOptionLabels();
+      expect(labels).toHaveLength(4);
+      expect(labels[0]).toContain('thread');
+      expect(labels[0]).toContain('Start new sub-conversation');
+      expect(labels[1]).toContain('Summarize');
+      expect(container.querySelector('[data-euiicon-type="comment"]')).toBeInTheDocument();
+      expect(container.querySelectorAll('[data-euiicon-type="document"]')).toHaveLength(3);
+    });
+
+    it('filters commands by query', () => {
+      renderWithProvider(<Skills query="thr" onSelect={jest.fn()} />);
+
+      expect(getOptionLabels()).toEqual([expect.stringContaining('thread')]);
+    });
+
+    it('hides a command that is unavailable here', () => {
+      jest
+        .mocked(useSlashCommands)
+        .mockReturnValue([{ ...threadCommand, unavailableReason: 'Not here.' }]);
+      renderWithProvider(<Skills query="" onSelect={jest.fn()} />);
+
+      expect(screen.queryByText('thread')).not.toBeInTheDocument();
+      expect(getOptionLabels()).toHaveLength(3);
+    });
+
+    it('fills in the command name instead of inserting a badge when picked', () => {
+      const onSelect = jest.fn();
+      const onReplaceText = jest.fn();
+      renderWithProvider(<Skills query="thr" onSelect={onSelect} onReplaceText={onReplaceText} />);
+
+      fireEvent.click(screen.getByRole('option'));
+
+      expect(onReplaceText).toHaveBeenCalledWith('thread ');
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it('still inserts a badge for a picked skill', () => {
+      const onSelect = jest.fn();
+      const onReplaceText = jest.fn();
+      renderWithProvider(<Skills query="sum" onSelect={onSelect} onReplaceText={onReplaceText} />);
+
+      fireEvent.click(screen.getByRole('option'));
+
+      expect(onSelect).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'skill-1', label: 'Summarize' })
+      );
+      expect(onReplaceText).not.toHaveBeenCalled();
+    });
+
+    it('reports no content once the command arguments are being typed', () => {
+      const useAgentSkillsMock = jest.requireMock(
+        '../../../../../../../hooks/skills/use_agent_skills'
+      ) as {
+        useAgentSkills: () => unknown;
+      };
+      const originalImpl = useAgentSkillsMock.useAgentSkills;
+      useAgentSkillsMock.useAgentSkills = () => ({
+        skills: [{ id: 'skill-4', name: 'thread summary' }],
+        isLoading: false,
+        error: null,
+        isError: false,
+      });
+
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Skills query="thread sum" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(false, 'thread sum');
 
       useAgentSkillsMock.useAgentSkills = originalImpl;
     });
