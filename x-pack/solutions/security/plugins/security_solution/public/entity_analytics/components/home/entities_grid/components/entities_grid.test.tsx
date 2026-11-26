@@ -142,6 +142,11 @@ describe('EntitiesGrid', () => {
       name: 'Show records resolved to alpha',
     });
     expect(expanders).toHaveLength(1);
+    // beta has a single record, so it must not get an expander of its own
+    expect(screen.getAllByRole('button', { name: /^Show records resolved to/ })).toHaveLength(1);
+    expect(
+      screen.queryByRole('button', { name: 'Show records resolved to beta' })
+    ).not.toBeInTheDocument();
 
     fireEvent.click(expanders[0]);
 

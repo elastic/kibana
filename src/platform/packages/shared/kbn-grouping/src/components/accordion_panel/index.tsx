@@ -117,7 +117,7 @@ const GroupPanelComponent = <T,>({
   return !groupFieldValue.asString ? null : (
     <EuiAccordion
       buttonClassName={customAccordionButtonClassName}
-      buttonProps={toggleAriaLabel ? { 'aria-label': toggleAriaLabel } : undefined}
+      arrowProps={toggleAriaLabel ? { 'aria-label': toggleAriaLabel } : undefined}
       buttonContent={
         <div data-test-subj="group-panel-toggle" className="groupingPanelRenderer">
           {groupPanel ?? (
