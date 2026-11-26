@@ -157,6 +157,11 @@ paths:
                   search_mode:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearchMode'
                     description: The search mode that ran; `legacy` when `semantic` was asked but search by meaning is not ready in the space (see `search_fallback_reason`).
+                  search_highlights:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    description: For a search by meaning, why each rule of the page matched, by rule id - the passage of the rule closest in meaning to the text, as plain text.
                   search_fallback_reason:
                     type: string
                     enum:

@@ -31,7 +31,12 @@ export type SemanticSearchFallbackReason =
   | 'error';
 
 export type SemanticSearchResult =
-  | { mode: 'semantic'; ruleIds: string[] }
+  | {
+      mode: 'semantic';
+      ruleIds: string[];
+      /** Why each rule matched: its passage closest in meaning to the text, by rule id. */
+      snippets: Record<string, string>;
+    }
   | { mode: 'legacy'; reason: SemanticSearchFallbackReason };
 
 /** The values that "Use AI features: off" writes, depending on which settings page wrote them. */
@@ -55,7 +60,10 @@ const hasRuleSearchModels = async (esClient: ElasticsearchClient) => {
 /** The table and its facet counts ask for the same text right after each other. */
 const CACHE_TTL_MS = 30_000;
 const CACHE_SIZE = 100;
-const cache = new Map<string, { at: number; ruleIds: string[] }>();
+const cache = new Map<
+  string,
+  { at: number; ruleIds: string[]; snippets: Record<string, string> }
+>();
 /** The same text from the table and its facet counts at once: one search, not two. */
 const inFlight = new Map<string, Promise<SemanticSearchResult>>();
 
@@ -149,19 +157,22 @@ const runSemanticSearch = async (params: SemanticSearchParams): Promise<Semantic
       return { mode: 'legacy', reason: check.reason };
     }
     if (candidateIds?.length === 0) {
-      return { mode: 'semantic', ruleIds: [] };
+      return { mode: 'semantic', ruleIds: [], snippets: {} };
     }
     const key = searchKey(params);
     const cached = cache.get(key);
     if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
-      return { mode: 'semantic', ruleIds: cached.ruleIds };
+      return { mode: 'semantic', ruleIds: cached.ruleIds, snippets: cached.snippets };
     }
     const ranked = await searchRelevantRuleIds({ esClient, spaceId, term, candidateIds });
     const ruleIds = ranked.map(({ soId }) => soId);
+    const snippets = Object.fromEntries(
+      ranked.flatMap(({ soId, snippet }) => (snippet ? [[soId, snippet]] : []))
+    );
     const oldest = cache.keys().next().value;
     if (cache.size >= CACHE_SIZE && oldest !== undefined) cache.delete(oldest);
-    cache.set(key, { at: Date.now(), ruleIds });
-    return { mode: 'semantic', ruleIds };
+    cache.set(key, { at: Date.now(), ruleIds, snippets });
+    return { mode: 'semantic', ruleIds, snippets };
   } catch (error) {
     logger.error(`Semantic rule search failed, using the keyword search: ${error.message}`);
     return { mode: 'legacy', reason: 'error' };

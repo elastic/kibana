@@ -57,3 +57,51 @@ export const KEYWORD_RESULTS = (count: number, text: string) =>
 export const AI_UNAVAILABLE = i18n.translate('xpack.securitySolution.ruleSearch.aiUnavailable', {
   defaultMessage: 'AI search is unavailable right now. Showing the rules that contain the text.',
 });
+
+export const WHY_IT_MATCHED = i18n.translate('xpack.securitySolution.ruleSearch.whyItMatched', {
+  defaultMessage: 'Why it matched',
+});
+
+export const OPEN_RULE_DETAILS = i18n.translate(
+  'xpack.securitySolution.ruleSearch.openRuleDetails',
+  { defaultMessage: 'Open rule details' }
+);
+
+export const NO_AI_MATCHES = (text: string) =>
+  i18n.translate('xpack.securitySolution.ruleSearch.noAiMatches', {
+    values: { text },
+    defaultMessage: 'No rules match "{text}" by meaning',
+  });
+
+export const SHOW_KEYWORD_MATCHES = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleSearch.showKeywordMatches', {
+    values: { count },
+    defaultMessage:
+      'Show the {count, plural, one {# rule} other {# rules}} that {count, plural, one {contains} other {contain}} this text',
+  });
+
+export const NO_KEYWORD_MATCHES = i18n.translate(
+  'xpack.securitySolution.ruleSearch.noKeywordMatches',
+  { defaultMessage: 'No rule contains this text either.' }
+);
+
+export const SEARCH_WITHOUT_FILTERS = i18n.translate(
+  'xpack.securitySolution.ruleSearch.searchWithoutFilters',
+  { defaultMessage: 'Search all rules, without the filters' }
+);
+
+export const TRY_EXAMPLES = i18n.translate('xpack.securitySolution.ruleSearch.tryExamples', {
+  defaultMessage: 'Describe what a rule detects, for example:',
+});
+
+export const EXAMPLE_QUERIES = [
+  i18n.translate('xpack.securitySolution.ruleSearch.example1', {
+    defaultMessage: 'credential theft from LSASS memory',
+  }),
+  i18n.translate('xpack.securitySolution.ruleSearch.example2', {
+    defaultMessage: 'persistence with scheduled tasks on Windows',
+  }),
+  i18n.translate('xpack.securitySolution.ruleSearch.example3', {
+    defaultMessage: 'suspicious Okta sign-ins',
+  }),
+];

@@ -55,6 +55,8 @@ export interface RulesQueryResponse {
   searchMode?: 'legacy' | 'semantic';
   /** Why a search by meaning ran as the keyword search. */
   searchFallbackReason?: SearchFallbackReason;
+  /** Why each rule matched a search by meaning, by rule id. */
+  searchHighlights?: Record<string, string>;
 }
 
 export type SearchFallbackReason = NonNullable<SearchRulesResponse['search_fallback_reason']>;
@@ -92,6 +94,7 @@ export const useFindRulesQuery = (
         warnings: response.warnings,
         searchMode: response.search_mode,
         searchFallbackReason: response.search_fallback_reason,
+        searchHighlights: response.search_highlights,
       };
     },
     {
@@ -153,6 +156,7 @@ export const useUpdateRulesCache = () => {
                 warnings: currentData.warnings,
                 searchMode: currentData.searchMode,
                 searchFallbackReason: currentData.searchFallbackReason,
+                searchHighlights: currentData.searchHighlights,
               }
             : undefined
       );

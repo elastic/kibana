@@ -30,7 +30,30 @@ const SEARCH_TIMEOUT_MS = 5_000;
 export interface RankedRule {
   soId: string;
   score: number;
+  /** The passage of the rule that is closest in meaning to the text, as plain text. */
+  snippet?: string;
 }
+
+const SNIPPET_LENGTH = 240;
+
+/**
+ * A chunk of the rule card as one readable line: no markdown marks, no rule name in front (the
+ * table shows it), cut at a word.
+ */
+const toSnippet = (chunk: string, name: string): string | undefined => {
+  let text = chunk
+    .replace(/`+/g, '')
+    .replace(/^\s*(#+|[-*]|\d+\.)\s+/gm, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (text.toLowerCase().startsWith(name.toLowerCase())) {
+    text = text.slice(name.length).trim();
+  }
+  if (!text) return undefined;
+  if (text.length <= SNIPPET_LENGTH) return text;
+  const cut = text.lastIndexOf(' ', SNIPPET_LENGTH);
+  return `${text.slice(0, cut > 0 ? cut : SNIPPET_LENGTH)}…`;
+};
 
 /**
  * The relevant rules for a text, best first: one search by words (exact names, MITRE ids,
@@ -101,13 +124,29 @@ export const searchRelevantRuleIds = async ({
     },
   };
 
-  const result = await esClient.search<{ so_id: string }>(
-    { index: RULE_SEARCH_INDEX, size: RERANK_WINDOW, _source: ['so_id'], retriever },
+  const result = await esClient.search<{ so_id: string; name: string }>(
+    {
+      index: RULE_SEARCH_INDEX,
+      size: RERANK_WINDOW,
+      _source: ['so_id', 'name'],
+      retriever,
+      highlight: {
+        fields: { rule_card: { type: 'semantic', number_of_fragments: 1, order: 'score' } },
+      },
+    },
     { requestTimeout: SEARCH_TIMEOUT_MS }
   );
-  const ranked = result.hits.hits.flatMap((hit) =>
-    hit._source ? [{ soId: hit._source.so_id, score: hit._score ?? 0 }] : []
-  );
+  const ranked = result.hits.hits.flatMap((hit) => {
+    if (!hit._source) return [];
+    const chunk = hit.highlight?.rule_card?.[0];
+    return [
+      {
+        soId: hit._source.so_id,
+        score: hit._score ?? 0,
+        snippet: chunk ? toSnippet(chunk, hit._source.name) : undefined,
+      },
+    ];
+  });
   if (ranked.length === 0) {
     return ranked;
   }

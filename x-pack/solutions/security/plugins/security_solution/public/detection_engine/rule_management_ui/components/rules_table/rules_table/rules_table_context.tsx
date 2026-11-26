@@ -46,6 +46,7 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import type { SearchFallbackReason } from '../../../../rule_management/api/hooks/use_find_rules_query';
+
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_PAGE,
@@ -57,6 +58,9 @@ import { useRulesTableSavedState } from './use_rules_table_saved_state';
 import { useRulesTableStorageKey } from './use_rules_table_storage_key';
 import { defaultRangeValue } from '../../../../rule_gaps/constants';
 import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
+
+/** One empty object, so that the table context does not change on every render. */
+const NO_HIGHLIGHTS: Record<string, string> = {};
 
 interface RulesSnoozeSettings {
   /**
@@ -162,6 +166,8 @@ export interface RulesTableState {
   searchMode?: 'legacy' | 'semantic';
   /** Why a search by meaning ran as the keyword search. */
   searchFallbackReason?: SearchFallbackReason;
+  /** Why each rule of the page matched a search by meaning, by rule id. */
+  searchHighlights: Record<string, string>;
 }
 
 export type LoadingRuleAction =
@@ -377,7 +383,14 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules
   const {
-    data: { rules, total, warnings, searchMode, searchFallbackReason } = {
+    data: {
+      rules,
+      total,
+      warnings,
+      searchMode,
+      searchFallbackReason,
+      searchHighlights = NO_HIGHLIGHTS,
+    } = {
       rules: [],
       total: 0,
       warnings: [],
@@ -504,6 +517,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         warnings,
         searchMode,
         searchFallbackReason,
+        searchHighlights,
       },
       actions,
     };
@@ -534,6 +548,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     warnings,
     searchMode,
     searchFallbackReason,
+    searchHighlights,
   ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;

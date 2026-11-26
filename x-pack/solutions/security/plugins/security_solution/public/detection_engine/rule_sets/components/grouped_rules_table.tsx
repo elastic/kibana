@@ -182,14 +182,26 @@ const SectionActions = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
-    state: { filterOptions },
+    state: { filterOptions, searchMode },
     actions: { setFilterOptions },
   } = useRulesTableContext();
   const { openSaveDialog } = useRuleSetEditor();
   const conditions = toGroupConditions(category, value);
   const closePopover = () => setIsOpen(false);
+  const showInTable = {
+    key: 'showInTable',
+    name: i18n.SECTION_SHOW_IN_TABLE,
+    onClick: () => {
+      closePopover();
+      setFilterOptions({ groupBy: undefined, browse: { category, value } });
+    },
+  };
 
   const getPanels = (): EuiContextMenuPanelDescriptor[] => {
+    // Bulk actions and a new set work on a query, not on the rules that AI search shows.
+    if (searchMode === 'semantic') {
+      return [{ id: 0, title: i18n.SECTION_ACTIONS_TITLE(count), items: [showInTable] }];
+    }
     const [bulkActions, ...bulkActionPanels] = getSectionBulkItems(
       closePopover,
       { ...filterOptions, groupBy: undefined, browse: { category, value } },
@@ -202,14 +214,7 @@ const SectionActions = ({
         items: [
           ...(bulkActions.items ?? []),
           { isSeparator: true, key: 'sectionSeparator' },
-          {
-            key: 'showInTable',
-            name: i18n.SECTION_SHOW_IN_TABLE,
-            onClick: () => {
-              closePopover();
-              setFilterOptions({ groupBy: undefined, browse: { category, value } });
-            },
-          },
+          showInTable,
           {
             key: 'newRuleSet',
             name: i18n.SECTION_NEW_GROUP,

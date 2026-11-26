@@ -12,7 +12,6 @@ import type {
 import {
   EuiBasicTable,
   EuiConfirmModal,
-  EuiEmptyPrompt,
   EuiProgress,
   useGeneratedHtmlId,
   EuiSpacer,
@@ -21,6 +20,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RulesFilterBar } from '../../../rule_sets/components/rules_group_by_control';
 import { SearchModeLine } from '../../../rule_sets/search/search_mode_line';
+import { RulesTableNoItems } from '../../../rule_sets/search/rules_table_no_items';
+import { RuleFlyoutProvider } from './rule_flyout';
 import { GroupedRulesTable } from '../../../rule_sets/components/grouped_rules_table';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -80,9 +81,7 @@ const wrapMenuItemClick = (
     : item;
 };
 
-const NO_ITEMS_MESSAGE = (
-  <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
-);
+const NO_ITEMS_MESSAGE = <RulesTableNoItems />;
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -109,6 +108,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       rules,
       filterOptions,
       searchMode,
+      searchHighlights,
       isPreflightInProgress,
       isAllSelected,
       isLoading,
@@ -445,39 +445,41 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             onToggleSelectAll={toggleSelectAll}
             isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
           />
-          {filterOptions.groupBy ? (
-            <GroupedRulesTable
-              key={filterOptions.groupBy}
-              columns={tableProps.columns}
-              getSectionBulkItems={getSectionBulkItems}
-            />
-          ) : (
-            <EuiBasicTable
-              itemId="id"
-              items={rules}
-              tableCaption={i18n.RULES_TABLE_CAPTION}
-              noItemsMessage={NO_ITEMS_MESSAGE}
-              onChange={tableOnChangeCallback}
-              pagination={paginationMemo}
-              selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
-              // Relevant rules (semantic search) come best first; columns do not sort them.
-              sorting={
-                searchMode === 'semantic'
-                  ? undefined
-                  : {
-                      sort: {
-                        // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
-                        field: sortingOptions.field as keyof Rule,
-                        direction: sortingOptions.order,
-                      },
-                    }
-              }
-              {...tableProps}
-              tableLayout="auto"
-              scrollableInline
-              responsiveBreakpoint={false}
-            />
-          )}
+          <RuleFlyoutProvider snippets={searchHighlights}>
+            {filterOptions.groupBy ? (
+              <GroupedRulesTable
+                key={filterOptions.groupBy}
+                columns={tableProps.columns}
+                getSectionBulkItems={getSectionBulkItems}
+              />
+            ) : (
+              <EuiBasicTable
+                itemId="id"
+                items={rules}
+                tableCaption={i18n.RULES_TABLE_CAPTION}
+                noItemsMessage={NO_ITEMS_MESSAGE}
+                onChange={tableOnChangeCallback}
+                pagination={paginationMemo}
+                selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
+                // Relevant rules (semantic search) come best first; columns do not sort them.
+                sorting={
+                  searchMode === 'semantic'
+                    ? undefined
+                    : {
+                        sort: {
+                          // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
+                          field: sortingOptions.field as keyof Rule,
+                          direction: sortingOptions.order,
+                        },
+                      }
+                }
+                {...tableProps}
+                tableLayout="auto"
+                scrollableInline
+                responsiveBreakpoint={false}
+              />
+            )}
+          </RuleFlyoutProvider>
         </>
       )}
     </>

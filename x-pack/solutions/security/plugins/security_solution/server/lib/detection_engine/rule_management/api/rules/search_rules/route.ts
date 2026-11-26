@@ -302,6 +302,14 @@ export const searchRulesRoute = (
                 })
               : undefined;
           const counts = disjunctive?.counts ?? mainCounts;
+          const searchHighlights =
+            semantic?.mode === 'semantic'
+              ? Object.fromEntries(
+                  rules.data.flatMap(({ id }) =>
+                    semantic.snippets[id] ? [[id, semantic.snippets[id]]] : []
+                  )
+                )
+              : {};
 
           const transformedRules = transformFindAlerts(
             rules,
@@ -316,6 +324,9 @@ export const searchRulesRoute = (
               : {}),
             ...(shouldUseSearchAfter && !relevantIds ? { search_after: rules.searchAfter } : {}),
             ...modeFields,
+            ...(Object.keys(searchHighlights).length
+              ? { search_highlights: searchHighlights }
+              : {}),
           };
 
           return response.ok({ body: responseBody });

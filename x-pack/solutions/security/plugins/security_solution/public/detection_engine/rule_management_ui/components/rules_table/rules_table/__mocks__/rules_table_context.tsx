@@ -12,6 +12,7 @@ export const useRulesTableContextMock = {
   create: (): jest.Mocked<RulesTableContextType> => ({
     state: {
       rules: [],
+      searchHighlights: {},
       rulesSnoozeSettings: {
         data: {},
         isLoading: false,

@@ -48,6 +48,7 @@ import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../common/translations';
 import type { Rule } from '../../../rule_management/logic';
 import { useRulesTableContext } from './rules_table/rules_table_context';
+import { RuleNameCell } from './rule_flyout';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
@@ -162,7 +163,7 @@ export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
 export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
-  render: (value: Rule['name'], item: Rule) => <RuleLink id={item.id} name={value} />,
+  render: (_: Rule['name'], item: Rule) => <RuleNameCell rule={item} />,
   sortable: true,
   truncateText: true,
   minWidth: '12em',
