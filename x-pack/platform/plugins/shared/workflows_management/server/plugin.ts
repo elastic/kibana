@@ -86,7 +86,10 @@ export class WorkflowsPlugin
     }
 
     plugins.features?.registerKibanaFeature(
-      getWorkflowsManagementFeatureConfig({ pagesEnabled: this.config.pages.enabled })
+      getWorkflowsManagementFeatureConfig({
+        pages: this.config.pages.enabled,
+        secrets: plugins.secrets !== undefined,
+      })
     );
 
     // `workflow-page` is a work-in-progress saved object type: it is registered only with

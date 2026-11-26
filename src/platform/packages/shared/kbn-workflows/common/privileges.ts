@@ -24,6 +24,7 @@ export enum WorkflowsManagementApiActions {
   'readManagedExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:readExecution`,
   'cancelExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:cancelExecution`,
   'managePages' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:pages:manage`,
+  'manageSecrets' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:secrets:manage`,
 }
 
 /**
@@ -70,6 +71,7 @@ export const WorkflowsManagementOperationPrivileges = {
   // Changing a page needs `execute` too, so a page manager never gets a link to a workflow that
   // they cannot run. It does not edit the workflow, so it needs no `update`.
   managePage: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.managePages],
+  manageSecrets: [WorkflowsManagementApiActions.manageSecrets],
 } as const satisfies Record<string, readonly WorkflowsManagementApiActions[]>;
 
 // The UI actions (aka capabilities) added by feature privileges, to be checked in the UI components.

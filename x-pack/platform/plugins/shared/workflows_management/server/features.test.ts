@@ -8,6 +8,7 @@
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import type { GatedFeature } from './features';
 import { getWorkflowsManagementFeatureConfig, WorkflowsManagementFeatureConfig } from './features';
 import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './pages/page_saved_object';
 
@@ -15,6 +16,11 @@ const getSubFeaturePrivilege = (id: string) =>
   WorkflowsManagementFeatureConfig.subFeatures!.flatMap((subFeature) =>
     subFeature.privilegeGroups.flatMap((group) => group.privileges)
   ).find((privilege) => privilege?.id === id);
+
+const getPrivileges = (enabledFeatures: Record<GatedFeature, boolean>) =>
+  getWorkflowsManagementFeatureConfig(enabledFeatures).subFeatures!.flatMap((subFeature) =>
+    subFeature.privilegeGroups.flatMap((group) => group.privileges)
+  );
 
 describe('WorkflowsManagementFeatureConfig', () => {
   it('grants ai_index read on workflow via the workflow_read sub-feature privilege', () => {
@@ -40,20 +46,19 @@ describe('WorkflowsManagementFeatureConfig', () => {
   });
 
   describe('workflow pages', () => {
-    const getPrivileges = (pagesEnabled: boolean) =>
-      getWorkflowsManagementFeatureConfig({ pagesEnabled }).subFeatures!.flatMap((subFeature) =>
-        subFeature.privilegeGroups.flatMap((group) => group.privileges)
-      );
-
     it('has no page privilege while pages are off', () => {
-      expect(getWorkflowsManagementFeatureConfig({ pagesEnabled: false })).toBe(
+      expect(getWorkflowsManagementFeatureConfig({ pages: false, secrets: false })).toBe(
         WorkflowsManagementFeatureConfig
       );
-      expect(getPrivileges(false).map(({ id }) => id)).not.toContain('workflow_page_manage');
+      expect(getPrivileges({ pages: false, secrets: true }).map(({ id }) => id)).not.toContain(
+        'workflow_page_manage'
+      );
     });
 
     it('lets page managers write pages without workflow update', () => {
-      const pagePrivilege = getPrivileges(true).find(({ id }) => id === 'workflow_page_manage')!;
+      const pagePrivilege = getPrivileges({ pages: true, secrets: false }).find(
+        ({ id }) => id === 'workflow_page_manage'
+      )!;
 
       expect(pagePrivilege.api).toEqual([WorkflowsManagementApiActions.managePages]);
       expect(pagePrivilege.savedObject).toEqual({
@@ -64,13 +69,30 @@ describe('WorkflowsManagementFeatureConfig', () => {
     });
 
     it('gives no other privilege access to pages', () => {
-      getPrivileges(true)
+      getPrivileges({ pages: true, secrets: true })
         .filter(({ id }) => id !== 'workflow_page_manage')
         .forEach(({ savedObject }) => {
           expect([...savedObject.all, ...savedObject.read]).not.toContain(
             WORKFLOW_PAGE_SAVED_OBJECT_TYPE
           );
         });
+    });
+  });
+
+  describe('workflow secrets', () => {
+    it('has no secret privilege while the secrets plugin is disabled', () => {
+      expect(getPrivileges({ pages: true, secrets: false }).map(({ id }) => id)).not.toContain(
+        'workflow_secret_manage'
+      );
+    });
+
+    it('lets users with All, and not Read, manage secrets', () => {
+      const secretPrivilege = getPrivileges({ pages: false, secrets: true }).find(
+        ({ id }) => id === 'workflow_secret_manage'
+      )!;
+
+      expect(secretPrivilege.api).toEqual([WorkflowsManagementApiActions.manageSecrets]);
+      expect(secretPrivilege.includeIn).toBe('all');
     });
   });
 });

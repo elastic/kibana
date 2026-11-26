@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/navigation-plugin'
   - '@kbn/config-schema'
   - '@kbn/workflows'
+  - '@kbn/secrets-plugin'
   - '@kbn/workflows-library'
   - '@kbn/human-readable-id'
   - '@kbn/dag-layout'

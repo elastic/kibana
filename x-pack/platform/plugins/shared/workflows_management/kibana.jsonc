@@ -34,7 +34,7 @@
       "licensing",
       "encryptedSavedObjects"
     ],
-    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox", "usageCollection"],
+    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox", "usageCollection", "secrets"],
     "runtimePluginDependencies": ["agentBuilder"],
     "extraPublicDirs": ["common"]
   }
