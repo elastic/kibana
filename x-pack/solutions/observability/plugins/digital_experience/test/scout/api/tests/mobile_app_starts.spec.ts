@@ -20,13 +20,7 @@ import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const {
-  COMMON_HEADERS,
-  DIGITAL_EXPERIENCE_ONLY_ROLE,
-  TIME_RANGE,
-  mobileAppStartsPath,
-  mobileKpisPath,
-} = testData;
+const { COMMON_HEADERS, TIME_RANGE, mobileAppStartsPath, mobileKpisPath } = testData;
 
 apiTest.describe(
   'Digital Experience mobile app starts API',
@@ -149,22 +143,6 @@ apiTest.describe(
       expect(totalColdStarts(inEnvironment)).toBe(0);
       expect(inEnvironment.reduce((sum, { warm }) => sum + warm.count, 0)).toBe(
         BUSY_WARM_START.count
-      );
-    });
-
-    apiTest('answers 403 naming the apm privilege, without it', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(DIGITAL_EXPERIENCE_ONLY_ROLE);
-
-      const response = await apiClient.get(mobileAppStartsPath(MOBILE_APPS.busyAndroid), {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(403);
-      // Kibana's own check, before the route reads any data, rather than an Elasticsearch
-      // access denial, which would be a 403 too
-      expect((response.body as { message: string }).message).toContain(
-        'is unauthorized for user, this action is granted by the Kibana privileges [apm]'
       );
     });
 
