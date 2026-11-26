@@ -235,18 +235,24 @@ export const initializeFiltersManager = (
       publishFilters();
     });
 
-  /** when auto-apply is `false` and the dashboard is reset, wait for new filters to be updated and publish them */
+  /**
+   * When auto-apply is `false` and the dashboard is reset, publish once the children have settled, i.e. are
+   * done computing their filters. `setState` only emits after every child has applied its new state, and a
+   * control flags `filtersLoading$` as soon as its state changes, so this waits for the controls' new filters
+   * when there are any, and resolves right away when the reset changes no filter-related state. This is the
+   * same settle condition as the initial publish. `switchMap` drops the wait if another reset happens first.
+   */
   const forcePublishSubscription = forcePublish$
     .pipe(
-      switchMap(async () => {
-        await new Promise((resolve) => {
-          // `unpublishedChildFilters$` replays its current (pre-reset) value on subscribe, so skip it and wait
-          // for the next push, which happens once the controls have reported their filters
-          unpublishedChildFilters$.pipe(skip(1), first()).subscribe(resolve);
-        });
-      })
+      switchMap(() =>
+        combineLatest([childFilters$, childFiltersLoading$]).pipe(
+          debounceTime(0),
+          first(([, loading]) => !loading)
+        )
+      )
     )
-    .subscribe(() => {
+    .subscribe(([allChildFilters]) => {
+      unpublishedChildFilters$.next(allChildFilters);
       publishFilters();
     });
 

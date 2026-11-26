@@ -255,9 +255,9 @@ describe('filters manager: awaiting required filters', () => {
     expect(awaitingRequiredFilters$.value).toBe(true);
 
     // reset to a state with a saved selection: the mounted control applies it and recomputes its filter later
-    forcePublish$.next();
-    await flush();
+    // the control flags that it is loading as soon as the reset applies its new state
     filtersLoading$.next(true);
+    forcePublish$.next();
     await flush();
     appliedFilters$.next([region]);
     awaiting$.next(false);
@@ -266,6 +266,28 @@ describe('filters manager: awaiting required filters', () => {
 
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
     expect(awaitingRequiredFilters$.value).toBe(false);
+  });
+
+  test('a reset that changes no filters does not leave a pending publish that applies a later change', async () => {
+    const { filtersManager, forcePublish$, setChildren } = buildSetup(['control1'], {
+      autoApplyFilters: false,
+    });
+    const control = buildControl('control1', { awaiting: false, loading: true });
+    setChildren([control]);
+    await flush();
+    control.filtersLoading$.next(false);
+    await flush();
+
+    // the reset leaves the controls untouched, so nothing is pushed
+    forcePublish$.next();
+    await flush();
+
+    // a later user selection must wait for the user to apply it
+    control.appliedFilters$.next([region]);
+    await flush();
+    expect(filtersManager.api.unpublishedChildFilters$.value).toEqual([region]);
+    expect(filtersManager.api.publishedChildFilters$.value).not.toEqual([region]);
+    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
   });
 
   test('flags an unpublished change when the awaiting state changes but the filters do not', async () => {
