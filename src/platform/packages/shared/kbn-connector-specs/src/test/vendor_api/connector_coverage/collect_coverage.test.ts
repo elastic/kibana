@@ -95,10 +95,10 @@ describe('collectCoverage', () => {
         id,
         reason: expect.any(String),
       });
-      expect({ id, types: document?.api_types }).toEqual({
-        id,
-        types: expect.not.arrayContaining(['other', 'unexplained']),
-      });
+      const catchAll = document?.api_types.filter((type) =>
+        ['other', 'unexplained'].includes(type)
+      );
+      expect({ id, catchAll }).toEqual({ id, catchAll: [] });
     }
   });
 
