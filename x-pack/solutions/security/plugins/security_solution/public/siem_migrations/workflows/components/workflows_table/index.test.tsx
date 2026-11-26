@@ -425,8 +425,8 @@ describe('MigrationWorkflowsTable', () => {
     mockWorkflows([]);
     renderTable();
 
-    await waitFor(() => expect(screen.queryByTestId('siemMigrationsWorkflowsTable')).toBeNull());
-    expect(screen.queryByText('Phishing triage')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('emptyMigrationContainer')).toBeInTheDocument();
+    expect(screen.queryByTestId('siemMigrationsWorkflowsTable')).not.toBeInTheDocument();
   });
 
   it('should search the workflows by the entered term', async () => {
