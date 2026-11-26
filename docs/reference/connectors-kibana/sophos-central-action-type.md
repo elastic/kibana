@@ -21,9 +21,11 @@ You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 
 ### Get API credentials [sophos-central-api-credentials]
 
+The credential is created by a Sophos Central **Super Admin**. No scope or role selection is required during creation — the resulting credential inherits full API access from the creating admin's role.
+
 1. Sign in to [Sophos Central Admin](https://central.sophos.com).
-2. Go to **My Products → General Settings → API Credentials Management**.
-3. Select **Add Credential** and assign a name.
+2. Go to **Global Settings → API Credentials** (the navigation label may vary by console version; look for **API Credentials** under your account or settings menu).
+3. Select **Add Credential**, enter a name, and click **Add**.
 4. Copy the **Client ID** and **Client Secret**.
 
 ### Connector configuration [sophos-central-connector-configuration]
@@ -31,7 +33,7 @@ You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 Sophos Central connectors have the following configuration properties:
 
 Authentication
-:   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret from Sophos Central (**My Products → General Settings → API Credentials → Add Credential**). Only tenant-level credentials are supported. Partner or organization credentials are rejected. The credential needs `alerts:read`, `alerts:action`, `endpoint-state:read`, `endpoint-state:update`, and `detections.queries.detections:create` scopes.
+:   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret obtained from **Global Settings → API Credentials** in Sophos Central. The credential must be created by a Super Admin and must be a tenant-level credential. Partner or organization credentials are rejected.
 
     If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure all three hosts are added to the allowed hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
 
