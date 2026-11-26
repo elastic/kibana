@@ -10,11 +10,12 @@
 import { format } from 'util';
 
 import Mocha from 'mocha';
-import { create as createSuite } from 'mocha/lib/suite';
-import Test from 'mocha/lib/test';
 
 import { filterSuites } from './filter_suites';
 import { EsVersion } from '../es_version';
+
+const { Suite, Test } = Mocha;
+const createSuite = Suite.create;
 
 function setup({ include, exclude, esVersion }) {
   return new Promise((resolve) => {
