@@ -40,4 +40,11 @@ export const AI_AGENT_TEST_IDS = {
   missingInteractivePrompt: `${PREFIX}MissingInteractivePrompt`,
   otelByAccount: `${PREFIX}OtelByAccount`,
   graph: `${PREFIX}Graph`,
+  headerWatchlists: `${PREFIX}HeaderWatchlists`,
+  personWatchlists: `${PREFIX}PersonWatchlists`,
+  storeContext: `${PREFIX}StoreContext`,
+  storeContextMissing: `${PREFIX}StoreContextMissing`,
+  storeContextWatchlists: `${PREFIX}StoreContextWatchlists`,
+  storeContextMfa: `${PREFIX}StoreContextMfa`,
+  storeContextUpdated: `${PREFIX}StoreContextUpdated`,
 } as const;

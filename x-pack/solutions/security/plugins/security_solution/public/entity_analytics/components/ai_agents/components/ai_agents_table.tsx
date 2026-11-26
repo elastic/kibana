@@ -21,6 +21,8 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RiskScoreCell } from '../../home/entities_table/risk_score_cell';
 import { RiskLevelBadge } from '../../../../flyout_v2/entity/shared/components/risk_level_badge';
+import { TruncatedBadgeList } from '../../../../flyout_v2/entity/shared/components/entity_source_value';
+import { useWatchlistLookup } from '../hooks/use_watchlist_lookup';
 import type { AgentInventoryRow } from '../types';
 import { getAgentDisplayName } from '../utils';
 import {
@@ -33,11 +35,13 @@ import {
   COLUMN_RISK,
   COLUMN_RUNS_AS,
   COLUMN_VERSION,
+  COLUMN_WATCHLISTS,
   NO_ACCOUNT,
   NO_SCORE_YET,
   OPEN_FLYOUT,
   SEARCH_PLACEHOLDER,
   UNKNOWN_VERSION,
+  WATCHLISTS_OVERFLOW_TITLE,
 } from '../translations';
 
 export const AI_AGENTS_TABLE_TEST_ID = 'aiAgentsTable';
@@ -52,6 +56,7 @@ export interface AiAgentsTableProps {
 /** One row per install. "Runs as" is the OS user, not an owner: most runners are shared accounts. */
 export const AiAgentsTable = memo(
   ({ rows, loading, alertsUnavailable, onOpenAgent }: AiAgentsTableProps) => {
+    const watchlistLookup = useWatchlistLookup();
     const columns = useMemo<Array<EuiBasicTableColumn<AgentInventoryRow>>>(
       () => [
         {
@@ -144,6 +149,20 @@ export const AiAgentsTable = memo(
             ),
         },
         {
+          field: 'watchlistIds',
+          name: COLUMN_WATCHLISTS,
+          width: '160px',
+          render: (watchlistIds: readonly string[]) => (
+            <TruncatedBadgeList
+              values={watchlistLookup(watchlistIds).map(({ name }) => name)}
+              overflowTooltipTitle={WATCHLISTS_OVERFLOW_TITLE}
+              showValueTooltip
+              textSize="xs"
+              data-test-subj="aiAgentsTableWatchlists"
+            />
+          ),
+        },
+        {
           field: 'riskScore',
           name: COLUMN_RISK,
           sortable: true,
@@ -166,7 +185,7 @@ export const AiAgentsTable = memo(
             ),
         },
       ],
-      [alertsUnavailable, onOpenAgent]
+      [alertsUnavailable, onOpenAgent, watchlistLookup]
     );
 
     const search = useMemo<EuiSearchBarProps>(
@@ -178,11 +197,18 @@ export const AiAgentsTable = memo(
       () =>
         rows.map((row) => ({
           ...row,
-          searchText: [row.agentName, row.hostName, row.hostId, row.userName, ...row.accountEmails]
+          searchText: [
+            row.agentName,
+            row.hostName,
+            row.hostId,
+            row.userName,
+            ...row.accountEmails,
+            ...watchlistLookup(row.watchlistIds).map(({ name }) => name),
+          ]
             .filter(Boolean)
             .join(' '),
         })),
-      [rows]
+      [rows, watchlistLookup]
     );
 
     return (

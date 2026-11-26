@@ -13,6 +13,7 @@ import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
 import type {
   AgentContext,
   AgentRow,
+  AgentStoreContext,
   RelatedEntity,
 } from '../../../../../entity_analytics/components/ai_agents/types';
 import { ContextSection } from './context_section';
@@ -21,9 +22,21 @@ import { AI_AGENT_TEST_IDS } from '../test_ids';
 jest.mock('../../../../use_flyout_api');
 jest.mock('../../../../../entity_analytics/api/hooks/use_get_watchlists', () => ({
   useGetWatchlists: jest.fn().mockReturnValue({
-    data: [{ id: 'departing-employees', name: 'Departing Employees' }],
+    data: [
+      { id: 'departing-employees', name: 'Departing Employees', riskModifier: 1.5 },
+      { id: 'privileged-users', name: 'Privileged Users', riskModifier: 1.5 },
+    ],
   }),
 }));
+
+const storeContext: AgentStoreContext = {
+  personWatchlistIds: ['privileged-users'],
+  personMfaEnabled: true,
+  hostCriticality: 'high_impact',
+  sharedAccountInstalls: 2,
+  runsAsRoot: false,
+  computedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
+};
 
 const agent: AgentRow = {
   entityId: 'ai_agent:claude_code@host-1@ec2-user',
@@ -280,5 +293,87 @@ describe('ContextSection', () => {
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.otherInstalls)).toHaveTextContent(
       'No other install has used these accounts.'
     );
+  });
+
+  it('links IdP status to the gap that keeps it off user rows', () => {
+    renderSection(fullContext);
+    expect(
+      within(screen.getByTestId(AI_AGENT_TEST_IDS.personIdp)).getByTestId(
+        `${AI_AGENT_TEST_IDS.gapLink}-user_rows_no_idp_status`
+      )
+    ).toBeInTheDocument();
+  });
+
+  describe('store context', () => {
+    it("lists the facts on the agent's row, saying they are kept by the maintainer", () => {
+      renderSection({ ...fullContext, agent: { ...agent, storeContext } });
+      const panel = screen.getByTestId(AI_AGENT_TEST_IDS.storeContext);
+      expect(panel).toHaveTextContent('From the Entity Store');
+      expect(screen.getByTestId(AI_AGENT_TEST_IDS.storeContextUpdated)).toHaveTextContent(
+        /AI agent context maintainer, not queried when the flyout opens\. Updated 5 minutes ago/
+      );
+      expect(screen.getByTestId(AI_AGENT_TEST_IDS.storeContextWatchlists)).toHaveTextContent(
+        'Privileged Users'
+      );
+      expect(screen.getByTestId(AI_AGENT_TEST_IDS.storeContextMfa)).toHaveTextContent('On');
+      expect(panel).toHaveTextContent('Host criticalityHigh Impact');
+      expect(panel).toHaveTextContent('Account shared with 2 other installs');
+      expect(panel).not.toHaveTextContent("Person's criticality");
+      expect(within(panel).queryByText('Runs as root')).not.toBeInTheDocument();
+    });
+
+    it('shows person criticality and runs as root only when the row has them', () => {
+      renderSection({
+        ...fullContext,
+        agent: {
+          ...agent,
+          storeContext: {
+            ...storeContext,
+            personCriticality: 'extreme_impact',
+            sharedAccountInstalls: 0,
+            runsAsRoot: true,
+          },
+        },
+      });
+      const panel = screen.getByTestId(AI_AGENT_TEST_IDS.storeContext);
+      expect(panel).toHaveTextContent("Person's criticalityExtreme Impact");
+      expect(panel).not.toHaveTextContent('Account shared');
+      expect(within(panel).getByText('Runs as root')).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId(AI_AGENT_TEST_IDS.runsAs)).getByText('Runs as root')
+      ).toBeInTheDocument();
+    });
+
+    it('says when the maintainer has not written the row yet', () => {
+      renderSection(fullContext);
+      expect(screen.getByTestId(AI_AGENT_TEST_IDS.storeContextMissing)).toBeInTheDocument();
+    });
+
+    it("prefers the row's MFA and watchlists on the only person's card", () => {
+      renderSection({ ...fullContext, agent: { ...agent, storeContext } });
+      expect(screen.getByTestId(AI_AGENT_TEST_IDS.personMfa)).toHaveTextContent('On');
+      expect(screen.getByTestId(AI_AGENT_TEST_IDS.personWatchlists)).toHaveTextContent(
+        'Privileged Users'
+      );
+      expect(screen.getByTestId(AI_AGENT_TEST_IDS.personIdp)).toHaveTextContent(
+        'Okta: Deprovisioned'
+      );
+    });
+
+    it('keeps the queried values on each card when the agent acts for several people', () => {
+      renderSection({
+        ...fullContext,
+        agent: { ...agent, storeContext },
+        people: [
+          ...fullContext.people,
+          { email: 'sam@example.com', rows: [], idpAccounts: [], watchlistIds: [] },
+        ],
+      });
+      const [alex] = screen.getAllByTestId(AI_AGENT_TEST_IDS.person);
+      expect(within(alex).getByTestId(AI_AGENT_TEST_IDS.personMfa)).toHaveTextContent('Off');
+      expect(within(alex).getByTestId(AI_AGENT_TEST_IDS.personWatchlists)).toHaveTextContent(
+        'Departing Employees'
+      );
+    });
   });
 });

@@ -124,6 +124,45 @@ export const WATCHLISTS_LABEL = i18n.translate(
 export const NONE = i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.none', {
   defaultMessage: 'None',
 });
+export const watchlistRiskModifierTooltip = (modifier: number) =>
+  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.watchlistRiskModifier', {
+    defaultMessage: 'Risk modifier {modifier}',
+    values: { modifier },
+  });
+
+export const STORE_CONTEXT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.title',
+  { defaultMessage: 'From the Entity Store' }
+);
+export const STORE_CONTEXT_MISSING = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.missing',
+  {
+    defaultMessage:
+      "The AI agent context maintainer hasn't written to this agent's row yet, so the cards below are read from the source indices.",
+  }
+);
+export const PERSON_WATCHLISTS_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.personWatchlists',
+  { defaultMessage: "Person's watchlists" }
+);
+export const PERSON_MFA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.personMfa',
+  { defaultMessage: "Person's MFA" }
+);
+export const PERSON_CRITICALITY_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.personCriticality',
+  { defaultMessage: "Person's criticality" }
+);
+export const HOST_CRITICALITY_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.hostCriticality',
+  { defaultMessage: 'Host criticality' }
+);
+export const sharedAccountBadge = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.sharedAccount', {
+    defaultMessage:
+      'Account shared with {count, plural, one {# other install} other {# other installs}}',
+    values: { count },
+  });
 export const CRITICALITY_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.criticality',
   { defaultMessage: 'Criticality' }

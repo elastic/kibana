@@ -23,7 +23,9 @@ import type {
   AgentRow,
 } from '../../../../entity_analytics/components/ai_agents/types';
 import { getAgentDisplayName } from '../../../../entity_analytics/components/ai_agents/utils';
+import { useWatchlistLookup } from '../../../../entity_analytics/components/ai_agents/hooks/use_watchlist_lookup';
 import { UNKNOWN_VERSION } from '../../../../entity_analytics/components/ai_agents/translations';
+import { WatchlistBadges } from './components/watchlist_badges';
 import { AI_AGENT_TEST_IDS } from './test_ids';
 import {
   ENTITY_TYPE_BADGE,
@@ -35,6 +37,7 @@ import {
   RUNS_AS_LABEL,
   SIGNED_IN_AS_LABEL,
   VERSION_LABEL,
+  WATCHLISTS_LABEL,
 } from './translations';
 
 export interface AiAgentHeaderProps {
@@ -47,7 +50,21 @@ export interface AiAgentHeaderProps {
 const formatDate = (value: string | undefined) =>
   value ? <PreferenceFormattedDate value={new Date(value)} /> : getEmptyTagValue();
 
-/** Agent, host, runs as, signed in as, version and lifecycle, with risk ("no score yet" when absent). */
+const AgentWatchlists = memo(({ watchlistIds }: { watchlistIds: readonly string[] }) => {
+  const watchlistLookup = useWatchlistLookup();
+  return (
+    <WatchlistBadges
+      watchlists={watchlistLookup(watchlistIds)}
+      data-test-subj={AI_AGENT_TEST_IDS.headerWatchlists}
+    />
+  );
+});
+AgentWatchlists.displayName = 'AgentWatchlists';
+
+/**
+ * Agent, host, runs as, signed in as, the agent's own watchlists, version and lifecycle, with risk
+ * ("no score yet" when absent).
+ */
 export const AiAgentHeader = memo(
   ({ identity, agent, signedInAs, isLoading }: AiAgentHeaderProps) => (
     <div data-test-subj={AI_AGENT_TEST_IDS.header}>
@@ -86,6 +103,10 @@ export const AiAgentHeader = memo(
             { title: HOST_LABEL, description: agent?.hostName ?? identity.hostId },
             { title: RUNS_AS_LABEL, description: identity.userName },
             { title: SIGNED_IN_AS_LABEL, description: signedInAs ?? NOT_SIGNED_IN },
+            {
+              title: WATCHLISTS_LABEL,
+              description: <AgentWatchlists watchlistIds={agent?.watchlistIds ?? []} />,
+            },
             { title: VERSION_LABEL, description: agent?.version ?? UNKNOWN_VERSION },
             { title: FIRST_SEEN_LABEL, description: formatDate(agent?.firstSeen) },
             { title: LAST_SEEN_LABEL, description: formatDate(agent?.lastSeen) },

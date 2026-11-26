@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import type {
   AgentIdentity,
@@ -14,6 +14,18 @@ import type {
 } from '../../../../entity_analytics/components/ai_agents/types';
 import { AiAgentHeader } from './header';
 import { AI_AGENT_TEST_IDS } from './test_ids';
+
+jest.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => ({
+  useGetWatchlists: jest.fn().mockReturnValue({
+    data: [
+      {
+        id: 'agents-for-departing-employees',
+        name: 'Agents acting for departing employees',
+        riskModifier: 1.5,
+      },
+    ],
+  }),
+}));
 
 const identity: AgentIdentity = {
   entityId: 'ai_agent:claude_code@host-1@ec2-user',
@@ -60,6 +72,31 @@ describe('AiAgentHeader', () => {
       'Risk: 64.76 Moderate'
     );
     expect(screen.getByText('alex@example.com')).toBeInTheDocument();
+  });
+
+  it("names the agent's own watchlists, with the risk modifier in a tooltip", async () => {
+    render(
+      <TestProviders>
+        <AiAgentHeader
+          identity={identity}
+          agent={{ ...agent, watchlistIds: ['agents-for-departing-employees'] }}
+          isLoading={false}
+        />
+      </TestProviders>
+    );
+    const badge = screen.getByText('Agents acting for departing employees');
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerWatchlists)).toContainElement(badge);
+    fireEvent.mouseOver(badge);
+    await waitFor(() => expect(screen.getByText('Risk modifier 1.5')).toBeInTheDocument());
+  });
+
+  it('says None when the agent is on no watchlist', () => {
+    render(
+      <TestProviders>
+        <AiAgentHeader identity={identity} agent={agent} isLoading={false} />
+      </TestProviders>
+    );
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerWatchlists)).toHaveTextContent('None');
   });
 
   it('falls back to the install ID fields when there is no store row', () => {

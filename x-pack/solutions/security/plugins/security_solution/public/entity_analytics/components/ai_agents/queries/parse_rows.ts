@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { AgentAlert, AgentRow, HrRecord, IdpAccount, RelatedEntity } from '../types';
+import { getAiAgentContextFieldPath } from '@kbn/entity-store/common/domain/definitions/ai_agent_context';
+import type {
+  AgentAlert,
+  AgentRow,
+  AgentStoreContext,
+  HrRecord,
+  IdpAccount,
+  RelatedEntity,
+} from '../types';
 import {
   firstString,
   isMockRow,
@@ -51,6 +59,21 @@ export const toRelatedEntity = (row: EsqlRecord): RelatedEntity | undefined => {
   };
 };
 
+/** The facts the AI agent context maintainer wrote, or undefined before its first run. */
+export const toAgentStoreContext = (row: EsqlRecord): AgentStoreContext | undefined => {
+  const computedAt = firstString(row[getAiAgentContextFieldPath('computed_at')]);
+  if (!computedAt) return undefined;
+  return {
+    personWatchlistIds: toStringArray(row[getAiAgentContextFieldPath('person_watchlists')]),
+    personCriticality: toCriticality(row[getAiAgentContextFieldPath('person_criticality')]),
+    personMfaEnabled: toBoolean(row[getAiAgentContextFieldPath('person_mfa_enabled')]),
+    hostCriticality: toCriticality(row[getAiAgentContextFieldPath('host_criticality')]),
+    sharedAccountInstalls: toNumber(row[getAiAgentContextFieldPath('shared_account_installs')]),
+    runsAsRoot: toBoolean(row[getAiAgentContextFieldPath('runs_as_root')]),
+    computedAt,
+  };
+};
+
 /**
  * Reads an agent row. The identity comes from the row's fields, falling back to the install ID, so
  * a row written before a field was retained still shows.
@@ -85,6 +108,7 @@ export const toAgentRow = (row: EsqlRecord): AgentRow | undefined => {
     accountIds: toStringArray(row['entity.relationships.acts_on_behalf_of.ids']),
     dependsOnIds: toStringArray(row['entity.relationships.depends_on.ids']),
     dataSources: toStringArray(row['entity.source']),
+    storeContext: toAgentStoreContext(row),
   };
 };
 

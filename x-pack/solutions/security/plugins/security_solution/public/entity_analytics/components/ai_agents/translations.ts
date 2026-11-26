@@ -107,6 +107,14 @@ export const COLUMN_RISK = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiAgents.columns.risk',
   { defaultMessage: 'Risk' }
 );
+export const COLUMN_WATCHLISTS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.aiAgents.columns.watchlists',
+  { defaultMessage: 'Watchlists' }
+);
+export const WATCHLISTS_OVERFLOW_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.aiAgents.watchlistsOverflowTitle',
+  { defaultMessage: 'Additional watchlists' }
+);
 
 export const UNKNOWN_VERSION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiAgents.unknownVersion',

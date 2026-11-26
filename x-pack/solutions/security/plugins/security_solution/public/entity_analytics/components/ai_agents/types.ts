@@ -34,6 +34,22 @@ export interface AgentRow extends AgentIdentity {
   readonly accountIds: readonly string[];
   readonly dependsOnIds: readonly string[];
   readonly dataSources: readonly string[];
+  /** Facts the AI agent context maintainer copies onto the row. Absent until it has run. */
+  readonly storeContext?: AgentStoreContext;
+}
+
+/** `entity.attributes.ai_agent_context`: facts about related entities, kept on the agent row. */
+export interface AgentStoreContext {
+  /** Watchlists of the people the agent acts for, across their resolution groups. */
+  readonly personWatchlistIds: readonly string[];
+  readonly personCriticality?: CriticalityLevelWithUnassigned;
+  /** False if any person has MFA off, absent if no person row reports it. */
+  readonly personMfaEnabled?: boolean;
+  readonly hostCriticality?: CriticalityLevelWithUnassigned;
+  /** Other installs that act for the same account. */
+  readonly sharedAccountInstalls?: number;
+  readonly runsAsRoot?: boolean;
+  readonly computedAt: string;
 }
 
 export interface AgentInventoryRow extends AgentRow {

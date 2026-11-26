@@ -19,6 +19,7 @@ export const GAP_IDS = {
   emailAfterSignIn: 'email_after_sign_in',
   noAgentStamp: 'no_agent_stamp',
   noAgentRisk: 'no_agent_risk',
+  userRowsNoIdpStatus: 'user_rows_no_idp_status',
 } as const;
 
 export type GapId = (typeof GAP_IDS)[keyof typeof GAP_IDS];
@@ -322,6 +323,35 @@ export const COLLECTION_GAPS: Readonly<Record<GapId, CollectionGap>> = {
       'xpack.securitySolution.entityAnalytics.aiAgents.gaps.noAgentRisk.workaround',
       {
         defaultMessage: 'Prototype branch',
+      }
+    ),
+  },
+  [GAP_IDS.userRowsNoIdpStatus]: {
+    id: GAP_IDS.userRowsNoIdpStatus,
+    title: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.userRowsNoIdpStatus.title',
+      {
+        defaultMessage: "User entity rows don't keep IdP account status",
+      }
+    ),
+    blocks: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.userRowsNoIdpStatus.blocks',
+      {
+        defaultMessage:
+          'Facts about the person on the agent row, store-query watchlists on "deprovisioned", the orphaned agent',
+      }
+    ),
+    status: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.userRowsNoIdpStatus.status',
+      {
+        defaultMessage:
+          'Entity Analytics (ours): extract user.account.status.* or asset.status into the user definition',
+      }
+    ),
+    workaround: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.aiAgents.gaps.userRowsNoIdpStatus.workaround',
+      {
+        defaultMessage: 'Watchlists from the HR index instead',
       }
     ),
   },

@@ -20,14 +20,17 @@ import {
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { AssetCriticalityBadge } from '../../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
-import { useGetWatchlists } from '../../../../../entity_analytics/api/hooks/use_get_watchlists';
-import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
+import {
+  useWatchlistLookup,
+  type WatchlistLookup,
+} from '../../../../../entity_analytics/components/ai_agents/hooks/use_watchlist_lookup';
 import { RiskLevelBadge } from '../../../shared/components/risk_level_badge';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import type {
   AgentContext,
   AgentPerson,
+  AgentStoreContext,
   IdpAccount,
   RelatedEntity,
 } from '../../../../../entity_analytics/components/ai_agents/types';
@@ -35,6 +38,8 @@ import { getAgentDisplayName } from '../../../../../entity_analytics/components/
 import { GAP_IDS } from '../../../../../entity_analytics/components/ai_agents/gaps';
 import { GapLink } from './missing_layer_note';
 import { GeneratedDataBadge } from './generated_data_badge';
+import { StoreContextPanel } from './store_context_panel';
+import { WatchlistBadges } from './watchlist_badges';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import {
   ACTS_FOR_NONE,
@@ -51,7 +56,6 @@ import {
   MFA_LABEL,
   MFA_OFF,
   MFA_ON,
-  NONE,
   OTHER_AGENTS_ON_HOST,
   OTHER_INSTALLS_NONE,
   OTHER_INSTALLS_TITLE,
@@ -67,21 +71,6 @@ import {
 import { NO_SCORE_YET } from '../../../../../entity_analytics/components/ai_agents/translations';
 
 type OpenEntity = (row: RelatedEntity) => void;
-
-const useWatchlistNames = () => {
-  const { data } = useGetWatchlists();
-  return useCallback(
-    (ids: readonly string[]): string[] => {
-      const byId = new Map(
-        (data ?? []).flatMap((watchlist: { id?: string; name: string }) =>
-          watchlist.id ? [[watchlist.id, watchlist.name] as const] : []
-        )
-      );
-      return ids.map((id) => byId.get(id) ?? getWatchlistName(id));
-    },
-    [data]
-  );
-};
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <>
@@ -128,17 +117,34 @@ interface MfaState {
   readonly isMock: boolean;
 }
 
-/** MFA from the IdP documents and the person's rows; off wins when any source reports off. */
-const getMfaState = ({ idpAccounts, rows }: AgentPerson): MfaState => {
+const hasMockMfa = ({ idpAccounts }: AgentPerson): boolean =>
+  idpAccounts.some((account) => account.mfaEnabled !== undefined && account.isMock);
+
+/**
+ * MFA for one person. The agent row's value comes first, when it speaks for this person alone.
+ * Otherwise it is read from the IdP documents and the person's rows, and off wins when any
+ * source reports off.
+ */
+const getMfaState = (person: AgentPerson, rowFacts?: AgentStoreContext): MfaState => {
+  const isMock = hasMockMfa(person);
+  if (rowFacts?.personMfaEnabled !== undefined) {
+    return { enabled: rowFacts.personMfaEnabled, isMock };
+  }
   const known = [
-    ...idpAccounts.map((account) => account.mfaEnabled),
-    ...rows.map((personRow) => personRow.mfaEnabled),
+    ...person.idpAccounts.map((account) => account.mfaEnabled),
+    ...person.rows.map((personRow) => personRow.mfaEnabled),
   ].filter((value): value is boolean => value !== undefined);
-  return {
-    enabled: known.length === 0 ? undefined : !known.includes(false),
-    isMock: idpAccounts.some((account) => account.mfaEnabled !== undefined && account.isMock),
-  };
+  return { enabled: known.length === 0 ? undefined : !known.includes(false), isMock };
 };
+
+const getPersonWatchlistIds = (
+  person: AgentPerson,
+  rowFacts?: AgentStoreContext
+): readonly string[] => rowFacts?.personWatchlistIds ?? person.watchlistIds;
+
+/** The row's `runs_as_root` comes first, then the OS user name. */
+const isRunningAsRoot = ({ agent, runsAs }: AgentContext): boolean =>
+  agent?.storeContext?.runsAsRoot ?? (agent?.userName ?? runsAs?.userName) === 'root';
 
 const SignedInBadge = ({ isCurrent, signedInAt }: { isCurrent: boolean; signedInAt?: string }) => {
   if (!isCurrent) return <EuiBadge color="hollow">{PREVIOUS_ACCOUNT}</EuiBadge>;
@@ -170,17 +176,20 @@ const PersonCard = memo(
     isCurrent,
     signedInAt,
     onOpen,
-    watchlistNames,
+    watchlistLookup,
+    rowFacts,
   }: {
     person: AgentPerson;
     isCurrent: boolean;
     signedInAt?: string;
     onOpen: OpenEntity;
-    watchlistNames: (ids: readonly string[]) => string[];
+    watchlistLookup: WatchlistLookup;
+    /** The agent row's context, given only when it describes this person alone. */
+    rowFacts?: AgentStoreContext;
   }) => {
     const { primary, idpAccounts, email } = person;
-    const names = watchlistNames(person.watchlistIds);
-    const mfa = getMfaState(person);
+    const watchlists = watchlistLookup(getPersonWatchlistIds(person, rowFacts));
+    const mfa = getMfaState(person, rowFacts);
     const isAtRisk =
       idpAccounts.some((account) => account.deprovisioned || account.suspended) ||
       isTerminated(person.hr?.status);
@@ -233,6 +242,7 @@ const PersonCard = memo(
                 ) : (
                   <EuiFlexGroup
                     gutterSize="xs"
+                    alignItems="center"
                     wrap
                     responsive={false}
                     data-test-subj={AI_AGENT_TEST_IDS.personIdp}
@@ -260,6 +270,11 @@ const PersonCard = memo(
                         )}
                       </React.Fragment>
                     ))}
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs">
+                        <GapLink gapId={GAP_IDS.userRowsNoIdpStatus} />
+                      </EuiText>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 ),
             },
@@ -341,18 +356,12 @@ const PersonCard = memo(
             },
             {
               title: WATCHLISTS_LABEL,
-              description:
-                names.length === 0 ? (
-                  NONE
-                ) : (
-                  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                    {names.map((name) => (
-                      <EuiFlexItem grow={false} key={name}>
-                        <EuiBadge color="warning">{name}</EuiBadge>
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                ),
+              description: (
+                <WatchlistBadges
+                  watchlists={watchlists}
+                  data-test-subj={AI_AGENT_TEST_IDS.personWatchlists}
+                />
+              ),
             },
             { title: RISK_LABEL, description: <RiskValue row={primary} /> },
           ]}
@@ -388,13 +397,14 @@ export interface ContextSectionProps {
 }
 
 /**
- * Identity and context: the person the agent acts for (IdP status, MFA, watchlists), the host
- * (criticality, risk, other agents), the local user it runs as, and other installs on the same
- * account. Each card opens that entity's flyout.
+ * Identity and context: the facts the context maintainer keeps on the agent row, the person the
+ * agent acts for (IdP status, MFA, watchlists), the host (criticality, risk, other agents), the
+ * local user it runs as, and other installs on the same account. Each card opens that entity's
+ * flyout.
  */
 export const ContextSection = memo(({ context, scopeId }: ContextSectionProps) => {
   const { openEntityDetailsAsChild } = useFlyoutApi();
-  const watchlistNames = useWatchlistNames();
+  const watchlistLookup = useWatchlistLookup();
   const {
     agent,
     host,
@@ -428,10 +438,20 @@ export const ContextSection = memo(({ context, scopeId }: ContextSectionProps) =
       [...people].sort((a, b) => Number(b.email === signedInAs) - Number(a.email === signedInAs)),
     [people, signedInAs]
   );
-  const runsAsRoot = (agent?.userName ?? runsAs?.userName) === 'root';
+  const storeContext = agent?.storeContext;
+  const runsAsRoot = isRunningAsRoot(context);
+  // The row's person facts are a union over every person, so they only stand in for a single card.
+  const rowFacts = sortedPeople.length === 1 ? storeContext : undefined;
 
   return (
     <>
+      <StoreContextPanel
+        storeContext={storeContext}
+        watchlistLookup={watchlistLookup}
+        mfaIsMock={people.some(hasMockMfa)}
+      />
+      <EuiSpacer size="m" />
+
       <SectionTitle>{ACTS_FOR_TITLE}</SectionTitle>
       {sortedPeople.length === 0 ? (
         <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.actsForNone}>
@@ -446,7 +466,8 @@ export const ContextSection = memo(({ context, scopeId }: ContextSectionProps) =
                 isCurrent={signedInAs ? person.email === signedInAs : sortedPeople.length === 1}
                 signedInAt={person.email === signedInAs ? signedInAt : undefined}
                 onOpen={onOpen}
-                watchlistNames={watchlistNames}
+                watchlistLookup={watchlistLookup}
+                rowFacts={rowFacts}
               />
             </EuiFlexItem>
           ))}

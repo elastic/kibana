@@ -11,6 +11,18 @@ import { TestProviders } from '../../../../common/mock';
 import type { AgentInventoryRow } from '../types';
 import { AiAgentsTable, AI_AGENTS_TABLE_TEST_ID } from './ai_agents_table';
 
+jest.mock('../../../api/hooks/use_get_watchlists', () => ({
+  useGetWatchlists: jest.fn().mockReturnValue({
+    data: [
+      {
+        id: 'agents-for-departing-employees',
+        name: 'Agents acting for departing employees',
+        riskModifier: 1.5,
+      },
+    ],
+  }),
+}));
+
 const row = (overrides: Partial<AgentInventoryRow> & { entityId: string }): AgentInventoryRow => ({
   agentName: 'claude_code',
   hostId: 'host-1',
@@ -34,6 +46,7 @@ const rows: AgentInventoryRow[] = [
     alertCount: 3,
     riskLevel: 'High',
     riskScore: 72,
+    watchlistIds: ['agents-for-departing-employees'],
   }),
   row({
     entityId: 'ai_agent:cursor@host-2@jenkins',
@@ -83,6 +96,25 @@ describe('AiAgentsTable', () => {
     expect(cursorRow).toHaveTextContent('Unknown');
     expect(cursorRow).toHaveTextContent('None seen');
     expect(cursorRow).toHaveTextContent('No score yet');
+  });
+
+  it("names each agent's own watchlists, and finds agents by watchlist name", () => {
+    renderTable();
+    expect(
+      within(
+        screen.getByTestId('aiAgentsTableRow-ai_agent:claude_code@host-1@ec2-user')
+      ).getByTestId('aiAgentsTableWatchlists')
+    ).toHaveTextContent('Agents acting for departing employees');
+    expect(
+      within(screen.getByTestId('aiAgentsTableRow-ai_agent:cursor@host-2@jenkins')).queryByTestId(
+        'aiAgentsTableWatchlists'
+      )
+    ).not.toBeInTheDocument();
+
+    const search = screen.getByRole('searchbox');
+    fireEvent.change(search, { target: { value: 'departing' } });
+    fireEvent.keyUp(search, { target: { value: 'departing' } });
+    expect(screen.getAllByTestId(/^aiAgentsTableRow-/)).toHaveLength(1);
   });
 
   it('opens the agent flyout from a row', () => {
