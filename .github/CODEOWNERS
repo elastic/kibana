@@ -2726,6 +2726,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/box/** @elastic/workc
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/buildkite/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/censys/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/cortex_xdr/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/databricks/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/dropbox/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/elasticsearch/** @elastic/workflows-eng

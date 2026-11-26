@@ -1,0 +1,849 @@
+{
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Artifact": {
+        "properties": {
+          "artifact_id": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_sha256": {
+            "type": "string"
+          },
+          "file_signature_status": {
+            "type": "string"
+          },
+          "file_wildfire_verdict": {
+            "type": "string"
+          },
+          "is_malicious": {
+            "type": "boolean"
+          },
+          "is_manual": {
+            "type": "boolean"
+          },
+          "is_process": {
+            "type": "boolean"
+          },
+          "low_confidence": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Asset": {
+        "properties": {
+          "asset_account": {
+            "type": "string"
+          },
+          "asset_category": {
+            "type": "string"
+          },
+          "asset_cloud_account_name": {
+            "type": "string"
+          },
+          "asset_external_provider_id": {
+            "type": "string"
+          },
+          "asset_group_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "asset_group_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_id": {
+            "type": "string"
+          },
+          "asset_name": {
+            "type": "string"
+          },
+          "asset_provider": {
+            "type": "string"
+          },
+          "asset_region": {
+            "type": "string"
+          },
+          "asset_tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "asset_type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Case": {
+        "properties": {
+          "access_mode": {
+            "enum": [
+              "CASE_SCOPE",
+              "TEAM_ONLY"
+            ],
+            "type": "string"
+          },
+          "aggregated_score": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "asset_group_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_group_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "asset_ids": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "assets": {
+            "items": {
+              "$ref": "#/components/schemas/Asset"
+            },
+            "type": "array"
+          },
+          "assigned_user_mail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "assigned_user_pretty_name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "case_domain": {
+            "type": "string"
+          },
+          "case_id": {
+            "type": "integer"
+          },
+          "case_name": {
+            "type": "string"
+          },
+          "case_team": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "member_type": {
+                  "enum": [
+                    "USER",
+                    "GROUP"
+                  ],
+                  "type": "string"
+                },
+                "team_role": {
+                  "enum": [
+                    "OWNER",
+                    "MEMBER"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "creation_time": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "critical_severity_issue_count": {
+            "type": "integer"
+          },
+          "custom_fields": {
+            "additionalProperties": true,
+            "nullable": true,
+            "type": "object"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "file_artifact_ids": {
+            "properties": {
+              "DATA": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "TOTAL_COUNT": {
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "high_severity_issue_count": {
+            "type": "integer"
+          },
+          "host_count": {
+            "type": "integer"
+          },
+          "hosts": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "is_blocked": {
+            "type": "boolean"
+          },
+          "issue_categories": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "issue_count": {
+            "type": "integer"
+          },
+          "issue_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "low_severity_issue_count": {
+            "type": "integer"
+          },
+          "med_severity_issue_count": {
+            "type": "integer"
+          },
+          "mitre_tactics_ids_and_names": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "mitre_techniques_ids_and_names": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "modification_time": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "network_artifact_ids": {
+            "properties": {
+              "DATA": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "TOTAL_COUNT": {
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "notes": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolution_sla": {
+            "nullable": true,
+            "type": "object"
+          },
+          "resolution_timer": {
+            "nullable": true,
+            "type": "object"
+          },
+          "resolve_comment": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolve_reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "resolved_timestamp": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "string"
+          },
+          "starred": {
+            "type": "boolean"
+          },
+          "status_progress": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "user_count": {
+            "type": "integer"
+          },
+          "user_severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "users": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "wildfire_hits": {
+            "type": "integer"
+          },
+          "xdr_url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CaseArtifact": {
+        "properties": {
+          "case_id": {
+            "type": "integer"
+          },
+          "file_artifacts": {
+            "properties": {
+              "DATA": {
+                "items": {
+                  "$ref": "#/components/schemas/Artifact"
+                },
+                "type": "array"
+              },
+              "TOTAL_COUNT": {
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "network_artifacts": {
+            "properties": {
+              "DATA": {
+                "items": {
+                  "$ref": "#/components/schemas/Artifact"
+                },
+                "type": "array"
+              },
+              "TOTAL_COUNT": {
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateCase": {
+        "additionalProperties": {},
+        "properties": {
+          "access_mode": {
+            "enum": [
+              "CASE_SCOPE",
+              "TEAM_ONLY"
+            ],
+            "type": "string"
+          },
+          "assigned_user": {
+            "type": "string"
+          },
+          "case_team": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "member_type": {
+                  "enum": [
+                    "USER",
+                    "GROUP"
+                  ],
+                  "type": "string"
+                },
+                "team_role": {
+                  "enum": [
+                    "OWNER",
+                    "MEMBER"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "resolve_comment": {
+            "type": "string"
+          },
+          "resolve_reason": {
+            "enum": [
+              "Resolved - Known Issue",
+              "Resolved - Duplicate Case",
+              "Resolved - False Positive",
+              "Resolved - Other",
+              "Resolved - True Positive",
+              "Resolved - Security Testing"
+            ],
+            "type": "string"
+          },
+          "status_progress": {
+            "type": "string"
+          },
+          "user_severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Cases API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/public_api/v1/case/artifacts/{case-id}/": {
+      "get": {
+        "operationId": "getCaseArtifacts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case-id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CaseArtifact"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/public_api/v1/case/search": {
+      "post": {
+        "operationId": "getCases",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "filters": {
+                        "items": {
+                          "properties": {
+                            "field": {
+                              "enum": [
+                                "case_id",
+                                "starred",
+                                "case_domain",
+                                "severity",
+                                "creation_time",
+                                "last_update_time",
+                                "modification_time",
+                                "status_progress",
+                                "assigned_user",
+                                "assigned_user_pretty",
+                                "asset_ids",
+                                "asset_names",
+                                "asset_classes",
+                                "asset_group_ids",
+                                "asset_categories",
+                                "asset_regions",
+                                "asset_providers",
+                                "asset_accounts",
+                                "asset_types",
+                                "asset_cloud_account_names",
+                                "asset_external_provider_ids",
+                                "asset_group_names",
+                                "asset_tags",
+                                "resolution_timer",
+                                "resolution_sla"
+                              ],
+                              "type": "string"
+                            },
+                            "operator": {
+                              "enum": [
+                                "in",
+                                "nin",
+                                "gte",
+                                "lte",
+                                "eq",
+                                "contains",
+                                "not_contains",
+                                "neq",
+                                "json_eq",
+                                "json_neq",
+                                "gt",
+                                "lt"
+                              ],
+                              "type": "string"
+                            },
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "items": {
+                                    "type": "integer"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "integer"
+                                },
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "properties": {
+                                    "key": {
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "key",
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                }
+                              ]
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "search_from": {
+                        "default": 0,
+                        "type": "integer"
+                      },
+                      "search_to": {
+                        "default": 100,
+                        "type": "integer"
+                      },
+                      "sort": {
+                        "properties": {
+                          "field": {
+                            "enum": [
+                              "case_id",
+                              "severity",
+                              "creation_time",
+                              "modification_time",
+                              "resolution_timer",
+                              "resolution_sla"
+                            ],
+                            "type": "string"
+                          },
+                          "keyword": {
+                            "enum": [
+                              "asc",
+                              "desc"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "reply": {
+                      "properties": {
+                        "DATA": {
+                          "items": {
+                            "$ref": "#/components/schemas/Case"
+                          },
+                          "type": "array"
+                        },
+                        "FILTER_COUNT": {
+                          "type": "integer"
+                        },
+                        "TOTAL_COUNT": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/public_api/v1/case/update/{case-id}": {
+      "post": {
+        "operationId": "updateCase",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case-id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-xdr-auth-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request_data": {
+                    "properties": {
+                      "update_data": {
+                        "$ref": "#/components/schemas/UpdateCase"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
+  "security": [],
+  "servers": [
+    {
+      "url": "https://api-yourfqdn"
+    }
+  ]
+}

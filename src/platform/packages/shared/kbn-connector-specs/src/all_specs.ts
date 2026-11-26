@@ -101,3 +101,4 @@ export { SSF } from './specs/ssf/ssf';
 export * from './specs/redis/redis';
 export * from './specs/sentinelone/sentinelone';
 export * from './specs/microsoft_sql_server/microsoft_sql_server';
+export * from './specs/cortex_xdr/cortex_xdr';

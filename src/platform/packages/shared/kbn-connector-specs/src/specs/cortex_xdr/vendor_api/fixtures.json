@@ -1,0 +1,300 @@
+{
+  "getActionStatus": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/actions/get_action_status"
+      }
+    ]
+  },
+  "getAuditLogs": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/audits/agents_reports"
+      },
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/audits/management_logs"
+      }
+    ],
+    "input": [
+      {
+        "logType": "management"
+      },
+      {
+        "logType": "agent"
+      }
+    ]
+  },
+  "getCaseDetails": {
+    "queries": [
+      {
+        "source": "cases",
+        "method": "POST",
+        "path": "/public_api/v1/case/search"
+      },
+      {
+        "source": "issues",
+        "method": "POST",
+        "path": "/public_api/v1/issue/search"
+      }
+    ],
+    "responses": [
+      {
+        "source": "cases",
+        "method": "POST",
+        "path": "/public_api/v1/case/search",
+        "status": 200,
+        "body": {
+          "reply": {
+            "TOTAL_COUNT": 1,
+            "FILTER_COUNT": 1,
+            "DATA": [
+              {
+                "case_id": 1234,
+                "case_name": "Suspicious process",
+                "issue_ids": [
+                  11,
+                  12
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "getCases": {
+    "queries": [
+      {
+        "source": "cases",
+        "method": "POST",
+        "path": "/public_api/v1/case/search"
+      }
+    ]
+  },
+  "getDeviceControlViolations": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/device_control/get_violations"
+      }
+    ]
+  },
+  "getEndpoints": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/endpoints/get_endpoint"
+      }
+    ]
+  },
+  "getIndicators": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/indicators/get"
+      }
+    ]
+  },
+  "getIssues": {
+    "queries": [
+      {
+        "source": "issues",
+        "method": "POST",
+        "path": "/public_api/v1/issue/search"
+      }
+    ]
+  },
+  "getPolicy": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/endpoints/get_policy"
+      }
+    ]
+  },
+  "getQuarantineStatus": {
+    "input": [
+      {
+        "endpointId": "aeec6a2cc92e46fab3b6f621722e9916",
+        "fileHash": "4e1243bd22c66e76c2ba9eddc1f91394e57f9f83e6d5b4b6e1e4e1fa3bcd0d5a"
+      }
+    ],
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/quarantine/status"
+      }
+    ]
+  },
+  "getRetrievedFileDetails": {
+    "input": [
+      {
+        "download": true
+      },
+      {
+        "download": false
+      }
+    ],
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/actions/file_retrieval_details"
+      },
+      {
+        "method": "POST",
+        "path": "/public_api/v1/download/{api_value}"
+      }
+    ],
+    "responses": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/actions/file_retrieval_details",
+        "status": 200,
+        "body": {
+          "reply": {
+            "data": {
+              "endpoint_ID": "/public_api/v1/download/a1b2c3d4e5"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "getRiskyUsers": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/public_api/v1/get_risky_users"
+      }
+    ]
+  },
+  "getScriptResults": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/scripts/get_script_execution_results"
+      }
+    ]
+  },
+  "getScripts": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/scripts/get_scripts"
+      }
+    ]
+  },
+  "getXqlResults": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/xql/get_query_results"
+      }
+    ]
+  },
+  "isolateEndpoint": {
+    "input": {
+      "endpointIds": [
+        "aeec6a2cc92e46fab3b6f621722e9916"
+      ]
+    },
+    "responses": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/endpoints/get_endpoint",
+        "status": 200,
+        "body": {
+          "reply": {
+            "total_count": 1,
+            "result_count": 1,
+            "endpoints": [
+              {
+                "endpoint_id": "aeec6a2cc92e46fab3b6f621722e9916",
+                "is_isolated": "AGENT_UNISOLATED"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "runXqlQuery": {
+    "queries": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/xql/start_xql_query"
+      }
+    ]
+  },
+  "unisolateEndpoint": {
+    "input": {
+      "endpointIds": [
+        "aeec6a2cc92e46fab3b6f621722e9916"
+      ]
+    },
+    "responses": [
+      {
+        "source": "platform",
+        "method": "POST",
+        "path": "/public_api/v1/endpoints/get_endpoint",
+        "status": 200,
+        "body": {
+          "reply": {
+            "total_count": 1,
+            "result_count": 1,
+            "endpoints": [
+              {
+                "endpoint_id": "aeec6a2cc92e46fab3b6f621722e9916",
+                "is_isolated": "AGENT_ISOLATED"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "updateCase": {
+    "input": [
+      {
+        "status": "In Progress",
+        "userSeverity": "high"
+      },
+      {
+        "status": "Resolved",
+        "resolveReason": "Resolved - Other",
+        "resolveComment": "Closed from Kibana"
+      }
+    ]
+  },
+  "updateIssue": {
+    "input": [
+      {
+        "status": "In Progress",
+        "severity": "HIGH"
+      },
+      {
+        "status": "Resolved",
+        "resolutionReason": "Resolved - False Positive",
+        "resolutionComment": "Benign"
+      }
+    ]
+  }
+}

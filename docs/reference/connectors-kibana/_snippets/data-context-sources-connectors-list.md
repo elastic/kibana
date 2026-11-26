@@ -91,6 +91,10 @@
 
 - [SentinelOne (v2)](/reference/connectors-kibana/sentinelone-v2-action-type.md): Find and isolate endpoints, triage and mitigate threats, run remote scripts, retrieve files, and manage blocklists, exclusions, indicators, firewall and detection rules.
 
+**Endpoint security**
+
+- [Cortex XDR](/reference/connectors-kibana/cortex-xdr-action-type.md): Search endpoints, cases, issues, and XQL data, and scan, tag, or collect files from endpoints.
+
 **Threat intelligence**
 
 - [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.

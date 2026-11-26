@@ -304,6 +304,41 @@ export const AZURE_SHARED_KEY_ACCOUNT_KEY_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const CORTEX_XDR_ADVANCED_KEY_AUTH_LABEL = i18n.translate(
+  'connectorSpecs.cortexXdrAdvancedKeyAuth.label',
+  {
+    defaultMessage: 'Cortex XDR Advanced API key',
+  }
+);
+
+export const CORTEX_XDR_ADVANCED_KEY_ID_LABEL = i18n.translate(
+  'connectorSpecs.cortexXdrAdvancedKeyAuth.apiKeyId.label',
+  {
+    defaultMessage: 'API key ID',
+  }
+);
+
+export const CORTEX_XDR_ADVANCED_KEY_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.cortexXdrAdvancedKeyAuth.apiKeyId.requiredMessage',
+  {
+    defaultMessage: 'Enter the API key ID.',
+  }
+);
+
+export const CORTEX_XDR_ADVANCED_KEY_LABEL = i18n.translate(
+  'connectorSpecs.cortexXdrAdvancedKeyAuth.apiKey.label',
+  {
+    defaultMessage: 'API key',
+  }
+);
+
+export const CORTEX_XDR_ADVANCED_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.cortexXdrAdvancedKeyAuth.apiKey.requiredMessage',
+  {
+    defaultMessage: 'Enter the Advanced API key.',
+  }
+);
+
 export const AWS_CREDENTIALS_LABEL = i18n.translate('connectorSpecs.awsCredentials.label', {
   defaultMessage: 'AWS Credentials',
 });
