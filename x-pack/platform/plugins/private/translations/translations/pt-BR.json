@@ -49805,7 +49805,6 @@
     "xpack.osquery.osquery_integration.fetchError": "Erro ao buscar integração do Osquery",
     "xpack.osquery.osquery_policies.fetchError": "Erro ao buscar políticas do osquery",
     "xpack.osquery.osquerySchemaLinkLabel": "Esquema do Osquery",
-    "xpack.osquery.pack.form.agentPoliciesFieldHelpText": "As consultas deste pack são agendadas para agentes nas políticas selecionadas.",
     "xpack.osquery.pack.form.agentPoliciesFieldLabel": "Políticas de agente agendadas (opcional)",
     "xpack.osquery.pack.form.cancelButtonLabel": "Cancelar",
     "xpack.osquery.pack.form.createPackButtonLabel": "Criar pacote",

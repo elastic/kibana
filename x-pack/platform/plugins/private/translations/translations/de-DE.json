@@ -49672,7 +49672,6 @@
     "xpack.osquery.osquery_integration.fetchError": "Fehler beim Abrufen der Osquery-Integration",
     "xpack.osquery.osquery_policies.fetchError": "Fehler beim Abrufen von Osquery-Richtlinien",
     "xpack.osquery.osquerySchemaLinkLabel": "Osquery-Schema",
-    "xpack.osquery.pack.form.agentPoliciesFieldHelpText": "Abfragen in diesem Paket sind für Agenten in den ausgewählten Richtlinien geplant.",
     "xpack.osquery.pack.form.agentPoliciesFieldLabel": "Richtlinien für geplante Agenten (optional)",
     "xpack.osquery.pack.form.cancelButtonLabel": "Abbrechen",
     "xpack.osquery.pack.form.createPackButtonLabel": "Paket erstellen",

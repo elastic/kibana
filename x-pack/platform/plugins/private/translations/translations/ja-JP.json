@@ -49790,7 +49790,6 @@
     "xpack.osquery.osquery_integration.fetchError": "osquery統合の取得中にエラーが発生しました",
     "xpack.osquery.osquery_policies.fetchError": "osqueryポリシーの取得中にエラーが発生しました",
     "xpack.osquery.osquerySchemaLinkLabel": "Osqueryスキーマ",
-    "xpack.osquery.pack.form.agentPoliciesFieldHelpText": "このパックのクエリーは、選択したポリシーのエージェントに対してスケジュールされています。",
     "xpack.osquery.pack.form.agentPoliciesFieldLabel": "スケジュールされたエージェントポリシー（任意）",
     "xpack.osquery.pack.form.cancelButtonLabel": "キャンセル",
     "xpack.osquery.pack.form.createPackButtonLabel": "パックを作成",

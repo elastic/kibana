@@ -49774,7 +49774,6 @@
     "xpack.osquery.osquery_integration.fetchError": "提取 osquery 集成时出错",
     "xpack.osquery.osquery_policies.fetchError": "提取 osquery 策略时出错",
     "xpack.osquery.osquerySchemaLinkLabel": "Osquery 架构",
-    "xpack.osquery.pack.form.agentPoliciesFieldHelpText": "计划对选定策略中的代理执行此包中的查询。",
     "xpack.osquery.pack.form.agentPoliciesFieldLabel": "计划的代理策略（可选）",
     "xpack.osquery.pack.form.cancelButtonLabel": "取消",
     "xpack.osquery.pack.form.createPackButtonLabel": "创建包",

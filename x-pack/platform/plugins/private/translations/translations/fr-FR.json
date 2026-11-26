@@ -49576,7 +49576,6 @@
     "xpack.osquery.osquery_integration.fetchError": "Erreur lors de la récupération de l'intégration osquery",
     "xpack.osquery.osquery_policies.fetchError": "Erreur lors de la récupération des politiques osquery",
     "xpack.osquery.osquerySchemaLinkLabel": "Schéma Osquery",
-    "xpack.osquery.pack.form.agentPoliciesFieldHelpText": "Les requêtes de ce pack sont planifiées pour les agents des politiques sélectionnées.",
     "xpack.osquery.pack.form.agentPoliciesFieldLabel": "Politiques d'agent planifiées (facultatif)",
     "xpack.osquery.pack.form.cancelButtonLabel": "Annuler",
     "xpack.osquery.pack.form.createPackButtonLabel": "Créer un pack",
