@@ -159,13 +159,15 @@ export const buildActionResultsQuery = ({
                     },
                   }
                 : {}),
+              // `exists` matches both the legacy `error` text field and the ECS `error.message`
+              // object field, so responses from any osquery_manager package version are counted.
               responses: {
-                terms: {
-                  script: {
-                    lang: 'painless',
-                    source:
-                      "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                  } as const,
+                filters: {
+                  keyed: false,
+                  filters: {
+                    success: { bool: { must_not: { exists: { field: 'error' } } } },
+                    error: { exists: { field: 'error' } },
+                  },
                 },
               },
             },

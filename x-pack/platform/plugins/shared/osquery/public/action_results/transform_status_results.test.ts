@@ -13,6 +13,7 @@ const createEdge = (
   overrides: {
     completedAt?: string;
     errorKeyword?: string;
+    errorMessage?: string;
     errorValue?: string;
     errorSkipped?: string;
     count?: number;
@@ -33,6 +34,7 @@ const createEdge = (
     ...(overrides.completedAt ? { completed_at: [overrides.completedAt] } : {}),
     ...(overrides.errorKeyword ? { 'error.keyword': [overrides.errorKeyword] } : {}),
     ...(overrides.errorValue ? { error: [overrides.errorValue] } : {}),
+    ...(overrides.errorMessage ? { 'error.message': [overrides.errorMessage] } : {}),
     ...(overrides.errorSkipped ? { 'error.skipped': [overrides.errorSkipped] } : {}),
     ...(overrides.agentName ? { 'agent.name': [overrides.agentName] } : {}),
     ...(overrides.hostName ? { 'host.name': [overrides.hostName] } : {}),
@@ -61,12 +63,29 @@ describe('transformStatusEdgesToRecords', () => {
     expect(records[0].id).toBe('result-agent-1');
   });
 
-  it('should return "error" status when error.keyword is present', () => {
+  it('should return "error" status when the legacy error text field is present', () => {
     const edges = [
       createEdge('agent-1', {
         completedAt: '2025-01-20T00:00:00Z',
         errorKeyword: 'Query failed',
         errorValue: 'Query failed',
+      }),
+    ];
+    const records = transformStatusEdgesToRecords({
+      edges,
+      agentNameMap,
+      expired: false,
+    });
+
+    expect(records[0].flattened.status).toBe('error');
+    expect(records[0].flattened.error).toBe('Query failed');
+  });
+
+  it('should return "error" status when ECS error.message is present', () => {
+    const edges = [
+      createEdge('agent-1', {
+        completedAt: '2025-01-20T00:00:00Z',
+        errorMessage: 'Query failed',
       }),
     ];
     const records = transformStatusEdgesToRecords({

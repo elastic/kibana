@@ -13,6 +13,7 @@ const createEdge = (
   overrides: {
     completedAt?: string;
     errorKeyword?: string;
+    errorMessage?: string;
     errorValue?: string;
     errorSkipped?: string;
   } = {}
@@ -26,6 +27,7 @@ const createEdge = (
     ...(overrides.completedAt ? { completed_at: [overrides.completedAt] } : {}),
     ...(overrides.errorKeyword ? { 'error.keyword': [overrides.errorKeyword] } : {}),
     ...(overrides.errorValue ? { error: [overrides.errorValue] } : {}),
+    ...(overrides.errorMessage ? { 'error.message': [overrides.errorMessage] } : {}),
     ...(overrides.errorSkipped ? { 'error.skipped': [overrides.errorSkipped] } : {}),
   },
 });
@@ -41,6 +43,13 @@ describe('enrichEdgesWithErrors', () => {
   it('should return edges unchanged when they already have error field', () => {
     const edges = [createEdge('agent-1', { errorValue: 'existing error' })];
     const result = enrichEdgesWithErrors(edges, 'another error', false);
+
+    expect(result).toEqual(edges);
+  });
+
+  it('should return edges unchanged when they already have an ECS error.message field', () => {
+    const edges = [createEdge('agent-1', { errorMessage: 'existing error' })];
+    const result = enrichEdgesWithErrors(edges, undefined, true);
 
     expect(result).toEqual(edges);
   });
@@ -64,7 +73,6 @@ describe('enrichEdgesWithErrors', () => {
     const edges = [createEdge('agent-1')];
     const result = enrichEdgesWithErrors(edges, undefined, true);
 
-    expect(result[0].fields?.['error.keyword']).toEqual(['The action request timed out.']);
     expect(result[0].fields?.error).toEqual(['The action request timed out.']);
   });
 
@@ -101,7 +109,7 @@ describe('enrichEdgesWithErrors', () => {
     // First edge untouched (has completed_at)
     expect(result[0]).toBe(edges[0]);
     // Second edge enriched with expired
-    expect(result[1].fields?.['error.keyword']).toEqual(['The action request timed out.']);
+    expect(result[1].fields?.error).toEqual(['The action request timed out.']);
   });
 
   it('should not add any error fields when no error and not expired', () => {

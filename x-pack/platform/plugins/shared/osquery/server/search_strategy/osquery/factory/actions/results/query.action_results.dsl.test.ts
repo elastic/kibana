@@ -89,11 +89,11 @@ describe('buildActionResultsQuery', () => {
                     },
                   },
                   responses: {
-                    terms: {
-                      script: {
-                        lang: 'painless',
-                        source:
-                          "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+                    filters: {
+                      keyed: false,
+                      filters: {
+                        success: { bool: { must_not: { exists: { field: 'error' } } } },
+                        error: { exists: { field: 'error' } },
                       },
                     },
                   },
@@ -366,11 +366,11 @@ describe('buildActionResultsQuery', () => {
                     },
                   },
                   responses: {
-                    terms: {
-                      script: {
-                        lang: 'painless',
-                        source:
-                          "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+                    filters: {
+                      keyed: false,
+                      filters: {
+                        success: { bool: { must_not: { exists: { field: 'error' } } } },
+                        error: { exists: { field: 'error' } },
                       },
                     },
                   },
