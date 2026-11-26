@@ -43,11 +43,15 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   );
   const { modal: startMigrationModal, showModal: showStartMigrationModal } =
     useStartWorkflowsMigrationModal({ migrationStats, onStartMigrationWithSettings });
-  // A stopped migration is resumed with the connector it was running with, no need to pick one again
-  const onResumeMigration = useCallback(
-    () => startMigration(migrationStats),
-    [migrationStats, startMigration]
-  );
+  // A stopped migration is resumed with the connector it was running with, no need to pick one again.
+  // Without a saved connector the service falls back to the default one.
+  const onResumeMigration = useCallback(() => {
+    const savedConnectorId = migrationStats.last_execution?.connector_id;
+    startMigration(
+      migrationStats,
+      savedConnectorId ? { connectorId: savedConnectorId } : undefined
+    );
+  }, [migrationStats, startMigration]);
 
   return (
     <>

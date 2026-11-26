@@ -137,6 +137,37 @@ describe('MigrationReadyPanel (workflows)', () => {
     expect(screen.queryByTestId('startMigrationModal')).not.toBeInTheDocument();
   });
 
+  it('should resume a stopped migration with the connector it was running with', async () => {
+    renderPanel(
+      getStats({
+        status: SiemMigrationTaskStatus.STOPPED,
+        last_execution: { connector_id: 'saved-connector' },
+      })
+    );
+
+    fireEvent.click(screen.getByTestId('startMigrationButton'));
+
+    await waitFor(() =>
+      expect(startWorkflowMigration).toHaveBeenCalledWith({
+        migrationId: 'migration-1',
+        settings: { connectorId: 'saved-connector' },
+      })
+    );
+  });
+
+  it('should resume a stopped migration without a saved connector with the default one', async () => {
+    renderPanel(getStats({ status: SiemMigrationTaskStatus.STOPPED }));
+
+    fireEvent.click(screen.getByTestId('startMigrationButton'));
+
+    await waitFor(() =>
+      expect(startWorkflowMigration).toHaveBeenCalledWith({
+        migrationId: 'migration-1',
+        settings: undefined,
+      })
+    );
+  });
+
   it('should offer to resume a stopped migration', () => {
     renderPanel(getStats({ status: SiemMigrationTaskStatus.STOPPED }));
 
