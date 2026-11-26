@@ -64,6 +64,18 @@ Cloud environment
     - **US Government GCC High**: Microsoft 365 Government GCC High cloud
     - **US Government DoD**: Microsoft 365 Government DoD cloud
 
+:::{note}
+On self-managed Kibana, both the token endpoint host and the Graph API host must be added to `xpack.actions.allowedHosts`.
+
+| Cloud | Token host | Graph API host |
+|---|---|---|
+| Commercial | `login.microsoftonline.com` | `graph.microsoft.com` |
+| GCC High | `login.microsoftonline.us` | `graph.microsoft.us` |
+| DoD | `login.microsoftonline.us` | `dod-graph.microsoft.us` |
+
+On Elastic Cloud (hosted or serverless) these hosts are pre-allowed and no extra configuration is needed.
+:::
+
 ### Authentication: Client secret (OAuth 2.0 Client Credentials) [microsoft-defender-xdr-client-secret-auth]
 
 Configure the following fields:
@@ -172,7 +184,7 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 :   Retrieves full details for a single custom detection rule by its numeric ID, including its KQL query, schedule, alert template, and trigger settings.
 
 `createDetectionRule` _(API only)_
-:   Creates a new custom detection rule that runs a KQL query on a schedule and generates alerts when the result count satisfies the trigger condition. The query must project at least one of: `DeviceId`, `AccountObjectId`, `AccountSid`, `AccountUpn`, `AccountName`, `MailboxAddress`, `FileName`, `SHA256`, `IPAddress`, `URL`. The `alertTemplate` object requires a `title` and `severity` and optionally accepts `description`, `recommendedActions`, and `tactics`. `tactics` is an array of tactic objects, each with a `tactic` string (e.g. `"Execution"`) and an optional `techniques` array; each technique has a `technique` string (e.g. `"T1059"`) and an optional `subTechniques` array of strings. The `period` must be one of `PT1H`, `PT3H`, `PT12H`, `P1D`, or `P7D`.
+:   Creates a new custom detection rule that runs a KQL query on a schedule and generates alerts when the result count satisfies the trigger condition. The query must project at least one of: `DeviceId`, `AccountObjectId`, `AccountSid`, `AccountUpn`, `AccountName`, `MailboxAddress`, `FileName`, `SHA256`, `IPAddress`, `URL`. The `alertTemplate` object requires a `title` and `severity` and optionally accepts `description`, `recommendedActions`, and `tactics`. `tactics` is an array of tactic objects, each with a `tactic` string (e.g. `"Execution"`) and an optional `techniques` array; each technique has a `technique` string (e.g. `"T1059"`) and an optional `subTechniques` array of strings. The `period` must be one of `PT1H`, `PT3H`, `PT12H`, `P1D`, or `P7D`. The optional `status` field controls whether the rule runs immediately after creation; it defaults to `'enabled'` when omitted — pass `'disabled'` to create an inactive rule that you can enable later.
 
 `updateDetectionRule` _(API only)_
 :   Updates an existing custom detection rule — modify `displayName`, enable/disable via `status` (`enabled` or `disabled`), change the KQL `queryText`, adjust the `period`, or update the `alertTemplate`. Provide only the fields you want to change.
