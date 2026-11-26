@@ -93,6 +93,7 @@ export const APP_INSTALLATION_ID = 'app.installation.id';
 /** Span name in the OTel traces indices; events are named in `event_name` instead. */
 export const OTEL_SPAN_NAME = 'name';
 export const OTEL_SPAN_ID = 'span_id';
+export const OTEL_TRACE_ID = 'trace_id';
 
 export const WEB_VITAL_NAME = 'browser.web_vital.name';
 export const WEB_VITAL_VALUE = 'browser.web_vital.value';

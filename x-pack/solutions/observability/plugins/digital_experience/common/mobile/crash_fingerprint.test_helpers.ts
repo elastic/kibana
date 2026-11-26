@@ -10,6 +10,7 @@ import {
   CRASH_FRAME_RULES,
   IOS_REPORT_MARKER,
   JAVASCRIPT_EXCEPTION_SUFFIX,
+  crashFrameRuleFlags,
   type CrashFrameRule,
   type CrashKind,
 } from './crash_fingerprint';
@@ -23,16 +24,16 @@ export interface CrashFields {
 
 const applyRules = (input: string, kind: CrashKind): string =>
   CRASH_FRAME_RULES[kind].reduce(
-    (text: string, { pattern, replacement, dotAll }: CrashFrameRule) =>
-      text.replace(new RegExp(pattern, dotAll ? 'gs' : 'g'), replacement),
+    (text: string, rule: CrashFrameRule) =>
+      text.replace(new RegExp(rule.pattern, `g${crashFrameRuleFlags(rule)}`), rule.replacement),
     input
   );
 
-/** The frames `crashFrames` computes in ES|QL, computed in JavaScript from the same rules. */
 /** Whether `isIosReport` holds for a crash, computed in JavaScript. */
 export const isIosReportOf = ({ stacktrace }: CrashFields): boolean =>
   stacktrace?.startsWith(IOS_REPORT_MARKER) ?? false;
 
+/** The frames `crashFrames` computes in ES|QL, computed in JavaScript from the same rules. */
 export const crashFramesOf = ({ type, message, stacktrace }: CrashFields): string | null => {
   if (type?.endsWith(JAVASCRIPT_EXCEPTION_SUFFIX)) {
     return message === undefined ? null : applyRules(message, 'javascript');
@@ -99,6 +100,20 @@ const jvmTrace = (type: string, message: string, line: number): string =>
     '\tat android.os.Handler.handleCallback(Handler.java:958)',
   ].join('\n');
 
+/** An Android crash whose cause's message has an object hash, and that shares frames with it. */
+const jvmTraceWithCause = ({ fragment, shared }: { fragment: string; shared: number }): string =>
+  [
+    'java.lang.RuntimeException: Unable to resume activity {com.example.app/MainActivity}',
+    '\tat android.app.ActivityThread.performResumeActivity(ActivityThread.java:5005)',
+    '\tat android.os.Handler.handleCallback(Handler.java:958)',
+    `Caused by: java.lang.IllegalStateException: Fragment HomeFragment{${fragment}} not attached`,
+    '\tat androidx.fragment.app.Fragment.requireContext(Fragment.java:972)',
+    '\tat com.example.app.ui.HomeFragment.onResume(HomeFragment.kt:41)',
+    `\t... ${shared} more`,
+    '\tSuppressed: java.io.IOException: Stream closed at offset 512',
+    '\t\tat java.io.BufferedInputStream.read(BufferedInputStream.java:351)',
+  ].join('\n');
+
 const javascriptCrash = (message: string): CrashFields => ({
   type: 'com.facebook.react.common.JavascriptException',
   message,
@@ -121,6 +136,14 @@ export const CRASH_FINGERPRINT_CASES = {
   jvmOtherType: {
     type: 'java.lang.IllegalStateException',
     stacktrace: jvmTrace('java.lang.NullPointerException', 'TrackRecorder is null', 88),
+  },
+  jvmCauseA: {
+    type: 'java.lang.RuntimeException',
+    stacktrace: jvmTraceWithCause({ fragment: '9f2c1d', shared: 12 }),
+  },
+  jvmCauseB: {
+    type: 'java.lang.RuntimeException',
+    stacktrace: jvmTraceWithCause({ fragment: '4b77e0', shared: 14 }),
   },
   iosLaunchA: {
     type: 'SIGSEGV',
@@ -154,10 +177,18 @@ export const CRASH_FINGERPRINT_CASES = {
   javascriptMap: javascriptCrash(
     "TypeError: Cannot read property 'map' of undefined, js engine: hermes"
   ),
-  // Errors that mention an iOS report's line: still read as what they are, not as iOS reports.
+  // Errors that mention an iOS report's lines: still read as what they are, not as iOS reports.
   jvmMentioningCrashed: {
     type: 'java.lang.IllegalStateException',
     stacktrace: jvmTrace('java.lang.IllegalStateException', 'Thread 0 Crashed: in native code', 88),
+  },
+  jvmMentioningIncident: {
+    type: 'java.lang.IllegalStateException',
+    stacktrace: jvmTrace(
+      'java.lang.IllegalStateException',
+      'Incident Identifier: 45090074-A604-C25B-087F-5EDD13FDEECB',
+      88
+    ),
   },
   javascriptMentioningCrashed: javascriptCrash('Error: Thread 0 Crashed: in a native module'),
   noStacktrace: { type: 'SIGKILL' },
@@ -169,6 +200,8 @@ export const EXPECTED_CRASH_FINGERPRINTS: Record<keyof typeof CRASH_FINGERPRINT_
   jvmLine88: '1335db39554a30b03c0078c2c345bc38866a546bbb2aa0ea306384f6d3069fd4',
   jvmLine91: '1335db39554a30b03c0078c2c345bc38866a546bbb2aa0ea306384f6d3069fd4',
   jvmOtherType: '7a04469118d128cdbc214032c282877dad105bba1ed21e165fdaf7dbb4d6884c',
+  jvmCauseA: '544621df180c7f6126bcfdbfd1ac73ad3d7ec84559bbb0941ac9bb0695861aa7',
+  jvmCauseB: '544621df180c7f6126bcfdbfd1ac73ad3d7ec84559bbb0941ac9bb0695861aa7',
   iosLaunchA: '2ff3f68c306a93625ec7cfe1d2db4587704a34b76bbfa9ed31afd8f69e8a0014',
   iosLaunchB: '2ff3f68c306a93625ec7cfe1d2db4587704a34b76bbfa9ed31afd8f69e8a0014',
   iosExceptionA: 'b514cfbd8ddc65d16c3b79fb02481d43247ac3fb6860d3ecdb3058af88ecf709',
@@ -178,6 +211,7 @@ export const EXPECTED_CRASH_FINGERPRINTS: Record<keyof typeof CRASH_FINGERPRINT_
   javascriptIban: '9cd1dde79ac088d104d51199ed83de21adee4505e4618b2df6e9221aa9bea494',
   javascriptMap: '5637ee732bc0a49b4e67e4e8fc8ce33e76ffdf371129843438e41c46229f72fb',
   jvmMentioningCrashed: '7a04469118d128cdbc214032c282877dad105bba1ed21e165fdaf7dbb4d6884c',
+  jvmMentioningIncident: '7a04469118d128cdbc214032c282877dad105bba1ed21e165fdaf7dbb4d6884c',
   javascriptMentioningCrashed: '911c7fe74e02926a1dd689a73b2dd2635fad699bb11aa8c2af2fe929d4693390',
   noStacktrace: '3005496ec4d1df64b0b8dd7156f3dad8f0620a373c2670c1a7f5ac1888d1eaed',
   stored: 'ingest-fingerprint',

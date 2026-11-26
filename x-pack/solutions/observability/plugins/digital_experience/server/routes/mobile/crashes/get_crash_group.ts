@@ -19,22 +19,20 @@ import {
   type CrashBreakdownRow,
   type LatestCrashRow,
 } from '../../../../common/mobile/crash_groups';
-import { RESULT_COLUMNS } from '../../../../common/mobile/fields';
+import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../../common/mobile/fields';
 import type { MobilePanelFilters } from '../../../../common/mobile/filters';
 import {
   SESSION_EVENTS_BEFORE_CRASH,
   sessionEventsBefore,
   type SessionEventRow,
 } from '../../../../common/mobile/session_events';
-import { SESSIONS_MAX_SESSION_HOURS, type SessionTimelineEvent } from '../../../../common/sessions';
+import { SESSIONS_MAX_SESSION_MS, type SessionTimelineEvent } from '../../../../common/sessions';
 import type {
   CrashBreakdown,
   MobileCrash,
   MobileCrashGroupDetailResponse,
 } from '../../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../../lib/esql';
-
-const MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
 
 export interface GetCrashGroupParams {
   esClient: TracedElasticsearchClient;
@@ -75,8 +73,8 @@ const toTimelineEvent = (row: SessionEventRow, firstMs: number): SessionTimeline
   // A browser's rage clicks; mobile taps are listed one by one.
   clickCount: null,
   stacktrace: row[RESULT_COLUMNS.stacktrace] ?? null,
-  traceId: row[RESULT_COLUMNS.traceId] ?? null,
-  spanId: row[RESULT_COLUMNS.spanId] ?? null,
+  traceId: row[MOBILE_FIELDS.traceId] ?? null,
+  spanId: row[MOBILE_FIELDS.spanId] ?? null,
   statusCode: row[RESULT_COLUMNS.statusCode] ?? null,
   durationMs: row[RESULT_COLUMNS.durationMs] ?? null,
 });
@@ -100,7 +98,7 @@ const getEventsBefore = async (
       before: time,
       limit: SESSION_EVENTS_BEFORE_CRASH,
     }),
-    timeFilter(crashMs - MAX_SESSION_MS, crashMs, undefined)
+    timeFilter(crashMs - SESSIONS_MAX_SESSION_MS, crashMs, undefined)
   );
   const oldestFirst = [...rows].reverse();
   const firstMs = oldestFirst.length > 0 ? Date.parse(oldestFirst[0]['@timestamp']) : 0;

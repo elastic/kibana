@@ -21,7 +21,10 @@ import { mobilePanelQuery, type MobilePanelFilters } from './filters';
  */
 export const CRASH_DELAY_MS = MOBILE_MAX_CRASH_DELAY_HOURS * 60 * 60 * 1000;
 
-/** How far back from the end of the range, at least, a group is looked for in older releases. */
+/**
+ * How far back from the end of the range, at least, a group's first crash is looked for, and the
+ * older releases it crashed on.
+ */
 export const CRASH_NEW_LOOKBACK_DAYS = 30;
 
 export interface CrashEventsParams extends MobilePanelFilters {
@@ -72,8 +75,8 @@ export const withCrashGroupStats = (query: ComposerQuery): ComposerQuery => {
     .pipe`LIMIT ${ERROR_GROUPS_ROWS}`;
 };
 
-/** The releases each of `fingerprints` crashed on. */
-export const withCrashGroupReleases = (
+/** The releases each of `fingerprints` crashed on, and its first crash. */
+export const withCrashGroupHistory = (
   query: ComposerQuery,
   fingerprints: readonly string[]
 ): ComposerQuery => {
@@ -84,13 +87,15 @@ export const withCrashGroupReleases = (
       values: fingerprints.map((value) => Builder.expression.literal.string(value)),
     }),
   ]);
-  return query.pipe`WHERE ${isListed}`.pipe`STATS ${resultColumn(
-    'releases'
-  )} = VALUES(${mobileColumn('serviceVersion')})
-      BY ${fingerprint}`.pipe`LIMIT ${fingerprints.length}`;
+  const crashTime = resultColumn('crashTime');
+  return query.pipe`WHERE ${isListed}`.pipe`STATS
+      ${resultColumn('releases')} = VALUES(${mobileColumn('serviceVersion')}),
+      ${resultColumn('firstSeen')} = MIN(${crashTime}),
+      ${resultColumn('firstRelease')} = FIRST(${mobileColumn('serviceVersion')}, ${crashTime})
+    BY ${fingerprint}`.pipe`LIMIT ${fingerprints.length}`;
 };
 
-/** The row of `withCrashGroupStats`. */
+/** The row of `withCrashGroupStats`: the first crash is the range's. */
 export interface CrashGroupRow {
   [RESULT_COLUMNS.fingerprint]: string;
   [RESULT_COLUMNS.users]: number;
@@ -106,10 +111,12 @@ export interface CrashGroupRow {
   [RESULT_COLUMNS.iosReports]?: number | null;
 }
 
-/** The row of `withCrashGroupReleases`: one release is a string, several an array. */
-export interface CrashGroupReleasesRow {
+/** The row of `withCrashGroupHistory`: one release is a string, several an array. */
+export interface CrashGroupHistoryRow {
   [RESULT_COLUMNS.fingerprint]: string;
   [RESULT_COLUMNS.releases]?: string | string[] | null;
+  [RESULT_COLUMNS.firstSeen]: string;
+  [RESULT_COLUMNS.firstRelease]?: string | null;
 }
 
 /** The crashes of one group. */

@@ -16,7 +16,7 @@ import {
 } from '../otel_data';
 import type { MobileSessionEventKind } from '../sessions';
 import { mobileDocuments } from './documents';
-import type { RESULT_COLUMNS } from './fields';
+import type { MOBILE_FIELDS, RESULT_COLUMNS } from './fields';
 import { inValues, mobileColumn, resultColumn } from './fields';
 
 /** Events "Before the crash" lists. */
@@ -116,8 +116,8 @@ export const sessionEventsBefore = ({
     resultColumn('page'),
     resultColumn('detail'),
     resultColumn('stacktrace'),
-    resultColumn('traceId'),
-    resultColumn('spanId'),
+    mobileColumn('traceId'),
+    mobileColumn('spanId'),
     resultColumn('statusCode'),
     resultColumn('durationMs'),
   ]}`;
@@ -131,8 +131,8 @@ export interface SessionEventRow {
   [RESULT_COLUMNS.page]?: string | null;
   [RESULT_COLUMNS.detail]?: string | null;
   [RESULT_COLUMNS.stacktrace]?: string | null;
-  [RESULT_COLUMNS.traceId]?: string | null;
-  [RESULT_COLUMNS.spanId]?: string | null;
+  [MOBILE_FIELDS.traceId]?: string | null;
+  [MOBILE_FIELDS.spanId]?: string | null;
   [RESULT_COLUMNS.statusCode]?: number | null;
   [RESULT_COLUMNS.durationMs]?: number | null;
 }

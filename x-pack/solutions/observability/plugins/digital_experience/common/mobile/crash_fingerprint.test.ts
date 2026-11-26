@@ -36,6 +36,22 @@ describe('crash fingerprint rules', () => {
     );
   });
 
+  it('keeps only the type of a cause or suppressed exception, and not how many frames it shares', () => {
+    expect(fingerprintOf('jvmCauseA')).toBe(fingerprintOf('jvmCauseB'));
+    expect(crashFramesOf(CRASH_FINGERPRINT_CASES.jvmCauseA)).toBe(
+      [
+        '\tat android.app.ActivityThread.performResumeActivity(ActivityThread.java)',
+        '\tat android.os.Handler.handleCallback(Handler.java)',
+        'Caused by: java.lang.IllegalStateException',
+        '\tat androidx.fragment.app.Fragment.requireContext(Fragment.java)',
+        '\tat com.example.app.ui.HomeFragment.onResume(HomeFragment.kt)',
+        '\t... more',
+        '\tSuppressed: java.io.IOException',
+        '\t\tat java.io.BufferedInputStream.read(BufferedInputStream.java)',
+      ].join('\n')
+    );
+  });
+
   it('splits the same frames of another exception type', () => {
     expect(fingerprintOf('jvmOtherType')).not.toBe(fingerprintOf('jvmLine88'));
   });
@@ -65,9 +81,11 @@ describe('crash fingerprint rules', () => {
   it("tells an iOS report by how it starts, not by a line an error's message can repeat", () => {
     expect(isIosReportOf(CRASH_FINGERPRINT_CASES.iosLaunchA)).toBe(true);
     expect(isIosReportOf(CRASH_FINGERPRINT_CASES.jvmMentioningCrashed)).toBe(false);
+    expect(isIosReportOf(CRASH_FINGERPRINT_CASES.jvmMentioningIncident)).toBe(false);
     expect(isIosReportOf(CRASH_FINGERPRINT_CASES.javascriptMentioningCrashed)).toBe(false);
     // Read with the JVM rules: the message line goes, so it groups with the same type's frames.
     expect(fingerprintOf('jvmMentioningCrashed')).toBe(fingerprintOf('jvmOtherType'));
+    expect(fingerprintOf('jvmMentioningIncident')).toBe(fingerprintOf('jvmOtherType'));
   });
 
   it('keeps the stored fingerprint over the computed one', () => {
@@ -86,5 +104,9 @@ describe('crashFingerprint', () => {
     expect(printed).toContain('`attributes.exception.type` LIKE "*JavascriptException"');
     expect(printed).toContain('REPLACE(`attributes.exception.message`, "(?s)\\\\n.*", "")');
     expect(printed).toContain('`attributes.exception.stacktrace` LIKE "Incident Identifier:*"');
+  });
+
+  it('passes a rule its flags inline, as Java takes them', () => {
+    expect(printed).toContain('"(?m)^([ \\\\t]*(?:Caused by|Suppressed): [^:\\\\n]+):.*$", "$1"');
   });
 });

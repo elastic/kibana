@@ -56,7 +56,7 @@ export function MobileCrashesTab({
   /** Fetched by the page: the filter options and the environments. */
   kpisState: MobileKpisState;
 }) {
-  const { response, isLoading, error, refresh } = useMobileCrashGroups(serviceName);
+  const { response, lastResponse, isLoading, error, refresh } = useMobileCrashGroups(serviceName);
   const { isFiltered, clearFiltersButton } = useMobileFilters();
   // In the URL, so a reload or a shared link reopens the group's detail.
   const { value: crashGroup, setValue: setCrashGroup } = useQueryParam('crashGroup');
@@ -122,7 +122,8 @@ export function MobileCrashesTab({
         <MobileCrashFlyout
           serviceName={serviceName}
           fingerprint={crashGroup}
-          group={response?.crashGroups.find(({ fingerprint }) => fingerprint === crashGroup)}
+          // The last list, so the header keeps its counts while the list refreshes.
+          group={lastResponse?.crashGroups.find(({ fingerprint }) => fingerprint === crashGroup)}
           onClose={() => setCrashGroup(undefined)}
         />
       )}

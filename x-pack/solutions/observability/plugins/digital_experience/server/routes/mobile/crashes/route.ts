@@ -6,8 +6,6 @@
  */
 
 import { lazySchema } from '@kbn/zod/v4';
-import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../../common/otel_data';
 import type {
   MobileCrashGroupDetailResponse,
   MobileCrashGroupsResponse,
@@ -17,12 +15,9 @@ import {
   APPLICATION_TAB_ROUTE_SECURITY,
   toApplicationSearch,
 } from '../../application_tab_route';
-import { hasPartialReadAccess } from '../../applications/get_partial_access';
-import {
-  createDigitalExperienceServerRoute,
-  type DigitalExperienceRouteHandlerResources,
-} from '../../create_digital_experience_server_route';
+import { createDigitalExperienceServerRoute } from '../../create_digital_experience_server_route';
 import { mobileCrashGroupParams, mobileFiltersParams } from '../mobile_params';
+import { isMobilePartialRead } from '../partial_read';
 import { getCrashGroup } from './get_crash_group';
 import { getCrashGroups } from './get_crash_groups';
 
@@ -30,29 +25,6 @@ export const MOBILE_CRASH_GROUPS_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/crash_groups';
 export const MOBILE_CRASH_GROUP_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/crash_groups/{fingerprint}';
-
-/**
- * Whether the user can't read every OTel logs and traces index. Both routes read both: crashes are
- * log records, while the newest release and the session before a crash also come from spans.
- */
-const isPartialRead = async ({
-  context,
-  request,
-  logger,
-}: Pick<
-  DigitalExperienceRouteHandlerResources,
-  'context' | 'request' | 'logger'
->): Promise<boolean> => {
-  const { elasticsearch } = await context.core;
-  // Elasticsearch skips the indices the user can't read, so the counts would look complete.
-  return hasPartialReadAccess({
-    esClient: elasticsearch.client.asCurrentUser,
-    internalEsClient: elasticsearch.client.asInternalUser,
-    getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
-    signal: getRequestAbortedSignal(request.events.aborted$),
-    logger,
-  });
-};
 
 const listRoute = createDigitalExperienceServerRoute({
   endpoint: MOBILE_CRASH_GROUPS_ENDPOINT,
@@ -75,7 +47,7 @@ const listRoute = createDigitalExperienceServerRoute({
         end,
         environment,
       }),
-      isPartialRead({ context, request, logger }),
+      isMobilePartialRead({ context, request, logger }),
     ]);
     return { crashGroups, isPartial };
   },
@@ -108,11 +80,15 @@ const detailRoute = createDigitalExperienceServerRoute({
         end,
         environment,
       }),
-      isPartialRead({ context, request, logger }),
+      isMobilePartialRead({ context, request, logger }),
     ]);
     return { ...detail, isPartial };
   },
 });
 
-/** The Crashes tab of the mobile application page: its groups, and a group's detail. */
+/**
+ * The Crashes tab of the mobile application page: its groups, and a group's detail. Both read the
+ * logs and the traces: crashes are log records, while the newest release and the session before a
+ * crash also come from spans.
+ */
 export const mobileCrashesRouteRepository = { ...listRoute, ...detailRoute };

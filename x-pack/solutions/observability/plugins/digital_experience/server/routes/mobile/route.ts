@@ -6,19 +6,17 @@
  */
 
 import { lazySchema } from '@kbn/zod/v4';
-import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
 import type { MobileKpisResponse, MobileReleasesResponse } from '../../../common/types/mobile';
 import {
   APPLICATION_TAB_ROUTE_OPTIONS,
   APPLICATION_TAB_ROUTE_SECURITY,
   toApplicationSearch,
 } from '../application_tab_route';
-import { hasPartialReadAccess } from '../applications/get_partial_access';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import { getMobileKpis } from './get_mobile_kpis';
 import { getMobileReleases } from './get_mobile_releases';
 import { mobileFiltersParams, mobileSeriesParams } from './mobile_params';
+import { isMobilePartialRead } from './partial_read';
 
 export const MOBILE_KPIS_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/kpis';
@@ -64,8 +62,6 @@ const kpisRoute = createDigitalExperienceServerRoute({
       request,
       logger,
     });
-    const { elasticsearch } = await context.core;
-    // Elasticsearch skips the indices the user can't read, so the counts would look complete.
     const [kpis, isPartial] = await Promise.all([
       getMobileKpis({
         esClient,
@@ -74,13 +70,7 @@ const kpisRoute = createDigitalExperienceServerRoute({
         end,
         environment,
       }),
-      hasPartialReadAccess({
-        esClient: elasticsearch.client.asCurrentUser,
-        internalEsClient: elasticsearch.client.asInternalUser,
-        getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
-        signal: getRequestAbortedSignal(request.events.aborted$),
-        logger,
-      }),
+      isMobilePartialRead({ context, request, logger }),
     ]);
     return { ...kpis, isPartial };
   },

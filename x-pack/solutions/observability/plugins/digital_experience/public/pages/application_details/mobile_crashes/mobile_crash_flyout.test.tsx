@@ -236,6 +236,13 @@ describe('MobileCrashFlyout', () => {
     expect(screen.getByTestId('digitalExperienceMobileCrashPartialAccess')).toBeInTheDocument();
   });
 
+  it('names what is loading for screen readers', () => {
+    mockDetail({ detail: undefined, isLoading: true });
+    renderFlyout();
+
+    expect(screen.getByRole('progressbar', { name: 'Loading crash details' })).toBeInTheDocument();
+  });
+
   it('shows the error with a retry', () => {
     const refresh = jest.fn();
     mockDetail({ detail: undefined, error: new Error('boom'), refresh });

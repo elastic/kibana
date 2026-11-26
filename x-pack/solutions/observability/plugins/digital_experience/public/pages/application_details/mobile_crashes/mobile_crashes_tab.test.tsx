@@ -68,6 +68,7 @@ const setCrashGroup = jest.fn();
 const mockCrashGroups = (state: Partial<MobileCrashGroupsState>) =>
   jest.mocked(useMobileCrashGroups).mockReturnValue({
     response: { crashGroups: [GROUP], isPartial: false },
+    lastResponse: { crashGroups: [GROUP], isPartial: false },
     isLoading: false,
     error: undefined,
     refresh: jest.fn(),
@@ -118,7 +119,12 @@ describe('MobileCrashesTab', () => {
 
   it('shows the error with a retry', () => {
     const refresh = jest.fn();
-    mockCrashGroups({ response: undefined, error: new Error('boom'), refresh });
+    mockCrashGroups({
+      response: undefined,
+      lastResponse: undefined,
+      error: new Error('boom'),
+      refresh,
+    });
     renderTab();
 
     expect(screen.getByTestId('digitalExperienceMobileCrashesError')).toBeInTheDocument();
@@ -167,6 +173,16 @@ describe('MobileCrashesTab', () => {
     );
     fireEvent.click(screen.getByTestId('crashFlyout'));
     expect(setCrashGroup).toHaveBeenCalledWith(undefined);
+  });
+
+  it("keeps the flyout's group while the list refreshes, so its header keeps the counts", () => {
+    jest.mocked(useQueryParam).mockReturnValue({ value: 'npe', setValue: setCrashGroup });
+    mockCrashGroups({ response: undefined, isLoading: true });
+    renderTab();
+
+    expect(jest.mocked(MobileCrashFlyout).mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ group: GROUP })
+    );
   });
 
   it('opens no flyout without a crash group in the URL', () => {

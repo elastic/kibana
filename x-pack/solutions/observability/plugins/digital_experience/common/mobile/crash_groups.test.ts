@@ -11,7 +11,7 @@ import {
   withCrashBreakdown,
   withCrashFingerprint,
   withCrashGroup,
-  withCrashGroupReleases,
+  withCrashGroupHistory,
   withCrashGroupStats,
   withLatestCrash,
 } from './crash_groups';
@@ -93,16 +93,16 @@ describe('withCrashGroupStats', () => {
   });
 });
 
-describe('withCrashGroupReleases', () => {
-  it('lists the releases of the listed groups only', () => {
-    const query = withCrashGroupReleases(
+describe('withCrashGroupHistory', () => {
+  it('lists the releases and the first crash of the listed groups only', () => {
+    const query = withCrashGroupHistory(
       withCrashFingerprint(crashEvents({ serviceName: 'ride-ios', start: START, end: END })),
       ['abc', 'd"e']
     ).print('basic');
 
     expect(query).toContain('| WHERE fingerprint IN ("abc", "d\\"e")');
     expect(query).toContain(
-      '| STATS releases = VALUES(`service.version`) BY fingerprint | LIMIT 2'
+      '| STATS releases = VALUES(`service.version`), first_seen = MIN(crash_time), first_release = FIRST(`service.version`, crash_time) BY fingerprint | LIMIT 2'
     );
   });
 });

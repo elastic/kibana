@@ -105,6 +105,15 @@ describe('MobileCrashGroupsTable', () => {
     expect(rowTypes()[0]).toBe('java.lang.IllegalStateException');
   });
 
+  it('sorts by first seen, so the newest groups can lead', () => {
+    renderTable();
+
+    fireEvent.click(screen.getByRole('button', { name: /First seen/ }));
+    expect(rowTypes()[0]).toBe('java.lang.NullPointerException');
+    fireEvent.click(screen.getByRole('button', { name: /First seen/ }));
+    expect(rowTypes()[0]).toBe('java.lang.IllegalStateException');
+  });
+
   it("opens a group's detail by its fingerprint", () => {
     const onSelect = jest.fn();
     renderTable(GROUPS, onSelect);

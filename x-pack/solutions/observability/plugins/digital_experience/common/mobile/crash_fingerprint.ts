@@ -15,6 +15,8 @@ export interface CrashFrameRule {
   replacement: string;
   /** Lets `.` match line breaks too. */
   dotAll?: boolean;
+  /** Lets `^` and `$` match at every line. */
+  multiline?: boolean;
 }
 
 /**
@@ -37,9 +39,16 @@ export const CRASH_FRAME_RULES = {
     { pattern: '0x[0-9a-f]+ 0x[0-9a-f]+ ', replacement: '' },
     { pattern: ' +', replacement: ' ' },
   ],
-  // JVM traces: the first line repeats the message, and line numbers change with every build
+  // JVM traces: the first line repeats the message, a cause's message and how many frames it shares
+  // vary per crash (ids, object hashes), and line numbers change with every build
   jvm: [
     { pattern: '^[^\\n]*\\n?', replacement: '' },
+    {
+      pattern: '^([ \\t]*(?:Caused by|Suppressed): [^:\\n]+):.*$',
+      replacement: '$1',
+      multiline: true,
+    },
+    { pattern: '^([ \\t]*)\\.\\.\\. \\d+ more$', replacement: '$1... more', multiline: true },
     { pattern: ':\\d+\\)', replacement: ')' },
   ],
 } as const satisfies Record<string, readonly CrashFrameRule[]>;
@@ -62,14 +71,17 @@ export const IOS_REPORT_MARKER = 'Incident Identifier:';
 export const isIosReport = (): ESQLAstExpression =>
   esql.exp`${mobileColumn('exceptionStacktrace')} LIKE ${`${IOS_REPORT_MARKER}*`}`;
 
+/** A rule's flags as Java's inline flags, e.g. `(?s)`, which JavaScript takes as `RegExp` flags. */
+export const crashFrameRuleFlags = ({ dotAll, multiline }: CrashFrameRule): string =>
+  `${dotAll ? 's' : ''}${multiline ? 'm' : ''}`;
+
 const withRules = (input: ESQLAstExpression, kind: CrashKind): ESQLAstExpression =>
-  CRASH_FRAME_RULES[kind].reduce<ESQLAstExpression>(
-    (expression, rule: CrashFrameRule) =>
-      esql.exp`REPLACE(${expression}, ${rule.dotAll ? `(?s)${rule.pattern}` : rule.pattern}, ${
-        rule.replacement
-      })`,
-    input
-  );
+  CRASH_FRAME_RULES[kind].reduce<ESQLAstExpression>((expression, rule: CrashFrameRule) => {
+    const flags = crashFrameRuleFlags(rule);
+    return esql.exp`REPLACE(${expression}, ${
+      flags ? `(?${flags})${rule.pattern}` : rule.pattern
+    }, ${rule.replacement})`;
+  }, input);
 
 /** The frames a crash is grouped on, as an ES|QL expression. */
 export const crashFrames = (): ESQLAstExpression =>

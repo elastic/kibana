@@ -18,12 +18,20 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { CRASH_NEW_LOOKBACK_DAYS } from '../../../../common/mobile/crash_groups';
 import { ERROR_GROUPS_ROWS } from '../../../../common/top_rows';
 import type { CrashGroupSeen, MobileCrashGroup } from '../../../../common/types/mobile';
 import { DataPanel } from '../../../components/data_panel';
 import { MOBILE_CRASHES_EBT_ELEMENTS } from '../../../ebt_constants';
 import { useFormatters } from '../../../hooks/use_formatters';
-import { LAST_SEEN_LABEL, SESSIONS_LABEL, UNKNOWN_ERROR_TYPE_LABEL } from '../../../labels';
+import {
+  EVENTS_LABEL,
+  LAST_SEEN_LABEL,
+  SESSIONS_LABEL,
+  UNKNOWN_ERROR_TYPE_LABEL,
+  USERS_LABEL,
+  newInReleaseLabel,
+} from '../../../labels';
 import { metricColumnPreset } from '../../../utils/column_presets';
 
 const TITLE = i18n.translate('xpack.digitalExperience.mobile.crashes.table.title', {
@@ -50,36 +58,33 @@ const CRASH_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table
 
 const CRASH_TOOLTIP = i18n.translate('xpack.digitalExperience.mobile.crashes.table.crashTooltip', {
   defaultMessage:
-    '"New in" marks a group only the newest release had in the 30 days before the end of the time range, or in the whole range when it is longer. iOS groups are never marked: their stack traces have no symbols yet, so each build changes them.',
-});
-
-const USERS_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table.users', {
-  defaultMessage: 'Users',
+    '"New in" marks a group only the newest release had in the {days, plural, one {# day} other {# days}} before the end of the time range, or in the whole range when it is longer. iOS groups are never marked: their stack traces have no symbols yet, so each build changes them.',
+  values: { days: CRASH_NEW_LOOKBACK_DAYS },
 });
 
 const USERS_TOOLTIP = i18n.translate('xpack.digitalExperience.mobile.crashes.table.usersTooltip', {
   defaultMessage: 'Installations of the app that crashed this way (app.installation.id).',
 });
 
-const EVENTS_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table.events', {
-  defaultMessage: 'Events',
-});
-
 const FIRST_SEEN_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table.firstSeen', {
   defaultMessage: 'First seen',
 });
 
-const newInReleaseLabel = (release: string) =>
-  i18n.translate('xpack.digitalExperience.mobile.crashes.table.newInRelease', {
-    defaultMessage: 'New in {release}',
-    values: { release },
-  });
+const FIRST_SEEN_TOOLTIP = i18n.translate(
+  'xpack.digitalExperience.mobile.crashes.table.firstSeenTooltip',
+  {
+    defaultMessage:
+      'The first crash of the group on any release in the {days, plural, one {# day} other {# days}} before the end of the time range, or in the whole range when it is longer.',
+    values: { days: CRASH_NEW_LOOKBACK_DAYS },
+  }
+);
 
 const NEW_IN_RELEASE_TOOLTIP = i18n.translate(
   'xpack.digitalExperience.mobile.crashes.table.newInReleaseTooltip',
   {
     defaultMessage:
-      'Only the newest release crashed this way in the 30 days before the end of the time range, or in the whole range when it is longer: the release likely brought it.',
+      'Only the newest release crashed this way in the {days, plural, one {# day} other {# days}} before the end of the time range, or in the whole range when it is longer: the release likely brought it.',
+    values: { days: CRASH_NEW_LOOKBACK_DAYS },
   }
 );
 
@@ -176,7 +181,9 @@ export function MobileCrashGroupsTable({
     {
       field: 'firstSeen',
       name: FIRST_SEEN_LABEL,
+      nameTooltip: { content: FIRST_SEEN_TOOLTIP },
       className: 'eui-textNoWrap',
+      sortable: ({ firstSeen }: MobileCrashGroup) => firstSeen.time,
       render: (firstSeen: CrashGroupSeen) => <Seen seen={firstSeen} />,
     },
     {

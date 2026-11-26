@@ -7,7 +7,10 @@
 
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import type { MobileCrashGroupsResponse } from '../../../../common/types/mobile';
+import type {
+  MobileCrashGroupDetailResponse,
+  MobileCrashGroupsResponse,
+} from '../../../../common/types/mobile';
 import { CRASH_APPS } from '../../common/fixtures/mobile_crash_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { testData } from '../fixtures';
@@ -86,6 +89,35 @@ apiTest.describe(
           'java.lang.NullPointerException',
           'java.lang.IllegalStateException',
           'java.lang.IllegalArgumentException',
+        ]);
+      }
+    );
+
+    apiTest(
+      "answers a group's detail to a user who can't read the traces, without the session's spans",
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(OTEL_LOGS_ONLY_ROLE);
+        const headers = { ...COMMON_HEADERS, ...cookieHeader };
+        const list = await apiClient.get(mobileCrashGroupsPath(CRASH_APPS.android), {
+          headers,
+          responseType: 'json',
+        });
+        const [npe] = (list.body as MobileCrashGroupsResponse).crashGroups;
+
+        const response = await apiClient.get(
+          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint: npe.fingerprint }),
+          { headers, responseType: 'json' }
+        );
+
+        // The crash and the tap are log records; the screen and the request before it are spans,
+        // which this user can't read, so they're missing and the response says so.
+        expect(response).toHaveStatusCode(200);
+        const { latestCrash, beforeCrash, isPartial } =
+          response.body as MobileCrashGroupDetailResponse;
+        expect(isPartial).toBe(true);
+        expect(latestCrash).toMatchObject({ type: 'java.lang.NullPointerException' });
+        expect(beforeCrash.map(({ kind, name }) => ({ kind, name }))).toStrictEqual([
+          { kind: 'tap', name: 'Start recording' },
         ]);
       }
     );

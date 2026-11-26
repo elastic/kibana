@@ -34,7 +34,9 @@ import {
   OTEL_SCOPE_NAME,
   OTEL_SEVERITY_TEXT,
   OTEL_SPAN_DURATION,
+  OTEL_SPAN_ID,
   OTEL_SPAN_NAME,
+  OTEL_TRACE_ID,
   TELEMETRY_DISTRO_NAME,
   attributeField,
   resourceAttributeField,
@@ -68,6 +70,8 @@ export const MOBILE_FIELDS = {
   spanKind: KIND,
   spanName: OTEL_SPAN_NAME,
   spanDuration: OTEL_SPAN_DURATION,
+  traceId: OTEL_TRACE_ID,
+  spanId: OTEL_SPAN_ID,
   scopeName: OTEL_SCOPE_NAME,
   httpMethod: attributeField(HTTP_REQUEST_METHOD),
   httpStatusCode: attributeField(HTTP_RESPONSE_STATUS_CODE),
@@ -129,8 +133,6 @@ export const RESULT_COLUMNS = {
   statusCode: 'status_code',
   durationMs: 'duration_ms',
   page: 'page',
-  traceId: 'trace_id',
-  spanId: 'span_id',
 } as const;
 
 /** A column the mobile queries compute, as an ES|QL column. */

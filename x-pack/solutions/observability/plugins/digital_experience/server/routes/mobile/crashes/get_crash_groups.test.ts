@@ -29,6 +29,14 @@ const groupRow = (fingerprint: string, overrides: Record<string, unknown> = {}) 
   ...overrides,
 });
 
+const historyRow = (fingerprint: string, overrides: Record<string, unknown> = {}) => ({
+  fingerprint,
+  releases: '4.2.0',
+  first_seen: '2021-01-18T12:05:00.000Z',
+  first_release: '4.2.0',
+  ...overrides,
+});
+
 describe('getCrashGroups', () => {
   it('has no groups, and runs no other query, without crashes', async () => {
     const { client, esClient } = createTracedEsClientMock();
@@ -61,8 +69,18 @@ describe('getCrashGroups', () => {
       )
       .mockResolvedValueOnce(
         esqlResponse([
-          { fingerprint: 'npe', releases: '4.2.0' },
-          { fingerprint: 'oom', releases: ['4.1.0', '4.2.0'] },
+          {
+            fingerprint: 'npe',
+            releases: '4.2.0',
+            first_seen: '2021-01-18T12:05:00.000Z',
+            first_release: '4.2.0',
+          },
+          {
+            fingerprint: 'oom',
+            releases: ['4.1.0', '4.2.0'],
+            first_seen: '2021-01-02T09:00:00.000Z',
+            first_release: '4.1.0',
+          },
         ])
       )
       .mockResolvedValueOnce(
@@ -89,10 +107,17 @@ describe('getCrashGroups', () => {
         lastSeen: { time: '2021-01-18T12:55:00.000Z', release: '4.2.0' },
         newInRelease: '4.2.0',
       },
-      expect.objectContaining({ fingerprint: 'oom', users: 2, events: 10, newInRelease: null }),
+      expect.objectContaining({
+        fingerprint: 'oom',
+        users: 2,
+        events: 10,
+        // Its first crash in the lookback, before the range.
+        firstSeen: { time: '2021-01-02T09:00:00.000Z', release: '4.1.0' },
+        newInRelease: null,
+      }),
     ]);
 
-    const [[groupsRequest], [releasesRequest], [latestRequest]] = client.esql.query.mock.calls;
+    const [[groupsRequest], [historyRequest], [latestRequest]] = client.esql.query.mock.calls;
     // Crashes sent on the next launch are in the timestamp filter, a day past the range.
     expect(groupsRequest.filter).toEqual({
       bool: {
@@ -103,10 +128,10 @@ describe('getCrashGroups', () => {
       },
     });
     expect(groupsRequest.params).toEqual(expect.arrayContaining([{ release: '4.2.0' }]));
-    // The new check looks 30 days back on every release, whatever the release filter.
-    expect(releasesRequest.query).toContain('WHERE fingerprint IN ("npe", "oom")');
-    expect(releasesRequest.params).not.toEqual(expect.arrayContaining([{ release: '4.2.0' }]));
-    expect(releasesRequest.params).toEqual(
+    // The first crash and the new check look 30 days back on every release, whatever the filter.
+    expect(historyRequest.query).toContain('WHERE fingerprint IN ("npe", "oom")');
+    expect(historyRequest.params).not.toEqual(expect.arrayContaining([{ release: '4.2.0' }]));
+    expect(historyRequest.params).toEqual(
       expect.arrayContaining([{ crash_start: new Date(END - 30 * DAY).toISOString() }])
     );
     expect(latestRequest.params).toEqual([{ service_name: 'trailmap-android' }]);
@@ -116,7 +141,16 @@ describe('getCrashGroups', () => {
     const { client, esClient } = createTracedEsClientMock();
     client.esql.query
       .mockResolvedValueOnce(esqlResponse([groupRow('npe', { first_release: null })]))
-      .mockResolvedValueOnce(esqlResponse([{ fingerprint: 'npe', releases: null }]))
+      .mockResolvedValueOnce(
+        esqlResponse([
+          {
+            fingerprint: 'npe',
+            releases: null,
+            first_seen: '2021-01-18T12:05:00.000Z',
+            first_release: null,
+          },
+        ])
+      )
       .mockResolvedValueOnce(esqlResponse([]));
 
     const [group] = await getCrashGroups({
@@ -134,7 +168,7 @@ describe('getCrashGroups', () => {
     const { client, esClient } = createTracedEsClientMock();
     client.esql.query
       .mockResolvedValueOnce(esqlResponse([groupRow('npe')]))
-      .mockResolvedValueOnce(esqlResponse([{ fingerprint: 'npe', releases: '4.2.0' }]))
+      .mockResolvedValueOnce(esqlResponse([historyRow('npe')]))
       .mockResolvedValueOnce(esqlResponse([{ latest_release: '4.2.0' }]));
     const start = END - 90 * DAY;
 
@@ -145,8 +179,8 @@ describe('getCrashGroups', () => {
       end: END,
     });
 
-    const [, [releasesRequest]] = client.esql.query.mock.calls;
-    expect(releasesRequest.params).toEqual(
+    const [, [historyRequest]] = client.esql.query.mock.calls;
+    expect(historyRequest.params).toEqual(
       expect.arrayContaining([{ crash_start: new Date(start).toISOString() }])
     );
   });
@@ -160,7 +194,12 @@ describe('getCrashGroups', () => {
           groupRow('npe'),
         ])
       )
-      .mockResolvedValueOnce(esqlResponse([{ fingerprint: 'npe', releases: '4.2.0' }]))
+      .mockResolvedValueOnce(
+        esqlResponse([
+          historyRow('sigsegv', { first_seen: '2021-01-10T08:00:00.000Z' }),
+          historyRow('npe'),
+        ])
+      )
       .mockResolvedValueOnce(esqlResponse([{ latest_release: '4.2.0' }]));
 
     const groups = await getCrashGroups({
@@ -171,28 +210,36 @@ describe('getCrashGroups', () => {
     });
 
     // Both only on the newest release, but the iOS one's fingerprint can't tell an older build's.
-    expect(groups.map(({ fingerprint, newInRelease }) => ({ fingerprint, newInRelease }))).toEqual([
-      { fingerprint: 'sigsegv', newInRelease: null },
-      { fingerprint: 'npe', newInRelease: '4.2.0' },
+    // Its first crash still comes from the lookback.
+    expect(
+      groups.map(({ fingerprint, firstSeen, newInRelease }) => ({
+        fingerprint,
+        firstSeen: firstSeen.time,
+        newInRelease,
+      }))
+    ).toEqual([
+      { fingerprint: 'sigsegv', firstSeen: '2021-01-10T08:00:00.000Z', newInRelease: null },
+      { fingerprint: 'npe', firstSeen: '2021-01-18T12:05:00.000Z', newInRelease: '4.2.0' },
     ]);
-    const [, [releasesRequest]] = client.esql.query.mock.calls;
-    expect(releasesRequest.query).toContain('WHERE fingerprint IN ("npe")');
+    const [, [historyRequest]] = client.esql.query.mock.calls;
+    expect(historyRequest.query).toContain('WHERE fingerprint IN ("sigsegv", "npe")');
   });
 
-  it('runs no release query when every group is of EDOT iOS reports', async () => {
+  it("keeps the range's first crash of a group the lookback misses", async () => {
     const { client, esClient } = createTracedEsClientMock();
-    client.esql.query.mockResolvedValueOnce(
-      esqlResponse([groupRow('sigsegv', { exception_type: 'SIGSEGV', ios_reports: 3 })])
-    );
+    client.esql.query
+      .mockResolvedValueOnce(esqlResponse([groupRow('npe')]))
+      .mockResolvedValueOnce(esqlResponse([]))
+      .mockResolvedValueOnce(esqlResponse([{ latest_release: '4.2.0' }]));
 
     const [group] = await getCrashGroups({
       esClient,
-      filters: { serviceName: 'ride-ios' },
+      filters: { serviceName: 'trailmap-android' },
       start: START,
       end: END,
     });
 
+    expect(group.firstSeen).toEqual({ time: '2021-01-18T12:05:00.000Z', release: '4.2.0' });
     expect(group.newInRelease).toBeNull();
-    expect(client.esql.query).toHaveBeenCalledTimes(1);
   });
 });

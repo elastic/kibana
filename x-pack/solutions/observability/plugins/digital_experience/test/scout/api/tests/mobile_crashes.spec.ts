@@ -91,12 +91,16 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
         users: 1,
         events: 4,
         sessions: 1,
+        firstSeen: { time: '2021-01-18T12:05:00.000Z', release: '4.1.0' },
         newInRelease: null,
       });
-      // In the range on the newest release only, but the older release had it before the range.
+      // In the range on the newest release only, but the older release had it before the range:
+      // first seen then, and not new.
       expect(crashGroups[2]).toMatchObject({
         type: 'java.lang.IllegalArgumentException',
-        firstSeen: { release: '4.2.0' },
+        events: 1,
+        firstSeen: { time: '2021-01-18T11:30:00.000Z', release: '4.1.0' },
+        lastSeen: { time: '2021-01-18T12:45:00.000Z', release: '4.2.0' },
         newInRelease: null,
       });
     }
@@ -113,12 +117,17 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
 
       // The crash the older release had before the range stays not new with the newest release
       // picked: the new check looks at every release.
+      // The first crash is looked for on every release too.
       const newest = await getGroups(apiClient, CRASH_APPS.android, { release: '4.2.0' });
       expect(
-        newest.crashGroups.map(({ type, newInRelease }) => ({ type, newInRelease }))
+        newest.crashGroups.map(({ type, firstSeen, newInRelease }) => ({
+          type,
+          firstRelease: firstSeen.release,
+          newInRelease,
+        }))
       ).toStrictEqual([
-        { type: 'java.lang.NullPointerException', newInRelease: '4.2.0' },
-        { type: 'java.lang.IllegalArgumentException', newInRelease: null },
+        { type: 'java.lang.NullPointerException', firstRelease: '4.2.0', newInRelease: '4.2.0' },
+        { type: 'java.lang.IllegalArgumentException', firstRelease: '4.1.0', newInRelease: null },
       ]);
     }
   );
@@ -129,14 +138,15 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       const { crashGroups } = await getGroups(apiClient, CRASH_APPS.ios);
 
       // Sent on the next launch with the legacy name, sent after the range ended, and without a
-      // session: one group. The crash sent in the range that happened before it is left out.
+      // session: one group. The crash sent in the range that happened before it is left out of
+      // the counts, but is the group's first crash.
       expect(crashGroups).toHaveLength(1);
       expect(crashGroups[0]).toMatchObject({
         type: 'SIGSEGV',
         users: 2,
         events: 3,
         sessions: 2,
-        firstSeen: { time: '2021-01-18T12:15:00.000Z' },
+        firstSeen: { time: '2021-01-18T11:30:00.000Z' },
         lastSeen: { time: '2021-01-18T12:55:00.000Z' },
         // Only on the newest release, but an iOS report's fingerprint changes with every build.
         newInRelease: null,

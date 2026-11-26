@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { SESSIONS_MAX_SESSION_HOURS } from '../../../../common/sessions';
+import { SESSIONS_MAX_SESSION_MS } from '../../../../common/sessions';
 import type { MobileCrash, MobileCrashGroup } from '../../../../common/types/mobile';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import {
@@ -35,14 +35,18 @@ import {
 } from '../../../ebt_constants';
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useFormatters } from '../../../hooks/use_formatters';
-import { LAST_SEEN_LABEL, UNKNOWN_ERROR_TYPE_LABEL } from '../../../labels';
+import {
+  EVENTS_LABEL,
+  LAST_SEEN_LABEL,
+  UNKNOWN_ERROR_TYPE_LABEL,
+  USERS_LABEL,
+  newInReleaseLabel,
+} from '../../../labels';
 import { mobileSessionDiscoverEsql } from '../../../../common/mobile/discover';
 import { sessionTimeRange } from '../../session_detail/utils/session_discover';
 import { CrashBreakdowns } from './crash_breakdowns';
 import { CrashTimeline } from './crash_timeline';
 import { useMobileCrashGroup } from './use_mobile_crash_group';
-
-const MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
 
 const LOAD_ERROR_TITLE = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.loadError', {
   defaultMessage: 'Could not load the crash',
@@ -111,19 +115,10 @@ const OPEN_SESSION_NO_DISCOVER = i18n.translate(
   { defaultMessage: 'Opening a session needs access to Discover.' }
 );
 
-const USERS_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.users', {
-  defaultMessage: 'Users',
+// EUI announces it as "Loading crash details".
+const DETAILS_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.details', {
+  defaultMessage: 'crash details',
 });
-
-const EVENTS_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.events', {
-  defaultMessage: 'Events',
-});
-
-const newInReleaseLabel = (release: string) =>
-  i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.newInRelease', {
-    defaultMessage: 'New in {release}',
-    values: { release },
-  });
 
 function SectionTitle({ title }: { title: string }) {
   return (
@@ -147,7 +142,7 @@ function OpenSessionButton({ serviceName, crash }: { serviceName: string; crash:
   const timeRange = useMemo(
     () =>
       sessionTimeRange({
-        startTime: new Date(Date.parse(time) - MAX_SESSION_MS).toISOString(),
+        startTime: new Date(Date.parse(time) - SESSIONS_MAX_SESSION_MS).toISOString(),
         endTime: Date.parse(reportedAt) > Date.parse(time) ? reportedAt : time,
       }),
     [time, reportedAt]
@@ -237,7 +232,7 @@ export function MobileCrashFlyout({
       );
     }
     if (!detail) {
-      return <EuiSkeletonText lines={8} isLoading contentAriaLabel={BEFORE_CRASH_TITLE} />;
+      return <EuiSkeletonText lines={8} isLoading contentAriaLabel={DETAILS_LABEL} />;
     }
     if (!latestCrash) {
       return <KbnInfoCallout size="s" title={NO_CRASH_TITLE} />;

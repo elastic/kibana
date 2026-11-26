@@ -12,9 +12,9 @@ import {
   CRASH_NEW_LOOKBACK_DAYS,
   crashEvents,
   withCrashFingerprint,
-  withCrashGroupReleases,
+  withCrashGroupHistory,
   withCrashGroupStats,
-  type CrashGroupReleasesRow,
+  type CrashGroupHistoryRow,
   type CrashGroupRow,
 } from '../../../../common/mobile/crash_groups';
 import { RESULT_COLUMNS } from '../../../../common/mobile/fields';
@@ -37,17 +37,24 @@ export interface GetCrashGroupsParams {
   environment?: string;
 }
 
-const toCrashGroup = (row: CrashGroupRow, newInRelease: string | null): MobileCrashGroup => ({
+const toCrashGroup = (
+  row: CrashGroupRow,
+  history: CrashGroupHistoryRow | undefined,
+  newInRelease: string | null
+): MobileCrashGroup => ({
   fingerprint: row[RESULT_COLUMNS.fingerprint],
   type: row[RESULT_COLUMNS.exceptionType] ?? null,
   message: row[RESULT_COLUMNS.message] ?? null,
   users: row[RESULT_COLUMNS.users],
   events: row[RESULT_COLUMNS.events],
   sessions: row[RESULT_COLUMNS.sessions],
-  firstSeen: {
-    time: row[RESULT_COLUMNS.firstSeen],
-    release: row[RESULT_COLUMNS.firstRelease] ?? null,
-  },
+  // The lookback reaches at least as far back as the range, on every release.
+  firstSeen: history
+    ? {
+        time: history[RESULT_COLUMNS.firstSeen],
+        release: history[RESULT_COLUMNS.firstRelease] ?? null,
+      }
+    : { time: row[RESULT_COLUMNS.firstSeen], release: row[RESULT_COLUMNS.firstRelease] ?? null },
   lastSeen: {
     time: row[RESULT_COLUMNS.lastSeen],
     release: row[RESULT_COLUMNS.lastRelease] ?? null,
@@ -56,9 +63,10 @@ const toCrashGroup = (row: CrashGroupRow, newInRelease: string | null): MobileCr
 });
 
 /**
- * An application's crash groups in the range, the most affected users first, each marked new when
- * only the newest release crashed that way in the lookback, whatever the release filter. Groups of
- * EDOT iOS reports are never marked new: their fingerprint changes with every build.
+ * An application's crash groups in the range, the most affected users first. Each group's first
+ * crash is looked for in the lookback, and the group is marked new when only the newest release
+ * crashed that way in it, whatever the release filter. Groups of EDOT iOS reports are never marked
+ * new: their fingerprint changes with every build.
  */
 export const getCrashGroups = async ({
   esClient,
@@ -73,24 +81,21 @@ export const getCrashGroups = async ({
     withCrashGroupStats(withCrashFingerprint(crashEvents({ ...filters, start, end }))),
     timeFilter(start, end + CRASH_DELAY_MS, environment)
   );
-  // An EDOT iOS report's fingerprint has offsets that change with every build, so each build's
-  // crashes would look new; those groups get no badge until frames are readable (#75).
-  const candidates = rows.filter((row) => !row[RESULT_COLUMNS.iosReports]);
-  if (candidates.length === 0) {
-    return rows.map((row) => toCrashGroup(row, null));
+  if (rows.length === 0) {
+    return [];
   }
 
   // A group the newest release brought can't be told apart on that release alone.
   const allReleases = omit(filters, 'release');
   // The whole range too, so a group the range shows on an older release is never new.
   const lookbackStart = Math.min(start, end - CRASH_NEW_LOOKBACK_DAYS * DAY_MS);
-  const [releaseRows, [latest]] = await Promise.all([
-    runEsql<CrashGroupReleasesRow>(
+  const [historyRows, [latest]] = await Promise.all([
+    runEsql<CrashGroupHistoryRow>(
       esClient,
-      'get_mobile_crash_group_releases',
-      withCrashGroupReleases(
+      'get_mobile_crash_group_history',
+      withCrashGroupHistory(
         withCrashFingerprint(crashEvents({ ...allReleases, start: lookbackStart, end })),
-        candidates.map((row) => row[RESULT_COLUMNS.fingerprint])
+        rows.map((row) => row[RESULT_COLUMNS.fingerprint])
       ),
       timeFilter(lookbackStart, end + CRASH_DELAY_MS, environment)
     ),
@@ -103,19 +108,19 @@ export const getCrashGroups = async ({
   ]);
 
   const latestRelease = latest?.[RESULT_COLUMNS.latestRelease] ?? null;
-  const releasesByFingerprint = new Map(
-    releaseRows.map((row) => [
-      row[RESULT_COLUMNS.fingerprint],
-      castArray(row[RESULT_COLUMNS.releases] ?? []),
-    ])
+  const historyByFingerprint = new Map(
+    historyRows.map((row) => [row[RESULT_COLUMNS.fingerprint], row])
   );
   return rows.map((row) => {
-    const releases = releasesByFingerprint.get(row[RESULT_COLUMNS.fingerprint]) ?? [];
+    const history = historyByFingerprint.get(row[RESULT_COLUMNS.fingerprint]);
+    const releases = castArray(history?.[RESULT_COLUMNS.releases] ?? []);
+    // An EDOT iOS report's fingerprint has offsets that change with every build, so each build's
+    // crashes would look new; those groups get no badge until frames are readable (#75).
     const isNew =
       !row[RESULT_COLUMNS.iosReports] &&
       latestRelease !== null &&
       releases.length === 1 &&
       releases[0] === latestRelease;
-    return toCrashGroup(row, isNew ? latestRelease : null);
+    return toCrashGroup(row, history, isNew ? latestRelease : null);
   });
 };

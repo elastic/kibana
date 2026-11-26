@@ -75,6 +75,7 @@ export const SESSIONS_MAX_ID_LENGTH = 256;
  * changed session is rebuilt from this far back.
  */
 export const SESSIONS_MAX_SESSION_HOURS = 24;
+export const SESSIONS_MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
 /** Max page views kept, in order, for the session journey. */
 export const SESSIONS_JOURNEY_SIZE = 10;
 /**

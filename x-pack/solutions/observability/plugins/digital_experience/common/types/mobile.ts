@@ -88,7 +88,9 @@ export interface MobileCrashGroup {
   users: number;
   events: number;
   sessions: number;
+  /** The first crash in the lookback on any release, which reaches back past a shorter range. */
   firstSeen: CrashGroupSeen;
+  /** The last crash in the range and filters. */
   lastSeen: CrashGroupSeen;
   /** The newest release, when no older release crashed this way in the lookback; `null` otherwise. */
   newInRelease: string | null;

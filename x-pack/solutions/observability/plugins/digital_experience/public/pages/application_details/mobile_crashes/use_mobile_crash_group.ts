@@ -8,10 +8,7 @@
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { MobileCrashGroupDetailResponse } from '../../../../common/types/mobile';
 import { useApiClient } from '../../../hooks/use_api_client';
-import { useEnvironment } from '../../../hooks/use_environment';
-import { useQueryParam } from '../../../hooks/use_query_param';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { toTimeRangeQuery } from '../../../utils/time_range_query';
+import { useMobileFiltersQuery } from '../mobile_overview/use_mobile_filters_query';
 
 export interface MobileCrashGroupState {
   /** The response of the current group and filters, `undefined` while they load. */
@@ -27,10 +24,7 @@ export const useMobileCrashGroup = (
   fingerprint: string
 ): MobileCrashGroupState => {
   const apiClient = useApiClient();
-  const { timeRange } = useTimeRange();
-  const { environment } = useEnvironment();
-  const { value: osName } = useQueryParam('osName');
-  const { value: release } = useQueryParam('release');
+  const { toQuery } = useMobileFiltersQuery();
 
   const { value, loading, error, refresh } = useAbortableAsync(
     async ({ signal }) =>
@@ -40,11 +34,11 @@ export const useMobileCrashGroup = (
           signal,
           params: {
             path: { serviceName, fingerprint },
-            query: { ...toTimeRangeQuery(timeRange, environment), osName, release },
+            query: toQuery(),
           },
         }
       ),
-    [apiClient, serviceName, fingerprint, timeRange, environment, osName, release],
+    [apiClient, serviceName, fingerprint, toQuery],
     { unsetValueOnError: true }
   );
   const isLoading = loading || (!value && !error);
