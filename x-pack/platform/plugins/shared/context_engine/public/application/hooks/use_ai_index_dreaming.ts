@@ -13,6 +13,7 @@ import { useKibana } from './use_kibana';
 
 interface UseAiIndexDreamingResult {
   dreaming: AiIndexDreamingConfig | undefined;
+  workflowIds: string[];
   isLoading: boolean;
 }
 
@@ -31,5 +32,9 @@ export const useAiIndexDreaming = (
     enabled,
   });
 
-  return { dreaming: data?.dreaming, isLoading: isInitialLoading };
+  return {
+    dreaming: data?.dreaming,
+    workflowIds: data?.workflow_ids ?? [],
+    isLoading: isInitialLoading,
+  };
 };

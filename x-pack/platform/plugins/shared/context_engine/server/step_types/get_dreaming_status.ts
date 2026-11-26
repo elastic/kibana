@@ -48,9 +48,6 @@ export const getDreamingStatusStepDefinition = ({
         if (!shouldDream(aiIndex)) {
           return skip(`Dreaming is not turned on for AI index '${aiIndexId}'.`);
         }
-        if (source === 'traces' && aiIndex.traces.length === 0) {
-          return skip(`AI index '${aiIndexId}' has no trace sources to dream on.`);
-        }
         if (
           source === 'relationships' &&
           (!aiIndex.dreaming || dreamingTypesOf(aiIndex.dreaming).relationships.length === 0)

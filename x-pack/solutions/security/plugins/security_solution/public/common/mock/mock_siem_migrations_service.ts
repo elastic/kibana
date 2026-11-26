@@ -58,5 +58,20 @@ export const createSiemMigrationsMock = () => {
         getDashboardMigrationMissingResources: jest.fn(),
       },
     },
+
+    workflows: {
+      ...commonMocks,
+      addWorkflowsToMigration: jest.fn(),
+      createWorkflowMigration: jest.fn(),
+      startWorkflowMigration: jest.fn(),
+      stopWorkflowMigration: jest.fn(),
+      getMigrationsStats: jest.fn(),
+      deleteMigration: jest.fn(),
+      isWorkflowsUiEnabled: jest.fn(),
+      api: {
+        getWorkflowMigrationStats: jest.fn(),
+        updateWorkflowMigration: jest.fn(),
+      },
+    },
   };
 };

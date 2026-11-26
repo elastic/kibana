@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -16,16 +15,16 @@ import type {
 export async function getMetricsIndices({
   core,
   plugins,
+  request,
   logger,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  request: KibanaRequest;
   logger: Logger;
 }): Promise<string[]> {
   const [coreStart] = await core.getStartServices();
-  const savedObjectsClient = new SavedObjectsClient(
-    coreStart.savedObjects.createInternalRepository()
-  );
+  const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
   try {
     const { metricsDataAccess } = plugins;

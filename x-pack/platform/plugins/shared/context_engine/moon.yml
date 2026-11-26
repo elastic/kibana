@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-http-browser'
   - '@kbn/react-query'
+  - '@kbn/charts-theme'
   - '@kbn/scout'
   - '@kbn/logging'
   - '@kbn/config-schema'
@@ -104,7 +105,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - server/dreaming/templates/*.json
+    - server/**/*.json
     - scripts/**/*
     - test/scout_agent_builder/**/*
     - '!target/**/*'

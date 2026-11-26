@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
+
 import type {
   NewOtlpOutput,
   OtlpExporterConfig,
@@ -16,6 +18,7 @@ import {
   otlpCompressionType,
   otlpProtocol,
 } from '../../../../../../../common/constants';
+import { getOtlpExporterEndpoints } from '../../../../../../../common/services/otlp_auth';
 
 import { useInput, useKeyValueInput, useSwitchInput } from '../../../../hooks';
 
@@ -31,6 +34,7 @@ import {
   validateOtlpProxyUrl,
   validateOtlpShortString,
 } from './output_form_validators';
+import { isOtlpAuthAvailable } from './use_otlp_auth_inputs';
 
 type OtlpProtocol = OtlpExporterConfig['protocol'];
 type OtlpHttpEncoding = NonNullable<OtlpHttpExporterConfig['encoding']>;
@@ -57,7 +61,12 @@ const toInputValue = (value: string | number | null | undefined) =>
 export function useOtlpInputs(
   otlpOutput: NewOtlpOutput | undefined,
   isSelected: boolean,
-  disabled: boolean
+  disabled: boolean,
+  auth: {
+    /** The header that the selected authentication sets, which the headers cannot set too. */
+    headerName: string | undefined;
+    managedOtlpUrl: string | undefined;
+  } = { headerName: undefined, managedOtlpUrl: undefined }
 ) {
   const exporter = otlpOutput?.otlp_exporter;
   const grpc: Partial<OtlpGrpcExporterConfig> | undefined =
@@ -82,12 +91,6 @@ export function useOtlpInputs(
   const otlpTimeoutInput = useInput(
     toInputValue(exporter?.timeout),
     validateIfSelected(validateOtlpDuration),
-    disabled
-  );
-  const otlpHeadersInput = useKeyValueInput(
-    'otlpHeadersComboBox',
-    headersToRows(exporter?.headers),
-    validateIfSelected(validateOtlpHeaders),
     disabled
   );
 
@@ -217,6 +220,29 @@ export function useOtlpInputs(
   );
   const otlpCookiesEnabledInput = useSwitchInput(http?.cookies?.enabled ?? false, disabled);
 
+  // the managed OTLP endpoint has no authentication, whichever signal is sent to it
+  const endpoints = getOtlpExporterEndpoints({
+    protocol: otlpProtocolInput.value as OtlpProtocol,
+    endpoint: otlpEndpointInput.value,
+    traces_endpoint: otlpTracesEndpointInput.value,
+    metrics_endpoint: otlpMetricsEndpointInput.value,
+    logs_endpoint: otlpLogsEndpointInput.value,
+    profiles_endpoint: otlpProfilesEndpointInput.value,
+  });
+  const authHeaderName = isOtlpAuthAvailable(endpoints, auth.managedOtlpUrl)
+    ? auth.headerName
+    : undefined;
+  const validateHeaders = useCallback(
+    (pairs: Array<{ key: string; value: string }>) => validateOtlpHeaders(pairs, authHeaderName),
+    [authHeaderName]
+  );
+  const otlpHeadersInput = useKeyValueInput(
+    'otlpHeadersComboBox',
+    headersToRows(exporter?.headers),
+    validateIfSelected(validateHeaders),
+    disabled
+  );
+
   return {
     otlpProtocolInput,
     otlpEndpointInput,
@@ -284,6 +310,17 @@ const httpTextInputs = (inputs: OtlpInputs) => [
   inputs.otlpHttp2PingTimeoutInput,
   inputs.otlpCompressionLevelInput,
 ];
+
+/** The URLs the exporter sends data to: the endpoint, and for HTTP the endpoints of the signals. */
+export const getOtlpInputEndpoints = (inputs: OtlpInputs): string[] =>
+  getOtlpExporterEndpoints({
+    protocol: inputs.otlpProtocolInput.value as OtlpProtocol,
+    endpoint: inputs.otlpEndpointInput.value,
+    traces_endpoint: inputs.otlpTracesEndpointInput.value,
+    metrics_endpoint: inputs.otlpMetricsEndpointInput.value,
+    logs_endpoint: inputs.otlpLogsEndpointInput.value,
+    profiles_endpoint: inputs.otlpProfilesEndpointInput.value,
+  });
 
 /** Whether a gRPC setting is set, other than to its default. */
 export const hasOtlpGrpcSettings = (inputs: OtlpInputs) =>

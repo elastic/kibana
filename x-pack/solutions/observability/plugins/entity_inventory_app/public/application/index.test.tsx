@@ -190,6 +190,18 @@ describe('EntityInventoryShell', () => {
     expect(getTypes).toHaveBeenCalledTimes(1);
   });
 
+  it('requests the lists that stay mounted again when the page changes', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getEntities = jest.fn(fixtureClient.getEntities);
+    const hostRequests = () => getEntities.mock.calls.filter(([type]) => type === 'host');
+    const { history } = renderShellAt('/hosts', { ...fixtureClient, getEntities });
+    await waitFor(() => expect(hostRequests()).toHaveLength(1));
+
+    act(() => history.push('/all-resources'));
+
+    await waitFor(() => expect(hostRequests()).toHaveLength(2));
+  });
+
   it('keeps the column choices of a type while another page is open', async () => {
     const { history } = renderShellAt('/hosts');
     expect(await screen.findByTestId('entityInventoryTable')).not.toHaveAttribute(

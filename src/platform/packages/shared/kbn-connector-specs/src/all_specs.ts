@@ -99,4 +99,6 @@ export * from './specs/azure_sql/azure_sql';
 export * from './specs/solarwinds_platform/solarwinds_platform';
 export { SSF } from './specs/ssf/ssf';
 export * from './specs/sophos_central/sophos_central';
+export * from './specs/redis/redis';
+export * from './specs/sentinelone/sentinelone';
 export * from './specs/microsoft_sql_server/microsoft_sql_server';

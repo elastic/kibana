@@ -143,16 +143,23 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
         input={inputs.kafkaKerberosRealmInput}
         testSubj="kafkaKerberosRealmInput"
       />
+      <TextSetting
+        label={i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaKerberosUsernameLabel', {
+          defaultMessage: 'Username',
+        })}
+        helpText={
+          isPassword
+            ? undefined
+            : i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaKerberosUsernameKeytabHelpText',
+                { defaultMessage: 'Username associated with the keytab file.' }
+              )
+        }
+        input={inputs.kafkaKerberosUsernameInput}
+        testSubj="kafkaKerberosUsernameInput"
+      />
       {isPassword ? (
         <>
-          <TextSetting
-            label={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.kafkaKerberosUsernameLabel',
-              { defaultMessage: 'Username' }
-            )}
-            input={inputs.kafkaKerberosUsernameInput}
-            testSubj="kafkaKerberosUsernameInput"
-          />
           <SecretFormRow
             fullWidth
             title={i18n.translate(
