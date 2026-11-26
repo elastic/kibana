@@ -16,7 +16,7 @@ export interface DetectionAlertsApiService {
   deleteAll: () => Promise<void>;
   /** Polls until ≥ minCount alerts for ruleName exist; rejects on timeout (default 30s). */
   waitForAlerts: (ruleName: string, minCount?: number, timeout?: number) => Promise<number>;
-  /** Returns the earliest and latest `@timestamp` (ISO) of the existing alerts for ruleName. */
+  /** Returns the earliest and latest `@timestamp` (ISO) of ruleName's searchable alerts; call after waitForAlerts. */
   getAlertsTimeRange: (ruleName: string) => Promise<{ from: string; to: string }>;
 }
 
@@ -88,13 +88,11 @@ export const getDetectionAlertsApiService = ({
         log,
         'security.detectionAlerts.getAlertsTimeRange',
         async () => {
-          const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
-          await esClient.indices.refresh({ index });
           const { aggregations } = await esClient.search<
             unknown,
             { earliest: estypes.AggregationsMinAggregate; latest: estypes.AggregationsMaxAggregate }
           >({
-            index,
+            index: `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`,
             size: 0,
             query: {
               term: { 'kibana.alert.rule.name': ruleName },
