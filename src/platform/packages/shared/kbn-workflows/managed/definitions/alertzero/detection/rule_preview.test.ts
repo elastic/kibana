@@ -9,7 +9,7 @@
 
 import { parse } from 'yaml';
 import { ALERTZERO_RULE_PREVIEW_WORKFLOW } from '.';
-import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 
 interface YamlStep {
   name: string;
