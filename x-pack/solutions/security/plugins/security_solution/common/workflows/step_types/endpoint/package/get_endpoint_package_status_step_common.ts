@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import type { BaseStepDefinition } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { endpointPartSchema, packagePartValues } from '../hosts/hosts_contracts';
 import { packageConfigurationsSchema, packageInfoSchema } from './package_contracts';
 
@@ -30,7 +30,7 @@ export const getEndpointPackageStatusOutputSchema = lazySchema(() =>
   })
 );
 
-export const getEndpointPackageStatusStepCommonDefinition: BaseStepDefinition<
+export const getEndpointPackageStatusStepCommonDefinition: CommonStepDefinition<
   typeof getEndpointPackageStatusInputSchema,
   typeof getEndpointPackageStatusOutputSchema
 > = {
@@ -47,6 +47,7 @@ export const getEndpointPackageStatusStepCommonDefinition: BaseStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'managed_only',
   inputSchema: getEndpointPackageStatusInputSchema,
   outputSchema: getEndpointPackageStatusOutputSchema,
   documentation: {
