@@ -1,0 +1,348 @@
+{
+  "addToBlocklist": {
+    "action": "addToBlocklist",
+    "note": "state-changing: adds hash to blocklist; retrieve item ID with getBlocklistItems for undo",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "addToBlocklist",
+      "params": {
+        "hashType": 1,
+        "hashList": [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ],
+        "sourceInfo": "SOAR automated blocklist"
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": true
+    }
+  },
+  "deleteQuarantineItem": {
+    "action": "deleteQuarantineItem",
+    "note": "state-changing: permanently deletes quarantine entry; irreversible",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "createRemoveQuarantineItemTask",
+      "params": {
+        "quarantineItemsIds": [
+          "q-item-001"
+        ]
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": true
+    }
+  },
+  "getBlocklistItems": {
+    "action": "getBlocklistItems",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "getBlocklistItems",
+      "params": {},
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "page": 1,
+        "perPage": 30,
+        "pagesCount": 1,
+        "total": 1,
+        "items": [
+          {
+            "id": "blocklist-item-001",
+            "hashType": 1,
+            "hashValue": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "sourceInfo": "SOAR automated blocklist"
+          }
+        ]
+      }
+    }
+  },
+  "getEndpoint": {
+    "action": "getEndpoint",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "getManagedEndpointDetails",
+      "params": {
+        "endpointId": "5a6b7c8d9e0f1a2b3c4d5e6f"
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "id": "5a6b7c8d9e0f1a2b3c4d5e6f",
+        "name": "test-workstation-01",
+        "isIsolated": false,
+        "operatingSystemVersion": "Windows 10 Enterprise",
+        "ipAddresses": [
+          "192.168.1.100"
+        ],
+        "policy": {
+          "id": "2b3c4d5e6f7a8b9c0d1e2f3a",
+          "name": "Default Policy"
+        }
+      }
+    }
+  },
+  "getTask": {
+    "action": "getTask",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "getTaskStatus",
+      "params": {
+        "taskId": "abc123-task-id"
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "status": 3,
+        "createdAt": "2026-01-01T12:00:00Z",
+        "updatedAt": "2026-01-01T12:05:00Z"
+      }
+    }
+  },
+  "isolateEndpoint": {
+    "action": "isolateEndpoint",
+    "note": "state-changing: creates isolation task; undo with restoreEndpointFromIsolation",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "createIsolateEndpointTask",
+      "params": {
+        "endpointIds": [
+          "5a6b7c8d9e0f1a2b3c4d5e6f"
+        ]
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": [
+        "task-id-isolate-001"
+      ]
+    }
+  },
+  "listGroups": {
+    "action": "listGroups",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "getCustomGroupsList",
+      "params": {},
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "items": [
+          {
+            "id": "1a2b3c4d5e6f7a8b9c0d1e2f",
+            "name": "Workstations",
+            "parentId": null
+          }
+        ]
+      }
+    }
+  },
+  "listPolicies": {
+    "action": "listPolicies",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "getPoliciesList",
+      "params": {},
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "page": 1,
+        "perPage": 30,
+        "pagesCount": 1,
+        "total": 1,
+        "items": [
+          {
+            "id": "2b3c4d5e6f7a8b9c0d1e2f3a",
+            "name": "Default Policy",
+            "isDefault": true
+          }
+        ]
+      }
+    }
+  },
+  "listQuarantineItems": {
+    "action": "listQuarantineItems",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "getQuarantineItemsList",
+      "params": {},
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "page": 1,
+        "perPage": 30,
+        "pagesCount": 1,
+        "total": 1,
+        "items": [
+          {
+            "threatName": "Gen:Trojan.Test.1",
+            "filePath": "C:\\Temp\\malware.exe",
+            "endpointName": "test-workstation-01",
+            "quarantinedAt": "2026-01-01T10:00:00Z",
+            "quarantineItemId": "q-item-001"
+          }
+        ]
+      }
+    }
+  },
+  "quarantineFile": {
+    "action": "quarantineFile",
+    "note": "state-changing: quarantines a file on target endpoints; requires EDR Sensor in Detection and prevention mode",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "createAddFileToQuarantineTask",
+      "params": {
+        "endpointIds": [
+          "5a6b7c8d9e0f1a2b3c4d5e6f"
+        ],
+        "filePath": "/tmp/suspicious.sh"
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": [
+        "task-id-quarantine-001"
+      ]
+    }
+  },
+  "removeFromBlocklist": {
+    "action": "removeFromBlocklist",
+    "note": "state-changing: removes a blocklist entry; get hashItemId from getBlocklistItems",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "removeFromBlocklist",
+      "params": {
+        "hashItemId": "blocklist-item-001"
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": true
+    }
+  },
+  "restoreEndpointFromIsolation": {
+    "action": "restoreEndpointFromIsolation",
+    "note": "state-changing: removes isolation; undo by re-isolating",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "createRestoreEndpointFromIsolationTask",
+      "params": {
+        "endpointIds": [
+          "5a6b7c8d9e0f1a2b3c4d5e6f"
+        ]
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": [
+        "task-id-restore-001"
+      ]
+    }
+  },
+  "restoreQuarantineItem": {
+    "action": "restoreQuarantineItem",
+    "note": "state-changing: restores quarantined file; lookup first with listQuarantineItems",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "createRestoreQuarantineItemTask",
+      "params": {
+        "quarantineItemsIds": [
+          "q-item-001"
+        ]
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": true
+    }
+  },
+  "scanEndpoint": {
+    "action": "scanEndpoint",
+    "note": "state-changing: launches scan task",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "createScanTask",
+      "params": {
+        "targetIds": [
+          "5a6b7c8d9e0f1a2b3c4d5e6f"
+        ],
+        "type": 1
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": "task-id-scan-001"
+    }
+  },
+  "searchEndpoints": {
+    "action": "searchEndpoints",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "getNetworkInventoryItems",
+      "params": {
+        "page": 1,
+        "perPage": 30
+      },
+      "id": "1"
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "page": 1,
+        "perPage": 30,
+        "pagesCount": 1,
+        "total": 1,
+        "items": [
+          {
+            "id": "5a6b7c8d9e0f1a2b3c4d5e6f",
+            "name": "test-workstation-01",
+            "isManaged": true,
+            "isIsolated": false,
+            "groupId": "1a2b3c4d5e6f7a8b9c0d1e2f",
+            "policy": {
+              "id": "2b3c4d5e6f7a8b9c0d1e2f3a",
+              "name": "Default Policy"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
