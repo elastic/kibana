@@ -41,6 +41,13 @@ import { getSynchronizationTaskId } from '@kbn/cases-plugin/server/cases_analyti
 // ensureScheduled on that id keeps the pending task's runAt, so a run-now backfill needs a fresh id.
 const getRunNowBackfillTaskId = (taskId: string): string => `${taskId}-${uuidv4()}`;
 
+// The run_soon route answers 200 with an error body when scheduling fails.
+const assertBackfillScheduled = ({ body }: { body: { id: string; error?: string } }): void => {
+  if (body.error) {
+    throw new Error(`Scheduling backfill task ${body.id} failed: ${body.error}`);
+  }
+};
+
 export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
@@ -51,7 +58,8 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
       destIndex: getCasesDestinationIndexName('default', 'securitySolution'),
       sourceQuery: JSON.stringify(getCasesSourceQuery('default', 'securitySolution')),
     })
-    .expect(200);
+    .expect(200)
+    .expect(assertBackfillScheduled);
 };
 
 export const runCAISynchronizationTask = async (
@@ -79,7 +87,8 @@ export const runAttachmentsBackfillTask = async (
       destIndex: getAttachmentsDestinationIndexName(spaceId, owner),
       sourceQuery: JSON.stringify(getAttachmentsSourceQuery(spaceId, owner)),
     })
-    .expect(200);
+    .expect(200)
+    .expect(assertBackfillScheduled);
 };
 
 export const runSchedulerTask = async (supertest: SuperTest.Agent) => {
@@ -100,7 +109,8 @@ export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
       destIndex: getCommentsDestinationIndexName('default', 'securitySolution'),
       sourceQuery: JSON.stringify(getCommentsSourceQuery('default', 'securitySolution')),
     })
-    .expect(200);
+    .expect(200)
+    .expect(assertBackfillScheduled);
 };
 
 export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
@@ -113,7 +123,8 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
       destIndex: getActivityDestinationIndexName('default', 'securitySolution'),
       sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolution')),
     })
-    .expect(200);
+    .expect(200)
+    .expect(assertBackfillScheduled);
 };
 
 /** Counts the backfill tasks that are scheduled or running; task manager deletes each one once it has run. */
