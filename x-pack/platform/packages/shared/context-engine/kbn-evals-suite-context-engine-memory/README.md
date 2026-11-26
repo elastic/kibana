@@ -18,6 +18,7 @@ This is the **direct-index arm**: a generic Agent Builder agent over a flat Elas
 
 It is also **not comparable to published LongMemEval numbers**:
 - The grading templates are the upstream ones, but the judge is the configured evaluation connector (currently `eis-zai-glm-5-2`), not GPT-4o, and it answers through a forced tool call (`{ correct: boolean }`) instead of free-text yes/no.
+- The agent prompt is a deliberate simplification: it names the index, gives the question date, and says to answer that the history does not contain the answer when it does not. Upstream LongMemEval prompts do none of these, and the last line favours the abstention question. The point of this arm is to test the agent's tools over a known index, not index discovery.
 - Only five frozen questions are used. With one run of five binary scores, a single flipped question moves the mean by 20 points, so this cannot detect regressions; it checks that the pipeline runs and persists scores.
 
 ### Why one document per turn
