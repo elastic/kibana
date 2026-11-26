@@ -171,9 +171,10 @@ test.describe(
       await page.getByTestId(launchButton).click();
       const popup = await popupPromise;
       await popup.waitForURL(awsConsole);
-      expect(new URL(popup.url()).hash.split('?')[1]).toContain(
-        `templateURL=${encodeURIComponent(renderedTemplateUrl)}`
-      );
+      const fragmentQuery = new URL(popup.url()).hash.split('?')[1];
+      expect(new URLSearchParams(fragmentQuery).getAll('templateURL')).toStrictEqual([
+        renderedTemplateUrl,
+      ]);
       await expect.poll(() => renderRequests.length).toBeGreaterThan(0);
       expect(renderRequests[0].integrations).toStrictEqual([
         { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
