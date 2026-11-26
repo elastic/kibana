@@ -580,11 +580,12 @@ async function runTask({
     ...logCoverage.event,
   });
 
+  const state = { namespace, logCoverageTargetDocs: logCoverage.nextTargetDocs };
   if (errors.length > 0) {
-    throw new Error(errors.join(', '));
+    return { state, error: new Error(errors.join(', ')) };
   }
 
-  return { state: { namespace, logCoverageTargetDocs: logCoverage.nextTargetDocs } };
+  return { state };
 }
 
 export function registerStatusReportTask({

@@ -869,10 +869,12 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     expect(payload.avgGroupSize).toBe(3.5);
   });
 
-  it('collects the error, does not report resolution state, and rethrows when the ESQL query fails', async () => {
+  it('collects the error, does not report resolution state, and returns the error when the ESQL query fails', async () => {
     esqlQuery.mockRejectedValue(new Error('boom'));
 
-    await expect(runStatusReportTask()).rejects.toThrow('boom');
+    expect(await runStatusReportTask()).toMatchObject({
+      error: expect.objectContaining({ message: expect.stringContaining('boom') }),
+    });
 
     const reportedResolutionState = reportEvent.mock.calls.some(
       ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType
@@ -927,7 +929,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       return { count: 42 };
     });
 
-    await expect(runStatusReportTask()).rejects.toThrow('count_boom');
+    expect(await runStatusReportTask()).toMatchObject({
+      error: expect.objectContaining({ message: expect.stringContaining('count_boom') }),
+    });
 
     const usageReported = reportEvent.mock.calls.some(
       ([eventType]) => eventType === ENTITY_STORE_USAGE_EVENT.eventType
@@ -953,7 +957,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       return makeEsqlResponse([[1, 3]]);
     });
 
-    await expect(runStatusReportTask()).rejects.toThrow('boom');
+    expect(await runStatusReportTask()).toMatchObject({
+      error: expect.objectContaining({ message: expect.stringContaining('boom') }),
+    });
 
     const resolutionStateTypes = reportEvent.mock.calls
       .filter(([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType)
@@ -1172,9 +1178,10 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       getLocalIndexPatterns.mockResolvedValue(['logs-*']);
       getStatus.mockRejectedValue(new Error('status_boom'));
 
-      await expect(runStatusReportTask({ logCoverageTargetDocs: 12_345 })).rejects.toThrow(
-        'status_boom'
-      );
+      expect(await runStatusReportTask({ logCoverageTargetDocs: 12_345 })).toEqual({
+        state: { namespace: NAMESPACE, logCoverageTargetDocs: 12_345 },
+        error: new Error('status_boom'),
+      });
 
       expect(reportedCoverage()).toEqual([
         expect.objectContaining({ namespace: NAMESPACE, outcome: 'skipped', windowHours: 12 }),
