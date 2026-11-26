@@ -51,9 +51,6 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   'alertzero.triage.tagPatternKeys',
   'hunt.packageReport',
 
-  // @elastic/alertzero-common-layer — proposals
-  'proposals.getLatestRevision',
-
   // @elastic/context-eng — context_engine
   'context-engine.applyDreamChanges',
   'context-engine.applyDreamRelationships',
@@ -61,7 +58,8 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   'context-engine.deleteKi',
   'context-engine.getDreamingStatus',
   'context-engine.getFeedbackContext',
-  'context-engine.readTraceTranscripts',
+  'context-engine.readSessionMemories',
+  'context-engine.readSessionTranscripts',
   'context-engine.recordImprovements',
   'context-engine.updateKi',
 ];

@@ -48,4 +48,8 @@ export const registerProposalsPublicStepDefinitions = (
       (m) => m.settleIncompleteProposalPublicStepDefinition
     )
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./get_latest_revision_step').then((m) => m.getLatestRevisionPublicStepDefinition)
+  );
 };

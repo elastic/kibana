@@ -5,7 +5,7 @@ How a Security suite gets into the weekly run, and what to verify in a PR. Re-de
 ## How the weekly run is built
 
 - `.buildkite/pipelines/evals/llm_evals.yml` defines one explicit step per weekly suite. Each runs `bash .buildkite/scripts/steps/evals/run_suite.sh` with `EVAL_SUITE_ID` and `EVAL_MODEL_GROUPS`.
-- `.buildkite/pipelines/evals/evals.suites.json` registers the suite: `id`, `configPath`, `ciLabels`, and optionally `serverConfigSet`, `slackChannel`, `weeklyEisModelGroups`, `stepTimeoutInMinutes`, `shards`.
+- `.buildkite/pipelines/evals/evals.suites.json` registers the suite: `id`, `configPath`, `ciLabels`, and optionally `serverConfigSet`, `slackChannel`, `weeklyEisModelGroups`, `stepTimeoutInMinutes`, `shardStepTimeoutInMinutes`, `fanoutConcurrency`, `concurrencyGroups`, `shards` (each with optional `judge` and `concurrencyGroup`).
 - A suite is weekly only if `llm_evals.yml` has a step for it. `weeklyEisModelGroups` does not create that step.
 - `weeklyEisModelGroups` still affects what a weekly step runs. `get_fanout_matrix.js` uses it as the default model list for spec files that have no `specModelGroups` override, when `KBN_EVALS_WEEKLY` is set and the suite defines `specModelGroups`. It also resolves the `models:weekly-eis-models` PR label for the suite, falling back to `DEFAULT_WEEKLY_EIS_MODELS` in `eval_pipeline.ts`. Treat a change to it as a change to weekly coverage.
 - `evals_suites_config.test.ts` checks that each `weeklyEisModelGroups` entry is covered by the suite step's `EVAL_MODEL_GROUPS`. It does not check that every suite has a step.

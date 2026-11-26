@@ -25,12 +25,14 @@ import type {
   ManifestOperation,
   ManifestPagination,
   ManifestSource,
+  AglioSourceFormat,
   MarkdownSourceFormat,
   ProtocolFormat,
   UnmatchedRequest,
   VendorApiManifest,
 } from '../manifest';
 import {
+  isAglioFormat,
   isMarkdownFormat,
   isNamedCall,
   isProtocolFormat,
@@ -69,8 +71,10 @@ export interface UpdateVendorApiOptions {
   readonly directory: string;
   /** Sources to add or point elsewhere, by name; the manifest's are kept otherwise. */
   readonly sources?: Readonly<Record<string, string>>;
-  /** Sources that are Markdown references, GraphQL or MCP, by name. */
-  readonly formats?: Readonly<Record<string, MarkdownSourceFormat | ProtocolFormat>>;
+  /** Sources that are Markdown or Aglio references, GraphQL or MCP, by name. */
+  readonly formats?: Readonly<
+    Record<string, MarkdownSourceFormat | AglioSourceFormat | ProtocolFormat>
+  >;
   /** Per GraphQL or MCP source, the URLs the connector calls; see `ManifestSource`. */
   readonly endpoints?: Readonly<Record<string, readonly string[]>>;
   /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
@@ -107,6 +111,10 @@ export interface UpdateVendorApiResult {
   readonly problems: readonly string[];
   /** The `problems` of each action, without the action's name in front. */
   readonly problemsByAction: Readonly<Record<string, readonly string[]>>;
+  /** Per action, the operations of its requests that break the spec, as `METHOD /path`. */
+  readonly violatedOperationsByAction: Readonly<
+    Record<string, readonly { readonly source: string; readonly operation: string }[]>
+  >;
   /** The `problems` that concern no single action, e.g. a missing pagination declaration. */
   readonly otherProblems: readonly DriftProblem[];
   /** The specs the actions were recorded against, by source, without the overlay. */
@@ -296,9 +304,12 @@ export const updateVendorApi = async ({
       }
       return captures[name];
     };
-  const markdownFormatOf = (name: string): MarkdownSourceFormat | undefined => {
+  // The formats whose source can't be told from its document, so the loader has to be told.
+  const referenceFormatOf = (
+    name: string
+  ): MarkdownSourceFormat | AglioSourceFormat | undefined => {
     const format = formatFlags[name] ?? previous?.sources[name]?.format;
-    return isMarkdownFormat(format) ? format : undefined;
+    return isMarkdownFormat(format) || isAglioFormat(format) ? format : undefined;
   };
   const pagesOf = (name: string): readonly string[] | undefined =>
     pageFlags[name] ?? previous?.sources[name]?.pages;
@@ -389,14 +400,14 @@ export const updateVendorApi = async ({
       if (captured && !capturing) {
         requireCapture(name);
       }
-      const markdownFormat = markdownFormatOf(name);
+      const referenceFormat = referenceFormatOf(name);
       const pages = pagesOf(name);
-      if (!markdownFormat && pages !== undefined) {
+      if (!isMarkdownFormat(referenceFormat) && pages !== undefined) {
         throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
       }
       log.info(capturing ? `Loading ${name} from its capture` : `Loading ${name} from ${url}`);
       const { format, apiVersion, document } = await loadVendorSpec(url, fetchTextOf(name), {
-        format: markdownFormat,
+        format: referenceFormat,
         pages,
       });
       formats[name] = format;
@@ -459,8 +470,16 @@ export const updateVendorApi = async ({
     own.add(text);
     problemsByAction.set(action, own);
   };
+  const violated = new Map<string, Map<string, { source: string; operation: string }>>();
   const warnings = new Set<string>();
   for (const finding of recording.findings) {
+    if (finding.kind === 'request-violation' && finding.operation !== undefined) {
+      const { source, method, path: operationPath } = finding.operation;
+      const operation = `${method.toUpperCase()} ${operationPath}`;
+      const own = violated.get(finding.action) ?? new Map();
+      own.set(`${source} ${operation}`, { source, operation });
+      violated.set(finding.action, own);
+    }
     if (isProblem(finding)) {
       addProblem(describeFinding(finding), actionOf(finding));
     } else {
@@ -639,6 +658,9 @@ export const updateVendorApi = async ({
     problems: [...problems],
     problemsByAction: Object.fromEntries(
       [...problemsByAction].map(([action, own]) => [action, [...own]])
+    ),
+    violatedOperationsByAction: Object.fromEntries(
+      [...violated].map(([action, own]) => [action, [...own.values()]])
     ),
     otherProblems: [...otherProblems.values()],
     specs: raw,

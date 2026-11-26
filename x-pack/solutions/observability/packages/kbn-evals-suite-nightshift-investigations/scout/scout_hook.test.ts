@@ -510,6 +510,25 @@ describe('ORCA CI shard', () => {
       NIGHTSHIFT_ORCA_ES_PASSWORD: orca.password,
     });
   });
+  it('runs one slice of the release on an orcabench-<index>-of-<count> shard', () => {
+    const whole = runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'orcabench' });
+    const { status, output } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'orcabench-2-of-5' }
+    );
+    expect(status).toBe(0);
+    expect(output.env).toEqual({ ...whole.output.env, NIGHTSHIFT_ORCA_SLICE: '2/5' });
+  });
+  it.each(['orcabench-2', 'orcabench-a-of-5', 'my-orcabench-2-of-5'])(
+    'does not treat %s as an ORCA shard',
+    (shardId) => {
+      const { output } = runHook(
+        { ...existing, nightshiftOrcaEs: orca },
+        { EVAL_SHARD_ID: shardId }
+      );
+      expect(output.env.NIGHTSHIFT_CONNECTOR_SET).toBe('default');
+    }
+  );
   it('uses the same credential for the no-flags variant, whose keys the eval restricts itself', () => {
     const run = (env: Record<string, string>) =>
       runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'orcabench', ...env });

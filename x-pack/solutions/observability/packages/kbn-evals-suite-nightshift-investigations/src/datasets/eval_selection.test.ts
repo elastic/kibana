@@ -251,15 +251,16 @@ describe('reinforcement selection', () => {
 
 describe('ORCA selection', () => {
   const orcaEnv = { ...WITH_SANDBOX, NIGHTSHIFT_CONNECTOR_SET: 'orcabench' };
-  it.each([{ EVAL_SHARD_ID: 'orcabench' }, { NIGHTSHIFT_DATASETS: 'orcabench' }])(
-    'isolates the ORCA job from existing coverage: %j',
-    (selection) => {
-      expect(resolveEvalSelection({ ...orcaEnv, ...selection })).toEqual({
-        ...NONE,
-        runOrca: true,
-      });
-    }
-  );
+  it.each([
+    { EVAL_SHARD_ID: 'orcabench' },
+    { EVAL_SHARD_ID: 'orcabench-2-of-5' },
+    { NIGHTSHIFT_DATASETS: 'orcabench' },
+  ])('isolates the ORCA job from existing coverage: %j', (selection) => {
+    expect(resolveEvalSelection({ ...orcaEnv, ...selection })).toEqual({
+      ...NONE,
+      runOrca: true,
+    });
+  });
   it.each([{}, { NIGHTSHIFT_CONNECTOR_SET: 'default' }])(
     'rejects an ORCA run on a reused server with another connector set: %j',
     (connectorSet) => {

@@ -8,7 +8,7 @@
 import { expect } from '@playwright/test';
 import { buildModelFromConnector, tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
-import { loadOrcaDataset, resolveOrcaRun, storeOrcaSlice } from './orca_dataset';
+import { loadOrcaDataset, resolveOrcaRun } from './orca_dataset';
 import { orcaJudgeConnector } from './orca_judge';
 import { createOrcaEvaluators } from './orca/evaluators';
 import { addOrcaReport, assertOrcaReportsWritten } from './orca/report';
@@ -54,11 +54,9 @@ evaluate.describe(
           `Re-grade ${experimentId} with the connector of the model that ran it`
         ).toBe(stored.taskModelId);
         // The pinned release, not the experiment's dataset, so earlier releases get orca_expected.
-        const release = await loadOrcaDataset(evalsClient, { release: run.release });
-        const dataset = await storeOrcaSlice(
-          evalsClient,
-          buildOrcaRegradeDataset(release, stored.outputs, experimentId)
-        );
+        const release = await loadOrcaDataset(evalsClient, run.release);
+        // The executor stores this dataset under its own name as it runs, like any ORCA run.
+        const dataset = buildOrcaRegradeDataset(release, stored.outputs, experimentId);
         const rubrics = await loadOrcaRubrics(evalsClient);
         assertOrcaRubricsCover(dataset.examples, rubrics);
         const judgeConnector = orcaJudgeConnector(evaluationConnector);

@@ -109,7 +109,12 @@ es_url=''
 es_key=''
 orca_username=''
 orca_password=''
-if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcabench ]]; then
+# The CI shards `orcabench-<index>-of-<count>` each run one slice of the release on their own server.
+orca_slice=''
+if [[ "${EVAL_SHARD_ID:-}" =~ ^orcabench-([0-9]+)-of-([0-9]+)$ ]]; then
+  orca_slice="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+fi
+if [[ "${EVAL_SHARD_ID:-}" == orcabench || -n "$orca_slice" || "${NIGHTSHIFT_DATASETS:-}" == orcabench ]]; then
   # Only the suite's own config holds the ORCA credential. CI forwards this same input when the
   # native CLI invokes the hook again.
   if ! printf '%s' "$config" | jq -e '.nightshiftOrcaEs |
@@ -257,6 +262,7 @@ HOOK_HOST="$host" \
   HOOK_ES_KEY="$es_key" \
   HOOK_ORCA_USERNAME="$orca_username" \
   HOOK_ORCA_PASSWORD="$orca_password" \
+  HOOK_ORCA_SLICE="$orca_slice" \
   HOOK_KNOWLEDGE="$knowledge" \
   HOOK_KNOWLEDGE_URL="$knowledge_url" \
   HOOK_KNOWLEDGE_KEY="$knowledge_key" \
@@ -287,7 +293,9 @@ HOOK_HOST="$host" \
       NIGHTSHIFT_ORCA_ES_URL: $ENV.HOOK_ES_URL,
       NIGHTSHIFT_ORCA_ES_USERNAME: $ENV.HOOK_ORCA_USERNAME,
       NIGHTSHIFT_ORCA_ES_PASSWORD: $ENV.HOOK_ORCA_PASSWORD
-    } else {} end) + (if $ENV.HOOK_KNOWLEDGE == "" then {} else {
+    } + (if $ENV.HOOK_ORCA_SLICE != "" then {
+      NIGHTSHIFT_ORCA_SLICE: $ENV.HOOK_ORCA_SLICE
+    } else {} end) else {} end) + (if $ENV.HOOK_KNOWLEDGE == "" then {} else {
       NIGHTSHIFT_KNOWLEDGE: $ENV.HOOK_KNOWLEDGE,
       NIGHTSHIFT_KNOWLEDGE_ES_URL: $ENV.HOOK_KNOWLEDGE_URL,
       NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: $ENV.HOOK_KNOWLEDGE_KEY,

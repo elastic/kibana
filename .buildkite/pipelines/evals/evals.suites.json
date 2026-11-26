@@ -161,19 +161,46 @@
         "eis/openai-gpt-5.6-terra"
       ],
       "stepTimeoutInMinutes": 240,
+      "shardStepTimeoutInMinutes": 120,
+      "fanoutConcurrency": 12,
+      "concurrencyGroups": {
+        "sandbox-heavy": 2
+      },
       "shards": [
         {
           "id": "customer0-golden",
           "judge": "eis-openai-gpt-6-sol",
+          "concurrencyGroup": "sandbox-heavy",
           "specFiles": ["evals/investigation/stored.spec.ts"]
         },
         {
           "id": "customer0-connector-probes",
           "judge": "eis-openai-gpt-6-sol",
+          "concurrencyGroup": "sandbox-heavy",
           "specFiles": ["evals/connector_probe/stored.spec.ts"]
         },
         {
-          "id": "orcabench",
+          "id": "orcabench-1-of-5",
+          "judge": "eis-openai-gpt-5-4",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "orcabench-2-of-5",
+          "judge": "eis-openai-gpt-5-4",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "orcabench-3-of-5",
+          "judge": "eis-openai-gpt-5-4",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "orcabench-4-of-5",
+          "judge": "eis-openai-gpt-5-4",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "orcabench-5-of-5",
           "judge": "eis-openai-gpt-5-4",
           "specFiles": ["evals/investigation/orcabench.spec.ts"]
         },
@@ -447,7 +474,7 @@
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-5.5-sonnet",
         "eis/anthropic-claude-5.5-opus",
-        "eis/openai-gpt-5.6-sol"
+        "eis/openai-gpt-6-sol"
       ]
     },
     {
@@ -465,7 +492,7 @@
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-5.5-sonnet",
         "eis/anthropic-claude-5.5-opus",
-        "eis/openai-gpt-5.6-sol"
+        "eis/openai-gpt-6-sol"
       ]
     },
     {

@@ -185,7 +185,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         disableScreenReaderOutput
       >
         <EuiButtonIcon
-          color="primary"
+          color="text"
           // eslint-disable-next-line @kbn/compat/react-jsx-no-bind, react-perf/jsx-no-new-function-as-prop
           onClick={() => onEditClick && onEditClick(item)}
           iconType="pencil"

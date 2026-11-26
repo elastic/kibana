@@ -51,6 +51,46 @@ interface RendererResult {
   etag: string;
 }
 
+interface ChunkPreloadManifest {
+  allChunks?: string[];
+  entrypointChunks?: Record<string, string[]>;
+}
+
+/** Converts parsed JSON into a chunk manifest that is safe to consume. */
+export const normalizeChunkPreloadManifest = (value: unknown): ChunkPreloadManifest => {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return { allChunks: [] };
+  }
+
+  const { allChunks, entrypointChunks } = value as Record<string, unknown>;
+  return {
+    allChunks: Array.isArray(allChunks)
+      ? allChunks.filter((chunk): chunk is string => typeof chunk === 'string')
+      : [],
+    ...(entrypointChunks !== null &&
+    typeof entrypointChunks === 'object' &&
+    !Array.isArray(entrypointChunks)
+      ? { entrypointChunks: entrypointChunks as Record<string, string[]> }
+      : {}),
+  };
+};
+
+/** Returns the preload chunks required by the selected internal plugin entries. */
+export const getChunkFilenamesForPlugins = (
+  manifest: ChunkPreloadManifest,
+  pluginIds: string[]
+): string[] => {
+  const { allChunks = [], entrypointChunks } = manifest;
+  if (
+    !entrypointChunks ||
+    pluginIds.some((pluginId) => !Array.isArray(entrypointChunks[pluginId]))
+  ) {
+    return allChunks;
+  }
+
+  return [...new Set(pluginIds.flatMap((pluginId) => entrypointChunks[pluginId]))].sort();
+};
+
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
   baseHref,
@@ -68,25 +108,24 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   const useHMR = !packageInfo.dist && process.env.KBN_HMR !== 'false';
   const isDist = packageInfo.dist;
 
-  // Read chunk-manifest.json to get all async chunk filenames for the load() array.
+  // Read chunk-manifest.json to get async chunk filenames for the load() array.
   // Cached in dist mode (chunks don't change at runtime). In dev mode, re-read each
   // request so HMR-triggered recompilations are picked up.
-  let cachedAllChunkFilenames: string[] | null = null;
-  const getAllChunkFilenames = (): string[] => {
-    if (isDist && cachedAllChunkFilenames) {
-      return cachedAllChunkFilenames;
+  let cachedChunkManifest: ChunkPreloadManifest | null = null;
+  const getChunkManifest = (): ChunkPreloadManifest => {
+    if (isDist && cachedChunkManifest) {
+      return cachedChunkManifest;
     }
     try {
       const manifestPath = fromRoot('target/public/bundles/chunk-manifest.json');
       const raw = Fs.readFileSync(manifestPath, 'utf-8');
-      const manifest = JSON.parse(raw) as { allChunks?: string[] };
-      const result = manifest.allChunks ?? [];
+      const manifest = normalizeChunkPreloadManifest(JSON.parse(raw));
       if (isDist) {
-        cachedAllChunkFilenames = result;
+        cachedChunkManifest = manifest;
       }
-      return result;
+      return manifest;
     } catch {
-      return [];
+      return {};
     }
   };
 
@@ -145,7 +184,13 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     });
     const externalPluginScriptPaths = externalPluginInfos.map(({ bundlePath }) => bundlePath);
 
-    const chunkPaths = getAllChunkFilenames().map((f) => `${bundlesHref}/${f}`);
+    const internalPluginIds = [
+      'core',
+      ...[...bundlePaths.keys()].filter((pluginId) => !externalPluginIds.has(pluginId)),
+    ];
+    const chunkPaths = getChunkFilenamesForPlugins(getChunkManifest(), internalPluginIds).map(
+      (filename) => `${bundlesHref}/${filename}`
+    );
 
     const jsDependencyPaths = getRspackDependencyPaths(
       bundlesHref,
@@ -176,6 +221,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       themeTagName,
       jsDependencyPaths,
       publicPathMap,
+      pluginIdsToLoad: ['core', ...bundlePaths.keys()],
       useHMR,
     });
 

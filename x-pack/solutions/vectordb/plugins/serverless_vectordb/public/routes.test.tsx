@@ -12,6 +12,7 @@ import { createMemoryHistory, type MemoryHistory } from 'history';
 import { hasSeenOnboarding } from '@kbn/vectordb-onboarding';
 import { GETTING_STARTED_PATH } from '../common/constants';
 import { AppRoutes } from './routes';
+import { useKibana } from './hooks/use_kibana';
 
 jest.mock('@kbn/vectordb-onboarding', () => ({
   ...jest.requireActual('@kbn/vectordb-onboarding'),
@@ -23,9 +24,14 @@ jest.mock('@kbn/vectordb-onboarding', () => ({
 
 jest.mock('./home_page', () => ({
   HomePage: () => <div data-test-subj="homePage" />,
+  IntegratedHomeApp: () => <div data-test-subj="integratedHomeApp" />,
 }));
 
+jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+
 const mockHasSeenOnboarding = jest.mocked(hasSeenOnboarding);
+const mockUseKibana = useKibana as jest.Mock;
+const useIntegratedOnboardingEnabled = jest.fn(() => false);
 
 const onOnboardingExit = jest.fn();
 
@@ -42,6 +48,10 @@ const renderRoutes = (initialEntry: string): MemoryHistory => {
 beforeEach(() => {
   jest.clearAllMocks();
   mockHasSeenOnboarding.mockReturnValue(true);
+  useIntegratedOnboardingEnabled.mockReturnValue(false);
+  mockUseKibana.mockReturnValue({
+    services: { elasticsearchHome: { useIntegratedOnboardingEnabled } },
+  });
 });
 
 describe('AppRoutes', () => {
@@ -103,5 +113,41 @@ describe('AppRoutes', () => {
 
     expect(history.location.pathname).toBe('/');
     expect(screen.getByTestId('homePage')).toBeInTheDocument();
+  });
+
+  describe('with integrated onboarding on', () => {
+    beforeEach(() => {
+      useIntegratedOnboardingEnabled.mockReturnValue(true);
+    });
+
+    it.each([
+      ['a first-time user', false],
+      ['a returning user', true],
+    ])(
+      'does not redirect %s to getting started and renders the integrated home app',
+      (_user, seenOnboarding) => {
+        mockHasSeenOnboarding.mockReturnValue(seenOnboarding);
+
+        const history = renderRoutes('/');
+
+        expect(history.location.pathname).toBe('/');
+        expect(screen.getByTestId('integratedHomeApp')).toBeInTheDocument();
+        expect(screen.queryByTestId('homePage')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('onboardingLandingPage')).not.toBeInTheDocument();
+      }
+    );
+
+    it('renders the integrated home app at the getting started path', () => {
+      renderRoutes(GETTING_STARTED_PATH);
+
+      expect(screen.getByTestId('integratedHomeApp')).toBeInTheDocument();
+      expect(screen.queryByTestId('onboardingLandingPage')).not.toBeInTheDocument();
+    });
+
+    it('does not call onOnboardingExit', () => {
+      renderRoutes('/');
+
+      expect(onOnboardingExit).not.toHaveBeenCalled();
+    });
   });
 });

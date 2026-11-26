@@ -535,7 +535,7 @@ describe('SublimeSecurityConnector', () => {
         ...mockContext,
         config: { baseUrl: `${BASE_URL}///` },
       } as unknown as ActionContext;
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: { id: 'task-9', state: 'pending' } });
+      (mockClient.get as jest.Mock).mockResolvedValue({ data: { id: 'task-9', state: 'started' } });
 
       await SublimeSecurityConnector.actions.getTask.handler(slashContext, { taskId: 'task-9' });
 

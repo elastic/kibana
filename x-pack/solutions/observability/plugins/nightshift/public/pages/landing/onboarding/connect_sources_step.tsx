@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   ConnectSourcesGrid,
   isAdditionalType,
@@ -21,7 +22,10 @@ export const CONNECT_SOURCES_TITLE = i18n.translate(
 export function OnboardingConnectSourcesStep(): React.ReactElement {
   return (
     <div data-test-subj="nightshiftOnboardingConnectSourcesStep">
-      <ConnectSourcesGrid filter={isAdditionalType} />
+      <ConnectSourcesGrid
+        ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_CONNECTORS}
+        filter={isAdditionalType}
+      />
     </div>
   );
 }
