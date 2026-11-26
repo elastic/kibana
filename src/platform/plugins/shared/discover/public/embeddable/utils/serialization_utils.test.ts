@@ -20,7 +20,9 @@ import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { getPersistedTabMock } from '../../application/main/state_management/redux/__mocks__/internal_state.mocks';
-import { deserializeState, serializeState, toPanelTableSettings } from './serialization_utils';
+import { deserializeState, serializeState } from './serialization_utils';
+import { applyTableSettingOverrides, toSessionTabAttributes } from './panel_tab';
+import type { SearchEmbeddablePanelTab, SearchEmbeddableRuntimeState } from '../types';
 import { toDiscoverSessionApiData } from '../../session/session_conversions';
 import { discoverSessionInternalDataSchema } from '../../../server/api/internal_schema';
 import type {
@@ -155,6 +157,9 @@ describe('Serialization utils', () => {
     });
   };
 
+  const getAttributes = ({ panelTab }: SearchEmbeddableRuntimeState) =>
+    toSessionTabAttributes(panelTab);
+
   const getSessionTabsWithMetrics = (): DiscoverSessionTab[] => [
     {
       ...mockTab('metrics-tab', 'Metrics tab'),
@@ -177,10 +182,7 @@ describe('Serialization utils', () => {
       expect(deserializedState).toMatchObject({
         title: 'test panel title',
         hide_border: true,
-        tab: apiStateByValue.tabs[0],
-        columns: ['_source'],
-        sort: [['order_date', 'desc']],
-        serializedSearchSource: { index: dataViewId },
+        panelTab: { tab: apiStateByValue.tabs[0] },
       });
     });
 
@@ -193,7 +195,7 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
 
-      expect(deserializedState.tabTypeState).toEqual(metricsTabTypeState);
+      expect(getAttributes(deserializedState).tabTypeState).toEqual(metricsTabTypeState);
     });
 
     test('by reference - default tab (no selectedTabId)', async () => {
@@ -220,7 +222,7 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
 
-      expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
+      expect(deserializedState.panelTab.tab).toBeDefined();
       expect(Object.keys(deserializedState)).toContain('savedObjectId');
       expect(deserializedState.savedObjectId).toBe('savedSearch');
       expect(deserializedState.title).toEqual('test panel title');
@@ -246,8 +248,8 @@ describe('Serialization utils', () => {
 
       expect(deserializedState.title).toEqual('test panel title');
       // For a valid/default tab, dashboard overrides win on top of resolved tab attributes
-      expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
-      expect(deserializedState.columns).toEqual(['_source']); // from tab-1
+      expect(getAttributes(deserializedState).sort).toEqual([['order_date', 'asc']]);
+      expect(getAttributes(deserializedState).columns).toEqual(['_source']); // from tab-1
       expect(deserializedState.selectedTabId).toEqual('tab-1');
       expect(deserializedState.tabs).toEqual([
         {
@@ -287,11 +289,11 @@ describe('Serialization utils', () => {
       expect(deserializedState.savedObjectId).toEqual('savedSearch');
       expect(deserializedState.selectedTabId).toEqual('tab-2');
       // Attributes should come from tab-2
-      expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
-      expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
+      expect(getAttributes(deserializedState).columns).toEqual(['col-a', 'col-b']);
+      expect(getAttributes(deserializedState).sort).toEqual([['timestamp', 'asc']]);
       // Like the session API, an ES|QL tab of a session has no sample size
-      expect(deserializedState.sampleSize).toBeUndefined();
-      expect(deserializedState.tabTypeState).toEqual(metricsTabTypeState);
+      expect(getAttributes(deserializedState).sampleSize).toBeUndefined();
+      expect(getAttributes(deserializedState).tabTypeState).toEqual(metricsTabTypeState);
     });
 
     test('by reference - deleted selectedTabId discards stale dashboard overrides', async () => {
@@ -319,8 +321,8 @@ describe('Serialization utils', () => {
       });
       expect(deserializedState.selectedTabId).toEqual('deleted-tab-id');
       // Stale overrides from the deleted tab should not carry over
-      expect(deserializedState.columns).toBeUndefined();
-      expect(deserializedState.sort).toBeUndefined();
+      expect(getAttributes(deserializedState).columns).toBeUndefined();
+      expect(getAttributes(deserializedState).sort).toBeUndefined();
     });
 
     test('by reference - valid selectedTabId with dashboard overrides', async () => {
@@ -345,8 +347,8 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
       // For a valid tab, dashboard overrides should win on top of tab-2 attributes
-      expect(deserializedState.columns).toEqual(['custom-col']);
-      expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
+      expect(getAttributes(deserializedState).columns).toEqual(['custom-col']);
+      expect(getAttributes(deserializedState).sort).toEqual([['timestamp', 'asc']]);
     });
 
     test('by reference - partial jsonModeSettings override deep-merges with the source', async () => {
@@ -369,7 +371,10 @@ describe('Serialization utils', () => {
 
       // jsonModeSettings partial-merges: wrap_lines is overridden while hide_nulls is preserved
       // from the source (a shallow replace dropped it).
-      expect(deserializedState.jsonModeSettings).toEqual({ hideNulls: true, wrapLines: false });
+      expect(getAttributes(deserializedState).jsonModeSettings).toEqual({
+        hideNulls: true,
+        wrapLines: false,
+      });
     });
 
     test('by reference - grid override replaces wholesale so removed columns are not resurrected', async () => {
@@ -394,7 +399,7 @@ describe('Serialization utils', () => {
       });
 
       // Unlike jsonModeSettings, grid must replace wholesale: B stays dropped, not merged back in.
-      expect(deserializedState.grid).toEqual({ columns: { A: { width: 100 } } });
+      expect(getAttributes(deserializedState).grid).toEqual({ columns: { A: { width: 100 } } });
     });
 
     test('by reference - empty column settings override keeps the session widths', async () => {
@@ -406,7 +411,7 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
 
-      expect(deserializedState.grid).toEqual(grid);
+      expect(getAttributes(deserializedState).grid).toEqual(grid);
     });
   });
 
@@ -435,7 +440,7 @@ describe('Serialization utils', () => {
             hide_border: runtimeState.hide_border,
           }),
           runtimeState,
-          tableSettings: toPanelTableSettings(runtimeState),
+          panelTab: runtimeState.panelTab,
         })
       ).toEqual(serializedState);
     });
@@ -451,6 +456,13 @@ describe('Serialization utils', () => {
       };
       const getTabs = (state: DiscoverSessionEmbeddableState) =>
         'tabs' in state ? state.tabs : [];
+      const editTable = (
+        { tab, inlineDataViewId }: SearchEmbeddablePanelTab,
+        tableSettings: DiscoverSessionApiEmbeddableOverrides
+      ): SearchEmbeddablePanelTab => ({
+        tab: tab && applyTableSettingOverrides(tab, tableSettings),
+        inlineDataViewId,
+      });
 
       test('equal state', async () => {
         const runtimeState = await getRuntimeState([mockTab('tab-1', 'Tab 1')]);
@@ -458,7 +470,7 @@ describe('Serialization utils', () => {
         const serializedState = serializeState({
           ...serializers,
           runtimeState,
-          tableSettings: toPanelTableSettings(runtimeState),
+          panelTab: runtimeState.panelTab,
           savedObjectId: 'savedSearch',
           selectedTabId: runtimeState.selectedTabId,
         });
@@ -476,12 +488,11 @@ describe('Serialization utils', () => {
         const serializedState = serializeState({
           ...serializers,
           runtimeState,
-          tableSettings: {
-            ...toPanelTableSettings(runtimeState),
+          panelTab: editTable(runtimeState.panelTab, {
             column_settings: { _source: { width: 250 } },
             sample_size: 500,
             sort: [{ name: 'order_date', direction: 'asc' }],
-          },
+          }),
           savedObjectId: 'savedSearch',
           selectedTabId: 'tab-1',
         });
@@ -523,10 +534,7 @@ describe('Serialization utils', () => {
         const serializedState = serializeState({
           ...serializers,
           runtimeState,
-          tableSettings: {
-            ...toPanelTableSettings(runtimeState),
-            column_order: ['message', 'host.name'],
-          },
+          panelTab: editTable(runtimeState.panelTab, { column_order: ['message', 'host.name'] }),
           savedObjectId: 'savedSearch',
           selectedTabId: runtimeState.selectedTabId,
         });
@@ -535,8 +543,8 @@ describe('Serialization utils', () => {
         expect(serializedState).toEqual(
           expect.objectContaining({ overrides: { column_order: ['message', 'host.name'] } })
         );
-        expect(reloadedState.columns).toEqual(['message', 'host.name']);
-        expect(reloadedState.serializedSearchSource).toMatchObject({
+        expect(getAttributes(reloadedState).columns).toEqual(['message', 'host.name']);
+        expect(getAttributes(reloadedState).serializedSearchSource).toMatchObject({
           index: { id: inlineDataViewId },
           filter: [
             {
@@ -559,7 +567,7 @@ describe('Serialization utils', () => {
           serializeState({
             ...serializers,
             runtimeState,
-            tableSettings: toPanelTableSettings(runtimeState),
+            panelTab: runtimeState.panelTab,
             savedObjectId: 'savedSearch',
             selectedTabId: runtimeState.selectedTabId,
           })
@@ -601,7 +609,7 @@ describe('Serialization utils', () => {
             serializeState({
               ...serializers,
               runtimeState,
-              tableSettings: toPanelTableSettings(runtimeState),
+              panelTab: runtimeState.panelTab,
               selectedTabId,
             })
           );
@@ -685,7 +693,7 @@ describe('Serialization utils', () => {
         });
         const serialized = serializeState({
           runtimeState: deserialized,
-          tableSettings: toPanelTableSettings(deserialized),
+          panelTab: deserialized.panelTab,
           serializeTitles: () => ({
             title: deserialized.title,
             description: deserialized.description,
@@ -714,7 +722,7 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
 
-      expect(deserialized.columns).toEqual(['message']);
+      expect(getAttributes(deserialized).columns).toEqual(['message']);
       expect(deserialized.title).toBe('Custom panel title');
     });
 

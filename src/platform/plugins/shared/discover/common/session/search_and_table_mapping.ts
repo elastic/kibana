@@ -33,7 +33,7 @@ import { migrateLegacyQuery } from '../migrate_legacy_query';
 // `toStored…` maps API fields to that format and `fromStored…` maps it back.
 
 /** Fields are optional because panels can override only some table settings. */
-type StoredTableSettings = Partial<
+export type StoredTableSettings = Partial<
   Pick<
     DiscoverSessionTabAttributes,
     | 'columns'

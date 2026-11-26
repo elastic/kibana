@@ -10,6 +10,11 @@
 import React from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_ESQL_DATA_SOURCE_TYPE,
+} from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
@@ -20,13 +25,14 @@ import {
   type PresentationContainer,
 } from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { VIEW_MODE, type DiscoverSessionTabTypeState } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 import { createProfileStateRegistry, METRICS_STATE_DEF } from '../../common/context_awareness';
+import { fromStoredTabTypeState } from '../../common/session/tab_type_state';
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
@@ -60,13 +66,35 @@ describe('saved search embeddable', () => {
 
   const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
+  const classicTab = {
+    type: DiscoverTabType.Default,
+    column_order: ['message', 'extension'],
+    row_height: 30,
+    header_row_height: 5,
+    rows_per_page: 50,
+    sample_size: 250,
+    filters: [],
+    sort: [],
+    view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+    data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewMock.id ?? '' },
+  } satisfies DiscoverSessionApiEmbeddableTab;
+
+  const getEsqlTab = (tabTypeState?: DiscoverSessionTabTypeState) =>
+    ({
+      ...fromStoredTabTypeState(tabTypeState),
+      sort: [],
+      data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'TS metrics-*' },
+    } satisfies DiscoverSessionApiEmbeddableTab);
+
   const getInitialRuntimeState = ({
     searchMock,
     dataView = dataViewMock,
+    tab = classicTab,
     partialState = {},
   }: {
     searchMock?: jest.Mock;
     dataView?: DataView;
+    tab?: DiscoverSessionApiEmbeddableTab;
     partialState?: Partial<SearchEmbeddableRuntimeState>;
   } = {}): SearchEmbeddableRuntimeState => {
     const searchSource = createSearchSourceMock({ index: dataView }, undefined, searchMock);
@@ -76,12 +104,7 @@ describe('saved search embeddable', () => {
 
     return {
       time_range: { from: 'now-15m', to: 'now' },
-      columns: ['message', 'extension'],
-      rowHeight: 30,
-      headerRowHeight: 5,
-      rowsPerPage: 50,
-      sampleSize: 250,
-      serializedSearchSource: searchSource.getSerializedFields(),
+      panelTab: { tab },
       ...partialState,
     };
   };
@@ -338,7 +361,7 @@ describe('saved search embeddable', () => {
       const { search } = createSearchFnMock(0);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
+        tab: { ...classicTab, view_mode: VIEW_MODE.AGGREGATED_LEVEL },
       });
 
       discoverServiceMock.uiSettings.get = jest.fn().mockImplementation((key: string) => {
@@ -433,12 +456,7 @@ describe('saved search embeddable', () => {
 
       return {
         time_range: { from: 'now-15m', to: 'now' },
-        columns: ['message', 'extension'],
-        rowHeight: 30,
-        headerRowHeight: 5,
-        rowsPerPage: 50,
-        sampleSize: 250,
-        serializedSearchSource: searchSource.getSerializedFields(),
+        panelTab: { tab: classicTab },
       };
     };
 
@@ -480,7 +498,7 @@ describe('saved search embeddable', () => {
 
   describe('search embeddable api', () => {
     describe('applySerializedState', () => {
-      const initialTabTypeState: SearchEmbeddableRuntimeState['tabTypeState'] = {
+      const initialTabTypeState: DiscoverSessionTabTypeState = {
         type: DiscoverTabType.Metrics,
         dimensions: ['initial.dimension'],
         searchTerm: 'cpu',
@@ -496,9 +514,7 @@ describe('saved search embeddable', () => {
         },
         { type: DiscoverTabType.Default, tabTypeState: undefined },
       ])('restores $type profile state in savedSearch$', async ({ tabTypeState }) => {
-        runtimeState = getInitialRuntimeState({
-          partialState: { tabTypeState: initialTabTypeState },
-        });
+        runtimeState = getInitialRuntimeState({ tab: getEsqlTab(initialTabTypeState) });
 
         const { api } = await factory.buildEmbeddable({
           initializeDrilldownsManager: mockInitializeDrilldownsManager,
@@ -514,7 +530,7 @@ describe('saved search embeddable', () => {
 
         expect(api.savedSearch$.getValue().tabTypeState).toEqual(initialTabTypeState);
 
-        runtimeState = getInitialRuntimeState({ partialState: { tabTypeState } });
+        runtimeState = getInitialRuntimeState({ tab: getEsqlTab(tabTypeState) });
         await act(async () => {
           await api.applySerializedState(byValueInitialState);
         });
@@ -570,10 +586,7 @@ describe('saved search embeddable', () => {
 
     it('should not fetch data if only a new input title is set', async () => {
       const { search, resolveSearch } = createSearchFnMock(1);
-      runtimeState = getInitialRuntimeState({
-        searchMock: search,
-        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
-      });
+      runtimeState = getInitialRuntimeState({ searchMock: search });
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { ref_id: 'id', overrides: {} },
@@ -631,7 +644,14 @@ describe('saved search embeddable', () => {
       );
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { serializedSearchSource: esqlSearchSource.getSerializedFields() },
+        tab: {
+          type: DiscoverTabType.Default,
+          sort: [],
+          data_source: {
+            type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+            query: 'FROM kibana_sample_data_logs | LIMIT 1',
+          },
+        },
       });
       const createSearchSource = jest
         .fn()
@@ -704,10 +724,7 @@ describe('saved search embeddable', () => {
 
     it('should not provide inline editing overrides for by-value embeddables', async () => {
       const { search } = createSearchFnMock(1);
-      runtimeState = getInitialRuntimeState({
-        searchMock: search,
-        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
-      });
+      runtimeState = getInitialRuntimeState({ searchMock: search });
 
       discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
         navigateToEditor: jest.fn(),
@@ -738,7 +755,7 @@ describe('saved search embeddable', () => {
 
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL, savedObjectId: 'id' },
+        partialState: { savedObjectId: 'id' },
       });
       const navigateToEditor = jest.fn();
 
@@ -794,10 +811,7 @@ describe('saved search embeddable', () => {
       let embeddableApi: SearchEmbeddableApi;
       beforeEach((done) => {
         const { search } = createSearchFnMock(1);
-        runtimeState = getInitialRuntimeState({
-          searchMock: search,
-          partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
-        });
+        runtimeState = getInitialRuntimeState({ searchMock: search });
         factory
           .buildEmbeddable({
             initializeDrilldownsManager,
@@ -1060,7 +1074,7 @@ describe('saved search embeddable', () => {
       const { search, resolveSearch } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { columns: ['rootProfile', 'message', 'extension'] },
+        tab: { ...classicTab, column_order: ['rootProfile', 'message', 'extension'] },
       });
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
@@ -1147,18 +1161,15 @@ describe('saved search embeddable', () => {
           return originalCreateScopedProfilesManager(args);
         });
 
-      runtimeState = getInitialRuntimeState({
-        partialState: {
-          tabTypeState: {
-            type: DiscoverTabType.Metrics,
-            dimensions: ['host.name'],
-            searchTerm: 'cpu',
-            counterAggregation: 'max',
-            gaugeAggregation: 'avg',
-            histogramPercentile: 'p99',
-          },
-        },
-      });
+      const tabTypeState: DiscoverSessionTabTypeState = {
+        type: DiscoverTabType.Metrics,
+        dimensions: ['host.name'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p99',
+      };
+      runtimeState = getInitialRuntimeState({ tab: getEsqlTab(tabTypeState) });
 
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
@@ -1181,7 +1192,7 @@ describe('saved search embeddable', () => {
         gaugeAggregation: 'avg',
         histogramPercentile: 'p99',
       });
-      expect(api.savedSearch$.getValue().tabTypeState).toEqual(runtimeState.tabTypeState);
+      expect(api.savedSearch$.getValue().tabTypeState).toEqual(tabTypeState);
     });
 
     it('should not expose addFilter through the toolkit when filters are disabled', async () => {

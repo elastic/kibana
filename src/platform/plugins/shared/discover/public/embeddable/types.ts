@@ -109,16 +109,18 @@ export interface SearchEmbeddableSessionTab {
   filters?: Filter[];
 }
 
-export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
-  SerializedTitles &
+/** The tab a panel shows, which its changes update and its search and table derive from. */
+export type SearchEmbeddablePanelTab = Omit<SearchEmbeddableSessionTab, 'id' | 'label'>;
+
+export type SearchEmbeddableRuntimeState = SerializedTitles &
   SerializedTimeRange &
   SerializedDrilldowns & {
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
-    /** Tab of a by-value panel */
-    tab?: DiscoverSessionApiEmbeddableTab;
+    /** The by-value tab, or the selected session tab with the overrides of a linked panel */
+    panelTab: SearchEmbeddablePanelTab;
     selectedTabId?: string;
     /** Session tabs of a linked panel */
     tabs?: SearchEmbeddableSessionTab[];
