@@ -37,6 +37,10 @@ jest.mock('./pages/entity_analytics_new_home_page', () => ({
   EntityAnalyticsNewHomePage: () => null,
 }));
 
+const mockFlags = (flags: Record<string, boolean>) => {
+  mockUseIsExperimentalFeatureEnabled.mockImplementation((flag: string) => flags[flag] ?? false);
+};
+
 const renderRetiredPrivmonUrl = (search: string) => {
   const route = routes.find(
     ({ path }) => path === ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH
@@ -61,24 +65,39 @@ describe('retired privileged user monitoring URL', () => {
     jest.clearAllMocks();
   });
 
-  it('redirects to the Watchlists tab and keeps the query string when watchlists are enabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  it.each([
+    {
+      watchlists: true,
+      entityStoreV2: true,
+      expectedPathname: `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/watchlists`,
+    },
+    {
+      watchlists: true,
+      entityStoreV2: false,
+      expectedPathname: `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/watchlists`,
+    },
+    {
+      watchlists: false,
+      entityStoreV2: true,
+      expectedPathname: ENTITY_ANALYTICS_MANAGEMENT_PATH,
+    },
+    {
+      watchlists: false,
+      entityStoreV2: false,
+      expectedPathname: ENTITY_ANALYTICS_MANAGEMENT_PATH,
+    },
+  ])(
+    'redirects to $expectedPathname and keeps the query string when watchlists=$watchlists and entityStoreV2=$entityStoreV2',
+    ({ watchlists, entityStoreV2, expectedPathname }) => {
+      mockFlags({
+        entityAnalyticsWatchlistEnabled: watchlists,
+        entityAnalyticsEntityStoreV2: entityStoreV2,
+      });
 
-    const history = renderRetiredPrivmonUrl('?foo=bar');
+      const history = renderRetiredPrivmonUrl('?foo=bar');
 
-    expect(mockUseIsExperimentalFeatureEnabled).toHaveBeenCalledWith(
-      'entityAnalyticsWatchlistEnabled'
-    );
-    expect(history.location.pathname).toBe(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/watchlists`);
-    expect(history.location.search).toBe('?foo=bar');
-  });
-
-  it('redirects to the management landing page and keeps the query string when watchlists are disabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-    const history = renderRetiredPrivmonUrl('?foo=bar');
-
-    expect(history.location.pathname).toBe(ENTITY_ANALYTICS_MANAGEMENT_PATH);
-    expect(history.location.search).toBe('?foo=bar');
-  });
+      expect(history.location.pathname).toBe(expectedPathname);
+      expect(history.location.search).toBe('?foo=bar');
+    }
+  );
 });
