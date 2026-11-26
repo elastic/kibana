@@ -12,6 +12,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { SLOPluginStartDependencies } from '../../../types';
+import { isAbortError } from '../../../utils/with_deadline';
 import type { ResourceInstallState } from '../../resource_install_state';
 
 export const TYPE = 'slo:resources-reconcile-task';
@@ -109,6 +110,10 @@ export class ResourcesReconcileTask {
         this.logger.debug('SLO resources are being installed by another process');
       }
     } catch (err) {
+      if (isAbortError(err)) {
+        this.logger.debug('SLO resources reconcile was cancelled');
+        return { state: {} };
+      }
       this.logger.warn(`Failed to reconcile SLO resources: ${err.message}`);
     }
 

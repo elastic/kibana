@@ -196,4 +196,19 @@ describe('resourceInstaller', () => {
       expect(call[call.length - 1]).toEqual(expect.objectContaining({ signal }));
     });
   });
+
+  it('names the template that failed when an earlier request was aborted', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.cluster.putComponentTemplate.mockImplementation(({ name }) =>
+      name === SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME
+        ? Promise.reject(new EsErrors.RequestAbortedError('Request aborted'))
+        : name === SLI_COMPONENT_TEMPLATE_SETTINGS_NAME
+        ? Promise.reject(new Error('boom'))
+        : Promise.resolve({ acknowledged: true })
+    );
+
+    await expect(createInstaller(esClient).install()).rejects.toThrow(
+      `Failed to install SLO resource [${SLI_COMPONENT_TEMPLATE_SETTINGS_NAME}]: boom`
+    );
+  });
 });

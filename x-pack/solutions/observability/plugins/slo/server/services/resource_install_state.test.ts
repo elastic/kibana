@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { LockManagerService } from '@kbn/lock-manager';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -230,5 +231,15 @@ describe('ResourceInstallState', () => {
       new SLOResourcesNotInstalled('SLO resources are being installed by another process')
     );
     expect(installer.install).not.toHaveBeenCalled();
+  });
+
+  it('rethrows an abort unwrapped and does not log it as an install failure', async () => {
+    const { installer, logger, state } = setup();
+    const abortError = new EsErrors.RequestAbortedError('Request aborted');
+    installer.install.mockRejectedValue(abortError);
+
+    await expect(state.reconcile()).rejects.toBe(abortError);
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

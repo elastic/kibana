@@ -11,6 +11,7 @@ import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../../common/constants';
 import { SLOResourcesNotInstalled } from '../errors';
 import type { RetryOptions } from '../utils/retry';
+import { isAbortError } from '../utils/with_deadline';
 import { DEFAULT_RETRY_OPTIONS, REQUEST_RETRY_OPTIONS } from '../utils/retry';
 import type { ResourceInstaller } from './resource_installer';
 
@@ -124,7 +125,8 @@ export class ResourceInstallState {
       if (isLockAcquisitionError(err)) {
         return false;
       }
-      if (err instanceof SLOResourcesNotInstalled) {
+      // A cancellation is not an install failure: callers handle it separately.
+      if (err instanceof SLOResourcesNotInstalled || isAbortError(err)) {
         throw err;
       }
       // The detail stays in the logs; API clients only get a generic message.

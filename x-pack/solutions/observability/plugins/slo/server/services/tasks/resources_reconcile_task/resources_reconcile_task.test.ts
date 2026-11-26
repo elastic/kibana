@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { LoggerFactory } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -92,6 +93,16 @@ describe('ResourcesReconcileTask', () => {
       expect(loggingSystemMock.collect(loggingSystem).debug).toContainEqual([
         'SLO resources are being installed by another process',
       ]);
+      expect(loggingSystemMock.collect(loggingSystem).warn).toEqual([]);
+    });
+
+    it('logs at debug without a warning when the run is cancelled', async () => {
+      resourceInstallState.reconcile.mockRejectedValue(
+        new EsErrors.RequestAbortedError('Request aborted')
+      );
+
+      await expect(task.runTask(createTaskInstance())).resolves.toEqual({ state: {} });
+
       expect(loggingSystemMock.collect(loggingSystem).warn).toEqual([]);
     });
 
