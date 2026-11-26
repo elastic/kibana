@@ -98,6 +98,14 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
+  const pinButtonLabel = isPinned
+    ? i18n.translate('indexPatternFieldEditor.fieldPreview.unpinFieldButtonLabel', {
+        defaultMessage: 'Unpin field',
+      })
+    : i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
+        defaultMessage: 'Pin field',
+      });
+
   const doesContainImage = useMemo(() => containsImgElement(formattedValue), [formattedValue]);
 
   const renderName = () => {
@@ -197,9 +205,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
         <EuiFlexItem css={styles.actions} grow={false}>
           {toggleIsPinned && (
             <EuiToolTip
-              content={i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
-                defaultMessage: 'Pin field',
-              })}
+              content={pinButtonLabel}
               disableScreenReaderOutput
             >
               <EuiButtonIcon
@@ -213,12 +219,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
                 color="text"
                 iconType={showPinIcon ? 'pinFill' : 'empty'}
                 data-test-subj="pinFieldButton"
-                aria-label={i18n.translate(
-                  'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
-                  {
-                    defaultMessage: 'Pin field',
-                  }
-                )}
+                aria-label={pinButtonLabel}
               />
             </EuiToolTip>
           )}
