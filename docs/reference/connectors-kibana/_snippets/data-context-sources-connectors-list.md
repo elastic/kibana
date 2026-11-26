@@ -88,7 +88,7 @@
 
 **Endpoint security**
 
-- [Sophos Central](/reference/connectors-kibana/sophos-central-action-type.md): Manage alerts, isolate and scan endpoints, manage IOC block and allow lists, control tamper protection, and query XDR detections in Sophos Central.
+- [Sophos Central](/reference/connectors-kibana/sophos-central-action-type.md): Manage alerts, isolate and scan endpoints, maintain the IOC block list, monitor tamper protection status, and query XDR detections in Sophos Central.
 
 **Threat intelligence**
 
