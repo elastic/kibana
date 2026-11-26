@@ -21,7 +21,7 @@ const setup = (children: Record<string, unknown>) => {
     } as unknown as FiltersManagerArgs[0],
     {
       api: { children$: new BehaviorSubject(children) },
-      internalApi: { childrenLoading$: new BehaviorSubject(false) },
+      internalApi: { childApisPending$: new BehaviorSubject(false) },
     } as unknown as FiltersManagerArgs[1],
     {
       api: { settings: { autoApplyFilters$: new BehaviorSubject(true) } },
