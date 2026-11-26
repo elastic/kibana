@@ -18,9 +18,6 @@ import {
 
 import { APP_UI_ID, SECURITY_FEATURE_ID } from '../common/constants';
 import { SecurityPageName } from './app/types';
-import { appLinks, getFilteredLinks } from './app/links';
-import { manageOldSiemRoutes } from './helpers';
-import { Plugin } from './plugin';
 import type { SetupPlugins, StartPlugins } from './types';
 
 jest.mock('./plugin_services', () => ({
@@ -42,7 +39,14 @@ jest.mock('./app/links', () => ({
 
 const LEGACY_SIEM_APP_ID = 'siem';
 
-const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
+const startPlugin = async ({ accessible = true }: { accessible?: boolean } = {}) => {
+  // `applicationLinksUpdater` is a module singleton that keeps the links of a previous test,
+  // so each test loads its own plugin modules (see `jest.resetModules` in `beforeEach`).
+  const { Plugin } = await import('./plugin');
+  const { manageOldSiemRoutes } = await import('./helpers');
+  const { appLinks, getFilteredLinks } = await import('./app/links');
+  (getFilteredLinks as jest.Mock).mockResolvedValue(appLinks);
+
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
 
@@ -91,7 +95,7 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
 
   plugin.start(coreStart, { licensing: { license$ } } as unknown as StartPlugins);
 
-  return { legacySiemApp, license$, currentAppId$, registeredDeepLinks };
+  return { legacySiemApp, license$, currentAppId$, registeredDeepLinks, manageOldSiemRoutes };
 };
 
 const mountLegacySiemApp = (legacySiemApp: App) =>
@@ -100,8 +104,8 @@ const mountLegacySiemApp = (legacySiemApp: App) =>
 describe('Security Solution plugin', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetModules();
     jest.useFakeTimers();
-    (getFilteredLinks as jest.Mock).mockResolvedValue(appLinks);
   });
 
   afterEach(() => {
@@ -110,7 +114,8 @@ describe('Security Solution plugin', () => {
 
   describe('legacy `siem` app', () => {
     it('redirects only once the deepLinks it resolves the legacy route with are registered', async () => {
-      const { legacySiemApp, license$, registeredDeepLinks } = startPlugin();
+      const { legacySiemApp, license$, registeredDeepLinks, manageOldSiemRoutes } =
+        await startPlugin();
       let deepLinkIdsOnRedirect: string[] | undefined;
       (manageOldSiemRoutes as jest.Mock).mockImplementationOnce(async () => {
         deepLinkIdsOnRedirect = registeredDeepLinks.at(-1)?.map(({ id }) => id);
@@ -132,7 +137,8 @@ describe('Security Solution plugin', () => {
     });
 
     it('does not redirect when the user navigated to another app before the deepLinks were registered', async () => {
-      const { legacySiemApp, license$, currentAppId$, registeredDeepLinks } = startPlugin();
+      const { legacySiemApp, license$, currentAppId$, registeredDeepLinks, manageOldSiemRoutes } =
+        await startPlugin();
       void mountLegacySiemApp(legacySiemApp);
 
       await jest.advanceTimersByTimeAsync(1000);
@@ -146,7 +152,8 @@ describe('Security Solution plugin', () => {
     });
 
     it('redirects when the Security Solution app is not accessible and no deepLink is registered', async () => {
-      const { legacySiemApp, license$, registeredDeepLinks } = startPlugin({ accessible: false });
+      const { legacySiemApp, license$, registeredDeepLinks, manageOldSiemRoutes } =
+        await startPlugin({ accessible: false });
       void mountLegacySiemApp(legacySiemApp);
 
       license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
