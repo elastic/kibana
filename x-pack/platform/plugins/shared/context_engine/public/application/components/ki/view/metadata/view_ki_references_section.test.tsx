@@ -115,6 +115,8 @@ describe('ViewKiReferencesSection', () => {
   });
 
   it('renders the same uri under different custom relations in Other', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     renderSection({
       references: [
         { uri: 'index://logs-*', relation: 'first' },
@@ -123,6 +125,10 @@ describe('ViewKiReferencesSection', () => {
     });
 
     expect(screen.getAllByText('index://logs-*')).toHaveLength(2);
+    expect(
+      consoleError.mock.calls.filter(([message]) => String(message).includes('same key'))
+    ).toHaveLength(0);
+    consoleError.mockRestore();
   });
 
   it('shows references without a known relation under Other', () => {
