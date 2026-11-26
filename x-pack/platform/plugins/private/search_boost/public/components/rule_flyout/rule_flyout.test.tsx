@@ -622,6 +622,36 @@ describe('RuleFlyout', () => {
       expect(onSave).not.toHaveBeenCalled();
     });
 
+    it("keeps the rule's type when its profile isn't among the profiles", async () => {
+      const onCreateProfile = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        rule: {
+          name: 'storefront-catalogs',
+          index_pattern: 'catalog-2026-*',
+          boost_profile: 'missing',
+          priority: 10,
+          is_builtin: false,
+        },
+        onCreateProfile,
+      });
+
+      expect(
+        screen.getByText(
+          "Lists only indices profiles, since a rule can't switch types after it's created."
+        )
+      ).toBeInTheDocument();
+
+      await userEvent.click(getProfileInput());
+      const options = await screen.findAllByRole('option');
+      expect(options.map(({ textContent }) => textContent)).toEqual([
+        'default_indicesManaged',
+        'storefront-search',
+      ]);
+
+      await userEvent.click(screen.getByTestId('searchBoostRuleFlyoutCreateProfile'));
+      expect(onCreateProfile).toHaveBeenCalledWith('indices');
+    });
+
     it('opens the profile flyout with the type fixed', async () => {
       const onCreateProfile = jest.fn().mockResolvedValue(undefined);
       renderFlyout({ rule: indicesRule, onCreateProfile });

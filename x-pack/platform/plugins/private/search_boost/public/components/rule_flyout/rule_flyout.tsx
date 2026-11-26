@@ -117,8 +117,10 @@ export const RuleFlyout = ({
 }: RuleFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'searchBoostRuleFlyoutTitle' });
+  // The rule's type also comes from the rules list, in case its profile is gone.
   const lockedType = rule
-    ? profiles.find(({ name }) => name === rule.boost_profile)?.type
+    ? profiles.find(({ name }) => name === rule.boost_profile)?.type ??
+      rules.find(({ name }) => name === rule.name)?.type
     : undefined;
 
   const { control, handleSubmit, setError } = useForm<RuleFormValues>({
