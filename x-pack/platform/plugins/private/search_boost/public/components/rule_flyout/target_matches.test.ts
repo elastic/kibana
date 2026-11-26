@@ -98,6 +98,23 @@ describe('matchTargets', () => {
     expect(target.matchType).toBeUndefined();
   });
 
+  it('treats a run of wildcards like a single one', () => {
+    const [, catalog] = matchTargets('catalog-***-fall', targets);
+
+    expect(catalog.matchType).toBe('exact');
+    expect(catalog.nameParts).toEqual(matchTargets('catalog-*-fall', targets)[1].nameParts);
+  });
+
+  it('matches nothing with a pattern over the length limit', () => {
+    expect(Object.values(matchOf('*'.repeat(255)))).toEqual(['exact', 'exact', 'exact', 'exact']);
+    expect(Object.values(matchOf('*'.repeat(256)))).toEqual([
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
   it('keeps the rest of each target', () => {
     const [outranked] = matchTargets('archive-*', [
       { name: 'archive-2024', outrankedByRuleName: 'archives' },

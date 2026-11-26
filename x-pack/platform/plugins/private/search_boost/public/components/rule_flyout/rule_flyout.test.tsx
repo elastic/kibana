@@ -639,6 +639,25 @@ describe('RuleFlyout', () => {
       expect(screen.getByTestId('searchBoostTimeline-period-standard')).toBeInTheDocument();
     });
 
+    it('matches nothing with a pattern over the length limit', async () => {
+      renderFlyout({ rule: indicesRule });
+      const field = screen.getByTestId('searchBoostRuleFlyoutIndexPattern');
+      expect(screen.getByTestId('searchBoostAppliesToFooter')).toBeInTheDocument();
+
+      // Under the limit, this would match every index.
+      await userEvent.clear(field);
+      await userEvent.paste('*'.repeat(256));
+
+      expect(screen.getByTestId('searchBoostRuleTargetsTitle')).toHaveTextContent('0 matches');
+      expect(screen.getByTestId('searchBoostRuleTargetsEmpty')).toHaveTextContent(
+        'No matches detected'
+      );
+      expect(screen.queryByTestId('searchBoostAppliesToFooter')).not.toBeInTheDocument();
+
+      await userEvent.tab();
+      expect(await screen.findByText('Use 255 bytes or fewer.')).toBeInTheDocument();
+    });
+
     it('hides the applies to footer while save reports a tie', async () => {
       const { onSave, rerender } = renderFlyout({ rule: indicesRule });
       expect(screen.getByTestId('searchBoostAppliesToFooter')).toBeInTheDocument();

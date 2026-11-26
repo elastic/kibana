@@ -71,12 +71,16 @@ export const validateName = (name: string): NameError | undefined => {
   return NAME_FORMAT.test(name) ? undefined : nameError('invalidFormat');
 };
 
+/** Whether an index pattern is over the byte limit Elasticsearch puts on index names. */
+export const isIndexPatternTooLong = (indexPattern: string): boolean =>
+  new TextEncoder().encode(indexPattern).length > MAX_INDEX_PATTERN_LENGTH;
+
 /** Checks that a boost rule targets one index or data stream name, or one pattern. */
 export const validateIndexPattern = (indexPattern: string): IndexPatternError | undefined => {
   if (indexPattern.trim().length === 0) {
     return indexPatternError('required');
   }
-  if (new TextEncoder().encode(indexPattern).length > MAX_INDEX_PATTERN_LENGTH) {
+  if (isIndexPatternTooLong(indexPattern)) {
     return indexPatternError('tooLong');
   }
   return TARGET_SEPARATOR.test(indexPattern) ? indexPatternError('notSingleTarget') : undefined;
