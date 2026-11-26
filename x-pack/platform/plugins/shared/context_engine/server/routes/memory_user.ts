@@ -20,6 +20,13 @@ export const MEMORY_WRITE_SECURITY: RouteSecurity = {
   },
 };
 
+export const MEMORY_READ_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [apiPrivileges.readContextEngine],
+    extendedPrivileges: [apiPrivileges.manageMemory],
+  },
+};
+
 export const MANAGE_MEMORY_REQUIRED_MESSAGE = `Acting on the memory of another user requires the [${apiPrivileges.manageMemory}] privilege.`;
 
 export const NO_PROFILE_MESSAGE =

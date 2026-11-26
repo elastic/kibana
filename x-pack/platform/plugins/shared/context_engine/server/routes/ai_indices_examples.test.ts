@@ -14,6 +14,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
+import { registerRecallRoutes } from './recall';
 import { registerSessionEventsRoutes } from './session_events';
 import { registerSessionMemoryRoutes } from './session_memory';
 
@@ -96,6 +97,13 @@ registerSessionMemoryRoutes({
   logger: loggerMock.create(),
 });
 
+registerRecallRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getRecallService: jest.fn(),
+  isMemoryEnabled: async () => false,
+});
+
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
   const examplePath = opts.options?.oasOperationObject?.();
   if (typeof examplePath !== 'string' || opts.validate === false) {
@@ -132,7 +140,7 @@ const routePattern = (route: string) =>
 
 describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(10);
+    expect(routesWithExamples).toHaveLength(11);
   });
 
   describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {

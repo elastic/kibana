@@ -33,6 +33,7 @@ import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerAutomationSuggestionRoutes } from './routes/automation_suggestions';
+import { registerRecallRoutes } from './routes/recall';
 import { registerSessionEventsRoutes } from './routes/session_events';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
@@ -60,6 +61,8 @@ import { installImprovementsIndexTemplate } from './improvements/storage';
 import { BackgroundWriteTracker } from './session_memory/background_write_tracker';
 import { createSessionMemoryService } from './session_memory/service';
 import { createSessionEventsService } from './session_events/service';
+import { createRecallReranker } from './recall/rerank';
+import { createRecallService } from './recall/service';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -476,6 +479,19 @@ export class ContextEnginePlugin
       logger: this.logger.get('session_memory'),
     });
 
+    registerRecallRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getRecallService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getRecallService();
+      },
+      isMemoryEnabled,
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
@@ -562,6 +578,14 @@ export class ContextEnginePlugin
 
     const sessionMemoryService = createSessionMemoryService(this.esClient);
     const sessionEventsService = createSessionEventsService(this.esClient);
+    const recallLogger = this.logger.get('recall');
+    const recallReranker = createRecallReranker({ esClient: this.esClient, logger: recallLogger });
+    const recallService = createRecallService({
+      internalEsClient: this.esClient,
+      aiIndexService,
+      reranker: recallReranker,
+      logger: recallLogger,
+    });
 
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
@@ -638,6 +662,7 @@ export class ContextEnginePlugin
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
       getSessionMemoryService: () => sessionMemoryService,
       getSessionEventsService: () => sessionEventsService,
+      getRecallService: () => recallService,
     };
   }
 

@@ -1,0 +1,140 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        recallYamlRequestExample:
+          summary: "Recall context as YAML"
+          description: "Example request to recall context from a user's session events, session memories, and one AI index, returned as YAML within a 6000-token budget."
+          value:
+            query: Why is checkout latency up since this morning?
+            user_id: u_jdoe_profile
+            include:
+              - session_events
+              - session_memory
+              - ai_index:ops-memory
+            token_budget: 6000
+        recallJsonRequestExample:
+          summary: "Recall context as JSON"
+          description: "Example request to recall context from two sessions and every AI index the caller can read, returned as a list of results."
+          value:
+            query: Why is checkout latency up since this morning?
+            user_id: u_jdoe_profile
+            session_ids:
+              - 3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43
+              - 8a1d4f2b-2c6e-4b9a-b7d3-1e5f9c0a2d64
+            include:
+              - session_events
+              - session_memory
+              - ai_index:*
+            format: json
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          recallYamlResponseExample:
+            summary: "Context as YAML"
+            description: "The recalled context as one YAML string, ready to add to a prompt"
+            value:
+              context: |
+                results:
+                  - id: ki-42
+                    source: ai_index:ops-memory
+                    date: 2026-11-15T17:20:00.000Z
+                    content: The checkout-service connection pool is capped at 20 connections.
+                  - id: evt-004
+                    session_id: 3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43
+                    source: session_events
+                    date: 2026-11-16T09:58:35.000Z
+                    role: assistant
+                    content: The checkout-service deploy at 08:40 is the most likely cause.
+              took_ms: 184
+          recallJsonResponseExample:
+            summary: "Context as JSON"
+            description: "The recalled results, most relevant first"
+            value:
+              results:
+                - id: ki-42
+                  source: ai_index:ops-memory
+                  date: "2026-11-15T17:20:00.000Z"
+                  content: The checkout-service connection pool is capped at 20 connections.
+                  attributes:
+                    type: configuration
+                    service: checkout-service
+                - id: evt-004
+                  session_id: 3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43
+                  source: session_events
+                  date: "2026-11-16T09:58:35.000Z"
+                  role: assistant
+                  content: The checkout-service deploy at 08:40 is the most likely cause.
+                - id: mem-7
+                  session_id: 8a1d4f2b-2c6e-4b9a-b7d3-1e5f9c0a2d64
+                  source: session_memory
+                  date: "2026-11-14T11:02:00.000Z"
+                  content: The user owns the checkout-service on-call rotation.
+                  attributes:
+                    topic: ownership
+              took_ms: 212
+  403:
+    content:
+      application/json:
+        examples:
+          manageMemoryRequiredExample:
+            summary: "Another user without manage memory"
+            description: "`user_id` names another user and the caller lacks `contextEngine:manage_memory`"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: Acting on the memory of another user requires the [contextEngine:manage_memory] privilege.
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+          memoryDisabledExample:
+            summary: "Memory turned off"
+            description: "Context Engine memory is turned off and `include` names a session store"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Context Engine memory is turned off.
+  429:
+    content:
+      application/json:
+        examples:
+          tooManyRequestsExample:
+            summary: "Too many requests"
+            description: "Elasticsearch rejected the request with 429; retry with backoff"
+            value:
+              statusCode: 429
+              error: Too Many Requests
+              message: "es_rejected_execution_exception: too many requests"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/context_engine/_recall" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H "kbn-xsrf: true" \
+        -d '{
+          "query": "Why is checkout latency up since this morning?",
+          "user_id": "u_jdoe_profile",
+          "include": ["session_events", "session_memory", "ai_index:ops-memory"],
+          "token_budget": 6000
+        }'
+  - lang: Console
+    source: |
+      POST kbn:/api/context_engine/_recall
+      {
+        "query": "Why is checkout latency up since this morning?",
+        "user_id": "u_jdoe_profile",
+        "include": ["session_events", "session_memory", "ai_index:ops-memory"],
+        "token_budget": 6000
+      }
