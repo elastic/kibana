@@ -21,8 +21,8 @@ interface Props {
     query: AggregateQuery,
     abortSignal: AbortSignal
   ) => Promise<{ columns: DatatableColumn[]; timeField?: string }>;
-  /** Reports the result columns of the saved query whenever they change. */
-  onColumnsChange?: (columns: DatatableColumn[]) => void;
+  /** Reports the result columns of the saved query whenever they change; `undefined` until they are known. */
+  onColumnsChange?: (columns: DatatableColumn[] | undefined) => void;
   /** Runs the saved query for the results accordion; no accordion is shown without it. */
   fetchResults?: (
     query: AggregateQuery,
@@ -42,7 +42,10 @@ export const EsqlAnnotationControls = ({
   isApproximate = false,
 }: Props) => {
   const [query, setQuery] = useState(annotation.query);
-  const [columns, setColumns] = useState<DatatableColumn[]>([]);
+  // `undefined` until the columns of the saved query arrive, so bound fields are not flagged as missing
+  const [columns, setColumns] = useState<DatatableColumn[] | undefined>(
+    annotation.query.esql.trim() ? undefined : []
+  );
   const [errors, setErrors] = useState<Error[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs>();
@@ -112,7 +115,8 @@ export const EsqlAnnotationControls = ({
   return (
     <ConfigPanelEsqlAnnotation
       annotation={annotation}
-      columns={columns}
+      columns={columns ?? []}
+      isLoadingColumns={columns === undefined}
       onChange={onChange}
       queryResults={
         dataGridAttrs ? (

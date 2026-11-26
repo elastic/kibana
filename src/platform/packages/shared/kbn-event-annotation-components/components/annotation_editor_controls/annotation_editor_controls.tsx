@@ -71,6 +71,8 @@ export interface Props {
   esql?: {
     /** Result columns of the annotation query, offered when text decoration is set to Field. */
     columns: DatatableColumn[];
+    /** True until the columns of the saved query are known; bound fields are not flagged as missing meanwhile. */
+    isLoadingColumns?: boolean;
     renderControls: (
       annotation: EsqlEventAnnotationConfig,
       onChange: (annotation: EsqlEventAnnotationConfig) => void
@@ -295,7 +297,8 @@ const AnnotationEditorControls = ({
               onDelete={() => update<EsqlEventAnnotationConfig>({ textColumn: undefined })}
               isClearable
               fieldIsInvalid={Boolean(
-                currentAnnotation.textColumn &&
+                !esql?.isLoadingColumns &&
+                  currentAnnotation.textColumn &&
                   !(esql?.columns ?? []).some(({ name }) => name === currentAnnotation.textColumn)
               )}
               data-test-subj="lnsXY-annotation-esql-range-label-field-picker"
@@ -361,7 +364,9 @@ const AnnotationEditorControls = ({
                           }
                         }}
                         fieldIsInvalid={Boolean(
-                          selectedColumn && !columns.some(({ name }) => name === selectedColumn)
+                          !esql?.isLoadingColumns &&
+                            selectedColumn &&
+                            !columns.some(({ name }) => name === selectedColumn)
                         )}
                         data-test-subj="lnsXY-annotation-esql-text-decoration-field-picker"
                         autoFocus={!selectedColumn}
@@ -536,7 +541,10 @@ const AnnotationEditorControls = ({
               extraFields={currentAnnotation.extraColumns}
               onChange={(extraColumns) => update<EsqlEventAnnotationConfig>({ extraColumns })}
               options={getColumnFieldOptions(esql.columns, 'lnsXY-annotation-tooltip-fieldOption-')}
-              isFieldValid={(fieldName) => esql.columns.some(({ name }) => name === fieldName)}
+              isFieldValid={(fieldName) =>
+                Boolean(esql.isLoadingColumns) ||
+                esql.columns.some(({ name }) => name === fieldName)
+              }
             />
           </EuiFormRow>
         </DimensionEditorSection>

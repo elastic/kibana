@@ -40,7 +40,10 @@ const columns: DatatableColumn[] = [
   { id: 'version-id', name: 'version', meta: { type: 'string' } },
 ];
 
-const renderEditor = (currentAnnotation: EventAnnotationConfig = annotation) => {
+const renderEditor = (
+  currentAnnotation: EventAnnotationConfig = annotation,
+  { isLoadingColumns = false }: { isLoadingColumns?: boolean } = {}
+) => {
   const onAnnotationChange = jest.fn();
   render(
     <AnnotationEditorControls
@@ -51,12 +54,14 @@ const renderEditor = (currentAnnotation: EventAnnotationConfig = annotation) => 
       appName="lens"
       hideQueryBasedControls
       esql={{
-        columns,
+        columns: isLoadingColumns ? [] : columns,
+        isLoadingColumns,
         renderControls: (current, onChange) => (
           <ConfigPanelEsqlAnnotation
             annotation={current}
             onChange={onChange}
-            columns={columns}
+            isLoadingColumns={isLoadingColumns}
+            columns={isLoadingColumns ? [] : columns}
             queryEditor={<div data-test-subj="esql-query-editor" />}
           />
         ),
@@ -299,6 +304,38 @@ describe('ES|QL annotation editor', () => {
           'combobox'
         )
       ).toHaveAttribute('aria-invalid', 'true');
+    });
+  });
+
+  describe('while the result columns are loading', () => {
+    it('does not flag the bound text and tooltip fields as invalid', () => {
+      renderEditor({ ...annotation, textVisibility: true }, { isLoadingColumns: true });
+
+      const invalid = (testSubj: string) =>
+        within(screen.getByTestId(testSubj)).getByRole('combobox').getAttribute('aria-invalid');
+      expect(invalid('lnsXY-annotation-esql-text-decoration-field-picker')).not.toBe('true');
+      expect(invalid('lnsXY-annotation-tooltip-field-picker--0')).not.toBe('true');
+      expect(screen.getByLabelText('Target date field')).not.toHaveAttribute(
+        'aria-invalid',
+        'true'
+      );
+    });
+
+    it('does not flag the range label field either', () => {
+      renderEditor(
+        {
+          ...annotation,
+          key: { type: 'range' },
+          endTimeColumn: 'end',
+        } as EsqlEventAnnotationConfig,
+        { isLoadingColumns: true }
+      );
+
+      expect(
+        within(screen.getByTestId('lnsXY-annotation-esql-range-label-field-picker')).getByRole(
+          'combobox'
+        )
+      ).not.toHaveAttribute('aria-invalid', 'true');
     });
   });
 

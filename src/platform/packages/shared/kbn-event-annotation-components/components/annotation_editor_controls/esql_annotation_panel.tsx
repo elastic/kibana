@@ -18,6 +18,8 @@ import { getPointToRangeOverrides, getRangeToPointOverrides } from './helpers';
 interface Props {
   annotation: EsqlEventAnnotationConfig;
   columns: DatatableColumn[];
+  /** True until the columns of the saved query are known; bound fields are not flagged as missing meanwhile. */
+  isLoadingColumns?: boolean;
   onChange: (annotation: EsqlEventAnnotationConfig) => void;
   queryEditor: ReactNode;
   /** Rendered right below the query editor, e.g. the accordion with the query results. */
@@ -27,6 +29,7 @@ interface Props {
 export const ConfigPanelEsqlAnnotation = ({
   annotation,
   columns,
+  isLoadingColumns = false,
   onChange,
   queryEditor,
   queryResults,
@@ -85,6 +88,7 @@ export const ConfigPanelEsqlAnnotation = ({
           defaultMessage: 'Target date field',
         })}
         columns={dateColumns}
+        isLoading={isLoadingColumns}
         value={annotation.timeColumn}
         onChange={(timeColumn) => onChange({ ...annotation, timeColumn })}
         data-test-subj="lnsXY-annotation-esql-timeColumn"
@@ -96,6 +100,7 @@ export const ConfigPanelEsqlAnnotation = ({
             defaultMessage: 'End date field',
           })}
           columns={dateColumns}
+          isLoading={isLoadingColumns}
           value={annotation.endTimeColumn}
           onChange={(endTimeColumn) => onChange({ ...annotation, endTimeColumn })}
           data-test-subj="lnsXY-annotation-esql-endTimeColumn"
@@ -116,6 +121,7 @@ const ColumnPicker = ({
   label,
   columns,
   value,
+  isLoading,
   onChange,
   required = false,
   'data-test-subj': dataTestSubj,
@@ -123,12 +129,15 @@ const ColumnPicker = ({
   label: string;
   columns: DatatableColumn[];
   value: string;
+  isLoading: boolean;
   onChange: (value: string) => void;
   required?: boolean;
   'data-test-subj': string;
 }) => {
   const id = useId();
-  const missingColumn = Boolean(value && !columns.some(({ name }) => name === value));
+  const isBoundToUnknownColumn = Boolean(value && !columns.some(({ name }) => name === value));
+  // The columns arrive after the query ran: do not flag a saved binding until they are known
+  const missingColumn = isBoundToUnknownColumn && !isLoading;
   const isInvalid = missingColumn || (required && !value);
 
   return (
@@ -164,10 +173,11 @@ const ColumnPicker = ({
                   }
                 ),
           },
-          ...(missingColumn ? [{ value, text: value }] : []),
+          ...(isBoundToUnknownColumn ? [{ value, text: value }] : []),
           ...columns.map(({ name }) => ({ value: name, text: name })),
         ]}
         isInvalid={isInvalid}
+        isLoading={isLoading}
         onChange={(event) => onChange(event.target.value)}
         data-test-subj={dataTestSubj}
       />

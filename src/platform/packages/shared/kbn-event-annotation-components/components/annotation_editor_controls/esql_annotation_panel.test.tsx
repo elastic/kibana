@@ -39,7 +39,8 @@ const annotation: EsqlEventAnnotationConfig = {
 const renderPanel = (
   currentAnnotation: EsqlEventAnnotationConfig = annotation,
   resultColumns = columns,
-  queryResults?: React.ReactNode
+  queryResults?: React.ReactNode,
+  isLoadingColumns = false
 ) => {
   const onChange = jest.fn();
   const rendered = render(
@@ -49,6 +50,7 @@ const renderPanel = (
       onChange={onChange}
       queryEditor={<div data-test-subj="annotation-query-editor" />}
       queryResults={queryResults}
+      isLoadingColumns={isLoadingColumns}
     />
   );
   return { ...rendered, onChange };
@@ -128,6 +130,22 @@ describe('ConfigPanelEsqlAnnotation', () => {
     expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(1);
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('does not flag saved bindings as missing while the columns are still loading', () => {
+    renderPanel(annotation, [], undefined, true);
+
+    const timeField = screen.getByLabelText('Target date field');
+    expect(timeField).toHaveValue('start');
+    expect(timeField).not.toHaveAttribute('aria-invalid', 'true');
+    expect(screen.queryByText(/is missing or has an incompatible type/)).not.toBeInTheDocument();
+  });
+
+  it('flags the same bindings once the loaded columns do not contain them', () => {
+    renderPanel(annotation, [], undefined, false);
+
+    expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(1);
   });
 
   it('reports an incompatible time column even when the result still contains its name', () => {

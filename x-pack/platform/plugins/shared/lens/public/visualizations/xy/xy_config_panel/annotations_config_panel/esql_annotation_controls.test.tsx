@@ -78,7 +78,7 @@ const renderControls = ({
   onColumnsChange,
   fetchResults,
 }: {
-  onColumnsChange?: (columns: DatatableColumn[]) => void;
+  onColumnsChange?: (columns: DatatableColumn[] | undefined) => void;
   fetchResults?: React.ComponentProps<typeof EsqlAnnotationControls>['fetchResults'];
 } = {}) => {
   const fetchColumns = jest
@@ -108,6 +108,31 @@ describe('EsqlAnnotationControls', () => {
     renderControls({ onColumnsChange });
 
     await waitFor(() => expect(onColumnsChange).toHaveBeenLastCalledWith(columns));
+  });
+
+  it('reports no columns until the saved query has run, so bound fields are not flagged meanwhile', async () => {
+    const onColumnsChange = jest.fn();
+    renderControls({ onColumnsChange });
+
+    expect(onColumnsChange).toHaveBeenNthCalledWith(1, undefined);
+    expect(screen.getByLabelText('Target date field')).not.toHaveAttribute('aria-invalid', 'true');
+    await waitFor(() => expect(onColumnsChange).toHaveBeenLastCalledWith(columns));
+    expect(screen.getByLabelText('Target date field')).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('flags bound fields as missing once the columns failed to load', async () => {
+    const fetchColumns = jest.fn().mockRejectedValue(new Error('Invalid query'));
+    render(
+      <EsqlAnnotationControls
+        annotation={annotation}
+        onChange={jest.fn()}
+        fetchColumns={fetchColumns}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true')
+    );
   });
 
   describe('query results accordion', () => {

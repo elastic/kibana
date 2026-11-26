@@ -75,7 +75,7 @@ export const AnnotationsPanel = (
   );
 
   const hideQueryBasedControls = isEsqlChart(frame.datasourceLayers);
-  const [esqlColumns, setEsqlColumns] = useState<DatatableColumn[]>([]);
+  const [esqlColumns, setEsqlColumns] = useState<DatatableColumn[]>();
 
   const [currentDataView, setCurrentDataView] = useState<DataView>();
 
@@ -163,7 +163,8 @@ export const AnnotationsPanel = (
         esql={
           hideQueryBasedControls
             ? {
-                columns: esqlColumns,
+                columns: esqlColumns ?? [],
+                isLoadingColumns: esqlColumns === undefined,
                 renderControls: (annotation, onChange) => (
                   <EsqlAnnotationControls
                     key={annotation.id}
