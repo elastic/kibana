@@ -29,7 +29,6 @@ interface StoredGlobalSettingsDocument {
 
 export interface GlobalSettingsStore {
   deleteStoredGlobalSettings: () => Promise<void>;
-  storeSliRetention: (sliRetention: StoredSliRetention) => Promise<void>;
   /** Restores the document found on creation, then deletes the temporary user and role. */
   cleanup: () => Promise<void>;
 }
@@ -92,14 +91,6 @@ export const createGlobalSettingsStore = async (esClient: Client): Promise<Globa
 
   return {
     deleteStoredGlobalSettings,
-    storeSliRetention: async (sliRetention) => {
-      await indexDocument({
-        type: 'slo-global-settings',
-        'slo-global-settings': { sliRetention },
-        typeMigrationVersion: '10.1.0',
-        updated_at: sliRetention.updatedAt,
-      });
-    },
     cleanup: async () => {
       try {
         if (original) {
