@@ -212,22 +212,22 @@ export const SubmitFileInputSchema = lazySchema(() =>
     fileName: z.string().min(1).max(255).describe('File name with extension.'),
     documentPassword: z
       .string()
-      .max(128)
-      .refine(byteLimit(128), 'documentPassword is at most 128 bytes')
+      .max(96)
+      .refine(byteLimit(96), 'documentPassword is at most 96 bytes')
       .optional()
-      .describe('Plain-text password of the document.'),
+      .describe('Plain-text password of the document, at most 96 bytes.'),
     archivePassword: z
       .string()
-      .max(128)
-      .refine(byteLimit(128), 'archivePassword is at most 128 bytes')
+      .max(96)
+      .refine(byteLimit(96), 'archivePassword is at most 96 bytes')
       .optional()
-      .describe('Plain-text password of the archive.'),
+      .describe('Plain-text password of the archive, at most 96 bytes.'),
     arguments: z
       .string()
-      .max(1024)
-      .refine(byteLimit(1024), 'arguments is at most 1024 bytes')
+      .max(768)
+      .refine(byteLimit(768), 'arguments is at most 768 bytes')
       .optional()
-      .describe('Command-line arguments for PE and script files.'),
+      .describe('Command-line arguments for PE and script files, at most 768 bytes.'),
   })
 );
 export type SubmitFileInput = z.infer<typeof SubmitFileInputSchema>;

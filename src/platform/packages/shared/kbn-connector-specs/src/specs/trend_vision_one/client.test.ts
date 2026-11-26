@@ -331,6 +331,24 @@ describe('TrendAI Vision One requests and errors', () => {
     );
   });
 
+  it('tells the caller of listObservedAttackTechniques to narrow the time window or the filter', async () => {
+    request.mockRejectedValue(
+      Object.assign(new Error('maxContentLength size of 1048576 exceeded'), {
+        isAxiosError: true,
+        code: 'ERR_BAD_RESPONSE',
+      })
+    );
+    const error = await vendorRequest(ctx, {
+      action: 'listObservedAttackTechniques',
+      method: 'GET',
+      path: '/x',
+      mutating: false,
+    }).catch((e: Error) => e);
+    expect((error as Error).message).toContain('narrow the time window or the filter');
+    expect((error as Error).message).not.toContain('smaller top');
+    expect((error as Error).message).not.toContain('select');
+  });
+
   it('never retries a state-changing call on 5xx', async () => {
     request.mockRejectedValue(httpError(500, vendorError('InternalServerError', 'boom')));
     await expect(

@@ -286,6 +286,12 @@ describe('TrendAI Vision One ids read from Location headers', () => {
     ['/v3.0/response/tasks/' + 'a'.repeat(37), null],
     ['/v3.0/response/tasks/00000012', '00000012'],
     ['/v3.0/response/tasks/RM%2D1', 'RM-1'],
+    ['https://api.xdr.trendmicro.com/v3.0/response/tasks/', null],
+    ['https://api.xdr.trendmicro.com/v3.0/xdr/response/tasks', null],
+    ['https://api.xdr.trendmicro.com/v3.0/xdr/response/tasks/?x=1', null],
+    ['https://api.xdr.trendmicro.com/v3.0/response/tasks/#details', null],
+    ['https://api.xdr.trendmicro.com/v3.0/response/00000012', null],
+    ['https://api.xdr.trendmicro.com/v3.0/xdr/response/tasks/00000012/', '00000012'],
   ])('taskIdFrom %s gives %j', (value, id) => {
     expect(taskIdFrom(opLocation(value))).toBe(id);
   });

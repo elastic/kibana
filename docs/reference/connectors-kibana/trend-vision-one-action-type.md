@@ -96,10 +96,10 @@ The TrendAI Vision One connector exposes the following actions:
 :   Returns a response task by the `taskId` that a response action returned: its status (`queued`, `running`, `pendingApproval`, `succeeded`, `failed`, `canceled`, or `rejected`), action, target, and error.
 
 `quarantineEmailMessage` _(API only)_
-:   Moves an email message to the quarantine folder of its mailbox. Give `messageId` (optionally with `mailBox`) or `uniqueId`.
+:   Moves an email message to the quarantine folder of its mailbox. Give `messageId` (optionally with `mailBox`) or `uniqueId`. Without `mailBox`, the product searches all mailboxes, so the action applies to every message that matches.
 
 `deleteEmailMessage` _(API only)_
-:   Deletes an email message. A deleted message cannot be recovered. Give `messageId` (optionally with `mailBox`) or `uniqueId`.
+:   Deletes an email message. A deleted message cannot be recovered. Give `messageId` (optionally with `mailBox`) or `uniqueId`. Without `mailBox`, the product searches all mailboxes, so every message that matches is deleted.
 
 `disableUserAccount` _(API only)_
 :   Disables a user account in Active Directory or Microsoft Entra ID.
@@ -120,7 +120,7 @@ The TrendAI Vision One connector exposes the following actions:
 :   Adds an object to the suspicious object exception list so that it is never flagged. This weakens detection for that object.
 
 `submitFileToSandbox` _(API only)_
-:   Submits one file, base64-encoded in `file` with its `fileName`, to the sandbox. `file` must be standard base64 with its `=` padding (a length that is a multiple of 4). The largest file is about 768 KB, and a file close to that size can be refused by {{kib}} before it reaches the connector, because the request body is limited by `server.maxPayload` (1 MiB by default) and the request adds a little to the file. Optional `documentPassword`, `archivePassword`, and `arguments` are given as plain text. Returns the submission `id`, the file `digest`, and the submission `quota`. Using Sandbox Analysis requires TrendAI Flex in your TrendAI Vision One tenant; ask your TrendAI Vision One administrator if submissions are refused.
+:   Submits one file, base64-encoded in `file` with its `fileName`, to the sandbox. `file` must be standard base64 with its `=` padding (a length that is a multiple of 4). The largest file is about 768 KB, and a file close to that size can be refused by {{kib}} before it reaches the connector, because the request body is limited by `server.maxPayload` (1 MiB by default) and the request adds a little to the file. Optional `documentPassword`, `archivePassword`, and `arguments` are given as plain text, at most 96, 96, and 768 bytes, so that their base64 form stays within the 128, 128, and 1,024 characters that the product's API schema allows. Returns the submission `id`, the file `digest`, and the submission `quota`. Using Sandbox Analysis requires TrendAI Flex in your TrendAI Vision One tenant; ask your TrendAI Vision One administrator if submissions are refused.
 
 `submitUrlsToSandbox` _(API only)_
 :   Submits 1 to 10 URLs to the sandbox. Returns one item per URL with its status and submission ID, and the submission `quota`. A submission costs sandbox credits and cannot be deleted. Using Sandbox Analysis requires TrendAI Flex in your TrendAI Vision One tenant; ask your TrendAI Vision One administrator if submissions are refused.

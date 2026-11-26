@@ -387,6 +387,18 @@ describe('TrendAI Vision One addAlertNote', () => {
   );
 
   it.each([
+    [`${API}/workbench/alerts/WB-1/notes/`, null],
+    [`${API}/workbench/alerts/WB-1/notes`, null],
+    [`${API}/workbench/alerts/WB-1/notes/?x=1`, null],
+    [`${API}/workbench/alerts/WB-1/2035567`, null],
+  ])('gives no note id when Location is %s', async (location, noteId) => {
+    request.mockResolvedValueOnce(ok(undefined, { location }, 201));
+    await expect(
+      run('addAlertNote', { alertId: 'WB-1', content: 'Checked by SOC' })
+    ).resolves.toEqual({ alertId: 'WB-1', noteId });
+  });
+
+  it.each([
     ['note_7#details', 'note_7'],
     ['note_7?x=1', 'note_7'],
     ['note_7?x=1#details', 'note_7'],

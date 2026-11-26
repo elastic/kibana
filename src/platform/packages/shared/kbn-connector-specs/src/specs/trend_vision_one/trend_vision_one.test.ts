@@ -287,6 +287,18 @@ describe('TrendAI Vision One connectivity test', () => {
     expect(sent()).toMatchObject({ method: 'GET', url: `${API}/healthcheck/connectivity` });
   });
 
+  it.each([
+    ['an HTML page', '<html><body>Sign in</body></html>'],
+    ['an empty object', {}],
+    ['another status', { status: 'degraded' }],
+    ['an empty body', ''],
+  ])('does not report a connection for a 200 answer that is %s', async (_name, body) => {
+    request.mockResolvedValueOnce(ok(body));
+    await expect(TrendVisionOne.test?.handler(ctx)).rejects.toThrow(
+      'did not return the expected connectivity answer'
+    );
+  });
+
   it('fails on an invalid key', async () => {
     request.mockRejectedValueOnce(httpError(401, vendorError('Unauthorized', 'Invalid token')));
     await expect(TrendVisionOne.test?.handler(ctx)).rejects.toThrow(

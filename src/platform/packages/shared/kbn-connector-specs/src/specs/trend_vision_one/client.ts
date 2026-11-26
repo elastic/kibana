@@ -96,13 +96,21 @@ export const describeError = (data: unknown): string => {
   return truncate(JSON.stringify(data));
 };
 
+/** What to change when a response is too large: most lists have a smaller `top` or a `select`; the OAT list has neither. */
+const DEFAULT_SIZE_HINT = 'ask for fewer items with a smaller top or fewer select fields';
+const SIZE_HINT: Record<string, string> = {
+  listObservedAttackTechniques: 'narrow the time window or the filter',
+};
+
 /** Why a request got no HTTP answer: a timeout, a response over the size limit, or the network error. */
-const failureReason = (err: AxiosError, timeoutMs: number): string => {
+const failureReason = (err: AxiosError, timeoutMs: number, action: string): string => {
   if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') {
     return `timed out after ${Math.round(timeoutMs / 1000)} s`;
   }
   if (/maxContentLength/i.test(err.message ?? '')) {
-    return `the response is larger than the Kibana limit (xpack.actions.maxResponseContentLength); ask for fewer items with a smaller top or fewer select fields (${err.message})`;
+    return `the response is larger than the Kibana limit (xpack.actions.maxResponseContentLength); ${
+      SIZE_HINT[action] ?? DEFAULT_SIZE_HINT
+    } (${err.message})`;
   }
   return err.message;
 };
@@ -146,7 +154,9 @@ export const toVendorError = (
   }
   const status = err.response?.status;
   if (status === undefined) {
-    return new Error(`${VENDOR} ${action} request failed: ${failureReason(err, timeoutMs)}`);
+    return new Error(
+      `${VENDOR} ${action} request failed: ${failureReason(err, timeoutMs, action)}`
+    );
   }
   const message = statusMessage(action, status, describeError(err.response?.data), notFound);
   // The Kibana action executor reads error.response.status (errorMeta.statusCode) and
@@ -178,21 +188,39 @@ const DOT_SEGMENT = /^(?:\.|%2e){1,2}$/i;
  * The URL parser drops the query and the fragment (an encoded %23 stays in the segment); null when
  * the value cannot be parsed or the segment is malformed.
  */
-export const lastPathSegment = (value: string): string | null => {
+const locationSegments = (value: string): string[] | null => {
   // A dot segment (`.`, `..` or its encoded form) is removed by the URL parser, which would make the
   // previous segment look like the id, so a location that ends in one has no id.
   const lastRaw = value.split(/[?#]/, 1)[0].split('/').filter(Boolean).pop();
   if (lastRaw !== undefined && DOT_SEGMENT.test(lastRaw)) {
     return null;
   }
-  let pathname: string;
   try {
-    pathname = new URL(value, 'https://placeholder.invalid').pathname;
+    return new URL(value, 'https://placeholder.invalid').pathname.split('/').filter(Boolean);
   } catch {
     return null;
   }
-  const segment = pathname.split('/').filter(Boolean).pop();
+};
+
+export const lastPathSegment = (value: string): string | null => {
+  const segment = locationSegments(value)?.pop();
   return segment === undefined ? null : decodeSegment(segment);
+};
+
+/**
+ * The id after a named collection segment (`tasks`, `notes`). A location that ends at the collection
+ * (`.../response/tasks/`) or whose id does not follow it has no id: the collection name is never an id.
+ */
+export const idAfterCollection = (value: string, collection: string): string | null => {
+  const segments = locationSegments(value);
+  if (
+    !segments ||
+    segments.length < 2 ||
+    decodeSegment(segments[segments.length - 2]) !== collection
+  ) {
+    return null;
+  }
+  return decodeSegment(segments[segments.length - 1]);
 };
 
 /** Added to a failed state-changing request whose outcome is unknown (no answer read, or a 5xx). */

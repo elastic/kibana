@@ -133,7 +133,12 @@ export const TrendVisionOne: ConnectorSpec = {
         path: '/healthcheck/connectivity',
         mutating: false,
       });
-      return { message: `Connected to TrendAI Vision One (${data?.status ?? 'available'})` };
+      if (data?.status !== 'available') {
+        throw new Error(
+          'TrendAI Vision One did not return the expected connectivity answer (status available). Check that the region API URL points at the TrendAI Vision One API.'
+        );
+      }
+      return { message: 'Connected to TrendAI Vision One (available)' };
     },
   },
 };

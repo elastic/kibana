@@ -11,7 +11,7 @@ import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import {
   buildFilter,
   getHeader,
-  lastPathSegment,
+  idAfterCollection,
   vendorRequest,
   withoutDeprecated,
 } from './client';
@@ -157,7 +157,10 @@ export const alertActions: ConnectorSpec['actions'] = {
         notFound: `Workbench alert ${input.alertId}`,
       });
       const location = getHeader(response, 'location');
-      return { alertId: input.alertId, noteId: location ? lastPathSegment(location) : null };
+      return {
+        alertId: input.alertId,
+        noteId: location ? idAfterCollection(location, 'notes') : null,
+      };
     },
   },
 };

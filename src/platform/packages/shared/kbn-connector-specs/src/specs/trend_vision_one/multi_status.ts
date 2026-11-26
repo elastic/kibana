@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lastPathSegment } from './client';
+import { idAfterCollection } from './client';
 import { VENDOR } from './constants';
 import { isAcceptedId } from './types';
 
@@ -64,11 +64,11 @@ const failItem = (action: string, item: MultiStatusItem): Error => {
   return new Error(`${VENDOR} ${action} failed for the target (${item.status ?? '?'}): ${detail}`);
 };
 
-/** Takes the task id from the Operation-Location header: the last path segment (query and fragment dropped); null when it is not a usable id. */
+/** Takes the task id from the Operation-Location header: the path segment after `tasks` (query and fragment dropped); null when the location names no task or the id is not usable. */
 export const taskIdFrom = (item: MultiStatusItem): string | null => {
   const location = item.headers?.find((h) => h.name?.toLowerCase() === 'operation-location');
   if (!location?.value) return null;
-  const id = lastPathSegment(location.value);
+  const id = idAfterCollection(location.value, 'tasks');
   return id !== null && isAcceptedId(id) ? id : null;
 };
 

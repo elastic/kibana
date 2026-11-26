@@ -237,9 +237,9 @@ describe('TrendAI Vision One list and sandbox input bounds', () => {
   });
 
   it.each([
-    ['documentPassword', 128],
-    ['archivePassword', 128],
-    ['arguments', 1024],
+    ['documentPassword', 96],
+    ['archivePassword', 96],
+    ['arguments', 768],
   ])('%s takes exactly %s bytes of UTF-8 and rejects one byte more', (field, bytes) => {
     const file = { file: 'ZWxhc3RpYw==', fileName: 'a.txt' };
     const twoByte = '\u00e9'.repeat(bytes / 2);
@@ -252,6 +252,28 @@ describe('TrendAI Vision One list and sandbox input bounds', () => {
       false
     );
   });
+
+  it.each([
+    ['documentPassword', 96, 128],
+    ['archivePassword', 96, 128],
+    ['arguments', 768, 1024],
+  ])(
+    '%s: the largest accepted value is at most the vendor limit of %s*4/3=%s characters after base64',
+    async (field, rawBytes, vendorLimit) => {
+      const file = { file: 'ZWxhc3RpYw==', fileName: 'a.txt' };
+      expect(Buffer.from('a'.repeat(rawBytes)).toString('base64').length).toBe(vendorLimit);
+      expect(Buffer.from('a'.repeat(rawBytes + 1)).toString('base64').length).toBeGreaterThan(
+        vendorLimit
+      );
+      request.mockResolvedValueOnce(ok({ id: 'x' }));
+      await run('submitFileToSandbox', { ...file, [field]: 'a'.repeat(rawBytes) });
+      const form = sent().data as FormData;
+      expect(String(form.get(field)).length).toBeLessThanOrEqual(vendorLimit);
+      expect(
+        parseInput('submitFileToSandbox', { ...file, [field]: 'a'.repeat(rawBytes + 1) }).success
+      ).toBe(false);
+    }
+  );
 
   it('treats a list item status of 299 as added and 300 as a failure', async () => {
     request.mockResolvedValueOnce(ok([{ status: 299 }], {}, 207));
