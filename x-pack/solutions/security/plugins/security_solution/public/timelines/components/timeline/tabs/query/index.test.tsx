@@ -142,6 +142,25 @@ const StubbedUnifiedTimelineBody = ({
   </>
 );
 
+// The sidebar tests never look at the table, so they stub it and keep the real sidebar.
+// The `mock` prefix lets the factory below read the flag.
+let mockStubTimelineTable = false;
+
+jest.mock('../../unified_components/data_table', () => {
+  const actual = jest.requireActual('../../unified_components/data_table');
+  const ActualReact = jest.requireActual('react');
+  return {
+    ...actual,
+    __esModule: true,
+    default: (props: Record<string, unknown>) =>
+      mockStubTimelineTable ? null : ActualReact.createElement(actual.default, props),
+  };
+});
+
+const useStubbedTable = () => {
+  mockStubTimelineTable = true;
+};
+
 const useRealGrid = () =>
   jest
     .mocked(UnifiedTimelineBody)
@@ -316,6 +335,7 @@ describe('query tab with unified timeline', () => {
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
 
     useRealGrid();
+    mockStubTimelineTable = false;
   });
 
   describe('render', () => {
@@ -333,6 +353,7 @@ describe('query tab with unified timeline', () => {
     it(
       'should render unified-field-list in timeline',
       async () => {
+        useStubbedTable();
         renderTestComponents();
         await waitFor(() => {
           expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
@@ -975,6 +996,7 @@ describe('query tab with unified timeline', () => {
     it(
       'should should show callout when field search does not matches any field',
       async () => {
+        useStubbedTable();
         renderTestComponents();
         expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
 
@@ -1002,6 +1024,7 @@ describe('query tab with unified timeline', () => {
     it(
       'should toggle side bar correctly',
       async () => {
+        useStubbedTable();
         renderTestComponents();
         expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
 
@@ -1138,7 +1161,15 @@ describe('query tab with unified timeline', () => {
       'should allow pinning when event has notes but notes are not attached in current timeline',
       async () => {
         useStubbedGrid();
-        renderTestComponents();
+        // no note is attached to the current timeline, so the event can be pinned
+        const stateWithoutAttachedNotes = structuredClone(mockState);
+        stateWithoutAttachedNotes.timeline.timelineById[TimelineId.test].eventIdToNoteIds = {};
+        const store = createMockStore(stateWithoutAttachedNotes);
+        render(
+          <TestProviders store={store}>
+            <TestComponent />
+          </TestProviders>
+        );
         expect(await screen.findAllByTestId('timeline-pin-event-button')).toHaveLength(1);
         expect(screen.getByTestId('timeline-pin-event-button')).not.toBeDisabled();
 
@@ -1146,6 +1177,13 @@ describe('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
           expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent('Pin event');
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-pin-event-button'));
+        await waitFor(() => {
+          expect(
+            store.getState().timeline.timelineById[TimelineId.test].pinnedEventIds
+          ).toMatchObject({ [mockTimelineData[0]._id]: true });
         });
       },
       SPECIAL_TEST_TIMEOUT
