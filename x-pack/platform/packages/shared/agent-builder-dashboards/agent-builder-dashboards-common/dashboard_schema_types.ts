@@ -113,15 +113,36 @@ const refreshIntervalSchema = z.object({
 // Dashboard Options Schema
 // ============================================================================
 
-const optionsSchema = z.object({
-  auto_apply_filters: z.boolean().optional(),
-  hide_panel_titles: z.boolean().optional(),
-  hide_panel_borders: z.boolean().optional(),
-  use_margins: z.boolean().optional(),
-  sync_colors: z.boolean().optional(),
-  sync_tooltips: z.boolean().optional(),
-  sync_cursor: z.boolean().optional(),
-});
+export const optionsSchema = lazySchema(() =>
+  z.object({
+    auto_apply_filters: z
+      .boolean()
+      .optional()
+      .describe(
+        'When false, control filter changes apply only after the user clicks the update button. Defaults to true.'
+      ),
+    hide_panel_titles: z.boolean().optional().describe('Hide panel titles. Defaults to false.'),
+    hide_panel_borders: z.boolean().optional().describe('Hide panel borders. Defaults to false.'),
+    use_margins: z
+      .boolean()
+      .optional()
+      .describe('Separate panels with a margin. Defaults to true.'),
+    sync_colors: z
+      .boolean()
+      .optional()
+      .describe('Synchronize colors across panels that share a data source. Defaults to false.'),
+    sync_tooltips: z
+      .boolean()
+      .optional()
+      .describe(
+        'Synchronize tooltips across panels. Works only while sync_cursor is on: turning it on needs sync_cursor: true, and turning sync_cursor off turns it off. Defaults to false.'
+      ),
+    sync_cursor: z
+      .boolean()
+      .optional()
+      .describe('Synchronize the cursor position across panels. Defaults to true.'),
+  })
+);
 
 // ============================================================================
 // Access Control Schema

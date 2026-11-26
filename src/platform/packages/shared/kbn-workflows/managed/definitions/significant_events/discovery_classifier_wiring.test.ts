@@ -159,6 +159,16 @@ describe('discovery workflow detection classifier wiring', () => {
       ).toEqual(['rule-A']);
     });
 
+    it('passes an empty agent report to the resolver as an empty list, not undefined', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(
+        evaluate(resolve.with?.reported_rule_uuids, {
+          steps: { compute_written_rule_uuids: { output: { written_rule_uuids: [] } } },
+        })
+      ).toEqual([]);
+    });
+
     describe('stamp rule uuids', () => {
       const resolved = requireStep('compute_resolved_stamp_rule_uuids');
       const fallback = requireStep('compute_fallback_stamp_rule_uuids');

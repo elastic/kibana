@@ -100,6 +100,11 @@ export const detectionSignalReadingSchema = lazySchema(() =>
     /** Whether the judge should compare the reading with what is normal for the series. */
     compare_with_normal: z.boolean(),
     /**
+     * Minutes without a breached reading after which the series counts as recovered. Set by a
+     * strategy that reports breaches only, so its events can close without a `recovered` reading.
+     */
+    quiet_period_minutes: z.number().int().min(1).optional(),
+    /**
      * Strategy-specific detail for the judge, kept as reported. Engine code never reads it. At most
      * {@link MAX_TEXT_LENGTH} characters serialized and {@link MAX_DETAILS_DEPTH} levels deep.
      */

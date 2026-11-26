@@ -12,6 +12,7 @@ import { MAX_SESSION_MEMORY_FORGET_IDS } from '../../common/constants';
 import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import type {
   ForgetResult,
+  SessionMemory,
   SessionMemoryScope,
   SessionMemoryService,
   StoredMemoryRevision,
@@ -42,6 +43,16 @@ const toErrorMessage = ({ type, reason, caused_by: cause }: ErrorCause): string 
 
 const isTombstone = (revision: StoredSessionMemory): revision is StoredTombstone =>
   revision.deleted_at !== undefined;
+
+const toSessionMemory = (revision: StoredMemoryRevision): SessionMemory => ({
+  id: revision.id,
+  sessionId: revision.session_id,
+  userId: revision.user_id,
+  aiIndexIds: revision.ai_index_id,
+  content: revision.content,
+  attributes: revision.attributes ?? {},
+  revisedAt: revision['@timestamp'],
+});
 
 const toTombstone = (latest: StoredMemoryRevision, timestamp: string): StoredTombstone => ({
   '@timestamp': timestamp,
@@ -112,15 +123,7 @@ export const createSessionMemoryService = (
     if (!latest || isTombstone(latest)) {
       return undefined;
     }
-    return {
-      id: latest.id,
-      sessionId: latest.session_id,
-      userId: latest.user_id,
-      aiIndexIds: latest.ai_index_id,
-      content: latest.content,
-      attributes: latest.attributes ?? {},
-      revisedAt: latest['@timestamp'],
-    };
+    return toSessionMemory(latest);
   },
 
   forget: async (scope, ids) => {
@@ -169,5 +172,63 @@ export const createSessionMemoryService = (
     }
 
     return uniqueIds.map((id) => toForgetResult(id, latestById.get(id), errorsById.get(id)));
+  },
+
+  readRevised: async ({ space, aiIndexId, since, after, size }) => {
+    if (space.trim() === '') {
+      throw new Error('Reading session memories requires a non-empty space');
+    }
+    const afterCursor: QueryDslQueryContainer[] = [{ range: { '@timestamp': { gt: since } } }];
+    if (after) {
+      afterCursor.push({
+        bool: { filter: [{ term: { '@timestamp': since } }, { range: { id: { gt: after } } }] },
+      });
+    }
+    const found = await esClient.search<StoredSessionMemory>({
+      index: SESSION_MEMORY_DATA_STREAM,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
+      size,
+      sort: [{ '@timestamp': 'asc' }, { id: 'asc' }],
+      collapse: { field: 'id' },
+      _source: ['@timestamp', 'id'],
+      query: {
+        bool: {
+          filter: [
+            { term: { space } },
+            { term: { ai_index_id: aiIndexId } },
+            { bool: { should: afterCursor, minimum_should_match: 1 } },
+          ],
+        },
+      },
+    });
+    const candidates = found.hits.hits.flatMap(({ _source }) => _source ?? []);
+    if (candidates.length === 0) {
+      return { memories: [] };
+    }
+    const last = candidates[candidates.length - 1];
+    const next =
+      candidates.length === size ? { revisedAt: last['@timestamp'], id: last.id } : undefined;
+
+    const latest = await esClient.search<StoredSessionMemory>({
+      index: SESSION_MEMORY_DATA_STREAM,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
+      size: candidates.length,
+      query: {
+        bool: { filter: [{ term: { space } }, { terms: { id: candidates.map((c) => c.id) } }] },
+      },
+      collapse: { field: 'id' },
+      sort: [{ '@timestamp': 'desc' }],
+    });
+    const revisions = latest.hits.hits.flatMap(({ _source }) => _source ?? []);
+    const byId = new Map(revisions.map((revision) => [revision.id, revision]));
+    const memories = candidates.flatMap(({ id }) => {
+      const revision = byId.get(id);
+      return revision && !isTombstone(revision) && revision.ai_index_id.includes(aiIndexId)
+        ? [toSessionMemory(revision)]
+        : [];
+    });
+    return { memories, ...(next && { next }) };
   },
 });
