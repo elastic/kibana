@@ -204,10 +204,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
         <EuiFlexItem css={styles.actions} grow={false}>
           {toggleIsPinned && (
-            <EuiToolTip
-              content={pinButtonLabel}
-              disableScreenReaderOutput
-            >
+            <EuiToolTip content={pinButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 onClick={(e: { detail: number }) => {
                   const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
