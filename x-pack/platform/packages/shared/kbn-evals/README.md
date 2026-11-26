@@ -294,6 +294,44 @@ can't bypass the gate. A passing verdict from an earlier PR commit is reused whe
 `requireDecisionOnPaths` changed since, so unrelated pushes don't re-run the suite. A regression is
 never reused: the next commit re-runs the suite, so a noisy result can clear.
 
+##### Pinned-baseline regression report
+
+A regression suite can compare PR runs against a pinned baseline instead of the latest run on
+`main`: an immutable snapshot of one blessed execution's scores, stored on the evaluations
+cluster. Set `pinnedBaseline` on the suite entry, and optionally `regressionReportGates` to
+supply the report thresholds (without it the CLI's built-in placeholders apply):
+
+```json
+"pinnedBaseline": true,
+"regressionReportGates": {
+  "defaults": { "failRelativeChange": 0.15, "warnRelativeChange": 0.08, "alpha": 0.05 },
+  "evaluators": { "Factuality": { "warnRelativeChange": 0.05 } }
+}
+```
+
+The PR comment then opens with a report-only verdict over every (dataset, evaluator) slice:
+fail on a significant worsening of at least `failRelativeChange` of the baseline mean, warn at
+`warnRelativeChange` or on any significant worsening. Unlike the merge gate above, the report
+never blocks a PR. The thresholds are placeholders until the suite's noise floor is measured.
+
+**Who pins, and how.** A baseline exists per (suite, task model) and is only created or moved
+deliberately:
+
+- The scheduled baseline pipeline runs the suite with `EVAL_PIN_BASELINE=1`, which pins the
+  run's scores after a clean export (`run_suite.sh` refuses filtered, sharded, or
+  export-incomplete runs).
+- A suite owner can pin a specific green run by hand:
+  `node scripts/evals ext pin-baseline --suite <suite-id> --execution-id <bk-BUILD::suite::model> --reason "..."`
+  (needs `EVAL_KBN_URL`/`EVAL_KBN_API_KEY` for the evaluations cluster and the `manage_evals`
+  privilege). Pass `--expect-scores <n>` to refuse the pin unless the baseline holds exactly
+  that many scores.
+- Pinning an already-pinned execution re-promotes its stored snapshot: that is the rollback
+  path after a bad pin.
+
+Flip `pinnedBaseline` on only after the first baseline is pinned for each of the suite's
+models; until then every labeled PR would get a "No pinned baseline" note instead of a
+comparison.
+
 #### Per-spec model groups
 
 The weekly run normally runs every model in a suite against every spec. To run a spec against
