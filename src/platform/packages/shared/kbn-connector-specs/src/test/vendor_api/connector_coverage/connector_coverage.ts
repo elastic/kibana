@@ -10,7 +10,7 @@
 import type { ConnectorSpec } from '../../../connector_spec';
 import { connectorSpecHasEvents } from '../../../connector_spec_has_events';
 import type { ManifestSource, VendorApiManifest } from '../manifest';
-import { isMarkdownFormat } from '../manifest';
+import { isAglioFormat, isMarkdownFormat } from '../manifest';
 
 export type CoverageDirection = 'outbound' | 'inbound' | 'both';
 
@@ -20,6 +20,7 @@ export type CoverageApiType =
   | 'discovery'
   | 'smithy'
   | 'markdown'
+  | 'html'
   | 'mcp'
   | 'database'
   | 'graphql'
@@ -308,8 +309,11 @@ const MCP_PATH = /(^|\/)mcp(\/|$)/i;
 /** How many actions call each kind of vendor API; an action that calls two counts under both. */
 export type ApiTypeActions = Partial<Record<CoverageApiType, number>>;
 
-const toApiType = (format: ManifestSource['format']): CoverageApiType =>
-  isMarkdownFormat(format) ? 'markdown' : format;
+const toApiType = (format: ManifestSource['format']): CoverageApiType => {
+  if (isMarkdownFormat(format)) return 'markdown';
+  if (isAglioFormat(format)) return 'html';
+  return format;
+};
 
 /**
  * The API types of a recorded connector with the actions that call each. An action calls the

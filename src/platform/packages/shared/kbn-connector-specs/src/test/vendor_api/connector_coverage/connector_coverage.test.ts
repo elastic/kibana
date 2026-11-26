@@ -118,6 +118,14 @@ describe('getRecordedApiTypeActions', () => {
     ).toEqual({ markdown: 1 });
   });
 
+  it('maps Aglio HTML formats to html', () => {
+    expect(
+      getRecordedApiTypeActions(
+        recorded({ sources: { v1: 'threatq-html' }, operations: { search: ['v1'] } })
+      )
+    ).toEqual({ html: 1 });
+  });
+
   it('counts an action once per kind of API, however many operations it calls', () => {
     expect(
       getRecordedApiTypeActions(
