@@ -31,17 +31,22 @@ export interface CalendarDateRounding {
   readonly amount: number;
 }
 
-/** How Elasticsearch assigns timestamps to date buckets for one interval. */
+/**
+ * How Elasticsearch splits time into buckets for one interval: `fixed` buckets have a constant
+ * width in local time, `calendar` buckets follow calendar days, weeks, months or years.
+ */
 export type DateRounding = FixedDateRounding | CalendarDateRounding;
 
 const FIXED_UNIT_MS = { ms: 1, s: SECOND_MS, m: MINUTE_MS, h: HOUR_MS } as const;
 
 /**
- * Parse a bucket interval such as `30m`, `12h`, `1d`, `1w` or `3M` with ES|QL `BUCKET` semantics:
- * `1d`, `7d` and `1w` are calendar units (`7d` is an ISO week, like `1w`), other day and week
- * multiples are fixed widths, and month and year multiples are calendar units aligned to January
- * of year 1.
- * Returns `undefined` for anything else.
+ * Parse a bucket interval such as `30m`, `12h`, `1d`, `1w` or `3M` into a `DateRounding`, following
+ * the ES|QL `BUCKET` rules:
+ * - `ms`, `s`, `m` and `h` are fixed widths;
+ * - `1d` is a calendar day, and `1w` and `7d` are calendar ISO weeks (starting on Monday);
+ * - any other number of days or weeks is a fixed width;
+ * - months and years are calendar units, counted from January of year 1.
+ * Returns `undefined` if the expression is not a positive integer followed by one of these units.
  */
 export const toDateRounding = (expression: string): DateRounding | undefined => {
   const parsed = /^(\d+)(ms|s|m|h|d|w|M|y)$/.exec(expression);
@@ -81,7 +86,10 @@ export const toDateRounding = (expression: string): DateRounding | undefined => 
   }
 };
 
-/** Key of the Elasticsearch date bucket that contains `timestamp` in `timeZone`. */
+/**
+ * Start of the date bucket containing `timestamp` in `timeZone`, in UTC epoch milliseconds. This is
+ * the value Elasticsearch returns as the bucket `key` for the same interval and time zone.
+ */
 export const roundToBucketKey = (
   timestamp: number,
   rounding: DateRounding,
@@ -89,12 +97,15 @@ export const roundToBucketKey = (
 ): number => {
   const periods = offsetPeriods(timeZone);
   if (rounding.kind === 'fixed') {
-    return roundFixed(periods, periodIndexAt(periods, timestamp), timestamp, rounding.widthMs);
+    return roundFixedAt(periods, timestamp, rounding.widthMs);
   }
   return localDayStart(periods, calendarStart(localDate(periods, timestamp), rounding));
 };
 
-/** Key of the Elasticsearch date bucket that follows the bucket containing `timestamp`. */
+/**
+ * Start of the bucket right after the one containing `timestamp` (the end of that bucket), in UTC
+ * epoch milliseconds. Like `roundToBucketKey`, it matches the bucket boundaries Elasticsearch uses.
+ */
 export const nextBucketKey = (
   timestamp: number,
   rounding: DateRounding,
@@ -103,9 +114,8 @@ export const nextBucketKey = (
   const periods = offsetPeriods(timeZone);
   if (rounding.kind === 'fixed') {
     const width = rounding.widthMs;
-    const key = roundFixed(periods, periodIndexAt(periods, timestamp), timestamp, width);
-    const end = fixedBucketEnd(periods, key, width);
-    return roundFixed(periods, periodIndexAt(periods, end), end, width);
+    const key = roundFixedAt(periods, timestamp, width);
+    return roundFixedAt(periods, fixedBucketEnd(periods, key, width), width);
   }
   const start = calendarStart(localDate(periods, timestamp), rounding);
   const unit = rounding.unit === 'isoWeek' ? 'week' : rounding.unit;
@@ -113,28 +123,44 @@ export const nextBucketKey = (
 };
 
 /**
- * First instant after `key` that rounds to a different key. Inside a constant-offset period
- * the key only changes on a local boundary, so only those and the period ends are probed.
+ * End of the fixed-width bucket that starts at `key`: the first instant that belongs to a
+ * different bucket. Within a period with a constant offset the bucket can only change at a local
+ * multiple of `width` or when the period ends, so only those instants are checked.
  */
 const fixedBucketEnd = (periods: readonly OffsetPeriod[], key: number, width: number): number => {
-  let cursor = key;
-  for (;;) {
-    const { end, offsetMs } = periods[periodIndexAt(periods, cursor)];
-    cursor = Math.min(localFloor(cursor, offsetMs, width) + width - offsetMs, end);
-    if (roundFixed(periods, periodIndexAt(periods, cursor), cursor, width) !== key) {
-      return cursor;
-    }
+  let candidate = nextFixedBoundary(periods, key, width);
+  while (roundFixedAt(periods, candidate, width) === key) {
+    candidate = nextFixedBoundary(periods, candidate, width);
   }
+  return candidate;
 };
 
-/** Local time of `utcMillis` at `offsetMs`, rounded down to a multiple of `width`. */
+/**
+ * Next instant after `utcMillis` where the bucket may change: the next local multiple of `width`
+ * in the current period, or the end of that period if it comes first.
+ */
+const nextFixedBoundary = (
+  periods: readonly OffsetPeriod[],
+  utcMillis: number,
+  width: number
+): number => {
+  const { end, offsetMs } = periods[periodIndexAt(periods, utcMillis)];
+  return Math.min(localFloor(utcMillis, offsetMs, width) + width - offsetMs, end);
+};
+
+const roundFixedAt = (periods: readonly OffsetPeriod[], utcMillis: number, width: number): number =>
+  roundFixed(periods, periodIndexAt(periods, utcMillis), utcMillis, width);
+
+/** Local time of `utcMillis` for a zone offset of `offsetMs`, rounded down to a multiple of `width`. */
 const localFloor = (utcMillis: number, offsetMs: number, width: number): number =>
   Math.floor((utcMillis + offsetMs) / width) * width;
 
 /**
- * ES `TimeIntervalRounding` in a zone with offset changes: round the local time down, then map it
- * back to UTC. A rounded local time skipped by a forward jump maps to the transition instant; one
- * that only exists before the transition rounds the last instant before it instead.
+ * Start of the fixed-width bucket containing `utcMillis`, which lies in `periods[index]`. Like ES
+ * `TimeIntervalRounding`, it rounds the local time down to a multiple of `width` and converts the
+ * result back to UTC. If that instant is before the period starts, the rounded local time either
+ * was skipped by a forward clock jump (the bucket starts at the jump) or only existed before the
+ * transition (the bucket is the one containing the last instant before it).
  */
 const roundFixed = (
   periods: readonly OffsetPeriod[],
@@ -154,7 +180,10 @@ const roundFixed = (
   );
 };
 
-/** Start of the forward transition at or before `periods[index]` whose skipped local times contain `localMillis`. */
+/**
+ * Start of the nearest forward clock jump, at or before `periods[index]`, that skips the local time
+ * `localMillis`; `undefined` if that local time was not skipped.
+ */
 const gapTransitionAt = (
   periods: readonly OffsetPeriod[],
   index: number,
@@ -172,17 +201,23 @@ const gapTransitionAt = (
   return undefined;
 };
 
-/** Local calendar date of `utcMillis`, as a UTC moment so date math ignores offsets. */
+/**
+ * Local calendar date of `utcMillis` in the zone described by `periods`, at local midnight. It is
+ * returned as a UTC moment so that date math is not affected by the zone's offset changes.
+ */
 const localDate = (periods: readonly OffsetPeriod[], utcMillis: number): moment.Moment => {
   const { offsetMs } = periods[periodIndexAt(periods, utcMillis)];
   return moment.utc(utcMillis + offsetMs).startOf('day');
 };
 
-/** First local date of the calendar bucket containing `date`; month and year multiples count from `ANCHOR_YEAR`. */
+/**
+ * First local date of the calendar bucket that contains `date`. Month and year buckets of more
+ * than one unit are counted from `ANCHOR_YEAR`, so `3M` buckets start in January, April, July and October.
+ */
 const calendarStart = (date: moment.Moment, rounding: CalendarDateRounding): moment.Moment => {
   const { unit, amount } = rounding;
   if (unit === 'day') {
-    return date.clone();
+    return date.clone().startOf('day');
   }
   if (unit === 'isoWeek') {
     return date.clone().startOf('isoWeek');
@@ -198,8 +233,9 @@ const calendarStart = (date: moment.Moment, rounding: CalendarDateRounding): mom
 };
 
 /**
- * First instant of the local midnight `date`, like ES calendar rounding: the earlier instant when
- * midnight repeats, the transition instant when a forward jump skips it.
+ * UTC instant at which the local date `date` starts, like ES calendar rounding. If local midnight
+ * happens twice (clock set back), the first one is used; if a forward clock jump skips it, the
+ * date starts at the jump.
  */
 const localDayStart = (periods: readonly OffsetPeriod[], date: moment.Moment): number => {
   const localMillis = date.valueOf();
