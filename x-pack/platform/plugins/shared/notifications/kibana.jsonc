@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/notifications-plugin",
   "owner": [
-    "@elastic/appex-sharedux"
+    "@elastic/response-ops"
   ],
   "group": "platform",
   "visibility": "shared",
