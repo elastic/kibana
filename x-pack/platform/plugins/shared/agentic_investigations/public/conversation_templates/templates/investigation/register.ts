@@ -55,7 +55,7 @@ export const investigationTemplate: TemplateDefinition = {
     renderAssignees,
     renderStatus,
     getImpactEntityOpener,
-    getOverviewSection,
+    getOverviewFooter,
   }) => {
     const { agentBuilder, proposals } = startDeps;
 
@@ -135,7 +135,7 @@ export const investigationTemplate: TemplateDefinition = {
             ...props,
             onOpenEntity: getImpactEntityOpener(),
             footer: props.conversation.agent_id
-              ? getOverviewSection?.(props.conversation.agent_id)
+              ? getOverviewFooter?.(props.conversation.agent_id)
               : undefined,
           });
         return Overview;

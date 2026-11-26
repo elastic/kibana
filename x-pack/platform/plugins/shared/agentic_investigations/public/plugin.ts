@@ -130,7 +130,7 @@ export class AgenticInvestigationsPublicPlugin
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
         getImpactEntityOpener: () => this.impactEntityOpener,
-        getOverviewSection: (agentId) => this.overviewSections.get(agentId),
+        getOverviewFooter: (agentId) => this.overviewSections.get(agentId),
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
