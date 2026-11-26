@@ -314,6 +314,34 @@ describe('KnownFailuresGenerator', () => {
     );
   });
 
+  // Dropping the older run also drops the event it opened, so the newer run's minutes are judged on
+  // their own threshold and found: as many findings as before, and the dropped ones must still show.
+  it('notes the findings it dropped when others take their place', async () => {
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({
+        rows: [
+          createRow(8, [2, 2, 9, 9, 2, 2, 2]),
+          // A busier hour before it: the event its two spikes open keeps a threshold above 9.
+          createRow(0, [50, 50, 2, 2, 2, 2, 2], {
+            baseline_median: 10,
+            baseline_mean: 10,
+            baseline_std_dev: 1,
+          }),
+        ],
+        // After the older run's normal hour starts, before the newer one's.
+        readDataStart: async () => ({
+          values: [[new Date(WINDOW.from - 55 * MINUTE_MS).toISOString()]],
+        }),
+      })
+    );
+
+    expect(result.readings).toEqual([
+      expect.objectContaining({ bucket_start: WINDOW.from + 10 * MINUTE_MS, value: 9 }),
+      expect.objectContaining({ bucket_start: WINDOW.from + 11 * MINUTE_MS, value: 9 }),
+    ]);
+    expect(result.notes).toEqual([expect.stringMatching(/dropped 2 finding\(s\)/)]);
+  });
+
   // Fail open: a missed failure costs more than a source warming up reported once.
   it('reports what it found, with a note, when it cannot tell when the source’s data begins', async () => {
     const result = await new KnownFailuresGenerator().generate(
