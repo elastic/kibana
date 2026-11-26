@@ -1436,24 +1436,42 @@ describe('listDetections', () => {
     // an Axios ECONNABORTED means the poll budget expired during the request itself.
     // This should return { runId, state: 'pending' } so the caller can resume with that runId,
     // rather than surface a confusing network error.
+    //
+    // The mock rejects after config.timeout ms (via a setTimeout driven by fake timers), so the
+    // test proves the right timeout was passed to Axios — not just that ECONNABORTED is handled.
     jest.useFakeTimers();
     const client = makeClient();
-    // No client cap (makeClient sets no defaults.timeout)
+    // No client cap — afterSleep (90 000 − 5 000 = 85 000 ms) becomes the Axios timeout.
     client.get.mockResolvedValue({
       data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
     client.request
       .mockResolvedValueOnce({ data: { runId: RUN_ID } }) // submit
-      .mockRejectedValueOnce(
-        // No response — pure timeout, not an HTTP error
-        Object.assign(new Error('timeout of 85000ms exceeded'), { code: 'ECONNABORTED' })
-      ); // poll times out mid-request (budget-limited)
+      .mockImplementationOnce(
+        (config: { timeout?: number }) =>
+          new Promise((_, reject) =>
+            setTimeout(
+              () =>
+                reject(
+                  Object.assign(new Error(`timeout of ${config.timeout}ms exceeded`), {
+                    code: 'ECONNABORTED',
+                  })
+                ),
+              config.timeout
+            )
+          )
+      ); // poll: rejects with ECONNABORTED after exactly config.timeout ms
 
     const ctx = makeCtx(client);
     const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {});
     await jest.runAllTimersAsync();
     const result = await resultPromise;
 
+    // The budget after a 5 000 ms sleep is 85 000 ms — that must be the Axios timeout.
+    expect(client.request).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ timeout: 85_000 })
+    );
     expect(result).toMatchObject({ runId: RUN_ID, state: 'pending' });
   });
 
@@ -1461,18 +1479,32 @@ describe('listDetections', () => {
     // When clientCap (Kibana responseTimeout) is shorter than the remaining budget,
     // effectiveTimeout = clientCap < afterSleep, so isBudgetLimited = false.
     // An ECONNABORTED in this case is a real configuration timeout — it must throw.
+    //
+    // The mock rejects after config.timeout ms (via a setTimeout driven by fake timers), so the
+    // test proves the clientCap was actually passed to Axios — not just that the error propagates.
     jest.useFakeTimers();
     const client = makeClient();
-    // Simulate a 3-second Kibana responseTimeout — shorter than the 90-second poll budget
+    // Simulate a 3-second Kibana responseTimeout — shorter than the 90-second poll budget.
     (client as unknown as { defaults: { timeout: number } }).defaults = { timeout: 3_000 };
     client.get.mockResolvedValue({
       data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
     client.request
       .mockResolvedValueOnce({ data: { runId: RUN_ID } }) // submit
-      .mockRejectedValueOnce(
-        Object.assign(new Error('timeout of 3000ms exceeded'), { code: 'ECONNABORTED' })
-      ); // poll times out at the Kibana client cap
+      .mockImplementationOnce(
+        (config: { timeout?: number }) =>
+          new Promise((_, reject) =>
+            setTimeout(
+              () =>
+                reject(
+                  Object.assign(new Error(`timeout of ${config.timeout}ms exceeded`), {
+                    code: 'ECONNABORTED',
+                  })
+                ),
+              config.timeout
+            )
+          )
+      ); // poll: rejects with ECONNABORTED after exactly config.timeout ms
 
     const ctx = makeCtx(client);
     const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {}).catch(
@@ -1481,6 +1513,11 @@ describe('listDetections', () => {
     await jest.runAllTimersAsync();
     const result = await resultPromise;
 
+    // The clientCap (3 000 ms) is shorter than the remaining budget — that must be the Axios timeout.
+    expect(client.request).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ timeout: 3_000 })
+    );
     // Must be an error, not a pending object
     expect(result).toBeInstanceOf(Error);
     expect(result).not.toMatchObject({ state: 'pending' });
