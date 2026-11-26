@@ -37,6 +37,8 @@ export interface TaskClaimingOpts {
   taskStore: TaskStore;
   maxAttempts: number;
   excludedTaskTypes: string[];
+  // Ids of individual tasks held back by configuration. Defaults to none.
+  excludedTaskIds?: string[];
   getAvailableCapacity: (taskType?: string) => number;
   taskPartitioner: TaskPartitioner;
   // Runtime task execution control (pause/resume). Defaults to unpaused.
@@ -87,6 +89,7 @@ export class TaskClaiming {
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly staticExcludedTaskTypes: string[];
+  private readonly staticExcludedTaskIds: string[];
   private readonly getExecutionControlState: () => TaskExecutionControlState;
   private readonly taskClaimer: TaskClaimerFn;
   private readonly taskPartitioner: TaskPartitioner;
@@ -106,6 +109,7 @@ export class TaskClaiming {
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.staticExcludedTaskTypes = opts.excludedTaskTypes;
+    this.staticExcludedTaskIds = opts.excludedTaskIds ?? [];
     this.getExecutionControlState =
       opts.getExecutionControlState ?? (() => DEFAULT_EXECUTION_CONTROL_STATE);
     this.taskClaimer = getTaskClaimer(this.logger, opts.strategy);
@@ -185,6 +189,7 @@ export class TaskClaiming {
           // Merge the statically-excluded task types (config) with the
           // runtime paused task types so both are dropped from the claim.
           excludedTaskTypes: [...this.staticExcludedTaskTypes, ...executionControl.pausedTaskTypes],
+          excludedTaskIds: this.staticExcludedTaskIds,
           logger: this.logger,
           taskPartitioner: this.taskPartitioner,
         };

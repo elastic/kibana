@@ -60,6 +60,7 @@ const pluginInitializerContextParams = {
     interval: 10000,
   },
   execution_control: {
+    paused_task_ids: [],
     poll_interval: 5000,
   },
   kibanas_per_partition: 2,

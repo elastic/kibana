@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema, CLAIM_STRATEGY_MGET } from './config';
+import { configSchema, CLAIM_STRATEGY_MGET, MAX_PAUSED_TASK_IDS } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
@@ -28,6 +28,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "execution_control": Object {
+          "paused_task_ids": Array [],
           "poll_interval": 5000,
         },
         "grant_uiam_api_keys": false,
@@ -98,6 +99,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "execution_control": Object {
+          "paused_task_ids": Array [],
           "poll_interval": 5000,
         },
         "grant_uiam_api_keys": false,
@@ -166,6 +168,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "execution_control": Object {
+          "paused_task_ids": Array [],
           "poll_interval": 5000,
         },
         "grant_uiam_api_keys": false,
@@ -322,6 +325,35 @@ describe('config validation', () => {
   test('claim_nudge.enabled can be disabled', () => {
     const result = configSchema.validate({ claim_nudge: { enabled: false } });
     expect(result.claim_nudge.enabled).toEqual(false);
+  });
+
+  test('execution_control.paused_task_ids defaults to an empty list', () => {
+    const result = configSchema.validate({});
+    expect(result.execution_control.paused_task_ids).toEqual([]);
+  });
+
+  test('execution_control.paused_task_ids accepts task ids', () => {
+    const result = configSchema.validate({
+      execution_control: { paused_task_ids: ['task-1', 'task-2'] },
+    });
+    expect(result.execution_control.paused_task_ids).toEqual(['task-1', 'task-2']);
+  });
+
+  test('execution_control.paused_task_ids rejects empty ids and more than 100 ids', () => {
+    expect(() =>
+      configSchema.validate({ execution_control: { paused_task_ids: [''] } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[execution_control.paused_task_ids.0]: value has length [0] but it must have a minimum length of [1]."`
+    );
+    expect(() =>
+      configSchema.validate({
+        execution_control: {
+          paused_task_ids: Array.from({ length: MAX_PAUSED_TASK_IDS + 1 }, (_, i) => `task-${i}`),
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[execution_control.paused_task_ids]: array size is [101], but cannot be greater than [100]"`
+    );
   });
 
   test('should not throw if ephemeral_tasks is defined', () => {

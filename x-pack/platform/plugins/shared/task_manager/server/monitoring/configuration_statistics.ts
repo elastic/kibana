@@ -35,6 +35,7 @@ interface ExecutionControlConfig extends JsonObject {
   execution_control: {
     paused: boolean;
     paused_task_types: string[];
+    paused_task_ids: string[];
   };
 }
 
@@ -73,17 +74,19 @@ export function createConfigurationAggregator(
   // The execution control service runs on every node (including UI-only nodes
   // that have no polling lifecycle), so read the pause state from it directly
   // to keep the health output consistent everywhere.
+  const { paused_task_ids: pausedTaskIds } = config.execution_control;
   const executionControl$ = executionControlService
     ? executionControlService.state.pipe(
         map<TaskExecutionControlState, ExecutionControlConfig>((state) => ({
           execution_control: {
             paused: state.paused,
             paused_task_types: state.pausedTaskTypes,
+            paused_task_ids: pausedTaskIds,
           },
         }))
       )
     : of<ExecutionControlConfig>({
-        execution_control: { paused: false, paused_task_types: [] },
+        execution_control: { paused: false, paused_task_types: [], paused_task_ids: pausedTaskIds },
       });
 
   return combineLatest([

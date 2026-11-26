@@ -289,11 +289,23 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     });
     this.pool.load.subscribe(emitEvent);
 
+    const { paused_task_ids: pausedTaskIds } = config.execution_control;
+    if (pausedTaskIds.length) {
+      this.logger.warn(
+        `Task Manager will not claim ${
+          pausedTaskIds.length
+        } task(s) paused by configuration (xpack.task_manager.execution_control.paused_task_ids): ${pausedTaskIds.join(
+          ', '
+        )}`
+      );
+    }
+
     this.taskClaiming = new TaskClaiming({
       taskStore,
       strategy: config.claim_strategy,
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
+      excludedTaskIds: config.execution_control.paused_task_ids,
       definitions,
       logger: this.logger,
       getAvailableCapacity: (taskType?: string) => this.pool.availableCapacity(taskType),

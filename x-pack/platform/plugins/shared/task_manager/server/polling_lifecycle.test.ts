@@ -99,6 +99,7 @@ describe('TaskPollingLifecycle', () => {
         interval: 10000,
       },
       execution_control: {
+        paused_task_ids: [],
         poll_interval: 5000,
       },
       kibanas_per_partition: 2,
@@ -284,6 +285,45 @@ describe('TaskPollingLifecycle', () => {
       expect(taskClaimingGetCapacity()).toEqual(80);
       expect(taskClaimingGetCapacity('report')).toEqual(10);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
+    });
+  });
+
+  describe('paused task ids', () => {
+    test('passes the configured task ids to TaskClaiming and logs them', () => {
+      const logger = mockLogger();
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        logger,
+        config: {
+          ...taskManagerOpts.config,
+          execution_control: {
+            ...taskManagerOpts.config.execution_control,
+            paused_task_ids: ['held-1', 'held-2'],
+          },
+        },
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+
+      expect(
+        (TaskClaiming as jest.Mock<TaskClaimingClass>).mock.calls[0][0].excludedTaskIds
+      ).toEqual(['held-1', 'held-2']);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Task Manager will not claim 2 task(s) paused by configuration (xpack.task_manager.execution_control.paused_task_ids): held-1, held-2'
+      );
+    });
+
+    test('does not log when no task ids are configured', () => {
+      const logger = mockLogger();
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        logger,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+
+      expect(
+        (TaskClaiming as jest.Mock<TaskClaimingClass>).mock.calls[0][0].excludedTaskIds
+      ).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 

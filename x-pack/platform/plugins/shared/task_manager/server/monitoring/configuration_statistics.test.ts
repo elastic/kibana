@@ -30,6 +30,7 @@ describe('Configuration Statistics Aggregator', () => {
       interval: 10000,
     },
     execution_control: {
+      paused_task_ids: [],
       poll_interval: 5000,
     },
     kibanas_per_partition: 2,
@@ -111,6 +112,7 @@ describe('Configuration Statistics Aggregator', () => {
               execution_control: {
                 paused: false,
                 paused_task_types: [],
+                paused_task_ids: [],
               },
             });
             expect(updatedWorkers.value).toEqual({
@@ -134,6 +136,7 @@ describe('Configuration Statistics Aggregator', () => {
               execution_control: {
                 paused: false,
                 paused_task_types: [],
+                paused_task_ids: [],
               },
             });
             resolve();
@@ -160,6 +163,23 @@ describe('Configuration Statistics Aggregator', () => {
     expect(value.execution_control).toEqual({
       paused: true,
       paused_task_types: ['alerting:foo'],
+      paused_task_ids: [],
     });
+  });
+
+  test('reports the task ids paused by configuration', async () => {
+    const { value } = await firstValueFrom(
+      createConfigurationAggregator(
+        {
+          ...configuration,
+          execution_control: { ...configuration.execution_control, paused_task_ids: ['held-1'] },
+        },
+        10,
+        undefined,
+        taskExecutionControlServiceMock.create()
+      )
+    );
+
+    expect(value.execution_control.paused_task_ids).toEqual(['held-1']);
   });
 });

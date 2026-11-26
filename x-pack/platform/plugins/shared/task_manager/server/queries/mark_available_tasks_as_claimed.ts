@@ -72,6 +72,12 @@ export const EnabledTask: MustCondition = {
   },
 };
 
+export const tasksNotWithIds = (taskIds: string[]): MustNotCondition => ({
+  bool: {
+    must_not: [{ ids: { values: taskIds.map((taskId) => `task:${taskId}`) } }],
+  },
+});
+
 export const RecognizedTask: MustNotCondition = {
   bool: {
     must_not: [

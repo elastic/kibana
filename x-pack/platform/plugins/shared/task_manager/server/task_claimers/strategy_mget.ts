@@ -46,6 +46,7 @@ import {
   OneOfTaskTypes,
   RecognizedTask,
   tasksWithPartitions,
+  tasksNotWithIds,
 } from '../queries/mark_available_tasks_as_claimed';
 
 import type { TaskStore, SearchOpts } from '../task_store';
@@ -62,6 +63,7 @@ interface OwnershipClaimingOpts {
   taskTypes: Set<string>;
   getCapacity: (taskType?: string | undefined) => number;
   excludedTaskTypePatterns: string[];
+  excludedTaskIds: string[];
   taskStore: TaskStore;
   events$: Subject<TaskClaim>;
   definitions: TaskTypeDictionary;
@@ -102,7 +104,7 @@ export async function claimAvailableTasksMget(
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore, taskPartitioner } = opts;
-  const { definitions, excludedTaskTypes, taskMaxAttempts } = opts;
+  const { definitions, excludedTaskTypes, excludedTaskIds = [], taskMaxAttempts } = opts;
   const logger = createWrappedLogger({ logger: opts.logger, tags: [claimAvailableTasksMget.name] });
   const initialCapacity = getCapacity();
   const stopTaskTimer = startTaskTimer();
@@ -112,6 +114,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     definitions,
     taskTypes: new Set(definitions.getAllTypes()),
     excludedTaskTypePatterns: excludedTaskTypes,
+    excludedTaskIds,
     taskStore,
     events$,
     claimOwnershipUntil,
@@ -334,6 +337,7 @@ async function searchAvailableTasks({
   definitions,
   taskTypes,
   excludedTaskTypePatterns,
+  excludedTaskIds,
   taskStore,
   getCapacity,
   size,
@@ -367,6 +371,7 @@ async function searchAvailableTasks({
   }
 
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
+  const notExcludedById = excludedTaskIds.length ? tasksNotWithIds(excludedTaskIds) : undefined;
   const searches: SearchOpts[] = [];
 
   // not handling removed types yet
@@ -388,7 +393,8 @@ async function searchAvailableTasks({
     const queryUnlimitedTasks = matchesClauses(
       queryForUnlimitedTasks,
       filterDownBy(InactiveTasks),
-      partitions.length ? tasksWithPartitions(partitions) : undefined
+      partitions.length ? tasksWithPartitions(partitions) : undefined,
+      notExcludedById
     );
     searches.push({
       query: queryUnlimitedTasks,
@@ -415,7 +421,8 @@ async function searchAvailableTasks({
     const query = matchesClauses(
       queryForLimitedTasks,
       filterDownBy(InactiveTasks),
-      partitions.length ? tasksWithPartitions(partitions) : undefined
+      partitions.length ? tasksWithPartitions(partitions) : undefined,
+      notExcludedById
     );
     searches.push({
       query,

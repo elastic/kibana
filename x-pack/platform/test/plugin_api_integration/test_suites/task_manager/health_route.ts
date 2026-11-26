@@ -154,6 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
         execution_control: {
           paused: false,
           paused_task_types: [],
+          paused_task_ids: [],
         },
       });
     });
