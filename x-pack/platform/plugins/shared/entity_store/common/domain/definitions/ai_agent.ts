@@ -61,6 +61,7 @@ export const aiAgentEntityDefinition: ManagedEntityDefinitionWithoutId & {
     },
   },
   extraction: {
+    entityTypeFallback: 'AI Agent',
     fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
     whenConditionTrueSetFieldsPreAgg: [
       {

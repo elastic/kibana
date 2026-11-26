@@ -20,8 +20,14 @@ export const EntityType = lazySchema(() =>
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-/** Types the install API installs when a request names none. `ai_agent` is installed on request. */
-export const DEFAULT_INSTALL_ENTITY_TYPES: EntityType[] = ['user', 'host', 'service', 'generic'];
+/** Types the install API installs when a request names none. */
+export const DEFAULT_INSTALL_ENTITY_TYPES: EntityType[] = [
+  'user',
+  'host',
+  'service',
+  'generic',
+  'ai_agent',
+];
 
 /** Registry type name. Wider than the closed `EntityType`, which only covers the built-ins. */
 export type EntityDefinitionType = string;

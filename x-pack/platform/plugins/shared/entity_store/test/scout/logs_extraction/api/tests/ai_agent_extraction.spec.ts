@@ -114,6 +114,7 @@ apiTest.describe('Entity Store ai_agent extraction', { tag: ENTITY_STORE_TAGS },
 
       const [claude, cursor] = rows;
       expect(get(claude, 'entity.name')).toBe('claude_code@ec2-user@dev-box');
+      expect(get(claude, 'entity.type')).toBe('AI Agent');
       expect(get(claude, 'entity.lifecycle')).toStrictEqual({
         first_seen: '2026-02-01T12:00:00.000Z',
         last_seen: '2026-02-01T12:30:00.000Z',
