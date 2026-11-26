@@ -82,7 +82,7 @@ export const CUSTOM_CONTENT_MULTI_QUERY_EXAMPLES: CustomContentDatasetExample[] 
   },
   {
     input: {
-      question: `${CREATE_PANEL} for ${LOGS} with three parts side by side: a row of headline numbers (total requests, unique hosts, average response time), a table of the top 5 hosts by request count, and a table of the 5 most common HTTP status codes with their counts.`,
+      question: `${CREATE_PANEL} for ${LOGS} with three parts side by side: a row of headline numbers (total requests, unique hosts, average bytes), a table of the top 5 hosts by request count, and a table of the 5 most common HTTP status codes with their counts.`,
     },
     output: {
       data: 'query',
