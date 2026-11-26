@@ -62,7 +62,7 @@ import {
 import type { AlertingPublisherContext } from '../events/domain_events';
 import { toEventOrigin } from '../event_origin/event_origin';
 import { buildSoSearch } from '../build_so_search';
-import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
+import { savedObjectNamespacesToSpaceId } from '../saved_object_namespaces_to_space_id';
 import { applyPatch } from '../apply_patch';
 import { buildActionPolicySoFilter } from './build_action_policy_filter';
 import { groupRoutingTags } from './group_routing_tags';
@@ -327,12 +327,12 @@ export class ActionPolicyClient {
     try {
       ({ id } = await this.actionPolicySavedObjectService.create({
         attrs: attributes,
-        id: params.options?.id,
+        id: parsed.id,
       }));
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
+      this.markApiKeysForInvalidation(attributes.apiKey, false, parsed.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        const conflictId = params.options?.id ?? 'unknown';
+        const conflictId = parsed.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
           code: ALERTING_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
           details: { action_policy_id: conflictId },
@@ -1021,7 +1021,7 @@ export class ActionPolicyClient {
     const exists = await this.actionPolicyExists({ id });
 
     if (!exists) {
-      const policy = await this.createActionPolicy({ data: parsed, options: { id } });
+      const policy = await this.createActionPolicy({ data: { ...parsed, id } });
       return { policy, created: true };
     }
 

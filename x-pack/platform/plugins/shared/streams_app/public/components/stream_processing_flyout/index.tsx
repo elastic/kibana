@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -46,6 +45,7 @@ import {
   deleteAllProcessorsPromptOptions,
   discardProcessingChangesPromptOptions,
 } from './prompt_options';
+import { SaveAndApplyButton } from './save_and_apply_button';
 
 const deleteAllLabel = i18n.translate('xpack.streams.processingFlyout.deleteAll', {
   defaultMessage: 'Delete all processors',
@@ -57,7 +57,14 @@ const closeLabel = i18n.translate('xpack.streams.processingFlyout.close', {
   defaultMessage: 'Close',
 });
 
-export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout }) {
+export function ProcessingFlyout({
+  flyout,
+  readOnly = false,
+}: {
+  flyout: CanvasProcessingFlyout;
+  /** Lists the processors without editing, for users without the V2 manage privilege. */
+  readOnly?: boolean;
+}) {
   const { euiTheme } = useEuiTheme();
   const headerId = useGeneratedHtmlId();
   const { closeProcessingFlyout } = useCanvasEvents();
@@ -72,6 +79,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
   const createPosition = useSelector(ref, (state) => state.context.createPosition);
   const isSaving = useSelector(ref, (state) => state.matches('saving'));
   const hasChanges = useSelector(ref, (state) => state.context.hasChanges);
+  const hasEditorChanges = useSelector(ref, (state) => state.context.hasEditorChanges);
   const editable = useSelector(ref, (state) => state.context.editable);
   const telemetry = useSelector(ref, (state) => state.context.telemetry);
   const diagnostics = useSelector(ref, (state) => state.context.diagnostics);
@@ -92,7 +100,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
   const componentIds = useMemo(() => usedComponentIds(unit), [unit]);
 
   const isCatalogueUnsupported = unsupportedVersion !== undefined;
-  const canEdit = editable && !isCatalogueUnsupported;
+  const canEdit = editable && !isCatalogueUnsupported && !readOnly;
   // Steps are still listed from an unsupported catalogue, but nothing in it is interpreted, so the
   // list falls back to raw types for display names.
   const listCatalogue = useMemo(
@@ -104,10 +112,10 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
 
   // A flyout opened to add a processor cannot add one from a catalogue this Kibana cannot read.
   useEffect(() => {
-    if (isCatalogueUnsupported && isEditing) {
+    if ((isCatalogueUnsupported || readOnly) && isEditing) {
       ref.send({ type: 'step.cancel' });
     }
-  }, [isCatalogueUnsupported, isEditing, ref]);
+  }, [isCatalogueUnsupported, isEditing, readOnly, ref]);
 
   const componentRefs = useMemo<ComponentReferenceOption[]>(
     () => [
@@ -138,9 +146,10 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
     [ref]
   );
   const cancelStep = useCallback(() => ref.send({ type: 'step.cancel' }), [ref]);
+  const changeStep = useCallback(() => ref.send({ type: 'step.change' }), [ref]);
 
   const confirmClose = useDiscardConfirm(closeProcessingFlyout, {
-    enabled: hasChanges || isEditing,
+    enabled: hasChanges || hasEditorChanges,
     ...discardProcessingChangesPromptOptions,
   });
   // Closing does not cancel a save in flight, so the flyout stays open until it settles.
@@ -199,6 +208,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
         onMove={moveStep}
         onCommit={commitStep}
         onCancel={cancelStep}
+        onChange={changeStep}
       />
     );
   };
@@ -393,17 +403,12 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={isSaving}
+            <SaveAndApplyButton
+              isSaving={isSaving}
               isDisabled={!canEdit || !hasChanges || isEditing}
+              isEditing={isEditing}
               onClick={() => ref.send({ type: 'flyout.save' })}
-              data-test-subj="streamsProcessingFlyoutSave"
-            >
-              {i18n.translate('xpack.streams.processingFlyout.save', {
-                defaultMessage: 'Save and apply',
-              })}
-            </EuiButton>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

@@ -25,6 +25,8 @@ export const INTERNAL_API_HEADERS = {
 
 export const AI_INDEX_COLLECTION_PATH = 'api/context_engine/ai_index';
 export const AI_INDEX_QUERY_PATH = `${AI_INDEX_COLLECTION_PATH}/_query`;
+export const SESSION_EVENTS_SAVE_PATH = 'api/context_engine/memory/_save_event';
+export const SESSION_MEMORY_FORGET_PATH = 'api/context_engine/memory/_forget';
 
 export const kiListPath = (aiIndexId: string) =>
   `internal/context_engine/ai_index/${aiIndexId}/kis`;
@@ -35,6 +37,9 @@ export const kiRestorePath = (aiIndexId: string, kiId: string) =>
   `${kiByIdPath(aiIndexId, kiId)}/_restore`;
 /** The internal (not public) API that lists Knowledge Indicators for one AI Index. */
 export const AI_INDEX_INTERNAL_PATH = 'internal/context_engine/ai_index';
+
+export const aiIndexDreamingPath = (aiIndexId: string) =>
+  `${AI_INDEX_INTERNAL_PATH}/${aiIndexId}/dreaming`;
 
 /** Kibana grant for the Context Engine `read` privilege in every space. */
 export const CONTEXT_ENGINE_READ: KibanaRole['kibana'][number] = {

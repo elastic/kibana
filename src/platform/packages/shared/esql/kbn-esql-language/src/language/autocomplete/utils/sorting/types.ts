@@ -15,6 +15,7 @@ export enum SuggestionCategory {
   COMMAND_MODIFIER = 'command_modifier', // Optional modifier typed before the arguments (HIGHLIGHT prefix = ...)
   USER_DEFINED_COLUMN = 'user_defined_column',
   TIME_PARAM = 'time_param',
+  GEO_PRECISION_PARAM = 'geo_precision_param',
   RECOMMENDED_FIELD = 'recommended_field',
   LOOKUP_COMMON_FIELD = 'lookup_common_field',
   ECS_FIELD = 'ecs_field',

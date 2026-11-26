@@ -81,7 +81,7 @@ describe('Update profile routes', () => {
       expect(bodySchema.validate({})).toEqual({});
       expect(
         bodySchema.validate({
-          avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
+          avatar: { initials: 'SI', color: 'some-color', imageUrl: 'some-image-url' },
           userSettings: {
             darkMode: 'dark',
             contrastMode: 'high',
@@ -90,7 +90,7 @@ describe('Update profile routes', () => {
           },
         })
       ).toEqual({
-        avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
+        avatar: { initials: 'SI', color: 'some-color', imageUrl: 'some-image-url' },
         userSettings: {
           darkMode: 'dark',
           contrastMode: 'high',
@@ -190,26 +190,44 @@ describe('Update profile routes', () => {
       ).toThrow();
     });
 
+    it('accepts avatar initials of up to 2 graphemes.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+
+      for (const initials of ['AB', '\u{1F44D}\u{1F3FD}\u{1F44D}\u{1F3FD}', 'A\u{1F44D}']) {
+        expect(
+          bodySchema.validate({
+            avatar: { initials },
+          })
+        ).toEqual({ avatar: { color: null, imageUrl: null, initials } });
+      }
+    });
+
+    it('rejects avatar initials of more than 2 graphemes.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+
+      expect(() =>
+        bodySchema.validate({
+          avatar: { initials: 'ABC' },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[avatar.initials]: types that failed validation:
+        - [avatar.initials.0]: must have at most 2 characters
+        - [avatar.initials.1]: expected value to equal [null]"
+      `);
+    });
+
     it('rejects avatar initials exceeding max length.', () => {
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
-      const MAX_STRING_FIELD_LENGTH = 1024;
 
-      // Valid length should pass
-      const validInitials = 'a'.repeat(MAX_STRING_FIELD_LENGTH);
-      expect(
-        bodySchema.validate({
-          avatar: { initials: validInitials },
-        })
-      ).toEqual({ avatar: { color: null, imageUrl: null, initials: validInitials } });
-
-      const invalidInitials = 'a'.repeat(MAX_STRING_FIELD_LENGTH + 1);
+      // One grapheme, but more code units than the cap allows.
+      const invalidInitials = `a${'́'.repeat(64)}`;
       expect(() =>
         bodySchema.validate({
           avatar: { initials: invalidInitials },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
         "[avatar.initials]: types that failed validation:
-        - [avatar.initials.0]: value has length [1025] but it must have a maximum length of [1024].
+        - [avatar.initials.0]: value has length [65] but it must have a maximum length of [64].
         - [avatar.initials.1]: expected value to equal [null]"
       `);
     });
@@ -445,6 +463,82 @@ describe('Update profile routes', () => {
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
       expect(userProfileService.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('sanitizes an SVG avatar image before storing it.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      const maliciousSvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(2)</script><rect width="10" height="10"/></svg>';
+      const avatar = {
+        initials: 'ab',
+        color: '#000000',
+        imageUrl: `data:image/svg+xml;base64,${Buffer.from(maliciousSvg).toString('base64')}`,
+      };
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledTimes(1);
+      const [, updatedData] = userProfileService.update.mock.calls[0];
+      const { imageUrl, ...rest } = (updatedData as { avatar: typeof avatar }).avatar;
+      expect(rest).toEqual({ initials: 'ab', color: '#000000' });
+      expect(imageUrl).toMatch(/^data:image\/svg\+xml;base64,/);
+      expect(
+        Buffer.from(imageUrl.replace('data:image/svg+xml;base64,', ''), 'base64').toString('utf8')
+      ).toBe('<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"></rect></svg>');
+    });
+
+    it('stores raster avatar images unchanged.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      const avatar = {
+        initials: null,
+        color: null,
+        imageUrl: 'data:image/png;base64,iVBORw0KGgo=',
+      };
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', { avatar });
+    });
+
+    it('rejects unsupported avatar image media types.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: { avatar: { imageUrl: 'data:text/html;base64,PHNjcmlwdD4=' } },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 415 }));
+
+      expect(userProfileService.update).not.toHaveBeenCalled();
     });
 
     describe('locale', () => {

@@ -9,7 +9,6 @@ import {
   buildVegaSavedVis,
   extractVegaSpecFromSavedVis,
   normalizeVegaConfig,
-  prettyPrintVegaSpec,
   VEGA_VIS_TYPE,
 } from './vega_saved_vis';
 
@@ -34,24 +33,8 @@ describe('buildVegaSavedVis', () => {
   });
 });
 
-describe('prettyPrintVegaSpec', () => {
-  it('re-indents a minified JSON spec with two spaces', () => {
-    expect(prettyPrintVegaSpec('{"mark":"bar"}')).toBe('{\n  "mark": "bar"\n}');
-  });
-
-  it('is idempotent for an already-indented spec', () => {
-    const pretty = '{\n  "mark": "bar"\n}';
-    expect(prettyPrintVegaSpec(pretty)).toBe(pretty);
-  });
-
-  it('returns the original text when the spec is not valid JSON', () => {
-    const hjson = '{mark: bar}';
-    expect(prettyPrintVegaSpec(hjson)).toBe(hjson);
-  });
-});
-
 describe('extractVegaSpecFromSavedVis', () => {
-  it('reads the spec, title, and description from a Vega legacy-vis config, pretty-printing the spec', () => {
+  it('reads the spec, title, and description from a Vega legacy-vis config', () => {
     const config = {
       savedVis: {
         type: 'vega',
@@ -62,7 +45,7 @@ describe('extractVegaSpecFromSavedVis', () => {
     };
 
     expect(extractVegaSpecFromSavedVis(config)).toEqual({
-      spec: '{\n  "mark": "bar"\n}',
+      spec: '{"mark":"bar"}',
       title: 'Title',
       description: 'Desc',
     });
@@ -78,6 +61,12 @@ describe('extractVegaSpecFromSavedVis', () => {
     expect(extractVegaSpecFromSavedVis({ attributes: {} })).toBeUndefined();
     expect(extractVegaSpecFromSavedVis({ savedVis: { type: 'vega', params: {} } })).toBeUndefined();
     expect(extractVegaSpecFromSavedVis(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined when the spec does not fit a native vega panel', () => {
+    const savedVis = (spec: string) => ({ savedVis: { type: 'vega', params: { spec } } });
+    expect(extractVegaSpecFromSavedVis(savedVis(''))).toBeUndefined();
+    expect(extractVegaSpecFromSavedVis(savedVis('x'.repeat(1_000_001)))).toBeUndefined();
   });
 });
 

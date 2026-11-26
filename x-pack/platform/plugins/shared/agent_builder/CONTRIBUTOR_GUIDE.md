@@ -336,25 +336,52 @@ agentBuilder.agents.register({
 
 `inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
 
-### Choosing the agent's reasoning level
+### Turning off built-in agent features (`capabilities`)
 
-A built-in agent can declare the reasoning level its runs use by default:
+Every agent gets some built-in Agent Builder features, such as the generic attachment tools. An agent that has no use for one can turn it off with `capabilities`:
+
+- **Who can set it:** agent types and built-in agents. Unlike `inference_feature_id`, it also works from an agent type's base configuration. It cannot be set through the HTTP API, the agent form, `configuration_overrides` or the `ai.agent` workflow step.
+- **Defaults:** a missing `capabilities`, a missing key or a missing `enabled` all mean on. Only `enabled: false` turns a feature off.
+- **Merge:** when both an agent type and its agent set `capabilities`, they are merged per key, and the agent's value wins.
+
+For example, an agent type whose agents do not need the generic attachment tools:
 
 ```ts
-agentBuilder.agents.register({
-  id: 'platform.my_solution.agent',
-  name: 'My solution agent',
-  description: 'Agent specialized in my solution',
-  configuration: {
-    instructions: 'You are a specialist [...]',
+agentBuilder.agents.registerType({
+  id: 'my_solution.background',
+  name: 'My background agent',
+  description: 'Runs from workflows; never reads attachments',
+  baseConfiguration: {
     tools: [{ tool_ids: ['[...]'] }],
-    inference_feature_id: 'my_solution_agent',
-    reasoning_level: 'high',
+    capabilities: { attachment_tools: { enabled: false } },
   },
 });
 ```
 
-`reasoning_level` is only supported for built-in agents, and cannot be set by agent types.
+#### `attachment_tools`
+
+With `attachment_tools: { enabled: false }`, the agent gets none of the five generic attachment tools (`attachments.read`, `attachments.add`, `attachments.update`, `attachments.list` and `attachments.diff`). The ATTACHMENTS section of its system prompt is replaced by a one-line notice that it cannot read attachment content, and it is not taught inline attachment rendering. This saves about 2K input tokens per model call in a default Kibana, and more when more attachment types are registered, because `attachments.add` lists every registered type.
+
+What the agent loses:
+
+- **Attachment content:** it cannot read any attachment's content. That includes pasted images, content sent with a message, items from `#` references and the automatic page context. It sees each attachment's notice (id, type, version) and says it cannot open the attachment when asked.
+- **Type descriptions:** some attachment types' descriptions still tell the agent to read the attachment. The notice tells it that it cannot.
+- **Skills:** skills that use the attachment tools, such as proposal management, do not work.
+- **Rendering:** it is not taught to render attachments inline in its replies.
+- **Follow-ups in the UI:** a follow-up typed into a conversation of such an agent in the Agent Builder UI runs that agent, with the same limits.
+
+What keeps working:
+
+- **Attachments themselves:** attachments can still be added through the API, workflow steps, the attachment client and the agent's own tools.
+- **Type and bound tools:** tools that an attachment type declares, and tools tied to one attachment, are still added.
+
+#### `bash_tool`
+
+With `bash_tool: { enabled: false }`, the agent does not get the virtual filesystem `bash` tool, and its system prompt no longer lists it in the FILESYSTEM section or tells it to write render payloads with it (renderers are left out of the CUSTOM RENDERING section). Use it for an agent that works on files through its own tools, because the `bash` tool's `/workspace` is the Agent Builder virtual filesystem, not whatever filesystem those tools edit. `read_file` and `list_files` stay on. The capability only matters when the `bash` experimental feature is on, since the tool does not exist otherwise.
+
+#### Adding a new key
+
+Add a field to `AgentCapabilities` (`@kbn/agent-builder-common`) and to `ResolvedCapabilities` (`run_agent/types.ts`), set its default in `resolveConfiguration` (`run_agent/utils/configuration.ts`), gate the feature on the resolved value, and add tests. A feature that should start off for everyone does not belong here.
 
 ## Registering attachment types
 
@@ -443,22 +470,36 @@ skill that owns the relevant task. See [Inline rendering guidance in skills](#in
 
 #### `toSurfaceComposition` — rendering outside Kibana
 
-Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps the data of one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes, which renders to every surface. Without it, the attachment is left out there.
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition built from the primitives of `@kbn/isomer-components` (`ComponentsNode`), rendered by the `isomer` plugin's runtime to every surface. Without it, the attachment is left out there.
+
+It gets the attachment at the rendered version and `{ request, spaceId }`, and may be async.
 
 ```ts
 const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
   id: 'my_type',
   validate: ...,
   format: ...,
-  toSurfaceComposition: (data) => ({
+  toSurfaceComposition: ({ data, origin }) => ({
     type: 'view',
     title: data.name,
-    body: [{ type: 'markdown', text: `Status: ${data.status}` }],
+    subtitle: data.kind,
+    body: [
+      { type: 'markdown', text: data.summary },
+      { type: 'fields', items: [{ label: 'Status', value: data.status }] },
+      ...(origin
+        ? [{ type: 'link', label: 'Open in Kibana', app: 'my_app', path: `/items/${origin}` }]
+        : []),
+    ],
   }),
 };
 ```
 
-GitHub-flavored markdown is converted per surface: tables become native Slack tables and code fences become code blocks. A mapping that throws leaves the attachment out. See the `text` type for an example.
+- **Heading.** `title` becomes a `header` and `subtitle` a `context` line, above the body.
+- **Nodes.** `markdown` for prose (GitHub-flavored markdown is converted per surface), `fields` for labeled values, `code` for source shown as written, `table` for rows, `context`, `section`, `quote`, `divider`, `link` and `actions`. Each primitive's schema describes it.
+- **Links back to Kibana.** Use an `actions` button, or a `link`, with an app route and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. A relative `/app/…` URL would lose the base path and the space.
+- **Limits.** Each primitive has limits, such as 12,000 characters of `code` or 10 items in a `fields` node, and plain text can't be blank. A composition that fails validation, or a mapping that throws, leaves the whole attachment out.
+
+See the `agentBuilderPlatform` types, such as `esql`, `skill` and `connector_setup`, for examples.
 
 #### Real example: the built-in image attachment
 
@@ -521,7 +562,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   ),
 
   // Customize buttons based on viewport context
-  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, setPreviewBadgeState, openSidebarConversation }) => {
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, openSidebarConversation }) => {
     const buttons = [];
 
     if (isSidebar) {
@@ -558,15 +599,6 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
         handler: openSidebarConversation,
       });
     }
-    // Optional: if preview happens outside canvas, keep inline badge state in sync
-    buttons.push({
-      label: 'Preview',
-      icon: 'eye',
-      type: ActionButtonType.SECONDARY,
-      handler: () => {
-        setPreviewBadgeState?.('previewing');
-      },
-    });
 
     return buttons;
   },
@@ -644,9 +676,23 @@ getActionButtons: ({ attachment, openSidebarConversation }) => {
 ```
 
 The callback handles setting the correct conversation context in localStorage before opening the sidebar, ensuring the sidebar loads the same conversation. It is `undefined` when already in the sidebar context.
-- **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
 
-`setPreviewBadgeState` accepts:
+#### Previewing outside the canvas
+
+When the attachment is previewed outside the canvas, for example in the app the user is on, return `previewing` from `getPreviewState$`. The inline card then shows a "You're previewing this" badge instead of its action buttons.
+
+```tsx
+getPreviewState$: (attachment) =>
+  previewedAttachment$.pipe(
+    map((previewed) =>
+      previewed?.id === attachment.id && previewed.version === attachment.versionData?.version
+        ? 'previewing'
+        : 'none'
+    )
+  ),
+```
+
+`getPreviewState$` emits:
 
 - **`none`** - regular inline state
 - **`preview_available`** - show "Preview Only" badge
@@ -1152,34 +1198,50 @@ The registry does not fetch card data or provide a default card when none is reg
 
 ### Conversation details header and footer
 
-Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
-`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
-`openConversationDetails`. It is supplied at render time, not through registration context.
+Tabs and `useDetailsFlyout` (below) share `ConversationTemplateDetailsFlyoutRenderProps`. `isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through `openConversationDetails`. It is supplied at render time, not through registration context.
 
-Template UI definitions can provide optional `detailsFlyout.header` and
-`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
-hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
-only the content for each slot. Without a custom header, the default title remains.
-Without a custom footer, no footer is rendered.
+Agent Builder renders the conversation details flyout with `@kbn/flyout-template`. A template describes the flyout's header and footer as data, through `detailsFlyout.load`. `load` resolves to a module with:
 
-Capture Agent Builder capabilities from the existing registration context, and
-provide any solution-specific React providers inside your components:
+- `useDetailsFlyout(props)`: a hook that returns a `ConversationTemplateDetailsFlyoutDescriptor`. Its `header` has a plain-text `title`, an optional `description`, an `isLoading` spinner named by `loadingLabel`, and lists of meta blocks, badges and info blocks. Its optional `footer` has a `primary` and a `secondary` action. The parts take `@kbn/flyout-template`'s props, so an info block value can be any React node, and the secondary action can take `variant: 'ai'`.
+- `Provider` (optional): wraps the flyout, so `useDetailsFlyout` and the values it returns can use your plugin's own contexts, such as its Kibana services or query client. The flyout renders outside them.
+
+`load` is called the first time a flyout for the template opens, and again on the next open after a load that failed. Until it resolves, the flyout shows a "Summary" header with a spinner, in the same flyout the loaded header replaces. Use a dynamic `import()` so the module stays out of your plugin's page-load bundle. Without `load`, the flyout is titled "Summary" and has no footer.
 
 ```tsx
 agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({
   name: investigationTemplateName,
   tabs: ['investigation.details'],
   detailsFlyout: {
-    header: InvestigationHeader,
-    footer: ({ conversation }) => (
-      <InvestigationFooter
-        conversation={conversation}
-        onOpenChat={() => context.openSidebarConversation(conversation.id)}
-      />
-    ),
+    load: async () => {
+      const { createInvestigationDetailsFlyout } = await import('./investigation_details_flyout');
+      return createInvestigationDetailsFlyout(context);
+    },
   },
 }));
+
+// investigation_details_flyout.tsx
+export const createInvestigationDetailsFlyout = (context: ConversationTemplateUIContext) => ({
+  Provider: InvestigationProviders,
+  useDetailsFlyout: ({ conversation, isOpenedFromChat }) => ({
+    header: {
+      title: conversation.title,
+      infoBlocks: [{ title: statusLabel, children: <StatusToggle conversation={conversation} /> }],
+    },
+    footer: isOpenedFromChat
+      ? undefined
+      : {
+          secondary: {
+            variant: 'ai',
+            iconType: 'productAgent',
+            label: openChatLabel,
+            onClick: () => context.openSidebarConversation(conversation.id),
+          },
+        },
+  }),
+});
 ```
+
+The header's zones, the tab bar and each tab carry fixed test subjects, the same in both hosts: `agentBuilderConversationDetailsFlyoutHeader`, `…Body`, `…Footer`, `…Tabs` and `agentBuilderConversationDetailsFlyoutTab-<tabId>`.
 
 ### Conversation details flyout width
 
@@ -1188,9 +1250,7 @@ Every conversation details flyout — the in-chat one and the ones opened with
 width in every consuming app:
 
 - Default width 480px, minimum 400px, maximum 640px.
-- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
-  next open, wherever the flyout is opened from. The flyout menu's reset action returns it to the
-  default.
+- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the next open, wherever the flyout is opened from.
 
 The width is not configurable per template or per caller: all surfaces share one setting.
 
@@ -1234,10 +1294,7 @@ agentBuilder.openConversationDetails({
 
 ### Opening flyouts from conversation details content
 
-Both conversation details flyouts are managed EUI flyouts in the
-`CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, header,
-footer, or attachment renderer and have it stack on top with a Back button, open it as a main flyout
-in the same group by passing these options when you open it:
+Both conversation details flyouts are managed EUI flyouts in the `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, a header or footer value, or an attachment renderer and have it stack on top with a Back button, open it as a main flyout in the same group by passing these options when you open it:
 
 ```tsx
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';

@@ -90,7 +90,109 @@ steps:
         {%- for alert in inputs.payload.alerts -%}
         - Rule: {{ inputs.payload.rules[alert.rule_id].name }}
           Host: {{ alert.data.host.name | default: "unknown" }}
+          Link: {{ alert.alert_url }}
         {%- endfor -%}
+`;
+
+const YAML_NO_ALERT_DETAILS_LINK = `
+name: notify
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        payload:
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup'
+steps:
+  - name: send_email
+    type: email
+    connector-id: abc123
+    with:
+      to:
+        - oncall@example.com
+      subject: "Alert fired"
+      message: |
+        {%- for alert in inputs.payload.alerts -%}
+        - Rule: {{ inputs.payload.rules[alert.rule_id].name }}
+        {%- endfor -%}
+`;
+
+/** Shape generated during evals: alerts copied through `data.set`, then an invented `.url` read off the copy. */
+const YAML_DATA_SET_COPY_WITH_INVENTED_URL = `
+name: notify
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        payload:
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup'
+steps:
+  - name: build_alert_lines
+    type: foreach
+    foreach: "{{ inputs.payload.alerts | json }}"
+    steps:
+      - name: set_current_alert
+        type: data.set
+        with:
+          current_alert: "{{ foreach.item | json }}"
+      - name: format_line
+        type: data.set
+        with:
+          line: |
+            Status:    {{ steps.set_current_alert.output.current_alert.status }}
+            Alert URL: {{ steps.set_current_alert.output.current_alert.url }}
+  - name: send_alert_email
+    type: email
+    connector-id: abc123
+    with:
+      to:
+        - oncall@example.com
+      subject: "{{ inputs.payload.alerts | size }} alert(s)"
+      message: "{{ steps.build_alert_lines.output | map: 'format_line' | map: 'line' | join: '' }}"
+`;
+
+const YAML_INGEST_ALERT_URL_ONLY = `
+name: notify
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        payload:
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup'
+steps:
+  - name: send_email
+    type: email
+    connector-id: abc123
+    with:
+      to:
+        - oncall@example.com
+      subject: "Alert fired"
+      message: |
+        {%- for alert in inputs.payload.alerts -%}
+        - Source: {{ alert.data.alert_url }}
+        {%- endfor -%}
+`;
+
+const YAML_FOREACH_ITEM_ALERT_URL = `
+name: notify
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        payload:
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup'
+steps:
+  - name: per_alert
+    type: foreach
+    foreach: "{{ inputs.payload.alerts }}"
+    steps:
+      - name: send_email
+        type: email
+        connector-id: abc123
+        with:
+          to:
+            - oncall@example.com
+          subject: "Alert fired"
+          message: "{{- foreach.item.alert_url -}}"
 `;
 
 const YAML_DUAL_TRIGGERS_MANUAL_AND_ALERT = `
@@ -276,6 +378,28 @@ describe('DestinationValidator', () => {
       expect(validator.finalize().diagnostics).toEqual([]);
     });
 
+    it('validates attachment YAML as a workflow that is not managed', async () => {
+      const validateWorkflow = jest.fn().mockResolvedValue({ valid: true, diagnostics: [] });
+      const validator = createValidator({
+        attachmentIndex: {
+          inMemoryWorkflowIds: new Set(['wf-1']),
+          attachmentToWorkflowId: new Map(),
+          inMemoryWorkflowIdToYaml: new Map([['wf-1', YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF]]),
+        },
+        validateWorkflow,
+        request: mockRequest,
+      });
+
+      await validator.resolveFromAttachments('wf-1');
+
+      expect(validateWorkflow).toHaveBeenCalledWith(
+        YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF,
+        'default',
+        mockRequest,
+        { isManaged: false }
+      );
+    });
+
     it('records an error when destinationId matches an attachment ID (not workflowId)', async () => {
       const validator = createValidator({
         attachmentIndex: {
@@ -339,6 +463,37 @@ describe('DestinationValidator', () => {
       expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
       expect(validator.finalize().diagnostics).toEqual([]);
     });
+
+    it.each([
+      { managed: true, isManaged: true },
+      { managed: false, isManaged: false },
+      { managed: undefined, isManaged: false },
+    ])(
+      'validates the YAML with isManaged $isManaged when the workflow has managed $managed',
+      async ({ managed, isManaged }) => {
+        const validateWorkflow = jest.fn().mockResolvedValue({ valid: true, diagnostics: [] });
+        const validator = createValidator({
+          persistedWorkflowLookup: {
+            getWorkflow: jest.fn().mockResolvedValue({
+              id: 'wf-1',
+              yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF,
+              managed,
+            }),
+          },
+          validateWorkflow,
+          request: mockRequest,
+        });
+
+        await validator.resolveFromPersistedWorkflow('wf-1');
+
+        expect(validateWorkflow).toHaveBeenCalledWith(
+          YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF,
+          'default',
+          mockRequest,
+          { isManaged }
+        );
+      }
+    );
 
     it('returns true with no diagnostics when persisted workflow has no yaml', async () => {
       const validator = createValidator({
@@ -752,6 +907,48 @@ describe('DestinationValidator', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Common template mistakes — alert details link
+  // -------------------------------------------------------------------------
+  describe('validateAlertDetailsLink', () => {
+    it.each([
+      ['no template renders alert_url', YAML_NO_ALERT_DETAILS_LINK],
+      [
+        'alerts are copied through data.set and an invented url is read',
+        YAML_DATA_SET_COPY_WITH_INVENTED_URL,
+      ],
+      ['only the ingest data.alert_url is rendered', YAML_INGEST_ALERT_URL_ONLY],
+    ])('records a warning even in blocking mode when %s', (_label, yaml) => {
+      const validator = createValidator({ blockOnStructuralErrors: true });
+      validator.validateAlertDetailsLink('wf-1', yaml);
+      expect(validator.finalize().diagnostics).toEqual([
+        expect.objectContaining({
+          severity: 'warning',
+          source: 'structural',
+          message: expect.stringContaining('does not render an alert details link'),
+        }),
+      ]);
+    });
+
+    it.each([
+      ['a for-loop alert', YAML_VALID_WITH_PAYLOAD_LIQUID],
+      ['a foreach item with whitespace control', YAML_FOREACH_ITEM_ALERT_URL],
+    ])('records no diagnostic when alert_url is rendered from %s', (_label, yaml) => {
+      const validator = createValidator();
+      validator.validateAlertDetailsLink('wf-1', yaml);
+      expect(validator.finalize().diagnostics).toEqual([]);
+    });
+
+    it.each([
+      ['has no Liquid', YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF],
+      ['never reads inputs.payload', YAML_LIQUID_NO_PAYLOAD_REF_IN_BODY],
+    ])('skips the check when the YAML %s', (_label, yaml) => {
+      const validator = createValidator();
+      validator.validateAlertDetailsLink('wf-1', yaml);
+      expect(validator.finalize().diagnostics).toEqual([]);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Common template mistakes — payload field paths
   // -------------------------------------------------------------------------
   describe('validatePayloadFieldPaths', () => {
@@ -875,7 +1072,8 @@ steps:
       expect(validateWorkflow).toHaveBeenCalledWith(
         YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF,
         'default',
-        mockRequest
+        mockRequest,
+        { isManaged: false }
       );
       expect(() => validator.finalize()).toThrow(
         /\[1\] \[error\] \[invalidVariablePath\] Unknown path "episodez" \(at steps\.0\.with\.message\)/
@@ -962,6 +1160,17 @@ steps:
       const validator = createValidator();
       await validator.validateWorkflow('wf-1', YAML_VALID_WITH_PAYLOAD_LIQUID);
       expect(validator.finalize().diagnostics).toEqual([]);
+    });
+
+    it('warns without throwing for a workflow that reads an invented url off a data.set copy', async () => {
+      const validator = createValidator({ blockOnStructuralErrors: true });
+      await validator.validateWorkflow('wf-1', YAML_DATA_SET_COPY_WITH_INVENTED_URL);
+      expect(validator.finalize().diagnostics).toEqual([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('invented fields like `url`'),
+        }),
+      ]);
     });
 
     it('stops after missing manual trigger (does not run payload ref or other checks)', async () => {

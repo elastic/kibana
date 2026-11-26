@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
-import pRetry from 'p-retry';
-import type { Evaluator } from '@kbn/evals';
-import { buildModelFromConnector } from '@kbn/evals';
-import type { EvalConnector } from '@kbn/evals';
-import type { InvestigationExample, InvestigationTaskOutput } from '../types';
+import type { InvestigationTaskOutput } from '../types';
 import { NO_CONCLUSION_ERROR } from '../task';
 import { composeRecallReadsText, extractRecallReads } from '../recall_evidence';
 import {
   AntiLeakageJudgePrompt,
   CauseCompletenessJudgePrompt,
-  CORTEX_INFLUENCE_TYPES,
+  WIKI_INFLUENCE_TYPES,
   DecisionTreeHelpfulnessJudgePrompt,
   GoalPassJudgePrompt,
   RecallUsageJudgePrompt,
   ToolCallHealthJudgePrompt,
   TruthfulnessJudgePrompt,
 } from './prompts';
+import type { JudgeDeps, InvestigationEvaluator } from './invoke_judge';
+import { createRunMemo, getModelFactory, invokeJudge } from './invoke_judge';
 import type { JudgeInputs } from './scoring';
 import {
   buildJudgeInputs,
@@ -42,18 +37,8 @@ export const TRUTHFULNESS_EVALUATOR = 'truthfulness';
 export const DECISION_TREE_HELPFULNESS_EVALUATOR = 'decision_tree_helpfulness';
 export const TOOL_CALLS_FAILED_EVALUATOR = 'tool_calls_failed';
 export const TOOL_CALLS_EMPTY_EVALUATOR = 'tool_calls_empty';
-export const CORTEX_CHANGED_DIRECTION_EVALUATOR = 'cortex_changed_direction';
+export const WIKI_CHANGED_DIRECTION_EVALUATOR = 'wiki_changed_direction';
 export const MEMORIES_CITED_EVALUATOR = 'memories_cited_in_answer';
-
-type InvestigationEvaluator = Evaluator<InvestigationExample, InvestigationTaskOutput>;
-
-interface JudgeDeps {
-  inferenceClient: BoundInferenceClient;
-  evaluationConnector: EvalConnector;
-  log: ToolingLog;
-}
-
-const scoreTool = { function: 'score' } as ToolChoice;
 
 /**
  * An execution error that leaves nothing to grade. A run that only failed to record its verdict
@@ -66,52 +51,6 @@ const NO_VERDICT_PREFIX = 'No verdict was recorded; graded the recorded hypothes
 
 const NO_TRAJECTORY_EXPLANATION =
   'No tool-call trajectory was captured for this run, so what the agent accessed cannot be judged.';
-
-/** Model attribution matching the built-in `evaluators` fixture (`toScoreModel(...)`). */
-const getModelFactory = (evaluationConnector: EvalConnector) => () => {
-  const model = buildModelFromConnector(evaluationConnector);
-  if (!model.id) return undefined;
-  return {
-    id: model.id,
-    ...(model.family ? { family: model.family } : {}),
-    ...(model.provider ? { provider: model.provider } : {}),
-  };
-};
-
-/**
- * Runs one judge prompt with retries and returns the first tool call's arguments.
- *
- * The `inferenceClient.prompt` REST call does not create a client-side inference span, so it must
- * run inside an active inference span for the server-side `gen_ai` chat span to be captured under
- * this evaluator's trace (and exported to the tracing cluster). This mirrors the built-in kbn-evals
- * LLM evaluators, which get the same span via `executeUntilValid` → `withActiveInferenceSpan`.
- * Without this wrap the judge model call emits no queryable `gen_ai` span.
- */
-const invokeJudge = async <TArgs>(
-  { inferenceClient, log }: Pick<JudgeDeps, 'inferenceClient' | 'log'>,
-  name: string,
-  prompt: Parameters<BoundInferenceClient['prompt']>[0]['prompt'],
-  input: Record<string, unknown>
-): Promise<TArgs> =>
-  withActiveInferenceSpan(
-    name,
-    { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
-    () =>
-      pRetry(
-        async () => {
-          const response = await inferenceClient.prompt({ prompt, input, toolChoice: scoreTool });
-          const toolCall = response.toolCalls[0];
-          if (!toolCall) throw new Error(`No tool call returned by the ${name} judge`);
-          return toolCall.function.arguments as TArgs;
-        },
-        {
-          retries: 3,
-          onFailedAttempt: (error) => {
-            log.warning(`${name} judge attempt ${error.attemptNumber} failed: ${error.message}`);
-          },
-        }
-      )
-  );
 
 export const createGoalPassEvaluator = (deps: JudgeDeps): InvestigationEvaluator => ({
   name: GOAL_PASS_EVALUATOR,
@@ -333,24 +272,6 @@ export const createDecisionTreeHelpfulnessEvaluator = (
   },
 });
 
-/**
- * Runs `run` once per investigation. Two evaluators fed by one judge call share its verdict, so
- * the judge isn't paid for twice; a run without an investigation id can't be keyed and isn't shared.
- */
-const createRunMemo = <T>() => {
-  const cache = new Map<string, Promise<T>>();
-  return (output: InvestigationTaskOutput, run: () => Promise<T>): Promise<T> => {
-    const key = output.investigation_id;
-    if (!key) return run();
-    const cached = cache.get(key);
-    if (cached) return cached;
-    const pending = run();
-    cache.set(key, pending);
-    pending.catch(() => cache.delete(key));
-    return pending;
-  };
-};
-
 interface ToolCallIssue {
   step: number;
   reason: string;
@@ -453,8 +374,8 @@ export const createToolCallHealthEvaluators = (deps: JudgeDeps): InvestigationEv
 };
 
 interface RecallUsage {
-  cortexInfluence: (typeof CORTEX_INFLUENCE_TYPES)[number];
-  cortexReasoning: string;
+  wikiInfluence: (typeof WIKI_INFLUENCE_TYPES)[number];
+  wikiReasoning: string;
   citedMemories: string[];
   memoriesReasoning: string;
 }
@@ -464,7 +385,7 @@ const isSamePath = (cited: string, read: string): boolean =>
   cited === read || read.endsWith(cited) || cited.endsWith(read);
 
 /**
- * `cortex_changed_direction` and `memories_cited_in_answer`, from one LLM read of the trajectory
+ * `wiki_changed_direction` and `memories_cited_in_answer`, from one LLM read of the trajectory
  * and the final report. Both are n/a when the agent never opened the matching kind of file.
  */
 export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] => {
@@ -476,24 +397,24 @@ export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvalu
   ): Promise<RecallUsage> =>
     memo(output, async () => {
       const result = await invokeJudge<{
-        cortex_influence?: string;
-        cortex_reasoning?: string;
+        wiki_influence?: string;
+        wiki_reasoning?: string;
         memories_cited?: string[];
         memories_reasoning?: string;
       }>(deps, 'recall_usage', RecallUsageJudgePrompt, {
         question: judge.question,
-        cortexReads: composeRecallReadsText(reads, 'cortex') || '(none)',
+        wikiReads: composeRecallReadsText(reads, 'wiki') || '(none)',
         memoryReads: composeRecallReadsText(reads, 'memories') || '(none)',
         answer: judge.answer,
         evidence: judge.evidence,
         trajectory: judge.trajectory,
       });
-      const influence = CORTEX_INFLUENCE_TYPES.find((type) => type === result.cortex_influence);
+      const influence = WIKI_INFLUENCE_TYPES.find((type) => type === result.wiki_influence);
       const memoryPaths = reads.filter(({ kind }) => kind === 'memories').map(({ path }) => path);
       const cited = Array.isArray(result.memories_cited) ? result.memories_cited : [];
       return {
-        cortexInfluence: influence ?? 'none',
-        cortexReasoning: result.cortex_reasoning ?? '',
+        wikiInfluence: influence ?? 'none',
+        wikiReasoning: result.wiki_reasoning ?? '',
         citedMemories: memoryPaths.filter((path) =>
           cited.some((each) => typeof each === 'string' && isSamePath(each, path))
         ),
@@ -501,30 +422,30 @@ export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvalu
       };
     });
 
-  const cortexChangedDirection: InvestigationEvaluator = {
-    name: CORTEX_CHANGED_DIRECTION_EVALUATOR,
+  const wikiChangedDirection: InvestigationEvaluator = {
+    name: WIKI_CHANGED_DIRECTION_EVALUATOR,
     kind: 'LLM',
     direction: 'neutral',
     getModel: getModelFactory(deps.evaluationConnector),
     evaluate: async ({ input, output, expected, metadata }) => {
       const judge = buildJudgeInputs(input, output, expected, metadata);
       const reads = extractRecallReads(output.tool_call_trajectory);
-      const cortexFiles = reads.filter(({ kind }) => kind === 'cortex').map(({ path }) => path);
-      if (!judge.trajectory || cortexFiles.length === 0) {
+      const wikiFiles = reads.filter(({ kind }) => kind === 'wiki').map(({ path }) => path);
+      if (!judge.trajectory || wikiFiles.length === 0) {
         return {
           score: null,
           label: 'n/a',
           explanation: judge.trajectory
-            ? 'Investigation did not open any cortex file.'
+            ? 'Investigation did not open any wiki file.'
             : NO_TRAJECTORY_EXPLANATION,
         };
       }
       const usage = await assess(output, judge, reads);
       return {
-        score: usage.cortexInfluence === 'redirected' ? 1 : 0,
-        label: usage.cortexInfluence,
-        explanation: usage.cortexReasoning,
-        metadata: { cortex_files: cortexFiles },
+        score: usage.wikiInfluence === 'redirected' ? 1 : 0,
+        label: usage.wikiInfluence,
+        explanation: usage.wikiReasoning,
+        metadata: { wiki_files: wikiFiles },
       };
     },
   };
@@ -559,7 +480,7 @@ export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvalu
     },
   };
 
-  return [cortexChangedDirection, memoriesCited];
+  return [wikiChangedDirection, memoriesCited];
 };
 
 /** The ported RCA judges plus truthfulness, decision-tree helpfulness, tool-call health and recall usage, in stable order for the investigation spec. */

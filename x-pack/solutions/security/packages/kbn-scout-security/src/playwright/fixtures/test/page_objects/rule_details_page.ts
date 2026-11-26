@@ -30,9 +30,11 @@ export class RuleDetailsPage {
   readonly alertSeverityCells: Locator;
   readonly alertRiskScoreCells: Locator;
   readonly investigateInTimelineButtons: Locator;
+  /** "Add rule exception" button shown on the exceptions tab while the rule has no exceptions. */
+  readonly addExceptionFromEmptyPromptButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.header = this.page.testSubj.locator('header-page-title');
+    this.header = this.page.testSubj.locator('appHeaderTitle');
     this.aboutSection = this.page.testSubj.locator('aboutRule');
     this.definitionSection = this.page.testSubj.locator('definitionRule');
     this.scheduleSection = this.page.testSubj.locator('schedule');
@@ -40,10 +42,10 @@ export class RuleDetailsPage {
     this.investigationNotesToggle = this.page.testSubj.locator('stepAboutDetailsToggle-notes');
     this.investigationNotes = this.page.testSubj.locator('stepAboutDetailsNoteContent');
     this.alertsTab = this.page.testSubj.locator('navigation-alerts');
-    this.actionsMenuButton = this.page.testSubj.locator('rules-details-popover-button-icon');
+    this.actionsMenuButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.duplicateMenuItem = this.page.testSubj.locator('rules-details-duplicate-rule');
     this.confirmModalButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    this.backToRuleDetailsLink = this.page.testSubj.locator('ruleEditBackToRuleDetails');
+    this.backToRuleDetailsLink = this.page.testSubj.locator('appHeaderBack');
     this.alertsCount = this.page.testSubj.locator('toolbar-alerts-count');
     this.alertRuleNameCells = this.page.testSubj.locator('formatted-field-kibana.alert.rule.name');
     this.alertSeverityCells = this.page.testSubj.locator('formatted-field-kibana.alert.severity');
@@ -51,13 +53,16 @@ export class RuleDetailsPage {
       'formatted-field-kibana.alert.risk_score'
     );
     this.investigateInTimelineButtons = this.page.testSubj.locator('send-alert-to-timeline-button');
+    this.addExceptionFromEmptyPromptButton = this.page.testSubj.locator(
+      'exceptionsEmptyPromptButton'
+    );
   }
 
   async goto(params: {
     kbnUrl: KibanaUrl;
     spaceId: string;
     ruleId: string;
-    tab?: 'alerts';
+    tab?: 'alerts' | 'rule_exceptions';
   }): Promise<void> {
     const { kbnUrl, spaceId, ruleId, tab } = params;
     await this.page.goto(
@@ -72,6 +77,12 @@ export class RuleDetailsPage {
       .getByRole('term')
       .filter({ hasText: new RegExp(`^${title}$`) })
       .locator('xpath=following-sibling::dd[1]');
+  }
+
+  /** Opens the investigation guide of the About section. Toasts from earlier actions can cover the toggle, so they are dismissed first. */
+  async openInvestigationNotes(): Promise<void> {
+    await this.page.components.toast().closeAll();
+    await this.investigationNotesToggle.click();
   }
 
   async openAlertsTab(): Promise<void> {

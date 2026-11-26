@@ -37,7 +37,7 @@ const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
     connectors: options.connectors ?? connectors,
     assignedCount: (options.assigned ?? ['a']).length,
   };
-  renderWithProviders(<ConnectTypeCard group={group} />);
+  renderWithProviders(<ConnectTypeCard group={group} ebtElement="test" />);
   return services;
 };
 
@@ -65,9 +65,11 @@ describe('ConnectTypeCard', () => {
       expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
       const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
         initialConnector: { actionTypeId: string };
+        hideSuccessToast: boolean;
         onConnectorCreated: (connector: { id: string; name: string }) => void;
       };
       expect(props.initialConnector).toEqual({ actionTypeId: '.http' });
+      expect(props.hideSuccessToast).toBe(true);
       props.onConnectorCreated({ id: 'new', name: 'new' });
       await waitFor(() =>
         expect(agents.addConnectorToAgent).toHaveBeenCalledWith({
@@ -82,7 +84,10 @@ describe('ConnectTypeCard', () => {
     const github = actionType('.github', { source: 'spec' });
     const { getAddConnectorFlyout } = mockKibanaServices({ types: [github], connectors: [] });
     renderWithProviders(
-      <ConnectTypeCard group={{ actionType: github, connectors: [], assignedCount: 0 }} />
+      <ConnectTypeCard
+        group={{ actionType: github, connectors: [], assignedCount: 0 }}
+        ebtElement="test"
+      />
     );
     await waitFor(() => expect(screen.getByTestId('.github-connect')).toBeEnabled());
 

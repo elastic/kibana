@@ -84,7 +84,7 @@ jest.mock('../../hooks/use_filters_query', () => ({
   }),
 }));
 
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
 
 const execCommandMock = (global.document.execCommand = jest.fn(() => true));

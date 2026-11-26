@@ -90,6 +90,44 @@ describe('readLastSweepIndexScope', () => {
     management.getStepExecution.mockRejectedValue(new Error('boom'));
     await expect(readLastSweepIndexScope(params)).resolves.toBeUndefined();
   });
+
+  it('ignores a scope of the wrong shape and warns, instead of failing silently', async () => {
+    const { params } = setup({
+      stepId: 'check_index_scope',
+      startedAt: 's',
+      finishedAt: 'f',
+      output: { ...scope, missing: 'custom-1' },
+    });
+
+    await expect(readLastSweepIndexScope(params)).resolves.toMatchObject({ scope: undefined });
+    expect(params.logger.warn).toHaveBeenCalledTimes(1);
+    expect(params.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('does not match the HuntScope schema and is ignored: missing')
+    );
+  });
+
+  it('reads a scope from a long data view whole, so a blocked sweep still shows as blocked', async () => {
+    const missing = [
+      ...Array.from({ length: 600 }, (_value, index) => `custom-${index}`),
+      'x'.repeat(600),
+    ];
+    const { params } = setup({
+      stepId: 'check_index_scope',
+      startedAt: 's',
+      finishedAt: 'f',
+      output: { ...scope, missing },
+    });
+
+    await expect(readLastSweepIndexScope(params)).resolves.toMatchObject({ scope: { missing } });
+    expect(params.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not warn for a scope that parses', async () => {
+    const { params } = setup({ stepId: 'check_index_scope', startedAt: 's', output: scope });
+
+    await readLastSweepIndexScope(params);
+    expect(params.logger.warn).not.toHaveBeenCalled();
+  });
 });
 
 describe('readLatestFinishedSweepIndexScope', () => {
@@ -157,6 +195,14 @@ describe('sweepEvaluatedUniverse', () => {
     missing: [],
   } as unknown as HuntScope;
 
+  // The policy-only block: every entry was skipped, so both sides hold no positive pattern.
+  it('matches an empty universe against a blocked scope that evaluated nothing', () => {
+    expect(sweepEvaluatedUniverse({ ...blocked, missing: [], policy_skipped: ['.a-1'] }, [])).toBe(
+      true
+    );
+    expect(sweepEvaluatedUniverse({ ...blocked, missing: [] }, ['-logs-x*'])).toBe(true);
+  });
+
   it('compares a blocked sweep to what it reported missing', () => {
     expect(sweepEvaluatedUniverse(blocked, ['logs-*'])).toBe(true);
     expect(sweepEvaluatedUniverse(blocked, ['logs-*', 'extra-*'])).toBe(false);
@@ -170,5 +216,45 @@ describe('sweepEvaluatedUniverse', () => {
   it('compares an unblocked sweep to its resolved patterns, ignoring exclusions', () => {
     expect(sweepEvaluatedUniverse(ok, ['logs-*', '-logs-y*'])).toBe(true);
     expect(sweepEvaluatedUniverse(ok, ['other-*'])).toBe(false);
+  });
+
+  describe('a sweep that dropped a name from the search', () => {
+    const pruned = {
+      ...scope,
+      status: 'ok',
+      resolution: 'universe',
+      index_patterns: ['logs-*'],
+      missing: ['custom-edr-1'],
+    } as unknown as HuntScope;
+
+    it('counts the dropped name as evaluated', () => {
+      expect(sweepEvaluatedUniverse(pruned, ['logs-*', 'custom-edr-1'])).toBe(true);
+    });
+
+    it('does not match a universe missing one live pattern', () => {
+      expect(sweepEvaluatedUniverse(pruned, ['logs-*', 'custom-edr-1', 'extra-*'])).toBe(false);
+    });
+
+    it('matches a universe with a duplicated entry', () => {
+      expect(sweepEvaluatedUniverse(pruned, ['logs-*', 'logs-*', 'custom-edr-1'])).toBe(true);
+    });
+
+    it('does not match a pre-change unblocked scope with a dot-prefixed index pattern', () => {
+      const dotted = {
+        ...pruned,
+        index_patterns: ['logs-*', '.alerts-x'],
+        missing: [],
+      } as HuntScope;
+      expect(sweepEvaluatedUniverse(dotted, ['logs-*'])).toBe(false);
+    });
+
+    it('does not match a pre-change blocked scope with a dot-prefixed missing entry', () => {
+      const dotted = { ...blocked, missing: ['.alerts-x'] } as HuntScope;
+      expect(sweepEvaluatedUniverse(dotted, ['logs-*'])).toBe(false);
+    });
+
+    it('matches a pre-change unblocked scope without dot entries', () => {
+      expect(sweepEvaluatedUniverse(ok, ['logs-*'])).toBe(true);
+    });
   });
 });

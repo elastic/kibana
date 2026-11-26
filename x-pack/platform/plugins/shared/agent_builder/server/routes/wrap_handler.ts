@@ -7,10 +7,18 @@
 
 import Boom from '@hapi/boom';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { isAgentBuilderError, isConversationBusyError } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  isAgentBuilderError,
+  isConversationBusyError,
+} from '@kbn/agent-builder-common';
 import { isInferenceError } from '@kbn/inference-common';
 import { isValidLicense } from '../../common/license';
 import type { AgentBuilderHandlerContext } from '../request_handler_context';
+
+const AGENT_BUILDER_ERROR_CODES: ReadonlySet<string> = new Set(
+  Object.values(AgentBuilderErrorCode)
+);
 
 export interface RouteWrapConfig {
   /**
@@ -72,7 +80,7 @@ export const getHandlerWrapper =
             });
           }
         }
-        if (isAgentBuilderError(e)) {
+        if (isAgentBuilderError(e) && AGENT_BUILDER_ERROR_CODES.has(e.code)) {
           // A busy conversation is an expected refusal the caller retries, not a failure.
           if (isConversationBusyError(e)) {
             logger.debug(`Request refused: ${e.message}`);
@@ -84,6 +92,7 @@ export const getHandlerWrapper =
             body: {
               message: e.message,
               attributes: {
+                code: e.code,
                 trace_id: e.meta?.traceId,
                 active_execution_id: e.meta?.activeExecutionId,
               },

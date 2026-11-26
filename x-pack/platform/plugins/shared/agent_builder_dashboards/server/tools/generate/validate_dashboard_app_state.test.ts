@@ -18,7 +18,13 @@ const mockGetTransforms = jest.fn();
 beforeEach(() => {
   mockGetTransforms.mockReset();
   mockGetTransforms.mockImplementation((type: string) =>
-    type === 'markdown' || type === 'lens-dashboard-app' || type === 'vega'
+    type === 'vega'
+      ? {
+          schema: z
+            .object({ spec: z.object({ format: z.literal('hjson'), value: z.string().min(1) }) })
+            .strict(),
+        }
+      : type === 'markdown' || type === 'lens-dashboard-app'
       ? { schema: z.object({ content: z.string() }).strict() }
       : undefined
   );
@@ -88,8 +94,28 @@ describe('createDashboardAppStateValidator', () => {
       expect(validatePanel({ content: 1 }, 'image')).toEqual([]);
     });
 
-    it('does not validate vega panels', () => {
-      expect(validatePanel({ spec: '{}' }, 'vega')).toEqual([]);
+    it.each([LENS_EMBEDDABLE_TYPE, 'markdown', 'custom_content'])(
+      'does not validate %s panels while their type registers no schema',
+      (type) => {
+        mockGetTransforms.mockReturnValue({});
+
+        expect(validatePanel({ content: 1 }, type)).toEqual([]);
+      }
+    );
+
+    it('reports an ML panel without a schema as unavailable in this deployment', () => {
+      expect(validatePanel({ job_ids: ['job-1'] }, 'ml_anomaly_charts')).toEqual([
+        'type: panel type "ml_anomaly_charts" is not available in this deployment, so it cannot be added or edited. Do not retry it; tell the user it is unavailable.',
+      ]);
+    });
+
+    it('validates vega panels with the vega schema', () => {
+      expect(validatePanel({ spec: { format: 'hjson', value: '{mark: bar}' } }, 'vega')).toEqual(
+        []
+      );
+      expect(validatePanel({ spec: '{mark: bar}' }, 'vega')).toEqual([
+        expect.stringMatching(/^config\.spec: /),
+      ]);
     });
 
     it('validates lens panels with the dashboard application lens schema', () => {

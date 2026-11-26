@@ -235,7 +235,8 @@ export const ToolbarSelector = ({
           singleSelection={singleSelection ?? true}
           aria-label={popoverTitle}
           data-test-subj={`${dataTestSubj}Selectable`}
-          data-is-searching={searchTerm !== searchTermDebounced}
+          // Commits with `filteredOptions`, so a test can tell the list reflects what it typed.
+          data-search-term={searchTermDebounced ?? ''}
           isPreFiltered={searchable}
           options={filteredOptions}
           onChange={onSelectionChange}

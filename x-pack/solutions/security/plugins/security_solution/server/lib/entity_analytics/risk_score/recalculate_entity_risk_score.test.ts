@@ -25,7 +25,7 @@ const mockScoreBaseEntities = jest.fn();
 const mockPersistZeroBaseScore = jest.fn();
 const mockRunResolutionScoringStep = jest.fn();
 
-jest.mock('../risk_engine/utils/saved_object_configuration', () => ({
+jest.mock('./configuration/saved_object_configuration', () => ({
   getConfiguration: (...args: unknown[]) => mockGetConfiguration(...args),
 }));
 
@@ -96,7 +96,6 @@ describe('recalculateEntityRiskScore', () => {
       entityId: ENTITY_ID,
       identifierType: EntityType.user,
       getWriter: async () => writer,
-      idBasedRiskScoringEnabled: true,
       logger,
       telemetry,
       profiling,

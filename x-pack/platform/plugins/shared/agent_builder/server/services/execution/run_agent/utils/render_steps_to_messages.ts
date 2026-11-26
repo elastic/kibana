@@ -18,7 +18,9 @@ import type {
 import {
   isAskUserQuestionStep,
   isBackgroundAgentCompleteStep,
+  isDeliveredMessageStep,
   isInjectedContextStep,
+  isInterimAnswerStep,
   isPreExecutionWorkflowStep,
   isReasoningStep,
   isRelevantSkillsStep,
@@ -29,6 +31,7 @@ import { isImageResult } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   createToolResultMessage,
   createUserMessage,
+  INTENT_PARAM,
   sanitizeToolId,
   wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
@@ -36,6 +39,7 @@ import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/form
 import type { HandoverParams, PromptImageResolver } from '../prompts/types';
 import {
   createCycleLimitSystemMessage,
+  formatDeliveredMessageNotice,
   formatHandover,
   formatRetryNotice,
   formatSubagentRosterNotice,
@@ -316,6 +320,7 @@ const renderToolCallGroup = async (
   const groupId = calls[0].tool_call_group_id;
   const groupReasoning = groupId
     ? joinReasoning(
+        // legacy reasoning bound to a single call (`tool_call_id`) is not rendered anymore
         reasoningSteps.filter((s) => s.tool_call_group_id === groupId && !s.tool_call_id)
       )
     : '';
@@ -323,15 +328,12 @@ const renderToolCallGroup = async (
   const aiMessage = new AIMessage({
     content: groupReasoning,
     tool_calls: calls.map((call) => {
-      const stepReasoning = joinReasoning(
-        reasoningSteps.filter((s) => s.tool_call_id === call.tool_call_id)
-      );
       const { toolId, args } = toModelToolCall(call);
       const name = sanitizeToolId(current?.run.renderState[call.tool_call_id]?.toolName ?? toolId);
       return {
         id: call.tool_call_id,
         name,
-        args: stepReasoning ? { _reasoning: stepReasoning, ...args } : args,
+        args: call.intent ? { [INTENT_PARAM]: call.intent, ...args } : args,
         type: 'tool_call' as const,
       };
     }),
@@ -441,6 +443,10 @@ const renderSteps = async (
     }
     if (isBackgroundAgentCompleteStep(step)) {
       messages.push(createUserMessage(formatSystemNotice(step)));
+    } else if (isDeliveredMessageStep(step)) {
+      messages.push(createUserMessage(formatDeliveredMessageNotice(step)));
+    } else if (isInterimAnswerStep(step)) {
+      messages.push(new AIMessage({ content: step.message }));
     } else if (isSubagentRosterUpdatedStep(step)) {
       messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
     } else if (isRelevantSkillsStep(step)) {

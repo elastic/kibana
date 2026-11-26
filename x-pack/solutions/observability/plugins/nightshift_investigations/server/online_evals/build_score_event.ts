@@ -6,6 +6,7 @@
  */
 
 import type { EvaluateFn } from '@kbn/evals-plugin/server';
+import { MAX_TAGS_PER_SCORE, readTags } from './score_tags';
 import type {
   OnlineEvalError,
   OnlineEvalScore,
@@ -18,6 +19,12 @@ export type EvaluateResult = Awaited<ReturnType<EvaluateFn>>[number];
 export type OnlineEvalScoreMetadata = Omit<
   OnlineEvalScoreEvent,
   | 'judge_model'
+  | 'judge_input_tokens'
+  | 'judge_cached_input_tokens'
+  | 'judge_output_tokens'
+  | 'judge_reasoning_tokens'
+  | 'judge_llm_calls'
+  | 'judge_llm_calls_without_usage'
   | 'scores'
   | 'evaluator_count'
   | 'failed_count'
@@ -44,16 +51,20 @@ const truncate = (value: string, maxLength: number): string => {
 
 const toScores = (results: EvaluateResult[], includeExplanations: boolean): OnlineEvalScore[] =>
   results.flatMap(({ evaluator, scores = [] }) =>
-    scores.map(({ name, score, label, explanation }) => ({
-      evaluator_name: evaluator.name,
-      evaluator_version: evaluator.version,
-      name,
-      ...(typeof score === 'number' ? { value: score } : {}),
-      ...(label ? { label: truncate(label, MAX_LABEL_LENGTH) } : {}),
-      ...(includeExplanations && explanation
-        ? { explanation: truncate(explanation, MAX_EXPLANATION_LENGTH) }
-        : {}),
-    }))
+    scores.map(({ name, score, label, explanation, metadata }) => {
+      const tags = readTags(metadata).slice(0, MAX_TAGS_PER_SCORE);
+      return {
+        evaluator_name: evaluator.name,
+        evaluator_version: evaluator.version,
+        name,
+        ...(typeof score === 'number' ? { value: score } : {}),
+        ...(label ? { label: truncate(label, MAX_LABEL_LENGTH) } : {}),
+        ...(tags.length > 0 ? { tags } : {}),
+        ...(includeExplanations && explanation
+          ? { explanation: truncate(explanation, MAX_EXPLANATION_LENGTH) }
+          : {}),
+      };
+    })
   );
 
 const toErrors = (results: EvaluateResult[]): OnlineEvalError[] =>
@@ -64,6 +75,39 @@ const toErrors = (results: EvaluateResult[]): OnlineEvalError[] =>
       evaluator_version: evaluator.version,
       code: error?.code ?? 'evaluator_error',
     }));
+
+type JudgeUsage = Pick<
+  OnlineEvalScoreEvent,
+  | 'judge_input_tokens'
+  | 'judge_cached_input_tokens'
+  | 'judge_output_tokens'
+  | 'judge_reasoning_tokens'
+  | 'judge_llm_calls'
+  | 'judge_llm_calls_without_usage'
+>;
+
+/** Sums the judges' token usage, or nothing when no judge made a model call. */
+const toJudgeUsage = (results: EvaluateResult[]): JudgeUsage => {
+  const usages = results.flatMap(({ usage }) => (usage ? [usage] : []));
+  if (usages.length === 0) {
+    return {};
+  }
+  const sum = (read: (usage: (typeof usages)[number]) => number | undefined) =>
+    usages.reduce((total, usage) => total + (read(usage) ?? 0), 0);
+  const sumReported = (read: (usage: (typeof usages)[number]) => number | undefined) =>
+    usages.some((usage) => read(usage) !== undefined) ? sum(read) : undefined;
+  const cached = sumReported(({ cached_input_tokens: tokens }) => tokens);
+  const reasoning = sumReported(({ reasoning_tokens: tokens }) => tokens);
+
+  return {
+    judge_input_tokens: sum(({ input_tokens: tokens }) => tokens),
+    ...(cached === undefined ? {} : { judge_cached_input_tokens: cached }),
+    judge_output_tokens: sum(({ output_tokens: tokens }) => tokens),
+    ...(reasoning === undefined ? {} : { judge_reasoning_tokens: reasoning }),
+    judge_llm_calls: sum(({ llm_calls: calls }) => calls),
+    judge_llm_calls_without_usage: sum(({ llm_calls_without_usage: calls }) => calls),
+  };
+};
 
 const withDropCounts = (
   event: OnlineEvalScoreEvent,
@@ -138,6 +182,7 @@ export const buildOnlineEvalScoreEvent = ({
   return fitToSizeLimit({
     ...metadata,
     ...(judgeModel ? { judge_model: judgeModel } : {}),
+    ...toJudgeUsage(results),
     scores: toScores(results, includeExplanations),
     evaluator_count: results.length + failedEvaluators.length,
     failed_count: errors.length - skippedCount,

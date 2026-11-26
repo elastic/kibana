@@ -16,7 +16,7 @@ import type { ContextsAdapter } from '../hooks';
 describe('getProfilesInspectorView', () => {
   it('should return the title', () => {
     const { title } = getProfilesInspectorView();
-    expect(title).toBe('Profiles');
+    expect(title).toBe('Discover profiles');
   });
 
   it('should return the help text', () => {

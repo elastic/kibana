@@ -113,6 +113,40 @@ describe('buildOnlineEvalScoreEvent', () => {
     expect(event.scores[1]).not.toHaveProperty('explanation');
   });
 
+  it('sends only tags from the allowed set even when explanations are off, and drops anything else, such as a well-shaped tag that is not in it', () => {
+    const event = buildOnlineEvalScoreEvent({
+      metadata,
+      results: [
+        llmResult('recovery_checks', [
+          {
+            name: 'checklist',
+            score: 0.5,
+            explanation: 'Free text the flag gates.',
+            metadata: {
+              tags: [
+                'strategy:alert_record:ran',
+                'Not A Keyword',
+                'a customer said this',
+                'service:checkout-prod',
+                'strategy:alert_record:maybe',
+                'strategy',
+                42,
+              ],
+            },
+          },
+          { name: 'plain', score: 1, metadata: { tags: 'strategy:alert_record:ran' } },
+        ]),
+      ],
+      includeExplanations: false,
+    });
+
+    expect(event.scores[0]).toEqual(
+      expect.objectContaining({ tags: ['strategy:alert_record:ran'] })
+    );
+    expect(event.scores[0]).not.toHaveProperty('explanation');
+    expect(event.scores[1]).not.toHaveProperty('tags');
+  });
+
   it('keeps not_applicable apart from evidence_unmet and counts both as skipped', () => {
     const event = buildOnlineEvalScoreEvent({
       metadata,
@@ -176,6 +210,62 @@ describe('buildOnlineEvalScoreEvent', () => {
           { evaluator_name: 'rca_quality', code: 'evaluation_failed' },
           { evaluator_name: 'rca_reward', evaluator_version: '1.0.0', code: 'evaluation_failed' },
         ],
+      })
+    );
+  });
+
+  it("sums the judges' token usage, failed judges included", () => {
+    const event = buildOnlineEvalScoreEvent({
+      metadata,
+      results: [
+        {
+          ...llmResult('rca_quality', [{ name: 'accuracy', score: 1 }]),
+          usage: {
+            input_tokens: 1000,
+            cached_input_tokens: 600,
+            output_tokens: 250,
+            reasoning_tokens: 150,
+            llm_calls: 2,
+            llm_calls_without_usage: 1,
+            calls: [
+              {
+                status: 'ok',
+                input_tokens: 1000,
+                cached_input_tokens: 600,
+                output_tokens: 250,
+                reasoning_tokens: 150,
+              },
+              { status: 'error', error: { code: 'providerError', message: 'rate limited' } },
+            ],
+          },
+        },
+        {
+          ...errorResult('conclusion_quality', { message: 'Invalid judge output' }),
+          usage: {
+            input_tokens: 500,
+            output_tokens: 50,
+            llm_calls: 3,
+            llm_calls_without_usage: 0,
+            calls: [
+              { status: 'ok', input_tokens: 200, output_tokens: 20 },
+              { status: 'ok', input_tokens: 200, output_tokens: 20 },
+              { status: 'ok', input_tokens: 100, output_tokens: 10 },
+            ],
+          },
+        },
+        llmResult('investigation_process', [{ name: 'process', score: 0.5 }]),
+      ],
+      includeExplanations: false,
+    });
+
+    expect(event).toEqual(
+      expect.objectContaining({
+        judge_input_tokens: 1500,
+        judge_cached_input_tokens: 600,
+        judge_output_tokens: 300,
+        judge_reasoning_tokens: 150,
+        judge_llm_calls: 5,
+        judge_llm_calls_without_usage: 1,
       })
     );
   });

@@ -6,7 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { EvaluateEvidence, EvaluateFn } from '@kbn/evals-plugin/server';
@@ -14,11 +14,15 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { buildOnlineEvalsEvidence } from '../online_evals/build_evidence';
 import { buildOnlineEvalScoreEvent, type EvaluateResult } from '../online_evals/build_score_event';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
 import type { NightshiftTelemetryClient } from '../telemetry';
 
-/** Judges run in parallel within one evaluation, so this bounds concurrent judge calls. */
-export const MAX_ONLINE_EVALS_EVALUATORS = 4;
+/**
+ * The most evaluators one evaluation takes. The evals plugin grades four at a time, so a larger
+ * set does not raise the number of concurrent judge calls.
+ */
+export const MAX_ONLINE_EVALS_EVALUATORS = 5;
 
 const isDate = (value: string) => !Number.isNaN(Date.parse(value));
 
@@ -36,7 +40,7 @@ const inputSchema = lazySchema(() =>
     graded_report: z
       .enum(['first_round', 'pre_recovery', 'current'])
       .describe(
-        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored. `pre_recovery`, the report just before an alert recovery, isn't supported yet."
+        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored (a recovery round's own analysis). `pre_recovery`, the report just before an alert recovery, isn't supported yet."
       ),
     evaluator_set: z
       .string()
@@ -99,7 +103,8 @@ const getErrorMessage = (error: unknown) =>
 
 /**
  * The round the judges grade. `first_round` is the investigation's first round, whatever round is
- * being scored; an alert recovery is the ground truth, so it is never graded itself.
+ * being scored, and a recovery round graded that way is the ground truth, never graded itself;
+ * `current` is the round being scored, which for a recovery is graded on its own analysis.
  */
 const getGradedRound = (
   input: ScoreInput,
@@ -107,9 +112,18 @@ const getGradedRound = (
   round: ConversationRound
 ): ConversationRound => {
   if (input.graded_report === 'first_round') {
+    // A recovery that is the first round, or read before it was saved, would grade itself.
+    if (input.round_kind === 'alert_recovery' && rounds[0].id === round.id) {
+      throw new OnlineEvalsStepError(
+        'invalid_input',
+        'Cannot grade an alert recovery against itself: it is the first round'
+      );
+    }
     return rounds[0];
   }
-  if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery') {
+  // The round itself is graded. An alert recovery is the ground truth for first-round judges, but
+  // judges of the recovery round's own analysis grade it too.
+  if (input.graded_report === 'current') {
     return round;
   }
   throw new OnlineEvalsStepError(
@@ -130,7 +144,12 @@ const readRound = async ({
   input: ScoreInput;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
-}): Promise<{ agentId: string; round: ConversationRound; gradedRound: ConversationRound }> => {
+}): Promise<{
+  agentId: string;
+  round: ConversationRound;
+  gradedRound: ConversationRound;
+  earlierRounds: ConversationRound[];
+}> => {
   const agentBuilder = getAgentBuilder();
   if (!agentBuilder) {
     throw new OnlineEvalsStepError(
@@ -155,6 +174,11 @@ const readRound = async ({
     agentId: conversation.agent_id,
     round,
     gradedRound: getGradedRound(input, conversation.rounds, round),
+    // The conversation already holds the earlier rounds, so judges that revisit them get them here.
+    earlierRounds: conversation.rounds.slice(
+      0,
+      conversation.rounds.findIndex(({ id }) => id === round.id)
+    ),
   };
 };
 
@@ -219,6 +243,8 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
   isPaused,
   shouldIncludeExplanations,
   telemetry,
+  getSavedObjects,
+  getUiSettings,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   /** The evals plugin's `evaluate()`; absent when the evals plugin isn't loaded. */
@@ -230,6 +256,8 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
   /** The `nightshift.onlineEvals.includeExplanations` flag. */
   shouldIncludeExplanations: () => boolean;
   telemetry: NightshiftTelemetryClient;
+  getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings?: () => CoreStart['uiSettings'] | undefined;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.onlineEvals.score',
@@ -264,26 +292,57 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
 
         const request = context.contextManager.getFakeRequest();
 
-        const { agentId, round, gradedRound } = await readRound({
+        const { agentId, round, gradedRound, earlierRounds } = await readRound({
           input,
           getAgentBuilder,
           request,
         });
-        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+        // A round resumed after human-in-the-loop has one trace per execution; the latest is the
+        // one whose response the user sees.
+        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
         const judgeConnectorId = await resolveJudge(resolveJudgeConnectorId, request);
-        const { results, failedEvaluators } = await runJudges({
-          input,
-          evidence: buildOnlineEvalsEvidence({
-            round: gradedRound,
-            alertOutcome:
-              input.round_kind === 'alert_recovery' ? round.response.message : undefined,
-          }),
-          judgeConnectorId,
-          evaluate,
-          request,
-          spaceId: workflow.spaceId,
-          logger: context.logger,
-        });
+        // Joins the round's trace so the judges show up in the conversation trace flyout.
+        const { results, failedEvaluators } = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.onlineEvals.score',
+            traceId: execution.id,
+            foregroundTraceId: roundTraceId,
+            roundId: input.round_id,
+            conversationId: input.investigation_id,
+            spaceId: workflow.spaceId,
+            workflowExecutionId: execution.id,
+            request,
+            getSavedObjects,
+            getUiSettings,
+            logger: context.logger,
+            attributes: {
+              'nightshift.evaluator_set': input.evaluator_set,
+              'nightshift.round_kind': input.round_kind,
+            },
+          },
+          () =>
+            runJudges({
+              input,
+              evidence: buildOnlineEvalsEvidence({
+                round: gradedRound,
+                // Only first-round judges read the recovery as ground truth.
+                alertOutcome:
+                  input.round_kind === 'alert_recovery' && input.graded_report === 'first_round'
+                    ? round.response.message
+                    : undefined,
+                // A recovery round's own analysis is judged against what the rounds before it said.
+                earlierRounds:
+                  input.round_kind === 'alert_recovery' && input.graded_report === 'current'
+                    ? earlierRounds
+                    : undefined,
+              }),
+              judgeConnectorId,
+              evaluate,
+              request,
+              spaceId: workflow.spaceId,
+              logger: context.logger,
+            })
+        );
 
         const event = buildOnlineEvalScoreEvent({
           metadata: {

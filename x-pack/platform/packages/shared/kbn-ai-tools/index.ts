@@ -40,6 +40,8 @@ export {
   type GetMappingConflictsParams,
 } from './src/utils/get_mapping_conflicts';
 export { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from './src/utils/default_esql_query_timeout';
+export { esqlTimeRange } from './src/utils/esql_time_range';
+export { buildCountQuery } from './src/utils/build_count_query';
 export {
   parseEsqlSourceDocuments,
   getEsqlDocumentId,

@@ -24,7 +24,7 @@ type HandlerParams = Parameters<typeof route.handler>[0];
 
 describe('continuous KI extraction settings route', () => {
   it('rolls back both settings when an enabled transition fails', async () => {
-    const request = { spaceId: 'space-a' };
+    const request = { spaceId: 'default' };
     const previousSettings = {
       [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]: false,
       [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS]: 12,

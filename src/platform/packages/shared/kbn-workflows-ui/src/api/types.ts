@@ -29,6 +29,12 @@ export interface BulkCreateWorkflowsResponse {
   failed: Array<{ index: number; id: string; error: string }>;
 }
 
+export interface BulkDeleteWorkflowsResponse {
+  total: number;
+  deleted: number;
+  failures: Array<{ id: string; error: string }>;
+}
+
 export interface CreateWorkflowParams {
   [key: string]: unknown;
 }
@@ -218,6 +224,8 @@ export interface LinkedRule {
 
 export interface GetLinkedRulesResponse {
   total: number;
+  /** Linked rules in the space that the user cannot read. */
+  hiddenTotal: number;
   rules: LinkedRule[];
 }
 
