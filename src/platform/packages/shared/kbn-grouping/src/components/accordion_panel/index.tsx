@@ -27,6 +27,7 @@ interface GroupPanelProps<T> {
   onToggleGroup?: (isOpen: boolean, groupBucket: GroupingBucket<T>) => void;
   renderChildComponent: GroupChildComponentRenderer<T>;
   selectedGroup: string;
+  toggleAriaLabel?: string;
   multiValueFields?: string[];
 }
 
@@ -73,6 +74,7 @@ const GroupPanelComponent = <T,>({
   selectedGroup,
   nullGroupMessage,
   multiValueFields,
+  toggleAriaLabel,
 }: GroupPanelProps<T>) => {
   const lastForceState = useRef(forceState);
   useEffect(() => {
@@ -115,6 +117,7 @@ const GroupPanelComponent = <T,>({
   return !groupFieldValue.asString ? null : (
     <EuiAccordion
       buttonClassName={customAccordionButtonClassName}
+      buttonProps={toggleAriaLabel ? { 'aria-label': toggleAriaLabel } : undefined}
       buttonContent={
         <div data-test-subj="group-panel-toggle" className="groupingPanelRenderer">
           {groupPanel ?? (

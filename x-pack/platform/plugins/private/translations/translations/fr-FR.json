@@ -58536,7 +58536,6 @@
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalSearch": "Rechercher le nom du champ",
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalTitle": "Champs",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId": "ID de l’entité : {entityId}",
-    "xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout": "Ouvrir les détails de l'entité",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.entities": "Entités :",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.riskScore": "Score de risque :",
     "xpack.securitySolution.entityAnalytics.entitiesTable.groupBy": "Regrouper les entités par",

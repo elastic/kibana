@@ -58863,7 +58863,6 @@
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalSearch": "搜索字段名称",
     "xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModalTitle": "字段",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId": "实体 ID：{entityId}",
-    "xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout": "打开实体详情",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.entities": "实体：",
     "xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.riskScore": "风险分数：",
     "xpack.securitySolution.entityAnalytics.entitiesTable.groupBy": "实体分组依据",
