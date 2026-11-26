@@ -26,7 +26,9 @@ export async function getPolicyHover(
 
   const result: Array<{ value: string }> = [];
   const { getPolicyMetadata } = getPolicyHelper(callbacks);
-  const policyMetadata = await getPolicyMetadata(source.name);
+  // source.name keeps a mode prefix (_any, _coordinator, _remote). Policies are keyed by the bare name.
+  const policyName = source.index?.valueUnquoted ?? source.name;
+  const policyMetadata = await getPolicyMetadata(policyName);
 
   if (policyMetadata) {
     result.push(

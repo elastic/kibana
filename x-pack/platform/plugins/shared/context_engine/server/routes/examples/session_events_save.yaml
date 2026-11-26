@@ -125,11 +125,22 @@ responses:
               statusCode: 404
               error: Not Found
               message: AI index 'ops-memory' not found
+  429:
+    content:
+      application/json:
+        examples:
+          tooManyRequestsExample:
+            summary: "Too many requests"
+            description: "Elasticsearch rejected the whole request with 429; retry with backoff"
+            value:
+              statusCode: 429
+              error: Too Many Requests
+              message: "es_rejected_execution_exception: too many requests"
 x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X POST "https://${KIBANA_URL}/api/context_engine/memory/_save_event" \
+        -X POST "${KIBANA_URL}/api/context_engine/memory/_save_event" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "Content-Type: application/json" \
         -H "kbn-xsrf: true" \

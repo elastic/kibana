@@ -15,7 +15,6 @@
       "kibanaReact",
       "triggersActionsUi",
       "encryptedSavedObjects",
-      "licensing",
       "spaces"
     ],
     "optionalPlugins": ["usageCollection", "cloud"],

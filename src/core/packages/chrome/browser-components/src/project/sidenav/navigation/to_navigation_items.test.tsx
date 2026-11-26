@@ -65,7 +65,7 @@ describe('toNavigationItems', () => {
     expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
       "
       === Navigation Warnings ===
-      • Panel opener node \\"securityGroup:entityAnalytics\\" should contain panel sections, not direct links. Flattening links \\"entity_analytics-overview, entity_analytics-privileged_user_monitoring\\" into secondary items and creating a placeholder section for these links.
+      • Panel opener node \\"securityGroup:entityAnalytics\\" should contain panel sections, not direct links. Flattening links \\"entity_analytics-overview\\" into secondary items and creating a placeholder section for these links.
       • Panel opener node \\"securityGroup:explore\\" should contain panel sections, not direct links. Flattening links \\"hosts, network, users\\" into secondary items and creating a placeholder section for these links.
       • Panel opener node \\"securityGroup:investigations\\" should contain panel sections, not direct links. Flattening links \\"timelines, notes, osquery\\" into secondary items and creating a placeholder section for these links.
       • Secondary menu item node \\"fleet\\" has a href \\"/jom/app/fleet\\", but it should not. We're using it as a section title that doesn't have a link.

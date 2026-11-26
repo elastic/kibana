@@ -68,6 +68,26 @@ describe('serializeManifest', () => {
     expect(parseManifest(serializeManifest(opaque))).toEqual(opaque);
   });
 
+  const lastItemCursor = {
+    style: 'cursor',
+    request: { cursorParam: 'search_after' },
+    response: { in: 'last_item', itemsPath: 'results', nextPath: 'sort' },
+  };
+
+  it('accepts a cursor held in the last item', () => {
+    const declared = withPagination(lastItemCursor) as VendorApiManifest;
+
+    expect(parseManifest(serializeManifest(declared))).toEqual(declared);
+  });
+
+  it('rejects an end signal for a cursor held in the last item, which has none', () => {
+    const invalid = withPagination({ ...lastItemCursor, end: 'null' }) as VendorApiManifest;
+
+    expect(() => serializeManifest(invalid)).toThrow(
+      'does not apply to a cursor held in the last item'
+    );
+  });
+
   it.each([
     ['an unknown field', { ...manifest, extra: true }],
     [
