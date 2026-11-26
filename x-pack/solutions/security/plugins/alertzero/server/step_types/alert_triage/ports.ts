@@ -813,8 +813,9 @@ const BLOCKED_KEYS_CHUNK = 500;
 
 /**
  * The strict key tags among `keyTags` that some alert carries with a verdict against a false
- * positive: a true positive, or an inconclusive verdict from the model or from an analyst who
- * dismissed a proposal. An alert with `az:inconclusive` and `az:model_fp` does not count: the model
+ * positive: a true positive, an inconclusive verdict from the model or from an analyst who
+ * dismissed a proposal, or an analyst's close with a reason other than false positive (the same
+ * rule the store step applies to the alerts of an approval). An alert with `az:inconclusive` and `az:model_fp` does not count: the model
  * judged it a false positive, and its proposal failed, expired or was never reviewed, so nobody
  * judged otherwise. Only the batch writes the strict key tag, so the `az:inconclusive` a
  * dismissal's skip adds never counts. Every alert counts, with no time limit: the consistency rule
@@ -849,6 +850,16 @@ export const findKeyTagsWithVerdicts = async (
                       bool: {
                         filter: [{ term: { [ALERT_FIELDS.tags]: 'az:inconclusive' } }],
                         must_not: [{ term: { [ALERT_FIELDS.tags]: 'az:model_fp' } }],
+                      },
+                    },
+                    // A close does not add a verdict tag, so the reason is the analyst's verdict.
+                    {
+                      bool: {
+                        filter: [
+                          { term: { [ALERT_FIELDS.status]: 'closed' } },
+                          { exists: { field: ALERT_FIELDS.reason } },
+                        ],
+                        must_not: [{ term: { [ALERT_FIELDS.reason]: 'false_positive' } }],
                       },
                     },
                   ],

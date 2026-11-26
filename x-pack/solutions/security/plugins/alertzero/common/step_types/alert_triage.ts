@@ -470,7 +470,7 @@ const storeFpDecisionsOutputSchema = lazySchema(() =>
     keys_with_other_verdicts: z
       .number()
       .describe(
-        'Keys where an earlier alert is a true positive, or inconclusive by the model or an analyst. A model false positive whose proposal was never decided does not count.'
+        'Keys where an earlier alert is a true positive, inconclusive by the model or an analyst, or closed by an analyst for a reason other than false positive. A model false positive whose proposal was never decided does not count.'
       ),
     keys_over_cap: z.number().describe('Keys left out by the per-approval cap.'),
     written: z.number(),
@@ -548,7 +548,7 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     blocked_by_verdict: z
       .number()
       .describe(
-        'Matches of an approved decision that was not acted on, because an alert of its key is a true positive, or inconclusive by the model or an analyst. In `shadow`, the matches that `on` would not act on.'
+        'Matches of an approved decision that was not acted on, because an alert of its key is a true positive, inconclusive by the model or an analyst, or closed by an analyst for a reason other than false positive. In `shadow`, the matches that `on` would not act on.'
       ),
     left_for_notes: z
       .number()

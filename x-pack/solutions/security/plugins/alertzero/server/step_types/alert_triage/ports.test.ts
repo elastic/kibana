@@ -159,7 +159,8 @@ describe('findKeyTagsWithVerdicts', () => {
 
   // A model false positive whose proposal failed, expired or was never reviewed is re-tagged
   // `az:inconclusive` and keeps `az:model_fp`: nobody judged it otherwise, so it must not block.
-  it('asks for alerts of the keys with a true positive, or an inconclusive verdict that is not a model false positive', async () => {
+  // An analyst who closes an alert as a true positive adds no verdict tag, only the close reason.
+  it('asks for alerts of the keys with a judged verdict against a false positive', async () => {
     const callKibanaApi = jest.fn().mockResolvedValue(answer(['k1']));
 
     const found = await findKeyTagsWithVerdicts({ callKibanaApi }, ['k1', 'k2']);
@@ -176,6 +177,15 @@ describe('findKeyTagsWithVerdicts', () => {
               bool: {
                 filter: [{ term: { 'kibana.alert.workflow_tags': 'az:inconclusive' } }],
                 must_not: [{ term: { 'kibana.alert.workflow_tags': 'az:model_fp' } }],
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  { term: { 'kibana.alert.workflow_status': 'closed' } },
+                  { exists: { field: 'kibana.alert.workflow_reason' } },
+                ],
+                must_not: [{ term: { 'kibana.alert.workflow_reason': 'false_positive' } }],
               },
             },
           ],
