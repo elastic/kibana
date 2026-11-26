@@ -57,7 +57,11 @@ function createGetEnrichFields(
       return [];
     }
 
-    const policyName = command.args[0].name;
+    // source.name keeps a mode prefix (_any, _coordinator, _remote). Policies are keyed by the bare name.
+    const policyName = command.args[0].index?.valueUnquoted;
+    if (!policyName) {
+      return [];
+    }
 
     const policies = await getPolicies();
     const policy = policies.get(policyName);

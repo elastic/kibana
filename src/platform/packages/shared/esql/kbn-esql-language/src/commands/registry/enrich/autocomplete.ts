@@ -49,11 +49,11 @@ export async function autocomplete(
     if (col && !col.userDefined) fieldNames.push(name);
   }
 
-  const policyName = (
-    command.args.find((arg) => !Array.isArray(arg) && arg.type === 'source') as
-      | ESQLSource
-      | undefined
-  )?.name;
+  const policySource = command.args.find(
+    (arg) => !Array.isArray(arg) && arg.type === 'source'
+  ) as ESQLSource | undefined;
+  // source.name keeps a mode prefix (_any, _coordinator, _remote). Policies are keyed by the bare name.
+  const policyName = policySource?.index?.valueUnquoted;
 
   const getFieldSuggestionsForWithClause = async () => {
     if (!policyName) {
