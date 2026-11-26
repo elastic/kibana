@@ -170136,8 +170136,6 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_apiMonitorFields'
     Kibana_HTTP_APIs_data_visualizer_field_stats:
       description: Field statistics table embeddable schema
-      discriminator:
-        propertyName: view_type
       oneOf:
         - additionalProperties: false
           type: object
@@ -170391,9 +170389,7 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCumulativeSum'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCounterRate'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricFormula'
-              - discriminator:
-                  propertyName: apply_color_to
-                oneOf:
+              - oneOf:
                   - additionalProperties: false
                     type: object
                     properties:
@@ -175520,10 +175516,6 @@ components:
       description: A dropdown control that filters data by selecting field values from a data view. Define the data view, field, and selection settings in `config`.
       properties:
         config:
-          discriminator:
-            mapping:
-              esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
-            propertyName: values_source
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'
@@ -175561,10 +175553,6 @@ components:
       description: A slider control that filters data by selecting a numeric range for the configured field. Define the data view, field, and selection settings in `config`.
       properties:
         config:
-          discriminator:
-            mapping:
-              esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
-            propertyName: values_source
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'
@@ -177688,10 +177676,6 @@ components:
       additionalProperties: false
       properties:
         config:
-          discriminator:
-            mapping:
-              esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
-            propertyName: values_source
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'
@@ -177714,10 +177698,6 @@ components:
       additionalProperties: false
       properties:
         config:
-          discriminator:
-            mapping:
-              esql: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
-            propertyName: values_source
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'
@@ -179446,8 +179426,6 @@ components:
       description: Formats a field into a color value.
       properties:
         params:
-          discriminator:
-            propertyName: field_type
           oneOf:
             - additionalProperties: false
               type: object
@@ -179995,8 +179973,6 @@ components:
       description: Formats a field into a link, image or audio.
       properties:
         params:
-          discriminator:
-            propertyName: type
           oneOf:
             - additionalProperties: false
               type: object
@@ -180686,8 +180662,6 @@ components:
       title: Vega
     Kibana_HTTP_APIs_kbn-vega-spec:
       description: 'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.'
-      discriminator:
-        propertyName: format
       oneOf:
         - additionalProperties: false
           properties:
@@ -197513,8 +197487,6 @@ components:
         metrics:
           description: Array of metrics to display as columns in the datatable
           items:
-            discriminator:
-              propertyName: apply_color_to
             oneOf:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetric'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar'
@@ -197524,8 +197496,6 @@ components:
         rows:
           description: Array of operations to split the datatable rows by
           items:
-            discriminator:
-              propertyName: apply_color_to
             oneOf:
               - type: object
                 properties:
@@ -197697,11 +197667,6 @@ components:
       title: Datatable Metric (ES|QL)
       type: object
     Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar:
-      discriminator:
-        mapping:
-          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
-          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
-        propertyName: fill_mode
       oneOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
@@ -197956,11 +197921,6 @@ components:
       title: Datatable metric progress bar (ES|QL) (solid fill)
       type: object
     Kibana_HTTP_APIs_visDatatableESQLRowProgressBar:
-      discriminator:
-        mapping:
-          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
-          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
-        propertyName: fill_mode
       oneOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
@@ -198213,9 +198173,7 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCumulativeSum'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCounterRate'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricFormula'
-              - discriminator:
-                  propertyName: apply_color_to
-                oneOf:
+              - oneOf:
                   - additionalProperties: false
                     type: object
                     properties:
@@ -198376,11 +198334,6 @@ components:
       title: Datatable (DSL)
       type: object
     Kibana_HTTP_APIs_visDatatableProgressBar:
-      discriminator:
-        mapping:
-          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
-          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
-        propertyName: fill_mode
       oneOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
@@ -198609,8 +198562,6 @@ components:
       type: object
     Kibana_HTTP_APIs_visDatatableProgressBarValueRange:
       description: The numeric span the progress bar represents
-      discriminator:
-        propertyName: type
       oneOf:
         - additionalProperties: false
           description: The bar spans the minimum to the maximum of the loaded values.
