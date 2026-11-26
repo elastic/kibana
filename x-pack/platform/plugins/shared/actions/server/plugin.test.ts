@@ -847,10 +847,6 @@ describe('Actions Plugin', () => {
       });
 
       describe('requests before the first load ends', () => {
-        beforeEach(() => {
-          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
-        });
-
         const getPendingState = (promise: Promise<unknown>) =>
           Promise.race([promise.then(() => 'resolved'), flush().then(() => 'pending')]);
 
@@ -891,7 +887,6 @@ describe('Actions Plugin', () => {
       describe('request wait cap', () => {
         beforeEach(() => {
           jest.useFakeTimers();
-          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
         });
 
         afterEach(() => {
