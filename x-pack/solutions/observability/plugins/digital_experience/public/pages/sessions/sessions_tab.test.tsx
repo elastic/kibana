@@ -92,6 +92,7 @@ const session = (overrides: Partial<SessionSummary> = {}): SessionSummary => ({
   failedRequestCount: 1,
   frustration: emptyFrustration(),
   bounced: false,
+  hasReplay: null,
   entryPage: '/',
   exitPage: '/cart',
   journey: ['/', '/products', '/cart'],

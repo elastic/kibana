@@ -242,6 +242,8 @@ export interface SessionSummary {
   failedRequestCount: number;
   frustration: FrustrationCounts;
   bounced: boolean;
+  /** Whether the session has a recorded replay; null when the summary doesn't say i.e. not determined */
+  hasReplay: boolean | null;
   entryPage: string | null;
   exitPage: string | null;
   journey: string[];

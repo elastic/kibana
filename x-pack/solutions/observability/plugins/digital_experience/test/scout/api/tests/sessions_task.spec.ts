@@ -12,6 +12,8 @@ import {
   EVENT_DEAD_CLICK,
   EVENT_ERROR_CLICK,
   EVENT_RAGE_CLICK,
+  EVENT_REPLAY_EVENT,
+  EVENT_REPLAY_START,
   FRUSTRATION_CLICK_COUNT,
 } from '../../../../common/otel_data';
 import {
@@ -31,6 +33,8 @@ const { COMMON_HEADERS, SESSIONS_ENABLE_PATH } = testData;
 const STATUS_PATH = 'internal/digital_experience/sessions/status';
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
+/** Where EDOT Browser's session replay writes, a match of the OTel logs pattern the task reads. */
+const REPLAY_INDEX = 'logs-rum.replay.otel-default';
 
 /** An application and environment no other suite uses, so its summaries are exactly these. */
 const APP = 'dx-sessions-contract';
@@ -156,6 +160,35 @@ const buildEvents = (sessionId: string, startMs: number) => {
   };
 };
 
+const REPLAY_EVENT_COUNT = 40;
+
+/**
+ * The records of a recording of the session: the start of its segment just before the first event,
+ * and a record per second to after the last. They carry the application and session of the events,
+ * as the recorder writes them, and are not activity: they must not change the counts and times.
+ */
+const buildReplayRecords = (sessionId: string, startMs: number) => {
+  const segment = `${sessionId}-segment`;
+  const record = (offsetMs: number, eventName: string, attributes: Record<string, unknown>) => ({
+    '@timestamp': new Date(startMs + offsetMs).toISOString(),
+    event_name: eventName,
+    resource,
+    attributes: { 'session.id': sessionId, 'elastic.replay.segment.id': segment, ...attributes },
+  });
+  return [
+    record(-2 * SECOND_MS, EVENT_REPLAY_START, {
+      'elastic.replay.trigger': 'sampled',
+      'elastic.replay.format': 'rrweb/2',
+    }),
+    ...Array.from({ length: REPLAY_EVENT_COUNT }, (_, sequence) =>
+      record((sequence + 1) * SECOND_MS, EVENT_REPLAY_EVENT, {
+        'elastic.replay.sequence': sequence,
+        'elastic.replay.event.type': sequence === 0 ? 2 : 3,
+      })
+    ),
+  ];
+};
+
 const FRUSTRATION_EVENT_NAMES: readonly string[] = [
   EVENT_RAGE_CLICK,
   EVENT_DEAD_CLICK,
@@ -166,7 +199,7 @@ const ingestEvents = async (
   esClient: EsClient,
   sessionId: string,
   startMs: number,
-  { frustrated = true }: { frustrated?: boolean } = {}
+  { frustrated = true, replay = false }: { frustrated?: boolean; replay?: boolean } = {}
 ) => {
   const { logs, spans } = buildEvents(sessionId, startMs);
   const logsToIngest = frustrated
@@ -177,6 +210,10 @@ const ingestEvents = async (
     operations: [
       ...logsToIngest.flatMap((document) => [{ create: { _index: LOGS_INDEX } }, document]),
       ...spans.flatMap((document) => [{ create: { _index: TRACES_INDEX } }, document]),
+      ...(replay ? buildReplayRecords(sessionId, startMs) : []).flatMap((document) => [
+        { create: { _index: REPLAY_INDEX } },
+        document,
+      ]),
     ],
   });
   if (errors) {
@@ -186,7 +223,7 @@ const ingestEvents = async (
 
 const deleteEvents = (esClient: EsClient) =>
   esClient.deleteByQuery({
-    index: [LOGS_INDEX, TRACES_INDEX],
+    index: [LOGS_INDEX, TRACES_INDEX, REPLAY_INDEX],
     query: { term: { 'resource.attributes.service.name': APP } },
     refresh: true,
     ignore_unavailable: true,
@@ -272,7 +309,9 @@ apiTest.describe(
         const startMs = Date.now() - 20 * MINUTE_MS;
 
         await apiTest.step('builds the expected summary from the events', async () => {
-          await ingestEvents(esClient, SESSION, startMs);
+          // The recording has more records than the session has events, from before its first
+          // event to after its last: only that a replay exists reaches the summary.
+          await ingestEvents(esClient, SESSION, startMs, { replay: true });
           await ingestEvents(esClient, CALM_SESSION, startMs, { frustrated: false });
           const status = await enable(apiClient);
           expect(status).toMatchObject({ installed: true, apiKeyInvalid: false });
@@ -313,6 +352,7 @@ apiTest.describe(
             http_request_count: 3,
             http_failed_request_count: 2,
             bounced: false,
+            has_replay: true,
             // Pages in first-view order, once each, without their query string.
             journey: ['/home', '/cart'],
             entry_page: '/home',
@@ -342,6 +382,8 @@ apiTest.describe(
               '/cart',
             ],
           });
+
+          expect(await getSummary(esClient, CALM_SESSION)).toMatchObject({ has_replay: false });
 
           await expect
             .poll(

@@ -637,11 +637,18 @@ and drill-down find nothing until the index is deleted for the task to rebuild i
 For local data, the `digital_experience_browser` synthtrace scenario emits these events by default
 (`--scenarioOpts frustration=false` turns them off).
 
-`has_replay` is mapped but never written yet. Session replay records one `elastic.replay.start`
-per recorded segment to `logs-rum.replay.otel-*`, which the task already reads as part of
-`logs-*.otel-*`, so it can set the field without a `SESSIONS_VERSION` bump and the rebuild one
-would cost. It is absent rather than `false` until something sets it, and readers expose it as
-`hasReplay`.
+`has_replay` is true when the session has at least one `elastic.replay.start` record, which session
+replay writes once per recorded segment to `logs-rum.replay.otel-*`, a match of `logs-*.otel-*`.
+Those records carry the session and the application of the telemetry, so the summary queries
+(`browserSessionEvents`) leave out the replay events (`elastic.replay.event`, one per rrweb event,
+far more than the session has telemetry), which would otherwise count as its events and make up most
+of what the task reads. The start records stay for `has_replay`, and are not counted in the
+session's `event_count`, `start_time` or `end_time`. The exclusion spells out `event_name IS NULL OR
+event_name != ...`: spans have no event name, which a bare `!=` would drop, and a `COALESCE` would
+keep Elasticsearch from applying it to the index.
+
+The field was mapped without a `SESSIONS_VERSION` bump, so a summary has it once its session gets
+new events. Until then the API exposes it as `hasReplay: null`, which is not the same as `false`.
 
 `load_time` was added without a bump too, as nothing reads it yet. An index built before it keeps
 it in `_source` only (`dynamic: false`), and the summaries it already holds lack it until their

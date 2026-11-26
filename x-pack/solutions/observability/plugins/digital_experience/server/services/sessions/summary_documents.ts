@@ -137,6 +137,7 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
         // at the first URLs, so the exit page, which is not, has the last word. A session with no
         // captured page isn't a bounce: there was none to leave.
         bounced: journey.length === 1 && exitPage === entryPage,
+        has_replay: numberOr(row.replay_start_count, 0) > 0,
         entry_page: entryPage,
         exit_page: exitPage,
         journey,

@@ -107,6 +107,16 @@ export const EVENT_DEAD_CLICK = 'elastic.frustration.dead_click';
 export const EVENT_ERROR_CLICK = 'elastic.frustration.error_click';
 export const FRUSTRATION_EVENTS = [EVENT_RAGE_CLICK, EVENT_DEAD_CLICK, EVENT_ERROR_CLICK] as const;
 
+/**
+ * EDOT Browser session replay records, which share the session and application of the telemetry
+ * and are written to `logs-rum.replay.otel-*`, a match of `OTEL_LOGS_INDEX`. A recording is one
+ * `elastic.replay.event` per rrweb event, so it outnumbers the telemetry of its session by orders
+ * of magnitude, and one `elastic.replay.start` per recorded segment.
+ * Neither is user activity: sessions count only the start records, to know that a replay exists.
+ */
+export const EVENT_REPLAY_EVENT = 'elastic.replay.event';
+export const EVENT_REPLAY_START = 'elastic.replay.start';
+
 /** Page loads and in-app navigations, which sessions count as page views. */
 export const PAGE_VIEW_EVENTS = [EVENT_DOCUMENT_LOAD, EVENT_NAVIGATION] as const;
 export const CLICK_EVENTS = [EVENT_CLICK, EVENT_USER_ACTION_CLICK] as const;
