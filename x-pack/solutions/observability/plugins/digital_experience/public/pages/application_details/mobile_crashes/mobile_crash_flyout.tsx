@@ -234,21 +234,28 @@ export function MobileCrashFlyout({
     if (!detail) {
       return <EuiSkeletonText lines={8} isLoading contentAriaLabel={DETAILS_LABEL} />;
     }
+    // Before the empty state too: a crash the user can't read looks like no crash.
+    const partialAccess = detail.isPartial && (
+      <>
+        <KbnWarningCallout
+          data-test-subj="digitalExperienceMobileCrashPartialAccess"
+          size="s"
+          title={PARTIAL_ACCESS_TITLE}
+        />
+        <EuiSpacer size="m" />
+      </>
+    );
     if (!latestCrash) {
-      return <KbnInfoCallout size="s" title={NO_CRASH_TITLE} />;
+      return (
+        <>
+          {partialAccess}
+          <KbnInfoCallout size="s" title={NO_CRASH_TITLE} />
+        </>
+      );
     }
     return (
       <>
-        {detail.isPartial && (
-          <>
-            <KbnWarningCallout
-              data-test-subj="digitalExperienceMobileCrashPartialAccess"
-              size="s"
-              title={PARTIAL_ACCESS_TITLE}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
+        {partialAccess}
         <OpenSessionButton serviceName={serviceName} crash={latestCrash} />
         <EuiSpacer size="l" />
         <SectionTitle title={STACKTRACE_TITLE} />

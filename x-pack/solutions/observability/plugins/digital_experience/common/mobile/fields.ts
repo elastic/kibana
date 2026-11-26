@@ -113,6 +113,7 @@ export const RESULT_COLUMNS = {
   environments: 'environments',
   environmentNames: 'environment_names',
   crashTime: 'crash_time',
+  crashRelease: 'crash_release',
   reportedAt: 'reported_at',
   fingerprint: 'fingerprint',
   events: 'events',
@@ -133,6 +134,7 @@ export const RESULT_COLUMNS = {
   statusCode: 'status_code',
   durationMs: 'duration_ms',
   page: 'page',
+  keptId: 'kept_id',
 } as const;
 
 /** A column the mobile queries compute, as an ES|QL column. */

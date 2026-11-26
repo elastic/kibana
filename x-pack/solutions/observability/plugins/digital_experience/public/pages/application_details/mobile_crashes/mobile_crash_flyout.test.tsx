@@ -243,6 +243,16 @@ describe('MobileCrashFlyout', () => {
     expect(screen.getByTestId('digitalExperienceMobileCrashPartialAccess')).toBeInTheDocument();
   });
 
+  it("says a crash may be missing when the user can't read every index and none is returned", () => {
+    mockDetail({ detail: { ...DETAIL, latestCrash: null, beforeCrash: [], isPartial: true } });
+    renderFlyout();
+
+    expect(screen.getByTestId('digitalExperienceMobileCrashPartialAccess')).toBeInTheDocument();
+    expect(
+      screen.getByText('This crash group has no crash in the selected time range and filters')
+    ).toBeInTheDocument();
+  });
+
   it('names what is loading for screen readers', () => {
     mockDetail({ detail: undefined, isLoading: true });
     renderFlyout();

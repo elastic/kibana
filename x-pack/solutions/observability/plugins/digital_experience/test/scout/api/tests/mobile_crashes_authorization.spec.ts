@@ -33,6 +33,15 @@ const OTEL_LOGS_ONLY_ROLE = {
   },
 };
 
+/** Both Kibana privileges, and the OTel traces, but not the logs, where crashes are. */
+const OTEL_TRACES_ONLY_ROLE = {
+  ...createRole({ digital_experience: ['read'], apm: ['read'] }),
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['traces-*.otel-*'], privileges: ['read'] }],
+  },
+};
+
 apiTest.describe(
   'Digital Experience mobile crashes API authorization',
   { tag: DIGITAL_EXPERIENCE_TAGS },
@@ -119,6 +128,34 @@ apiTest.describe(
         expect(beforeCrash.map(({ kind, name }) => ({ kind, name }))).toStrictEqual([
           { kind: 'tap', name: 'Start recording' },
         ]);
+      }
+    );
+
+    apiTest(
+      "answers no crash to a user who can't read the logs, where crashes are",
+      async ({ apiClient, samlAuth }) => {
+        const viewer = await samlAuth.asInteractiveUser('viewer');
+        const viewerList = await apiClient.get(mobileCrashGroupsPath(CRASH_APPS.android), {
+          headers: { ...COMMON_HEADERS, ...viewer.cookieHeader },
+          responseType: 'json',
+        });
+        const [npe] = (viewerList.body as MobileCrashGroupsResponse).crashGroups;
+        const { cookieHeader } = await samlAuth.asInteractiveUser(OTEL_TRACES_ONLY_ROLE);
+        const headers = { ...COMMON_HEADERS, ...cookieHeader };
+
+        const list = await apiClient.get(mobileCrashGroupsPath(CRASH_APPS.android), {
+          headers,
+          responseType: 'json',
+        });
+        const detail = await apiClient.get(
+          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint: npe.fingerprint }),
+          { headers, responseType: 'json' }
+        );
+
+        expect(list).toHaveStatusCode(200);
+        expect(list.body).toStrictEqual({ crashGroups: [], isPartial: true });
+        expect(detail).toHaveStatusCode(200);
+        expect(detail.body).toMatchObject({ latestCrash: null, beforeCrash: [], isPartial: true });
       }
     );
   }

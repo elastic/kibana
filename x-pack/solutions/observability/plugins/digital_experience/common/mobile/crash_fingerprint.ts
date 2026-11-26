@@ -60,6 +60,17 @@ export const MAX_CRASH_FINGERPRINT_LENGTH = 256;
 
 /** `exception.type` suffix of the JavaScript errors React Native reports as crashes. */
 export const JAVASCRIPT_EXCEPTION_SUFFIX = 'JavascriptException';
+/**
+ * The release in a PLCrashReporter report's `Version:` line, e.g. `8.4.0` of `8.4.0 (840)`, or an
+ * empty string without one. EDOT iOS sends a crash on the next launch, with that launch's resource,
+ * so the report's release is the one that crashed.
+ */
+export const IOS_REPORT_RELEASE_RULE = {
+  pattern: '^(?:.*?\\nVersion: +(\\S+))?.*$',
+  replacement: '$1',
+  dotAll: true,
+} as const satisfies CrashFrameRule;
+
 /** How a PLCrashReporter text report starts, which no exception's message or frames do. */
 export const IOS_REPORT_MARKER = 'Incident Identifier:';
 
@@ -75,13 +86,25 @@ export const isIosReport = (): ESQLAstExpression =>
 export const crashFrameRuleFlags = ({ dotAll, multiline }: CrashFrameRule): string =>
   `${dotAll ? 's' : ''}${multiline ? 'm' : ''}`;
 
+const withRule = (input: ESQLAstExpression, rule: CrashFrameRule): ESQLAstExpression => {
+  const flags = crashFrameRuleFlags(rule);
+  return esql.exp`REPLACE(${input}, ${flags ? `(?${flags})${rule.pattern}` : rule.pattern}, ${
+    rule.replacement
+  })`;
+};
+
 const withRules = (input: ESQLAstExpression, kind: CrashKind): ESQLAstExpression =>
-  CRASH_FRAME_RULES[kind].reduce<ESQLAstExpression>((expression, rule: CrashFrameRule) => {
-    const flags = crashFrameRuleFlags(rule);
-    return esql.exp`REPLACE(${expression}, ${
-      flags ? `(?${flags})${rule.pattern}` : rule.pattern
-    }, ${rule.replacement})`;
-  }, input);
+  CRASH_FRAME_RULES[kind].reduce<ESQLAstExpression>(withRule, input);
+
+/**
+ * The release in an EDOT iOS report's `Version:` line, as an ES|QL expression: `NULL` for other
+ * crashes, and an empty string for a report without one.
+ */
+export const reportRelease = (): ESQLAstExpression =>
+  esql.exp`CASE(${isIosReport()}, ${withRule(
+    mobileColumn('exceptionStacktrace'),
+    IOS_REPORT_RELEASE_RULE
+  )}, NULL)`;
 
 /** The frames a crash is grouped on, as an ES|QL expression. */
 export const crashFrames = (): ESQLAstExpression =>

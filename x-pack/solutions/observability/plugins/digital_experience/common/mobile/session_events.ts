@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql, type ComposerQuery } from '@elastic/esql';
+import { Builder, esql, type ComposerQuery } from '@elastic/esql';
 import {
   EVENT_EXCEPTION,
   EVENT_SCREEN_CLICK,
@@ -62,19 +62,22 @@ const eventKind = () =>
  * case, as EDOT iOS writes `session.id` in uppercase. The timeline and its Discover link both read
  * the session this way, so they show the same events.
  */
-export const mobileSessionDocuments = ({
-  serviceName,
-  sessionId,
-}: Pick<SessionEventsParams, 'serviceName' | 'sessionId'>): ComposerQuery =>
-  mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} == ${{
+export const mobileSessionDocuments = (
+  { serviceName, sessionId }: Pick<SessionEventsParams, 'serviceName' | 'sessionId'>,
+  documents: ComposerQuery = mobileDocuments()
+): ComposerQuery =>
+  documents.pipe`WHERE ${mobileColumn('serviceName')} == ${{
     service_name: serviceName,
   }}`.pipe`WHERE ${mobileColumn('sessionId')} IN (${{ session_id: sessionId }}, ${{
     session_id_lower: sessionId.toLowerCase(),
   }}, ${{ session_id_upper: sessionId.toUpperCase() }})`;
 
+/** Events read from spans: an SDK can send a span again, as another document with its id. */
+const SPAN_KINDS: readonly MobileSessionEventKind[] = ['request', 'screen'];
+
 /**
  * The latest events of a mobile session before a time, newest first: requests, screens, taps,
- * handled errors and logs.
+ * handled errors and logs. A span sent twice is listed once, before the limit is applied.
  */
 export const sessionEventsBefore = ({
   serviceName,
@@ -84,10 +87,20 @@ export const sessionEventsBefore = ({
 }: SessionEventsParams): ComposerQuery => {
   const eventKindColumn = resultColumn('eventKind');
   const is = (value: MobileSessionEventKind) => esql.exp`${eventKindColumn} == ${value}`;
-  return mobileSessionDocuments({ serviceName, sessionId }).pipe`WHERE @timestamp < TO_DATETIME(${{
+  const keptId = resultColumn('keptId');
+  const isSpan = Builder.expression.func.binary('in', [
+    eventKindColumn,
+    Builder.expression.list.tuple({
+      values: SPAN_KINDS.map((kind) => Builder.expression.literal.string(kind)),
+    }),
+  ]);
+  return mobileSessionDocuments({ serviceName, sessionId }, mobileDocuments({ metadataFields: ['_id'] }))
+    .pipe`WHERE @timestamp < TO_DATETIME(${{
     before,
   }})`.pipe`EVAL ${eventKindColumn} = ${eventKind()}`.pipe`WHERE ${eventKindColumn} IS NOT NULL`
-    .pipe`SORT @timestamp DESC`.pipe`LIMIT ${limit}`.pipe`EVAL
+    .pipe`INLINE STATS ${keptId} = MIN(_id) BY ${mobileColumn('spanId')}, ${eventKindColumn}`
+    .pipe`WHERE NOT ${isSpan} OR _id == ${keptId}`.pipe`SORT @timestamp DESC`.pipe`LIMIT ${limit}`
+    .pipe`EVAL
       ${resultColumn('name')} = COALESCE(CASE(
         ${is(KIND.request)}, ${mobileColumn('httpMethod')},
         ${is(KIND.error)}, ${mobileColumn('exceptionType')},

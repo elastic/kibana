@@ -34,7 +34,7 @@ describe('getCrashGroup', () => {
       if (query.includes('LIMIT 1 |')) {
         return esqlResponse([LATEST]);
       }
-      if (query.includes('BY value = `service.version`')) {
+      if (query.includes('BY value = crash_release')) {
         // The top values and the crashes without a release, as the query cuts them; the total also
         // counts 8.1.0's 4 crashes, which the limit left out.
         return esqlResponse(

@@ -6,7 +6,11 @@
  */
 
 import { esql } from '@elastic/esql';
-import { crashFingerprint } from './crash_fingerprint';
+import {
+  IOS_REPORT_RELEASE_RULE,
+  crashFingerprint,
+  crashFrameRuleFlags,
+} from './crash_fingerprint';
 import {
   CRASH_FINGERPRINT_CASES,
   EXPECTED_CRASH_FINGERPRINTS,
@@ -90,6 +94,27 @@ describe('crash fingerprint rules', () => {
 
   it('keeps the stored fingerprint over the computed one', () => {
     expect(fingerprintOf('stored')).toBe('ingest-fingerprint');
+  });
+});
+
+describe('IOS_REPORT_RELEASE_RULE', () => {
+  const releaseOf = (stacktrace: string) =>
+    stacktrace.replace(
+      new RegExp(
+        IOS_REPORT_RELEASE_RULE.pattern,
+        `g${crashFrameRuleFlags(IOS_REPORT_RELEASE_RULE)}`
+      ),
+      IOS_REPORT_RELEASE_RULE.replacement
+    );
+
+  it("reads the release of an iOS report's Version line, not its OS Version line", () => {
+    expect(releaseOf(CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace)).toBe('8.5.0');
+  });
+
+  it('is empty for a report without a Version line', () => {
+    expect(releaseOf('Incident Identifier: X\nOS Version: iPhone OS 17.6\nThread 0 Crashed:')).toBe(
+      ''
+    );
   });
 });
 

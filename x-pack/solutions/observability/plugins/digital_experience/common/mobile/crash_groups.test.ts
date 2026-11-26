@@ -44,10 +44,17 @@ describe('crashEvents', () => {
     expect(params).toEqual([
       { service_name: 'ride-ios' },
       { os_name: 'iOS' },
-      { release: '8.5.0' },
       { crash_start: '2021-01-18T12:00:00.000Z' },
       { crash_end: '2021-01-18T13:00:00.000Z' },
+      { release: '8.5.0' },
     ]);
+  });
+
+  it("filters by the release that crashed: an iOS report's own, else the resource's", () => {
+    expect(query).toContain(
+      '| EVAL crash_release = CASE(`attributes.exception.stacktrace` LIKE "Incident Identifier:*", REPLACE(`attributes.exception.stacktrace`, "(?s)^(?:.*?\\\\nVersion: +(\\\\S+))?.*$", "$1"), NULL) | EVAL crash_release = CASE(crash_release IS NULL OR crash_release == "", `service.version`, crash_release) | WHERE crash_release == ?release'
+    );
+    expect(query).not.toContain('WHERE `service.version` ==');
   });
 
   it('lets the timestamp filter reach a day past the range, for crashes sent on the next launch', () => {
@@ -79,8 +86,8 @@ describe('withCrashGroupStats', () => {
   it('reads the first and last crash, and the latest type and message, by crash time', () => {
     expect(query).toContain('first_seen = MIN(crash_time), last_seen = MAX(crash_time)');
     expect(query).toContain('message = LAST(`attributes.exception.message`, crash_time)');
-    expect(query).toContain('first_release = FIRST(`service.version`, crash_time)');
-    expect(query).toContain('last_release = LAST(`service.version`, crash_time)');
+    expect(query).toContain('first_release = FIRST(crash_release, crash_time)');
+    expect(query).toContain('last_release = LAST(crash_release, crash_time)');
     expect(query).toContain('BY fingerprint');
     // EDOT iOS reports, whose fingerprint changes with every build, so they are never marked new.
     expect(query).toContain(
@@ -102,7 +109,7 @@ describe('withCrashGroupHistory', () => {
 
     expect(query).toContain('| WHERE fingerprint IN ("abc", "d\\"e")');
     expect(query).toContain(
-      '| STATS releases = VALUES(`service.version`), first_seen = MIN(crash_time), first_release = FIRST(`service.version`, crash_time) BY fingerprint | LIMIT 2'
+      '| STATS releases = VALUES(crash_release), first_seen = MIN(crash_time), first_release = FIRST(crash_release, crash_time) BY fingerprint | LIMIT 2'
     );
   });
 });
@@ -123,14 +130,14 @@ describe('crash group detail', () => {
 
   it('reads the latest crash with its stack trace and session', () => {
     expect(withLatestCrash(groupCrashes()).print('basic')).toContain(
-      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = `service.version`, session_id = `attributes.session.id`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, session_id'
+      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, session_id = `attributes.session.id`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, session_id'
     );
   });
 
   it('counts the crashes per release, OS version and device model, with the total for "Other"', () => {
     // The total is counted before the top values are cut, so "Other" holds every crash they leave out.
     expect(withCrashBreakdown(groupCrashes(), 'releases').print('basic')).toContain(
-      '| INLINE STATS total = COUNT(*) | STATS count = COUNT(*), total = MAX(total) BY value = `service.version` | SORT count DESC, value | LIMIT 6'
+      '| INLINE STATS total = COUNT(*) | STATS count = COUNT(*), total = MAX(total) BY value = crash_release | SORT count DESC, value | LIMIT 6'
     );
     expect(withCrashBreakdown(groupCrashes(), 'osVersions').print('basic')).toContain(
       'BY value = `resource.attributes.os.version`'

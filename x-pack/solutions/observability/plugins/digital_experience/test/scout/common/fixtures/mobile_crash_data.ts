@@ -65,6 +65,9 @@ const android = {
   osName: 'Android',
 } as const;
 
+/** The release the delayed iOS crash happened on, before the update that sent it. */
+export const IOS_CRASHED_RELEASE = '8.4.0';
+
 const ios = {
   serviceName: CRASH_APPS.ios,
   osName: 'iOS',
@@ -138,13 +141,18 @@ const CRASHES: Crash[] = [
     observedTimestamp: at('12:15:00'),
     stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace,
   },
+  // Crashed on the older release, and sent after the app was updated: its resource has the new
+  // release, its report the one that crashed.
   {
     ...ios,
     installationId: 'crash-ios-device-2',
     sessionId: 'CRASH-IOS-SESSION-2',
     timestamp: at('13:20:00'),
     observedTimestamp: at('12:55:00'),
-    stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace,
+    stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace.replace(
+      `Version:         ${ios.version} (850)`,
+      `Version:         ${IOS_CRASHED_RELEASE} (840)`
+    ),
   },
   {
     ...ios,
@@ -216,6 +224,26 @@ const SESSION_EVENTS = [
       attributes: { 'session.id': NPE_LATEST_SESSION, 'app.screen.name': 'Map' },
     },
   },
+  {
+    index: TRACES_INDEX,
+    resource: npeSession,
+    document: {
+      '@timestamp': at('12:39:55'),
+      name: 'POST',
+      kind: 'Client',
+      trace_id: 'c'.repeat(32),
+      span_id: 'c'.repeat(15) + '2',
+      duration: 420_000_000,
+      attributes: {
+        'session.id': NPE_LATEST_SESSION,
+        'app.screen.name': 'Map',
+        'http.request.method': 'POST',
+        'url.full': 'https://api.example.com/tracks?id=7',
+        'http.response.status_code': 503,
+      },
+    },
+  },
+  // The same request span sent again, as an SDK retrying an export does: listed once.
   {
     index: TRACES_INDEX,
     resource: npeSession,

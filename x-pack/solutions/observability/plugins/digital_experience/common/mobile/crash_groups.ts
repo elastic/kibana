@@ -9,7 +9,7 @@ import { Builder, esql, type ComposerQuery } from '@elastic/esql';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
 import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
-import { crashFingerprint, isIosReport } from './crash_fingerprint';
+import { crashFingerprint, isIosReport, reportRelease } from './crash_fingerprint';
 import { mobileDocuments } from './documents';
 import type { RESULT_COLUMNS } from './fields';
 import { inValues, mobileColumn, resultColumn } from './fields';
@@ -34,18 +34,32 @@ export interface CrashEventsParams extends MobilePanelFilters {
 
 /**
  * The crashes of an application that happened in `[start, end)`, each with its `crash_time`, the
- * earlier of its two times.
+ * earlier of its two times, and its `crash_release`, the release that crashed. The release filter
+ * is on the latter: EDOT iOS sends a crash with the resource of the next launch, which may run an
+ * updated release.
  */
-export const crashEvents = ({ start, end, ...filters }: CrashEventsParams): ComposerQuery => {
+export const crashEvents = ({
+  start,
+  end,
+  release,
+  ...filters
+}: CrashEventsParams): ComposerQuery => {
   const crashTime = resultColumn('crashTime');
-  return mobilePanelQuery(filters, mobileDocuments({ indices: [OTEL_LOGS_INDEX] })).pipe`WHERE ${inValues(
+  const crashRelease = resultColumn('crashRelease');
+  const query = mobilePanelQuery(filters, mobileDocuments({ indices: [OTEL_LOGS_INDEX] })).pipe`WHERE ${inValues(
     'eventName',
     CRASH_EVENTS
   )}`.pipe`EVAL ${crashTime} = LEAST(@timestamp, COALESCE(TO_DATETIME(${mobileColumn(
     'observedTimestamp'
   )}), @timestamp))`.pipe`WHERE ${crashTime} >= TO_DATETIME(${{
     crash_start: new Date(start).toISOString(),
-  }}) AND ${crashTime} < TO_DATETIME(${{ crash_end: new Date(end).toISOString() }})`;
+  }}) AND ${crashTime} < TO_DATETIME(${{ crash_end: new Date(end).toISOString() }})`
+    .pipe`EVAL ${crashRelease} = ${reportRelease()}`.pipe`EVAL ${crashRelease} = CASE(
+      ${crashRelease} IS NULL OR ${crashRelease} == "",
+      ${mobileColumn('serviceVersion')},
+      ${crashRelease}
+    )`;
+  return release ? query.pipe`WHERE ${crashRelease} == ${{ release }}` : query;
 };
 
 /** Adds each crash's group as `fingerprint`. */
@@ -68,8 +82,8 @@ export const withCrashGroupStats = (query: ComposerQuery): ComposerQuery => {
       ${resultColumn('lastSeen')} = MAX(${crashTime}),
       ${resultColumn('exceptionType')} = LAST(${mobileColumn('exceptionType')}, ${crashTime}),
       ${resultColumn('message')} = LAST(${mobileColumn('exceptionMessage')}, ${crashTime}),
-      ${resultColumn('firstRelease')} = FIRST(${mobileColumn('serviceVersion')}, ${crashTime}),
-      ${resultColumn('lastRelease')} = LAST(${mobileColumn('serviceVersion')}, ${crashTime}),
+      ${resultColumn('firstRelease')} = FIRST(${resultColumn('crashRelease')}, ${crashTime}),
+      ${resultColumn('lastRelease')} = LAST(${resultColumn('crashRelease')}, ${crashTime}),
       ${resultColumn('iosReports')} = COUNT(*) WHERE ${isIosReport()}
     BY ${resultColumn('fingerprint')}`.pipe`SORT ${users} DESC, ${events} DESC`
     .pipe`LIMIT ${ERROR_GROUPS_ROWS}`;
@@ -89,9 +103,9 @@ export const withCrashGroupHistory = (
   ]);
   const crashTime = resultColumn('crashTime');
   return query.pipe`WHERE ${isListed}`.pipe`STATS
-      ${resultColumn('releases')} = VALUES(${mobileColumn('serviceVersion')}),
+      ${resultColumn('releases')} = VALUES(${resultColumn('crashRelease')}),
       ${resultColumn('firstSeen')} = MIN(${crashTime}),
-      ${resultColumn('firstRelease')} = FIRST(${mobileColumn('serviceVersion')}, ${crashTime})
+      ${resultColumn('firstRelease')} = FIRST(${resultColumn('crashRelease')}, ${crashTime})
     BY ${fingerprint}`.pipe`LIMIT ${fingerprints.length}`;
 };
 
@@ -129,7 +143,7 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
       ${resultColumn('exceptionType')} = ${mobileColumn('exceptionType')},
       ${resultColumn('message')} = ${mobileColumn('exceptionMessage')},
       ${resultColumn('stacktrace')} = ${mobileColumn('exceptionStacktrace')},
-      ${resultColumn('release')} = ${mobileColumn('serviceVersion')},
+      ${resultColumn('release')} = ${resultColumn('crashRelease')},
       ${resultColumn('sessionId')} = ${mobileColumn('sessionId')},
       ${resultColumn('reportedAt')} = @timestamp`.pipe`KEEP ${[
     resultColumn('crashTime'),
@@ -143,7 +157,7 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
 
 /** What a crash group is broken down by in its detail. */
 export const CRASH_BREAKDOWNS = {
-  releases: () => mobileColumn('serviceVersion'),
+  releases: () => resultColumn('crashRelease'),
   osVersions: () => mobileColumn('osVersion'),
   deviceModels: () =>
     esql.exp`COALESCE(${mobileColumn('deviceModelName')}, ${mobileColumn(

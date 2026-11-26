@@ -31,7 +31,15 @@ describe('sessionEventsBefore', () => {
 
   it('keeps the latest listed events before the time', () => {
     expect(query).toContain('| WHERE @timestamp < TO_DATETIME(?before)');
-    expect(query).toContain('| WHERE event_kind IS NOT NULL | SORT @timestamp DESC | LIMIT 20');
+    expect(query).toContain('| WHERE event_kind IS NOT NULL |');
+    expect(query).toContain('| SORT @timestamp DESC | LIMIT 20');
+  });
+
+  it('lists a span an SDK sent twice once, before the limit', () => {
+    expect(query).toContain('FROM traces-*.otel-*, logs-*.otel-* METADATA _id |');
+    expect(query).toContain(
+      '| INLINE STATS kept_id = MIN(_id) BY span_id, event_kind | WHERE NOT (event_kind IN ("request", "screen")) OR _id == kept_id | SORT @timestamp DESC | LIMIT 20'
+    );
   });
 
   it("computes each kind's timeline fields", () => {

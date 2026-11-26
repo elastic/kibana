@@ -20,6 +20,7 @@ import type {
 import {
   BREAKDOWN_DEVICE_MODELS,
   CRASH_APPS,
+  IOS_CRASHED_RELEASE,
   NPE_LATEST_SESSION,
 } from '../../common/fixtures/mobile_crash_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
@@ -57,12 +58,13 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
   const getDetail = async (
     apiClient: ApiClientFixture,
     serviceName: string,
-    fingerprint: string
+    fingerprint: string,
+    query: Record<string, string> = {}
   ) => {
-    const response = await apiClient.get(mobileCrashGroupsPath(serviceName, { fingerprint }), {
-      headers,
-      responseType: 'json',
-    });
+    const response = await apiClient.get(
+      mobileCrashGroupsPath(serviceName, { ...query, fingerprint }),
+      { headers, responseType: 'json' }
+    );
     expect(response).toHaveStatusCode(200);
     return response.body as MobileCrashGroupDetailResponse;
   };
@@ -147,10 +149,34 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
         events: 3,
         sessions: 2,
         firstSeen: { time: '2021-01-18T11:30:00.000Z' },
-        lastSeen: { time: '2021-01-18T12:55:00.000Z' },
-        // Only on the newest release, but an iOS report's fingerprint changes with every build.
+        // Sent by the updated app, but its report says which release crashed.
+        lastSeen: { time: '2021-01-18T12:55:00.000Z', release: IOS_CRASHED_RELEASE },
+        // An iOS report's fingerprint changes with every build.
         newInRelease: null,
       });
+    }
+  );
+
+  apiTest(
+    'filters iOS crashes by the release that crashed, not the one that sent them',
+    async ({ apiClient }) => {
+      const crashed = await getGroups(apiClient, CRASH_APPS.ios, { release: IOS_CRASHED_RELEASE });
+      expect(crashed.crashGroups.map(({ events }) => events)).toStrictEqual([1]);
+      const [group] = crashed.crashGroups;
+      const detail = await getDetail(apiClient, CRASH_APPS.ios, group.fingerprint, {
+        release: IOS_CRASHED_RELEASE,
+      });
+      expect(detail.latestCrash).toMatchObject({
+        release: IOS_CRASHED_RELEASE,
+        sessionId: 'CRASH-IOS-SESSION-2',
+      });
+      expect(detail.releases).toStrictEqual({
+        top: [{ key: IOS_CRASHED_RELEASE, count: 1 }],
+        other: 0,
+      });
+
+      const sending = await getGroups(apiClient, CRASH_APPS.ios, { release: '8.5.0' });
+      expect(sending.crashGroups.map(({ events }) => events)).toStrictEqual([2]);
     }
   );
 
@@ -202,6 +228,7 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       });
       expect(detail.latestCrash?.stacktrace).toContain('MainActivity.onResume(MainActivity.kt:88)');
       expect(detail.releases).toStrictEqual({ top: [{ key: '4.2.0', count: 3 }], other: 0 });
+      // Its session's request was sent twice; the timeline below lists it once.
       expect(detail.osVersions).toStrictEqual({
         top: [
           { key: '15', count: 2 },
@@ -252,6 +279,22 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
     expect(detail.latestCrash).toBeNull();
     expect(detail.beforeCrash).toStrictEqual([]);
   });
+
+  apiTest(
+    'has no latest crash for a group the release filter leaves out',
+    async ({ apiClient }) => {
+      const [npe] = (await getGroups(apiClient, CRASH_APPS.android)).crashGroups;
+
+      // The NPE only crashed on 4.2.0.
+      const detail = await getDetail(apiClient, CRASH_APPS.android, npe.fingerprint, {
+        release: '4.1.0',
+      });
+
+      expect(detail.latestCrash).toBeNull();
+      expect(detail.releases).toStrictEqual({ top: [], other: 0 });
+      expect(detail.beforeCrash).toStrictEqual([]);
+    }
+  );
 
   apiTest('rejects a fingerprint longer than any', async ({ apiClient }) => {
     const response = await apiClient.get(
