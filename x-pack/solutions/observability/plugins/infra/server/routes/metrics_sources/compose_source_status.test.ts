@@ -252,8 +252,7 @@ describe('composeSourceStatus', () => {
     // Escaping a real tab to `\t` would collide with a source id that already contains the two
     // literal characters `\` `t`, letting an operator attribute a failed probe to the wrong
     // source. The backslash is escaped too, so the two forms render differently.
-    const timeout = () =>
-      jest.fn().mockRejectedValue(new errors.TimeoutError('Request timed out'));
+    const timeout = () => jest.fn().mockRejectedValue(new errors.TimeoutError('Request timed out'));
 
     const logFor = async (sourceId: string) => {
       jest.clearAllMocks();
