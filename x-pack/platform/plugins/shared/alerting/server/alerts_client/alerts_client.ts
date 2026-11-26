@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
+  ALERT_INSTANCE_ID,
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_MAINTENANCE_WINDOW_IDS,
@@ -15,7 +16,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
-import { flatMap, get, isEmpty, keys, values } from 'lodash';
+import { flatMap, get, isEmpty, keys, uniq, values } from 'lodash';
 import type {
   MsearchRequestItem,
   MsearchResponseItem,
@@ -71,8 +72,10 @@ import {
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
-import { createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
-import { reconcileTrackedAlertsWithState } from './lib/reconcile_tracked_alerts';
+import { buildUntrackedAlert } from './lib/build_untracked_alert';
+import { createEmptyTrackedAlerts, getAlertUuidsFromState } from './lib/get_tracked_alerts';
+import { formatInstanceIds, reconcileTrackedAlertsWithState } from './lib/reconcile_tracked_alerts';
+import { untrackOrphanedAlerts } from './lib/untrack_orphaned_alerts';
 import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
@@ -86,6 +89,9 @@ export interface AlertsClientParams extends CreateAlertsClientParams {
   kibanaVersion: string;
   dataStreamAdapter: DataStreamAdapter;
   isServerless: boolean;
+  // Rules whose orphaned alert documents were already untracked. Shared across runs by the
+  // alerts service, so a rule is only searched once per Kibana process.
+  rulesWithoutOrphanedAlerts?: Set<string>;
 }
 
 interface AlertsAffectedByMaintenanceWindows {
@@ -126,6 +132,7 @@ export class AlertsClient<
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
+  private readonly rulesWithoutOrphanedAlerts: Set<string>;
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -154,6 +161,7 @@ export class AlertsClient<
     this.ruleInfoMessage = `for ${this.ruleType.id}:${this.options.rule.id} '${this.options.rule.name}'`;
     this.logTags = { tags: [this.ruleType.id, this.options.rule.id, 'alerts-client'] };
     this.isServerless = options.isServerless;
+    this.rulesWithoutOrphanedAlerts = options.rulesWithoutOrphanedAlerts ?? new Set();
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
@@ -174,6 +182,9 @@ export class AlertsClient<
     const { trackedAlerts, activeAlertsFromState, recoveredAlertsFromState } =
       await this.reconcileTrackedAlerts(opts);
     this.trackedAlerts = trackedAlerts;
+    if (opts.shouldUntrackOrphanedAlerts) {
+      await this.untrackOrphanedAlerts(opts);
+    }
     await this.legacyAlertsClient.initializeExecution({
       ...opts,
       activeAlertsFromState,
@@ -205,6 +216,42 @@ export class AlertsClient<
     }
   }
 
+  // Temporary cleanup of active alert documents that no run loads anymore: the ones written
+  // before `kibana.alert.tracked` existed and the ones an earlier version left active with
+  // tracked set to false. They are written here and kept out of the tracked alerts, so the rule
+  // executor never sees them and a failure cannot fail the run.
+  // Removal is tracked in https://github.com/elastic/response-ops-team/issues/896
+  private async untrackOrphanedAlerts({
+    activeAlertsFromState,
+    recoveredAlertsFromState,
+  }: InitializeExecutionOpts) {
+    const ruleKey = `${this.options.rule.spaceId}:${this.options.rule.id}`;
+    if (!this.ruleType.alerts?.shouldWrite || this.rulesWithoutOrphanedAlerts.has(ruleKey)) {
+      return;
+    }
+
+    const { isComplete } = await untrackOrphanedAlerts<AlertData>({
+      ruleId: this.options.rule.id,
+      knownAlertUuids: uniq([
+        ...Object.keys(this.trackedAlerts.all),
+        ...getAlertUuidsFromState(activeAlertsFromState, recoveredAlertsFromState),
+      ]),
+      timestamp: this.startedAtString ?? new Date().toISOString(),
+      search: (queryBody) => this.search(queryBody),
+      bulk: async (operations) => {
+        const esClient = await this.options.elasticsearchClientPromise;
+        return esClient.bulk({ operations });
+      },
+      logger: this.options.logger,
+      ruleInfoMessage: this.ruleInfoMessage,
+      logTags: this.logTags,
+    });
+
+    if (isComplete) {
+      this.rulesWithoutOrphanedAlerts.add(ruleKey);
+    }
+  }
+
   public async search<Aggregation = unknown>(
     queryBody: SearchRequest['body']
   ): Promise<SearchResult<AlertData, Aggregation>> {
@@ -215,13 +262,14 @@ export class AlertsClient<
     const {
       hits: { hits, total },
       aggregations,
+      _shards,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
       body: queryBody,
       ignore_unavailable: true,
     });
 
-    return { hits, total, aggregations };
+    return { hits, total, aggregations, _shards };
   }
 
   public async msearch<Aggregation = unknown>(
@@ -558,14 +606,39 @@ export class AlertsClient<
       }
     }
     // Tracked AAD docs that are not in this run's working set will never be
-    // rebuilt. Flip tracked to false so they stop matching the tracked query.
-    // Status and lifecycle fields are left unchanged; status-aware orphan
-    // reconciliation is a follow-up.
+    // rebuilt, so they must stop matching the tracked query. An active one is
+    // untracked, otherwise it would stay active forever with nothing left to
+    // recover it. Any other status only has tracked flipped to false.
+    // Backfill runs reach this loop too, with an empty task state. It finds
+    // nothing there only because backfills are limited to rule types without
+    // autoRecoverAlerts (see getRuleOrError in the backfill client), and
+    // tracked alerts are not loaded for those. Revisit this loop before
+    // allowing backfills for lifecycle rule types, or it would untrack alerts
+    // the rule still tracks.
+    const untrackedInstanceIds: string[] = [];
     for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
       if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
         continue;
       }
-      recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+      if (get(alert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
+        recoveredAlertsToIndex.push(
+          buildUntrackedAlert<AlertData>({ alert, timestamp: currentTime })
+        );
+        untrackedInstanceIds.push(get(alert, ALERT_INSTANCE_ID) ?? uuid);
+      } else {
+        recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+      }
+    }
+
+    if (untrackedInstanceIds.length > 0) {
+      this.options.logger.warn(
+        `Untracking ${
+          untrackedInstanceIds.length
+        } active alert document(s) that this run does not track ${
+          this.ruleInfoMessage
+        }: ${formatInstanceIds(untrackedInstanceIds)}`,
+        this.logTags
+      );
     }
 
     const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
