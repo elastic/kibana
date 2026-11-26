@@ -21,17 +21,6 @@ describe('getEsqlDefaultColumns', () => {
     ).toEqual(responseColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS));
   });
 
-  it('uses result columns for a wide FORK with schema and aggregate rows', () => {
-    const responseColumns = ['name', 'type', 'role', 'origin', 'description', '_fork', 'count'];
-
-    expect(
-      getEsqlDefaultColumns({
-        esql: 'FROM logs | FORK (DESCRIBE) (STATS count = COUNT(*))',
-        responseColumns,
-      })
-    ).toEqual(responseColumns);
-  });
-
   it('uses non-transformational response columns when there are at most five', () => {
     expect(
       getEsqlDefaultColumns({

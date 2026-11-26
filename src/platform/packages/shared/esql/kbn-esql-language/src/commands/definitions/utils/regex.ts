@@ -86,38 +86,6 @@ export function matchesWildcardPattern(pattern: string, value: string): boolean 
   return regex.test(value);
 }
 
-/** Returns a matcher for a field selector containing an unquoted wildcard. */
-export const getFieldPatternMatcher = (text: string): ((name: string) => boolean) | undefined => {
-  if (!text.includes('*')) return;
-  const parts = text.match(/`(?:``|[^`])*`|\*|[^`*]+/g) ?? [];
-  const segments = [''];
-  for (const part of parts) {
-    if (part === '*') {
-      segments.push('');
-    } else {
-      const literal = part.startsWith('`') ? part.slice(1, -1).replace(/``/g, '`') : part;
-      segments[segments.length - 1] += literal;
-    }
-  }
-
-  if (segments.length === 1) return;
-
-  // Match literal segments in order without backtracking, reserving the anchored suffix.
-  return (name) => {
-    const prefix = segments[0];
-    const suffix = segments[segments.length - 1];
-    if (!name.startsWith(prefix) || !name.endsWith(suffix)) return false;
-    const end = name.length - suffix.length;
-    let position = prefix.length;
-    for (const segment of segments.slice(1, -1)) {
-      const index = name.indexOf(segment, position);
-      if (index === -1 || index + segment.length > end) return false;
-      position = index + segment.length;
-    }
-    return position <= end;
-  };
-};
-
 /** Extracts the trailing identifier from text (e.g., "start" from "end=value start"). */
 export function getTrailingIdentifier(text: string): string | undefined {
   const match = text.match(TRAILING_IDENTIFIER_REGEX);

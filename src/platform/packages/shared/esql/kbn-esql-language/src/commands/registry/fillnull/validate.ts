@@ -10,12 +10,42 @@ import { isColumn, isParamLiteral, isParametrized, Walker } from '@elastic/esql'
 import type { ESQLAst, ESQLAstAllCommands, ESQLAstFillNullCommand } from '@elastic/esql/types';
 import type { ESQLMessage } from '../../definitions/types';
 import { validateColumnForCommand } from '../../definitions/utils/validation/column';
-import { getFieldPatternMatcher } from '../../definitions/utils/regex';
 import { getColumnName } from '../../definitions/utils/columns';
 import { METADATA_FIELDS, CPS_METADATA_FIELDS } from '../options/metadata/fields';
 import { errors } from '../../definitions/utils/errors';
 import { isUnmappedFieldsStrategy, UnmappedFieldsStrategy } from '../types';
 import type { ICommandCallbacks, ICommandContext } from '../types';
+
+// Stars inside quoted identifiers are literal field-name characters.
+const hasWildcard = (text: string): boolean => text.replace(/`(?:``|[^`])*`/g, '').includes('*');
+const getPatternMatcher = (text: string): ((name: string) => boolean) => {
+  const parts = text.match(/`(?:``|[^`])*`|\*|[^`*]+/g) ?? [];
+  const segments = [''];
+  for (const part of parts) {
+    if (part === '*') {
+      segments.push('');
+    } else {
+      const literal = part.startsWith('`') ? part.slice(1, -1).replace(/``/g, '`') : part;
+      segments[segments.length - 1] += literal;
+    }
+  }
+
+  // Match literal segments in order without backtracking, reserving the anchored suffix.
+  return (name) => {
+    const prefix = segments[0];
+    const suffix = segments[segments.length - 1];
+    if (segments.length === 1) return name === prefix;
+    if (!name.startsWith(prefix) || !name.endsWith(suffix)) return false;
+    const end = name.length - suffix.length;
+    let position = prefix.length;
+    for (const segment of segments.slice(1, -1)) {
+      const index = name.indexOf(segment, position);
+      if (index === -1 || index + segment.length > end) return false;
+      position = index + segment.length;
+    }
+    return position <= end;
+  };
+};
 
 export const validate = (
   command: ESQLAstAllCommands,
@@ -41,7 +71,7 @@ export const validate = (
       return [errors.unknownColumn(field)];
     }
 
-    const matcher = getFieldPatternMatcher(field.text);
+    const matcher = hasWildcard(field.text) ? getPatternMatcher(field.text) : undefined;
     if (matcher) {
       if ([...context.columns.keys()].some(matcher)) {
         return [];
@@ -55,7 +85,7 @@ export const validate = (
         ? new Set(
             [...fields, ...Walker.findAll(ast, (node) => node.location.min > command.location.max)]
               .filter(isColumn)
-              .filter((column) => !isParametrized(column) && !getFieldPatternMatcher(column.text))
+              .filter((column) => !isParametrized(column) && !hasWildcard(column.text))
               .map(getColumnName)
               .filter((name) => !metadataFields.has(name))
           )

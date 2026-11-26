@@ -26,8 +26,6 @@ export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasAggregatingCommand,
-  hasESQLSchemaDerivedRows,
-  hasESQLSchemaTableResult,
   hasTransformationalCommand,
   parseTimeFieldFromESQLQuery,
   prettifyQuery,

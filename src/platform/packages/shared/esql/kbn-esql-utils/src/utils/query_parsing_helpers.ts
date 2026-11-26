@@ -19,13 +19,8 @@ import {
 import {
   CommandNames,
   esqlCommandRegistry,
-  analyzeResultRows,
-  hasSchemaDerivedRows,
-  isSchemaTableResult,
-  getNamedSubqueries,
   getPromqlBracketsToClose,
   TRANSFORMATIONAL_COMMANDS,
-  type EsqlResultRows,
 } from '@kbn/esql-language';
 import type { PromQLLabel } from '@elastic/esql';
 import type {
@@ -44,7 +39,6 @@ import type { VariableNamePrefix } from '@kbn/esql-types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/code-editor';
-import { parseEsqlCached } from './parse_esql_cached';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -90,31 +84,13 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
   return clustersSet.size > 0 ? [...clustersSet] : undefined;
 }
 
-const resultRowsCache = new WeakMap<ESQLAstQueryExpression, EsqlResultRows>();
-
-function getResultRowsFromAst(root: ESQLAstQueryExpression): EsqlResultRows {
-  const cached = resultRowsCache.get(root);
-  if (cached) {
-    return cached;
-  }
-
-  const result = analyzeResultRows(root.commands, getNamedSubqueries(root.header));
-  resultRowsCache.set(root, result);
-  return result;
-}
-
-/** Analyzes the pipelines that supply the query results. */
-export function getESQLResultRows(esql: string): EsqlResultRows {
-  return getResultRowsFromAst(parseEsqlCached(esql).root);
-}
-
 /**
  * Returns true when the query contains a STATS or PROMQL command, including nested
  * FORK branches. KEEP and INLINE STATS are not aggregating.
  */
 export function hasAggregatingCommand(esql?: string): boolean {
   if (!esql) return false;
-  const { root } = parseEsqlCached(esql);
+  const { root } = Parser.parse(esql);
   return (
     Walker.findAll(
       root,
@@ -123,42 +99,69 @@ export function hasAggregatingCommand(esql?: string): boolean {
   );
 }
 
-/** Checks whether the query can emit schema-derived rows. */
-export function hasESQLSchemaDerivedRows(esql: string): boolean {
-  return hasSchemaDerivedRows(getESQLResultRows(esql));
-}
-
-/** Checks whether schema-derived rows contribute to a table-only result. */
-export function hasESQLSchemaTableResult(esql: string): boolean {
-  return isSchemaTableResult(getESQLResultRows(esql));
-}
-
-/** Detects schema table results and preserves the legacy transformational classification. */
-export function hasTransformationalCommand(esql?: string): boolean {
+/**
+ * Determines if an ES|QL query contains transformational commands.
+ *
+ * For ES|QL, we consider the following as transformational commands:
+ * - `stats`: Performs aggregations and transformations
+ * - `keep`: Filters and selects specific fields
+ * - `fork` commands where ALL branches contain only transformational commands
+ *
+ * @param esql - The ES|QL query string to analyze
+ * @returns true if the query contains transformational commands or fork commands with all transformational branches
+ *
+ * @example
+ * hasTransformationalCommand('from index | stats count() by field') // true
+ * hasTransformationalCommand('from index | keep field1, field2') // true
+ * hasTransformationalCommand('from index | fork (stats count()) (keep field)') // true
+ * hasTransformationalCommand('from index | fork (where x > 0) (eval y = x * 2)') // false
+ * hasTransformationalCommand('from index | where field > 0') // false
+ */
+export function hasTransformationalCommand(esql?: string) {
   if (!esql) return false;
-  const { root } = parseEsqlCached(esql);
-  if (root.commands.some(({ name }) => TRANSFORMATIONAL_COMMANDS.includes(name))) {
-    return true;
-  }
+  const { root } = Parser.parse(esql);
 
-  if (isSchemaTableResult(getResultRowsFromAst(root))) {
-    return true;
-  }
-
-  const forks = Walker.findAll(
-    root,
-    (node) => node.type === 'command' && node.name === 'fork'
-  ) as ESQLAstForkCommand[];
-  return forks.some(
-    ({ args }) =>
-      args.length > 0 &&
-      args.every(
-        ({ child }) =>
-          child.type === 'query' &&
-          child.commands.length > 0 &&
-          child.commands.every(({ name }) => TRANSFORMATIONAL_COMMANDS.includes(name))
-      )
+  // Check for direct transformational commands first
+  const hasAtLeastOneTransformationalCommand = TRANSFORMATIONAL_COMMANDS.some((command) =>
+    root.commands.find(({ name }) => name === command)
   );
+
+  // Early return if we found direct transformational commands
+  if (hasAtLeastOneTransformationalCommand) {
+    return true;
+  }
+
+  // Check for fork commands with all transformational branches
+  const forkCommands = Walker.findAll(
+    root,
+    (node) => node.name === 'fork'
+  ) as Array<ESQLAstForkCommand>;
+
+  const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
+    const forkArguments = forkCommand?.args;
+
+    if (!forkArguments || forkArguments.length === 0) {
+      return false;
+    }
+
+    return forkArguments.every((parens) => {
+      const branch = parens.child;
+
+      if (branch.type !== 'query') {
+        return false;
+      }
+
+      const branchCommands = branch.commands;
+
+      // Branch must have at least one command and all commands must be transformational
+      return (
+        branchCommands.length > 0 &&
+        branchCommands.every((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name))
+      );
+    });
+  });
+
+  return hasForkWithAllTransformationalBranches;
 }
 
 export function getLimitFromESQLQuery(esql: string): number {

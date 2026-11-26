@@ -9,40 +9,31 @@
 import type { ESQLCommand } from '@elastic/esql/types';
 import { walk } from '@elastic/esql';
 import type { ESQLColumnData } from '../types';
-import { getFieldPatternMatcher } from '../../definitions/utils/regex';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
   query: string
 ) => {
-  const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
-  const groups: ESQLColumnData[][] = [];
-  const winners = new Map<string, { precedence: number; group: ESQLColumnData[] }>();
+  const columnsToKeep: string[] = [];
 
   walk(command, {
     visitColumn: (node) => {
-      const group: ESQLColumnData[] = [];
-      groups.push(group);
-      const matcher = getFieldPatternMatcher(node.text);
-      if (!matcher) {
-        winners.set(node.parts.join('.'), { precedence: 2, group });
-        return;
-      }
-
-      // Exact names outrank partial patterns, which outrank '*'. Ties go to the rightmost selector.
-      const selector = { precedence: node.text === '*' ? 0 : 1, group };
-      for (const name of columnsByName.keys()) {
-        const prior = winners.get(name);
-        if ((!prior || selector.precedence >= prior.precedence) && matcher(name)) {
-          winners.set(name, selector);
-        }
-      }
+      columnsToKeep.push(node.parts.join('.'));
     },
   });
 
-  for (const column of columnsByName.values()) {
-    winners.get(column.name)?.group.push(column);
-  }
-  return groups.flat();
+  const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
+  const uniqueColumnsToKeep = columnsToKeep.filter(
+    (name, index) => columnsToKeep.lastIndexOf(name) === index
+  );
+
+  // KEEP follows the written order and keeps the last occurrence of repeated columns.
+  // For example, `KEEP a, b, a` returns `[b, a]`.
+  // Multi-column IN uses this order to compare the fields on each side.
+  return uniqueColumnsToKeep.flatMap((name) => {
+    const column = columnsByName.get(name);
+
+    return column ? [column] : [];
+  });
 };

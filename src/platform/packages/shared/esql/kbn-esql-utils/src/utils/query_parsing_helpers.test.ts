@@ -16,7 +16,6 @@ import {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
-  getESQLResultRows,
   hasAggregatingCommand,
   parseTimeFieldFromESQLQuery,
   prettifyQuery,
@@ -79,33 +78,6 @@ describe('esql query helpers', () => {
           'from a | drop @timestamp | drop a | drop b | keep c | drop d'
         )
       ).toBe('from a | keep c ');
-    });
-  });
-
-  describe('DESCRIBE result pipelines', () => {
-    it.each`
-      query                                                                                | rows                                 | transformational
-      ${'FROM logs | DESCRIBE'}                                                            | ${['schema']}                        | ${true}
-      ${'FROM logs | DESCRIBE | STATS c = COUNT(*)'}                                       | ${['schema-aggregate']}              | ${true}
-      ${'FROM (FROM logs | DESCRIBE | STATS c = COUNT(*))'}                                | ${['schema-aggregate']}              | ${true}
-      ${'FROM (FROM logs | DESCRIBE)'}                                                     | ${['schema']}                        | ${true}
-      ${'FROM logs, (FROM other | DESCRIBE)'}                                              | ${['document', 'schema']}            | ${false}
-      ${'FROM logs | FORK (DESCRIBE) (DESCRIBE)'}                                          | ${['schema']}                        | ${true}
-      ${'FROM logs | DESCRIBE | FORK (LIMIT 1) (KEEP name)'}                               | ${['schema']}                        | ${true}
-      ${'FROM logs | FORK (DESCRIBE) (STATS c = COUNT(*))'}                                | ${['schema', 'aggregate']}           | ${true}
-      ${'FROM logs | FORK (DESCRIBE) (KEEP host)'}                                         | ${['schema', 'document']}            | ${false}
-      ${'FROM logs | FORK (DESCRIBE) (KEEP host) | STATS c = COUNT(*)'}                    | ${['schema-aggregate', 'aggregate']} | ${true}
-      ${'ROW input = 1 | FORK (DESCRIBE) (LIMIT 1)'}                                       | ${['schema', 'unknown']}             | ${false}
-      ${'LET schema = (FROM logs | DESCRIBE); FROM schema'}                                | ${['schema']}                        | ${true}
-      ${'LET schema = (FROM logs | DESCRIBE); LET copy = (FROM schema); FROM copy'}        | ${['schema']}                        | ${true}
-      ${'LET schema = (FROM logs | DESCRIBE); FROM logs'}                                  | ${['document']}                      | ${false}
-      ${'LET schema = (FROM logs | DESCRIBE); FROM logs | WHERE host IN (FROM schema)'}    | ${['document']}                      | ${false}
-      ${'FROM logs | WHERE host IN (FROM other | FORK (DESCRIBE) (DESCRIBE) | KEEP name)'} | ${['document']}                      | ${false}
-      ${'FROM (FROM logs | STATS c = COUNT(*))'}                                           | ${['aggregate']}                     | ${false}
-      ${'LET x = (FROM logs | STATS c = COUNT(*)); FROM x'}                                | ${['aggregate']}                     | ${false}
-    `('analyzes $query', ({ query, rows, transformational }) => {
-      expect(getESQLResultRows(query)).toEqual(new Set(rows));
-      expect(hasTransformationalCommand(query)).toBe(transformational);
     });
   });
 

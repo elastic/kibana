@@ -59,44 +59,4 @@ describe('DESCRIBE editor support', () => {
       expect.objectContaining({ code: 'unknownColumn', text: 'Unknown column "input"' }),
     ]);
   });
-
-  it.each([
-    'SET unmapped_fields="LOAD"; LET schema = (FROM logs | DESCRIBE); FROM schema',
-    'SET unmapped_fields="LOAD"; FROM (FROM logs | DESCRIBE)',
-    'SET unmapped_fields="LOAD"; FROM (FROM logs | FORK (DESCRIBE) (STATS n = COUNT(*)))',
-  ])('rejects unknown schema columns after %s', async (query) => {
-    const callbacks = { getColumnsFor: () => Promise.resolve([]) };
-
-    expect((await validateQuery(`${query} | KEEP name`, callbacks)).errors).toEqual([]);
-    expect((await validateQuery(`${query} | KEEP message`, callbacks)).errors).toEqual([
-      expect.objectContaining({ code: 'unknownColumn', text: 'Unknown column "message"' }),
-    ]);
-
-    const filterQuery = `${query} | WHERE message IS NULL`;
-    const { root } = Parser.parse(filterQuery);
-    const columns = await new QueryColumns(root, filterQuery, callbacks).byType();
-    expect(columns.map(({ name }) => name)).not.toContain('message');
-  });
-
-  it('retains aggregate columns selected by a KEEP wildcard in a FORK branch', async () => {
-    const query =
-      'SET unmapped_fields="LOAD"; FROM (FROM logs | FORK (DESCRIBE) (STATS total = COUNT(*) | KEEP tot*))';
-    const callbacks = { getColumnsFor: () => Promise.resolve([]) };
-
-    expect((await validateQuery(`${query} | KEEP total`, callbacks)).errors).toEqual([]);
-    expect((await validateQuery(`${query} | KEEP message`, callbacks)).errors).toEqual([
-      expect.objectContaining({ code: 'unknownColumn', text: 'Unknown column "message"' }),
-    ]);
-  });
-
-  it('still loads unmapped columns after a plain STATS subquery', async () => {
-    const query =
-      'SET unmapped_fields="LOAD"; FROM (FROM logs | STATS n = COUNT(*)) | WHERE message IS NULL';
-    const callbacks = { getColumnsFor: () => Promise.resolve([]) };
-    const { root } = Parser.parse(query);
-
-    expect((await validateQuery(query, callbacks)).errors).toEqual([]);
-    const columns = await new QueryColumns(root, query, callbacks).byType();
-    expect(columns.map(({ name }) => name)).toContain('message');
-  });
 });

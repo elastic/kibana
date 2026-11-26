@@ -209,17 +209,15 @@ async function validateAst(
    * the full command subsequence that precedes that command.
    */
   // Each subquery keeps the commands of its pipeline, which its command is validated against.
-  const subqueries = pipelines.flatMap(({ commands, header }) => {
-    const visibleBindings = getNamedSubqueries(header);
-    return getSubqueriesToValidate(commands, header).map((subquery) => ({
+  const subqueries = pipelines.flatMap(({ commands, header }) =>
+    getSubqueriesToValidate(commands, header).map((subquery) => ({
       subquery,
       pipelineCommands: commands,
       pipelineHeader: header,
-      visibleBindings,
-    }));
-  });
+    }))
+  );
 
-  for (const { subquery, pipelineCommands, pipelineHeader, visibleBindings } of subqueries) {
+  for (const { subquery, pipelineCommands, pipelineHeader } of subqueries) {
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
     const subqueryForColumns =
@@ -248,11 +246,9 @@ async function validateAst(
       datasets: datasets?.datasets ?? [],
     };
 
-    const unmappedFieldsStrategy =
-      unmappedFieldsStrategyFromHeader !== UnmappedFieldsStrategy.DEFAULT &&
-      areNewUnmappedFieldsAllowed(subqueryForColumns.commands, visibleBindings)
-        ? unmappedFieldsStrategyFromHeader
-        : UnmappedFieldsStrategy.DEFAULT;
+    const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
+      ? unmappedFieldsStrategyFromHeader
+      : UnmappedFieldsStrategy.DEFAULT;
 
     const commandMessages = validateCommand(
       currentCommand,

@@ -29,9 +29,3 @@ it('keeps the unmapped fields of a FORK branch as columns', async () => {
     []
   );
 });
-
-it('counts only surviving columns after wildcard DROP and KEEP in an IN subquery', async () => {
-  const { expectErrors } = await setup();
-
-  await expectErrors('ROW x = 1 | WHERE x IN (ROW a = 1, tmp1 = 2 | DROP tmp* | KEEP a, *)', []);
-});

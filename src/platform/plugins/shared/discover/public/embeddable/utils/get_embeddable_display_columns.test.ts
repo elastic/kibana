@@ -229,21 +229,6 @@ describe('getEmbeddableDisplayColumns', () => {
     ).toEqual({ columns: [], grid: undefined });
   });
 
-  it('uses schema columns for DESCRIBE', () => {
-    const columns = ['name', 'type', 'role', 'field', 'origin', 'metric_type'];
-
-    expect(
-      getEmbeddableDisplayColumns({
-        autoApplyDiscoverColumnDefaults: true,
-        persistedColumns: [],
-        dataView: dataViewMock,
-        isEsql: true,
-        esql: 'FROM logs | DESCRIBE',
-        esqlResultColumnNames: columns,
-      })
-    ).toEqual({ columns, grid: undefined });
-  });
-
   it('uses STATS result columns for mixed FORK aggregations', () => {
     expect(
       getEmbeddableDisplayColumns({

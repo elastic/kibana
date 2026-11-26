@@ -18,7 +18,6 @@ import {
   mapVariableToColumn,
   isComputedColumn,
   getQuerySummary,
-  hasESQLSchemaDerivedRows,
   buildRenameSourceFieldMap,
 } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -58,13 +57,10 @@ export const mapEsqlResponseToDatatable = (
     ? []
     : body.values;
 
-  // Source filters are ambiguous when a query combines schema and document rows.
-  const hasSchemaRows = hasESQLSchemaDerivedRows(query);
   const querySummary = getQuerySummary(query);
-  const renameSourceFieldMap =
-    !hasSchemaRows && querySummary.renamedColumnsPairs?.size
-      ? buildRenameSourceFieldMap(query)
-      : null;
+  const renameSourceFieldMap: Map<string, string> | null = querySummary.renamedColumnsPairs?.size
+    ? buildRenameSourceFieldMap(query)
+    : null;
 
   const allColumns =
     (body.all_columns ?? body.columns)?.map(({ name, type, original_types, _meta }) => {
@@ -75,8 +71,7 @@ export const mapEsqlResponseToDatatable = (
         : esFieldTypeToKibanaFieldType(type);
 
       const isSourceFieldFilterable =
-        !hasSchemaRows &&
-        (!querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false));
+        !querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false);
       const sourceField = renameSourceFieldMap?.get(name) ?? name;
 
       return {
@@ -93,7 +88,7 @@ export const mapEsqlResponseToDatatable = (
           ...(_meta !== undefined && { esMeta: _meta }),
         },
         isNull: hasEmptyColumns ? !lookup.has(name) : false,
-        isComputedColumn: hasSchemaRows || isComputedColumn(name, querySummary),
+        isComputedColumn: isComputedColumn(name, querySummary),
       };
     }) ?? [];
 

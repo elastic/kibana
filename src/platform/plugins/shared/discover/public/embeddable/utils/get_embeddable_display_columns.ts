@@ -9,7 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { hasESQLSchemaTableResult, hasAggregatingCommand } from '@kbn/esql-utils';
+import { hasAggregatingCommand } from '@kbn/esql-utils';
 import type { DefaultAppStateColumn } from '../../context_awareness';
 import { getResolvedProfileColumns } from '../../context_awareness/utils/get_resolved_profile_columns';
 import { getEsqlDefaultColumns } from '../../utils/get_esql_default_columns';
@@ -75,11 +75,8 @@ export const getEmbeddableDisplayColumns = ({
     return profileResolved;
   }
 
-  if (isEsql && esql) {
-    if (!hasESQLSchemaTableResult(esql) && !hasAggregatingCommand(esql)) {
-      return EMPTY_DISPLAY_COLUMNS;
-    }
-
+  // KEEP is transformational in ES|QL but still documents — Summary, not those fields as columns.
+  if (isEsql && esql && hasAggregatingCommand(esql)) {
     const esqlDefaults = getEsqlDefaultColumns({
       esql,
       responseColumns: esqlResultColumnNames ? [...esqlResultColumnNames] : undefined,

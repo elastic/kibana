@@ -60,6 +60,18 @@ describe('buildRenameSourceFieldMap', () => {
     });
   });
 
+  it.each([
+    'FROM logs | RENAME service.name AS name | DESCRIBE',
+    'FROM logs | RENAME service.name AS name | DESCRIBE | RENAME name AS label',
+    'FROM logs | RENAME service.name AS name | STATS name = COUNT(*)',
+    'LET x = (FROM logs | RENAME service.name AS name | DESCRIBE); FROM x',
+  ])(
+    'drops stale source mappings when a command creates a column with the same name: %s',
+    (query) => {
+      expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
+    }
+  );
+
   describe('EVAL and synthetic columns', () => {
     it('does not unwind through EVAL output that only appears as the old side of RENAME', () => {
       const query =

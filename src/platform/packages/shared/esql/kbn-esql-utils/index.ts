@@ -17,8 +17,6 @@ export {
   getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
   hasAggregatingCommand,
-  hasESQLSchemaDerivedRows,
-  hasESQLSchemaTableResult,
   hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
