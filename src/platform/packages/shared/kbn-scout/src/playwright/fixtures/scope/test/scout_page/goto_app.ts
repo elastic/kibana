@@ -37,13 +37,21 @@ export type GotoAppOptions = PathOptions &
      */
     readyWhen?: Locator;
     /**
-     * Time to wait for `readyWhen` to become visible. Defaults to the running project's
-     * `navigationTimeout` + `actionTimeout`: 30s locally, 55s on the Cloud projects.
+     * Time to wait for `readyWhen` to become visible, or for Kibana to finish bootstrapping when
+     * `readyWhen` is not set. Defaults to the running project's `navigationTimeout` +
+     * `actionTimeout`: 30s locally, 55s on the Cloud projects.
      */
     readyTimeout?: number;
   };
 
-/** Navigates to a Kibana app URL, optionally gating on an app-specific readiness locator. */
+// Server-rendered "Loading Elastic" screen. Core removes it once every plugin has started, right
+// before it renders the chrome and mounts the app.
+const KIBANA_LOADING_SCREEN_SELECTOR = '[data-test-subj="kbnLoadingMessage"]';
+
+/**
+ * Navigates to a Kibana app URL. Gates on `readyWhen` when set. Otherwise waits for Kibana to
+ * finish bootstrapping, unless the caller picked its own `waitUntil`.
+ */
 export const navigateToApp = async (
   page: Page,
   buildAppUrl: (pathOptions: PathOptions) => string,
@@ -53,7 +61,16 @@ export const navigateToApp = async (
   const url = buildAppUrl({ params, hash });
 
   if (!readyWhen) {
-    return page.goto(url, gotoOptions);
+    const response = await page.goto(url, gotoOptions);
+    if (gotoOptions.waitUntil === undefined) {
+      // The `load` event fires before Kibana is usable. Without this gate plugin setup and start
+      // are charged to the caller's first 10s action or assertion.
+      await page.locator(KIBANA_LOADING_SCREEN_SELECTOR).waitFor({
+        state: 'hidden',
+        timeout: readyTimeout ?? resolveAppReadyTimeout(),
+      });
+    }
+    return response;
   }
 
   const response = await page.goto(url, { waitUntil: 'commit', ...gotoOptions });
