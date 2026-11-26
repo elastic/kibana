@@ -315,7 +315,7 @@ describe('getFetchEventAnnotations', () => {
         .mocked(dataMock.search.esql)
         .mockReset()
         .mockResolvedValue({
-          rawResponse: { columns: [], values: [], is_running: false },
+          rawResponse: { columns: [], values: [] },
           datatable: {
             type: 'datatable',
             columns: [{ id: 'time-id', name: 'time', meta: { type: 'date' } }],
@@ -452,7 +452,7 @@ describe('getFetchEventAnnotations', () => {
       expect(handleRequest).toHaveBeenCalledTimes(1);
 
       resolveEsql({
-        rawResponse: { columns: [], values: [], is_running: false },
+        rawResponse: { columns: [], values: [] },
         datatable: {
           type: 'datatable',
           columns: [{ id: 'time-id', name: 'time', meta: { type: 'date' } }],
@@ -465,7 +465,7 @@ describe('getFetchEventAnnotations', () => {
 
     it('clips rows to the chart time range when the query has no time filter and no time field', async () => {
       jest.mocked(dataMock.search.esql).mockResolvedValueOnce({
-        rawResponse: { columns: [], values: [], is_running: false },
+        rawResponse: { columns: [], values: [] },
         datatable: {
           type: 'datatable',
           columns: [{ id: 'time-id', name: 'time', meta: { type: 'date' } }],

@@ -20,6 +20,8 @@ interface Props {
   columns: DatatableColumn[];
   onChange: (annotation: EsqlEventAnnotationConfig) => void;
   queryEditor: ReactNode;
+  /** Rendered right below the query editor, e.g. the accordion with the query results. */
+  queryResults?: ReactNode;
 }
 
 export const ConfigPanelEsqlAnnotation = ({
@@ -27,6 +29,7 @@ export const ConfigPanelEsqlAnnotation = ({
   columns,
   onChange,
   queryEditor,
+  queryResults,
 }: Props) => {
   const rangeSwitchId = useId();
   const isRange = 'endTimeColumn' in annotation;
@@ -35,6 +38,7 @@ export const ConfigPanelEsqlAnnotation = ({
   return (
     <>
       {queryEditor}
+      {queryResults}
       <EuiSpacer size="m" />
       <EuiFormRow
         display="rowCompressed"

@@ -11,6 +11,8 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { ConfigPanelEsqlAnnotation } from '@kbn/event-annotation-components';
+import { ESQLDataGridAccordion } from '../../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
+import type { ESQLDataGridAttrs } from '../../../../app_plugin/shared/edit_on_the_fly/helpers';
 
 interface Props {
   annotation: EsqlEventAnnotationConfig;
@@ -21,18 +23,30 @@ interface Props {
   ) => Promise<{ columns: DatatableColumn[]; timeField?: string }>;
   /** Reports the result columns of the saved query whenever they change. */
   onColumnsChange?: (columns: DatatableColumn[]) => void;
+  /** Runs the saved query for the results accordion; no accordion is shown without it. */
+  fetchResults?: (
+    query: AggregateQuery,
+    abortController: AbortController
+  ) => Promise<ESQLDataGridAttrs>;
+  isApproximate?: boolean;
 }
+
+const noop = () => {};
 
 export const EsqlAnnotationControls = ({
   annotation,
   onChange,
   fetchColumns,
   onColumnsChange,
+  fetchResults,
+  isApproximate = false,
 }: Props) => {
   const [query, setQuery] = useState(annotation.query);
   const [columns, setColumns] = useState<DatatableColumn[]>([]);
   const [errors, setErrors] = useState<Error[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs>();
+  const [isResultsOpen, setIsResultsOpen] = useState(false);
   const requestRef = useRef<AbortController>();
   const loadedResultRef = useRef<{ query: string; fetchColumns: Props['fetchColumns'] }>();
   const currentPropsRef = useRef({ annotation, onChange });
@@ -43,6 +57,25 @@ export const EsqlAnnotationControls = ({
 
   const savedQuery = annotation.query.esql;
   useEffect(() => setQuery({ esql: savedQuery }), [savedQuery]);
+
+  // Like the data layer editor, the results of the saved query back an accordion below the
+  // editor. Query errors are already reported by the column fetch, so a failure here only
+  // hides the accordion.
+  useEffect(() => {
+    if (!fetchResults || !savedQuery.trim()) {
+      setDataGridAttrs(undefined);
+      return;
+    }
+    const controller = new AbortController();
+    fetchResults({ esql: savedQuery }, controller)
+      .then((attrs) => {
+        if (!controller.signal.aborted) setDataGridAttrs(attrs);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setDataGridAttrs(undefined);
+      });
+    return () => controller.abort();
+  }, [savedQuery, fetchResults]);
 
   useEffect(() => {
     if (
@@ -81,6 +114,20 @@ export const EsqlAnnotationControls = ({
       annotation={annotation}
       columns={columns}
       onChange={onChange}
+      queryResults={
+        dataGridAttrs ? (
+          <ESQLDataGridAccordion
+            dataGridAttrs={dataGridAttrs}
+            query={annotation.query}
+            isAccordionOpen={isResultsOpen}
+            setIsAccordionOpen={setIsResultsOpen}
+            onAccordionToggleCb={noop}
+            isTableView
+            isApproximate={isApproximate}
+            isEmbedded
+          />
+        ) : null
+      }
       queryEditor={
         // the editor renders its run button outside of `dataTestSubj`, so tests scope to this wrapper
         <div data-test-subj="lnsXY-annotation-esql-query">

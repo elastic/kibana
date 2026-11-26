@@ -71,11 +71,12 @@ export const buildDisplayRowsFromEsqlValues = ({
 const getDSLFilter = (
   queryService: DataPublicPluginStart['query'],
   uiSettings: IUiSettingsClient,
-  timeFieldName?: string
+  timeFieldName?: string,
+  ignoreGlobalFilters = false
 ) => {
   const esQueryConfigs = getEsQueryConfig(uiSettings);
-  const kqlQuery = queryService.queryString.getQuery();
-  const filters = queryService.filterManager.getFilters();
+  const kqlQuery = ignoreGlobalFilters ? undefined : queryService.queryString.getQuery();
+  const filters = ignoreGlobalFilters ? [] : queryService.filterManager.getFilters();
   const timeFilter =
     queryService.timefilter.timefilter.getTime() &&
     getTime(undefined, queryService.timefilter.timefilter.getTime(), {
@@ -98,7 +99,8 @@ export const getGridAttrs = async (
   uiSettings: IUiSettingsClient,
   abortController?: AbortController,
   esqlVariables: ESQLControlVariable[] = [],
-  approximation?: boolean
+  approximation?: boolean,
+  ignoreGlobalFilters = false
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
@@ -117,7 +119,7 @@ export const getGridAttrs = async (
         http,
       });
 
-  const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
+  const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName, ignoreGlobalFilters);
   const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
   const {
     rawResponse: { all_columns: allColumns = [], columns: valueColumns = [], values },

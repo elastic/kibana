@@ -26,6 +26,8 @@ interface ESQLDataGridAccordionProps {
   query: AggregateQuery;
   isTableView: boolean;
   isApproximate: boolean;
+  /** Set when rendered inside a padded panel, which already provides the horizontal inset. */
+  isEmbedded?: boolean;
   setIsAccordionOpen: (flag: boolean) => void;
   onAccordionToggleCb: (status: boolean) => void;
 }
@@ -36,6 +38,7 @@ export const ESQLDataGridAccordion = ({
   query,
   isTableView,
   isApproximate,
+  isEmbedded = false,
   setIsAccordionOpen,
   onAccordionToggleCb,
 }: ESQLDataGridAccordionProps) => {
@@ -55,7 +58,7 @@ export const ESQLDataGridAccordion = ({
         .euiAccordion__childWrapper {
           flex: ${isAccordionOpen ? 1 : 'none'};
         }
-        padding: 0 ${euiTheme.size.base};
+        padding: ${isEmbedded ? 0 : `0 ${euiTheme.size.base}`};
         border-bottom: ${euiTheme.border.thin};
       `}
     >
@@ -90,7 +93,7 @@ export const ESQLDataGridAccordion = ({
           </EuiTitle>
         }
         buttonProps={{
-          paddingSize: 'm',
+          paddingSize: isEmbedded ? 's' : 'm',
         }}
         initialIsOpen={isAccordionOpen}
         forceState={isAccordionOpen ? 'open' : 'closed'}

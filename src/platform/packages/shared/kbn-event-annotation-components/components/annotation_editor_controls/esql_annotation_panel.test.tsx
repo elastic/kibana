@@ -38,7 +38,8 @@ const annotation: EsqlEventAnnotationConfig = {
 
 const renderPanel = (
   currentAnnotation: EsqlEventAnnotationConfig = annotation,
-  resultColumns = columns
+  resultColumns = columns,
+  queryResults?: React.ReactNode
 ) => {
   const onChange = jest.fn();
   const rendered = render(
@@ -47,6 +48,7 @@ const renderPanel = (
       columns={resultColumns}
       onChange={onChange}
       queryEditor={<div data-test-subj="annotation-query-editor" />}
+      queryResults={queryResults}
     />
   );
   return { ...rendered, onChange };
@@ -64,6 +66,13 @@ describe('ConfigPanelEsqlAnnotation', () => {
     ).toEqual(['Select a field', 'start', 'end']);
     expect(screen.queryByLabelText('Text field')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('End date field')).not.toBeInTheDocument();
+  });
+
+  it('renders the query results slot directly after the query editor', () => {
+    renderPanel(annotation, columns, <div data-test-subj="annotation-query-results" />);
+
+    const editor = screen.getByTestId('annotation-query-editor');
+    expect(editor.nextElementSibling).toBe(screen.getByTestId('annotation-query-results'));
   });
 
   it('uses result names rather than datatable IDs and preserves the query and appearance', () => {

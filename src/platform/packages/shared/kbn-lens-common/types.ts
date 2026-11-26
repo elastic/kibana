@@ -1112,6 +1112,10 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   removeLayer: (layerId: string) => void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   isInlineEditing?: boolean;
+  /** Dashboard ES|QL control variables, for dimension editors that run ES|QL queries. */
+  esqlVariables?: ESQLControlVariable[];
+  /** Whether the panel's ES|QL queries run in approximation mode. */
+  isApproximate?: boolean;
 };
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {

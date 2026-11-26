@@ -10,7 +10,12 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import type { ESQLLangEditor } from '@kbn/esql/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { ESQLDataGridAttrs } from '../../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { EsqlAnnotationControls } from './esql_annotation_controls';
+
+jest.mock('@kbn/esql-datagrid/public', () => ({
+  ESQLDataGrid: () => <div data-test-subj="esql-data-grid" />,
+}));
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: (props: React.ComponentProps<typeof ESQLLangEditor>) => {
@@ -71,12 +76,16 @@ const submitQuery = () => {
 
 const renderControls = ({
   onColumnsChange,
-}: { onColumnsChange?: (columns: DatatableColumn[]) => void } = {}) => {
+  fetchResults,
+}: {
+  onColumnsChange?: (columns: DatatableColumn[]) => void;
+  fetchResults?: React.ComponentProps<typeof EsqlAnnotationControls>['fetchResults'];
+} = {}) => {
   const fetchColumns = jest
     .fn<Promise<FetchResult>, [typeof annotation.query, AbortSignal]>()
     .mockResolvedValue({ columns, timeField: '@timestamp' });
   const onChange = jest.fn();
-  const props = { annotation, onChange, fetchColumns, onColumnsChange };
+  const props = { annotation, onChange, fetchColumns, onColumnsChange, fetchResults };
   const rendered = render(<EsqlAnnotationControls {...props} />);
   return { ...rendered, props, fetchColumns, onChange };
 };
@@ -99,6 +108,42 @@ describe('EsqlAnnotationControls', () => {
     renderControls({ onColumnsChange });
 
     await waitFor(() => expect(onColumnsChange).toHaveBeenLastCalledWith(columns));
+  });
+
+  describe('query results accordion', () => {
+    const gridAttrs = {
+      rows: [['2026-01-01'], ['2026-01-02']],
+      columns,
+    } as unknown as ESQLDataGridAttrs;
+
+    it('shows the results of the saved query in an accordion below the editor, like data layers', async () => {
+      const fetchResults = jest.fn().mockResolvedValue(gridAttrs);
+      renderControls({ fetchResults });
+
+      expect(await screen.findByText('ES|QL Query Results')).toBeInTheDocument();
+      expect(fetchResults).toHaveBeenCalledWith(annotation.query, expect.any(AbortController));
+      // the row count badge, with the grid itself only rendered once the accordion opens
+      expect(within(screen.getByTestId('ESQLQueryResults')).getByText('2')).toBeInTheDocument();
+      expect(screen.queryByTestId('esql-data-grid')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('ES|QL Query Results'));
+      expect(await screen.findByTestId('esql-data-grid')).toBeInTheDocument();
+    });
+
+    it('shows no accordion when no results fetcher is supplied', async () => {
+      renderControls();
+      await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
+
+      expect(screen.queryByText('ES|QL Query Results')).not.toBeInTheDocument();
+    });
+
+    it('hides the accordion when the results request fails', async () => {
+      const fetchResults = jest.fn().mockRejectedValue(new Error('boom'));
+      renderControls({ fetchResults });
+
+      await waitFor(() => expect(fetchResults).toHaveBeenCalled());
+      expect(screen.queryByText('ES|QL Query Results')).not.toBeInTheDocument();
+    });
   });
 
   it('commits a submitted query only after success and preserves edits made while loading', async () => {

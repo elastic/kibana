@@ -29,6 +29,7 @@ import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS, isEsqlChart } from '../.
 import { getTimeRangeFilter } from '../../../../app_plugin/shared/edit_on_the_fly/get_time_range_filter';
 import { updateLayer } from '../../toolbar';
 import { isDataLayer } from '../../visualization_helpers';
+import { getGridAttrs } from '../../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { EsqlAnnotationControls } from './esql_annotation_controls';
 
 export const AnnotationsPanel = (
@@ -129,6 +130,24 @@ export const AnnotationsPanel = (
     [data.search.search, http, uiSettings]
   );
 
+  const { esqlVariables, isApproximate = false } = props;
+  const ignoreGlobalFilters = Boolean(localLayer.ignoreGlobalFilters);
+  const fetchResults = useCallback(
+    (query: AggregateQuery, abortController: AbortController) =>
+      getGridAttrs(
+        query,
+        [],
+        data,
+        http,
+        uiSettings,
+        abortController,
+        esqlVariables,
+        isApproximate,
+        ignoreGlobalFilters
+      ),
+    [data, http, uiSettings, esqlVariables, isApproximate, ignoreGlobalFilters]
+  );
+
   if (!currentAnnotation) {
     throw new Error('Annotation not found... this should never happen!');
   }
@@ -151,6 +170,8 @@ export const AnnotationsPanel = (
                     onChange={onChange}
                     fetchColumns={fetchColumns}
                     onColumnsChange={setEsqlColumns}
+                    fetchResults={fetchResults}
+                    isApproximate={isApproximate}
                   />
                 ),
               }
