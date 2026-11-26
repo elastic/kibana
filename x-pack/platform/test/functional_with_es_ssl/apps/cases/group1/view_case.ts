@@ -576,16 +576,29 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds lens visualization in new comment', async () => {
+        // The activity sort order is persisted in local storage, so the new
+        // comment is identified by its id rather than by its position.
+        const getUserCommentCopyLinkSubjects = async () => {
+          const copyLinks = await find.allByCssSelector(
+            '[data-test-subj="comment-comment-comment"] [data-test-subj^="copy-link-"]'
+          );
+          return Promise.all(copyLinks.map((copyLink) => copyLink.getAttribute('data-test-subj')));
+        };
+        const copyLinkSubjectsBefore = await getUserCommentCopyLinkSubjects();
+
         await cases.singleCase.addVisualizationToNewComment(LENS_BASIC_XY_VIS_TITLE);
 
         await header.waitUntilLoadingHasFinished();
 
-        // Activity lists oldest first, so the new comment is the last user comment.
-        // xyVisChart also wraps the no-results placeholder; .echChart renders only with data.
-        const userComments = await find.allByCssSelector(
-          '[data-test-subj="comment-comment-comment"]'
+        const newCopyLinkSubjects = (await getUserCommentCopyLinkSubjects()).filter(
+          (subject) => !copyLinkSubjectsBefore.includes(subject)
         );
-        const newComment = userComments[userComments.length - 1];
+        expect(newCopyLinkSubjects).to.have.length(1);
+
+        const newComment = await find.byCssSelector(
+          `[data-test-subj="comment-comment-comment"]:has([data-test-subj="${newCopyLinkSubjects[0]}"])`
+        );
+        // xyVisChart also wraps the no-results placeholder; .echChart renders only with data.
         await newComment.findByCssSelector('[data-test-subj="xyVisChart"] .echChart');
       });
     });
