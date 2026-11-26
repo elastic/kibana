@@ -59,25 +59,25 @@ describe('ConfigPanelEsqlAnnotation', () => {
 
     expect(screen.getByTestId('annotation-query-editor')).toBeInTheDocument();
     expect(
-      within(screen.getByLabelText('Time column'))
+      within(screen.getByLabelText('Target date field'))
         .getAllByRole('option')
         .map((option) => option.textContent)
-    ).toEqual(['Select a column', 'start', 'end']);
+    ).toEqual(['Select a field', 'start', 'end']);
     expect(
-      within(screen.getByLabelText('Text column'))
+      within(screen.getByLabelText('Text field'))
         .getAllByRole('option')
         .map((option) => option.textContent)
     ).toEqual(['None', 'start', 'end', 'version', 'duration']);
-    expect(screen.queryByLabelText('End time column')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('End date field')).not.toBeInTheDocument();
   });
 
   it('uses result names rather than datatable IDs and preserves the query and appearance', () => {
     const { onChange } = renderPanel();
 
-    fireEvent.change(screen.getByLabelText('Time column'), { target: { value: 'end' } });
+    fireEvent.change(screen.getByLabelText('Target date field'), { target: { value: 'end' } });
     expect(onChange).toHaveBeenLastCalledWith({ ...annotation, timeColumn: 'end' });
 
-    fireEvent.change(screen.getByLabelText('Text column'), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText('Text field'), { target: { value: '' } });
     expect(onChange).toHaveBeenLastCalledWith({ ...annotation, textColumn: undefined });
   });
 
@@ -95,7 +95,7 @@ describe('ConfigPanelEsqlAnnotation', () => {
     };
     const { onChange } = renderPanel(range);
 
-    fireEvent.change(screen.getByLabelText('End time column'), { target: { value: 'start' } });
+    fireEvent.change(screen.getByLabelText('End date field'), { target: { value: 'start' } });
     expect(onChange).toHaveBeenCalledWith({ ...range, endTimeColumn: 'start' });
   });
 
@@ -116,7 +116,7 @@ describe('ConfigPanelEsqlAnnotation', () => {
   it('adds tooltip columns without changing the existing configuration', async () => {
     const { onChange } = renderPanel();
 
-    await userEvent.click(screen.getByRole('combobox', { name: 'Tooltip columns' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Tooltip fields' }));
     await userEvent.click(
       within(screen.getByRole('listbox')).getByRole('option', { name: 'version' })
     );
@@ -127,9 +127,9 @@ describe('ConfigPanelEsqlAnnotation', () => {
   it('retains missing bindings and reports errors instead of choosing another column', () => {
     const { onChange } = renderPanel(annotation, [columns[1]]);
 
-    expect(screen.getByLabelText('Time column')).toHaveValue('start');
-    expect(screen.getByLabelText('Time column')).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByLabelText('Text column')).toHaveValue('version');
+    expect(screen.getByLabelText('Target date field')).toHaveValue('start');
+    expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Text field')).toHaveValue('version');
     expect(screen.getByText('duration')).toBeInTheDocument();
     expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(3);
     expect(onChange).not.toHaveBeenCalled();
@@ -138,7 +138,7 @@ describe('ConfigPanelEsqlAnnotation', () => {
   it('reports an incompatible time column even when the result still contains its name', () => {
     renderPanel(annotation, [{ ...columns[0], meta: { type: 'number' } }, ...columns.slice(1)]);
 
-    expect(screen.getByLabelText('Time column')).toHaveValue('start');
-    expect(screen.getByLabelText('Time column')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Target date field')).toHaveValue('start');
+    expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
   });
 });

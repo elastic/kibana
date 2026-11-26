@@ -83,7 +83,7 @@ export const ConfigPanelEsqlAnnotation = ({
       </EuiFormRow>
       <ColumnPicker
         label={i18n.translate('eventAnnotationComponents.esqlAnnotation.timeColumnLabel', {
-          defaultMessage: 'Time column',
+          defaultMessage: 'Target date field',
         })}
         columns={dateColumns}
         value={annotation.timeColumn}
@@ -94,7 +94,7 @@ export const ConfigPanelEsqlAnnotation = ({
       {'endTimeColumn' in annotation && (
         <ColumnPicker
           label={i18n.translate('eventAnnotationComponents.esqlAnnotation.endTimeColumnLabel', {
-            defaultMessage: 'End time column',
+            defaultMessage: 'End date field',
           })}
           columns={dateColumns}
           value={annotation.endTimeColumn}
@@ -105,7 +105,7 @@ export const ConfigPanelEsqlAnnotation = ({
       )}
       <ColumnPicker
         label={i18n.translate('eventAnnotationComponents.esqlAnnotation.textColumnLabel', {
-          defaultMessage: 'Text column',
+          defaultMessage: 'Text field',
         })}
         columns={columns}
         value={annotation.textColumn ?? ''}
@@ -121,7 +121,7 @@ export const ConfigPanelEsqlAnnotation = ({
       <EuiFormRow
         id={tooltipColumnsId}
         label={i18n.translate('eventAnnotationComponents.esqlAnnotation.extraColumnsLabel', {
-          defaultMessage: 'Tooltip columns',
+          defaultMessage: 'Tooltip fields',
         })}
         display="rowCompressed"
         fullWidth
@@ -146,7 +146,7 @@ export const ConfigPanelEsqlAnnotation = ({
 
 const getMissingColumnError = (column: string): string =>
   i18n.translate('eventAnnotationComponents.esqlAnnotation.missingColumnErrorMessage', {
-    defaultMessage: 'Column {column} is missing or has an incompatible type. Update the selection.',
+    defaultMessage: 'Field {column} is missing or has an incompatible type. Update the selection.',
     values: { column },
   });
 
@@ -180,7 +180,7 @@ const ColumnPicker = ({
         missingColumn
           ? getMissingColumnError(value)
           : i18n.translate('eventAnnotationComponents.esqlAnnotation.requiredColumnErrorMessage', {
-              defaultMessage: 'Select a column.',
+              defaultMessage: 'Select a field.',
             })
       }
     >
@@ -193,7 +193,7 @@ const ColumnPicker = ({
             value: '',
             text: required
               ? i18n.translate('eventAnnotationComponents.esqlAnnotation.columnPlaceholder', {
-                  defaultMessage: 'Select a column',
+                  defaultMessage: 'Select a field',
                 })
               : i18n.translate(
                   'eventAnnotationComponents.esqlAnnotation.noColumnDropDownOptionLabel',

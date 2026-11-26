@@ -180,7 +180,7 @@ describe('toEsqlAnnotationDatatable', () => {
   it.each(['missing', 'message'])('rejects missing or non-date time columns: %s', (timeColumn) => {
     expect(() =>
       toEsqlAnnotationDatatable({ ...options, annotation: { ...annotation, timeColumn } })
-    ).toThrow(`column ${timeColumn} is missing or has an incompatible type`);
+    ).toThrow(`field ${timeColumn} is missing or has an incompatible type`);
   });
 
   it.each([null, 'not-a-date'])('skips rows with invalid timestamps: %s', (time) => {
@@ -219,7 +219,7 @@ describe('toEsqlAnnotationDatatable', () => {
         ...options,
         annotation: { ...annotation, extraColumns: ['gone'] },
       })
-    ).toThrow('column gone is missing or has an incompatible type');
+    ).toThrow('field gone is missing or has an incompatible type');
   });
 
   it('limits points per bucket and carries skipped counts through merging with manual annotations', () => {

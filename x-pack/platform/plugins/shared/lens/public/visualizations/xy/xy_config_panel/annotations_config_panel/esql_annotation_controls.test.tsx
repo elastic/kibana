@@ -87,7 +87,7 @@ describe('EsqlAnnotationControls', () => {
 
     expect(fetchColumns).toHaveBeenCalledWith(annotation.query, expect.any(AbortSignal));
     expect(
-      within(screen.getByLabelText('Text column')).getByRole('option', { name: 'version' })
+      within(screen.getByLabelText('Text field')).getByRole('option', { name: 'version' })
     ).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -127,9 +127,9 @@ describe('EsqlAnnotationControls', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Invalid query');
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByLabelText('Time column')).toHaveValue('time');
+    expect(screen.getByLabelText('Target date field')).toHaveValue('time');
     expect(
-      within(screen.getByLabelText('Text column')).getByRole('option', { name: 'version' })
+      within(screen.getByLabelText('Text field')).getByRole('option', { name: 'version' })
     ).toBeInTheDocument();
   });
 

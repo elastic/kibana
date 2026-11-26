@@ -55,7 +55,7 @@ const resolveAnnotationColumns = ({
       throw new Error(
         i18n.translate('eventAnnotation.esqlAnnotation.invalidColumnErrorMessage', {
           defaultMessage:
-            'Annotation {label}: column {column} is missing or has an incompatible type.',
+            'Annotation {label}: field {column} is missing or has an incompatible type.',
           values: { label: annotation.label, column: name },
         })
       );
