@@ -61,18 +61,33 @@ export const kiUri = (kiId: string): string => `${KI_URI_PREFIX}${kiId}`;
 export const kiIdFromUri = (uri: string): string | undefined =>
   uri.startsWith(KI_URI_PREFIX) ? uri.slice(KI_URI_PREFIX.length) : undefined;
 
-/** Memory ids of agent rounds read from traces: the prefix, then the trace id. */
-export const TRACE_ROUND_ID_PREFIX = 'trace:';
-const TRACE_URI_PREFIX = 'trace://';
+/** Memory ids of session memories: the prefix, then the id the memory was saved under. */
+export const SESSION_MEMORY_ID_PREFIX = 'session-memory:';
+/** Memory ids of session turns: the prefix, then the session id, a slash and the turn id. */
+export const SESSION_TURN_ID_PREFIX = 'session:';
 
-/** The URI a dreamed KI cites a memory by: `trace://` for a round, `ki://` for a memory KI. */
-export const memoryUri = (memoryId: string): string =>
-  memoryId.startsWith(TRACE_ROUND_ID_PREFIX)
-    ? `${TRACE_URI_PREFIX}${memoryId.slice(TRACE_ROUND_ID_PREFIX.length)}`
-    : kiUri(memoryId);
+const EXTERNAL_MEMORY_SOURCES = [
+  { idPrefix: SESSION_MEMORY_ID_PREFIX, uriPrefix: 'session-memory://' },
+  { idPrefix: SESSION_TURN_ID_PREFIX, uriPrefix: 'session://' },
+] as const;
+
+/** The id prefixes of the memories dreaming reads from outside the AI index. */
+export const EXTERNAL_MEMORY_ID_PREFIXES: readonly string[] = EXTERNAL_MEMORY_SOURCES.map(
+  ({ idPrefix }) => idPrefix
+);
+
+/** Whether a memory id names a memory KI of the AI index, not one read from outside it. */
+export const isMemoryKiId = (memoryId: string): boolean =>
+  !EXTERNAL_MEMORY_SOURCES.some(({ idPrefix }) => memoryId.startsWith(idPrefix));
+
+/** The URI a dreamed KI cites a memory by: its source's scheme, or `ki://` for a memory KI. */
+export const memoryUri = (memoryId: string): string => {
+  const source = EXTERNAL_MEMORY_SOURCES.find(({ idPrefix }) => memoryId.startsWith(idPrefix));
+  return source ? `${source.uriPrefix}${memoryId.slice(source.idPrefix.length)}` : kiUri(memoryId);
+};
 
 /** The memory id a `derived_from` reference cites, the reverse of {@link memoryUri}. */
-export const memoryIdFromUri = (uri: string): string | undefined =>
-  uri.startsWith(TRACE_URI_PREFIX)
-    ? `${TRACE_ROUND_ID_PREFIX}${uri.slice(TRACE_URI_PREFIX.length)}`
-    : kiIdFromUri(uri);
+export const memoryIdFromUri = (uri: string): string | undefined => {
+  const source = EXTERNAL_MEMORY_SOURCES.find(({ uriPrefix }) => uri.startsWith(uriPrefix));
+  return source ? `${source.idPrefix}${uri.slice(source.uriPrefix.length)}` : kiIdFromUri(uri);
+};

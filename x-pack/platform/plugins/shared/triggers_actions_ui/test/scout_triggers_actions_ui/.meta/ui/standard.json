@@ -1,5 +1,5 @@
 {
-  "sha1": "8f4456096ee19373ddae96bd86ea445866ce8da0",
+  "sha1": "d886350e825dbbec2fc5374383f430e6a5c829ff",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_triggers_actions_ui/ui/tests/connector_preconfigured.spec.ts",
-        "line": 95,
+        "line": 94,
         "column": 11
       }
     },

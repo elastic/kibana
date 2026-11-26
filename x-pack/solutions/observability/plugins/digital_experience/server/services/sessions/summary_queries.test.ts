@@ -163,17 +163,17 @@ describe('sessionSummaryQuery', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
     expect(query).toContain(
-      'rage_click_count = COUNT(*) WHERE event == "browser.frustration.rage_click"'
+      'rage_click_count = COUNT(*) WHERE event == "elastic.frustration.rage_click"'
     );
     expect(query).toContain(
-      'dead_click_count = COUNT(*) WHERE event == "browser.frustration.dead_click"'
+      'dead_click_count = COUNT(*) WHERE event == "elastic.frustration.dead_click"'
     );
     expect(query).toContain(
-      'error_click_count = COUNT(*) WHERE event == "browser.frustration.error_click"'
+      'error_click_count = COUNT(*) WHERE event == "elastic.frustration.error_click"'
     );
     expect(query).toContain('frustration_count = COUNT(*) WHERE is_frustration');
     expect(query).toContain(
-      'is_frustration = event IN ("browser.frustration.rage_click", "browser.frustration.dead_click", "browser.frustration.error_click")'
+      'is_frustration = event IN ("elastic.frustration.rage_click", "elastic.frustration.dead_click", "elastic.frustration.error_click")'
     );
     expect(query).toContain('frustration_count = MAX(frustration_count)');
   });

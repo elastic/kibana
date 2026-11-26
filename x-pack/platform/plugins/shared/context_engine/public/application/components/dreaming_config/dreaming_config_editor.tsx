@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import {
   ABOUT_RELATIONSHIP_TYPE,
   type DreamingEntities,
@@ -236,10 +236,22 @@ const replaced = <T,>(items: readonly T[], index: number | undefined, item: T): 
     ? [...items, item]
     : items.map((current, i) => (i === index ? item : current));
 
+/** The editor's blocks, for a layout that places them itself. Type sections are null while entities are off. */
+export interface DreamingConfigEditorParts {
+  facts: ReactNode;
+  entitiesSwitchLabel: string;
+  entitiesDescription: string;
+  renderEntitiesSwitch: (options: { showLabel: boolean }) => ReactNode;
+  entityTypes: ReactNode;
+  relationshipTypes: ReactNode;
+}
+
 interface DreamingConfigEditorProps {
   draft: DreamingConfigDraft;
   onChange?: (draft: DreamingConfigDraft) => void;
   suggestedEntities?: DreamingEntities;
+  /** Replaces the default stacked layout. */
+  renderLayout?: (parts: DreamingConfigEditorParts) => ReactNode;
 }
 
 /** Edits the fact, entity and relationship types dreaming learns, each type in a modal. */
@@ -247,6 +259,7 @@ export const DreamingConfigEditor = ({
   draft,
   onChange,
   suggestedEntities,
+  renderLayout,
 }: DreamingConfigEditorProps) => {
   const [editing, setEditing] = useState<Editing>();
   const { facts, entities, entitiesEnabled, relationships } = draft;
@@ -266,144 +279,176 @@ export const DreamingConfigEditor = ({
   const takenBy = (types: string[], index: number | undefined) =>
     types.filter((_, i) => i !== index);
 
+  const factsSection = (
+    <Section
+      title={i18n.translate('xpack.contextEngine.dreamingConfig.factsTitle', {
+        defaultMessage: 'Fact types',
+      })}
+      count={facts.length}
+      description={i18n.translate('xpack.contextEngine.dreamingConfig.factsDescription', {
+        defaultMessage:
+          'What dreaming writes down: the kinds of knowledge your agent can recall later.',
+      })}
+      addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addFact', {
+        defaultMessage: 'Add fact type',
+      })}
+      onAdd={readOnly ? undefined : () => setEditing({ kind: 'fact' })}
+      emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.factsEmpty', {
+        defaultMessage: 'No fact types yet. Add one for dreaming to start writing facts.',
+      })}
+      data-test-subj="contextDreamingConfigFacts"
+    >
+      {facts.map(({ type, description }, index) => (
+        <EuiFlexItem key={type}>
+          <TypeCard
+            type={type}
+            description={description}
+            {...(!readOnly && {
+              onEdit: () => setEditing({ kind: 'fact', index }),
+              onDelete: () => update({ facts: without(facts, index) }),
+            })}
+            data-test-subj={`contextDreamingConfigFact-${type}`}
+          />
+        </EuiFlexItem>
+      ))}
+    </Section>
+  );
+
+  const entitiesSwitchLabel = i18n.translate('xpack.contextEngine.dreamingConfig.entitiesSwitch', {
+    defaultMessage: 'Also learn entities',
+  });
+  const entitiesDescription = i18n.translate(
+    'xpack.contextEngine.dreamingConfig.entitiesSwitchDescription',
+    {
+      defaultMessage:
+        'Entities are the things your memories are about, each with a summary of what is known about it. Turn them on once facts are useful, or now.',
+    }
+  );
+  const renderEntitiesSwitch = ({ showLabel }: { showLabel: boolean }) => (
+    <EuiSwitch
+      label={entitiesSwitchLabel}
+      showLabel={showLabel}
+      checked={entitiesEnabled}
+      disabled={readOnly}
+      onChange={(event) => toggleEntities(event.target.checked)}
+      data-test-subj="contextDreamingConfigEntitiesSwitch"
+    />
+  );
+
+  const entityTypesSection = entitiesEnabled ? (
+    <Section
+      title={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesTitle', {
+        defaultMessage: 'Entity types',
+      })}
+      count={nodes.length}
+      description={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesDescription', {
+        defaultMessage: 'The things your agent remembers: the nouns of your domain.',
+      })}
+      addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addEntity', {
+        defaultMessage: 'Add entity type',
+      })}
+      onAdd={readOnly ? undefined : () => setEditing({ kind: 'entity' })}
+      emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesEmpty', {
+        defaultMessage: 'No entity types yet. Add one, such as customer or product.',
+      })}
+      data-test-subj="contextDreamingConfigEntities"
+    >
+      {nodes.map(({ type, description, attributes = [] }, index) => (
+        <EuiFlexItem key={type}>
+          <TypeCard
+            type={type}
+            description={description}
+            footer={
+              attributes.length > 0 && (
+                <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                  {attributes.map((attribute) => (
+                    <EuiFlexItem grow={false} key={attribute}>
+                      <EuiCode>{attribute}</EuiCode>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              )
+            }
+            {...(!readOnly && {
+              onEdit: () => setEditing({ kind: 'entity', index }),
+              onDelete: () => update({ entities: { nodes: without(nodes, index) } }),
+            })}
+            data-test-subj={`contextDreamingConfigEntity-${type}`}
+          />
+        </EuiFlexItem>
+      ))}
+    </Section>
+  ) : null;
+
+  const relationshipTypesSection = entitiesEnabled ? (
+    <Section
+      title={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsTitle', {
+        defaultMessage: 'Relationship types',
+      })}
+      count={relationships.length}
+      description={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsDescription', {
+        defaultMessage:
+          'How the entities dreaming writes are linked, such as member_of or uses. Facts link to the entities they are about with the built-in "about" type. Each relationship is stored as its own knowledge item.',
+      })}
+      addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addRelationship', {
+        defaultMessage: 'Add relationship type',
+      })}
+      onAdd={readOnly ? undefined : () => setEditing({ kind: 'relationship' })}
+      emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsEmpty', {
+        defaultMessage: 'No relationship types yet. Without one, dreaming links nothing.',
+      })}
+      data-test-subj="contextDreamingConfigRelationships"
+    >
+      {relationships.map(({ type, description }, index) => (
+        <EuiFlexItem key={type}>
+          <TypeCard
+            type={type}
+            description={description}
+            {...(!readOnly && {
+              onEdit: () => setEditing({ kind: 'relationship', index }),
+              onDelete: () => update({ relationships: without(relationships, index) }),
+            })}
+            data-test-subj={`contextDreamingConfigRelationship-${type}`}
+          />
+        </EuiFlexItem>
+      ))}
+    </Section>
+  ) : null;
+
+  const parts: DreamingConfigEditorParts = {
+    facts: factsSection,
+    entitiesSwitchLabel,
+    entitiesDescription,
+    renderEntitiesSwitch,
+    entityTypes: entityTypesSection,
+    relationshipTypes: relationshipTypesSection,
+  };
+
   return (
     <div data-test-subj="contextDreamingConfigEditor">
-      <Section
-        title={i18n.translate('xpack.contextEngine.dreamingConfig.factsTitle', {
-          defaultMessage: 'Fact types',
-        })}
-        count={facts.length}
-        description={i18n.translate('xpack.contextEngine.dreamingConfig.factsDescription', {
-          defaultMessage:
-            'What dreaming writes down: the kinds of knowledge your agent can recall later.',
-        })}
-        addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addFact', {
-          defaultMessage: 'Add fact type',
-        })}
-        onAdd={readOnly ? undefined : () => setEditing({ kind: 'fact' })}
-        emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.factsEmpty', {
-          defaultMessage: 'No fact types yet. Add one for dreaming to start writing facts.',
-        })}
-        data-test-subj="contextDreamingConfigFacts"
-      >
-        {facts.map(({ type, description }, index) => (
-          <EuiFlexItem key={type}>
-            <TypeCard
-              type={type}
-              description={description}
-              {...(!readOnly && {
-                onEdit: () => setEditing({ kind: 'fact', index }),
-                onDelete: () => update({ facts: without(facts, index) }),
-              })}
-              data-test-subj={`contextDreamingConfigFact-${type}`}
-            />
-          </EuiFlexItem>
-        ))}
-      </Section>
-      <EuiHorizontalRule margin="l" />
-      <EuiSwitch
-        label={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesSwitch', {
-          defaultMessage: 'Also learn entities',
-        })}
-        checked={entitiesEnabled}
-        disabled={readOnly}
-        onChange={(event) => toggleEntities(event.target.checked)}
-        data-test-subj="contextDreamingConfigEntitiesSwitch"
-      />
-      <EuiSpacer size="s" />
-      <EuiText size="xs" color="subdued">
-        <p>
-          {i18n.translate('xpack.contextEngine.dreamingConfig.entitiesSwitchDescription', {
-            defaultMessage:
-              'Entities are the things your memories are about, each with a summary of what is known about it. Turn them on once facts are useful, or now.',
-          })}
-        </p>
-      </EuiText>
-      {entitiesEnabled && (
+      {renderLayout ? (
+        renderLayout(parts)
+      ) : (
         <>
-          <EuiSpacer size="l" />
-          <Section
-            title={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesTitle', {
-              defaultMessage: 'Entity types',
-            })}
-            count={nodes.length}
-            description={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesDescription', {
-              defaultMessage: 'The things your agent remembers: the nouns of your domain.',
-            })}
-            addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addEntity', {
-              defaultMessage: 'Add entity type',
-            })}
-            onAdd={readOnly ? undefined : () => setEditing({ kind: 'entity' })}
-            emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesEmpty', {
-              defaultMessage: 'No entity types yet. Add one, such as customer or product.',
-            })}
-            data-test-subj="contextDreamingConfigEntities"
-          >
-            {nodes.map(({ type, description, attributes = [] }, index) => (
-              <EuiFlexItem key={type}>
-                <TypeCard
-                  type={type}
-                  description={description}
-                  footer={
-                    attributes.length > 0 && (
-                      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                        {attributes.map((attribute) => (
-                          <EuiFlexItem grow={false} key={attribute}>
-                            <EuiCode>{attribute}</EuiCode>
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
-                    )
-                  }
-                  {...(!readOnly && {
-                    onEdit: () => setEditing({ kind: 'entity', index }),
-                    onDelete: () => update({ entities: { nodes: without(nodes, index) } }),
-                  })}
-                  data-test-subj={`contextDreamingConfigEntity-${type}`}
-                />
-              </EuiFlexItem>
-            ))}
-          </Section>
-        </>
-      )}
-      {entitiesEnabled && (
-        <>
-          <EuiHorizontalRule margin="xl" />
-          <Section
-            title={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsTitle', {
-              defaultMessage: 'Relationship types',
-            })}
-            count={relationships.length}
-            description={i18n.translate(
-              'xpack.contextEngine.dreamingConfig.relationshipsDescription',
-              {
-                defaultMessage:
-                  'How the entities dreaming writes are linked, such as member_of or uses. Facts link to the entities they are about with the built-in "about" type. Each relationship is stored as its own knowledge item.',
-              }
-            )}
-            addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addRelationship', {
-              defaultMessage: 'Add relationship type',
-            })}
-            onAdd={readOnly ? undefined : () => setEditing({ kind: 'relationship' })}
-            emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsEmpty', {
-              defaultMessage: 'No relationship types yet. Without one, dreaming links nothing.',
-            })}
-            data-test-subj="contextDreamingConfigRelationships"
-          >
-            {relationships.map(({ type, description }, index) => (
-              <EuiFlexItem key={type}>
-                <TypeCard
-                  type={type}
-                  description={description}
-                  {...(!readOnly && {
-                    onEdit: () => setEditing({ kind: 'relationship', index }),
-                    onDelete: () => update({ relationships: without(relationships, index) }),
-                  })}
-                  data-test-subj={`contextDreamingConfigRelationship-${type}`}
-                />
-              </EuiFlexItem>
-            ))}
-          </Section>
+          {factsSection}
+          <EuiHorizontalRule margin="l" />
+          {renderEntitiesSwitch({ showLabel: true })}
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            <p>{entitiesDescription}</p>
+          </EuiText>
+          {entityTypesSection && (
+            <>
+              <EuiSpacer size="l" />
+              {entityTypesSection}
+            </>
+          )}
+          {relationshipTypesSection && (
+            <>
+              <EuiHorizontalRule margin="xl" />
+              {relationshipTypesSection}
+            </>
+          )}
         </>
       )}
       {editing?.kind === 'fact' && (

@@ -12,6 +12,7 @@ import { isRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { set } from '@kbn/safer-lodash-set';
 import type { Condition } from '@kbn/streamlang';
 import { isNeverCondition } from '@kbn/streamlang';
+import { isRemovedStreamTypeDefinition } from './removed_stream_types';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,
@@ -21,7 +22,7 @@ import {
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
   let migratedDefinition = definition;
   let hasBeenMigrated = false;
-  if ('group' in migratedDefinition) {
+  if ('group' in migratedDefinition || isRemovedStreamTypeDefinition(migratedDefinition)) {
     return migratedDefinition as unknown as Streams.all.Definition;
   }
   // Add required description
@@ -182,28 +183,44 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
-  // Initialize query_streams as empty array for ingest streams (WiredStream and ClassicStream)
-  // that don't have this field yet
-  if (isObject(migratedDefinition.ingest) && !('query_streams' in migratedDefinition)) {
-    migratedDefinition = {
-      ...migratedDefinition,
-      query_streams: [],
-    };
+  // Query streams have been removed; drop the list of child query streams
+  if ('query_streams' in migratedDefinition) {
+    const { query_streams: _queryStreams, ...rest } = migratedDefinition;
+    migratedDefinition = rest;
     hasBeenMigrated = true;
+  }
+
+  // Draft streams have been removed; drop draft flags and routing to draft children
+  if (
+    isObject(migratedDefinition.ingest) &&
+    'wired' in migratedDefinition.ingest &&
+    isObject(migratedDefinition.ingest.wired)
+  ) {
+    const { draft, ...wired } = migratedDefinition.ingest.wired as {
+      draft?: boolean;
+      routing?: Array<Record<string, unknown>>;
+    };
+    const hasDraftRouting = wired.routing?.some((route) => 'draft' in route) ?? false;
+
+    if (draft !== undefined || hasDraftRouting) {
+      const routing = wired.routing
+        ?.filter((route) => route.draft !== true)
+        .map(({ draft: _draft, ...route }) => route);
+      set(migratedDefinition, 'ingest.wired', routing ? { ...wired, routing } : wired);
+      hasBeenMigrated = true;
+    }
   }
 
   // Add required type discriminator field based on stream structure
   if (!('type' in migratedDefinition)) {
-    let streamType: 'wired' | 'classic' | 'query';
+    let streamType: 'wired' | 'classic';
     if (isObject(migratedDefinition.ingest) && 'wired' in migratedDefinition.ingest) {
       streamType = 'wired';
     } else if (isObject(migratedDefinition.ingest) && 'classic' in migratedDefinition.ingest) {
       streamType = 'classic';
-    } else if (!('ingest' in migratedDefinition)) {
-      streamType = 'query';
     } else {
       throw new Error(
-        `Cannot determine stream type: document has an 'ingest' key but it does not contain 'wired' or 'classic'. This may indicate a corrupted stream definition.`
+        `Cannot determine stream type: document does not contain 'ingest.wired' or 'ingest.classic'. This may indicate a corrupted stream definition.`
       );
     }
     migratedDefinition = { ...migratedDefinition, type: streamType };

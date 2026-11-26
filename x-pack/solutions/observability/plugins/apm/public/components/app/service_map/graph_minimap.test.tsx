@@ -297,6 +297,33 @@ describe('ServiceMapGraph - MiniMap', () => {
       expect(nodeColorFn(depNode)).toBe(MOCK_EUI_THEME.colors.mediumShade);
     });
 
+    it('returns a subdued lightShade for the box of an open group, not the dependency colour', () => {
+      render(
+        <ReactFlowProvider>
+          <ServiceMapGraph {...defaultProps} />
+        </ReactFlowProvider>
+      );
+
+      const nodeColorFn = mockMinimapProps.nodeColor as (node: ServiceMapNode) => string;
+      const box: ServiceMapNode = {
+        id: 'group-1',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'group-1',
+          label: 'shop',
+          isService: false as const,
+          isServiceGroupBox: true as const,
+          groupKind: 'attribute',
+          memberServiceIds: ['a', 'b'],
+          memberCount: 2,
+        },
+        type: 'serviceGroupBox',
+      } as ServiceMapNode;
+
+      expect(nodeColorFn(box)).toBe(MOCK_EUI_THEME_FOR_USE_THEME.colors.lightShade);
+      expect(nodeColorFn(box)).not.toBe(MOCK_EUI_THEME_FOR_USE_THEME.colors.mediumShade);
+    });
+
     it('returns primary when service anomaly stats exist without anomaly score', () => {
       render(
         <ReactFlowProvider>
