@@ -57,7 +57,11 @@ apiTest.describe(
       const { apiKeyHeader } = await requestAuth.getApiKey('platform_engineer');
       headers = { ...PUBLIC_API_HEADERS, 'kbn-xsrf': 'scout', ...apiKeyHeader };
 
-      await setupFleetForEndpoint(kbnClient, log);
+      // Setup upgrades Elastic Defend to a prerelease that teardown does not remove, so reuse an installed version.
+      const { status } = await getEndpointPackageInfo(kbnClient);
+      if (status !== 'installed') {
+        await setupFleetForEndpoint(kbnClient, log);
+      }
       const { version } = await getEndpointPackageInfo(kbnClient);
       // Fleet keeps tamper protection only on agent policies that include Elastic Defend.
       indexedPolicy = await indexFleetEndpointPolicy(
