@@ -597,6 +597,11 @@ const CODES = Object.freeze({
     'xpack.securitySolution.endpointActionResponseCodes.runscript.invalidInput',
     { defaultMessage: 'Script action input is invalid' }
   ),
+  // DEV: script SHA-256 is not in the `response_actions.allowed_actions` advanced policy option
+  'ra_runscript_error_not-allowed': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.notAllowed',
+    { defaultMessage: 'This script is not allowed to run by the advanced configuration' }
+  ),
   'ra_runscript_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.notPermitted',
     { defaultMessage: 'Misconfiguration - no permission to use Fleet API for script retrieval' }
