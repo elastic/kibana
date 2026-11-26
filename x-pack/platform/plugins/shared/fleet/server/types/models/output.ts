@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 
 import {
   kafkaAuthType,
@@ -591,40 +592,81 @@ const OtlpExporterTlsSchema = schema.object({
   ),
 });
 
+// A setting that takes a value, or `null` to remove a stored value.
+const nullable = <T>(type: Type<T>, description: string) =>
+  schema.maybe(schema.oneOf([schema.literal(null), type], { meta: { description } }));
+
 const OtlpExporterSendingQueueSchema = schema.object({
-  enabled: schema.maybe(schema.boolean()),
-  num_consumers: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
-  queue_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
-  sizer: schema.maybe(
-    schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')])
+  enabled: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Whether the exporter uses a sending queue. Default: `true`.' },
+    })
   ),
-  wait_for_result: schema.maybe(schema.boolean()),
-  block_on_overflow: schema.maybe(schema.boolean()),
-  batch: schema.maybe(
-    schema.oneOf([
-      schema.literal(null),
-      schema.object({
-        flush_timeout: schema.maybe(
-          schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
-        ),
-        min_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
-        max_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
-        sizer: schema.maybe(schema.oneOf([schema.literal('items'), schema.literal('bytes')])),
-        partition: schema.maybe(
-          schema.oneOf([
-            schema.literal(null),
-            schema.object({
-              metadata_keys: schema.maybe(
-                schema.oneOf([
-                  schema.literal(null),
-                  schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
-                ])
-              ),
-            }),
-          ])
-        ),
-      }),
-    ])
+  num_consumers: nullable(
+    schema.number(),
+    'Number of consumers that send the data of the queue. Default: `10`.'
+  ),
+  queue_size: nullable(
+    schema.number(),
+    'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
+  ),
+  sizer: schema.maybe(
+    schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')], {
+      meta: {
+        description:
+          'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.',
+      },
+    })
+  ),
+  wait_for_result: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether incoming requests are blocked until they are processed. Default: `false`.',
+      },
+    })
+  ),
+  block_on_overflow: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.',
+      },
+    })
+  ),
+  batch: nullable(
+    schema.object({
+      flush_timeout: nullable(
+        schema.string({ maxLength: 64 }),
+        'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
+      ),
+      min_size: nullable(
+        schema.number(),
+        'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
+      ),
+      max_size: nullable(
+        schema.number(),
+        'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
+      ),
+      sizer: schema.maybe(
+        schema.oneOf([schema.literal('items'), schema.literal('bytes')], {
+          meta: {
+            description:
+              'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.',
+          },
+        })
+      ),
+      partition: nullable(
+        schema.object({
+          metadata_keys: nullable(
+            schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+            'Client metadata keys used to batch data separately.'
+          ),
+        }),
+        'Batches data separately by client metadata.'
+      ),
+    }),
+    'Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.'
   ),
 });
 
@@ -653,7 +695,10 @@ const OtlpExporterBaseSchema = {
   ),
   timeout: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])),
   tls: schema.maybe(schema.oneOf([schema.literal(null), OtlpExporterTlsSchema])),
-  sending_queue: schema.maybe(schema.oneOf([schema.literal(null), OtlpExporterSendingQueueSchema])),
+  sending_queue: nullable(
+    OtlpExporterSendingQueueSchema,
+    'The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.'
+  ),
   retry_on_failure: schema.maybe(schema.oneOf([schema.literal(null), OtlpExporterRetrySchema])),
 };
 

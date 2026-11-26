@@ -8,10 +8,7 @@
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { MobileKpisResponse } from '../../../../common/types/mobile';
 import { useApiClient } from '../../../hooks/use_api_client';
-import { useEnvironment } from '../../../hooks/use_environment';
-import { useQueryParam } from '../../../hooks/use_query_param';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { toTimeRangeQuery } from '../../../utils/time_range_query';
+import { useMobileFiltersQuery } from './use_mobile_filters_query';
 
 export interface MobileKpisState {
   /** The last response, kept while new filters load: only the filter options and badges use it. */
@@ -27,10 +24,7 @@ export interface MobileKpisState {
 /** A mobile application's KPIs, picker options and platforms, over the URL's filters and range. */
 export const useMobileKpis = (serviceName: string): MobileKpisState => {
   const apiClient = useApiClient();
-  const { timeRange } = useTimeRange();
-  const { environment } = useEnvironment();
-  const { value: osName } = useQueryParam('osName');
-  const { value: release } = useQueryParam('release');
+  const { toQuery } = useMobileFiltersQuery();
 
   const {
     value: kpis,
@@ -43,10 +37,10 @@ export const useMobileKpis = (serviceName: string): MobileKpisState => {
         signal,
         params: {
           path: { serviceName },
-          query: { ...toTimeRangeQuery(timeRange, environment), osName, release },
+          query: toQuery(),
         },
       }),
-    [apiClient, serviceName, timeRange, environment, osName, release],
+    [apiClient, serviceName, toQuery],
     { unsetValueOnError: true }
   );
   // Nothing has been fetched before the first request starts.

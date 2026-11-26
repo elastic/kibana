@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
@@ -15,6 +16,8 @@ import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID, PACK_USERS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import type { ClearableExecutionDefaults, PackItem, PackSavedObject } from './types';
+import type { SharedIntegrationWarning } from '../../common/api/packs/shared_integration_warning';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 interface UseCreatePackProps {
   withRedirect?: boolean;
@@ -23,14 +26,21 @@ interface UseCreatePackProps {
 export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   const queryClient = useQueryClient();
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp },
     http,
     notifications: { toasts },
+    analytics,
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
+  const startServices = useMemo(
+    () => ({ analytics, i18n: i18nStart, theme }),
+    [analytics, i18nStart, theme]
+  );
   const setErrorToast = useErrorToast();
 
   return useMutation<
-    { data: PackSavedObject },
+    { data: PackSavedObject; warnings?: SharedIntegrationWarning[] },
     { body: { error: string; message: string } },
     Omit<PackItem, 'id' | 'min_osquery_version' | 'result_type' | 'platform'> &
       ClearableExecutionDefaults
@@ -59,6 +69,15 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
             },
           })
         );
+        addSharedIntegrationWarningToasts({
+          warnings: payload.warnings,
+          packId: payload.data?.saved_object_id,
+          toasts,
+          queryClient,
+          getUrlForApp,
+          navigateToApp,
+          startServices,
+        });
       },
     }
   );

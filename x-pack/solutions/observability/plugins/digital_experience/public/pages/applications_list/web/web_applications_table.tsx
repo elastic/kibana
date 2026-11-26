@@ -41,6 +41,8 @@ import { useFormatters } from '../../../hooks/use_formatters';
 import { useVisibleColumns } from '../../../hooks/use_visible_columns';
 import { APPLICATIONS_LABEL, LAST_SEEN_LABEL, SOURCE_LABELS } from '../../../labels';
 import type { ApplicationRow } from '../utils/filter_applications';
+import type { IngestColumnState } from '../components/ingest_column';
+import { SORT_BY_INGEST, ingestColumn } from '../components/ingest_column';
 import { renderLastSeen } from '../components/render_last_seen';
 import {
   applicationColumnPreset,
@@ -193,8 +195,6 @@ const FAILED_HTTP_COLUMN = i18n.translate('xpack.digitalExperience.applications.
   defaultMessage: 'Failed HTTP',
 });
 
-const SORT_BY_PAGE_LOADS = { sort: { field: 'pageLoads.count', direction: 'desc' } } as const;
-
 type OptionalColumnId =
   | 'errorRate'
   | 'lcp'
@@ -207,8 +207,8 @@ type OptionalColumnId =
   | 'lastSeen';
 
 /**
- * The columns the user can hide, in display order; the application and its page loads, which the
- * table is sorted by, are always shown.
+ * The columns the user can hide, in display order; the application, its ingest, which the table is
+ * sorted by, and its page loads are always shown.
  */
 const OPTIONAL_COLUMNS: Array<{ id: OptionalColumnId; label: string }> = [
   { id: 'errorRate', label: ERROR_RATE_COLUMN },
@@ -246,12 +246,15 @@ export function WebApplicationsTable({
   noItemsMessage,
   visibleColumns,
   onShowClassicData,
+  ingest,
 }: {
   items: ApplicationRow[];
   searchTerm: string;
   isLoading: boolean;
   /** Shown instead of rows: loading, an error, no match or no web data. */
   noItemsMessage: ReactNode;
+  /** The rows' ingest, which loads apart from them. */
+  ingest: IngestColumnState;
   visibleColumns: ReadonlySet<OptionalColumnId>;
   /** Shows the Classic RUM rows, from the badge of an application that has them too. */
   onShowClassicData: () => void;
@@ -397,12 +400,22 @@ export function WebApplicationsTable({
 
     return [
       applicationColumn,
+      ingestColumn<ApplicationRow>(ingest),
       pageLoadsColumn,
       ...OPTIONAL_COLUMN_IDS.filter((id) => visibleColumns.has(id)).map(
         (id) => optionalColumns[id]
       ),
     ];
-  }, [application, router, listQuery, onShowClassicData, visibleColumns, searchTerm, formatters]);
+  }, [
+    application,
+    router,
+    listQuery,
+    onShowClassicData,
+    visibleColumns,
+    searchTerm,
+    formatters,
+    ingest,
+  ]);
 
   return (
     <EuiInMemoryTable<ApplicationRow>
@@ -416,7 +429,7 @@ export function WebApplicationsTable({
       scrollableInline
       stickyScrollbar
       pagination={true}
-      sorting={SORT_BY_PAGE_LOADS}
+      sorting={SORT_BY_INGEST}
       loading={isLoading}
       noItemsMessage={noItemsMessage}
     />

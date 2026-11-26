@@ -51,6 +51,7 @@ export interface PackSavedObject {
   updated_by: string | undefined;
   updated_by_profile_uid?: string;
   policy_ids: string[];
+  effective_policy_ids?: string[];
   references: Array<{ name: string; id: string; type: string }>;
   /**
    * Pack-level schedule type. When absent, no pack-level schedule is set and

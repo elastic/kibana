@@ -67,7 +67,7 @@
   "sources": {
     "v1": {
       "apiVersion": "version not set",
-      "fetchedAt": "2026-10-07T20:18:25.747Z",
+      "fetchedAt": "2026-11-23T11:12:56.199Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/argoproj/argo-cd/master/assets/swagger.json"
     }
