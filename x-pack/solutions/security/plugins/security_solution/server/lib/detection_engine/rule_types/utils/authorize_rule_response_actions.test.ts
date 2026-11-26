@@ -32,12 +32,28 @@ describe('createResponseActionsParamsAuthorizer', () => {
     endpointAppContextService = createMockEndpointAppContextService();
   });
 
-  it('resolves when neither new nor previous params have response actions', async () => {
+  it('skips getEndpointAuthz when creating with no response actions', async () => {
     const authorizer = createResponseActionsParamsAuthorizer({ endpointAppContextService });
 
     await expect(
       authorizer.authorize(paramsWithResponseActions(), { request, spaceId })
     ).resolves.toBeUndefined();
+
+    expect(endpointAppContextService.getEndpointAuthz).not.toHaveBeenCalled();
+  });
+
+  it('skips getEndpointAuthz when updating with empty response actions on both sides', async () => {
+    const authorizer = createResponseActionsParamsAuthorizer({ endpointAppContextService });
+
+    await expect(
+      authorizer.authorize(paramsWithResponseActions([]), {
+        request,
+        spaceId,
+        previousParams: paramsWithResponseActions([]),
+      })
+    ).resolves.toBeUndefined();
+
+    expect(endpointAppContextService.getEndpointAuthz).not.toHaveBeenCalled();
   });
 
   it('resolves when the user is authorized for the added response action', async () => {
@@ -52,6 +68,29 @@ describe('createResponseActionsParamsAuthorizer', () => {
         spaceId,
       })
     ).resolves.toBeUndefined();
+
+    expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request, {
+      cache: true,
+    });
+  });
+
+  it('calls getEndpointAuthz when removing response actions from a previous rule', async () => {
+    endpointAppContextService.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({ canIsolateHost: true })
+    );
+    const authorizer = createResponseActionsParamsAuthorizer({ endpointAppContextService });
+
+    await expect(
+      authorizer.authorize(paramsWithResponseActions([]), {
+        request,
+        spaceId,
+        previousParams: paramsWithResponseActions([isolateResponseAction()]),
+      })
+    ).resolves.toBeUndefined();
+
+    expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request, {
+      cache: true,
+    });
   });
 
   it('throws a 403 Boom error when the user lacks privileges for the added response action', async () => {
