@@ -22,12 +22,19 @@ export const callConverse = async ({
   question,
   attachments,
   log,
+  configurationOverrides,
 }: {
   fetch: HttpHandler;
   connectorId: string;
   question: string;
   attachments: Array<{ type: string; data?: unknown }>;
   log: ToolingLog;
+  /** Optional converse overrides, for example skill_ids: [] for a no-skill arm. */
+  configurationOverrides?: {
+    skill_ids?: string[];
+    enable_elastic_capabilities?: boolean;
+    tools?: Array<{ tool_ids: string[] }>;
+  };
 }) => {
   log.info(`Calling converse: "${question.slice(0, 80)}..."`);
 
@@ -39,6 +46,7 @@ export const callConverse = async ({
       connector_id: connectorId,
       input: question,
       attachments,
+      ...(configurationOverrides ? { configuration_overrides: configurationOverrides } : {}),
     }),
   })) as ConverseResponse;
 

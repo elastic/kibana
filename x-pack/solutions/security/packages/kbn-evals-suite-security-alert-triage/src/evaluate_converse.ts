@@ -22,6 +22,10 @@ export interface ConverseEvalExample extends Example {
   metadata?: {
     attachments?: Array<{ type: string; data?: unknown }>;
     expectedAttachmentReads?: number;
+    /** When set, the exact skill set for the run (built-in Elastic skills are turned off). */
+    skillIds?: string[];
+    /** When set, passed to converse as configuration_overrides.tools. */
+    toolIds?: string[];
   };
 }
 
@@ -69,13 +73,23 @@ export const createEvaluateConverse = ({
           } satisfies EvaluationDataset,
         ],
         task: async ({ input, metadata }) => {
-          const { attachments = [] } = metadata ?? {};
+          const { attachments = [], skillIds, toolIds } = metadata ?? {};
           return callConverse({
             fetch,
             connectorId: connector.id,
             question: input.question,
             attachments,
             log,
+            // skill_ids only pins the skill set when built-in skills are off.
+            configurationOverrides:
+              skillIds !== undefined || toolIds !== undefined
+                ? {
+                    ...(skillIds !== undefined
+                      ? { skill_ids: skillIds, enable_elastic_capabilities: false }
+                      : {}),
+                    ...(toolIds !== undefined ? { tools: [{ tool_ids: toolIds }] } : {}),
+                  }
+                : undefined,
           });
         },
       },
