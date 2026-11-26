@@ -354,11 +354,13 @@ export const ListDetectionsInputSchema = lazySchema(() =>
     from: z
       .string()
       .datetime({ offset: true })
+      .max(50)
       .optional()
       .describe('Start of the date range, ISO 8601 format (e.g. 2024-01-01T00:00:00.000Z).'),
     to: z
       .string()
       .datetime({ offset: true })
+      .max(50)
       .optional()
       .describe('End of the date range, ISO 8601 format (e.g. 2024-12-31T23:59:59.999Z).'),
     page: z
