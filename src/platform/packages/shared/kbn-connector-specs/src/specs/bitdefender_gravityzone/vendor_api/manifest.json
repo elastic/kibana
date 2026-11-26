@@ -1,0 +1,50 @@
+{
+  "note": "Bitdefender GravityZone uses a JSON-RPC 2.0 API; every call is a POST to a service-specific path. The vendor publishes HTML-only documentation at https://www.bitdefender.com/business/support/en/77212-125277-public-api.html — no OpenAPI/Swagger is available. Paths and method names are captured here from the live API and the HTML docs.",
+  "operations": {
+    "searchEndpoints": [
+      { "method": "post", "path": "/v1.0/jsonrpc/network", "rpc_method": "getNetworkInventoryItems" }
+    ],
+    "getEndpoint": [
+      { "method": "post", "path": "/v1.0/jsonrpc/network", "rpc_method": "getManagedEndpointDetails" }
+    ],
+    "getTask": [
+      { "method": "post", "path": "/v1.1/jsonrpc/network", "rpc_method": "getTaskStatus" }
+    ],
+    "isolateEndpoint": [
+      { "method": "post", "path": "/v1.1/jsonrpc/incidents", "rpc_method": "createIsolateEndpointTask" }
+    ],
+    "restoreEndpointFromIsolation": [
+      { "method": "post", "path": "/v1.1/jsonrpc/incidents", "rpc_method": "createRestoreEndpointFromIsolationTask" }
+    ],
+    "scanEndpoint": [
+      { "method": "post", "path": "/v1.0/jsonrpc/network", "rpc_method": "createScanTask" }
+    ],
+    "quarantineFile": [
+      { "method": "post", "path": "/v1.1/jsonrpc/quarantine/computers", "rpc_method": "createAddFileToQuarantineTask" }
+    ],
+    "listQuarantineItems": [
+      { "method": "post", "path": "/v1.0/jsonrpc/quarantine/computers", "rpc_method": "getQuarantineItemsList" }
+    ],
+    "restoreQuarantineItem": [
+      { "method": "post", "path": "/v1.0/jsonrpc/quarantine/computers", "rpc_method": "addRestoreQuarantineItem" }
+    ],
+    "deleteQuarantineItem": [
+      { "method": "post", "path": "/v1.0/jsonrpc/quarantine/computers", "rpc_method": "removeQuarantineItem" }
+    ],
+    "addToBlocklist": [
+      { "method": "post", "path": "/v1.0/jsonrpc/incidents", "rpc_method": "addToBlocklist" }
+    ],
+    "getBlocklistItems": [
+      { "method": "post", "path": "/v1.0/jsonrpc/incidents", "rpc_method": "getBlocklistItems" }
+    ],
+    "removeFromBlocklist": [
+      { "method": "post", "path": "/v1.0/jsonrpc/incidents", "rpc_method": "removeFromBlocklist" }
+    ],
+    "listGroups": [
+      { "method": "post", "path": "/v1.0/jsonrpc/network", "rpc_method": "getCustomGroupsList" }
+    ],
+    "listPolicies": [
+      { "method": "post", "path": "/v1.0/jsonrpc/policies", "rpc_method": "getPoliciesList" }
+    ]
+  }
+}
