@@ -47,8 +47,10 @@ primaryAction={{
 
 ## Storybook
 
+The stories are part of the `presentation` Storybook, under **Panel message**:
+
 ```sh
-pnpm storybook presentation_panel_message
+pnpm storybook presentation
 ```
 
 - **All states**: every panel state from the design, in the same order and numbering.

@@ -796,7 +796,7 @@ src/platform/packages/shared/kbn-yaml-loader @elastic/streams-ui
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-engineering
 src/platform/packages/shared/navigation-customization-components @elastic/appex-sharedux
-src/platform/packages/shared/presentation/presentation_panel_message @elastic/kibana-dashboards
+src/platform/packages/shared/presentation/presentation-panel-message @elastic/kibana-dashboards
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-dashboards
 src/platform/packages/shared/presentation/presentation_publishing_schemas @elastic/kibana-dashboards
 src/platform/packages/shared/presentation/presentation_util @elastic/kibana-dashboards

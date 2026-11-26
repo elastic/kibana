@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/presentation-panel-message
   channel: ''
   owner: '@elastic/kibana-dashboards'
-  sourceRoot: src/platform/packages/shared/presentation/presentation_panel_message
+  sourceRoot: src/platform/packages/shared/presentation/presentation-panel-message
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'

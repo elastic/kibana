@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+module.exports = {
+  preset: '@kbn/jest',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/presentation/presentation-panel-message'],
+};

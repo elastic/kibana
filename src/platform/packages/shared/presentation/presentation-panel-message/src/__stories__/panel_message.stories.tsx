@@ -164,7 +164,7 @@ const DESIGN_STATES: readonly DesignState[] = [
 ];
 
 const meta: Meta = {
-  title: 'Presentation/Panel message',
+  title: 'Panel message',
 };
 
 export default meta;
