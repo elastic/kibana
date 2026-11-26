@@ -163,7 +163,10 @@ describe('readServedTokenUrls', () => {
     await fs.rm(directory, { recursive: true, force: true });
   });
 
-  const withTokenUrl = (tokenUrl: string, servers: Array<{ url: string; variables?: object }>) => ({
+  const withTokenUrl = (
+    tokenUrl: string,
+    servers: Array<{ url: string; variables?: object | null }>
+  ) => ({
     openapi: '3.0.3',
     servers,
     components: {
@@ -197,13 +200,14 @@ describe('readServedTokenUrls', () => {
       withTokenUrl('//auth.example.com/token', [
         {
           url: '{protocol}://api.example.com/v1',
-          variables: { protocol: { default: 'http', enum: ['http'] } },
+          variables: { protocol: { default: 'http', enum: ['http', 'https'] } },
         },
       ])
     );
 
     await expect(readServedTokenUrls(directory)).resolves.toEqual([
       'http://auth.example.com/token',
+      'https://auth.example.com/token',
     ]);
   });
 
