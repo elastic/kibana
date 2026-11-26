@@ -49,8 +49,7 @@ const ShareModalComponent: React.FC<Props> = ({
     () => getCurrentConversationOwner(selectedConversation),
     [selectedConversation]
   );
-  // seeded on mount only, so a refetch of selectedConversation does not discard the pending selection
-  const [nextUsers, setNextUsers] = useState<UserProfile[]>(
+  const savedUsers = useMemo<UserProfile[]>(
     () =>
       selectedConversation?.users
         // do not show current user in UI
@@ -63,15 +62,19 @@ const ShareModalComponent: React.FC<Props> = ({
           enabled: true,
           user: { username: name ?? id ?? '' },
           data: {},
-        })) || []
+        })) || [],
+    [conversationOwner, selectedConversation]
   );
+  // undefined until the user edits the picker, so refetches update an untouched picker but never discard an edit
+  const [editedUsers, setEditedUsers] = useState<UserProfile[] | undefined>();
+  const nextUsers = editedUsers ?? savedUsers;
   const handleCopyUrl = useCallback(
     () => copyConversationUrl(selectedConversation),
     [copyConversationUrl, selectedConversation]
   );
 
   const onNextUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
-    setNextUsers(updatedUsers);
+    setEditedUsers(updatedUsers);
   }, []);
 
   const onCancelShare = useCallback(() => {

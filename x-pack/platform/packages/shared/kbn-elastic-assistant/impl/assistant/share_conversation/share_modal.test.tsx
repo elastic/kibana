@@ -129,6 +129,36 @@ describe('ShareModal', () => {
     });
   });
 
+  it('uses the refetched users when the picker was not edited', async () => {
+    mockUpdateConversationUsers.mockResolvedValueOnce({});
+    const { rerender } = render(
+      <TestProviders providerContext={{ toasts: toastsMock }}>
+        <ShareModal
+          {...testProps}
+          selectedConversation={{
+            ...welcomeConvo,
+            users: [welcomeConvo.createdBy, { id: 'user1', name: 'User One' }],
+          }}
+        />
+      </TestProviders>
+    );
+    rerender(
+      <TestProviders providerContext={{ toasts: toastsMock }}>
+        <ShareModal
+          {...testProps}
+          selectedConversation={{ ...welcomeConvo, users: [welcomeConvo.createdBy] }}
+        />
+      </TestProviders>
+    );
+    fireEvent.click(screen.getByTestId('shareConversation'));
+    await waitFor(() => {
+      expect(mockUpdateConversationUsers).toHaveBeenCalledWith({
+        conversationId: welcomeConvo.id,
+        updatedUsers: [welcomeConvo.createdBy],
+      });
+    });
+  });
+
   it('shows error toast if updateConversationUsers throws', async () => {
     mockUpdateConversationUsers.mockRejectedValueOnce(new Error('fail'));
     render(
