@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
@@ -26,6 +26,10 @@ const disabledCollapsingTooltip = i18n.translate(
     defaultMessage: 'You must keep at least one area visible',
   }
 );
+
+// Toggling the sidebar switches the layout mode, which remounts the main panel (and this component).
+// The flag survives the remount so focus can be restored on the new sidebar toggle button.
+let shouldRestoreSidebarToggleFocus = false;
 
 export interface PanelsToggleProps {
   omitChartButton?: boolean;
@@ -149,9 +153,20 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   const onToggleSidebar = useCallback(() => {
     const hideSidebar = !isSidebarHidden;
+    shouldRestoreSidebarToggleFocus = true;
     setSidebarHidden(storage, 'discover', hideSidebar);
     dispatch(updateAppState({ appState: { hideSidebar } }));
   }, [dispatch, isSidebarHidden, storage, updateAppState]);
+
+  useEffect(() => {
+    if (!shouldRestoreSidebarToggleFocus) {
+      return;
+    }
+    shouldRestoreSidebarToggleFocus = false;
+    const testSubj = isSidebarHidden ? 'dscShowSidebarButton' : 'dscHideSidebarButton';
+    const groupSelector = `[data-test-subj="dscPanelsToggle${dataTestSubjSuffix ?? ''}"]`;
+    document.querySelector<HTMLElement>(`${groupSelector} [data-test-subj="${testSubj}"]`)?.focus();
+  }, [isSidebarHidden, dataTestSubjSuffix]);
 
   const disableHideChart = isTableHidden && !isChartHidden;
   const disableHideTable = isChartHidden && !isTableHidden;
