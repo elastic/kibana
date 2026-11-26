@@ -13,13 +13,16 @@ import {
   createSecretsClient,
   SecretsUnavailableError,
 } from '@kbn/secrets';
-import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createAuditedSecretsClient } from './audit/audited_secrets_client';
-import { createConnectorSecretProvider } from './providers/connector_secret_provider';
-import { createConnectorSecretReaders } from './providers/connector_secret_readers';
-import { registerSecretType, SECRET_SAVED_OBJECT_TYPE } from './saved_objects/secret_saved_object';
+import {
+  getSecretSavedObjectId,
+  registerSecretType,
+  SECRET_SAVED_OBJECT_TYPE,
+} from './saved_objects/secret_saved_object';
 import { createSavedObjectsSecretsStorage } from './storage/saved_objects_secrets_storage';
 import type {
+  SecretProviderRegistration,
   SecretsPluginSetup,
   SecretsPluginSetupDependencies,
   SecretsPluginStart,
@@ -40,6 +43,7 @@ export class SecretsPlugin
 {
   private readonly logger: Logger;
   private canEncrypt = false;
+  private connectorProviderRegistration?: SecretProviderRegistration;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -54,12 +58,19 @@ export class SecretsPlugin
       this.logger.warn('Secrets are unavailable: Kibana has no saved objects encryption key.');
     }
     registerSecretType({ savedObjects, encryptedSavedObjects });
-    return {};
+    return {
+      registerProvider: (registration) => {
+        if (this.connectorProviderRegistration) {
+          throw new Error(`A provider of "${registration.type}" secrets is already registered.`);
+        }
+        this.connectorProviderRegistration = registration;
+      },
+    };
   }
 
   public start(
     core: CoreStart,
-    { encryptedSavedObjects, spaces, actions }: SecretsPluginStartDependencies
+    { encryptedSavedObjects, spaces }: SecretsPluginStartDependencies
   ): SecretsPluginStart {
     // Every call passes its namespace. Callers include task runs, whose request has no
     // credentials for the space check that the spaces extension makes.
@@ -69,8 +80,6 @@ export class SecretsPlugin
     });
     const encryptedClient = encryptedSavedObjects.getClient({ includedHiddenTypes });
     const kibanaSecretProvider = createKibanaSecretProvider();
-    // Throws, so that Kibana does not start, when a listed connector type cannot read secrets.
-    const secretReaders = createConnectorSecretReaders();
 
     return {
       getClient: ({ request, consumer }) => {
@@ -90,14 +99,15 @@ export class SecretsPlugin
           username: core.security.authc.getCurrentUser(request)?.username ?? UNKNOWN_USERNAME,
           providers: {
             kibana: kibanaSecretProvider,
-            connector: actions
-              ? createConnectorSecretProvider({
-                  actions,
-                  request,
-                  spaceId: brandSpaceId(spaceId),
-                  secretReaders,
-                })
-              : undefined,
+            // Absent when no plugin registered one: secrets then only come from Kibana.
+            connector: this.connectorProviderRegistration?.create({
+              request,
+              spaceId,
+              getSecretSavedObject: ({ name }) => ({
+                type: SECRET_SAVED_OBJECT_TYPE,
+                id: getSecretSavedObjectId({ spaceId, name }),
+              }),
+            }),
           },
         });
         return createAuditedSecretsClient({

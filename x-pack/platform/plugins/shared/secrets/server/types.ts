@@ -10,9 +10,8 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SecretsClient } from '@kbn/secrets';
+import type { ConnectorSecretProvider, SECRET_PROVIDER_TYPE, SecretsClient } from '@kbn/secrets';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
 export interface GetSecretsClientParams {
   readonly request: KibanaRequest;
@@ -20,11 +19,30 @@ export interface GetSecretsClientParams {
   readonly consumer: string;
 }
 
+/** What a registered provider gets to serve one secrets client. */
+export interface CreateSecretProviderParams {
+  /** The request of the caller of the secrets client. */
+  readonly request: KibanaRequest;
+  readonly spaceId: string;
+  /** The saved object that stores a secret, for a provider that reports what it acts for. */
+  getSecretSavedObject(params: { name: string }): { type: string; id: string };
+}
+
 /**
- * Setup contract of the secrets plugin. It has no members yet: dependants use its presence
- * to know, at setup, that the plugin is enabled.
+ * A provider of secrets whose values live outside Kibana. The plugin that can reach them
+ * registers it, so that the secrets plugin depends on none of them.
  */
-export type SecretsPluginSetup = Record<string, never>;
+export interface SecretProviderRegistration {
+  readonly type: typeof SECRET_PROVIDER_TYPE.connector;
+  /** Creates the provider for one secrets client. Called for each client, after start. */
+  create(params: CreateSecretProviderParams): ConnectorSecretProvider;
+}
+
+/** Setup contract of the secrets plugin. Dependants also use its presence to know it is enabled. */
+export interface SecretsPluginSetup {
+  /** Registers a provider of secrets. Throws when its type already has one. */
+  registerProvider(registration: SecretProviderRegistration): void;
+}
 
 export interface SecretsPluginStart {
   /**
@@ -42,6 +60,4 @@ export interface SecretsPluginSetupDependencies {
 export interface SecretsPluginStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   spaces?: SpacesPluginStart;
-  /** Optional: without it, secrets cannot come from external secret managers. */
-  actions?: ActionsPluginStart;
 }

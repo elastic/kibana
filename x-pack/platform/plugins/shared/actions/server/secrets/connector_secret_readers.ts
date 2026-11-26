@@ -10,15 +10,13 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import { SecretValidationError } from '@kbn/secrets';
 
 /**
- * The connector types that can hold secrets. A "secret manager" is the external service that
- * keeps the values (GCP Secret Manager, AWS Parameter Store), and a connector is how Kibana
- * talks to it. How a value is read comes from the `secretManager` member of each spec: nothing
- * here is specific to one connector.
+ * The connector types that can hold secrets: the ones whose spec has a `secretManager` member.
+ * A "secret manager" is the external service that keeps the values (GCP Secret Manager, AWS
+ * Parameter Store), and a connector is how Kibana talks to it. How a value is read comes from
+ * that member: nothing here is specific to one connector.
  */
-const SECRET_CONNECTOR_SPECS: readonly ConnectorSpec[] = [
-  connectorsSpecs.GcpSecretManager,
-  connectorsSpecs.AwsSsmConnector,
-];
+const getSecretConnectorSpecs = (): ConnectorSpec[] =>
+  Object.values(connectorsSpecs).filter(({ secretManager }) => secretManager !== undefined);
 
 export interface ConnectorSecretReadParams {
   subAction: string;
@@ -81,9 +79,9 @@ const createConnectorSecretReader = ({
 
 /**
  * Creates the readers of the connector types that can hold secrets, by connector type id.
- * Throws when a listed connector type cannot be used to read secrets.
+ * Throws when one of them reads secrets with an action it does not have.
  */
 export const createConnectorSecretReaders = (): ReadonlyMap<string, ConnectorSecretReader> =>
   new Map(
-    SECRET_CONNECTOR_SPECS.map((spec) => [spec.metadata.id, createConnectorSecretReader(spec)])
+    getSecretConnectorSpecs().map((spec) => [spec.metadata.id, createConnectorSecretReader(spec)])
   );

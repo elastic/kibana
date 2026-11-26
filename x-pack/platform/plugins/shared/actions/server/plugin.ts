@@ -47,8 +47,10 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import type { SecretsPluginSetup } from '@kbn/secrets-plugin/server';
 import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-specs';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import { registerConnectorSecretProvider } from './secrets/register_connector_secret_provider';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -282,6 +284,8 @@ export interface ActionsPluginsSetup {
   serverless?: ServerlessPluginSetup;
   cloud: CloudSetup;
   usageApi?: UsageApiSetup;
+  /** Optional: with it, secrets can be read from secret managers through connectors. */
+  secrets?: SecretsPluginSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -541,6 +545,16 @@ export class ActionsPlugin
       oauthRateLimiter,
       inboundEvents,
     });
+
+    if (plugins.secrets) {
+      registerConnectorSecretProvider({
+        secrets: plugins.secrets,
+        getActionsStart: async () => {
+          const [, , actionsStart] = await core.getStartServices();
+          return actionsStart;
+        },
+      });
+    }
 
     return {
       registerType: <
