@@ -407,14 +407,30 @@ describe('OTLP output authentication', () => {
         ).not.toThrow();
       });
 
-      it('rejects an empty endpoint, the signals would have nowhere to be sent', () => {
+      it('accepts an output that only sends signals to their own endpoints', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...managedIdentity, scopes: ['https://monitor.azure.com/.default'] },
+            hasCredential: false,
+            exporter: {
+              endpoint: '',
+              protocol: 'http/protobuf',
+              logs_endpoint: 'https://collector.example.com:4318/v1/logs',
+            },
+          })
+        ).not.toThrow();
+      });
+
+      it('rejects an output without any endpoint', () => {
         expect(() =>
           validateOtlpAuth({
             auth: managedIdentity,
             hasCredential: false,
-            exporter: { endpoint: '', protocol: 'http/protobuf' },
+            exporter: { endpoint: '', protocol: 'http/protobuf', logs_endpoint: '' },
           })
-        ).toThrow('auth.type "azure" requires https endpoints, otlp_exporter.endpoint is not one');
+        ).toThrow(
+          'auth.type "azure" requires an https endpoint, otlp_exporter.endpoint or a signal endpoint'
+        );
       });
 
       it('rejects skipping the verification of the server certificate', () => {
