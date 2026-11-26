@@ -81,7 +81,7 @@ describe('Update profile routes', () => {
       expect(bodySchema.validate({})).toEqual({});
       expect(
         bodySchema.validate({
-          avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
+          avatar: { initials: 'SI', color: 'some-color', imageUrl: 'some-image-url' },
           userSettings: {
             darkMode: 'dark',
             contrastMode: 'high',
@@ -90,7 +90,7 @@ describe('Update profile routes', () => {
           },
         })
       ).toEqual({
-        avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
+        avatar: { initials: 'SI', color: 'some-color', imageUrl: 'some-image-url' },
         userSettings: {
           darkMode: 'dark',
           contrastMode: 'high',
@@ -190,26 +190,44 @@ describe('Update profile routes', () => {
       ).toThrow();
     });
 
+    it('accepts avatar initials of up to 2 graphemes.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+
+      for (const initials of ['AB', '\u{1F44D}\u{1F3FD}\u{1F44D}\u{1F3FD}', 'A\u{1F44D}']) {
+        expect(
+          bodySchema.validate({
+            avatar: { initials },
+          })
+        ).toEqual({ avatar: { color: null, imageUrl: null, initials } });
+      }
+    });
+
+    it('rejects avatar initials of more than 2 graphemes.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+
+      expect(() =>
+        bodySchema.validate({
+          avatar: { initials: 'ABC' },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[avatar.initials]: types that failed validation:
+        - [avatar.initials.0]: must have at most 2 characters
+        - [avatar.initials.1]: expected value to equal [null]"
+      `);
+    });
+
     it('rejects avatar initials exceeding max length.', () => {
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
-      const MAX_STRING_FIELD_LENGTH = 1024;
 
-      // Valid length should pass
-      const validInitials = 'a'.repeat(MAX_STRING_FIELD_LENGTH);
-      expect(
-        bodySchema.validate({
-          avatar: { initials: validInitials },
-        })
-      ).toEqual({ avatar: { color: null, imageUrl: null, initials: validInitials } });
-
-      const invalidInitials = 'a'.repeat(MAX_STRING_FIELD_LENGTH + 1);
+      // One grapheme, but more code units than the cap allows.
+      const invalidInitials = `a${'́'.repeat(64)}`;
       expect(() =>
         bodySchema.validate({
           avatar: { initials: invalidInitials },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
         "[avatar.initials]: types that failed validation:
-        - [avatar.initials.0]: value has length [1025] but it must have a maximum length of [1024].
+        - [avatar.initials.0]: value has length [65] but it must have a maximum length of [64].
         - [avatar.initials.1]: expected value to equal [null]"
       `);
     });

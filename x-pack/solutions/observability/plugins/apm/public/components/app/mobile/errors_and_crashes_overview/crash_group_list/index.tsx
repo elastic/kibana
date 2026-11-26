@@ -135,7 +135,7 @@ function MobileCrashGroupList({
         render: (_, item) => {
           return (
             <MessageAndCulpritCell>
-              <EuiToolTip id="error-message-tooltip" content={item.name || NOT_AVAILABLE_LABEL}>
+              <EuiToolTip content={item.name || NOT_AVAILABLE_LABEL} disableScreenReaderOutput>
                 <MessageLink serviceName={serviceName} groupId={item.groupId} query={query}>
                   {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>

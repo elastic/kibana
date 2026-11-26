@@ -31,7 +31,7 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
-import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
+import { useGetFlyoutLink } from './hooks/use_get_flyout_link';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
 import { DocumentPagination, useShowDocumentPagination } from './components/document_pagination';
 

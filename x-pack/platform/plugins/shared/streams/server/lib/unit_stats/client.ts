@@ -10,15 +10,18 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { MAX_STREAMS_UNIT_STATS_COMPONENTS, type StreamsUnit } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
+import { chunk } from 'lodash';
 import { StatusError } from '../streams/errors/status_error';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import {
   ESQL_MAX_ROWS,
+  STATS_COLUMN,
   UNIT_METRICS_STREAM,
   UNIT_STATS_DEFAULT_WINDOW_MS,
   UNIT_STATS_REQUEST_TIMEOUT_MS,
 } from './constants';
 import { getDestinationAuthFailures, getNoAuthFailures } from './destination_auth_failures';
+import { getDestinationDeliverySeries } from './destination_delivery_series';
 import { toSearchError } from './errors/search_errors';
 import { mostActionableFailure, STATS_ERROR_CODE, UnitStatsError } from './errors/unit_stats_error';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
@@ -28,8 +31,10 @@ import {
   noDestinationStats,
   withAuthFailures,
 } from './mappers/map_destination_stats_result';
+import { withDeliverySeries } from './mappers/map_delivery_series';
 import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_result';
 import { mapSourceStatsRows, noSourceStats } from './mappers/map_source_stats_result';
+import { buildDestinationCollectionsQuery } from './query_builders/build_destination_collections_query';
 import {
   buildDestinationRateQuery,
   buildDestinationSumsQuery,
@@ -47,6 +52,12 @@ import {
   type SourceQueryRef,
 } from './query_refs';
 import { getSeriesBucketMs } from './utils/series_bucket';
+
+/** A data stream or index a destination wrote to, and the documents that stayed in it. */
+export interface DestinationCollection {
+  name: string;
+  documents: number;
+}
 
 /** The results of one kind, and the error when its queries failed. */
 interface KindOutcome<TResult> {
@@ -110,6 +121,65 @@ export class UnitStatsClient {
       components: { destinations, processors, sources },
       meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
     };
+  }
+
+  /**
+   * The collections (data streams or indices) each destination wrote documents to in the window,
+   * with the documents that stayed in each, see `buildDestinationCollectionsQuery`. A destination
+   * that wrote nothing, or a unit that has not reported yet, has an empty list. A failure throws as
+   * a `UnitStatsError`.
+   */
+  async getDestinationCollections({
+    unitId,
+    destinationIds,
+    window,
+  }: {
+    unitId: string;
+    destinationIds: string[];
+    window: StatsQueryBaseParams['window'];
+  }): Promise<Record<string, DestinationCollection[]>> {
+    const what = 'destination collections';
+    const collections: Record<string, DestinationCollection[]> = Object.fromEntries(
+      destinationIds.map((id) => [id, []])
+    );
+    if (destinationIds.length === 0) return collections;
+
+    try {
+      if (!(await this.doesUnitMetricsStreamExist())) return collections;
+
+      const rowGroups = await Promise.all(
+        chunk(destinationIds, MAX_STREAMS_UNIT_STATS_COMPONENTS).map((ids) =>
+          this.runQuery(buildDestinationCollectionsQuery({ unitId, window, ids }))
+        )
+      );
+      for (const rows of rowGroups) {
+        if (rows.length >= ESQL_MAX_ROWS) {
+          this.dependencies.logger.warn(
+            `Unit stats ${what} for unit [${unitId}] reached the ${ESQL_MAX_ROWS} row limit, so some collections are missing`
+          );
+        }
+        for (const {
+          [STATS_COLUMN.id]: id,
+          [STATS_COLUMN.collection]: name,
+          [STATS_COLUMN.documents]: documents,
+        } of rows) {
+          if (
+            typeof id === 'string' &&
+            typeof name === 'string' &&
+            typeof documents === 'number' &&
+            Object.hasOwn(collections, id)
+          ) {
+            collections[id].push({ name, documents });
+          }
+        }
+      }
+
+      return collections;
+    } catch (error) {
+      const failure = toSearchError(error, what);
+      this.logFailure(failure, { unitId, what });
+      throw failure;
+    }
   }
 
   /** Every destination, processor and source in the unit, as long as one request can name them all. */
@@ -261,35 +331,60 @@ export class UnitStatsClient {
 
       // The failed rate of each parent result decides which destinations to ask about their auth
       // failures. A destination type whose queries fail is logged once, and its destinations keep
-      // their other stats, with the error beside them and no failure rates.
-      const { failures, failedGroups } = await getDestinationAuthFailures({
-        runQuery: (query) => this.runQuery(query),
-        baseParams,
-        destinations,
-        parentResults: results,
-      });
-      const failureErrors = Object.fromEntries(
-        failedGroups.flatMap(({ types, ids: failedIds, error }) => {
-          const failedWhat = `destination ${types.join(', ')} authentication and authorization`;
+      // their other stats, with the error beside them and no failure rates. The delivery series is
+      // for the destinations that ask for it, and does not depend on the rest, so it runs beside.
+      const [authFailures, deliverySeries] = await Promise.all([
+        getDestinationAuthFailures({
+          runQuery: (query) => this.runQuery(query),
+          baseParams,
+          destinations,
+          parentResults: results,
+        }),
+        getDestinationDeliverySeries({
+          runQuery: (query) => this.runQuery(query),
+          baseParams,
+          destinations: destinations.filter(({ include }) => include?.delivery_series),
+          bucketMs,
+        }),
+      ]);
+      const { failures } = authFailures;
+      const { series } = deliverySeries;
+      const toGroupErrors = (
+        groups: Array<{ types: string[]; ids: string[]; error: unknown }>,
+        about: string
+      ) =>
+        groups.flatMap(({ types, ids: failedIds, error }) => {
+          const failedWhat = `destination ${types.join(', ')} ${about}`;
           const failure = toSearchError(error, failedWhat);
           this.logFailure(failure, { unitId: baseParams.unitId, what: failedWhat });
 
-          return failedIds.map((id) => [id, failure.toStatsError()]);
-        })
-      );
+          return failedIds.map((id) => [id, failure.toStatsError()] as const);
+        });
+      // A destination has one error, and the later entry wins, so the one about the failures comes
+      // last: it is the one that hides rates.
+      const failureErrors = Object.fromEntries([
+        ...toGroupErrors(deliverySeries.failedGroups, 'delivery series'),
+        ...toGroupErrors(authFailures.failedGroups, 'authentication and authorization'),
+      ]);
 
       return {
         results: Object.fromEntries(
-          destinations.map(({ id, type }) => [
-            id,
-            {
-              ...withAuthFailures(
-                results[id],
-                Object.hasOwn(failures, id) ? failures[id] : getNoAuthFailures(type)
-              ),
-              ...(Object.hasOwn(failureErrors, id) ? { error: failureErrors[id] } : {}),
-            },
-          ])
+          destinations.map(({ id, type }) => {
+            const withFailures = withAuthFailures(
+              results[id],
+              Object.hasOwn(failures, id) ? failures[id] : getNoAuthFailures(type)
+            );
+
+            return [
+              id,
+              {
+                ...(Object.hasOwn(series, id)
+                  ? withDeliverySeries(withFailures, series[id])
+                  : withFailures),
+                ...(Object.hasOwn(failureErrors, id) ? { error: failureErrors[id] } : {}),
+              },
+            ];
+          })
         ),
       };
     } catch (error) {

@@ -1,5 +1,5 @@
 {
-  "sha1": "439e23995869ea53bddc0a69f96b0ef4c7ac4f9c",
+  "sha1": "243e38339186d55b6b652420c78f2286e453c2ed",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -85,27 +85,27 @@
     {
       "id": "53a2dbab1ffadf5-cc6d67ea9c35a54",
       "title": "Discover replay cache with a changed global context loads fresh results after opening a dashboard with a stored time range",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_replay_cache_global_context.spec.ts",
-        "line": 51,
-        "column": 52
+        "line": 50,
+        "column": 54
       }
     },
     {
       "id": "53a2dbab1ffadf5-eb7984682273c90",
       "title": "Discover replay cache with a changed global context loads fresh results after a dashboard removes a pinned filter",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_replay_cache_global_context.spec.ts",
         "line": 57,
-        "column": 50
+        "column": 24
       }
     },
     {

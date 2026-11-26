@@ -9,11 +9,12 @@
 
 import type { Readable } from 'node:stream';
 import { buffer as collectBuffer } from 'node:stream/consumers';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { core } from '@elastic/opentelemetry-node/sdk';
 import { ProtobufTraceSerializer } from '@opentelemetry/otlp-transformer';
 import type { IExportTraceServiceResponse } from '@opentelemetry/otlp-transformer';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace';
+import { ExportResultCode } from '@opentelemetry/core';
+import type { ExportResult } from '@opentelemetry/core';
 
 const ES_OTLP_TRACES_PATH = '/_otlp/v1/traces';
 const CONTENT_TYPE_PROTOBUF = 'application/x-protobuf';
@@ -30,21 +31,21 @@ const extractPartialFailure = (buf: Buffer): { errorMessage: string } | undefine
 };
 
 /**
- * A {@link tracing.SpanExporter} that ships OTLP-protobuf encoded spans
+ * A {@link SpanExporter} that ships OTLP-protobuf encoded spans
  * to Elasticsearch's native `/_otlp/v1/traces` endpoint via the
  * ES client transport. This reuses the same connection, auth, and TLS
  * settings that Kibana already has for talking to Elasticsearch.
  */
-export class ElasticsearchOtlpExporter implements tracing.SpanExporter {
+export class ElasticsearchOtlpExporter implements SpanExporter {
   private readonly sendingPromises = new Set<Promise<void>>();
   private isShutdown = false;
 
   constructor(private readonly client: ElasticsearchClient) {}
 
-  export(spans: tracing.ReadableSpan[], resultCallback: (result: core.ExportResult) => void): void {
+  export(spans: ReadableSpan[], resultCallback: (result: ExportResult) => void): void {
     if (this.isShutdown) {
       resultCallback({
-        code: core.ExportResultCode.FAILED,
+        code: ExportResultCode.FAILED,
         error: new Error('Exporter has been shut down'),
       });
       return;
@@ -53,7 +54,7 @@ export class ElasticsearchOtlpExporter implements tracing.SpanExporter {
     const serialized = ProtobufTraceSerializer.serializeRequest(spans);
     if (!serialized) {
       resultCallback({
-        code: core.ExportResultCode.FAILED,
+        code: ExportResultCode.FAILED,
         error: new Error('Serialization failed'),
       });
       return;
@@ -79,14 +80,14 @@ export class ElasticsearchOtlpExporter implements tracing.SpanExporter {
 
         if (failure) {
           resultCallback({
-            code: core.ExportResultCode.FAILED,
+            code: ExportResultCode.FAILED,
             error: new Error(failure.errorMessage),
           });
         } else {
-          resultCallback({ code: core.ExportResultCode.SUCCESS });
+          resultCallback({ code: ExportResultCode.SUCCESS });
         }
       })
-      .catch((error) => resultCallback({ code: core.ExportResultCode.FAILED, error }))
+      .catch((error) => resultCallback({ code: ExportResultCode.FAILED, error }))
       .finally(() => this.sendingPromises.delete(exportPromise));
 
     this.sendingPromises.add(exportPromise);

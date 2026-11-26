@@ -375,6 +375,10 @@ What keeps working:
 - **Attachments themselves:** attachments can still be added through the API, workflow steps, the attachment client and the agent's own tools.
 - **Type and bound tools:** tools that an attachment type declares, and tools tied to one attachment, are still added.
 
+#### `bash_tool`
+
+With `bash_tool: { enabled: false }`, the agent does not get the virtual filesystem `bash` tool, and its system prompt no longer lists it in the FILESYSTEM section or tells it to write render payloads with it (renderers are left out of the CUSTOM RENDERING section). Use it for an agent that works on files through its own tools, because the `bash` tool's `/workspace` is the Agent Builder virtual filesystem, not whatever filesystem those tools edit. `read_file` and `list_files` stay on. The capability only matters when the `bash` experimental feature is on, since the tool does not exist otherwise.
+
 #### Adding a new key
 
 Add a field to `AgentCapabilities` (`@kbn/agent-builder-common`) and to `ResolvedCapabilities` (`run_agent/types.ts`), set its default in `resolveConfiguration` (`run_agent/utils/configuration.ts`), gate the feature on the resolved value, and add tests. A feature that should start off for everyone does not belong here.
@@ -1194,34 +1198,50 @@ The registry does not fetch card data or provide a default card when none is reg
 
 ### Conversation details header and footer
 
-Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
-`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
-`openConversationDetails`. It is supplied at render time, not through registration context.
+Tabs and `useDetailsFlyout` (below) share `ConversationTemplateDetailsFlyoutRenderProps`. `isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through `openConversationDetails`. It is supplied at render time, not through registration context.
 
-Template UI definitions can provide optional `detailsFlyout.header` and
-`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
-hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
-only the content for each slot. Without a custom header, the default title remains.
-Without a custom footer, no footer is rendered.
+Agent Builder renders the conversation details flyout with `@kbn/flyout-template`. A template describes the flyout's header and footer as data, through `detailsFlyout.load`. `load` resolves to a module with:
 
-Capture Agent Builder capabilities from the existing registration context, and
-provide any solution-specific React providers inside your components:
+- `useDetailsFlyout(props)`: a hook that returns a `ConversationTemplateDetailsFlyoutDescriptor`. Its `header` has a plain-text `title`, an optional `description`, an `isLoading` spinner named by `loadingLabel`, and lists of meta blocks, badges and info blocks. Its optional `footer` has a `primary` and a `secondary` action. The parts take `@kbn/flyout-template`'s props, so an info block value can be any React node, and the secondary action can take `variant: 'ai'`.
+- `Provider` (optional): wraps the flyout, so `useDetailsFlyout` and the values it returns can use your plugin's own contexts, such as its Kibana services or query client. The flyout renders outside them.
+
+`load` is called the first time a flyout for the template opens, and again on the next open after a load that failed. Until it resolves, the flyout shows a "Summary" header with a spinner, in the same flyout the loaded header replaces. Use a dynamic `import()` so the module stays out of your plugin's page-load bundle. Without `load`, the flyout is titled "Summary" and has no footer.
 
 ```tsx
 agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({
   name: investigationTemplateName,
   tabs: ['investigation.details'],
   detailsFlyout: {
-    header: InvestigationHeader,
-    footer: ({ conversation }) => (
-      <InvestigationFooter
-        conversation={conversation}
-        onOpenChat={() => context.openSidebarConversation(conversation.id)}
-      />
-    ),
+    load: async () => {
+      const { createInvestigationDetailsFlyout } = await import('./investigation_details_flyout');
+      return createInvestigationDetailsFlyout(context);
+    },
   },
 }));
+
+// investigation_details_flyout.tsx
+export const createInvestigationDetailsFlyout = (context: ConversationTemplateUIContext) => ({
+  Provider: InvestigationProviders,
+  useDetailsFlyout: ({ conversation, isOpenedFromChat }) => ({
+    header: {
+      title: conversation.title,
+      infoBlocks: [{ title: statusLabel, children: <StatusToggle conversation={conversation} /> }],
+    },
+    footer: isOpenedFromChat
+      ? undefined
+      : {
+          secondary: {
+            variant: 'ai',
+            iconType: 'productAgent',
+            label: openChatLabel,
+            onClick: () => context.openSidebarConversation(conversation.id),
+          },
+        },
+  }),
+});
 ```
+
+The header's zones, the tab bar and each tab carry fixed test subjects, the same in both hosts: `agentBuilderConversationDetailsFlyoutHeader`, `…Body`, `…Footer`, `…Tabs` and `agentBuilderConversationDetailsFlyoutTab-<tabId>`.
 
 ### Conversation details flyout width
 
@@ -1230,9 +1250,7 @@ Every conversation details flyout — the in-chat one and the ones opened with
 width in every consuming app:
 
 - Default width 480px, minimum 400px, maximum 640px.
-- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
-  next open, wherever the flyout is opened from. The flyout menu's reset action returns it to the
-  default.
+- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the next open, wherever the flyout is opened from.
 
 The width is not configurable per template or per caller: all surfaces share one setting.
 
@@ -1276,10 +1294,7 @@ agentBuilder.openConversationDetails({
 
 ### Opening flyouts from conversation details content
 
-Both conversation details flyouts are managed EUI flyouts in the
-`CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, header,
-footer, or attachment renderer and have it stack on top with a Back button, open it as a main flyout
-in the same group by passing these options when you open it:
+Both conversation details flyouts are managed EUI flyouts in the `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, a header or footer value, or an attachment renderer and have it stack on top with a Back button, open it as a main flyout in the same group by passing these options when you open it:
 
 ```tsx
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
