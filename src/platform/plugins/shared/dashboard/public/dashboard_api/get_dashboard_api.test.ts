@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 
 import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
@@ -69,7 +69,10 @@ describe('pause fetch', () => {
         initiallyAwaitingFilters: true,
       });
       // required controls can only be given a selection once they have fetched their options
-      expect(await firstValueFrom(api.isFetchPaused$)).toBe(false);
+      // the grid opening re-pauses briefly until its controls have published, so wait for the unpause
+      expect(await firstValueFrom(api.isFetchPaused$.pipe(filter((paused) => !paused)))).toBe(
+        false
+      );
     }
   );
 });

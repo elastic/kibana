@@ -508,6 +508,40 @@ describe('filters manager: awaiting required filters', () => {
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([pinnedFilter, gridFilter]);
   });
 
+  test("auto-apply off: the apply that hides the grid also drops the grid controls' filters", async () => {
+    const { filtersManager, setChildren, setVisibleChildren } = buildSetup(['control1'], {
+      autoApplyFilters: false,
+    });
+    const pinnedFilter = { meta: { key: 'pinned' } } as Filter;
+    const gridFilter = { meta: { key: 'grid' } } as Filter;
+    const control = buildControl('control1', { awaiting: false, filters: [pinnedFilter] });
+    setChildren([
+      control,
+      {
+        uuid: 'gridControl',
+        filtersLoading$: new BehaviorSubject<boolean>(false),
+        appliedFilters$: new BehaviorSubject<Filter[] | undefined>([gridFilter]),
+      },
+    ]);
+    await flush();
+    filtersManager.api.publishFilters();
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([pinnedFilter, gridFilter]);
+
+    // the required control is cleared: nothing is published until Apply
+    control.awaitingRequiredFilters$.next(true);
+    control.appliedFilters$.next(undefined);
+    await flush();
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([pinnedFilter, gridFilter]);
+
+    filtersManager.api.publishFilters();
+    setVisibleChildren([]); // the real layout manager hides the grid once awaiting is published
+    await flush();
+
+    expect(filtersManager.api.awaitingRequiredFilters$.value).toBe(true);
+    expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+    expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+  });
+
   test('ignores filtersLoading$ of children that are not rendered, so the restored required selection can publish', async () => {
     const { filtersManager, setChildren, setVisibleChildren } = buildSetup(['control1']);
     const requiredFilter = { meta: { key: 'required' } } as Filter;
@@ -598,5 +632,49 @@ describe('filters manager: awaiting required filters', () => {
 
     expect(filtersManager.api.unpublishedChildFilters$.value).toEqual([region, saved]);
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([region, saved]);
+  });
+
+  test('initialPublishPending$ is true on load and from the grid opening, until the rendered children are published', async () => {
+    const { filtersManager, awaitingRequiredFilters$, childApisPending$, setChildren } = buildSetup(
+      ['control1'],
+      { initiallyAwaitingFilters: true }
+    );
+    const pinnedFilter = { meta: { key: 'pinned' } } as Filter;
+    const gridFilter = { meta: { key: 'grid' } } as Filter;
+    const states: Array<{ pending: boolean; published: Filter[] | undefined }> = [];
+    filtersManager.internalApi.initialPublishPending$.subscribe((pending) => {
+      states.push({ pending, published: filtersManager.api.publishedChildFilters$.value });
+    });
+    // like the real layout manager, the grid's children are pending from the moment the grid opens
+    awaitingRequiredFilters$.subscribe((awaiting) => {
+      if (!awaiting) childApisPending$.next(true);
+    });
+
+    const control = buildControl('control1', { awaiting: true });
+    setChildren([control]);
+    await flush();
+    // the pinned controls have reported on the waiting screen
+    expect(states).toEqual([
+      { pending: true, published: undefined },
+      { pending: false, published: undefined },
+    ]);
+
+    // the required control gets its selection, which opens the grid
+    control.appliedFilters$.next([pinnedFilter]);
+    control.awaitingRequiredFilters$.next(false);
+    await flush();
+    expect(awaitingRequiredFilters$.value).toBe(false);
+    // only the pinned selection is published so far, and fetching is held back
+    expect(states[states.length - 1]).toEqual({ pending: true, published: [pinnedFilter] });
+
+    // a slower grid control registers with its saved selection
+    setChildren([control, buildControl('gridControl', { filters: [gridFilter] })]);
+    childApisPending$.next(false);
+    await flush();
+    expect(states[states.length - 1]).toEqual({
+      pending: false,
+      published: [pinnedFilter, gridFilter],
+    });
+    expect(states.filter(({ pending }) => !pending)).toHaveLength(2);
   });
 });

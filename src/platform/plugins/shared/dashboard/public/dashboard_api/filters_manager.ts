@@ -18,9 +18,12 @@ import {
   filter,
   first,
   map,
+  of,
   skip,
   skipWhile,
+  startWith,
   switchMap,
+  tap,
   type Subject,
 } from 'rxjs';
 
@@ -119,33 +122,33 @@ export const initializeFiltersManager = (
     }
   ).pipe(distinctUntilChanged(deepEqual));
 
-  /** when auto-apply is `false`, the first set of complete filters is published automatically, exactly once */
-  let initialPublishPending = !settingsManager.api.settings.autoApplyFilters$.getValue();
   /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
   const unpublishedFiltersSubscription = combineLatest({
     allChildFilters: childFilters$,
     loading: anyChildFiltersLoading$,
     // a change in what the children are awaiting also pushes, so that auto-apply publishes it along with their filters
     childrenAwaiting: childrenAwaitingRequiredFilters$,
-    hasPendingChildApis: layoutManager.internalApi.childApisPending$,
-    // the grid mounting (published awaiting state going to `false`) also pushes, so grid controls' saved
-    // selections can be published as soon as they have reported
-    awaiting: awaitingRequiredFilters$,
   })
     .pipe(
       skip(1),
       debounceTime(0),
       filter(({ loading }) => !loading)
     )
-    .subscribe(({ allChildFilters, hasPendingChildApis }) => {
+    .subscribe(({ allChildFilters }) => {
       unpublishedChildFilters$.next(allChildFilters);
-      // don't consume the initial publish until every rendered child (including the pinned controls) has
-      // registered, so slower controls have reported their filters
-      if (initialPublishPending && !hasPendingChildApis) {
-        initialPublishPending = false;
-        publishFilters();
-      }
     });
+
+  /** the filters of the pinned children alone, i.e. what remains once the grid is hidden */
+  const getPinnedChildFilters = (): Filter[] | undefined => {
+    const children = layoutManager.api.children$.getValue();
+    const filters = Object.keys(layoutManager.api.layout$.getValue().pinnedPanels).flatMap(
+      (uuid) => {
+        const child = children[uuid];
+        return apiAppliesFilters(child) ? child.appliedFilters$.getValue() ?? [] : [];
+      }
+    );
+    return filters.length > 0 ? filters : undefined;
+  };
 
   /**
    * The filters and the awaiting state are emitted back to back on purpose: when a required control is cleared,
@@ -153,21 +156,50 @@ export const initializeFiltersManager = (
    * so mounted panels don't get the chance to fetch with the filters that no longer satisfy the required control.
    */
   const publishFilters = () => {
-    const published = publishedChildFilters$.getValue();
-    const unpublished = unpublishedChildFilters$.getValue();
-    if (!deepEqual(published, unpublished)) {
-      publishedChildFilters$.next(unpublished);
-    }
     const awaiting = childrenAwaitingRequiredFilters$.getValue();
+    const published = publishedChildFilters$.getValue();
+    // The grid is hidden in the same apply that starts awaiting, so its controls' filters are dropped rather
+    // than published: users could no longer see or change them, yet they would keep narrowing the required
+    // controls' choices, and the awaiting screen offers no second apply.
+    const toPublish = awaiting ? getPinnedChildFilters() : unpublishedChildFilters$.getValue();
+    if (!deepEqual(published, toPublish)) {
+      publishedChildFilters$.next(toPublish);
+    }
     if (awaiting !== awaitingRequiredFilters$.getValue()) {
-      // The grid was not rendered while awaiting, so the initial publish only saw the pinned controls. Re-arm it
-      // so the saved selections of grid controls are published once the grid opens.
-      if (!awaiting && !settingsManager.api.settings.autoApplyFilters$.getValue()) {
-        initialPublishPending = true;
-      }
       awaitingRequiredFilters$.next(awaiting);
     }
   };
+
+  /**
+   * The initial publish. On load, and again each time the grid opens, the filters of the rendered children are
+   * published once without the user applying, as soon as every one of them has registered and finished
+   * computing its filters. `initialPublishPending$` is `true` until then, which keeps fetching paused so that
+   * panels don't fetch with filters that are still incomplete.
+   */
+  const initialPublishPending$ = new BehaviorSubject<boolean>(true);
+  const initialPublishSubscription = awaitingRequiredFilters$
+    .pipe(
+      distinctUntilChanged(),
+      // `switchMap` drops the wait in flight whenever the grid opens or is hidden, including when it is the
+      // initial publish itself that opens the grid
+      switchMap((awaiting, index) => {
+        // hiding the grid leaves only the pinned children, which were published together with the awaiting state
+        if (awaiting && index > 0) return of(false);
+        return combineLatest([childFilters$, childFiltersLoading$]).pipe(
+          debounceTime(0),
+          first(([, loading]) => !loading),
+          tap(([allChildFilters]) => {
+            unpublishedChildFilters$.next(allChildFilters);
+            publishFilters();
+          }),
+          map(() => false),
+          startWith(true)
+        );
+      })
+    )
+    .subscribe((pending) => {
+      if (pending !== initialPublishPending$.getValue()) initialPublishPending$.next(pending);
+    });
 
   /**
    * `true` while the unpublished child filters, or whether the children are awaiting required filters,
@@ -240,6 +272,7 @@ export const initializeFiltersManager = (
       publishFilters,
       awaitingRequiredFilters$,
     },
+    internalApi: { initialPublishPending$: initialPublishPending$.asObservable() },
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();
       unpublishedFiltersSubscription.unsubscribe();
@@ -247,6 +280,7 @@ export const initializeFiltersManager = (
       filtersSubscription.unsubscribe();
       forcePublishSubscription.unsubscribe();
       requiredFiltersSubscription.unsubscribe();
+      initialPublishSubscription.unsubscribe();
     },
   };
 };

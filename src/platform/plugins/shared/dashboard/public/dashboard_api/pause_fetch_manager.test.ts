@@ -12,39 +12,47 @@ import { BehaviorSubject } from 'rxjs';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 
 describe('initializePauseFetchManager', () => {
-  test('starts paused while children are loading', () => {
-    const childrenLoading$ = new BehaviorSubject<boolean>(true);
-    const { api } = initializePauseFetchManager(childrenLoading$);
+  test('starts paused while the initial publish is pending', () => {
+    const { api } = initializePauseFetchManager(new BehaviorSubject<boolean>(true));
     expect(api.isFetchPaused$.value).toBe(true);
   });
 
-  test('unpauses once children are done loading', () => {
-    const childrenLoading$ = new BehaviorSubject<boolean>(true);
-    const { api } = initializePauseFetchManager(childrenLoading$);
-    childrenLoading$.next(false);
+  test('unpauses once the initial publish is done', () => {
+    const initialPublishPending$ = new BehaviorSubject<boolean>(true);
+    const { api } = initializePauseFetchManager(initialPublishPending$);
+    initialPublishPending$.next(false);
     expect(api.isFetchPaused$.value).toBe(false);
   });
 
-  test('unpauses immediately when children are already loaded', () => {
+  test('unpauses immediately when the initial publish is already done', () => {
     const { api } = initializePauseFetchManager(new BehaviorSubject<boolean>(false));
     expect(api.isFetchPaused$.value).toBe(false);
   });
 
-  test('only unpauses automatically once, so a later loading cycle does not override a manual pause', () => {
-    const childrenLoading$ = new BehaviorSubject<boolean>(true);
-    const { api } = initializePauseFetchManager(childrenLoading$);
-    childrenLoading$.next(false);
+  test('pauses again while another initial publish is pending, e.g. when the grid opens', () => {
+    const initialPublishPending$ = new BehaviorSubject<boolean>(false);
+    const { api } = initializePauseFetchManager(initialPublishPending$);
+    initialPublishPending$.next(true);
+    expect(api.isFetchPaused$.value).toBe(true);
+    initialPublishPending$.next(false);
+    expect(api.isFetchPaused$.value).toBe(false);
+  });
+
+  test('does not override a manual pause when a later initial publish is done', () => {
+    const initialPublishPending$ = new BehaviorSubject<boolean>(true);
+    const { api } = initializePauseFetchManager(initialPublishPending$);
+    initialPublishPending$.next(false);
     api.setFetchPaused(true);
-    childrenLoading$.next(true);
-    childrenLoading$.next(false);
+    initialPublishPending$.next(true);
+    initialPublishPending$.next(false);
     expect(api.isFetchPaused$.value).toBe(true);
   });
 
   test('does not unpause after cleanup', () => {
-    const childrenLoading$ = new BehaviorSubject<boolean>(true);
-    const { api, cleanup } = initializePauseFetchManager(childrenLoading$);
+    const initialPublishPending$ = new BehaviorSubject<boolean>(true);
+    const { api, cleanup } = initializePauseFetchManager(initialPublishPending$);
     cleanup();
-    childrenLoading$.next(false);
+    initialPublishPending$.next(false);
     expect(api.isFetchPaused$.value).toBe(true);
   });
 });

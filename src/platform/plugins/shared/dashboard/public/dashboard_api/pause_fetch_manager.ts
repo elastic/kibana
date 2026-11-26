@@ -8,20 +8,27 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, filter, first } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 
-export function initializePauseFetchManager(childrenLoading$: Observable<boolean>) {
+/**
+ * Fetching is paused while the initial publish of the children's filters is pending: on load, and again each
+ * time the grid opens. A pause set through `setFetchPaused` after the first unpause is left alone.
+ */
+export function initializePauseFetchManager(initialPublishPending$: Observable<boolean>) {
   const isFetchPaused$ = new BehaviorSubject<boolean>(true);
   const setFetchPaused = (paused: boolean) => isFetchPaused$.next(paused);
 
-  /** Fetching stays paused until every rendered child API has registered and finished computing its filters */
-  const initialFiltersSubscription = childrenLoading$
-    .pipe(
-      filter((loading) => !loading),
-      first()
-    )
-    .subscribe(() => {
-      setFetchPaused(false);
+  let pausedForInitialPublish = true;
+  const initialPublishSubscription = initialPublishPending$
+    .pipe(distinctUntilChanged())
+    .subscribe((pending) => {
+      if (pending && !isFetchPaused$.getValue()) {
+        pausedForInitialPublish = true;
+        setFetchPaused(true);
+      } else if (!pending && pausedForInitialPublish) {
+        pausedForInitialPublish = false;
+        setFetchPaused(false);
+      }
     });
 
   return {
@@ -30,7 +37,7 @@ export function initializePauseFetchManager(childrenLoading$: Observable<boolean
       setFetchPaused,
     },
     cleanup: () => {
-      initialFiltersSubscription.unsubscribe();
+      initialPublishSubscription.unsubscribe();
     },
   };
 }
