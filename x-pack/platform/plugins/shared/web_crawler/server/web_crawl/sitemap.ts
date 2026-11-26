@@ -62,7 +62,8 @@ export const parseSitemap = (
   content: string,
   sitemapUrl: string,
   siteKeys: string[],
-  maxPages: number
+  maxPages: number,
+  fileExtensions: readonly string[] = []
 ): SitemapEntries => {
   const pageUrls = new Set<string>();
   const sitemapUrls = new Set<string>();
@@ -77,7 +78,7 @@ export const parseSitemap = (
     }
     if (isSitemapUrl(url)) {
       sitemapUrls.add(url);
-    } else if (siteKeys.some((siteKey) => isSameSitePage(url, siteKey))) {
+    } else if (siteKeys.some((siteKey) => isSameSitePage(url, siteKey, fileExtensions))) {
       pageUrls.add(url);
     }
   }
@@ -94,6 +95,8 @@ interface DiscoverSitemapPagesOptions {
   /** How many sitemaps may be requested. */
   maxRequests?: number;
   maxPages: number;
+  /** Files listed in a sitemap that count as pages. */
+  fileExtensions?: readonly string[];
   signal: AbortSignal;
   fetchContent: (url: string) => Promise<string | undefined>;
   /** Called when sitemaps or pages were left unread because a budget ran out. */
@@ -110,6 +113,7 @@ export const discoverSitemapPages = async ({
   siteKeys = [getSiteKey(siteUrl)],
   maxRequests = MAX_SITEMAP_REQUESTS,
   maxPages,
+  fileExtensions,
   signal,
   fetchContent,
   onIncomplete,
@@ -145,7 +149,8 @@ export const discoverSitemapPages = async ({
         content,
         batch[position],
         siteKeys,
-        maxPages - pages.size
+        maxPages - pages.size,
+        fileExtensions
       );
       pageUrls.forEach((pageUrl) => pages.add(pageUrl));
       queue.push(...sitemapUrls);

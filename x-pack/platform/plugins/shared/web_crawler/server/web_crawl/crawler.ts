@@ -57,6 +57,8 @@ export interface CrawlOptions {
   maxDocuments: number;
   /** Narrow the links the crawl follows. The URL it starts from is always crawled. */
   pathRules?: PathRules;
+  /** Linked files to crawl as pages, by extension. Other than web pages, none are by default. */
+  fileExtensions?: readonly string[];
   /** Called synchronously whenever the counts change, so it has to be cheap. */
   onProgress?: (progress: CrawlProgress) => void;
 }
@@ -124,6 +126,7 @@ export const crawlSite = async ({
   maxDepth,
   maxDocuments,
   pathRules = NO_PATH_RULES,
+  fileExtensions = [],
   onProgress,
 }: CrawlOptions): Promise<CrawlResult> => {
   if (taskSignal.aborted) {
@@ -381,7 +384,7 @@ export const crawlSite = async ({
 
       // Links are queued before the page is indexed, so idle workers start on them right away.
       if (depth < maxDepth) {
-        const links = extractLinks(page.content, pageUrl);
+        const links = extractLinks(page.content, pageUrl, fileExtensions);
         if (links.length >= MAX_LINKS_PER_PAGE) {
           hasDroppedLinks = true;
         }
@@ -443,6 +446,7 @@ export const crawlSite = async ({
       try {
         const discovery = {
           maxPages: maxDocuments,
+          fileExtensions,
           signal: sitemapAbort.signal,
           fetchContent: (sitemapUrl: string) => fetchContent(sitemapUrl, sitemapAbort.signal),
           onIncomplete: () => {

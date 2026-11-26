@@ -697,6 +697,40 @@ describe('crawlSite', () => {
     });
   });
 
+  describe('file extensions', () => {
+    const site = (): Site => ({
+      [SEED_URL]: pageLinkingTo(['/a', '/files/report.pdf', '/logo.png', '/notes.docx']),
+      [`${ORIGIN}/a`]: pageLinkingTo([]),
+      [`${ORIGIN}/files/report.pdf`]: pageLinkingTo(['/from-report']),
+      [`${ORIGIN}/from-report`]: pageLinkingTo([]),
+      [`${ORIGIN}/from-sitemap.pdf`]: pageLinkingTo([]),
+    });
+
+    it('leaves linked and listed files alone unless asked for them', async () => {
+      siteFiles[SITEMAP_URL] = toSitemap([`${ORIGIN}/from-sitemap.pdf`]);
+      mockSite(site());
+
+      await crawl();
+
+      expect(getIndexedDepths()).toEqual({ [SEED_URL]: 0, [`${ORIGIN}/a`]: 1 });
+    });
+
+    it('crawls the files with the extensions asked for, from links and sitemaps, and follows their links', async () => {
+      siteFiles[SITEMAP_URL] = toSitemap([`${ORIGIN}/from-sitemap.pdf`]);
+      mockSite(site());
+
+      await crawl({ fileExtensions: ['pdf'] });
+
+      expect(getIndexedDepths()).toEqual({
+        [SEED_URL]: 0,
+        [`${ORIGIN}/a`]: 1,
+        [`${ORIGIN}/files/report.pdf`]: 1,
+        [`${ORIGIN}/from-sitemap.pdf`]: 1,
+        [`${ORIGIN}/from-report`]: 2,
+      });
+    });
+  });
+
   describe('explicit sitemap URLs', () => {
     it('reads one that a crawl would not follow as a link', async () => {
       const deepSitemapUrl = `${ORIGIN}/${range(17, (level) => `s${level}`).join('/')}/sitemap.xml`;

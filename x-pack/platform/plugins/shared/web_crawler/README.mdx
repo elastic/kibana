@@ -42,6 +42,11 @@ fails when that leaves no site. Sitemaps and sitemap indexes are read within a s
 A crawl can be narrowed with path prefixes: with `includePaths` only pages under one of them are
 followed, and pages under an `excludePaths` prefix never are.
 
+Links to files are not followed unless the crawl is given their extensions in `fileExtensions`. The
+ones in `WEB_CRAWL_FILE_EXTENSIONS` can be asked for: PDF and Office documents, CSV and JSON files,
+and images. The inference endpoint returns their text, and for an image a short description, which
+is indexed like the markdown of a page.
+
 ## How a crawl runs
 
 Kibana never fetches the site itself: each page, `robots.txt` and sitemap is fetched by a

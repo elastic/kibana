@@ -161,6 +161,16 @@ describe('parseSitemap', () => {
     });
   });
 
+  it('lists files of the extensions it is given as pages', () => {
+    const content = toUrlSet([`${ORIGIN}/a`, `${ORIGIN}/file.pdf`, `${ORIGIN}/photo.png`]);
+
+    expect(parse(content).pageUrls).toEqual([`${ORIGIN}/a`]);
+    expect(parseSitemap(content, SITEMAP_URL, [SITE_KEY], 100, ['pdf']).pageUrls).toEqual([
+      `${ORIGIN}/a`,
+      `${ORIGIN}/file.pdf`,
+    ]);
+  });
+
   it('stops at maxPages pages, not counting duplicates or skipped entries', () => {
     const content = toUrlSet([
       `${ORIGIN}/a`,

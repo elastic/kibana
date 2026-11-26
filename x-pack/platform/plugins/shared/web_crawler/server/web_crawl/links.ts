@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { WebCrawlFileExtension } from '../../common/constants';
+import { WEB_CRAWL_FILE_EXTENSIONS } from '../../common/constants';
+
 const MAX_URL_LENGTH = 2048;
 // Deeper paths and longer queries are mostly calendars, faceted listings and other URL traps.
 const MAX_URL_SEGMENTS = 16;
@@ -126,11 +129,34 @@ export const getUrlFields = (url: string): UrlFields => {
   };
 };
 
-const hasSkippedExtension = (url: string): boolean => {
+const SUPPORTED_FILE_EXTENSIONS: ReadonlySet<string> = new Set(WEB_CRAWL_FILE_EXTENSIONS);
+const isSupportedFileExtension = (extension: string): extension is WebCrawlFileExtension =>
+  SUPPORTED_FILE_EXTENSIONS.has(extension);
+
+/** Lowercases and de-duplicates file extensions, or returns `null` when one cannot be crawled. */
+export const normalizeFileExtensions = (
+  extensions: string[] = []
+): WebCrawlFileExtension[] | null => {
+  const normalized = new Set<WebCrawlFileExtension>();
+  for (const rawExtension of extensions) {
+    const extension = rawExtension.trim().toLowerCase().replace(/^\./, '');
+    if (!isSupportedFileExtension(extension)) {
+      return null;
+    }
+    normalized.add(extension);
+  }
+  return [...normalized];
+};
+
+const hasSkippedExtension = (url: string, fileExtensions: readonly string[]): boolean => {
   const { pathname } = new URL(url);
   const lastSegment = pathname.slice(pathname.lastIndexOf('/') + 1);
   const dotIndex = lastSegment.lastIndexOf('.');
-  return dotIndex !== -1 && SKIPPED_EXTENSIONS.has(lastSegment.slice(dotIndex + 1).toLowerCase());
+  if (dotIndex === -1) {
+    return false;
+  }
+  const extension = lastSegment.slice(dotIndex + 1).toLowerCase();
+  return SKIPPED_EXTENSIONS.has(extension) && !fileExtensions.includes(extension);
 };
 
 const isWhitespace = (char: string): boolean =>
@@ -174,12 +200,22 @@ export function* iterateLinkTargets(markdown: string): Generator<string> {
   }
 }
 
-/** Whether a normalized URL is a page of the site, as opposed to another site or a binary asset. */
-export const isSameSitePage = (url: string, siteKey: string): boolean =>
-  getSiteKey(url) === siteKey && !hasSkippedExtension(url);
+/**
+ * Whether a normalized URL is a page of the site, as opposed to another site or an asset. Files
+ * with one of `fileExtensions` count as pages.
+ */
+export const isSameSitePage = (
+  url: string,
+  siteKey: string,
+  fileExtensions: readonly string[] = []
+): boolean => getSiteKey(url) === siteKey && !hasSkippedExtension(url, fileExtensions);
 
 /** Collects the same-site page links of a markdown document. */
-export const extractLinks = (markdown: string, pageUrl: string): string[] => {
+export const extractLinks = (
+  markdown: string,
+  pageUrl: string,
+  fileExtensions: readonly string[] = []
+): string[] => {
   const siteKey = getSiteKey(pageUrl);
   const links = new Set<string>();
 
@@ -188,7 +224,7 @@ export const extractLinks = (markdown: string, pageUrl: string): string[] => {
       break;
     }
     const link = normalizeUrl(target, pageUrl);
-    if (link && isSameSitePage(link, siteKey)) {
+    if (link && isSameSitePage(link, siteKey, fileExtensions)) {
       links.add(link);
     }
   }

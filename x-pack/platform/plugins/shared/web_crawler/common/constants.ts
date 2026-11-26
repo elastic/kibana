@@ -30,3 +30,26 @@ export const WEB_CRAWL_MAX_SEED_URLS = 20;
 export const WEB_CRAWL_MAX_SITEMAP_URLS = 20;
 export const WEB_CRAWL_MAX_URL_LENGTH = 2048;
 export const WEB_CRAWL_MAX_INDEX_NAME_LENGTH = 255;
+/**
+ * The files a crawl indexes besides web pages when asked to. The extraction endpoint returns their
+ * text, and a description for an image.
+ */
+export const WEB_CRAWL_FILE_EXTENSIONS = [
+  'pdf',
+  'doc',
+  'docx',
+  'ppt',
+  'pptx',
+  'xls',
+  'xlsx',
+  'csv',
+  'json',
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'webp',
+  'bmp',
+  'svg',
+] as const;
+export type WebCrawlFileExtension = (typeof WEB_CRAWL_FILE_EXTENSIONS)[number];

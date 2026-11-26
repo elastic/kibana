@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { WEB_CRAWL_FILE_EXTENSIONS } from '../../common/constants';
 import {
   extractLinks,
   getPageKey,
@@ -12,6 +13,7 @@ import {
   getUrlFields,
   isSameSitePage,
   iterateLinkTargets,
+  normalizeFileExtensions,
   normalizeUrl,
 } from './links';
 
@@ -182,6 +184,34 @@ describe('isSameSitePage', () => {
     expect(rejected.filter((url) => isSameSitePage(url, 'example.com'))).toEqual([]);
     expect(isSameSitePage(`${ORIGIN}/page`, 'www.example.com')).toBe(false);
   });
+
+  it('accepts the files whose extension is asked for, whatever its case, and no others', () => {
+    const fileExtensions = ['pdf', 'jpg'];
+    const isPage = (url: string) => isSameSitePage(url, 'example.com', fileExtensions);
+
+    expect(isPage(`${ORIGIN}/report.pdf`)).toBe(true);
+    expect(isPage(`${ORIGIN}/photo.JPG?size=large`)).toBe(true);
+    expect(isPage(`${ORIGIN}/page.html`)).toBe(true);
+    expect(isPage(`${ORIGIN}/notes.docx`)).toBe(false);
+    expect(isPage(`${ORIGIN}/archive.tar.gz`)).toBe(false);
+    expect(isPage('https://other.org/report.pdf')).toBe(false);
+    expect(isSameSitePage(`${ORIGIN}/app.js`, 'example.com', ['js'])).toBe(true);
+  });
+});
+
+describe('normalizeFileExtensions', () => {
+  it('lowercases, trims and de-duplicates extensions, with or without their dot', () => {
+    expect(normalizeFileExtensions(['PDF', ' .docx ', 'pdf', '.Pdf'])).toEqual(['pdf', 'docx']);
+    expect(normalizeFileExtensions([...WEB_CRAWL_FILE_EXTENSIONS])).toEqual([
+      ...WEB_CRAWL_FILE_EXTENSIONS,
+    ]);
+    expect(normalizeFileExtensions([])).toEqual([]);
+    expect(normalizeFileExtensions()).toEqual([]);
+  });
+
+  it.each(['zip', 'html', '', '..pdf', 'pdf,docx'])('rejects %p', (extension) => {
+    expect(normalizeFileExtensions(['pdf', extension])).toBeNull();
+  });
 });
 
 describe('iterateLinkTargets', () => {
@@ -253,6 +283,17 @@ describe('extractLinks', () => {
       `${ORIGIN}/root?query=1`,
     ]);
     expect(extractLinks('# Title\n\nNo [links] (here).', PAGE_URL)).toEqual([]);
+  });
+
+  it('collects linked files of the extensions it is given', () => {
+    const markdown = '[page](/a) [report](/files/report.pdf) [![logo](/logo.png)](/notes.docx)';
+
+    expect(extractLinks(markdown, PAGE_URL)).toEqual([`${ORIGIN}/a`]);
+    expect(extractLinks(markdown, PAGE_URL, ['pdf', 'docx'])).toEqual([
+      `${ORIGIN}/a`,
+      `${ORIGIN}/files/report.pdf`,
+      `${ORIGIN}/notes.docx`,
+    ]);
   });
 
   it('only keeps links to the same site, whatever the protocol, the port or the www. prefix', () => {
