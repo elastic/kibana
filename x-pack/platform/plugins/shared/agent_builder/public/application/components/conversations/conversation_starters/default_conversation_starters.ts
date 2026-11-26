@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { ConversationStarter } from '@kbn/agent-builder-common';
 
 /**
- * The starters shown on the default Elastic AI agent when nothing more specific exists. Each one
+ * The starters shown on the default Elastic AI agent when neither the app nor the solution of the
+ * space has any. The label is the title on the card and the prompt is what a click sends. Each one
  * must be something the agent can do out of the box.
  */
 export const DEFAULT_CONVERSATION_STARTERS: readonly ConversationStarter[] = [

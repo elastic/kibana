@@ -1368,7 +1368,12 @@ Conversation starters are cards under the input on the empty state of a new conv
 ```ts
 agentBuilder.setChatConfig({
   conversationStarters: [
-    { label: i18n.translate('myPlugin.chat.starters.topErrors', { defaultMessage: 'Top errors' }) },
+    {
+      label: i18n.translate('myPlugin.chat.starters.topErrors', { defaultMessage: 'Top errors' }),
+      prompt: i18n.translate('myPlugin.chat.starters.topErrors.prompt', {
+        defaultMessage: 'What are the top errors in the last hour?',
+      }),
+    },
     { label: i18n.translate('myPlugin.chat.starters.slowest', { defaultMessage: 'Slowest requests' }) },
   ],
 });
@@ -1376,14 +1381,14 @@ agentBuilder.setChatConfig({
 
 - **They replace the other lists:** The starters of the solution and the default list are not shown, and they do not fill the cards you leave out. Pass none, or an empty list, to show those lists.
 - **They show only for the default Elastic AI agent.** Pass its `agentId` if you open the chat yourself.
-- **Limits:** Up to 3, with labels of up to 30 characters. Pass already-translated labels and prompts, since they are sent as the message. Blank and repeated labels are dropped.
+- **Limits:** Up to 3, with labels of up to 30 characters. The `prompt` is optional. Pass already-translated labels and prompts, since they are sent as the message. Blank and repeated labels are dropped.
 - **Lifecycle:** Call `clearChatConfig()` when your page goes away. `openChat(options)` replaces the whole config instead of merging it (unless it only has a `conversationId`), so pass the starters again there.
 
 `EmbeddableConversation` accepts the same `conversationStarters` prop.
 
 #### Starters of a solution
 
-The team of a solution adds its set to `SOLUTION_CONVERSATION_STARTERS` in `public/application/components/conversations/conversation_starters/solution_conversation_starters.ts`, by PR. The labels are translated, up to 30 characters, 3 at most, and each starter must relate to what the agent can do out of the box. A solution with an empty list shows the default list.
+The team of a solution adds its set to `SOLUTION_CONVERSATION_STARTERS` in `public/application/components/conversations/conversation_starters/solution_conversation_starters.ts`, by PR. The labels and the optional prompts are translated, the labels are up to 30 characters, 3 at most, and each starter must relate to what the agent can do out of the box. A solution with an empty list shows the default list.
 
 ### `addAttachment(...)`
 

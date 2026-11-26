@@ -105,13 +105,14 @@ export interface EmbeddableConversationProps {
    * `openChat` if the sidebar should open with them. They replace the starters of the solution and
    * the default list; when omitted or empty, those are shown.
    *
-   * At most 3 are shown, with labels of up to 30 characters. The labels are rendered as plain text
-   * and sent as the message when clicked, so pass already-translated strings.
+   * At most 3 are shown, with labels of up to 30 characters. The label is rendered as plain text on
+   * the card. A click sends the optional `prompt` of the starter as the message, or its label when
+   * it has none. Pass already-translated strings.
    *
    * Like the rest of this config, they are kept until `clearChatConfig` is called, and `openChat`
    * options replace them.
    *
-   * Example: `[{ label: 'Top errors' }, { label: 'Recent alerts' }]`
+   * Example: `[{ label: 'Top errors', prompt: 'What are the top errors in the last hour?' }]`
    */
   conversationStarters?: readonly ConversationStarter[];
 
