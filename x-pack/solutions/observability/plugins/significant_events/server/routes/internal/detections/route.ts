@@ -205,6 +205,11 @@ const createDetectionSchema = z.object({
   // which the Detection workflow persists like any other non-stationary observation.
   change_point_type: z.string().min(1).max(64),
   p_value: z.number(),
+  // Empty when the verdict names no change point: the workflow renders an absent value as ''.
+  change_point_at: z
+    .union([z.literal(''), isoDateTime({ offset: true })])
+    .optional()
+    .transform((value) => value || undefined),
   severity_score: z.number().min(0).max(100).optional(),
   alert_index: z.string().max(MAX_ID_LENGTH).optional(),
   workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),

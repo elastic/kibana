@@ -160,6 +160,11 @@ export const detectionSchema = lazySchema(() =>
       .describe(
         'Statistical p_value of the change point detection. Lower values indicate stronger signal.'
       ),
+    change_point_at: isoDateTime({ offset: true })
+      .optional()
+      .describe(
+        'Start of the series bucket where the alert volume changed. Absent when the change point type names no bucket (non_stationary, stationary).'
+      ),
     severity_score: z
       .number()
       .min(0)

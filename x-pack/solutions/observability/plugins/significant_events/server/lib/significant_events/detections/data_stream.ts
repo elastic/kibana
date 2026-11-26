@@ -35,6 +35,7 @@ export const detectionsMappings = {
 /** `_source`-only fields the Detection and Discovery workflows also persist (mappings are `dynamic: false`). */
 interface UnmappedDetectionFields {
   source_id?: string;
+  change_point_at?: string;
   alert_index?: string;
   workflow_execution_id?: string;
   scanned_by?: string;

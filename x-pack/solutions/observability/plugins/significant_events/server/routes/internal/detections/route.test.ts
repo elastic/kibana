@@ -267,6 +267,20 @@ describe('POST /internal/significant_events/detections', () => {
     expect(detections).toEqual([detection]);
   });
 
+  it('drops the empty change_point_at the workflow renders', () => {
+    const changePointAt = '2026-11-26T10:02:00.000Z';
+    const { detections } = bodySchema.parse({
+      detections: [
+        { ...detection, change_point_at: changePointAt },
+        { ...detection, change_point_at: '' },
+      ],
+    });
+    expect(detections.map(({ change_point_at: value }) => value)).toEqual([
+      changePointAt,
+      undefined,
+    ]);
+  });
+
   it('rejects an empty or oversized batch', () => {
     expect(bodySchema.safeParse({ detections: [] }).success).toBe(false);
     expect(

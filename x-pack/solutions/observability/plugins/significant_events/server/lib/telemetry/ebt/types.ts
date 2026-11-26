@@ -7,6 +7,7 @@
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type {
+  ChangePointType,
   Severity,
   SignificantEventCloseReason,
   SignificantEventStatus,
@@ -209,6 +210,11 @@ interface AgentToolEventWriteProps
   written: boolean;
   source_ids: string[];
   detection_workflow_execution_ids?: string[];
+  /** Onset fields are set together, only on the write that creates an event. */
+  onset_at?: string;
+  onset_source?: 'change_point';
+  onset_change_point_type?: ChangePointType;
+  detected_at?: string;
   error_message?: string;
   /** Tier actually stored. Present only when written is true. */
   severity?: Severity;
