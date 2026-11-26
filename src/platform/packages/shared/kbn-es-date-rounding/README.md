@@ -34,10 +34,9 @@ The `date_histogram` aggregation rounds the same way, but an interval string alo
 | Interval | ES\|QL `BUCKET` and `toDateRounding` | DSL `date_histogram` |
 | --- | --- | --- |
 | `1d` | Calendar day | `calendar_interval: 1d` is a calendar day; `fixed_interval: 1d` is a fixed 24-hour width |
-| `1h` | Fixed 1-hour width | `calendar_interval: 1h` is a calendar hour; `fixed_interval: 1h` is a fixed 1-hour width |
 | `3M` | Three calendar months, counted from January of year 1 | Not accepted: `calendar_interval` only takes single units such as `1M` |
 
-So for a DSL interval, build the `DateRounding` from the parameter instead of calling `toDateRounding`. For example, use `{ kind: 'calendar', unit: 'day', amount: 1 }` for `calendar_interval: 1d` and `{ kind: 'fixed', widthMs: 86_400_000 }` for `fixed_interval: 1d`.
+So for a DSL interval, build the `DateRounding` from the parameter instead of calling `toDateRounding`. For example, use `{ kind: 'calendar', unit: 'day', amount: 1 }` for `calendar_interval: 1d` and `{ kind: 'fixed', widthMs: 86_400_000 }` for `fixed_interval: 1d`. `DateRounding` covers `fixed_interval` in `ms`, `s`, `m`, `h` or `d` and `calendar_interval` of `1d`, `1w` or `1M`. It has no calendar minute or hour, so don't substitute a fixed width for `calendar_interval: 1m` or `1h` and expect the same bucket keys.
 
 Daylight saving changes follow Elasticsearch:
 
