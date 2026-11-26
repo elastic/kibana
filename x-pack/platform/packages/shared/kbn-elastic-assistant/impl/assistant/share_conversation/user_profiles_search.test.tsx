@@ -20,10 +20,9 @@ const mockSecondUser = {
     username: 'test_guy_stevens',
   },
 };
+const mockUseUserProfiles = jest.fn();
 jest.mock('./use_user_profiles', () => ({
-  useUserProfiles: () => ({
-    data: [MOCK_USER_PROFILE],
-  }),
+  useUserProfiles: () => mockUseUserProfiles(),
 }));
 jest.mock('./use_suggest_user_profiles', () => ({
   useSuggestUserProfiles: () => ({
@@ -37,6 +36,11 @@ const testProps = {
 };
 
 describe('UserProfilesSearch', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseUserProfiles.mockReturnValue({ data: [MOCK_USER_PROFILE] });
+  });
+
   it('renders UserProfilesSearch', () => {
     render(
       <TestProviders>
@@ -65,6 +69,19 @@ describe('UserProfilesSearch', () => {
   });
 
   it('calls onUsersSelect when user is selected', async () => {
+    render(
+      <TestProviders>
+        <UserProfilesSearch {...testProps} />
+      </TestProviders>
+    );
+    fireEvent.click(
+      screen.getByTestId(`userProfileSelectableOption-${mockSecondUser.user.username}`)
+    );
+    expect(testProps.onUsersSelect).toHaveBeenCalledWith([mockSecondUser, MOCK_USER_PROFILE]);
+  });
+
+  it('keeps the selected users when a user is selected while their profiles load', () => {
+    mockUseUserProfiles.mockReturnValue({ data: undefined });
     render(
       <TestProviders>
         <UserProfilesSearch {...testProps} />

@@ -22,7 +22,9 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   onUsersSelect,
   selectedUsers,
 }) => {
-  const { data: selectedUserProfiles } = useUserProfiles(selectedUsers.map((user) => user.uid));
+  const { data: loadedUserProfiles } = useUserProfiles(selectedUsers.map((user) => user.uid));
+  // while the profiles load, the selection must still hold selectedUsers, or the next pick replaces them
+  const selectedUserProfiles = loadedUserProfiles ?? selectedUsers;
   const [searchTerm, setSearchTerm] = useState('');
   const { data: userProfiles, isLoading } = useSuggestUserProfiles({
     forbiddenUsers,
@@ -51,13 +53,10 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
         options: Array.from(
           new Map(
             // always show selected users
-            [...(userProfiles ?? []), ...(selectedUserProfiles ?? [])].map((user) => [
-              user.uid,
-              user,
-            ])
+            [...(userProfiles ?? []), ...selectedUserProfiles].map((user) => [user.uid, user])
           ).values()
         ),
-        selectedOptions: selectedUserProfiles ?? [],
+        selectedOptions: selectedUserProfiles,
       }}
     />
   );
