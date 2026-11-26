@@ -1,5 +1,5 @@
 {
-  "sha1": "982b0fb17eda124d370e7a0eb3a3c3698fbbc89b",
+  "sha1": "455ab65219c77f5c31e77ea4fb86d1d79eaf3faf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -578,6 +578,110 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
         "line": 287,
         "column": 4
+      }
+    },
+    {
+      "id": "c923ce3e21924ab-b29faed937ea041",
+      "title": "latest index mappings upgrade of an existing install adds user.entity.id and the version to an index that predates it, without touching the index itself",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings_upgrade.spec.ts",
+        "line": 163,
+        "column": 38
+      }
+    },
+    {
+      "id": "c923ce3e21924ab-aa9eff54b1279c0",
+      "title": "latest index mappings upgrade of an existing install is a no-op when run a second time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings_upgrade.spec.ts",
+        "line": 192,
+        "column": 13
+      }
+    },
+    {
+      "id": "c923ce3e21924ab-c0a375e5b7dbabf",
+      "title": "latest index mappings upgrade of an existing install counts a user.entity.id that Elasticsearch mapped dynamically as present and leaves it alone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings_upgrade.spec.ts",
+        "line": 212,
+        "column": 16
+      }
+    },
+    {
+      "id": "c923ce3e21924ab-924b4a62e032a78",
+      "title": "latest index mappings upgrade of an existing install keeps the live type of a conflicting field, adds the rest, writes the version and warns once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings_upgrade.spec.ts",
+        "line": 257,
+        "column": 16
+      }
+    },
+    {
+      "id": "e678f4e517df7a6-0eae5d40eb4d1d8",
+      "title": "latest index mappings are installed with the entity store maps user.entity.id as keyword and stamps the mappings version on a fresh install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "e678f4e517df7a6-f7e6292e9b34709",
+      "title": "latest index mappings are installed with the entity store keeps the latest index in lookup mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings.spec.ts",
+        "line": 70,
+        "column": 69
+      }
+    },
+    {
+      "id": "e678f4e517df7a6-356cba3e0dbadfa",
+      "title": "latest index mappings are installed with the entity store does not change the mappings version when install is called again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/latest_index_mappings.spec.ts",
+        "line": 74,
+        "column": 12
       }
     },
     {

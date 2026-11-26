@@ -55,13 +55,13 @@ paths:
             example: elastic,admin
             type: string
         - description: Comma-separated list of source types to include. Valid values are
-            `live`, `rule`, and `scheduled`.
+            `live`, `rule`, `scheduled`, and `workflow`.
           in: query
           name: sourceFilters
           required: false
           schema:
             description: Comma-separated list of source types to include. Valid values are
-              `live`, `rule`, and `scheduled`.
+              `live`, `rule`, `scheduled`, and `workflow`.
             example: live,scheduled
             type: string
         - description: The start of the time range filter (ISO 8601).
@@ -603,6 +603,13 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/SortOrderOrUndefined'
+        - description: Set to `true` to include `effective_policy_ids` for each pack.
+            Reads Fleet integrations, so leave it unset when you do not need it.
+          in: query
+          name: withEffectivePolicyIds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -615,6 +622,8 @@ paths:
                       - created_at: '2025-02-26T13:37:30.452Z'
                         created_by: elastic
                         description: My pack
+                        effective_policy_ids:
+                          - my_policy_id
                         enabled: true
                         name: my_pack
                         queries:
@@ -733,6 +742,13 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/PackId'
+        - description: Set to `true` to include `effective_policy_ids`. Reads Fleet
+            integrations, so leave it unset when you do not need it.
+          in: query
+          name: withEffectivePolicyIds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -745,6 +761,8 @@ paths:
                       created_at: '2025-02-26T13:37:30.452Z'
                       created_by: elastic
                       description: My pack
+                      effective_policy_ids:
+                        - my_policy_id
                       enabled: true
                       name: my_pack
                       policy_ids:
@@ -2000,6 +2018,30 @@ components:
           required:
             - saved_object_id
             - name
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a
+            shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
       required:
         - data
     CreateSavedQueryRequestBody:
@@ -2369,6 +2411,28 @@ components:
             expiration:
               format: date-time
               type: string
+            origin:
+              description: What started the live query. Absent for live queries started from
+                the UI, the API or a rule.
+              type: object
+              properties:
+                run_id:
+                  description: The workflow execution (run) ID that made the request.
+                  type: string
+                type:
+                  description: The kind of origin. `workflow` means a workflow run made the
+                    request.
+                  enum:
+                    - workflow
+                  type: string
+                verified:
+                  description: Whether Kibana verified that the run exists and made the request.
+                    Always `false` for now.
+                  type: boolean
+              required:
+                - type
+                - run_id
+                - verified
             pack_id:
               type: string
             pack_name:
@@ -2563,6 +2627,15 @@ components:
               type: string
             description:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
+            effective_policy_ids:
+              description: Agent policies that receive this pack through Fleet, including
+                those that share an Osquery Manager integration with a selected
+                agent policy. Returned only when the request sets
+                `withEffectivePolicyIds=true`, and absent when Fleet state is
+                unavailable.
+              items:
+                type: string
+              type: array
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
             interval:
@@ -2659,6 +2732,15 @@ components:
                 type: string
               description:
                 $ref: '#/components/schemas/PackDescriptionOrUndefined'
+              effective_policy_ids:
+                description: Agent policies that receive this pack through Fleet, including
+                  those that share an Osquery Manager integration with a
+                  selected agent policy. Returned only when the request sets
+                  `withEffectivePolicyIds=true`, and absent when Fleet state is
+                  unavailable.
+                items:
+                  type: string
+                type: array
               enabled:
                 $ref: '#/components/schemas/EnabledOrUndefined'
               interval:
@@ -3114,6 +3196,11 @@ components:
               additionalProperties: true
               description: ECS mapping configuration used for the query.
               type: object
+            originVerified:
+              description: Set on `Workflow` rows only. Whether Kibana verified that the
+                workflow run made the request. Always `false` until workflow
+                runs can be verified.
+              type: boolean
             queriesTotal:
               description: The total number of sub-queries in the live action.
               type: integer
@@ -3124,10 +3211,13 @@ components:
               description: The saved query ID, if the live query was based on a saved query.
               type: string
             source:
-              description: Whether this was a manually run live query or triggered by a rule.
+              description: Whether the live query was run manually, by a rule, or by a
+                workflow. `Workflow` comes from an unverified request header and
+                is for display only.
               enum:
                 - Live
                 - Rule
+                - Workflow
               type: string
             sourceType:
               description: Identifies this as a live query history row.
@@ -3711,6 +3801,30 @@ components:
             version:
               description: The pack version number.
               type: integer
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a
+            shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
     UpdateSavedQueryRequestBody:
       example:
         id: updated_my_saved_query_name

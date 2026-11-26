@@ -28,8 +28,6 @@ export function IndexInspectOverview({
           streamName={indexName}
           esqlSource={indexName}
           canReadFailureStore={canReadFailureStore && failureStoreEnabled}
-          isQueryStream={false}
-          isDraft={false}
         />
       </EuiFlexItem>
       {isDataStream && (

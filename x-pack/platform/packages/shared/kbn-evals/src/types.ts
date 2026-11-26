@@ -130,6 +130,7 @@ export interface DefaultEvaluators {
     latency: Evaluator;
     toolCalls: Evaluator;
     cachedTokens: Evaluator;
+    estimatedCost: Evaluator;
   };
 }
 
@@ -162,6 +163,11 @@ export interface EvalsExecutorClient {
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
       trustUpstreamDataset?: boolean;
+      /**
+       * Runs only the examples this returns true for. The whole dataset is still stored, and each
+       * run keeps the example's index in it, so runs that split one dataset score into it together.
+       */
+      selectExample?: (example: TEvaluationDataset['examples'][number], index: number) => boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult[]>;

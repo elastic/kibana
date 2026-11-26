@@ -23,7 +23,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
+import { KibanaFetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 
 // export contract
 export const STREAMS_LIST_CONTRACT: InternalConnectorContract = {
@@ -47,10 +47,10 @@ Fetches list of all streams<br/><br/>[Required authorization] Route required pri
     bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(get_streams_request, 'body'),
-    ...getShapeAt(get_streams_request, 'path'),
     ...getShapeAt(get_streams_request, 'query'),
-    fetcher: FetcherConfigSchema,
+    ...getShapeAt(get_streams_request, 'path'),
+    ...getShapeAt(get_streams_request, 'body'),
+    fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),
   outputSchema: z.optional(z.looseObject({})),

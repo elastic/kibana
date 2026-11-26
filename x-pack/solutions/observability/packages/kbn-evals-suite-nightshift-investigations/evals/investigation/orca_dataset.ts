@@ -13,7 +13,7 @@ import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
 import { timeoutSignal } from '@kbn/std';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
-import { ORCABENCH_ES_CONNECTOR_ID, getConnectorSet } from './connector_sets';
+import { isOrcaConnectorId } from './connector_sets';
 import { investigationExampleSchema } from './types';
 import type { InvestigationExample } from './types';
 
@@ -26,18 +26,18 @@ export interface OrcaRelease {
 
 /** ORCA's 50 sampled tasks, the CI shard. */
 export const ORCA_RELEASE = {
-  id: 'eeffbc6e-664b-50d1-9c5f-c195a39ed235',
-  name: 'nightshift/orca-sampled50-v3',
+  id: 'e6eb3aba-1f11-56f8-869a-ace8bdbb60a0',
+  name: 'nightshift/orca-sampled50-v4',
   examples: 50,
-  sha256: '6e47ae50da1fa0ce60f8de5dcbb90e887b74bd937711c6bc23fa997369000803',
+  sha256: '7267c32d424fbb2b34bfa759a7b71a517bee4881dd2aa0b1eaf25cf2a301acba',
 } as const;
 
 /** Every task of the public Harbor dataset `orca-bench/orca-bench`, the periodic baseline. */
 export const ORCA_PUBLIC_RELEASE = {
-  id: '342ac04a-b9f7-59a1-9462-3503b3bd52a6',
-  name: 'nightshift/orca-bench-public755-v1',
+  id: '7e7dd22d-83fb-54a5-9e51-dd2b67def0ef',
+  name: 'nightshift/orca-bench-public755-v2',
   examples: 755,
-  sha256: '5b09b95d3f192f43086a5653572e3d8480c97412e14a79c0e48411d519555ecb',
+  sha256: 'f6a6f74aba362adb3dfe2882422f1ea23c1fb0db4169116579b42c38d45777a1',
 } as const;
 
 const ORCA_RELEASES: Readonly<Record<string, OrcaRelease>> = {
@@ -58,7 +58,8 @@ export interface OrcaRun {
 
 /**
  * Which release and slice to run, from `NIGHTSHIFT_ORCA_RELEASE` (`sampled50` by default, or
- * `public755`) and `NIGHTSHIFT_ORCA_SLICE` (`<index>/<count>`, for example `3/8`).
+ * `public755`) and `NIGHTSHIFT_ORCA_SLICE` (`<index>/<count>`, for example `3/8`). The Scout hook
+ * sets the slice for the CI shards `orcabench-<index>-of-<count>`.
  */
 export const resolveOrcaRun = (env: Record<string, string | undefined> = process.env): OrcaRun => {
   const releaseKey = env.NIGHTSHIFT_ORCA_RELEASE?.trim() || 'sampled50';
@@ -134,6 +135,15 @@ export const validateOrcaDataset = (
     examples.every((example) => orcaCurrentTimeMs(example.metadata.current_time) !== undefined),
     'ORCA dataset examples must record a parseable metadata.current_time'
   );
+  // Reads are bounded at the snapshot ORCA serves each task, so every task must name it.
+  assert(
+    examples.every(
+      ({ metadata }) =>
+        typeof metadata.telemetry_snapshot_time === 'string' &&
+        !Number.isNaN(Date.parse(metadata.telemetry_snapshot_time))
+    ),
+    'ORCA dataset examples must record a parseable metadata.telemetry_snapshot_time'
+  );
   return {
     name: dataset.name,
     description: dataset.description,
@@ -144,14 +154,15 @@ export const validateOrcaDataset = (
 };
 
 /**
- * Keeps one contiguous part of a validated release. The part gets its own dataset name, because
- * the eval client upserts the dataset it runs: under the release name it would drop the rest.
+ * One contiguous part of a release's examples, in `case_id` order. A slice runs against the
+ * release itself, so its scores land on the release's examples and the slices of one build merge
+ * into a single comparison row.
  */
-export const sliceOrcaDataset = (
-  dataset: EvaluationDataset<InvestigationExample>,
+export const selectOrcaSlice = (
+  examples: InvestigationExample[],
   { index, count }: OrcaSlice
-): EvaluationDataset<InvestigationExample> => {
-  const ordered = [...dataset.examples].sort((left, right) =>
+): InvestigationExample[] => {
+  const ordered = [...examples].sort((left, right) =>
     left.metadata.case_id < right.metadata.case_id
       ? -1
       : left.metadata.case_id > right.metadata.case_id
@@ -160,59 +171,17 @@ export const sliceOrcaDataset = (
   );
   const start = Math.floor(((index - 1) * ordered.length) / count);
   const end = Math.floor((index * ordered.length) / count);
-  return {
-    ...dataset,
-    name: `${dataset.name}/slice-${index}-of-${count}`,
-    description: `Slice ${index} of ${count} of ${dataset.name}, in case_id order. ${dataset.description}`,
-    examples: ordered.slice(start, end),
-  };
+  return ordered.slice(start, end);
 };
 
-/**
- * Stores a slice under its own name and gives each example the id the server stored it under.
- * The server derives example ids from the dataset id, so the parent release's ids would match no
- * example of the slice dataset and its scores would show no history. The executor's own upsert of
- * the same examples is then a no-op.
- */
-export const storeOrcaSlice = async (
-  client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>,
-  slice: EvaluationDataset<InvestigationExample>
-): Promise<EvaluationDataset<InvestigationExample>> => {
-  await client.upsertDataset({
-    name: slice.name,
-    description: slice.description,
-    tags: slice.tags,
-    maturity: slice.maturity,
-    examples: slice.examples.map(({ input, output, metadata }) => ({ input, output, metadata })),
-  });
-  const stored = await client.getDatasetByName(slice.name);
-  assert(stored, `ORCA slice dataset ${slice.name} is missing after it was stored`);
-  const idsByCase = new Map(
-    stored.examples.map(({ id, metadata }) => [metadata?.case_id, id] as const)
-  );
-  assert(
-    stored.examples.length === slice.examples.length &&
-      slice.examples.every(({ metadata }) => idsByCase.has(metadata.case_id)),
-    `ORCA slice dataset ${slice.name} does not hold exactly the slice's cases`
-  );
-  return {
-    ...slice,
-    examples: slice.examples.map((example) => ({
-      ...example,
-      id: idsByCase.get(example.metadata.case_id),
-    })),
-  };
-};
-
-/** Fetches a pinned Golden release, optionally one slice of it, without a file or synthetic fallback. */
+/** Fetches and validates a pinned Golden release, without a file or synthetic fallback. */
 export const loadOrcaDataset = async (
-  client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>,
-  { release, slice }: OrcaRun = { release: ORCA_RELEASE }
+  client: Pick<EvalsClient, 'getDatasetByName'>,
+  release: OrcaRelease = ORCA_RELEASE
 ): Promise<EvaluationDataset<InvestigationExample>> => {
   const dataset = await client.getDatasetByName(release.name);
   assert(dataset, 'Pinned ORCA dataset is missing from Golden');
-  const validated = validateOrcaDataset(dataset, release);
-  return slice ? storeOrcaSlice(client, sliceOrcaDataset(validated, slice)) : validated;
+  return validateOrcaDataset(dataset, release);
 };
 
 const hasRows = (stdout: string): boolean => {
@@ -267,7 +236,7 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
     .some(
       ({ tool_id: toolId, params, results }) =>
         toolId === 'nightshift_sandbox_bash' &&
-        params.connector_id === ORCABENCH_ES_CONNECTOR_ID &&
+        isOrcaConnectorId(params.connector_id) &&
         results.some(
           ({ type, data }) =>
             type === ToolResultType.other &&
@@ -307,20 +276,13 @@ export const resolveOrcaTelemetryVariant = (
 };
 
 /**
- * Checks the immutable historical data with the configured read key before starting paid tasks. The
- * counts also prove which variant the key sees, so an ablation cannot run on full telemetry.
+ * Checks the immutable historical data with a read key before starting paid tasks. The counts also
+ * prove which variant the key sees, so an ablation cannot run on full telemetry.
  */
 export const assertOrcaSource = async (
-  request: typeof globalThis.fetch = globalThis.fetch,
-  env: NodeJS.ProcessEnv = process.env
+  { url, apiKey, variant }: { url: string; apiKey: string; variant: OrcaTelemetryVariant },
+  request: typeof globalThis.fetch = globalThis.fetch
 ): Promise<void> => {
-  const url = env.NIGHTSHIFT_ES_URL;
-  const apiKey = env.NIGHTSHIFT_ES_API_KEY;
-  assert(
-    url && apiKey && getConnectorSet(env) === 'orcabench',
-    'ORCA requires a Scout server started with the orcabench connector set'
-  );
-  const variant = resolveOrcaTelemetryVariant(env);
   await Promise.all(
     Object.entries(ORCA_PREFLIGHT_COUNTS[variant]).map(async ([signal, expected]) => {
       const deadline = timeoutSignal(30_000);

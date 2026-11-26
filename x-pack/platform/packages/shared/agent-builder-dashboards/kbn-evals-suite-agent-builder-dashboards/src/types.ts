@@ -47,6 +47,12 @@ export interface EnhanceGold {
   defects: EnhanceDefectId[];
 }
 
+/** An answer to the mode question that names specific charts: only those may change. */
+export interface ScopedEnhanceGold {
+  /** Ids of the seeded panels the request names. */
+  panelIds: string[];
+}
+
 /** The top-level container in layout edit gold; sections are named by id. */
 export const TOP_LEVEL = 'top';
 
@@ -164,6 +170,14 @@ export interface RequestedFilterGold {
   substitutes: readonly string[];
 }
 
+/**
+ * The dashboard settings a prompt changes, in the attachment's own shapes. Every setting the gold
+ * does not name must keep its seed value.
+ */
+export interface SettingsGold {
+  options?: NonNullable<DashboardAttachmentData['options']>;
+}
+
 /** A visualization attachment by id, as the visualization skill stores it on the conversation. */
 export interface VisualizationAttachment {
   id: string;
@@ -175,8 +189,8 @@ export type DashboardDatasetExample = Example<
     question: string;
     /** Seeded dashboard sent as a by-value attachment with the opening turn. */
     dashboard?: DashboardAttachmentData;
-    /** Mode to pick if the agent asks which enhance mode to apply. */
-    modeAnswer?: EnhanceMode;
+    /** Mode to pick, or free text to type, if the agent asks which enhance mode to apply. */
+    modeAnswer?: EnhanceMode | { text: string };
     /** Discover ES|QL results sent as an attachment with the opening turn, as the 'AI Agent' action does. */
     esqlResults?: EsqlQueryResultsData;
     /** Screen context sent with the opening turn, as the app attaches it from the page the user is on. */
@@ -188,17 +202,25 @@ export type DashboardDatasetExample = Example<
     route?: DashboardRoute;
     structure?: DashboardStructureGold;
     enhance?: EnhanceGold;
+    scopedEnhance?: ScopedEnhanceGold;
     controls?: ControlsGold;
     /** The time range the dashboard must end up with. */
     timeRange?: { from: string; to: string };
     layoutEdit?: LayoutEditGold;
     /** Panels the prompt edits in place, and what each must look like after. */
     panelEdits?: readonly PanelEditGold[];
+    /** Dashboard settings the prompt changes; `{}` when it must change none. */
+    settings?: SettingsGold;
     replaceConfirmation?: ReplaceConfirmationGold;
     /** Requests the agent must neither build nor drop silently. */
     unavailableRequests?: readonly UnavailableRequestGold[];
     /** Nothing in the request can be built, so the turn must end without a dashboard. */
     noDashboard?: boolean;
+    /**
+     * Panel types the prompt asks for whose config schema is only in a skill reference. The agent
+     * reads each type's reference before writing a panel of it.
+     */
+    panelConfigTypes?: readonly string[];
     goldenToolPath?: string[];
   },
   {

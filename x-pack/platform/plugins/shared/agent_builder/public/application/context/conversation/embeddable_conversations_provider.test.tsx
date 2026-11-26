@@ -10,7 +10,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useQueryClient, type QueryClient } from '@kbn/react-query';
-import type { EmbeddableConversationCallbacks } from '../../../embeddable/types';
+import type { ConversationStarter } from '@kbn/agent-builder-common';
+import type {
+  EmbeddableConversationCallbacks,
+  EmbeddableConversationProps,
+} from '../../../embeddable/types';
 import type { AgentBuilderInternalService } from '../../../services/types';
 import { storageKeys } from '../../storage_keys';
 import type { refreshListsOnAgentChanges } from '../../utils/refresh_lists_on_agent_changes';
@@ -85,6 +89,12 @@ const ContextSpy = () => {
   );
 };
 
+const StartersSpy = () => {
+  const { conversationStarters } = useConversationContext();
+  const labels = (conversationStarters ?? []).map(({ label }) => label).join('|');
+  return <div>{`starters:${labels || 'none'}`}</div>;
+};
+
 const seedPersistedConversation = (sessionTag: string, conversationId: string) => {
   localStorage.setItem(
     storageKeys.getLastConversationKey(sessionTag, AGENT_ID),
@@ -96,10 +106,12 @@ const renderEmbeddableProvider = ({
   sessionTag = TAG_A,
   getConversation = jest.fn().mockResolvedValue({ id: 'conversation-a' }),
   children = <ContextSpy />,
+  conversationStarters,
 }: {
   sessionTag?: string;
   getConversation?: jest.Mock;
   children?: React.ReactNode;
+  conversationStarters?: readonly ConversationStarter[];
 } = {}) => {
   let callbacks: EmbeddableConversationCallbacks | undefined;
   const coreStart = coreMock.createStart();
@@ -118,6 +130,7 @@ const renderEmbeddableProvider = ({
       ariaLabelledBy="test-chat"
       agentId={AGENT_ID}
       sessionTag={sessionTag}
+      conversationStarters={conversationStarters}
       initialMessage={INITIAL_MESSAGE}
       autoSendInitialMessage
       onRegisterCallbacks={(registered) => {
@@ -132,6 +145,16 @@ const renderEmbeddableProvider = ({
     services,
     unmount,
     getConversation,
+    resetChatConfig: () => {
+      act(() => {
+        callbacks?.resetChatConfig();
+      });
+    },
+    updateProps: (props: EmbeddableConversationProps) => {
+      act(() => {
+        callbacks?.updateProps(props);
+      });
+    },
     reopenWith: (nextSessionTag: string) => {
       act(() => {
         callbacks?.updateProps({
@@ -267,6 +290,57 @@ describe('EmbeddableConversationsProvider initial message', () => {
 
     expect(await screen.findByText(`initialMessage:${INITIAL_MESSAGE}`)).toBeInTheDocument();
     expect(screen.getByText('conversationId:none')).toBeInTheDocument();
+  });
+});
+
+describe('EmbeddableConversationsProvider conversation starters', () => {
+  const ConfigSpy = () => {
+    const { agentId, conversationStarters, browserApiTools } = useConversationContext();
+    const labels = (conversationStarters ?? []).map(({ label }) => label).join('|');
+    return (
+      <>
+        <div>{`agent:${agentId}`}</div>
+        <div>{`starters:${labels || 'none'}`}</div>
+        <div>{`tools:${browserApiTools?.length ?? 0}`}</div>
+      </>
+    );
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: true,
+    });
+  });
+
+  it('passes the starters of the props to the conversation context', async () => {
+    renderEmbeddableProvider({
+      children: <StartersSpy />,
+      conversationStarters: [{ label: 'first' }, { label: 'second' }],
+    });
+
+    expect(await screen.findByText('starters:first|second')).toBeInTheDocument();
+  });
+
+  it('removes the starters and the browser API tools on reset and keeps the rest of the config', async () => {
+    const { updateProps, resetChatConfig } = renderEmbeddableProvider({ children: <ConfigSpy /> });
+    updateProps({
+      agentId: AGENT_ID,
+      sessionTag: TAG_A,
+      conversationStarters: [{ label: 'first' }],
+      browserApiTools: [{ id: 'tool' }] as never,
+    });
+    expect(await screen.findByText('starters:first')).toBeInTheDocument();
+    expect(screen.getByText('tools:1')).toBeInTheDocument();
+
+    resetChatConfig();
+
+    expect(await screen.findByText('starters:none')).toBeInTheDocument();
+    expect(screen.getByText('tools:0')).toBeInTheDocument();
+    expect(screen.getByText(`agent:${AGENT_ID}`)).toBeInTheDocument();
   });
 });
 

@@ -55,8 +55,8 @@ export interface HuntBehaviorModels {
 
 /**
  * Shared service handles the hunt pipeline (Tier 1, Tier 2, correlation and,
- * eventually, investigation write-back) needs from sibling plugins. Assembled
- * once in AlertZeroPlugin#start and threaded through every hunt route/service
+ * eventually, investigation write-back) needs from sibling plugins. Built from the
+ * Worker context by `createHuntServices` and threaded through every hunt route/service
  * so none of them import agentBuilder/inference directly.
  */
 export interface HuntServices {
@@ -86,5 +86,5 @@ export interface HuntServices {
    * in which case Tier 2 sees an empty catalog, returns early before extraction, and reports a
    * report-level `catalog_unavailable`.
    */
-  mitreDataClient?: MitreAttackDataClient;
+  readonly mitreDataClient?: MitreAttackDataClient;
 }

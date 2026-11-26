@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DiscoverServices } from '../../../../build_services';
-import type { RuntimeStateManager } from '../redux';
+import { isDataViewSource } from '../../../../../common/data_sources';
+import type { DiscoverAppState, RuntimeStateManager } from '../redux';
 
 interface DataViewData {
   /**
@@ -109,7 +110,7 @@ export async function loadDataView({
   }
 
   return {
-    // We can be certain that a data view exists due to an earlier hasData check
+    // We can be certain that a data view exists due to an earlier data view availability check
     loadedDataView: (fetchedDataView || defaultDataView || defaultAdHocDataView)!,
     requestedDataViewId: fetchId,
     requestedDataViewFound: Boolean(fetchId) && Boolean(fetchedDataView),
@@ -237,4 +238,67 @@ export const loadAndResolveDataView = async ({
   }
 
   return { fallback, dataView };
+};
+
+/**
+ * The data view a tab asks for when it opens: the URL data source takes precedence over the saved
+ * tab, which overrides the tab's initial state.
+ */
+export const getInitialDataViewTarget = ({
+  dataSource,
+  initialDataViewIdOrSpec,
+  currentDataView,
+}: {
+  dataSource: DiscoverAppState['dataSource'];
+  initialDataViewIdOrSpec: string | DataViewSpec | undefined;
+  currentDataView: DataView | undefined;
+}): { dataViewId: string | undefined; initialAdHocDataViewSpec: DataViewSpec | undefined } => {
+  const initialAdHocDataViewSpec =
+    typeof initialDataViewIdOrSpec === 'string' ? undefined : initialDataViewIdOrSpec;
+  const initialDataViewId =
+    typeof initialDataViewIdOrSpec === 'string'
+      ? initialDataViewIdOrSpec
+      : initialAdHocDataViewSpec?.id;
+  const dataViewId = isDataViewSource(dataSource)
+    ? dataSource.dataViewId
+    : currentDataView?.id ?? initialDataViewId;
+
+  return { dataViewId, initialAdHocDataViewSpec };
+};
+
+/**
+ * Whether a tab can open without persisted data views: in ES|QL mode, or with an ad hoc data view
+ * from the location state, the tab or a profile.
+ */
+export const canOpenWithoutPersistedDataViews = ({
+  isEsqlMode,
+  locationStateHasDataViewSpec,
+  dataViewId,
+  initialAdHocDataViewSpec,
+  currentDataView,
+  adHocDataViews,
+  defaultProfileAdHocDataViewIds,
+}: {
+  isEsqlMode: boolean;
+  locationStateHasDataViewSpec: boolean;
+  dataViewId: string | undefined;
+  initialAdHocDataViewSpec: DataViewSpec | undefined;
+  currentDataView: DataView | undefined;
+  adHocDataViews: DataView[];
+  defaultProfileAdHocDataViewIds: string[];
+}): boolean => {
+  const hasInitialAdHocDataView =
+    Boolean(dataViewId) && initialAdHocDataViewSpec?.id === dataViewId;
+  const hasCurrentAdHocDataView = currentDataView?.isPersisted() === false;
+  const hasProfileDataView = adHocDataViews.some(
+    ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
+  );
+
+  return (
+    isEsqlMode ||
+    locationStateHasDataViewSpec ||
+    hasInitialAdHocDataView ||
+    hasCurrentAdHocDataView ||
+    hasProfileDataView
+  );
 };

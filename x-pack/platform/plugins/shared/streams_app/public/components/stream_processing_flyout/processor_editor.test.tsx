@@ -10,8 +10,14 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import type { ComponentCatalogue } from '@kbn/streams-schema';
-import fixture from '../../services/component_catalogue/catalogue_snapshot/components_v1.json';
 import { toComponentChecker } from '../../services/component_catalogue';
+import {
+  definitionOf,
+  singleProcessorCatalogue,
+  testCatalogue,
+  withDefinition,
+  withItemTelemetry,
+} from '../component_definition_form/test_helpers';
 import { ProcessorEditor } from './processor_editor';
 
 const mockOpenConfirm = jest.fn();
@@ -19,19 +25,21 @@ jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({ core: { overlays: { openConfirm: mockOpenConfirm } } }),
 }));
 
-const catalogue = fixture as ComponentCatalogue;
+// With one processor on offer the editor preselects it, so most cases start in its form.
+const catalogue = singleProcessorCatalogue('set');
+const setDefinition = definitionOf('set');
 
 const savedStep = {
   key: 'step-0',
   status: 'saved' as const,
   processor: {
-    id: 'add-fields-1',
-    type: 'add_fields',
+    id: 'set-1',
+    type: 'set',
     supported_telemetry: ['logs' as const],
     config: [
       {
-        name: 'fields',
-        value: [{ action: 'delete', location: 'attributes', path: 'secret' }],
+        name: 'operations',
+        value: [{ action: 'update', location: 'attributes', path: 'secret', value: 'x' }],
       },
     ],
   },
@@ -46,6 +54,7 @@ const renderEditor = ({
 }: Partial<React.ComponentProps<typeof ProcessorEditor>> & { fetchCheck?: jest.Mock } = {}) => {
   const onCommit = jest.fn();
   const onCancel = jest.fn();
+  const onChange = jest.fn();
   render(
     <EuiProvider>
       <ProcessorEditor
@@ -53,14 +62,15 @@ const renderEditor = ({
         telemetry={['logs']}
         componentRefs={[]}
         checkComponent={toComponentChecker(fetchCheck)}
-        componentIds={new Set(['add-fields-1'])}
+        componentIds={new Set(['set-1'])}
         onCommit={onCommit}
         onCancel={onCancel}
+        onChange={onChange}
         {...props}
       />
     </EuiProvider>
   );
-  return { onCommit, onCancel, fetchCheck };
+  return { onCommit, onCancel, onChange, fetchCheck };
 };
 
 /** Sets the path combo box in two synchronous events; typing it re-renders per keystroke. */
@@ -73,7 +83,21 @@ const commitPath = (value: string) => {
   fireEvent.keyDown(input, { key: 'Enter' });
 };
 
-/** Fills the one `add_fields` operation the editor starts with. */
+/** Removes a signal pill in one synchronous event; `userEvent` rechecks the editor tree per click. */
+const removeSignal = (signal: string, picker?: HTMLElement) =>
+  fireEvent.click(
+    (picker ? within(picker) : screen).getByLabelText(
+      `Remove ${signal} from selection in this group`
+    )
+  );
+
+/** Opens a signals combo box and picks one of its options, in two synchronous events. */
+const pickSignal = (signal: string, picker: HTMLElement) => {
+  fireEvent.focusIn(within(picker).getByTestId('comboBoxSearchInput'));
+  fireEvent.click(screen.getByRole('option', { name: signal }));
+};
+
+/** Fills the one `set` operation the editor starts with. */
 const fillOperation = () => {
   commitPath('team');
   fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
@@ -93,11 +117,26 @@ beforeEach(() => {
   mockOpenConfirm.mockReset();
 });
 
+// Every case mounts the whole editor, a cost that parallel CI load pushes past the default 5s.
+jest.setTimeout(30_000);
+
+const fixedCatalogue = withDefinition(catalogue, {
+  ...setDefinition,
+  telemetry_selection: 'fixed',
+});
+
 describe('ProcessorEditor', () => {
+  it('waits for a processor to be chosen when the catalogue offers several', () => {
+    renderEditor({ catalogue: testCatalogue });
+
+    expect(screen.queryByTestId(/^componentDefinitionForm-processor-/)).toBeNull();
+    expect(screen.getByTestId('streamsProcessingFlyoutEditorSubmit')).toBeDisabled();
+  });
+
   it('preselects the only processor and commits its configuration', async () => {
     const { onCommit } = renderEditor();
 
-    expect(screen.getByTestId('componentDefinitionForm-processor-add_fields')).toBeTruthy();
+    expect(screen.getByTestId('componentDefinitionForm-processor-set')).toBeTruthy();
     commitPath('team');
     fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
       target: { value: 'core' },
@@ -107,15 +146,80 @@ describe('ProcessorEditor', () => {
     await waitFor(() => expect(onCommit).toHaveBeenCalled());
 
     expect(onCommit).toHaveBeenCalledWith({
-      type: 'add_fields',
+      type: 'set',
       supported_telemetry: ['logs'],
       config: [
         {
-          name: 'fields',
+          name: 'operations',
           value: [{ location: 'record', path: 'team', value: 'core', action: 'upsert' }],
         },
       ],
     });
+  });
+
+  it('labels the status badge from the catalogue and explains it on hover', async () => {
+    renderEditor();
+
+    const badge = screen.getByTestId('streamsProcessingFlyoutStatusBadge');
+    expect(badge.textContent).toBe('Experimental');
+    await userEvent.hover(badge);
+    expect(await screen.findByText(/New and still evolving/)).toBeTruthy();
+  });
+
+  it('falls back to the status value when the catalogue does not describe statuses', () => {
+    const { 'component.statuses': statuses, ...enumSets } = catalogue.metadata.enum_sets;
+    renderEditor({
+      catalogue: { ...catalogue, metadata: { ...catalogue.metadata, enum_sets: enumSets } },
+    });
+
+    expect(screen.getByTestId('streamsProcessingFlyoutStatusBadge').textContent).toBe(
+      'experimental'
+    );
+  });
+
+  describe('the help of a processor', () => {
+    const withHelp = (help: NonNullable<typeof setDefinition.help>) =>
+      withDefinition(catalogue, { ...setDefinition, help });
+
+    it('shows only the summary when the catalogue sends nothing more', () => {
+      renderEditor();
+
+      expect(screen.getByText(setDefinition.help?.summary ?? '')).toBeTruthy();
+      expect(screen.queryByTestId('streamsProcessingFlyoutProcessorHelpDetails')).toBeNull();
+      expect(screen.queryByTestId('streamsProcessingFlyoutProcessorHelpLink')).toBeNull();
+    });
+
+    it('shows the details under the summary and links to the documentation', () => {
+      renderEditor({
+        catalogue: withHelp({
+          summary: 'Sets fields.',
+          details: 'Each operation writes one field.',
+          documentation: 'https://www.elastic.co/docs/set',
+        }),
+      });
+
+      expect(screen.getByText('Sets fields.')).toBeTruthy();
+      expect(screen.getByTestId('streamsProcessingFlyoutProcessorHelpDetails').textContent).toBe(
+        'Each operation writes one field.'
+      );
+      const link = screen.getByTestId('streamsProcessingFlyoutProcessorHelpLink');
+      expect(link.getAttribute('href')).toBe('https://www.elastic.co/docs/set');
+      expect(link.getAttribute('target')).toBe('_blank');
+      expect(link.getAttribute('rel')).toContain('noopener');
+    });
+
+    // Put together here, as the linter takes a script URL written out for one in use.
+    const scriptUrl = ['javascript', 'alert(1)'].join(':');
+
+    it.each([scriptUrl, 'data:text/html,hello', 'ftp://example.com/set', '/docs/set', 'not a url'])(
+      'does not link to %s',
+      (documentation) => {
+        renderEditor({ catalogue: withHelp({ summary: 'Sets fields.', documentation }) });
+
+        expect(screen.getByText('Sets fields.')).toBeTruthy();
+        expect(screen.queryByTestId('streamsProcessingFlyoutProcessorHelpLink')).toBeNull();
+      }
+    );
   });
 
   it('shows client validation errors instead of committing an incomplete processor', async () => {
@@ -129,19 +233,18 @@ describe('ProcessorEditor', () => {
   it('edits an existing processor and keeps its id', async () => {
     const { onCommit } = renderEditor({ step: savedStep });
 
-    expect(screen.queryByTestId('componentDefinitionFormLiteral-value')).toBeNull();
     await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
 
     await waitFor(() => expect(onCommit).toHaveBeenCalled());
 
     expect(onCommit).toHaveBeenCalledWith({
-      id: 'add-fields-1',
-      type: 'add_fields',
+      id: 'set-1',
+      type: 'set',
       supported_telemetry: ['logs'],
       config: [
         {
-          name: 'fields',
-          value: [{ location: 'attributes', path: 'secret', action: 'delete' }],
+          name: 'operations',
+          value: [{ location: 'attributes', path: 'secret', value: 'x', action: 'update' }],
         },
       ],
     });
@@ -163,8 +266,8 @@ describe('ProcessorEditor', () => {
       expect.objectContaining({
         config: [
           {
-            name: 'fields',
-            value: [{ location: 'attributes', path: 'secret.token', action: 'delete' }],
+            name: 'operations',
+            value: [{ location: 'attributes', path: 'secret.token', value: 'x', action: 'update' }],
           },
         ],
       })
@@ -190,6 +293,56 @@ describe('ProcessorEditor', () => {
     expect(onCancel).not.toHaveBeenCalled();
   });
 
+  it('reports that the processor changed once a field is edited, not before', () => {
+    const { onChange } = renderEditor();
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
+      target: { value: 'core' },
+    });
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it('reports that the processor changed once its signals are edited', () => {
+    const { onChange } = renderEditor({
+      telemetry: ['logs', 'metrics'],
+      step: {
+        ...savedStep,
+        processor: { ...savedStep.processor, supported_telemetry: ['logs', 'metrics'] },
+      },
+    });
+    expect(onChange).not.toHaveBeenCalled();
+
+    removeSignal('Metrics', screen.getByTestId('streamsProcessingFlyoutEditorSignals'));
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it('counts JSON that does not parse yet as a change, so cancelling asks first', async () => {
+    mockOpenConfirm.mockResolvedValue(false);
+    const { onChange, onCancel } = renderEditor({
+      catalogue: {
+        ...catalogue,
+        definitions: catalogue.definitions.map((definition) =>
+          definition.type === 'set'
+            ? {
+                ...definition,
+                fields: [{ name: 'payload', type: 'literal', literal_kinds: ['object'] }],
+              }
+            : definition
+        ),
+      },
+    });
+
+    fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-payload'), {
+      target: { value: '{"team":' },
+    });
+    expect(onChange).toHaveBeenCalled();
+
+    await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorCancel'));
+    expect(mockOpenConfirm).toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
   it('does not offer delete while creating a processor', () => {
     renderEditor();
     expect(screen.queryByTestId('streamsProcessingFlyoutEditorDelete')).toBeNull();
@@ -206,17 +359,6 @@ describe('ProcessorEditor', () => {
   });
 
   it('enables every supported signal for a new processor with fixed telemetry', async () => {
-    const fixedCatalogue: ComponentCatalogue = {
-      ...catalogue,
-      components: catalogue.components.map((component) =>
-        component.type === 'add_fields' ? { ...component, telemetry_selection: 'fixed' } : component
-      ),
-      definitions: catalogue.definitions.map((definition) =>
-        definition.type === 'add_fields'
-          ? { ...definition, telemetry_selection: 'fixed' }
-          : definition
-      ),
-    };
     const { onCommit } = renderEditor({ catalogue: fixedCatalogue });
     commitPath('team');
     fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
@@ -234,14 +376,10 @@ describe('ProcessorEditor', () => {
   });
 
   describe('choosing the signals a processor applies to', () => {
-    const limitedCatalogue = (limit: number): ComponentCatalogue => ({
-      ...catalogue,
-      definitions: catalogue.definitions.map((definition) =>
-        definition.type === 'add_fields'
-          ? { ...definition, max_selected_telemetry: limit }
-          : definition
-      ),
-    });
+    const limitedCatalogue = (limit: number): ComponentCatalogue =>
+      withDefinition(catalogue, { ...setDefinition, max_selected_telemetry: limit });
+    // No processor of the catalogue lets its items choose their signals, though the schema does.
+    const scopedItemsCatalogue = withDefinition(catalogue, withItemTelemetry(setDefinition));
 
     it('applies a new processor to every flowing signal when there is no limit', () => {
       renderEditor({ telemetry: ['logs', 'metrics'] });
@@ -257,7 +395,7 @@ describe('ProcessorEditor', () => {
     it('narrows a new processor to the signals left after removing one', async () => {
       const { onCommit } = renderEditor({ telemetry: ['logs', 'metrics', 'traces'] });
 
-      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
+      removeSignal('Metrics');
       commitPath('team');
       fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
         target: { value: 'core' },
@@ -271,7 +409,7 @@ describe('ProcessorEditor', () => {
       );
     });
 
-    it('keeps offering the signals an existing processor enables after they are all removed', async () => {
+    it('keeps offering the signals an existing processor enables after they are all removed', () => {
       renderEditor({
         telemetry: ['logs'],
         step: {
@@ -280,33 +418,33 @@ describe('ProcessorEditor', () => {
         },
       });
 
-      await userEvent.click(screen.getByLabelText('Remove Logs from selection in this group'));
-      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
+      removeSignal('Logs');
+      removeSignal('Metrics');
 
       expect(screen.getByText('Choose at least one signal')).toBeTruthy();
       expect(screen.getByTestId('streamsProcessingFlyoutEditorSubmit')).toBeDisabled();
 
       const picker = screen.getByTestId('streamsProcessingFlyoutEditorSignals');
-      await userEvent.click(within(picker).getByRole('combobox'));
-      await userEvent.click(screen.getByRole('option', { name: 'Metrics' }));
+      pickSignal('Metrics', picker);
       expect(within(picker).getByText('Metrics')).toBeTruthy();
       expect(screen.queryByText('Choose at least one signal')).toBeNull();
     });
 
-    it('offers item scopes only while the processor applies to more than one signal', async () => {
-      renderEditor({ telemetry: ['logs', 'metrics'] });
+    it('offers item scopes only while the processor applies to more than one signal', () => {
+      renderEditor({ catalogue: scopedItemsCatalogue, telemetry: ['logs', 'metrics'] });
       expect(screen.getByTestId('componentDefinitionFormItemTelemetry')).toBeTruthy();
 
-      await userEvent.click(screen.getByLabelText('Remove Logs from selection in this group'));
+      removeSignal('Logs');
       expect(screen.queryByTestId('componentDefinitionFormItemTelemetry')).toBeNull();
 
-      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
+      removeSignal('Metrics');
       expect(screen.queryByTestId('componentDefinitionFormItemTelemetry')).toBeNull();
     });
 
     it('narrows item scopes with the processor and flags an item left with no signal', async () => {
       const item = { location: 'record', path: 'tier', action: 'upsert', value: 'gold' };
       const { onCommit } = renderEditor({
+        catalogue: scopedItemsCatalogue,
         telemetry: ['logs', 'metrics'],
         step: {
           ...savedStep,
@@ -315,7 +453,7 @@ describe('ProcessorEditor', () => {
             supported_telemetry: ['logs', 'metrics'],
             config: [
               {
-                name: 'fields',
+                name: 'operations',
                 value: [
                   { ...item, telemetry: ['logs', 'metrics'] },
                   { ...item, telemetry: ['metrics'] },
@@ -326,11 +464,7 @@ describe('ProcessorEditor', () => {
         },
       });
 
-      await userEvent.click(
-        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByLabelText(
-          'Remove Metrics from selection in this group'
-        )
-      );
+      removeSignal('Metrics', screen.getByTestId('streamsProcessingFlyoutEditorSignals'));
 
       expect(
         screen.getByText(
@@ -340,7 +474,7 @@ describe('ProcessorEditor', () => {
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
       expect(onCommit).not.toHaveBeenCalled();
 
-      await userEvent.click(screen.getAllByTestId('componentDefinitionFormArrayRemove')[1]);
+      fireEvent.click(screen.getAllByTestId('componentDefinitionFormArrayRemove')[1]);
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
 
       await waitFor(() => expect(onCommit).toHaveBeenCalled());
@@ -348,7 +482,9 @@ describe('ProcessorEditor', () => {
       expect(onCommit).toHaveBeenCalledWith(
         expect.objectContaining({
           supported_telemetry: ['logs'],
-          config: [{ name: 'fields', value: [expect.objectContaining({ telemetry: ['logs'] })] }],
+          config: [
+            { name: 'operations', value: [expect.objectContaining({ telemetry: ['logs'] })] },
+          ],
         })
       );
     });
@@ -364,12 +500,7 @@ describe('ProcessorEditor', () => {
       fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
         target: { value: 'core' },
       });
-      await userEvent.click(
-        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByTestId(
-          'comboBoxSearchInput'
-        )
-      );
-      await userEvent.click(screen.getByRole('option', { name: 'Metrics' }));
+      pickSignal('Metrics', screen.getByTestId('streamsProcessingFlyoutEditorSignals'));
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
 
       await waitFor(() => expect(onCommit).toHaveBeenCalled());
@@ -396,14 +527,7 @@ describe('ProcessorEditor', () => {
 
     it('lists the signals of a fixed processor instead of offering a choice', () => {
       renderEditor({
-        catalogue: {
-          ...catalogue,
-          definitions: catalogue.definitions.map((definition) =>
-            definition.type === 'add_fields'
-              ? { ...definition, telemetry_selection: 'fixed' }
-              : definition
-          ),
-        },
+        catalogue: fixedCatalogue,
         telemetry: ['logs', 'metrics'],
       });
 
@@ -422,7 +546,7 @@ describe('ProcessorEditor', () => {
       expect(fetchCheck).toHaveBeenCalledWith(
         {
           kind: 'processor',
-          component: expect.objectContaining({ id: 'add-fields-2', type: 'add_fields' }),
+          component: expect.objectContaining({ id: 'set-2', type: 'set' }),
         },
         expect.any(AbortSignal)
       );
@@ -446,7 +570,7 @@ describe('ProcessorEditor', () => {
             {
               severity: 'error',
               code: 'E028_INVALID_CONFIG_TYPE',
-              message: 'action must be one of upsert, update, insert, delete',
+              message: 'action must be one of upsert, update, insert',
             },
           ],
         }),
@@ -457,9 +581,39 @@ describe('ProcessorEditor', () => {
       const callout = await screen.findByTestId('streamsProcessingFlyoutEditorDiagnostics');
       expect(within(callout).getByText('E028_INVALID_CONFIG_TYPE:')).toBeTruthy();
       expect(
-        within(callout).getByText('action must be one of upsert, update, insert, delete')
+        within(callout).getByText('action must be one of upsert, update, insert')
       ).toBeTruthy();
       expect(onCommit).not.toHaveBeenCalled();
+    });
+
+    it('lists the details a diagnostic came with under its message', async () => {
+      renderEditor({
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [
+            {
+              severity: 'error',
+              code: 'E028_INVALID_CONFIG_TYPE',
+              message: 'action is not one of the allowed values',
+              details: { got: 'delete', allowed: ['upsert', 'update', 'insert'] },
+            },
+            { severity: 'error', code: 'E030', message: 'no details here' },
+          ],
+        }),
+      });
+      await fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      const callout = await screen.findByTestId('streamsProcessingFlyoutEditorDiagnostics');
+      const details = within(callout).getAllByTestId(
+        'streamsProcessingFlyoutEditorDiagnosticDetails'
+      );
+      expect(details).toHaveLength(1);
+      expect(
+        within(details[0])
+          .getAllByRole('listitem')
+          .map((item) => item.textContent)
+      ).toEqual(['got: delete', 'allowed: ["upsert","update","insert"]']);
     });
 
     it('shows warnings from a valid check and commits only once the user continues', async () => {
@@ -478,7 +632,7 @@ describe('ProcessorEditor', () => {
       expect(onCommit).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorCommitAnyway'));
-      expect(onCommit).toHaveBeenCalledWith(expect.objectContaining({ type: 'add_fields' }));
+      expect(onCommit).toHaveBeenCalledWith(expect.objectContaining({ type: 'set' }));
     });
 
     it('drops the warnings once the processor is edited again', async () => {
@@ -500,7 +654,7 @@ describe('ProcessorEditor', () => {
     });
 
     it('shows a diagnostic on the field its pointer names and clears it on edit', async () => {
-      const message = 'action must be one of upsert, update, insert, delete';
+      const message = 'action must be one of upsert, update, insert';
       const { onCommit } = renderEditor({
         fetchCheck: jest.fn().mockResolvedValue({
           valid: false,
@@ -533,6 +687,41 @@ describe('ProcessorEditor', () => {
       ).toBeNull();
     });
 
+    it('drops the rejection once the user switches to another processor', async () => {
+      renderEditor({
+        catalogue: testCatalogue,
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [
+            {
+              severity: 'error',
+              code: 'E028_INVALID_CONFIG_TYPE',
+              message: 'action must be one of upsert, update, insert',
+              path: '/config/0/value/0/action',
+            },
+          ],
+        }),
+      });
+      const selectProcessor = async (name: RegExp) => {
+        await userEvent.click(
+          within(screen.getByTestId('streamsProcessingFlyoutProcessorType')).getByTestId(
+            'comboBoxSearchInput'
+          )
+        );
+        // The option's name also carries its status badge.
+        await userEvent.click(await screen.findByRole('option', { name }));
+      };
+      await selectProcessor(/^Set/);
+      await fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+      await screen.findByTestId('streamsProcessingFlyoutEditorDiagnostics');
+
+      await selectProcessor(/^Add fields/);
+
+      expect(screen.queryByTestId('streamsProcessingFlyoutEditorDiagnostics')).toBeNull();
+      expect(screen.getByText('ADD FIELDS')).toBeTruthy();
+    });
+
     it('lists a diagnostic on a config entry the form has no field for', async () => {
       const message = 'unknown parameter legacy_option';
       renderEditor({
@@ -558,6 +747,46 @@ describe('ProcessorEditor', () => {
       expect(within(callout).queryByText(/highlighted field/)).toBeNull();
     });
 
+    it('keeps what no field could show while the form is edited', async () => {
+      const message = 'unknown parameter legacy_option';
+      const fieldMessage = 'action must be one of upsert, update, insert';
+      renderEditor({
+        step: {
+          ...savedStep,
+          processor: {
+            ...savedStep.processor,
+            config: [...savedStep.processor.config, { name: 'legacy_option', value: true }],
+          },
+        },
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [
+            { severity: 'error', code: 'E029_UNKNOWN_CONFIG', message, path: '/config/1' },
+            {
+              severity: 'error',
+              code: 'E028_INVALID_CONFIG_TYPE',
+              message: fieldMessage,
+              path: '/config/0/value/0/action',
+            },
+          ],
+        }),
+      });
+      commitPath('other');
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+      const callout = await screen.findByTestId('streamsProcessingFlyoutEditorDiagnostics');
+      expect(within(callout).getByText('Fix the highlighted field above.')).toBeTruthy();
+
+      fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
+        target: { value: 'platform' },
+      });
+
+      const kept = screen.getByTestId('streamsProcessingFlyoutEditorDiagnostics');
+      expect(within(kept).getByText(message)).toBeTruthy();
+      // The edit took the error off the field, so there is no highlighted field to point at.
+      expect(within(kept).queryByText(/highlighted field/)).toBeNull();
+      expect(screen.queryByText(fieldMessage)).toBeNull();
+    });
+
     it('commits unchecked when the configuration service cannot be reached', async () => {
       const { onCommit } = renderEditor({
         fetchCheck: jest.fn().mockRejectedValue(httpError(502, 'Bad Gateway')),
@@ -566,7 +795,7 @@ describe('ProcessorEditor', () => {
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
 
       await waitFor(() =>
-        expect(onCommit).toHaveBeenCalledWith(expect.objectContaining({ type: 'add_fields' }), {
+        expect(onCommit).toHaveBeenCalledWith(expect.objectContaining({ type: 'set' }), {
           unchecked: true,
         })
       );
@@ -607,6 +836,100 @@ describe('ProcessorEditor', () => {
       expect(onCommit).not.toHaveBeenCalled();
       expect(onCancel).not.toHaveBeenCalled();
       expect(screen.getByTestId('streamsProcessingFlyoutEditorSubmit')).toBeEnabled();
+    });
+  });
+
+  // The actions stay in view on a long form, so what a submit reports can be scrolled out of it.
+  describe('bringing what a submit reports into view', () => {
+    const scrollIntoView = jest.fn();
+    const original = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView');
+
+    /** The elements scrolled into view, in order. */
+    const scrolledElements = () => scrollIntoView.mock.contexts as Element[];
+
+    beforeEach(() => {
+      scrollIntoView.mockReset();
+      // jsdom does not implement it.
+      Object.defineProperty(Element.prototype, 'scrollIntoView', {
+        configurable: true,
+        writable: true,
+        value: scrollIntoView,
+      });
+    });
+
+    afterEach(() => {
+      if (original) {
+        Object.defineProperty(Element.prototype, 'scrollIntoView', original);
+      } else {
+        Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+      }
+    });
+
+    it('scrolls to the first field the client validation rejects', async () => {
+      renderEditor();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+      expect(scrolledElements()[0].getAttribute('aria-invalid')).toBe('true');
+    });
+
+    it.each([
+      [
+        'a rejection',
+        'streamsProcessingFlyoutEditorDiagnostics',
+        jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [{ severity: 'error', code: 'E030', message: 'not allowed here' }],
+        }),
+      ],
+      [
+        'warnings',
+        'streamsProcessingFlyoutEditorWarnings',
+        jest.fn().mockResolvedValue({
+          valid: true,
+          diagnostics: [{ severity: 'warning', code: 'W001', message: 'This field is deprecated' }],
+        }),
+      ],
+      [
+        'a failed check',
+        'streamsProcessingFlyoutEditorCheckFailed',
+        jest.fn().mockRejectedValue(httpError(500, 'Something broke')),
+      ],
+    ])('scrolls to %s from the configuration service', async (_, calloutTestSubj, fetchCheck) => {
+      renderEditor({ fetchCheck });
+      fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      const callout = await screen.findByTestId(calloutTestSubj);
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+      expect(scrolledElements()[0].contains(callout)).toBe(true);
+    });
+
+    it('does not scroll when the processor commits', async () => {
+      const { onCommit } = renderEditor();
+      fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      await waitFor(() => expect(onCommit).toHaveBeenCalled());
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('does not scroll again when a rejected processor is edited', async () => {
+      renderEditor({
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [{ severity: 'error', code: 'E030', message: 'not allowed here' }],
+        }),
+      });
+      fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+
+      fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
+        target: { value: 'platform' },
+      });
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
     });
   });
 

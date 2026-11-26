@@ -83,7 +83,6 @@
     "@kbn/crypto",
     "@kbn/test-es-server",
     "@kbn/core-lifecycle-server",
-    "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",
     "@kbn/core-spaces-common",
     "@kbn/core-http-server",
@@ -109,6 +108,8 @@
     "@kbn/cps-utils",
     "@kbn/cps",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/app-menu"
+    "@kbn/app-menu",
+    "@kbn/ui-callout",
+    "@kbn/core-application-browser"
   ]
 }

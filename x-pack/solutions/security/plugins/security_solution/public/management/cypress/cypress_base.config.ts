@@ -9,14 +9,12 @@
 import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
 
-import { transparentApiProxy } from './support/transparent_api_proxy';
 import { samlAuthentication } from './support/saml_authentication';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
-import { agentActions } from './support/agent_actions';
 import { usageTracker } from '../../../common/endpoint/data_loaders/usage_tracker';
 
 export const getCypressBaseConfig = (
@@ -33,6 +31,10 @@ export const getCypressBaseConfig = (
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
       pageLoadTimeout: 60000,
+      // Teardown tasks destroy a real VM in CI, which outlives Cypress' 60s `taskTimeout` default.
+      // Sized above the destroy's own 242s bound, so that bound logs a stuck VM and rejects the destroy.
+      // The teardown tasks catch that rejection, so a stuck VM does not fail the Cypress task.
+      taskTimeout: 300000,
 
       retries: {
         runMode: 1,
@@ -89,16 +91,12 @@ export const getCypressBaseConfig = (
 
           dataLoaders(on, config);
 
-          transparentApiProxy(on, config);
-
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
 
-          agentActions(on);
-
           responseActionTasks(on, config);
 
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
           require('@cypress/grep/plugin').plugin(config);
 
           on('after:spec', (_, results) => {

@@ -7,12 +7,8 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/dev-cli-errors",
-    "@kbn/dev-cli-runner",
-    "@kbn/es-snapshot-loader",
     "@kbn/evals",
     "@kbn/evals-common",
-    "@kbn/kibana-api-cli",
     "@kbn/scout",
     "@kbn/tooling-log",
     "@kbn/agent-builder-common",
@@ -21,6 +17,7 @@
     "@kbn/inference-common",
     "@kbn/inference-tracing",
     "@kbn/repo-info",
+    "@kbn/fs",
     "@kbn/nightshift-decision-trees",
     "@kbn/nightshift-investigations-plugin",
     "@kbn/nightshift-shared",
@@ -30,6 +27,8 @@
     "@kbn/zod",
     "@kbn/config",
     "@kbn/config-schema",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors"
   ]
 }

@@ -24,13 +24,12 @@ const formWithTags = (tags: string[]): Partial<FormValues> => ({
 
 const createServices = (responses: string[][] = [[]]) => {
   const http = httpServiceMock.createStartContract();
-  if (responses.length === 1) {
-    http.get.mockResolvedValue({ tags: responses[0] });
-  } else {
-    for (const tags of responses) {
-      http.get.mockResolvedValueOnce({ tags });
-    }
+  const [lastResponse = []] = responses.slice(-1);
+  for (const tags of responses.slice(0, -1)) {
+    http.get.mockResolvedValueOnce({ tags });
   }
+  /* The last response persists so extra debounced search requests still resolve. */
+  http.get.mockResolvedValue({ tags: lastResponse });
   return { ...createMockServices(), http };
 };
 

@@ -40,8 +40,10 @@ import {
   RISK_SCORE_NORM_FIELD,
   getEntityId,
   getNumber,
+  getString,
 } from '../common';
-import type { Row, TimeRange } from '../common';
+import type { TimeRange } from '../../queries/time_range';
+import type { Row } from '../common';
 
 const MAX_GROUP_RECORDS = 100;
 
@@ -386,14 +388,27 @@ const EXPANDER_HEADER_LABEL = i18n.translate(
   { defaultMessage: 'Expand group' }
 );
 
-const getExpandRowLabel = (isExpanded: boolean) =>
-  isExpanded
-    ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.collapseRowAriaLabel', {
-        defaultMessage: 'Collapse records resolved to this entity',
+const getExpandRowLabel = (isExpanded: boolean, entityName?: string) => {
+  if (!entityName) {
+    return isExpanded
+      ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.collapseRowAriaLabel', {
+          defaultMessage: 'Collapse records resolved to this entity',
+        })
+      : i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.expandRowAriaLabel', {
+          defaultMessage: 'Show records resolved to this entity',
+        });
+  }
+
+  return isExpanded
+    ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.collapseNamedRowAriaLabel', {
+        defaultMessage: 'Collapse records resolved to {entityName}',
+        values: { entityName },
       })
-    : i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.expandRowAriaLabel', {
-        defaultMessage: 'Show records resolved to this entity',
+    : i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.expandNamedRowAriaLabel', {
+        defaultMessage: 'Show records resolved to {entityName}',
+        values: { entityName },
       });
+};
 
 const EntityGridExpanderHeader = () => (
   <EuiScreenReaderOnly>
@@ -409,7 +424,7 @@ const EntityGridExpanderCell = ({ rowIndex }: EuiDataGridCellValueElementProps) 
   const groupSize = getNumber(row, GROUP_SIZE_FIELD) ?? 1;
   if (!entityId || groupSize <= 1) return null;
   const isExpanded = expandedIds.has(entityId);
-  const label = getExpandRowLabel(isExpanded);
+  const label = getExpandRowLabel(isExpanded, getString(row, 'entity.name'));
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>
       <EuiButtonIcon

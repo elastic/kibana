@@ -10,6 +10,7 @@
 import { registerBundleRoutesMock } from './core_app.test.mocks';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import type { Request } from '@hapi/hapi';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -354,6 +355,7 @@ describe('CoreApp', () => {
       prebootUIPlugins.internal.set('some-plugin', {
         publicAssetsDir: '/foo',
         publicTargetDir: '/bar',
+        requiredPlugins: [],
         requiredBundles: [],
         version: '1.0.0',
       });
@@ -369,6 +371,7 @@ describe('CoreApp', () => {
       prebootUIPlugins.internal.set('some-plugin-2', {
         publicAssetsDir: '/foo',
         publicTargetDir: '/bar',
+        requiredPlugins: [],
         requiredBundles: [],
         version: '1.0.0',
       });
@@ -382,8 +385,8 @@ describe('CoreApp', () => {
       await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
 
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledTimes(
-        // Twice for all UI plugins + core's UI asset routes + @elastic/charts assets
-        prebootUIPlugins.public.size * 2 + 3
+        // Two shared plugin routes + core's UI asset routes + @elastic/charts assets
+        5
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
         '/static-assets-path/ui/{path*}',
@@ -398,20 +401,12 @@ describe('CoreApp', () => {
         expect.any(String)
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets-path/some-plugin/{path*}',
-        expect.any(String)
+        '/static-assets-path/plugins/{pluginName}/assets/{path*}',
+        expect.any(Function)
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/some-plugin/assets/{path*}', // legacy
-        expect.any(String)
-      );
-      expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets-path/some-plugin-2/{path*}',
-        expect.any(String)
-      );
-      expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/some-plugin-2/assets/{path*}', // legacy
-        expect.any(String)
+        '/plugins/{pluginName}/assets/{path*}', // legacy
+        expect.any(Function)
       );
     });
 
@@ -500,6 +495,7 @@ describe('CoreApp', () => {
     uiPlugins.internal.set('some-plugin', {
       publicAssetsDir: '/foo',
       publicTargetDir: '/bar',
+      requiredPlugins: [],
       requiredBundles: [],
       version: '1.0.0',
     });
@@ -515,12 +511,14 @@ describe('CoreApp', () => {
     uiPlugins.internal.set('some-plugin-2', {
       publicAssetsDir: '/foo',
       publicTargetDir: '/bar',
+      requiredPlugins: [],
       requiredBundles: [],
       version: '1.0.0',
     });
     uiPlugins.internal.set('some-plugin-3-internal', {
       publicAssetsDir: '/foo-internal',
       publicTargetDir: '/bar-internal',
+      requiredPlugins: [],
       requiredBundles: [],
       version: '1.0.0',
     });
@@ -534,8 +532,8 @@ describe('CoreApp', () => {
     await coreApp.setup(internalCoreSetup, uiPlugins);
 
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledTimes(
-      // Twice for all _internal_ UI plugins + core's UI asset routes + @elastic/charts assets
-      uiPlugins.internal.size * 2 + 3
+      // Two shared plugin routes + core's UI asset routes + @elastic/charts assets
+      5
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
       '/static-assets-path/ui/{path*}',
@@ -550,29 +548,25 @@ describe('CoreApp', () => {
       expect.any(String)
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/static-assets-path/some-plugin/{path*}',
-      expect.any(String)
+      '/static-assets-path/plugins/{pluginName}/assets/{path*}',
+      expect.any(Function)
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/plugins/some-plugin/assets/{path*}', // legacy
-      expect.any(String)
-    );
-    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/static-assets-path/some-plugin-2/{path*}',
-      expect.any(String)
-    );
-    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/plugins/some-plugin-2/assets/{path*}', // legacy
-      expect.any(String)
+      '/plugins/{pluginName}/assets/{path*}', // legacy
+      expect.any(Function)
     );
 
-    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/static-assets-path/some-plugin-3-internal/{path*}',
-      expect.any(String)
+    const pluginRoutes = internalCoreSetup.http.registerStaticDir.mock.calls.filter(([path]) =>
+      path.includes('{pluginName}')
     );
-    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/plugins/some-plugin-3-internal/assets/{path*}', // legacy
-      expect.any(String)
-    );
+    const requestFor = (pluginName: string) => ({ params: { pluginName } } as unknown as Request);
+    for (const [, resolveDir] of pluginRoutes) {
+      if (typeof resolveDir !== 'function') {
+        throw new Error('Plugin asset route must resolve its directory from the request');
+      }
+      expect(resolveDir(requestFor('some-plugin'))).toBe('/foo');
+      expect(resolveDir(requestFor('some-plugin-3-internal'))).toBe('/foo-internal');
+      expect(resolveDir(requestFor('unknown'))).toMatchObject({ output: { statusCode: 404 } });
+    }
   });
 });

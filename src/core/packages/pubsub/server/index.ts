@@ -8,6 +8,7 @@
  */
 
 export { assertTopicName, defineTopic } from './src/topic';
+export { PUBSUB_MAX_ID_LENGTH } from './src/contracts';
 export type { Topic } from './src/topic';
 export type {
   PubSubEvent,

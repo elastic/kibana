@@ -20,6 +20,7 @@ import {
 import { resolveWorkerIndexCoverage } from '../../services/watches/hunt/common/resolve_worker_index_coverage';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
 /**
@@ -30,6 +31,8 @@ export const registerHuntWorkerIndexCoverageRoute = ({
   router,
   logger,
   getSpaceId,
+  getClusterClient,
+  isCpsEnabled,
   getWorkersService,
   getWorkflowsManagement,
   isServerless,
@@ -55,8 +58,12 @@ export const registerHuntWorkerIndexCoverageRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const spaceId = getSpaceId(request);
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          const indexPatterns = await resolveHuntUniverse(context, logger);
+          const esClient = huntEsClient({ getClusterClient, request });
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger,
+            isCpsEnabled()
+          );
           const { workflowId, serviceAccountId } = await getWorkersService().getHuntCoverageInputs(
             spaceId,
             request
@@ -67,6 +74,8 @@ export const registerHuntWorkerIndexCoverageRoute = ({
             request,
             spaceId,
             indexPatterns,
+            policySkippedPatterns: policySkipped,
+            crossProjectSearch: isCpsEnabled(),
             workflowId,
             serviceAccountId,
             roleName: getWorkerRoleName(

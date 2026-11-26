@@ -535,6 +535,287 @@ describe('useKeyboardNavigation', () => {
     });
   });
 
+  describe('open groups', () => {
+    const closedGroup = {
+      ...createNode('shop', 0, 0, 'shop'),
+      type: 'serviceGroup',
+      data: { id: 'shop', label: 'shop', isService: false, isServiceGroup: true },
+    } as ServiceMapNode;
+    const box = {
+      ...createNode('shop', 0, 0, 'shop'),
+      type: 'serviceGroupBox',
+      data: { id: 'shop', label: 'shop', isService: false, isServiceGroupBox: true },
+    } as ServiceMapNode;
+    const member = { ...createNode('cart', 24, 72, 'cart'), parentId: 'shop' } as ServiceMapNode;
+
+    let focusedElement: HTMLDivElement;
+
+    const focusNode = (id: string) => {
+      focusedElement = document.createElement('div');
+      focusedElement.setAttribute('data-id', id);
+      focusedElement.tabIndex = 0;
+      document.body.appendChild(focusedElement);
+      focusedElement.focus();
+    };
+
+    const press = (key: string) =>
+      act(() => {
+        const event = new KeyboardEvent('keydown', {
+          key,
+          bubbles: true,
+          cancelable: true,
+        });
+        document.dispatchEvent(event);
+      });
+
+    afterEach(() => {
+      focusedElement?.remove();
+    });
+
+    it('closes the group on Escape when its box has the focus', () => {
+      const onNodeSelect = jest.fn();
+      renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [box, member], onNodeSelect })
+      );
+      focusNode('shop');
+
+      press('Escape');
+
+      expect(onNodeSelect).toHaveBeenCalledWith(box);
+    });
+
+    it('closes the group on Escape when one of its members has the focus', () => {
+      const onNodeSelect = jest.fn();
+      renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [box, member], onNodeSelect })
+      );
+      focusNode('cart');
+
+      press('Escape');
+
+      expect(onNodeSelect).toHaveBeenCalledWith(box);
+    });
+
+    it('leaves Escape to what is open for a selected member', () => {
+      const onNodeSelect = jest.fn();
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes: [box, member],
+          selectedNodeId: 'cart',
+          onNodeSelect,
+        })
+      );
+      focusNode('cart');
+
+      press('Escape');
+
+      expect(onNodeSelect).not.toHaveBeenCalled();
+    });
+
+    it('does nothing on Escape for a closed group or a node outside any group', () => {
+      const onNodeSelect = jest.fn();
+      const outside = createNode('outside', 500, 0);
+      renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [closedGroup, outside], onNodeSelect })
+      );
+
+      focusNode('shop');
+      press('Escape');
+      focusedElement.remove();
+      focusNode('outside');
+      press('Escape');
+
+      expect(onNodeSelect).not.toHaveBeenCalled();
+    });
+
+    it('claims the Escape, so the map does not leave fullscreen with it', () => {
+      renderHook(() => useKeyboardNavigation({ ...defaultProps, nodes: [box, member] }));
+      focusNode('shop');
+      const event = new KeyboardEvent('keydown', {
+        key: 'Escape',
+        bubbles: true,
+        cancelable: true,
+      });
+
+      act(() => {
+        document.dispatchEvent(event);
+      });
+
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    // The graph announces a group that opened or closed, once it has, whatever way it was done.
+    it('does not announce a selection when Enter is pressed on a group', () => {
+      const onNodeSelect = jest.fn();
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [closedGroup], onNodeSelect })
+      );
+      focusNode('shop');
+
+      press('Enter');
+
+      expect(onNodeSelect).toHaveBeenCalledWith(closedGroup);
+      expect(result.current.screenReaderAnnouncement).toBe('');
+    });
+
+    it('does not announce a selection when Enter is pressed on the box of a group', () => {
+      const onNodeSelect = jest.fn();
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: [box], onNodeSelect })
+      );
+      focusNode('shop');
+
+      press('Enter');
+
+      expect(onNodeSelect).toHaveBeenCalledWith(box);
+      expect(result.current.screenReaderAnnouncement).toBe('');
+    });
+
+    it('announces what the graph says through announce', () => {
+      const { result } = renderHook(() => useKeyboardNavigation({ ...defaultProps }));
+
+      act(() => result.current.announce('Opened group shop.'));
+
+      expect(result.current.screenReaderAnnouncement).toBe('Opened group shop.');
+    });
+  });
+
+  describe('arrow keys with an open group', () => {
+    // The members are placed relative to the box: `cart` is at (524, 72) and `pay` at (760, 72)
+    // on the map. `left` and `right` are outside the group.
+    const box = {
+      ...createNode('shop', 500, 0, 'shop'),
+      type: 'serviceGroupBox',
+      width: 400,
+      height: 300,
+      data: { id: 'shop', label: 'shop', isService: false, isServiceGroupBox: true },
+    } as ServiceMapNode;
+    const cart = { ...createNode('cart', 24, 72, 'cart'), parentId: 'shop' } as ServiceMapNode;
+    const pay = { ...createNode('pay', 260, 72, 'pay'), parentId: 'shop' } as ServiceMapNode;
+    const left = createNode('left', 100, 72);
+    const right = createNode('right', 1200, 72);
+    const nodes = [box, cart, pay, left, right];
+
+    const findNext = (
+      currentNodeId: string,
+      direction: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight',
+      mapNodes: ServiceMapNode[] = nodes
+    ) => {
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({ ...defaultProps, nodes: mapNodes })
+      );
+      return result.current.findNodeInDirection(currentNodeId, direction)?.id;
+    };
+
+    it('moves between the members of the group', () => {
+      expect(findNext('cart', 'ArrowRight')).toBe('pay');
+      expect(findNext('pay', 'ArrowLeft')).toBe('cart');
+    });
+
+    it('moves from a member to a node outside the group, on either side', () => {
+      expect(findNext('cart', 'ArrowLeft')).toBe('left');
+      expect(findNext('pay', 'ArrowRight')).toBe('right');
+    });
+
+    it('moves from a node outside the group to the member next to it', () => {
+      expect(findNext('left', 'ArrowRight')).toBe('cart');
+      expect(findNext('right', 'ArrowLeft')).toBe('pay');
+    });
+
+    it('does not stop on the box', () => {
+      expect(findNext('left', 'ArrowRight')).not.toBe('shop');
+      expect(findNext('cart', 'ArrowUp')).toBeUndefined();
+    });
+
+    it('goes into the group from its box', () => {
+      expect(findNext('shop', 'ArrowRight')).toBe('pay');
+      expect(findNext('shop', 'ArrowLeft')).toBe('cart');
+    });
+
+    it('skips a hidden member', () => {
+      const hiddenCart = { ...cart, hidden: true };
+
+      expect(findNext('left', 'ArrowRight', [box, hiddenCart, pay, left, right])).toBe('pay');
+    });
+
+    it('moves between members of two open groups', () => {
+      const otherBox = {
+        ...box,
+        id: 'other',
+        position: { x: 500, y: 600 },
+        data: { ...box.data, id: 'other', label: 'other' },
+      } as ServiceMapNode;
+      const stock = {
+        ...createNode('stock', 24, 72, 'stock'),
+        parentId: 'other',
+      } as ServiceMapNode;
+
+      expect(findNext('cart', 'ArrowDown', [...nodes, otherBox, stock])).toBe('stock');
+      expect(findNext('stock', 'ArrowUp', [...nodes, otherBox, stock])).toBe('cart');
+    });
+
+    describe('with the focus on a node', () => {
+      const elements: HTMLDivElement[] = [];
+
+      const addElement = (id: string) => {
+        const element = document.createElement('div');
+        element.setAttribute('data-id', id);
+        element.tabIndex = 0;
+        document.body.appendChild(element);
+        elements.push(element);
+        return element;
+      };
+
+      afterEach(() => {
+        elements.splice(0).forEach((element) => element.remove());
+      });
+
+      const pressArrowRight = () =>
+        act(() => {
+          document.dispatchEvent(
+            new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
+          );
+        });
+
+      it('focuses the next member and says which group it is in', () => {
+        const { result } = renderHook(() => useKeyboardNavigation({ ...defaultProps, nodes }));
+        addElement('cart').focus();
+        const payElement = addElement('pay');
+
+        pressArrowRight();
+
+        expect(document.activeElement).toBe(payElement);
+        expect(result.current.screenReaderAnnouncement).toBe('Focused on pay, in group shop');
+      });
+
+      it('moves to a node whose id would break a selector', () => {
+        const quoted = createNode('say "hi"]', 400, 0);
+        const { result } = renderHook(() =>
+          useKeyboardNavigation({ ...defaultProps, nodes: [createNode('a', 0, 0), quoted] })
+        );
+        addElement('a').focus();
+        const quotedElement = addElement('say "hi"]');
+
+        pressArrowRight();
+
+        expect(document.activeElement).toBe(quotedElement);
+        expect(result.current.screenReaderAnnouncement).toBe('Focused on say "hi"]');
+      });
+
+      it('does not mention a group for a node outside it', () => {
+        const { result } = renderHook(() => useKeyboardNavigation({ ...defaultProps, nodes }));
+        addElement('pay').focus();
+        const rightElement = addElement('right');
+
+        pressArrowRight();
+
+        expect(document.activeElement).toBe(rightElement);
+        expect(result.current.screenReaderAnnouncement).toBe('Focused on right');
+      });
+    });
+  });
+
   describe('Enter/Space on node elements', () => {
     let nodeElement: HTMLDivElement;
 

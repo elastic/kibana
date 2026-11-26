@@ -187,7 +187,7 @@ describe('nightshift-investigations scout hook', () => {
     expect(runHook({ sandbox: { apiKey: 'REPLACE_ME', url: 'REPLACE_ME' } }).output).toEqual({});
   });
 
-  it('rejects sandbox settings without an API key instead of silently running only smoke', () => {
+  it('rejects sandbox settings without an API key instead of silently dropping them', () => {
     const { status, stderr } = runHook({ sandbox: { url: 'https://sandbox.example.com' } });
     expect(status).toBe(1);
     expect(stderr).toContain('sandbox host port set without an API key');
@@ -247,6 +247,32 @@ describe('nightshift-investigations scout hook', () => {
       rmSync(shimDir, { recursive: true, force: true });
     }
   });
+  it('exports NIGHTSHIFT_DECISION_TREES only when the reinforcement micro-eval is selected', () => {
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'reinforcement' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: ' reinforcement ' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'trace-only' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBeUndefined();
+  });
+
+  it('exports NIGHTSHIFT_DECISION_TREES on the reinforcement CI shard only', () => {
+    expect(
+      runHook({ sandbox: SANDBOX }, { EVAL_SHARD_ID: 'reinforcement' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { EVAL_SHARD_ID: 'customer0' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBeUndefined();
+  });
+
   it('keeps dataset selection out of the server fingerprint', () => {
     expect(runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASET_NAME: 'first' }).output).toEqual(
       runHook(
@@ -256,7 +282,7 @@ describe('nightshift-investigations scout hook', () => {
     );
   });
 
-  it('leaves dataset validation to Playwright, including smoke-only startup', () => {
+  it('leaves dataset validation to Playwright, including startup without a sandbox', () => {
     const result = runHook(
       {},
       { NIGHTSHIFT_DATASET_NAME: 'stored', NIGHTSHIFT_EXAMPLES_FILE: 'examples.json' }
@@ -380,6 +406,46 @@ describe('nightshift-investigations scout hook', () => {
       }
     );
 
+    describe('shell override of the profile key', () => {
+      const override = {
+        NIGHTSHIFT_ES_URL_OVERRIDE: 'https://override.example.com',
+        NIGHTSHIFT_ES_API_KEY_OVERRIDE: 'override-key',
+      };
+
+      it('beats the profile block, which the plain shell variables never do', () => {
+        const { output } = runHook(PROFILE, {
+          ...override,
+          NIGHTSHIFT_ES_URL: 'https://shell.example.com',
+          NIGHTSHIFT_ES_API_KEY: 'shell-key',
+        });
+        expect(output.env).toMatchObject({
+          NIGHTSHIFT_CONNECTOR_SET: 'default',
+          NIGHTSHIFT_ES_URL: 'https://override.example.com',
+          NIGHTSHIFT_ES_API_KEY: 'override-key',
+        });
+      });
+
+      it.each<Record<string, string>>([
+        { NIGHTSHIFT_ES_URL_OVERRIDE: 'https://override.example.com' },
+        { NIGHTSHIFT_ES_API_KEY_OVERRIDE: 'SECRET_OVERRIDE_KEY' },
+      ])('rejects an incomplete override %j without echoing credentials', (env) => {
+        const { status, stderr } = runHook(PROFILE, env);
+        expect(status).toBe(1);
+        expect(stderr).toContain('must be set together');
+        expect(stderr).not.toContain('SECRET_OVERRIDE_KEY');
+      });
+
+      it('still rejects embedded URL credentials', () => {
+        const { status, stderr } = runHook(PROFILE, {
+          NIGHTSHIFT_ES_URL_OVERRIDE: 'https://elastic:SECRET_PASSWORD@es.example.com',
+          NIGHTSHIFT_ES_API_KEY_OVERRIDE: 'override-key',
+        });
+        expect(status).toBe(1);
+        expect(stderr).toContain('Elasticsearch URL must not embed credentials');
+        expect(stderr).not.toContain('SECRET_PASSWORD');
+      });
+    });
+
     it.each<Record<string, string>>([
       { NIGHTSHIFT_ES_URL: 'https://shell.example.com' },
       { NIGHTSHIFT_ES_API_KEY: 'SECRET_SHELL_KEY' },
@@ -410,61 +476,74 @@ describe('nightshift-investigations scout hook', () => {
 });
 
 describe('ORCA CI shard', () => {
-  const orca = { url: 'https://orca.example:443', apiKey: 'orca-key' };
+  const orca = {
+    url: 'https://orca.example:443',
+    username: 'nightshift-orcabench-eval',
+    password: 'orca-password',
+  };
   const existing = {
     sandbox: SANDBOX,
     nightshift: { telemetry: { url: 'https://default.example', apiKey: 'default-key' } },
   };
-  it('starts the orcabench connector set and preserves sandbox authentication', () => {
+  it('exports the ORCA eval user for the orcabench set, preconfigures no connector and keeps the sandbox', () => {
     const { status, output, stderr } = runHook(
       { ...existing, nightshiftOrcaEs: orca },
       { EVAL_SHARD_ID: 'orcabench' }
     );
     expect(status).toBe(0);
-    expect(stderr).not.toContain(orca.apiKey);
+    expect(stderr).not.toContain(orca.password);
     expect(output.env).toEqual({
       ...runHook({ sandbox: SANDBOX }).output.env,
       NIGHTSHIFT_DATASETS: 'orcabench',
       NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
-      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/orcabench.yml'),
-      NIGHTSHIFT_ES_URL: orca.url,
-      NIGHTSHIFT_ES_API_KEY: orca.apiKey,
+      NIGHTSHIFT_ORCA_ES_URL: orca.url,
+      NIGHTSHIFT_ORCA_ES_USERNAME: orca.username,
+      NIGHTSHIFT_ORCA_ES_PASSWORD: orca.password,
     });
   });
-  it('reads the restricted key for the no-flags variant and leaves the full key alone', () => {
-    const withBoth = { ...existing, nightshiftOrcaEs: { ...orca, noFlagsApiKey: 'no-flags-key' } };
-
-    const ablation = runHook(withBoth, {
-      EVAL_SHARD_ID: 'orcabench',
-      NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags',
-    });
-    expect(ablation.status).toBe(0);
-    expect(ablation.stderr).not.toContain('no-flags-key');
-    expect(ablation.output.env.NIGHTSHIFT_ES_API_KEY).toBe('no-flags-key');
-
-    const full = runHook(withBoth, { EVAL_SHARD_ID: 'orcabench' });
-    expect(full.output.env.NIGHTSHIFT_ES_API_KEY).toBe(orca.apiKey);
-  });
-  it('refuses the no-flags variant without its restricted key, rather than run on full telemetry', () => {
-    const { status, stderr } = runHook(
+  it('runs one slice of the release on an orcabench-<index>-of-<count> shard', () => {
+    const whole = runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'orcabench' });
+    const { status, output } = runHook(
       { ...existing, nightshiftOrcaEs: orca },
-      { EVAL_SHARD_ID: 'orcabench', NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags' }
+      { EVAL_SHARD_ID: 'orcabench-2-of-5' }
     );
-    expect(status).toBe(1);
-    expect(stderr).toContain('nightshiftOrcaEs.noFlagsApiKey');
-    expect(stderr).not.toContain(orca.apiKey);
+    expect(status).toBe(0);
+    expect(output.env).toEqual({ ...whole.output.env, NIGHTSHIFT_ORCA_SLICE: '2/5' });
   });
-  it('ignores a readable-indices hint left in the ORCA block', () => {
+  it.each(['orcabench-2', 'orcabench-a-of-5', 'my-orcabench-2-of-5'])(
+    'does not treat %s as an ORCA shard',
+    (shardId) => {
+      const { output } = runHook(
+        { ...existing, nightshiftOrcaEs: orca },
+        { EVAL_SHARD_ID: shardId }
+      );
+      expect(output.env.NIGHTSHIFT_CONNECTOR_SET).toBe('default');
+    }
+  );
+  it('uses the same credential for the no-flags variant, whose keys the eval restricts itself', () => {
+    const run = (env: Record<string, string>) =>
+      runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'orcabench', ...env });
+    expect(run({ NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags' }).output).toEqual(run({}).output);
+  });
+  it('ignores read keys and hints left in the ORCA block', () => {
     expect(
       runHook(
-        { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: 'Read orca indices.' } },
+        {
+          ...existing,
+          nightshiftOrcaEs: {
+            ...orca,
+            apiKey: 'unbounded-key',
+            noFlagsApiKey: 'no-flags-key',
+            readableIndices: 'Read orca indices.',
+          },
+        },
         { EVAL_SHARD_ID: 'orcabench' }
       ).output
     ).toEqual(
       runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'orcabench' }).output
     );
   });
-  it('ignores a shared evals config, so the suite secret is the only source of the ORCA key', () => {
+  it('ignores a shared evals config, so the suite secret is the only source of the ORCA credential', () => {
     const { status, stderr } = runHook(existing, {
       EVAL_SHARD_ID: 'orcabench',
       KBN_EVALS_CONFIG_B64: Buffer.from(JSON.stringify({ nightshiftOrcaEs: orca })).toString(
@@ -485,6 +564,18 @@ describe('ORCA CI shard', () => {
       NIGHTSHIFT_ES_URL: existing.nightshift.telemetry.url,
       NIGHTSHIFT_ES_API_KEY: existing.nightshift.telemetry.apiKey,
     });
+    expect(output.env).not.toHaveProperty('NIGHTSHIFT_ORCA_ES_PASSWORD');
+  });
+  it('starts the reinforcement shard with the default connector set and decision trees', () => {
+    const { output } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'reinforcement' }
+    );
+    expect(output.env).toEqual({
+      ...runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'customer0' }).output
+        .env,
+      NIGHTSHIFT_DECISION_TREES: 'true',
+    });
   });
   it('selects ORCA from NIGHTSHIFT_DATASETS for local runs outside CI', () => {
     const { output, status } = runHook(
@@ -493,12 +584,14 @@ describe('ORCA CI shard', () => {
     );
     expect(status).toBe(0);
     expect(output.env.NIGHTSHIFT_CONNECTOR_SET).toBe('orcabench');
-    expect(output.env.NIGHTSHIFT_ES_API_KEY).toBe(orca.apiKey);
+    expect(output.env.NIGHTSHIFT_ORCA_ES_USERNAME).toBe(orca.username);
   });
   it.each([
     undefined,
     { url: orca.url },
-    { apiKey: orca.apiKey },
+    { url: orca.url, apiKey: 'unbounded-key' },
+    { url: orca.url, username: orca.username },
+    { ...orca, password: 'REPLACE_ME' },
     { ...orca, url: 'https://user:password@orca.example' },
   ])(
     'fails without a complete ORCA credential instead of using the default set: %j',
@@ -510,6 +603,7 @@ describe('ORCA CI shard', () => {
       expect(status).toBe(1);
       expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
       expect(stderr).not.toContain('default-key');
+      expect(stderr).not.toContain(orca.password);
     }
   );
 

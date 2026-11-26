@@ -7,8 +7,80 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'crypto';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
-import { grantedScopes } from './token_endpoints';
+import { grantedScopes, resolveTokenUrlAgainstServers } from './token_endpoints';
+
+describe('resolveTokenUrlAgainstServers', () => {
+  it('keeps an absolute token URL', () => {
+    expect(
+      resolveTokenUrlAgainstServers('https://id.example.com/token', ['https://api.example.com/v1'])
+    ).toEqual(['https://id.example.com/token']);
+  });
+
+  it('resolves a relative token URL against each server', () => {
+    expect(
+      resolveTokenUrlAgainstServers('/oauth2/v1/token', [
+        'https://api.example.com/v1',
+        'https://eu.example.com/v1',
+      ])
+    ).toEqual([
+      'https://api.example.com/oauth2/v1/token',
+      'https://eu.example.com/oauth2/v1/token',
+    ]);
+  });
+
+  // `new URL` lowercases `{yourOktaDomain}` and rejects `{protocol}://{name}`, which would leave
+  // a token URL that matches nothing. Okta and Datadog declare both shapes.
+  it('resolves against templated servers without touching the variables', () => {
+    expect(resolveTokenUrlAgainstServers('/oauth2/v1/token', ['https://{yourOktaDomain}'])).toEqual(
+      ['https://{yourOktaDomain}/oauth2/v1/token']
+    );
+    // A server whose scheme is itself a variable has no parseable origin, so its token URL
+    // matches on the path alone, as it does for a relative server such as `/v1`.
+    expect(
+      resolveTokenUrlAgainstServers('/oauth2/v1/token', [
+        'https://{subdomain}.{site}',
+        '{protocol}://{name}',
+      ])
+    ).toEqual(['https://{subdomain}.{site}/oauth2/v1/token', '/oauth2/v1/token']);
+  });
+
+  it('falls back to the server OpenAPI assumes when a spec declares none', () => {
+    expect(resolveTokenUrlAgainstServers('/oauth2/v1/token', [])).toEqual(['/oauth2/v1/token']);
+  });
+
+  it('resolves a scheme-relative token URL on each scheme a templated server allows', () => {
+    const server = (allowed?: string[]) => ({
+      url: '{protocol}://api.example.com/v1',
+      variables: { protocol: { default: 'http', ...(allowed ? { enum: allowed } : {}) } },
+    });
+    expect(resolveTokenUrlAgainstServers('//auth.example.com/token', [server()])).toEqual([
+      'http://auth.example.com/token',
+    ]);
+    expect(
+      resolveTokenUrlAgainstServers('//auth.example.com/token', [server(['http', 'https'])])
+    ).toEqual(['http://auth.example.com/token', 'https://auth.example.com/token']);
+  });
+
+  it('uses https for a scheme-relative token URL when the server has no scheme', () => {
+    expect(resolveTokenUrlAgainstServers('//auth.example.com/token', [])).toEqual([
+      'https://auth.example.com/token',
+    ]);
+    expect(resolveTokenUrlAgainstServers('//auth.example.com/token', ['/v1'])).toEqual([
+      'https://auth.example.com/token',
+    ]);
+  });
+
+  it('takes the scheme from the server for a scheme-relative token URL', () => {
+    expect(
+      resolveTokenUrlAgainstServers('//auth.example.com/token', ['https://api.example.com/v1'])
+    ).toEqual(['https://auth.example.com/token']);
+  });
+});
 
 const spec = {
   openapi: '3.0.3',
@@ -66,6 +138,78 @@ describe('token endpoints', () => {
       ['OAuth token', 200],
       ['GET /items', 200],
     ]);
+  });
+
+  it('serves a scheme-relative token URL on its host when the server has no scheme', async () => {
+    const schemeRelative = {
+      ...spec,
+      servers: [{ url: '/v1' }],
+      components: {
+        securitySchemes: {
+          oauth: {
+            type: 'oauth2',
+            flows: { clientCredentials: { tokenUrl: '//auth.example.com/token', scopes: {} } },
+          },
+        },
+      },
+    };
+    const { fetch: mockFetch } = createEmulatorFetch({ specs: [schemeRelative] });
+    const post = (url: string) =>
+      mockFetch(url, {
+        method: 'POST',
+        headers: FORM,
+        body: 'grant_type=client_credentials&client_id=id',
+      });
+
+    const served = await post('https://auth.example.com/token');
+    const otherHost = await post('https://other.example.com/token');
+    const asPath = await post('https://other.example.com//auth.example.com/token');
+
+    expect([served.status, otherHost.status, asPath.status]).toEqual([200, 404, 404]);
+  });
+
+  it('serves a scheme-relative token URL on each scheme a templated server allows', async () => {
+    // The token request's status at http and at https, with `protocol` restricted to `allowed`
+    const statuses = (allowed: string[]) => {
+      const { fetch: mockFetch } = createEmulatorFetch({
+        specs: [
+          {
+            ...spec,
+            servers: [
+              {
+                url: '{protocol}://api.example.com/v1',
+                variables: { protocol: { default: 'http', enum: allowed } },
+              },
+            ],
+            components: {
+              securitySchemes: {
+                oauth: {
+                  type: 'oauth2',
+                  flows: {
+                    clientCredentials: { tokenUrl: '//auth.example.com/token', scopes: {} },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+      return Promise.all(
+        ['http', 'https'].map(
+          async (scheme) =>
+            (
+              await mockFetch(`${scheme}://auth.example.com/token`, {
+                method: 'POST',
+                headers: FORM,
+                body: 'grant_type=client_credentials&client_id=id',
+              })
+            ).status
+        )
+      );
+    };
+
+    expect(await statuses(['http', 'https'])).toEqual([200, 200]);
+    expect(await statuses(['http'])).toEqual([200, 404]);
   });
 
   it('resolves relative token and refresh URLs against the server', async () => {
@@ -157,6 +301,293 @@ describe('token endpoints', () => {
     });
 
     expect(status).toBe(200);
+  });
+
+  describe('authorization code flow', () => {
+    const AUTHORIZE_URL = 'https://auth.example.com/oauth/authorize';
+    const TOKEN_URL = 'https://auth.example.com/oauth/token';
+    const REDIRECT_URI = 'https://kibana/cb';
+    const VERIFIER = 'a-code-verifier-that-is-long-enough-for-rfc-7636-checks';
+    const S256_CHALLENGE = createHash('sha256').update(VERIFIER).digest('base64url');
+    const withFlow = {
+      ...spec,
+      components: {
+        securitySchemes: {
+          oauth: {
+            type: 'oauth2',
+            flows: {
+              authorizationCode: {
+                authorizationUrl: AUTHORIZE_URL,
+                tokenUrl: TOKEN_URL,
+                scopes: {},
+              },
+            },
+          },
+        },
+      },
+    };
+    const { fetch: flowFetch, calls: flowCalls } = createEmulatorFetch({ specs: [withFlow] });
+
+    const authorize = async (params: Record<string, string>) => {
+      const response = await flowFetch(`${AUTHORIZE_URL}?${new URLSearchParams(params)}`);
+      const location = response.headers.get('location');
+      return {
+        status: response.status,
+        location: location ? new URL(location) : undefined,
+        body: location ? undefined : await response.json(),
+      };
+    };
+    const VALID = { response_type: 'code', client_id: 'id', redirect_uri: REDIRECT_URI };
+    const codeFor = async (params: Record<string, string> = {}) =>
+      (await authorize({ ...VALID, ...params })).location?.searchParams.get('code') ?? '';
+    const exchange = async (params: Record<string, string>) => {
+      const response = await flowFetch(TOKEN_URL, {
+        method: 'POST',
+        headers: FORM,
+        body: new URLSearchParams({ grant_type: 'authorization_code', ...params }).toString(),
+      });
+      return { status: response.status, body: await response.json() };
+    };
+
+    afterEach(() => {
+      flowCalls.length = 0;
+    });
+
+    it('redirects back with a code and the unchanged state', async () => {
+      const { status, location } = await authorize({ ...VALID, state: 's p/a+c=e' });
+
+      expect(status).toBe(302);
+      expect(`${location?.origin}${location?.pathname}`).toBe(REDIRECT_URI);
+      expect(location?.searchParams.get('code')).toEqual(expect.any(String));
+      expect(location?.searchParams.get('state')).toBe('s p/a+c=e');
+      expect(flowCalls).toEqual([
+        expect.objectContaining({ operation: 'OAuth authorization', token: true, status: 302 }),
+      ]);
+    });
+
+    it('keeps the query of the redirect URI', async () => {
+      const { location } = await authorize({ ...VALID, redirect_uri: `${REDIRECT_URI}?a=1` });
+
+      expect(location?.searchParams.get('a')).toBe('1');
+      expect(location?.searchParams.has('code')).toBe(true);
+    });
+
+    it('exchanges the code for tokens carrying the requested scopes', async () => {
+      const code = await codeFor({ scope: 'read write' });
+
+      const { status, body } = await exchange({ code, redirect_uri: REDIRECT_URI });
+
+      expect(status).toBe(200);
+      expect(body.scope).toBe('read write');
+      expect(grantedScopes(body.access_token)).toEqual(['read', 'write']);
+      expect(body.refresh_token).toEqual(expect.stringMatching(/^contract-mock-refresh-token\./));
+    });
+
+    it('still accepts codes the mock did not issue', async () => {
+      expect((await exchange({ code: 'from-a-recording' })).status).toBe(200);
+    });
+
+    it("rejects a redirect_uri that doesn't match the authorization request", async () => {
+      const code = await codeFor();
+
+      const wrong = await exchange({ code, redirect_uri: 'https://elsewhere/cb' });
+      const missing = await exchange({ code });
+
+      expect(wrong).toEqual({
+        status: 400,
+        body: expect.objectContaining({ error: 'invalid_grant' }),
+      });
+      expect(missing.body.error).toBe('invalid_grant');
+    });
+
+    it.each([
+      ['S256', S256_CHALLENGE, 'S256', VERIFIER],
+      ['plain', VERIFIER, 'plain', VERIFIER],
+      ['plain by default', VERIFIER, undefined, VERIFIER],
+    ])('verifies code_verifier with %s PKCE', async (_, challenge, method, verifier) => {
+      const code = await codeFor({
+        code_challenge: challenge,
+        ...(method ? { code_challenge_method: method } : {}),
+      });
+      const tokenRequest = { code, redirect_uri: REDIRECT_URI };
+
+      const right = await exchange({ ...tokenRequest, code_verifier: verifier });
+      const wrong = await exchange({ ...tokenRequest, code_verifier: `${verifier}-wrong` });
+      const missing = await exchange(tokenRequest);
+
+      expect(right.status).toBe(200);
+      expect(wrong).toEqual({
+        status: 400,
+        body: expect.objectContaining({ error: 'invalid_grant' }),
+      });
+      expect(missing.body.error).toBe('invalid_grant');
+    });
+
+    it.each([
+      ['an empty response_type', { response_type: '' }, 'unsupported_response_type'],
+      ['another response_type', { response_type: 'token' }, 'unsupported_response_type'],
+      ['an unknown PKCE method', { code_challenge: VERIFIER, code_challenge_method: 'S512' }],
+      ['a PKCE method without a challenge', { code_challenge_method: 'S256' }],
+      ['a short code_challenge', { code_challenge: 'short' }],
+    ])('redirects back with the error for %s', async (_, params, error = 'invalid_request') => {
+      const { status, location } = await authorize({ ...VALID, state: 's', ...params });
+
+      expect(status).toBe(302);
+      expect(location?.searchParams.get('error')).toBe(error);
+      expect(location?.searchParams.get('state')).toBe('s');
+      expect(location?.searchParams.has('code')).toBe(false);
+      expect(flowCalls[0].requestViolations).toEqual([expect.objectContaining({ code: error })]);
+    });
+
+    it('reports a response_type that is left out', async () => {
+      const { location } = await authorize({ client_id: 'id', redirect_uri: REDIRECT_URI });
+
+      expect(location?.searchParams.get('error')).toBe('invalid_request');
+    });
+
+    it.each([
+      ['a missing redirect_uri', { response_type: 'code', client_id: 'id' }],
+      ['a relative redirect_uri', { ...VALID, redirect_uri: '/cb' }],
+      ['a redirect_uri with a fragment', { ...VALID, redirect_uri: `${REDIRECT_URI}#f` }],
+      ['a missing client_id', { response_type: 'code', redirect_uri: REDIRECT_URI }],
+    ])('answers 400 instead of redirecting for %s', async (_, params) => {
+      const { status, location, body } = await authorize(params);
+
+      expect(status).toBe(400);
+      expect(location).toBeUndefined();
+      expect(body.error).toBe('invalid_request');
+    });
+
+    it("doesn't serve Google's authorization URL for other vendors' specs", async () => {
+      const response = await flowFetch(
+        `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(VALID)}`
+      );
+
+      expect(response.status).toBe(404);
+    });
+
+    it('only serves GET at the authorization URL', async () => {
+      const response = await flowFetch(`${AUTHORIZE_URL}?${new URLSearchParams(VALID)}`, {
+        method: 'POST',
+      });
+
+      expect(response.status).toBe(404);
+    });
+
+    it('resolves relative authorization URLs against the server', async () => {
+      const relative = {
+        ...spec,
+        components: {
+          securitySchemes: {
+            oauth: {
+              type: 'oauth2',
+              flows: {
+                authorizationCode: {
+                  authorizationUrl: '/oauth/authorize',
+                  tokenUrl: '/oauth/token',
+                  scopes: {},
+                },
+              },
+            },
+          },
+        },
+      };
+      const { fetch: relativeFetch } = createEmulatorFetch({ specs: [relative] });
+
+      const response = await relativeFetch(
+        `https://api.example.com/oauth/authorize?${new URLSearchParams(VALID)}`
+      );
+
+      expect(response.status).toBe(302);
+    });
+
+    it("serves Google's current authorization URL for the committed Gmail snapshot", async () => {
+      const gmail = JSON.parse(
+        readFileSync(
+          resolve(
+            __dirname,
+            '../../../kbn-connector-specs/src/specs/gmail/vendor_api/snapshots/v1.openapi.json'
+          ),
+          'utf8'
+        )
+      );
+      const { fetch: gmailFetch } = createEmulatorFetch({ specs: [gmail] });
+
+      const response = await gmailFetch(
+        `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(VALID)}`
+      );
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get('location')).toMatch(/^https:\/\/kibana\/cb\?code=/);
+    });
+
+    it('serves an authorization URL a spec declares as the v2 URL, not only the alias', async () => {
+      const v2Url = 'https://accounts.google.com/o/oauth2/v2/auth';
+      const declared = {
+        ...withFlow,
+        components: {
+          securitySchemes: {
+            oauth: {
+              type: 'oauth2',
+              flows: {
+                authorizationCode: { authorizationUrl: v2Url, tokenUrl: TOKEN_URL, scopes: {} },
+              },
+            },
+          },
+        },
+      };
+      const { fetch: declaredFetch } = createEmulatorFetch({ specs: [declared] });
+
+      const response = await declaredFetch(`${v2Url}?${new URLSearchParams(VALID)}`);
+
+      expect(response.status).toBe(302);
+    });
+
+    it('rejects a code_verifier that is not 43 to 128 unreserved characters', async () => {
+      const short = 'short';
+      const code = await codeFor({
+        code_challenge: createHash('sha256').update(short).digest('base64url'),
+        code_challenge_method: 'S256',
+      });
+
+      const response = await exchange({
+        code,
+        redirect_uri: REDIRECT_URI,
+        code_verifier: short,
+      });
+
+      expect(response).toEqual({
+        status: 400,
+        body: expect.objectContaining({
+          error: 'invalid_grant',
+          error_description: 'code_verifier must be 43 to 128 unreserved characters',
+        }),
+      });
+    });
+
+    it('throws on authorization URLs that cannot be parsed', () => {
+      const invalid = {
+        ...spec,
+        components: {
+          securitySchemes: {
+            oauth: {
+              type: 'oauth2',
+              flows: {
+                authorizationCode: {
+                  authorizationUrl: 'https://exa mple.com/a',
+                  tokenUrl: TOKEN_URL,
+                  scopes: {},
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(() => createEmulatorFetch({ specs: [invalid] })).toThrow(
+        'The authorizationUrl of the authorizationCode flow of security scheme oauth "https://exa mple.com/a" is not a valid URL'
+      );
+    });
   });
 
   describe('JWT bearer assertions', () => {

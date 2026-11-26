@@ -15,7 +15,6 @@ import type {
 import {
   TaskCost,
   TaskPriority,
-  throwUnrecoverableError,
   type TaskManagerSetupContract,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -28,7 +27,7 @@ import { measureSourceVolume } from './measure_source_volume';
 import { SOURCE_VOLUME_EVENT_TYPE, type SourceVolumeEntry } from './source_volume_event';
 
 export const SOURCE_VOLUME_TASK_TYPE = 'nightshiftSources:sourceVolumeTelemetry';
-export const SOURCE_VOLUME_TASK_ID = 'nightshift-sources:source-volume-telemetry:1.0.0';
+export const SOURCE_VOLUME_TASK_ID = 'nightshift-sources:source-volume-telemetry';
 const TASK_INTERVAL = '24h';
 const TASK_TIMEOUT = '10m';
 const WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -144,7 +143,7 @@ export const registerSourceVolumeTask = ({
     [SOURCE_VOLUME_TASK_TYPE]: {
       title: 'Nightshift Sources - daily volume telemetry',
       description:
-        'Reports the data volume each configured Nightshift source matched over the past 24 hours via EBT.',
+        'Reports the data volume each configured nightshift source matched over the past 24 hours via EBT.',
       timeout: TASK_TIMEOUT,
       maxAttempts: 1,
       cost: TaskCost.Normal,
@@ -152,9 +151,7 @@ export const registerSourceVolumeTask = ({
       createTaskRunner: ({ taskInstance, fakeRequest, signal }) => ({
         async run() {
           if (!fakeRequest) {
-            return throwUnrecoverableError(
-              new Error('Source volume telemetry task has no user credentials')
-            );
+            throw new Error('Source volume telemetry task has no user credentials');
           }
           await reportSourceVolumes(await getDeps(fakeRequest), signal);
           return { state: taskInstance.state };

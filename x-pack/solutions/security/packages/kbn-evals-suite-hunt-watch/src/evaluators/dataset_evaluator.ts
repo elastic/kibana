@@ -105,6 +105,7 @@ export const createEvaluateDataset =
     log,
     judge,
     kibanaUrl,
+    gatesCapability,
   }: {
     huntWatchClient: HuntWatchClient;
     evaluators: DefaultEvaluators;
@@ -114,6 +115,8 @@ export const createEvaluateDataset =
     log: ToolingLog;
     judge?: JudgeProvenance;
     kibanaUrl?: string;
+    /** Whether `capability` rows gate this subject model; see `assertCodeScoresPass`. */
+    gatesCapability?: boolean;
   }) =>
   async ({
     dataset,
@@ -163,5 +166,5 @@ export const createEvaluateDataset =
     );
 
     logRunSummary({ sink: collector.scores, datasetName: dataset.name, log });
-    assertCodeScoresPass(dataset.name, collector.codeFailures);
+    assertCodeScoresPass(dataset.name, collector.codeFailures, { gatesCapability, log });
   };

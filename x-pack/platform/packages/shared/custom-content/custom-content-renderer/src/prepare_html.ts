@@ -59,6 +59,7 @@ export function injectStyleTag(html: string, style: string): string {
  * pattern when you control the CSS; overriding CSS we did not write needs the opt-out form.
  */
 const BASE_STYLES = `
+html,body{height:100%}
 body{margin:0;padding:var(--cc-space-l);box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text)}
 *,*::before,*::after{box-sizing:inherit}
 body{background:var(--cc-color-background)!important}

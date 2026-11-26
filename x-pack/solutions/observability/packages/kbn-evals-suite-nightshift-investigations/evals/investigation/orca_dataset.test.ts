@@ -16,8 +16,7 @@ import {
   ORCA_RELEASE,
   resolveOrcaRun,
   resolveOrcaTelemetryVariant,
-  sliceOrcaDataset,
-  storeOrcaSlice,
+  selectOrcaSlice,
   validateOrcaDataset,
 } from './orca_dataset';
 
@@ -25,7 +24,11 @@ const example = {
   id: 'example',
   input: { question: 'Investigate the incident.' },
   output: { reference_answer: 'The cause.' },
-  metadata: { case_id: 'incident', current_time: '2026-04-19T16:22:00.000Z' },
+  metadata: {
+    case_id: 'incident',
+    current_time: '2026-04-19T16:22:00.000Z',
+    telemetry_snapshot_time: '2026-04-19T16:27:11Z',
+  },
 };
 const dataset = {
   id: 'dataset',
@@ -64,6 +67,14 @@ describe('pinned ORCA release', () => {
       /current_time/
     );
   });
+  it('rejects an example without the telemetry snapshot ORCA serves it', () => {
+    const { telemetry_snapshot_time: _, ...metadata } = example.metadata;
+    const unbounded = { ...example, metadata };
+    const unboundedRelease = { ...release, sha256: getOrcaDatasetHash([unbounded]) };
+    expect(() =>
+      validateOrcaDataset({ ...dataset, examples: [unbounded] }, unboundedRelease)
+    ).toThrow(/telemetry_snapshot_time/);
+  });
   it('ignores object key order while retaining all payload values', () => {
     const reordered = {
       ...example,
@@ -75,10 +86,7 @@ describe('pinned ORCA release', () => {
   });
   it('fails if Golden is unavailable, without reading a bundled file', async () => {
     await expect(
-      loadOrcaDataset({
-        getDatasetByName: jest.fn().mockResolvedValue(null),
-        upsertDataset: jest.fn(),
-      })
+      loadOrcaDataset({ getDatasetByName: jest.fn().mockResolvedValue(null) })
     ).rejects.toThrow('missing from Golden');
   });
 });
@@ -107,90 +115,35 @@ describe('ORCA release selection', () => {
 });
 
 describe('ORCA release slices', () => {
-  const many = {
-    name: 'nightshift/release',
-    description: 'A release',
-    examples: Array.from({ length: 10 }, (_, index) => ({
-      input: { question: `Question ${index}` },
-      metadata: { case_id: `case-${String(9 - index).padStart(2, '0')}` },
-    })),
-  };
+  const examples = Array.from({ length: 10 }, (_, index) => ({
+    input: { question: `Question ${index}` },
+    metadata: { case_id: `case-${String(9 - index).padStart(2, '0')}` },
+  }));
   it('splits the release into contiguous case_id ranges that cover it exactly once', () => {
-    const slices = [1, 2, 3].map((index) => sliceOrcaDataset(many, { index, count: 3 }));
-    const caseIds = slices.flatMap(({ examples }) =>
-      examples.map(({ metadata }) => metadata.case_id)
-    );
+    const slices = [1, 2, 3].map((index) => selectOrcaSlice(examples, { index, count: 3 }));
+    const caseIds = slices.flatMap((slice) => slice.map(({ metadata }) => metadata.case_id));
     expect(caseIds).toEqual([...caseIds].sort());
     expect(new Set(caseIds).size).toBe(10);
-    expect(slices.map(({ examples }) => examples.length)).toEqual([3, 3, 4]);
+    expect(slices.map((slice) => slice.length)).toEqual([3, 3, 4]);
   });
-  it('names each slice apart from the release, so running it never upserts over the release', () => {
-    const slice = sliceOrcaDataset(many, { index: 2, count: 3 });
-    expect(slice.name).toBe('nightshift/release/slice-2-of-3');
-    expect(slice.description).toContain('nightshift/release');
+  it('keeps the release examples as they are, so their scores land on the release', () => {
+    const [first] = selectOrcaSlice(examples, { index: 1, count: 3 });
+    expect(examples).toContain(first);
   });
-  it('validates the whole release before slicing it', async () => {
-    const run = { release: { ...release, examples: 2 }, slice: { index: 1, count: 2 } };
+  it('loads the whole validated release', async () => {
+    const client = { getDatasetByName: jest.fn().mockResolvedValue(dataset) };
+    await expect(loadOrcaDataset(client, release)).resolves.toEqual(
+      expect.objectContaining({ name: dataset.name, examples: [example] })
+    );
+    expect(client.getDatasetByName).toHaveBeenCalledWith(dataset.name);
+  });
+  it('fails when the release does not hold every pinned incident', async () => {
     await expect(
       loadOrcaDataset(
-        { getDatasetByName: jest.fn().mockResolvedValue(dataset), upsertDataset: jest.fn() },
-        run
+        { getDatasetByName: jest.fn().mockResolvedValue(dataset) },
+        { ...release, examples: 2 }
       )
     ).rejects.toThrow('every pinned incident');
-  });
-
-  describe('storing a slice', () => {
-    const slice = sliceOrcaDataset(
-      {
-        ...many,
-        examples: many.examples.map((each, index) => ({ ...each, id: `release-${index}` })),
-      },
-      { index: 1, count: 3 }
-    );
-    const stored = (examples: typeof slice.examples) => ({
-      id: 'slice-dataset',
-      name: slice.name,
-      description: slice.description,
-      examples: examples.map(({ input, metadata }) => ({
-        id: `slice-${metadata.case_id}`,
-        input,
-        output: {},
-        metadata,
-      })),
-    });
-
-    it('stores the slice under its own name and runs it with the ids the server assigned', async () => {
-      const client = {
-        upsertDataset: jest.fn().mockResolvedValue('slice-dataset'),
-        getDatasetByName: jest.fn().mockResolvedValue(stored([...slice.examples].reverse())),
-      };
-
-      const result = await storeOrcaSlice(client, slice);
-
-      expect(client.upsertDataset).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: slice.name,
-          examples: slice.examples.map(({ input, metadata }) => ({
-            input,
-            output: undefined,
-            metadata,
-          })),
-        })
-      );
-      expect(client.getDatasetByName).toHaveBeenCalledWith(slice.name);
-      expect(result.examples).toEqual(
-        slice.examples.map((each) => ({ ...each, id: `slice-${each.metadata.case_id}` }))
-      );
-    });
-
-    it('fails when the stored slice does not hold exactly its cases', async () => {
-      const client = {
-        upsertDataset: jest.fn().mockResolvedValue('slice-dataset'),
-        getDatasetByName: jest.fn().mockResolvedValue(stored(slice.examples.slice(1))),
-      };
-
-      await expect(storeOrcaSlice(client, slice)).rejects.toThrow(/exactly the slice's cases/);
-    });
   });
 });
 
@@ -228,6 +181,7 @@ describe('ORCA telemetry evidence', () => {
   it.each([
     { ...call, tool_id: 'execute_api' },
     { ...call, params: { ...call.params, connector_id: 'another-cluster' } },
+    { ...call, params: { ...call.params, connector_id: 'orcabench-es-0123456789ab' } },
     {
       ...call,
       results: [{ ...call.results[0], data: { stdout: '{"values":[[0]]}', exit_code: 0 } }],
@@ -262,19 +216,16 @@ describe('ORCA telemetry evidence', () => {
 });
 
 describe('ORCA source preflight', () => {
-  const env = {
-    NIGHTSHIFT_ES_URL: 'https://orca.example',
-    NIGHTSHIFT_ES_API_KEY: 'private-key',
-    NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
-  };
+  const source = { url: 'https://orca.example/', apiKey: 'private-key', variant: 'full' } as const;
   it('checks all three historical signals with the read key', async () => {
     const request = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
     request
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[14268]] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[11864]] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[117594]] })));
-    await expect(assertOrcaSource(request, env)).resolves.toBeUndefined();
+    await expect(assertOrcaSource(source, request)).resolves.toBeUndefined();
     expect(request).toHaveBeenCalledTimes(3);
+    expect(request.mock.calls[0][0]).toBe('https://orca.example/_query');
     expect(request.mock.calls[0][1]?.headers).toEqual({
       Authorization: 'ApiKey private-key',
       'Content-Type': 'application/json',
@@ -290,7 +241,7 @@ describe('ORCA source preflight', () => {
       // Each in-flight request needs its own body. Cancelling clones of one response deadlocks the tee.
       const body = await response.text();
       const request = jest.fn(async () => new Response(body, { status: response.status }));
-      await expect(assertOrcaSource(request, env)).rejects.toThrow('ORCA');
+      await expect(assertOrcaSource(source, request)).rejects.toThrow('ORCA');
     }
   );
 
@@ -302,14 +253,14 @@ describe('ORCA source preflight', () => {
     return request;
   };
   it('accepts a flag-ablation key only when the run asks for that variant', async () => {
-    const noFlags = { ...env, NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags' };
+    const noFlags = { ...source, variant: 'no-flags' } as const;
     await expect(
-      assertOrcaSource(answering(13182, 11136, 115056), noFlags)
+      assertOrcaSource(noFlags, answering(13182, 11136, 115056))
     ).resolves.toBeUndefined();
-    await expect(assertOrcaSource(answering(13182, 11136, 115056), env)).rejects.toThrow(
+    await expect(assertOrcaSource(source, answering(13182, 11136, 115056))).rejects.toThrow(
       'pinned full snapshot'
     );
-    await expect(assertOrcaSource(answering(14268, 11864, 117594), noFlags)).rejects.toThrow(
+    await expect(assertOrcaSource(noFlags, answering(14268, 11864, 117594))).rejects.toThrow(
       'pinned no-flags snapshot'
     );
   });

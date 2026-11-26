@@ -44,8 +44,6 @@ store_old_version() {
   old_version=$(jq -r '.version' package.json)
   echo "Current version: $old_version"
   echo "New version: $TARGET_VERSION"
-
-  buildkite-agent meta-data set "OLD_VERSION" "$old_version"
 }
 
 update_package_json_version() {

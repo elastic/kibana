@@ -336,25 +336,52 @@ agentBuilder.agents.register({
 
 `inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
 
-### Choosing the agent's reasoning level
+### Turning off built-in agent features (`capabilities`)
 
-A built-in agent can declare the reasoning level its runs use by default:
+Every agent gets some built-in Agent Builder features, such as the generic attachment tools. An agent that has no use for one can turn it off with `capabilities`:
+
+- **Who can set it:** agent types and built-in agents. Unlike `inference_feature_id`, it also works from an agent type's base configuration. It cannot be set through the HTTP API, the agent form, `configuration_overrides` or the `ai.agent` workflow step.
+- **Defaults:** a missing `capabilities`, a missing key or a missing `enabled` all mean on. Only `enabled: false` turns a feature off.
+- **Merge:** when both an agent type and its agent set `capabilities`, they are merged per key, and the agent's value wins.
+
+For example, an agent type whose agents do not need the generic attachment tools:
 
 ```ts
-agentBuilder.agents.register({
-  id: 'platform.my_solution.agent',
-  name: 'My solution agent',
-  description: 'Agent specialized in my solution',
-  configuration: {
-    instructions: 'You are a specialist [...]',
+agentBuilder.agents.registerType({
+  id: 'my_solution.background',
+  name: 'My background agent',
+  description: 'Runs from workflows; never reads attachments',
+  baseConfiguration: {
     tools: [{ tool_ids: ['[...]'] }],
-    inference_feature_id: 'my_solution_agent',
-    reasoning_level: 'high',
+    capabilities: { attachment_tools: { enabled: false } },
   },
 });
 ```
 
-`reasoning_level` is only supported for built-in agents, and cannot be set by agent types.
+#### `attachment_tools`
+
+With `attachment_tools: { enabled: false }`, the agent gets none of the five generic attachment tools (`attachments.read`, `attachments.add`, `attachments.update`, `attachments.list` and `attachments.diff`). The ATTACHMENTS section of its system prompt is replaced by a one-line notice that it cannot read attachment content, and it is not taught inline attachment rendering. This saves about 2K input tokens per model call in a default Kibana, and more when more attachment types are registered, because `attachments.add` lists every registered type.
+
+What the agent loses:
+
+- **Attachment content:** it cannot read any attachment's content. That includes pasted images, content sent with a message, items from `#` references and the automatic page context. It sees each attachment's notice (id, type, version) and says it cannot open the attachment when asked.
+- **Type descriptions:** some attachment types' descriptions still tell the agent to read the attachment. The notice tells it that it cannot.
+- **Skills:** skills that use the attachment tools, such as proposal management, do not work.
+- **Rendering:** it is not taught to render attachments inline in its replies.
+- **Follow-ups in the UI:** a follow-up typed into a conversation of such an agent in the Agent Builder UI runs that agent, with the same limits.
+
+What keeps working:
+
+- **Attachments themselves:** attachments can still be added through the API, workflow steps, the attachment client and the agent's own tools.
+- **Type and bound tools:** tools that an attachment type declares, and tools tied to one attachment, are still added.
+
+#### `bash_tool`
+
+With `bash_tool: { enabled: false }`, the agent does not get the virtual filesystem `bash` tool, and its system prompt no longer lists it in the FILESYSTEM section or tells it to write render payloads with it (renderers are left out of the CUSTOM RENDERING section). Use it for an agent that works on files through its own tools, because the `bash` tool's `/workspace` is the Agent Builder virtual filesystem, not whatever filesystem those tools edit. `read_file` and `list_files` stay on. The capability only matters when the `bash` experimental feature is on, since the tool does not exist otherwise.
+
+#### Adding a new key
+
+Add a field to `AgentCapabilities` (`@kbn/agent-builder-common`) and to `ResolvedCapabilities` (`run_agent/types.ts`), set its default in `resolveConfiguration` (`run_agent/utils/configuration.ts`), gate the feature on the resolved value, and add tests. A feature that should start off for everyone does not belong here.
 
 ## Registering attachment types
 
@@ -469,7 +496,7 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
 
 - **Heading.** `title` becomes a `header` and `subtitle` a `context` line, above the body.
 - **Nodes.** `markdown` for prose (GitHub-flavored markdown is converted per surface), `fields` for labeled values, `code` for source shown as written, `table` for rows, `context`, `section`, `quote`, `divider`, `link` and `actions`. Each primitive's schema describes it.
-- **Links back to Kibana.** Use `link` with an app id and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. `actions` take absolute URLs only: a relative `/app/…` URL would lose the base path and the space. For a button, build one from the context's `kibanaUrl`, the space's public Kibana URL, and leave the button out when it's undefined.
+- **Links back to Kibana.** Use an `actions` button, or a `link`, with an app route and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. A relative `/app/…` URL would lose the base path and the space.
 - **Limits.** Each primitive has limits, such as 12,000 characters of `code` or 10 items in a `fields` node, and plain text can't be blank. A composition that fails validation, or a mapping that throws, leaves the whole attachment out.
 
 See the `agentBuilderPlatform` types, such as `esql`, `skill` and `connector_setup`, for examples.
@@ -1171,34 +1198,50 @@ The registry does not fetch card data or provide a default card when none is reg
 
 ### Conversation details header and footer
 
-Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
-`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
-`openConversationDetails`. It is supplied at render time, not through registration context.
+Tabs and `useDetailsFlyout` (below) share `ConversationTemplateDetailsFlyoutRenderProps`. `isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through `openConversationDetails`. It is supplied at render time, not through registration context.
 
-Template UI definitions can provide optional `detailsFlyout.header` and
-`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
-hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
-only the content for each slot. Without a custom header, the default title remains.
-Without a custom footer, no footer is rendered.
+Agent Builder renders the conversation details flyout with `@kbn/flyout-template`. A template describes the flyout's header and footer as data, through `detailsFlyout.load`. `load` resolves to a module with:
 
-Capture Agent Builder capabilities from the existing registration context, and
-provide any solution-specific React providers inside your components:
+- `useDetailsFlyout(props)`: a hook that returns a `ConversationTemplateDetailsFlyoutDescriptor`. Its `header` has a plain-text `title`, an optional `description`, an `isLoading` spinner named by `loadingLabel`, and lists of meta blocks, badges and info blocks. Its optional `footer` has a `primary` and a `secondary` action. The parts take `@kbn/flyout-template`'s props, so an info block value can be any React node, and the secondary action can take `variant: 'ai'`.
+- `Provider` (optional): wraps the flyout, so `useDetailsFlyout` and the values it returns can use your plugin's own contexts, such as its Kibana services or query client. The flyout renders outside them.
+
+`load` is called the first time a flyout for the template opens, and again on the next open after a load that failed. Until it resolves, the flyout shows a "Summary" header with a spinner, in the same flyout the loaded header replaces. Use a dynamic `import()` so the module stays out of your plugin's page-load bundle. Without `load`, the flyout is titled "Summary" and has no footer.
 
 ```tsx
 agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({
   name: investigationTemplateName,
   tabs: ['investigation.details'],
   detailsFlyout: {
-    header: InvestigationHeader,
-    footer: ({ conversation }) => (
-      <InvestigationFooter
-        conversation={conversation}
-        onOpenChat={() => context.openSidebarConversation(conversation.id)}
-      />
-    ),
+    load: async () => {
+      const { createInvestigationDetailsFlyout } = await import('./investigation_details_flyout');
+      return createInvestigationDetailsFlyout(context);
+    },
   },
 }));
+
+// investigation_details_flyout.tsx
+export const createInvestigationDetailsFlyout = (context: ConversationTemplateUIContext) => ({
+  Provider: InvestigationProviders,
+  useDetailsFlyout: ({ conversation, isOpenedFromChat }) => ({
+    header: {
+      title: conversation.title,
+      infoBlocks: [{ title: statusLabel, children: <StatusToggle conversation={conversation} /> }],
+    },
+    footer: isOpenedFromChat
+      ? undefined
+      : {
+          secondary: {
+            variant: 'ai',
+            iconType: 'productAgent',
+            label: openChatLabel,
+            onClick: () => context.openSidebarConversation(conversation.id),
+          },
+        },
+  }),
+});
 ```
+
+The header's zones, the tab bar and each tab carry fixed test subjects, the same in both hosts: `agentBuilderConversationDetailsFlyoutHeader`, `…Body`, `…Footer`, `…Tabs` and `agentBuilderConversationDetailsFlyoutTab-<tabId>`.
 
 ### Conversation details flyout width
 
@@ -1207,9 +1250,7 @@ Every conversation details flyout — the in-chat one and the ones opened with
 width in every consuming app:
 
 - Default width 480px, minimum 400px, maximum 640px.
-- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
-  next open, wherever the flyout is opened from. The flyout menu's reset action returns it to the
-  default.
+- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the next open, wherever the flyout is opened from.
 
 The width is not configurable per template or per caller: all surfaces share one setting.
 
@@ -1253,10 +1294,7 @@ agentBuilder.openConversationDetails({
 
 ### Opening flyouts from conversation details content
 
-Both conversation details flyouts are managed EUI flyouts in the
-`CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, header,
-footer, or attachment renderer and have it stack on top with a Back button, open it as a main flyout
-in the same group by passing these options when you open it:
+Both conversation details flyouts are managed EUI flyouts in the `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, a header or footer value, or an attachment renderer and have it stack on top with a Back button, open it as a main flyout in the same group by passing these options when you open it:
 
 ```tsx
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
@@ -1304,8 +1342,9 @@ It supports the regular embeddable conversation props, including:
 
 - `newConversation` - force the sidebar to start a fresh conversation instead of restoring the persisted one
 - `attachments` - pre-populate the pending attachment list for the active sidebar conversation
+- `conversationStarters` - show your own conversation starters on the empty state of a new conversation
 
-Use `clearChatConfig()` to remove that runtime configuration.
+Use `clearChatConfig()` to remove that runtime configuration. It also removes the conversation starters from a sidebar that is open.
 
 #### `newConversation`
 
@@ -1332,6 +1371,35 @@ agentBuilder.setChatConfig({
   ],
 });
 ```
+
+#### `conversationStarters`
+
+Conversation starters are cards under the input on the empty state of a new conversation. A click sends the label as the user's message, or the optional `prompt` when a starter has one (the card still shows the label):
+
+```ts
+agentBuilder.setChatConfig({
+  conversationStarters: [
+    {
+      label: i18n.translate('myPlugin.chat.starters.topErrors', { defaultMessage: 'Top errors' }),
+      prompt: i18n.translate('myPlugin.chat.starters.topErrors.prompt', {
+        defaultMessage: 'What are the top errors in the last hour?',
+      }),
+    },
+    { label: i18n.translate('myPlugin.chat.starters.slowest', { defaultMessage: 'Slowest requests' }) },
+  ],
+});
+```
+
+- **They replace the other lists:** The starters of the solution and the default list are not shown, and they do not fill the cards you leave out. Pass none, or an empty list, to show those lists.
+- **They show only for the default Elastic AI agent.** Pass its `agentId` if you open the chat yourself.
+- **Limits:** Up to 3, with labels of up to 30 characters. The `prompt` is optional. Pass already-translated labels and prompts, since they are sent as the message. Blank and repeated labels are dropped.
+- **Lifecycle:** Call `clearChatConfig()` when your page goes away. `openChat(options)` replaces the whole config instead of merging it, so pass the starters again there.
+
+`EmbeddableConversation` accepts the same `conversationStarters` prop.
+
+#### Starters of a solution
+
+The team of a solution adds its set to `SOLUTION_CONVERSATION_STARTERS` in `public/application/components/conversations/conversation_starters/solution_conversation_starters.ts`, by PR. The labels and the optional prompts are translated, the labels are up to 30 characters, 3 at most, and each starter must relate to what the agent can do out of the box. A solution with an empty list shows the default list.
 
 ### `addAttachment(...)`
 
