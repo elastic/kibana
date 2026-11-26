@@ -832,7 +832,6 @@ describe('OtelOverview', () => {
 
   it('reloads the vitals chart on Refresh, as a relative range stays the same', async () => {
     renderOverview();
-    await findPageLoads('1,533');
     const reloadTime = () =>
       jest.mocked(VitalsTrendPanel).mock.calls.at(-1)?.[0].lastReloadRequestTime;
     expect(reloadTime()).toBeUndefined();

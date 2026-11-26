@@ -26,6 +26,7 @@ import { useOverviewFilters } from '../../../../hooks/use_overview_filters';
 import { useOverviewKuery } from '../../../../hooks/use_overview_search';
 import { usePersistedChoice } from '../../../../hooks/use_persisted_choice';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { VITAL_LABELS } from '../../../../utils/web_vitals';
 import { vitalTrendAttributes, vitalTrendConfig } from '../utils/vital_trend_lens';
 
 const VITAL_STORAGE_KEY = 'xpack.digitalExperience.overview.vitalTrend';
@@ -43,24 +44,15 @@ const VITAL_LEGEND = i18n.translate('xpack.digitalExperience.overview.vitalTrend
   defaultMessage: 'Web vital',
 });
 
-/** The vitals' short names, as Google and the Core Web Vitals panel name them. */
-const VITAL_NAMES: Record<CoreWebVital, string> = {
-  [CORE_WEB_VITAL.lcp]: 'LCP',
-  [CORE_WEB_VITAL.inp]: 'INP',
-  [CORE_WEB_VITAL.cls]: 'CLS',
-  [CORE_WEB_VITAL.fcp]: 'FCP',
-  [CORE_WEB_VITAL.ttfb]: 'TTFB',
-};
-
 const chartTitle = (vital: CoreWebVital) =>
   i18n.translate('xpack.digitalExperience.overview.vitalTrend.chartTitle', {
     defaultMessage: '{vital} (p75)',
-    values: { vital: VITAL_NAMES[vital] },
+    values: { vital: VITAL_LABELS[vital] },
   });
 
 const VITAL_OPTIONS = CORE_WEB_VITALS.map((vital) => ({
   id: vital,
-  label: VITAL_NAMES[vital],
+  label: VITAL_LABELS[vital],
   'data-test-subj': `digitalExperienceOverviewVitalTrend-${vital}`,
 }));
 

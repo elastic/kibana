@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  ENVIRONMENT_ALL_VALUE,
-  ENVIRONMENT_NOT_DEFINED_VALUE,
-  SERVICE_ENVIRONMENT,
-  TELEMETRY_SDK_LANGUAGE,
-} from '@kbn/apm-types';
+import { TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
 import { escapeStringValue } from '@kbn/esql-utils';
 import type { CoreWebVital } from './core_web_vitals';
+import { esqlEnvironmentCondition, TIME_BUCKETS } from './esql_values';
 import {
   BROWSER_SDK_LANGUAGE,
   ENVIRONMENT_FIELDS,
@@ -20,6 +16,7 @@ import {
   OTEL_LOGS_INDEX,
 } from './otel_data';
 import {
+  NULLIFY_UNMAPPED_FIELDS,
   SOURCE_EVENT_NAME_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_WEB_VITAL_NAME_FIELD,
@@ -32,9 +29,6 @@ import {
   esqlLogConditions,
 } from './overview_filters_esql';
 
-/** The buckets of a trend over the time range, as many as the Overview's other charts draw. */
-const TREND_BUCKETS = 50;
-
 /** The columns of `vitalTrendQuery`'s rows. */
 export const VITAL_TREND_COLUMNS = { time: 'time', p75: 'p75' } as const;
 
@@ -44,24 +38,6 @@ export interface VitalTrendQueryParams {
   environment?: string;
   filters?: OverviewFilters;
 }
-
-/**
- * The environment as a `WHERE` condition, as the routes' `environmentFilter` reads it: either
- * environment field, or "Not defined" for APM's sentinel or neither; none for all environments.
- */
-const environmentCondition = (environment: string | undefined): string | undefined => {
-  if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
-    return undefined;
-  }
-  if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    return `(${SERVICE_ENVIRONMENT} == ${escapeStringValue(
-      ENVIRONMENT_NOT_DEFINED_VALUE
-    )} OR (${ENVIRONMENT_FIELDS.map((field) => `${field} IS NULL`).join(' AND ')}))`;
-  }
-  return `(${ENVIRONMENT_FIELDS.map(
-    (field) => `${field} == ${escapeStringValue(environment)}`
-  ).join(' OR ')})`;
-};
 
 /**
  * The p75 of one web vital per bucket of the time range, for a Lens chart: Lens keeps the time
@@ -80,7 +56,7 @@ export const vitalTrendQuery = (
     // The SDK names the vitals in upper case, as the searches match it whatever its case.
     `TO_LOWER(${SOURCE_WEB_VITAL_NAME_FIELD}) == ${escapeStringValue(vital)}`,
     `${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL`,
-    environmentCondition(environment),
+    esqlEnvironmentCondition(environment, ENVIRONMENT_FIELDS),
   ].filter((condition): condition is string => condition !== undefined);
   const filterEvals = esqlFilterEvals(filters);
   const documentConditions = [...esqlDocumentConditions(filters), ...esqlLogConditions(filters)];
@@ -88,12 +64,12 @@ export const vitalTrendQuery = (
 
   return [
     // OTel attributes that some index doesn't map read as null instead of failing the query.
-    'SET unmapped_fields = "NULLIFY";',
+    NULLIFY_UNMAPPED_FIELDS,
     `FROM ${OTEL_LOGS_INDEX}`,
     `| WHERE ${conditions.join(' AND ')}`,
     ...(filterEvals.length > 0 ? [`| EVAL ${filterEvals.join(', ')}`] : []),
     ...(documentConditions.length > 0 ? [`| WHERE ${documentConditions.join(' AND ')}`] : []),
-    `| STATS ${p75} = PERCENTILE(${SOURCE_WEB_VITAL_VALUE_FIELD}, 75) BY ${time} = BUCKET(@timestamp, ${TREND_BUCKETS}, ?_tstart, ?_tend)`,
+    `| STATS ${p75} = PERCENTILE(${SOURCE_WEB_VITAL_VALUE_FIELD}, 75) BY ${time} = BUCKET(@timestamp, ${TIME_BUCKETS}, ?_tstart, ?_tend)`,
     `| SORT ${time}`,
   ].join('\n');
 };
