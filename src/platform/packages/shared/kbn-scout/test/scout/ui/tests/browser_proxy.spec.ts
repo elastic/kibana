@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig, expect, tags } from '../../../../src/playwright';
+import { createPlaywrightConfig, expect } from '../../../../src/playwright';
 import { test } from '../fixtures';
 
-test.describe('Browser proxy environment', { tag: [...tags.stateful.classic] }, () => {
+// Local only: this checks the CI machine, not the deployment under test.
+test.describe('Browser proxy environment', { tag: ['@local-stateful-classic'] }, () => {
   test.skip(
     process.platform !== 'linux',
     'Chromium reads proxy environment variables only on Linux'
