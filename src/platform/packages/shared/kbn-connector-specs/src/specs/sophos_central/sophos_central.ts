@@ -184,7 +184,11 @@ function checkBatchErrors(
   throw new Error(`${fallback}: ${messages}`);
 }
 
-function throwApiError(err: unknown, fallback: string): never {
+function throwApiError(
+  err: unknown,
+  fallback: string,
+  meta?: Record<string, unknown>
+): never {
   const axiosErr = err as AxiosError<{ error?: string; message?: string }>;
   const response = axiosErr?.response;
   if (response) {
@@ -199,10 +203,13 @@ function throwApiError(err: unknown, fallback: string): never {
     if (headers?.['retry-after']) {
       (wrapped as Error & { retryAfter: string }).retryAfter = headers['retry-after'] as string;
     }
+    if (meta) Object.assign(wrapped, meta);
     throw wrapped;
   }
   const original = err instanceof Error ? err.message : String(err);
-  throw new Error(`${fallback}: ${original}`);
+  const newErr = new Error(`${fallback}: ${original}`);
+  if (meta) Object.assign(newErr, meta);
+  throw newErr;
 }
 
 // ---------------------------------------------------------------------------
@@ -262,20 +269,33 @@ async function pollDetectionRunToCompletion(
     const afterSleep = deadline - Date.now();
     if (afterSleep < MIN_POLL_TIMEOUT_MS) return { runId, state: 'pending' };
 
+    // effectiveTimeout: use the smaller of the client cap and the remaining budget.
+    // isBudgetLimited: true when afterSleep is the binding constraint — an Axios timeout
+    // in that case means the poll budget expired mid-request, which should be treated as
+    // pending rather than an error. When clientCap is the binding constraint (Kibana's
+    // responseTimeout is shorter than the remaining budget), a timeout is a real error.
+    const effectiveTimeout = clientCap !== undefined ? Math.min(clientCap, afterSleep) : afterSleep;
+    const isBudgetLimited = effectiveTimeout === afterSleep;
+
     try {
       const pollRes = await request<{ result?: string; status?: string }>(
         ctx,
         'GET',
         `/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
-        {
-          tenantId,
-          dataRegion,
-          timeout: clientCap !== undefined ? Math.min(clientCap, afterSleep) : afterSleep,
-        }
+        { tenantId, dataRegion, timeout: effectiveTimeout }
       );
       runState = pollRes?.result ?? pollRes?.status ?? '';
     } catch (err) {
-      throwApiError(err, `Sophos Central listDetections: failed to poll run ${runId}`);
+      // An Axios request timeout (ECONNABORTED) when the timeout was budget-limited means
+      // the 90-second poll budget expired during the request itself. Return pending so the
+      // caller can resume with the same runId rather than seeing a network error.
+      if ((err as AxiosError)?.code === 'ECONNABORTED' && isBudgetLimited) {
+        return { runId, state: 'pending' };
+      }
+      // All other errors (HTTP 4xx/5xx, connection failure, Kibana responseTimeout):
+      // attach runId so Agent Builder can tell the caller to resume this run rather than
+      // starting a new query from scratch.
+      throwApiError(err, `Sophos Central listDetections: failed to poll run ${runId}`, { runId });
     }
   }
 
@@ -919,9 +939,11 @@ export const SophosCentral: ConnectorSpec = {
             }
           );
         } catch (err) {
+          // Attach runId so the caller knows to resume with this runId rather than resubmit.
           throwApiError(
             err,
-            `Sophos Central listDetections: failed to fetch results for run ${runId}`
+            `Sophos Central listDetections: failed to fetch results for run ${runId}`,
+            { runId }
           );
         }
 

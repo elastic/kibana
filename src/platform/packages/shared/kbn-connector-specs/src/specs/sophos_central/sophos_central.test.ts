@@ -1398,6 +1398,151 @@ describe('listDetections', () => {
     const pollCall = client.request.mock.calls[1][0];
     expect(pollCall.timeout).toBeGreaterThan(0);
   });
+
+  it('resumes a still-pending run when runId is provided — polls until success without a new submit', async () => {
+    // After a pending timeout the caller passes the same runId back. The continuation path
+    // must poll (without sleeping on the first check) until the run succeeds, then fetch
+    // results — no new submit query must be issued.
+    jest.useFakeTimers();
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    // Immediate poll check → still running; after one sleep → succeeded; then results
+    client.request
+      .mockResolvedValueOnce({ data: { status: 'running' } }) // immediate poll (no sleep)
+      .mockResolvedValueOnce({ data: { result: 'succeeded' } }) // poll after 5 s sleep
+      .mockResolvedValueOnce({ data: { items: [{ id: 'det-3' }] } }); // results
+
+    const ctx = makeCtx(client);
+    const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {
+      runId: RUN_ID,
+    });
+    await jest.runAllTimersAsync();
+    const result = await resultPromise;
+
+    // No submit POST was issued — the caller resumed an existing run
+    expect(client.request).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'POST',
+        url: expect.stringContaining('/queries/detections'),
+      })
+    );
+    expect(result).toEqual({ items: [{ id: 'det-3' }], runId: RUN_ID });
+  });
+
+  it('returns pending when an in-flight poll times out at the budget boundary, not an HTTP error', async () => {
+    // When afterSleep is used as the Axios request timeout (no clientCap or afterSleep < clientCap),
+    // an Axios ECONNABORTED means the poll budget expired during the request itself.
+    // This should return { runId, state: 'pending' } so the caller can resume with that runId,
+    // rather than surface a confusing network error.
+    jest.useFakeTimers();
+    const client = makeClient();
+    // No client cap (makeClient sets no defaults.timeout)
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    client.request
+      .mockResolvedValueOnce({ data: { runId: RUN_ID } }) // submit
+      .mockRejectedValueOnce(
+        // No response — pure timeout, not an HTTP error
+        Object.assign(new Error('timeout of 85000ms exceeded'), { code: 'ECONNABORTED' })
+      ); // poll times out mid-request (budget-limited)
+
+    const ctx = makeCtx(client);
+    const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {});
+    await jest.runAllTimersAsync();
+    const result = await resultPromise;
+
+    expect(result).toMatchObject({ runId: RUN_ID, state: 'pending' });
+  });
+
+  it('throws a poll timeout when it is caused by a shorter Kibana responseTimeout, not the budget', async () => {
+    // When clientCap (Kibana responseTimeout) is shorter than the remaining budget,
+    // effectiveTimeout = clientCap < afterSleep, so isBudgetLimited = false.
+    // An ECONNABORTED in this case is a real configuration timeout — it must throw.
+    jest.useFakeTimers();
+    const client = makeClient();
+    // Simulate a 3-second Kibana responseTimeout — shorter than the 90-second poll budget
+    (client as unknown as { defaults: { timeout: number } }).defaults = { timeout: 3_000 };
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    client.request
+      .mockResolvedValueOnce({ data: { runId: RUN_ID } }) // submit
+      .mockRejectedValueOnce(
+        Object.assign(new Error('timeout of 3000ms exceeded'), { code: 'ECONNABORTED' })
+      ); // poll times out at the Kibana client cap
+
+    const ctx = makeCtx(client);
+    const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {}).catch(
+      (e) => e
+    );
+    await jest.runAllTimersAsync();
+    const result = await resultPromise;
+
+    // Must be an error, not a pending object
+    expect(result).toBeInstanceOf(Error);
+    expect(result).not.toMatchObject({ state: 'pending' });
+  });
+
+  it('attaches runId to poll errors after submission so callers know to resume, not resubmit', async () => {
+    // A 5xx during the poll step must carry runId on the error. Without it, Agent Builder
+    // would retry with the original parameters (no runId), starting a second query instead
+    // of recovering the run Sophos already accepted.
+    jest.useFakeTimers();
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    client.request
+      .mockResolvedValueOnce({ data: { runId: RUN_ID } }) // submit
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Service Unavailable'), {
+          response: { status: 503, headers: {}, data: { message: 'Service unavailable' } },
+        })
+      ); // poll fails with 503
+
+    const ctx = makeCtx(client);
+    let caught: (Error & { runId?: string }) | undefined;
+    const p = SophosCentral.actions.listDetections.handler(ctx as never, {});
+    const catching = p.catch((err) => {
+      caught = err as Error & { runId?: string };
+    });
+    await jest.runAllTimersAsync();
+    await catching;
+
+    expect(caught).toBeInstanceOf(Error);
+    expect(caught?.runId).toBe(RUN_ID);
+  });
+
+  it('attaches runId to results errors so callers know to resume with the same runId', async () => {
+    jest.useFakeTimers();
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    client.request
+      .mockResolvedValueOnce({ data: { runId: RUN_ID } }) // submit
+      .mockResolvedValueOnce({ data: { result: 'succeeded' } }) // poll
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Server Error'), {
+          response: { status: 500, headers: {}, data: { message: 'Internal error' } },
+        })
+      ); // results fails
+
+    const ctx = makeCtx(client);
+    let caught: (Error & { runId?: string }) | undefined;
+    const p = SophosCentral.actions.listDetections.handler(ctx as never, {});
+    const catching = p.catch((err) => {
+      caught = err as Error & { runId?: string };
+    });
+    await jest.runAllTimersAsync();
+    await catching;
+
+    expect(caught).toBeInstanceOf(Error);
+    expect(caught?.runId).toBe(RUN_ID);
+  });
 });
 
 // ---------------------------------------------------------------------------
