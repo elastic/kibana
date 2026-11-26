@@ -317,7 +317,8 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiKeyboardShortcuts.copyTitle\\": \\"C\\",
     \\"euiFlyoutMenu.maximize\\": \\"Maximize\\",
     \\"euiFlyoutMenu.restore\\": \\"Restore\\",
-    \\"euiExpression.invalid\\": \\"Invalid expression\\"
+    \\"euiExpression.invalid\\": \\"Invalid expression\\",
+    \\"euiComboBoxInput.collapsedSelectionsDialog\\": \\"Hidden selections\\"
   }
 }"
 `;

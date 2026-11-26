@@ -1924,5 +1924,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Invalid expression',
       description: 'Screen reader label for the warning icon shown on an invalid EuiExpression',
     }),
+    'euiComboBoxInput.collapsedSelections': ({ count }: EuiValues) =>
+      i18n.translate('core.euiComboBoxInput.collapsedSelections', {
+        defaultMessage: 'Show {count} hidden selections',
+        values: { count },
+      }),
+    'euiComboBoxInput.collapsedSelectionsDialog': i18n.translate(
+      'core.euiComboBoxInput.collapsedSelectionsDialog',
+      {
+        defaultMessage: 'Hidden selections',
+        description: 'Screen reader label for the dialog that shows hidden selections',
+      }
+    ),
   };
 };
