@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
+import { expectParseError } from '@kbn/zod-helpers/v4';
 import {
   MAX_ATTACHMENT_ID_LENGTH,
   MAX_ATTACHMENT_JSON_DEPTH,
@@ -181,11 +183,13 @@ describe('UnifiedAttachmentRouteRequestSchema', () => {
       data: { list: Array(MAX_ATTACHMENT_JSON_LENGTH + 1).fill(0) },
     });
 
-    expect(result.success).toBe(false);
-    expect(result.error?.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ code: 'too_big', origin: 'array', path: ['data', 'list'] }),
-      ])
+    expectParseError(result);
+    const dataError = z.treeifyError(result.error).properties?.data;
+    const listErrors =
+      dataError && 'properties' in dataError ? dataError.properties?.list?.errors : [];
+
+    expect(listErrors).toContain(
+      `Too big: expected array to have <=${MAX_ATTACHMENT_JSON_LENGTH} items`
     );
   });
 });

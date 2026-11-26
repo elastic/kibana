@@ -38,6 +38,8 @@ paths:
         content:
           application/json:
             schema:
+              discriminator:
+                propertyName: action
               oneOf:
                 - $ref: '#/components/schemas/BulkDeleteRules'
                 - $ref: '#/components/schemas/BulkDisableRules'
@@ -1604,12 +1606,16 @@ components:
         - type
 
     BulkActionEditPayloadAlertSuppression:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
         - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
         - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
 
     BulkActionEditPayload:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
         - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
@@ -1617,7 +1623,9 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
-        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
+        - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
 
     BulkEditRules:
       allOf:
