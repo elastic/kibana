@@ -22,7 +22,7 @@ import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
-import type { InvestigationOverviewSection } from '../../../../types';
+import type { InvestigationOverviewFooter } from '../../../../types';
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -116,7 +116,7 @@ export const InvestigationOverview: React.FC<
   OverviewSlotRenderProps & {
     /** Present when a solution registered an entity flyout. Entity-store ids open it. */
     onOpenEntity?: (entity: ImpactEntityTarget) => void;
-    footer?: InvestigationOverviewSection;
+    footer?: InvestigationOverviewFooter;
   }
 > = ({
   conversation,

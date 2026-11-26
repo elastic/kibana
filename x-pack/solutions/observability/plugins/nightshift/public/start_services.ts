@@ -57,7 +57,7 @@ export const startNightshiftServices = ({
       ? application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/general' })
       : undefined;
     subscription.add(
-      agenticInvestigations.registerInvestigationOverviewSection(
+      agenticInvestigations.registerInvestigationOverviewFooter(
         NIGHTSHIFT_INVESTIGATION_AGENT_ID,
         ({ investigationId }) =>
           React.createElement(

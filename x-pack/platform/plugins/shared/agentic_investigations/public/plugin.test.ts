@@ -135,6 +135,57 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
     expect(open).toHaveBeenCalledWith({ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' });
   });
 
+  it('renders the footer for each agent and disposes registrations independently', async () => {
+    const core = coreMock.createStart();
+    core.http.get.mockResolvedValue({
+      metadata: { summary: 'Test investigation summary' },
+      proposals: [],
+    });
+    const agentBuilder = agentBuilderMocks.createStart();
+    const { registerInvestigationOverviewFooter } = createPlugin().start(core, { agentBuilder });
+    const removeFirst = registerInvestigationOverviewFooter('first-agent', () => 'First footer');
+    const removeSecond = registerInvestigationOverviewFooter('second-agent', () => 'Second footer');
+    const [, createOverviewTab] = agentBuilder.conversationTemplates.registerTab.mock.calls[0];
+    const { content: OverviewTabContent } = createOverviewTab({} as never);
+    const viewFor = (agentId: string) =>
+      React.createElement(
+        EuiProvider,
+        null,
+        React.createElement(
+          I18nProvider,
+          null,
+          React.createElement(OverviewTabContent, {
+            conversation: {
+              id: 'footer-test-investigation',
+              agent_id: agentId,
+              title: 'Test investigation',
+              user: { username: 'elastic' },
+              created_at: '2026-09-01T00:00:00.000Z',
+              updated_at: '2026-09-01T00:00:00.000Z',
+              rounds: [],
+              template_id: 'investigation',
+            },
+            isOpenedFromChat: false,
+          })
+        )
+      );
+
+    const { rerender } = render(viewFor('first-agent'));
+    expect(await screen.findByText('First footer')).toBeVisible();
+    expect(screen.queryByText('Second footer')).not.toBeInTheDocument();
+
+    removeFirst();
+    rerender(viewFor('first-agent'));
+    expect(screen.queryByText('First footer')).not.toBeInTheDocument();
+
+    rerender(viewFor('second-agent'));
+    expect(await screen.findByText('Second footer')).toBeVisible();
+
+    removeSecond();
+    rerender(viewFor('second-agent'));
+    expect(screen.queryByText('Second footer')).not.toBeInTheDocument();
+  });
+
   it('exposes a registration that the investigation overview reads from', () => {
     const plugin = createPlugin();
     const workflowsExtensions = {
