@@ -15,6 +15,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import {
   PageOrUndefined,
@@ -80,6 +81,12 @@ export const OsqueryFindPacksRequestQuery = lazySchema(() =>
      * The sort order.
      */
     sortOrder: SortOrderOrUndefined.optional().describe('The sort order.'),
+    /**
+     * Set to `true` to include `effective_policy_ids` for each pack. Reads Fleet integrations, so leave it unset when you do not need it.
+     */
+    withEffectivePolicyIds: BooleanFromString.optional().describe(
+      'Set to `true` to include `effective_policy_ids` for each pack. Reads Fleet integrations, so leave it unset when you do not need it.'
+    ),
   })
 );
 export type OsqueryFindPacksRequestQuery = z.infer<typeof OsqueryFindPacksRequestQuery>;
@@ -87,6 +94,20 @@ export type OsqueryFindPacksRequestQueryInput = z.input<typeof OsqueryFindPacksR
 
 export const OsqueryFindPacksResponse = lazySchema(() => FindPacksResponse);
 export type OsqueryFindPacksResponse = z.infer<typeof OsqueryFindPacksResponse>;
+export const OsqueryGetPacksDetailsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Set to `true` to include `effective_policy_ids`. Reads Fleet integrations, so leave it unset when you do not need it.
+     */
+    withEffectivePolicyIds: BooleanFromString.optional().describe(
+      'Set to `true` to include `effective_policy_ids`. Reads Fleet integrations, so leave it unset when you do not need it.'
+    ),
+  })
+);
+export type OsqueryGetPacksDetailsRequestQuery = z.infer<typeof OsqueryGetPacksDetailsRequestQuery>;
+export type OsqueryGetPacksDetailsRequestQueryInput = z.input<
+  typeof OsqueryGetPacksDetailsRequestQuery
+>;
 
 export const OsqueryGetPacksDetailsRequestParams = lazySchema(() =>
   z.object({

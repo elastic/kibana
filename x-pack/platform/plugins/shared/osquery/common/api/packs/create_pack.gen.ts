@@ -56,6 +56,22 @@ export type CreatePacksRequestBody = z.infer<typeof CreatePacksRequestBody>;
  */
 export const CreatePacksResponse = lazySchema(() =>
   z.object({
+    /**
+     * Additional agent policies receiving this enabled pack through a shared integration.
+     */
+    warnings: z
+      .array(
+        z.object({
+          code: z.literal('shared_integration_overdelivery'),
+          package_policy_id: z.string(),
+          package_policy_name: z.string(),
+          additional_policy_ids: z.array(z.string()),
+        })
+      )
+      .optional()
+      .describe(
+        'Additional agent policies receiving this enabled pack through a shared integration.'
+      ),
     data: z.object({
       /**
        * The saved object ID of the pack.

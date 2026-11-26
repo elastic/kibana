@@ -724,6 +724,22 @@ describe('rule template create-rule schema coupling', () => {
             "query": Object {
               "$ref": "#/definitions/__schema2",
             },
+            "reason": Object {
+              "additionalProperties": false,
+              "description": "Alert reason configuration. Only allowed when kind is \\"alert\\". \`template\` is the alert reason template, for example \\"CPU on {{data.host.name}} was {{data.cpu_pct}}%.\\" Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.",
+              "properties": Object {
+                "template": Object {
+                  "description": "Alert reason template.",
+                  "maxLength": 1024,
+                  "minLength": 1,
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "template",
+              ],
+              "type": "object",
+            },
             "recovery": Object {
               "allOf": Array [
                 Object {

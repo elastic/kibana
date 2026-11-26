@@ -56,7 +56,7 @@ import {
   SOURCE_WEB_VITAL_NAME_FIELD,
   SOURCE_WEB_VITAL_VALUE_FIELD,
 } from '../../../common/otel_source_fields';
-import { cleanedValue } from '../../lib/esql';
+import { cleanedValue } from '../../../common/esql_values';
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 

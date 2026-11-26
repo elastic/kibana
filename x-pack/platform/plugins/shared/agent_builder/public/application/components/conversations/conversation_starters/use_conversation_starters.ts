@@ -8,47 +8,60 @@
 import { useCallback, useMemo } from 'react';
 import type { ConversationStarter } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { DEFAULT_CONVERSATION_STARTERS } from './default_conversation_starters';
-import type { ConversationStartersSource } from './resolve_conversation_starters';
+import type { ResolvedConversationStarters } from './resolve_conversation_starters';
 import { resolveConversationStarters } from './resolve_conversation_starters';
+import { getSolutionConversationStarters } from './solution_conversation_starters';
 
-const STARTERS_SOURCE: ConversationStartersSource = 'default';
+const NO_STARTERS: ResolvedConversationStarters = { starters: [], source: 'default' };
 
 /**
- * The starters to show, and how to send one. They are shown for the default Elastic AI agent only,
- * and only while the experimental features setting is on, until their copy is final. A click sends
- * the label as the message, which creates the conversation and moves the user to it.
+ * The starters to show for the default Elastic AI agent, and how to send one. A click sends the
+ * prompt of the starter, or its label when it has none.
  */
-export const useConversationStarters = () => {
+export const useConversationStarters = ({
+  solution,
+}: {
+  /** The solution of the current space, `undefined` while it is loading. */
+  solution?: SolutionView;
+} = {}) => {
   const agentId = useAgentId();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const { conversationStarters: appStarters } = useConversationContext();
 
-  const canShow = isExperimentalFeaturesEnabled && agentId === agentBuilderDefaultAgentId;
+  const isDefaultAgent = agentId === agentBuilderDefaultAgentId;
+  const canShowBuiltInStarters = solution !== undefined;
 
-  const starters = useMemo(
+  const { starters, source } = useMemo(
     () =>
-      canShow
-        ? resolveConversationStarters({ defaultStarters: DEFAULT_CONVERSATION_STARTERS })
-        : [],
-    [canShow]
+      isDefaultAgent
+        ? resolveConversationStarters({
+            appStarters,
+            solutionStarters: canShowBuiltInStarters
+              ? getSolutionConversationStarters(solution)
+              : undefined,
+            defaultStarters: canShowBuiltInStarters ? DEFAULT_CONVERSATION_STARTERS : undefined,
+          })
+        : NO_STARTERS,
+    [isDefaultAgent, appStarters, canShowBuiltInStarters, solution]
   );
 
   const onSelect = useCallback(
-    ({ label }: ConversationStarter) => {
-      void submitMessage(label);
+    ({ label, prompt }: ConversationStarter) => {
+      void submitMessage(prompt ?? label);
     },
     [submitMessage]
   );
 
   return {
     starters,
-    source: STARTERS_SOURCE,
+    source,
     onSelect,
     isDisabled: isCreatingConversation || isAgentModelLoading,
   };
